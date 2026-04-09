@@ -68,7 +68,6 @@ mod switch;
 mod tab_strip;
 mod tabs;
 mod table;
-mod text_area;
 mod text_input;
 mod time_ago;
 mod time_field;
@@ -154,7 +153,8 @@ pub use switch::SwitchSpec;
 pub use tab_strip::TabStripSpec;
 pub use tabs::TabsSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
-pub use text_area::TextAreaSpec;
+/// Deprecated: use `TextInputSpec` with `rows > 1` instead.
+pub type TextAreaSpec = TextInputSpec;
 pub use text_input::TextInputSpec;
 pub use time_ago::TimeAgoSpec;
 pub use time_field::TimeFieldSpec;
@@ -192,7 +192,6 @@ pub const ACTION_FIELD_EXPORTS: &[&str] = &[
     "FieldSpec",
     "FieldRelationships",
     "TextInputSpec",
-    "TextAreaSpec",
     "SearchInputSpec",
     "FormActionsSpec",
 ];
@@ -245,7 +244,7 @@ mod tests {
         PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
         SearchInputSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
         StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
-        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextAreaSpec, TextInputSpec,
+        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec,
         TimeFieldSpec, TooltipSpec, ValidationState,
     };
 
@@ -385,10 +384,13 @@ mod tests {
     }
 
     #[test]
-    fn text_area_defaults_to_four_rows_and_reports_pending_busy_state() {
-        let spec = TextAreaSpec::new().with_validation_state(ValidationState::Pending);
+    fn text_input_multiline_reports_pending_busy_state() {
+        let spec = TextInputSpec::new()
+            .with_rows(4)
+            .with_validation_state(ValidationState::Pending);
 
         assert_eq!(spec.rows, 4);
+        assert!(spec.is_multiline());
         assert_eq!(spec.aria_busy(), Some("true"));
         assert_eq!(spec.border_token(), semantic::COLOR_ACCENT_BASE);
     }

@@ -83,7 +83,8 @@ export { default as Surface } from "./Surface.svelte";
 export { default as Switch } from "./Switch.svelte";
 export { default as Tabs } from "./Tabs.svelte";
 export { default as Table } from "./Table.svelte";
-export { default as TextArea } from "./TextArea.svelte";
+/** @deprecated Use `TextInput` with `type="multiline"` or `rows > 1` instead. */
+export { default as TextArea } from "./TextInput.svelte";
 export { default as TimeAgo } from "./TimeAgo.svelte";
 export { default as TextInput } from "./TextInput.svelte";
 export { default as TimeField } from "./TimeField.svelte";

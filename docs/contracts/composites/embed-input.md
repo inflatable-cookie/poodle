@@ -11,7 +11,7 @@ Updated: 2026-03-30
   detects the embed provider (YouTube, Vimeo, generic URL, iframe), and
   surfaces the parsed result with a status indicator showing provider name
   and success/error feedback
-- In scope: URL and embed code input via TextArea, debounced parsing,
+- In scope: URL and embed code input via TextInput (rows=3), debounced parsing,
   provider detection (YouTube, Vimeo, generic URL, iframe embed code),
   provider restriction, error and success status display, parsed result
   output via two-way binding
@@ -21,7 +21,7 @@ Updated: 2026-03-30
 
 ```text
 [Root .embed-input]  <div>
-  ├── [TextArea]  TextArea primitive (rows=3)
+  ├── [TextInput]  TextInput primitive (rows=3)
   └── [Status .embed-input__status]  <div>
         ├── [Error .embed-input__error]  <span> (when error)
         └── [Success]  (when parsed)
@@ -32,7 +32,7 @@ Updated: 2026-03-30
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | flex column container | gap |
-| TextArea | yes | TextArea primitive for URL/embed code input | delegates to TextArea contract |
+| TextInput | yes | TextInput primitive for URL/embed code input | delegates to TextInput contract |
 | Status | yes | flex row showing parse result or error | min-height, font-size, gap |
 | Error | conditional | error message text (when `error` is set) | text-danger color |
 | ProviderPill | conditional | Pill showing detected provider name (when `parsed` is set) | delegates to Pill contract (tone="success", sizeRole="chrome") |
@@ -44,13 +44,13 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `id` | `string` | `"embed-input"` | no | id attribute for the TextArea |
+| `id` | `string` | `"embed-input"` | no | id attribute for the TextInput |
 | `value` | `string` | `""` | no | current input text; supports two-way binding |
 | `parsed` | `ParsedEmbed \| null` | `null` | no | parsed embed result; supports two-way binding — updated after parsing |
-| `placeholder` | `string` | `"Paste a URL or embed code..."` | no | placeholder text for the TextArea |
+| `placeholder` | `string` | `"Paste a URL or embed code..."` | no | placeholder text for the TextInput |
 | `parseDebounce` | `number` | `300` | no | debounce delay in milliseconds before parsing |
 | `providers` | `string[]` | `[]` | no | allowed provider names; empty array means all providers allowed |
-| `disabled` | `boolean` | `false` | no | disables the TextArea input |
+| `disabled` | `boolean` | `false` | no | disables the TextInput input |
 | `error` | `string \| null` | `null` | no | external error message; supports two-way binding |
 | `resolveParseState` | `((value: string, providers: string[]) => EmbedParseState) \| undefined` | `undefined` | no | optional custom parse resolver; defaults to the built-in `resolveEmbedParseState` helper |
 
@@ -124,7 +124,7 @@ None.
 | parsing | value changed, debounce timer running | no dedicated loading surface; parsing remains silent until a result is available |
 | success | valid embed detected | Pill showing provider name + "Embed detected" text |
 | error | provider not allowed or external error set | red error message text in status area |
-| disabled | `disabled=true` | TextArea is disabled; parsing still operates on current value |
+| disabled | `disabled=true` | TextInput is disabled; parsing still operates on current value |
 
 ### Component States
 
@@ -143,7 +143,7 @@ None.
 
 ### Semantics
 
-- TextArea: delegates to TextArea primitive accessibility
+- TextInput: delegates to TextInput primitive accessibility
 - Status messages: visible text only (no `aria-live` region); error is
   visually distinguished by color
 - ProviderPill: decorative indicator; delegates to Pill contract
@@ -152,12 +152,12 @@ None.
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | focuses the TextArea (standard form navigation) |
+| `Tab` | focuses the TextInput (standard form navigation) |
 | (typing) | triggers debounced parsing after `parseDebounce` ms |
 
 ### Focus And Announcement
 
-- Focus is managed by the TextArea primitive
+- Focus is managed by the TextInput primitive
 - No custom focus management in this composite
 
 ## 7. Layout
@@ -167,14 +167,14 @@ None.
 - Root: flex column, gap `0.25rem` (4px)
 - Status: flex row, gap `0.375rem` (6px), min-height `1.25rem` (20px),
   font-size `0.75rem` (12px)
-- TextArea: 3 rows
+- TextInput: 3 rows
 
 ### Composition
 
-- Composes: `TextArea` and `Pill` from `@poodle/svelte-primitives`
+- Composes: `TextInput` and `Pill` from `@poodle/svelte-primitives`
 - Parent expectations: form fields (often wrapped in Field), embed editing UIs
 - Child expectations: none (self-contained inputs)
-- Resizing rules: fills parent width; TextArea height determined by rows prop
+- Resizing rules: fills parent width; TextInput height determined by rows prop
 
 ## 8. Token Usage — Exact Values
 
@@ -212,7 +212,7 @@ None.
 
 | Part | Delegates To |
 |------|-------------|
-| TextArea | TextArea contract (foundation), `rows=3` |
+| TextInput | TextInput contract (foundation), `rows=3` |
 | ProviderPill | Pill contract (foundation), `tone="success"`, `sizeRole="chrome"` |
 
 ### Light Theme Overrides
@@ -222,22 +222,22 @@ None.
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `parse` and `change` events
-- Composes `TextArea` and `Pill` from `@poodle/svelte-primitives`
+- Composes `TextInput` and `Pill` from `@poodle/svelte-primitives`
 - Debounce uses `setTimeout`/`clearTimeout` with configurable delay
 - Parsing is routed through the exported `resolveEmbedParseState` helper in
   `embed-input.ts` rather than being inline; the helper calls
   `detectParsedEmbed` for pattern matching, then applies provider restriction
 - callers can override parsing with `resolveParseState` when they need a richer
   provider/parser contract while keeping the same Poodle UI shell
-- TextArea receives the `id` prop directly
-- TextArea `on:valueChange` event drives input handling — value is extracted
+- TextInput receives the `id` prop directly
+- TextInput `on:valueChange` event drives input handling — value is extracted
   from `event.detail.value`
 - Pill uses `sizeRole="chrome"` (not `size="xs"`)
 
 ## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::embed_input`
-- TextArea and Pill are composed from GPUI primitives
+- TextInput and Pill are composed from GPUI primitives
 - GPUI consumes the same public `parsed` / `error` contract as Svelte
 - The Rust composites contract should expose a parser helper for deriving
   `parsed` and provider-restriction `error` from `value` and `providers`
@@ -270,7 +270,7 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| URL or embed code input | default props, `bind:value`, `bind:parsed`, `placeholder="Paste a YouTube URL, Vimeo link, or embed code..."` | TextArea with placeholder; status area shows parse result when URL is entered |
+| URL or embed code input | default props, `bind:value`, `bind:parsed`, `placeholder="Paste a YouTube URL, Vimeo link, or embed code..."` | TextInput with placeholder; status area shows parse result when URL is entered |
 
 ### With Field Wrapper
 

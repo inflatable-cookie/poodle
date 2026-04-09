@@ -132,7 +132,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Action
     "ButtonSpec", "IconButtonSpec", "FormActionsSpec", "ToolbarSpec",
     // Input
-    "TextInputSpec", "TextAreaSpec", "SearchInputSpec", "FieldSpec", "NumberInputSpec",
+    "TextInputSpec", "SearchInputSpec", "FieldSpec", "NumberInputSpec",
     "CodeInputSpec", "EditableLabelSpec", "TimeFieldSpec",
     // Selection
     "CheckboxSpec", "RadioGroupSpec", "SwitchSpec", "SelectSpec", "SliderSpec",
@@ -231,7 +231,7 @@ mod tests {
 
     #[test]
     fn full_parity_component_counts() {
-        assert_eq!(SUPPORTED_PRIMITIVES.len(), 63);
+        assert_eq!(SUPPORTED_PRIMITIVES.len(), 62);
         assert_eq!(SUPPORTED_COMPOSITES.len(), 47);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }

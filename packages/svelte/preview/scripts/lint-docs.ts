@@ -1530,7 +1530,6 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     "form-actions",
     "icon-button",
     "search-input",
-    "text-area",
     "text-input",
   ];
   const expectedExportNames = [
@@ -1540,7 +1539,6 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     "FormActionsSpec",
     "IconButtonSpec",
     "SearchInputSpec",
-    "TextAreaSpec",
     "TextInputSpec",
   ];
   const crateRoot = path.join(repoRoot, actionFieldBaseline.cratePath);

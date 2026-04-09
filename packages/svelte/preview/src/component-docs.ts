@@ -3387,40 +3387,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </Tabs>`,
   },
 
-  "text-area": {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "id", type: "string", required: true, description: "HTML id attribute for the textarea." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled value of the textarea." },
-      { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
-      { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when empty." },
-      { name: "rows", type: "number", default: "4", description: "Number of visible text rows." },
-      { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the textarea is disabled." },
-      { name: "readOnly", type: "boolean", default: "false", description: "Whether the textarea is read-only." },
-      { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state; pending shows a spinner, invalid shows a red cross, and valid shows a green tick." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the textarea." },
-      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this textarea." },
-    ],
-    slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the textarea value changes." },
-      { name: "submit", payload: "{ value: string }", description: "Fires on submit (e.g. Cmd+Enter)." },
-      { name: "cancel", payload: "void", description: "Fires when editing is cancelled." },
-      { name: "focus", payload: "FocusEvent", description: "Fires when the textarea receives focus." },
-      { name: "blur", payload: "FocusEvent", description: "Fires when the textarea loses focus." },
-    ],
-    usage: `<script lang="ts">
-  import { TextArea } from "@poodle/svelte-primitives";
-
-  let comment = "";
-</script>
-
-<TextArea id="comment" bind:value={comment} placeholder="Write a comment…" rows={4} />`,
-  },
-
   "text-input": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
@@ -3449,7 +3415,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the input." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
       { name: "inputMode", type: "string | null", default: "null", description: "Hint for virtual keyboard type." },
-      { name: "type", type: 'HTMLInputElement["type"]', default: '"text"', description: "HTML input type attribute." },
+      { name: "type", type: 'HTMLInputElement["type"] | "multiline"', default: '"text"', description: "HTML input type attribute. Use \"multiline\" for multi-line textarea mode." },
+      { name: "rows", type: "number | null", default: "null", description: "Number of visible text rows. When > 1 and type is not explicitly set, auto-switches to multiline mode." },
+      { name: "resize", type: '"vertical" | "horizontal" | "both" | "none"', default: '"vertical"', description: "Resize behaviour for multiline mode." },
       { name: "prefix", type: "string | null", default: "null", description: "Static prefix text shown inside the input." },
       { name: "suffix", type: "string | null", default: "null", description: "Static suffix text shown inside the input." },
       { name: "maxLength", type: "number | null", default: "null", description: "Maximum character length." },

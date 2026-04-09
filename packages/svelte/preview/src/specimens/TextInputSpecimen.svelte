@@ -117,6 +117,42 @@
       />
     </Field>
   </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Multiline (explicit type)</Eyebrow>
+    <Field id="multiline-field" label="Description">
+      <TextInput
+        id="multiline-field"
+        type="multiline"
+        placeholder="Enter a description..."
+      />
+    </Field>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Multiline (auto-detected from rows)</Eyebrow>
+    <Field id="rows-field" label="Notes">
+      <TextInput
+        id="rows-field"
+        rows={6}
+        placeholder="Type your notes here..."
+      />
+    </Field>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Multiline with character count</Eyebrow>
+    <Field id="bio-field" label="Bio">
+      <TextInput
+        id="bio-field"
+        type="multiline"
+        rows={3}
+        maxLength={280}
+        showCharCount
+        placeholder="Tell us about yourself..."
+      />
+    </Field>
+  </div>
 </div>
 
 <style>

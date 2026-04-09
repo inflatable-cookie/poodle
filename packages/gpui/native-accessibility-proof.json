@@ -54,7 +54,6 @@
         "switch",
         "tab-strip",
         "tabs",
-        "text-area",
         "text-input",
         "time-field",
         "tooltip"
@@ -97,7 +96,6 @@
         "SwitchSpec",
         "TabStripSpec",
         "TabsSpec",
-        "TextAreaSpec",
         "TextInputSpec",
         "TimeFieldSpec",
         "TooltipSpec"

@@ -114,7 +114,6 @@ above it in downstream repos such as Loophole.
 - `foundation/switch.md`
 - `foundation/table.md`
 - `foundation/tabs.md`
-- `foundation/text-area.md`
 - `foundation/text-input.md`
 - `foundation/time-ago.md`
 - `foundation/time-field.md`

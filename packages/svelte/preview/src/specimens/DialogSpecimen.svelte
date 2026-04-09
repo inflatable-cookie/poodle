@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Dialog, Button, Eyebrow, TextInput, TextArea, Select, Field, Checkbox, Pill } from "@poodle/svelte-primitives";
+  import { Dialog, Button, Eyebrow, TextInput, Select, Field, Checkbox, Pill } from "@poodle/svelte-primitives";
 
   let basicOpen = false;
   let formOpen = false;
@@ -56,7 +56,7 @@
         </Field>
         <div class="form-full-width">
           <Field label="Description">
-            <TextArea id="dialog-desc" placeholder="What is this project for?" />
+            <TextInput id="dialog-desc" placeholder="What is this project for?" rows={3} />
           </Field>
         </div>
         <div class="form-full-width">

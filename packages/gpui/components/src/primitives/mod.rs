@@ -69,7 +69,6 @@ mod switch;
 mod tab_strip;
 mod table;
 mod tabs;
-mod text_area;
 mod text_input;
 mod time_ago;
 mod time_field;
@@ -153,7 +152,8 @@ pub use switch::Switch;
 pub use tab_strip::TabStrip;
 pub use table::Table;
 pub use tabs::Tabs;
-pub use text_area::TextArea;
+/// Deprecated: use `TextInput` with multiline mode instead.
+pub type TextArea = TextInput;
 pub use text_input::TextInput;
 pub use time_ago::TimeAgo;
 pub use time_field::TimeField;

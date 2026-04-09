@@ -13,7 +13,8 @@ Updated: 2026-03-25
 - In scope: plain text input, placeholder, prefix/suffix affixes, character
   count, validation state, submit/cancel behavior, controlled and uncontrolled
   value models
-- Out of scope: multiline editing (see TextArea), search-specific clear behavior
+- In scope: multiline editing via `type="multiline"` or `rows > 1`
+- Out of scope: search-specific clear behavior
   (see SearchInput), inline edit mode switching (see EditableLabel), number
   formatting (see NumberInput)
 

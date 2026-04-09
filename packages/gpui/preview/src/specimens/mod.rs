@@ -21,7 +21,6 @@ mod button;
 mod icon_button;
 mod split_button;
 mod text_input;
-mod text_area;
 mod search_input;
 mod field;
 mod form_actions;
@@ -245,7 +244,6 @@ pub fn render_single_specimen(
         "icon-button" => specimen_card("IconButton", theme, icon_button::render(state, cx)),
         "split-button" => specimen_card("SplitButton", theme, split_button::render(state, cx)),
         "text-input" => specimen_card("TextInput", theme, text_input::render(state, cx)),
-        "text-area" => specimen_card("TextArea", theme, text_area::render(state, cx)),
         "search-input" => specimen_card("SearchInput", theme, search_input::render(state, cx)),
         "field" => specimen_card("Field", theme, field::render(state, cx)),
         "field-set" => specimen_card("FieldSet", theme, field_set_specimen::render(theme)),

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  import { TextArea, Pill } from "@poodle/svelte-primitives";
+  import { TextInput, Pill } from "@poodle/svelte-primitives";
 
   import { resolveEmbedParseState } from "./embed-input";
   import type { EmbedParseState } from "./embed-input";
@@ -47,7 +47,7 @@
 </script>
 
 <div class="embed-input">
-  <TextArea
+  <TextInput
     {id}
     {value}
     {placeholder}

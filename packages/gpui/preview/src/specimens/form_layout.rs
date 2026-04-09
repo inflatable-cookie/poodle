@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_primitives::{ButtonSpec, ButtonVariant, TextInputSpec, TextAreaSpec, CheckboxSpec, EyebrowSpec};
-use poodle_gpui_components::{Button, TextInput, TextArea, Checkbox, FormLayout, Field, Eyebrow};
+use poodle_primitives::{ButtonSpec, ButtonVariant, TextInputSpec, CheckboxSpec, EyebrowSpec};
+use poodle_gpui_components::{Button, TextInput, Checkbox, FormLayout, Field, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
 
@@ -46,8 +46,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         )
                         .with_child(
                             Field::new("fl-notes", "Notes", theme)
-                                .with_control(TextArea::from_spec(
-                                    TextAreaSpec::new().with_placeholder("Any additional notes..."),
+                                .with_control(TextInput::from_spec(
+                                    TextInputSpec::new().with_placeholder("Any additional notes...").with_rows(3),
                                     theme,
                                 ).with_id("fl-notes"))
                         )
@@ -153,8 +153,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         )
                         .with_child(
                             Field::new("fl-bio", "Bio", theme)
-                                .with_control(TextArea::from_spec(
-                                    TextAreaSpec::new().with_placeholder("Tell us about yourself..."),
+                                .with_control(TextInput::from_spec(
+                                    TextInputSpec::new().with_placeholder("Tell us about yourself...").with_rows(3),
                                     theme,
                                 ).with_id("fl-bio"))
                         )

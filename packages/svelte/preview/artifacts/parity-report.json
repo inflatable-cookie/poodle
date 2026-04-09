@@ -2127,19 +2127,6 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "TextArea",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
         "exportName": "TextInput",
         "kind": "component",
         "status": "previewed",

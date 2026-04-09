@@ -436,7 +436,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "RadioGroup",
       "SearchInput",
       "Switch",
-      "TextArea",
       "TextInput",
     ],
   },

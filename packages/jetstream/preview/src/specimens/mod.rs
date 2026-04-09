@@ -112,7 +112,6 @@ pub mod switch;
 pub mod tab_strip;
 pub mod table;
 pub mod tabs;
-pub mod text_area;
 pub mod text_input;
 pub mod time_ago;
 pub mod time_field;
@@ -336,7 +335,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "tab-strip" => Some(tab_strip::render(theme)),
         "table" => Some(table::render(theme)),
         "tabs" => Some(tabs::render(theme)),
-        "text-area" => Some(text_area::render(theme)),
         "text-input" => Some(text_input::render(theme)),
         "time-ago" => Some(time_ago::render(theme)),
         "time-field" => Some(time_field::render(theme)),

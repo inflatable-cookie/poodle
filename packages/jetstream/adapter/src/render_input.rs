@@ -1,11 +1,11 @@
 //! RenderComponent implementations for input primitives.
 //!
-//! g08.005: TextInputSpec, TextAreaSpec, SearchInputSpec, FieldSpec,
+//! g08.005: TextInputSpec, SearchInputSpec, FieldSpec,
 //! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
-    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, SearchInputSpec, TextAreaSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, SearchInputSpec,
     TextInputSpec, TimeFieldSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -52,27 +52,6 @@ impl RenderComponent<TextInputSpec> for JetstreamAdapter {
             _ => "text-input".to_string(),
         };
         JetstreamNodeHandle::new(node_id, "TextInputSpec", WidgetKind::TextInput, mapped)
-    }
-}
-
-impl RenderComponent<TextAreaSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, spec: &TextAreaSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut mapped = map_style(style);
-
-        // Resolve fill (background) color
-        let fill_color = theme.resolve_color(spec.fill_token());
-        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
-
-        // Resolve border color (varies by validation state)
-        let border_color = theme.resolve_color(spec.border_token());
-        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
-
-        // Resolve corner radius
-        let r = theme.resolve_radius(spec.radius_token());
-        mapped.visuals.corner_radii = [r; 4];
-
-        JetstreamNodeHandle::new("text-area", "TextAreaSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -221,14 +200,6 @@ mod tests {
         let spec = TextInputSpec::new().with_disabled(true).with_id("name");
         let h = a().render(&spec, &s(), &t());
         assert_eq!(h.node_id, "text-input-name");
-        assert_eq!(h.widget_kind, WidgetKind::TextInput);
-    }
-
-    #[test]
-    fn text_area_renders() {
-        let h = a().render(&TextAreaSpec::new(), &s(), &t());
-        assert_eq!(h.node_id, "text-area");
-        assert_eq!(h.spec_type, "TextAreaSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 

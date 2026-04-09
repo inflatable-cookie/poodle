@@ -25,7 +25,7 @@ use poodle_primitives::{
     AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
     FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SearchInputSpec,
     SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
-    SwitchSpec, TabsSpec, TextAreaSpec, TextInputSpec, ToolbarSpec,
+    SwitchSpec, TabsSpec, TextInputSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 use poodle_workstation::{
@@ -111,7 +111,7 @@ fn render_form_and_validation(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScr
     screen.push(a.render(&FormShellSpec::new("demo-form"), &s, t));
     screen.push(a.render(&FieldSpec::new("title", "Title"), &s, t));
     screen.push(a.render(&TextInputSpec::new(), &s, t));
-    screen.push(a.render(&TextAreaSpec::new(), &s, t));
+    screen.push(a.render(&TextInputSpec::new().with_rows(4), &s, t));
     screen.push(a.render(&SelectSpec::new(vec![]), &s, t));
     screen.push(a.render(&CheckboxSpec::new(), &s, t));
     screen.push(a.render(&SwitchSpec::new(), &s, t));

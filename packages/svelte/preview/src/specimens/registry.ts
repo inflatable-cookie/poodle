@@ -99,7 +99,6 @@ import SurfaceSpecimen from "./SurfaceSpecimen.svelte";
 import SwitchSpecimen from "./SwitchSpecimen.svelte";
 import TabsSpecimen from "./TabsSpecimen.svelte";
 import TableSpecimen from "./TableSpecimen.svelte";
-import TextAreaSpecimen from "./TextAreaSpecimen.svelte";
 import TimeAgoSpecimen from "./TimeAgoSpecimen.svelte";
 import TextInputSpecimen from "./TextInputSpecimen.svelte";
 import TimeFieldSpecimen from "./TimeFieldSpecimen.svelte";
@@ -229,7 +228,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   switch: SwitchSpecimen,
   table: TableSpecimen,
   tabs: TabsSpecimen,
-  "text-area": TextAreaSpecimen,
   "time-ago": TimeAgoSpecimen,
   "text-input": TextInputSpecimen,
   "time-field": TimeFieldSpecimen,

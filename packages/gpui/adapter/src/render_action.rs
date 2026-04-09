@@ -2,14 +2,14 @@
 //!
 //! Implements the adapter trait for:
 //! - ButtonSpec, IconButtonSpec
-//! - FieldSpec, TextInputSpec, TextAreaSpec, SearchInputSpec
+//! - FieldSpec, TextInputSpec, SearchInputSpec
 //! - FormActionsSpec, TimeFieldSpec
 //! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
     ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-    NumberInputSpec, SearchInputSpec, TextAreaSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+    NumberInputSpec, SearchInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -155,35 +155,6 @@ impl RenderComponent<TextInputSpec> for GpuiAdapter {
             format!("text-input-{}", spec.id.as_deref().unwrap_or("anonymous")),
             "TextInputSpec",
         )
-    }
-}
-
-impl RenderComponent<TextAreaSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-
-    fn render(
-        &self,
-        spec: &TextAreaSpec,
-        style: &StyleDescriptor,
-        theme: &dyn ThemeProvider,
-    ) -> GpuiElementHandle {
-        let mut gpui_style = map_style(style);
-
-        let fill = theme.resolve_color(spec.fill_token());
-        let border = theme.resolve_color(spec.border_token());
-        gpui_style.background = Some(fill.into());
-        gpui_style.border_color = Some(border.into());
-
-        // Resolve corner radius
-        let radius = theme.resolve_radius(spec.radius_token());
-        gpui_style.corner_radii = crate::GpuiCornerRadii {
-            top_left: radius,
-            top_right: radius,
-            bottom_left: radius,
-            bottom_right: radius,
-        };
-
-        GpuiElementHandle::new("text-area", "TextAreaSpec")
     }
 }
 
@@ -353,7 +324,7 @@ mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_primitives::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberInputSpec, SearchInputSpec, TextAreaSpec, TextInputSpec,
+        NumberInputSpec, SearchInputSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
@@ -415,13 +386,6 @@ mod tests {
         let handle = a.render(&spec, &style(), &theme());
         assert_eq!(handle.element_id, "text-input-email");
         assert_eq!(handle.spec_type, "TextInputSpec");
-    }
-
-    #[test]
-    fn render_text_area_resolves_radius() {
-        let a = adapter();
-        let handle = a.render(&TextAreaSpec::new(), &style(), &theme());
-        assert_eq!(handle.spec_type, "TextAreaSpec");
     }
 
     #[test]

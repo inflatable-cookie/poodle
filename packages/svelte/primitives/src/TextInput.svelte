@@ -56,7 +56,11 @@
     | "numeric"
     | "decimal"
     | null = null;
-  export let type: HTMLInputElement["type"] = "text";
+  export let type: HTMLInputElement["type"] | "multiline" = "text";
+  /** Number of visible text rows. When > 1 and type is not explicitly set, auto-switches to multiline. */
+  export let rows: number | null = null;
+  /** Resize behaviour for multiline mode. */
+  export let resize: "vertical" | "horizontal" | "both" | "none" = "vertical";
   export let prefix: string | null = null;
   export let suffix: string | null = null;
   export let maxLength: number | null = null;
@@ -115,6 +119,8 @@
   $: isOverLimit = maxLength !== null && charCount > maxLength;
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
+  // Auto-detect multiline: explicit type="multiline", or rows > 1 with default type
+  $: isMultiline = type === "multiline" || (type === "text" && rows !== null && rows > 1);
   $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
   $: validationIcon =
     effectiveValidationState === "valid"
@@ -266,7 +272,7 @@
   }
 </script>
 
-<div class="text-input" data-validation-state={effectiveValidationState} data-size={resolvedSize} data-density={resolvedDensity}>
+<div class="text-input" class:text-input--multiline={isMultiline} data-validation-state={effectiveValidationState} data-size={resolvedSize} data-density={resolvedDensity}>
   {#if prefix}
     <span class="text-input__affix text-input__affix--prefix">{prefix}</span>
   {/if}
@@ -277,43 +283,87 @@
     </span>
   {/if}
 
-  <input
-    id={id || undefined}
-    {name}
-    list={list ?? undefined}
-    {type}
-    inputmode={inputMode ?? undefined}
-    class="text-input__control"
-    value={currentValue}
-    {placeholder}
-    {autocomplete}
-    {required}
-    {pattern}
-    {spellcheck}
-    autocapitalize={autocapitalize ?? undefined}
-    enterkeyhint={enterKeyHint ?? undefined}
-    maxlength={maxLength ?? undefined}
-    disabled={disabled}
-    readonly={readOnly}
-    aria-label={ariaLabel ?? undefined}
-    aria-describedby={describedBy ?? undefined}
-    aria-invalid={ariaInvalid}
-    aria-busy={ariaBusy}
-    on:input={handleInput}
-    on:keydown={handleKeydown}
-    on:focus={(event) => dispatch("focus", event)}
-    on:blur={(event) => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-        debounceTimer = null;
-        dispatch("valueChange", { value: liveValue });
-      }
-      if (validate && validateOnBlur) {
-        triggerValidation(liveValue, true);
-      }
-      dispatch("blur", event);
-    }}
-  />
+  {#if isMultiline}
+    <textarea
+      id={id || undefined}
+      {name}
+      class="text-input__control text-input__control--multiline"
+      value={currentValue}
+      {placeholder}
+      {autocomplete}
+      {spellcheck}
+      autocapitalize={autocapitalize ?? undefined}
+      rows={rows ?? 4}
+      style={resize !== "vertical" ? `resize: ${resize}` : undefined}
+      maxlength={maxLength ?? undefined}
+      disabled={disabled}
+      readonly={readOnly}
+      aria-label={ariaLabel ?? undefined}
+      aria-describedby={describedBy ?? undefined}
+      aria-invalid={ariaInvalid}
+      aria-busy={ariaBusy}
+      on:input={handleInput}
+      on:keydown={(event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+          dispatch("submit", { value: currentValue });
+        }
+        if (event.key === "Escape") {
+          dispatch("cancel");
+        }
+        dispatch("keydown", event);
+      }}
+      on:focus={(event) => dispatch("focus", event)}
+      on:blur={(event) => {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+          debounceTimer = null;
+          dispatch("valueChange", { value: liveValue });
+        }
+        if (validate && validateOnBlur) {
+          triggerValidation(liveValue, true);
+        }
+        dispatch("blur", event);
+      }}
+    ></textarea>
+  {:else}
+    <input
+      id={id || undefined}
+      {name}
+      list={list ?? undefined}
+      {type}
+      inputmode={inputMode ?? undefined}
+      class="text-input__control"
+      value={currentValue}
+      {placeholder}
+      {autocomplete}
+      {required}
+      {pattern}
+      {spellcheck}
+      autocapitalize={autocapitalize ?? undefined}
+      enterkeyhint={enterKeyHint ?? undefined}
+      maxlength={maxLength ?? undefined}
+      disabled={disabled}
+      readonly={readOnly}
+      aria-label={ariaLabel ?? undefined}
+      aria-describedby={describedBy ?? undefined}
+      aria-invalid={ariaInvalid}
+      aria-busy={ariaBusy}
+      on:input={handleInput}
+      on:keydown={handleKeydown}
+      on:focus={(event) => dispatch("focus", event)}
+      on:blur={(event) => {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+          debounceTimer = null;
+          dispatch("valueChange", { value: liveValue });
+        }
+        if (validate && validateOnBlur) {
+          triggerValidation(liveValue, true);
+        }
+        dispatch("blur", event);
+      }}
+    />
+  {/if}
 
   {#if $$slots.trailing}
     <span class="text-input__affordance text-input__affordance--trailing">
@@ -500,6 +550,26 @@
 
   .text-input[data-density="comfortable"] {
     padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  }
+
+  /* Multiline (textarea) mode */
+  .text-input--multiline {
+    min-height: auto;
+  }
+
+  .text-input__control--multiline {
+    min-height: calc(1lh * 4);
+    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
+    resize: vertical;
+    line-height: var(--poodle-typography-body-lineHeight);
+  }
+
+  .text-input--multiline[data-density="compact"] .text-input__control--multiline {
+    padding: calc(var(--poodle-space-control-y, 0.375rem) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
+  }
+
+  .text-input--multiline[data-density="comfortable"] .text-input__control--multiline {
+    padding: calc(var(--poodle-space-control-y, 0.375rem) + 0.125rem) calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
   /* Size variants */

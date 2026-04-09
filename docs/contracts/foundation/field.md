@@ -321,6 +321,6 @@ embedded Popover component.
 
 - contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: all form-based UIs wrapping TextInput, TextArea,
+- downstream adopters: all form-based UIs wrapping TextInput,
   SearchInput, Select, and future selection controls
 - future follow-up: fieldset/field-group semantics for grouped controls

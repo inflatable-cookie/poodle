@@ -82,7 +82,6 @@ pub mod slider;
 pub mod split_button;
 pub mod tab_strip;
 pub mod tabs;
-pub mod text_area;
 pub mod text_input;
 pub mod time_ago;
 pub mod toggle_group;

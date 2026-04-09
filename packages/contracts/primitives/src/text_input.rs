@@ -23,6 +23,8 @@ pub struct TextInputSpec {
     pub show_char_count: bool,
     pub leading_icon: Option<String>,
     pub trailing_icon: Option<String>,
+    pub rows: u16,
+    pub resize: String,
     pub submit_enabled: bool,
     pub cancel_enabled: bool,
     pub size: ControlSize,
@@ -52,6 +54,8 @@ impl Default for TextInputSpec {
             show_char_count: false,
             leading_icon: None,
             trailing_icon: None,
+            rows: 1,
+            resize: String::from("vertical"),
             submit_enabled: false,
             cancel_enabled: false,
             size: ControlSize::Md,
@@ -159,6 +163,21 @@ impl TextInputSpec {
     pub fn with_trailing_icon(mut self, trailing_icon: impl Into<String>) -> Self {
         self.trailing_icon = Some(trailing_icon.into());
         self
+    }
+
+    pub fn with_rows(mut self, rows: u16) -> Self {
+        self.rows = rows;
+        self
+    }
+
+    pub fn with_resize(mut self, resize: impl Into<String>) -> Self {
+        self.resize = resize.into();
+        self
+    }
+
+    /// Whether this spec operates in multiline mode (rows > 1 or input_type is "multiline").
+    pub fn is_multiline(&self) -> bool {
+        self.input_type == "multiline" || self.rows > 1
     }
 
     pub fn with_submit_enabled(mut self, submit_enabled: bool) -> Self {

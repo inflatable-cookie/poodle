@@ -21,7 +21,7 @@ pub enum SemanticEvent {
 
     /// A component's value changed.
     ///
-    /// Emitted by: TextInput, TextArea, Slider, Select, Checkbox, Switch,
+    /// Emitted by: TextInput, Slider, Select, Checkbox, Switch,
     /// DatePicker, TimePicker, ColorPicker, etc.
     /// - GPUI: `on_change` handler
     /// - Jetstream: `UiEvent::ValueChanged` / `UiEvent::TextChanged`

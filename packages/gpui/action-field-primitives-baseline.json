@@ -9,7 +9,6 @@
     "form-actions",
     "icon-button",
     "search-input",
-    "text-area",
     "text-input"
   ],
   "exportNames": [
@@ -19,7 +18,6 @@
     "FormActionsSpec",
     "IconButtonSpec",
     "SearchInputSpec",
-    "TextAreaSpec",
     "TextInputSpec"
   ],
   "knownDeltas": [

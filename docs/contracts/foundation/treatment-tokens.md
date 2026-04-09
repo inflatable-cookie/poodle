@@ -214,7 +214,6 @@ No tokens are currently defined for this role.
 | Component | Tokens consumed |
 |-----------|----------------|
 | TextInput | radius, fill, fill-focus, border, border-focus, shadow, shadow-focus |
-| TextArea | radius, fill, fill-focus, border, border-focus, shadow, shadow-focus |
 | SearchInput | radius (via calc), fill-hover |
 | Select | radius, fill, fill-focus, border, shadow, shadow-focus |
 

@@ -4,7 +4,6 @@
     Eyebrow,
     Field,
     TextInput,
-    TextArea,
     Select,
     Checkbox,
     Button,
@@ -53,7 +52,7 @@
         <Select id="fl-region" options={regionOptions} defaultValue="" ariaLabel="Region" />
       </Field>
       <Field label="Notes" id="fl-notes" span={6}>
-        <TextArea id="fl-notes" placeholder="Any additional notes…" />
+        <TextInput id="fl-notes" placeholder="Any additional notes…" rows={3} />
       </Field>
       <svelte:fragment slot="actions">
         <Button variant="ghost">Cancel</Button>
@@ -90,7 +89,7 @@
         <Select id="fl-mix-country" options={countryOptions} defaultValue="" ariaLabel="Country" />
       </Field>
       <Field label="Bio" id="fl-mix-bio" span={6}>
-        <TextArea id="fl-mix-bio" placeholder="Tell us about yourself…" />
+        <TextInput id="fl-mix-bio" placeholder="Tell us about yourself…" rows={3} />
       </Field>
       <svelte:fragment slot="actions">
         <Button variant="ghost">Cancel</Button>
@@ -106,7 +105,7 @@
         <TextInput id="fl-display" placeholder="Enter a name" />
       </Field>
       <Field label="Bio" id="fl-bio">
-        <TextArea id="fl-bio" placeholder="Tell us about yourself…" />
+        <TextInput id="fl-bio" placeholder="Tell us about yourself…" rows={3} />
       </Field>
       <Checkbox id="fl-agree" label="I agree to the terms" />
       <svelte:fragment slot="actions">

@@ -33,7 +33,6 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `FieldSet`
 - `FileUpload`
 - `TextInput`
-- `TextArea`
 - `TimeField`
 - `TimeAgo`
 - `TimeZoneSelect`
