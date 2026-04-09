@@ -141,6 +141,22 @@ Rules for this pattern:
   page shape, not a canned dashboard data model
 - keep loading and error posture simple and local
 
+## Workflow Overview Variant
+
+Use this when the route is still an overview page, but it primarily launches
+workflow queues or review surfaces rather than summarizing metrics.
+
+Rules for this variant:
+
+- keep the same `PageHeader` shell with a clear task-oriented subtitle
+- use grouped `NavCard` bands with short section copy when the page is mainly a
+  workflow launcher
+- add small host-owned badges like `Queue` or `Review` on the cards when they
+  help distinguish staged next actions
+- skip the metric band entirely when the route has no stable summary numbers;
+  do not invent fake stats just to satisfy the overview layout
+- keep the sections app-owned even when the shared page shape is reused
+
 ## Section Tabs
 
 Use `Tabs` directly. Keep mount policy app-owned.
