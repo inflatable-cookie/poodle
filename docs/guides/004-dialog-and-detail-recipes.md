@@ -65,6 +65,21 @@ detail pages and modal forms without recreating old app-shell helpers.
 - `FormLayout` already sits inside it; do not recreate that composition in app
   code unless the dialog is truly non-standard
 
+### Inline detail-route dialogs
+
+For create or edit actions launched from an existing detail route:
+
+- keep the trigger in the local section header or page actions
+- keep the dialog title focused on the mutation itself
+- use `subtitle` to carry the parent context, for example `For module FA-101`
+  or `For handbook.pdf`
+- keep submit, close, and refetch orchestration in host code
+- after a successful mutation, close the dialog and patch or refetch the parent
+  detail surface locally instead of inventing a new shared workflow wrapper
+
+This keeps the visible modal shell stable while leaving mutation sequencing and
+detail-page updates app-owned.
+
 ## Detail Pages
 
 ### Default posture
