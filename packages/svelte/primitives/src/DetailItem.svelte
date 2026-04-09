@@ -1,4 +1,7 @@
 <script lang="ts">
+  import Icon from "./Icon.svelte";
+  import Popover from "./Popover.svelte";
+
   export let label: string;
   export let description: string | null = null;
   export let value: string | number | null = null;
@@ -18,10 +21,19 @@
   aria-label={ariaLabel ?? undefined}
 >
   <div class="detail-item__label-block">
-    <dt class="detail-item__label">{label}</dt>
-    {#if description}
-      <p class="detail-item__description">{description}</p>
-    {/if}
+    <dt class="detail-item__label">
+      {label}
+      {#if description}
+        <Popover placement="top" offset={6} ariaLabel="More information">
+          <span slot="trigger" class="detail-item__info-trigger">
+            <span class="detail-item__info-icon" aria-label="More information">
+              <Icon name="info" />
+            </span>
+          </span>
+          <p class="detail-item__info-content">{description}</p>
+        </Popover>
+      {/if}
+    </dt>
   </div>
 
   <dd class:truncate={truncateValue} class="detail-item__value">
@@ -70,28 +82,25 @@
   }
 
   .detail-item__label,
-  .detail-item__description,
   .detail-item__value {
     margin: 0;
   }
 
   .detail-item__label-block {
-    display: grid;
+    display: flex;
+    align-items: baseline;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
   .detail-item__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     line-height: var(--poodle-typography-label-lineHeight);
-  }
-
-  .detail-item__description {
-    color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
-    line-height: 1.5;
   }
 
   .detail-item__value {
@@ -108,6 +117,62 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  /* ── Info icon popover (matches Field pattern) ── */
+
+  .detail-item__info-trigger {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .detail-item__info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25em;
+    height: 1.25em;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: var(--poodle-radius-pill);
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 14%, transparent);
+    color: var(--poodle-color-text-secondary);
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .detail-item__info-icon :global(svg) {
+    width: 0.75em !important;
+    height: 0.75em !important;
+  }
+
+  .detail-item__info-trigger:hover .detail-item__info-icon {
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 26%, transparent);
+    color: var(--poodle-color-text-primary);
+  }
+
+  .detail-item__info-content {
+    margin: 0;
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .detail-item__label :global(.popover__surface) {
+    min-width: 10rem;
+    max-width: 22rem;
+    padding: 0.5rem 0.625rem;
+  }
+
+  .detail-item__label :global(.popover__trigger:focus-visible) {
+    outline: none;
+  }
+
+  .detail-item__info-trigger:focus-visible .detail-item__info-icon {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+  }
+
+  /* ── Surface presentation ── */
 
   .detail-item[data-presentation="surface"] {
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
