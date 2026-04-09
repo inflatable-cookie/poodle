@@ -29,6 +29,7 @@ export { default as EmptyState } from "./EmptyState.svelte";
 export { default as FilterToolbar } from "./FilterToolbar.svelte";
 export { default as FormDialog } from "./FormDialog.svelte";
 export { default as FormLayout } from "./FormLayout.svelte";
+export { default as InlineListSection } from "./InlineListSection.svelte";
 export { default as DebugDialog } from "./DebugDialog.svelte";
 export { ListCard } from "@poodle/svelte-primitives";
 export { default as LogList } from "./LogList.svelte";

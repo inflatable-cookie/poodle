@@ -145,7 +145,8 @@ Rules for this pattern:
 - use `Tabs variant="card"` with `historyKey="tab"` for stable navigation
 - render the details tab as `Card` + `DetailSection` + `DetailItem`, not as a
   second nested page shell
-- keep versions and usage as host-owned card/list content under their tabs
+- use `InlineListSection` for compact versions and usage sections under their
+  tabs
 - keep media lifecycle actions, version activation, and destructive policy in
   host code even when the visible shell is shared
 

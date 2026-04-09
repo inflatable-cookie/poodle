@@ -26,6 +26,7 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `filter-toolbar.md`
 - `form-dialog.md`
 - `form-layout.md`
+- `inline-list-section.md`
 - `log-list.md`
 - `list-container.md`
 - `markdown-editor.md`

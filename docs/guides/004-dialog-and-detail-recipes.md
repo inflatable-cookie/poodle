@@ -69,30 +69,51 @@ detail pages and modal forms without recreating old app-shell helpers.
 
 ### Default posture
 
-- use `DetailShell` for page-level readonly identity and state handling
+- use `PageHeader` + `MetaBar` for most app-level detail routes
+- use top-level `Tabs` when the route has multiple detail/list/workflow surfaces
 - use `DetailSection` to group related readonly information under a local
   heading
 - use `DetailItem` for label/value presentation
+- use local `Card` sections and inline list content under that shell rather than
+  introducing a second inner page header
+- use `DetailShell` only when the page really wants one composite readonly shell
+  to own identity and state handling end-to-end
 - keep routing, fetch state, actions, and domain data shaping in host code
 
-### Standard detail page
+### Standard app detail page
 
 ```svelte
 <script lang="ts">
-  import { DetailShell, DetailSection } from "@poodle/svelte-composites";
-  import { DetailItem, Button } from "@poodle/svelte-primitives";
+  import { PageHeader } from "@poodle/svelte-composites";
+  import { Card, Code, DetailItem, MetaBar, MetaItem, Pill, Tabs } from "@poodle/svelte-primitives";
+  import { DetailSection } from "@poodle/svelte-composites";
 </script>
 
-<DetailShell
-  title="Project details"
-  eyebrow="Projects"
-  subtitle="Readonly project metadata and current configuration."
-  state="ready"
->
+<PageHeader title="Marketing site rebuild" backHref="/projects" backLabel="Back to projects">
   <svelte:fragment slot="actions">
-    <Button variant="secondary">Edit</Button>
+    <!-- host-owned actions -->
   </svelte:fragment>
+</PageHeader>
 
+<MetaBar ariaLabel="Project metadata">
+  <MetaItem label="ID">
+    <Code inline source={project.id} showCopyButton />
+  </MetaItem>
+  <Pill tone="success" appearance="badge" size="lg">Active</Pill>
+</MetaBar>
+
+<Tabs
+  value={activeTab}
+  items={[
+    { value: "details", label: "Details" },
+    { value: "tasks", label: "Tasks", count: taskCount }
+  ]}
+  variant="card"
+  size="sm"
+  ariaLabel="Project sections"
+/>
+
+<Card>
   <DetailSection title="Overview">
     <DetailItem label="Name" value="Marketing site rebuild" />
     <DetailItem label="Owner" value="Alice Johnson" />
@@ -103,14 +124,24 @@ detail pages and modal forms without recreating old app-shell helpers.
     <DetailItem label="Published at" value="2026-03-25" />
     <DetailItem label="Expires at" emptyText="No expiry set" />
   </DetailSection>
-</DetailShell>
+</Card>
 ```
+
+### Inline related sections
+
+For versions, usages, aliases, notices, and similar related lists:
+
+- keep them as host-owned related-item sections under the stable parent shell
+- prefer `InlineListSection` for compact versions/usages/related-item shells
+- keep row actions local
+- do not add a second inner `PageHeader` or nested route shell inside the
+  details tab just to frame those related items
 
 ## Detail Actions
 
-Keep page-level actions in `DetailShell` actions. Keep section-local actions in
-`DetailSection` actions. Do not turn every page-specific action cluster into a
-new Poodle wrapper.
+Keep page-level actions in `PageHeader` actions. Keep section-local actions in
+`DetailSection` actions or local inline-list headers. Do not turn every
+page-specific action cluster into a new Poodle wrapper.
 
 ```svelte
 <DetailSection title="Billing">
@@ -124,8 +155,10 @@ new Poodle wrapper.
 
 ## State Handling
 
-Let `DetailShell` own ready vs loading vs error vs empty posture in the same way
-`ListContainer` owns browse-page state.
+Let the route own loading/error/empty posture around `PageHeader` + `MetaBar` +
+`Tabs` in the common app-detail case. Use `DetailShell` when you explicitly
+want one composite shell to own ready vs loading vs error vs empty in the same
+way `ListContainer` owns browse-page state.
 
 ```svelte
 <DetailShell
@@ -150,15 +183,19 @@ Those remain host-owned unless Poodle later promotes a narrower generic surface.
 ## Decision
 
 - `FormDialog` is the default modal form shell
-- `DetailShell` is the default readonly page shell
+- `PageHeader` + `MetaBar` + optional top-level `Tabs` is the default app
+  detail shell
+- `DetailShell` is still available when one composite readonly shell is the
+  right abstraction
 - `DetailSection` and `DetailItem` are the default building blocks for grouped
-  detail content
+  detail content and tab-level overview cards
 
 ## Related Contracts
 
 - [FormDialog](../contracts/composites/form-dialog.md)
 - [DetailShell](../contracts/composites/detail-shell.md)
 - [DetailSection](../contracts/composites/detail-section.md)
+- [InlineListSection](../contracts/composites/inline-list-section.md)
 - [DetailItem](../contracts/foundation/detail-item.md)
 
 ## Next Task
