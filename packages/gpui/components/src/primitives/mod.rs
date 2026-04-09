@@ -77,7 +77,7 @@ mod toolbar;
 mod tooltip;
 mod tri_state_switch;
 mod password_requirements;
-mod zoned_date_time_picker;
+mod date_time_zone_picker;
 
 pub use accordion::Accordion;
 pub use alert_dialog::AlertDialog;
@@ -163,4 +163,4 @@ pub use toolbar::Toolbar;
 pub use tooltip::Tooltip;
 pub use tri_state_switch::TriStateSwitch;
 pub use password_requirements::PasswordRequirements;
-pub use zoned_date_time_picker::ZonedDateTimePicker;
+pub use date_time_zone_picker::DateTimeZonePicker;

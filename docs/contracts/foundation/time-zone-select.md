@@ -285,5 +285,5 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 - contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: scheduler setup, publishing settings, zoned datetime pickers,
-  ZonedDateTimePicker composite
+  DateTimeZonePicker composite
 - future follow-up: consider searchable timezone picker if list length proves unwieldy

@@ -2270,7 +2270,7 @@
       },
       {
         "packageName": "@poodle/svelte-primitives",
-        "exportName": "ZonedDateTimePicker",
+        "exportName": "DateTimeZonePicker",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

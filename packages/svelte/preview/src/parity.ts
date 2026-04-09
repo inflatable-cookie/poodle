@@ -535,7 +535,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Tooltip",
       "TriStateSwitch",
       "UiPresentationProvider",
-      "ZonedDateTimePicker",
+      "DateTimeZonePicker",
     ],
   },
   {

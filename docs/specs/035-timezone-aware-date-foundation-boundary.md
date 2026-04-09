@@ -16,7 +16,7 @@ conversion workflows.
 The current timezone-aware family is:
 
 - `TimeZoneSelect`
-- `ZonedDateTimePicker`
+- `DateTimeZonePicker`
 
 These cover named timezone selection and explicit local date-time plus timezone
 entry without claiming offset math, recurrence, or transport semantics.
@@ -59,7 +59,7 @@ Timezone-aware primitives must preserve:
 
 `TimeZoneSelect` is the standalone timezone-value primitive.
 
-`ZonedDateTimePicker` composes `Calendar`, `TimeField`, and
+`DateTimeZonePicker` composes `Calendar`, `TimeField`, and
 `TimeZoneSelect` under one contract-owned value.
 
 Higher layers may wrap these primitives, but they should not replace the value
@@ -75,7 +75,7 @@ publishing workflows still need explicit later ownership decisions.
 ## Evidence
 
 - `docs/contracts/foundation/time-zone-select.md`
-- `docs/contracts/foundation/zoned-date-time-picker.md`
+- `docs/contracts/foundation/date-time-zone-picker.md`
 - `packages/svelte/primitives/README.md`
 
 ## Next Task

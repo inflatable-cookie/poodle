@@ -188,7 +188,7 @@ RangeSlider, Toolbar, TriStateSwitch
 
 **009 — Selection, feedback, and temporal (8):**
 Meter, Pill, Rating, Skeleton, TimeAgo, DurationInput, TimeZoneSelect,
-ZonedDateTimePicker
+DateTimeZonePicker
 
 **010 — Informational, code, and color (4):**
 Code, ColorPicker, FileUpload, SplitButton

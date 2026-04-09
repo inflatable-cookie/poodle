@@ -123,7 +123,7 @@ above it in downstream repos such as Loophole.
 - `foundation/treatment-tokens.md`
 - `foundation/tri-state-switch.md`
 - `foundation/ui-presentation-provider.md`
-- `foundation/zoned-date-time-picker.md`
+- `foundation/date-time-zone-picker.md`
 - `composites/README.md`
 - `composites/action-discovery-panel.md`
 - `composites/app-header.md`

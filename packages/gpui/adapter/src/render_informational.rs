@@ -1,7 +1,7 @@
 //! RenderComponent implementations for informational, code, color, file, and temporal primitives.
 //!
 //! g07.006: Code, ColorPicker, FileUpload, Eyebrow, Pill, TimeAgo, DurationInput,
-//! TimeZoneSelect, ZonedDateTimePicker, SplitButton, DatePicker, Calendar,
+//! TimeZoneSelect, DateTimeZonePicker, SplitButton, DatePicker, Calendar,
 //! DateRangePicker, DateTimePicker, DateTimeRangePicker
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
@@ -9,7 +9,7 @@ use poodle_primitives::{
     CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     PillSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
-    ZonedDateTimePickerSpec,
+    DateTimeZonePickerSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -171,9 +171,9 @@ impl RenderComponent<TimeZoneSelectSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<ZonedDateTimePickerSpec> for GpuiAdapter {
+impl RenderComponent<DateTimeZonePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &ZonedDateTimePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(&self, spec: &DateTimeZonePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve border color
@@ -187,7 +187,7 @@ impl RenderComponent<ZonedDateTimePickerSpec> for GpuiAdapter {
         // Resolve shadow (no shadow field on GpuiStyle — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        GpuiElementHandle::new("zoned-date-time-picker", "ZonedDateTimePickerSpec")
+        GpuiElementHandle::new("date-time-zone-picker", "DateTimeZonePickerSpec")
     }
 }
 
@@ -276,7 +276,7 @@ mod tests {
     #[test] fn time_ago() { assert_eq!(a().render(&TimeAgoSpec::new(), &s(), &t()).spec_type, "TimeAgoSpec"); }
     #[test] fn duration_input() { assert_eq!(a().render(&DurationInputSpec::new(), &s(), &t()).spec_type, "DurationInputSpec"); }
     #[test] fn time_zone_select() { assert_eq!(a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type, "TimeZoneSelectSpec"); }
-    #[test] fn zoned_date_time_picker() { assert_eq!(a().render(&ZonedDateTimePickerSpec::new(), &s(), &t()).spec_type, "ZonedDateTimePickerSpec"); }
+    #[test] fn date_time_zone_picker() { assert_eq!(a().render(&DateTimeZonePickerSpec::new(), &s(), &t()).spec_type, "DateTimeZonePickerSpec"); }
     #[test] fn split_button() { assert_eq!(a().render(&SplitButtonSpec::new(), &s(), &t()).spec_type, "SplitButtonSpec"); }
     #[test] fn calendar() { assert_eq!(a().render(&CalendarSpec::new(), &s(), &t()).spec_type, "CalendarSpec"); }
     #[test] fn date_picker() { assert_eq!(a().render(&DatePickerSpec::new(), &s(), &t()).spec_type, "DatePickerSpec"); }

@@ -1,7 +1,7 @@
-//! ZonedDateTimePicker — Jetstream date+time+zone picker trigger backed by ZonedDateTimePickerSpec.
+//! DateTimeZonePicker — Jetstream date+time+zone picker trigger backed by DateTimeZonePickerSpec.
 //!
-//! Contract: `docs/contracts/foundation/zoned-date-time-picker.md`
-//! Reference: `packages/svelte/primitives/src/ZonedDateTimePicker.svelte`
+//! Contract: `docs/contracts/foundation/date-time-zone-picker.md`
+//! Reference: `packages/svelte/primitives/src/DateTimeZonePicker.svelte`
 //!
 //! Renders the trigger button with value/placeholder display and disclosure
 //! indicator.  The calendar+time-field+timezone-select surface is overlay-managed
@@ -10,7 +10,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::ZonedDateTimePickerSpec;
+use poodle_primitives::DateTimeZonePickerSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -18,8 +18,8 @@ use crate::presentation::{
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
-pub fn js_zoned_date_time_picker(
-    spec: &ZonedDateTimePickerSpec,
+pub fn js_date_time_zone_picker(
+    spec: &DateTimeZonePickerSpec,
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);

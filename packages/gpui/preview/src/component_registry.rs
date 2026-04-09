@@ -80,7 +80,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "toolbar", display_name: "Toolbar", description: "Horizontal action bar." },
     ComponentEntry { slug: "tooltip", display_name: "Tooltip", description: "Informational overlay." },
     ComponentEntry { slug: "tri-state-switch", display_name: "TriStateSwitch", description: "Three-position switch." },
-    ComponentEntry { slug: "zoned-date-time-picker", display_name: "ZonedDateTimePicker", description: "Date-time with timezone." },
+    ComponentEntry { slug: "date-time-zone-picker", display_name: "DateTimeZonePicker", description: "Date-time with timezone." },
 ];
 
 pub static COMPOSITES: &[ComponentEntry] = &[

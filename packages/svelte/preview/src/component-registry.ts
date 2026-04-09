@@ -116,7 +116,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Toolbar", "primitive", P, "Horizontal action bar with grouped controls.", true),
   entry("Tooltip", "primitive", P, "Hover/focus-triggered informational overlay.", true),
   entry("TriStateSwitch", "primitive", P, "Three-position switch for on/off/indeterminate.", true),
-  entry("ZonedDateTimePicker", "primitive", P, "Date-time picker with timezone awareness.", true),
+  entry("DateTimeZonePicker", "primitive", P, "Date-time picker with timezone awareness.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const compositeComponents: ComponentEntry[] = [

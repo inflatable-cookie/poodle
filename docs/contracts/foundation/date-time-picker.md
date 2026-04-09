@@ -361,5 +361,5 @@ All preview apps must render the following specimens identically.
 - approvers: pending
 - downstream adopters: publishing forms, reminders, appointments, scheduler
   setup flows
-- future follow-up: consider timezone-aware variant (see ZonedDateTimePicker);
+- future follow-up: consider timezone-aware variant (see DateTimeZonePicker);
   align overlay placement with Popover rules if needed

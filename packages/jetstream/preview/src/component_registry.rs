@@ -104,7 +104,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "toolbar", display_name: "Toolbar", description: "Horizontal action bar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tooltip", display_name: "Tooltip", description: "Informational overlay.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tri-state-switch", display_name: "TriStateSwitch", description: "Three-position switch.", tier: Tier::Primitive, has_specimen: true },
-    ComponentEntry { slug: "zoned-date-time-picker", display_name: "ZonedDateTimePicker", description: "Date-time with timezone.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "date-time-zone-picker", display_name: "DateTimeZonePicker", description: "Date-time with timezone.", tier: Tier::Primitive, has_specimen: true },
 ];
 
 pub static COMPOSITES: &[ComponentEntry] = &[

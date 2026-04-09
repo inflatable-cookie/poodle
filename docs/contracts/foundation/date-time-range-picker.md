@@ -390,6 +390,6 @@ All preview apps must render the following specimens identically.
 - approvers: pending
 - downstream adopters: report filters, booking windows, publishing ranges,
   scheduled review windows
-- future follow-up: consider timezone-aware variant (see ZonedDateTimePicker
+- future follow-up: consider timezone-aware variant (see DateTimeZonePicker
   for single datetime with timezone); align overlay placement with Popover rules
   if needed

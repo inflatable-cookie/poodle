@@ -11,7 +11,7 @@ date/time primitives.
 ## Components (16)
 
 CodeSpec, ColorPickerSpec, FileUploadSpec, EyebrowSpec, PillSpec, TimeAgoSpec,
-DurationInputSpec, TimeZoneSelectSpec, ZonedDateTimePickerSpec, SplitButtonSpec,
+DurationInputSpec, TimeZoneSelectSpec, DateTimeZonePickerSpec, SplitButtonSpec,
 CalendarSpec, RangeCalendarSpec, DatePickerSpec, DateRangePickerSpec,
 DateTimePickerSpec, DateTimeRangePickerSpec
 

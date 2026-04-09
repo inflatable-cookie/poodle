@@ -34,7 +34,7 @@ date_time_range_picker, duration_input, editable_label, file_upload, menu,
 menubar, navigation_menu, number_entry, pill, pin_input, radio_group,
 range_calendar, range_slider, rating, segmented_control, select, slider,
 split_button, switch, tab_strip, tabs, text_area, text_input, time_field,
-time_zone_select, toggle, tri_state_switch, zoned_date_time_picker
+time_zone_select, toggle, tri_state_switch, date_time_zone_picker
 
 ### Hardcoded Hover/Active Colors (~16 components)
 

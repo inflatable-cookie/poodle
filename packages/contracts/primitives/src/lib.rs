@@ -76,7 +76,7 @@ mod toggle_group;
 mod tooltip;
 mod tri_state_switch;
 mod types;
-mod zoned_date_time_picker;
+mod date_time_zone_picker;
 
 pub use accordion::AccordionSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
@@ -165,7 +165,9 @@ pub type ToggleSpec = ButtonSpec;
 pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
-pub use zoned_date_time_picker::ZonedDateTimePickerSpec;
+pub use date_time_zone_picker::DateTimeZonePickerSpec;
+/// Deprecated: Use `DateTimeZonePickerSpec` instead.
+pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
     AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlDensity, ControlSize, DateRangeValue,

@@ -86,7 +86,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Tooltip`
 - `TriStateSwitch`
 - `UiPresentationProvider`
-- `ZonedDateTimePicker`
+- `DateTimeZonePicker`
 - `DEFAULT_COMPRESSION`
 - `compressImage`
 - `controlHeightRem`

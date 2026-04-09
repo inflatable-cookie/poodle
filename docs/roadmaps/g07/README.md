@@ -129,7 +129,7 @@ ContextMenu, Tabs, TabStrip, NavigationMenu, Menubar
 
 **006 — Informational, code, color, file, and temporal (est. 10 components):**
 Code, ColorPicker, FileUpload, Eyebrow, Pill, TimeAgo, DurationInput,
-TimeZoneSelect, ZonedDateTimePicker, DatePicker (and other date/time variants
+TimeZoneSelect, DateTimeZonePicker, DatePicker (and other date/time variants
 if not covered in 004)
 
 ### 007–009 — Composite Rendering Batches

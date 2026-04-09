@@ -48,7 +48,7 @@ navigation_menu, popover, tooltip
 toggle
 
 **Date/Time (6):** calendar, date_picker, date_range_picker, date_time_picker,
-date_time_range_picker, zoned_date_time_picker
+date_time_range_picker, date_time_zone_picker
 
 **Composites (17):** action_discovery_panel, app_header, command_palette,
 data_table, detail_shell, dock_region, empty_state, filter_toolbar,

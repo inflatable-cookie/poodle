@@ -203,7 +203,7 @@ RangeSlider, Toolbar, TriStateSwitch
 
 **009 — Selection, feedback, and temporal (est. 8 specs):**
 Meter, Pill, Rating, Skeleton, TimeAgo, DurationInput, TimeZoneSelect,
-ZonedDateTimePicker
+DateTimeZonePicker
 
 **010 — Informational, code, and color (est. 4 specs):**
 Code, ColorPicker, FileUpload, RangeSlider (if not covered in 008)

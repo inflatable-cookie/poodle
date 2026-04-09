@@ -1,31 +1,31 @@
-//! ZonedDateTimePicker — real GPUI component backed by ZonedDateTimePickerSpec.
+//! DateTimeZonePicker — real GPUI component backed by DateTimeZonePickerSpec.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, ZonedDateTimePickerSpec};
+use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, DateTimeZonePickerSpec};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
-/// A real GPUI zoned date-time picker component backed by `ZonedDateTimePickerSpec`.
-pub struct ZonedDateTimePicker {
-    spec: ZonedDateTimePickerSpec,
+/// A real GPUI date-time-zone picker component backed by `DateTimeZonePickerSpec`.
+pub struct DateTimeZonePicker {
+    spec: DateTimeZonePickerSpec,
     theme: GpuiThemeProvider,
     on_toggle: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
 }
 
-impl std::ops::Deref for ZonedDateTimePicker {
-    type Target = ZonedDateTimePickerSpec;
-    fn deref(&self) -> &ZonedDateTimePickerSpec { &self.spec }
+impl std::ops::Deref for DateTimeZonePicker {
+    type Target = DateTimeZonePickerSpec;
+    fn deref(&self) -> &DateTimeZonePickerSpec { &self.spec }
 }
 
-impl ZonedDateTimePicker {
+impl DateTimeZonePicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ZonedDateTimePickerSpec::new(), theme: theme.clone(), on_toggle: None }
+        Self { spec: DateTimeZonePickerSpec::new(), theme: theme.clone(), on_toggle: None }
     }
 
-    pub fn from_spec(spec: ZonedDateTimePickerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub fn from_spec(spec: DateTimeZonePickerSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
@@ -51,7 +51,7 @@ impl ZonedDateTimePicker {
     }
 }
 
-impl IntoElement for ZonedDateTimePicker {
+impl IntoElement for DateTimeZonePicker {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
@@ -93,7 +93,7 @@ impl IntoElement for ZonedDateTimePicker {
         let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
 
         let mut trigger = div()
-            .id(SharedString::from("poodle-zoned-dt-picker"))
+            .id(SharedString::from("poodle-dt-zone-picker"))
             .focusable()
             .h(control_height)
             .px(inline_padding)

@@ -118,7 +118,7 @@ pub mod table;
 pub mod time_field;
 pub mod time_zone_select;
 pub mod tooltip;
-pub mod zoned_date_time_picker;
+pub mod date_time_zone_picker;
 
 // Composites (g10.006)
 pub mod action_discovery_panel;

@@ -18,7 +18,7 @@ Add 8 new primitive spec structs for selection, feedback, and temporal component
 | `TimeAgoSpec` | timestamp, live | text_color_token, font_size_token |
 | `DurationInputSpec` | value, is_disabled, validation_state, show_seconds | border_token |
 | `TimeZoneSelectSpec` | value, placeholder, is_open, is_disabled | trigger_text(), border_token, overlay_fill_token |
-| `ZonedDateTimePickerSpec` | value, time_zone, is_open, is_disabled | border_token, overlay_fill_token, shadow_token |
+| `DateTimeZonePickerSpec` | value, time_zone, is_open, is_disabled | border_token, overlay_fill_token, shadow_token |
 
 ## Running Total
 

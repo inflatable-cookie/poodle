@@ -47,7 +47,7 @@ mod time_field;
 mod date_time_picker;
 mod date_time_range_picker;
 mod time_zone_select;
-mod zoned_date_time_picker;
+mod date_time_zone_picker;
 
 // ── Feedback ──────────────────────────────────────────────
 mod progress;
@@ -270,7 +270,7 @@ pub fn render_single_specimen(
         "date-time-picker" => specimen_card("DateTimePicker", theme, date_time_picker::render(state, cx)),
         "date-time-range-picker" => specimen_card("DateTimeRangePicker", theme, date_time_range_picker::render(state, cx)),
         "time-zone-select" => specimen_card("TimeZoneSelect", theme, time_zone_select::render(state, cx)),
-        "zoned-date-time-picker" => specimen_card("ZonedDateTimePicker", theme, zoned_date_time_picker::render(state, cx)),
+        "date-time-zone-picker" => specimen_card("DateTimeZonePicker", theme, date_time_zone_picker::render(state, cx)),
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(theme)),

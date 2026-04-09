@@ -147,7 +147,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Informational and temporal
     "CodeSpec", "EyebrowSpec", "PillSpec", "TimeAgoSpec", "SplitButtonSpec",
     "ColorPickerSpec", "FileUploadSpec", "DurationInputSpec", "TimeZoneSelectSpec",
-    "ZonedDateTimePickerSpec", "CalendarSpec", "DatePickerSpec",
+    "DateTimeZonePickerSpec", "CalendarSpec", "DatePickerSpec",
     "DateRangePickerSpec", "DateTimePickerSpec", "DateTimeRangePickerSpec",
 ];
 

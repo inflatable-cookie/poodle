@@ -1,11 +1,11 @@
-# Zoned Date Time Picker
+# Date Time Zone Picker
 
 Status: detailed contract
 Updated: 2026-03-30
 
 ## 1. Purpose
 
-- Component name: `ZonedDateTimePicker`
+- Component name: `DateTimeZonePicker`
 - Layer: `foundation`
 - Summary: a value control that combines a picker trigger with a calendar,
   time-field, and timezone-select composition in a single overlay surface
@@ -18,19 +18,19 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .zoned-date-time-picker]  <div>
-  ├── [Trigger .zoned-date-time-picker__trigger]  <button>
-  │     ├── [Value .zoned-date-time-picker__value]  <span>
-  │     └── [Indicator .zoned-date-time-picker__indicator]  <span>
-  └── [Surface .zoned-date-time-picker__surface]  <div role="dialog"> (conditional, when open)
-        └── [Body .zoned-date-time-picker__body]
+[Root .date-time-zone-picker]  <div>
+  ├── [Trigger .date-time-zone-picker__trigger]  <button>
+  │     ├── [Value .date-time-zone-picker__value]  <span>
+  │     └── [Indicator .date-time-zone-picker__indicator]  <span>
+  └── [Surface .date-time-zone-picker__surface]  <div role="dialog"> (conditional, when open)
+        └── [Body .date-time-zone-picker__body]
               ├── [Calendar] (composed)
-              └── [Fields .zoned-date-time-picker__fields]
-                    ├── [Field .zoned-date-time-picker__field]
-                    │     ├── [Field Label .zoned-date-time-picker__label]  <label> ("Time")
+              └── [Fields .date-time-zone-picker__fields]
+                    ├── [Field .date-time-zone-picker__field]
+                    │     ├── [Field Label .date-time-zone-picker__label]  <label> ("Time")
                     │     └── [TimeField] (composed)
-                    └── [Field .zoned-date-time-picker__field]
-                          ├── [Field Label .zoned-date-time-picker__label]  <label> ("Time zone")
+                    └── [Field .date-time-zone-picker__field]
+                          ├── [Field Label .date-time-zone-picker__label]  <label> ("Time zone")
                           └── [TimeZoneSelect] (composed)
 ```
 
@@ -125,7 +125,7 @@ TimeZoneOption: {
 - Surface: `role="dialog"`, unique id referenced by `aria-controls`
 - Trigger accessible name from external label or `ariaLabel` prop
 - Disabled: `disabled` attribute on trigger button
-- Module-level `nextZonedDateTimePickerId` counter generates unique ids for ARIA relationships
+- Module-level `nextDateTimeZonePickerId` counter generates unique ids for ARIA relationships
 - TimeField receives `ariaLabel` "Time"; TimeZoneSelect receives `ariaLabel` "Time zone"
 
 ### Keyboard
@@ -165,7 +165,7 @@ TimeZoneOption: {
 
 ## 8. Token Usage — Exact Values
 
-### Root `.zoned-date-time-picker`
+### Root `.date-time-zone-picker`
 
 | Property | Value |
 |----------|-------|
@@ -173,7 +173,7 @@ TimeZoneOption: {
 | `display` | `inline-grid` |
 | `min-width` | `18rem` |
 
-### Trigger `.zoned-date-time-picker__trigger`
+### Trigger `.date-time-zone-picker__trigger`
 
 | Property | Value |
 |----------|-------|
@@ -213,20 +213,20 @@ TimeZoneOption: {
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
-### Value — placeholder state `.zoned-date-time-picker__value--placeholder`
+### Value — placeholder state `.date-time-zone-picker__value--placeholder`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 
-### Indicator `.zoned-date-time-picker__indicator`
+### Indicator `.date-time-zone-picker__indicator`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.75rem` |
 
-### Surface `.zoned-date-time-picker__surface`
+### Surface `.date-time-zone-picker__surface`
 
 | Property | Value |
 |----------|-------|
@@ -240,28 +240,28 @@ TimeZoneOption: {
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
 | `box-shadow` | `var(--poodle-elevation-overlay)` |
 
-### Body `.zoned-date-time-picker__body`
+### Body `.date-time-zone-picker__body`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.875rem` |
 
-### Fields `.zoned-date-time-picker__fields`
+### Fields `.date-time-zone-picker__fields`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.75rem` |
 
-### Field `.zoned-date-time-picker__field`
+### Field `.date-time-zone-picker__field`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.375rem` |
 
-### Field Label `.zoned-date-time-picker__label`
+### Field Label `.date-time-zone-picker__label`
 
 | Property | Value |
 |----------|-------|
@@ -290,7 +290,7 @@ TimeZoneOption: {
 
 ## 9. Svelte Notes
 
-- Module-level `nextZonedDateTimePickerId` counter generates unique ids for each
+- Module-level `nextDateTimeZonePickerId` counter generates unique ids for each
   instance to wire ARIA relationships (`aria-controls`, `aria-expanded`)
 - Controlled/uncontrolled pattern: if `value` prop is non-null, component
   operates in controlled mode; otherwise `defaultValue` seeds internal state
@@ -307,7 +307,7 @@ TimeZoneOption: {
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::primitives::zoned_date_time_picker`
+- expected crate/module surface: `poodle_gpui::primitives::date_time_zone_picker`
 - GPUI must implement trigger button with dialog overlay pattern
 - Must expose haspopup, expanded state, and dialog relationship through native
   accessibility APIs

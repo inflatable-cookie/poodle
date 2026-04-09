@@ -2,7 +2,7 @@ use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ZonedDateTimePickerSpec {
+pub struct DateTimeZonePickerSpec {
     pub value: Option<String>,
     pub time_zone: Option<String>,
     pub is_open: bool,
@@ -12,7 +12,7 @@ pub struct ZonedDateTimePickerSpec {
     pub density: ControlDensity,
 }
 
-impl Default for ZonedDateTimePickerSpec {
+impl Default for DateTimeZonePickerSpec {
     fn default() -> Self {
         Self {
             value: None,
@@ -26,7 +26,7 @@ impl Default for ZonedDateTimePickerSpec {
     }
 }
 
-impl ZonedDateTimePickerSpec {
+impl DateTimeZonePickerSpec {
     pub fn new() -> Self {
         Self::default()
     }

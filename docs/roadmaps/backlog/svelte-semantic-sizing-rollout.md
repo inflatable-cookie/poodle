@@ -48,7 +48,7 @@ RadioGroup, Switch, TextInput, Select, NumberEntry, Slider,
 RangeSlider, Rating, PinInput, Pagination, Menu, DatePicker, TextArea,
 EditableLabel, FileUpload, DurationInput, ColorPicker,
 DateRangePicker, DateTimePicker, DateTimeRangePicker, TimeField,
-TimeZoneSelect, ZonedDateTimePicker, Calendar, RangeCalendar, Menubar,
+TimeZoneSelect, DateTimeZonePicker, Calendar, RangeCalendar, Menubar,
 ContextMenu, NavigationMenu, Breadcrumbs, OrderBy, BulkActionBar, Code,
 Dialog, AlertDialog, Drawer, Accordion, Collapsible, CollapseToggle, Callout
 
@@ -117,7 +117,7 @@ still needs its own sizeRole prop and presentation wiring.
 | DateTimeRangePicker | no | `control` | needs full implementation |
 | TimeField | no | `control` | needs full implementation |
 | TimeZoneSelect | no | `control` | needs full implementation |
-| ZonedDateTimePicker | no | `control` | needs full implementation |
+| DateTimeZonePicker | no | `control` | needs full implementation |
 | Calendar | no | `control` | date grid used inside pickers |
 | RangeCalendar | no | `control` | range date grid |
 

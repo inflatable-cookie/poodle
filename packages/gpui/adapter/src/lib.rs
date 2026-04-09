@@ -158,7 +158,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "TimeAgoSpec",
     "DurationInputSpec",
     "TimeZoneSelectSpec",
-    "ZonedDateTimePickerSpec",
+    "DateTimeZonePickerSpec",
     "SplitButtonSpec",
     "CalendarSpec",
     "DatePickerSpec",

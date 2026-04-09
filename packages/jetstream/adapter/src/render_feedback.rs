@@ -3,7 +3,7 @@
 //! g08.007: ProgressSpec, BadgeSpec, SpinnerSpec, StatusIndicatorSpec, SkeletonSpec,
 //! MeterSpec, RatingSpec, CodeSpec, EyebrowSpec, PillSpec, TimeAgoSpec,
 //! SplitButtonSpec, ColorPickerSpec, FileUploadSpec, DurationInputSpec,
-//! TimeZoneSelectSpec, ZonedDateTimePickerSpec, CalendarSpec,
+//! TimeZoneSelectSpec, DateTimeZonePickerSpec, CalendarSpec,
 //! DatePickerSpec, DateRangePickerSpec, DateTimePickerSpec, DateTimeRangePickerSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
@@ -12,7 +12,7 @@ use poodle_primitives::{
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     MeterSpec, PillSpec, ProgressSpec, RatingSpec, SkeletonSpec,
     SpinnerSpec, SplitButtonSpec, StatusIndicatorSpec, TimeAgoSpec, TimeZoneSelectSpec,
-    ZonedDateTimePickerSpec,
+    DateTimeZonePickerSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -340,9 +340,9 @@ impl RenderComponent<TimeZoneSelectSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<ZonedDateTimePickerSpec> for JetstreamAdapter {
+impl RenderComponent<DateTimeZonePickerSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
-    fn render(&self, spec: &ZonedDateTimePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
+    fn render(&self, spec: &DateTimeZonePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
         // Resolve border color
@@ -358,7 +358,7 @@ impl RenderComponent<ZonedDateTimePickerSpec> for JetstreamAdapter {
         // Resolve shadow (no shadow field on JetstreamVisuals — resolve for proof)
         let _shadow = theme.resolve_color(spec.shadow_token());
 
-        JetstreamNodeHandle::new("zoned-date-time-picker", "ZonedDateTimePickerSpec", WidgetKind::Panel, mapped)
+        JetstreamNodeHandle::new("date-time-zone-picker", "DateTimeZonePickerSpec", WidgetKind::Panel, mapped)
     }
 }
 
@@ -429,7 +429,7 @@ mod tests {
     #[test] fn file_upload() { assert_eq!(a().render(&FileUploadSpec::new(), &s(), &t()).spec_type, "FileUploadSpec"); }
     #[test] fn duration_input() { assert_eq!(a().render(&DurationInputSpec::new(), &s(), &t()).spec_type, "DurationInputSpec"); }
     #[test] fn time_zone_select() { assert_eq!(a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type, "TimeZoneSelectSpec"); }
-    #[test] fn zoned_date_time_picker() { assert_eq!(a().render(&ZonedDateTimePickerSpec::new(), &s(), &t()).spec_type, "ZonedDateTimePickerSpec"); }
+    #[test] fn date_time_zone_picker() { assert_eq!(a().render(&DateTimeZonePickerSpec::new(), &s(), &t()).spec_type, "DateTimeZonePickerSpec"); }
     #[test] fn calendar() { assert_eq!(a().render(&CalendarSpec::new(), &s(), &t()).spec_type, "CalendarSpec"); }
     #[test] fn date_picker() { assert_eq!(a().render(&DatePickerSpec::new(), &s(), &t()).spec_type, "DatePickerSpec"); }
     #[test] fn date_range_picker() { assert_eq!(a().render(&DateRangePickerSpec::new(), &s(), &t()).spec_type, "DateRangePickerSpec"); }

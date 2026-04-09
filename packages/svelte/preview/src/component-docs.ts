@@ -3703,7 +3703,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <VideoPlayer src="/videos/intro.mp4" poster="/images/poster.jpg" showCaptions />`,
   },
 
-  "zoned-date-time-picker": {
+  "date-time-zone-picker": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
@@ -3727,12 +3727,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { ZonedDateTimePicker } from "@poodle/svelte-primitives";
+  import { DateTimeZonePicker } from "@poodle/svelte-primitives";
 
   let meeting = { date: null, time: null, timeZone: "America/New_York" };
 </script>
 
-<ZonedDateTimePicker bind:value={meeting} placeholder="Pick date, time & zone" />`,
+<DateTimeZonePicker bind:value={meeting} placeholder="Pick date, time & zone" />`,
   },
 
   "action-discovery-panel": {

@@ -109,7 +109,7 @@ import ToolbarSpecimen from "./ToolbarSpecimen.svelte";
 import TooltipSpecimen from "./TooltipSpecimen.svelte";
 import TriStateSwitchSpecimen from "./TriStateSwitchSpecimen.svelte";
 import VideoPlayerSpecimen from "./VideoPlayerSpecimen.svelte";
-import ZonedDateTimePickerSpecimen from "./ZonedDateTimePickerSpecimen.svelte";
+import DateTimeZonePickerSpecimen from "./DateTimeZonePickerSpecimen.svelte";
 
 // Composite specimens
 import ActionDiscoveryPanelSpecimen from "./ActionDiscoveryPanelSpecimen.svelte";
@@ -238,7 +238,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "tri-state-switch": TriStateSwitchSpecimen,
   "video-player": VideoPlayerSpecimen,
   "dock-region": DockRegionSpecimen,
-  "zoned-date-time-picker": ZonedDateTimePickerSpecimen,
+  "date-time-zone-picker": DateTimeZonePickerSpecimen,
 
   // Workstation
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,

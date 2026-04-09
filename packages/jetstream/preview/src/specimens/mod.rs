@@ -123,7 +123,7 @@ pub mod tooltip;
 pub mod tri_state_switch;
 pub mod validation_summary;
 pub mod video_player;
-pub mod zoned_date_time_picker;
+pub mod date_time_zone_picker;
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
@@ -345,7 +345,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "tri-state-switch" => Some(tri_state_switch::render(theme)),
         "validation-summary" => Some(validation_summary::render(theme)),
         "video-player" => Some(video_player::render(theme)),
-        "zoned-date-time-picker" => Some(zoned_date_time_picker::render(theme)),
+        "date-time-zone-picker" => Some(date_time_zone_picker::render(theme)),
         _ => None,
     }
 }

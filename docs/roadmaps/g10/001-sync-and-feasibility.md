@@ -112,7 +112,7 @@ These need adaptation but are achievable:
 | date_range_picker | Same | Inline range calendar |
 | date_time_picker | Calendar + time | Inline combined |
 | date_time_range_picker | Same | Inline combined |
-| zoned_date_time_picker | Same + timezone | Inline combined |
+| date_time_zone_picker | Same + timezone | Inline combined |
 | calendar | Grid of days | Feasible as text grid |
 | range_calendar | Same with range | Feasible |
 | time_field | Time input | Segmented number inputs |

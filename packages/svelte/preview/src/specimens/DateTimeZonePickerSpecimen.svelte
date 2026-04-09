@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ZonedDateTimePicker, Eyebrow } from "@poodle/svelte-primitives";
+  import { DateTimeZonePicker, Eyebrow } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
@@ -7,14 +7,14 @@
 <div class="specimen">
   <div class="specimen__group">
     <Eyebrow>Default</Eyebrow>
-    <ZonedDateTimePicker ariaLabel="Select date, time, and zone" />
+    <DateTimeZonePicker ariaLabel="Select date, time, and zone" />
   </div>
 
   <div class="specimen__group">
     <Eyebrow>Sizes</Eyebrow>
     <div class="specimen__stack">
       {#each controlSizes as size}
-        <ZonedDateTimePicker {size} ariaLabel={size} />
+        <DateTimeZonePicker {size} ariaLabel={size} />
       {/each}
     </div>
   </div>
@@ -25,7 +25,7 @@
       {#each ["compact", "default", "comfortable"] as density}
         <div class="specimen__row">
           <span class="specimen__label">{density}</span>
-          <ZonedDateTimePicker {density} />
+          <DateTimeZonePicker {density} />
         </div>
       {/each}
     </div>
@@ -33,7 +33,7 @@
 
   <div class="specimen__group">
     <Eyebrow>With default value</Eyebrow>
-    <ZonedDateTimePicker
+    <DateTimeZonePicker
       defaultValue={{ date: "2026-03-14", time: "10:00", timeZone: "America/Los_Angeles" }}
       ariaLabel="Pre-filled zoned date time"
     />
@@ -41,7 +41,7 @@
 
   <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
-    <ZonedDateTimePicker disabled ariaLabel="Disabled picker" />
+    <DateTimeZonePicker disabled ariaLabel="Disabled picker" />
   </div>
 </div>
 

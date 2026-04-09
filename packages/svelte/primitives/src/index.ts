@@ -96,7 +96,9 @@ export { default as Tooltip } from "./Tooltip.svelte";
 export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
 export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
-export { default as ZonedDateTimePicker } from "./ZonedDateTimePicker.svelte";
+export { default as DateTimeZonePicker } from "./DateTimeZonePicker.svelte";
+/** @deprecated Use `DateTimeZonePicker` instead. */
+export { default as ZonedDateTimePicker } from "./DateTimeZonePicker.svelte";
 export {
   formatDisplayDate,
   formatDisplayDateTime,
