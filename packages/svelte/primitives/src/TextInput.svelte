@@ -615,6 +615,19 @@
   .text-input--multiline {
     min-height: auto;
     padding: 0;
+    position: relative;
+  }
+
+  .text-input--multiline .text-input__char-count {
+    position: absolute;
+    bottom: 0.375rem;
+    right: 0.5rem;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .text-input--multiline .text-input__control--multiline {
+    padding-bottom: 1.5rem;
   }
 
   .text-input__control--multiline {
