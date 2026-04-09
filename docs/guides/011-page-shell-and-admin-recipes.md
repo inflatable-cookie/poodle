@@ -64,7 +64,7 @@ projects, categories, and scheduled-task list/detail/edit pages.
 ```svelte
 <script lang="ts">
   import { FilterToolbar, ListContainer } from "@poodle/svelte-composites";
-  import { Button, Field, SearchInput, Select } from "@poodle/svelte-primitives";
+  import { Button, Field, TextInput, Select } from "@poodle/svelte-primitives";
 </script>
 
 <ListContainer
@@ -83,7 +83,7 @@ projects, categories, and scheduled-task list/detail/edit pages.
   {#snippet filters()}
     <FilterToolbar summaryText={summaryText}>
       <Field id="project-search" label="Search">
-        <SearchInput id="project-search" bind:value={query} />
+        <TextInput id="project-search" type="search" bind:value={query} />
       </Field>
 
       <Field id="project-status" label="Status">

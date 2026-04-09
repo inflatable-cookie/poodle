@@ -81,7 +81,6 @@ import RegionSpecimen from "./RegionSpecimen.svelte";
 import ReorderableListSpecimen from "./ReorderableListSpecimen.svelte";
 import RelationPickerSpecimen from "./RelationPickerSpecimen.svelte";
 import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
-import SearchInputSpecimen from "./SearchInputSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
 import SelectSpecimen from "./SelectSpecimen.svelte";
 import SelectionSummarySpecimen from "./SelectionSummarySpecimen.svelte";
@@ -210,7 +209,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "relation-picker": RelationPickerSpecimen,
   "reorderable-list": ReorderableListSpecimen,
   "scroll-shell": ScrollShellSpecimen,
-  "search-input": SearchInputSpecimen,
   "segmented-control": SegmentedControlSpecimen,
   select: SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,

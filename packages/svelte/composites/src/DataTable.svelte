@@ -7,7 +7,6 @@
     Icon,
     Menu,
     Popover,
-    SearchInput,
     Select,
     TextInput,
     getUiPresentation,
@@ -372,8 +371,9 @@
                     on:valueChange={(event) => requestFilterChange(column.id, event.detail.value)}
                   />
                 {:else}
-                  <SearchInput
+                  <TextInput
                     id={getFilterInputId(column)}
+                    type="search"
                     value={filters[column.id] ?? ""}
                     placeholder={`Filter ${column.label.toLowerCase()}...`}
                     ariaLabel={`Filter ${column.label}`}

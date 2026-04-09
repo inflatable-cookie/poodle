@@ -53,7 +53,6 @@ mod rating;
 mod region;
 mod resize_handle;
 mod scroll_shell;
-mod search_input;
 mod segmented_control;
 mod select;
 mod separator;
@@ -136,9 +135,10 @@ pub use rating::RatingSpec;
 pub use region::RegionSpec;
 pub use resize_handle::ResizeHandleSpec;
 pub use scroll_shell::ScrollShellSpec;
-pub use search_input::SearchInputSpec;
-/// Deprecated: use `SearchInputSpec` instead.
-pub type SearchFieldSpec = SearchInputSpec;
+/// Deprecated: use `TextInputSpec` with `input_type("search")` instead.
+pub type SearchInputSpec = TextInputSpec;
+/// Deprecated: use `TextInputSpec` with `input_type("search")` instead.
+pub type SearchFieldSpec = TextInputSpec;
 pub use segmented_control::SegmentedControlSpec;
 pub use select::{SelectMode, SelectSpec};
 pub use separator::SeparatorSpec;
@@ -192,7 +192,6 @@ pub const ACTION_FIELD_EXPORTS: &[&str] = &[
     "FieldSpec",
     "FieldRelationships",
     "TextInputSpec",
-    "SearchInputSpec",
     "FormActionsSpec",
 ];
 pub const SELECTION_FEEDBACK_DATE_EXPORTS: &[&str] = &[
@@ -242,7 +241,7 @@ mod tests {
         IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec,
         NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale,
         PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
-        SearchInputSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
+        SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
         StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
         TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec,
         TimeFieldSpec, TooltipSpec, ValidationState,
@@ -396,15 +395,15 @@ mod tests {
     }
 
     #[test]
-    fn search_input_exposes_clear_action_only_when_query_exists() {
-        let spec = SearchInputSpec::new().with_default_value("track lane");
-        let input = spec.as_text_input_spec();
+    fn text_input_search_type_preserves_current_value() {
+        let spec = TextInputSpec::new()
+            .with_input_type("search")
+            .with_default_value("track lane")
+            .with_leading_icon("search");
 
-        assert!(spec.shows_clear_action());
-        assert_eq!(input.input_type, "search");
-        assert_eq!(input.current_value(), "track lane");
-        assert_eq!(input.leading_icon.as_deref(), Some("search"));
-        assert_eq!(input.trailing_icon.as_deref(), Some("clear"));
+        assert_eq!(spec.input_type, "search");
+        assert_eq!(spec.current_value(), "track lane");
+        assert_eq!(spec.leading_icon.as_deref(), Some("search"));
     }
 
     #[test]

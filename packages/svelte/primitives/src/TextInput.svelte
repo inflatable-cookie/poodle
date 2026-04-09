@@ -68,12 +68,15 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
+  /** When type="search", whether to show the clear button when the input has a value. */
+  export let showClearButton = true;
 
   const dispatch = createEventDispatcher<{
     valueChange: { value: string };
     validationChange: { status: InputValidationStatus; valid: boolean; message: string };
     submit: { value: string };
     cancel: void;
+    clear: void;
     keydown: KeyboardEvent;
     focus: FocusEvent;
     blur: FocusEvent;
@@ -92,6 +95,8 @@
   let previousValidationSnapshot = "";
   let previousControlledValue = value;
 
+  $: isSearch = type === "search";
+  $: canClear = isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0;
   $: isControlled = value !== null;
   $: if (isControlled) {
     if (value !== previousControlledValue) {
@@ -201,6 +206,15 @@
     }
   }
 
+  function handleClear(): void {
+    liveValue = "";
+    if (!isControlled) {
+      uncontrolledValue = "";
+    }
+    dispatch("valueChange", { value: "" });
+    dispatch("clear");
+  }
+
   function buildValidationKey(inputValue: string, context: unknown): string {
     return JSON.stringify({ value: inputValue, context: serializeValidationContext(context) });
   }
@@ -280,6 +294,10 @@
   {#if $$slots.leading}
     <span class="text-input__affordance text-input__affordance--leading">
       <slot name="leading" />
+    </span>
+  {:else if isSearch}
+    <span class="text-input__affordance text-input__affordance--leading" aria-hidden="true">
+      <Icon icon="search" />
     </span>
   {/if}
 
@@ -369,6 +387,17 @@
     <span class="text-input__affordance text-input__affordance--trailing">
       <slot name="trailing" />
     </span>
+  {/if}
+
+  {#if canClear}
+    <button
+      class="text-input__clear"
+      type="button"
+      aria-label="Clear search query"
+      on:click={handleClear}
+    >
+      <Icon icon="x" />
+    </button>
   {/if}
 
   {#if showValidationIndicator}
@@ -541,6 +570,36 @@
 
   .text-input__char-count--over {
     color: var(--poodle-color-status-danger);
+  }
+
+  /* Search clear button */
+  .text-input__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--poodle-icon-size-default);
+    height: var(--poodle-icon-size-default);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-icon-muted);
+    cursor: pointer;
+    border-radius: calc(
+      var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control)) - 0.0625rem
+    );
+  }
+
+  .text-input__clear:hover {
+    background: var(
+      --poodle-treatment-interactive-subtle-fill-hover,
+      color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)
+    );
+    color: var(--poodle-color-text-primary);
+  }
+
+  .text-input__clear:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
   }
 
   /* Density variants */

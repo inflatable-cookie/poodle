@@ -52,7 +52,6 @@ mod rating;
 mod region;
 mod resize_handle;
 mod scroll_shell;
-mod search_input;
 mod segmented_control;
 mod select;
 mod separator;
@@ -133,9 +132,10 @@ pub use rating::Rating;
 pub use region::Region;
 pub use resize_handle::ResizeHandle;
 pub use scroll_shell::ScrollShell;
-pub use search_input::SearchInput;
-/// Deprecated: use `SearchInput` instead.
-pub type SearchField = SearchInput;
+/// Deprecated: use `TextInput` with search type instead.
+pub type SearchInput = TextInput;
+/// Deprecated: use `TextInput` with search type instead.
+pub type SearchField = TextInput;
 pub use segmented_control::SegmentedControl;
 pub use select::Select;
 pub use separator::Separator;

@@ -1,11 +1,11 @@
 //! RenderComponent implementations for input primitives.
 //!
-//! g08.005: TextInputSpec, SearchInputSpec, FieldSpec,
+//! g08.005: TextInputSpec, FieldSpec,
 //! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
-    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, SearchInputSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec,
     TextInputSpec, TimeFieldSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -52,22 +52,6 @@ impl RenderComponent<TextInputSpec> for JetstreamAdapter {
             _ => "text-input".to_string(),
         };
         JetstreamNodeHandle::new(node_id, "TextInputSpec", WidgetKind::TextInput, mapped)
-    }
-}
-
-impl RenderComponent<SearchInputSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, spec: &SearchInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut mapped = map_style(style);
-
-        // Resolve search icon color
-        let search_icon_color = theme.resolve_color(spec.search_icon_color_token());
-        mapped.visuals.icon_color = Some(JetstreamColor::from(search_icon_color));
-
-        // Resolve clear action icon color (for proof)
-        let _clear_icon_color = theme.resolve_color(spec.clear_action_icon_color_token());
-
-        JetstreamNodeHandle::new("search-input", "SearchInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -200,14 +184,6 @@ mod tests {
         let spec = TextInputSpec::new().with_disabled(true).with_id("name");
         let h = a().render(&spec, &s(), &t());
         assert_eq!(h.node_id, "text-input-name");
-        assert_eq!(h.widget_kind, WidgetKind::TextInput);
-    }
-
-    #[test]
-    fn search_input_renders() {
-        let h = a().render(&SearchInputSpec::new(), &s(), &t());
-        assert_eq!(h.node_id, "search-input");
-        assert_eq!(h.spec_type, "SearchInputSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 

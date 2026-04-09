@@ -22,7 +22,7 @@ Updated: 2026-03-30
         │     │     ├── [Separator]   "/"
         │     │     └── [BreadcrumbItem...]
         │     ├── [DrillLevelLabel]   (when drilling)
-        │     ├── [SearchInput]       (drill search or main search)
+        │     ├── [TextInput type="search"]       (drill search or main search)
         ├── [SelectionSummary]  (slot: selection, hidden while drilling)
         ├── [DrillList]         (when drilling, replaces candidate list)
         │     └── [DrillListItem...]
@@ -61,7 +61,7 @@ Updated: 2026-03-30
 | drill-separator | `<span>` | "/" separator between breadcrumb items |
 | drill-breadcrumb-item | `<button>` | Clickable breadcrumb, navigates to that level |
 | drill-level-label | `<div>` | Uppercase label for current drill level |
-| search-field | `SearchInput` | Main or drill search, with clear and keydown handling |
+| search-field | `TextInput type="search"` | Main or drill search, with clear and keydown handling |
 | selection-summary | `SelectionSummary` | Removable selection pills, hidden during drilling |
 | drill-list | `<ul>` | Grid list of drill-down items |
 | drill-button | `<button>` | Full-width button for each drill item |
@@ -225,7 +225,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 
 ### Composition
 
-- Composes: `PickerShell`, `SelectionSummary`, `SearchInput`, `Checkbox`, `Button`, `FormActions`, `Icon`
+- Composes: `PickerShell`, `SelectionSummary`, `TextInput type="search"`, `Checkbox`, `Button`, `FormActions`, `Icon`
 - Parent expectations: inline containers, popovers, modal dialogs
 - Wraps children in `UiPresentationProvider` with resolved size and density
 

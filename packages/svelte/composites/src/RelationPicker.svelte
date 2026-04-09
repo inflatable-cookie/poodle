@@ -6,7 +6,7 @@
     Checkbox,
     FormActions,
     Icon,
-    SearchInput,
+    TextInput,
     UiPresentationProvider,
     getUiPresentation,
     resolveSemanticControlSize,
@@ -299,8 +299,9 @@
             </div>
           {/if}
           <div class="drill-level-label">{currentLevel?.label}</div>
-          <SearchInput
+          <TextInput
             id="drill-search"
+            type="search"
             value={drillSearchQuery}
             ariaLabel={`Search ${currentLevel?.label ?? "items"}`}
             placeholder={currentLevel?.searchPlaceholder ?? `Search ${currentLevel?.label?.toLowerCase() ?? 'items'}...`}
@@ -333,8 +334,9 @@
               {/each}
             </div>
           {/if}
-          <SearchInput
+          <TextInput
             id="relation-picker-search"
+            type="search"
             value={query}
             ariaLabel="Search picker results"
             describedBy={statusId}

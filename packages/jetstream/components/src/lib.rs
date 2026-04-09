@@ -76,7 +76,6 @@ pub mod number_input;
 pub mod radio_group;
 pub mod range_slider;
 pub mod rating;
-pub mod search_input;
 pub mod segmented_control;
 pub mod slider;
 pub mod split_button;

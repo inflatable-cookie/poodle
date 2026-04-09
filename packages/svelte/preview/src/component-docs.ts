@@ -2289,7 +2289,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { ListContainer } from "@poodle/svelte-composites";
-  import { Button, Field, SearchInput, Select } from "@poodle/svelte-primitives";
+  import { Button, Field, TextInput, Select } from "@poodle/svelte-primitives";
 
   let page = 1;
 </script>
@@ -2309,7 +2309,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   <svelte:fragment slot="filters">
     <Field label="Search">
-      <SearchInput placeholder="Search incidents" />
+      <TextInput type="search" placeholder="Search incidents" />
     </Field>
   </svelte:fragment>
 
@@ -2812,39 +2812,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <ScrollShell direction="vertical" padding="md" style="max-height: 300px;">
   <p>Long scrollable content goes here...</p>
 </ScrollShell>`,
-  },
-
-  "search-input": {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "id", type: "string", required: true, description: "HTML id attribute for the input." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled search value." },
-      { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
-      { name: "placeholder", type: "string", default: '"Search"', description: "Placeholder text." },
-      { name: "ariaLabel", type: "string", default: '"Search"', description: "Accessible label for the search field." },
-      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this field." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
-      { name: "readOnly", type: "boolean", default: "false", description: "Whether the field is read-only." },
-      { name: "debounce", type: "number | null", default: "null", description: "Delay valueChange emission while typing." },
-      { name: "showClearButton", type: "boolean", default: "true", description: "Whether to show the clear button." },
-      { name: "validationState", type: "ValidationState", default: '"none"', description: "Validation state of the field." },
-    ],
-    slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the search value changes." },
-      { name: "submit", payload: "{ value: string }", description: "Fires when the search is submitted." },
-      { name: "clear", payload: "void", description: "Fires when the field is cleared." },
-      { name: "cancel", payload: "void", description: "Fires when the search is cancelled." },
-    ],
-    usage: `<script lang="ts">
-  import { SearchInput } from "@poodle/svelte-primitives";
-
-  let query = "";
-</script>
-
-<SearchInput id="search" bind:value={query} placeholder="Search products..." on:submit={(e) => search(e.detail.value)} />`,
   },
 
   "segmented-control": {
@@ -3422,9 +3389,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "suffix", type: "string | null", default: "null", description: "Static suffix text shown inside the input." },
       { name: "maxLength", type: "number | null", default: "null", description: "Maximum character length." },
       { name: "showCharCount", type: "boolean", default: "false", description: "Whether to display a character count." },
+      { name: "showClearButton", type: "boolean", default: "true", description: "When type=\"search\", whether to show the clear button when the input has a value. Only applies to search type." },
     ],
     slots: [
-      { name: "leading", description: "Content rendered before the input (e.g. icon)." },
+      { name: "leading", description: "Content rendered before the input (e.g. icon). When type=\"search\" and no leading slot is provided, a search icon is rendered automatically." },
       { name: "trailing", description: "Content rendered after the input (e.g. icon)." },
     ],
     events: [
@@ -3432,6 +3400,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "validationChange", payload: '{ status: InputValidationStatus; valid: boolean; message: string }', description: "Fires when built-in validation state changes." },
       { name: "submit", payload: "{ value: string }", description: "Fires on Enter key press." },
       { name: "cancel", payload: "void", description: "Fires when editing is cancelled." },
+      { name: "clear", payload: "void", description: "Fires when the search clear button is clicked (type=\"search\" only)." },
       { name: "focus", payload: "FocusEvent", description: "Fires when the input receives focus." },
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],

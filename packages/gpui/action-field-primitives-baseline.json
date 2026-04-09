@@ -17,7 +17,6 @@
     "FieldSpec",
     "FormActionsSpec",
     "IconButtonSpec",
-    "SearchInputSpec",
     "TextInputSpec"
   ],
   "knownDeltas": [

@@ -85,7 +85,6 @@
         "ProgressSpec",
         "RadioGroupSpec",
         "ScrollShellSpec",
-        "SearchInputSpec",
         "SegmentedControlSpec",
         "SelectSpec",
         "SeparatorSpec",

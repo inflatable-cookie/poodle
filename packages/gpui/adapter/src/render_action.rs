@@ -2,14 +2,14 @@
 //!
 //! Implements the adapter trait for:
 //! - ButtonSpec, IconButtonSpec
-//! - FieldSpec, TextInputSpec, SearchInputSpec
+//! - FieldSpec, TextInputSpec
 //! - FormActionsSpec, TimeFieldSpec
 //! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_primitives::{
     ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-    NumberInputSpec, SearchInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+    NumberInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -158,31 +158,6 @@ impl RenderComponent<TextInputSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<SearchInputSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-
-    fn render(
-        &self,
-        spec: &SearchInputSpec,
-        style: &StyleDescriptor,
-        theme: &dyn ThemeProvider,
-    ) -> GpuiElementHandle {
-        let mut gpui_style = map_style(style);
-
-        // Resolve search icon color
-        let search_icon_color = theme.resolve_color(spec.search_icon_color_token());
-        gpui_style.text_color = Some(search_icon_color.into());
-
-        // Resolve clear action icon color (for proof)
-        let _clear_icon_color = theme.resolve_color(spec.clear_action_icon_color_token());
-
-        GpuiElementHandle::new(
-            format!("search-input-{}", if spec.shows_clear_action() { "active" } else { "idle" }),
-            "SearchInputSpec",
-        )
-    }
-}
-
 impl RenderComponent<FormActionsSpec> for GpuiAdapter {
     type Target = GpuiTarget;
 
@@ -324,7 +299,7 @@ mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_primitives::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberInputSpec, SearchInputSpec, TextInputSpec,
+        NumberInputSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
@@ -386,15 +361,6 @@ mod tests {
         let handle = a.render(&spec, &style(), &theme());
         assert_eq!(handle.element_id, "text-input-email");
         assert_eq!(handle.spec_type, "TextInputSpec");
-    }
-
-    #[test]
-    fn render_search_input_resolves_tokens() {
-        let a = adapter();
-        let spec = SearchInputSpec::new().with_default_value("query");
-        let handle = a.render(&spec, &style(), &theme());
-        assert_eq!(handle.element_id, "search-input-active");
-        assert_eq!(handle.spec_type, "SearchInputSpec");
     }
 
     #[test]

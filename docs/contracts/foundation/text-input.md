@@ -14,8 +14,10 @@ Updated: 2026-03-25
   count, validation state, submit/cancel behavior, controlled and uncontrolled
   value models
 - In scope: multiline editing via `type="multiline"` or `rows > 1`
-- Out of scope: search-specific clear behavior
-  (see SearchInput), inline edit mode switching (see EditableLabel), number
+- In scope: search mode via `type="search"` — automatic leading search icon
+  (when no leading slot is provided), optional clear button with `showClearButton`
+  prop, and `clear` event
+- Out of scope: inline edit mode switching (see EditableLabel), number
   formatting (see NumberInput)
 
 ## 2. Anatomy
@@ -71,7 +73,8 @@ Updated: 2026-03-25
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `inputMode` | `"none" \| "search" \| "text" \| "tel" \| "url" \| "email" \| "numeric" \| "decimal" \| null` | `null` | no | virtual keyboard hint |
-| `type` | `string` | `"text"` | no | HTML input type attribute |
+| `type` | `string` | `"text"` | no | HTML input type attribute. When `"search"`, automatically renders a leading search icon (if no `leading` slot is provided), supports `showClearButton`, and emits `clear` event |
+| `showClearButton` | `boolean` | `true` | no | when `type="search"`, whether to show the clear button when the input has a value and is not disabled/readonly |
 | `prefix` | `string \| null` | `null` | no | static text before input (e.g. "$") |
 | `suffix` | `string \| null` | `null` | no | static text after input (e.g. "kg") |
 | `maxLength` | `number \| null` | `null` | no | maximum character count |
@@ -465,7 +468,8 @@ One disabled text input:
 
 - contract status: `detailed contract`
 - approvers: pending
-- downstream adopters: SearchInput (composition), EditableLabel, NumberInput,
+- downstream adopters: EditableLabel, NumberInput,
   Field-wrapped form inputs, Aura search/edit controls, Spark search/edit controls
+  (search behavior is now built into TextInput via type="search")
 - future follow-up: attach richer validation timing rules once Field wrappers
   are fully adopted

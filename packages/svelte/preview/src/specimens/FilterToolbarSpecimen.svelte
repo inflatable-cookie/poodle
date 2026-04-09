@@ -1,6 +1,6 @@
 <script lang="ts">
   import { FilterToolbar } from "@poodle/svelte-composites";
-  import { Eyebrow, Select, SearchInput, Button, IconButton, type SelectOption } from "@poodle/svelte-primitives";
+  import { Eyebrow, Select, TextInput, Button, IconButton, type SelectOption } from "@poodle/svelte-primitives";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -32,7 +32,7 @@
   <div class="specimen__group">
     <Eyebrow>Responsive grid layout</Eyebrow>
     <FilterToolbar summaryText="Showing 24 of 156 items" ariaLabel="Item filters">
-      <SearchInput id="filter-search" placeholder="Search…" ariaLabel="Search items" />
+      <TextInput id="filter-search" type="search" placeholder="Search…" ariaLabel="Search items" />
       <Select id="filter-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="filter-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
       <Select id="filter-owner" options={ownerOptions} defaultValue="all" ariaLabel="Owner" />
@@ -44,7 +44,7 @@
     <div class="specimen__stack">
       {#each controlSizes as size}
         <FilterToolbar summaryText="Toolbar at {size}" {size} ariaLabel="Filter toolbar at {size}">
-          <SearchInput id="size-search-{size}" placeholder="Search…" ariaLabel="Search" />
+          <TextInput id="size-search-{size}" type="search" placeholder="Search…" ariaLabel="Search" />
           <Select id="size-status-{size}" options={statusOptions} defaultValue="all" ariaLabel="Status" />
         </FilterToolbar>
       {/each}
@@ -62,7 +62,7 @@
       <svelte:fragment slot="actions">
         <IconButton icon="refresh-cw" sizeRole="chrome" ariaLabel="Refresh" />
       </svelte:fragment>
-      <SearchInput id="col-search" placeholder="Search…" ariaLabel="Search" />
+      <TextInput id="col-search" type="search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="col-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
     </FilterToolbar>
@@ -79,7 +79,7 @@
       <svelte:fragment slot="actions">
         <IconButton icon="refresh-cw" sizeRole="chrome" ariaLabel="Refresh" />
       </svelte:fragment>
-      <SearchInput id="col2-search" placeholder="Search…" ariaLabel="Search" />
+      <TextInput id="col2-search" type="search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col2-status" options={statusOptions} defaultValue="active" ariaLabel="Status" />
     </FilterToolbar>
   </div>
@@ -87,7 +87,7 @@
   <div class="specimen__group">
     <Eyebrow>With secondary slot</Eyebrow>
     <FilterToolbar ariaLabel="Project filters" columns={3}>
-      <SearchInput id="proj-search" placeholder="Filter projects…" ariaLabel="Filter" />
+      <TextInput id="proj-search" type="search" placeholder="Filter projects…" ariaLabel="Filter" />
       <Select id="proj-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="proj-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
       <svelte:fragment slot="secondary">

@@ -34,7 +34,7 @@ export const underlayWrapperPolicies: UnderlayWrapperPolicy[] = [
       "result-shell composition remains Underlay-owned",
     ],
     notes:
-      "Underlay may reuse Poodle SearchInput internals while preserving Underlay search APIs and surrounding browse workflows.",
+      "Underlay may reuse Poodle TextInput type=\"search\" internals while preserving Underlay search APIs and surrounding browse workflows.",
   },
   {
     underlayExport: "Panel",

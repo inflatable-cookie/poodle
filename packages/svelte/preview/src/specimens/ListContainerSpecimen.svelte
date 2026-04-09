@@ -1,6 +1,6 @@
 <script lang="ts">
   import { FilterToolbar, ListContainer } from "@poodle/svelte-composites";
-  import { Button, IconButton, Pill, SearchInput, Select, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { Button, IconButton, Pill, TextInput, Select, Eyebrow, Surface } from "@poodle/svelte-primitives";
 
   type QueueItem = {
     id: string;
@@ -81,7 +81,7 @@
                 tooltip="Refresh queues"
               />
             </svelte:fragment>
-            <SearchInput id="list-container-search-input" placeholder="Search queues" ariaLabel="Search queues" />
+            <TextInput id="list-container-search-input" type="search" placeholder="Search queues" ariaLabel="Search queues" />
             <Select
               id="list-container-status-select"
               value=""

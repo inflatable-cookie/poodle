@@ -96,7 +96,6 @@ above it in downstream repos such as Loophole.
 - `foundation/region.md`
 - `foundation/resize-handle.md`
 - `foundation/scroll-shell.md`
-- `foundation/search-input.md`
 - `foundation/segmented-control.md`
 - `foundation/select.md`
 - `foundation/separator.md`

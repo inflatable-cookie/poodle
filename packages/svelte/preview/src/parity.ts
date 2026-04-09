@@ -434,7 +434,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Field",
       "FormActions",
       "RadioGroup",
-      "SearchInput",
       "Switch",
       "TextInput",
     ],

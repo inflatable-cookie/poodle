@@ -1538,7 +1538,6 @@ function validateGpuiActionFieldBaseline(errors: string[]): { actionFieldExportC
     "FieldSpec",
     "FormActionsSpec",
     "IconButtonSpec",
-    "SearchInputSpec",
     "TextInputSpec",
   ];
   const crateRoot = path.join(repoRoot, actionFieldBaseline.cratePath);

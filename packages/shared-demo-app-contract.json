@@ -104,7 +104,6 @@
       "componentExpectations": [
         "Field",
         "TextInput",
-        "SearchInput",
         "Select",
         "RadioGroup",
         "Switch",
