@@ -163,7 +163,7 @@
     );
     --poodle-button-fill-active: color-mix(
       in srgb,
-      var(--poodle-surface, var(--poodle-color-background-surface)) 74%,
+      var(--poodle-surface, var(--poodle-color-background-surface)) 84%,
       var(--poodle-color-text-primary)
     );
     --poodle-button-border: var(
