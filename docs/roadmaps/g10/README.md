@@ -29,13 +29,16 @@ surface that needs to be made explicit again.
 
 ## Current State
 
-`g10.001` is complete, but the active thread work has drifted beyond that
-single feasibility milestone. The next honest step is to open a fresh
-recovery/control lane that freezes the real current queue from evidence and
-then compiles the next bounded milestone.
+- `g10.001` complete — Jetstream feasibility proven
+- `g10.002` complete — recovery/control lane opened, queue frozen, seams
+  classified, next milestone compiled
+- `g10.003` active — Svelte Component Overhaul Closeout
+
+Three active seams identified:
+- Seam A (Svelte Component Overhaul): actively executing via `g10.003`
+- Seam B (Jetstream Implementation): planned, not started — own milestone after A
+- Seam C (Parity/Verification): ad-hoc — systematic pass after A freezes
 
 ## Next Task
 
-Execute `g10.002`: recover the real live queue across Jetstream feasibility,
-component-overhaul work, and parity/specimen follow-through, then compile the
-next bounded milestone from that evidence.
+Execute `g10.003` Batch 3.1: finish the remaining composite specimen review pass.

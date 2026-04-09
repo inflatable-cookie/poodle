@@ -4,12 +4,11 @@
 
 - `g10`
   - Status: active
-  - Range: `001` to `002`, with extension required
-  - Notes: `g09` is complete on disk and the real live queue has already moved
-    into Jetstream feasibility, renderer parity, and component-overhaul
-    recovery work. `g10` is now the active generation and needs a fresh
-    recovery/control lane so the current thread work stops drifting outside the
-    roadmap surface.
+  - Range: `001` to `003`
+  - Notes: `g10.001` proved Jetstream feasibility. `g10.002` recovered the
+    live queue and classified three seams (Svelte overhaul, Jetstream
+    implementation, parity). `g10.003` is the active milestone: Svelte
+    Component Overhaul Closeout.
 
 ## Completed Foundations
 
@@ -76,5 +75,4 @@ When roadmap files disagree:
 
 ## Next Task
 
-Open the active `g10` recovery lane, freeze the real live overhaul posture from
-current evidence, and leave one bounded next milestone as the explicit queue.
+Execute `g10.003` Batch 3.1: finish the remaining composite specimen review pass.

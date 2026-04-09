@@ -1,6 +1,6 @@
 # g10.002 Jetstream And Component Overhaul Recovery
 
-Status: active
+Status: complete
 Owner: Poodle core
 Depends on: g10.001
 Updated: 2026-04-09
@@ -50,18 +50,27 @@ queue from evidence and turn it back into an explicit bounded sequence.
 
 ### Batch 2.2 - Queue Freeze
 
-- [ ] audit the live active work across Jetstream feasibility, component
+- [x] audit the live active work across Jetstream feasibility, component
       overhaul, and parity/specimen follow-through
-- [ ] classify which seams are actively executing, which need planning, and
+- [x] classify which seams are actively executing, which need planning, and
       which are blocked on sibling/runtime work
-- [ ] record where the recent unified-select and related Svelte work belongs in
+- [x] record where the recent unified-select and related Svelte work belongs in
       the real queue
+
+Classification:
+- Seam A (Svelte Component Overhaul): actively executing, unbounded — needs
+  closeout milestone
+- Seam B (Jetstream Implementation): planned not started — needs own milestone
+  after A stabilizes
+- Seam C (Parity/Verification): ad-hoc incomplete — systematic pass after A
 
 ### Batch 2.3 - Next Milestone Compilation
 
-- [ ] compile the next bounded milestone from the recovered queue
-- [ ] keep any parallel or blocked follow-on work explicit but pending
-- [ ] leave one unambiguous next task in the active authority surface
+- [x] compile the next bounded milestone from the recovered queue
+- [x] keep any parallel or blocked follow-on work explicit but pending
+- [x] leave one unambiguous next task in the active authority surface
+
+Compiled milestone: `g10.003` Svelte Component Overhaul Closeout
 
 ## Exit Criteria
 
@@ -73,6 +82,5 @@ queue from evidence and turn it back into an explicit bounded sequence.
 
 ## Next Task
 
-Execute Batch 2.2: freeze the real live queue across Jetstream feasibility,
-component-overhaul work, and parity/specimen follow-through, then compile the
-first bounded `g10` milestone from that evidence.
+`g10.002` is complete. The next active milestone is `g10.003` Svelte Component
+Overhaul Closeout — execute Batch 3.1 (remaining composite specimen review).
