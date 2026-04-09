@@ -1,7 +1,7 @@
 <script lang="ts">
   import { LogList } from "@poodle/svelte-composites";
   import type { LogEntry, LogFilter } from "@poodle/svelte-composites";
-  import { Eyebrow, Button, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { Eyebrow, Button } from "@poodle/svelte-primitives";
 
   const now = Date.now();
 
@@ -106,16 +106,6 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
-    <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
-        <LogList {entries} ariaLabel="Compact application logs" />
-        <LogList {entries} ariaLabel="Prominent application logs" sizeRole="prominent" />
-      </div>
-    </UiPresentationProvider>
-  </div>
-
-  <div class="specimen__group">
     <Eyebrow>Audit activity list</Eyebrow>
     <LogList
       entries={auditEntries}
@@ -148,10 +138,5 @@
   .specimen__actions {
     display: flex;
     gap: 0.5rem;
-  }
-
-  .specimen__stack {
-    display: grid;
-    gap: 0.75rem;
   }
 </style>
