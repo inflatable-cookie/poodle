@@ -35,5 +35,8 @@
     "@poodle/svelte-primitives": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "marked": "^18.0.0"
   }
 }

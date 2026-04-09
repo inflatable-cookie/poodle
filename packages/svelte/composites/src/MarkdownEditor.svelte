@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from "svelte";
+  import { marked } from "marked";
 
   import {
     Icon,
@@ -76,73 +77,7 @@
     dispatch("change", { value });
   }
 
-  /** Built-in minimal markdown-to-HTML fallback. Produces valid block
-   *  structure (paragraphs, lists, blockquotes). For production use,
-   *  provide a `renderHtml` prop with a proper parser. */
-  function fallbackRender(src: string): string {
-    const escape = (s: string) =>
-      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-    const inline = (s: string) =>
-      s
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-        .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
-        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.+?)\*/g, "<em>$1</em>")
-        .replace(/`([^`]+)`/g, "<code>$1</code>");
-
-    const blocks = escape(src).split(/\n{2,}/);
-    const out: string[] = [];
-
-    for (const block of blocks) {
-      const trimmed = block.trim();
-      if (!trimmed) continue;
-
-      // Horizontal rule
-      if (/^---+$/.test(trimmed)) {
-        out.push("<hr />");
-        continue;
-      }
-
-      // Heading
-      const headingMatch = trimmed.match(/^(#{1,3}) (.+)$/);
-      if (headingMatch) {
-        const level = headingMatch[1].length;
-        out.push(`<h${level}>${inline(headingMatch[2])}</h${level}>`);
-        continue;
-      }
-
-      // Unordered list (consecutive lines starting with - or *)
-      const lines = trimmed.split("\n");
-      if (lines.every((l) => /^[-*] /.test(l))) {
-        const items = lines.map((l) => `<li>${inline(l.replace(/^[-*] /, ""))}</li>`).join("");
-        out.push(`<ul>${items}</ul>`);
-        continue;
-      }
-
-      // Ordered list
-      if (lines.every((l) => /^\d+\. /.test(l))) {
-        const items = lines.map((l) => `<li>${inline(l.replace(/^\d+\. /, ""))}</li>`).join("");
-        out.push(`<ol>${items}</ol>`);
-        continue;
-      }
-
-      // Blockquote (consecutive lines starting with >)
-      if (lines.every((l) => /^&gt; /.test(l) || /^&gt;$/.test(l))) {
-        const content = lines.map((l) => l.replace(/^&gt; ?/, "")).join("<br />");
-        out.push(`<blockquote>${inline(content)}</blockquote>`);
-        continue;
-      }
-
-      // Paragraph
-      out.push(`<p>${inline(lines.join("<br />"))}</p>`);
-    }
-
-    return out.join("");
-  }
-
-  $: previewHtml = renderHtml ? renderHtml(value) : fallbackRender(value);
+  $: previewHtml = renderHtml ? renderHtml(value) : marked.parse(value, { async: false }) as string;
 
   const toolbarActions = [
     { label: "Bold", icon: "bold", action: () => insertMarkdown("**", "**") },
