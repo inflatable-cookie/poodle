@@ -155,15 +155,15 @@
   .button {
     --poodle-button-fill: var(
       --poodle-treatment-interactive-fill,
-      var(--poodle-color-background-surface)
+      color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 78%, var(--poodle-color-background-elevated))
     );
     --poodle-button-fill-hover: var(
       --poodle-treatment-interactive-fill-active,
-      color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))
+      color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 62%, var(--poodle-color-background-elevated))
     );
     --poodle-button-fill-active: color-mix(
       in srgb,
-      var(--poodle-color-background-surface) 72%,
+      var(--poodle-surface, var(--poodle-color-background-surface)) 52%,
       var(--poodle-color-background-elevated)
     );
     --poodle-button-border: var(
@@ -330,9 +330,9 @@
   }
 
   .button[data-tone="danger"] {
-    --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
-    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 24%, var(--poodle-color-background-surface));
-    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 32%, var(--poodle-color-background-surface));
+    --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-surface, var(--poodle-color-background-surface)));
+    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 24%, var(--poodle-surface, var(--poodle-color-background-surface)));
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 32%, var(--poodle-surface, var(--poodle-color-background-surface)));
     --poodle-button-border: var(--poodle-color-border-default);
     --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-danger) 62%, var(--poodle-color-border-default));
     --poodle-button-text: var(--poodle-color-text-primary);
