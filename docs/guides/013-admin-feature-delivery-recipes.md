@@ -175,6 +175,64 @@ Rules for this pattern:
 - keep purge wording and permissions app-owned even when the visible layout is
   shared
 
+## Selection And Bulk Actions Pattern
+
+Use this when a browse surface needs explicit selection mode for destructive or
+transform-style actions.
+
+```svelte
+<PageHeader title="Media Library">
+  {#snippet actions()}
+    {#if items.length > 0}
+      <IconButton
+        type="button"
+        variant="secondary"
+        tone={isSelectionMode ? "danger" : "default"}
+        icon={squareCheckIcon}
+        ariaLabel={isSelectionMode ? "Cancel selection" : "Select items"}
+        tooltip={isSelectionMode ? "Cancel Selection" : "Select Items"}
+        on:click={toggleSelectionMode}
+      />
+    {/if}
+    {#if !isSelectionMode}
+      <IconButton type="button" variant="secondary" tone="danger" icon={trash2Icon} ariaLabel="View trash" />
+      <IconButton type="button" variant="primary" icon={uploadIcon} ariaLabel="Add item" />
+    {/if}
+  {/snippet}
+</PageHeader>
+
+<ListCard
+  href={isSelectionMode ? undefined : detailHref}
+  selectable={isSelectionMode}
+  selected={selection.isSelected(item.id)}
+  on:selectedChange={(event) => {
+    if (isSelectionMode) selection.toggle(item.id, event.detail.selected);
+  }}
+/>
+
+<BulkActionBar
+  selectionCount={selection.count}
+  totalCount={items.length}
+  actions={batchActions}
+  showSelectAll
+  allSelected={selection.count > 0 && selection.count === items.length}
+  on:clear={handleClearSelection}
+  on:selectAll={handleSelectAll}
+  on:action={handleBatchAction}
+/>
+```
+
+Rules for this pattern:
+
+- keep selection mode explicit instead of making cards always selectable
+- hide normal create/trash/row-action affordances while selection mode is active
+- render `BulkActionBar` only when something is selected; do not pin it as
+  permanent page chrome
+- treat selection mode and reorder mode as mutually exclusive workflows
+- keep destructive confirmation and command execution in host code
+- use one `handleSelectAll` path that toggles between selecting visible items
+  and clearing the current selection
+
 ## Rules
 
 - keep routing, API commands, and navigation context in host code

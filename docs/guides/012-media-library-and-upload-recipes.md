@@ -99,6 +99,56 @@ Use `MediaThumbnail` and `MediaPreview` directly for read-only media framing.
 <MediaPreview kind={media.kind} src={media.url} title={media.title} />
 ```
 
+## Media Detail Pattern
+
+Use this when the app needs a full media detail page with metadata, version
+history, preview, and usage tabs.
+
+```svelte
+<PageHeader title={media.title} backHref="/media" backLabel="Back to media">
+  {#snippet actions()}
+    <MediaActionsMenu {media} />
+  {/snippet}
+</PageHeader>
+
+<MetaBar ariaLabel="Media metadata">
+  <MetaItem label="ID">
+    <Code inline source={media.id} showCopyButton />
+  </MetaItem>
+  <Pill tone="neutral" appearance="badge" size="lg">{media.kindLabel}</Pill>
+  <Pill tone="neutral" appearance="badge" size="lg">{media.visibilityLabel}</Pill>
+</MetaBar>
+
+<Tabs
+  value={activeTab}
+  items={[
+    { value: "details", label: "Details" },
+    { value: "preview", label: "Preview" },
+    { value: "usage", label: "Usage", count: media.usageCount }
+  ]}
+  variant="card"
+  size="sm"
+  historyKey="tab"
+  ariaLabel="Media sections"
+/>
+
+<Card>
+  <DetailSection title="File Details" columns={2} separated={false}>
+    <DetailItem presentation="surface" label="Original Filename" value={media.originalFilename} />
+  </DetailSection>
+</Card>
+```
+
+Rules for this pattern:
+
+- keep one top-level `PageHeader` and one `MetaBar` above the tabs
+- use `Tabs variant="card"` with `historyKey="tab"` for stable navigation
+- render the details tab as `Card` + `DetailSection` + `DetailItem`, not as a
+  second nested page shell
+- keep versions and usage as host-owned card/list content under their tabs
+- keep media lifecycle actions, version activation, and destructive policy in
+  host code even when the visible shell is shared
+
 ## What Stays Out
 
 - duplicate-detection APIs
