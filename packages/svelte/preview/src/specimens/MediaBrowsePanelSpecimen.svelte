@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider } from "@poodle/svelte-primitives";
   import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let loading = false;
   let error: string | null = null;
@@ -26,8 +27,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Browse panel</Eyebrow>
+  <SpecimenGroup label="Browse panel">
     <div class="specimen__actions">
       <button type="button" on:click={() => { loading = true; error = null; lastAction = "Loading"; }}>Loading</button>
       <button type="button" on:click={() => { loading = false; error = "Failed to load media"; lastAction = "Error"; }}>Error</button>
@@ -43,27 +43,20 @@
       on:loadMore={() => (lastAction = "Load more")}
     />
     <p>Last action: <strong>{lastAction}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <MediaBrowsePanel {items} hasMore />
         <MediaBrowsePanel {items} hasMore sizeRole="prominent" />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen,
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
   .specimen__actions {
     display: flex;
     gap: 0.5rem;

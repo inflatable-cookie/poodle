@@ -1,21 +1,20 @@
 <script lang="ts">
   import { DetailSection } from "@poodle/svelte-composites";
-  import { Button, DetailItem, Eyebrow } from "@poodle/svelte-primitives";
+  import { Button, DetailItem } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>With title and rows</Eyebrow>
+  <SpecimenGroup label="With title and rows">
     <DetailSection title="Project details" description="Core metadata for this project.">
       <DetailItem label="Name" value="Poodle Design System" />
       <DetailItem label="Owner" value="Clay + Aura" />
       <DetailItem label="Created" value="March 2025" />
       <DetailItem label="Status" value="Active" />
     </DetailSection>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With actions</Eyebrow>
+  <SpecimenGroup label="With actions">
     <DetailSection title="Billing">
       <svelte:fragment slot="actions">
         <Button variant="secondary" size="sm">Edit</Button>
@@ -24,18 +23,16 @@
       <DetailItem label="Billing cycle" value="Monthly" />
       <DetailItem label="Next invoice" value="April 1, 2026" />
     </DetailSection>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>DetailItem with description</Eyebrow>
+  <SpecimenGroup label="DetailItem with description">
     <DetailSection title="Configuration">
       <DetailItem label="API endpoint" value="https://api.example.com/v2" description="The base URL for all API requests." truncateValue />
       <DetailItem label="Rate limit" value="1,000 req/min" description="Maximum requests per minute." />
     </DetailSection>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Two-column details</Eyebrow>
+  <SpecimenGroup label="Two-column details">
     <DetailSection
       title="Runtime summary"
       description="Compact layout for denser metadata surfaces."
@@ -46,19 +43,14 @@
       <DetailItem label="Authority" value="local" layout="stacked" />
       <DetailItem label="Displays" value="2" layout="stacked" />
     </DetailSection>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

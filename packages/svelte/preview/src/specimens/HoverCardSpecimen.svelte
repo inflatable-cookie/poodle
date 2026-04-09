@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { HoverCard, Eyebrow } from "@poodle/svelte-primitives";
+  import { HoverCard } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default (top placement)</Eyebrow>
+  <SpecimenGroup label="Default (top placement)">
     <HoverCard ariaLabel="User preview">
       <span slot="trigger" class="trigger-link">@clay</span>
       <div class="card-content">
@@ -12,10 +12,9 @@
         <p>Design systems engineer working on Poodle. Loves component architecture and accessibility.</p>
       </div>
     </HoverCard>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Bottom placement</Eyebrow>
+  <SpecimenGroup label="Bottom placement">
     <HoverCard placement="bottom" ariaLabel="Repository info">
       <span slot="trigger" class="trigger-link">poodle/svelte-primitives</span>
       <div class="card-content">
@@ -23,7 +22,7 @@
         <p>Core primitive components for the Poodle design system. 64 components, 94% coverage.</p>
       </div>
     </HoverCard>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
@@ -31,13 +30,6 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
   }
 
   .trigger-link {

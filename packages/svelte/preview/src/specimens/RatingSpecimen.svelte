@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Rating, Eyebrow } from "@poodle/svelte-primitives";
+  import { Rating } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -10,27 +11,24 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default (5 stars)</Eyebrow>
+  <SpecimenGroup label="Default (5 stars)">
     <Rating
       value={rating}
       ariaLabel="Rating"
       on:valueChange={(e) => { if (e.detail.value != null) rating = e.detail.value; }}
     />
     <p>Rating: <strong>{rating} / 5</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <Rating value={3} ariaLabel={"Rating at " + size} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -39,41 +37,26 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>10-star scale</Eyebrow>
+  <SpecimenGroup label="10-star scale">
     <Rating defaultValue={7} max={10} ariaLabel="Score out of 10" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Clearable</Eyebrow>
+  <SpecimenGroup label="Clearable">
     <Rating defaultValue={4} allowClear ariaLabel="Clearable rating" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <Rating defaultValue={2} disabled ariaLabel="Disabled rating" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .specimen__row {

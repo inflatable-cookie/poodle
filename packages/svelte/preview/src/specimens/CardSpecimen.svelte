@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Card, Eyebrow } from "@poodle/svelte-primitives";
+  import { Card } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default variant</Eyebrow>
+  <SpecimenGroup label="Default variant">
     <div class="specimen__cards">
       <Card ariaLabel="Project card">
         <svelte:fragment slot="header">
@@ -23,50 +23,41 @@
         <p class="card-body">48 components shipped across 3 packages this month.</p>
       </Card>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Outlined variant</Eyebrow>
+  <SpecimenGroup label="Outlined variant">
     <Card variant="outlined" ariaLabel="Outlined card">
       <svelte:fragment slot="header">
         <h3 class="card-title">Outlined card</h3>
       </svelte:fragment>
       <p class="card-body">This card uses a subtle border instead of elevation.</p>
     </Card>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Elevated variant</Eyebrow>
+  <SpecimenGroup label="Elevated variant">
     <Card variant="elevated" ariaLabel="Elevated card">
       <svelte:fragment slot="header">
         <h3 class="card-title">Elevated card</h3>
       </svelte:fragment>
       <p class="card-body">This card uses a drop shadow for visual prominence.</p>
     </Card>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Interactive</Eyebrow>
+  <SpecimenGroup label="Interactive">
     <Card interactive ariaLabel="Clickable card">
       <svelte:fragment slot="header">
         <h3 class="card-title">Interactive card</h3>
       </svelte:fragment>
       <p class="card-body">Hover to see the interactive state. Cursor changes to pointer.</p>
     </Card>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__cards {

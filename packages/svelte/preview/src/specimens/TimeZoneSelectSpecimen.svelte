@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { TimeZoneSelect, Eyebrow } from "@poodle/svelte-primitives";
+  import { TimeZoneSelect } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -10,8 +11,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <TimeZoneSelect
       ariaLabel="Time zone"
       on:valueChange={(e) => (zone = e.detail.value)}
@@ -19,19 +19,17 @@
     {#if zone}
       <p>Selected: <strong>{zone}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <TimeZoneSelect {size} ariaLabel={size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -40,31 +38,23 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With pre-selected zone</Eyebrow>
+  <SpecimenGroup label="With pre-selected zone">
     <TimeZoneSelect defaultValue="America/New_York" ariaLabel="Pre-filled time zone" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <TimeZoneSelect disabled ariaLabel="Disabled time zone" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 20rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .specimen__stack {
@@ -86,9 +76,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

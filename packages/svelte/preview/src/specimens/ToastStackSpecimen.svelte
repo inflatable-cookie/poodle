@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ToastStack, type ToastItem } from "@poodle/svelte-composites";
-  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { Button } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -22,8 +23,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <div class="toast-container">
@@ -34,10 +34,9 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Interactive stack</Eyebrow>
+  <SpecimenGroup label="Interactive stack">
     <Button variant="secondary" on:click={addToast}>Add toast</Button>
     <div class="toast-container">
       <ToastStack
@@ -46,20 +45,14 @@
         on:action={(e) => (items = items.filter((t) => t.id !== e.detail.id))}
       />
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

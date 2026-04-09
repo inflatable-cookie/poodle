@@ -1,6 +1,6 @@
 <script lang="ts">
   import { SelectionSummary } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -14,23 +14,20 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Multiple items selected</Eyebrow>
+  <SpecimenGroup label="Multiple items selected">
     <SelectionSummary
       {items}
       selectionMode="multiple"
       on:remove={(e) => (items = items.filter((i) => i.id !== e.detail.id))}
       on:clear={() => (items = [])}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Single item</Eyebrow>
+  <SpecimenGroup label="Single item">
     <SelectionSummary items={[{ id: "1", label: "Primary button" }]} selectionMode="single" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <SelectionSummary
@@ -39,10 +36,9 @@
         />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Truncated (max 3 visible)</Eyebrow>
+  <SpecimenGroup label="Truncated (max 3 visible)">
     <SelectionSummary
       items={[
         { id: "a", label: "Alpha" },
@@ -54,20 +50,14 @@
       ]}
       maxVisibleItems={3}
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

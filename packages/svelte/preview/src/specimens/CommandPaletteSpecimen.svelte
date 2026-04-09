@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { Eyebrow, Button, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { Button, UiPresentationProvider } from "@poodle/svelte-primitives";
   import { CommandPalette } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let open = false;
   let compactOpen = false;
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Command Palette</Eyebrow>
+  <SpecimenGroup label="Command Palette">
     <p class="specimen__hint">Click below to open the palette. Close with Escape, click outside, or the X button.</p>
     <div>
       <Button on:click={() => (open = true)}>Open Command Palette</Button>
@@ -25,10 +25,9 @@
         { id: "sidebar", title: "Toggle Sidebar", shortcut: "Ctrl+B", group: "View" },
       ]}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <Button on:click={() => (compactOpen = true)}>Open compact palette</Button>
@@ -50,20 +49,14 @@
         />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__hint {

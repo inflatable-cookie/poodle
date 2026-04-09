@@ -1,53 +1,48 @@
 <script lang="ts">
-  import { DetailItem, Eyebrow, Button, Pill } from "@poodle/svelte-primitives";
+  import { DetailItem, Button, Pill } from "@poodle/svelte-primitives";
   import { DetailSection } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Inline layout (default)</Eyebrow>
+  <SpecimenGroup label="Inline layout (default)">
     <DetailSection title="Package info">
       <DetailItem label="Name" value="Poodle Design System" />
       <DetailItem label="Version" value="2.1.0" />
       <DetailItem label="License" value="MIT" />
     </DetailSection>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With description</Eyebrow>
+  <SpecimenGroup label="With description">
     <DetailItem label="API endpoint" value="https://api.example.com/v2" description="Base URL for all API requests." />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With action slot</Eyebrow>
+  <SpecimenGroup label="With action slot">
     <DetailItem label="Email" value="clay@example.com">
       <svelte:fragment slot="action">
         <Button variant="secondary" size="sm">Change</Button>
       </svelte:fragment>
     </DetailItem>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With value slot</Eyebrow>
+  <SpecimenGroup label="With value slot">
     <DetailItem label="Status">
       <svelte:fragment slot="value">
         <Pill tone="success" appearance="badge">Active</Pill>
       </svelte:fragment>
     </DetailItem>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Stacked layout</Eyebrow>
+  <SpecimenGroup label="Stacked layout">
     <DetailItem
       label="Arrangement"
       value="2CF8B3D0-F592-4D87-8F9F-74D6B42E0E7D:main:external:0:0:3440:1440:1000|37D8832A..."
       truncateValue
       layout="stacked"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Surface presentation</Eyebrow>
+  <SpecimenGroup label="Surface presentation">
     <DetailSection title="Account">
       <DetailItem label="Name" value="Alice Chen" presentation="surface" />
       <DetailItem label="Role" value="Engineer" presentation="surface" />
@@ -57,19 +52,14 @@
         </svelte:fragment>
       </DetailItem>
     </DetailSection>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-  }
 </style>

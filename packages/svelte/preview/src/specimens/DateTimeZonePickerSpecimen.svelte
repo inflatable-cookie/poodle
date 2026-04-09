@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { DateTimeZonePicker, Eyebrow } from "@poodle/svelte-primitives";
+  import { DateTimeZonePicker } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -8,22 +9,19 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <DateTimeZonePicker ariaLabel="Select date, time, and zone" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <DateTimeZonePicker {size} ariaLabel={size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -32,34 +30,26 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With default value</Eyebrow>
+  <SpecimenGroup label="With default value">
     <DateTimeZonePicker
       defaultValue={{ date: "2026-03-14", time: "10:00", timeZone: "America/Los_Angeles" }}
       ariaLabel="Pre-filled zoned date time"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <DateTimeZonePicker disabled ariaLabel="Disabled picker" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 24rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .specimen__stack {

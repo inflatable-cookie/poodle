@@ -1,7 +1,8 @@
 <script lang="ts">
   import { EmbedInput, resolveEmbedParseState } from "@poodle/svelte-composites";
-  import { Eyebrow, Field } from "@poodle/svelte-primitives";
+  import { Field } from "@poodle/svelte-primitives";
   import type { ParsedEmbed } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let parsed: ParsedEmbed | null = null;
   let value = "";
@@ -34,8 +35,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Supported providers</Eyebrow>
+  <SpecimenGroup label="Supported providers">
     <table class="providers">
       <thead>
         <tr><th>Provider</th><th>Detected patterns</th></tr>
@@ -46,10 +46,9 @@
         <tr><td><code>generic</code></td><td>Any valid URL, or <code>&lt;iframe&gt;</code> embed code</td></tr>
       </tbody>
     </table>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Detection matrix</Eyebrow>
+  <SpecimenGroup label="Detection matrix">
     <table class="providers">
       <thead>
         <tr><th>Input</th><th>Resolved state</th></tr>
@@ -74,39 +73,35 @@
         {/each}
       </tbody>
     </table>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>URL or embed code input</Eyebrow>
+  <SpecimenGroup label="URL or embed code input">
     <EmbedInput
       bind:value
       bind:parsed
       placeholder="Paste a YouTube URL, Vimeo link, or embed code..."
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With Field wrapper</Eyebrow>
+  <SpecimenGroup label="With Field wrapper">
     <Field label="Video embed" id="embed-input-video">
       <EmbedInput
         placeholder="https://youtube.com/watch?v=..."
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Restricted providers</Eyebrow>
+  <SpecimenGroup label="Restricted providers">
     <EmbedInput
       providers={["youtube", "vimeo"]}
       placeholder="Only YouTube and Vimeo allowed..."
     />
-  </div>
+  </SpecimenGroup>
 
   {#if parsed}
-    <div class="specimen__group">
-      <Eyebrow>Parsed result</Eyebrow>
+    <SpecimenGroup label="Parsed result">
       <pre class="parsed">{JSON.stringify(parsed, null, 2)}</pre>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -114,13 +109,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .providers {

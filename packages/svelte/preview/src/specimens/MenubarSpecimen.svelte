@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Menubar, Eyebrow, type MenubarItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { Menubar, type MenubarItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -45,24 +46,21 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Application menu bar</Eyebrow>
+  <SpecimenGroup label="Application menu bar">
     <Menubar {items} ariaLabel="Application menu" on:action={(e) => (lastAction = e.detail.value)} />
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Menubar {items} ariaLabel={size + " menu bar"} {size} />
       {/each}
     </div>
-  </div>
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  </SpecimenGroup>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -71,20 +69,14 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {
@@ -106,9 +98,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { Spacer, Stack, Surface, Eyebrow } from "@poodle/svelte-primitives";
+  import { Spacer, Stack, Surface } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Push items apart</Eyebrow>
+  <SpecimenGroup label="Push items apart">
     <Stack direction="row" gap="md">
       <Surface padding="sm" border="subtle"><span>Logo</span></Surface>
       <Spacer />
       <Surface padding="sm" border="subtle"><span>Sign in</span></Surface>
     </Stack>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Between three items</Eyebrow>
+  <SpecimenGroup label="Between three items">
     <Stack direction="row" gap="md">
       <Surface padding="sm" border="subtle"><span>Left</span></Surface>
       <Spacer />
@@ -21,20 +20,14 @@
       <Spacer />
       <Surface padding="sm" border="subtle"><span>Right</span></Surface>
     </Stack>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   span {

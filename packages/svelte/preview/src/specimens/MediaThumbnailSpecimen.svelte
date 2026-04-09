@@ -1,11 +1,10 @@
 <script lang="ts">
   import { MediaThumbnail } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Image thumbnails</Eyebrow>
+  <SpecimenGroup label="Image thumbnails">
     <div class="thumb-grid">
       <MediaThumbnail kind="image" title="Photo 1" badge="New" aspectRatio="square">
         <div class="placeholder-thumb">IMG</div>
@@ -17,10 +16,9 @@
         <div class="placeholder-thumb">VID</div>
       </MediaThumbnail>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Compact presentation</Eyebrow>
+  <SpecimenGroup label="Compact presentation">
     <div class="thumb-grid">
       <MediaThumbnail kind="document" title="Report.pdf" presentation="compact" aspectRatio="landscape">
         <div class="placeholder-thumb">PDF</div>
@@ -29,25 +27,18 @@
         <div class="placeholder-thumb">MP3</div>
       </MediaThumbnail>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Loading state</Eyebrow>
+  <SpecimenGroup label="Loading state">
     <MediaThumbnail kind="image" state="loading" aspectRatio="square" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .thumb-grid {

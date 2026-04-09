@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { ScrollShell, Surface, Eyebrow } from "@poodle/svelte-primitives";
+  import { ScrollShell, Surface } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Vertical scroll</Eyebrow>
+  <SpecimenGroup label="Vertical scroll">
     <div class="scroll-container">
       <ScrollShell direction="vertical" label="Scrollable content">
         {#each Array(12) as _, i}
@@ -14,10 +14,9 @@
         {/each}
       </ScrollShell>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Horizontal scroll</Eyebrow>
+  <SpecimenGroup label="Horizontal scroll">
     <ScrollShell direction="horizontal" label="Horizontal items">
       <div class="h-row">
         {#each Array(10) as _, i}
@@ -27,20 +26,14 @@
         {/each}
       </div>
     </ScrollShell>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .scroll-container {

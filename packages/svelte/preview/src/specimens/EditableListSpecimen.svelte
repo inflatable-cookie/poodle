@@ -1,7 +1,8 @@
 <script lang="ts">
   import { EditableList } from "@poodle/svelte-composites";
-  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider } from "@poodle/svelte-primitives";
   import type { ReorderableItem } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let tags: ReorderableItem[] = [
     { id: "1", label: "svelte" },
@@ -15,49 +16,44 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Reorderable with add/remove</Eyebrow>
+  <SpecimenGroup label="Reorderable with add/remove">
     <EditableList
       bind:items={tags}
       ariaLabel="Tags"
       placeholder="Add a tag…"
       addLabel="Add"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With max items (5)</Eyebrow>
+  <SpecimenGroup label="With max items (5)">
     <EditableList
       items={[{ id: "a", label: "Item A" }, { id: "b", label: "Item B" }]}
       maxItems={5}
       ariaLabel="Limited list"
       placeholder="Add item…"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Non-reorderable</Eyebrow>
+  <SpecimenGroup label="Non-reorderable">
     <EditableList
       items={[{ id: "x", label: "Static item" }]}
       reorderable={false}
       ariaLabel="Static list"
       placeholder="Add item…"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <EditableList bind:items={compactItems} ariaLabel="Compact list" addLabel="Add" />
         <EditableList items={compactItems} ariaLabel="Prominent list" addLabel="Add" sizeRole="prominent" />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   .specimen__stack { display: grid; gap: 0.75rem; }
 </style>

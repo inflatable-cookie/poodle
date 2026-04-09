@@ -53,4 +53,6 @@ effigy health
 
 ## Next Task
 
-Keep the docs landing pages aligned with the real execution state, starting with `roadmaps/README.md`, `generation-index.md`, and any generation README that still overstates progress or points at superseded work.
+Use `g10.002` to recover the real live queue, then compile the next bounded
+milestone so Poodle resumes from roadmap authority instead of handoff-only
+momentum.

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Menu, Button, Eyebrow, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { Menu, Button, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -32,18 +33,16 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>With shortcuts</Eyebrow>
+  <SpecimenGroup label="With shortcuts">
     <Menu items={fileItems} ariaLabel="File menu" on:action={(e) => (lastAction = e.detail.value)}>
       <Button variant="secondary" slot="trigger">File</Button>
     </Menu>
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <Menu items={fileItems} ariaLabel={size + " menu"} {size}>
@@ -51,10 +50,9 @@
         </Menu>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -65,34 +63,26 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With checkboxes</Eyebrow>
+  <SpecimenGroup label="With checkboxes">
     <Menu items={settingsItems} ariaLabel="Settings menu">
       <Button variant="secondary" slot="trigger">Settings</Button>
     </Menu>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Destructive Action</Eyebrow>
+  <SpecimenGroup label="Destructive Action">
     <Menu items={destructiveItems} ariaLabel="Item actions" triggerAriaLabel="Item actions">
       <Button variant="secondary" slot="trigger">Actions</Button>
     </Menu>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {
@@ -115,9 +105,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

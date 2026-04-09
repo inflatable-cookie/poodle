@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Select, Eyebrow, Pill, type SelectOption, type SelectOptionGroup } from "@poodle/svelte-primitives";
+  import { Select, Pill, type SelectOption, type SelectOptionGroup } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const fruitOptions: SelectOption[] = [
     { value: "apple", label: "Apple" },
@@ -53,8 +54,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Native (default)</Eyebrow>
+  <SpecimenGroup label="Native (default)">
     <div class="specimen__field">
       <Select
         id="select-native"
@@ -67,10 +67,9 @@
         <p class="specimen__value">Selected: {selectedFruit}</p>
       {/if}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom dropdown (non-searchable)</Eyebrow>
+  <SpecimenGroup label="Custom dropdown (non-searchable)">
     <div class="specimen__field">
       <Select
         id="select-custom"
@@ -84,10 +83,9 @@
         <p class="specimen__value">Selected: {selectedCountry}</p>
       {/if}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Searchable</Eyebrow>
+  <SpecimenGroup label="Searchable">
     <div class="specimen__field">
       <Select
         id="select-searchable"
@@ -101,10 +99,9 @@
         <p class="specimen__value">Selected: {selectedFramework}</p>
       {/if}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Searchable with groups</Eyebrow>
+  <SpecimenGroup label="Searchable with groups">
     <div class="specimen__field">
       <Select
         id="select-searchable-grouped"
@@ -118,10 +115,9 @@
         <p class="specimen__value">Selected: {selectedGrouped}</p>
       {/if}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Freeform (autocomplete)</Eyebrow>
+  <SpecimenGroup label="Freeform (autocomplete)">
     <div class="specimen__field">
       <Select
         id="select-freeform"
@@ -136,10 +132,9 @@
         <p class="specimen__value">Value: {freeformValue}</p>
       {/if}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Rich option rendering (custom slot)</Eyebrow>
+  <SpecimenGroup label="Rich option rendering (custom slot)">
     <Select
       id="select-rich"
       options={richOptions}
@@ -159,10 +154,9 @@
         {/if}
       </div>
     </Select>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Clearable (custom)</Eyebrow>
+  <SpecimenGroup label="Clearable (custom)">
     <Select
       id="select-clearable"
       options={fruitOptions}
@@ -171,20 +165,18 @@
       clearable
       ariaLabel="Clearable fruit selection"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Native grouped</Eyebrow>
+  <SpecimenGroup label="Native grouped">
     <Select
       id="select-native-grouped"
       options={groupedOptions}
       placeholder="Choose a food"
       ariaLabel="Grouped food selection"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <Select
       id="select-disabled"
       options={fruitOptions}
@@ -192,21 +184,14 @@
       disabled
       ariaLabel="Disabled"
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-width: 22rem;
+    gap: 1rem;
   }
 
   .specimen__field {

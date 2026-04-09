@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { Eyebrow, Region } from "@poodle/svelte-primitives";
+  import { Region } from "@poodle/svelte-primitives";
   import { SplitView } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
   <!-- 1. Simple layout with Regions -->
-  <div class="specimen__group">
-    <Eyebrow>Basic horizontal layout</Eyebrow>
+  <SpecimenGroup label="Basic horizontal layout">
     <div class="specimen__frame">
       <SplitView orientation="horizontal">
         <div slot="primary" class="specimen__fill">
@@ -17,10 +17,9 @@
         </div>
       </SplitView>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Basic vertical layout</Eyebrow>
+  <SpecimenGroup label="Basic vertical layout">
     <div class="specimen__frame specimen__frame--tall">
       <SplitView orientation="vertical">
         <div slot="primary" class="specimen__fill">
@@ -31,11 +30,10 @@
         </div>
       </SplitView>
     </div>
-  </div>
+  </SpecimenGroup>
 
   <!-- 2. Horizontal with collapse toggles -->
-  <div class="specimen__group">
-    <Eyebrow>Horizontal with collapse toggles (drag to edge to collapse)</Eyebrow>
+  <SpecimenGroup label="Horizontal with collapse toggles (drag to edge to collapse)">
     <div class="specimen__frame">
       <SplitView
         orientation="horizontal"
@@ -50,11 +48,10 @@
         </div>
       </SplitView>
     </div>
-  </div>
+  </SpecimenGroup>
 
   <!-- 3. Vertical with collapse toggles -->
-  <div class="specimen__group">
-    <Eyebrow>Vertical with collapse toggles</Eyebrow>
+  <SpecimenGroup label="Vertical with collapse toggles">
     <div class="specimen__frame specimen__frame--tall">
       <SplitView
         orientation="vertical"
@@ -69,11 +66,10 @@
         </div>
       </SplitView>
     </div>
-  </div>
+  </SpecimenGroup>
 
   <!-- 4. Nested splits (IDE-style layout) -->
-  <div class="specimen__group">
-    <Eyebrow>Nested splits (IDE-style layout)</Eyebrow>
+  <SpecimenGroup label="Nested splits (IDE-style layout)">
     <div class="specimen__frame specimen__frame--tall">
       <SplitView
         orientation="horizontal"
@@ -99,11 +95,10 @@
         </div>
       </SplitView>
     </div>
-  </div>
+  </SpecimenGroup>
 
   <!-- 5. Disabled -->
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <div class="specimen__frame">
       <SplitView
         orientation="horizontal"
@@ -119,20 +114,14 @@
         </div>
       </SplitView>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__frame {

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Slider, Eyebrow } from "@poodle/svelte-primitives";
+  import { Slider } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -13,8 +14,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <Slider
       value={volume}
       min={0}
@@ -23,10 +23,9 @@
       on:valueChange={(e) => (volume = e.detail.value)}
     />
     <p>Volume: <strong>{volume}%</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With step</Eyebrow>
+  <SpecimenGroup label="With step">
     <Slider
       value={opacity}
       min={0}
@@ -36,19 +35,17 @@
       on:valueChange={(e) => (opacity = e.detail.value)}
     />
     <p>Opacity: <strong>{opacity}%</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Slider bind:value={sizeValues[size]} min={0} max={100} ariaLabel={"Slider at " + size} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -57,32 +54,19 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <Slider value={40} min={0} max={100} ariaLabel="Disabled slider" disabled />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 20rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
   }
 
   .specimen__stack {

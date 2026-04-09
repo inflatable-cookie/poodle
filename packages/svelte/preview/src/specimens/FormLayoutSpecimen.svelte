@@ -9,6 +9,7 @@
     Button,
     type SelectOption,
   } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const roleOptions: SelectOption[] = [
     { value: "", label: "Select a role…" },
@@ -33,8 +34,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Two-column layout (span 3 = half)</Eyebrow>
+  <SpecimenGroup label="Two-column layout (span 3 = half)">
     <FormLayout description="Fill in the details below to create a new user account.">
       <Field label="First name" id="fl-first" span={3}>
         <TextInput id="fl-first" placeholder="Jane" />
@@ -59,10 +59,9 @@
         <Button variant="primary">Create user</Button>
       </svelte:fragment>
     </FormLayout>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Mixed 2-col and 3-col rows</Eyebrow>
+  <SpecimenGroup label="Mixed 2-col and 3-col rows">
     <FormLayout description="Mixing half-width (span 3) and third-width (span 2) fields.">
       <Field label="First name" id="fl-mix-first" span={2}>
         <TextInput id="fl-mix-first" placeholder="Jane" />
@@ -96,10 +95,9 @@
         <Button variant="primary">Save</Button>
       </svelte:fragment>
     </FormLayout>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Single column (columns=1)</Eyebrow>
+  <SpecimenGroup label="Single column (columns=1)">
     <FormLayout columns={1}>
       <Field label="Display name" id="fl-display">
         <TextInput id="fl-display" placeholder="Enter a name" />
@@ -112,10 +110,9 @@
         <Button variant="primary">Save profile</Button>
       </svelte:fragment>
     </FormLayout>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With error and field errors</Eyebrow>
+  <SpecimenGroup label="With error and field errors">
     <FormLayout
       error="Unable to save. Please fix the errors below."
       fieldErrors={{
@@ -133,10 +130,9 @@
         <Button variant="primary">Retry</Button>
       </svelte:fragment>
     </FormLayout>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With success message</Eyebrow>
+  <SpecimenGroup label="With success message">
     <FormLayout success="Settings saved successfully." columns={1}>
       <Field label="Site name" id="fl-site">
         <TextInput id="fl-site" value="My Project" />
@@ -145,19 +141,14 @@
         <Button variant="primary">Save</Button>
       </svelte:fragment>
     </FormLayout>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

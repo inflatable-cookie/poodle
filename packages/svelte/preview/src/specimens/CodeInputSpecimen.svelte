@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, CodeInput } from "@poodle/svelte-primitives";
+  import { CodeInput } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -11,8 +12,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <CodeInput
       id="code-default"
       value={code}
@@ -24,29 +24,26 @@
     {#if completed}
       <p>Completed value: <strong>{code}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Masked</Eyebrow>
+  <SpecimenGroup label="Masked">
     <CodeInput
       id="code-masked"
       label="PIN code"
       hint="Digits are hidden for security."
       mask
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <CodeInput id={"size-" + size} label={"Code at " + size} ariaLabel={"Code at " + size} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -55,20 +52,18 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With error</Eyebrow>
+  <SpecimenGroup label="With error">
     <CodeInput
       id="code-error"
       value="12"
       label="Email code"
       error="That verification code is invalid."
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <CodeInput
       id="code-disabled"
       defaultValue="1234"
@@ -76,27 +71,15 @@
       label="Disabled code"
       disabled
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 24rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
   }
 
   .specimen__stack {

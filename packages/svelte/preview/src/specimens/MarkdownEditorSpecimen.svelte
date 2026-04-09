@@ -1,6 +1,7 @@
 <script lang="ts">
   import { MarkdownEditor } from "@poodle/svelte-composites";
-  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let content = `# Hello World
 
@@ -21,43 +22,33 @@ Check out [Poodle](https://example.com) for more.`;
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Split view</Eyebrow>
+  <SpecimenGroup label="Split view">
     <MarkdownEditor bind:value={content} mode="split" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Edit mode</Eyebrow>
+  <SpecimenGroup label="Edit mode">
     <MarkdownEditor bind:value={emptyContent} mode="edit" placeholder="Start writing..." />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <MarkdownEditor value="Read-only content" disabled />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <MarkdownEditor bind:value={compactContent} mode="split" />
         <MarkdownEditor value={compactContent} mode="preview" sizeRole="prominent" />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

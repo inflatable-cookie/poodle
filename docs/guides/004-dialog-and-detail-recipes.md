@@ -215,6 +215,17 @@ way `ListContainer` owns browse-page state.
 Override state slots only when the page needs custom recovery or empty-state
 content.
 
+For host-owned detail and tab content:
+
+- use `PageLoading` for loading branches
+- use `Callout tone="danger"` for recoverable load failures
+- include a small ghost `Retry` action when the route or tab can refetch
+  locally
+- use compact `EmptyState` for tab-level no-data posture such as usage,
+  related-items, or preview gaps
+- keep these recovery actions local to the route or tab instead of creating a
+  shared retry wrapper
+
 ## What Stays Out
 
 - route orchestration

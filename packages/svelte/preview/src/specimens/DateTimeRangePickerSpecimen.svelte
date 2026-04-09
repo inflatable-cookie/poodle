@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { DateTimeRangePicker, Eyebrow } from "@poodle/svelte-primitives";
+  import { DateTimeRangePicker } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -8,22 +9,19 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <DateTimeRangePicker ariaLabel="Select date and time range" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <DateTimeRangePicker {size} ariaLabel={size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -32,10 +30,9 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With default range</Eyebrow>
+  <SpecimenGroup label="With default range">
     <DateTimeRangePicker
       defaultValue={{
         start: { date: "2026-03-10", time: "09:00" },
@@ -43,26 +40,19 @@
       }}
       ariaLabel="Pre-filled range"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <DateTimeRangePicker disabled ariaLabel="Disabled range picker" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 24rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .specimen__stack {

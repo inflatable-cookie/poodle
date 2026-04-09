@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { Eyebrow, Grid, Icon, NavCard } from "@poodle/svelte-primitives";
+  import { Grid, Icon, NavCard } from "@poodle/svelte-primitives";
   import { house, layers, slidersHorizontal, fileText } from "@poodle/icons-lucide";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let lastClick = "";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Navigation cards in a grid (2 columns)</Eyebrow>
+  <SpecimenGroup label="Navigation cards in a grid (2 columns)">
     <Grid columns="1fr 1fr" gap="md" asRole="navigation" ariaLabel="Navigation cards">
       <NavCard
         title="Getting Started"
@@ -39,27 +39,24 @@
         <svelte:fragment slot="icon"><Icon icon={fileText} /></svelte:fragment>
       </NavCard>
     </Grid>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Single card (as link)</Eyebrow>
+  <SpecimenGroup label="Single card (as link)">
     <NavCard
       title="View Documentation"
       description="Open the full documentation site."
       href="#"
     />
-  </div>
+  </SpecimenGroup>
 
   {#if lastClick}
-    <div class="specimen__group">
-      <Eyebrow>Last click</Eyebrow>
+    <SpecimenGroup label="Last click">
       <p>{lastClick}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   p { margin: 0; }
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Switch, Eyebrow } from "@poodle/svelte-primitives";
+  import { Switch } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -12,8 +13,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <Switch
       label="Dark mode"
       checked={darkMode}
@@ -29,19 +29,17 @@
       checked={compactView}
       on:checkedChange={(e) => (compactView = e.detail.checked)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <Switch label="Enabled" {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -50,17 +48,15 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>States</Eyebrow>
+  <SpecimenGroup label="States">
     <Switch label="Disabled off" disabled />
     <Switch label="Disabled on" checked={true} disabled />
     <Switch label="Read-only on" checked={true} readOnly />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom colors</Eyebrow>
+  <SpecimenGroup label="Custom colors">
     <Switch
       label="Billing alerts"
       checked={true}
@@ -73,10 +69,9 @@
       onColor="#f59e0b"
       offColor="#94a3b8"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Dual labels and tones</Eyebrow>
+  <SpecimenGroup label="Dual labels and tones">
     <Switch
       defaultChecked={true}
       leftLabel="Draft"
@@ -93,20 +88,14 @@
       rightTone="success"
       ariaLabel="Access status"
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
+    gap: 1rem;
   }
 
   .specimen__row {

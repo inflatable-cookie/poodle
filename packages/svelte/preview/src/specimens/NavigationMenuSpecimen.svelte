@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { NavigationMenu, Eyebrow, type NavigationMenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { NavigationMenu, type NavigationMenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -17,8 +18,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Horizontal navigation</Eyebrow>
+  <SpecimenGroup label="Horizontal navigation">
     <NavigationMenu
       {items}
       value={active}
@@ -27,18 +27,16 @@
     >
       <p>Active section: <strong>{active}</strong></p>
     </NavigationMenu>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <NavigationMenu {items} value="components" ariaLabel={size + " navigation"} {size} />
       {/each}
     </div>
-  </div>
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  </SpecimenGroup>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -47,20 +45,14 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

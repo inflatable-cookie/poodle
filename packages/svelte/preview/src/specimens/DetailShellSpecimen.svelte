@@ -1,11 +1,11 @@
 <script lang="ts">
   import { DetailShell, DetailSection, PageHeader } from "@poodle/svelte-composites";
-  import { Button, Pill, DetailItem, Eyebrow, Region, Separator, Surface } from "@poodle/svelte-primitives";
+  import { Button, Pill, DetailItem, Region, Separator } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <Surface tone="panel" border="subtle" padding="md">
-    <Eyebrow>Layout structure</Eyebrow>
+  <SpecimenGroup label="Layout structure">
     <div class="specimen__demo">
       <DetailShell ariaLabel="Layout regions">
         <svelte:fragment slot="header">
@@ -16,10 +16,9 @@
         <Region label="Section 3" color="#a855f7" minHeight="3rem" />
       </DetailShell>
     </div>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface tone="panel" border="subtle" padding="md">
-    <Eyebrow>Multi-section layout with header</Eyebrow>
+  <SpecimenGroup label="Multi-section layout with header">
     <div class="specimen__demo">
       <DetailShell ariaLabel="Project detail view">
         <svelte:fragment slot="header">
@@ -51,17 +50,15 @@
         </DetailSection>
       </DetailShell>
     </div>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface tone="panel" border="subtle" padding="md">
-    <Eyebrow>Loading state</Eyebrow>
+  <SpecimenGroup label="Loading state">
     <div class="specimen__demo">
       <DetailShell title="Loading" state="loading" ariaLabel="Loading view" />
     </div>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface tone="panel" border="subtle" padding="md">
-    <Eyebrow>Error state</Eyebrow>
+  <SpecimenGroup label="Error state">
     <div class="specimen__demo">
       <DetailShell
         title="Error"
@@ -71,7 +68,7 @@
         ariaLabel="Error view"
       />
     </div>
-  </Surface>
+  </SpecimenGroup>
 </div>
 
 <style>

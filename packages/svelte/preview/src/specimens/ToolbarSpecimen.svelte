@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Toolbar, Button, Separator, Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { Toolbar, Button, Separator, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Chrome role inside a small toolbar</Eyebrow>
+  <SpecimenGroup label="Chrome role inside a small toolbar">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <Toolbar ariaLabel="Formatting toolbar">
         <Button variant="ghost" sizeRole="chrome" leadingIcon="bold" ariaLabel="Bold" />
@@ -16,10 +16,9 @@
         <Button variant="ghost" sizeRole="chrome" leadingIcon="text-align-end" ariaLabel="Align right" />
       </Toolbar>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Prominent role offset in the same context</Eyebrow>
+  <SpecimenGroup label="Prominent role offset in the same context">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <Toolbar ariaLabel="Actions toolbar">
         <Button variant="secondary" sizeRole="chrome">Discard</Button>
@@ -28,19 +27,14 @@
         <Button sizeRole="prominent">Publish</Button>
       </Toolbar>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

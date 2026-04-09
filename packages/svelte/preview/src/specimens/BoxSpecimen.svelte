@@ -1,50 +1,41 @@
 <script lang="ts">
-  import { Box, Eyebrow } from "@poodle/svelte-primitives";
+  import { Box } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default (no padding)</Eyebrow>
+  <SpecimenGroup label="Default (no padding)">
     <div class="demo-outline">
       <Box>Content inside a Box with no padding.</Box>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With padding</Eyebrow>
+  <SpecimenGroup label="With padding">
     <div class="demo-outline">
       <Box padding="lg">Content inside a Box with large padding.</Box>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Fixed dimensions</Eyebrow>
+  <SpecimenGroup label="Fixed dimensions">
     <div class="demo-outline">
       <Box padding="md" width="12rem" height="6rem">Fixed 12×6rem box.</Box>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Overflow hidden</Eyebrow>
+  <SpecimenGroup label="Overflow hidden">
     <div class="demo-outline">
       <Box padding="sm" width="10rem" height="3rem" overflow="hidden">
         This text is too long and will be clipped by the overflow hidden setting on the box container.
       </Box>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .demo-outline {

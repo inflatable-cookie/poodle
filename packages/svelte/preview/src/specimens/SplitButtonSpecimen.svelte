@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { SplitButton, Eyebrow } from "@poodle/svelte-primitives";
+  import { SplitButton } from "@poodle/svelte-primitives";
   import type { ControlDensity, MenuItem } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -45,28 +46,25 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Primary variant</Eyebrow>
+  <SpecimenGroup label="Primary variant">
     <SplitButton
       variant="primary"
       items={saveItems}
       on:click={() => (lastAction = "Primary save clicked")}
       on:action={(e) => (lastAction = `Action: ${e.detail.value}`)}
     >Save</SplitButton>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Secondary variant</Eyebrow>
+  <SpecimenGroup label="Secondary variant">
     <SplitButton
       variant="secondary"
       items={exportItems}
       on:click={() => (lastAction = "Export clicked")}
       on:action={(e) => (lastAction = `Export: ${e.detail.value}`)}
     >Export</SplitButton>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Danger tone</Eyebrow>
+  <SpecimenGroup label="Danger tone">
     <SplitButton
       tone="danger"
       items={[
@@ -76,10 +74,9 @@
       on:click={() => (lastAction = "Delete clicked")}
       on:action={(e) => (lastAction = `Delete: ${e.detail.value}`)}
     >Delete</SplitButton>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -88,20 +85,17 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Loading state</Eyebrow>
+  <SpecimenGroup label="Loading state">
     <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Submit semantics</Eyebrow>
+  <SpecimenGroup label="Submit semantics">
     <form class="specimen__form" on:submit={handleSubmit}>
       <input type="hidden" name="intent" value={submitIntent} />
       <SplitButton
@@ -116,10 +110,9 @@
     {#if submittedWith}
       <p>Submitted with intent: {submittedWith}</p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Constrained scroll container</Eyebrow>
+  <SpecimenGroup label="Constrained scroll container">
     <div class="specimen__well">
       <div class="specimen__spacer"></div>
       <SplitButton
@@ -129,13 +122,12 @@
         on:action={(e) => (lastAction = `Queue action: ${e.detail.value}`)}
       >Queue actions</SplitButton>
     </div>
-  </div>
+  </SpecimenGroup>
 
   {#if lastAction}
-    <div class="specimen__group">
-      <Eyebrow>Last action</Eyebrow>
+    <SpecimenGroup label="Last action">
       <p>{lastAction}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -143,13 +135,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

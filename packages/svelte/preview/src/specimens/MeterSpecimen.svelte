@@ -1,49 +1,35 @@
 <script lang="ts">
-  import { Meter, Eyebrow } from "@poodle/svelte-primitives";
+  import { Meter } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default (50%)</Eyebrow>
+  <SpecimenGroup label="Default (50%)">
     <Meter value={50} ariaLabel="Storage usage" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With thresholds</Eyebrow>
+  <SpecimenGroup label="With thresholds">
     <Meter value={82} low={25} high={75} optimum={50} ariaLabel="CPU usage" />
     <p>82% — above high threshold</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Low value (optimal range)</Eyebrow>
+  <SpecimenGroup label="Low value (optimal range)">
     <Meter value={30} low={25} high={75} optimum={50} ariaLabel="Memory usage" />
     <p>30% — within normal range</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom range (0–500)</Eyebrow>
+  <SpecimenGroup label="Custom range (0–500)">
     <Meter value={350} min={0} max={500} ariaLabel="API calls" />
     <p>350 / 500 API calls used</p>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 20rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

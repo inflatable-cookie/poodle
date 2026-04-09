@@ -1,6 +1,7 @@
 <script lang="ts">
   import { FilterToolbar, ListContainer } from "@poodle/svelte-composites";
-  import { Button, IconButton, Pill, TextInput, Select, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { Button, IconButton, Pill, TextInput, Select, Surface } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   type QueueItem = {
     id: string;
@@ -46,8 +47,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Ready with slots and built-in pagination</Eyebrow>
+  <SpecimenGroup label="Ready with slots and built-in pagination">
     <Surface padding="lg" border="subtle">
       <ListContainer
         title="Operational queues"
@@ -117,10 +117,9 @@
         </div>
       </ListContainer>
     </Surface>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>State handling</Eyebrow>
+  <SpecimenGroup label="State handling">
     <Surface padding="lg" border="subtle">
       <div class="specimen__state-buttons">
         <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "ready")}>Ready</Button>
@@ -143,24 +142,13 @@
         </div>
       </ListContainer>
     </Surface>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .specimen__group :global(.surface) {
-    display: grid;
     gap: 1rem;
   }
 

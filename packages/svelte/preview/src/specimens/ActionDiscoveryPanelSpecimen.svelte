@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider } from "@poodle/svelte-primitives";
   import { ActionDiscoveryPanel } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Grouped actions</Eyebrow>
+  <SpecimenGroup label="Grouped actions">
     <div class="specimen__frame">
       <ActionDiscoveryPanel
         items={[
@@ -20,10 +20,9 @@
         ariaLabel="Demo actions"
       />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With descriptions and badges</Eyebrow>
+  <SpecimenGroup label="With descriptions and badges">
     <div class="specimen__frame">
       <ActionDiscoveryPanel
         items={[
@@ -34,17 +33,15 @@
         ariaLabel="CI actions"
       />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Empty state</Eyebrow>
+  <SpecimenGroup label="Empty state">
     <div class="specimen__frame">
       <ActionDiscoveryPanel items={[]} state="empty" ariaLabel="Empty actions" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <div class="specimen__frame">
@@ -66,20 +63,14 @@
         </div>
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__frame {

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, CollapseToggle } from "@poodle/svelte-primitives";
+  import { CollapseToggle } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -13,8 +14,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Directions</Eyebrow>
+  <SpecimenGroup label="Directions">
     <div class="specimen__row">
       <div class="specimen__labeled">
         <CollapseToggle
@@ -49,19 +49,17 @@
         <span>Down {collapsedDown ? "(collapsed)" : "(expanded)"}</span>
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <CollapseToggle direction="left" {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__row">
       {#each densities as density}
         <div class="specimen__labeled">
@@ -70,28 +68,21 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <div class="specimen__row">
       <CollapseToggle direction="left" disabled />
       <CollapseToggle direction="right" disabled />
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

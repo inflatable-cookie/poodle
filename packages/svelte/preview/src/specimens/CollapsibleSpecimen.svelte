@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Collapsible, Eyebrow } from "@poodle/svelte-primitives";
+  import { Collapsible } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -8,26 +9,23 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default (closed)</Eyebrow>
+  <SpecimenGroup label="Default (closed)">
     <Collapsible title="Project settings" description="Configure build options and deploy targets.">
       <p>Build target: production</p>
       <p>Output directory: dist/</p>
       <p>Source maps: enabled</p>
     </Collapsible>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Default open</Eyebrow>
+  <SpecimenGroup label="Default open">
     <Collapsible title="Advanced options" defaultOpen>
       <p>Cache TTL: 3600s</p>
       <p>Retry count: 3</p>
       <p>Timeout: 30s</p>
     </Collapsible>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Collapsible title="Collapsible at {size}" {size}>
@@ -35,10 +33,9 @@
         </Collapsible>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <Collapsible title="Collapsible at {density} density" {density}>
@@ -46,33 +43,20 @@
         </Collapsible>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <Collapsible title="Locked section" description="Requires admin access." disabled>
       <p>This content is hidden behind a disabled collapsible.</p>
     </Collapsible>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .specimen__stack {

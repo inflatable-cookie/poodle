@@ -1,20 +1,19 @@
 <script lang="ts">
   import { EmptyState } from "@poodle/svelte-composites";
-  import { Button, Eyebrow, Icon } from "@poodle/svelte-primitives";
+  import { Button, Icon } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Neutral</Eyebrow>
+  <SpecimenGroup label="Neutral">
     <EmptyState title="No projects yet" message="Create your first project to get started.">
       <svelte:fragment slot="actions">
         <Button>Create project</Button>
       </svelte:fragment>
     </EmptyState>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Search</Eyebrow>
+  <SpecimenGroup label="Search">
     <EmptyState
       variant="search"
       title="No results found"
@@ -24,19 +23,17 @@
         <Button variant="secondary">Clear filters</Button>
       </svelte:fragment>
     </EmptyState>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>First run</Eyebrow>
+  <SpecimenGroup label="First run">
     <EmptyState
       variant="firstRun"
       title="Welcome to your workspace"
       message="This is where your team's components will appear once you start building."
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Compact custom visual</Eyebrow>
+  <SpecimenGroup label="Compact custom visual">
     <EmptyState
       size="compact"
       title="No captured emails found"
@@ -46,19 +43,14 @@
         <Icon name="mail" />
       </svelte:fragment>
     </EmptyState>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

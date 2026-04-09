@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@poodle/svelte-primitives";
   import { DockRegion } from "@poodle/svelte-composites";
   import type { PanelTabItem, DockEdge } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import { folder, code, list as listIcon, terminal } from "@poodle/icons-lucide";
 
   // ── Static dock state ──────────────────────────────────────────────
@@ -114,197 +114,169 @@
 
 <div class="specimen">
   <!-- 1a. Static dock — horizontal (top edge, panels stack vertically) -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Static dock — horizontal (top edge)</Eyebrow>
-      <div class="specimen__frame specimen__frame--short">
-        <DockRegion
-          edge="top"
-          sizing="static"
-          items={staticItems}
-          on:reorder={handleStaticReorder}
-        >
-          <div slot="panel" let:item class="specimen__static-panel">
-            {item.label}
-          </div>
-        </DockRegion>
-      </div>
+  <SpecimenGroup label="Static dock — horizontal (top edge)">
+    <div class="specimen__frame specimen__frame--short">
+      <DockRegion
+        edge="top"
+        sizing="static"
+        items={staticItems}
+        on:reorder={handleStaticReorder}
+      >
+        <div slot="panel" let:item class="specimen__static-panel">
+          {item.label}
+        </div>
+      </DockRegion>
     </div>
-  </Surface>
+  </SpecimenGroup>
 
   <!-- 1b. Static dock — vertical (left edge, panels stack horizontally) -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Static dock — vertical (left edge)</Eyebrow>
-      <div class="specimen__frame">
-        <DockRegion
-          edge="left"
-          sizing="static"
-          items={staticVerticalItems}
-          on:reorder={handleStaticVerticalReorder}
-        >
-          <div slot="panel" let:item class="specimen__static-panel">
-            {item.label}
-          </div>
-        </DockRegion>
-      </div>
+  <SpecimenGroup label="Static dock — vertical (left edge)">
+    <div class="specimen__frame">
+      <DockRegion
+        edge="left"
+        sizing="static"
+        items={staticVerticalItems}
+        on:reorder={handleStaticVerticalReorder}
+      >
+        <div slot="panel" let:item class="specimen__static-panel">
+          {item.label}
+        </div>
+      </DockRegion>
     </div>
-  </Surface>
+  </SpecimenGroup>
 
   <!-- 2. Flexible dock (expanded) -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Flexible dock — expanded (left edge)</Eyebrow>
-      <div class="specimen__frame">
-        <DockRegion
-          edge="left"
-          sizing="flexible"
-          items={flexItems}
-          value={flexActivePanel}
-          collapsed={false}
-          on:valueChange={(e) => (flexActivePanel = e.detail.value)}
-        >
-          <div class="specimen__panel-content">
-            <strong>{flexActivePanel}</strong>
-            <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
-          </div>
-        </DockRegion>
-      </div>
+  <SpecimenGroup label="Flexible dock — expanded (left edge)">
+    <div class="specimen__frame">
+      <DockRegion
+        edge="left"
+        sizing="flexible"
+        items={flexItems}
+        value={flexActivePanel}
+        collapsed={false}
+        on:valueChange={(e) => (flexActivePanel = e.detail.value)}
+      >
+        <div class="specimen__panel-content">
+          <strong>{flexActivePanel}</strong>
+          <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+        </div>
+      </DockRegion>
     </div>
-  </Surface>
+  </SpecimenGroup>
 
   <!-- 3. Flexible dock (collapsed icon-strip) -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Flexible dock — collapsed icon-strip (left edge)</Eyebrow>
-      <div class="specimen__frame specimen__frame--narrow">
-        <DockRegion
-          edge="left"
-          sizing="flexible"
-          items={flexItems}
-          value={flexActivePanel}
-          collapsed={true}
-          collapsedPosture="icon-strip"
-          on:valueChange={(e) => (flexActivePanel = e.detail.value)}
-        />
-      </div>
+  <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)">
+    <div class="specimen__frame specimen__frame--narrow">
+      <DockRegion
+        edge="left"
+        sizing="flexible"
+        items={flexItems}
+        value={flexActivePanel}
+        collapsed={true}
+        collapsedPosture="icon-strip"
+        on:valueChange={(e) => (flexActivePanel = e.detail.value)}
+      />
     </div>
-  </Surface>
+  </SpecimenGroup>
 
   <!-- 4. Interactive collapse toggle -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Interactive collapse toggle (click to toggle)</Eyebrow>
-      <div class="specimen__frame specimen__frame--flex">
+  <SpecimenGroup label="Interactive collapse toggle (click to toggle)">
+    <div class="specimen__frame specimen__frame--flex">
+      <DockRegion
+        edge="left"
+        sizing="flexible"
+        collapsible
+        items={interactiveItems}
+        value={interactiveActive}
+        collapsed={interactiveCollapsed}
+        collapsedPosture="icon-strip"
+        on:valueChange={(e) => (interactiveActive = e.detail.value)}
+        on:collapsedChange={(e) => (interactiveCollapsed = e.detail.isCollapsed)}
+      >
+        <div class="specimen__panel-content">
+          <strong>{interactiveActive}</strong>
+          <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
+        </div>
+      </DockRegion>
+      <div class="specimen__flex-main">
+        Main content area
+      </div>
+    </div>
+  </SpecimenGroup>
+
+  <!-- 5. Bottom edge collapsible dock -->
+  <SpecimenGroup label="Bottom edge dock (click to toggle)">
+    <div class="specimen__frame specimen__frame--bottom-layout">
+      <div class="specimen__flex-main">
+        Editor area
+      </div>
+      <DockRegion
+        edge="bottom"
+        sizing="flexible"
+        collapsible
+        items={bottomItems}
+        value={bottomActive}
+        collapsed={bottomCollapsed}
+        collapsedPosture="icon-strip"
+        on:valueChange={(e) => (bottomActive = e.detail.value)}
+        on:collapsedChange={(e) => (bottomCollapsed = e.detail.isCollapsed)}
+      >
+        <div class="specimen__panel-content">
+          <strong>{bottomActive}</strong>
+          <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
+        </div>
+      </DockRegion>
+    </div>
+  </SpecimenGroup>
+
+  <!-- 6. Cross-region drag-and-drop -->
+  <SpecimenGroup label="Cross-region drag-and-drop (drag tabs between docks)">
+    <div class="specimen__dnd-layout">
+      <div class="specimen__frame specimen__dnd-region">
         <DockRegion
           edge="left"
           sizing="flexible"
-          collapsible
-          items={interactiveItems}
-          value={interactiveActive}
-          collapsed={interactiveCollapsed}
-          collapsedPosture="icon-strip"
-          on:valueChange={(e) => (interactiveActive = e.detail.value)}
-          on:collapsedChange={(e) => (interactiveCollapsed = e.detail.isCollapsed)}
+          items={leftItems}
+          value={leftActive}
+          ariaLabel="Left dock"
+          {canAcceptPanel}
+          on:valueChange={(e) => (leftActive = e.detail.value)}
+          on:reorder={handleLeftReorder}
+          on:panelDrop={handleLeftDrop}
         >
           <div class="specimen__panel-content">
-            <strong>{interactiveActive}</strong>
-            <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
+            <strong>{leftActive}</strong>
+            <p>Left dock — {leftItems.length} panels</p>
           </div>
         </DockRegion>
-        <div class="specimen__flex-main">
-          Main content area
-        </div>
       </div>
-    </div>
-  </Surface>
-
-  <!-- 5. Bottom edge collapsible dock -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Bottom edge dock (click to toggle)</Eyebrow>
-      <div class="specimen__frame specimen__frame--bottom-layout">
-        <div class="specimen__flex-main">
-          Editor area
-        </div>
+      <div class="specimen__frame specimen__dnd-region">
         <DockRegion
-          edge="bottom"
+          edge="right"
           sizing="flexible"
-          collapsible
-          items={bottomItems}
-          value={bottomActive}
-          collapsed={bottomCollapsed}
-          collapsedPosture="icon-strip"
-          on:valueChange={(e) => (bottomActive = e.detail.value)}
-          on:collapsedChange={(e) => (bottomCollapsed = e.detail.isCollapsed)}
+          items={rightItems}
+          value={rightActive}
+          ariaLabel="Right dock"
+          {canAcceptPanel}
+          on:valueChange={(e) => (rightActive = e.detail.value)}
+          on:reorder={handleRightReorder}
+          on:panelDrop={handleRightDrop}
         >
           <div class="specimen__panel-content">
-            <strong>{bottomActive}</strong>
-            <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
+            <strong>{rightActive}</strong>
+            <p>Right dock — {rightItems.length} panels</p>
           </div>
         </DockRegion>
       </div>
     </div>
-  </Surface>
-
-  <!-- 6. Cross-region drag-and-drop -->
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Cross-region drag-and-drop (drag tabs between docks)</Eyebrow>
-      <div class="specimen__dnd-layout">
-        <div class="specimen__frame specimen__dnd-region">
-          <DockRegion
-            edge="left"
-            sizing="flexible"
-            items={leftItems}
-            value={leftActive}
-            ariaLabel="Left dock"
-            {canAcceptPanel}
-            on:valueChange={(e) => (leftActive = e.detail.value)}
-            on:reorder={handleLeftReorder}
-            on:panelDrop={handleLeftDrop}
-          >
-            <div class="specimen__panel-content">
-              <strong>{leftActive}</strong>
-              <p>Left dock — {leftItems.length} panels</p>
-            </div>
-          </DockRegion>
-        </div>
-        <div class="specimen__frame specimen__dnd-region">
-          <DockRegion
-            edge="right"
-            sizing="flexible"
-            items={rightItems}
-            value={rightActive}
-            ariaLabel="Right dock"
-            {canAcceptPanel}
-            on:valueChange={(e) => (rightActive = e.detail.value)}
-            on:reorder={handleRightReorder}
-            on:panelDrop={handleRightDrop}
-          >
-            <div class="specimen__panel-content">
-              <strong>{rightActive}</strong>
-              <p>Right dock — {rightItems.length} panels</p>
-            </div>
-          </DockRegion>
-        </div>
-      </div>
-    </div>
-  </Surface>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 1rem;
   }
 
   .specimen__frame {

@@ -1,11 +1,10 @@
 <script lang="ts">
   import { MediaPreview } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Image preview</Eyebrow>
+  <SpecimenGroup label="Image preview">
     <MediaPreview
       title="Hero banner"
       description="Main landing page banner image for the product launch."
@@ -16,10 +15,9 @@
     >
       <div slot="media" class="placeholder-media">Image placeholder</div>
     </MediaPreview>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Video preview</Eyebrow>
+  <SpecimenGroup label="Video preview">
     <MediaPreview
       title="Onboarding walkthrough"
       eyebrow="Video"
@@ -29,10 +27,9 @@
     >
       <div slot="media" class="placeholder-media">Video placeholder</div>
     </MediaPreview>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Error state</Eyebrow>
+  <SpecimenGroup label="Error state">
     <MediaPreview
       title="Corrupted file"
       kind="document"
@@ -41,21 +38,15 @@
       stateMessage="This file cannot be previewed."
       aspectRatio="landscape"
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 24rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .placeholder-media {

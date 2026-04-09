@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Table, Eyebrow, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
+  import { Table, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isRowHeader: true },
@@ -28,37 +29,28 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Standard table</Eyebrow>
+  <SpecimenGroup label="Standard table">
     <Table {columns} {rows} ariaLabel="Team members" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With caption</Eyebrow>
+  <SpecimenGroup label="With caption">
     <Table {columns} {rows} caption="Q1 team allocation" ariaLabel="Team allocation table" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Minimal key-value</Eyebrow>
+  <SpecimenGroup label="Minimal key-value">
     <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Package info" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Empty state</Eyebrow>
+  <SpecimenGroup label="Empty state">
     <Table {columns} rows={[]} ariaLabel="Empty table" emptyMessage="No team members found." />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

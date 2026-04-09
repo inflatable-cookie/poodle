@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { SegmentedControl, Eyebrow, type SegmentedControlOption, type ControlDensity } from "@poodle/svelte-primitives";
+  import { SegmentedControl, type SegmentedControlOption, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -20,8 +21,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <SegmentedControl
       options={viewOptions}
       value={view}
@@ -29,15 +29,13 @@
       on:valueChange={(e) => (view = e.detail.value)}
     />
     <p>View: <strong>{view}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With disabled option</Eyebrow>
+  <SpecimenGroup label="With disabled option">
     <SegmentedControl options={statusOptions} defaultValue="all" ariaLabel="Status filter" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Content Fit</Eyebrow>
+  <SpecimenGroup label="Content Fit">
     <SegmentedControl
       options={[
         { value: "1h", label: "1h", title: "Last 1 hour" },
@@ -49,10 +47,9 @@
       size="xs"
       equalWidth={false}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -61,25 +58,18 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Fully disabled</Eyebrow>
+  <SpecimenGroup label="Fully disabled">
     <SegmentedControl options={viewOptions} defaultValue="list" ariaLabel="Disabled control" disabled />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {
@@ -101,9 +91,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

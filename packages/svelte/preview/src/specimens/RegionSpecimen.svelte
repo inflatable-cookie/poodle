@@ -1,25 +1,23 @@
 <script lang="ts">
-  import { Region, Eyebrow, Stack } from "@poodle/svelte-primitives";
+  import { Region, Stack } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <Region label="Content area" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom colors</Eyebrow>
+  <SpecimenGroup label="Custom colors">
     <Stack gap="sm">
       <Region label="Header" color="#5b9bd5" minHeight="3rem" />
       <Region label="Sidebar" color="#70ad47" minHeight="6rem" />
       <Region label="Main content" color="#ed7d31" minHeight="8rem" />
       <Region label="Footer" color="#a855f7" minHeight="3rem" />
     </Stack>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Layout composition</Eyebrow>
+  <SpecimenGroup label="Layout composition">
     <div class="specimen__layout">
       <Region label="Nav" color="#5b9bd5" minHeight="100%" />
       <div class="specimen__layout-main">
@@ -27,20 +25,14 @@
         <Region label="Content" color="#ed7d31" minHeight="10rem" />
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__layout {

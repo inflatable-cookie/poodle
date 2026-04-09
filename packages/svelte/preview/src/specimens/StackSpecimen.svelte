@@ -1,64 +1,54 @@
 <script lang="ts">
-  import { Stack, Surface, Eyebrow } from "@poodle/svelte-primitives";
+  import { Stack, Surface } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Column (default)</Eyebrow>
+  <SpecimenGroup label="Column (default)">
     <Stack gap="md">
       <Surface padding="sm" border="subtle"><p>First item</p></Surface>
       <Surface padding="sm" border="subtle"><p>Second item</p></Surface>
       <Surface padding="sm" border="subtle"><p>Third item</p></Surface>
     </Stack>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Column — large gap, center aligned</Eyebrow>
+  <SpecimenGroup label="Column — large gap, center aligned">
     <Stack gap="lg" align="center">
       <Surface padding="sm" border="subtle"><p>Centered A</p></Surface>
       <Surface padding="sm" border="subtle"><p>Centered B</p></Surface>
     </Stack>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Row</Eyebrow>
+  <SpecimenGroup label="Row">
     <Stack direction="row" gap="md">
       <Surface padding="sm" border="subtle"><span>Item A</span></Surface>
       <Surface padding="sm" border="subtle"><span>Taller item B with more text</span></Surface>
       <Surface padding="sm" border="subtle"><span>Item C</span></Surface>
     </Stack>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Row — justify: between</Eyebrow>
+  <SpecimenGroup label="Row — justify: between">
     <Stack direction="row" gap="md" justify="between">
       <Surface padding="sm" border="subtle"><span>Left</span></Surface>
       <Surface padding="sm" border="subtle"><span>Center</span></Surface>
       <Surface padding="sm" border="subtle"><span>Right</span></Surface>
     </Stack>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Row — wrapping</Eyebrow>
+  <SpecimenGroup label="Row — wrapping">
     <Stack direction="row" gap="sm" wrap>
       {#each Array(8) as _, i}
         <Surface padding="sm" border="subtle"><span>Tag {i + 1}</span></Surface>
       {/each}
     </Stack>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   p, span {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { EmbedPreview } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
   import type { ParsedEmbed } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const youtubeParsed: ParsedEmbed = {
     provider: "youtube",
@@ -17,42 +17,32 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>YouTube embed</Eyebrow>
+  <SpecimenGroup label="YouTube embed">
     <EmbedPreview parsed={youtubeParsed} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Vimeo embed</Eyebrow>
+  <SpecimenGroup label="Vimeo embed">
     <EmbedPreview parsed={vimeoParsed} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Loading state</Eyebrow>
+  <SpecimenGroup label="Loading state">
     <EmbedPreview loading />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Error state</Eyebrow>
+  <SpecimenGroup label="Error state">
     <EmbedPreview error="Failed to load embed. The URL may be invalid or the provider is unavailable." />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Empty state</Eyebrow>
+  <SpecimenGroup label="Empty state">
     <EmbedPreview emptyMessage="Paste a URL above to see a preview" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

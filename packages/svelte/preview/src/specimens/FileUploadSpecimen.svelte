@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { DEFAULT_COMPRESSION, FileUpload, Eyebrow } from "@poodle/svelte-primitives";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte-primitives";
   import type { FileUploadItem } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let imageFiles: FileUploadItem[] = [];
   let docFiles: FileUploadItem[] = [];
@@ -9,8 +10,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Image upload with preview</Eyebrow>
+  <SpecimenGroup label="Image upload with preview">
     <FileUpload
       accept="image/*"
       multiple
@@ -19,20 +19,18 @@
       bind:files={imageFiles}
       on:error={(e) => (errorMsg = e.detail.message)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Document upload (single file)</Eyebrow>
+  <SpecimenGroup label="Document upload (single file)">
     <FileUpload
       accept=".pdf,.doc,.docx,.txt"
       maxSize={10 * 1024 * 1024}
       showPreview={false}
       bind:files={docFiles}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Compressed image upload with custom validation</Eyebrow>
+  <SpecimenGroup label="Compressed image upload with custom validation">
     <FileUpload
       accept="image/*"
       multiple
@@ -42,18 +40,16 @@
       validate={(file) => (file.name.includes(" ") ? "Filename cannot contain spaces" : null)}
       on:error={(e) => (errorMsg = e.detail.message)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <FileUpload disabled />
-  </div>
+  </SpecimenGroup>
 
   {#if errorMsg}
-    <div class="specimen__group">
-      <Eyebrow>Last error</Eyebrow>
+    <SpecimenGroup label="Last error">
       <p class="error">{errorMsg}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -61,13 +57,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .error {

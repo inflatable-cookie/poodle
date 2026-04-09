@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { TimeAgo, Eyebrow } from "@poodle/svelte-primitives";
+  import { TimeAgo } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const now = Date.now();
   const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
@@ -9,8 +10,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Recent timestamps</Eyebrow>
+  <SpecimenGroup label="Recent timestamps">
     <div class="specimen__row">
       <span class="specimen__label">2 minutes ago:</span>
       <TimeAgo datetime={twoMinutesAgo} />
@@ -23,18 +23,16 @@
       <span class="specimen__label">2 days ago:</span>
       <TimeAgo datetime={twoDaysAgo} />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Future timestamp</Eyebrow>
+  <SpecimenGroup label="Future timestamp">
     <div class="specimen__row">
       <span class="specimen__label">In 5 minutes:</span>
       <TimeAgo datetime={inFiveMinutes} />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Long format</Eyebrow>
+  <SpecimenGroup label="Long format">
     <div class="specimen__row">
       <span class="specimen__label">2 minutes ago:</span>
       <TimeAgo datetime={twoMinutesAgo} short={false} />
@@ -43,30 +41,22 @@
       <span class="specimen__label">2 days ago:</span>
       <TimeAgo datetime={twoDaysAgo} short={false} />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Static (live updates off)</Eyebrow>
+  <SpecimenGroup label="Static (live updates off)">
     <TimeAgo datetime={twoMinutesAgo} live={false} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>From ISO string</Eyebrow>
+  <SpecimenGroup label="From ISO string">
     <TimeAgo datetime="2026-03-14T00:00:00Z" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

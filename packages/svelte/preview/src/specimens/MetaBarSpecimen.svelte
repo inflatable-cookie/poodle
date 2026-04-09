@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Code, Eyebrow, MetaBar, MetaItem, Pill } from "@poodle/svelte-primitives";
+  import { Code, MetaBar, MetaItem, Pill } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Header metadata</Eyebrow>
+  <SpecimenGroup label="Header metadata">
     <MetaBar ariaLabel="Project metadata">
       <MetaItem label="ID">
         <Code inline source="proj_01JX9G9NVV1W3M4P6K8Q8T2D5A" showCopyButton />
@@ -13,28 +13,22 @@
       <MetaItem label="Owner">Clay</MetaItem>
       <MetaItem label="Updated">2 hours ago</MetaItem>
     </MetaBar>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>No separators</Eyebrow>
+  <SpecimenGroup label="No separators">
     <MetaBar showSeparators={false}>
       <MetaItem label="Type">Media</MetaItem>
       <Pill tone="info">Public</Pill>
       <MetaItem>1920 × 1080</MetaItem>
     </MetaBar>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
 </style>

@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { Tooltip, Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { Tooltip, Button } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <div class="specimen__row">
       <Tooltip content="Save your changes">
         <Button variant="secondary">Hover me</Button>
       </Tooltip>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Placements</Eyebrow>
+  <SpecimenGroup label="Placements">
     <div class="specimen__row">
       <Tooltip content="Top tooltip" placement="top">
         <Button variant="ghost">Top</Button>
@@ -28,20 +27,14 @@
         <Button variant="ghost">Right</Button>
       </Tooltip>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

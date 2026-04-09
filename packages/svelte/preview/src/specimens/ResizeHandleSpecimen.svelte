@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
   import { ResizeHandle } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Horizontal split (vertical handle — drag left/right)</Eyebrow>
+  <SpecimenGroup label="Horizontal split (vertical handle — drag left/right)">
     <div class="specimen__row">
       <div class="specimen__pane">Left</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--horizontal">
@@ -13,10 +12,9 @@
       </div>
       <div class="specimen__pane">Right</div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Vertical split (horizontal handle — drag up/down)</Eyebrow>
+  <SpecimenGroup label="Vertical split (horizontal handle — drag up/down)">
     <div class="specimen__col">
       <div class="specimen__pane">Top</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--vertical">
@@ -24,10 +22,9 @@
       </div>
       <div class="specimen__pane">Bottom</div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled (horizontal split)</Eyebrow>
+  <SpecimenGroup label="Disabled (horizontal split)">
     <div class="specimen__row">
       <div class="specimen__pane">Left</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--horizontal">
@@ -35,10 +32,9 @@
       </div>
       <div class="specimen__pane">Right</div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled (vertical split)</Eyebrow>
+  <SpecimenGroup label="Disabled (vertical split)">
     <div class="specimen__col">
       <div class="specimen__pane">Top</div>
       <div class="specimen__handle-wrapper specimen__handle-wrapper--vertical">
@@ -46,20 +42,14 @@
       </div>
       <div class="specimen__pane">Bottom</div>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

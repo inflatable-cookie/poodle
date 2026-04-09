@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Checkbox, Eyebrow } from "@poodle/svelte-primitives";
+  import { Checkbox } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -12,8 +13,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <Checkbox
       label="Enable email notifications"
       checked={notifications}
@@ -29,19 +29,17 @@
       checked={terms}
       on:checkedChange={(e) => (terms = e.detail.checked)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <Checkbox label="Accept terms" {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -50,34 +48,26 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>States</Eyebrow>
+  <SpecimenGroup label="States">
     <Checkbox label="Disabled unchecked" disabled />
     <Checkbox label="Disabled checked" checked={true} disabled />
     <Checkbox label="Mixed / indeterminate" mixed />
     <Checkbox label="Read-only checked" checked={true} readOnly />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom selected color</Eyebrow>
+  <SpecimenGroup label="Custom selected color">
     <Checkbox label="Billable feature" checked={true} selectedColor="#22c55e" />
     <Checkbox label="Requires moderation" checked={true} selectedColor="#f59e0b" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
+    gap: 1rem;
   }
 
   .specimen__row {

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { TimeField, Eyebrow } from "@poodle/svelte-primitives";
+  import { TimeField } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -10,8 +11,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <TimeField
       id="start-time"
       ariaLabel="Start time"
@@ -20,19 +20,17 @@
     {#if time}
       <p>Selected: <strong>{time}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <TimeField id={"size-" + size} ariaLabel={size} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -41,36 +39,27 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With default value</Eyebrow>
+  <SpecimenGroup label="With default value">
     <TimeField id="meeting-time" defaultValue="14:30" ariaLabel="Meeting time" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With min/max constraints</Eyebrow>
+  <SpecimenGroup label="With min/max constraints">
     <TimeField id="office" defaultValue="09:00" min="08:00" max="18:00" ariaLabel="Office hours" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <TimeField id="disabled-time" defaultValue="12:00" disabled ariaLabel="Disabled time" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 12rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .specimen__row {
@@ -93,9 +82,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

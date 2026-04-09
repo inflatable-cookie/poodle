@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { TextInput, Field, Eyebrow } from "@poodle/svelte-primitives";
+  import { TextInput, Field } from "@poodle/svelte-primitives";
   import type { ControlDensity, InputValidationStatus, ValidationState } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -44,8 +45,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <Field id="name-field" label="Name" description="Enter your full name.">
       <TextInput
         id="name-field"
@@ -53,19 +53,17 @@
         on:valueChange={(event) => (name = event.detail.value)}
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <TextInput id={"size-" + size} placeholder={size.toUpperCase()} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -74,10 +72,9 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With validation</Eyebrow>
+  <SpecimenGroup label="With validation">
     <Field
       id="email-field"
       label="Email"
@@ -95,10 +92,9 @@
         }}
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Async validation</Eyebrow>
+  <SpecimenGroup label="Async validation">
     <Field
       id="workspace-field"
       label="Workspace"
@@ -123,10 +119,9 @@
         }}
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Slug</Eyebrow>
+  <SpecimenGroup label="Slug">
     <Field
       id="slug-field"
       label="Slug"
@@ -149,10 +144,9 @@
         }}
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Search</Eyebrow>
+  <SpecimenGroup label="Search">
     <TextInput
       id="search-field"
       type="search"
@@ -164,10 +158,9 @@
     {#if searchQuery}
       <p class="specimen__hint">Query: <strong>{searchQuery}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Prefix and suffix</Eyebrow>
+  <SpecimenGroup label="Prefix and suffix">
     <TextInput
       id="price-field"
       prefix="$"
@@ -175,20 +168,18 @@
       placeholder="0.00"
       inputMode="decimal"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Suffix only</Eyebrow>
+  <SpecimenGroup label="Suffix only">
     <TextInput
       id="weight-field"
       suffix="kg"
       placeholder="0"
       inputMode="numeric"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <Field id="disabled-field" label="API key">
       <TextInput
         id="disabled-field"
@@ -196,10 +187,9 @@
         disabled
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Multiline (explicit type)</Eyebrow>
+  <SpecimenGroup label="Multiline (explicit type)">
     <Field id="multiline-field" label="Description">
       <TextInput
         id="multiline-field"
@@ -207,10 +197,9 @@
         placeholder="Enter a description..."
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Multiline (auto-detected from rows)</Eyebrow>
+  <SpecimenGroup label="Multiline (auto-detected from rows)">
     <Field id="rows-field" label="Notes">
       <TextInput
         id="rows-field"
@@ -218,10 +207,9 @@
         placeholder="Type your notes here..."
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Multiline with character count</Eyebrow>
+  <SpecimenGroup label="Multiline with character count">
     <Field id="bio-field" label="Bio">
       <TextInput
         id="bio-field"
@@ -232,21 +220,15 @@
         placeholder="Tell us about yourself..."
       />
     </Field>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 24rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .specimen__stack {

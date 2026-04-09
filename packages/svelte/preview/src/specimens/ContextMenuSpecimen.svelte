@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { ContextMenu, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -19,8 +20,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Right-click the area below</Eyebrow>
+  <SpecimenGroup label="Right-click the area below">
     <ContextMenu {items} on:action={(e) => (lastAction = e.detail.value)}>
       <div class="target-area">
         <p>Right-click here to open context menu</p>
@@ -29,10 +29,9 @@
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <ContextMenu {items} {size}>
@@ -42,9 +41,8 @@
         </ContextMenu>
       {/each}
     </div>
-  </div>
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  </SpecimenGroup>
+  <SpecimenGroup label="Densities">
     <div class="specimen__row">
       {#each densities as density}
         <ContextMenu {items} {density}>
@@ -54,20 +52,14 @@
         </ContextMenu>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

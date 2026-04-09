@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Callout, Eyebrow } from "@poodle/svelte-primitives";
+  import { Callout } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -8,8 +9,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Tones</Eyebrow>
+  <SpecimenGroup label="Tones">
     <Callout tone="neutral" title="Neutral callout">
       This is a general informational message with no specific severity.
     </Callout>
@@ -25,10 +25,9 @@
     <Callout tone="danger" title="Error">
       Unable to connect to the database. Check your credentials and try again.
     </Callout>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Callout tone="info" title="Callout at {size}" {size}>
@@ -36,10 +35,9 @@
         </Callout>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <Callout tone="info" title="Callout at {density} density" {density}>
@@ -47,42 +45,33 @@
         </Callout>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Message prop</Eyebrow>
+  <SpecimenGroup label="Message prop">
     <Callout tone="info" title="Information" message="This is an informational callout using the message prop instead of slot content." />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Dismissible</Eyebrow>
+  <SpecimenGroup label="Dismissible">
     <Callout
       tone="info"
       title="Dismissible callout"
       message="This callout can be dismissed by the user."
       dismissible
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Without title</Eyebrow>
+  <SpecimenGroup label="Without title">
     <Callout tone="info">
       A simple inline callout without a title for brief contextual notes.
     </Callout>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

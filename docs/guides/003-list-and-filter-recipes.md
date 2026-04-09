@@ -120,6 +120,14 @@ Use state overrides only when the page truly needs a custom region:
 </ListContainer>
 ```
 
+When host code owns the state region directly:
+
+- use `PageLoading` for the main loading branch
+- use `Callout tone="danger"` for recoverable load failures
+- include a small ghost `Retry` action when the route can refetch locally
+- use `EmptyState` for no-results posture, with copy that reflects the current
+  filters or browse context instead of a generic failure message
+
 ## FilterToolbar Rules
 
 - Use `summaryText` for result summary or active-filter summary

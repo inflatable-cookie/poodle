@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, PasswordRequirements } from "@poodle/svelte-primitives";
+  import { PasswordRequirements } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let password = "";
 
@@ -14,42 +15,33 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <label class="specimen__field">
       <span>Password</span>
       <input bind:value={password} type="password" />
     </label>
     <PasswordRequirements {password} {requirements} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Loading</Eyebrow>
+  <SpecimenGroup label="Loading">
     <PasswordRequirements password="" requirements={null} loading />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Error</Eyebrow>
+  <SpecimenGroup label="Error">
     <PasswordRequirements
       password=""
       requirements={null}
       error="Could not load password requirements."
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 28rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
   }
 
   .specimen__field {

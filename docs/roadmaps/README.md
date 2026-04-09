@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-03-23
+Updated: 2026-04-09
 
 Roadmaps hold executable milestone work for Poodle.
 
@@ -17,9 +17,10 @@ Roadmaps hold executable milestone work for Poodle.
 ## Current Index State
 
 - highest on-disk generation folder: `g10`
-- current executable generation plan: `g09`
-- next planned generation: `g10`
-- `g09` remains open and will need extension beyond its original completed tranche
+- current executable generation plan: `g10`
+- `g09` is complete
+- `g10` is active and needs a fresh recovery/control lane before more freeform
+  implementation continues
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -34,8 +35,8 @@ If a generation README conflicts with that file, treat the index as the source o
 - `g06` shared multi-renderer contract layer, typed token resolution, layout or event abstractions, and full component-surface expansion
 - `g07` GPUI rendering build-out, adapter crate, primitive and composite rendering, workstation shell updates, and parity reporting
 - `g08` consolidated GPUI production-quality and compliance program
-- `g09` active GPUI continuation and closeout generation
-- `g10` next Jetstream-focused generation
+- `g09` completed GPUI continuation and semantic sizing/density generation
+- `g10` active Jetstream-focused and component-overhaul generation
 
 ## Working Rule
 
@@ -44,4 +45,6 @@ Do not assume the highest-numbered generation folder is the active one.
 
 ## Next Task
 
-Extend `g09` with the remaining GPUI work still needed to reach a real closeout state, then keep `g10` focused on the Jetstream-specific follow-on program.
+Recover the live `g10` queue so the active component and Jetstream work stops
+drifting outside the roadmap surface, then leave one bounded milestone as the
+explicit next step.

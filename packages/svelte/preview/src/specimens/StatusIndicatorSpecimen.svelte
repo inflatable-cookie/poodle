@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { StatusIndicator, Eyebrow } from "@poodle/svelte-primitives";
+  import { StatusIndicator } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>All statuses</Eyebrow>
+  <SpecimenGroup label="All statuses">
     <div class="status-list">
       <StatusIndicator status="neutral" label="Neutral" />
       <StatusIndicator status="info" label="Info" />
@@ -15,19 +15,17 @@
       <StatusIndicator status="danger" label="Danger" />
       <StatusIndicator status="pending" label="Pending" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="status-list">
       {#each controlSizes as size}
         <StatusIndicator status="success" label={size.toUpperCase()} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Without labels (dot only)</Eyebrow>
+  <SpecimenGroup label="Without labels (dot only)">
     <div class="status-row">
       <StatusIndicator status="success" ariaLabel="Online" />
       <StatusIndicator status="info" ariaLabel="Active" />
@@ -35,25 +33,18 @@
       <StatusIndicator status="danger" ariaLabel="Offline" />
       <StatusIndicator status="neutral" ariaLabel="Unknown" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Slot content</Eyebrow>
+  <SpecimenGroup label="Slot content">
     <StatusIndicator status="success">Build passing</StatusIndicator>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .status-list {

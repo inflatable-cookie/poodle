@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Calendar, Eyebrow } from "@poodle/svelte-primitives";
+  import { Calendar } from "@poodle/svelte-primitives";
   import type { ControlDensity, DateRangeValue } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -11,25 +12,22 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <Calendar ariaLabel="Select a date" on:valueChange={(e) => (selected = e.detail.value as string)} />
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Calendar {size} ariaLabel={size + " calendar"} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -38,20 +36,17 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With pre-selected date</Eyebrow>
+  <SpecimenGroup label="With pre-selected date">
     <Calendar defaultValue="2026-03-14" ariaLabel="Calendar with default" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <Calendar defaultValue="2026-03-01" disabled ariaLabel="Disabled calendar" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Range selection</Eyebrow>
+  <SpecimenGroup label="Range selection">
     <Calendar
       mode="range"
       ariaLabel="Select a date range"
@@ -60,34 +55,26 @@
     {#if range.start}
       <p>{range.start} &rarr; {range.end || "..."}</p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Range with pre-selected range</Eyebrow>
+  <SpecimenGroup label="Range with pre-selected range">
     <Calendar
       mode="range"
       defaultValue={{ start: "2026-03-05", end: "2026-03-12" }}
       ariaLabel="Pre-selected range"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Range disabled</Eyebrow>
+  <SpecimenGroup label="Range disabled">
     <Calendar mode="range" disabled ariaLabel="Disabled range calendar" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {
@@ -109,9 +96,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

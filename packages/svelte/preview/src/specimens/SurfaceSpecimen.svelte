@@ -1,48 +1,39 @@
 <script lang="ts">
-  import { Surface, Eyebrow } from "@poodle/svelte-primitives";
+  import { Surface } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Panel tone (default)</Eyebrow>
+  <SpecimenGroup label="Panel tone (default)">
     <Surface padding="md" border="subtle">
       <p>Panel surface with subtle border — the standard container.</p>
     </Surface>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Canvas tone</Eyebrow>
+  <SpecimenGroup label="Canvas tone">
     <Surface tone="canvas" padding="md" border="subtle">
       <p>Canvas surface sits behind panels as a background layer.</p>
     </Surface>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Elevated tone</Eyebrow>
+  <SpecimenGroup label="Elevated tone">
     <Surface tone="elevated" padding="md" border="subtle" elevated>
       <p>Elevated surface with shadow for overlays and cards.</p>
     </Surface>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>No border</Eyebrow>
+  <SpecimenGroup label="No border">
     <Surface padding="md" border="none">
       <p>Surface with no border — just padding and background.</p>
     </Surface>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   p {

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Dialog, Button, Eyebrow, TextInput, Select, Field, Checkbox, Pill } from "@poodle/svelte-primitives";
+  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let basicOpen = false;
   let formOpen = false;
@@ -13,8 +14,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Simple informational</Eyebrow>
+  <SpecimenGroup label="Simple informational">
     <Button variant="secondary" on:click={() => (basicOpen = true)}>View details</Button>
     <Dialog
       open={basicOpen}
@@ -30,10 +30,9 @@
         <div class="shortcut"><kbd>Esc</kbd> <span>Close dialog</span></div>
       </div>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Form dialog</Eyebrow>
+  <SpecimenGroup label="Form dialog">
     <Button variant="secondary" on:click={() => (formOpen = true)}>Create project</Button>
     <Dialog
       open={formOpen}
@@ -68,10 +67,9 @@
         <Button on:click={() => (formOpen = false)}>Create project</Button>
       </svelte:fragment>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Content-only (no actions)</Eyebrow>
+  <SpecimenGroup label="Content-only (no actions)">
     <Button variant="secondary" on:click={() => (contentOnlyOpen = true)}>View changelog</Button>
     <Dialog
       open={contentOnlyOpen}
@@ -100,10 +98,9 @@
         </div>
       </div>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom footer</Eyebrow>
+  <SpecimenGroup label="Custom footer">
     <Button variant="secondary" on:click={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
     <Dialog
       open={customFooterOpen}
@@ -126,10 +123,9 @@
         </div>
       </svelte:fragment>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Bare mode (image preview)</Eyebrow>
+  <SpecimenGroup label="Bare mode (image preview)">
     <Button variant="secondary" on:click={() => (bareOpen = true)}>Preview image</Button>
     <Dialog
       open={bareOpen}
@@ -154,10 +150,9 @@
         </div>
       </div>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Scrollable content</Eyebrow>
+  <SpecimenGroup label="Scrollable content">
     <Button variant="secondary" on:click={() => (scrollableOpen = true)}>View log</Button>
     <Dialog
       open={scrollableOpen}
@@ -181,10 +176,9 @@
         <Button on:click={() => (scrollableOpen = false)}>Export log</Button>
       </svelte:fragment>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Width presets</Eyebrow>
+  <SpecimenGroup label="Width presets">
     <div class="specimen__row">
       {#each ["sm", "md", "lg", "xl"] as w}
         <Button variant="secondary" on:click={() => (widthOpenMap[w] = true)}>{w}</Button>
@@ -202,10 +196,9 @@
         </Dialog>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Non-dismissible</Eyebrow>
+  <SpecimenGroup label="Non-dismissible">
     <Button variant="secondary" on:click={() => (wideOpen = true)}>Open persistent</Button>
     <Dialog
       open={wideOpen}
@@ -219,36 +212,14 @@
         <Button on:click={() => (wideOpen = false)}>Done</Button>
       </svelte:fragment>
     </Dialog>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-    line-height: 1.5;
-  }
-
-  .specimen__group code {
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated));
-    font-family: var(--poodle-typography-code-family);
-    font-size: 0.8125rem;
+    gap: 1rem;
   }
 
   .specimen__row {

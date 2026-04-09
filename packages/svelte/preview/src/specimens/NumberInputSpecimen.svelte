@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { NumberInput, Eyebrow } from "@poodle/svelte-primitives";
+  import { NumberInput } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -12,8 +13,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Numeric Value</Eyebrow>
+  <SpecimenGroup label="Numeric Value">
     <NumberInput
       id="qty"
       bind:value={quantity}
@@ -22,19 +22,17 @@
       ariaLabel="Quantity"
     />
     <p>Quantity: <strong>{quantity ?? "none"}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <NumberInput id={"size-" + size} value={1} ariaLabel={"Number at " + size} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -43,10 +41,9 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With Steppers</Eyebrow>
+  <SpecimenGroup label="With Steppers">
     <NumberInput
       id="price"
       bind:value={price}
@@ -57,10 +54,9 @@
       ariaLabel="Price"
     />
     <p>Price: <strong>{price == null ? "none" : `$${price.toFixed(2)}`}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>String Form Binding</Eyebrow>
+  <SpecimenGroup label="String Form Binding">
     <NumberInput
       id="ticket-code"
       bind:value={ticketCode}
@@ -70,37 +66,23 @@
       ariaLabel="Ticket code"
     />
     <p>Ticket code: <strong>{ticketCode}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <NumberInput id="disabled-num" value={42} ariaLabel="Disabled" disabled />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Invalid</Eyebrow>
+  <SpecimenGroup label="Invalid">
     <NumberInput id="invalid-num" value={-5} min={0} ariaLabel="Invalid number" validationState="invalid" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 16rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
   }
 
   .specimen__stack {

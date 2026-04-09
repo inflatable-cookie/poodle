@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { Icon, IconProvider, Eyebrow } from "@poodle/svelte-primitives";
+  import { Icon, IconProvider } from "@poodle/svelte-primitives";
   import type { IconSet, IconNodes } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   // A small custom icon set to demonstrate swappability
   const customIcons: IconSet = {
@@ -15,8 +16,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Full Lucide set via IconProvider</Eyebrow>
+  <SpecimenGroup label="Full Lucide set via IconProvider">
     <p class="hint">
       Wrap a subtree in <code>&lt;IconProvider icons={"{iconNodes}"}&gt;</code> to
       make all {Object.keys(iconNodes).length} Lucide icons available by name.
@@ -32,10 +32,9 @@
         {/each}
       </div>
     </IconProvider>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom icon set</Eyebrow>
+  <SpecimenGroup label="Custom icon set">
     <p class="hint">
       Any <code>Record&lt;string, IconNodes&gt;</code> works as an icon set.
       You can supply a Phosphor equivalent, a subset, or your own custom icons.
@@ -50,10 +49,9 @@
         {/each}
       </div>
     </IconProvider>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Without IconProvider — built-in internals</Eyebrow>
+  <SpecimenGroup label="Without IconProvider — built-in internals">
     <p class="hint">
       Without any <code>IconProvider</code>, string names resolve to the 35
       built-in icons used for component chrome (chevrons, check, x, etc.).
@@ -80,20 +78,14 @@
         <span class="label">plus</span>
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .hint {

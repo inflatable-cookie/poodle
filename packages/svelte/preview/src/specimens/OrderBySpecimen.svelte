@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Eyebrow, OrderBy, type OrderByValue, type SortField, type ControlDensity } from "@poodle/svelte-primitives";
+  import { OrderBy, type OrderByValue, type SortField, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -23,23 +24,20 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Multi-field sort builder</Eyebrow>
+  <SpecimenGroup label="Multi-field sort builder">
     <OrderBy {fields} bind:value compact />
     <pre>{JSON.stringify(value, null, 2)}</pre>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <OrderBy {fields} bind:value={sizeValue} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -48,17 +46,15 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <OrderBy {fields} value={[{ key: "title", direction: "asc" }]} disabled />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
   .specimen__row { display: flex; align-items: center; gap: 0.5rem; }
   .specimen__label { font-size: 0.75rem; font-family: var(--poodle-typography-code-family); color: var(--poodle-color-text-muted); min-width: 6rem; }

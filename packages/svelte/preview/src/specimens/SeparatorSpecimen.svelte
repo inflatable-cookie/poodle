@@ -1,17 +1,16 @@
 <script lang="ts">
-  import { Separator, Eyebrow } from "@poodle/svelte-primitives";
+  import { Separator } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Horizontal (default)</Eyebrow>
+  <SpecimenGroup label="Horizontal (default)">
     <p>Content above</p>
     <Separator />
     <p>Content below</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Vertical</Eyebrow>
+  <SpecimenGroup label="Vertical">
     <div class="specimen__row">
       <span>Left</span>
       <Separator orientation="vertical" />
@@ -19,32 +18,18 @@
       <Separator orientation="vertical" />
       <span>Right</span>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Decorative</Eyebrow>
+  <SpecimenGroup label="Decorative">
     <Separator decorative />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p,
-  .specimen__group span {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .specimen__row {

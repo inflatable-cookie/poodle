@@ -1,7 +1,8 @@
 <script lang="ts">
   import { DataTable } from "@poodle/svelte-composites";
   import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/svelte-composites";
-  import { Eyebrow, Pill } from "@poodle/svelte-primitives";
+  import { Pill } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -98,8 +99,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>With sorting, column visibility, and export</Eyebrow>
+  <SpecimenGroup label="With sorting, column visibility, and export">
     <DataTable
       {columns}
       {rows}
@@ -121,10 +121,9 @@
       <p class="last-action">Last action: <strong>{lastAction}</strong></p>
     {/if}
     <p class="selection-count">{selectedRowIds.length} of {rows.length} selected</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With filters and pagination</Eyebrow>
+  <SpecimenGroup label="With filters and pagination">
     <DataTable
       {columns}
       {rows}
@@ -138,10 +137,9 @@
       on:pageChange={(event) => (pagination = { ...pagination, page: event.detail.page })}
       on:limitChange={(event) => (pagination = { ...pagination, page: 1, limit: event.detail.limit })}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <DataTable
@@ -152,10 +150,9 @@
         />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With custom cells and expanded rows</Eyebrow>
+  <SpecimenGroup label="With custom cells and expanded rows">
     <DataTable
       columns={incidentColumns}
       rows={incidentRows}
@@ -188,30 +185,23 @@
         {/if}
       </svelte:fragment>
     </DataTable>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Empty state</Eyebrow>
+  <SpecimenGroup label="Empty state">
     <DataTable
       {columns}
       rows={[]}
       ariaLabel="Empty data table"
       emptyMessage="No team members match the current filters."
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

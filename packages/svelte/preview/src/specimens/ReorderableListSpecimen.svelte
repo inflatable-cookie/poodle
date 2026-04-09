@@ -1,7 +1,8 @@
 <script lang="ts">
   import { ReorderableList } from "@poodle/svelte-composites";
-  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider } from "@poodle/svelte-primitives";
   import type { ReorderableItem } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let items: ReorderableItem[] = [
     { id: "1", label: "First item" },
@@ -45,17 +46,15 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Drag to reorder (or Alt+Arrow keys)</Eyebrow>
+  <SpecimenGroup label="Drag to reorder (or Alt+Arrow keys)">
     <ReorderableList
       bind:items
       ariaLabel="Reorderable items"
       on:reorder={(e) => (lastReorder = e.detail.items.map(i => i.label).join(", "))}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Workflow shell</Eyebrow>
+  <SpecimenGroup label="Workflow shell">
     <ReorderableList
       bind:items={sessionItems}
       ariaLabel="Reorder page sections"
@@ -64,47 +63,42 @@
       onsubmit={saveSession}
       oncancel={cancelSession}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Large-list session</Eyebrow>
+  <SpecimenGroup label="Large-list session">
     <ReorderableList
       bind:items={windowedItems}
       ariaLabel="Windowed reorder list"
       longListThreshold={8}
       windowSize={5}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <ReorderableList
       items={[{ id: "a", label: "Locked item A" }, { id: "b", label: "Locked item B" }]}
       disabled
     />
-  </div>
+  </SpecimenGroup>
 
   {#if lastReorder}
-    <div class="specimen__group">
-      <Eyebrow>Current order</Eyebrow>
+    <SpecimenGroup label="Current order">
       <p>{lastReorder}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <ReorderableList bind:items={compactItems} ariaLabel="Compact reorderable items" />
         <ReorderableList items={compactItems} ariaLabel="Prominent reorderable items" sizeRole="prominent" />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   .specimen__stack { display: grid; gap: 0.75rem; }
   p { margin: 0; font-size: 0.8125rem; }
 </style>

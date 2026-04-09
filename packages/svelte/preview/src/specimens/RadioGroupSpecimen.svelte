@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { RadioGroup, Eyebrow, type RadioGroupOption, type ControlDensity } from "@poodle/svelte-primitives";
+  import { RadioGroup, type RadioGroupOption, type ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -23,8 +24,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Vertical (default)</Eyebrow>
+  <SpecimenGroup label="Vertical (default)">
     <RadioGroup
       options={planOptions}
       value={selectedPlan}
@@ -32,10 +32,9 @@
       on:valueChange={(e) => (selectedPlan = e.detail.value)}
     />
     <p>Selected: <strong>{selectedPlan}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Horizontal</Eyebrow>
+  <SpecimenGroup label="Horizontal">
     <RadioGroup
       options={sizeOptions}
       value={selectedSize}
@@ -44,10 +43,9 @@
       on:valueChange={(e) => (selectedSize = e.detail.value)}
     />
     <p>Selected: <strong>{selectedSize}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <RadioGroup
@@ -58,10 +56,9 @@
         />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__stack">
@@ -75,15 +72,13 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <RadioGroup options={planOptions} defaultValue="free" disabled ariaLabel="Disabled plan selector" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom selected color</Eyebrow>
+  <SpecimenGroup label="Custom selected color">
     <RadioGroup
       options={planOptions}
       value={selectedPlan}
@@ -91,26 +86,14 @@
       ariaLabel="Select plan with custom selected color"
       on:valueChange={(e) => (selectedPlan = e.detail.value)}
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .specimen__stack {

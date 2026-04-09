@@ -1,13 +1,13 @@
 <script lang="ts">
   import { ConfirmAction } from "@poodle/svelte-composites";
-  import { Eyebrow, Button, IconButton } from "@poodle/svelte-primitives";
+  import { Button, IconButton } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let lastAction = "";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default trigger (danger)</Eyebrow>
+  <SpecimenGroup label="Default trigger (danger)">
     <ConfirmAction
       title="Delete this record?"
       description="This record will be permanently removed."
@@ -15,10 +15,9 @@
       confirmLabel="Delete"
       on:confirm={() => (lastAction = "Record deleted")}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Warning tone</Eyebrow>
+  <SpecimenGroup label="Warning tone">
     <ConfirmAction
       title="Archive this project?"
       description="The project will be moved to the archive and can be restored later."
@@ -27,10 +26,9 @@
       confirmLabel="Archive"
       on:confirm={() => (lastAction = "Project archived")}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom trigger slot</Eyebrow>
+  <SpecimenGroup label="Custom trigger slot">
     <ConfirmAction
       title="Remove all filters?"
       description="This will clear all active filters and show all items."
@@ -42,10 +40,9 @@
         <Button variant="ghost">Clear filters</Button>
       </svelte:fragment>
     </ConfirmAction>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With body content</Eyebrow>
+  <SpecimenGroup label="With body content">
     <ConfirmAction
       title="Revoke API key?"
       description="This key will immediately stop working."
@@ -56,13 +53,12 @@
         <code>pk_live_abc123...xyz789</code>
       </div>
     </ConfirmAction>
-  </div>
+  </SpecimenGroup>
 
   {#if lastAction}
-    <div class="specimen__group">
-      <Eyebrow>Last action</Eyebrow>
+    <SpecimenGroup label="Last action">
       <p>{lastAction}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -70,13 +66,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .key-display {

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Accordion, Eyebrow, type AccordionItem } from "@poodle/svelte-primitives";
+  import { Accordion, type AccordionItem } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const singleItems: AccordionItem[] = [
     { value: "getting-started", label: "Getting started" },
@@ -33,8 +34,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Single selection</Eyebrow>
+  <SpecimenGroup label="Single selection">
     <Accordion
       items={singleItems}
       selectionMode="single"
@@ -44,10 +44,9 @@
     >
       <p>{singleContent[item.value]}</p>
     </Accordion>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Multiple selection</Eyebrow>
+  <SpecimenGroup label="Multiple selection">
     <Accordion
       items={multiItems}
       selectionMode="multiple"
@@ -57,25 +56,13 @@
     >
       <p>{multiContent[item.value]}</p>
     </Accordion>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
-    line-height: 1.5;
-  }</style>
+</style>

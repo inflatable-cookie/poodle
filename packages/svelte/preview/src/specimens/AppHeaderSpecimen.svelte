@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, Button, IconButton, Menubar } from "@poodle/svelte-primitives";
+  import { Button, IconButton, Menubar } from "@poodle/svelte-primitives";
   import { AppHeader } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const menuItems = [
     {
@@ -49,8 +50,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Full app window header (title + menubar + utility)</Eyebrow>
+  <SpecimenGroup label="Full app window header (title + menubar + utility)">
     <div class="specimen__frame specimen__frame--app">
       <AppHeader title="Poodle Studio">
         <svelte:fragment slot="actions">
@@ -68,10 +68,9 @@
         <p>Application content area</p>
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With title, actions, and utility</Eyebrow>
+  <SpecimenGroup label="With title, actions, and utility">
     <div class="specimen__frame">
       <AppHeader title="My Application">
         <svelte:fragment slot="actions">
@@ -83,17 +82,15 @@
         </svelte:fragment>
       </AppHeader>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Title only</Eyebrow>
+  <SpecimenGroup label="Title only">
     <div class="specimen__frame">
       <AppHeader title="Poodle Workstation" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom identity slot</Eyebrow>
+  <SpecimenGroup label="Custom identity slot">
     <div class="specimen__frame">
       <AppHeader>
         <svelte:fragment slot="identity">
@@ -106,20 +103,14 @@
         </svelte:fragment>
       </AppHeader>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__frame {

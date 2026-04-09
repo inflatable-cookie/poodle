@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { DurationInput, Eyebrow } from "@poodle/svelte-primitives";
+  import { DurationInput } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -13,8 +14,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Hours, minutes, seconds</Eyebrow>
+  <SpecimenGroup label="Hours, minutes, seconds">
     <DurationInput
       bind:hours
       bind:minutes
@@ -22,19 +22,17 @@
       on:change={(e) => (lastChange = `${e.detail.totalSeconds}s total`)}
     />
     <p>Total: {hours}h {minutes}m {seconds}s</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <DurationInput hours={1} minutes={30} seconds={0} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -43,23 +41,20 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Hours and minutes only</Eyebrow>
+  <SpecimenGroup label="Hours and minutes only">
     <DurationInput hours={0} minutes={45} showSeconds={false} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <DurationInput hours={2} minutes={15} seconds={30} disabled />
-  </div>
+  </SpecimenGroup>
 
   {#if lastChange}
-    <div class="specimen__group">
-      <Eyebrow>Last change</Eyebrow>
+    <SpecimenGroup label="Last change">
       <p>{lastChange}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -67,13 +62,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
   import { StatusBar } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default</Eyebrow>
+  <SpecimenGroup label="Default">
     <div class="specimen__frame">
       <StatusBar summary="Ready">
         <svelte:fragment slot="leading">
@@ -19,27 +18,20 @@
         </svelte:fragment>
       </StatusBar>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Summary only</Eyebrow>
+  <SpecimenGroup label="Summary only">
     <div class="specimen__frame">
       <StatusBar summary="3 items selected" />
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__frame {

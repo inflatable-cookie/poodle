@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Drawer, Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { Drawer, Button } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -13,8 +14,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Right edge (default)</Eyebrow>
+  <SpecimenGroup label="Right edge (default)">
     <Button on:click={() => (rightOpen = true)}>Open right drawer</Button>
     <Drawer
       open={rightOpen}
@@ -28,10 +28,9 @@
         <Button on:click={() => (rightOpen = false)}>Save</Button>
       </svelte:fragment>
     </Drawer>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = true)}>{size}</Button>
@@ -50,10 +49,9 @@
         </Drawer>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__row">
       {#each densities as density}
         <Button variant="secondary" on:click={() => (densityOpenMap[density] = true)}>{density}</Button>
@@ -72,10 +70,9 @@
         </Drawer>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Left edge</Eyebrow>
+  <SpecimenGroup label="Left edge">
     <Button variant="secondary" on:click={() => (leftOpen = true)}>Open left drawer</Button>
     <Drawer
       open={leftOpen}
@@ -85,20 +82,14 @@
     >
       <p>Side navigation or filters can live in a left-edge drawer.</p>
     </Drawer>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

@@ -1,43 +1,28 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Section label</Eyebrow>
+  <SpecimenGroup label="Section label">
     <p>Eyebrow renders small uppercase text used for categorizing content above headings.</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Primitive</Eyebrow>
+  <SpecimenGroup label="Primitive">
     <h3 class="demo-heading">Button</h3>
     <p>Primary interactive control for triggering actions.</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Composite</Eyebrow>
+  <SpecimenGroup label="Composite">
     <h3 class="demo-heading">DataTable</h3>
     <p>Feature-rich table with sorting, selection, and pagination.</p>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .demo-heading {

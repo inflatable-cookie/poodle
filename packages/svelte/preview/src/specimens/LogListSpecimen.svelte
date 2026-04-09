@@ -1,7 +1,8 @@
 <script lang="ts">
   import { LogList } from "@poodle/svelte-composites";
   import type { LogEntry, LogFilter } from "@poodle/svelte-composites";
-  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { Button } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const now = Date.now();
 
@@ -97,16 +98,14 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Log output with filtering</Eyebrow>
+  <SpecimenGroup label="Log output with filtering">
     <LogList {entries} ariaLabel="Application logs" />
     <div class="specimen__actions">
       <Button variant="secondary" on:click={addEntry}>Add log entry</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Audit activity list</Eyebrow>
+  <SpecimenGroup label="Audit activity list">
     <LogList
       entries={auditEntries}
       ariaLabel="Audit activity"
@@ -119,20 +118,14 @@
         action === "delete" ? null : `/${resourceType}/${resourceId}`
       }
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__actions {

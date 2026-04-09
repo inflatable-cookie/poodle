@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { ColorPicker, Eyebrow } from "@poodle/svelte-primitives";
+  import { ColorPicker } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -16,23 +17,20 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Basic picker</Eyebrow>
+  <SpecimenGroup label="Basic picker">
     <ColorPicker bind:value={color} />
     <p>Selected: <strong>{color}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <ColorPicker value="#6366f1" {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -41,41 +39,35 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With swatches</Eyebrow>
+  <SpecimenGroup label="With swatches">
     <ColorPicker
       bind:value={color}
       swatches={brandSwatches}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With alpha</Eyebrow>
+  <SpecimenGroup label="With alpha">
     <ColorPicker bind:value={alphaColor} showAlpha />
     <p>Selected: <strong>{alphaColor}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Default open, RGB mode</Eyebrow>
+  <SpecimenGroup label="Default open, RGB mode">
     <ColorPicker value="#22c55e" defaultOpen defaultMode="rgb" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Preview only (no input)</Eyebrow>
+  <SpecimenGroup label="Preview only (no input)">
     <ColorPicker value={color} showInput={false} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <ColorPicker value="#22c55e" disabled />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   .specimen__row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
   .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
   .specimen__label { font-size: 0.75rem; font-family: var(--poodle-typography-code-family); color: var(--poodle-color-text-muted); min-width: 6rem; }

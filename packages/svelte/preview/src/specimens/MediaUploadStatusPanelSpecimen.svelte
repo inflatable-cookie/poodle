@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
   import { MediaUploadStatusPanel } from "@poodle/svelte-composites";
   import type { MediaUploadWorkflowStep } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -10,8 +10,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Upload status panel</Eyebrow>
+  <SpecimenGroup label="Upload status panel">
     <div class="specimen__actions">
       <button type="button" on:click={() => (uploadStep = "checking")}>Checking</button>
       <button type="button" on:click={() => (uploadStep = "duplicate")}>Duplicate</button>
@@ -31,10 +30,9 @@
       on:selectUploaded={() => (lastAction = "Select uploaded")}
     />
     <p>Last action: <strong>{lastAction}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <MediaUploadStatusPanel
@@ -44,17 +42,11 @@
         />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen,
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
   .specimen__stack {
     display: flex;
     flex-direction: column;

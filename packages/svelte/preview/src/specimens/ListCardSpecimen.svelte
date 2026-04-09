@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { ContextMenu, Eyebrow, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@poodle/svelte-primitives";
+  import { ContextMenu, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@poodle/svelte-primitives";
   import { folder, layers, grid2x2 } from "@poodle/icons-lucide";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let lastClick = "";
   let selectedCard = false;
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Interactive list cards</Eyebrow>
+  <SpecimenGroup label="Interactive list cards">
     <div class="specimen__stack">
       <ListCard
         title="design-system-v2.figma"
@@ -37,10 +37,9 @@
         <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Link roots and explicit actions</Eyebrow>
+  <SpecimenGroup label="Link roots and explicit actions">
     <div class="specimen__stack">
       <ListCard
         title="Billing settings"
@@ -64,10 +63,9 @@
         </svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Selectable cards</Eyebrow>
+  <SpecimenGroup label="Selectable cards">
     <div class="specimen__stack">
       <ListCard
         title="Selected row"
@@ -106,10 +104,9 @@
         </svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Rounded-square leading (thumbnails)</Eyebrow>
+  <SpecimenGroup label="Rounded-square leading (thumbnails)">
     <div class="specimen__stack">
       <ListCard
         title="hero-banner.png"
@@ -132,10 +129,9 @@
         <svelte:fragment slot="leading"><Icon name="play" /></svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With badges</Eyebrow>
+  <SpecimenGroup label="With badges">
     <div class="specimen__stack">
       <ListCard
         title="API integration guide"
@@ -162,10 +158,9 @@
         </svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With footer counters</Eyebrow>
+  <SpecimenGroup label="With footer counters">
     <div class="specimen__stack">
       <ListCard
         title="Design system"
@@ -198,10 +193,9 @@
         </svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Solid fill with accent colors</Eyebrow>
+  <SpecimenGroup label="Solid fill with accent colors">
     <div class="specimen__stack">
       <ListCard
         title="Design tokens"
@@ -247,10 +241,9 @@
         <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With context menu</Eyebrow>
+  <SpecimenGroup label="With context menu">
     <div class="specimen__stack">
       <ContextMenu
         items={[
@@ -273,10 +266,9 @@
         </ListCard>
       </ContextMenu>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Not live (dashed border, interactive)</Eyebrow>
+  <SpecimenGroup label="Not live (dashed border, interactive)">
     <div class="specimen__stack">
       <ListCard
         title="Unpublished draft"
@@ -301,10 +293,9 @@
         </svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Corner sash badges</Eyebrow>
+  <SpecimenGroup label="Corner sash badges">
     <div class="specimen__stack">
       <ListCard
         title="Free tier plan"
@@ -339,24 +330,21 @@
         <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
       </ListCard>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Static list card</Eyebrow>
+  <SpecimenGroup label="Static list card">
     <ListCard title="Read-only item" subtitle="No click handler" />
-  </div>
+  </SpecimenGroup>
 
   {#if lastClick}
-    <div class="specimen__group">
-      <Eyebrow>Last click</Eyebrow>
+    <SpecimenGroup label="Last click">
       <p>{lastClick}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   .specimen__stack { display: flex; flex-direction: column; gap: 0.25rem; }
   p { margin: 0; }
 </style>

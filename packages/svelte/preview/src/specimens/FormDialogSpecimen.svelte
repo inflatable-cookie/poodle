@@ -1,6 +1,7 @@
 <script lang="ts">
   import { FormDialog } from "@poodle/svelte-composites";
-  import { Button, Eyebrow, TextInput, Field, Select, FormActions } from "@poodle/svelte-primitives";
+  import { Button, TextInput, Field, Select, FormActions } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let basicOpen: boolean | null = null;
   let errorOpen: boolean | null = null;
@@ -48,8 +49,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Basic form dialog</Eyebrow>
+  <SpecimenGroup label="Basic form dialog">
     <Button variant="primary" on:click={() => (basicOpen = true)}>Add user</Button>
     <FormDialog
       open={basicOpen}
@@ -68,10 +68,9 @@
         <Select options={roleOptions} bind:value={role} placeholder="Select role" />
       </Field>
     </FormDialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With error state</Eyebrow>
+  <SpecimenGroup label="With error state">
     <Button variant="secondary" on:click={() => { errorOpen = true; error = null; }}>Try with error</Button>
     <FormDialog
       open={errorOpen}
@@ -87,10 +86,9 @@
         <TextInput value="existing@example.com" placeholder="Enter email" />
       </Field>
     </FormDialog>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Shell mode with custom actions</Eyebrow>
+  <SpecimenGroup label="Shell mode with custom actions">
     <Button variant="ghost" on:click={() => { shellOpen = true; success = null; }}>Open settings shell</Button>
     <FormDialog
       open={shellOpen}
@@ -118,13 +116,12 @@
         </FormActions>
       </svelte:fragment>
     </FormDialog>
-  </div>
+  </SpecimenGroup>
 
   {#if lastAction}
-    <div class="specimen__group">
-      <Eyebrow>Last action</Eyebrow>
+    <SpecimenGroup label="Last action">
       <p>{lastAction}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -132,13 +129,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   p {

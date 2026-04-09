@@ -1,6 +1,7 @@
 <script lang="ts">
   import { FilterToolbar } from "@poodle/svelte-composites";
-  import { Eyebrow, Select, TextInput, Button, IconButton, type SelectOption } from "@poodle/svelte-primitives";
+  import { Select, TextInput, Button, IconButton, type SelectOption } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -29,18 +30,16 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Responsive grid layout</Eyebrow>
+  <SpecimenGroup label="Responsive grid layout">
     <FilterToolbar summaryText="Showing 24 of 156 items" ariaLabel="Item filters">
       <TextInput id="filter-search" type="search" placeholder="Search…" ariaLabel="Search items" />
       <Select id="filter-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="filter-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
       <Select id="filter-owner" options={ownerOptions} defaultValue="all" ariaLabel="Owner" />
     </FilterToolbar>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <FilterToolbar summaryText="Toolbar at {size}" {size} ariaLabel="Filter toolbar at {size}">
@@ -49,10 +48,9 @@
         </FilterToolbar>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Collapsible with actions</Eyebrow>
+  <SpecimenGroup label="Collapsible with actions">
     <FilterToolbar
       collapsible
       bind:collapsed={collapsed1}
@@ -66,10 +64,9 @@
       <Select id="col-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="col-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
     </FilterToolbar>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Explicit collapsed state</Eyebrow>
+  <SpecimenGroup label="Explicit collapsed state">
     <FilterToolbar
       collapsible
       bind:collapsed={collapsed2}
@@ -82,10 +79,9 @@
       <TextInput id="col2-search" type="search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col2-status" options={statusOptions} defaultValue="active" ariaLabel="Status" />
     </FilterToolbar>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With secondary slot</Eyebrow>
+  <SpecimenGroup label="With secondary slot">
     <FilterToolbar ariaLabel="Project filters" columns={3}>
       <TextInput id="proj-search" type="search" placeholder="Filter projects…" ariaLabel="Filter" />
       <Select id="proj-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
@@ -94,20 +90,14 @@
         <Button variant="secondary" sizeRole="chrome">Reset all</Button>
       </svelte:fragment>
     </FilterToolbar>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

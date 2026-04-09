@@ -1,13 +1,10 @@
-<script context="module" lang="ts">
-  export const noSurface = true;
-</script>
-
 <script lang="ts">
-  import { FieldSet, Field, TextInput, Select, Surface } from "@poodle/svelte-primitives";
+  import { FieldSet, Field, TextInput, Select } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <Surface tone="panel" border="subtle" padding="md">
+  <SpecimenGroup label="Contact Information">
     <FieldSet legend="Contact Information">
       <Field id="fs-name" label="Full Name" required>
         <TextInput id="fs-name" placeholder="Jane Smith" ariaLabel="Full Name" />
@@ -19,9 +16,9 @@
         <TextInput id="fs-phone" placeholder="+1 (555) 000-0000" ariaLabel="Phone" />
       </Field>
     </FieldSet>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface tone="panel" border="subtle" padding="md">
+  <SpecimenGroup label="Address (two-column)">
     <FieldSet legend="Address" columns={2}>
       <Field id="fs-street" label="Street" span="full">
         <TextInput id="fs-street" placeholder="123 Main St" ariaLabel="Street" />
@@ -55,9 +52,9 @@
         />
       </Field>
     </FieldSet>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface tone="panel" border="subtle" padding="md">
+  <SpecimenGroup label="No legend, small gap">
     <FieldSet columns={2} gap="sm">
       <Field id="fs-first" label="First Name">
         <TextInput id="fs-first" placeholder="Jane" ariaLabel="First Name" />
@@ -66,9 +63,9 @@
         <TextInput id="fs-last" placeholder="Smith" ariaLabel="Last Name" />
       </Field>
     </FieldSet>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface tone="panel" border="subtle" padding="md">
+  <SpecimenGroup label="Multiple sections">
     <div class="form-sections">
       <FieldSet legend="Personal" columns={2}>
         <Field id="fs2-first" label="First Name" required>
@@ -103,14 +100,14 @@
         </Field>
       </FieldSet>
     </div>
-  </Surface>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 36rem;
   }
 

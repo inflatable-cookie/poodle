@@ -1,31 +1,28 @@
 <script lang="ts">
   import { MetricTile } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Basic tiles</Eyebrow>
+  <SpecimenGroup label="Basic tiles">
     <div class="specimen__grid">
       <MetricTile label="Components" value="85" />
       <MetricTile label="Coverage" value="94%" />
       <MetricTile label="Open issues" value="12" />
       <MetricTile label="Build time" value="1.8s" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With trend indicators</Eyebrow>
+  <SpecimenGroup label="With trend indicators">
     <div class="specimen__grid">
       <MetricTile label="Active users" value="2,847" trend="up" trendLabel="+12.3%" />
       <MetricTile label="Error rate" value="0.04%" trend="down" trendLabel="-8%" />
       <MetricTile label="Latency" value="42ms" trend="flat" trendLabel="No change" />
       <MetricTile label="Revenue" value="$14.2k" trend="up" trendLabel="+3.1%" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With sparklines</Eyebrow>
+  <SpecimenGroup label="With sparklines">
     <div class="specimen__grid">
       <MetricTile
         label="Requests/min"
@@ -47,20 +44,14 @@
         sparklineData={[3.8, 3.9, 4.0, 4.1, 4.0, 4.1, 4.2]}
       />
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__grid {

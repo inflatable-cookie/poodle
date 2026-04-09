@@ -1,6 +1,7 @@
 <script lang="ts">
   import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@poodle/svelte-composites";
-  import { Eyebrow, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const items: PickerItem[] = [
     { id: "btn", label: "Button", description: "Primary interactive control", meta: "Primitive" },
@@ -89,8 +90,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Multiple selection</Eyebrow>
+  <SpecimenGroup label="Multiple selection">
     <RelationPicker
       title="Select components"
       description="Choose related components."
@@ -100,19 +100,17 @@
       on:selectionChange={(e) => (selected = e.detail.selectedIds)}
     />
     <p>Selected: <strong>{selected.join(", ")}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Single selection</Eyebrow>
+  <SpecimenGroup label="Single selection">
     <RelationPicker
       title="Choose a parent"
       {items}
       selectionMode="single"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Drill-down (Category → Subcategory → Items)</Eyebrow>
+  <SpecimenGroup label="Drill-down (Category → Subcategory → Items)">
     <RelationPicker
       title="Browse components"
       description="Navigate categories to find components."
@@ -125,10 +123,9 @@
     {#if drillSelected.length > 0}
       <p>Selected: <strong>{drillSelected.join(", ")}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <RelationPicker
@@ -149,20 +146,14 @@
         />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

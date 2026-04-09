@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Breadcrumbs, type BreadcrumbItem, type ControlDensity } from "@poodle/svelte-primitives";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -25,8 +25,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Basic</Eyebrow>
+  <SpecimenGroup label="Basic">
     <Breadcrumbs
       items={basicItems}
       on:navigate={(e) => (lastNav = e.detail.value)}
@@ -34,19 +33,17 @@
     {#if lastNav}
       <p>Navigated to: <strong>{lastNav}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Breadcrumbs items={basicItems} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -55,30 +52,22 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Deep path</Eyebrow>
+  <SpecimenGroup label="Deep path">
     <Breadcrumbs items={deepItems} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Collapsed (max 3 visible)</Eyebrow>
+  <SpecimenGroup label="Collapsed (max 3 visible)">
     <Breadcrumbs items={deepItems} maxVisibleItems={3} />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {
@@ -100,9 +89,4 @@
     min-width: 6rem;
   }
 
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: var(--poodle-color-text-secondary);
-  }
 </style>

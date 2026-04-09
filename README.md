@@ -63,4 +63,6 @@ Historical `pug` and `flint` references should be treated as migration leftovers
 
 ## Next Task
 
-Do one broad downstream dependency sweep so consuming repos move from `flint` to `poodle` in package scopes, crate imports, Git remotes, and local path references.
+Recover the live `g10` queue from current evidence, then compile the next
+bounded Jetstream or component-overhaul milestone before more freeform work
+continues.

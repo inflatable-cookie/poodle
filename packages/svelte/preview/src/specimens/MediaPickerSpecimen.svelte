@@ -1,7 +1,8 @@
 <script lang="ts">
   import { MediaPicker } from "@poodle/svelte-composites";
-  import { Eyebrow, Button, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { Button, UiPresentationProvider } from "@poodle/svelte-primitives";
   import type { MediaPickerItem } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let open: boolean | null = null;
   let compactOpen: boolean | null = null;
@@ -19,8 +20,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Media picker dialog</Eyebrow>
+  <SpecimenGroup label="Media picker dialog">
     <Button variant="secondary" on:click={() => (open = true)}>Select media</Button>
     <MediaPicker
       {open}
@@ -32,10 +32,9 @@
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic presentation</Eyebrow>
+  <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
         <Button variant="secondary" on:click={() => (compactOpen = true)}>Open compact picker</Button>
@@ -57,20 +56,14 @@
         {/if}
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

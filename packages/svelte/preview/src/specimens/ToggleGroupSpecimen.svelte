@@ -5,6 +5,7 @@
     UiPresentationProvider,
     type ToggleGroupOption,
   } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const viewOptions: ToggleGroupOption[] = [
     { value: "grid", label: "Grid" },
@@ -31,8 +32,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Single selection</Eyebrow>
+  <SpecimenGroup label="Single selection">
     <ToggleGroup
       options={viewOptions}
       value={view}
@@ -40,20 +40,18 @@
       on:valueChange={(e) => (view = e.detail.value as string)}
     />
     <p>View: <strong>{view}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Four options</Eyebrow>
+  <SpecimenGroup label="Four options">
     <ToggleGroup
       options={alignOptions}
       value={align}
       ariaLabel="Text alignment"
       on:valueChange={(e) => (align = e.detail.value as string)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Multiple selection</Eyebrow>
+  <SpecimenGroup label="Multiple selection">
     <ToggleGroup
       options={tagOptions}
       value={tags}
@@ -62,10 +60,9 @@
       on:valueChange={(e) => (tags = e.detail.value as string[])}
     />
     <p>Selected: <strong>{tags.join(", ") || "none"}</strong></p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Semantic role offsets</Eyebrow>
+  <SpecimenGroup label="Semantic role offsets">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__row">
         <ToggleGroup options={viewOptions} defaultValue="grid" sizeRole="chrome" ariaLabel="Chrome-sized group" />
@@ -73,36 +70,23 @@
         <ToggleGroup options={viewOptions} defaultValue="board" sizeRole="prominent" ariaLabel="Prominent group" />
       </div>
     </UiPresentationProvider>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <ToggleGroup
       options={viewOptions}
       defaultValue="list"
       disabled
       ariaLabel="Disabled toggle group"
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .specimen__row {

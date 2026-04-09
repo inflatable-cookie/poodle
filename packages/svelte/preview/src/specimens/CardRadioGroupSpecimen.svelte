@@ -1,7 +1,7 @@
 <script lang="ts">
   import { CardRadioGroup } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
   import type { CardRadioItem } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
@@ -23,8 +23,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Plan selection (2 columns)</Eyebrow>
+  <SpecimenGroup label="Plan selection (2 columns)">
     <CardRadioGroup
       items={planItems}
       bind:value={planValue}
@@ -34,10 +33,9 @@
     {#if planValue}
       <p>Selected: <strong>{planValue}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Instance size (3 columns)</Eyebrow>
+  <SpecimenGroup label="Instance size (3 columns)">
     <CardRadioGroup
       items={sizeItems}
       bind:value={sizeValue}
@@ -47,10 +45,9 @@
     {#if sizeValue}
       <p>Selected: <strong>{sizeValue}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <CardRadioGroup
@@ -62,10 +59,9 @@
         />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled group</Eyebrow>
+  <SpecimenGroup label="Disabled group">
     <CardRadioGroup
       items={sizeItems}
       value="md"
@@ -73,20 +69,14 @@
       disabled
       ariaLabel="Disabled selection"
     />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

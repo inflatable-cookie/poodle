@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Tabs, Eyebrow, type TabItem } from "@poodle/svelte-primitives";
+  import { Tabs, type TabItem } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const basicTabs: TabItem[] = [
     { value: "overview", label: "Overview" },
@@ -47,8 +48,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Text variant (default, with indicator line)</Eyebrow>
+  <SpecimenGroup label="Text variant (default, with indicator line)">
     <Tabs
       items={basicTabs}
       defaultValue="overview"
@@ -57,20 +57,18 @@
     >
       <p>Active tab: <strong>{activeValue}</strong></p>
     </Tabs>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Text variant (no border)</Eyebrow>
+  <SpecimenGroup label="Text variant (no border)">
     <Tabs
       items={basicTabs}
       defaultValue="overview"
       bordered={false}
       ariaLabel="Section tabs without border"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Card variant (closable, reorderable)</Eyebrow>
+  <SpecimenGroup label="Card variant (closable, reorderable)">
     <Tabs
       items={closableTabs}
       variant="card"
@@ -86,10 +84,9 @@
     {#if lastReorder}
       <p>Reordered: <strong>{lastReorder}</strong></p>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Block variant (full-width shell tabs with separators)</Eyebrow>
+  <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
     <div class="specimen__frame">
       <Tabs
         items={stripTabs}
@@ -102,29 +99,26 @@
         <p>Surface content area</p>
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Pill variant (with icons)</Eyebrow>
+  <SpecimenGroup label="Pill variant (with icons)">
     <Tabs
       items={iconTabs}
       variant="pill"
       defaultValue="home"
       ariaLabel="Navigation"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Underline (with icons, no panel)</Eyebrow>
+  <SpecimenGroup label="Underline (with icons, no panel)">
     <Tabs
       items={iconTabs}
       defaultValue="home"
       ariaLabel="Icon tabs"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Strip variant (full-width bar with icons, closable, reorderable)</Eyebrow>
+  <SpecimenGroup label="Strip variant (full-width bar with icons, closable, reorderable)">
     <div class="specimen__frame">
       <Tabs
         items={stripTabs}
@@ -139,10 +133,9 @@
         <p>Surface content area</p>
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Strip variant — vertical (icon-only, collapsed panel)</Eyebrow>
+  <SpecimenGroup label="Strip variant — vertical (icon-only, collapsed panel)">
     <div class="specimen__frame specimen__frame--row">
       <Tabs
         items={panelTabs}
@@ -155,10 +148,9 @@
         <p>Panel content</p>
       </div>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Strip variant — collapse toggle (click to toggle orientation)</Eyebrow>
+  <SpecimenGroup label="Strip variant — collapse toggle (click to toggle orientation)">
     <div class="specimen__frame specimen__frame--row">
       {#if !panelCollapsed}
         <div class="specimen__panel-expanded">
@@ -191,10 +183,9 @@
         {panelCollapsed ? "→" : "←"}
       </button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Card variant with counts, separators, and URL sync</Eyebrow>
+  <SpecimenGroup label="Card variant with counts, separators, and URL sync">
     <Tabs
       items={detailTabs}
       variant="card"
@@ -205,26 +196,14 @@
     >
       <p>Active tab: <strong>{activeValue}</strong></p>
     </Tabs>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__group :global(p) {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--poodle-color-text-secondary);
+    gap: 1rem;
   }
 
   .specimen__frame {

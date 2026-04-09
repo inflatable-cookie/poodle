@@ -1,66 +1,54 @@
 <script lang="ts">
-  import { Skeleton, Eyebrow } from "@poodle/svelte-primitives";
+  import { Skeleton } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Basic shapes</Eyebrow>
+  <SpecimenGroup label="Basic shapes">
     <div class="specimen__row">
       <Skeleton shape="line" width="12rem" />
       <Skeleton shape="circle" width="2.5rem" height="2.5rem" />
       <Skeleton shape="block" width="8rem" height="3rem" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Preset: avatar-line</Eyebrow>
+  <SpecimenGroup label="Preset: avatar-line">
     <Skeleton preset="avatar-line" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Preset: list-item (×3)</Eyebrow>
+  <SpecimenGroup label="Preset: list-item (×3)">
     <Skeleton preset="list-item" />
     <Skeleton preset="list-item" />
     <Skeleton preset="list-item" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Preset: table-row (×3)</Eyebrow>
+  <SpecimenGroup label="Preset: table-row (×3)">
     <Skeleton preset="table-row" />
     <Skeleton preset="table-row" />
     <Skeleton preset="table-row" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Preset: card</Eyebrow>
+  <SpecimenGroup label="Preset: card">
     <div class="specimen__card-grid">
       <Skeleton preset="card" />
       <Skeleton preset="card" />
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Preset: detail-section</Eyebrow>
+  <SpecimenGroup label="Preset: detail-section">
     <Skeleton preset="detail-section" lines={4} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Static (no animation)</Eyebrow>
+  <SpecimenGroup label="Static (no animation)">
     <Skeleton shape="line" width="10rem" animated={false} />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .specimen__row {

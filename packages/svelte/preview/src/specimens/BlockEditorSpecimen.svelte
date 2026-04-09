@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BlockEditor } from "@poodle/svelte-composites";
   import type { EditorBlock, BlockTypeDefinition } from "@poodle/svelte-composites";
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const blockTypes: BlockTypeDefinition[] = [
     { type: "paragraph", label: "Paragraph", icon: "file-text" },
@@ -26,8 +26,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Consumer-driven block types</Eyebrow>
+  <SpecimenGroup label="Consumer-driven block types">
     <BlockEditor {blocks} {blockTypes} on:change={handleChange}>
       <svelte:fragment slot="block" let:block let:disabled let:update>
         {#if block.type === "divider"}
@@ -72,20 +71,14 @@
       </svelte:fragment>
     </BlockEditor>
     <p class="specimen__count">{blocks.length} blocks</p>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__count {

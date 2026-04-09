@@ -1,6 +1,7 @@
 <script lang="ts">
   import { PageLoading } from "@poodle/svelte-composites";
-  import { Eyebrow, Button } from "@poodle/svelte-primitives";
+  import { Button } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let showIndeterminate = false;
   let showDeterminate = false;
@@ -35,8 +36,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Inline</Eyebrow>
+  <SpecimenGroup label="Inline">
     <Button variant="secondary" on:click={() => (showInline = !showInline)}>
       Toggle inline loading
     </Button>
@@ -49,10 +49,9 @@
         />
       </div>
     {/if}
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Indeterminate (spinner only)</Eyebrow>
+  <SpecimenGroup label="Indeterminate (spinner only)">
     <Button variant="secondary" on:click={() => (showIndeterminate = true)}>
       Show loading overlay
     </Button>
@@ -60,10 +59,9 @@
       visible={showIndeterminate}
       message="Loading data..."
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Determinate (with progress bar)</Eyebrow>
+  <SpecimenGroup label="Determinate (with progress bar)">
     <Button variant="secondary" on:click={startDeterminate}>
       Show progress overlay
     </Button>
@@ -72,10 +70,9 @@
       value={demoProgress}
       message="Uploading files... {demoProgress}%"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With cancel button</Eyebrow>
+  <SpecimenGroup label="With cancel button">
     <Button variant="secondary" on:click={() => (showWithCancel = true)}>
       Show cancellable loading
     </Button>
@@ -85,7 +82,7 @@
       canCancel
       on:cancel={closeAll}
     />
-  </div>
+  </SpecimenGroup>
 
   {#if showIndeterminate || showDeterminate || showWithCancel}
     <button class="specimen__dismiss" on:click={closeAll}>
@@ -98,13 +95,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__inline-shell {

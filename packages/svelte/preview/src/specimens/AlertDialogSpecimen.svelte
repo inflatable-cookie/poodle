@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AlertDialog, Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { AlertDialog, Button } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let dangerOpen: boolean | null = null;
   let warningOpen: boolean | null = null;
@@ -13,8 +14,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Danger tone (default)</Eyebrow>
+  <SpecimenGroup label="Danger tone (default)">
     <Button tone="danger" on:click={() => (dangerOpen = true)}>Delete item</Button>
     <AlertDialog
       open={dangerOpen}
@@ -29,10 +29,9 @@
       on:cancel={() => (dangerOpen = false)}
       on:openChange={(e) => (dangerOpen = e.detail.open ? true : null)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Warning tone</Eyebrow>
+  <SpecimenGroup label="Warning tone">
     <Button variant="secondary" on:click={() => (warningOpen = true)}>Reset settings</Button>
     <AlertDialog
       open={warningOpen}
@@ -48,10 +47,9 @@
       on:cancel={() => (warningOpen = false)}
       on:openChange={(e) => (warningOpen = e.detail.open ? true : null)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Async confirm callback</Eyebrow>
+  <SpecimenGroup label="Async confirm callback">
     <Button tone="danger" on:click={() => (asyncOpen = true)}>Archive project</Button>
     <AlertDialog
       open={asyncOpen}
@@ -71,13 +69,12 @@
         <span>14 linked tasks will move to the archived view.</span>
       </div>
     </AlertDialog>
-  </div>
+  </SpecimenGroup>
 
   {#if lastAction}
-    <div class="specimen__group">
-      <Eyebrow>Last action</Eyebrow>
+    <SpecimenGroup label="Last action">
       <p>{lastAction}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -85,13 +82,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .user-card {

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { EditableLabel, Eyebrow } from "@poodle/svelte-primitives";
+  import { EditableLabel } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -13,27 +14,24 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Double-click to edit (default)</Eyebrow>
+  <SpecimenGroup label="Double-click to edit (default)">
     <EditableLabel
       bind:value={title}
       ariaLabel="Project title"
       on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}" (was: "${e.detail.previousValue}")`)}
       on:cancel={() => (lastEvent = "Edit cancelled")}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <EditableLabel value={size.toUpperCase()} ariaLabel={"Label at " + size} {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -42,10 +40,9 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Click to edit with icon</Eyebrow>
+  <SpecimenGroup label="Click to edit with icon">
     <EditableLabel
       bind:value={title}
       ariaLabel="Project title"
@@ -53,10 +50,9 @@
       showEditIcon
       on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}"`)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Empty state</Eyebrow>
+  <SpecimenGroup label="Empty state">
     <EditableLabel
       bind:value={emptyValue}
       ariaLabel="Description"
@@ -64,10 +60,9 @@
       emptyText="Add a description…"
       on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}"`)}
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Flush variant</Eyebrow>
+  <SpecimenGroup label="Flush variant">
     <EditableLabel
       bind:value={flushValue}
       ariaLabel="Heading"
@@ -75,10 +70,9 @@
       activationMode="enterOrSpace"
       showEditIcon
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With max length</Eyebrow>
+  <SpecimenGroup label="With max length">
     <EditableLabel
       value="Short text"
       ariaLabel="Short text"
@@ -86,22 +80,20 @@
       maxLength={20}
       placeholder="Enter text…"
     />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Disabled</Eyebrow>
+  <SpecimenGroup label="Disabled">
     <EditableLabel
       value="Read-only value"
       ariaLabel="Read-only"
       disabled
     />
-  </div>
+  </SpecimenGroup>
 
   {#if lastEvent}
-    <div class="specimen__group">
-      <Eyebrow>Last event</Eyebrow>
+    <SpecimenGroup label="Last event">
       <p>{lastEvent}</p>
-    </div>
+    </SpecimenGroup>
   {/if}
 </div>
 
@@ -109,13 +101,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

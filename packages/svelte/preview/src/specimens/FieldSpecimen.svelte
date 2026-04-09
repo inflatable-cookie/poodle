@@ -1,69 +1,58 @@
 <script lang="ts">
-  import { Field, TextInput, Eyebrow } from "@poodle/svelte-primitives";
+  import { Field, TextInput } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Default with description</Eyebrow>
+  <SpecimenGroup label="Default with description">
     <Field label="Display name" description="This is how your name appears to other users." id="field-name">
       <TextInput id="field-name" placeholder="Enter your name" ariaLabel="Display name" />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Required</Eyebrow>
+  <SpecimenGroup label="Required">
     <Field label="Email address" required id="field-email">
       <TextInput id="field-email" placeholder="you@example.com" ariaLabel="Email address" />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With error</Eyebrow>
+  <SpecimenGroup label="With error">
     <Field label="Username" error="This username is already taken." validationState="invalid" id="field-user">
       <TextInput id="field-user" value="admin" ariaLabel="Username" />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Valid</Eyebrow>
+  <SpecimenGroup label="Valid">
     <Field label="Password" validationState="valid" description="Must be at least 8 characters." id="field-pass">
       <TextInput id="field-pass" value="••••••••••" ariaLabel="Password" />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Optional</Eyebrow>
+  <SpecimenGroup label="Optional">
     <Field label="Phone number" optionalLabel="optional" id="field-phone">
       <TextInput id="field-phone" placeholder="+1 (555) 000-0000" ariaLabel="Phone number" />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With hint (progressive disclosure)</Eyebrow>
+  <SpecimenGroup label="With hint (progressive disclosure)">
     <Field label="URL Slug" hint="A URL-friendly identifier used in page addresses. Lowercase letters, numbers, and hyphens only." id="field-slug">
       <TextInput id="field-slug" placeholder="my-page-slug" ariaLabel="URL Slug" />
     </Field>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Hint + description + required</Eyebrow>
+  <SpecimenGroup label="Hint + description + required">
     <Field label="API Key" description="Your personal API key for authentication." hint="Keep this key secret. Rotate it periodically for security." required id="field-api">
       <TextInput id="field-api" placeholder="sk_live_..." ariaLabel="API Key" />
     </Field>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     max-width: 24rem;
   }
 
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 </style>

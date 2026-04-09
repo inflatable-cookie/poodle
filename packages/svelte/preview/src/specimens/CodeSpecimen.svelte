@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Code, Eyebrow } from "@poodle/svelte-primitives";
+  import { Code } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -21,22 +22,19 @@ function handleClick(event: MouseEvent): void {
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Block with language label</Eyebrow>
+  <SpecimenGroup label="Block with language label">
     <Code source={tsExample} language="typescript" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__stack">
       {#each controlSizes as size}
         <Code source="const x = 1;" {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -45,32 +43,27 @@ function handleClick(event: MouseEvent): void {
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With line numbers and highlight</Eyebrow>
+  <SpecimenGroup label="With line numbers and highlight">
     <Code source={tsExample} language="ts" showLineNumbers highlightLines={[3, 4]} />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>CSS with max height</Eyebrow>
+  <SpecimenGroup label="CSS with max height">
     <Code source={cssExample} language="css" maxHeight="6rem" />
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Inline code</Eyebrow>
+  <SpecimenGroup label="Inline code">
     <p>Use <Code source="npm install" inline /> to install dependencies.</p>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>No copy button</Eyebrow>
+  <SpecimenGroup label="No copy button">
     <Code source="echo 'hello world'" language="bash" showCopyButton={false} />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1.5rem; }
-  .specimen__group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .specimen { display: flex; flex-direction: column; gap: 1rem; }
   .specimen__stack { display: flex; flex-direction: column; gap: 0.5rem; }
   .specimen__row { display: flex; align-items: center; gap: 0.5rem; }
   .specimen__label { font-size: 0.75rem; font-family: var(--poodle-typography-code-family); color: var(--poodle-color-text-muted); min-width: 6rem; }

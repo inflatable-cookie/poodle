@@ -2,18 +2,23 @@
 
 ## Active Execution Track
 
-- `g09`
-  - Status: active
-  - Range: `001` to `008`, with extension required
-  - Notes: GPUI remains the current execution focus. The original `g09.001` through `g09.008` tranche completed the architecture-unification work, but the generation stays open because substantial GPUI work still remains before closeout.
-
-## Next Planned Generation
-
 - `g10`
-  - Status: planned
-  - Notes: Jetstream-focused follow-on generation that starts after `g09` reaches a genuine closeout state
+  - Status: active
+  - Range: `001` to `002`, with extension required
+  - Notes: `g09` is complete on disk and the real live queue has already moved
+    into Jetstream feasibility, renderer parity, and component-overhaul
+    recovery work. `g10` is now the active generation and needs a fresh
+    recovery/control lane so the current thread work stops drifting outside the
+    roadmap surface.
 
 ## Completed Foundations
+
+- `g09`
+  - Status: completed
+  - Range: `001` to `009`
+  - Notes: architecture unification, GPUI continuation, semantic sizing or
+    density rollout, and the original cross-runtime verification tranche are
+    complete enough that `g09` no longer acts as the live queue
 
 - `g01`
   - Status: completed
@@ -67,8 +72,9 @@ When roadmap files disagree:
 
 1. treat this index as the top-level source of truth
 2. treat `docs/roadmaps/README.md` as the entrypoint
-3. treat `g09` as the active generation until it is explicitly closed
+3. treat `g10` as the active generation until it is explicitly closed
 
 ## Next Task
 
-Add the remaining GPUI milestones needed to extend `g09`, then start `g10` only after `g09` has an explicit closeout path.
+Open the active `g10` recovery lane, freeze the real live overhaul posture from
+current evidence, and leave one bounded next milestone as the explicit queue.

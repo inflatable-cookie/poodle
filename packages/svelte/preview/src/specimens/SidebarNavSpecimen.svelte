@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@poodle/svelte-primitives";
   import { SidebarNav } from "@poodle/svelte-composites";
   import type { SidebarNavGroup } from "@poodle/svelte-composites";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let catalogueValue = "dock-region";
   let harnessValue = "pulse-runtime-foundation";
@@ -42,44 +42,33 @@
 </script>
 
 <div class="specimen">
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Single-group catalogue</Eyebrow>
-      <div class="specimen__frame">
-        <SidebarNav
-          ariaLabel="Catalogue navigation"
-          groups={catalogueGroups}
-          value={catalogueValue}
-          on:valueChange={(event) => (catalogueValue = event.detail.value)}
-        />
-      </div>
+  <SpecimenGroup label="Single-group catalogue">
+    <div class="specimen__frame">
+      <SidebarNav
+        ariaLabel="Catalogue navigation"
+        groups={catalogueGroups}
+        value={catalogueValue}
+        on:valueChange={(event) => (catalogueValue = event.detail.value)}
+      />
     </div>
-  </Surface>
+  </SpecimenGroup>
 
-  <Surface>
-    <div class="specimen__section">
-      <Eyebrow>Grouped verification nav</Eyebrow>
-      <div class="specimen__frame">
-        <SidebarNav
-          ariaLabel="Verification navigation"
-          groups={harnessGroups}
-          value={harnessValue}
-          on:valueChange={(event) => (harnessValue = event.detail.value)}
-        />
-      </div>
+  <SpecimenGroup label="Grouped verification nav">
+    <div class="specimen__frame">
+      <SidebarNav
+        ariaLabel="Verification navigation"
+        groups={harnessGroups}
+        value={harnessValue}
+        on:valueChange={(event) => (harnessValue = event.detail.value)}
+      />
     </div>
-  </Surface>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: grid;
     gap: 1rem;
-  }
-
-  .specimen__section {
-    display: grid;
-    gap: 0.75rem;
   }
 
   .specimen__frame {

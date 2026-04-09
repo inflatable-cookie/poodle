@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { Icon, IconProvider, Eyebrow } from "@poodle/svelte-primitives";
+  import { Icon, IconProvider } from "@poodle/svelte-primitives";
   import type { ControlDensity, IconSet } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@poodle/icons-lucide";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -32,8 +33,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Direct import — tree-shakeable</Eyebrow>
+  <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="hint">
       Import individual icons from <code>@poodle/icons-lucide</code>.
       Only the icons you use are included in the bundle.
@@ -53,10 +53,9 @@
       <br />
       <code>&lt;Icon icon={"{star}"} size="lg" /&gt;</code>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="density-stack">
       {#each densities as density}
         <div class="density-row">
@@ -67,10 +66,9 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Color inheritance</Eyebrow>
+  <SpecimenGroup label="Color inheritance">
     <p class="hint">
       Icons inherit <code>currentColor</code> from their parent element.
     </p>
@@ -88,10 +86,9 @@
         <Icon icon={triangleAlert} /> Danger
       </span>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Accessibility</Eyebrow>
+  <SpecimenGroup label="Accessibility">
     <p class="hint">
       Set <code>ariaLabel</code> for meaningful icons. Decorative icons
       are automatically <code>aria-hidden</code>.
@@ -104,10 +101,9 @@
         <Icon icon={pencil} /> without ariaLabel (aria-hidden)
       </span>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Built-in internal icons ({builtinNames.length})</Eyebrow>
+  <SpecimenGroup label="Built-in internal icons ({builtinNames.length})">
     <p class="hint">
       These icons are embedded in the framework and work with string names
       without any <code>IconProvider</code>. They cover component chrome
@@ -129,10 +125,9 @@
     <div class="code-hint">
       <code>&lt;Icon icon="chevron-down" sizeRole="chrome" /&gt;</code>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>All icons via IconProvider ({allIconNames.length})</Eyebrow>
+  <SpecimenGroup label="All icons via IconProvider ({allIconNames.length})">
     <p class="hint">
       Wrap your app (or a subtree) in <code>&lt;IconProvider&gt;</code> with
       a full icon set to enable string-based lookups for any icon.
@@ -158,20 +153,14 @@
         {/each}
       </div>
     </IconProvider>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .hint {

@@ -2,7 +2,8 @@
   import { writable } from "svelte/store";
 
   import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte-composites";
-  import { Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { Button } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   type ToneSeed = "info" | "success" | "warning" | "error";
 
@@ -38,13 +39,12 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Runtime host</Eyebrow>
+  <SpecimenGroup label="Runtime host">
     <p class="specimen__copy">
       The host owns timer policy and fixed positioning while `ToastStack` stays presentational.
     </p>
     <Button variant="secondary" on:click={pushToast}>Add toast</Button>
-  </div>
+  </SpecimenGroup>
 
   <div class="specimen__surface">
     <ToastHost {store} />
@@ -56,12 +56,6 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .specimen__copy {

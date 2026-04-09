@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Button, Eyebrow } from "@poodle/svelte-primitives";
+  import { Button } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -19,53 +20,47 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Variants</Eyebrow>
+  <SpecimenGroup label="Variants">
     <div class="specimen__row">
       <Button variant="primary" on:click={() => log("Primary")}>Primary</Button>
       <Button variant="secondary" on:click={() => log("Secondary")}>Secondary</Button>
       <Button variant="ghost" on:click={() => log("Ghost")}>Ghost</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Danger tone</Eyebrow>
+  <SpecimenGroup label="Danger tone">
     <div class="specimen__row">
       <Button variant="primary" tone="danger" on:click={() => log("Danger primary")}>Danger primary</Button>
       <Button variant="secondary" tone="danger" on:click={() => log("Danger secondary")}>Danger secondary</Button>
       <Button variant="ghost" tone="danger" on:click={() => log("Danger ghost")}>Danger ghost</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With icons</Eyebrow>
+  <SpecimenGroup label="With icons">
     <div class="specimen__row">
       <Button leadingIcon="plus" on:click={() => log("Leading icon")}>Create</Button>
       <Button trailingIcon="external-link" on:click={() => log("Trailing icon")}>Open</Button>
       <Button leadingIcon="save" trailingIcon="check" on:click={() => log("Both icons")}>Save</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>With chevron</Eyebrow>
+  <SpecimenGroup label="With chevron">
     <div class="specimen__row">
       <Button chevron on:click={() => log("Chevron")}>Options</Button>
       <Button variant="primary" chevron on:click={() => log("Primary chevron")}>Actions</Button>
       <Button leadingIcon="filter" chevron on:click={() => log("Icon + chevron")}>Filter</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each controlSizes as size}
         <Button variant="primary" leadingIcon="plus" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -74,19 +69,17 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>States</Eyebrow>
+  <SpecimenGroup label="States">
     <div class="specimen__row">
       <Button variant="primary" disabled>Disabled</Button>
       <Button variant="primary" loading>Loading</Button>
       <Button variant="secondary" disabled>Disabled secondary</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Toggle (pressed state)</Eyebrow>
+  <SpecimenGroup label="Toggle (pressed state)">
     <div class="specimen__row">
       <Button
         variant="ghost"
@@ -110,10 +103,9 @@
         on:pressedChange={(e) => (underlinePressed = e.detail.pressed)}
       >U</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Toggle with icon (uncontrolled)</Eyebrow>
+  <SpecimenGroup label="Toggle with icon (uncontrolled)">
     <div class="specimen__row">
       <Button
         variant="secondary"
@@ -124,10 +116,9 @@
       <Button variant="ghost" leadingIcon="heart" defaultPressed={false}>Like</Button>
       <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Lock</Button>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Form overrides</Eyebrow>
+  <SpecimenGroup label="Form overrides">
     <form class="specimen__form" on:submit|preventDefault={() => log(`Submitted via ${intent}`)}>
       <input type="hidden" name="intent" value={intent} />
       <div class="specimen__row">
@@ -153,7 +144,7 @@
         </Button>
       </div>
     </form>
-  </div>
+  </SpecimenGroup>
 
   <p class="specimen__log">{clickLog}</p>
 </div>
@@ -162,13 +153,7 @@
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {

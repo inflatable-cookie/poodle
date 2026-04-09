@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, Spinner } from "@poodle/svelte-primitives";
+  import { Spinner } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -8,26 +9,23 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Ring</Eyebrow>
+  <SpecimenGroup label="Ring">
     <div class="specimen__row">
       {#each spinnerSizes as size}
         <Spinner variant="ring" {size} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>CLI grid</Eyebrow>
+  <SpecimenGroup label="CLI grid">
     <div class="specimen__row">
       {#each spinnerSizes as size, index}
         <Spinner variant="grid" {size} tone={index === 0 ? "muted" : index === 2 ? "accent" : "current"} />
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -37,29 +35,22 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Context tones</Eyebrow>
+  <SpecimenGroup label="Context tones">
     <div class="specimen__row specimen__row--tones">
       <span class="specimen__chip specimen__chip--inverse"><Spinner variant="ring" tone="current" /></span>
       <span class="specimen__chip"><Spinner variant="ring" tone="accent" /></span>
       <span class="specimen__chip"><Spinner variant="grid" tone="muted" /></span>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__stack {

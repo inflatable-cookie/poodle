@@ -1,7 +1,7 @@
 # g09 GPUI Continuation
 
-Status: active
-Updated: 2026-03-30
+Status: complete
+Updated: 2026-04-09
 
 ## Context
 
@@ -45,18 +45,19 @@ All three runtimes (Svelte, GPUI, Jetstream) have full contract coverage
 with semantic sizing and density support. The contract surface is fully
 detailed and audited against the Svelte reference implementation.
 
-## Remaining for g09 Closeout
+## Closeout State
 
-- [ ] Jetstream preview specimens for 42 new components
-- [ ] Cross-runtime visual parity spot-check
-- [ ] GPUI preview specimens for 5 new components
-- [ ] Final `effigy health` + Rust test pass across all crates
+- the original `g09.001` through `g09.009` milestone chain is complete
+- any remaining Jetstream feasibility, specimen, parity, or renderer work now
+  belongs in `g10`
+- `g09` remains useful lineage for the cross-runtime contract build-out, but it
+  is no longer the live queue
 
 ## Working Rule
 
 - treat `g09.001` through `g09.009` as completed work
-- remaining items above are verification/polish, not new feature work
-- `g10` can start once the verification pass confirms parity
+- do not reopen `g09` for Jetstream-focused follow-on work
+- use `g10` for the active queue
 
 ## g10 Scope (Next Generation)
 
@@ -64,3 +65,8 @@ detailed and audited against the Svelte reference implementation.
 and production readiness for the Jetstream target. The heavy lifting
 of component implementation is now done in g09.009 — g10 focuses on
 runtime integration, visual verification, and production hardening.
+
+## Next Task
+
+Use `g10` as the active generation and recover its live queue from current
+evidence before more implementation proceeds.

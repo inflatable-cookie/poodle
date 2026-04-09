@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Pill, Eyebrow } from "@poodle/svelte-primitives";
+  import { Pill } from "@poodle/svelte-primitives";
   import type { ControlDensity } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const densities: ControlDensity[] = ["compact", "default", "comfortable"];
 
@@ -8,8 +9,7 @@
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Tones</Eyebrow>
+  <SpecimenGroup label="Tones">
     <div class="specimen__row">
       <Pill tone="neutral" sizeRole="control">Neutral</Pill>
       <Pill tone="info" sizeRole="control">Info</Pill>
@@ -17,19 +17,17 @@
       <Pill tone="warning" sizeRole="control">Warning</Pill>
       <Pill tone="danger" sizeRole="control">Danger</Pill>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Sizes</Eyebrow>
+  <SpecimenGroup label="Sizes">
     <div class="specimen__row">
       {#each pillSizes as size}
         <Pill {size}>{size.toUpperCase()}</Pill>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Densities</Eyebrow>
+  <SpecimenGroup label="Densities">
     <div class="specimen__stack">
       {#each densities as density}
         <div class="specimen__row">
@@ -38,28 +36,25 @@
         </div>
       {/each}
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Code font</Eyebrow>
+  <SpecimenGroup label="Code font">
     <div class="specimen__row">
       <Pill font="mono" sizeRole="control">v2.4.1</Pill>
       <Pill font="mono" tone="success" sizeRole="control">stable</Pill>
       <Pill font="mono" tone="warning" sizeRole="control">beta</Pill>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Muted</Eyebrow>
+  <SpecimenGroup label="Muted">
     <div class="specimen__row">
       <Pill muted sizeRole="control">Muted neutral</Pill>
       <Pill muted tone="success" sizeRole="control">Muted success</Pill>
       <Pill muted tone="danger" sizeRole="control">Muted danger</Pill>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Badge</Eyebrow>
+  <SpecimenGroup label="Badge">
     <div class="specimen__row">
       <Pill appearance="badge" sizeRole="control">3</Pill>
       <Pill appearance="badge" sizeRole="control">12</Pill>
@@ -67,30 +62,23 @@
       <Pill appearance="badge" sizeRole="control">New</Pill>
       <Pill appearance="badge" tone="neutral" sizeRole="control">Draft</Pill>
     </div>
-  </div>
+  </SpecimenGroup>
 
-  <div class="specimen__group">
-    <Eyebrow>Custom accent</Eyebrow>
+  <SpecimenGroup label="Custom accent">
     <div class="specimen__row">
       <Pill accent="#3b82f6" sizeRole="control">Info-ish</Pill>
       <Pill accent="#22c55e" sizeRole="control">Positive-ish</Pill>
       <Pill accent="#f59e0b" sizeRole="control">Caution-ish</Pill>
       <Pill accent="#ef4444" sizeRole="control">Danger-ish</Pill>
     </div>
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .specimen__row {
