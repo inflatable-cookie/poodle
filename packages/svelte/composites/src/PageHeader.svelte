@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import { Callout } from "@poodle/svelte-primitives";
+  import { Callout, Icon } from "@poodle/svelte-primitives";
 
   interface Props {
     title?: string | null;
@@ -93,8 +93,8 @@
   {#if backHref || actions}
     <div class="page-header__actions-row">
       {#if backHref}
-        <a class="page-header__back" href={backHref}>
-          <span>{backLabel ?? "Back"}</span>
+        <a class="page-header__back" href={backHref} aria-label={backLabel ?? "Go back"}>
+          <Icon name="arrow-left" />
           {#if backIsContextual}
             <span class="page-header__context-dot" aria-hidden="true"></span>
           {/if}
@@ -151,14 +151,26 @@
   }
 
   .page-header__back {
-    width: fit-content;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--poodle-radius-control);
     color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
-    line-height: 1.2;
     text-decoration: none;
+    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .page-header__back:hover {
+    background: color-mix(in srgb, var(--poodle-color-text-secondary) 12%, transparent);
+    color: var(--poodle-color-text-primary);
+  }
+
+  .page-header__back:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
   }
 
   .page-header__context-dot {
@@ -167,12 +179,6 @@
     border-radius: 999px;
     background: var(--poodle-color-fill-info-strong, var(--poodle-color-border-info));
     flex: none;
-  }
-
-  .page-header__back:hover {
-    color: var(--poodle-color-text-primary);
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
   }
 
   .page-header__title-block {
