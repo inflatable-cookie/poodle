@@ -160,7 +160,7 @@
       columns={incidentColumns}
       rows={incidentRows}
       showRowActions={false}
-      expandedRowWhen={(row) => expandedIncidentId === row.id}
+      expandedRowIds={expandedIncidentId ? [expandedIncidentId] : []}
       ariaLabel="Active incidents"
     >
       <svelte:fragment slot="cell" let:column let:row>

@@ -38,7 +38,7 @@
   export let rowActionLabel = "Open";
   export let showRowActions = true;
   export let rowActions: TableRowAction[] | ((row: TableRow) => TableRowAction[]) = [];
-  export let expandedRowWhen: (row: TableRow) => boolean = () => false;
+  export let expandedRowIds: string[] = [];
   export let emptyMessage = "No rows match the current view.";
   export let hiddenColumnIds: string[] = [];
   export let showColumnVisibility = false;
@@ -80,6 +80,7 @@
   $: mixedSelection = selectionCount > 0 && !allRowsSelected;
   $: hasCustomCellSlot = $$slots.cell !== undefined;
   $: hasExpandedRowSlot = $$slots.expandedRow !== undefined;
+  $: expandedIdSet = new Set(expandedRowIds);
   $: hasEmptySlot = $$slots.empty !== undefined;
   $: hasRichRowActions = typeof rowActions === "function" || rowActions.length > 0;
   $: showLegacyRowAction = showRowActions && !hasRichRowActions;
@@ -514,7 +515,7 @@
               </td>
             {/if}
           </tr>
-          {#if hasExpandedRowSlot && expandedRowWhen(row)}
+          {#if hasExpandedRowSlot && expandedIdSet.has(row.id)}
             <tr class="data-table__expanded-row">
               <td colspan={columnCount}>
                 <div class="data-table__expanded-panel">
@@ -865,8 +866,8 @@
   .data-table--compact .data-table__filters-row td,
   .data-table--compact .data-table__expanded-panel,
   .data-table--compact .data-table__footer {
-    padding-top: var(--poodle-space-control-y-tight);
-    padding-bottom: var(--poodle-space-control-y-tight);
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
   }
 
   .data-table--striped tbody tr:nth-child(even) {
@@ -1016,8 +1017,8 @@
 
   .data-table[data-density="compact"] th,
   .data-table[data-density="compact"] td {
-    padding-top: var(--poodle-space-control-y-tight);
-    padding-bottom: var(--poodle-space-control-y-tight);
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
   }
 
   .data-table[data-density="compact"] .data-table__footer {

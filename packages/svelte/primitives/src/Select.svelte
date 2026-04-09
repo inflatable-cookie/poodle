@@ -80,6 +80,16 @@
   export let native: boolean | undefined = undefined;
   export let emptyMessage = "No matches";
 
+  // Appearance
+  /**
+   * Visual variant of the trigger.
+   * - `"default"`: standard bordered input appearance
+   * - `"ghost"`: no border, background, or chevron — bare trigger
+   */
+  export let variant: "default" | "ghost" = "default";
+  /** Minimum width for the dropdown listbox (e.g. "12rem"). */
+  export let menuMinWidth: string | null = null;
+
   // Accessibility
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
@@ -105,6 +115,7 @@
   let query = "";
   let highlightIndex = 0;
   let placement: "below" | "above" = "below";
+  let alignEnd = false;
 
   // Async loading state
   let loadedOptions: SelectItems | null = null;
@@ -233,6 +244,12 @@
     return o.disabled === true || o.isDisabled === true;
   }
 
+  function parseMinWidth(value: string): number {
+    const num = parseFloat(value);
+    if (value.endsWith("rem")) return num * 16;
+    return num;
+  }
+
   async function startLoad(): Promise<void> {
     if (loadState === "loading") return;
     loadState = "loading";
@@ -275,6 +292,15 @@
       const rect = rootElement.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
       placement = spaceBelow < 280 ? "above" : "below";
+
+      // Horizontal: if menuMinWidth is set, check if left-anchored would overflow
+      if (menuMinWidth) {
+        const spaceRight = window.innerWidth - rect.left;
+        const minW = parseMinWidth(menuMinWidth);
+        alignEnd = minW > spaceRight && rect.right > minW;
+      } else {
+        alignEnd = false;
+      }
     }
     open = nextOpen;
     dispatch("openChange", { open: nextOpen });
@@ -382,6 +408,7 @@
     class="select select--custom"
     data-open={open}
     data-placeholder={!hasSelection}
+    data-variant={variant}
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
@@ -457,9 +484,11 @@
             <Icon name="x" size="xs" />
           </button>
         {/if}
-        <span class="select__indicator" aria-hidden="true">
-          <Icon name="chevron-down" />
-        </span>
+        {#if variant !== "ghost"}
+          <span class="select__indicator" aria-hidden="true">
+            <Icon name="chevron-down" />
+          </span>
+        {/if}
       </div>
     {/if}
 
@@ -474,8 +503,11 @@
         id={listboxId}
         class="select__listbox"
         class:select__listbox--above={placement === "above"}
+        class:select__listbox--auto-width={!!menuMinWidth}
+        class:select__listbox--align-end={alignEnd}
         role="listbox"
         aria-label={ariaLabel ?? undefined}
+        style={menuMinWidth ? `min-width: ${menuMinWidth}` : undefined}
       >
         {#if isGrouped && !searchable}
           {#each normalizedOptions as group}
@@ -904,6 +936,45 @@
     padding: 0.5rem;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
+  }
+
+  /* ═══ GHOST VARIANT ═══ */
+
+  .select[data-variant="ghost"] {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .select[data-variant="ghost"]:focus-within {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .select[data-variant="ghost"] .select__trigger-area {
+    padding: 0;
+    min-height: 0;
+  }
+
+  .select[data-variant="ghost"] .select__trigger {
+    min-height: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  /* Auto-width listbox (used with menuMinWidth) */
+  .select__listbox--auto-width {
+    right: auto;
+    width: max-content;
+  }
+
+  .select__listbox--align-end {
+    left: auto;
+    right: -0.0625rem;
   }
 
   /* ═══ DENSITY VARIANTS ═══ */
