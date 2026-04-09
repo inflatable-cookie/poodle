@@ -333,7 +333,7 @@
     --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
     --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 24%, var(--poodle-color-background-surface));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 32%, var(--poodle-color-background-surface));
-    --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    --poodle-button-border: var(--poodle-color-border-default);
     --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-danger) 62%, var(--poodle-color-border-default));
     --poodle-button-text: var(--poodle-color-text-primary);
   }
