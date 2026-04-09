@@ -477,6 +477,22 @@
     grid-template-rows: auto minmax(0, 1fr);
   }
 
+  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="left"] {
+    border-right: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="right"] {
+    border-left: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="top"] {
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="bottom"] {
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
   .dock-region__strip[data-orientation="horizontal"] {
     display: flex;
     align-items: center;
