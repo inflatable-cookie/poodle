@@ -125,6 +125,67 @@ Rules for this pattern:
 - keep retry/cancel/refresh behavior in host code; only the visible layout is
   shared
 
+## Ops Detail Pattern
+
+Use this when a system page drills into one job, scheduled task, or operational
+record.
+
+```svelte
+<PageHeader title={jobTypeLabel} backHref="/system/jobs" backLabel="Back to jobs">
+  {#snippet actions()}
+    <Button variant="secondary">Cancel</Button>
+    <Button variant="primary">Retry</Button>
+    <IconButton variant="secondary" icon="refresh-cw" ariaLabel="Refresh job" />
+  {/snippet}
+</PageHeader>
+
+<MetaBar ariaLabel="Job metadata">
+  <MetaItem label="ID">
+    <Code inline source={job.id} showCopyButton />
+  </MetaItem>
+  <Pill tone="danger" appearance="badge" size="lg">Failed</Pill>
+</MetaBar>
+
+<Card>
+  <DetailSection title="Details" columns={2} separated={false}>
+    <DetailItem presentation="surface" label="Type">
+      <Code inline source={job.jobType} />
+    </DetailItem>
+    <DetailItem presentation="surface" label="Attempts" value={`${job.attempts} / ${job.maxAttempts}`} />
+  </DetailSection>
+
+  <DetailSection title="Timestamps" columns={2} separated={false}>
+    <DetailItem presentation="surface" label="Created" value={createdAtLabel} />
+    <DetailItem presentation="surface" label="Finished" value={finishedAtLabel} />
+  </DetailSection>
+</Card>
+
+<Card>
+  <h3>Payload</h3>
+  <pre>{jsonPayload}</pre>
+</Card>
+```
+
+Rules for this pattern:
+
+- keep the same `PageHeader` + `MetaBar` shell as the rest of the admin detail
+  family
+- keep retry/cancel/trigger/refresh actions in the header, not in a secondary
+  action row below it
+- use one carded summary block for details and timestamps before payload/error
+  sections
+- use additional `Card` sections for worker identity, last error, payload,
+  progress, and history blocks
+- keep JSON/code content host-owned even when the surrounding section posture is
+  shared
+- use a dedicated tab only when the detail page truly has a second collection
+  surface, like task job runs
+- for error logs, prefer an expandable `DataTable` detail row as the default
+  inspection flow
+- keep a dedicated error-detail route only when the app needs a permalink or
+  cross-navigation target, and reuse the same metadata/code posture if it
+  exists
+
 ## Trash Recovery Pattern
 
 Use this when the primary task is recovering or purging soft-deleted records.
