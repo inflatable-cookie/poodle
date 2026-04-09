@@ -327,12 +327,15 @@
 
   .button[data-tone="danger"] {
     --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
+    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 24%, var(--poodle-color-background-surface));
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 32%, var(--poodle-color-background-surface));
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
     --poodle-button-text: var(--poodle-color-text-primary);
   }
 
   .button[data-variant="primary"][data-tone="danger"] {
     --poodle-button-fill: var(--poodle-color-status-danger);
+    --poodle-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-status-danger));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 88%, black);
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
     --poodle-button-text: var(--poodle-color-text-inverse);
@@ -343,6 +346,8 @@
 
   .button[data-variant="ghost"][data-tone="danger"] {
     --poodle-button-fill: transparent;
+    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 12%, transparent);
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent);
     --poodle-button-border: transparent;
     --poodle-button-text: var(--poodle-color-status-danger);
     --poodle-button-shadow: none;
