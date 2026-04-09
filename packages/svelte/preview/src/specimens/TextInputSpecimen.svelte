@@ -12,6 +12,21 @@
   let workspace = "acme-admin";
   let workspaceStatus: InputValidationStatus = "idle";
   let workspaceError: string | null = null;
+  let slug = "";
+  let slugStatus: InputValidationStatus = "idle";
+
+  async function validateSlug(value: string) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    if (value === "northstar") {
+      return {
+        valid: false,
+        message: "That slug is already in use.",
+      };
+    }
+
+    return { valid: true };
+  }
 
   async function validateWorkspace(value: string) {
     await new Promise((resolve) => setTimeout(resolve, 250));
@@ -104,6 +119,32 @@
         on:validationChange={(event) => {
           workspaceStatus = event.detail.status;
           workspaceError = event.detail.message || null;
+        }}
+      />
+    </Field>
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Slug</Eyebrow>
+    <Field
+      id="slug-field"
+      label="Slug"
+      description="Generates from the title until the user edits it."
+      validationState={slugStatus === "validating" ? "pending" : slugStatus === "invalid" ? "invalid" : slugStatus === "valid" ? "valid" : "none"}
+      pendingMessage={slugStatus === "validating" ? "Checking slug..." : null}
+      error={slugStatus === "invalid" ? "That slug is not available." : null}
+    >
+      <TextInput
+        id="slug-field"
+        type="slug"
+        value={slug}
+        source="Northstar Launch Plan"
+        prefix="/projects/"
+        maxLength={64}
+        validate={validateSlug}
+        on:valueChange={(event) => (slug = event.detail.value)}
+        on:validationChange={(event) => {
+          slugStatus = event.detail.status;
         }}
       />
     </Field>

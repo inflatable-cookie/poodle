@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-03-25
+Updated: 2026-04-09
 
 ## 1. Purpose
 
@@ -17,6 +17,9 @@ Updated: 2026-03-25
 - In scope: search mode via `type="search"` — automatic leading search icon
   (when no leading slot is provided), optional clear button with `showClearButton`
   prop, and `clear` event
+- In scope: slug mode via `type="slug"` — auto-normalised URL segment entry
+  with source-driven generation, reserved-route protection, and the same
+  validation event semantics as other typed inputs
 - Out of scope: inline edit mode switching (see EditableLabel), number
   formatting (see NumberInput)
 
@@ -66,6 +69,7 @@ Updated: 2026-03-25
 | `debounce` | `number \| null` | `null` | no | delays `valueChange` while typing |
 | `validate` | `InputValidator \| undefined` | `undefined` | no | optional validator function for sync or async validation |
 | `validationContext` | `unknown` | `undefined` | no | app-owned context passed to `validate` |
+| `validationKey` | `unknown` | `undefined` | no | optional stable value merged into validation context when validation must re-run after identity changes |
 | `validationDebounce` | `number` | `300` | no | delay before validation runs while typing |
 | `validateOnBlur` | `boolean` | `true` | no | whether blur triggers immediate validation |
 | `showValidationStatus` | `boolean` | `true` | no | whether built-in validation status chrome is shown |
@@ -73,7 +77,8 @@ Updated: 2026-03-25
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `inputMode` | `"none" \| "search" \| "text" \| "tel" \| "url" \| "email" \| "numeric" \| "decimal" \| null` | `null` | no | virtual keyboard hint |
-| `type` | `string` | `"text"` | no | HTML input type attribute. When `"search"`, automatically renders a leading search icon (if no `leading` slot is provided), supports `showClearButton`, and emits `clear` event |
+| `type` | `string` | `"text"` | no | HTML input type attribute. When `"search"`, automatically renders a leading search icon (if no `leading` slot is provided), supports `showClearButton`, and emits `clear` event. When `"slug"`, behaves as semantic slug entry but renders a native text input for HTML compatibility |
+| `source` | `string \| null` | `null` | no | when `type="slug"`, source text used to auto-generate the slug until the user meaningfully edits the field |
 | `showClearButton` | `boolean` | `true` | no | when `type="search"`, whether to show the clear button when the input has a value and is not disabled/readonly |
 | `prefix` | `string \| null` | `null` | no | static text before input (e.g. "$") |
 | `suffix` | `string \| null` | `null` | no | static text after input (e.g. "kg") |
@@ -88,6 +93,8 @@ Updated: 2026-03-25
 - controlled: `value` (non-null) plus `valueChange` event
 - uncontrolled: `defaultValue` sets the initial value; component owns its own state
 - do not mix controlled and uncontrolled modes simultaneously
+- when `type="slug"`, `valueChange` also fires for source-driven auto-generation
+  so parent-controlled forms stay in sync
 
 ### Validation
 
@@ -101,6 +108,34 @@ Updated: 2026-03-25
   - `invalid` -> `invalid`
 - `validationContext` is opaque and app-owned; use it when validation depends
   on sibling field values or existing record identifiers
+- `validationKey` is merged into `validationContext` before validation runs;
+  use it when the caller needs a stable revalidation trigger without replacing
+  the whole context object
+
+### Slug Mode
+
+- `type="slug"` is a semantic mode, not a native HTML input type
+- the rendered control uses `<input type="text">` with:
+  - `autocapitalize="off"`
+  - `spellcheck={false}`
+  - `inputmode="text"`
+- input normalisation rules:
+  - accents are removed
+  - lowercase is enforced
+  - spaces and underscores become hyphens
+  - repeated hyphens collapse
+  - leading and trailing hyphens are trimmed
+- built-in validation rules:
+  - valid slugs contain lowercase letters, numbers, and single hyphen separators
+  - length must be between `2` and `maxLength` (default `100`)
+  - reserved route-like slugs are rejected: `new`, `edit`, `delete`, `create`, `update`, `list`, `admin`, `api`, `auth`, `login`, `logout`, `register`, `settings`, `profile`, `dashboard`, `search`
+- when `prefix` is present, built-in validation and custom `validate` receive
+  the combined candidate `prefix + value`
+- when `source` is present, the control auto-generates from `source` until the
+  user edits the field; if the user clears the slug entirely, auto-generation
+  resumes on later source changes
+- custom `validate` still runs after built-in slug checks and receives the
+  combined slug candidate plus merged validation context
 
 ## 4. States
 
@@ -129,6 +164,7 @@ Updated: 2026-03-25
 | `validationChange` | built-in validation status changes | `{ status: "idle" \| "validating" \| "valid" \| "invalid"; valid: boolean; message: string }` | only fires when `validate` is provided |
 | `submit` | Enter key pressed | `{ value: string }` | fires current value |
 | `cancel` | Escape key pressed | `void` | fires with no payload |
+| `clear` | built-in search clear button pressed | `void` | only emitted in search mode |
 | `focus` | input receives focus | `FocusEvent` | native focus event passthrough |
 | `blur` | input loses focus | `FocusEvent` | native blur event passthrough |
 

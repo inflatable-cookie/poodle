@@ -39,6 +39,7 @@
   export let debounce: number | null = null;
   export let validate: InputValidator | undefined = undefined;
   export let validationContext: unknown = undefined;
+  export let validationKey: unknown = undefined;
   export let validationDebounce = 300;
   export let validateOnBlur = true;
   export let showValidationStatus = true;
@@ -56,11 +57,13 @@
     | "numeric"
     | "decimal"
     | null = null;
-  export let type: HTMLInputElement["type"] | "multiline" = "text";
+  export let type: HTMLInputElement["type"] | "multiline" | "slug" = "text";
   /** Number of visible text rows. When > 1 and type is not explicitly set, auto-switches to multiline. */
   export let rows: number | null = null;
   /** Resize behaviour for multiline mode. */
   export let resize: "vertical" | "horizontal" | "both" | "none" = "vertical";
+  /** Source value used to auto-generate a slug when type="slug". */
+  export let source: string | null = null;
   export let prefix: string | null = null;
   export let suffix: string | null = null;
   export let maxLength: number | null = null;
@@ -91,11 +94,33 @@
   let internalValidationStatus: InputValidationStatus = "idle";
   let internalValidationMessage = "";
   let lastValidatedValue = "";
-  let previousContextKey = serializeValidationContext(validationContext);
+  let previousContextKey = serializeValidationContext(mergeValidationContext(validationContext, validationKey));
   let previousValidationSnapshot = "";
   let previousControlledValue = value;
+  let userEditedSlug = false;
+  let previousGeneratedSlug = "";
+
+  const RESERVED_SLUGS = [
+    "new",
+    "edit",
+    "delete",
+    "create",
+    "update",
+    "list",
+    "admin",
+    "api",
+    "auth",
+    "login",
+    "logout",
+    "register",
+    "settings",
+    "profile",
+    "dashboard",
+    "search",
+  ] as const;
 
   $: isSearch = type === "search";
+  $: isSlug = type === "slug";
   $: canClear = isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0;
   $: isControlled = value !== null;
   $: if (isControlled) {
@@ -126,6 +151,7 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
   // Auto-detect multiline: explicit type="multiline", or rows > 1 with default type
   $: isMultiline = type === "multiline" || (type === "text" && rows !== null && rows > 1);
+  $: nativeInputType = isSlug ? "text" : type;
   $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
   $: validationIcon =
     effectiveValidationState === "valid"
@@ -133,7 +159,22 @@
       : effectiveValidationState === "invalid"
         ? "x"
         : null;
-  $: contextKey = serializeValidationContext(validationContext);
+  $: effectiveValidationContext = mergeValidationContext(validationContext, validationKey);
+  $: contextKey = serializeValidationContext(effectiveValidationContext);
+  $: generatedSlug = isSlug ? slugify(source ?? "") : "";
+
+  $: if (isSlug && source !== null) {
+    if (!userEditedSlug || liveValue === previousGeneratedSlug || liveValue === "") {
+      previousGeneratedSlug = generatedSlug;
+      if (liveValue !== generatedSlug) {
+        liveValue = generatedSlug;
+        if (!isControlled) {
+          uncontrolledValue = generatedSlug;
+        }
+        dispatch("valueChange", { value: generatedSlug });
+      }
+    }
+  }
 
   $: if (validate && liveValue !== lastValidatedValue) {
     triggerValidation(liveValue, false);
@@ -176,9 +217,52 @@
     }
   }
 
+  function mergeValidationContext(context: unknown, key: unknown): unknown {
+    if (key === undefined || key === null || key === "") {
+      return context;
+    }
+
+    if (context === undefined || context === null) {
+      return { validationKey: key };
+    }
+
+    if (typeof context === "object") {
+      return { ...(context as Record<string, unknown>), validationKey: key };
+    }
+
+    return { value: context, validationKey: key };
+  }
+
+  function slugify(input: string): string {
+    return input
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/[\s_]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function isValidSlugFormat(slug: string, limit: number = 100): boolean {
+    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length >= 2 && slug.length <= limit;
+  }
+
+  function isReservedSlug(slug: string): boolean {
+    return (RESERVED_SLUGS as readonly string[]).includes(slug);
+  }
+
+  function normalizeInputValue(input: string): string {
+    return isSlug ? slugify(input) : input;
+  }
+
   function handleInput(event: Event): void {
-    const nextValue = (event.currentTarget as HTMLInputElement).value;
+    const nextValue = normalizeInputValue((event.currentTarget as HTMLInputElement).value);
     liveValue = nextValue;
+    if (isSlug) {
+      userEditedSlug = true;
+    }
 
     if (!isControlled) {
       uncontrolledValue = nextValue;
@@ -208,6 +292,9 @@
 
   function handleClear(): void {
     liveValue = "";
+    if (isSlug) {
+      userEditedSlug = true;
+    }
     if (!isControlled) {
       uncontrolledValue = "";
     }
@@ -239,7 +326,7 @@
 
     clearValidationTimers();
 
-    if (!inputValue.trim()) {
+    if (!inputValue.trim() && !isSlug) {
       activeValidationKey = null;
       internalValidationStatus = "idle";
       internalValidationMessage = "";
@@ -247,14 +334,16 @@
       return;
     }
 
-    const validationKey = buildValidationKey(inputValue, validationContext);
+    const validationKey = buildValidationKey(inputValue, effectiveValidationContext);
     activeValidationKey = validationKey;
     internalValidationStatus = "validating";
     internalValidationMessage = "";
 
     const runValidation = async (): Promise<void> => {
       try {
-        const result = await validate?.(inputValue, validationContext);
+        const result = isSlug
+          ? await validateSlugValue(inputValue)
+          : await validate?.(inputValue, effectiveValidationContext);
         if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
         internalValidationStatus = result?.valid ? "valid" : "invalid";
         internalValidationMessage = result?.message ?? "";
@@ -283,6 +372,29 @@
       validationTimer = null;
       void runValidation();
     }, validationDebounce);
+  }
+
+  async function validateSlugValue(inputValue: string): Promise<ValidationResult> {
+    const candidate = `${prefix ?? ""}${inputValue}`.trim();
+    const limit = maxLength ?? 100;
+
+    if (!candidate) {
+      return { valid: !required, message: required ? "Required" : "" };
+    }
+
+    if (!isValidSlugFormat(candidate, limit)) {
+      return { valid: false, message: "Use lowercase letters, numbers, and hyphens only." };
+    }
+
+    if (isReservedSlug(candidate)) {
+      return { valid: false, message: "This slug is reserved." };
+    }
+
+    if (!validate) {
+      return { valid: true, message: "" };
+    }
+
+    return await validate(candidate, effectiveValidationContext);
   }
 </script>
 
@@ -348,16 +460,16 @@
       id={id || undefined}
       {name}
       list={list ?? undefined}
-      {type}
-      inputmode={inputMode ?? undefined}
+      type={nativeInputType}
+      inputmode={(isSlug ? "text" : inputMode) ?? undefined}
       class="text-input__control"
       value={currentValue}
       {placeholder}
       {autocomplete}
       {required}
       {pattern}
-      {spellcheck}
-      autocapitalize={autocapitalize ?? undefined}
+      spellcheck={isSlug ? false : spellcheck}
+      autocapitalize={isSlug ? "off" : autocapitalize ?? undefined}
       enterkeyhint={enterKeyHint ?? undefined}
       maxlength={maxLength ?? undefined}
       disabled={disabled}
