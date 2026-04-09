@@ -52,15 +52,6 @@
 
 <header class="page-header" data-align={align} aria-label={ariaLabel ?? undefined}>
   <div class="page-header__content">
-    {#if backHref}
-      <a class="page-header__back" href={backHref}>
-        <span>{backLabel ?? "Back"}</span>
-        {#if backIsContextual}
-          <span class="page-header__context-dot" aria-hidden="true"></span>
-        {/if}
-      </a>
-    {/if}
-
     {#if breadcrumbs}
       <div class="page-header__breadcrumbs">
         {@render breadcrumbs()}
@@ -99,9 +90,21 @@
     </div>
   </div>
 
-  {#if actions}
-    <div class="page-header__actions">
-      {@render actions()}
+  {#if backHref || actions}
+    <div class="page-header__actions-row">
+      {#if backHref}
+        <a class="page-header__back" href={backHref}>
+          <span>{backLabel ?? "Back"}</span>
+          {#if backIsContextual}
+            <span class="page-header__context-dot" aria-hidden="true"></span>
+          {/if}
+        </a>
+      {/if}
+      {#if actions}
+        <div class="page-header__actions">
+          {@render actions()}
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -251,12 +254,18 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
+  .page-header__actions-row {
+    display: flex;
+    align-items: center;
+    gap: var(--poodle-space-inline-md);
+  }
+
   .page-header__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--poodle-space-inline-md);
-    justify-content: flex-end;
-    align-items: start;
+    gap: 0.375rem;
+    align-items: center;
+    margin-left: auto;
   }
 
   .page-header__banner {
@@ -266,6 +275,14 @@
   @media (max-width: 45rem) {
     .page-header[data-align="between"] {
       grid-template-columns: 1fr;
+    }
+
+    .page-header__actions-row {
+      flex-wrap: wrap;
+    }
+
+    .page-header__actions {
+      margin-left: 0;
     }
   }
 </style>

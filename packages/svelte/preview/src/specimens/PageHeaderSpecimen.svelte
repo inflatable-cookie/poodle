@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PageHeader } from "@poodle/svelte-composites";
-  import { Button, Eyebrow, MetaBar, Pill, TimeAgo } from "@poodle/svelte-primitives";
+  import { Eyebrow, IconButton, MetaBar, Pill, TimeAgo } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
@@ -10,21 +10,26 @@
   </div>
 
   <div class="specimen__group">
-    <Eyebrow>With back link</Eyebrow>
+    <Eyebrow>With back link and actions</Eyebrow>
     <PageHeader
       title="Media Library"
       subtitle="Browse, review, and manage uploaded files."
       backHref="/dashboard"
       backLabel="Back to dashboard"
-    />
+    >
+      {#snippet actions()}
+        <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
+        <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
+      {/snippet}
+    </PageHeader>
   </div>
 
   <div class="specimen__group">
     <Eyebrow>With eyebrow and actions</Eyebrow>
     <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
       {#snippet actions()}
-        <Button variant="secondary">View source</Button>
-        <Button>Edit</Button>
+        <IconButton icon="code" ariaLabel="View source" variant="secondary" />
+        <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
       {/snippet}
     </PageHeader>
   </div>
@@ -46,8 +51,8 @@
       bannerTone="warning"
     >
       {#snippet actions()}
-        <Button variant="secondary">Run now</Button>
-        <Button>Edit</Button>
+        <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
+        <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
       {/snippet}
     </PageHeader>
   </div>
@@ -63,8 +68,8 @@
         </MetaBar>
       {/snippet}
       {#snippet actions()}
-        <Button variant="secondary">Run now</Button>
-        <Button>Edit schedule</Button>
+        <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
+        <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" />
       {/snippet}
     </PageHeader>
   </div>
