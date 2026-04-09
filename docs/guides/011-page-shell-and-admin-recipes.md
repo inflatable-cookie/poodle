@@ -96,6 +96,51 @@ projects, categories, and scheduled-task list/detail/edit pages.
 </ListContainer>
 ```
 
+## Overview Page Pattern
+
+Use this when the route is an app landing page, admin dashboard, or overview
+surface rather than a CRUD browse page.
+
+```svelte
+<script lang="ts">
+  import { MetricTile, NavCard, PageHeader } from "@poodle/svelte-composites";
+  import { Callout, Grid } from "@poodle/svelte-primitives";
+</script>
+
+<PageHeader
+  title="Dashboard"
+  subtitle="Platform overview and key metrics"
+/>
+
+{#if loadError}
+  <Callout tone="danger" message={loadError} />
+{/if}
+
+<div class="metrics-grid">
+  <a class="metric-link" href="/users">
+    <MetricTile label="Active users" value={activeUsersLabel} />
+  </a>
+</div>
+
+<section>
+  <h2>Key areas</h2>
+  <Grid columns="repeat(auto-fit, minmax(16rem, 1fr))" gap="md">
+    <NavCard href="/system" title="System" description="Diagnostics and tools." />
+  </Grid>
+</section>
+```
+
+Rules for this pattern:
+
+- use `PageHeader` for the route title and subtitle instead of ad hoc header
+  markup
+- keep summary metrics as host-owned `MetricTile` link cards
+- use one or more secondary sections below the metrics grid:
+  `NavCard`, `LogList`, or another local host-owned section
+- keep the metric and section contents app-owned; the shared pattern is the
+  page shape, not a canned dashboard data model
+- keep loading and error posture simple and local
+
 ## Section Tabs
 
 Use `Tabs` directly. Keep mount policy app-owned.
