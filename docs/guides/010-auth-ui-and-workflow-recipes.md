@@ -104,6 +104,33 @@ contract.
 <PasswordRequirements {password} {requirements} />
 ```
 
+## Account Profile And Security Pages
+
+For signed-in account pages, keep the workflow state in host code and compose
+the visible surface directly in Poodle. The stable posture is:
+
+- profile overview in `Card`
+- edit actions in the header area of that card
+- password change as a verify-first flow using `CodeInput`, `TextInput`,
+  `FormActions`, and `Callout`
+- passkeys as a compact list with inline rename/delete actions plus
+  `AlertDialog` confirmation
+- 2FA setup in a `Card` with QR/manual details and `CodeInput`
+
+```svelte
+<Card>
+  <header class="account-header">
+    <h2>Profile</h2>
+    <Button variant="ghost">Edit profile</Button>
+  </header>
+  <!-- detail items or local overview content -->
+</Card>
+```
+
+Do not introduce a second shared auth-shell wrapper for account security pages.
+These are app-local screens built from Poodle primitives plus host-owned auth
+hooks and API commands.
+
 ## What Stays Out
 
 - token/session orchestration
@@ -111,6 +138,7 @@ contract.
 - password-policy fetching and fallback defaults
 - route redirects after completion
 - app vocabulary and branding
+- signed-in account profile/security orchestration
 
 Those remain host-owned unless a real shared workflow shell still earns its
 place outside Poodle.
