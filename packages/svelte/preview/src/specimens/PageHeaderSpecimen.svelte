@@ -1,18 +1,19 @@
+<script context="module" lang="ts">
+  export const noSurface = true;
+</script>
+
 <script lang="ts">
   import { PageHeader } from "@poodle/svelte-composites";
-  import { Eyebrow, IconButton, MetaBar, Pill, Separator, TimeAgo } from "@poodle/svelte-primitives";
+  import { IconButton, MetaBar, Pill, TimeAgo } from "@poodle/svelte-primitives";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="specimen">
-  <div class="specimen__group">
-    <Eyebrow>Basic</Eyebrow>
+  <SpecimenGroup label="Basic">
     <PageHeader title="Components" subtitle="Browse and manage your component library." />
-  </div>
+  </SpecimenGroup>
 
-  <Separator />
-
-  <div class="specimen__group">
-    <Eyebrow>With back link and actions</Eyebrow>
+  <SpecimenGroup label="With back link and actions">
     <PageHeader
       title="Media Library"
       subtitle="Browse, review, and manage uploaded files."
@@ -24,31 +25,22 @@
         <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
       {/snippet}
     </PageHeader>
-  </div>
+  </SpecimenGroup>
 
-  <Separator />
-
-  <div class="specimen__group">
-    <Eyebrow>With eyebrow and actions</Eyebrow>
+  <SpecimenGroup label="With eyebrow and actions">
     <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
       {#snippet actions()}
         <IconButton icon="code" ariaLabel="View source" variant="secondary" />
         <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
       {/snippet}
     </PageHeader>
-  </div>
+  </SpecimenGroup>
 
-  <Separator />
-
-  <div class="specimen__group">
-    <Eyebrow>With count</Eyebrow>
+  <SpecimenGroup label="With count">
     <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
-  </div>
+  </SpecimenGroup>
 
-  <Separator />
-
-  <div class="specimen__group">
-    <Eyebrow>Section and banner</Eyebrow>
+  <SpecimenGroup label="Section and banner">
     <PageHeader
       section="Scheduled Task"
       title="Nightly Sync"
@@ -63,12 +55,9 @@
         <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
       {/snippet}
     </PageHeader>
-  </div>
+  </SpecimenGroup>
 
-  <Separator />
-
-  <div class="specimen__group">
-    <Eyebrow>With MetaBar</Eyebrow>
+  <SpecimenGroup label="With MetaBar">
     <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
       {#snippet meta()}
         <MetaBar>
@@ -82,27 +71,18 @@
         <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" />
       {/snippet}
     </PageHeader>
-  </div>
+  </SpecimenGroup>
 
-  <Separator />
-
-  <div class="specimen__group">
-    <Eyebrow>Title only</Eyebrow>
+  <SpecimenGroup label="Title only">
     <PageHeader title="Settings" />
-  </div>
+  </SpecimenGroup>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .specimen__group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .meta-text {
