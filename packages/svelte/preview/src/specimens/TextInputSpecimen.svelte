@@ -14,6 +14,7 @@
   let workspaceError: string | null = null;
   let slug = "";
   let slugStatus: InputValidationStatus = "idle";
+  let searchQuery = "";
 
   async function validateSlug(value: string) {
     await new Promise((resolve) => setTimeout(resolve, 250));
@@ -151,6 +152,42 @@
   </div>
 
   <div class="specimen__group">
+    <Eyebrow>Search</Eyebrow>
+    <TextInput
+      id="search-field"
+      type="search"
+      placeholder="Search..."
+      value={searchQuery}
+      on:valueChange={(event) => (searchQuery = event.detail.value)}
+      on:clear={() => (searchQuery = "")}
+    />
+    {#if searchQuery}
+      <p class="specimen__hint">Query: <strong>{searchQuery}</strong></p>
+    {/if}
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Prefix and suffix</Eyebrow>
+    <TextInput
+      id="price-field"
+      prefix="$"
+      suffix="USD"
+      placeholder="0.00"
+      inputMode="decimal"
+    />
+  </div>
+
+  <div class="specimen__group">
+    <Eyebrow>Suffix only</Eyebrow>
+    <TextInput
+      id="weight-field"
+      suffix="kg"
+      placeholder="0"
+      inputMode="numeric"
+    />
+  </div>
+
+  <div class="specimen__group">
     <Eyebrow>Disabled</Eyebrow>
     <Field id="disabled-field" label="API key">
       <TextInput
@@ -230,5 +267,11 @@
     font-family: var(--poodle-typography-code-family);
     color: var(--poodle-color-text-muted);
     min-width: 6rem;
+  }
+
+  .specimen__hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
   }
 </style>
