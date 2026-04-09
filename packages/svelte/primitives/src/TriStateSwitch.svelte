@@ -95,9 +95,9 @@
     --poodle-tri-state-excluded-color: var(--poodle-color-status-danger);
     --poodle-tri-state-default-color: var(--poodle-color-text-primary);
     --poodle-tri-state-included-color: var(--poodle-color-status-success);
-    --poodle-tri-state-excluded-track: color-mix(in srgb, var(--poodle-tri-state-excluded-color) 18%, var(--poodle-color-background-surface));
-    --poodle-tri-state-default-track: color-mix(in srgb, var(--poodle-tri-state-default-color) 10%, var(--poodle-color-background-surface));
-    --poodle-tri-state-included-track: color-mix(in srgb, var(--poodle-tri-state-included-color) 18%, var(--poodle-color-background-surface));
+    --poodle-tri-state-excluded-track: color-mix(in srgb, var(--poodle-tri-state-excluded-color) 14%, color-mix(in srgb, var(--poodle-color-background-canvas) 70%, black));
+    --poodle-tri-state-default-track: color-mix(in srgb, var(--poodle-tri-state-default-color) 8%, color-mix(in srgb, var(--poodle-color-background-canvas) 70%, black));
+    --poodle-tri-state-included-track: color-mix(in srgb, var(--poodle-tri-state-included-color) 14%, color-mix(in srgb, var(--poodle-color-background-canvas) 70%, black));
     --poodle-tri-state-height: var(--poodle-size-control-height);
     --poodle-tri-state-x: var(--poodle-space-control-x);
     --poodle-tri-state-track-inset: 0.125rem;
