@@ -536,6 +536,14 @@
     grid-template-rows: 1fr;
   }
 
+  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"] {
+    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
   /* Side docks collapse to narrow icon strip */
   .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="left"],
   .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="right"] {
