@@ -504,7 +504,6 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    min-height: var(--poodle-size-control-height);
     padding: 0.1875rem 0.5rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
