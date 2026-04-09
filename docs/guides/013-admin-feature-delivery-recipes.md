@@ -224,6 +224,23 @@ Rules for this pattern:
 - use a `DataTable` browse surface for the queue body; only introduce a
   dedicated detail route when the review workflow truly needs drill-in context
 
+## Review Detail Pattern
+
+Use this when the queue has a drill-in route for one submission, review item,
+or claimed work unit.
+
+Rules for this pattern:
+
+- keep the same `PageHeader` shell as other admin detail pages, with actions in
+  the header for claim, release, retry, refresh, or continue-work behavior
+- use a `MetaBar` for the stable queue metadata like ID, status, and source
+- start the body with one carded summary block using `DetailSection` and
+  `DetailItem` for identifiers, timestamps, and current claim state
+- follow that summary with app-owned cards for answer content, AI results,
+  reviewer forms, or scoring history
+- treat richer content-inspection routes as local exceptions; do not force every
+  assessment or workflow detail page into the same minimal ops-detail shape
+
 ## Ops Detail Pattern
 
 Use this when a system page drills into one job, scheduled task, or operational
