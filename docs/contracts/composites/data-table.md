@@ -137,7 +137,7 @@ type TablePagination = {
 | `rowActionLabel` | `string` | `"Open"` | no | label for row action buttons |
 | `showRowActions` | `boolean` | `true` | no | row action column visibility |
 | `rowActions` | `TableRowAction[] \| ((row: TableRow) => TableRowAction[])` | `[]` | no | richer per-row action model |
-| `expandedRowWhen` | `(row: TableRow) => boolean` | `() => false` | no | shows the `expandedRow` slot for matching rows |
+| `expandedRowIds` | `string[]` | `[]` | no | shows the `expandedRow` slot for rows whose ids are present |
 | `emptyMessage` | `string` | `"No rows match the current view."` | no | empty posture copy |
 | `ariaLabel` | `string` | `"Data table"` | no | accessible table name |
 | `hiddenColumnIds` | `string[]` | `[]` | no | ids of columns currently hidden |

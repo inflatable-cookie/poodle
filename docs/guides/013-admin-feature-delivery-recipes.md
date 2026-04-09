@@ -23,8 +23,10 @@ without rebuilding Underlay-era wrapper layers?"
 - browse pages: `ListContainer` + `FilterToolbar`
 - detail pages: `PageHeader` + `MetaBar` + `Tabs`
 - modal workflows: `FormDialog` or `AlertDialog`
-- forms: `Field`, `TextInput`, `Select`, `TextArea`, `FormActions`
+- forms: `Field`, `TextInput`, `Select`, `FormActions`
 - status and compact metadata: `Pill`, `Code`, `MetaItem`
+- diagnostics and operational browse pages: `PageHeader` + stats cards +
+  filter control + `DataTable`
 
 ## Reference Implementations
 
@@ -81,6 +83,98 @@ list/detail/edit/tasks routes plus the user and media detail flows.
 />
 ```
 
+## Diagnostics Browse Pattern
+
+Use this when the page is primarily about operational inspection and safe
+actions rather than entity CRUD.
+
+```svelte
+<PageHeader title="Job Queue" backHref="/system" backLabel="Back to system">
+  {#snippet actions()}
+    <Button type="button" variant="ghost" on:click={() => pageData.refetch()}>
+      Refresh
+    </Button>
+  {/snippet}
+</PageHeader>
+
+<div class="stats-grid">
+  <Card>{/* pending/running/failed/recent cards */}</Card>
+</div>
+
+<Field id="system-jobs-status-filter" label="Status">
+  <Select id="system-jobs-status-filter" bind:value={statusFilter} items={statusOptions} />
+</Field>
+
+<DataTable
+  {columns}
+  {rows}
+  expandedRowIds={rows.filter((row) => row.data.errorMessage).map((row) => row.id)}
+  emptyMessage="No jobs found"
+  showRowActions={false}
+/>
+```
+
+Rules for this pattern:
+
+- use `PageHeader` rather than a custom system-page shell
+- keep summary metrics as host-owned cards above the table
+- keep the filter control simple and local unless multiple filters justify a
+  full `FilterToolbar`
+- use `expandedRowIds`, not legacy row-predicate props, when rows expose inline
+  diagnostics like error text or fetched detail
+- keep retry/cancel/refresh behavior in host code; only the visible layout is
+  shared
+
+## Trash Recovery Pattern
+
+Use this when the primary task is recovering or purging soft-deleted records.
+
+```svelte
+<PageHeader title="Media Trash" backHref="/media" backLabel="Back to media" />
+
+<p class="trash-info">
+  Items in trash can be restored or permanently deleted. Permanently deleted
+  items cannot be recovered.
+</p>
+
+<ListGrid minItemWidth={26}>
+  <ListCard title={item.title} href={`/media/${item.id}`}>
+    <svelte:fragment slot="leading">
+      <MediaThumbnail kind={item.kind} presentation="compact" />
+    </svelte:fragment>
+
+    <svelte:fragment slot="trailing">
+      <Pill tone="neutral" appearance="badge">{item.kindLabel}</Pill>
+      <Pill tone="danger" appearance="badge">Deleted</Pill>
+    </svelte:fragment>
+
+    <span slot="footer">Deleted {item.deletedAtLabel}</span>
+
+    <div slot="actions" class="trash-actions">
+      <Button type="button" variant="ghost" size="sm">Restore</Button>
+      <Button type="button" variant="ghost" tone="danger" size="sm">Delete</Button>
+    </div>
+  </ListCard>
+</ListGrid>
+
+<AlertDialog
+  title="Permanently delete media?"
+  confirmLabel="Delete forever"
+  tone="danger"
+/>
+```
+
+Rules for this pattern:
+
+- use `ListGrid` for card-based trash pages instead of ad hoc grid markup
+- show the reversible/irreversible lifecycle note above the grid, not buried in
+  dialog copy
+- keep `Restore` as the fast action and `Delete` guarded by `AlertDialog`
+- keep item metadata compact: kind, deleted state, deleted date, and one stable
+  identifier or title
+- keep purge wording and permissions app-owned even when the visible layout is
+  shared
+
 ## Rules
 
 - keep routing, API commands, and navigation context in host code
@@ -108,6 +202,7 @@ Poodle.
 - [Form Layout And Field Recipes](./001-form-layout-and-field-recipes.md)
 - [List And Filter Recipes](./003-list-and-filter-recipes.md)
 - [Dialog And Detail Recipes](./004-dialog-and-detail-recipes.md)
+- [Admin App Shell Recipes](./014-admin-app-shell-recipes.md)
 
 ## Next Task
 
