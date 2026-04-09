@@ -248,3 +248,11 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "status-bar": StatusBarSpecimen,
   "split-view": SplitViewSpecimen,
 };
+
+/** Specimens that opt out of the single-Surface wrapper in ComponentPage.
+ *  These use SpecimenGroup internally to provide per-example Surfaces. */
+export const noSurfaceSlugs = new Set([
+  "field-set",
+  "page-header",
+  "dock-region",
+]);

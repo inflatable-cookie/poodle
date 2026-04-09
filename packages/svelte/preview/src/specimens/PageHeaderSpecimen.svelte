@@ -1,7 +1,3 @@
-<script context="module" lang="ts">
-  export const noSurface = true;
-</script>
-
 <script lang="ts">
   import { PageHeader } from "@poodle/svelte-composites";
   import { IconButton, MetaBar, Pill, TimeAgo } from "@poodle/svelte-primitives";

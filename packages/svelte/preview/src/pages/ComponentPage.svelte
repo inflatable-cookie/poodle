@@ -3,11 +3,13 @@
   import UsageDocs from "../components/UsageDocs.svelte";
   import type { ComponentEntry } from "../component-registry";
   import { componentDocsMap } from "../component-docs";
+  import { noSurfaceSlugs } from "../specimens/registry";
 
   export let entry: ComponentEntry;
   export let specimenComponent: any = null;
 
   $: docs = componentDocsMap[entry.slug] ?? null;
+  $: noSurface = noSurfaceSlugs.has(entry.slug);
 </script>
 
 <article class="component-page">
@@ -25,7 +27,7 @@
   {#if specimenComponent}
     <section class="component-page__section">
       <h2 class="component-page__section-title">Live demo</h2>
-      {#if specimenComponent.noSurface}
+      {#if noSurface}
         <svelte:component this={specimenComponent} />
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
