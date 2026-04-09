@@ -15,7 +15,7 @@
       title="Media Library"
       subtitle="Browse, review, and manage uploaded files."
       backHref="/dashboard"
-      backLabel="Back to dashboard"
+      backLabel="Dashboard"
     >
       {#snippet actions()}
         <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
@@ -36,7 +36,7 @@
 
   <div class="specimen__group">
     <Eyebrow>With count</Eyebrow>
-    <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Back to dashboard" />
+    <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
   </div>
 
   <div class="specimen__group">
@@ -45,7 +45,7 @@
       section="Scheduled Task"
       title="Nightly Sync"
       backHref="/system/tasks"
-      backLabel="Back to tasks"
+      backLabel="Tasks"
       backIsContextual={true}
       bannerMessage="This task is currently paused."
       bannerTone="warning"
