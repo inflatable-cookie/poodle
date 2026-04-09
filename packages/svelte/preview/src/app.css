@@ -56,7 +56,7 @@ input:focus-visible {
 .app-shell {
   --poodle-surface: var(--poodle-color-background-canvas);
   --poodle-treatment-interactive-radius: var(--poodle-radius-control);
-  --poodle-treatment-interactive-fill: color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 78%, var(--poodle-color-background-elevated));
+  --poodle-treatment-interactive-fill: color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary));
   --poodle-treatment-interactive-fill-active: color-mix(
     in srgb,
     var(--poodle-color-accent-base) 24%,

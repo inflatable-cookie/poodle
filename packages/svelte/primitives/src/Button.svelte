@@ -155,16 +155,16 @@
   .button {
     --poodle-button-fill: var(
       --poodle-treatment-interactive-fill,
-      color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 78%, var(--poodle-color-background-elevated))
+      color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary))
     );
     --poodle-button-fill-hover: var(
       --poodle-treatment-interactive-fill-active,
-      color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 62%, var(--poodle-color-background-elevated))
+      color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 80%, var(--poodle-color-text-primary))
     );
     --poodle-button-fill-active: color-mix(
       in srgb,
-      var(--poodle-surface, var(--poodle-color-background-surface)) 52%,
-      var(--poodle-color-background-elevated)
+      var(--poodle-surface, var(--poodle-color-background-surface)) 74%,
+      var(--poodle-color-text-primary)
     );
     --poodle-button-border: var(
       --poodle-treatment-interactive-border,
