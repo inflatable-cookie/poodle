@@ -21,6 +21,9 @@
   export let ariaLabel = "Markdown editor";
   export let minHeight = "12rem";
   export let mode: "edit" | "preview" | "split" = "edit";
+  /** Custom markdown-to-HTML renderer. When provided, replaces the built-in
+   *  fallback. Use this to plug in a real parser (marked, remark, etc.). */
+  export let renderHtml: ((markdown: string) => string) | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
@@ -73,39 +76,73 @@
     dispatch("change", { value });
   }
 
-  /** Simple markdown-to-HTML (safe subset, no raw HTML passthrough) */
-  function renderMarkdown(src: string): string {
-    let html = src
-      // Escape HTML
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      // Headings
-      .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-      .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-      .replace(/^# (.+)$/gm, "<h1>$1</h1>")
-      // Bold / Italic
-      .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      // Inline code
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      // Links
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-      // Images
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
-      // Blockquotes
-      .replace(/^&gt; (.+)$/gm, "<blockquote>$1</blockquote>")
-      // Unordered list items
-      .replace(/^[-*] (.+)$/gm, "<li>$1</li>")
-      // Horizontal rule
-      .replace(/^---$/gm, "<hr />")
-      // Line breaks
-      .replace(/\n\n/g, "</p><p>")
-      .replace(/\n/g, "<br />");
+  /** Built-in minimal markdown-to-HTML fallback. Produces valid block
+   *  structure (paragraphs, lists, blockquotes). For production use,
+   *  provide a `renderHtml` prop with a proper parser. */
+  function fallbackRender(src: string): string {
+    const escape = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    return `<p>${html}</p>`;
+    const inline = (s: string) =>
+      s
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    const blocks = escape(src).split(/\n{2,}/);
+    const out: string[] = [];
+
+    for (const block of blocks) {
+      const trimmed = block.trim();
+      if (!trimmed) continue;
+
+      // Horizontal rule
+      if (/^---+$/.test(trimmed)) {
+        out.push("<hr />");
+        continue;
+      }
+
+      // Heading
+      const headingMatch = trimmed.match(/^(#{1,3}) (.+)$/);
+      if (headingMatch) {
+        const level = headingMatch[1].length;
+        out.push(`<h${level}>${inline(headingMatch[2])}</h${level}>`);
+        continue;
+      }
+
+      // Unordered list (consecutive lines starting with - or *)
+      const lines = trimmed.split("\n");
+      if (lines.every((l) => /^[-*] /.test(l))) {
+        const items = lines.map((l) => `<li>${inline(l.replace(/^[-*] /, ""))}</li>`).join("");
+        out.push(`<ul>${items}</ul>`);
+        continue;
+      }
+
+      // Ordered list
+      if (lines.every((l) => /^\d+\. /.test(l))) {
+        const items = lines.map((l) => `<li>${inline(l.replace(/^\d+\. /, ""))}</li>`).join("");
+        out.push(`<ol>${items}</ol>`);
+        continue;
+      }
+
+      // Blockquote (consecutive lines starting with >)
+      if (lines.every((l) => /^&gt; /.test(l) || /^&gt;$/.test(l))) {
+        const content = lines.map((l) => l.replace(/^&gt; ?/, "")).join("<br />");
+        out.push(`<blockquote>${inline(content)}</blockquote>`);
+        continue;
+      }
+
+      // Paragraph
+      out.push(`<p>${inline(lines.join("<br />"))}</p>`);
+    }
+
+    return out.join("");
   }
+
+  $: previewHtml = renderHtml ? renderHtml(value) : fallbackRender(value);
 
   const toolbarActions = [
     { label: "Bold", icon: "bold", action: () => insertMarkdown("**", "**") },
@@ -182,7 +219,7 @@
       {#if mode !== "edit"}
         <div class="md-editor__preview" aria-label="Preview">
           {#if value.trim()}
-            {@html renderMarkdown(value)}
+            {@html previewHtml}
           {:else}
             <p class="md-editor__preview-empty">Nothing to preview</p>
           {/if}
@@ -420,10 +457,14 @@
     color: var(--poodle-color-text-secondary);
   }
 
+  .md-editor__preview :global(ul),
+  .md-editor__preview :global(ol) {
+    margin: 0 0 0.5rem;
+    padding-left: 1.25rem;
+  }
+
   .md-editor__preview :global(li) {
     margin: 0 0 0.125rem;
-    padding-left: 0.25rem;
-    list-style: disc inside;
   }
 
   .md-editor__preview :global(hr) {
