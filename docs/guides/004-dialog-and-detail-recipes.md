@@ -80,6 +80,36 @@ For create or edit actions launched from an existing detail route:
 This keeps the visible modal shell stable while leaving mutation sequencing and
 detail-page updates app-owned.
 
+## Destructive Confirm Flows
+
+### Default posture
+
+- use `AlertDialog` for destructive confirm and guarded irreversible actions
+- keep the title action-specific, for example `Permanently delete version?`
+- keep the description focused on the consequence, not generic warning text
+- use `itemLabel` and `itemValue` to show the affected record or version
+  identifier instead of hand-rolling local inline markup
+- use `tone="warning"` for guarded non-destructive state changes like activate,
+  promote, or restore
+- use `tone="danger"` for irreversible delete and purge actions
+- keep success handling, refetch, and local state updates in host code
+
+### Media-detail confirm example
+
+```svelte
+<AlertDialog
+  bind:open={deleteDialogOpen}
+  title="Permanently delete version?"
+  description="This will permanently delete this version and its stored file. This cannot be undone."
+  itemLabel="Version"
+  itemValue={selectedVersionLabel}
+  confirmLabel="Permanently delete version"
+  tone="danger"
+  onConfirm={confirmDelete}
+  onCancel={cancelDelete}
+/>
+```
+
 ## Detail Pages
 
 ### Default posture
