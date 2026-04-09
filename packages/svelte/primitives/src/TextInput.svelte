@@ -591,11 +591,12 @@
     --poodle-text-input-padding-block: var(--poodle-space-control-y);
     --poodle-text-input-adornment-gap: var(--poodle-space-inline-sm);
     --poodle-text-input-height-adjust: 0rem;
-    --poodle-text-input-inline-adjust: 0rem;
-    --poodle-text-input-block-adjust: 0rem;
+    --poodle-text-input-density-inline-adjust: 0rem;
+    --poodle-text-input-density-block-adjust: 0rem;
+    --poodle-text-input-size-inline-adjust: 0rem;
+    --poodle-text-input-size-block-adjust: 0rem;
     display: flex;
     align-items: center;
-    gap: var(--poodle-text-input-adornment-gap);
     min-height: calc(var(--poodle-size-control-height) + var(--poodle-text-input-height-adjust));
     border: 0.0625rem solid var(--poodle-text-input-border);
     border-radius: var(--poodle-text-input-radius);
@@ -649,9 +650,10 @@
   }
 
   .text-input__field {
-    display: flex;
+    position: relative;
     flex: 1;
     min-width: 0;
+    display: flex;
     align-items: center;
   }
 
@@ -670,6 +672,9 @@
   }
 
   .text-input__affordance {
+    position: absolute;
+    top: 0;
+    bottom: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -677,21 +682,26 @@
     font-family: var(--poodle-typography-code-family);
     font-size: var(--poodle-icon-size-default);
     pointer-events: none;
-    flex: 0 0 auto;
   }
 
   .text-input__affordance--leading {
-    margin-inline-start: var(--poodle-text-input-padding-inline);
+    left: var(--poodle-text-input-padding-inline);
+  }
+
+  .text-input__affordance--trailing {
+    right: var(--poodle-text-input-padding-inline);
   }
 
   .text-input__validation-indicator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: var(--poodle-text-input-padding-inline);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--poodle-color-icon-muted);
     pointer-events: none;
-    flex: 0 0 auto;
-    margin-inline-end: var(--poodle-text-input-padding-inline);
   }
 
   .text-input__validation-indicator--pending {
@@ -742,6 +752,10 @@
 
   /* Search clear button */
   .text-input__clear {
+    position: absolute;
+    top: 50%;
+    right: var(--poodle-text-input-padding-inline);
+    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -752,15 +766,14 @@
     background: transparent;
     color: var(--poodle-color-icon-muted);
     cursor: pointer;
-    flex: 0 0 auto;
     border-radius: calc(
       var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control)) - 0.0625rem
     );
   }
 
-  .text-input__field > .text-input__clear:last-child,
-  .text-input__field > .text-input__affordance--trailing:last-child {
-    margin-inline-end: var(--poodle-text-input-padding-inline);
+  /* When clear + validation both present, offset clear button inward */
+  .text-input__field > .text-input__clear + .text-input__validation-indicator {
+    right: calc(var(--poodle-text-input-padding-inline) + var(--poodle-icon-size-default) + 0.25rem);
   }
 
   .text-input__clear:hover {
@@ -779,14 +792,14 @@
   /* Density variants */
   .text-input[data-density="compact"] {
     --poodle-text-input-adornment-gap: calc(var(--poodle-space-inline-sm) - 0.125rem);
-    --poodle-text-input-inline-adjust: -0.125rem;
-    --poodle-text-input-block-adjust: -0.125rem;
+    --poodle-text-input-density-inline-adjust: -0.125rem;
+    --poodle-text-input-density-block-adjust: -0.125rem;
   }
 
   .text-input[data-density="comfortable"] {
     --poodle-text-input-adornment-gap: calc(var(--poodle-space-inline-sm) + 0.125rem);
-    --poodle-text-input-inline-adjust: 0.125rem;
-    --poodle-text-input-block-adjust: 0.125rem;
+    --poodle-text-input-density-inline-adjust: 0.125rem;
+    --poodle-text-input-density-block-adjust: 0.125rem;
   }
 
   /* Multiline (textarea) mode */
@@ -822,7 +835,7 @@
   /* Size variants */
   .text-input[data-size="xs"] {
     --poodle-text-input-height-adjust: -0.5rem;
-    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) - 0.125rem);
+    --poodle-text-input-size-inline-adjust: -0.125rem;
   }
 
   .text-input[data-size="xs"] .text-input__control {
@@ -831,12 +844,12 @@
 
   .text-input[data-size="sm"] {
     --poodle-text-input-height-adjust: -0.375rem;
-    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) - 0.0625rem);
+    --poodle-text-input-size-inline-adjust: -0.0625rem;
   }
 
   .text-input[data-size="lg"] {
     --poodle-text-input-height-adjust: 0.375rem;
-    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) + 0.125rem);
+    --poodle-text-input-size-inline-adjust: 0.125rem;
   }
 
   .text-input[data-size="lg"] .text-input__control {
@@ -845,7 +858,7 @@
 
   .text-input[data-size="xl"] {
     --poodle-text-input-height-adjust: 0.5rem;
-    --poodle-text-input-inline-adjust: calc(var(--poodle-text-input-inline-adjust) + 0.1875rem);
+    --poodle-text-input-size-inline-adjust: 0.1875rem;
   }
 
   .text-input[data-size="xl"] .text-input__control {
@@ -853,7 +866,11 @@
   }
 
   .text-input {
-    --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + var(--poodle-text-input-inline-adjust));
-    --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + var(--poodle-text-input-block-adjust));
+    --poodle-text-input-padding-inline: calc(
+      var(--poodle-space-control-x) + var(--poodle-text-input-density-inline-adjust) + var(--poodle-text-input-size-inline-adjust)
+    );
+    --poodle-text-input-padding-block: calc(
+      var(--poodle-space-control-y) + var(--poodle-text-input-density-block-adjust) + var(--poodle-text-input-size-block-adjust)
+    );
   }
 </style>
