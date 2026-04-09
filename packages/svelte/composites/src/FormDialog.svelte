@@ -17,7 +17,10 @@
   export let success: string | null = null;
   export let ariaLabel: string | null = null;
   export let width: string | null = null;
+  export let columns = 6;
   export let showDefaultActions = true;
+  /** When true, the Dialog body renders the default slot directly with no FormLayout wrapper. */
+  export let bare = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
@@ -87,9 +90,13 @@
     </div>
   {/if}
 
-  <FormLayout {error} {success} columns={1}>
+  {#if bare}
     <slot {submitting} />
-  </FormLayout>
+  {:else}
+    <FormLayout {error} {success} {columns}>
+      <slot {submitting} />
+    </FormLayout>
+  {/if}
 
   <svelte:fragment slot="actions">
     {#if $$slots.actions}
