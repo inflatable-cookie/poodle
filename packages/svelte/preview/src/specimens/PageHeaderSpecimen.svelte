@@ -1,111 +1,108 @@
 <script lang="ts">
   import { PageHeader } from "@poodle/svelte-composites";
-  import { Eyebrow, IconButton, MetaBar, Pill, Surface, TimeAgo } from "@poodle/svelte-primitives";
+  import { Eyebrow, IconButton, MetaBar, Pill, Separator, TimeAgo } from "@poodle/svelte-primitives";
 </script>
 
 <div class="specimen">
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>Basic</Eyebrow>
-      <PageHeader title="Components" subtitle="Browse and manage your component library." />
-    </div>
-  </Surface>
+  <div class="specimen__group">
+    <Eyebrow>Basic</Eyebrow>
+    <PageHeader title="Components" subtitle="Browse and manage your component library." />
+  </div>
 
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>With back link and actions</Eyebrow>
-      <PageHeader
-        title="Media Library"
-        subtitle="Browse, review, and manage uploaded files."
-        backHref="/dashboard"
-        backLabel="Dashboard"
-      >
-        {#snippet actions()}
-          <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
-          <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
-        {/snippet}
-      </PageHeader>
-    </div>
-  </Surface>
+  <Separator />
 
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>With eyebrow and actions</Eyebrow>
-      <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
-        {#snippet actions()}
-          <IconButton icon="code" ariaLabel="View source" variant="secondary" />
-          <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
-        {/snippet}
-      </PageHeader>
-    </div>
-  </Surface>
+  <div class="specimen__group">
+    <Eyebrow>With back link and actions</Eyebrow>
+    <PageHeader
+      title="Media Library"
+      subtitle="Browse, review, and manage uploaded files."
+      backHref="/dashboard"
+      backLabel="Dashboard"
+    >
+      {#snippet actions()}
+        <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
+        <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
+      {/snippet}
+    </PageHeader>
+  </div>
 
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>With count</Eyebrow>
-      <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
-    </div>
-  </Surface>
+  <Separator />
 
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>Section and banner</Eyebrow>
-      <PageHeader
-        section="Scheduled Task"
-        title="Nightly Sync"
-        backHref="/system/tasks"
-        backLabel="Tasks"
-        backIsContextual={true}
-        bannerMessage="This task is currently paused."
-        bannerTone="warning"
-      >
-        {#snippet actions()}
-          <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
-          <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
-        {/snippet}
-      </PageHeader>
-    </div>
-  </Surface>
+  <div class="specimen__group">
+    <Eyebrow>With eyebrow and actions</Eyebrow>
+    <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
+      {#snippet actions()}
+        <IconButton icon="code" ariaLabel="View source" variant="secondary" />
+        <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
+      {/snippet}
+    </PageHeader>
+  </div>
 
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>With MetaBar</Eyebrow>
-      <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
-        {#snippet meta()}
-          <MetaBar>
-            <Pill tone="success" appearance="badge">Active</Pill>
-            <span class="meta-text">Every 6 hours</span>
-            <span class="meta-text">Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
-          </MetaBar>
-        {/snippet}
-        {#snippet actions()}
-          <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
-          <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" />
-        {/snippet}
-      </PageHeader>
-    </div>
-  </Surface>
+  <Separator />
 
-  <Surface>
-    <div class="specimen__card">
-      <Eyebrow>Title only</Eyebrow>
-      <PageHeader title="Settings" />
-    </div>
-  </Surface>
+  <div class="specimen__group">
+    <Eyebrow>With count</Eyebrow>
+    <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
+  </div>
+
+  <Separator />
+
+  <div class="specimen__group">
+    <Eyebrow>Section and banner</Eyebrow>
+    <PageHeader
+      section="Scheduled Task"
+      title="Nightly Sync"
+      backHref="/system/tasks"
+      backLabel="Tasks"
+      backIsContextual={true}
+      bannerMessage="This task is currently paused."
+      bannerTone="warning"
+    >
+      {#snippet actions()}
+        <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
+        <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
+      {/snippet}
+    </PageHeader>
+  </div>
+
+  <Separator />
+
+  <div class="specimen__group">
+    <Eyebrow>With MetaBar</Eyebrow>
+    <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
+      {#snippet meta()}
+        <MetaBar>
+          <Pill tone="success" appearance="badge">Active</Pill>
+          <span class="meta-text">Every 6 hours</span>
+          <span class="meta-text">Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
+        </MetaBar>
+      {/snippet}
+      {#snippet actions()}
+        <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
+        <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" />
+      {/snippet}
+    </PageHeader>
+  </div>
+
+  <Separator />
+
+  <div class="specimen__group">
+    <Eyebrow>Title only</Eyebrow>
+    <PageHeader title="Settings" />
+  </div>
 </div>
 
 <style>
   .specimen {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
-  .specimen__card {
+  .specimen__group {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 0.5rem;
   }
 
   .meta-text {
