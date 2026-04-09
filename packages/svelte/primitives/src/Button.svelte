@@ -170,6 +170,10 @@
       --poodle-treatment-interactive-border,
       var(--poodle-color-border-default)
     );
+    --poodle-button-border-hover: var(
+      --poodle-treatment-interactive-border-active,
+      color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary))
+    );
     --poodle-button-text: var(--poodle-color-text-primary);
     --poodle-button-shadow: var(
       --poodle-treatment-interactive-shadow,
@@ -330,6 +334,7 @@
     --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 24%, var(--poodle-color-background-surface));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 32%, var(--poodle-color-background-surface));
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-danger) 62%, var(--poodle-color-border-default));
     --poodle-button-text: var(--poodle-color-text-primary);
   }
 
@@ -338,6 +343,7 @@
     --poodle-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-status-danger));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 88%, black);
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
+    --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-danger) 72%, black);
     --poodle-button-text: var(--poodle-color-text-inverse);
     --poodle-button-shadow:
       inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
@@ -349,16 +355,14 @@
     --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 12%, transparent);
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent);
     --poodle-button-border: transparent;
+    --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-danger) 28%, transparent);
     --poodle-button-text: var(--poodle-color-status-danger);
     --poodle-button-shadow: none;
   }
 
   .button:hover:not(:disabled) {
     background: var(--poodle-button-fill-hover);
-    border-color: var(
-      --poodle-treatment-interactive-border-active,
-      color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary))
-    );
+    border-color: var(--poodle-button-border-hover);
     box-shadow: var(
       --poodle-treatment-interactive-shadow-active,
       var(--poodle-button-shadow)
