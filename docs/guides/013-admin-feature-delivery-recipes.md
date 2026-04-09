@@ -83,6 +83,24 @@ list/detail/edit/tasks routes plus the user and media detail flows.
 />
 ```
 
+## User Management Pattern
+
+Use this when the admin family needs a user list, user detail route, and
+user edit flow with sessions or activity tabs.
+
+Rules for this pattern:
+
+- keep the list page on the standard browse posture: `PageHeader` + `DataTable`
+- keep the detail page on `PageHeader` + `MetaBar` + `Tabs variant="card"`
+- use badge-style `Pill` status and role chips in both the list and detail
+  shells
+- render the overview tab as one `Card` with `DetailSection` groups for account
+  and security fields
+- keep sessions and activity as separate tabbed `DataTable` surfaces with
+  row-level actions
+- use `SpaFormShell` for edit routes when save vs save-close intent and
+  navigation-context return handling are still useful
+
 ## Diagnostics Browse Pattern
 
 Use this when the page is primarily about operational inspection and safe
