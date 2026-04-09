@@ -614,6 +614,7 @@
   /* Multiline (textarea) mode */
   .text-input--multiline {
     min-height: auto;
+    padding: 0;
   }
 
   .text-input__control--multiline {
