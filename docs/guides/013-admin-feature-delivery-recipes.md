@@ -101,6 +101,48 @@ Rules for this pattern:
 - use `SpaFormShell` for edit routes when save vs save-close intent and
   navigation-context return handling are still useful
 
+## Nested Child Form Pattern
+
+Use this when the route creates or edits a child entity inside a parent detail
+family, like project tasks or module aliases.
+
+```svelte
+<PageHeader
+  title="New Task"
+  backHref={`/projects/${project.id}`}
+  backLabel={`Back to ${project.name}`}
+  subtitle={`For project: ${project.name}`}
+/>
+
+<Card>
+  <form onsubmit={handleSubmit}>
+    <Field id="title" label="Title" required>
+      <TextInput id="title" bind:value={title} />
+    </Field>
+
+    <Field id="description" label="Description">
+      <TextInput id="description" bind:value={description} rows={4} />
+    </Field>
+
+    <FormActions align="end">
+      <Button type="button" variant="secondary">Cancel</Button>
+      <Button type="submit">Save</Button>
+    </FormActions>
+  </form>
+</Card>
+```
+
+Rules for this pattern:
+
+- keep the route on the normal `PageHeader` shell rather than inventing a
+  separate nested-page frame
+- show the parent context in the back link and subtitle so the child route is
+  never visually detached from its parent
+- keep the editable body inside one carded form section
+- use direct `form` + `FormActions` for simple single-submit child flows
+- switch to `SpaFormShell` only when the child route needs save-vs-save-close,
+  delete intent, or navigation-context return orchestration
+
 ## Diagnostics Browse Pattern
 
 Use this when the page is primarily about operational inspection and safe
