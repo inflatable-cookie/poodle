@@ -303,6 +303,7 @@
       --poodle-treatment-interactive-primary-fill-hover,
       color-mix(in srgb, white 12%, var(--poodle-color-accent-base))
     );
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-accent-base) 88%, black);
     --poodle-button-border: var(
       --poodle-treatment-interactive-primary-border,
       color-mix(in srgb, var(--poodle-color-accent-base) 84%, black)
@@ -332,6 +333,7 @@
 
   .button[data-variant="primary"][data-tone="danger"] {
     --poodle-button-fill: var(--poodle-color-status-danger);
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 88%, black);
     --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
     --poodle-button-text: var(--poodle-color-text-inverse);
     --poodle-button-shadow:
@@ -373,16 +375,14 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Pressed/toggle state — direct styles to guarantee override */
+  /* Pressed/toggle state */
   .button[data-pressed="true"] {
-    background: var(--poodle-color-accent-base) !important;
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black) !important;
-    color: #fff !important;
-    box-shadow: none !important;
-  }
-
-  .button[data-pressed="true"]:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, black) !important;
+    --poodle-button-fill: var(--poodle-color-accent-base);
+    --poodle-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-accent-base));
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-accent-base) 88%, black);
+    --poodle-button-border: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
+    --poodle-button-text: #fff;
+    --poodle-button-shadow: none;
   }
 
   .button__label {
