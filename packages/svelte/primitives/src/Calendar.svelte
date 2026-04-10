@@ -298,7 +298,7 @@
   .calendar__weekdays,
   .calendar__week {
     display: grid;
-    grid-template-columns: repeat(7, 2.25rem);
+    grid-template-columns: repeat(7, var(--calendar-cell-size, 2.25rem));
     align-items: center;
   }
 
@@ -434,10 +434,10 @@
   }
 
   /* Size variants */
-  .calendar[data-size="xs"] { width: 14.5rem; }
-  .calendar[data-size="sm"] { width: 16rem; }
-  .calendar[data-size="lg"] { width: 20.5rem; }
-  .calendar[data-size="xl"] { width: 23rem; }
+  .calendar[data-size="xs"] { --calendar-cell-size: 1.75rem; }
+  .calendar[data-size="sm"] { --calendar-cell-size: 2rem; }
+  .calendar[data-size="lg"] { --calendar-cell-size: 2.5rem; }
+  .calendar[data-size="xl"] { --calendar-cell-size: 2.75rem; }
 
   .calendar[data-size="xs"] .calendar__nav {
     width: 1.5rem;
