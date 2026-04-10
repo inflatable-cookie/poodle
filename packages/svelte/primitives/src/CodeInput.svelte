@@ -196,8 +196,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--poodle-size-control-height);
-    height: var(--poodle-size-control-height);
+    width: 2.25rem;
+    height: 2.25rem;
     padding: 0;
     border: 0.0625rem solid var(--code-slot-border, var(--poodle-color-border-default));
     border-radius: var(--poodle-radius-control);
@@ -228,26 +228,26 @@
   }
 
   .code-input[data-size="xs"] .code-input__slot {
-    width: var(--poodle-size-control-height);
-    height: var(--poodle-size-control-height);
+    width: 1.5rem;
+    height: 1.5rem;
     font-size: 0.8125rem;
   }
 
   .code-input[data-size="sm"] .code-input__slot {
-    width: var(--poodle-size-control-height);
-    height: var(--poodle-size-control-height);
+    width: 1.75rem;
+    height: 1.75rem;
     font-size: 0.875rem;
   }
 
   .code-input[data-size="lg"] .code-input__slot {
-    width: var(--poodle-size-control-height);
-    height: var(--poodle-size-control-height);
+    width: 2.75rem;
+    height: 2.75rem;
     font-size: 1.125rem;
   }
 
   .code-input[data-size="xl"] .code-input__slot {
-    width: var(--poodle-size-control-height);
-    height: var(--poodle-size-control-height);
+    width: 3.25rem;
+    height: 3.25rem;
     font-size: 1.25rem;
   }
 
@@ -261,8 +261,8 @@
 
   @media (max-width: 30rem) {
     .code-input__slot {
-      width: var(--poodle-size-control-height);
-      height: var(--poodle-size-control-height);
+      width: 2rem;
+      height: 2rem;
       font-size: 0.9375rem;
     }
 
