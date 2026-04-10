@@ -125,7 +125,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.5rem var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     --poodle-recipe-bulk-fill: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary));
