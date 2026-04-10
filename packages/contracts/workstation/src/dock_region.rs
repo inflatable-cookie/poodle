@@ -12,6 +12,7 @@ pub enum DockTabsPlacement {
 pub struct DockRegionSpec {
     pub edge: DockEdge,
     pub is_collapsed: bool,
+    pub is_collapsible: bool,
     pub tabs_placement: DockTabsPlacement,
     pub items: Vec<PanelTabItem>,
     pub value: Option<String>,
@@ -23,6 +24,7 @@ impl DockRegionSpec {
         Self {
             edge,
             is_collapsed: false,
+            is_collapsible: false,
             tabs_placement: DockTabsPlacement::Edge,
             items,
             value: None,
@@ -32,6 +34,11 @@ impl DockRegionSpec {
 
     pub fn with_collapsed(mut self, is_collapsed: bool) -> Self {
         self.is_collapsed = is_collapsed;
+        self
+    }
+
+    pub fn with_collapsible(mut self, is_collapsible: bool) -> Self {
+        self.is_collapsible = is_collapsible;
         self
     }
 

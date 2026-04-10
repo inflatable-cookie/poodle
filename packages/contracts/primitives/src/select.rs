@@ -19,6 +19,22 @@ impl Default for SelectMode {
     }
 }
 
+/// Visual variant for the Select.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SelectVariant {
+    /// Default variant with border, background, padding, and chevron.
+    Default,
+    /// Ghost variant strips all field chrome (border, background, shadow,
+    /// padding, min-height) and hides the chevron indicator.
+    Ghost,
+}
+
+impl Default for SelectVariant {
+    fn default() -> Self {
+        Self::Default
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SelectSpec {
     pub value: Option<String>,
@@ -41,6 +57,11 @@ pub struct SelectSpec {
     pub freeform: bool,
     /// Message shown when filtering produces no matches.
     pub empty_message: String,
+    /// Visual variant: Default or Ghost.
+    pub variant: SelectVariant,
+    /// Optional minimum width for the dropdown listbox (CSS length string, e.g. "12rem").
+    /// When set, listbox uses `width: max-content` with viewport-aware anchor flipping.
+    pub menu_min_width: Option<String>,
 }
 
 impl Default for SelectSpec {
@@ -62,6 +83,8 @@ impl Default for SelectSpec {
             searchable: false,
             freeform: false,
             empty_message: String::from("No matches"),
+            variant: SelectVariant::default(),
+            menu_min_width: None,
         }
     }
 }
@@ -171,5 +194,17 @@ impl SelectSpec {
             SelectMode::Native => false,
             SelectMode::Auto => self.shows_search_input(),
         }
+    }
+
+    /// Set the visual variant (Default or Ghost).
+    pub fn with_variant(mut self, variant: SelectVariant) -> Self {
+        self.variant = variant;
+        self
+    }
+
+    /// Set the dropdown listbox minimum width (CSS length string).
+    pub fn with_menu_min_width(mut self, width: impl Into<String>) -> Self {
+        self.menu_min_width = Some(width.into());
+        self
     }
 }

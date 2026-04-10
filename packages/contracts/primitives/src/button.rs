@@ -17,6 +17,11 @@ pub struct ButtonSpec {
     pub label: Option<String>,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Controlled toggle state. When non-null, button acts as a toggle with
+    /// `aria-pressed`. Non-primary variants get accent fill when pressed.
+    pub pressed: Option<bool>,
+    /// Initial pressed state for uncontrolled toggle mode.
+    pub default_pressed: bool,
 }
 
 impl Default for ButtonSpec {
@@ -35,6 +40,8 @@ impl Default for ButtonSpec {
             label: None,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            pressed: None,
+            default_pressed: false,
         }
     }
 }
@@ -181,5 +188,27 @@ impl ButtonSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+
+    /// Set the controlled toggle pressed state.
+    pub fn with_pressed(mut self, pressed: bool) -> Self {
+        self.pressed = Some(pressed);
+        self
+    }
+
+    /// Set the initial uncontrolled pressed state.
+    pub fn with_default_pressed(mut self, default_pressed: bool) -> Self {
+        self.default_pressed = default_pressed;
+        self
+    }
+
+    /// Returns true when button is in toggle mode (pressed non-null or default_pressed set).
+    pub fn is_toggle_mode(&self) -> bool {
+        self.pressed.is_some() || self.default_pressed
+    }
+
+    /// Current pressed state for toggle-mode buttons.
+    pub fn current_pressed(&self) -> bool {
+        self.pressed.unwrap_or(self.default_pressed)
     }
 }
