@@ -214,25 +214,6 @@
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .icon-button[data-size="xs"] {
-    width: calc(var(--poodle-size-control-height) - 0.5rem);
-    height: calc(var(--poodle-size-control-height) - 0.5rem);
-  }
-
-  .icon-button[data-size="sm"] {
-    width: calc(var(--poodle-size-control-height) - 0.25rem);
-    height: calc(var(--poodle-size-control-height) - 0.25rem);
-  }
-
-  .icon-button[data-size="lg"] {
-    width: calc(var(--poodle-size-control-height) + 0.375rem);
-    height: calc(var(--poodle-size-control-height) + 0.375rem);
-  }
-
-  .icon-button[data-size="xl"] {
-    width: calc(var(--poodle-size-control-height) + 0.5rem);
-    height: calc(var(--poodle-size-control-height) + 0.5rem);
-  }
 
   .icon-button[data-variant="primary"] {
     --poodle-icon-button-fill: var(
