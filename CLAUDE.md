@@ -41,6 +41,14 @@ The contract defines:
 7. ☐ Focus ring implemented where contract requires it
 8. ☐ ARIA attributes applied (role, aria-label, aria-expanded, etc.)
 
+### Size And Density Contract
+
+Size and density are orthogonal axes:
+- **Size** controls intrinsic dimensions: height, vertical padding, font-size, icon-size, border-radius. Size changes make a component physically larger or smaller.
+- **Density** controls spacing between siblings: horizontal padding, gaps between items, margins between list rows. Density changes make a layout tighter or looser without changing component height.
+
+**Density must never affect vertical padding or component height.** If a density variant overrides `padding-top`, `padding-bottom`, `padding-block`, `min-height`, or `height`, that is a bug — those properties belong to size variants. The only exception is when vertical padding has a distinct compositional meaning for density on a case-by-case basis (e.g. a panel's internal vertical padding between sections), which must be explicitly justified.
+
 ### Token Resolution Is Mandatory
 
 Components must resolve their visual properties from the semantic token system, not hardcode values:
