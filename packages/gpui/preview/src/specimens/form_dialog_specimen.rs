@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_gpui_components::{FormDialog, Field, TextInput, Eyebrow};
-use poodle_primitives::{TextInputSpec, EyebrowSpec};
+use poodle_gpui_components::{Button, Eyebrow, Field, FormDialog, TextInput};
+use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, TextInputSpec};
 use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -74,6 +74,89 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         theme,
                                     ).with_id("fd-name-sub")
                                 )
+                        )
+                )
+        )
+
+        // -- Shell mode with custom actions --
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Shell mode with custom actions"), theme))
+                .child(
+                    FormDialog::new(theme)
+                        .title("Edit workspace settings")
+                        .subtitle("Update shared defaults for this workspace.")
+                        .show_default_actions(false)
+                        .with_child(
+                            Field::new("fd-ws-name", "Workspace name", theme)
+                                .with_control(
+                                    TextInput::from_spec(
+                                        TextInputSpec::new().with_value("Northstar"),
+                                        theme,
+                                    ).with_id("fd-ws-name")
+                                )
+                        )
+                        .with_child(
+                            Field::new("fd-ws-role", "Default role", theme)
+                                .with_control(
+                                    TextInput::from_spec(
+                                        TextInputSpec::new().with_value("editor"),
+                                        theme,
+                                    ).with_id("fd-ws-role")
+                                )
+                        )
+                        .with_actions(
+                            div().flex().gap(px(8.0)).justify_end()
+                                .child(
+                                    Button::from_spec(
+                                        ButtonSpec::new()
+                                            .with_variant(ButtonVariant::Ghost)
+                                            .with_label("Cancel"),
+                                        theme,
+                                    )
+                                    .with_id("fd-shell-cancel")
+                                )
+                                .child(
+                                    Button::from_spec(
+                                        ButtonSpec::new()
+                                            .with_variant(ButtonVariant::Secondary)
+                                            .with_tone(ButtonTone::Danger)
+                                            .with_label("Reset defaults"),
+                                        theme,
+                                    )
+                                    .with_id("fd-shell-reset")
+                                )
+                                .child(
+                                    Button::from_spec(
+                                        ButtonSpec::new()
+                                            .with_variant(ButtonVariant::Primary)
+                                            .with_label("Save changes"),
+                                        theme,
+                                    )
+                                    .with_id("fd-shell-save")
+                                )
+                        )
+                )
+        )
+
+        // -- Bare mode (no FormLayout wrapper) --
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Bare mode (no FormLayout wrapper)"), theme))
+                .child(
+                    FormDialog::new(theme)
+                        .title("Quick search")
+                        .subtitle("Type to search across the workspace.")
+                        .bare(true)
+                        .show_default_actions(false)
+                        .with_child(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_placeholder("Search components, pages, docs\u{2026}")
+                                    .with_input_type("search"),
+                                theme,
+                            )
+                            .with_id("fd-bare-search")
                         )
                 )
         )
