@@ -23,7 +23,8 @@
       showSelectAll
       {allSelected}
       on:action={(e) => (lastAction = e.detail.id)}
-      on:selectAll={() => (allSelected = !allSelected)}
+      on:selectAll={() => (allSelected = true)}
+      on:clear={() => (allSelected = false)}
     />
     {#if lastAction}
       <p class="specimen__hint">Last action: <strong>{lastAction}</strong></p>
