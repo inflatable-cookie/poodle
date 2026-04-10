@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CollapsibleSpec, EyebrowSpec};
+use poodle_primitives::{CollapsibleSpec, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{Collapsible, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -103,5 +103,69 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child(disabled_collapsible)
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Xs size"),
+                                theme,
+                            ).with_id("size-xs").size(ControlSize::Xs)
+                        )
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Sm size"),
+                                theme,
+                            ).with_id("size-sm").size(ControlSize::Sm)
+                        )
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Md size"),
+                                theme,
+                            ).with_id("size-md").size(ControlSize::Md)
+                        )
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Lg size"),
+                                theme,
+                            ).with_id("size-lg").size(ControlSize::Lg)
+                        )
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Xl size"),
+                                theme,
+                            ).with_id("size-xl").size(ControlSize::Xl)
+                        )
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Compact"),
+                                theme,
+                            ).with_id("density-compact").with_density(ControlDensity::Compact)
+                        )
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Default"),
+                                theme,
+                            ).with_id("density-default").with_density(ControlDensity::Default)
+                        )
+                        .child(
+                            Collapsible::from_spec(
+                                CollapsibleSpec::new().with_title("Comfortable"),
+                                theme,
+                            ).with_id("density-comfortable").with_density(ControlDensity::Comfortable)
+                        )
+                )
         )
 }

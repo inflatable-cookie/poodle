@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ColorPickerSpec, ColorInputMode, EyebrowSpec};
+use poodle_primitives::{ColorPickerSpec, ColorInputMode, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{ColorPicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -173,6 +173,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("disabled")
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("size-xs").size(ControlSize::Xs))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("size-sm").size(ControlSize::Sm))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("size-md").size(ControlSize::Md))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("size-lg").size(ControlSize::Lg))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("size-xl").size(ControlSize::Xl))
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("density-compact").with_density(ControlDensity::Compact))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("density-default").with_density(ControlDensity::Default))
+                        .child(ColorPicker::from_spec(
+                            ColorPickerSpec::new().with_value("#6366f1"), theme,
+                        ).with_id("density-comfortable").with_density(ControlDensity::Comfortable))
                 )
         )
 }

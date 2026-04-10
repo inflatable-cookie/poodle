@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CallOutSpec, StatusTone, EyebrowSpec};
+use poodle_primitives::{CallOutSpec, ControlDensity, ControlSize, StatusTone, EyebrowSpec};
 use poodle_gpui_components::{Callout, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -127,6 +127,78 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_content("A simple inline callout without a title for brief contextual notes."),
                         theme,
                     )
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Xs size")
+                                .with_content("Extra small callout."),
+                            theme,
+                        ).size(ControlSize::Xs))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Sm size")
+                                .with_content("Small callout."),
+                            theme,
+                        ).size(ControlSize::Sm))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Md size")
+                                .with_content("Medium callout."),
+                            theme,
+                        ).size(ControlSize::Md))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Lg size")
+                                .with_content("Large callout."),
+                            theme,
+                        ).size(ControlSize::Lg))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Xl size")
+                                .with_content("Extra large callout."),
+                            theme,
+                        ).size(ControlSize::Xl))
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Compact")
+                                .with_content("Tighter internal spacing."),
+                            theme,
+                        ).with_density(ControlDensity::Compact))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Default")
+                                .with_content("Default internal spacing."),
+                            theme,
+                        ).with_density(ControlDensity::Default))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Info)
+                                .with_title("Comfortable")
+                                .with_content("Looser internal spacing."),
+                            theme,
+                        ).with_density(ControlDensity::Comfortable))
                 )
         )
 }
