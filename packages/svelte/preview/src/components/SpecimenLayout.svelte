@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tabs, UiPresentationProvider, type TabItem } from "@poodle/svelte-primitives";
+  import { Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
 
@@ -11,6 +11,8 @@
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
   const densities = ["compact", "default", "comfortable"] as const;
+
+  const uiPresentation = getUiPresentation();
 </script>
 
 <div class="specimen-layout">
@@ -32,7 +34,7 @@
         {#each controlSizes as size}
           <div class="specimen-layout__variant">
             <span class="specimen-layout__label">{size}</span>
-            <UiPresentationProvider sizeScale={size}>
+            <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
               <slot name="sizes" {size} />
             </UiPresentationProvider>
           </div>
@@ -43,7 +45,7 @@
         {#each densities as density}
           <div class="specimen-layout__variant">
             <span class="specimen-layout__label">{density}</span>
-            <UiPresentationProvider {density}>
+            <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
               <slot name="densities" {density} />
             </UiPresentationProvider>
           </div>
