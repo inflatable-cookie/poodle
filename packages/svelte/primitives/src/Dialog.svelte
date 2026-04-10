@@ -296,14 +296,14 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
-    margin-bottom: calc(var(--poodle-space-stack-md) + 0.25rem);
+    margin-bottom: calc(var(--poodle-space-stack-md) + 0.5rem);
   }
 
   .dialog__close {
     position: static;
     flex-shrink: 0;
-    margin-top: -0.25rem;
-    margin-right: -0.25rem;
+    margin-top: -0.5rem;
+    margin-right: -0.375rem;
   }
 
   .dialog__close--overlay {
