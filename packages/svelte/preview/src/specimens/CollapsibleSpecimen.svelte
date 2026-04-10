@@ -5,7 +5,7 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Default (closed)">
+  <SpecimenGroup bare label="Default (closed)">
     <Collapsible title="Project settings" description="Configure build options and deploy targets.">
       <p>Build target: production</p>
       <p>Output directory: dist/</p>
@@ -13,7 +13,7 @@
     </Collapsible>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Default open">
+  <SpecimenGroup bare label="Default open">
     <Collapsible title="Advanced options" defaultOpen>
       <p>Cache TTL: 3600s</p>
       <p>Retry count: 3</p>
@@ -21,7 +21,7 @@
     </Collapsible>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Disabled">
+  <SpecimenGroup bare label="Disabled">
     <Collapsible title="Locked section" description="Requires admin access." disabled>
       <p>This content is hidden behind a disabled collapsible.</p>
     </Collapsible>
