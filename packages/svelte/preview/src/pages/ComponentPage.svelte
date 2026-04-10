@@ -20,23 +20,17 @@
     <p class="component-page__description">{entry.description}</p>
   </header>
 
-  <Separator />
-
   {#if specimenComponent}
     <section class="component-page__section">
-      <h2 class="component-page__section-title">Live demo</h2>
       <svelte:component this={specimenComponent} />
     </section>
-    <Separator />
   {:else}
     <section class="component-page__section">
-      <h2 class="component-page__section-title">Live demo</h2>
       <div class="component-page__placeholder">
         <p>Specimen not yet available for <strong>{entry.displayName}</strong>.</p>
         <p>Check back as we build out interactive demos for each component.</p>
       </div>
     </section>
-    <Separator />
   {/if}
 
   <section class="component-page__section">
