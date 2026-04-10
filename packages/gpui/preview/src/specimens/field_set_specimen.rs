@@ -28,7 +28,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_child(
                         Field::from_spec(
-                            FieldSpec::new("fs-email", "Email").with_required(true),
+                            FieldSpec::new("fs-email", "Email")
+                                .with_required(true)
+                                .with_description("We'll never share your email."),
                             theme,
                         )
                         .with_control(
@@ -40,7 +42,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_child(
                         Field::from_spec(
-                            FieldSpec::new("fs-phone", "Phone"),
+                            FieldSpec::new("fs-phone", "Phone")
+                                .with_optional_label("Optional"),
                             theme,
                         )
                         .with_control(
@@ -177,7 +180,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             )
                             .with_child(
                                 Field::from_spec(
-                                    FieldSpec::new("fs2-tz", "Time Zone"),
+                                    FieldSpec::new("fs2-tz", "Time Zone")
+                                        .with_description("Used for scheduling and notifications."),
                                     theme,
                                 )
                                 .with_control(
