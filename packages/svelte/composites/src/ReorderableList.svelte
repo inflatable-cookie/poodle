@@ -352,6 +352,7 @@
     --poodle-reorderable-list-item-x: 0.625rem;
     --poodle-reorderable-list-item-y: 0.5rem;
     --poodle-reorderable-list-handle-size: 1rem;
+    --poodle-reorderable-list-font-size: 0.8125rem;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -363,20 +364,28 @@
   .reorderable-list[data-size="xs"] {
     --poodle-reorderable-list-handle-size: 0.875rem;
     --poodle-reorderable-list-item-x: 0.5rem;
+    --poodle-reorderable-list-item-y: 0.375rem;
+    --poodle-reorderable-list-font-size: 0.6875rem;
   }
 
   .reorderable-list[data-size="sm"] {
     --poodle-reorderable-list-handle-size: 1rem;
+    --poodle-reorderable-list-item-y: 0.4375rem;
+    --poodle-reorderable-list-font-size: 0.75rem;
   }
 
   .reorderable-list[data-size="lg"] {
     --poodle-reorderable-list-handle-size: 1.125rem;
     --poodle-reorderable-list-item-x: 0.75rem;
+    --poodle-reorderable-list-item-y: 0.5625rem;
+    --poodle-reorderable-list-font-size: 0.875rem;
   }
 
   .reorderable-list[data-size="xl"] {
     --poodle-reorderable-list-handle-size: 1.25rem;
     --poodle-reorderable-list-item-x: 0.875rem;
+    --poodle-reorderable-list-item-y: 0.625rem;
+    --poodle-reorderable-list-font-size: 0.9375rem;
   }
 
   .reorderable-list[data-density="compact"] {
@@ -448,7 +457,7 @@
     flex: 1;
     min-width: 0;
     font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-typography-body-size);
+    font-size: var(--poodle-reorderable-list-font-size);
     color: var(--poodle-color-text-primary);
   }
 </style>
