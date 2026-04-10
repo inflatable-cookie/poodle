@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_primitives::{CalendarMode, CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
@@ -22,6 +22,11 @@ pub struct Calendar {
     on_select: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     /// Called when prev/next month is clicked, with the new "YYYY-MM" string.
     on_navigate: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    /// Range-mode selection callback. Called with the updated DateRangeValue
+    /// after a click: first click sets `start` (end = None), second click
+    /// sets `end`, third click resets back to start-only. The caller is
+    /// responsible for storing the new range and feeding it back via spec.
+    on_range_select: Option<std::rc::Rc<dyn Fn(&DateRangeValue, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Calendar {
@@ -31,7 +36,14 @@ impl std::ops::Deref for Calendar {
 
 impl Calendar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CalendarSpec::new(), theme: theme.clone(), id_suffix: None, on_select: None, on_navigate: None }
+        Self {
+            spec: CalendarSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_select: None,
+            on_navigate: None,
+            on_range_select: None,
+        }
     }
 
     pub fn from_spec(spec: CalendarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -41,6 +53,7 @@ impl Calendar {
             id_suffix: None,
             on_select: None,
             on_navigate: None,
+            on_range_select: None,
         }
     }
 
@@ -75,6 +88,33 @@ impl Calendar {
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_navigate = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Fluent shortcut for entering range mode.
+    pub fn mode(mut self, mode: CalendarMode) -> Self { self.spec.mode = mode; self }
+
+    /// Seed the initial range value for range mode.
+    pub fn default_range(mut self, range: DateRangeValue) -> Self {
+        self.spec.default_range_value = range;
+        self
+    }
+
+    /// Controlled range value (wins over `default_range_value`).
+    pub fn range_value(mut self, range: DateRangeValue) -> Self {
+        self.spec.range_value = Some(range);
+        self
+    }
+
+    /// Called when a day is clicked in range mode. The handler receives
+    /// the new DateRangeValue computed from the click (first click →
+    /// start only; second click → start + end, swapped if clicked
+    /// before start; third click → reset to start only).
+    pub fn on_range_select(
+        mut self,
+        handler: impl Fn(&DateRangeValue, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_range_select = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -172,6 +212,17 @@ impl IntoElement for Calendar {
 
         let selected_date = spec.current_value().map(|s| s.to_string());
         let selected_day = selected_date.as_deref().and_then(Self::parse_day);
+
+        // Range-mode state: resolve start / end ISO strings once. Cells
+        // compare their own YYYY-MM-DD against these to decide whether
+        // they are the range start, end, or an interior day.
+        let is_range_mode = spec.mode == CalendarMode::Range;
+        let (range_start_iso, range_end_iso) = if is_range_mode {
+            let range = spec.current_range_value();
+            (range.start.clone(), range.end.clone())
+        } else {
+            (None, None)
+        };
 
         // Determine which month to show
         let (year, month) = spec
@@ -462,8 +513,21 @@ impl IntoElement for Calendar {
                     );
                 } else {
                     let day_num = cell_idx - start_offset + 1;
-                    let is_selected = selected_day == Some(day_num);
+                    let date_iso = format!("{:04}-{:02}-{:02}", year, month, day_num);
+                    let is_selected = !is_range_mode && selected_day == Some(day_num);
                     let is_today = today_day == Some(day_num);
+
+                    // Range-mode state for this cell
+                    let is_range_start = is_range_mode
+                        && range_start_iso.as_deref() == Some(&date_iso);
+                    let is_range_end = is_range_mode
+                        && range_end_iso.as_deref() == Some(&date_iso);
+                    let is_in_range = is_range_mode
+                        && match (range_start_iso.as_deref(), range_end_iso.as_deref()) {
+                            (Some(s), Some(e)) => date_iso.as_str() > s && date_iso.as_str() < e,
+                            _ => false,
+                        };
+                    let is_range_edge = is_range_start || is_range_end;
 
                     let cell_id = SharedString::from(format!("poodle-cal-day-{}", day_num));
                     let mut cell = div()
@@ -477,11 +541,24 @@ impl IntoElement for Calendar {
                         .rounded(control_radius)
                         .text_size(body_size);
 
-                    if is_selected {
+                    if is_selected || is_range_edge {
+                        // Solid accent pill for selected / range edge days.
                         cell = cell
                             .bg(accent)
                             .text_color(text_inverse)
                             .font_weight(FontWeight::SEMIBOLD);
+                    } else if is_in_range {
+                        // Interior range days: accent 20% mix with surface.
+                        let in_range_bg = color_mix(accent, surface_bg, 0.20);
+                        cell = cell
+                            .bg(in_range_bg)
+                            .text_color(text_primary);
+                        if is_today {
+                            cell = cell
+                                .border_1()
+                                .border_color(today_border)
+                                .font_weight(FontWeight::SEMIBOLD);
+                        }
                     } else {
                         cell = cell.text_color(text_primary);
                         // Contract: today = border ring around cell
@@ -501,11 +578,28 @@ impl IntoElement for Calendar {
                         cell = cell.cursor_pointer();
                     }
 
-                    // Wire on_select click handler
+                    // Wire click handler — range mode computes a new
+                    // DateRangeValue and fires on_range_select; single
+                    // mode fires on_select with the ISO date.
                     if !spec.is_disabled {
-                        if let Some(ref handler) = self.on_select {
+                        if is_range_mode {
+                            if let Some(ref handler) = self.on_range_select {
+                                let handler = handler.clone();
+                                let current_start = range_start_iso.clone();
+                                let current_end = range_end_iso.clone();
+                                let date_clicked = date_iso.clone();
+                                cell = cell.on_click(move |_event, window, cx| {
+                                    let next = compute_next_range(
+                                        current_start.as_deref(),
+                                        current_end.as_deref(),
+                                        &date_clicked,
+                                    );
+                                    handler(&next, window, cx);
+                                });
+                            }
+                        } else if let Some(ref handler) = self.on_select {
                             let handler = handler.clone();
-                            let date_str = format!("{:04}-{:02}-{:02}", year, month, day_num);
+                            let date_str = date_iso.clone();
                             cell = cell.on_click(move |_event, window, cx| {
                                 handler(&date_str, window, cx);
                             });
@@ -520,5 +614,31 @@ impl IntoElement for Calendar {
         }
 
         cal.into_any_element()
+    }
+}
+
+/// Compute the next range value after a click in range mode. ISO date
+/// strings are lexicographically comparable so raw `<`/`>` works.
+///
+/// - First click (start=None): sets start = clicked, end = None.
+/// - Second click (start=Some, end=None):
+///   * if clicked >= start → end = clicked.
+///   * if clicked < start → swap so start = clicked, end = (old start).
+/// - Third click (start=Some, end=Some): reset to start = clicked, end = None.
+fn compute_next_range(
+    current_start: Option<&str>,
+    current_end: Option<&str>,
+    clicked: &str,
+) -> DateRangeValue {
+    match (current_start, current_end) {
+        (None, _) => DateRangeValue::new(Some(clicked.to_string()), None),
+        (Some(start), None) => {
+            if clicked >= start {
+                DateRangeValue::new(Some(start.to_string()), Some(clicked.to_string()))
+            } else {
+                DateRangeValue::new(Some(clicked.to_string()), Some(start.to_string()))
+            }
+        }
+        (Some(_), Some(_)) => DateRangeValue::new(Some(clicked.to_string()), None),
     }
 }

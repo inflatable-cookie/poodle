@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CalendarSpec, ControlDensity, ControlSize, EyebrowSpec};
+use poodle_primitives::{CalendarMode, CalendarSpec, ControlDensity, ControlSize, DateRangeValue, EyebrowSpec};
 use poodle_gpui_components::{Calendar, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -12,6 +12,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let selected_date = state.specimens.text.get("calendar-selected").cloned();
     let nav_month = state.specimens.text.get("calendar-nav-month").cloned();
+    let range_start = state.specimens.text.get("calendar-range-start").cloned();
+    let range_end = state.specimens.text.get("calendar-range-end").cloned();
 
     div().flex().flex_col().gap(px(24.0))
         // --- Default ---
@@ -55,6 +57,51 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.aria_label = Some("Calendar with default".to_string());
                     Calendar::from_spec(spec, theme).with_id("preselected")
                 })
+        )
+        // --- Range selection ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Range selection"), theme))
+                .child({
+                    // Seed a default range when nothing is picked yet so
+                    // the specimen shows range styling immediately.
+                    let (eff_start, eff_end) = match (&range_start, &range_end) {
+                        (Some(s), Some(e)) => (Some(s.clone()), Some(e.clone())),
+                        (Some(s), None) => (Some(s.clone()), None),
+                        _ => (Some("2026-03-10".to_string()), Some("2026-03-20".to_string())),
+                    };
+
+                    let mut spec = CalendarSpec::new().with_mode(CalendarMode::Range);
+                    spec.range_value = Some(DateRangeValue::new(eff_start.clone(), eff_end.clone()));
+                    spec.visible_month = Some("2026-03".to_string());
+                    spec.aria_label = Some("Pick a date range".to_string());
+
+                    Calendar::from_spec(spec, theme)
+                        .with_id("range")
+                        .on_range_select(cx.listener(|this, range: &DateRangeValue, _w, cx| {
+                            if let Some(ref start) = range.start {
+                                this.state.specimens.text.insert("calendar-range-start".to_string(), start.clone());
+                            } else {
+                                this.state.specimens.text.remove("calendar-range-start");
+                            }
+                            if let Some(ref end) = range.end {
+                                this.state.specimens.text.insert("calendar-range-end".to_string(), end.clone());
+                            } else {
+                                this.state.specimens.text.remove("calendar-range-end");
+                            }
+                            cx.notify();
+                        }))
+                })
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(color_to_hsla(text_primary))
+                        .child(format!(
+                            "Start: {} · End: {}",
+                            range_start.as_deref().unwrap_or("(none)"),
+                            range_end.as_deref().unwrap_or("(none)"),
+                        ))
+                )
         )
         // --- Sizes ---
         .child(
