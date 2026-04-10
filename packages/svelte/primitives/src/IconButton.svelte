@@ -34,12 +34,16 @@
   export let tooltipPlacement: OverlayPlacement = "top";
   export let disabled = false;
   export let loading = false;
+  /** Toggle pressed state. When provided (non-null), acts as a toggle with aria-pressed. */
   export let pressed: boolean | null = null;
+  /** Initial pressed state for uncontrolled toggle mode. */
+  export let defaultPressed = false;
   export let describedBy: string | null = null;
   export let type: HTMLButtonElement["type"] = "button";
 
   const dispatch = createEventDispatcher<{
     click: MouseEvent;
+    pressedChange: { pressed: boolean };
     focus: FocusEvent;
     blur: FocusEvent;
   }>();
@@ -53,7 +57,12 @@
   let resolvedTooltipPlacement: OverlayPlacement = tooltipPlacement;
   let tooltipStyle = "";
 
+  let uncontrolledPressed = defaultPressed;
+
   $: isUnavailable = disabled || loading;
+  $: isToggle = pressed !== null || defaultPressed;
+  $: pressedControlled = pressed !== null;
+  $: currentPressed = pressedControlled ? pressed === true : uncontrolledPressed;
   $: tooltipText = tooltip ?? ariaLabel;
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
@@ -134,13 +143,20 @@
     data-size={resolvedSize}
     data-density={resolvedDensity}
     data-loading={loading}
-    data-pressed={pressed === true}
+    data-pressed={isToggle ? currentPressed : undefined}
     disabled={isUnavailable}
     aria-label={ariaLabel}
     aria-describedby={tooltipOpen ? tooltipId : describedBy ?? undefined}
     aria-busy={loading ? "true" : undefined}
-    aria-pressed={pressed === null ? undefined : pressed ? "true" : "false"}
-    on:click={(event) => dispatch("click", event)}
+    aria-pressed={isToggle ? (currentPressed ? "true" : "false") : undefined}
+    on:click={(event) => {
+      if (isToggle) {
+        const next = !currentPressed;
+        if (!pressedControlled) uncontrolledPressed = next;
+        dispatch("pressedChange", { pressed: next });
+      }
+      dispatch("click", event);
+    }}
     on:focus={scheduleOpen}
     on:blur={dismiss}
     on:focus={(event) => dispatch("focus", event)}

@@ -6,9 +6,6 @@
   let clickLog = "No button clicked yet.";
   let intent = "save";
 
-  let boldPressed = false;
-  let italicPressed = false;
-  let underlinePressed = true;
   let bookmarked = false;
 
   function log(label: string): void {
@@ -60,39 +57,13 @@
   <SpecimenGroup label="Toggle (pressed state)">
     <div class="specimen__row">
       <Button
-        variant="ghost"
-        leadingIcon="bold"
-        pressed={boldPressed}
-        ariaLabel="Bold"
-        on:pressedChange={(e) => (boldPressed = e.detail.pressed)}
-      >B</Button>
-      <Button
-        variant="ghost"
-        leadingIcon="italic"
-        pressed={italicPressed}
-        ariaLabel="Italic"
-        on:pressedChange={(e) => (italicPressed = e.detail.pressed)}
-      >I</Button>
-      <Button
-        variant="ghost"
-        leadingIcon="underline"
-        pressed={underlinePressed}
-        ariaLabel="Underline"
-        on:pressedChange={(e) => (underlinePressed = e.detail.pressed)}
-      >U</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Toggle with icon (uncontrolled)">
-    <div class="specimen__row">
-      <Button
         variant="secondary"
         leadingIcon="star"
         defaultPressed={false}
         on:pressedChange={(e) => (bookmarked = e.detail.pressed)}
       >{bookmarked ? "Bookmarked" : "Bookmark"}</Button>
-      <Button variant="ghost" leadingIcon="heart" defaultPressed={false}>Like</Button>
-      <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Lock</Button>
+      <Button variant="secondary" leadingIcon="heart" defaultPressed={false}>Like</Button>
+      <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Locked</Button>
     </div>
   </SpecimenGroup>
 

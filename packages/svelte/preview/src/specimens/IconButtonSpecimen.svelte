@@ -3,6 +3,12 @@
   import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  let bold = false;
+  let italic = false;
+  let underline = true;
+  let pinned = false;
+  let starred = false;
 </script>
 
 <SpecimenLayout>
@@ -22,19 +28,25 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="States">
+  <SpecimenGroup label="Toggle (text editor toolbar)">
     <div class="button-row">
-      <IconButton icon={mapPin} ariaLabel="Pin" pressed={true} variant="secondary" />
-      <IconButton icon={ban} ariaLabel="Disabled" disabled variant="secondary" />
-      <IconButton icon={refreshCw} ariaLabel="Loading" loading variant="secondary" />
+      <IconButton icon="bold" ariaLabel="Bold" variant="ghost" bind:pressed={bold} />
+      <IconButton icon="italic" ariaLabel="Italic" variant="ghost" bind:pressed={italic} />
+      <IconButton icon="underline" ariaLabel="Underline" variant="ghost" bind:pressed={underline} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="String name (built-in internals)">
+  <SpecimenGroup label="Toggle (secondary variant)">
     <div class="button-row">
-      <IconButton icon="plus" ariaLabel="Add" variant="secondary" />
-      <IconButton icon="search" ariaLabel="Search" variant="secondary" />
-      <IconButton icon="x" ariaLabel="Close" variant="ghost" />
+      <IconButton icon={mapPin} ariaLabel="Pin" variant="secondary" bind:pressed={pinned} />
+      <IconButton icon={star} ariaLabel="Favorite" variant="secondary" bind:pressed={starred} />
+    </div>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Disabled and loading">
+    <div class="button-row">
+      <IconButton icon={ban} ariaLabel="Disabled" disabled variant="secondary" />
+      <IconButton icon={refreshCw} ariaLabel="Loading" loading variant="secondary" />
     </div>
   </SpecimenGroup>
 
