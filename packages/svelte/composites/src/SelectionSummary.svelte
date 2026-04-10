@@ -48,7 +48,7 @@
 <style>
   .selection-summary {
     font-size: var(--poodle-typography-label-size, 0.75rem);
-    padding-bottom: 0.25rem;
+    padding-bottom: 0.625rem;
   }
 
   .selection-summary__chips {
