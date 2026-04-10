@@ -195,13 +195,13 @@
   }
 
   /* Size variants */
-  .date-picker[data-size="xs"] .date-picker__trigger { min-height: var(--poodle-size-control-height); font-size: 0.75rem; }
+  .date-picker[data-size="xs"] .date-picker__trigger { min-height: 1.5rem; font-size: 0.75rem; }
   .date-picker[data-size="xs"] .date-picker__indicator { font-size: 0.625rem; }
-  .date-picker[data-size="sm"] .date-picker__trigger { min-height: var(--poodle-size-control-height); font-size: 0.8125rem; }
+  .date-picker[data-size="sm"] .date-picker__trigger { min-height: 1.75rem; font-size: 0.8125rem; }
   .date-picker[data-size="sm"] .date-picker__indicator { font-size: 0.6875rem; }
-  .date-picker[data-size="lg"] .date-picker__trigger { min-height: var(--poodle-size-control-height); font-size: 0.9375rem; }
+  .date-picker[data-size="lg"] .date-picker__trigger { min-height: 2.75rem; font-size: 0.9375rem; }
   .date-picker[data-size="lg"] .date-picker__indicator { font-size: 0.8125rem; }
-  .date-picker[data-size="xl"] .date-picker__trigger { min-height: var(--poodle-size-control-height); font-size: 1rem; }
+  .date-picker[data-size="xl"] .date-picker__trigger { min-height: 3.25rem; font-size: 1rem; }
   .date-picker[data-size="xl"] .date-picker__indicator { font-size: 0.875rem; }
 
   /* Density variants */

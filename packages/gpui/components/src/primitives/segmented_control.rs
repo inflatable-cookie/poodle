@@ -40,6 +40,7 @@ impl SegmentedControl {
     pub fn options(mut self, v: Vec<ChoiceOption>) -> Self { self.spec.options = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn equal_width(mut self, v: bool) -> Self { self.spec.equal_width = v; self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
@@ -134,6 +135,11 @@ impl IntoElement for SegmentedControl {
                 .overflow_x_hidden()
                 .text_ellipsis()
                 .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+
+            // equal_width: every segment takes an equal share of the row.
+            if self.spec.equal_width {
+                seg = seg.flex_1();
+            }
 
             if is_selected {
                 // Contract: selected segment with inset shadow

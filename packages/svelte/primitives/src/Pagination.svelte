@@ -451,10 +451,10 @@
   }
 
   /* Size variants */
-  .pagination[data-size="xs"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); font-size: 0.6875rem; }
-  .pagination[data-size="sm"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); }
-  .pagination[data-size="lg"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); font-size: 0.875rem; }
-  .pagination[data-size="xl"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); font-size: 0.9375rem; }
+  .pagination[data-size="xs"] .pagination__button { min-width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
+  .pagination[data-size="sm"] .pagination__button { min-width: 1.75rem; height: 1.75rem; }
+  .pagination[data-size="lg"] .pagination__button { min-width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
+  .pagination[data-size="xl"] .pagination__button { min-width: 3.25rem; height: 3.25rem; font-size: 0.9375rem; }
 
   /* Density variants */
   .pagination[data-density="compact"] .pagination__controls,

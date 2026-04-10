@@ -9,6 +9,10 @@ pub struct SegmentedControlSpec {
     pub options: Vec<ChoiceOption>,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
+    /// When true, every segment takes equal horizontal space instead
+    /// of sizing to its label content. Matches the Svelte
+    /// `equalWidth` prop.
+    pub equal_width: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -22,6 +26,7 @@ impl Default for SegmentedControlSpec {
             options: Vec::new(),
             is_disabled: false,
             aria_label: None,
+            equal_width: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -39,6 +44,11 @@ impl SegmentedControlSpec {
 
     pub fn with_default_value(mut self, default_value: impl Into<String>) -> Self {
         self.default_value = Some(default_value.into());
+        self
+    }
+
+    pub fn with_equal_width(mut self, equal_width: bool) -> Self {
+        self.equal_width = equal_width;
         self
     }
 

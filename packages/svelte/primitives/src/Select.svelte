@@ -990,27 +990,27 @@
   .select--custom[data-density="comfortable"] .select__trigger { padding: 0; }
 
   /* ═══ SIZE VARIANTS ═══ */
-  .select[data-size="xs"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
-  .select[data-size="xs"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
+  .select[data-size="xs"] { min-height: 1.5rem; padding: 0 0.5rem; }
+  .select[data-size="xs"] .select__control { height: calc(1.5rem - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
   .select[data-size="xs"] .select__input,
-  .select[data-size="xs"] .select__trigger { font-size: 0.75rem; min-height: var(--poodle-size-control-height); }
+  .select[data-size="xs"] .select__trigger { font-size: 0.75rem; min-height: 1.5rem; }
   .select--custom[data-size="xs"] { padding: 0; }
 
-  .select[data-size="sm"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
-  .select[data-size="sm"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); }
+  .select[data-size="sm"] { min-height: 1.75rem; padding: 0 0.625rem; }
+  .select[data-size="sm"] .select__control { height: calc(1.75rem - (var(--poodle-border-width-default) * 2)); }
   .select[data-size="sm"] .select__input,
-  .select[data-size="sm"] .select__trigger { min-height: var(--poodle-size-control-height); }
+  .select[data-size="sm"] .select__trigger { min-height: 1.75rem; }
   .select--custom[data-size="sm"] { padding: 0; }
 
-  .select[data-size="lg"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
-  .select[data-size="lg"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
+  .select[data-size="lg"] { min-height: 2.75rem; padding: 0 1rem; }
+  .select[data-size="lg"] .select__control { height: calc(2.75rem - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
   .select[data-size="lg"] .select__input,
-  .select[data-size="lg"] .select__trigger { font-size: 0.9375rem; min-height: var(--poodle-size-control-height); }
+  .select[data-size="lg"] .select__trigger { font-size: 0.9375rem; min-height: 2.75rem; }
   .select--custom[data-size="lg"] { padding: 0; }
 
-  .select[data-size="xl"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
-  .select[data-size="xl"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
+  .select[data-size="xl"] { min-height: 3.25rem; padding: 0 1.125rem; }
+  .select[data-size="xl"] .select__control { height: calc(3.25rem - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
   .select[data-size="xl"] .select__input,
-  .select[data-size="xl"] .select__trigger { font-size: 1rem; min-height: var(--poodle-size-control-height); }
+  .select[data-size="xl"] .select__trigger { font-size: 1rem; min-height: 3.25rem; }
   .select--custom[data-size="xl"] { padding: 0; }
 </style>

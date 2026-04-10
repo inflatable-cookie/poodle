@@ -80,6 +80,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("seg-fully-disabled")
                 )
         )
+        // --- Equal width segments ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Equal width segments"), theme))
+                .child(
+                    div().w(px(360.0))
+                        .child(
+                            SegmentedControl::from_spec(
+                                SegmentedControlSpec::new(vec![
+                                    ChoiceOption::new("day", "Day"),
+                                    ChoiceOption::new("week", "Week"),
+                                    ChoiceOption::new("month", "Month"),
+                                    ChoiceOption::new("year", "Year"),
+                                ])
+                                .with_default_value("week")
+                                .with_equal_width(true),
+                                theme,
+                            )
+                            .with_id("seg-equal-width")
+                            .aria_label("Time range")
+                        )
+                )
+        )
         .into_any_element();
 
     let make_opts = || vec![
