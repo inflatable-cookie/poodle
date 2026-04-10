@@ -40,7 +40,10 @@ impl FileUpload {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn accept(mut self, v: impl Into<String>) -> Self { self.spec.accept = Some(v.into()); self }
     pub fn max_size(mut self, v: u64) -> Self { self.spec.max_size = Some(v); self }
+    pub fn max_files(mut self, v: u32) -> Self { self.spec.max_files = Some(v); self }
     pub fn multiple(mut self, v: bool) -> Self { self.spec.is_multiple = v; self }
+    pub fn compress(mut self, v: bool) -> Self { self.spec.compress = v; self }
+    pub fn validation_error(mut self, v: impl Into<String>) -> Self { self.spec.validation_error = Some(v.into()); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn dragging(mut self, v: bool) -> Self { self.spec.is_dragging = v; self }
 
@@ -103,9 +106,35 @@ impl IntoElement for FileUpload {
             .cursor_pointer()
             .child("Browse");
 
-        let mut accept_hint = div().text_size(px(12.0)).text_color(text_secondary);
+        // Helper text block — stacks the accept hint, max-files cap,
+        // and compress notice in a small column. Kept empty when none
+        // of the hints apply.
+        let mut helper_block = div()
+            .flex()
+            .flex_col()
+            .items_center()
+            .gap(px(2.0))
+            .text_size(px(12.0))
+            .text_color(text_secondary);
+
         if let Some(ref accept) = spec.accept {
-            accept_hint = accept_hint.child(format!("Accepted: {}", accept));
+            helper_block = helper_block.child(
+                div().child(format!("Accepted: {}", accept)),
+            );
+        }
+
+        if let Some(max_files) = spec.max_files {
+            if spec.is_multiple {
+                helper_block = helper_block.child(
+                    div().child(format!("Up to {max_files} files")),
+                );
+            }
+        }
+
+        if spec.compress {
+            helper_block = helper_block.child(
+                div().child("Images will be compressed before upload"),
+            );
         }
 
         // Contract: dropzone fill when dragging uses accent at 8% opacity
@@ -149,12 +178,30 @@ impl IntoElement for FileUpload {
                     .child(label),
             )
             .child(browse_btn)
-            .child(accept_hint);
+            .child(helper_block);
 
         if spec.is_disabled {
             zone = zone
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
+        }
+
+        // Validation error message rendered below the dropzone when
+        // the spec carries one. Uses status.danger foreground.
+        if let Some(ref err) = spec.validation_error {
+            let danger = resolve_color(theme, spec.error_color_token());
+            return div()
+                .flex()
+                .flex_col()
+                .gap(px(6.0))
+                .child(zone)
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(danger)
+                        .child(err.clone()),
+                )
+                .into_any_element();
         }
 
         zone.into_any_element()

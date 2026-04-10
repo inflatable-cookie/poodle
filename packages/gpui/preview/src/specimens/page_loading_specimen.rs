@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_composites::PageLoadingSpec;
+use poodle_composites::{PageLoadingPresentation, PageLoadingSpec};
 use poodle_primitives::EyebrowSpec;
 use poodle_gpui_components::{PageLoading, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
@@ -56,6 +56,19 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_max(100.0)
                             .with_message("Importing data... 35%")
                             .with_can_cancel(true),
+                        theme,
+                    )
+                )
+        )
+        // --- Inline presentation (in-flow, no backdrop) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Inline presentation (no backdrop)"), theme))
+                .child(
+                    PageLoading::from_spec(
+                        PageLoadingSpec::new()
+                            .with_message("Loading this section\u{2026}")
+                            .with_presentation(PageLoadingPresentation::Inline),
                         theme,
                     )
                 )

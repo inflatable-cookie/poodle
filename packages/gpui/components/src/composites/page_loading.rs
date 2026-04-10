@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::PageLoadingSpec;
+use poodle_composites::{PageLoadingPresentation, PageLoadingSpec};
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Spinner;
@@ -33,6 +33,8 @@ impl PageLoading {
     pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn presentation(mut self, v: PageLoadingPresentation) -> Self { self.spec.presentation = v; self }
+    pub fn inline(mut self) -> Self { self.spec.presentation = PageLoadingPresentation::Inline; self }
 }
 
 impl IntoElement for PageLoading {
@@ -116,12 +118,30 @@ impl IntoElement for PageLoading {
             );
         }
 
-        // Full-page backdrop
-        div()
-            .bg(backdrop)
-            .size_full()
-            .flex().items_center().justify_center()
-            .child(card)
-            .into_any_element()
+        // Branch on presentation: Inline renders the card on its
+        // own, sized to fit the parent container; Overlay wraps it
+        // in a full-viewport backdrop scrim.
+        match self.spec.presentation {
+            PageLoadingPresentation::Inline => {
+                div()
+                    .w_full()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .py(px(24.0))
+                    .child(card)
+                    .into_any_element()
+            }
+            PageLoadingPresentation::Overlay => {
+                div()
+                    .bg(backdrop)
+                    .size_full()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(card)
+                    .into_any_element()
+            }
+        }
     }
 }

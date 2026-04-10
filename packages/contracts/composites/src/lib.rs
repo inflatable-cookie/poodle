@@ -70,7 +70,7 @@ pub use media_thumbnail::MediaThumbnailSpec;
 pub use media_upload_status_panel::{MediaUploadStatusPanelSpec, MediaUploadStep};
 pub use metric_tile::{MetricTileSpec, MetricTrend};
 pub use page_header::{PageHeaderAlign, PageHeaderSpec};
-pub use page_loading::PageLoadingSpec;
+pub use page_loading::{PageLoadingPresentation, PageLoadingSpec};
 pub use pagination_summary::PaginationSummarySpec;
 pub use picker_shell::PickerShellSpec;
 pub use relation_picker::{

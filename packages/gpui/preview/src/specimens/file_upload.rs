@@ -58,4 +58,48 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
+        // --- With max files cap ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With max files cap"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_accept("image/*")
+                            .with_multiple(true)
+                            .with_max_files(5)
+                            .with_max_size(5 * 1024 * 1024),
+                        theme,
+                    )
+                )
+        )
+        // --- Image compression ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Image compression"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_accept("image/*")
+                            .with_multiple(true)
+                            .with_compress(true)
+                            .with_max_files(10),
+                        theme,
+                    )
+                )
+        )
+        // --- Validation error ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Validation error"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_accept(".pdf,.doc,.docx")
+                            .with_max_size(2 * 1024 * 1024)
+                            .with_validation_error("File \"contract.pdf\" exceeds the 2 MB limit."),
+                        theme,
+                    )
+                )
+        )
 }

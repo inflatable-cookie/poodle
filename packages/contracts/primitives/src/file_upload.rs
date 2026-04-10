@@ -8,6 +8,20 @@ pub struct FileUploadSpec {
     pub is_multiple: bool,
     pub is_disabled: bool,
     pub is_dragging: bool,
+    /// Maximum number of files that can be uploaded in a multi-file
+    /// session. Only meaningful when `is_multiple` is true. When None
+    /// there is no cap.
+    pub max_files: Option<u32>,
+    /// When true the component advertises that images will be
+    /// compressed client-side before upload. The compression itself
+    /// is consumer-owned; this flag only drives the "Will compress
+    /// images" helper copy.
+    pub compress: bool,
+    /// Pre-computed validation error to display beneath the drop
+    /// zone. Mirrors Svelte's `validate` closure returning a
+    /// non-null string — here the caller runs their validator and
+    /// passes the resolved error (if any).
+    pub validation_error: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -21,6 +35,9 @@ impl Default for FileUploadSpec {
             is_multiple: false,
             is_disabled: false,
             is_dragging: false,
+            max_files: None,
+            compress: false,
+            validation_error: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -56,6 +73,29 @@ impl FileUploadSpec {
     pub fn with_dragging(mut self, is_dragging: bool) -> Self {
         self.is_dragging = is_dragging;
         self
+    }
+
+    pub fn with_max_files(mut self, max_files: u32) -> Self {
+        self.max_files = Some(max_files);
+        self
+    }
+
+    pub fn with_compress(mut self, compress: bool) -> Self {
+        self.compress = compress;
+        self
+    }
+
+    pub fn with_validation_error(mut self, error: impl Into<String>) -> Self {
+        self.validation_error = Some(error.into());
+        self
+    }
+
+    pub fn has_validation_error(&self) -> bool {
+        self.validation_error.is_some()
+    }
+
+    pub fn error_color_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_DANGER
     }
 
     pub fn fill_token(&self) -> &'static str {

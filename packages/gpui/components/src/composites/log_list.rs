@@ -9,17 +9,83 @@ use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A single log entry for display in the LogList.
-#[derive(Clone, Debug)]
+///
+/// Audit-style rows can populate the optional actor/resource/action
+/// fields; when any of them are set the component renders an
+/// additional metadata line under the main message.
+#[derive(Clone, Debug, Default)]
 pub struct LogEntry {
     pub timestamp: String,
     pub level: LogLevel,
     pub message: String,
+    /// Display name of the principal who triggered the entry
+    /// (e.g. "Alice Chen"). When None the row reads as "System".
+    pub actor_name: Option<String>,
+    /// Optional link target for the actor — when Some, the actor
+    /// name renders as an accent-coloured link.
+    pub actor_href: Option<String>,
+    /// Human-readable label for the affected resource
+    /// (e.g. "Workspace » Acme").
+    pub resource_label: Option<String>,
+    /// Optional link target for the resource.
+    pub resource_href: Option<String>,
+    /// Action verb for audit rows (e.g. "updated", "deleted").
+    pub action: Option<String>,
+}
+
+impl LogEntry {
+    /// New stream-style entry (no actor/resource metadata).
+    pub fn new(timestamp: impl Into<String>, level: LogLevel, message: impl Into<String>) -> Self {
+        Self {
+            timestamp: timestamp.into(),
+            level,
+            message: message.into(),
+            actor_name: None,
+            actor_href: None,
+            resource_label: None,
+            resource_href: None,
+            action: None,
+        }
+    }
+
+    pub fn with_actor(mut self, name: impl Into<String>) -> Self {
+        self.actor_name = Some(name.into());
+        self
+    }
+
+    pub fn with_actor_href(mut self, href: impl Into<String>) -> Self {
+        self.actor_href = Some(href.into());
+        self
+    }
+
+    pub fn with_resource(mut self, label: impl Into<String>) -> Self {
+        self.resource_label = Some(label.into());
+        self
+    }
+
+    pub fn with_resource_href(mut self, href: impl Into<String>) -> Self {
+        self.resource_href = Some(href.into());
+        self
+    }
+
+    pub fn with_action(mut self, action: impl Into<String>) -> Self {
+        self.action = Some(action.into());
+        self
+    }
+
+    /// Whether any of the audit-style fields are populated.
+    pub fn is_audit(&self) -> bool {
+        self.actor_name.is_some()
+            || self.resource_label.is_some()
+            || self.action.is_some()
+    }
 }
 
 /// Log severity level, mapped to badge colours.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum LogLevel {
     Debug,
+    #[default]
     Info,
     Warn,
     Error,
@@ -204,6 +270,8 @@ impl IntoElement for LogList {
             );
         }
 
+        let accent = resolve_color(theme, "color.accent.base");
+
         for entry in &self.entries {
             let badge_fill = resolve_color(theme, entry.level.badge_fill_token());
 
@@ -229,16 +297,77 @@ impl IntoElement for LogList {
                 .text_color(text_primary)
                 .child(entry.message.clone());
 
-            let row = div()
+            let top_row = div()
                 .flex()
                 .items_center()
                 .gap(px(item_gap))
-                .py(px(2.0))
                 .child(timestamp)
                 .child(badge)
                 .child(message);
 
-            rows = rows.child(row);
+            // Audit metadata line — renders "Alice updated Workspace »
+            // Acme" when any of actor/action/resource are populated.
+            // Links use the accent colour as a visual cue; GPUI doesn't
+            // expose an anchor tag so the href is stored but not
+            // activated here.
+            let audit_row = if entry.is_audit() {
+                let mut row = div()
+                    .flex()
+                    .items_center()
+                    .gap(px(4.0))
+                    .pl(px(70.0 + 8.0)) // align under the message column
+                    .text_size(px(11.0))
+                    .text_color(text_secondary);
+
+                if let Some(ref name) = entry.actor_name {
+                    let color = if entry.actor_href.is_some() { accent } else { text_secondary };
+                    row = row.child(
+                        div()
+                            .text_color(color)
+                            .font_weight(FontWeight::MEDIUM)
+                            .child(name.clone()),
+                    );
+                } else {
+                    row = row.child(
+                        div()
+                            .text_color(text_secondary)
+                            .font_weight(FontWeight::MEDIUM)
+                            .child("System"),
+                    );
+                }
+
+                if let Some(ref action) = entry.action {
+                    row = row.child(
+                        div()
+                            .text_color(text_secondary)
+                            .child(format!(" {} ", action)),
+                    );
+                }
+
+                if let Some(ref label) = entry.resource_label {
+                    let color = if entry.resource_href.is_some() { accent } else { text_secondary };
+                    row = row.child(
+                        div()
+                            .text_color(color)
+                            .child(label.clone()),
+                    );
+                }
+
+                Some(row)
+            } else {
+                None
+            };
+
+            let mut entry_block = div()
+                .flex()
+                .flex_col()
+                .py(px(2.0))
+                .child(top_row);
+            if let Some(audit) = audit_row {
+                entry_block = entry_block.child(audit);
+            }
+
+            rows = rows.child(entry_block);
         }
 
         // Append any extra children

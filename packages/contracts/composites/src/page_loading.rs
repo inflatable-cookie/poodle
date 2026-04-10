@@ -1,6 +1,30 @@
 use poodle_tokens::semantic;
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+/// Presentation mode for PageLoading. Controls whether the loader
+/// renders as a full-viewport overlay (the default) or as an inline
+/// panel suitable for embedding inside a page region while its
+/// content is loading.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum PageLoadingPresentation {
+    /// Full-viewport scrim with the progress block centred on top.
+    #[default]
+    Overlay,
+    /// In-flow block that takes the width of its container and has
+    /// no backdrop. Suitable for "loading this region" states.
+    Inline,
+}
+
+impl PageLoadingPresentation {
+    pub fn is_overlay(self) -> bool {
+        matches!(self, Self::Overlay)
+    }
+
+    pub fn is_inline(self) -> bool {
+        matches!(self, Self::Inline)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct PageLoadingSpec {
     pub is_visible: bool,
@@ -8,6 +32,9 @@ pub struct PageLoadingSpec {
     pub max: f64,
     pub message: Option<String>,
     pub can_cancel: bool,
+    /// Rendering mode — overlay (default) or inline. Matches the
+    /// Svelte `presentation` prop.
+    pub presentation: PageLoadingPresentation,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -21,10 +48,20 @@ impl PageLoadingSpec {
             max: 100.0,
             message: None,
             can_cancel: false,
+            presentation: PageLoadingPresentation::Overlay,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
         }
+    }
+
+    pub fn with_presentation(mut self, presentation: PageLoadingPresentation) -> Self {
+        self.presentation = presentation;
+        self
+    }
+
+    pub fn is_inline(&self) -> bool {
+        self.presentation.is_inline()
     }
 
     pub fn with_visible(mut self, is_visible: bool) -> Self {
