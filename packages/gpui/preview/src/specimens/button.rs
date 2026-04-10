@@ -272,6 +272,62 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        // --- Toggle (pressed state) ---
+        .child({
+            let bold = state.specimens.is_on("btn-bold");
+            let italic = state.specimens.is_on("btn-italic");
+            let underline = !state.specimens.is_on("btn-underline-off");
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Toggle (pressed state)"), theme))
+                .child(
+                    div().flex().gap(px(8.0))
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_leading_icon("bold")
+                                    .with_pressed(bold)
+                                    .with_label("B"),
+                                theme,
+                            )
+                            .with_id("btn-bold")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("btn-bold");
+                                cx.notify();
+                            }))
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_leading_icon("italic")
+                                    .with_pressed(italic)
+                                    .with_label("I"),
+                                theme,
+                            )
+                            .with_id("btn-italic")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("btn-italic");
+                                cx.notify();
+                            }))
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_leading_icon("underline")
+                                    .with_pressed(underline)
+                                    .with_label("U"),
+                                theme,
+                            )
+                            .with_id("btn-underline")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("btn-underline-off");
+                                cx.notify();
+                            }))
+                        )
+                )
+        })
         // --- Form overrides ---
         .child(
             div().flex().flex_col().gap(px(8.0))

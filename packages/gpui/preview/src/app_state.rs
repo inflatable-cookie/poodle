@@ -81,25 +81,29 @@ impl ThemePreset {
 /// Density mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Density {
-    Comfortable,
     Compact,
+    Default,
+    Comfortable,
 }
 
 impl Density {
-    pub const ALL: &[Density] = &[Density::Comfortable, Density::Compact];
+    /// Order matches Svelte preview: compact, default, comfortable.
+    pub const ALL: &[Density] = &[Density::Compact, Density::Default, Density::Comfortable];
 
     pub fn label(self) -> &'static str {
         match self {
-            Density::Comfortable => "comfortable",
             Density::Compact => "compact",
+            Density::Default => "default",
+            Density::Comfortable => "comfortable",
         }
     }
 
     /// Return the token density definition for this variant.
     pub fn token_definition(self) -> &'static poodle_tokens::density::DensityDefinition {
         match self {
-            Density::Comfortable => &poodle_tokens::density::COMFORTABLE,
             Density::Compact => &poodle_tokens::density::COMPACT,
+            Density::Default => &poodle_tokens::density::DEFAULT,
+            Density::Comfortable => &poodle_tokens::density::COMFORTABLE,
         }
     }
 }
@@ -115,8 +119,8 @@ pub enum ControlSize {
 }
 
 impl ControlSize {
-    /// Order matches Svelte preview: xl, lg, md, sm, xs.
-    pub const ALL: &[ControlSize] = &[ControlSize::Xl, ControlSize::Lg, ControlSize::Md, ControlSize::Sm, ControlSize::Xs];
+    /// Order matches Svelte preview: xs, sm, md, lg, xl.
+    pub const ALL: &[ControlSize] = &[ControlSize::Xs, ControlSize::Sm, ControlSize::Md, ControlSize::Lg, ControlSize::Xl];
 
     pub fn label(self) -> &'static str {
         match self {

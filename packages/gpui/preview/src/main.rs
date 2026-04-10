@@ -758,8 +758,9 @@ fn parse_cli_args() -> CliArgs {
             "--density" => {
                 if let Some(val) = args.get(i + 1) {
                     density = match val.as_str() {
-                        "comfortable" => Some(Density::Comfortable),
                         "compact" => Some(Density::Compact),
+                        "default" => Some(Density::Default),
+                        "comfortable" => Some(Density::Comfortable),
                         _ => None,
                     };
                     i += 1;
@@ -839,7 +840,9 @@ fn main() {
         cx.on_action(|_: &Quit, cx| cx.quit());
         cx.on_action(|_: &CloseWindow, cx| cx.quit());
 
-        let bounds = Bounds::centered(None, size(px(1280.0), px(800.0)), cx);
+        // Use a taller window in screenshot mode so all specimen sections fit.
+        let window_height = if cli.screenshot.is_some() { 1600.0 } else { 800.0 };
+        let bounds = Bounds::centered(None, size(px(1280.0), px(window_height)), cx);
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
