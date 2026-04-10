@@ -1,14 +1,18 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, PaginationSpec};
+use poodle_primitives::{EyebrowSpec, PaginationSpec};
 use poodle_gpui_components::{Eyebrow, Pagination};
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -66,58 +70,34 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let sizes: &[ControlSize] = &[
-                        ControlSize::Xs,
-                        ControlSize::Sm,
-                        ControlSize::Md,
-                        ControlSize::Lg,
-                        ControlSize::Xl,
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &size in sizes {
-                        col = col.child(
-                            Pagination::from_spec(
-                                PaginationSpec::new()
-                                    .with_current_page(3)
-                                    .with_total_pages(10)
-                                    .with_aria_label("Pagination size variant"),
-                                theme,
-                            )
-                            .size(size)
-                        );
-                    }
-                    col
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let densities: &[ControlDensity] = &[
-                        ControlDensity::Compact,
-                        ControlDensity::Default,
-                        ControlDensity::Comfortable,
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &density in densities {
-                        col = col.child(
-                            Pagination::from_spec(
-                                PaginationSpec::new()
-                                    .with_current_page(3)
-                                    .with_total_pages(10)
-                                    .with_aria_label("Pagination density variant"),
-                                theme,
-                            )
-                            .with_density(density)
-                        );
-                    }
-                    col
-                })
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "pagination",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Pagination::from_spec(
+                PaginationSpec::new()
+                    .with_current_page(3)
+                    .with_total_pages(10)
+                    .with_aria_label("Pagination"),
+                theme,
+            )
+            .size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Pagination::from_spec(
+                PaginationSpec::new()
+                    .with_current_page(3)
+                    .with_total_pages(10)
+                    .with_aria_label("Pagination"),
+                theme,
+            )
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }

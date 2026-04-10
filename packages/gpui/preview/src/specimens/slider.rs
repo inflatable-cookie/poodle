@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, SliderSpec};
+use poodle_primitives::{EyebrowSpec, SliderSpec};
 use poodle_gpui_components::{Slider, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -17,7 +19,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .and_then(|v| v.parse::<f64>().ok())
         .unwrap_or(100.0);
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -76,70 +78,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Opacity: {:.0}%", opacity))
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(12.0))
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Xs),
-                                theme,
-                            ).with_id("slider-size-xs")
-                        )
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Sm),
-                                theme,
-                            ).with_id("slider-size-sm")
-                        )
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Md),
-                                theme,
-                            ).with_id("slider-size-md")
-                        )
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Lg),
-                                theme,
-                            ).with_id("slider-size-lg")
-                        )
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Xl),
-                                theme,
-                            ).with_id("slider-size-xl")
-                        )
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(ControlDensity::Compact),
-                                theme,
-                            ).with_id("slider-density-compact")
-                        )
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(ControlDensity::Default),
-                                theme,
-                            ).with_id("slider-density-default")
-                        )
-                        .child(
-                            Slider::from_spec(
-                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(ControlDensity::Comfortable),
-                                theme,
-                            ).with_id("slider-density-comfortable")
-                        )
-                )
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -157,4 +95,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("slider-disabled")
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "slider",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Slider::from_spec(
+                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(size),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Slider::from_spec(
+                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(density),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .into_any_element()
+        },
+    )
 }

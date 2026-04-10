@@ -2,11 +2,13 @@ use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
 use poodle_primitives::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, SeparatorSpec,
+    ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, SeparatorSpec,
     SeparatorOrientation, RuleTone, ToolbarSpec,
 };
 use poodle_gpui_components::{Button, Eyebrow, Separator, Toolbar};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -17,7 +19,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_default();
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Horizontal (default) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -160,182 +162,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(12.0))
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_size(ControlSize::Xs)
-                                    .with_aria_label("Xs toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Xs).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-size-xs-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Xs).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-size-xs-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Xs).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-size-xs-u"))
-                        )
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_size(ControlSize::Sm)
-                                    .with_aria_label("Sm toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-size-sm-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-size-sm-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-size-sm-u"))
-                        )
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_size(ControlSize::Md)
-                                    .with_aria_label("Md toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Md).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-size-md-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Md).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-size-md-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Md).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-size-md-u"))
-                        )
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_size(ControlSize::Lg)
-                                    .with_aria_label("Lg toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Lg).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-size-lg-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Lg).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-size-lg-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Lg).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-size-lg-u"))
-                        )
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_size(ControlSize::Xl)
-                                    .with_aria_label("Xl toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Xl).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-size-xl-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Xl).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-size-xl-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Xl).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-size-xl-u"))
-                        )
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_density(ControlDensity::Compact)
-                                    .with_aria_label("Compact toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-density-compact-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-density-compact-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-density-compact-u"))
-                        )
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_density(ControlDensity::Default)
-                                    .with_aria_label("Default toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-density-default-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-density-default-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-density-default-u"))
-                        )
-                        .child(
-                            Toolbar::from_spec(
-                                ToolbarSpec::new()
-                                    .with_density(ControlDensity::Comfortable)
-                                    .with_aria_label("Comfortable toolbar"),
-                                theme,
-                            )
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("B"),
-                                theme,
-                            ).with_id("toolbar-density-comfortable-b"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("I"),
-                                theme,
-                            ).with_id("toolbar-density-comfortable-i"))
-                            .child(Button::from_spec(
-                                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("U"),
-                                theme,
-                            ).with_id("toolbar-density-comfortable-u"))
-                        )
-                )
-        )
         // --- Last action feedback ---
         .when(!last_action.is_empty(), |d| {
             d.child(
@@ -343,4 +169,42 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .child(format!("Last action: {}", last_action))
             )
         })
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "toolbar",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Toolbar::from_spec(
+                ToolbarSpec::new().with_size(size).with_aria_label("Toolbar"),
+                theme,
+            )
+            .child(Button::from_spec(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(size).with_label("B"),
+                theme,
+            ).with_id(format!("specimen-toolbar-size-{:?}-b", size)))
+            .child(Button::from_spec(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(size).with_label("I"),
+                theme,
+            ).with_id(format!("specimen-toolbar-size-{:?}-i", size)))
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Toolbar::from_spec(
+                ToolbarSpec::new().with_density(density).with_aria_label("Toolbar"),
+                theme,
+            )
+            .child(Button::from_spec(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("B"),
+                theme,
+            ).with_id(format!("specimen-toolbar-density-{:?}-b", density)))
+            .child(Button::from_spec(
+                ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_size(ControlSize::Sm).with_label("I"),
+                theme,
+            ).with_id(format!("specimen-toolbar-density-{:?}-i", density)))
+            .into_any_element()
+        },
+    )
 }

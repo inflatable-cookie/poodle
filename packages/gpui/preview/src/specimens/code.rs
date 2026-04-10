@@ -1,18 +1,22 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CodeSpec, ControlDensity, ControlSize, EyebrowSpec};
+use poodle_primitives::{CodeSpec, EyebrowSpec};
 use poodle_gpui_components::{Code, Eyebrow};
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_primary = theme.resolve_color("color.text.primary");
 
     let ts_source = "import { Button } from \"@poodle/svelte-primitives\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
 
     let css_source = ".button {\n  display: inline-flex;\n  align-items: center;\n  border-radius: var(--poodle-radius-control);\n  background: var(--poodle-color-accent-base);\n}";
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Block with language label ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -78,56 +82,32 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let sizes: &[ControlSize] = &[
-                        ControlSize::Xs,
-                        ControlSize::Sm,
-                        ControlSize::Md,
-                        ControlSize::Lg,
-                        ControlSize::Xl,
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &size in sizes {
-                        col = col.child(
-                            Code::from_spec(
-                                CodeSpec::new()
-                                    .with_content("const x: number = 42;")
-                                    .with_language("ts"),
-                                theme,
-                            )
-                            .size(size)
-                        );
-                    }
-                    col
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let densities: &[ControlDensity] = &[
-                        ControlDensity::Compact,
-                        ControlDensity::Default,
-                        ControlDensity::Comfortable,
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &density in densities {
-                        col = col.child(
-                            Code::from_spec(
-                                CodeSpec::new()
-                                    .with_content("const x: number = 42;")
-                                    .with_language("ts"),
-                                theme,
-                            )
-                            .with_density(density)
-                        );
-                    }
-                    col
-                })
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "code",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Code::from_spec(
+                CodeSpec::new()
+                    .with_content("const x: number = 42;")
+                    .with_language("ts"),
+                theme,
+            )
+            .size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Code::from_spec(
+                CodeSpec::new()
+                    .with_content("const x: number = 42;")
+                    .with_language("ts"),
+                theme,
+            )
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }

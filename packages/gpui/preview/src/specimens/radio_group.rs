@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlDensity, ControlSize, EyebrowSpec, Orientation, RadioGroupSpec};
+use poodle_primitives::{ChoiceOption, EyebrowSpec, Orientation, RadioGroupSpec};
 use poodle_gpui_components::{RadioGroup, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -31,7 +33,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "md".to_string());
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Vertical (default) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -90,94 +92,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("radio-disabled")
                 })
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(12.0))
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_size(ControlSize::Xs),
-                                theme,
-                            ).with_id("radio-size-xs")
-                        )
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_size(ControlSize::Sm),
-                                theme,
-                            ).with_id("radio-size-sm")
-                        )
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_size(ControlSize::Md),
-                                theme,
-                            ).with_id("radio-size-md")
-                        )
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_size(ControlSize::Lg),
-                                theme,
-                            ).with_id("radio-size-lg")
-                        )
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_size(ControlSize::Xl),
-                                theme,
-                            ).with_id("radio-size-xl")
-                        )
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_density(ControlDensity::Compact),
-                                theme,
-                            ).with_id("radio-density-compact")
-                        )
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_density(ControlDensity::Default),
-                                theme,
-                            ).with_id("radio-density-default")
-                        )
-                        .child(
-                            RadioGroup::from_spec(
-                                RadioGroupSpec::new(plan_options.clone())
-                                    .with_value("pro")
-                                    .with_orientation(Orientation::Horizontal)
-                                    .with_density(ControlDensity::Comfortable),
-                                theme,
-                            ).with_id("radio-density-comfortable")
-                        )
-                )
-        )
         // --- Custom selected color ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -200,4 +114,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
         )
+        .into_any_element();
+
+    let make_options = || vec![
+        ChoiceOption::new("free", "Free"),
+        ChoiceOption::new("pro", "Pro"),
+        ChoiceOption::new("enterprise", "Enterprise"),
+    ];
+
+    specimen_layout(
+        state,
+        cx,
+        "radio-group",
+        examples,
+        move |size, theme: &GpuiThemeProvider| {
+            RadioGroup::from_spec(
+                RadioGroupSpec::new(make_options())
+                    .with_value("pro")
+                    .with_orientation(Orientation::Horizontal)
+                    .with_size(size),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .into_any_element()
+        },
+        move |density, theme: &GpuiThemeProvider| {
+            RadioGroup::from_spec(
+                RadioGroupSpec::new(make_options())
+                    .with_value("pro")
+                    .with_orientation(Orientation::Horizontal)
+                    .with_density(density),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .into_any_element()
+        },
+    )
 }

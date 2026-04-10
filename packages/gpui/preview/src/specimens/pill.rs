@@ -1,10 +1,25 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, PillAppearance, PillFont, PillSize, PillSpec, PillTone, EyebrowSpec};
+use poodle_primitives::{ControlSize, PillAppearance, PillFont, PillSize, PillSpec, PillTone, EyebrowSpec};
 use poodle_gpui_components::{Pill, Eyebrow};
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div().flex().flex_col().gap(px(24.0))
+fn control_size_to_pill(size: ControlSize) -> PillSize {
+    match size {
+        ControlSize::Xs => PillSize::Xs,
+        ControlSize::Sm => PillSize::Sm,
+        ControlSize::Md => PillSize::Md,
+        ControlSize::Lg => PillSize::Lg,
+        ControlSize::Xl => PillSize::Xl,
+    }
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Tones ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -16,30 +31,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child(Pill::from_spec(PillSpec::new().with_label("Success").with_tone(PillTone::Success), theme))
                         .child(Pill::from_spec(PillSpec::new().with_label("Warning").with_tone(PillTone::Warning), theme))
                         .child(Pill::from_spec(PillSpec::new().with_label("Danger").with_tone(PillTone::Danger), theme))
-                )
-        )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_wrap().gap(px(8.0)).items_center()
-                        .child(Pill::from_spec(PillSpec::new().with_label("Extra small").with_size(PillSize::Xs), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("Small").with_size(PillSize::Sm), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("Medium").with_size(PillSize::Md), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("Large").with_size(PillSize::Lg), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("Extra large").with_size(PillSize::Xl), theme))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_wrap().gap(px(8.0)).items_center()
-                        .child(Pill::from_spec(PillSpec::new().with_label("compact").with_density(ControlDensity::Compact), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("default").with_density(ControlDensity::Default), theme))
-                        .child(Pill::from_spec(PillSpec::new().with_label("comfortable").with_density(ControlDensity::Comfortable), theme))
                 )
         )
         // --- Code font ---
@@ -88,4 +79,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child(Pill::from_spec(PillSpec::new().with_label("Pink").with_accent_color("#ec4899"), theme))
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "pill",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Pill::from_spec(
+                PillSpec::new().with_label("Pill").with_size(control_size_to_pill(size)),
+                theme,
+            )
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Pill::from_spec(
+                PillSpec::new().with_label("Pill").with_density(density),
+                theme,
+            )
+            .into_any_element()
+        },
+    )
 }

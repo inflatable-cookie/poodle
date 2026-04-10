@@ -275,7 +275,7 @@ pub fn render_single_specimen(
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(state, cx)),
-        "pill" => specimen_card("Pill", theme, pill::render(theme)),
+        "pill" => specimen_card("Pill", theme, pill::render(state, cx)),
         "status-indicator" => specimen_card("StatusIndicator", theme, status_indicator::render(theme)),
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
@@ -284,7 +284,7 @@ pub fn render_single_specimen(
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" => specimen_card("TimeAgo", theme, time_ago_specimen::render(theme)),
         "duration-input" => specimen_card("DurationInput", theme, duration_input_specimen::render(state, cx)),
-        "code" => specimen_card("Code", theme, code::render(theme)),
+        "code" => specimen_card("Code", theme, code::render(state, cx)),
         "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
         "file-upload" => specimen_card("FileUpload", theme, file_upload::render(theme)),
 
@@ -307,7 +307,7 @@ pub fn render_single_specimen(
         "table" => specimen_card("Table", theme, table::render(theme)),
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),
         "list-card" => specimen_card("ListCard", theme, list_card::render(state, cx)),
-        "pagination" => specimen_card("Pagination", theme, pagination::render(theme)),
+        "pagination" => specimen_card("Pagination", theme, pagination::render(state, cx)),
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
         "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
         "detail-item" => specimen_card("DetailItem", theme, detail_item_specimen::render(theme)),

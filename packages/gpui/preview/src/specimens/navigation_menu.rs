@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, NavigationMenuSpec, NavigationMenuEntry, EyebrowSpec};
+use poodle_primitives::{NavigationMenuSpec, NavigationMenuEntry, EyebrowSpec};
 use poodle_gpui_components::{NavigationMenu, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -26,7 +28,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_value(active_value.clone())
         .with_aria_label("Main navigation");
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal navigation"), theme))
@@ -48,64 +50,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Active section: {}", active_value))
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let sizes: &[(&str, ControlSize)] = &[
-                        ("xs", ControlSize::Xs),
-                        ("sm", ControlSize::Sm),
-                        ("md", ControlSize::Md),
-                        ("lg", ControlSize::Lg),
-                        ("xl", ControlSize::Xl),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &(key, size) in sizes {
-                        let items = vec![
-                            NavigationMenuEntry::new("home", "Home"),
-                            NavigationMenuEntry::new("docs", "Docs"),
-                            NavigationMenuEntry::new("about", "About"),
-                        ];
-                        let spec = NavigationMenuSpec::new(items)
-                            .with_value("docs")
-                            .with_aria_label(format!("Nav size {}", key));
-                        col = col.child(
-                            NavigationMenu::from_spec(spec, theme)
-                                .with_id(format!("size-{}", key))
-                                .size(size)
-                        );
-                    }
-                    col
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let densities: &[(&str, ControlDensity)] = &[
-                        ("compact", ControlDensity::Compact),
-                        ("default", ControlDensity::Default),
-                        ("comfortable", ControlDensity::Comfortable),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &(key, density) in densities {
-                        let items = vec![
-                            NavigationMenuEntry::new("home", "Home"),
-                            NavigationMenuEntry::new("docs", "Docs"),
-                            NavigationMenuEntry::new("about", "About"),
-                        ];
-                        let spec = NavigationMenuSpec::new(items)
-                            .with_value("docs")
-                            .with_aria_label(format!("Nav density {}", key));
-                        col = col.child(
-                            NavigationMenu::from_spec(spec, theme)
-                                .with_id(format!("density-{}", key))
-                                .with_density(density)
-                        );
-                    }
-                    col
-                })
-        )
+        .into_any_element();
+
+    let make_items = || vec![
+        NavigationMenuEntry::new("home", "Home"),
+        NavigationMenuEntry::new("docs", "Docs"),
+        NavigationMenuEntry::new("about", "About"),
+    ];
+
+    specimen_layout(
+        state,
+        cx,
+        "navigation-menu",
+        examples,
+        move |size, theme: &GpuiThemeProvider| {
+            NavigationMenu::from_spec(
+                NavigationMenuSpec::new(make_items())
+                    .with_value("docs")
+                    .with_aria_label("Navigation"),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .size(size)
+            .into_any_element()
+        },
+        move |density, theme: &GpuiThemeProvider| {
+            NavigationMenu::from_spec(
+                NavigationMenuSpec::new(make_items())
+                    .with_value("docs")
+                    .with_aria_label("Navigation"),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }
