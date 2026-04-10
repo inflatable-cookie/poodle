@@ -140,7 +140,7 @@ pub type SearchInputSpec = TextInputSpec;
 /// Deprecated: use `TextInputSpec` with `input_type("search")` instead.
 pub type SearchFieldSpec = TextInputSpec;
 pub use segmented_control::SegmentedControlSpec;
-pub use select::{SelectMode, SelectSpec};
+pub use select::{SelectMode, SelectSpec, SelectVariant};
 pub use separator::SeparatorSpec;
 pub use skeleton::SkeletonSpec;
 pub use slider::SliderSpec;

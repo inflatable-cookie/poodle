@@ -141,6 +141,18 @@ impl IntoElement for Button {
             (fill, border_color)
         };
 
+        // Pressed/toggle state (contract §8 Pressed/toggle state):
+        // Non-primary variants get accent fill, accent border, inverse text
+        let is_pressed = spec.is_toggle_mode() && spec.current_pressed();
+        let (fill, border_color, text_color) = if is_pressed && spec.variant != ButtonVariant::Primary {
+            let accent = resolve_color(theme, "color.accent.base");
+            let text_inverse = resolve_color(theme, "color.text.inverse");
+            let pressed_border = color_mix_black(accent, 0.86);
+            (accent, pressed_border, text_inverse)
+        } else {
+            (fill, border_color, text_color)
+        };
+
         // ── Hover/active colors (contract §8 Hover/Active) ──────
         // hover fill: color-mix(fill 84%, elevated)
         // active fill: color-mix(fill 72%, elevated)

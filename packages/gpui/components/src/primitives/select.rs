@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec};
+use poodle_primitives::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec, SelectVariant};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
@@ -128,36 +128,51 @@ impl IntoElement for Select {
 
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let icon_muted = resolve_color(theme, "color.icon.muted");
+        let is_ghost = spec.variant == SelectVariant::Ghost;
 
-        // Trigger button
+        // Trigger button — ghost variant strips all field chrome
         let mut trigger = div()
             .id(SharedString::from(id_str))
-            .focusable()
-            .h(control_height)
-            .px(inline_padding)
-            .rounded(control_radius);
+            .focusable();
 
-        if theme.brand_raised {
-            trigger = trigger.bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg));
+        if is_ghost {
+            // Ghost: no border, background, padding, min-height, or shadow
+            trigger = trigger
+                .flex()
+                .items_center()
+                .gap(inline_gap)
+                .text_size(body_size)
+                .focus(move |s| s.shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
         } else {
-            trigger = trigger.bg(surface_bg);
-        }
+            trigger = trigger
+                .h(control_height)
+                .px(inline_padding)
+                .rounded(control_radius);
 
-        trigger = trigger.border_1()
-            .border_color(if is_open { accent } else { border })
-            .flex()
-            .items_center()
-            .justify_between()
-            .gap(inline_gap)
-            .text_size(body_size)
-            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            if theme.brand_raised {
+                trigger = trigger.bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg));
+            } else {
+                trigger = trigger.bg(surface_bg);
+            }
+
+            trigger = trigger.border_1()
+                .border_color(if is_open { accent } else { border })
+                .flex()
+                .items_center()
+                .justify_between()
+                .gap(inline_gap)
+                .text_size(body_size)
+                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        }
 
         if is_disabled {
             trigger = trigger.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
-        } else {
+        } else if !is_ghost {
             trigger = trigger
                 .cursor_pointer()
                 .hover(move |s| s.bg(hover_bg).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]));
+        } else {
+            trigger = trigger.cursor_pointer();
         }
 
         let text_col = if is_placeholder {
@@ -167,11 +182,13 @@ impl IntoElement for Select {
         };
 
         // Contract: indicator uses icon-muted color, not text-secondary with opacity
-        trigger = trigger
-            .child(
-                div().text_color(text_col).flex_1().child(trigger_text.to_string()),
-            )
-            .child(
+        trigger = trigger.child(
+            div().text_color(text_col).flex_1().child(trigger_text.to_string()),
+        );
+
+        // Ghost variant hides the chevron indicator
+        if !is_ghost {
+            trigger = trigger.child(
                 Icon::from_spec(
                     IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
                         .with_size(IconSize::Sm),
@@ -179,6 +196,7 @@ impl IntoElement for Select {
                 )
                 .with_color(icon_muted),
             );
+        }
 
         // Wrap callbacks in Rc for sharing across trigger + option closures
         let on_toggle_rc: Option<std::rc::Rc<dyn Fn(&bool, &mut Window, &mut App)>> =
@@ -266,6 +284,12 @@ impl IntoElement for Select {
             let mut list = div()
                 .id("poodle-select-list")
                 .rounded(control_radius);
+
+            // menu_min_width: parse CSS length string to pixels (supports rem and px)
+            if let Some(ref min_width_str) = spec.menu_min_width {
+                let min_px = parse_css_length_to_px(min_width_str);
+                list = list.min_w(px(min_px));
+            }
 
             // Brand-raised treatment: gradient fill for elevated surface
             if theme.brand_raised {
@@ -384,5 +408,18 @@ impl IntoElement for Select {
         }
 
         wrapper.into_any_element()
+    }
+}
+
+/// Parse a CSS length string (e.g. "12rem", "200px") to pixels.
+/// Returns 0.0 on parse failure. Uses 16px as the rem base.
+fn parse_css_length_to_px(value: &str) -> f32 {
+    let trimmed = value.trim();
+    if let Some(num_str) = trimmed.strip_suffix("rem") {
+        num_str.trim().parse::<f32>().unwrap_or(0.0) * 16.0
+    } else if let Some(num_str) = trimmed.strip_suffix("px") {
+        num_str.trim().parse::<f32>().unwrap_or(0.0)
+    } else {
+        trimmed.parse::<f32>().unwrap_or(0.0)
     }
 }
