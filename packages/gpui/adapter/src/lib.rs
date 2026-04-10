@@ -197,7 +197,6 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "BlockEditorSpec",
     "EmbedInputSpec",
     "EmbedPreviewSpec",
-    "ReorderableListSpec",
     "BreadcrumbsSpec",
     "CardRadioGroupSpec",
     "ListCardSpec",

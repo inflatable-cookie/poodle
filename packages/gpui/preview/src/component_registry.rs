@@ -107,7 +107,6 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "page-header", display_name: "PageHeader", description: "Page-level header." },
     ComponentEntry { slug: "page-loading", display_name: "PageLoading", description: "Full-viewport loading overlay." },
     ComponentEntry { slug: "relation-picker", display_name: "RelationPicker", description: "Searchable related items picker." },
-    ComponentEntry { slug: "reorderable-list", display_name: "ReorderableList", description: "Drag-and-drop list." },
     ComponentEntry { slug: "selection-summary", display_name: "SelectionSummary", description: "Current selection state." },
     ComponentEntry { slug: "metric-tile", display_name: "MetricTile", description: "Compact label-value tile." },
     ComponentEntry { slug: "toast-stack", display_name: "ToastStack", description: "Stacked notification manager." },

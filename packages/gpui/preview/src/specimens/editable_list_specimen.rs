@@ -13,7 +13,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     div().flex().flex_col().gap(px(8.0))
                         .child(
                             EditableList::new(theme)
-                                .title("Tags")
+                                .aria_label("Tags")
                                 .items(vec![
                                     "design-system".to_string(),
                                     "rust".to_string(),
@@ -24,7 +24,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )
                         .child(
                             EditableList::new(theme)
-                                .title("Disabled list")
+                                .aria_label("Disabled list")
                                 .items(vec![
                                     "locked-item".to_string(),
                                 ])

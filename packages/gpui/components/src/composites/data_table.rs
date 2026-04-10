@@ -8,7 +8,7 @@ use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, Semanti
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::resolve_color;
 
 /// A real GPUI data table component backed by `DataTableSpec`.
 ///

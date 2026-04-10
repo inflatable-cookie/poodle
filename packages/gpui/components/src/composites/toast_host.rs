@@ -99,8 +99,7 @@ impl IntoElement for ToastHost {
         // ── Position the host container at the chosen corner ──────
         let mut container = div()
             .absolute()
-            .w(width)
-            .z_index(80);
+            .w(width);
 
         match self.spec.placement {
             ToastHostPlacement::BottomEnd => {

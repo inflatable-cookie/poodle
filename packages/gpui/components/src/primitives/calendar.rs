@@ -6,7 +6,7 @@ use poodle_primitives::{CalendarSpec, CalendarWeekStart, ControlDensity, Control
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
 const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];

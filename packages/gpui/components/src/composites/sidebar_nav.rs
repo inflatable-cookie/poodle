@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
+use poodle_composites::{SidebarNavGroup, SidebarNavSpec};
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -113,7 +113,7 @@ impl IntoElement for SidebarNav {
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let control_radius = resolve_radius(theme, "radius.control");
-        let item_radius = px(control_radius.0 - 2.0); // contract: calc(radius-control - 0.125rem)
+        let item_radius = control_radius - px(2.0); // contract: calc(radius-control - 0.125rem)
 
         // Active item background: accent at 10% opacity
         let active_bg = color_mix(active_indicator_color, gpui::transparent_black(), 0.10);

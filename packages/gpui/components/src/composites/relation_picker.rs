@@ -9,7 +9,7 @@ use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, Semanti
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::{Icon, Spinner};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 /// A real GPUI relation picker component backed by `RelationPickerSpec`.
 ///

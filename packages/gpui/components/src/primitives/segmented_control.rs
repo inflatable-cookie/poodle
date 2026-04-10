@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ChoiceOption, ControlSize, SegmentedControlSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI segmented control component backed by `SegmentedControlSpec`.
 pub struct SegmentedControl {

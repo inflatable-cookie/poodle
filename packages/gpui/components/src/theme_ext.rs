@@ -117,53 +117,46 @@ fn blend_white(color: Hsla, white_ratio: f32) -> Hsla {
 /// Create a brand-raised gradient fill for primary buttons.
 ///
 /// CSS: `linear-gradient(180deg, white/24%, white/0%), accent-base`
-/// Hover: `linear-gradient(180deg, white/30%, white/6%), white/6% + accent-base`
 pub fn brand_raised_primary_fill(accent: Hsla) -> gpui::Background {
     let top = blend_white(accent, 0.24);
     let bottom = accent;
-    gpui::linear_gradient(180.0, top, bottom)
+    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
 }
 
 /// Brand-raised hover gradient for primary buttons.
 pub fn brand_raised_primary_fill_hover(accent: Hsla) -> gpui::Background {
-    let base = blend_white(accent, 0.06); // white 6% + accent
+    let base = blend_white(accent, 0.06);
     let top = blend_white(base, 0.30);
     let bottom = blend_white(base, 0.06);
-    gpui::linear_gradient(180.0, top, bottom)
+    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
 }
 
 /// Brand-raised gradient for secondary/ghost buttons and surfaces.
-///
-/// CSS: `linear-gradient(180deg, white/18%, white/2%), elevated/92% + surface`
 pub fn brand_raised_interactive_fill(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.18);
     let bottom = blend_white(base_color, 0.02);
-    gpui::linear_gradient(180.0, top, bottom)
+    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
 }
 
 /// Brand-raised gradient for subtle input controls.
-///
-/// CSS: `linear-gradient(180deg, white/10%, white/0%), surface/84%`
 pub fn brand_raised_subtle_fill(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.10);
     let bottom = base_color;
-    gpui::linear_gradient(180.0, top, bottom)
+    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
 }
 
 /// Brand-raised hover gradient for subtle input controls.
 pub fn brand_raised_subtle_fill_hover(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.16);
     let bottom = blend_white(base_color, 0.02);
-    gpui::linear_gradient(180.0, top, bottom)
+    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
 }
 
 /// Brand-raised gradient for surface/card/panel containers.
-///
-/// CSS: `linear-gradient(180deg, white/14%, white/2%), panel/92% + elevated`
 pub fn brand_raised_surface_fill(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.14);
     let bottom = blend_white(base_color, 0.02);
-    gpui::linear_gradient(180.0, top, bottom)
+    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
 }
 
 /// Brand-raised shadow for interactive elements.

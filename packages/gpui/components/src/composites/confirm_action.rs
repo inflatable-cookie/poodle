@@ -8,7 +8,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::ConfirmActionSpec;
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct ConfirmAction {
     spec: ConfirmActionSpec,

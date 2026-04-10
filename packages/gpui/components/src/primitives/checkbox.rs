@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{CheckState, CheckboxSpec, ControlSize};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
+use crate::presentation::{resolve_semantic_size, control_height_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.

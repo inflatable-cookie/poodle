@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ColorPickerSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Parse a hex color string (e.g. "#ff0000") into an Hsla color.

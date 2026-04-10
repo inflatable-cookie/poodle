@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.

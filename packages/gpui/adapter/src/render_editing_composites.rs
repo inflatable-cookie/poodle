@@ -2,7 +2,7 @@
 //! and operational composites.
 //!
 //! g07.009: AudioPlayer, VideoPlayer, MediaPicker, MarkdownEditor, BlockEditor,
-//! EmbedInput, EmbedPreview, ReorderableList,
+//! EmbedInput, EmbedPreview,
 //! Breadcrumbs, CardRadioGroup, ListCard, NavCard,
 //! OrderBy, PageHeader, LogList, PageLoading,
 //! StateTile, ToastStack, EmptyState
@@ -12,7 +12,7 @@ use poodle_composites::{
     AudioPlayerSpec, BlockEditorSpec, CardRadioGroupSpec,
     EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec,
-    PageHeaderSpec, PageLoadingSpec, ReorderableListSpec,
+    PageHeaderSpec, PageLoadingSpec,
     StateTileSpec, ToastStackSpec, VideoPlayerSpec,
 };
 use poodle_primitives::{
@@ -76,14 +76,6 @@ impl RenderComponent<EmbedPreviewSpec> for GpuiAdapter {
     fn render(&self, _spec: &EmbedPreviewSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("embed-preview", "EmbedPreviewSpec")
-    }
-}
-
-impl RenderComponent<ReorderableListSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-    fn render(&self, _spec: &ReorderableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
-        let _s = map_style(style);
-        GpuiElementHandle::new("reorderable-list", "ReorderableListSpec")
     }
 }
 
@@ -194,7 +186,6 @@ mod tests {
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
     #[test] fn embed_preview() { assert_eq!(a().render(&EmbedPreviewSpec::new(), &s(), &t()).spec_type, "EmbedPreviewSpec"); }
-    #[test] fn reorderable_list() { assert_eq!(a().render(&ReorderableListSpec::new(), &s(), &t()).spec_type, "ReorderableListSpec"); }
     #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![ChoiceOption::new("a", "A")]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
     #[test] fn list_card() { assert_eq!(a().render(&ListCardSpec::new(), &s(), &t()).spec_type, "ListCardSpec"); }

@@ -81,7 +81,7 @@ pub enum SemanticEvent {
 
     /// A drag operation started, moved, or ended.
     ///
-    /// Emitted by: Slider (thumb), ReorderableList, SplitView (divider)
+    /// Emitted by: Slider (thumb), EditableList (reorderable), SplitView (divider)
     /// - GPUI: Drag event handlers
     /// - Jetstream: `UiEvent::DragStarted` / `DragMoved` / `DragEnded`
     DragChanged {

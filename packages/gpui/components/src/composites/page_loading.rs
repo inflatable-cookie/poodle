@@ -6,7 +6,7 @@ use poodle_composites::PageLoadingSpec;
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Spinner;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct PageLoading {
     spec: PageLoadingSpec,

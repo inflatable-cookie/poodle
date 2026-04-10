@@ -121,7 +121,6 @@ mod media_thumbnail_specimen;
 mod split_view_specimen;
 mod video_player_specimen;
 mod form_layout;
-mod reorderable_list;
 
 // ── Layout Helpers ───────────────────────────────────────
 mod collapse_toggle;
@@ -308,7 +307,6 @@ pub fn render_single_specimen(
         "list-card" => specimen_card("ListCard", theme, list_card::render(state, cx)),
         "pagination" => specimen_card("Pagination", theme, pagination::render(theme)),
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
-        "reorderable-list" => specimen_card("ReorderableList", theme, reorderable_list::render(theme)),
         "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
         "detail-item" => specimen_card("DetailItem", theme, detail_item_specimen::render(theme)),
         "detail-section" => specimen_card("DetailSection", theme, detail_section_specimen::render(theme)),

@@ -9,8 +9,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ControlSize, EditableLabelSpec};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
 pub struct EditableLabel {

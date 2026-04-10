@@ -1,6 +1,7 @@
 //! ListContainer — paginated list view with header and state handling.
 
 use gpui::*;
+use gpui::prelude::FluentBuilder;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{ListContainerSpec, ListContainerState};
 

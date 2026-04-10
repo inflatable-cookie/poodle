@@ -5,8 +5,8 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::{MediaUploadStatusPanelSpec, MediaUploadStep};
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, control_space_x_rem, rem_to_px};
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct MediaUploadStatusPanel {
     spec: MediaUploadStatusPanelSpec,
@@ -76,7 +76,7 @@ impl IntoElement for MediaUploadStatusPanel {
                         div()
                             .h(px(4.0)).rounded(px(2.0))
                             .bg(accent)
-                            .w(Pixels(progress_pct / 100.0 * 200.0)) // approximate width
+                            .w(px(progress_pct / 100.0 * 200.0)) // approximate width
                     )
             );
             panel = panel.child(

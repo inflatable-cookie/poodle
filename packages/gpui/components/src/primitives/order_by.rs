@@ -2,7 +2,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ControlDensity, ControlSize, OrderBySpec, SemanticControlSizeRole, SortDirection};
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem, control_space_x_rem, control_height_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct OrderBy {
     spec: OrderBySpec,
