@@ -87,6 +87,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }))
                 )
         )
+        // With destructive item
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With destructive item"), theme))
+                .child(
+                    Menu::from_spec(
+                        MenuSpec::new(vec![
+                            MenuEntry::new("rename", "Rename"),
+                            MenuEntry::new("duplicate", "Duplicate"),
+                            MenuEntry::new("export", "Export\u{2026}"),
+                            MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
+                            MenuEntry::new("delete", "Delete")
+                                .with_destructive(true)
+                                .with_shortcut_label("\u{2318} \u{232B}"),
+                        ])
+                        .with_default_open(true)
+                        .with_aria_label("Item actions"),
+                        theme,
+                    )
+                    .with_id("specimen-menu-destructive")
+                )
+        )
         // --- Last action feedback ---
         .when(!last_action.is_empty(), |d| {
             d.child(

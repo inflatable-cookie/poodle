@@ -576,6 +576,9 @@ pub struct MenuEntry {
     pub is_checked: bool,
     pub shortcut_label: Option<String>,
     pub kind: MenuItemKind,
+    /// When true the entry renders in a destructive tone
+    /// (status.danger foreground). Used for items like Delete, Remove.
+    pub is_destructive: bool,
 }
 
 impl MenuEntry {
@@ -587,6 +590,7 @@ impl MenuEntry {
             is_checked: false,
             shortcut_label: None,
             kind: MenuItemKind::Action,
+            is_destructive: false,
         }
     }
 
@@ -607,6 +611,11 @@ impl MenuEntry {
 
     pub fn with_kind(mut self, kind: MenuItemKind) -> Self {
         self.kind = kind;
+        self
+    }
+
+    pub fn with_destructive(mut self, is_destructive: bool) -> Self {
+        self.is_destructive = is_destructive;
         self
     }
 }

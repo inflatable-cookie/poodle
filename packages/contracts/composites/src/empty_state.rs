@@ -9,6 +9,10 @@ pub struct EmptyStateSpec {
     pub variant: EmptyStateVariant,
     pub aria_label: Option<String>,
     pub actions: Vec<RemediationAction>,
+    /// When true the empty state renders in a tighter form suitable
+    /// for embedding inside lists or small containers — reduced
+    /// vertical padding, smaller title, smaller icon.
+    pub compact: bool,
 }
 
 impl EmptyStateSpec {
@@ -19,7 +23,13 @@ impl EmptyStateSpec {
             variant: EmptyStateVariant::Neutral,
             aria_label: None,
             actions: Vec::new(),
+            compact: false,
         }
+    }
+
+    pub fn with_compact(mut self, compact: bool) -> Self {
+        self.compact = compact;
+        self
     }
 
     pub fn with_message(mut self, message: impl Into<String>) -> Self {

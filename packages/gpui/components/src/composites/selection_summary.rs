@@ -41,6 +41,7 @@ impl SelectionSummary {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn items(mut self, v: Vec<SelectionSummaryItem>) -> Self { self.spec.items = v; self }
     pub fn clear_action(mut self, v: RemediationAction) -> Self { self.spec.clear_action = Some(v); self }
+    pub fn max_visible_items(mut self, v: usize) -> Self { self.spec.max_visible_items = Some(v); self }
     pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
@@ -87,8 +88,9 @@ impl IntoElement for SelectionSummary {
             .items_center()
             .gap(gap);
 
-        // Selected item pills
-        for item in &spec.items {
+        // Selected item pills — clamped by max_visible_items if set.
+        let visible_count = spec.visible_item_count();
+        for item in spec.items.iter().take(visible_count) {
             let item_id = SharedString::from(format!("selection-pill-{}", item.id));
 
             let mut pill = div()
@@ -129,6 +131,25 @@ impl IntoElement for SelectionSummary {
             );
 
             container = container.child(pill);
+        }
+
+        // Overflow chip — "+N more" when the list was truncated.
+        let overflow = spec.overflow_count();
+        if overflow > 0 {
+            container = container.child(
+                div()
+                    .flex()
+                    .items_center()
+                    .px(px(8.0))
+                    .py(px(3.0))
+                    .rounded(px(12.0))
+                    .bg(bg)
+                    .border_1()
+                    .border_color(border)
+                    .text_size(px(12.0))
+                    .text_color(text_secondary)
+                    .child(format!("+{overflow} more")),
+            );
         }
 
         // Clear all action

@@ -42,6 +42,7 @@ impl EmptyState {
     pub fn variant(mut self, v: EmptyStateVariant) -> Self { self.spec.variant = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn actions(mut self, v: Vec<RemediationAction>) -> Self { self.spec.actions = v; self }
+    pub fn compact(mut self, v: bool) -> Self { self.spec.compact = v; self }
 
 
     pub fn with_illustration(mut self, illustration: impl IntoElement) -> Self {
@@ -74,13 +75,18 @@ impl IntoElement for EmptyState {
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, "color.accent.base");
 
+        // Compact mode halves the vertical padding and reduces the
+        // title size, suitable for embedding in tight containers.
+        let vertical_padding = if spec.compact { px(24.0) } else { px(48.0) };
+        let title_size = if spec.compact { body_size } else { heading_size };
+
         let mut container = div()
             .w_full()
             .flex()
             .flex_col()
             .items_center()
             .justify_center()
-            .py(px(48.0))
+            .py(vertical_padding)
             .px(px(24.0))
             .gap(gap);
 
@@ -98,7 +104,7 @@ impl IntoElement for EmptyState {
         // Title
         container = container.child(
             div()
-                .text_size(heading_size)
+                .text_size(title_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .text_center()

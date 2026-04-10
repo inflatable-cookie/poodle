@@ -59,6 +59,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        // --- Truncated (max visible = 3) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Truncated (max visible = 3)"), theme))
+                .child(
+                    SelectionSummary::from_spec(
+                        SelectionSummarySpec::new(vec![
+                            SelectionSummaryItem::new("1", "Button"),
+                            SelectionSummaryItem::new("2", "Card"),
+                            SelectionSummaryItem::new("3", "Dialog"),
+                            SelectionSummaryItem::new("4", "Select"),
+                            SelectionSummaryItem::new("5", "Switch"),
+                            SelectionSummaryItem::new("6", "Table"),
+                            SelectionSummaryItem::new("7", "Tabs"),
+                        ])
+                        .with_max_visible_items(3),
+                        theme,
+                    )
+                )
+        )
         .into_any_element();
 
     let items = || vec![

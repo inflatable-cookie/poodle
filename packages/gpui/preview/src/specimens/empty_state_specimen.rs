@@ -51,4 +51,18 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
+        // --- Compact (embedded in a list) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Compact"), theme))
+                .child(
+                    EmptyState::from_spec(
+                        EmptyStateSpec::new("No comments yet")
+                            .with_variant(EmptyStateVariant::Neutral)
+                            .with_message("Be the first to add one.")
+                            .with_compact(true),
+                        theme,
+                    )
+                )
+        )
 }

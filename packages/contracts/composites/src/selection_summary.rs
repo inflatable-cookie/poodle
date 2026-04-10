@@ -7,6 +7,11 @@ use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 pub struct SelectionSummarySpec {
     pub items: Vec<SelectionSummaryItem>,
     pub clear_action: Option<RemediationAction>,
+    /// Optional cap on the number of item chips rendered inline. When
+    /// the list exceeds this limit, the overflow is surfaced as a
+    /// "+N more" chip instead of a long wrapping row. Matches the
+    /// Svelte `maxVisibleItems` prop.
+    pub max_visible_items: Option<usize>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -17,6 +22,7 @@ impl Default for SelectionSummarySpec {
         Self {
             items: Vec::new(),
             clear_action: None,
+            max_visible_items: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -37,12 +43,30 @@ impl SelectionSummarySpec {
         self
     }
 
+    pub fn with_max_visible_items(mut self, max: usize) -> Self {
+        self.max_visible_items = Some(max);
+        self
+    }
+
     pub fn selected_count(&self) -> usize {
         self.items.len()
     }
 
     pub fn has_clear_action(&self) -> bool {
         self.clear_action.is_some()
+    }
+
+    /// Number of items actually rendered inline, taking `max_visible_items`
+    /// into account.
+    pub fn visible_item_count(&self) -> usize {
+        self.max_visible_items
+            .map(|max| self.items.len().min(max))
+            .unwrap_or(self.items.len())
+    }
+
+    /// Number of items hidden behind the "+N more" overflow chip.
+    pub fn overflow_count(&self) -> usize {
+        self.items.len().saturating_sub(self.visible_item_count())
     }
 
     pub fn gap_token(&self) -> &'static str {

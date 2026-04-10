@@ -224,10 +224,20 @@ impl IntoElement for Menu {
                 });
             }
 
+            // Destructive items take the status.danger foreground,
+            // overriding the default text tone (but deferring to
+            // disabled dimming).
+            let danger_color = crate::theme_ext::resolve_color(theme, "color.status.danger");
+            let default_text = if item.is_destructive {
+                danger_color
+            } else {
+                text_primary
+            };
+
             if is_active {
                 row = row
                     .bg(item_hover)
-                    .text_color(accent);
+                    .text_color(if item.is_destructive { danger_color } else { accent });
             } else if is_disabled {
                 row = row
                     .text_color(text_secondary)
@@ -235,7 +245,7 @@ impl IntoElement for Menu {
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 row = row
-                    .text_color(text_primary)
+                    .text_color(default_text)
                     .cursor_pointer()
                     .hover(|s| s.bg(item_hover));
 
