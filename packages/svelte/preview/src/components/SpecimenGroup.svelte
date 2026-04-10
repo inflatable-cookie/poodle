@@ -2,14 +2,25 @@
   import { Eyebrow, Surface } from "@poodle/svelte-primitives";
 
   export let label: string;
+  /** When true, renders without Surface wrapper — for components that are surfaces themselves. */
+  export let bare = false;
 </script>
 
-<Surface tone="panel" border="subtle" padding="md">
-  <Eyebrow>{label}</Eyebrow>
-  <div class="specimen-group__content">
-    <slot />
+{#if bare}
+  <div class="specimen-group">
+    <Eyebrow>{label}</Eyebrow>
+    <div class="specimen-group__content">
+      <slot />
+    </div>
   </div>
-</Surface>
+{:else}
+  <Surface tone="panel" border="subtle" padding="md">
+    <Eyebrow>{label}</Eyebrow>
+    <div class="specimen-group__content">
+      <slot />
+    </div>
+  </Surface>
+{/if}
 
 <style>
   .specimen-group__content {
