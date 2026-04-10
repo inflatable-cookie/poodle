@@ -389,9 +389,43 @@
   }
 
   .video-player__volume {
+    -webkit-appearance: none;
+    appearance: none;
     width: 3.5rem;
+    height: 1rem;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .video-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
-    accent-color: white;
+    border-radius: 0.125rem;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .video-player__volume::-moz-range-track {
+    height: 0.25rem;
+    border-radius: 0.125rem;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .video-player__volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    margin-top: -0.1875rem;
+  }
+
+  .video-player__volume::-moz-range-thumb {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    border: none;
+    background: white;
   }
 
   .video-player__time {
