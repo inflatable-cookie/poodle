@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{EyebrowSpec, PaginationSpec};
+use poodle_primitives::{EyebrowSpec, PaginationSpec, PaginationVariant};
 use poodle_gpui_components::{Eyebrow, Pagination};
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
@@ -66,6 +66,56 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_current_page(2)
                             .with_total_pages(3)
                             .with_aria_label("Short pagination"),
+                        theme,
+                    )
+                )
+        )
+        // --- Simple variant with info and page size ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Simple variant with info and page size"), theme))
+                .child(
+                    Pagination::from_spec(
+                        PaginationSpec::new()
+                            .with_current_page(4)
+                            .with_total_pages(12)
+                            .with_variant(PaginationVariant::Simple)
+                            .with_info_text("Showing 31–40 of 112")
+                            .with_page_size(10)
+                            .with_aria_label("Simple pagination"),
+                        theme,
+                    )
+                )
+        )
+        // --- Full variant ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Full variant"), theme))
+                .child(
+                    Pagination::from_spec(
+                        PaginationSpec::new()
+                            .with_current_page(6)
+                            .with_total_pages(25)
+                            .with_sibling_count(1)
+                            .with_variant(PaginationVariant::Full)
+                            .with_info_text("Showing 51–60 of 248")
+                            .with_page_size(10)
+                            .with_aria_label("Full pagination"),
+                        theme,
+                    )
+                )
+        )
+        // --- Standalone (no container chrome) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Standalone (no container chrome)"), theme))
+                .child(
+                    Pagination::from_spec(
+                        PaginationSpec::new()
+                            .with_current_page(3)
+                            .with_total_pages(8)
+                            .with_standalone(true)
+                            .with_aria_label("Standalone pagination"),
                         theme,
                     )
                 )

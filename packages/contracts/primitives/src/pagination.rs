@@ -7,12 +7,34 @@ pub enum PageItem {
     Ellipsis,
 }
 
+/// Rendering variant for Pagination. Matches the Svelte `variant` prop:
+/// - `Numbered` (default): numbered page buttons with first/last + ellipsis.
+/// - `Simple`: just Prev/Next buttons, no numbered pages.
+/// - `Full`: numbered pages plus a "Go to page" input field.
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
+pub enum PaginationVariant {
+    #[default]
+    Numbered,
+    Simple,
+    Full,
+}
+
 #[derive(Debug, Clone)]
 pub struct PaginationSpec {
     pub current_page: usize,
     pub total_pages: usize,
     pub sibling_count: usize,
     pub aria_label: Option<String>,
+    pub variant: PaginationVariant,
+    /// When true the component renders without the outer panel chrome
+    /// (border + background). Matches Svelte `standalone` prop.
+    pub standalone: bool,
+    /// Optional "showing X of Y" info text rendered alongside simple
+    /// and full variants.
+    pub info_text: Option<String>,
+    /// Current page size (items per page) shown alongside the info
+    /// text. None suppresses the page-size selector.
+    pub page_size: Option<usize>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -25,6 +47,10 @@ impl Default for PaginationSpec {
             total_pages: 1,
             sibling_count: 1,
             aria_label: None,
+            variant: PaginationVariant::Numbered,
+            standalone: false,
+            info_text: None,
+            page_size: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -57,6 +83,34 @@ impl PaginationSpec {
     pub fn with_aria_label(mut self, label: impl Into<String>) -> Self {
         self.aria_label = Some(label.into());
         self
+    }
+
+    pub fn with_variant(mut self, variant: PaginationVariant) -> Self {
+        self.variant = variant;
+        self
+    }
+
+    pub fn with_standalone(mut self, standalone: bool) -> Self {
+        self.standalone = standalone;
+        self
+    }
+
+    pub fn with_info_text(mut self, info_text: impl Into<String>) -> Self {
+        self.info_text = Some(info_text.into());
+        self
+    }
+
+    pub fn with_page_size(mut self, page_size: usize) -> Self {
+        self.page_size = Some(page_size);
+        self
+    }
+
+    pub fn is_simple(&self) -> bool {
+        matches!(self.variant, PaginationVariant::Simple)
+    }
+
+    pub fn is_full(&self) -> bool {
+        matches!(self.variant, PaginationVariant::Full)
     }
 
     // Token methods

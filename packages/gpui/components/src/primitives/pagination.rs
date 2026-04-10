@@ -92,6 +92,10 @@ impl Pagination {
     pub fn total_pages(mut self, v: usize) -> Self { self.spec.total_pages = v; self }
     pub fn sibling_count(mut self, v: usize) -> Self { self.spec.sibling_count = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn variant(mut self, v: poodle_primitives::PaginationVariant) -> Self { self.spec.variant = v; self }
+    pub fn standalone(mut self, v: bool) -> Self { self.spec.standalone = v; self }
+    pub fn info_text(mut self, v: impl Into<String>) -> Self { self.spec.info_text = Some(v.into()); self }
+    pub fn page_size(mut self, v: usize) -> Self { self.spec.page_size = Some(v); self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
@@ -154,6 +158,60 @@ impl Pagination {
             );
 
         // Wire click handler for navigation
+        if !disabled {
+            if let Some(ref handler) = self.on_page_change {
+                let handler = handler.clone();
+                btn = btn.on_click(move |_event, window, cx| {
+                    handler(target_page, window, cx);
+                });
+            }
+        }
+
+        btn.into_any_element()
+    }
+
+    /// Text-label variant of the nav button used by the Simple variant
+    /// ("Prev" / "Next" instead of chevron icons).
+    fn render_text_nav_button(
+        &self,
+        label: &'static str,
+        disabled: bool,
+        target_page: usize,
+        id: &str,
+    ) -> AnyElement {
+        let fill = self.button_fill;
+        let border = self.button_border;
+        let text_color = self.button_text;
+        let hover_fill = self.hover_fill;
+        let focus_ring = self.focus_ring;
+        let radius = self.radius;
+        let button_height = self.button_height;
+        let disabled_opacity = self.disabled_opacity;
+
+        let mut btn = div()
+            .id(SharedString::from(id.to_string()))
+            .focusable()
+            .flex()
+            .items_center()
+            .justify_center()
+            .h(button_height)
+            .px(self.button_padding)
+            .bg(fill)
+            .border_1()
+            .border_color(border)
+            .rounded(radius)
+            .text_size(px(12.0))
+            .text_color(text_color)
+            .focus(move |s| s.border_color(focus_ring))
+            .when(disabled, |el| {
+                el.opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed)
+            })
+            .when(!disabled, |el| {
+                el.cursor_pointer().hover(|style| style.bg(hover_fill))
+            })
+            .child(label);
+
         if !disabled {
             if let Some(ref handler) = self.on_page_change {
                 let handler = handler.clone();
@@ -247,10 +305,17 @@ impl IntoElement for Pagination {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        use poodle_primitives::PaginationVariant;
+
         let visible = self.spec.visible_pages();
         let is_first = self.spec.is_first_page();
         let is_last = self.spec.is_last_page();
         let current_page = self.spec.current_page;
+        let theme = &self.theme;
+
+        let text_secondary = crate::theme_ext::resolve_color(theme, "color.text.secondary");
+        let border_color = crate::theme_ext::resolve_color(theme, "color.border.subtle");
+        let surface_bg = crate::theme_ext::resolve_color(theme, "color.background.surface");
 
         // Contract: root gap 0.375rem, pages gap 0.25rem
         let mut root = div()
@@ -260,29 +325,80 @@ impl IntoElement for Pagination {
             .items_center()
             .gap(px(6.0)); // 0.375rem
 
-        // Prev button
-        let prev_page = if current_page > 1 { current_page - 1 } else { 1 };
-        root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, "poodle-pg-prev"));
-
-        // Page buttons container
-        let mut pages_container = div()
-            .flex()
-            .flex_row()
-            .items_center()
-            .gap(px(4.0)); // 0.25rem
-
-        for item in &visible {
-            match item {
-                PageItem::Page(page) => {
-                    pages_container = pages_container.child(self.render_page_button(*page));
-                }
-                PageItem::Ellipsis => {
-                    pages_container = pages_container.child(self.render_ellipsis());
-                }
-            }
+        // Standalone mode strips the panel chrome.
+        if !self.spec.standalone {
+            root = root
+                .bg(surface_bg)
+                .border_1()
+                .border_color(border_color)
+                .rounded(px(6.0))
+                .px(px(12.0))
+                .py(px(8.0));
         }
 
-        root = root.child(pages_container);
+        // Info text block (shown on simple/full variants).
+        if self.spec.info_text.is_some() || self.spec.page_size.is_some() {
+            let mut info = div().flex().items_center().gap(px(6.0));
+
+            if let Some(ref text) = self.spec.info_text {
+                info = info.child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(text_secondary)
+                        .child(text.clone()),
+                );
+            }
+
+            if let Some(page_size) = self.spec.page_size {
+                info = info.child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(text_secondary)
+                        .child(format!("{page_size} per page")),
+                );
+            }
+
+            root = root.child(info);
+        }
+
+        // Prev button — label differs between simple and numbered variants.
+        let prev_page = if current_page > 1 { current_page - 1 } else { 1 };
+        let prev_id = "poodle-pg-prev";
+        if self.spec.is_simple() {
+            root = root.child(self.render_text_nav_button("Prev", is_first, prev_page, prev_id));
+        } else {
+            root = root.child(self.render_nav_button("chevron-left", is_first, prev_page, prev_id));
+        }
+
+        // Numbered pages only render on Numbered and Full variants.
+        if !self.spec.is_simple() {
+            let mut pages_container = div()
+                .flex()
+                .flex_row()
+                .items_center()
+                .gap(px(4.0)); // 0.25rem
+
+            for item in &visible {
+                match item {
+                    PageItem::Page(page) => {
+                        pages_container = pages_container.child(self.render_page_button(*page));
+                    }
+                    PageItem::Ellipsis => {
+                        pages_container = pages_container.child(self.render_ellipsis());
+                    }
+                }
+            }
+
+            root = root.child(pages_container);
+        } else {
+            // Simple variant: show "Page X of Y" text between prev/next.
+            root = root.child(
+                div()
+                    .text_size(px(12.0))
+                    .text_color(text_secondary)
+                    .child(format!("Page {} of {}", current_page, self.spec.total_pages)),
+            );
+        }
 
         // Next button
         let next_page = if current_page < self.spec.total_pages {
@@ -290,7 +406,42 @@ impl IntoElement for Pagination {
         } else {
             self.spec.total_pages
         };
-        root = root.child(self.render_nav_button("chevron-right", is_last, next_page, "poodle-pg-next"));
+        let next_id = "poodle-pg-next";
+        if self.spec.is_simple() {
+            root = root.child(self.render_text_nav_button("Next", is_last, next_page, next_id));
+        } else {
+            root = root.child(self.render_nav_button("chevron-right", is_last, next_page, next_id));
+        }
+
+        // Full variant: "Go to page" input text (non-interactive stub for now —
+        // matches the visual affordance from Svelte without wiring a handler).
+        if matches!(self.spec.variant, PaginationVariant::Full) {
+            root = root.child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap(px(6.0))
+                    .child(
+                        div()
+                            .text_size(px(12.0))
+                            .text_color(text_secondary)
+                            .child("Go to"),
+                    )
+                    .child(
+                        div()
+                            .w(px(48.0))
+                            .h(px(24.0))
+                            .px(px(6.0))
+                            .border_1()
+                            .border_color(border_color)
+                            .rounded(px(4.0))
+                            .flex()
+                            .items_center()
+                            .text_size(px(12.0))
+                            .child(format!("{current_page}")),
+                    ),
+            );
+        }
 
         root.into_any_element()
     }

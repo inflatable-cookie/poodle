@@ -120,7 +120,7 @@ pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;
 pub use number_input::NumberInputSpec;
 pub use order_by::{ActiveSort, OrderBySpec, SortDirection, SortField};
-pub use pagination::{PageItem, PaginationSpec};
+pub use pagination::{PageItem, PaginationSpec, PaginationVariant};
 pub use password_requirements::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 pub use code_input::CodeInputSpec;

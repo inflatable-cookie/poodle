@@ -108,6 +108,149 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        // --- Slug ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Slug"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("slug-field", "URL slug")
+                            .with_description("Lowercase letters, numbers, and hyphens."),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("slug-field")
+                                .with_prefix("poodle.dev/")
+                                .with_value("team-alpha")
+                                .with_placeholder("your-workspace"),
+                            theme,
+                        )
+                    )
+                )
+        )
+        // --- Search ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Search"), theme))
+                .child(
+                    TextInput::from_spec(
+                        TextInputSpec::new()
+                            .with_id("search-field")
+                            .with_input_type("search")
+                            .with_placeholder("Search components…"),
+                        theme,
+                    )
+                )
+        )
+        // --- Prefix and suffix ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Prefix and suffix"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("price-field", "Monthly cost"),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("price-field")
+                                .with_prefix("$")
+                                .with_suffix("/mo")
+                                .with_value("29")
+                                .with_input_type("number"),
+                            theme,
+                        )
+                    )
+                )
+        )
+        // --- Suffix only ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Suffix only"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("weight-field", "Weight"),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("weight-field")
+                                .with_suffix("kg")
+                                .with_value("72")
+                                .with_input_type("number"),
+                            theme,
+                        )
+                    )
+                )
+        )
+        // --- Multiline (explicit type) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiline (explicit type)"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("bio-field", "Bio")
+                            .with_description("Tell us a bit about yourself."),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("bio-field")
+                                .with_input_type("multiline")
+                                .with_placeholder("A few sentences…")
+                                .with_rows(4),
+                            theme,
+                        )
+                    )
+                )
+        )
+        // --- Multiline (auto-detected from rows) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiline (auto-detected from rows)"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("notes-field", "Notes"),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("notes-field")
+                                .with_placeholder("Scratch space…")
+                                .with_rows(3),
+                            theme,
+                        )
+                    )
+                )
+        )
+        // --- Multiline with character count ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiline with character count"), theme))
+                .child(
+                    Field::from_spec(
+                        FieldSpec::new("summary-field", "Summary"),
+                        theme,
+                    )
+                    .with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("summary-field")
+                                .with_input_type("multiline")
+                                .with_rows(3)
+                                .with_max_length(140)
+                                .with_placeholder("Up to 140 characters…"),
+                            theme,
+                        )
+                    )
+                )
+        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
