@@ -328,6 +328,7 @@
 
   .dialog__header p {
     margin: 0;
+    padding-top: 0.375rem;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
