@@ -10,6 +10,16 @@ pub struct SplitViewSpec {
     pub min_secondary_size: Option<f32>,
     pub is_primary_collapsed: bool,
     pub is_secondary_collapsed: bool,
+    /// When true the divider cannot be dragged and the split renders
+    /// in a non-interactive state. Collapse toggles (if shown) are
+    /// disabled as well.
+    pub is_disabled: bool,
+    /// When true the split renders a collapse-toggle affordance on
+    /// the primary side of the divider.
+    pub show_collapse_primary: bool,
+    /// When true the split renders a collapse-toggle affordance on
+    /// the secondary side of the divider.
+    pub show_collapse_secondary: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -25,6 +35,9 @@ impl SplitViewSpec {
             min_secondary_size: None,
             is_primary_collapsed: false,
             is_secondary_collapsed: false,
+            is_disabled: false,
+            show_collapse_primary: false,
+            show_collapse_secondary: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -58,6 +71,21 @@ impl SplitViewSpec {
 
     pub fn with_secondary_collapsed(mut self, is_secondary_collapsed: bool) -> Self {
         self.is_secondary_collapsed = is_secondary_collapsed;
+        self
+    }
+
+    pub fn with_disabled(mut self, is_disabled: bool) -> Self {
+        self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_show_collapse_primary(mut self, show: bool) -> Self {
+        self.show_collapse_primary = show;
+        self
+    }
+
+    pub fn with_show_collapse_secondary(mut self, show: bool) -> Self {
+        self.show_collapse_secondary = show;
         self
     }
 

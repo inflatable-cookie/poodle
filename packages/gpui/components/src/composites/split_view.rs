@@ -52,6 +52,9 @@ impl SplitView {
     pub fn min_secondary_size(mut self, v: f32) -> Self { self.spec.min_secondary_size = Some(v); self }
     pub fn primary_collapsed(mut self, v: bool) -> Self { self.spec.is_primary_collapsed = v; self }
     pub fn secondary_collapsed(mut self, v: bool) -> Self { self.spec.is_secondary_collapsed = v; self }
+    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn show_collapse_primary(mut self, v: bool) -> Self { self.spec.show_collapse_primary = v; self }
+    pub fn show_collapse_secondary(mut self, v: bool) -> Self { self.spec.show_collapse_secondary = v; self }
     pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
@@ -94,6 +97,13 @@ impl IntoElement for SplitView {
             container = container.flex();
         } else {
             container = container.flex().flex_col();
+        }
+
+        // Disabled treatment: dim the entire split and forbid the
+        // col/row-resize cursor on the divider below.
+        if spec.is_disabled {
+            let disabled_opacity = crate::theme_ext::resolve_opacity(theme, "state.opacity.disabled");
+            container = container.opacity(disabled_opacity);
         }
 
         // Primary pane
@@ -154,27 +164,33 @@ impl IntoElement for SplitView {
                 divider = divider
                     .w(px(4.0))
                     .h_full()
-                    .cursor_col_resize()
                     .flex()
                     .items_center()
                     .justify_center()
                     .child(div().w(px(1.0)).h_full().bg(border))
                     .child(toggle_indicator);
+                if !spec.is_disabled {
+                    divider = divider.cursor_col_resize();
+                }
             } else {
                 divider = divider
                     .h(px(4.0))
                     .w_full()
-                    .cursor_row_resize()
                     .flex()
                     .items_center()
                     .justify_center()
                     .child(div().h(px(1.0)).w_full().bg(border))
                     .child(toggle_indicator);
+                if !spec.is_disabled {
+                    divider = divider.cursor_row_resize();
+                }
             }
 
-            divider = divider.hover(|s| {
-                s.bg(resolve_color(theme, "color.accent.base").opacity(0.3))
-            });
+            if !spec.is_disabled {
+                divider = divider.hover(|s| {
+                    s.bg(resolve_color(theme, "color.accent.base").opacity(0.3))
+                });
+            }
 
             container = container.child(divider);
         }
