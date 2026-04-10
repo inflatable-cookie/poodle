@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, SwitchSpec};
+use poodle_primitives::{ControlSize, SwitchSpec, SwitchTone};
 
 use crate::presentation::{control_height_rem, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
@@ -40,6 +40,10 @@ impl Switch {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn read_only(mut self, v: bool) -> Self { self.spec.is_read_only = v; self }
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
+    pub fn left_label(mut self, v: impl Into<String>) -> Self { self.spec.left_label = Some(v.into()); self }
+    pub fn right_label(mut self, v: impl Into<String>) -> Self { self.spec.right_label = Some(v.into()); self }
+    pub fn left_tone(mut self, v: SwitchTone) -> Self { self.spec.left_tone = v; self }
+    pub fn right_tone(mut self, v: SwitchTone) -> Self { self.spec.right_tone = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
@@ -108,12 +112,21 @@ impl IntoElement for Switch {
         let knob_offset = if is_checked { thumb_size + track_padding } else { track_padding };
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
-        // Svelte: off-track = text-primary 18% + surface, on-track = accent 24% + surface
-        // Custom colors override the track fill entirely
+        // Svelte: off-track = text-primary 18% + surface, on-track = accent 24% + surface.
+        // Resolution order for each side:
+        //   1. explicit hex (on_color / off_color)
+        //   2. tone-derived color (right_tone / left_tone) mixed with surface
+        //   3. default track color (accent / text-primary mix)
+        let resolve_tone_color = |tone: SwitchTone| -> Option<Hsla> {
+            tone.color_token().map(|token| resolve_color(theme, token))
+        };
+
         let track_bg = if is_checked {
             if let Some(ref hex) = spec.on_color {
                 crate::theme_ext::parse_hex_color(hex)
                     .unwrap_or_else(|| color_mix(accent, surface_bg, 0.24))
+            } else if let Some(tone_color) = resolve_tone_color(spec.right_tone) {
+                color_mix(tone_color, surface_bg, 0.24)
             } else {
                 color_mix(accent, surface_bg, 0.24)
             }
@@ -121,20 +134,28 @@ impl IntoElement for Switch {
             if let Some(ref hex) = spec.off_color {
                 crate::theme_ext::parse_hex_color(hex)
                     .unwrap_or_else(|| color_mix(text_primary, surface_bg, 0.18))
+            } else if let Some(tone_color) = resolve_tone_color(spec.left_tone) {
+                color_mix(tone_color, surface_bg, 0.18)
             } else {
                 color_mix(text_primary, surface_bg, 0.18)
             }
         };
 
-        // Contract: checked track border = accent-base 58% + border-default
+        // Contract: checked track border = accent-base 58% + border-default.
+        // Tone-aware version: use the resolved tone color (or accent as fallback).
+        let on_tone_color = resolve_tone_color(spec.right_tone).unwrap_or(accent);
+        let off_tone_color = resolve_tone_color(spec.left_tone).unwrap_or(text_primary);
+
         let track_border = if is_checked {
-            color_mix(accent, border, 0.58)
+            color_mix(on_tone_color, border, 0.58)
+        } else if spec.left_tone != SwitchTone::Default {
+            color_mix(off_tone_color, border, 0.58)
         } else {
             border
         };
 
-        // Contract: checked thumb = accent-base, unchecked = text-primary
-        let knob_color = if is_checked { accent } else { text_primary };
+        // Contract: checked thumb = accent-base (or tone), unchecked = text-primary (or tone)
+        let knob_color = if is_checked { on_tone_color } else { off_tone_color };
 
         // Contract: track inset shadow = inset 0 0 0 1px white/8%
         let inset_shadow_color = hsla(0.0, 0.0, 1.0, 0.08);
@@ -192,15 +213,57 @@ impl IntoElement for Switch {
             row = row.cursor_pointer();
         }
 
-        row = row.child(track);
+        // Dual-label mode: left label | track | right label. Tones tint the
+        // corresponding label text using the resolved tone color (unchecked
+        // side is muted via alpha). Otherwise: track | optional single label.
+        if spec.is_dual_label() {
+            let text_secondary = resolve_color(theme, "color.text.secondary");
 
-        if let Some(ref label) = spec.label {
-            row = row.child(
-                div()
-                    .text_size(body_size)
-                    .text_color(text_primary)
-                    .child(label.clone()),
-            );
+            let label_color = |tone_color: Hsla, is_active: bool| -> Hsla {
+                if is_active {
+                    tone_color
+                } else {
+                    // Inactive side fades toward secondary text.
+                    let mut dim = text_secondary;
+                    dim.a *= 0.85;
+                    dim
+                }
+            };
+
+            if let Some(ref left) = spec.left_label {
+                let color = label_color(off_tone_color, !is_checked);
+                row = row.child(
+                    div()
+                        .text_size(body_size)
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(color)
+                        .child(left.clone()),
+                );
+            }
+
+            row = row.child(track);
+
+            if let Some(ref right) = spec.right_label {
+                let color = label_color(on_tone_color, is_checked);
+                row = row.child(
+                    div()
+                        .text_size(body_size)
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(color)
+                        .child(right.clone()),
+                );
+            }
+        } else {
+            row = row.child(track);
+
+            if let Some(ref label) = spec.label {
+                row = row.child(
+                    div()
+                        .text_size(body_size)
+                        .text_color(text_primary)
+                        .child(label.clone()),
+                );
+            }
         }
 
         // Click + keyboard handlers

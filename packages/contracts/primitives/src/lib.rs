@@ -149,7 +149,7 @@ pub use split_button::{SplitButtonSpec, SplitMenuItem};
 pub use stack::{LayoutJustify, StackDirection, StackSpec};
 pub use status_indicator::StatusIndicatorSpec;
 pub use surface::SurfaceSpec;
-pub use switch::SwitchSpec;
+pub use switch::{SwitchSpec, SwitchTone};
 pub use tab_strip::TabStripSpec;
 pub use tabs::TabsSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};

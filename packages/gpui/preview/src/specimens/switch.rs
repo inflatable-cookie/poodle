@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{ControlDensity, ControlSize, SwitchSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, SwitchSpec, SwitchTone, EyebrowSpec};
 use poodle_gpui_components::{Switch, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -149,6 +149,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_off_color("#94a3b8");
                     spec.label = Some("Quiet mode".to_string());
                     col = col.child(Switch::from_spec(spec, theme).with_id("sw-custom-amber"));
+
+                    col
+                })
+        )
+        // --- Dual labels and tones ---
+        .child(
+            div().flex().flex_col().gap(px(10.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Dual labels and tones"), theme))
+                .child({
+                    let mut col = div().flex().flex_col().gap(px(10.0));
+
+                    col = col.child(
+                        Switch::from_spec(
+                            SwitchSpec::new()
+                                .with_default_checked(true)
+                                .with_left_label("Draft")
+                                .with_right_label("Live")
+                                .with_left_tone(SwitchTone::Danger)
+                                .with_right_tone(SwitchTone::Success)
+                                .with_aria_label("Publication status"),
+                            theme,
+                        )
+                        .with_id("sw-dual-publish")
+                    );
+
+                    col = col.child(
+                        Switch::from_spec(
+                            SwitchSpec::new()
+                                .with_default_checked(false)
+                                .with_left_label("Restricted")
+                                .with_right_label("Free")
+                                .with_left_tone(SwitchTone::Warning)
+                                .with_right_tone(SwitchTone::Success)
+                                .with_aria_label("Access status"),
+                            theme,
+                        )
+                        .with_id("sw-dual-access")
+                    );
 
                     col
                 })
