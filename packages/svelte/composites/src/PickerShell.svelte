@@ -37,12 +37,6 @@
     </div>
   </div>
 
-  {#if statusText}
-    <p class="picker-shell__status" id={statusId ?? undefined} role="status" aria-live="polite" aria-atomic="true">
-      {statusText}
-    </p>
-  {/if}
-
   {#if $$slots.toolbar}
     <div class="picker-shell__toolbar">
       <slot name="toolbar" />
@@ -53,6 +47,13 @@
     <div class="picker-shell__selection">
       <slot name="selection" />
     </div>
+  {/if}
+
+  <!-- Screen-reader-only live region for status updates -->
+  {#if statusText}
+    <p class="picker-shell__status sr-only" id={statusId ?? undefined} role="status" aria-live="polite" aria-atomic="true">
+      {statusText}
+    </p>
   {/if}
 
   {#if state === "ready"}
@@ -87,6 +88,7 @@
 <style>
   .picker-shell {
     display: grid;
+    grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
     gap: var(--poodle-space-stack-md);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
@@ -134,11 +136,28 @@
     margin: 0;
   }
 
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .picker-shell__meta {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
     align-items: baseline;
+  }
+
+  .picker-shell__body {
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .picker-shell__state {
