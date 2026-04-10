@@ -149,7 +149,13 @@
     gap: var(--poodle-space-inline-md);
   }
 
-  /* Size variants */
+  /* Size variants — label */
+  .checkbox[data-size="xs"] .checkbox__label { font-size: 0.6875rem; }
+  .checkbox[data-size="sm"] .checkbox__label { font-size: 0.75rem; }
+  .checkbox[data-size="lg"] .checkbox__label { font-size: 0.875rem; }
+  .checkbox[data-size="xl"] .checkbox__label { font-size: 0.9375rem; }
+
+  /* Size variants — indicator */
   .checkbox[data-size="xs"] .checkbox__indicator {
     width: calc(var(--poodle-size-icon-default) - 0.125rem);
     height: calc(var(--poodle-size-icon-default) - 0.125rem);
