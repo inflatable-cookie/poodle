@@ -207,5 +207,7 @@
 
   /* Density variants — horizontal padding and gap only, not vertical padding */
   .bulk-action-bar[data-density="compact"] { padding-inline: 0.75rem; gap: 0.375rem; }
+  .bulk-action-bar[data-density="compact"] .bulk-action-bar__actions { gap: 0.125rem; }
   .bulk-action-bar[data-density="comfortable"] { padding-inline: 1.25rem; gap: 1rem; }
+  .bulk-action-bar[data-density="comfortable"] .bulk-action-bar__actions { gap: 0.5rem; }
 </style>
