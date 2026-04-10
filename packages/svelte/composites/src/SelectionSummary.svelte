@@ -23,27 +23,27 @@
   $: overflowCount = Math.max(0, items.length - visibleItems.length);
 </script>
 
-{#if items.length > 0}
-  <section class="selection-summary" aria-label="Current selection" data-size={resolvedSize} data-density={resolvedDensity}>
-    <div class="selection-summary__chips">
-      {#each visibleItems as item}
-        <button
-          type="button"
-          class="selection-summary__chip"
-          on:click={() => dispatch("remove", { id: item.id })}
-          aria-label={`Remove ${item.label}`}
-        >
-          {item.label}
-          <span aria-hidden="true"><Icon name="x" /></span>
-        </button>
-      {/each}
-      {#if overflowCount > 0}
-        <span class="selection-summary__overflow">+{overflowCount} more</span>
-      {/if}
+<section class="selection-summary" aria-label="Current selection" data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="selection-summary__chips">
+    {#each visibleItems as item}
+      <button
+        type="button"
+        class="selection-summary__chip"
+        on:click={() => dispatch("remove", { id: item.id })}
+        aria-label={`Remove ${item.label}`}
+      >
+        {item.label}
+        <span aria-hidden="true"><Icon name="x" /></span>
+      </button>
+    {/each}
+    {#if overflowCount > 0}
+      <span class="selection-summary__overflow">+{overflowCount} more</span>
+    {/if}
+    {#if items.length > 0}
       <button type="button" class="selection-summary__clear" on:click={() => dispatch("clear")}>Clear</button>
-    </div>
-  </section>
-{/if}
+    {/if}
+  </div>
+</section>
 
 <style>
   .selection-summary {
@@ -56,6 +56,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
+    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
   }
 
   .selection-summary__chip {
