@@ -135,43 +135,45 @@
   on:popstate={syncCurrentLocation}
 />
 
-<UiPresentationProvider density={density} sizeScale={controlSize}>
-  <div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
-    <header class="app-top-bar">
-      <div class="app-top-bar__title">
-        <strong>Poodle</strong>
-      </div>
-      <Tabs
-        value={activeSection}
-        items={topTabs}
-        variant="pill"
-        ariaLabel="Main navigation"
-        on:valueChange={(event) => navigateToSection(event.detail.value as SectionId)}
-      />
-      <div class="app-top-bar__pills">
-        <Pill>{theme}</Pill>
-        <Pill>{density}</Pill>
-        <Pill>{controlSize}</Pill>
-      </div>
-    </header>
-
-    <DisplayControls
-      {theme}
-      {density}
-      {controlSize}
-      {appearanceTreatment}
-      {disabled}
-      {invalid}
-      {busy}
-      onThemeChange={(value) => (theme = value as ThemeName)}
-      onDensityChange={(value) => (density = value as DensityName)}
-      onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
-      onAppearanceTreatmentChange={(value) => (appearanceTreatment = value as AppearanceTreatmentName)}
-      onDisabledChange={(checked) => (disabled = checked)}
-      onInvalidChange={(checked) => (invalid = checked)}
-      onBusyChange={(checked) => (busy = checked)}
+<div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
+  <header class="app-top-bar">
+    <div class="app-top-bar__title">
+      <strong>Poodle</strong>
+    </div>
+    <Tabs
+      value={activeSection}
+      items={topTabs}
+      variant="pill"
+      size="sm"
+      density="compact"
+      ariaLabel="Main navigation"
+      on:valueChange={(event) => navigateToSection(event.detail.value as SectionId)}
     />
+    <div class="app-top-bar__pills">
+      <Pill>{theme}</Pill>
+      <Pill>{density}</Pill>
+      <Pill>{controlSize}</Pill>
+    </div>
+  </header>
 
+  <DisplayControls
+    {theme}
+    {density}
+    {controlSize}
+    {appearanceTreatment}
+    {disabled}
+    {invalid}
+    {busy}
+    onThemeChange={(value) => (theme = value as ThemeName)}
+    onDensityChange={(value) => (density = value as DensityName)}
+    onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
+    onAppearanceTreatmentChange={(value) => (appearanceTreatment = value as AppearanceTreatmentName)}
+    onDisabledChange={(checked) => (disabled = checked)}
+    onInvalidChange={(checked) => (invalid = checked)}
+    onBusyChange={(checked) => (busy = checked)}
+  />
+
+  <UiPresentationProvider density={density} sizeScale={controlSize}>
     <main class="app-main">
       {#key `${theme}:${activeSection}`}
         <IconProvider icons={iconNodes as unknown as IconSet}>
@@ -187,8 +189,8 @@
         </IconProvider>
       {/key}
     </main>
-  </div>
-</UiPresentationProvider>
+  </UiPresentationProvider>
+</div>
 
 <style>
   :global(.app-shell) {
