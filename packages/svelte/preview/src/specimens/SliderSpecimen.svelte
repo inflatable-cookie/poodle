@@ -7,6 +7,7 @@
   let opacity = 100;
 </script>
 
+<div class="slider-specimen">
 <SpecimenLayout>
   <SpecimenGroup label="Default">
     <Slider
@@ -43,9 +44,10 @@
     <Slider value={50} min={0} max={100} ariaLabel={"Slider at " + density + " density"} {density} />
   </svelte:fragment>
 </SpecimenLayout>
+</div>
 
 <style>
-  :global(.specimen-layout) {
+  .slider-specimen {
     max-width: 20rem;
   }
 </style>

@@ -7,6 +7,7 @@
   let ageRange: [number, number] = [23, 43];
 </script>
 
+<div class="range-slider-specimen">
 <SpecimenLayout>
   <SpecimenGroup label="Default">
     <RangeSlider
@@ -43,9 +44,10 @@
     <RangeSlider value={[25, 75]} min={0} max={100} ariaLabel={"Range at " + density + " density"} {density} />
   </svelte:fragment>
 </SpecimenLayout>
+</div>
 
 <style>
-  :global(.specimen-layout) {
+  .range-slider-specimen {
     max-width: 20rem;
   }
 </style>
