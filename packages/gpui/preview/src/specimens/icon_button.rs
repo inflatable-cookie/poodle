@@ -105,6 +105,62 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        // --- Toggle (text editor toolbar) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Toggle (text editor toolbar)"), theme))
+                .child(
+                    div().flex().gap(px(8.0)).items_center()
+                        .child({
+                            let bold = state.specimens.is_on("icon-btn-bold");
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("bold")
+                                    .with_pressed(bold)
+                                    .with_aria_label("Bold"),
+                                theme,
+                            )
+                            .with_id("toggle-bold")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("icon-btn-bold");
+                                cx.notify();
+                            }))
+                        })
+                        .child({
+                            let italic = state.specimens.is_on("icon-btn-italic");
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("italic")
+                                    .with_pressed(italic)
+                                    .with_aria_label("Italic"),
+                                theme,
+                            )
+                            .with_id("toggle-italic")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("icon-btn-italic");
+                                cx.notify();
+                            }))
+                        })
+                        .child({
+                            let underline = state.specimens.is_on("icon-btn-underline");
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("underline")
+                                    .with_pressed(underline)
+                                    .with_aria_label("Underline"),
+                                theme,
+                            )
+                            .with_id("toggle-underline")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("icon-btn-underline");
+                                cx.notify();
+                            }))
+                        })
+                )
+        )
         // --- States ---
         .child(
             div().flex().flex_col().gap(px(8.0))
