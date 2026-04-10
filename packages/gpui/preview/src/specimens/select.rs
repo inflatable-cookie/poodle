@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{SelectSpec, ChoiceOption, EyebrowSpec};
+use poodle_primitives::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
 use poodle_gpui_components::{Select, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -19,6 +19,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ChoiceOption::new("elderberry", "Elderberry"),
     ];
 
+    let rich_options: Vec<ChoiceOption> = vec![
+        ChoiceOption::new("us", "United States").with_description("North America"),
+        ChoiceOption::new("uk", "United Kingdom").with_description("Europe"),
+        ChoiceOption::new("jp", "Japan").with_description("Asia"),
+        ChoiceOption::new("au", "Australia").with_description("Oceania"),
+        ChoiceOption::new("br", "Brazil").with_description("South America"),
+    ];
+
+    let framework_options: Vec<ChoiceOption> = vec![
+        ChoiceOption::new("svelte", "Svelte"),
+        ChoiceOption::new("react", "React"),
+        ChoiceOption::new("vue", "Vue"),
+        ChoiceOption::new("angular", "Angular"),
+        ChoiceOption::new("solid", "SolidJS"),
+        ChoiceOption::new("astro", "Astro"),
+    ];
+
     // Grouped options flattened (GPUI Select does not yet support option groups)
     let grouped_options: Vec<ChoiceOption> = vec![
         ChoiceOption::new("apple", "Apple"),
@@ -31,92 +48,196 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             opt.is_disabled = true;
             opt
         },
-        ChoiceOption::new("rice", "Rice"),
-        ChoiceOption::new("wheat", "Wheat"),
     ];
 
-    let disabled_options: Vec<ChoiceOption> = vec![
-        ChoiceOption::new("apple", "Apple"),
-        ChoiceOption::new("banana", "Banana"),
-        ChoiceOption::new("cherry", "Cherry"),
-        ChoiceOption::new("dragonfruit", "Dragonfruit"),
-        ChoiceOption::new("elderberry", "Elderberry"),
-    ];
+    // Helper for reading toggle/value state
+    let get_open = |key: &str| state.specimens.is_on(key);
+    let get_value = |key: &str| state.specimens.text.get(key).cloned();
 
-    let default_open = state.specimens.is_on("select-default-open");
-    let default_value = state.specimens.text.get("select-default-value").cloned();
-    let grouped_open = state.specimens.is_on("select-grouped-open");
-    let grouped_value = state.specimens.text.get("select-grouped-value").cloned();
+    // Helper for building a Select with common toggle/change handlers
+    let build_select = |id: &'static str,
+                        spec: SelectSpec,
+                        cx: &mut Context<PreviewRoot>|
+     -> Select {
+        let open_key = format!("{}-open", id);
+        let value_key = format!("{}-value", id);
+        Select::from_spec(spec, theme)
+            .with_id(id)
+            .on_toggle(cx.listener(move |this, _open: &bool, _w, cx| {
+                this.state.specimens.toggle(&open_key);
+                cx.notify();
+            }))
+            .on_change(cx.listener(move |this, val: &str, _w, cx| {
+                let open_key = format!("{}-open", id);
+                let value_key = format!("{}-value", id);
+                this.state.specimens.text.insert(value_key, val.to_string());
+                this.state.specimens.toggles.insert(open_key, false);
+                cx.notify();
+            }))
+    };
 
     div().flex().flex_col().gap(px(24.0))
-        // --- Default (flat options) ---
+        // --- Native (default) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (flat options)"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Native (default)"), theme))
                 .child({
-                    let mut spec = SelectSpec::new(fruit_options)
+                    let value = get_value("select-native-value");
+                    let mut spec = SelectSpec::new(fruit_options.clone())
                         .with_placeholder("Choose a fruit")
-                        .with_open(default_open);
-                    if let Some(ref val) = default_value {
-                        spec = spec.with_value(val.as_str());
+                        .with_open(get_open("select-native-open"));
+                    if let Some(ref v) = value {
+                        spec = spec.with_value(v.as_str());
                     }
-
                     div().flex().flex_col().gap(px(6.0)).max_w(px(320.0))
-                        .child(
-                            Select::from_spec(spec, theme)
-                                .with_id("select-default")
-                                .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                                    this.state.specimens.toggle("select-default-open");
-                                    cx.notify();
-                                }))
-                                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                    this.state.specimens.text.insert("select-default-value".to_string(), val.to_string());
-                                    this.state.specimens.toggles.insert("select-default-open".to_string(), false);
-                                    cx.notify();
-                                }))
-                        )
-                        .when(default_value.is_some(), |d| {
+                        .child(build_select("select-native", spec, cx))
+                        .when(value.is_some(), |d| {
                             d.child(
-                                div().text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Selected: {}", default_value.as_deref().unwrap_or("")))
+                                div().text_sm().text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Selected: {}", value.as_deref().unwrap_or("")))
                             )
                         })
                 })
         )
-        // --- Grouped options ---
+        // --- Custom dropdown (non-searchable) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Grouped options"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom dropdown (non-searchable)"), theme))
                 .child({
-                    let mut spec = SelectSpec::new(grouped_options)
-                        .with_placeholder("Choose a food")
-                        .with_open(grouped_open);
-                    if let Some(ref val) = grouped_value {
-                        spec = spec.with_value(val.as_str());
+                    let value = get_value("select-custom-value");
+                    let mut spec = SelectSpec::new(rich_options.clone())
+                        .with_placeholder("Choose a country")
+                        .with_open(get_open("select-custom-open"));
+                    spec.mode = SelectMode::Custom;
+                    if let Some(ref v) = value {
+                        spec = spec.with_value(v.as_str());
                     }
-
                     div().flex().flex_col().gap(px(6.0)).max_w(px(320.0))
-                        .child(
-                            Select::from_spec(spec, theme)
-                                .with_id("select-grouped")
-                                .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                                    this.state.specimens.toggle("select-grouped-open");
-                                    cx.notify();
-                                }))
-                                .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                    this.state.specimens.text.insert("select-grouped-value".to_string(), val.to_string());
-                                    this.state.specimens.toggles.insert("select-grouped-open".to_string(), false);
-                                    cx.notify();
-                                }))
-                        )
-                        .when(grouped_value.is_some(), |d| {
+                        .child(build_select("select-custom", spec, cx))
+                        .when(value.is_some(), |d| {
                             d.child(
-                                div().text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Selected: {}", grouped_value.as_deref().unwrap_or("")))
+                                div().text_sm().text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Selected: {}", value.as_deref().unwrap_or("")))
                             )
                         })
+                })
+        )
+        // --- Searchable ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Searchable"), theme))
+                .child({
+                    let value = get_value("select-searchable-value");
+                    let mut spec = SelectSpec::new(framework_options.clone())
+                        .with_placeholder("Search frameworks...")
+                        .with_open(get_open("select-searchable-open"));
+                    spec.searchable = true;
+                    if let Some(ref v) = value {
+                        spec = spec.with_value(v.as_str());
+                    }
+                    div().flex().flex_col().gap(px(6.0)).max_w(px(320.0))
+                        .child(build_select("select-searchable", spec, cx))
+                        .when(value.is_some(), |d| {
+                            d.child(
+                                div().text_sm().text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Selected: {}", value.as_deref().unwrap_or("")))
+                            )
+                        })
+                })
+        )
+        // --- Searchable with groups ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Searchable with groups"), theme))
+                .child({
+                    let value = get_value("select-searchable-grouped-value");
+                    let mut spec = SelectSpec::new(grouped_options.clone())
+                        .with_placeholder("Search food...")
+                        .with_open(get_open("select-searchable-grouped-open"));
+                    spec.searchable = true;
+                    if let Some(ref v) = value {
+                        spec = spec.with_value(v.as_str());
+                    }
+                    div().flex().flex_col().gap(px(6.0)).max_w(px(320.0))
+                        .child(build_select("select-searchable-grouped", spec, cx))
+                        .when(value.is_some(), |d| {
+                            d.child(
+                                div().text_sm().text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Selected: {}", value.as_deref().unwrap_or("")))
+                            )
+                        })
+                })
+        )
+        // --- Freeform (autocomplete) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Freeform (autocomplete)"), theme))
+                .child({
+                    let value = get_value("select-freeform-value");
+                    let mut spec = SelectSpec::new(framework_options.clone())
+                        .with_placeholder("Type or select...")
+                        .with_open(get_open("select-freeform-open"));
+                    spec.searchable = true;
+                    spec.freeform = true;
+                    if let Some(ref v) = value {
+                        spec = spec.with_value(v.as_str());
+                    }
+                    div().flex().flex_col().gap(px(6.0)).max_w(px(320.0))
+                        .child(build_select("select-freeform", spec, cx))
+                        .when(value.is_some(), |d| {
+                            d.child(
+                                div().text_sm().text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Value: {}", value.as_deref().unwrap_or("")))
+                            )
+                        })
+                })
+        )
+        // --- Rich option rendering (custom slot) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Rich option rendering (custom slot)"), theme))
+                .child({
+                    let mut spec = SelectSpec::new(rich_options.clone())
+                        .with_placeholder("Choose a country")
+                        .with_open(get_open("select-rich-open"));
+                    spec.mode = SelectMode::Custom;
+                    if let Some(ref v) = get_value("select-rich-value") {
+                        spec = spec.with_value(v.as_str());
+                    }
+                    div().max_w(px(320.0))
+                        .child(build_select("select-rich", spec, cx))
+                })
+        )
+        // --- Clearable (custom) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Clearable (custom)"), theme))
+                .child({
+                    let mut spec = SelectSpec::new(fruit_options.clone())
+                        .with_placeholder("All fruits")
+                        .with_clearable(true)
+                        .with_open(get_open("select-clearable-open"));
+                    spec.mode = SelectMode::Custom;
+                    if let Some(ref v) = get_value("select-clearable-value") {
+                        spec = spec.with_value(v.as_str());
+                    }
+                    div().max_w(px(320.0))
+                        .child(build_select("select-clearable", spec, cx))
+                })
+        )
+        // --- Native grouped ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Native grouped"), theme))
+                .child({
+                    let mut spec = SelectSpec::new(grouped_options.clone())
+                        .with_placeholder("Choose a food")
+                        .with_open(get_open("select-native-grouped-open"));
+                    if let Some(ref v) = get_value("select-native-grouped-value") {
+                        spec = spec.with_value(v.as_str());
+                    }
+                    div().max_w(px(320.0))
+                        .child(build_select("select-native-grouped", spec, cx))
                 })
         )
         // --- Disabled ---
@@ -124,7 +245,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child({
-                    let mut spec = SelectSpec::new(disabled_options)
+                    let mut spec = SelectSpec::new(fruit_options)
                         .with_placeholder("Choose a fruit")
                         .with_value("banana");
                     spec.is_disabled = true;
