@@ -6,28 +6,55 @@ use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
-        // --- Indeterminate ---
+        // --- Indeterminate (spinner only) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Indeterminate"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Indeterminate (spinner only)"), theme))
                 .child(
                     PageLoading::from_spec(
                         PageLoadingSpec::new()
-                            .with_message("Loading components..."),
+                            .with_message("Loading data..."),
                         theme,
                     )
                 )
         )
-        // --- Determinate (60%) ---
+        // --- Determinate (with progress bar) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Determinate (60%)"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Determinate (with progress bar)"), theme))
                 .child(
                     PageLoading::from_spec(
                         PageLoadingSpec::new()
                             .with_value(60.0)
                             .with_max(100.0)
-                            .with_message("Importing data...")
+                            .with_message("Uploading files... 60%"),
+                        theme,
+                    )
+                )
+        )
+        // --- With cancel button ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With cancel button"), theme))
+                .child(
+                    PageLoading::from_spec(
+                        PageLoadingSpec::new()
+                            .with_message("Processing request...")
+                            .with_can_cancel(true),
+                        theme,
+                    )
+                )
+        )
+        // --- Determinate with cancel ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Determinate with cancel"), theme))
+                .child(
+                    PageLoading::from_spec(
+                        PageLoadingSpec::new()
+                            .with_value(35.0)
+                            .with_max(100.0)
+                            .with_message("Importing data... 35%")
                             .with_can_cancel(true),
                         theme,
                     )

@@ -105,6 +105,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ))
                 )
         )
+        // --- Range with pre-selected range ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Range with pre-selected range"), theme))
+                .child({
+                    let mut spec = CalendarSpec::new().with_mode(CalendarMode::Range);
+                    spec.default_range_value = DateRangeValue::new(
+                        Some("2026-03-05".to_string()),
+                        Some("2026-03-12".to_string()),
+                    );
+                    spec.visible_month = Some("2026-03".to_string());
+                    spec.aria_label = Some("Pre-selected range".to_string());
+                    Calendar::from_spec(spec, theme).with_id("range-preselected")
+                })
+        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -115,6 +130,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled calendar".to_string());
                     Calendar::from_spec(spec, theme).with_id("disabled")
+                })
+        )
+        // --- Range disabled ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Range disabled"), theme))
+                .child({
+                    let mut spec = CalendarSpec::new().with_mode(CalendarMode::Range);
+                    spec.is_disabled = true;
+                    spec.aria_label = Some("Disabled range calendar".to_string());
+                    Calendar::from_spec(spec, theme).with_id("range-disabled")
                 })
         )
         .into_any_element();

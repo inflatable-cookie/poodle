@@ -32,6 +32,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
+        // --- Dragging state (active drop target) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Dragging state"), theme))
+                .child(
+                    FileUpload::from_spec(
+                        FileUploadSpec::new()
+                            .with_accept("image/*")
+                            .with_multiple(true)
+                            .with_dragging(true),
+                        theme,
+                    )
+                )
+        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
