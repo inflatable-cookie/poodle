@@ -323,7 +323,7 @@ pub fn render_single_specimen(
         "metric-tile" | "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
         "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
         "toast-stack" => specimen_card("ToastStack", theme, state_display::render(state, cx)),
-        "confirm-action" => specimen_card("ConfirmAction", theme, confirm_action_specimen::render(theme)),
+        "confirm-action" => specimen_card("ConfirmAction", theme, confirm_action_specimen::render(state, cx)),
         "form-dialog" => specimen_card("FormDialog", theme, form_dialog_specimen::render(theme)),
         "filter-toolbar" => specimen_card("FilterToolbar", theme, filter_toolbar_specimen::render(theme)),
         "bulk-action-bar" => specimen_card("BulkActionBar", theme, bulk_action_bar_specimen::render(theme)),

@@ -55,12 +55,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                     )
-                    .on_confirm(cx.listener(|this, _w, cx| {
+                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-danger-open".to_string(), false);
                         this.state.specimens.text.insert("confirm-action-last".to_string(), "Record deleted".to_string());
                         cx.notify();
                     }))
-                    .on_cancel(cx.listener(|this, _w, cx| {
+                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-danger-open".to_string(), false);
                         cx.notify();
                     }))
@@ -95,12 +95,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                     )
-                    .on_confirm(cx.listener(|this, _w, cx| {
+                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-warning-open".to_string(), false);
                         this.state.specimens.text.insert("confirm-action-last".to_string(), "Project archived".to_string());
                         cx.notify();
                     }))
-                    .on_cancel(cx.listener(|this, _w, cx| {
+                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-warning-open".to_string(), false);
                         cx.notify();
                     }))
@@ -135,12 +135,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                     )
-                    .on_confirm(cx.listener(|this, _w, cx| {
+                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-ghost-open".to_string(), false);
                         this.state.specimens.text.insert("confirm-action-last".to_string(), "Filters cleared".to_string());
                         cx.notify();
                     }))
-                    .on_cancel(cx.listener(|this, _w, cx| {
+                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-ghost-open".to_string(), false);
                         cx.notify();
                     }))
@@ -190,12 +190,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .font_family("Menlo")
                             .child("pk_live_abc123...xyz789")
                     })
-                    .on_confirm(cx.listener(|this, _w, cx| {
+                    .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-body-open".to_string(), false);
                         this.state.specimens.text.insert("confirm-action-last".to_string(), "Key revoked".to_string());
                         cx.notify();
                     }))
-                    .on_cancel(cx.listener(|this, _w, cx| {
+                    .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         this.state.specimens.toggles.insert("confirm-action-body-open".to_string(), false);
                         cx.notify();
                     }))

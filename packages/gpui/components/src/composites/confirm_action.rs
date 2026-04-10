@@ -18,8 +18,8 @@ pub struct ConfirmAction {
     /// Optional body content rendered between the description and the
     /// action row (matches the Svelte default slot).
     content: Option<AnyElement>,
-    on_confirm: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
-    on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_confirm: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_cancel: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for ConfirmAction {
@@ -58,12 +58,16 @@ impl ConfirmAction {
     /// `ConfirmActionSpec::with_open`.
     pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
 
-    pub fn on_confirm(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+    /// Fired when the confirm button is clicked. Signature matches
+    /// `Div::on_click` so specimen code can pass `cx.listener(...)` directly.
+    pub fn on_confirm(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
         self.on_confirm = Some(Box::new(handler));
         self
     }
 
-    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
+    /// Fired when the cancel button is clicked. Signature matches
+    /// `Div::on_click` so specimen code can pass `cx.listener(...)` directly.
+    pub fn on_cancel(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
         self.on_cancel = Some(Box::new(handler));
         self
     }
@@ -142,8 +146,8 @@ impl IntoElement for ConfirmAction {
             .child(spec.cancel_label.clone());
 
         if let Some(handler) = self.on_cancel {
-            cancel_btn = cancel_btn.on_click(move |_event, window, cx| {
-                handler(window, cx);
+            cancel_btn = cancel_btn.on_click(move |event, window, cx| {
+                handler(event, window, cx);
             });
         }
 
@@ -159,8 +163,8 @@ impl IntoElement for ConfirmAction {
             .child(spec.confirm_label.clone());
 
         if let Some(handler) = self.on_confirm {
-            confirm_btn = confirm_btn.on_click(move |_event, window, cx| {
-                handler(window, cx);
+            confirm_btn = confirm_btn.on_click(move |event, window, cx| {
+                handler(event, window, cx);
             });
         }
 
