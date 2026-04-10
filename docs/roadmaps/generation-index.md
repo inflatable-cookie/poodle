@@ -75,4 +75,4 @@ When roadmap files disagree:
 
 ## Next Task
 
-Execute `g10.003` Batch 3.1: finish the remaining composite specimen review pass.
+`g10.003` is complete. The next milestone is Jetstream component implementation.

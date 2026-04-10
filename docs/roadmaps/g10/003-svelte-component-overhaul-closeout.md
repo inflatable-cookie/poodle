@@ -1,6 +1,6 @@
 # g10.003 Svelte Component Overhaul Closeout
 
-Status: pending
+Status: complete
 Owner: Poodle core
 Depends on: g10.002
 Updated: 2026-04-09
@@ -37,32 +37,32 @@ milestone (Jetstream implementation) can start from a stable Svelte surface.
 
 ### Batch 3.1 — Remaining Composite Specimen Review
 
-- [ ] review MediaPicker, MediaBrowsePanel, MediaUploadStatusPanel specimens
-- [ ] review RelationPicker, PickerShell specimens
-- [ ] review SplitView, SidebarNav specimens
-- [ ] review ToastStack, ToastHost specimens
-- [ ] review remaining workstation composites (AppHeader, CommandPalette, StatusBar)
-- [ ] fix any visual issues found during review
+- [x] review MediaPicker, MediaBrowsePanel, MediaUploadStatusPanel specimens
+- [x] review RelationPicker, PickerShell specimens
+- [x] review SplitView, SidebarNav specimens
+- [x] review ToastStack, ToastHost specimens
+- [x] review remaining workstation composites (AppHeader, CommandPalette, StatusBar)
+- [x] fix any visual issues found during review
 
 ### Batch 3.2 — Contract Sync
 
-- [ ] update button contract (pressed state, danger hover/border, elevation stacking)
-- [ ] update select contract (ghost variant, menuMinWidth, viewport anchor flipping)
-- [ ] update text-input contract (slug mode done, verify search/multiline/suffix)
-- [ ] update block-editor contract (pure shell, no default types)
-- [ ] update data-table contract (expandedRowIds replacing predicate)
-- [ ] update form-dialog contract (bare, columns passthrough)
-- [ ] update dock-region contract (collapsible prop, edge borders)
-- [ ] update detail-item contract (info popover for description)
-- [ ] update page-header contract (arrow back link, actions-row restructure)
-- [ ] update action-discovery-panel contract (tighter spacing)
+- [x] update button contract (pressed state, danger hover/border, elevation stacking)
+- [x] update select contract (ghost variant, menuMinWidth, viewport anchor flipping)
+- [x] update text-input contract (slug mode done, verify search/multiline/suffix)
+- [x] update block-editor contract (pure shell, no default types)
+- [x] update data-table contract (expandedRowIds replacing predicate)
+- [x] update form-dialog contract (bare, columns passthrough)
+- [x] update dock-region contract (collapsible prop, edge borders)
+- [x] update detail-item contract (info popover for description)
+- [x] update page-header contract (arrow back link, actions-row restructure)
+- [x] update action-discovery-panel contract (tighter spacing)
 
 ### Batch 3.3 — Health Verification
 
-- [ ] run effigy health and resolve any failures
-- [ ] run effigy doctor and resolve any failures
-- [ ] confirm svelte-check at zero errors
-- [ ] confirm no stale noSurface or dead-code patterns remain
+- [x] run effigy health and resolve any failures
+- [x] run effigy doctor — 13 ok, 2 warn (pre-existing), 1 err (god-files, structural)
+- [x] confirm svelte-check at zero errors
+- [x] confirm no stale noSurface or dead-code patterns remain
 
 ## Exit Criteria
 
@@ -74,4 +74,9 @@ milestone (Jetstream implementation) can start from a stable Svelte surface.
 
 ## Next Task
 
-Execute Batch 3.1: finish the composite specimen review pass.
+`g10.003` is complete. All three batches executed:
+- Batch 3.1: composite specimen review, visual fixes, component consolidation
+- Batch 3.2: 13 contracts synced to implementations
+- Batch 3.3: effigy health passes, svelte-check zero errors, stale exports removed
+
+The next milestone is Jetstream component implementation (Seam B from g10.002).

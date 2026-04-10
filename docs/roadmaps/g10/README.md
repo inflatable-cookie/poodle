@@ -32,7 +32,7 @@ surface that needs to be made explicit again.
 - `g10.001` complete — Jetstream feasibility proven
 - `g10.002` complete — recovery/control lane opened, queue frozen, seams
   classified, next milestone compiled
-- `g10.003` active — Svelte Component Overhaul Closeout
+- `g10.003` complete — Svelte Component Overhaul Closeout
 
 Three active seams identified:
 - Seam A (Svelte Component Overhaul): actively executing via `g10.003`
@@ -41,4 +41,6 @@ Three active seams identified:
 
 ## Next Task
 
-Execute `g10.003` Batch 3.1: finish the remaining composite specimen review pass.
+`g10.003` is complete. The Svelte component overhaul is closed out. The next
+milestone is Jetstream component implementation (Seam B from g10.002 queue
+freeze).
