@@ -4,6 +4,8 @@
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
   /** When true, size/density variants render without a Surface wrapper. */
   export let bareVariants = false;
+  /** Layout direction for size/density variants. */
+  export let variantDirection: "row" | "column" = "column";
 
   const tabs: TabItem[] = [
     { value: "examples", label: "Examples" },
@@ -31,14 +33,14 @@
       <slot />
     {:else if activeTab === "sizes"}
       {#if bareVariants}
-        <div class="specimen-layout__variants">
+        <div class="specimen-layout__variants" data-direction={variantDirection}>
           {#each controlSizes as size}
             <slot name="sizes" {size} />
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
-          <div class="specimen-layout__variants">
+          <div class="specimen-layout__variants" data-direction={variantDirection}>
             {#each controlSizes as size}
               <slot name="sizes" {size} />
             {/each}
@@ -47,14 +49,14 @@
       {/if}
     {:else if activeTab === "densities"}
       {#if bareVariants}
-        <div class="specimen-layout__variants">
+        <div class="specimen-layout__variants" data-direction={variantDirection}>
           {#each densities as density}
             <slot name="densities" {density} />
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
-          <div class="specimen-layout__variants">
+          <div class="specimen-layout__variants" data-direction={variantDirection}>
             {#each densities as density}
               <slot name="densities" {density} />
             {/each}
@@ -83,5 +85,12 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .specimen-layout__variants[data-direction="row"] {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 </style>
