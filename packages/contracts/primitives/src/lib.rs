@@ -98,7 +98,7 @@ pub use date_picker::DatePickerSpec;
 pub use date_range_picker::DateRangePickerSpec;
 pub use date_time_picker::DateTimePickerSpec;
 pub use date_time_range_picker::DateTimeRangePickerSpec;
-pub use detail_item::{DetailItemLayout, DetailItemSpec};
+pub use detail_item::{DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec};
 pub use dialog::DialogSpec;
 pub use drawer::DrawerSpec;
 pub use duration_input::DurationInputSpec;

@@ -1,7 +1,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{DetailItemLayout, DetailItemSpec};
+use poodle_primitives::{DetailItemLayout, DetailItemPresentation, DetailItemSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -58,8 +58,10 @@ impl DetailItem {
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
     pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
     pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
+    pub fn empty_text(mut self, v: impl Into<String>) -> Self { self.spec.empty_text = v.into(); self }
     pub fn truncate_value(mut self, v: bool) -> Self { self.spec.truncate_value = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn presentation(mut self, v: DetailItemPresentation) -> Self { self.spec.presentation = v; self }
 
 
     pub fn with_action(mut self, action: impl IntoElement) -> Self {
@@ -111,16 +113,27 @@ impl IntoElement for DetailItem {
                 })
                 .child(value.clone())
         } else {
-            div().flex_1()
+            // Empty state: show empty_text (default "--") in muted color
+            div()
+                .flex_1()
+                .text_color(self.description_color)
+                .child(self.spec.empty_text.clone())
         };
+
+        // Surface presentation adds background, padding, and radius; Simple is plain
+        let is_surface = self.spec.presentation == DetailItemPresentation::Surface;
 
         let mut row = div()
             .flex()
-            .gap(self.gap)
-            .bg(self.background)
-            .rounded(self.radius)
-            .px(self.padding_x)
-            .py(self.padding_y);
+            .gap(self.gap);
+
+        if is_surface {
+            row = row
+                .bg(self.background)
+                .rounded(self.radius)
+                .px(self.padding_x)
+                .py(self.padding_y);
+        }
 
         if is_stacked {
             row = row.flex_col();
