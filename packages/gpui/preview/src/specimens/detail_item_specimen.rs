@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_primitives::{DetailItemLayout, DetailItemPresentation, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{DetailItem, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
@@ -75,6 +75,41 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .child("Active".to_string())
                             )
                     )
+                )
+        )
+        // --- Surface presentation ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Surface presentation"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(DetailItem::from_spec(
+                            DetailItemSpec::new("Name")
+                                .with_value("Alice Chen")
+                                .with_presentation(DetailItemPresentation::Surface),
+                            theme,
+                        ))
+                        .child(DetailItem::from_spec(
+                            DetailItemSpec::new("Role")
+                                .with_value("Engineer")
+                                .with_presentation(DetailItemPresentation::Surface),
+                            theme,
+                        ))
+                        .child(DetailItem::from_spec(
+                            DetailItemSpec::new("Email")
+                                .with_value("alice@example.com")
+                                .with_presentation(DetailItemPresentation::Surface),
+                            theme,
+                        )
+                        .with_action(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_size(ControlSize::Sm)
+                                    .with_label("Edit"),
+                                theme,
+                            ).with_id("dr-surface-edit")
+                        ))
                 )
         )
         // --- Stacked layout ---

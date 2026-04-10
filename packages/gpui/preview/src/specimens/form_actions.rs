@@ -112,6 +112,42 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        // --- Responsive danger actions ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Responsive danger actions"), theme))
+                .child(
+                    FormActions::from_spec(FormActionsSpec::new(), theme)
+                        .with_action(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_tone(ButtonTone::Danger)
+                                    .with_label("Discard draft"),
+                                theme,
+                            )
+                            .with_id("fa-discard-danger")
+                        )
+                        .with_action(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_label("Back"),
+                                theme,
+                            )
+                            .with_id("fa-back-danger")
+                        )
+                        .with_action(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Save changes"),
+                                theme,
+                            )
+                            .with_id("fa-save-danger")
+                        )
+                )
+        )
         // --- Last action feedback ---
         .when(!last_action.is_empty(), |d| {
             d.child(

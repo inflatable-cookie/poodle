@@ -66,6 +66,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }))
                 )
         )
+        // --- With error ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With error"), theme))
+                .child(
+                    CodeInput::from_spec(
+                        CodeInputSpec::new()
+                            .with_value("1234")
+                            .with_error("Invalid code — try again.")
+                            .with_aria_label("Code with error"),
+                        theme,
+                    )
+                )
+        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))

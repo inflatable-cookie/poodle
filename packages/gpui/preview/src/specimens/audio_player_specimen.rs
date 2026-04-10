@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_composites::AudioPlayerSpec;
-use poodle_primitives::EyebrowSpec;
+use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use poodle_gpui_components::{AudioPlayer, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 
@@ -12,4 +12,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .child(div().flex().flex_col().gap(px(8.0))
             .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With speed control"), theme))
             .child(AudioPlayer::from_spec(AudioPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3").with_duration(2.0).with_show_speed_control(true), theme)))
+        .child(div().flex().flex_col().gap(px(8.0))
+            .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic presentation"), theme))
+            .child(div().flex().flex_col().gap(px(12.0))
+                .child(AudioPlayer::from_spec(
+                    AudioPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3")
+                        .with_duration(2.0)
+                        .with_size(ControlSize::Sm)
+                        .with_density(ControlDensity::Compact),
+                    theme,
+                ))
+                .child(AudioPlayer::from_spec(
+                    AudioPlayerSpec::new("https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3")
+                        .with_duration(2.0)
+                        .with_show_speed_control(true)
+                        .with_size_role(SemanticControlSizeRole::Prominent)
+                        .with_density(ControlDensity::Compact),
+                    theme,
+                ))
+            ))
 }

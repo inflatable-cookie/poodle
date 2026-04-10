@@ -2,7 +2,7 @@ use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
 use poodle_composites::{CommandPaletteSpec, CommandActionItem};
-use poodle_primitives::EyebrowSpec;
+use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use poodle_gpui_components::{CommandPalette, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -70,6 +70,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 cx.notify();
                             }))
                     )
+                )
+        )
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic presentation"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(12.0))
+                        .child(
+                            div().w(px(420.0)).child(
+                                CommandPalette::from_spec(
+                                    CommandPaletteSpec::new(vec![
+                                        CommandActionItem::new("save", "Save")
+                                            .with_group("File")
+                                            .with_shortcut("\u{2318}S"),
+                                        CommandActionItem::new("open", "Open File")
+                                            .with_group("File")
+                                            .with_shortcut("\u{2318}O"),
+                                    ])
+                                    .with_size(ControlSize::Sm)
+                                    .with_density(ControlDensity::Compact),
+                                    theme,
+                                )
+                                .with_id("cmd-palette-compact")
+                            )
+                        )
+                        .child(
+                            div().w(px(480.0)).child(
+                                CommandPalette::from_spec(
+                                    CommandPaletteSpec::new(vec![
+                                        CommandActionItem::new("save", "Save")
+                                            .with_group("File")
+                                            .with_shortcut("\u{2318}S"),
+                                    ])
+                                    .with_size_role(SemanticControlSizeRole::Prominent)
+                                    .with_density(ControlDensity::Compact),
+                                    theme,
+                                )
+                                .with_id("cmd-palette-prominent")
+                            )
+                        )
                 )
         )
         .when(last_executed.is_some(), |d| {
