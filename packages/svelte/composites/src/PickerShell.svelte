@@ -88,7 +88,7 @@
 <style>
   .picker-shell {
     display: grid;
-    grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
     gap: var(--poodle-space-stack-md);
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
