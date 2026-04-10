@@ -50,6 +50,9 @@ pub struct PillSpec {
     pub is_removable: bool,
     pub is_selected: bool,
     pub is_disabled: bool,
+    pub density: crate::types::ControlDensity,
+    /// Optional CSS hex string for a custom accent color (overrides tone fill).
+    pub accent_color: Option<String>,
 }
 
 impl Default for PillSpec {
@@ -64,6 +67,8 @@ impl Default for PillSpec {
             is_removable: false,
             is_selected: false,
             is_disabled: false,
+            density: crate::types::ControlDensity::default(),
+            accent_color: None,
         }
     }
 }
@@ -115,6 +120,16 @@ impl PillSpec {
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_density(mut self, density: crate::types::ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
+
+    pub fn with_accent_color(mut self, color: impl Into<String>) -> Self {
+        self.accent_color = Some(color.into());
         self
     }
 
