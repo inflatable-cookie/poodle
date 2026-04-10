@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonVariant, ButtonTone, ControlDensity, SplitButtonSpec, SplitMenuItem, EyebrowSpec};
+use poodle_primitives::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem, EyebrowSpec};
 use poodle_gpui_components::{SplitButton, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -13,7 +15,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| String::from("(none)"));
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Primary variant ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -205,53 +207,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            SplitButton::from_spec(
-                                SplitButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_label("Compact")
-                                    .with_items(vec![
-                                        SplitMenuItem::action("a", "Action A"),
-                                        SplitMenuItem::action("b", "Action B"),
-                                    ]),
-                                theme,
-                            )
-                            .density(ControlDensity::Compact)
-                        )
-                        .child(
-                            SplitButton::from_spec(
-                                SplitButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_label("Default")
-                                    .with_items(vec![
-                                        SplitMenuItem::action("a", "Action A"),
-                                        SplitMenuItem::action("b", "Action B"),
-                                    ]),
-                                theme,
-                            )
-                            .density(ControlDensity::Default)
-                        )
-                        .child(
-                            SplitButton::from_spec(
-                                SplitButtonSpec::new()
-                                    .with_variant(ButtonVariant::Secondary)
-                                    .with_label("Comfortable")
-                                    .with_items(vec![
-                                        SplitMenuItem::action("a", "Action A"),
-                                        SplitMenuItem::action("b", "Action B"),
-                                    ]),
-                                theme,
-                            )
-                            .density(ControlDensity::Comfortable)
-                        )
-                )
-        )
         // --- Last action ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -261,4 +216,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Last action: {}", last_action))
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "split-button",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            SplitButton::from_spec(
+                SplitButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(size)
+                    .with_label("Action")
+                    .with_items(vec![
+                        SplitMenuItem::action("a", "Action A"),
+                        SplitMenuItem::action("b", "Action B"),
+                    ]),
+                theme,
+            )
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            SplitButton::from_spec(
+                SplitButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_label("Action")
+                    .with_items(vec![
+                        SplitMenuItem::action("a", "Action A"),
+                        SplitMenuItem::action("b", "Action B"),
+                    ]),
+                theme,
+            )
+            .density(density)
+            .into_any_element()
+        },
+    )
 }

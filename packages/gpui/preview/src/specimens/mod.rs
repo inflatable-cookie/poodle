@@ -274,7 +274,7 @@ pub fn render_single_specimen(
         "date-time-zone-picker" => specimen_card("DateTimeZonePicker", theme, date_time_zone_picker::render(state, cx)),
 
         // ── Feedback ────────────────────────────────────────────
-        "progress" => specimen_card("Progress", theme, progress::render(theme)),
+        "progress" => specimen_card("Progress", theme, progress::render(state, cx)),
         "pill" => specimen_card("Pill", theme, pill::render(theme)),
         "status-indicator" => specimen_card("StatusIndicator", theme, status_indicator::render(theme)),
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
@@ -283,7 +283,7 @@ pub fn render_single_specimen(
         "spinner" => specimen_card("Spinner", theme, spinner::render(state, cx)),
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" => specimen_card("TimeAgo", theme, time_ago_specimen::render(theme)),
-        "duration-input" => specimen_card("DurationInput", theme, duration_input_specimen::render(theme)),
+        "duration-input" => specimen_card("DurationInput", theme, duration_input_specimen::render(state, cx)),
         "code" => specimen_card("Code", theme, code::render(theme)),
         "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
         "file-upload" => specimen_card("FileUpload", theme, file_upload::render(theme)),
@@ -316,8 +316,8 @@ pub fn render_single_specimen(
         "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),
         "picker-shell" => specimen_card("PickerShell", theme, picker_shell_specimen::render(theme)),
         "relation-picker" => specimen_card("RelationPicker", theme, relation_picker_specimen::render(theme)),
-        "selection-summary" => specimen_card("SelectionSummary", theme, selection_summary_specimen::render(theme)),
-        "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(theme)),
+        "selection-summary" => specimen_card("SelectionSummary", theme, selection_summary_specimen::render(state, cx)),
+        "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
         "breadcrumbs" => specimen_card("Breadcrumbs", theme, breadcrumbs_specimen::render(theme)),
         "page-loading" => specimen_card("PageLoading", theme, page_loading_specimen::render(theme)),

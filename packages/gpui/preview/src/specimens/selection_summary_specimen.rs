@@ -1,11 +1,16 @@
 use gpui::*;
 use poodle_composites::{SelectionSummarySpec, SelectionSummaryItem};
-use poodle_primitives::{ControlSize, EyebrowSpec};
+use poodle_primitives::EyebrowSpec;
 use poodle_gpui_components::{SelectionSummary, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div().flex().flex_col().gap(px(24.0))
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Multiple items selected ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -54,22 +59,28 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let items = || vec![
-                        SelectionSummaryItem::new("1", "Button"),
-                        SelectionSummaryItem::new("2", "Card"),
-                        SelectionSummaryItem::new("3", "Dialog"),
-                    ];
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Xs))
-                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Sm))
-                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Md))
-                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Lg))
-                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Xl))
-                })
-        )
+        .into_any_element();
+
+    let items = || vec![
+        SelectionSummaryItem::new("1", "Button"),
+        SelectionSummaryItem::new("2", "Card"),
+        SelectionSummaryItem::new("3", "Dialog"),
+    ];
+
+    specimen_layout(
+        state,
+        cx,
+        "selection-summary",
+        examples,
+        move |size, theme: &GpuiThemeProvider| {
+            SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme)
+                .with_size(size)
+                .into_any_element()
+        },
+        move |density, theme: &GpuiThemeProvider| {
+            SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme)
+                .with_density(density)
+                .into_any_element()
+        },
+    )
 }

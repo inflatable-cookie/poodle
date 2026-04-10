@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, NumberInputSpec, ValidationState, EyebrowSpec};
+use poodle_primitives::{NumberInputSpec, ValidationState, EyebrowSpec};
 use poodle_gpui_components::{NumberInput, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -19,7 +21,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_else(|| "29.99".to_string());
     let price: f64 = price_str.parse().unwrap_or(29.99);
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(224.0)) // 14rem
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(224.0)) // 14rem
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -90,30 +92,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Price: ${:.2}", price))
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Xs))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Sm))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Md))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Lg))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Xl))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).density(ControlDensity::Compact))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).density(ControlDensity::Default))
-                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).density(ControlDensity::Comfortable))
-                )
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -139,4 +117,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "number-input",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            NumberInput::from_spec(NumberInputSpec::new(1.0), theme)
+                .size(size)
+                .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            NumberInput::from_spec(NumberInputSpec::new(1.0), theme)
+                .density(density)
+                .into_any_element()
+        },
+    )
 }

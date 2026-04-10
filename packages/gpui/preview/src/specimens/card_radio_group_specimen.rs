@@ -1,10 +1,12 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlSize, EyebrowSpec};
+use poodle_primitives::{ChoiceOption, EyebrowSpec};
 use poodle_composites::CardRadioGroupSpec;
 use poodle_gpui_components::{CardRadioGroup, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -12,7 +14,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Plan selection ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -77,53 +79,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         })
                 })
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let items = || vec![
-                        ChoiceOption::new("a", "Option A").with_description("First option"),
-                        ChoiceOption::new("b", "Option B").with_description("Second option"),
-                    ];
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(
-                            CardRadioGroup::from_spec(
-                                CardRadioGroupSpec::new(items()).with_value("a"),
-                                theme,
-                            )
-                            .with_size(ControlSize::Xs)
-                        )
-                        .child(
-                            CardRadioGroup::from_spec(
-                                CardRadioGroupSpec::new(items()).with_value("a"),
-                                theme,
-                            )
-                            .with_size(ControlSize::Sm)
-                        )
-                        .child(
-                            CardRadioGroup::from_spec(
-                                CardRadioGroupSpec::new(items()).with_value("a"),
-                                theme,
-                            )
-                            .with_size(ControlSize::Md)
-                        )
-                        .child(
-                            CardRadioGroup::from_spec(
-                                CardRadioGroupSpec::new(items()).with_value("a"),
-                                theme,
-                            )
-                            .with_size(ControlSize::Lg)
-                        )
-                        .child(
-                            CardRadioGroup::from_spec(
-                                CardRadioGroupSpec::new(items()).with_value("a"),
-                                theme,
-                            )
-                            .with_size(ControlSize::Xl)
-                        )
-                })
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -141,4 +96,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "card-radio-group",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            CardRadioGroup::from_spec(
+                CardRadioGroupSpec::new(vec![
+                    ChoiceOption::new("a", "Option A").with_description("First option"),
+                    ChoiceOption::new("b", "Option B").with_description("Second option"),
+                ]).with_value("a"),
+                theme,
+            )
+            .with_size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            CardRadioGroup::from_spec(
+                CardRadioGroupSpec::new(vec![
+                    ChoiceOption::new("a", "Option A").with_description("First option"),
+                    ChoiceOption::new("b", "Option B").with_description("Second option"),
+                ]).with_value("a"),
+                theme,
+            )
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }

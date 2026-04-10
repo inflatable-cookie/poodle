@@ -1,10 +1,15 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, ProgressSpec, EyebrowSpec};
+use poodle_primitives::{ProgressSpec, EyebrowSpec};
 use poodle_gpui_components::{Progress, Eyebrow};
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div().flex().flex_col().gap(px(24.0))
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Determinate ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -30,17 +35,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     spec
                 }, theme))
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(Progress::from_spec(ProgressSpec::new().with_value(60.0), theme).size(ControlSize::Xs))
-                        .child(Progress::from_spec(ProgressSpec::new().with_value(60.0), theme).size(ControlSize::Sm))
-                        .child(Progress::from_spec(ProgressSpec::new().with_value(60.0), theme).size(ControlSize::Md))
-                        .child(Progress::from_spec(ProgressSpec::new().with_value(60.0), theme).size(ControlSize::Lg))
-                        .child(Progress::from_spec(ProgressSpec::new().with_value(60.0), theme).size(ControlSize::Xl))
-                )
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "progress",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Progress::from_spec(ProgressSpec::new().with_value(60.0), theme)
+                .size(size)
+                .into_any_element()
+        },
+        // Progress has no density axis; empty row.
+        |_density, theme: &GpuiThemeProvider| {
+            Progress::from_spec(ProgressSpec::new().with_value(60.0), theme)
+                .into_any_element()
+        },
+    )
 }

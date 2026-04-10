@@ -1,7 +1,9 @@
 use gpui::*;
-use poodle_primitives::{ControlDensity, ControlSize, DateTimeZonePickerSpec, EyebrowSpec};
+use poodle_primitives::{DateTimeZonePickerSpec, EyebrowSpec};
 use poodle_gpui_components::{DateTimeZonePicker, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -9,7 +11,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let is_open = state.specimens.is_on("dtz-picker-open");
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -41,36 +43,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let make_spec = || DateTimeZonePickerSpec::new()
-                        .with_value("2026-03-23T14:30:00")
-                        .with_time_zone("America/New_York");
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Xs))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Sm))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Md))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Lg))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Xl))
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let make_spec = || DateTimeZonePickerSpec::new()
-                        .with_value("2026-03-23T14:30:00")
-                        .with_time_zone("America/New_York");
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).with_density(ControlDensity::Compact))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).with_density(ControlDensity::Default))
-                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).with_density(ControlDensity::Comfortable))
-                })
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -85,4 +57,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "date-time-zone-picker",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            DateTimeZonePicker::from_spec(
+                DateTimeZonePickerSpec::new()
+                    .with_value("2026-03-23T14:30:00")
+                    .with_time_zone("America/New_York"),
+                theme,
+            )
+            .size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            DateTimeZonePicker::from_spec(
+                DateTimeZonePickerSpec::new()
+                    .with_value("2026-03-23T14:30:00")
+                    .with_time_zone("America/New_York"),
+                theme,
+            )
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }

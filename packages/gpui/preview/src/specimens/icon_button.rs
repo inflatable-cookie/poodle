@@ -1,9 +1,11 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, EyebrowSpec};
+use poodle_primitives::{ButtonVariant, IconButtonSpec, EyebrowSpec};
 use poodle_gpui_components::{IconButton, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -14,7 +16,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_default();
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Variants ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -100,102 +102,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("danger-ghost")
-                        )
-                )
-        )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().gap(px(8.0)).items_center()
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_size(ControlSize::Xs)
-                                    .with_aria_label("Star"),
-                                theme,
-                            )
-                            .with_id("size-xs")
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_size(ControlSize::Sm)
-                                    .with_aria_label("Star"),
-                                theme,
-                            )
-                            .with_id("size-sm")
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_size(ControlSize::Md)
-                                    .with_aria_label("Star"),
-                                theme,
-                            )
-                            .with_id("size-md")
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_size(ControlSize::Lg)
-                                    .with_aria_label("Star"),
-                                theme,
-                            )
-                            .with_id("size-lg")
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_size(ControlSize::Xl)
-                                    .with_aria_label("Star"),
-                                theme,
-                            )
-                            .with_id("size-xl")
-                        )
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().gap(px(8.0)).items_center()
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_aria_label("Compact"),
-                                theme,
-                            )
-                            .with_id("density-compact")
-                            .density(ControlDensity::Compact)
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_aria_label("Default"),
-                                theme,
-                            )
-                            .with_id("density-default")
-                            .density(ControlDensity::Default)
-                        )
-                        .child(
-                            IconButton::from_spec(
-                                IconButtonSpec::new()
-                                    .with_icon("star")
-                                    .with_aria_label("Comfortable"),
-                                theme,
-                            )
-                            .with_id("density-comfortable")
-                            .density(ControlDensity::Comfortable)
                         )
                 )
         )
@@ -285,4 +191,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .child(format!("Last action: {}", last_clicked))
             )
         })
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "icon-button",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            IconButton::from_spec(
+                IconButtonSpec::new()
+                    .with_icon("star")
+                    .with_size(size)
+                    .with_aria_label("Star"),
+                theme,
+            )
+            .with_id(SharedString::from(format!("specimen-size-{:?}", size)))
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            IconButton::from_spec(
+                IconButtonSpec::new()
+                    .with_icon("star")
+                    .with_aria_label("Star"),
+                theme,
+            )
+            .with_id(SharedString::from(format!("specimen-density-{:?}", density)))
+            .density(density)
+            .into_any_element()
+        },
+    )
 }

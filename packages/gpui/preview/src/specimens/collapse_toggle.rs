@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, EyebrowSpec};
+use poodle_primitives::{CollapseDirection, CollapseToggleSpec, EyebrowSpec};
 use poodle_gpui_components::{CollapseToggle, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -27,7 +29,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
     };
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Directions (interactive, all directions) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -92,30 +94,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ))
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().gap(px(8.0)).items_center()
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("size-xs").size(ControlSize::Xs))
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("size-sm").size(ControlSize::Sm))
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("size-md").size(ControlSize::Md))
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("size-lg").size(ControlSize::Lg))
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("size-xl").size(ControlSize::Xl))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().gap(px(8.0)).items_center()
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("density-compact").with_density(ControlDensity::Compact))
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("density-default").with_density(ControlDensity::Default))
-                        .child(CollapseToggle::from_spec(CollapseToggleSpec::new().with_direction(CollapseDirection::Left), theme).with_id("density-comfortable").with_density(ControlDensity::Comfortable))
-                )
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -142,4 +120,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "collapse-toggle",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            CollapseToggle::from_spec(
+                CollapseToggleSpec::new().with_direction(CollapseDirection::Left),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            CollapseToggle::from_spec(
+                CollapseToggleSpec::new().with_direction(CollapseDirection::Left),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }
