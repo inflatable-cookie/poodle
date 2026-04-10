@@ -21,7 +21,6 @@
   export let showSelectAll = false;
   export let allSelected = false;
   export let selectAllLabel = "Select all";
-  export let deselectAllLabel = "Deselect all";
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
@@ -52,28 +51,22 @@
   <div class="bulk-action-bar__summary">
     <strong>{selectionCount} selected</strong>
     {#if totalCount !== null}
-      <span>of {totalCount} visible rows</span>
+      <span>of {totalCount}</span>
+    {/if}
+    {#if showSelectAll && !allSelected}
+      <IconButton
+        icon="check-check"
+        ariaLabel={totalCount !== null ? `${selectAllLabel} (${totalCount})` : selectAllLabel}
+        tooltip={totalCount !== null ? `${selectAllLabel} (${totalCount})` : selectAllLabel}
+        variant="ghost"
+        sizeRole="chrome"
+        disabled={isUnavailable}
+        on:click={() => dispatch("selectAll")}
+      />
     {/if}
   </div>
 
   <div class="bulk-action-bar__actions">
-    {#if showSelectAll}
-      <button
-        type="button"
-        class="bulk-action-bar__button"
-        disabled={isUnavailable}
-        on:click={() => dispatch("selectAll")}
-      >
-        {#if allSelected}
-          {deselectAllLabel}
-        {:else if totalCount !== null}
-          {selectAllLabel} ({totalCount})
-        {:else}
-          {selectAllLabel}
-        {/if}
-      </button>
-    {/if}
-
     {#each actions as action}
       {@const actionTone = action.tone ?? "default"}
       <span
@@ -154,25 +147,6 @@
     gap: var(--poodle-space-inline-sm);
   }
 
-  .bulk-action-bar__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
-    font: inherit;
-    font-size: var(--poodle-typography-body-size);
-    cursor: pointer;
-  }
-
-  .bulk-action-bar__button:disabled {
-    opacity: var(--poodle-state-opacity-disabled);
-    cursor: not-allowed;
-  }
 
   .bulk-action-bar__icon-action {
     display: inline-flex;
@@ -187,23 +161,14 @@
     color: color-mix(in srgb, var(--poodle-color-status-warning) 82%, var(--poodle-color-text-primary));
   }
 
-  .bulk-action-bar__button:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
-  }
-
   /* Size variants — controls and text only, not container padding */
   .bulk-action-bar[data-size="xs"] .bulk-action-bar__summary { font-size: 0.75rem; }
-  .bulk-action-bar[data-size="xs"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 0.75rem; }
 
   .bulk-action-bar[data-size="sm"] .bulk-action-bar__summary { font-size: 0.8125rem; }
-  .bulk-action-bar[data-size="sm"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 0.8125rem; }
 
   .bulk-action-bar[data-size="lg"] .bulk-action-bar__summary { font-size: 0.9375rem; }
-  .bulk-action-bar[data-size="lg"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 0.9375rem; }
 
   .bulk-action-bar[data-size="xl"] .bulk-action-bar__summary { font-size: 1rem; }
-  .bulk-action-bar[data-size="xl"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 1rem; }
 
   /* Density variants — horizontal padding and gap only, not vertical padding */
   .bulk-action-bar[data-density="compact"] { padding-inline: 0.75rem; gap: 0.375rem; }
