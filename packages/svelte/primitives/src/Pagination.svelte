@@ -37,8 +37,10 @@
   export let scrollOffset = 16;
   export let className = "";
   export let loading = false;
-  /** When true, renders without container padding, border, and background. */
-  export let standalone = false;
+  /** When true, renders with container padding, border, and background. */
+  export let chrome = false;
+  /** @deprecated Use chrome instead. */
+  export let standalone: boolean | undefined = undefined;
   export let ariaLabel: string | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
@@ -202,7 +204,7 @@
     class="pagination {className}"
     class:pagination--compact={compact}
     class:pagination--loading={isLoading}
-    class:pagination--standalone={standalone}
+    class:pagination--chrome={standalone !== undefined ? !standalone : chrome}
     aria-label={ariaLabel ?? "Pagination"}
     data-size={resolvedSize}
     data-density={resolvedDensity}
@@ -323,17 +325,14 @@
     justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
+    padding: 0;
+  }
+
+  .pagination--chrome {
     margin-top: var(--poodle-space-panel-y);
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
-  }
-
-  .pagination--standalone {
-    margin-top: 0;
-    padding: 0;
-    border-top: none;
-    background: transparent;
   }
 
   .pagination--compact {

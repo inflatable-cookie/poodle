@@ -69,12 +69,12 @@
     <p>Page <strong>{page4}</strong> of 7</p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Standalone (no container chrome)">
+  <SpecimenGroup label="With container chrome">
     <Pagination
       currentPage={1}
       totalPages={10}
-      standalone
-      ariaLabel="Standalone pagination"
+      chrome
+      ariaLabel="Pagination with chrome"
     />
   </SpecimenGroup>
 
