@@ -4,7 +4,9 @@ use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{BrowseState, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode};
+use poodle_composites::{
+    BrowseState, DrillDownItem, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode,
+};
 use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
@@ -15,12 +17,25 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 ///
 /// Renders an entity relationship picker that shows items with selection state,
 /// an optional search field, and checkmarks for selected items.
+/// Argument passed to `on_drill_enter` — pairs the zero-based level
+/// index with the clicked drill-down item id. Packed into a struct so
+/// it can flow through a `cx.listener(|this, arg, w, cx|)` closure.
+#[derive(Clone, Debug)]
+pub struct DrillEnterArgs {
+    pub level_index: usize,
+    pub item_id: String,
+}
+
 pub struct RelationPicker {
     spec: RelationPickerSpec,
     theme: GpuiThemeProvider,
     on_select: Option<Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
-    on_breadcrumb_click: Option<Rc<dyn Fn(usize, &ClickEvent, &mut Window, &mut App) + 'static>>,
-    /// Current drill-down path (e.g. ["Projects", "Backend"]).
+    on_breadcrumb_click: Option<Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
+    /// Fired when the user clicks a drill-down row at a non-leaf level.
+    on_drill_enter: Option<Rc<dyn Fn(&DrillEnterArgs, &mut Window, &mut App) + 'static>>,
+    /// Legacy per-component drill path (pre-contract drill-down support).
+    /// Kept so existing callers that use `.with_drill_path(...)` still
+    /// render breadcrumbs the same way.
     drill_path: Vec<String>,
 }
 
@@ -31,7 +46,14 @@ impl std::ops::Deref for RelationPicker {
 
 impl RelationPicker {
     pub fn new(items: Vec<PickerItemSpec>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RelationPickerSpec::new(items), theme: theme.clone(), on_select: None, on_breadcrumb_click: None, drill_path: Vec::new() }
+        Self {
+            spec: RelationPickerSpec::new(items),
+            theme: theme.clone(),
+            on_select: None,
+            on_breadcrumb_click: None,
+            on_drill_enter: None,
+            drill_path: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: RelationPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -40,6 +62,7 @@ impl RelationPicker {
             theme: theme.clone(),
             on_select: None,
             on_breadcrumb_click: None,
+            on_drill_enter: None,
             drill_path: Vec::new(),
         }
     }
@@ -65,11 +88,28 @@ impl RelationPicker {
         self
     }
 
+    /// Fired when a breadcrumb segment is clicked. The argument is the
+    /// target depth the user wants to return to (0 = root).
+    /// Signature matches `cx.listener` so specimen code can pass it
+    /// directly.
     pub fn on_breadcrumb_click(
         mut self,
-        handler: impl Fn(usize, &ClickEvent, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_breadcrumb_click = Some(Rc::new(handler));
+        self
+    }
+
+    /// Fired when the user clicks a drill-down row at a non-leaf level.
+    /// The handler receives the level index and the clicked item id
+    /// packed into a `DrillEnterArgs` so it flows cleanly through
+    /// `cx.listener(...)`, and is responsible for pushing the new id
+    /// onto `spec.drill_down_path`.
+    pub fn on_drill_enter(
+        mut self,
+        handler: impl Fn(&DrillEnterArgs, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_drill_enter = Some(Rc::new(handler));
         self
     }
 }
@@ -106,8 +146,26 @@ impl IntoElement for RelationPicker {
             .rounded(control_radius)
             .overflow_hidden();
 
-        // Drill-down breadcrumb navigation
-        if !self.drill_path.is_empty() {
+        // Drill-down breadcrumb navigation — prefer the spec-backed
+        // path when drill-down config is present; otherwise fall back
+        // to the legacy component-local `drill_path` field.
+        let breadcrumb_segments: Vec<String> = if let Some(ref dd) = spec.drill_down {
+            spec.drill_down_path
+                .iter()
+                .enumerate()
+                .map(|(level_idx, item_id)| {
+                    let level = dd.levels.get(level_idx);
+                    level
+                        .and_then(|l| l.items.iter().find(|i| &i.id == item_id))
+                        .map(|i| i.label.clone())
+                        .unwrap_or_else(|| item_id.clone())
+                })
+                .collect()
+        } else {
+            self.drill_path.clone()
+        };
+
+        if !breadcrumb_segments.is_empty() {
             let mut breadcrumb_row = div()
                 .w_full()
                 .flex()
@@ -128,14 +186,14 @@ impl IntoElement for RelationPicker {
                     .child("Root");
                 if let Some(ref handler) = self.on_breadcrumb_click {
                     let handler = handler.clone();
-                    root_el = root_el.on_click(move |ev, win, app| {
-                        handler(0, ev, win, app);
+                    root_el = root_el.on_click(move |_ev, win, app| {
+                        handler(&0, win, app);
                     });
                 }
                 breadcrumb_row = breadcrumb_row.child(root_el);
             }
 
-            for (idx, segment) in self.drill_path.iter().enumerate() {
+            for (idx, segment) in breadcrumb_segments.iter().enumerate() {
                 // Chevron separator
                 breadcrumb_row = breadcrumb_row.child(
                     Icon::from_spec(
@@ -156,8 +214,8 @@ impl IntoElement for RelationPicker {
                 if let Some(ref handler) = self.on_breadcrumb_click {
                     let handler = handler.clone();
                     let depth = idx + 1;
-                    seg_el = seg_el.on_click(move |ev, win, app| {
-                        handler(depth, ev, win, app);
+                    seg_el = seg_el.on_click(move |_ev, win, app| {
+                        handler(&depth, win, app);
                     });
                 }
                 breadcrumb_row = breadcrumb_row.child(seg_el);
@@ -243,6 +301,130 @@ impl IntoElement for RelationPicker {
                 );
             }
             BrowseState::Ready => {
+                // Drill-down mode: render either the next level's
+                // DrillDownItem rows or the current leaf PickerItemSpecs.
+                if let Some(ref dd) = spec.drill_down {
+                    if !dd.is_at_leaf(&spec.drill_down_path) {
+                        let level_idx = spec.drill_down_path.len();
+                        let level_items: &[DrillDownItem] = dd
+                            .next_level(&spec.drill_down_path)
+                            .map(|l| l.items.as_slice())
+                            .unwrap_or(&[]);
+
+                        let mut list = div()
+                            .id("relation-picker-drill-list")
+                            .w_full()
+                            .flex()
+                            .flex_col()
+                            .max_h(px(240.0))
+                            .overflow_y_scroll();
+
+                        for item in level_items {
+                            let row_id = SharedString::from(
+                                format!("relation-picker-drill-{}-{}", level_idx, item.id),
+                            );
+                            let mut row = div()
+                                .id(row_id)
+                                .w_full()
+                                .flex()
+                                .items_center()
+                                .gap(inline_gap)
+                                .px(inline_padding)
+                                .py(px(8.0))
+                                .cursor_pointer()
+                                .border_b_1()
+                                .border_color(border.opacity(0.3));
+
+                            let mut content = div().flex().flex_col().gap(px(1.0)).flex_grow();
+                            content = content.child(
+                                div()
+                                    .text_size(body_size)
+                                    .text_color(text_primary)
+                                    .child(item.label.clone()),
+                            );
+                            if let Some(ref desc) = item.description {
+                                content = content.child(
+                                    div()
+                                        .text_size(px(12.0))
+                                        .text_color(text_secondary)
+                                        .child(desc.clone()),
+                                );
+                            }
+                            row = row.child(content);
+
+                            if let Some(count) = item.count {
+                                row = row.child(
+                                    div()
+                                        .text_size(px(12.0))
+                                        .text_color(text_secondary.opacity(0.7))
+                                        .child(format!("{} items", count)),
+                                );
+                            }
+
+                            // Chevron pointing into the next level
+                            row = row.child(
+                                Icon::from_spec(
+                                    IconSpec::new("chevron-right").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(text_secondary),
+                            );
+
+                            if let Some(ref handler) = self.on_drill_enter {
+                                let handler = handler.clone();
+                                let id = item.id.clone();
+                                let level_copy = level_idx;
+                                row = row.on_click(move |_ev, win, app| {
+                                    let args = DrillEnterArgs {
+                                        level_index: level_copy,
+                                        item_id: id.clone(),
+                                    };
+                                    handler(&args, win, app);
+                                });
+                            }
+
+                            list = list.child(row);
+                        }
+
+                        container = container.child(list);
+                        container = container.child(
+                            div()
+                                .w_full()
+                                .flex()
+                                .items_center()
+                                .px(inline_padding)
+                                .py(px(6.0))
+                                .border_t_1()
+                                .border_color(border)
+                                .child(
+                                    div()
+                                        .text_size(px(12.0))
+                                        .text_color(text_secondary)
+                                        .child(format!(
+                                            "{} {}",
+                                            level_items.len(),
+                                            dd.levels
+                                                .get(level_idx)
+                                                .map(|l| l.label.to_lowercase())
+                                                .unwrap_or_else(|| "items".to_string())
+                                        )),
+                                ),
+                        );
+                        return container.into_any_element();
+                    }
+                    // At a leaf: fall through to the regular item loop
+                    // below, but using the leaf group's items instead
+                    // of the top-level `spec.items`.
+                }
+
+                // Compute the source slice once: leaf items in drill-down
+                // mode, otherwise the top-level spec items.
+                let source_items: &[PickerItemSpec] = if let Some(ref dd) = spec.drill_down {
+                    dd.leaf_items_for(&spec.drill_down_path)
+                } else {
+                    spec.items.as_slice()
+                };
+
                 // Item list
                 let mut list = div()
                     .id("relation-picker-list")
@@ -252,7 +434,7 @@ impl IntoElement for RelationPicker {
                     .max_h(px(240.0))
                     .overflow_y_scroll();
 
-                for item in &spec.items {
+                for item in source_items {
                     let is_selected = spec
                         .selected_ids
                         .iter()
@@ -328,8 +510,18 @@ impl IntoElement for RelationPicker {
             }
         }
 
-        // Footer with count
+        // Footer with count — use leaf items when drilled all the
+        // way in, or the top-level items otherwise.
         let count = spec.selected_item_count();
+        let total_for_footer = if let Some(ref dd) = spec.drill_down {
+            if dd.is_at_leaf(&spec.drill_down_path) {
+                dd.leaf_items_for(&spec.drill_down_path).len()
+            } else {
+                spec.items.len()
+            }
+        } else {
+            spec.items.len()
+        };
         container = container.child(
             div()
                 .w_full()
@@ -343,11 +535,7 @@ impl IntoElement for RelationPicker {
                     div()
                         .text_size(px(12.0))
                         .text_color(text_secondary)
-                        .child(format!(
-                            "{} of {} selected",
-                            count,
-                            spec.items.len()
-                        )),
+                        .child(format!("{} of {} selected", count, total_for_footer)),
                 ),
         );
 

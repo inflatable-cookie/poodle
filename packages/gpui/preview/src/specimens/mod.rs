@@ -315,7 +315,7 @@ pub fn render_single_specimen(
         "card" => specimen_card("Card", theme, card_specimen::render(theme)),
         "card-radio-group" => specimen_card("CardRadioGroup", theme, card_radio_group_specimen::render(state, cx)),
         "picker-shell" => specimen_card("PickerShell", theme, picker_shell_specimen::render(theme)),
-        "relation-picker" => specimen_card("RelationPicker", theme, relation_picker_specimen::render(theme)),
+        "relation-picker" => specimen_card("RelationPicker", theme, relation_picker_specimen::render(state, cx)),
         "selection-summary" => specimen_card("SelectionSummary", theme, selection_summary_specimen::render(state, cx)),
         "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),

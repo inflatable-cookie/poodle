@@ -66,7 +66,7 @@ pub use metric_tile::MetricTile;
 pub use page_header::PageHeader;
 pub use page_loading::PageLoading;
 pub use picker_shell::PickerShell;
-pub use relation_picker::RelationPicker;
+pub use relation_picker::{DrillEnterArgs, RelationPicker};
 pub use selection_summary::SelectionSummary;
 pub use sidebar_nav::SidebarNav;
 pub use split_view::SplitView;
