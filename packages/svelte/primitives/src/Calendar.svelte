@@ -291,14 +291,14 @@
   .calendar {
     display: grid;
     gap: 0.75rem;
-    width: 18rem;
+    width: fit-content;
   }
 
   .calendar__header,
   .calendar__weekdays,
   .calendar__week {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, 2.25rem);
     align-items: center;
   }
 
