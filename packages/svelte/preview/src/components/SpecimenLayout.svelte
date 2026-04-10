@@ -2,8 +2,8 @@
   import { Eyebrow, Surface, Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
-  /** When true, each size/density variant is wrapped in a Surface card. */
-  export let surfaceVariants = false;
+  /** When false, size/density variants render without a Surface wrapper. */
+  export let bareVariants = false;
 
   const tabs: TabItem[] = [
     { value: "examples", label: "Examples" },
@@ -33,7 +33,7 @@
       <div class="specimen-layout__grid">
         {#each controlSizes as size}
           <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
-            {#if surfaceVariants}
+            {#if !bareVariants}
               <Surface tone="panel" border="subtle" padding="md">
                 <Eyebrow>{size}</Eyebrow>
                 <div class="specimen-layout__demo">
@@ -55,7 +55,7 @@
       <div class="specimen-layout__grid">
         {#each densities as density}
           <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
-            {#if surfaceVariants}
+            {#if !bareVariants}
               <Surface tone="panel" border="subtle" padding="md">
                 <Eyebrow>{density}</Eyebrow>
                 <div class="specimen-layout__demo">
