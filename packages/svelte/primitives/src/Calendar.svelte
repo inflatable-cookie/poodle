@@ -492,9 +492,9 @@
 
   /* Density variants */
   .calendar[data-density="compact"] .calendar__grid { gap: 0; }
-  .calendar[data-density="compact"] .calendar__week { gap: 0; }
-  .calendar[data-density="compact"] .calendar__nav { gap: 0.25rem; }
-  .calendar[data-density="comfortable"] .calendar__grid { gap: 0.375rem; }
-  .calendar[data-density="comfortable"] .calendar__week { gap: 0.375rem; }
-  .calendar[data-density="comfortable"] .calendar__nav { gap: 0.75rem; }
+  .calendar[data-density="compact"] .calendar__week,
+  .calendar[data-density="compact"] .calendar__weekdays { gap: 0; }
+  .calendar[data-density="comfortable"] .calendar__grid { gap: 0.25rem; }
+  .calendar[data-density="comfortable"] .calendar__week,
+  .calendar[data-density="comfortable"] .calendar__weekdays { gap: 0.25rem; }
 </style>
