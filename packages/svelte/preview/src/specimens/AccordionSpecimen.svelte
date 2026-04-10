@@ -34,7 +34,7 @@
 </script>
 
 <div class="specimen">
-  <SpecimenGroup label="Single selection">
+  <SpecimenGroup bare label="Single selection">
     <Accordion
       items={singleItems}
       selectionMode="single"
@@ -46,7 +46,7 @@
     </Accordion>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Multiple selection">
+  <SpecimenGroup bare label="Multiple selection">
     <Accordion
       items={multiItems}
       selectionMode="multiple"
