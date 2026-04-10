@@ -173,7 +173,7 @@
     />
 
     <main class="app-main">
-      {#key `${previewModeKey}:${activeSection}`}
+      {#key `${theme}:${activeSection}`}
         <IconProvider icons={iconNodes as unknown as IconSet}>
           {#if activeSection === "primitives"}
             <PrimitivesSection activeComponent={route.component} />
