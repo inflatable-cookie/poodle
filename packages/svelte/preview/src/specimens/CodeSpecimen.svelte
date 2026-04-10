@@ -18,23 +18,23 @@ function handleClick(event: MouseEvent): void {
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Block with language label">
+  <SpecimenGroup bare label="Block with language label">
     <Code source={tsExample} language="typescript" />
   </SpecimenGroup>
 
-  <SpecimenGroup label="With line numbers and highlight">
+  <SpecimenGroup bare label="With line numbers and highlight">
     <Code source={tsExample} language="ts" showLineNumbers highlightLines={[3, 4]} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="CSS with max height">
+  <SpecimenGroup bare label="CSS with max height">
     <Code source={cssExample} language="css" maxHeight="6rem" />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Inline code">
+  <SpecimenGroup bare label="Inline code">
     <p>Use <Code source="npm install" inline /> to install dependencies.</p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="No copy button">
+  <SpecimenGroup bare label="No copy button">
     <Code source="echo 'hello world'" language="bash" showCopyButton={false} />
   </SpecimenGroup>
 
