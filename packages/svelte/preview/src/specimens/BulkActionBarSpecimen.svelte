@@ -14,7 +14,7 @@
   let allSelected = false;
 </script>
 
-<SpecimenLayout bareVariants>
+<SpecimenLayout>
   <SpecimenGroup label="With selection count and select all" bare>
     <BulkActionBar
       selectionCount={5}

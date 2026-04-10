@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { Eyebrow, Surface, Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
+  import { Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
-  /** When false, size/density variants render without a Surface wrapper. */
-  export let bareVariants = false;
 
   const tabs: TabItem[] = [
     { value: "examples", label: "Examples" },
@@ -30,46 +28,18 @@
     {#if activeTab === "examples"}
       <slot />
     {:else if activeTab === "sizes"}
-      <div class="specimen-layout__grid">
+      <div class="specimen-layout__variants">
         {#each controlSizes as size}
           <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
-            {#if !bareVariants}
-              <Surface tone="panel" border="subtle" padding="md">
-                <Eyebrow>{size}</Eyebrow>
-                <div class="specimen-layout__demo">
-                  <slot name="sizes" {size} />
-                </div>
-              </Surface>
-            {:else}
-              <div class="specimen-layout__variant">
-                <Eyebrow>{size}</Eyebrow>
-                <div class="specimen-layout__demo">
-                  <slot name="sizes" {size} />
-                </div>
-              </div>
-            {/if}
+            <slot name="sizes" {size} />
           </UiPresentationProvider>
         {/each}
       </div>
     {:else if activeTab === "densities"}
-      <div class="specimen-layout__grid">
+      <div class="specimen-layout__variants">
         {#each densities as density}
           <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
-            {#if !bareVariants}
-              <Surface tone="panel" border="subtle" padding="md">
-                <Eyebrow>{density}</Eyebrow>
-                <div class="specimen-layout__demo">
-                  <slot name="densities" {density} />
-                </div>
-              </Surface>
-            {:else}
-              <div class="specimen-layout__variant">
-                <Eyebrow>{density}</Eyebrow>
-                <div class="specimen-layout__demo">
-                  <slot name="densities" {density} />
-                </div>
-              </div>
-            {/if}
+            <slot name="densities" {density} />
           </UiPresentationProvider>
         {/each}
       </div>
@@ -90,23 +60,10 @@
     gap: 1rem;
   }
 
-  .specimen-layout__grid {
+  .specimen-layout__variants {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .specimen-layout__variant {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-  }
-
-  .specimen-layout__demo {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
   }
 </style>
