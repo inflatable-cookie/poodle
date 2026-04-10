@@ -536,6 +536,10 @@ pub enum TabVariant {
     Underline,
     Card,
     Pill,
+    /// Full-width tabs with vertical separators, no radius, no outer chrome.
+    /// Selected item receives an accent-tinted surface fill. Matches Svelte
+    /// `data-variant="block"`.
+    Block,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

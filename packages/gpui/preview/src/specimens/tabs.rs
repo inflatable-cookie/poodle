@@ -102,6 +102,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
+    // 3b. BLOCK VARIANT (FULL-WIDTH, SEPARATORS)
+    let block_tabs = vec![
+        TabDefinition::new("inbox", "Inbox"),
+        TabDefinition::new("archive", "Archive"),
+        TabDefinition::new("spam", "Spam"),
+        TabDefinition::new("trash", "Trash"),
+    ];
+
+    let block_value = state.specimens.text.get("tabs-block-value")
+        .map(|s| s.as_str())
+        .unwrap_or("inbox")
+        .to_string();
+
+    let block_spec = TabsSpec::new(block_tabs)
+        .with_variant(TabVariant::Block)
+        .with_value(&block_value)
+        .with_aria_label("Mailbox");
+
+    let block_component = Tabs::from_spec(block_spec, theme)
+        .with_id("specimen-block")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-block-value".to_string(), val.to_string());
+            cx.notify();
+        }));
+
     // 4. UNDERLINE WITH ICONS (NO PANEL)
     let underline_icon_tabs = vec![
         TabDefinition::new("home", "Home"),
@@ -241,6 +266,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pill variant (with icons)"), theme))
                 .child(pill_component)
+        )
+
+        // 3b. Block variant
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Block variant (full-width, separators)"), theme))
+                .child(block_component)
         )
 
         // 4. Underline with icons (no panel)

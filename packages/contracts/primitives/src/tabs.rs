@@ -112,6 +112,36 @@ impl TabsSpec {
         0.18
     }
 
+    /// Block variant: opacity of the panel background tint applied to the
+    /// tab list. Matches Svelte `color-mix(... panel 90%, transparent)`.
+    pub fn block_list_bg_opacity(&self) -> f32 {
+        0.9
+    }
+
+    /// Block variant: opacity of the accent tint layered onto the surface
+    /// for the selected item. Matches Svelte `accent 14% + surface`.
+    pub fn block_selected_accent_mix(&self) -> f32 {
+        0.14
+    }
+
+    /// Block variant: opacity of the accent tint on hover of a selected
+    /// item. Matches Svelte `accent 18% + surface`.
+    pub fn block_selected_hover_accent_mix(&self) -> f32 {
+        0.18
+    }
+
+    /// Block variant: opacity of the separator border between items.
+    /// Matches Svelte `border-subtle 72%`.
+    pub fn block_separator_opacity(&self) -> f32 {
+        0.72
+    }
+
+    /// Block variant: opacity of the elevated background used on unselected
+    /// item hover. Matches Svelte `elevated 50%`.
+    pub fn block_hover_bg_opacity(&self) -> f32 {
+        0.5
+    }
+
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
