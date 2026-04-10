@@ -60,6 +60,7 @@
     <RadioGroup
       options={planOptions}
       defaultValue="pro"
+      {size}
       ariaLabel={"Plan at " + size}
     />
   </svelte:fragment>
@@ -68,6 +69,7 @@
     <RadioGroup
       options={planOptions}
       defaultValue="pro"
+      {density}
       ariaLabel={"Plan at " + density + " density"}
     />
   </svelte:fragment>

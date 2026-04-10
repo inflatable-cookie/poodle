@@ -237,7 +237,7 @@ pub fn render_single_specimen(
         "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
 
         // ── Foundation ──────────────────────────────────────────
-        "icon" => specimen_card("Icon", theme, icon::render(theme)),
+        "icon" => specimen_card("Icon", theme, icon::render(state, cx)),
 
         // ── Action ──────────────────────────────────────────────
         "button" => specimen_card("Button", theme, button::render(state, cx)),

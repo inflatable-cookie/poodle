@@ -73,7 +73,9 @@ pub use page_header::{PageHeaderAlign, PageHeaderSpec};
 pub use page_loading::PageLoadingSpec;
 pub use pagination_summary::PaginationSummarySpec;
 pub use picker_shell::PickerShellSpec;
-pub use relation_picker::RelationPickerSpec;
+pub use relation_picker::{
+    DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel, RelationPickerSpec,
+};
 pub use remediation_banner::RemediationBannerSpec;
 pub use selection_summary::SelectionSummarySpec;
 pub use shell_status_bar::ShellStatusBarSpec;

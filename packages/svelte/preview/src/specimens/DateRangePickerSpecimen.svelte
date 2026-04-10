@@ -29,10 +29,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <DateRangePicker ariaLabel={size} />
+    <DateRangePicker {size} ariaLabel={size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <DateRangePicker />
+    <DateRangePicker {density} />
   </svelte:fragment>
 </SpecimenLayout>

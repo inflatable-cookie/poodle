@@ -53,7 +53,7 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <TriStateSwitch value="default" ariaLabel={`Tri-state switch at ${size}`} />
+    <TriStateSwitch value="default" {size} ariaLabel={`Tri-state switch at ${size}`} />
   </svelte:fragment>
 </SpecimenLayout>
 

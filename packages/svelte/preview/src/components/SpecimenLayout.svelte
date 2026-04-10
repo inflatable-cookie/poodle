@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Surface, Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
+  import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
 
@@ -31,9 +31,7 @@
       <Surface tone="panel" border="subtle" padding="md">
         <div class="specimen-layout__variants">
           {#each controlSizes as size}
-            <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
-              <slot name="sizes" {size} />
-            </UiPresentationProvider>
+            <slot name="sizes" {size} />
           {/each}
         </div>
       </Surface>
@@ -41,9 +39,7 @@
       <Surface tone="panel" border="subtle" padding="md">
         <div class="specimen-layout__variants">
           {#each densities as density}
-            <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
-              <slot name="densities" {density} />
-            </UiPresentationProvider>
+            <slot name="densities" {density} />
           {/each}
         </div>
       </Surface>

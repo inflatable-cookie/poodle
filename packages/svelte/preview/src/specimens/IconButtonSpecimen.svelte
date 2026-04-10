@@ -51,11 +51,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <IconButton icon={star} ariaLabel={`Favorite (${size})`} variant="secondary" />
+    <IconButton icon={star} ariaLabel={`Favorite (${size})`} variant="secondary" {size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <IconButton icon={settings} ariaLabel="Settings" variant="secondary" />
+    <IconButton icon={settings} ariaLabel="Settings" variant="secondary" {density} />
   </svelte:fragment>
 </SpecimenLayout>
 

@@ -27,11 +27,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <NavigationMenu {items} value="components" ariaLabel={size + " navigation"} />
+    <NavigationMenu {items} value="components" {size} ariaLabel={size + " navigation"} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <NavigationMenu {items} value="components" ariaLabel="{density} navigation" />
+    <NavigationMenu {items} value="components" {density} ariaLabel="{density} navigation" />
   </svelte:fragment>
 </SpecimenLayout>
 

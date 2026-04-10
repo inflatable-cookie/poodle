@@ -52,14 +52,14 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Menu items={fileItems} ariaLabel={size + " menu"}>
-      <Button variant="secondary" slot="trigger">{size.toUpperCase()}</Button>
+    <Menu items={fileItems} {size} ariaLabel={size + " menu"}>
+      <Button variant="secondary" {size} slot="trigger">{size.toUpperCase()}</Button>
     </Menu>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Menu items={fileItems} ariaLabel="{density} menu">
-      <Button variant="secondary" slot="trigger">{density}</Button>
+    <Menu items={fileItems} {density} ariaLabel="{density} menu">
+      <Button variant="secondary" {density} slot="trigger">{density}</Button>
     </Menu>
   </svelte:fragment>
 </SpecimenLayout>

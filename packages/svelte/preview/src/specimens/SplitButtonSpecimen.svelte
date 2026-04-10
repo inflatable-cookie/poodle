@@ -119,7 +119,7 @@
   {/if}
 
   <svelte:fragment slot="densities" let:density>
-    <SplitButton variant="primary" items={saveItems}>Save</SplitButton>
+    <SplitButton variant="primary" {density} items={saveItems}>Save</SplitButton>
   </svelte:fragment>
 </SpecimenLayout>
 

@@ -50,11 +50,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <BulkActionBar selectionCount={5} {actions} />
+    <BulkActionBar selectionCount={5} {actions} {size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <BulkActionBar selectionCount={5} {actions} />
+    <BulkActionBar selectionCount={5} {actions} {density} />
   </svelte:fragment>
 </SpecimenLayout>
 

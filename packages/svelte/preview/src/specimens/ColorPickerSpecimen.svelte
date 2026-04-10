@@ -43,11 +43,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <ColorPicker value="#6366f1" />
+    <ColorPicker value="#6366f1" {size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <ColorPicker />
+    <ColorPicker {density} />
   </svelte:fragment>
 </SpecimenLayout>
 

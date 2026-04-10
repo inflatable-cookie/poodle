@@ -201,11 +201,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <TextInput id={"size-" + size} placeholder={size.toUpperCase()} />
+    <TextInput id={"size-" + size} {size} placeholder={size.toUpperCase()} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <TextInput id={"density-" + density} placeholder="Type here" />
+    <TextInput id={"density-" + density} {density} placeholder="Type here" />
   </svelte:fragment>
 </SpecimenLayout>
 

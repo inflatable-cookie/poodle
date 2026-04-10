@@ -41,10 +41,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Breadcrumbs items={basicItems} />
+    <Breadcrumbs items={basicItems} {size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Breadcrumbs items={basicItems} />
+    <Breadcrumbs items={basicItems} {density} />
   </svelte:fragment>
 </SpecimenLayout>

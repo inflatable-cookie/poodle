@@ -26,10 +26,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <TimeZoneSelect ariaLabel={size} />
+    <TimeZoneSelect {size} ariaLabel={size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <TimeZoneSelect id={"density-" + density} />
+    <TimeZoneSelect {density} id={"density-" + density} />
   </svelte:fragment>
 </SpecimenLayout>

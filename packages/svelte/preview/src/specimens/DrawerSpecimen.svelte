@@ -39,8 +39,9 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Button variant="secondary" on:click={() => (sizeOpenMap[size] = true)}>{size}</Button>
+    <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = true)}>{size}</Button>
     <Drawer
+      {size}
       open={sizeOpenMap[size] ?? false}
       title="Drawer at {size}"
       description="Header and action chrome scale with the size prop."
@@ -48,15 +49,16 @@
     >
       <p>Content at <strong>{size}</strong> size.</p>
       <svelte:fragment slot="actions">
-        <Button variant="secondary" on:click={() => (sizeOpenMap[size] = false)}>Cancel</Button>
-        <Button on:click={() => (sizeOpenMap[size] = false)}>Save</Button>
+        <Button variant="secondary" {size} on:click={() => (sizeOpenMap[size] = false)}>Cancel</Button>
+        <Button {size} on:click={() => (sizeOpenMap[size] = false)}>Save</Button>
       </svelte:fragment>
     </Drawer>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Button variant="secondary" on:click={() => (densityOpenMap[density] = true)}>{density}</Button>
+    <Button variant="secondary" {density} on:click={() => (densityOpenMap[density] = true)}>{density}</Button>
     <Drawer
+      {density}
       open={densityOpenMap[density] ?? false}
       title="Drawer at {density} density"
       description="Internal spacing adjusts with the density prop."
@@ -64,8 +66,8 @@
     >
       <p>Content at <strong>{density}</strong> density.</p>
       <svelte:fragment slot="actions">
-        <Button variant="secondary" on:click={() => (densityOpenMap[density] = false)}>Cancel</Button>
-        <Button on:click={() => (densityOpenMap[density] = false)}>Save</Button>
+        <Button variant="secondary" {density} on:click={() => (densityOpenMap[density] = false)}>Cancel</Button>
+        <Button {density} on:click={() => (densityOpenMap[density] = false)}>Save</Button>
       </svelte:fragment>
     </Drawer>
   </svelte:fragment>

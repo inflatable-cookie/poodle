@@ -143,17 +143,17 @@
 
   <svelte:fragment slot="sizes" let:size>
     <div class="size-demo">
-      <Icon icon={star} />
-      <Icon icon={heart} />
-      <Icon icon={settings} />
+      <Icon icon={star} {size} />
+      <Icon icon={heart} {size} />
+      <Icon icon={settings} {size} />
     </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
     <div class="size-demo">
-      <Icon icon={star} />
-      <Icon icon={heart} />
-      <Icon icon={settings} />
+      <Icon icon={star} {density} />
+      <Icon icon={heart} {density} />
+      <Icon icon={settings} {density} />
     </div>
   </svelte:fragment>
 </SpecimenLayout>

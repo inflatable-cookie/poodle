@@ -35,11 +35,11 @@
   {/if}
 
   <svelte:fragment slot="sizes" let:size>
-    <DurationInput hours={1} minutes={30} seconds={0} />
+    <DurationInput hours={1} minutes={30} seconds={0} {size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <DurationInput />
+    <DurationInput {density} />
   </svelte:fragment>
 </SpecimenLayout>
 

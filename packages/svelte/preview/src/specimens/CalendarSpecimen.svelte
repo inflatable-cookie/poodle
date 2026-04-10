@@ -48,10 +48,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Calendar ariaLabel={size + " calendar"} />
+    <Calendar {size} ariaLabel={size + " calendar"} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Calendar />
+    <Calendar {density} />
   </svelte:fragment>
 </SpecimenLayout>

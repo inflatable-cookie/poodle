@@ -31,11 +31,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <OrderBy {fields} bind:value={sizeValue} />
+    <OrderBy {fields} {size} bind:value={sizeValue} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <OrderBy {fields} bind:value={densityValue} />
+    <OrderBy {fields} {density} bind:value={densityValue} />
   </svelte:fragment>
 </SpecimenLayout>
 

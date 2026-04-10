@@ -51,10 +51,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <CodeInput id={"size-" + size} label={"Code at " + size} ariaLabel={"Code at " + size} />
+    <CodeInput id={"size-" + size} {size} label={"Code at " + size} ariaLabel={"Code at " + size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <CodeInput id={"density-" + density} label={"Code at " + density} ariaLabel={"Code at " + density} />
+    <CodeInput id={"density-" + density} {density} label={"Code at " + density} ariaLabel={"Code at " + density} />
   </svelte:fragment>
 </SpecimenLayout>
