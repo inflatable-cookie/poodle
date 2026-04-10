@@ -491,8 +491,10 @@
   }
 
   /* Density variants */
-  .calendar[data-density="compact"] .calendar__grid { gap: 0.0625rem; }
-  .calendar[data-density="compact"] .calendar__week { gap: 0.0625rem; }
-  .calendar[data-density="comfortable"] .calendar__grid { gap: 0.25rem; }
-  .calendar[data-density="comfortable"] .calendar__week { gap: 0.25rem; }
+  .calendar[data-density="compact"] .calendar__grid { gap: 0; }
+  .calendar[data-density="compact"] .calendar__week { gap: 0; }
+  .calendar[data-density="compact"] .calendar__nav { gap: 0.25rem; }
+  .calendar[data-density="comfortable"] .calendar__grid { gap: 0.375rem; }
+  .calendar[data-density="comfortable"] .calendar__week { gap: 0.375rem; }
+  .calendar[data-density="comfortable"] .calendar__nav { gap: 0.75rem; }
 </style>
