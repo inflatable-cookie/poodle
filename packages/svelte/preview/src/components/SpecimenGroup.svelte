@@ -25,8 +25,8 @@
   .specimen-group {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
-    margin-bottom: 0.25rem;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 
   .specimen-group__content {
