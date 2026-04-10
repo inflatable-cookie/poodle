@@ -2,11 +2,43 @@ use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
 use poodle_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use poodle_primitives::EyebrowSpec;
+use poodle_primitives::{ControlSize, EyebrowSpec};
 use poodle_gpui_components::{DataTable, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+
+fn make_columns() -> Vec<TableColumnSpec> {
+    vec![
+        TableColumnSpec::new("name", "Name").with_sortable(true),
+        TableColumnSpec::new("email", "Email").with_sortable(true),
+        TableColumnSpec::new("role", "Role").with_sortable(true),
+        TableColumnSpec::new("status", "Status"),
+    ]
+}
+
+fn make_rows() -> Vec<TableRowSpec> {
+    vec![
+        TableRowSpec::new("1", vec![
+            ("name".into(), "Alice Chen".into()),
+            ("email".into(), "alice@example.com".into()),
+            ("role".into(), "Engineer".into()),
+            ("status".into(), "Active".into()),
+        ]),
+        TableRowSpec::new("2", vec![
+            ("name".into(), "Bob Martinez".into()),
+            ("email".into(), "bob@example.com".into()),
+            ("role".into(), "Designer".into()),
+            ("status".into(), "Active".into()),
+        ]),
+        TableRowSpec::new("3", vec![
+            ("name".into(), "Carol Patel".into()),
+            ("email".into(), "carol@example.com".into()),
+            ("role".into(), "PM".into()),
+            ("status".into(), "On leave".into()),
+        ]),
+    ]
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -137,6 +169,39 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(format!("{} of 5 selected", selected_count))
         )
 
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[(&str, ControlSize)] = &[
+                        ("xs", ControlSize::Xs),
+                        ("sm", ControlSize::Sm),
+                        ("md", ControlSize::Md),
+                        ("lg", ControlSize::Lg),
+                        ("xl", ControlSize::Xl),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(16.0));
+                    for &(key, size) in sizes {
+                        col = col
+                            .child(
+                                div()
+                                    .text_size(px(11.0))
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("size = {}", key))
+                            )
+                            .child(
+                                DataTable::from_spec(
+                                    DataTableSpec::new(make_columns(), make_rows())
+                                        .with_aria_label(format!("Data table at {}", key))
+                                        .with_size(size),
+                                    theme,
+                                )
+                            );
+                    }
+                    col
+                })
+        )
         // --- Empty state ---
         .child(
             div().flex().flex_col().gap(px(8.0))
