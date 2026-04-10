@@ -372,12 +372,17 @@ pub enum ScrollOwner {
     Content,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TableColumnSpec {
     pub id: String,
     pub label: String,
     pub align_end: bool,
     pub is_sortable: bool,
+    /// When false the column cannot be hidden via the column-visibility
+    /// menu. Matches Svelte `hideable` prop (inverted default).
+    pub is_hideable: bool,
+    /// Optional explicit width in rem. When None the column flex-grows.
+    pub width_rem: Option<f32>,
 }
 
 impl TableColumnSpec {
@@ -387,6 +392,8 @@ impl TableColumnSpec {
             label: label.into(),
             align_end: false,
             is_sortable: false,
+            is_hideable: true,
+            width_rem: None,
         }
     }
 
@@ -399,6 +406,16 @@ impl TableColumnSpec {
         self.is_sortable = is_sortable;
         self
     }
+
+    pub fn with_hideable(mut self, is_hideable: bool) -> Self {
+        self.is_hideable = is_hideable;
+        self
+    }
+
+    pub fn with_width_rem(mut self, width_rem: f32) -> Self {
+        self.width_rem = Some(width_rem);
+        self
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -406,6 +423,11 @@ pub struct TableRowSpec {
     pub id: String,
     pub cells: Vec<(String, String)>,
     pub summary: Option<String>,
+    /// When set, the cell value is rendered as a status Pill with the
+    /// specified tone instead of plain text. Keyed by column id.
+    /// This lets specimens exercise the "custom cell" pattern without
+    /// a full slot API.
+    pub cell_tones: Vec<(String, StatusTone)>,
 }
 
 impl TableRowSpec {
@@ -414,12 +436,78 @@ impl TableRowSpec {
             id: id.into(),
             cells,
             summary: None,
+            cell_tones: Vec::new(),
         }
     }
 
     pub fn with_summary(mut self, summary: impl Into<String>) -> Self {
         self.summary = Some(summary.into());
         self
+    }
+
+    pub fn with_cell_tone(mut self, column_id: impl Into<String>, tone: StatusTone) -> Self {
+        self.cell_tones.push((column_id.into(), tone));
+        self
+    }
+
+    pub fn cell_tone_for(&self, column_id: &str) -> Option<StatusTone> {
+        self.cell_tones
+            .iter()
+            .find(|(id, _)| id == column_id)
+            .map(|(_, tone)| *tone)
+    }
+}
+
+/// Pagination state for a DataTable — matches Svelte TablePagination.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TablePagination {
+    pub page: u32,
+    pub limit: u32,
+    pub total: u32,
+}
+
+impl TablePagination {
+    pub fn new(page: u32, limit: u32, total: u32) -> Self {
+        Self { page, limit, total }
+    }
+
+    /// Total number of pages given the current `limit` and `total`.
+    pub fn total_pages(&self) -> u32 {
+        if self.limit == 0 {
+            0
+        } else {
+            (self.total + self.limit - 1) / self.limit
+        }
+    }
+
+    /// 1-based first item index on the current page.
+    pub fn first_item(&self) -> u32 {
+        if self.total == 0 {
+            0
+        } else {
+            (self.page - 1) * self.limit + 1
+        }
+    }
+
+    /// 1-based last item index on the current page.
+    pub fn last_item(&self) -> u32 {
+        (self.page * self.limit).min(self.total)
+    }
+}
+
+/// Filter state — keyed by column id.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TableFilter {
+    pub column_id: String,
+    pub value: String,
+}
+
+impl TableFilter {
+    pub fn new(column_id: impl Into<String>, value: impl Into<String>) -> Self {
+        Self {
+            column_id: column_id.into(),
+            value: value.into(),
+        }
     }
 }
 

@@ -87,7 +87,8 @@ pub use types::{
     CommandActionItem, DiscoveryState, DockEdge, EmptyStateVariant, FormActionLayout,
     FormFieldState, FormSectionSpec, FormStatusSummary, MediaKind, MediaState, MinColumnWidth,
     PanelTabItem, PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
-    SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableRowSpec, TableSortDirection,
+    SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableFilter, TablePagination,
+    TableRowSpec, TableSortDirection,
     ParsedEmbed,
     ValidationSummaryEntry,
 };

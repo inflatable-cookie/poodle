@@ -1,8 +1,11 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::{DataTableSpec, TableColumnSpec, TableRowSpec, TableSortDirection};
-use poodle_primitives::{ControlSize, EyebrowSpec};
+use poodle_composites::{
+    DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec,
+    TableSortDirection,
+};
+use poodle_primitives::{ControlSize, EyebrowSpec, StatusTone};
 use poodle_gpui_components::{DataTable, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -200,6 +203,84 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             );
                     }
                     col
+                })
+        )
+        // --- With filters and pagination (compact + striped + sticky header) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With filters and pagination"), theme))
+                .child(
+                    DataTable::from_spec(
+                        DataTableSpec::new(make_columns(), make_rows())
+                            .with_filters(vec![
+                                TableFilter::new("name", "Alice"),
+                                TableFilter::new("role", "Engineer"),
+                            ])
+                            .with_pagination(TablePagination::new(1, 10, 42))
+                            .with_compact(true)
+                            .with_striped(true)
+                            .with_sticky_header(true)
+                            .with_show_row_actions(false)
+                            .with_aria_label("Directory table"),
+                        theme,
+                    )
+                )
+        )
+        // --- With column visibility, export, and row selection ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Column visibility + export + row selection"), theme))
+                .child(
+                    DataTable::from_spec(
+                        DataTableSpec::new(make_columns(), make_rows())
+                            .with_selectable(true)
+                            .with_selected_row_ids(vec!["1".to_string(), "3".to_string()])
+                            .with_hidden_column_ids(vec!["email".to_string()])
+                            .with_show_column_visibility(true)
+                            .with_show_export(true)
+                            .with_show_row_actions(false)
+                            .with_aria_label("Team members"),
+                        theme,
+                    )
+                )
+        )
+        // --- Custom cells and expanded rows ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom cells and expanded rows"), theme))
+                .child({
+                    let incident_columns = vec![
+                        TableColumnSpec::new("status", "Status")
+                            .with_width_rem(7.0),
+                        TableColumnSpec::new("endpoint", "Endpoint"),
+                        TableColumnSpec::new("owner", "Owner")
+                            .with_width_rem(10.0),
+                    ];
+
+                    let incident_rows = vec![
+                        TableRowSpec::new("incident-1", vec![
+                            ("status".into(), "Open".into()),
+                            ("endpoint".into(), "POST /api/orders".into()),
+                            ("owner".into(), "Alice".into()),
+                        ])
+                        .with_summary("Active incident — last updated 2026-03-27 11:18 UTC.")
+                        .with_cell_tone("status", StatusTone::Danger),
+                        TableRowSpec::new("incident-2", vec![
+                            ("status".into(), "Resolved".into()),
+                            ("endpoint".into(), "GET /api/catalog".into()),
+                            ("owner".into(), "Bob".into()),
+                        ])
+                        .with_summary("Resolved 2026-03-27 09:42 UTC — rollback completed.")
+                        .with_cell_tone("status", StatusTone::Success),
+                    ];
+
+                    DataTable::from_spec(
+                        DataTableSpec::new(incident_columns, incident_rows)
+                            .with_expanded_row_ids(vec!["incident-1".to_string()])
+                            .with_show_row_actions(false)
+                            .with_aria_label("Active incidents"),
+                        theme,
+                    )
                 })
         )
         // --- Empty state ---
