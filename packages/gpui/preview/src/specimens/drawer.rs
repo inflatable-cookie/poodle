@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
+use poodle_primitives::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::{Drawer, Button, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -13,7 +15,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let right_open = state.specimens.is_on("drawer-right-open");
     let left_open = state.specimens.is_on("drawer-left-open");
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Right edge (default) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -122,76 +124,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     col
                 })
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Xs size").with_description("Extra small drawer."),
-                            theme,
-                        ).size(ControlSize::Xs).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Xs drawer body content.")
-                        ))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Sm size").with_description("Small drawer."),
-                            theme,
-                        ).size(ControlSize::Sm).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Sm drawer body content.")
-                        ))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Md size").with_description("Medium drawer."),
-                            theme,
-                        ).size(ControlSize::Md).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Md drawer body content.")
-                        ))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Lg size").with_description("Large drawer."),
-                            theme,
-                        ).size(ControlSize::Lg).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Lg drawer body content.")
-                        ))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Xl size").with_description("Extra large drawer."),
-                            theme,
-                        ).size(ControlSize::Xl).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Xl drawer body content.")
-                        ))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Compact").with_description("Tighter layout."),
-                            theme,
-                        ).with_density(ControlDensity::Compact).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Compact drawer body.")
-                        ))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Default").with_description("Default layout."),
-                            theme,
-                        ).with_density(ControlDensity::Default).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Default drawer body.")
-                        ))
-                        .child(Drawer::from_spec(
-                            DrawerSpec::new().with_title("Comfortable").with_description("Looser layout."),
-                            theme,
-                        ).with_density(ControlDensity::Comfortable).with_content(
-                            div().text_size(px(12.0)).text_color(color_to_hsla(text_secondary))
-                                .child("Comfortable drawer body.")
-                        ))
-                )
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "drawer",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Drawer::from_spec(
+                DrawerSpec::new().with_title("Drawer").with_description("Drawer body."),
+                theme,
+            )
+            .size(size)
+            .with_content(
+                div().text_size(px(12.0))
+                    .child("Drawer body.".to_string())
+            )
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Drawer::from_spec(
+                DrawerSpec::new().with_title("Drawer").with_description("Drawer body."),
+                theme,
+            )
+            .with_density(density)
+            .with_content(
+                div().text_size(px(12.0))
+                    .child("Drawer body.".to_string())
+            )
+            .into_any_element()
+        },
+    )
 }

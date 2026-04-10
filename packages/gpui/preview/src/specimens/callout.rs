@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CallOutSpec, ControlDensity, ControlSize, StatusTone, EyebrowSpec};
+use poodle_primitives::{CallOutSpec, StatusTone, EyebrowSpec};
 use poodle_gpui_components::{Callout, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -13,7 +15,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let dismissed_info = state.specimens.is_on("callout-dismissed-info");
     let dismissed_warning = state.specimens.is_on("callout-dismissed-warning");
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Tones ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -129,76 +131,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Xs size")
-                                .with_content("Extra small callout."),
-                            theme,
-                        ).size(ControlSize::Xs))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Sm size")
-                                .with_content("Small callout."),
-                            theme,
-                        ).size(ControlSize::Sm))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Md size")
-                                .with_content("Medium callout."),
-                            theme,
-                        ).size(ControlSize::Md))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Lg size")
-                                .with_content("Large callout."),
-                            theme,
-                        ).size(ControlSize::Lg))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Xl size")
-                                .with_content("Extra large callout."),
-                            theme,
-                        ).size(ControlSize::Xl))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Compact")
-                                .with_content("Tighter internal spacing."),
-                            theme,
-                        ).with_density(ControlDensity::Compact))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Default")
-                                .with_content("Default internal spacing."),
-                            theme,
-                        ).with_density(ControlDensity::Default))
-                        .child(Callout::from_spec(
-                            CallOutSpec::new()
-                                .with_tone(StatusTone::Info)
-                                .with_title("Comfortable")
-                                .with_content("Looser internal spacing."),
-                            theme,
-                        ).with_density(ControlDensity::Comfortable))
-                )
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "callout",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            Callout::from_spec(
+                CallOutSpec::new()
+                    .with_tone(StatusTone::Info)
+                    .with_title("Callout")
+                    .with_content("An informational callout."),
+                theme,
+            )
+            .size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            Callout::from_spec(
+                CallOutSpec::new()
+                    .with_tone(StatusTone::Info)
+                    .with_title("Callout")
+                    .with_content("An informational callout."),
+                theme,
+            )
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }

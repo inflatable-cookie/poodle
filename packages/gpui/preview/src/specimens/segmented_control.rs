@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlDensity, ControlSize, EyebrowSpec, SegmentedControlSpec};
+use poodle_primitives::{ChoiceOption, EyebrowSpec, SegmentedControlSpec};
 use poodle_gpui_components::{SegmentedControl, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -41,7 +43,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_default_value("list");
     fully_disabled_spec.is_disabled = true;
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -69,64 +71,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("seg-disabled-opt")
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for (id, size) in [
-                        ("seg-size-xs", ControlSize::Xs),
-                        ("seg-size-sm", ControlSize::Sm),
-                        ("seg-size-md", ControlSize::Md),
-                        ("seg-size-lg", ControlSize::Lg),
-                        ("seg-size-xl", ControlSize::Xl),
-                    ] {
-                        let opts = vec![
-                            ChoiceOption::new("grid", "Grid"),
-                            ChoiceOption::new("list", "List"),
-                            ChoiceOption::new("table", "Table"),
-                        ];
-                        col = col.child(
-                            SegmentedControl::from_spec(
-                                SegmentedControlSpec::new(opts).with_default_value("grid"),
-                                theme,
-                            )
-                            .with_id(id)
-                            .size(size)
-                        );
-                    }
-                    col
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for (id, density) in [
-                        ("seg-density-compact", ControlDensity::Compact),
-                        ("seg-density-default", ControlDensity::Default),
-                        ("seg-density-comfortable", ControlDensity::Comfortable),
-                    ] {
-                        let opts = vec![
-                            ChoiceOption::new("grid", "Grid"),
-                            ChoiceOption::new("list", "List"),
-                            ChoiceOption::new("table", "Table"),
-                        ];
-                        col = col.child(
-                            SegmentedControl::from_spec(
-                                SegmentedControlSpec::new(opts).with_default_value("grid"),
-                                theme,
-                            )
-                            .with_id(id)
-                            .density(density)
-                        );
-                    }
-                    col
-                })
-        )
         // --- Fully disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -136,4 +80,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("seg-fully-disabled")
                 )
         )
+        .into_any_element();
+
+    let make_opts = || vec![
+        ChoiceOption::new("grid", "Grid"),
+        ChoiceOption::new("list", "List"),
+        ChoiceOption::new("table", "Table"),
+    ];
+
+    specimen_layout(
+        state,
+        cx,
+        "segmented-control",
+        examples,
+        move |size, theme: &GpuiThemeProvider| {
+            SegmentedControl::from_spec(
+                SegmentedControlSpec::new(make_opts()).with_default_value("grid"),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .size(size)
+            .into_any_element()
+        },
+        move |density, theme: &GpuiThemeProvider| {
+            SegmentedControl::from_spec(
+                SegmentedControlSpec::new(make_opts()).with_default_value("grid"),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .density(density)
+            .into_any_element()
+        },
+    )
 }

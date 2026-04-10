@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ColorPickerSpec, ColorInputMode, ControlDensity, ControlSize, EyebrowSpec};
+use poodle_primitives::{ColorPickerSpec, ColorInputMode, EyebrowSpec};
 use poodle_gpui_components::{ColorPicker, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -39,7 +41,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "#22c55e".to_string());
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(420.0))
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(420.0))
         // --- Basic picker ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -175,44 +177,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("disabled")
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("size-xs").size(ControlSize::Xs))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("size-sm").size(ControlSize::Sm))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("size-md").size(ControlSize::Md))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("size-lg").size(ControlSize::Lg))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("size-xl").size(ControlSize::Xl))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("density-compact").with_density(ControlDensity::Compact))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("density-default").with_density(ControlDensity::Default))
-                        .child(ColorPicker::from_spec(
-                            ColorPickerSpec::new().with_value("#6366f1"), theme,
-                        ).with_id("density-comfortable").with_density(ControlDensity::Comfortable))
-                )
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "color-picker",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            ColorPicker::from_spec(
+                ColorPickerSpec::new().with_value("#6366f1"),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .size(size)
+            .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            ColorPicker::from_spec(
+                ColorPickerSpec::new().with_value("#6366f1"),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .with_density(density)
+            .into_any_element()
+        },
+    )
 }

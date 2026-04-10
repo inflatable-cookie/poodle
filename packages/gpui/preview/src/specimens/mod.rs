@@ -319,7 +319,7 @@ pub fn render_single_specimen(
         "selection-summary" => specimen_card("SelectionSummary", theme, selection_summary_specimen::render(state, cx)),
         "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
-        "breadcrumbs" => specimen_card("Breadcrumbs", theme, breadcrumbs_specimen::render(theme)),
+        "breadcrumbs" => specimen_card("Breadcrumbs", theme, breadcrumbs_specimen::render(state, cx)),
         "page-loading" => specimen_card("PageLoading", theme, page_loading_specimen::render(theme)),
         "pagination-summary" => specimen_card("PaginationSummary", theme, pagination_summary_specimen::render(theme)),
         "metric-tile" | "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),

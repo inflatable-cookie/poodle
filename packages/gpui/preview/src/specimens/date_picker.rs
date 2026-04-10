@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, DatePickerSpec, EyebrowSpec};
+use poodle_primitives::{DatePickerSpec, EyebrowSpec};
 use poodle_gpui_components::{DatePicker, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -17,7 +19,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let prefilled_selected = state.specimens.text.get("date-picker-prefilled-value").cloned()
         .unwrap_or_else(|| "2026-03-14".to_string());
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(256.0)) // 16rem
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(256.0)) // 16rem
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -82,36 +84,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     DatePicker::from_spec(spec, theme).with_id("disabled")
                 })
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("size-xs").size(ControlSize::Xs))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("size-sm").size(ControlSize::Sm))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("size-md").size(ControlSize::Md))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("size-lg").size(ControlSize::Lg))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("size-xl").size(ControlSize::Xl))
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("density-compact").with_density(ControlDensity::Compact))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("density-default").with_density(ControlDensity::Default))
-                        .child(DatePicker::from_spec(DatePickerSpec::new(), theme)
-                            .with_id("density-comfortable").with_density(ControlDensity::Comfortable))
-                )
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "date-picker",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            DatePicker::from_spec(DatePickerSpec::new(), theme)
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            DatePicker::from_spec(DatePickerSpec::new(), theme)
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
+        },
+    )
 }
