@@ -57,7 +57,7 @@
   $: tooltipText = tooltip ?? ariaLabel;
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
+  $: resolvedIconSize = resolvedSize;
   $: if (tooltipOpen && tooltipText) {
     void updateTooltipPosition();
   }
