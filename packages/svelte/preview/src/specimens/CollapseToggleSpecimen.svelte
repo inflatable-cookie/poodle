@@ -1,11 +1,7 @@
 <script lang="ts">
   import { CollapseToggle } from "@poodle/svelte-primitives";
-  import type { ControlDensity } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let collapsedLeft = false;
   let collapsedRight = false;
@@ -13,7 +9,7 @@
   let collapsedDown = false;
 </script>
 
-<div class="specimen">
+<SpecimenLayout bareVariants>
   <SpecimenGroup label="Directions">
     <div class="specimen__row">
       <div class="specimen__labeled">
@@ -51,40 +47,23 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__row">
-      {#each controlSizes as size}
-        <CollapseToggle direction="left" {size} />
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__row">
-      {#each densities as density}
-        <div class="specimen__labeled">
-          <CollapseToggle direction="left" {density} />
-          <span>{density}</span>
-        </div>
-      {/each}
-    </div>
-  </SpecimenGroup>
-
   <SpecimenGroup label="Disabled">
     <div class="specimen__row">
       <CollapseToggle direction="left" disabled />
       <CollapseToggle direction="right" disabled />
     </div>
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <CollapseToggle direction="left" {size} />
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <CollapseToggle direction="left" {density} />
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .specimen__row {
     display: flex;
     gap: 1.5rem;
