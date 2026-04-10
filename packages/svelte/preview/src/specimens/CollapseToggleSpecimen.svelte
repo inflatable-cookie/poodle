@@ -9,7 +9,7 @@
   let collapsedDown = false;
 </script>
 
-<SpecimenLayout variantDirection="row">
+<SpecimenLayout>
   <SpecimenGroup label="Directions">
     <div class="specimen__row">
       <div class="specimen__labeled">
