@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{CheckboxSpec, EyebrowSpec};
+use poodle_primitives::{CheckboxSpec, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{Checkbox, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -47,6 +47,70 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     col
                 })
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().gap(px(16.0)).items_center()
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("Accept terms"),
+                                theme,
+                            ).with_id("size-xs").size(ControlSize::Xs)
+                        )
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("Accept terms"),
+                                theme,
+                            ).with_id("size-sm").size(ControlSize::Sm)
+                        )
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("Accept terms"),
+                                theme,
+                            ).with_id("size-md").size(ControlSize::Md)
+                        )
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("Accept terms"),
+                                theme,
+                            ).with_id("size-lg").size(ControlSize::Lg)
+                        )
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("Accept terms"),
+                                theme,
+                            ).with_id("size-xl").size(ControlSize::Xl)
+                        )
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("compact: Option"),
+                                theme,
+                            ).with_id("density-compact").density(ControlDensity::Compact)
+                        )
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("default: Option"),
+                                theme,
+                            ).with_id("density-default").density(ControlDensity::Default)
+                        )
+                        .child(
+                            Checkbox::from_spec(
+                                CheckboxSpec::new().with_label("comfortable: Option"),
+                                theme,
+                            ).with_id("density-comfortable").density(ControlDensity::Comfortable)
+                        )
+                )
         )
         // --- States ---
         .child(

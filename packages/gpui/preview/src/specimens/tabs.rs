@@ -225,7 +225,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // 1. Underline variant (default, with panel)
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Underline variant (default, with panel)"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Text variant (default, with indicator line)"), theme))
                 .child(underline_component)
         )
 
@@ -246,7 +246,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // 4. Underline with icons (no panel)
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Underline (with icons, no panel)"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Text variant (no border)"), theme))
                 .child(underline_icon_component)
         )
 
