@@ -76,8 +76,8 @@
   }
 
   .poodle-icon[data-size="xs"] {
-    width: 0.625rem;
-    height: 0.625rem;
+    width: var(--poodle-size-icon-xs);
+    height: var(--poodle-size-icon-xs);
   }
 
   .poodle-icon[data-size="sm"] {
@@ -91,7 +91,7 @@
   }
 
   .poodle-icon[data-size="xl"] {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: var(--poodle-size-icon-xl);
+    height: var(--poodle-size-icon-xl);
   }
 </style>
