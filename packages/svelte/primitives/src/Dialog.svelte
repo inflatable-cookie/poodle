@@ -315,7 +315,7 @@
 
   .dialog__header {
     display: grid;
-    gap: 0.375rem;
+    gap: 0.625rem;
     flex: 1 1 auto;
     min-width: 0;
   }
