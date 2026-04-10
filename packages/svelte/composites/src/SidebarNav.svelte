@@ -191,7 +191,7 @@
     padding: var(--poodle-sidebar-nav-item-padding-block) var(--poodle-sidebar-nav-item-padding-inline);
     border: 0;
     border-left: 0.1875rem solid transparent;
-    border-radius: 0.125rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.125rem;
+    border-radius: 0.2rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.2rem;
     background: transparent;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);
