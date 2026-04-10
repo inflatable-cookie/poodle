@@ -80,7 +80,7 @@ impl IntoElement for Drawer {
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
         let density_pad = px(rem_to_px(panel_space_x_rem(spec.density)));
-        let body_font = px(rem_to_px(size_font_rem(effective_size)));
+        let _body_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let stack_gap = resolve_px(theme, "space.stack.sm");
         let panel_padding = density_pad;

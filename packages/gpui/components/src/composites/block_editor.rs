@@ -56,7 +56,7 @@ impl IntoElement for BlockEditor {
         let _effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
         let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
-        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+        let _item_gap = rem_to_px(control_space_x_rem(self.spec.density));
 
         let fill = resolve_color(theme, self.spec.fill_token());
         let border = resolve_color(theme, self.spec.border_token());

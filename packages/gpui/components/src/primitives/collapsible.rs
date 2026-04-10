@@ -68,7 +68,7 @@ impl IntoElement for Collapsible {
         let is_open = spec.current_open();
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
         let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
-        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
+        let _density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
         let title_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let heading_size = title_font;

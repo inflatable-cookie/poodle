@@ -69,7 +69,7 @@ impl IntoElement for NavigationMenu {
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
-        let base_height = resolve_px(theme, "size.control.height");
+        let _base_height = resolve_px(theme, "size.control.height");
         let trigger_height_offset = px(rem_to_px(size_height_offset_rem(effective_size)));
         let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let density_panel_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));

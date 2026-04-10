@@ -149,7 +149,7 @@ impl IntoElement for Calendar {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let cell_size = px(rem_to_px(control_height_rem(effective_size)));
+        let _cell_size = px(rem_to_px(control_height_rem(effective_size)));
         let cal_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let control_radius = resolve_radius(theme, "radius.control");

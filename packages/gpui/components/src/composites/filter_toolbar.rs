@@ -79,7 +79,7 @@ impl IntoElement for FilterToolbar {
         let font_size = rem_to_px(size_font_rem(effective_size));
         let panel_px = rem_to_px(panel_space_x_rem(spec.density));
         let panel_py = rem_to_px(panel_space_y_rem(spec.density));
-        let item_gap = rem_to_px(control_space_x_rem(spec.density));
+        let _item_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let inline_padding = px(panel_px);
         let body_size = px(font_size);
