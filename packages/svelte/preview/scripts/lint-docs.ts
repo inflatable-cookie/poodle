@@ -1620,7 +1620,6 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     "date-time-range-picker",
     "progress",
     "radio-group",
-    "range-calendar",
     "segmented-control",
     "select",
     "slider",

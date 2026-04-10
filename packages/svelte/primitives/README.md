@@ -44,6 +44,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `IconProvider`
 - `ListCard`
 - `ListCardCounter`
+- `ListGrid`
 - `Meter`
 - `Menubar`
 - `Menu`
@@ -91,6 +92,8 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `compressImage`
 - `controlHeightRem`
 - `controlSpaceXRem`
+- `formatDisplayDate`
+- `formatDisplayDateTime`
 - `formatFileSize`
 - `getUiPresentation`
 - `panelSpaceXRem`

@@ -16,6 +16,7 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `command-palette.md`
 - `confirm-action.md`
 - `data-table.md`
+- `debug-dialog.md`
 - `detail-section.md`
 - `detail-shell.md`
 - `dock-region.md`
@@ -23,6 +24,7 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `embed-input.md`
 - `embed-preview.md`
 - `empty-state.md`
+- `error-boundary.md`
 - `filter-toolbar.md`
 - `form-dialog.md`
 - `form-layout.md`

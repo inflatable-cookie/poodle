@@ -16,6 +16,7 @@ and data components.
 - `CommandPalette`
 - `ConfirmAction`
 - `DataTable`
+- `DebugDialog`
 - `DetailItem`
 - `DetailSection`
 - `DetailShell`
@@ -24,9 +25,11 @@ and data components.
 - `EmbedInput`
 - `EmbedPreview`
 - `EmptyState`
+- `ErrorBoundary`
 - `FilterToolbar`
 - `FormDialog`
 - `FormLayout`
+- `InlineListSection`
 - `ListCard`
 - `ListContainer`
 - `LogList`

@@ -61,13 +61,7 @@ export { default as RadioGroup } from "./RadioGroup.svelte";
 export { default as Rating } from "./Rating.svelte";
 export { default as Region } from "./Region.svelte";
 export { default as ResizeHandle } from "./ResizeHandle.svelte";
-/** @deprecated Use `Calendar` with `mode="range"` instead. */
-export { default as RangeCalendar } from "./Calendar.svelte";
 export { default as RangeSlider } from "./RangeSlider.svelte";
-/** @deprecated Use `TextInput` with `type="search"` instead. */
-export { default as SearchInput } from "./TextInput.svelte";
-/** @deprecated Use `TextInput` with `type="search"` instead. */
-export { default as SearchField } from "./TextInput.svelte";
 export { default as SegmentedControl } from "./SegmentedControl.svelte";
 export { default as Select } from "./Select.svelte";
 export { default as ScrollShell } from "./ScrollShell.svelte";
@@ -84,8 +78,6 @@ export { default as Surface } from "./Surface.svelte";
 export { default as Switch } from "./Switch.svelte";
 export { default as Tabs } from "./Tabs.svelte";
 export { default as Table } from "./Table.svelte";
-/** @deprecated Use `TextInput` with `type="multiline"` or `rows > 1` instead. */
-export { default as TextArea } from "./TextInput.svelte";
 export { default as TimeAgo } from "./TimeAgo.svelte";
 export { default as TextInput } from "./TextInput.svelte";
 export { default as TimeField } from "./TimeField.svelte";
@@ -97,8 +89,6 @@ export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
 export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
 export { default as DateTimeZonePicker } from "./DateTimeZonePicker.svelte";
-/** @deprecated Use `DateTimeZonePicker` instead. */
-export { default as ZonedDateTimePicker } from "./DateTimeZonePicker.svelte";
 export {
   formatDisplayDate,
   formatDisplayDateTime,

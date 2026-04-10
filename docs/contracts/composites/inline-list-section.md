@@ -3,7 +3,10 @@
 Status: active
 Updated: 2026-04-09
 
-## Purpose
+## 1. Purpose
+
+- Component name: `InlineListSection`
+- Layer: `composites`
 
 `InlineListSection` provides the compact card-contained related-list shell used
 inside detail tabs and metadata pages for versions, usages, aliases, and other
@@ -74,3 +77,14 @@ It does not own:
   {/snippet}
 </InlineListSection>
 ```
+
+## 2. Accessibility
+
+- root `Card` wrapper: uses default card semantics with no additional ARIA role
+- section header: rendered as a visible heading; heading level is determined by
+  the host context
+- empty state: empty-message text is rendered inline inside the card so screen
+  readers announce it naturally
+- item rows: host-owned content is responsible for its own row-level
+  accessibility attributes
+- action buttons in the header: host must supply `ariaLabel` on each action

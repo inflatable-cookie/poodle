@@ -75,6 +75,7 @@ above it in downstream repos such as Loophole.
 - `foundation/icon.md`
 - `foundation/list-card-counter.md`
 - `foundation/list-card.md`
+- `foundation/list-grid.md`
 - `foundation/menu.md`
 - `foundation/menubar.md`
 - `foundation/meta-bar.md`
@@ -133,6 +134,7 @@ above it in downstream repos such as Loophole.
 - `composites/command-palette.md`
 - `composites/confirm-action.md`
 - `composites/data-table.md`
+- `composites/debug-dialog.md`
 - `composites/detail-section.md`
 - `composites/detail-shell.md`
 - `composites/dock-region.md`
@@ -140,9 +142,11 @@ above it in downstream repos such as Loophole.
 - `composites/embed-input.md`
 - `composites/embed-preview.md`
 - `composites/empty-state.md`
+- `composites/error-boundary.md`
 - `composites/filter-toolbar.md`
 - `composites/form-dialog.md`
 - `composites/form-layout.md`
+- `composites/inline-list-section.md`
 - `composites/list-container.md`
 - `composites/log-list.md`
 - `composites/markdown-editor.md`
