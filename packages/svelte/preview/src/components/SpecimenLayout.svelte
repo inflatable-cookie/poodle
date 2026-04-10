@@ -20,8 +20,6 @@
     value={activeTab}
     items={tabs}
     variant="text"
-    size="sm"
-    density="compact"
     ariaLabel="Specimen view"
     on:valueChange={(e) => (activeTab = e.detail.value as typeof activeTab)}
   />
@@ -35,7 +33,9 @@
           <div class="specimen-layout__variant">
             <span class="specimen-layout__label">{size}</span>
             <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
-              <slot name="sizes" {size} />
+              <div class="specimen-layout__demo">
+                <slot name="sizes" {size} />
+              </div>
             </UiPresentationProvider>
           </div>
         {/each}
@@ -46,7 +46,9 @@
           <div class="specimen-layout__variant">
             <span class="specimen-layout__label">{density}</span>
             <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
-              <slot name="densities" {density} />
+              <div class="specimen-layout__demo">
+                <slot name="densities" {density} />
+              </div>
             </UiPresentationProvider>
           </div>
         {/each}
@@ -71,7 +73,7 @@
   .specimen-layout__grid {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .specimen-layout__variant {
@@ -86,5 +88,12 @@
     color: var(--poodle-color-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+  }
+
+  .specimen-layout__demo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 </style>
