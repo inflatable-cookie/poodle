@@ -17,6 +17,13 @@
   export let items: T[] = [];
   export let ariaLabel = "Reorderable list";
   export let disabled = false;
+  export let reorderable = true;
+  /** Show add-item input and remove buttons. */
+  export let editable = false;
+  export let addLabel = "Add item";
+  export let addPlaceholder = "New item";
+  export let maxItems: number | null = null;
+  export let removable = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
@@ -35,10 +42,14 @@
 
   const dispatch = createEventDispatcher<{
     reorder: { items: T[] };
+    add: { item: T };
+    remove: { id: string };
+    change: { items: T[] };
     submit: void;
     cancel: void;
   }>();
 
+  let newItemText = "";
   let draggingIndex: number | null = null;
   let dropTargetIndex: number | null = null;
   let grabbedIndex: number | null = null;
@@ -49,6 +60,8 @@
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isUnavailable = disabled || submitting;
+  $: canAdd = editable && !isUnavailable && (maxItems === null || items.length < maxItems);
+  $: showRemove = editable || removable;
   $: showWorkflowChrome = onsubmit !== null || oncancel !== null;
   $: isLongList = longListThreshold !== null && longListThreshold > 0 && items.length > longListThreshold;
   $: effectiveLongListWarning =
@@ -162,6 +175,33 @@
     });
   }
 
+  function addItem(): void {
+    const label = newItemText.trim();
+    if (!label || !canAdd) return;
+    const newItem = {
+      id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      label,
+    } as T;
+    items = [...items, newItem];
+    newItemText = "";
+    dispatch("add", { item: newItem });
+    dispatch("change", { items });
+  }
+
+  function removeItem(id: string): void {
+    if (isUnavailable) return;
+    items = items.filter((i) => i.id !== id);
+    dispatch("remove", { id });
+    dispatch("change", { items });
+  }
+
+  function handleAddKeydown(event: KeyboardEvent): void {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addItem();
+    }
+  }
+
   async function handleSubmit(): Promise<void> {
     if (!onsubmit || isUnavailable || !dirty) return;
     dispatch("submit");
@@ -255,23 +295,25 @@
           aria-selected="false"
           aria-label={`Reorder ${reorderItem.label ?? reorderItem.id}. Position ${index + 1} of ${items.length}. Press space to grab, then arrow keys to move.`}
           data-reorder-index={index}
-          draggable={!isUnavailable}
+          draggable={reorderable && !isUnavailable}
           on:dragstart={(e) => handleDragStart(e, index)}
           on:dragover={(e) => handleDragOver(e, index)}
           on:drop={(e) => handleDrop(e, index)}
           on:dragend={handleDragEnd}
           on:keydown={(e) => handleKeydown(e, index)}
         >
-          <span class="reorderable-list__handle" aria-hidden="true">
-            <svg viewBox="0 0 16 16" fill="currentColor">
-              <circle cx="5" cy="4" r="1.25" />
-              <circle cx="11" cy="4" r="1.25" />
-              <circle cx="5" cy="8" r="1.25" />
-              <circle cx="11" cy="8" r="1.25" />
-              <circle cx="5" cy="12" r="1.25" />
-              <circle cx="11" cy="12" r="1.25" />
-            </svg>
-          </span>
+          {#if reorderable}
+            <span class="reorderable-list__handle" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="5" cy="4" r="1.25" />
+                <circle cx="11" cy="4" r="1.25" />
+                <circle cx="5" cy="8" r="1.25" />
+                <circle cx="11" cy="8" r="1.25" />
+                <circle cx="5" cy="12" r="1.25" />
+                <circle cx="11" cy="12" r="1.25" />
+              </svg>
+            </span>
+          {/if}
           <span class="reorderable-list__content">
             {#if item}
               {@render item(reorderItem)}
@@ -279,9 +321,49 @@
               {reorderItem.label ?? reorderItem.id}
             {/if}
           </span>
+          {#if showRemove}
+            <button
+              type="button"
+              class="reorderable-list__remove"
+              disabled={isUnavailable}
+              aria-label={`Remove ${reorderItem.label ?? reorderItem.id}`}
+              on:click|stopPropagation={() => removeItem(reorderItem.id)}
+            >
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </button>
+          {/if}
         </li>
       {/each}
     </ul>
+
+    {#if canAdd}
+      <div class="reorderable-list__add">
+        <input
+          type="text"
+          class="reorderable-list__add-input"
+          bind:value={newItemText}
+          placeholder={addPlaceholder}
+          disabled={isUnavailable}
+          on:keydown={handleAddKeydown}
+        />
+        <button
+          type="button"
+          class="reorderable-list__add-btn"
+          disabled={!newItemText.trim() || !canAdd}
+          on:click={addItem}
+        >
+          {addLabel}
+        </button>
+      </div>
+    {/if}
+
+    {#if editable && maxItems !== null}
+      <span class="reorderable-list__count">
+        {items.length}/{maxItems}
+      </span>
+    {/if}
   </div>
 </UiPresentationProvider>
 
@@ -457,5 +539,89 @@
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-reorderable-list-font-size);
     color: var(--poodle-color-text-primary);
+  }
+
+  .reorderable-list__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--poodle-reorderable-list-handle-size);
+    height: var(--poodle-reorderable-list-handle-size);
+    padding: 0;
+    border: 0;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--poodle-color-text-secondary);
+    cursor: pointer;
+  }
+
+  .reorderable-list__remove:hover:not(:disabled) {
+    color: var(--poodle-color-status-danger);
+  }
+
+  .reorderable-list__remove svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .reorderable-list__add {
+    display: flex;
+    gap: 0.375rem;
+  }
+
+  .reorderable-list__add-input {
+    flex: 1;
+    min-width: 0;
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-reorderable-list-font-size);
+    outline: none;
+  }
+
+  .reorderable-list__add-input:focus {
+    border-color: var(--poodle-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus)
+      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
+  }
+
+  .reorderable-list__add-input::placeholder {
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .reorderable-list__add-btn {
+    display: inline-flex;
+    align-items: center;
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    border: 0.0625rem solid var(--poodle-color-border-default);
+    border-radius: var(--poodle-radius-control);
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-primary);
+    cursor: pointer;
+    font-family: var(--poodle-typography-label-family);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
+  }
+
+  .reorderable-list__add-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
+  }
+
+  .reorderable-list__add-btn:disabled {
+    cursor: not-allowed;
+    opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .reorderable-list__count {
+    font-size: var(--poodle-typography-label-size);
+    color: var(--poodle-color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    align-self: flex-end;
   }
 </style>
