@@ -327,6 +327,8 @@
   .dialog__header p {
     margin: 0;
     color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
   }
 
   .dialog__body {
@@ -351,19 +353,31 @@
   }
 
   .dialog[data-size="xs"] .dialog__header p {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
   }
 
   .dialog[data-size="sm"] .dialog__header strong {
     font-size: 0.875rem;
   }
 
+  .dialog[data-size="sm"] .dialog__header p {
+    font-size: 0.75rem;
+  }
+
   .dialog[data-size="lg"] .dialog__header strong {
     font-size: 1.0625rem;
   }
 
+  .dialog[data-size="lg"] .dialog__header p {
+    font-size: 0.875rem;
+  }
+
   .dialog[data-size="xl"] .dialog__header strong {
     font-size: 1.125rem;
+  }
+
+  .dialog[data-size="xl"] .dialog__header p {
+    font-size: 0.9375rem;
   }
 
   /* Density variants */
