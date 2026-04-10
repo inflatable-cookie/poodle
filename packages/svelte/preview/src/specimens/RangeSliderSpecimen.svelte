@@ -37,11 +37,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <RangeSlider value={[25, 75]} min={0} max={100} ariaLabel={"Range at " + size} {size} />
+    <RangeSlider value={[25, 75]} min={0} max={100} ariaLabel={"Range at " + size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <RangeSlider value={[25, 75]} min={0} max={100} ariaLabel={"Range at " + density + " density"} {density} />
+    <RangeSlider value={[25, 75]} min={0} max={100} ariaLabel={"Range at " + density + " density"} />
   </svelte:fragment>
 </SpecimenLayout>
 </div>

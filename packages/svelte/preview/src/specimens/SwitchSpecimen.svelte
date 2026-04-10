@@ -68,10 +68,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Switch label="Enabled" {size} />
+    <Switch label="Enabled" />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Switch id={"density-" + density} label="Toggle" {density} />
+    <Switch id={"density-" + density} label="Toggle" />
   </svelte:fragment>
 </SpecimenLayout>

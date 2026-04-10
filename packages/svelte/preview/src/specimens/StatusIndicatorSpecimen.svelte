@@ -31,7 +31,7 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <StatusIndicator status="success" label={size.toUpperCase()} {size} />
+    <StatusIndicator status="success" label={size.toUpperCase()} />
   </svelte:fragment>
 </SpecimenLayout>
 

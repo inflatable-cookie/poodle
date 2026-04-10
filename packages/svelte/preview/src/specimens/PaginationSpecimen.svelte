@@ -79,10 +79,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Pagination currentPage={1} totalPages={10} ariaLabel={size + " pagination"} {size} />
+    <Pagination currentPage={1} totalPages={10} ariaLabel={size + " pagination"} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Pagination totalPages={10} {density} />
+    <Pagination totalPages={10} />
   </svelte:fragment>
 </SpecimenLayout>

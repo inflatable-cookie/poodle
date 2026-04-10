@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
+  import { Surface, Tabs, UiPresentationProvider, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
 
@@ -28,21 +28,25 @@
     {#if activeTab === "examples"}
       <slot />
     {:else if activeTab === "sizes"}
-      <div class="specimen-layout__variants">
-        {#each controlSizes as size}
-          <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
-            <slot name="sizes" {size} />
-          </UiPresentationProvider>
-        {/each}
-      </div>
+      <Surface tone="panel" border="subtle" padding="md">
+        <div class="specimen-layout__variants">
+          {#each controlSizes as size}
+            <UiPresentationProvider sizeScale={size} density={$uiPresentation.density}>
+              <slot name="sizes" {size} />
+            </UiPresentationProvider>
+          {/each}
+        </div>
+      </Surface>
     {:else if activeTab === "densities"}
-      <div class="specimen-layout__variants">
-        {#each densities as density}
-          <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
-            <slot name="densities" {density} />
-          </UiPresentationProvider>
-        {/each}
-      </div>
+      <Surface tone="panel" border="subtle" padding="md">
+        <div class="specimen-layout__variants">
+          {#each densities as density}
+            <UiPresentationProvider sizeScale={$uiPresentation.sizeScale} {density}>
+              <slot name="densities" {density} />
+            </UiPresentationProvider>
+          {/each}
+        </div>
+      </Surface>
     {/if}
   </div>
 </div>

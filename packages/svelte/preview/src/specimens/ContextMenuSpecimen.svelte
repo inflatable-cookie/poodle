@@ -29,7 +29,7 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <ContextMenu {items} {size}>
+    <ContextMenu {items}>
       <div class="target-area target-area--small">
         <p>{size.toUpperCase()}</p>
       </div>
@@ -37,7 +37,7 @@
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <ContextMenu {items} {density}>
+    <ContextMenu {items}>
       <div class="target-area target-area--small">
         <p>{density}</p>
       </div>

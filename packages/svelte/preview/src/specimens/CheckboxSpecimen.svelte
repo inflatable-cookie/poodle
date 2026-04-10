@@ -40,10 +40,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Checkbox label="Accept terms" {size} />
+    <Checkbox label="Accept terms" />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Checkbox id={"density-" + density} label="Option" {density} />
+    <Checkbox id={"density-" + density} label="Option" />
   </svelte:fragment>
 </SpecimenLayout>

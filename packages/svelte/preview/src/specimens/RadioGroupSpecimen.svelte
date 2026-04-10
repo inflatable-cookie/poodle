@@ -61,7 +61,6 @@
       options={planOptions}
       defaultValue="pro"
       ariaLabel={"Plan at " + size}
-      {size}
     />
   </svelte:fragment>
 
@@ -70,7 +69,6 @@
       options={planOptions}
       defaultValue="pro"
       ariaLabel={"Plan at " + density + " density"}
-      {density}
     />
   </svelte:fragment>
 </SpecimenLayout>

@@ -31,10 +31,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <TimeField id={"size-" + size} ariaLabel={size} {size} />
+    <TimeField id={"size-" + size} ariaLabel={size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <TimeField id={"density-" + density} {density} />
+    <TimeField id={"density-" + density} />
   </svelte:fragment>
 </SpecimenLayout>

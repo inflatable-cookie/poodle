@@ -127,11 +127,11 @@
   <p class="specimen__log">{clickLog}</p>
 
   <svelte:fragment slot="sizes" let:size>
-    <Button variant="primary" leadingIcon="plus" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
+    <Button variant="primary" leadingIcon="plus" on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Button variant="secondary" leadingIcon="download" {density} on:click={() => log(`Density ${density}`)}>Action</Button>
+    <Button variant="secondary" leadingIcon="download" on:click={() => log(`Density ${density}`)}>Action</Button>
   </svelte:fragment>
 </SpecimenLayout>
 

@@ -33,15 +33,15 @@
 
   <svelte:fragment slot="sizes" let:size>
     <div class="specimen__row">
-      <Spinner variant="ring" {size} />
-      <Spinner variant="grid" {size} />
+      <Spinner variant="ring" />
+      <Spinner variant="grid" />
     </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
     <div class="specimen__row">
-      <Spinner variant="ring" {density} />
-      <Spinner variant="grid" {density} />
+      <Spinner variant="ring" />
+      <Spinner variant="grid" />
     </div>
   </svelte:fragment>
 </SpecimenLayout>

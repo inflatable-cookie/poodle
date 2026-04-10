@@ -74,11 +74,11 @@
   {/if}
 
   <svelte:fragment slot="sizes" let:size>
-    <EditableLabel value={size.toUpperCase()} ariaLabel={"Label at " + size} {size} />
+    <EditableLabel value={size.toUpperCase()} ariaLabel={"Label at " + size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <EditableLabel value="Edit me" {density} />
+    <EditableLabel value="Edit me" />
   </svelte:fragment>
 </SpecimenLayout>
 

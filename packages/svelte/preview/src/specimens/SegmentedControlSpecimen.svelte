@@ -53,6 +53,6 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="densities" let:density>
-    <SegmentedControl options={viewOptions} defaultValue="grid" ariaLabel="{density} view mode" {density} />
+    <SegmentedControl options={viewOptions} defaultValue="grid" ariaLabel="{density} view mode" />
   </svelte:fragment>
 </SpecimenLayout>

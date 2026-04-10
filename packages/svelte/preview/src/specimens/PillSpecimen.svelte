@@ -51,11 +51,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Pill {size}>{size.toUpperCase()}</Pill>
+    <Pill>{size.toUpperCase()}</Pill>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Pill {density}>Label</Pill>
+    <Pill>Label</Pill>
   </svelte:fragment>
 </SpecimenLayout>
 

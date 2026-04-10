@@ -39,11 +39,11 @@ function handleClick(event: MouseEvent): void {
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Code source="const x = 1;" {size} />
+    <Code source="const x = 1;" />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Code source="const x = 1;" {density} />
+    <Code source="const x = 1;" />
   </svelte:fragment>
 </SpecimenLayout>
 

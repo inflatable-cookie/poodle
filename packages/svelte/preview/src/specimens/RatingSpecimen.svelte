@@ -29,10 +29,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Rating value={3} ariaLabel={"Rating at " + size} {size} />
+    <Rating value={3} ariaLabel={"Rating at " + size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Rating value={3} ariaLabel={"Rating at " + density + " density"} {density} />
+    <Rating value={3} ariaLabel={"Rating at " + density + " density"} />
   </svelte:fragment>
 </SpecimenLayout>
