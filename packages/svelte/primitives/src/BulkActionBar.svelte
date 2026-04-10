@@ -194,16 +194,16 @@
 
   /* Size variants — controls and text only, not container padding */
   .bulk-action-bar[data-size="xs"] .bulk-action-bar__summary { font-size: 0.75rem; }
-  .bulk-action-bar[data-size="xs"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) - 0.5rem); font-size: 0.75rem; }
+  .bulk-action-bar[data-size="xs"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 0.75rem; }
 
   .bulk-action-bar[data-size="sm"] .bulk-action-bar__summary { font-size: 0.8125rem; }
-  .bulk-action-bar[data-size="sm"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) - 0.375rem); font-size: 0.8125rem; }
+  .bulk-action-bar[data-size="sm"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 0.8125rem; }
 
   .bulk-action-bar[data-size="lg"] .bulk-action-bar__summary { font-size: 0.9375rem; }
-  .bulk-action-bar[data-size="lg"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) + 0.375rem); font-size: 0.9375rem; }
+  .bulk-action-bar[data-size="lg"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 0.9375rem; }
 
   .bulk-action-bar[data-size="xl"] .bulk-action-bar__summary { font-size: 1rem; }
-  .bulk-action-bar[data-size="xl"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) + 0.5rem); font-size: 1rem; }
+  .bulk-action-bar[data-size="xl"] .bulk-action-bar__button { min-height: var(--poodle-size-control-height); font-size: 1rem; }
 
   /* Density variants — horizontal padding and gap only, not vertical padding */
   .bulk-action-bar[data-density="compact"] { padding-inline: 0.75rem; gap: 0.375rem; }

@@ -401,7 +401,7 @@
     align-items: center;
     justify-content: center;
     min-width: var(--poodle-size-control-height);
-    height: calc(var(--poodle-size-control-height) - 0.125rem);
+    height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
     border-radius: var(--poodle-radius-control);
@@ -451,10 +451,10 @@
   }
 
   /* Size variants */
-  .pagination[data-size="xs"] .pagination__button { min-width: calc(var(--poodle-size-control-height) - 0.625rem); height: calc(var(--poodle-size-control-height) - 0.625rem); font-size: 0.6875rem; }
-  .pagination[data-size="sm"] .pagination__button { min-width: calc(var(--poodle-size-control-height) - 0.375rem); height: calc(var(--poodle-size-control-height) - 0.375rem); }
-  .pagination[data-size="lg"] .pagination__button { min-width: calc(var(--poodle-size-control-height) + 0.125rem); height: calc(var(--poodle-size-control-height) + 0.125rem); font-size: 0.875rem; }
-  .pagination[data-size="xl"] .pagination__button { min-width: calc(var(--poodle-size-control-height) + 0.375rem); height: calc(var(--poodle-size-control-height) + 0.375rem); font-size: 0.9375rem; }
+  .pagination[data-size="xs"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); font-size: 0.6875rem; }
+  .pagination[data-size="sm"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); }
+  .pagination[data-size="lg"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); font-size: 0.875rem; }
+  .pagination[data-size="xl"] .pagination__button { min-width: var(--poodle-size-control-height); height: var(--poodle-size-control-height); font-size: 0.9375rem; }
 
   /* Density variants */
   .pagination[data-density="compact"] .pagination__controls,

@@ -777,7 +777,7 @@
   .select__input {
     flex: 1;
     min-width: 0;
-    height: calc(var(--poodle-size-control-height) - 0.125rem);
+    height: var(--poodle-size-control-height);
     padding: 0;
     border: 0;
     background: transparent;
@@ -799,7 +799,7 @@
     gap: 0.25rem;
     flex: 1;
     min-width: 0;
-    min-height: calc(var(--poodle-size-control-height) - 0.125rem);
+    min-height: var(--poodle-size-control-height);
     padding: 0;
     border: 0;
     background: transparent;
@@ -990,27 +990,27 @@
   .select--custom[data-density="comfortable"] .select__trigger { padding: 0; }
 
   /* ═══ SIZE VARIANTS ═══ */
-  .select[data-size="xs"] { min-height: calc(var(--poodle-size-control-height) - 0.5rem); padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .select[data-size="xs"] .select__control { height: calc(var(--poodle-size-control-height) - 0.5rem - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
+  .select[data-size="xs"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
+  .select[data-size="xs"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
   .select[data-size="xs"] .select__input,
-  .select[data-size="xs"] .select__trigger { font-size: 0.75rem; min-height: calc(var(--poodle-size-control-height) - 0.5rem); }
+  .select[data-size="xs"] .select__trigger { font-size: 0.75rem; min-height: var(--poodle-size-control-height); }
   .select--custom[data-size="xs"] { padding: 0; }
 
-  .select[data-size="sm"] { min-height: calc(var(--poodle-size-control-height) - 0.375rem); padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem); }
-  .select[data-size="sm"] .select__control { height: calc(var(--poodle-size-control-height) - 0.375rem - (var(--poodle-border-width-default) * 2)); }
+  .select[data-size="sm"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
+  .select[data-size="sm"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); }
   .select[data-size="sm"] .select__input,
-  .select[data-size="sm"] .select__trigger { min-height: calc(var(--poodle-size-control-height) - 0.375rem); }
+  .select[data-size="sm"] .select__trigger { min-height: var(--poodle-size-control-height); }
   .select--custom[data-size="sm"] { padding: 0; }
 
-  .select[data-size="lg"] { min-height: calc(var(--poodle-size-control-height) + 0.375rem); padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
-  .select[data-size="lg"] .select__control { height: calc(var(--poodle-size-control-height) + 0.375rem - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
+  .select[data-size="lg"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
+  .select[data-size="lg"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
   .select[data-size="lg"] .select__input,
-  .select[data-size="lg"] .select__trigger { font-size: 0.9375rem; min-height: calc(var(--poodle-size-control-height) + 0.375rem); }
+  .select[data-size="lg"] .select__trigger { font-size: 0.9375rem; min-height: var(--poodle-size-control-height); }
   .select--custom[data-size="lg"] { padding: 0; }
 
-  .select[data-size="xl"] { min-height: calc(var(--poodle-size-control-height) + 0.5rem); padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem); }
-  .select[data-size="xl"] .select__control { height: calc(var(--poodle-size-control-height) + 0.5rem - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
+  .select[data-size="xl"] { min-height: var(--poodle-size-control-height); padding: 0 var(--poodle-space-control-x); }
+  .select[data-size="xl"] .select__control { height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
   .select[data-size="xl"] .select__input,
-  .select[data-size="xl"] .select__trigger { font-size: 1rem; min-height: calc(var(--poodle-size-control-height) + 0.5rem); }
+  .select[data-size="xl"] .select__trigger { font-size: 1rem; min-height: var(--poodle-size-control-height); }
   .select--custom[data-size="xl"] { padding: 0; }
 </style>

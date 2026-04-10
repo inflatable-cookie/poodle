@@ -250,7 +250,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     width: 100%;
-    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
+    min-height: var(--poodle-size-control-height);
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
@@ -288,22 +288,22 @@
 
   /* Size variants */
   .context-menu[data-size="xs"] .context-menu__item {
-    min-height: calc(var(--poodle-size-control-height) - 0.75rem);
-    padding: calc(var(--poodle-space-control-y) - 0.0625rem) calc(var(--poodle-space-control-x) - 0.125rem);
+    min-height: var(--poodle-size-control-height);
+    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
   .context-menu[data-size="sm"] .context-menu__item {
-    min-height: calc(var(--poodle-size-control-height) - 0.625rem);
+    min-height: var(--poodle-size-control-height);
   }
 
   .context-menu[data-size="lg"] .context-menu__item {
-    min-height: calc(var(--poodle-size-control-height) + 0.125rem);
+    min-height: var(--poodle-size-control-height);
     font-size: 0.9375rem;
   }
 
   .context-menu[data-size="xl"] .context-menu__item {
-    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+    min-height: var(--poodle-size-control-height);
     font-size: 1rem;
   }
 

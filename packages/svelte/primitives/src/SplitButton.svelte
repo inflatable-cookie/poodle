@@ -361,25 +361,25 @@
 
   .split-button[data-size="sm"] .split-button__primary,
   .split-button[data-size="sm"] .split-button__toggle {
-    height: calc(var(--poodle-size-control-height) - 0.375rem);
+    height: var(--poodle-size-control-height);
     font-size: 0.75rem;
   }
 
   .split-button[data-size="xs"] .split-button__primary,
   .split-button[data-size="xs"] .split-button__toggle {
-    height: calc(var(--poodle-size-control-height) - 0.5rem);
+    height: var(--poodle-size-control-height);
     font-size: 0.6875rem;
   }
 
   .split-button[data-size="lg"] .split-button__primary,
   .split-button[data-size="lg"] .split-button__toggle {
-    height: calc(var(--poodle-size-control-height) + 0.375rem);
+    height: var(--poodle-size-control-height);
     font-size: 0.875rem;
   }
 
   .split-button[data-size="xl"] .split-button__primary,
   .split-button[data-size="xl"] .split-button__toggle {
-    height: calc(var(--poodle-size-control-height) + 0.5rem);
+    height: var(--poodle-size-control-height);
     font-size: 0.9375rem;
   }
 
@@ -480,7 +480,7 @@
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
+    min-height: var(--poodle-size-control-height);
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);

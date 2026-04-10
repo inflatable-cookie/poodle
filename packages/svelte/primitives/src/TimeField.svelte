@@ -80,25 +80,25 @@
 
   /* Size variants */
   .time-field[data-size="xs"] {
-    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
   .time-field[data-size="sm"] {
-    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
   }
 
   .time-field[data-size="lg"] {
-    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
 
   .time-field[data-size="xl"] {
-    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 1rem;
   }
 

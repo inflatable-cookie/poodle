@@ -256,25 +256,25 @@
 
   /* Size variants */
   .date-time-picker[data-size="xs"] .date-time-picker__trigger {
-    min-height: calc(var(--poodle-size-control-height) - 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
   .date-time-picker[data-size="sm"] .date-time-picker__trigger {
-    min-height: calc(var(--poodle-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.0625rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
   }
 
   .date-time-picker[data-size="lg"] .date-time-picker__trigger {
-    min-height: calc(var(--poodle-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
 
   .date-time-picker[data-size="xl"] .date-time-picker__trigger {
-    min-height: calc(var(--poodle-size-control-height) + 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 1rem;
   }
 

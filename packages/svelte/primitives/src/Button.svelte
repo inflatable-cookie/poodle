@@ -208,29 +208,29 @@
 
   .button[data-size="xs"] {
     min-width: 3.75rem;
-    height: calc(var(--poodle-size-control-height) - 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.6875rem;
   }
 
   .button[data-size="sm"] {
     min-width: 4.25rem;
-    height: calc(var(--poodle-size-control-height) - 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
   .button[data-size="lg"] {
     min-width: 5.75rem;
-    height: calc(var(--poodle-size-control-height) + 0.375rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.875rem;
   }
 
   .button[data-size="xl"] {
     min-width: 6.5rem;
-    height: calc(var(--poodle-size-control-height) + 0.5rem);
-    padding: 0 calc(var(--poodle-space-control-x) + 0.1875rem);
+    height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
 

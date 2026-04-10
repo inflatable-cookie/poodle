@@ -379,7 +379,7 @@
   }
 
   .number-input__field[data-size="xs"] {
-    height: calc(var(--poodle-size-control-height) - 0.5rem);
+    height: var(--poodle-size-control-height);
   }
 
   .number-input__field[data-size="xs"] .number-input__control {
@@ -387,11 +387,11 @@
   }
 
   .number-input__field[data-size="sm"] {
-    height: calc(var(--poodle-size-control-height) - 0.375rem);
+    height: var(--poodle-size-control-height);
   }
 
   .number-input__field[data-size="lg"] {
-    height: calc(var(--poodle-size-control-height) + 0.375rem);
+    height: var(--poodle-size-control-height);
   }
 
   .number-input__field[data-size="lg"] .number-input__control {
@@ -399,7 +399,7 @@
   }
 
   .number-input__field[data-size="xl"] {
-    height: calc(var(--poodle-size-control-height) + 0.5rem);
+    height: var(--poodle-size-control-height);
   }
 
   .number-input__field[data-size="xl"] .number-input__control {

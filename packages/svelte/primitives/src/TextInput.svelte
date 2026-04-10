@@ -590,14 +590,11 @@
     --poodle-text-input-padding-inline: var(--poodle-space-control-x);
     --poodle-text-input-padding-block: var(--poodle-space-control-y);
     --poodle-text-input-adornment-gap: var(--poodle-space-inline-sm);
-    --poodle-text-input-height-adjust: 0rem;
     --poodle-text-input-density-inline-adjust: 0rem;
     --poodle-text-input-density-block-adjust: 0rem;
-    --poodle-text-input-size-inline-adjust: 0rem;
-    --poodle-text-input-size-block-adjust: 0rem;
     display: flex;
     align-items: center;
-    min-height: calc(var(--poodle-size-control-height) + var(--poodle-text-input-height-adjust));
+    min-height: var(--poodle-size-control-height);
     border: 0.0625rem solid var(--poodle-text-input-border);
     border-radius: var(--poodle-text-input-radius);
     background: var(--poodle-text-input-fill);
@@ -634,9 +631,7 @@
   .text-input__control {
     display: block;
     width: 100%;
-    height: calc(
-      var(--poodle-size-control-height) + var(--poodle-text-input-height-adjust) - (var(--poodle-border-width-default) * 2)
-    );
+    height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
     box-sizing: border-box;
     border: 0;
     background: transparent;
@@ -834,32 +829,12 @@
   }
 
   /* Size variants */
-  .text-input[data-size="xs"] {
-    --poodle-text-input-height-adjust: -0.5rem;
-    --poodle-text-input-size-inline-adjust: -0.125rem;
-  }
-
   .text-input[data-size="xs"] .text-input__control {
     font-size: 0.75rem;
   }
 
-  .text-input[data-size="sm"] {
-    --poodle-text-input-height-adjust: -0.375rem;
-    --poodle-text-input-size-inline-adjust: -0.0625rem;
-  }
-
-  .text-input[data-size="lg"] {
-    --poodle-text-input-height-adjust: 0.375rem;
-    --poodle-text-input-size-inline-adjust: 0.125rem;
-  }
-
   .text-input[data-size="lg"] .text-input__control {
     font-size: 0.9375rem;
-  }
-
-  .text-input[data-size="xl"] {
-    --poodle-text-input-height-adjust: 0.5rem;
-    --poodle-text-input-size-inline-adjust: 0.1875rem;
   }
 
   .text-input[data-size="xl"] .text-input__control {
@@ -868,10 +843,10 @@
 
   .text-input {
     --poodle-text-input-padding-inline: calc(
-      var(--poodle-space-control-x) + var(--poodle-text-input-density-inline-adjust) + var(--poodle-text-input-size-inline-adjust)
+      var(--poodle-space-control-x) + var(--poodle-text-input-density-inline-adjust)
     );
     --poodle-text-input-padding-block: calc(
-      var(--poodle-space-control-y) + var(--poodle-text-input-density-block-adjust) + var(--poodle-text-input-size-block-adjust)
+      var(--poodle-space-control-y) + var(--poodle-text-input-density-block-adjust)
     );
   }
 </style>

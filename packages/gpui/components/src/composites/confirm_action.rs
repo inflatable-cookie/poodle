@@ -15,6 +15,9 @@ pub struct ConfirmAction {
     theme: GpuiThemeProvider,
     /// Optional trigger element that opens the confirmation dialog.
     trigger: Option<AnyElement>,
+    /// Optional body content rendered between the description and the
+    /// action row (matches the Svelte default slot).
+    content: Option<AnyElement>,
     on_confirm: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
     on_cancel: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
@@ -30,12 +33,13 @@ impl ConfirmAction {
             spec: ConfirmActionSpec::new("Confirm", "Are you sure?", "Confirm", "Cancel"),
             theme: theme.clone(),
             trigger: None,
+            content: None,
             on_confirm: None,
             on_cancel: None,
         }
     }
     pub fn from_spec(spec: ConfirmActionSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), trigger: None, on_confirm: None, on_cancel: None }
+        Self { spec, theme: theme.clone(), trigger: None, content: None, on_confirm: None, on_cancel: None }
     }
 
     /// Set a trigger element (e.g. a button) that opens the confirmation dialog.
@@ -43,6 +47,16 @@ impl ConfirmAction {
         self.trigger = Some(trigger.into_any_element());
         self
     }
+
+    /// Body content rendered between the description and the action row.
+    pub fn with_content(mut self, content: impl IntoElement) -> Self {
+        self.content = Some(content.into_any_element());
+        self
+    }
+
+    /// Set the open state via spec. Included as a fluent shortcut alongside
+    /// `ConfirmActionSpec::with_open`.
+    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
 
     pub fn on_confirm(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
         self.on_confirm = Some(Box::new(handler));
@@ -61,6 +75,15 @@ impl ConfirmAction {
 impl IntoElement for ConfirmAction {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
+        // When closed, render only the trigger (if any) — no backdrop.
+        if !self.spec.is_open {
+            return if let Some(trigger) = self.trigger {
+                div().child(trigger).into_any_element()
+            } else {
+                div().into_any_element()
+            };
+        }
+
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -99,6 +122,11 @@ impl IntoElement for ConfirmAction {
 
         dialog = dialog.child(div().text_size(px(18.0)).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
         dialog = dialog.child(div().text_size(body_size).text_color(msg_color).child(spec.message.clone()));
+
+        // Optional body content slot (matches Svelte default slot)
+        if let Some(content) = self.content {
+            dialog = dialog.child(content);
+        }
 
         let control_radius = resolve_radius(theme, "radius.control");
         let hover_fill = resolve_color(theme, "color.background.elevated");
