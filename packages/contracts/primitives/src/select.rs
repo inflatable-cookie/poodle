@@ -62,6 +62,8 @@ pub struct SelectSpec {
     /// Optional minimum width for the dropdown listbox (CSS length string, e.g. "12rem").
     /// When set, listbox uses `width: max-content` with viewport-aware anchor flipping.
     pub menu_min_width: Option<String>,
+    /// When true, shows a clear button when a value is selected (custom dropdown only).
+    pub clearable: bool,
 }
 
 impl Default for SelectSpec {
@@ -85,6 +87,7 @@ impl Default for SelectSpec {
             empty_message: String::from("No matches"),
             variant: SelectVariant::default(),
             menu_min_width: None,
+            clearable: false,
         }
     }
 }
@@ -205,6 +208,12 @@ impl SelectSpec {
     /// Set the dropdown listbox minimum width (CSS length string).
     pub fn with_menu_min_width(mut self, width: impl Into<String>) -> Self {
         self.menu_min_width = Some(width.into());
+        self
+    }
+
+    /// Enable the clear button when a value is selected.
+    pub fn with_clearable(mut self, clearable: bool) -> Self {
+        self.clearable = clearable;
         self
     }
 }
