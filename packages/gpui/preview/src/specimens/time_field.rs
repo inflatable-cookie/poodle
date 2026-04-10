@@ -1,9 +1,11 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, TimeFieldSpec, EyebrowSpec};
+use poodle_primitives::{TimeFieldSpec, EyebrowSpec};
 use poodle_gpui_components::{TimeField, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -18,7 +20,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "14:30".to_string());
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -82,54 +84,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     TimeField::from_spec(spec, theme).with_id("constrained")
                 })
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let sizes: &[(&str, ControlSize)] = &[
-                        ("xs", ControlSize::Xs),
-                        ("sm", ControlSize::Sm),
-                        ("md", ControlSize::Md),
-                        ("lg", ControlSize::Lg),
-                        ("xl", ControlSize::Xl),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &(key, size) in sizes {
-                        let mut spec = TimeFieldSpec::new().with_default_value("09:30");
-                        spec.aria_label = Some(format!("Time field size {}", key));
-                        col = col.child(
-                            TimeField::from_spec(spec, theme)
-                                .with_id(format!("size-{}", key))
-                                .size(size)
-                        );
-                    }
-                    col
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let densities: &[(&str, ControlDensity)] = &[
-                        ("compact", ControlDensity::Compact),
-                        ("default", ControlDensity::Default),
-                        ("comfortable", ControlDensity::Comfortable),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &(key, density) in densities {
-                        let mut spec = TimeFieldSpec::new().with_default_value("09:30");
-                        spec.aria_label = Some(format!("Time field density {}", key));
-                        col = col.child(
-                            TimeField::from_spec(spec, theme)
-                                .with_id(format!("density-{}", key))
-                                .with_density(density)
-                        );
-                    }
-                    col
-                })
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -141,4 +95,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     TimeField::from_spec(spec, theme).with_id("disabled")
                 })
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "time-field",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            let mut spec = TimeFieldSpec::new().with_default_value("09:30");
+            spec.aria_label = Some("Time field".to_string());
+            TimeField::from_spec(spec, theme)
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            let mut spec = TimeFieldSpec::new().with_default_value("09:30");
+            spec.aria_label = Some("Time field".to_string());
+            TimeField::from_spec(spec, theme)
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
+        },
+    )
 }

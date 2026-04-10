@@ -262,7 +262,7 @@ pub fn render_single_specimen(
         "select" => specimen_card("Select", theme, select::render(state, cx)),
         "segmented-control" => specimen_card("SegmentedControl", theme, segmented_control::render(state, cx)),
         "slider" => specimen_card("Slider", theme, slider::render(state, cx)),
-        "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(theme)),
+        "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(state, cx)),
 
         // ── Date/Time ───────────────────────────────────────────
         "calendar" => specimen_card("Calendar", theme, calendar::render(state, cx)),

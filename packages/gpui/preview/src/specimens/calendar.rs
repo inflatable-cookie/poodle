@@ -1,8 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CalendarMode, CalendarSpec, ControlDensity, ControlSize, DateRangeValue, EyebrowSpec};
+use poodle_primitives::{CalendarMode, CalendarSpec, DateRangeValue, EyebrowSpec};
 use poodle_gpui_components::{Calendar, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -15,7 +17,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let range_start = state.specimens.text.get("calendar-range-start").cloned();
     let range_end = state.specimens.text.get("calendar-range-end").cloned();
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Default ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -103,56 +105,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ))
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child({
-                    let sizes: &[(&str, ControlSize)] = &[
-                        ("xs", ControlSize::Xs),
-                        ("sm", ControlSize::Sm),
-                        ("md", ControlSize::Md),
-                        ("lg", ControlSize::Lg),
-                        ("xl", ControlSize::Xl),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &(key, size) in sizes {
-                        let mut spec = CalendarSpec::new();
-                        spec.default_value = Some("2026-03-14".to_string());
-                        spec.aria_label = Some(format!("Calendar size {}", key));
-                        col = col.child(
-                            Calendar::from_spec(spec, theme)
-                                .with_id(format!("size-{}", key))
-                                .size(size)
-                        );
-                    }
-                    col
-                })
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child({
-                    let densities: &[(&str, ControlDensity)] = &[
-                        ("compact", ControlDensity::Compact),
-                        ("default", ControlDensity::Default),
-                        ("comfortable", ControlDensity::Comfortable),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(8.0));
-                    for &(key, density) in densities {
-                        let mut spec = CalendarSpec::new();
-                        spec.default_value = Some("2026-03-14".to_string());
-                        spec.aria_label = Some(format!("Calendar density {}", key));
-                        col = col.child(
-                            Calendar::from_spec(spec, theme)
-                                .with_id(format!("density-{}", key))
-                                .with_density(density)
-                        );
-                    }
-                    col
-                })
-        )
         // --- Disabled ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -165,4 +117,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Calendar::from_spec(spec, theme).with_id("disabled")
                 })
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "calendar",
+        examples,
+        |size, theme: &GpuiThemeProvider| {
+            let mut spec = CalendarSpec::new();
+            spec.default_value = Some("2026-03-14".to_string());
+            spec.aria_label = Some("Calendar".to_string());
+            Calendar::from_spec(spec, theme)
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
+        },
+        |density, theme: &GpuiThemeProvider| {
+            let mut spec = CalendarSpec::new();
+            spec.default_value = Some("2026-03-14".to_string());
+            spec.aria_label = Some("Calendar".to_string());
+            Calendar::from_spec(spec, theme)
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
+        },
+    )
 }
