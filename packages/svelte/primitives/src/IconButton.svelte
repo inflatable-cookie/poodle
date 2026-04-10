@@ -348,14 +348,6 @@
 
   /* ── Tooltip ── */
 
-  /* Density variants */
-  .icon-button[data-density="compact"] {
-    padding: 0.125rem;
-  }
-
-  .icon-button[data-density="comfortable"] {
-    padding: 0.375rem;
-  }
 
   .icon-button__tooltip {
     position: fixed;
