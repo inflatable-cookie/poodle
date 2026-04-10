@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, EyebrowSpec};
 use poodle_gpui_components::{DateTimeRangePicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -52,6 +52,54 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             this.state.specimens.toggle("datetime-range-prefilled-open");
                             cx.notify();
                         }))
+                })
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[(&str, ControlSize)] = &[
+                        ("xs", ControlSize::Xs),
+                        ("sm", ControlSize::Sm),
+                        ("md", ControlSize::Md),
+                        ("lg", ControlSize::Lg),
+                        ("xl", ControlSize::Xl),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, size) in sizes {
+                        let mut spec = DateTimeRangePickerSpec::new();
+                        spec.aria_label = Some(format!("Date time range size {}", key));
+                        col = col.child(
+                            DateTimeRangePicker::from_spec(spec, theme)
+                                .with_id(format!("size-{}", key))
+                                .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[(&str, ControlDensity)] = &[
+                        ("compact", ControlDensity::Compact),
+                        ("default", ControlDensity::Default),
+                        ("comfortable", ControlDensity::Comfortable),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, density) in densities {
+                        let mut spec = DateTimeRangePickerSpec::new();
+                        spec.aria_label = Some(format!("Date time range density {}", key));
+                        col = col.child(
+                            DateTimeRangePicker::from_spec(spec, theme)
+                                .with_id(format!("density-{}", key))
+                                .with_density(density)
+                        );
+                    }
+                    col
                 })
         )
         // --- Disabled ---

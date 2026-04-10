@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CalendarSpec, EyebrowSpec};
+use poodle_primitives::{CalendarSpec, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{Calendar, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -54,6 +54,56 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.default_value = Some("2026-03-14".to_string());
                     spec.aria_label = Some("Calendar with default".to_string());
                     Calendar::from_spec(spec, theme).with_id("preselected")
+                })
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[(&str, ControlSize)] = &[
+                        ("xs", ControlSize::Xs),
+                        ("sm", ControlSize::Sm),
+                        ("md", ControlSize::Md),
+                        ("lg", ControlSize::Lg),
+                        ("xl", ControlSize::Xl),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, size) in sizes {
+                        let mut spec = CalendarSpec::new();
+                        spec.default_value = Some("2026-03-14".to_string());
+                        spec.aria_label = Some(format!("Calendar size {}", key));
+                        col = col.child(
+                            Calendar::from_spec(spec, theme)
+                                .with_id(format!("size-{}", key))
+                                .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[(&str, ControlDensity)] = &[
+                        ("compact", ControlDensity::Compact),
+                        ("default", ControlDensity::Default),
+                        ("comfortable", ControlDensity::Comfortable),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, density) in densities {
+                        let mut spec = CalendarSpec::new();
+                        spec.default_value = Some("2026-03-14".to_string());
+                        spec.aria_label = Some(format!("Calendar density {}", key));
+                        col = col.child(
+                            Calendar::from_spec(spec, theme)
+                                .with_id(format!("density-{}", key))
+                                .with_density(density)
+                        );
+                    }
+                    col
                 })
         )
         // --- Disabled ---

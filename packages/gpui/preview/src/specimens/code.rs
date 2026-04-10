@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CodeSpec, EyebrowSpec};
+use poodle_primitives::{CodeSpec, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{Code, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
@@ -77,5 +77,57 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_copyable(false),
                     theme,
                 ))
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[ControlSize] = &[
+                        ControlSize::Xs,
+                        ControlSize::Sm,
+                        ControlSize::Md,
+                        ControlSize::Lg,
+                        ControlSize::Xl,
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &size in sizes {
+                        col = col.child(
+                            Code::from_spec(
+                                CodeSpec::new()
+                                    .with_content("const x: number = 42;")
+                                    .with_language("ts"),
+                                theme,
+                            )
+                            .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[ControlDensity] = &[
+                        ControlDensity::Compact,
+                        ControlDensity::Default,
+                        ControlDensity::Comfortable,
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &density in densities {
+                        col = col.child(
+                            Code::from_spec(
+                                CodeSpec::new()
+                                    .with_content("const x: number = 42;")
+                                    .with_language("ts"),
+                                theme,
+                            )
+                            .with_density(density)
+                        );
+                    }
+                    col
+                })
         )
 }

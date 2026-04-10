@@ -60,7 +60,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         cx: &mut Context<PreviewRoot>|
      -> Select {
         let open_key = format!("{}-open", id);
-        let value_key = format!("{}-value", id);
         Select::from_spec(spec, theme)
             .with_id(id)
             .on_toggle(cx.listener(move |this, _open: &bool, _w, cx| {

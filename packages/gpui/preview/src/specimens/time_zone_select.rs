@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{TimeZoneSelectSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, TimeZoneSelectSpec, EyebrowSpec};
 use poodle_gpui_components::{TimeZoneSelect, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -38,6 +38,56 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                 )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[ControlSize] = &[
+                        ControlSize::Xs,
+                        ControlSize::Sm,
+                        ControlSize::Md,
+                        ControlSize::Lg,
+                        ControlSize::Xl,
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &size in sizes {
+                        col = col.child(
+                            TimeZoneSelect::from_spec(
+                                TimeZoneSelectSpec::new()
+                                    .with_value("America/New_York"),
+                                theme,
+                            )
+                            .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[ControlDensity] = &[
+                        ControlDensity::Compact,
+                        ControlDensity::Default,
+                        ControlDensity::Comfortable,
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &density in densities {
+                        col = col.child(
+                            TimeZoneSelect::from_spec(
+                                TimeZoneSelectSpec::new()
+                                    .with_value("America/New_York"),
+                                theme,
+                            )
+                            .with_density(density)
+                        );
+                    }
+                    col
+                })
         )
         // --- Disabled ---
         .child(

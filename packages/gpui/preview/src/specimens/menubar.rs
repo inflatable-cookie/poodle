@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{MenubarSpec, MenubarEntry, MenuEntry, MenuItemKind, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, MenubarSpec, MenubarEntry, MenuEntry, MenuItemKind, EyebrowSpec};
 use poodle_gpui_components::{Menubar, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -72,5 +72,73 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .text_color(color_to_hsla(text_primary))
                         .child(format!("Last action: {}", last_action.as_deref().unwrap_or("(none)")))
                 )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[(&str, ControlSize)] = &[
+                        ("xs", ControlSize::Xs),
+                        ("sm", ControlSize::Sm),
+                        ("md", ControlSize::Md),
+                        ("lg", ControlSize::Lg),
+                        ("xl", ControlSize::Xl),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, size) in sizes {
+                        let items = vec![
+                            MenubarEntry::new("file", "File", vec![
+                                MenuEntry::new("new", "New"),
+                                MenuEntry::new("open", "Open\u{2026}"),
+                            ]),
+                            MenubarEntry::new("edit", "Edit", vec![
+                                MenuEntry::new("undo", "Undo"),
+                                MenuEntry::new("redo", "Redo"),
+                            ]),
+                        ];
+                        let spec = MenubarSpec::new(items)
+                            .with_aria_label(format!("Menubar size {}", key));
+                        col = col.child(
+                            Menubar::from_spec(spec, theme)
+                                .with_id(format!("size-{}", key))
+                                .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[(&str, ControlDensity)] = &[
+                        ("compact", ControlDensity::Compact),
+                        ("default", ControlDensity::Default),
+                        ("comfortable", ControlDensity::Comfortable),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, density) in densities {
+                        let items = vec![
+                            MenubarEntry::new("file", "File", vec![
+                                MenuEntry::new("new", "New"),
+                                MenuEntry::new("open", "Open\u{2026}"),
+                            ]),
+                            MenubarEntry::new("edit", "Edit", vec![
+                                MenuEntry::new("undo", "Undo"),
+                                MenuEntry::new("redo", "Redo"),
+                            ]),
+                        ];
+                        let spec = MenubarSpec::new(items)
+                            .with_aria_label(format!("Menubar density {}", key));
+                        col = col.child(
+                            Menubar::from_spec(spec, theme)
+                                .with_id(format!("density-{}", key))
+                                .with_density(density)
+                        );
+                    }
+                    col
+                })
         )
 }

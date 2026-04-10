@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{EditableLabelSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, EditableLabelSpec, EyebrowSpec};
 use poodle_gpui_components::{EditableLabel, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -124,6 +124,60 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                     .with_id("max-length")
                 )
+        )
+
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[(&str, ControlSize)] = &[
+                        ("xs", ControlSize::Xs),
+                        ("sm", ControlSize::Sm),
+                        ("md", ControlSize::Md),
+                        ("lg", ControlSize::Lg),
+                        ("xl", ControlSize::Xl),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, size) in sizes {
+                        col = col.child(
+                            EditableLabel::from_spec(
+                                EditableLabelSpec::new()
+                                    .with_value(format!("Size {}", key)),
+                                theme,
+                            )
+                            .with_id(format!("size-{}", key))
+                            .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[(&str, ControlDensity)] = &[
+                        ("compact", ControlDensity::Compact),
+                        ("default", ControlDensity::Default),
+                        ("comfortable", ControlDensity::Comfortable),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &(key, density) in densities {
+                        col = col.child(
+                            EditableLabel::from_spec(
+                                EditableLabelSpec::new()
+                                    .with_value(format!("Density {}", key)),
+                                theme,
+                            )
+                            .with_id(format!("density-{}", key))
+                            .density(density)
+                        );
+                    }
+                    col
+                })
         )
 
         // --- Disabled ---

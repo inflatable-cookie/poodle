@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{EyebrowSpec, RangeSliderSpec};
+use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, RangeSliderSpec};
 use poodle_gpui_components::{Eyebrow, RangeSlider};
 use crate::style_bridge::color_to_hsla;
 
@@ -49,6 +49,58 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .child("Ages 25 \u{2013} 45".to_string())
                         )
                 )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let sizes: &[ControlSize] = &[
+                        ControlSize::Xs,
+                        ControlSize::Sm,
+                        ControlSize::Md,
+                        ControlSize::Lg,
+                        ControlSize::Xl,
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &size in sizes {
+                        col = col.child(
+                            RangeSlider::from_spec(
+                                RangeSliderSpec::new(20.0, 80.0)
+                                    .with_bounds(0.0, 100.0)
+                                    .with_aria_label("Range size variant"),
+                                theme,
+                            )
+                            .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let densities: &[ControlDensity] = &[
+                        ControlDensity::Compact,
+                        ControlDensity::Default,
+                        ControlDensity::Comfortable,
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for &density in densities {
+                        col = col.child(
+                            RangeSlider::from_spec(
+                                RangeSliderSpec::new(20.0, 80.0)
+                                    .with_bounds(0.0, 100.0)
+                                    .with_aria_label("Range density variant"),
+                                theme,
+                            )
+                            .density(density)
+                        );
+                    }
+                    col
+                })
         )
         // --- Disabled ---
         .child(
