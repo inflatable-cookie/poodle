@@ -476,41 +476,61 @@
     --poodle-relation-picker-list-x: 0.625rem;
     --poodle-relation-picker-list-y: 0.5rem;
     --poodle-relation-picker-list-gap: 0.125rem;
+    --poodle-relation-picker-item-y: 0.375rem;
+    --poodle-relation-picker-item-x: 0.5rem;
+    --poodle-relation-picker-item-gap: 0.5rem;
+    --poodle-relation-picker-title-size: 0.8125rem;
+    --poodle-relation-picker-desc-size: 0.6875rem;
   }
 
   .relation-picker[data-size="xs"] {
     --poodle-relation-picker-breadcrumb-control: 1.25rem;
     --poodle-relation-picker-breadcrumb-x: 0.25rem;
     --poodle-relation-picker-list-x: 0.5rem;
+    --poodle-relation-picker-item-y: 0.25rem;
+    --poodle-relation-picker-item-x: 0.375rem;
+    --poodle-relation-picker-item-gap: 0.375rem;
+    --poodle-relation-picker-title-size: 0.6875rem;
+    --poodle-relation-picker-desc-size: 0.5625rem;
   }
 
   .relation-picker[data-size="sm"] {
     --poodle-relation-picker-breadcrumb-control: 1.5rem;
+    --poodle-relation-picker-title-size: 0.75rem;
+    --poodle-relation-picker-desc-size: 0.625rem;
   }
 
   .relation-picker[data-size="md"] {
     --poodle-relation-picker-breadcrumb-control: 1.75rem;
+    --poodle-relation-picker-title-size: 0.8125rem;
+    --poodle-relation-picker-desc-size: 0.6875rem;
   }
 
   .relation-picker[data-size="lg"] {
     --poodle-relation-picker-breadcrumb-control: 2rem;
     --poodle-relation-picker-breadcrumb-x: 0.5rem;
     --poodle-relation-picker-list-x: 0.75rem;
+    --poodle-relation-picker-item-y: 0.5rem;
+    --poodle-relation-picker-item-x: 0.625rem;
+    --poodle-relation-picker-title-size: 0.875rem;
+    --poodle-relation-picker-desc-size: 0.75rem;
   }
 
   .relation-picker[data-size="xl"] {
     --poodle-relation-picker-breadcrumb-control: 2.25rem;
     --poodle-relation-picker-breadcrumb-x: 0.625rem;
     --poodle-relation-picker-list-x: 0.875rem;
+    --poodle-relation-picker-item-y: 0.5rem;
+    --poodle-relation-picker-item-x: 0.75rem;
+    --poodle-relation-picker-title-size: 0.9375rem;
+    --poodle-relation-picker-desc-size: 0.8125rem;
   }
 
   .relation-picker[data-density="compact"] {
-    --poodle-relation-picker-list-y: 0.375rem;
     --poodle-relation-picker-list-gap: 0.0625rem;
   }
 
   .relation-picker[data-density="comfortable"] {
-    --poodle-relation-picker-list-y: 0.625rem;
     --poodle-relation-picker-list-gap: 0.1875rem;
   }
 
@@ -659,7 +679,7 @@
   /* Existing flat picker styles */
   .relation-picker__list {
     display: grid;
-    gap: var(--poodle-space-stack-sm);
+    gap: var(--poodle-relation-picker-list-gap);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -669,13 +689,12 @@
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--poodle-space-inline-md);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    gap: var(--poodle-relation-picker-item-gap);
+    padding: var(--poodle-relation-picker-item-y) var(--poodle-relation-picker-item-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
-    border-radius: var(--poodle-radius-surface);
+    border-radius: var(--poodle-radius-control);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
     color: var(--poodle-color-text-primary);
-    font-size: var(--poodle-typography-label-size, 0.75rem);
   }
 
   .relation-picker__item[data-selected="true"] {
@@ -702,16 +721,23 @@
     gap: 0.25rem;
   }
 
-  .relation-picker__item-copy strong,
-  .relation-picker__item-copy small,
-  .relation-picker__footer-note {
+  .relation-picker__item-copy strong {
     margin: 0;
+    font-size: var(--poodle-relation-picker-title-size);
+    font-weight: 500;
   }
 
-  .relation-picker__item-copy small,
-  .relation-picker__footer-note {
+  .relation-picker__item-copy small {
+    margin: 0;
     color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
+    font-size: var(--poodle-relation-picker-desc-size);
+    line-height: 1.4;
+  }
+
+  .relation-picker__footer-note {
+    margin: 0;
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-relation-picker-desc-size);
     line-height: 1.5;
   }
 
