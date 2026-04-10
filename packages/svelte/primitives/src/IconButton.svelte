@@ -152,7 +152,11 @@
     on:click={(event) => {
       if (isToggle) {
         const next = !currentPressed;
-        if (!pressedControlled) uncontrolledPressed = next;
+        if (pressedControlled) {
+          pressed = next;
+        } else {
+          uncontrolledPressed = next;
+        }
         dispatch("pressedChange", { pressed: next });
       }
       dispatch("click", event);
@@ -287,12 +291,12 @@
     background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
   }
 
-  .icon-button[data-pressed="true"] {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 20%, var(--poodle-icon-button-fill));
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 56%, var(--poodle-icon-button-border));
-    box-shadow:
-      inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent),
-      inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
+  .icon-button[data-pressed="true"]:not([data-variant="primary"]) {
+    --poodle-icon-button-fill: var(--poodle-color-accent-base);
+    --poodle-icon-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-accent-base));
+    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
+    --poodle-icon-button-text: var(--poodle-color-text-inverse);
+    --poodle-icon-button-shadow: none;
   }
 
   .icon-button:hover:not(:disabled) {
