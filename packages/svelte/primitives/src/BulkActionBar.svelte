@@ -205,7 +205,7 @@
   .bulk-action-bar[data-size="xl"] .bulk-action-bar__summary { font-size: 1rem; }
   .bulk-action-bar[data-size="xl"] .bulk-action-bar__button { min-height: calc(var(--poodle-size-control-height) + 0.5rem); font-size: 1rem; }
 
-  /* Density variants — gap only, padding comes from panel tokens */
-  .bulk-action-bar[data-density="compact"] { gap: var(--poodle-space-inline-sm); }
-  .bulk-action-bar[data-density="comfortable"] { gap: var(--poodle-space-inline-lg, 1rem); }
+  /* Density variants — padding and gap */
+  .bulk-action-bar[data-density="compact"] { padding: 0.5rem 0.75rem; gap: 0.375rem; }
+  .bulk-action-bar[data-density="comfortable"] { padding: 1rem 1.25rem; gap: 1rem; }
 </style>
