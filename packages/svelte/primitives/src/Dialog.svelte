@@ -296,7 +296,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
-    margin-bottom: calc(var(--poodle-space-stack-md) + 0.5rem);
+    margin-bottom: 1.25rem;
   }
 
   .dialog__close {
