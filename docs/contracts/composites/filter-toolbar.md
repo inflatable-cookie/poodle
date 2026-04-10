@@ -75,7 +75,7 @@ Updated: 2026-03-30
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | expanded | default or `collapsed=false` | Header + controls grid visible |
-| collapsed | `collapsible=true`, `collapsed=true` | Header only (as `<button>`), controls hidden; header clickable to expand |
+| collapsed | `collapsible=true`, `collapsed=true` | Header only (as `<button>`), controls hidden; header click toggles open |
 | summarized | `summaryText` present | Summary text in header row |
 | with-actions | actions slot populated | Icon buttons right-aligned in header |
 | sticky | `sticky=true` | Sticky positioning with elevation shadow |
@@ -94,7 +94,7 @@ No component-owned events beyond child control behavior and collapse toggle. The
 
 - Root: `role="toolbar"` with `aria-label` (default `"Filters"`)
 - Collapsed header: renders as `<button>` with `aria-expanded="false"` and descriptive `aria-label` including summary text
-- Expanded header: renders as `<div>` (non-interactive)
+- Expanded header: renders as `<div>`; when `collapsible` is true, gets `cursor: pointer` and a click handler that toggles `collapsed` (bidirectional toggle)
 - CollapseToggle: managed by CollapseToggle primitive accessibility
 
 ### Keyboard
@@ -260,8 +260,9 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 - Controls grid uses CSS custom properties (`--ft-columns`, `--ft-min-width`) driven by props
 - `collapsed` prop supports `bind:collapsed` for two-way binding
 - Resolves size via `resolveSemanticControlSize` with `sizeRole="chrome"` (not `"control"`)
-- When collapsed, header renders as `<button>` for accessibility; clicking expands (unless clicking on actions or collapse toggle)
-- `handleHeaderClick` filters clicks on `.filter-toolbar__actions` and `.collapse-toggle` children
+- When collapsed, header renders as `<button>` for accessibility
+- When expanded and `collapsible` is true, header `<div>` gets a click handler and `cursor: pointer` class (`filter-toolbar__header--clickable`)
+- `handleHeaderClick` does `collapsed = !collapsed` (bidirectional toggle), filtering clicks on `.filter-toolbar__actions` and `.collapse-toggle` children
 
 ## 10. GPUI Notes
 

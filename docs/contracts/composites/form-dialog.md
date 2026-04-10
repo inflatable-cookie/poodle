@@ -1,7 +1,7 @@
 # FormDialog
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-04-09
 
 ## 1. Purpose
 
@@ -24,13 +24,14 @@ Updated: 2026-03-30
   ├── [Header .form-dialog__header]  (optional, when subtitle slot provided)
   │     └── [Subtitle .form-dialog__subtitle]  <div>
   │           └── (slot: subtitle)
-  ├── [FormLayout]  FormLayout composite (columns=1)
+  ├── [FormLayout]  FormLayout composite (columns={columns})  -- when bare=false
   │     ├── [ErrorDisplay]  (when error is set, handled by FormLayout)
   │     ├── [SuccessDisplay]  (when success is set, handled by FormLayout)
   │     └── [FormContent]  (via default slot)
+  ├── [BareContent]  (via default slot, rendered directly)  -- when bare=true
   └── [Actions slot]
         ├── [Custom actions]  (slot: actions) — when provided
-        └── [Default actions]  when showDefaultActions=true and no actions slot
+        └── [Default actions]  when resolvedShowActions=true and no actions slot
               ├── [CancelButton]  Button (variant="ghost")
               └── [SubmitButton]  Button (variant="primary")
 ```
@@ -40,8 +41,9 @@ Updated: 2026-03-30
 | Dialog | yes | Dialog primitive with controlled open state | delegates to Dialog contract |
 | Header | no | subtitle container rendered when subtitle slot is provided | margin-bottom spacing |
 | Subtitle | no | rich subtitle content area | text-secondary, body typography |
-| FormLayout | yes | FormLayout composite for form structure and error/success display | delegates to FormLayout contract |
-| FormContent | yes (via slot) | form fields and content provided by consumer | layout delegated to FormLayout |
+| FormLayout | conditional | FormLayout composite for form structure and error/success display; rendered when `bare=false` | delegates to FormLayout contract |
+| BareContent | conditional | slot content rendered directly without FormLayout wrapper; rendered when `bare=true` | none (consumer controls layout) |
+| FormContent | yes (via slot) | form fields and content provided by consumer | layout delegated to FormLayout (or consumer when bare) |
 | CancelButton | conditional | ghost Button for canceling; disabled during submission | delegates to Button contract |
 | SubmitButton | conditional | primary Button for submission; shows "Submitting..." text when submitting | delegates to Button contract |
 
@@ -62,7 +64,12 @@ Updated: 2026-03-30
 | `success` | `string \| null` | `null` | no | form-level success message passed to FormLayout |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the dialog |
 | `width` | `string \| null` | `null` | no | custom dialog width CSS value (applied via `--poodle-form-dialog-width`) |
-| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons; expects an `actions` slot |
+| `columns` | `number` | `6` | no | number of columns passed through to FormLayout; ignored when `bare=true` |
+| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons; expects an `actions` slot; automatically set to false when `bare=true` |
+| `bare` | `boolean` | `false` | no | when true, renders the default slot directly without a FormLayout wrapper and automatically sets `showDefaultActions` to false; use for embedding reusable form components that already own their own FormLayout |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for dialog and action controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for dialog and action controls |
 
 ### Slots
 
@@ -90,6 +97,7 @@ Updated: 2026-03-30
 | error | `error` is set | FormLayout displays error message above form content |
 | success | `success` is set | FormLayout displays success message above form content |
 | shell mode | `showDefaultActions` is false | caller supplies the full footer via the `actions` slot |
+| bare mode | `bare` is true | slot content rendered directly without FormLayout wrapper; `showDefaultActions` automatically set to false |
 | custom width | `width` is set | dialog surface uses the specified width (capped at 100%) |
 
 ### Component States
@@ -139,7 +147,9 @@ No additional internal state. All state is externally controlled via props.
 - Dialog: default Dialog sizing unless `width` is supplied
 - Custom width: applied via `--poodle-form-dialog-width` CSS custom property,
   capped with `min(var(--poodle-form-dialog-width, 34rem), 100%)`
-- FormLayout: `columns={1}` — single-column form layout
+- FormLayout: `columns={columns}` (default 6) — passed through to FormLayout
+- When `bare=true`: no FormLayout wrapper; slot content rendered directly,
+  allowing embedded components that own their own FormLayout
 - Actions: standard Dialog actions slot layout (flex row, right-aligned)
 
 ### Composition
@@ -207,6 +217,12 @@ None.
 - custom width is applied through `contentStyle` and `contentClassName`
   props on Dialog; the global `.form-dialog__surface` class sets the width
 - Dialog receives `showCloseButton={true}` always
+- `bare` mode: when true, the default slot is rendered directly without a
+  FormLayout wrapper; `resolvedShowActions` is derived as `bare ? false : showDefaultActions`
+- `columns` prop (default 6) is passed through to `FormLayout` as `{columns}`;
+  ignored when bare mode is active since FormLayout is not rendered
+- `size`, `sizeRole`, and `density` are resolved via `getUiPresentation()` and
+  passed through to Dialog and action Buttons
 
 ## 10. GPUI Notes
 
@@ -227,6 +243,8 @@ None.
 - [ ] slot context provides submitting boolean
 - [ ] subtitle takes precedence over description
 - [ ] cancel event fires on Escape/backdrop/cancel button (not during submitting)
+- [ ] `bare` mode renders slot directly without FormLayout, sets showDefaultActions to false
+- [ ] `columns` prop passes through to FormLayout (default 6)
 
 ### Tier 2: Visual Parity
 

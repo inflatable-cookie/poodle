@@ -16,9 +16,6 @@ Updated: 2026-03-30
 ```text
 [Root .page-header]  <header> data-align, aria-label
   ├── [Content .page-header__content]  <div>
-  │     ├── [BackLink .page-header__back]  <a> (optional, when backHref)
-  │     │     ├── [BackLabel]  <span> back link text
-  │     │     └── [ContextDot .page-header__context-dot]  <span> (optional, when backIsContextual)
   │     ├── [Breadcrumbs .page-header__breadcrumbs]  <div> (optional, breadcrumbs slot)
   │     └── [TitleBlock .page-header__title-block]  <div>
   │           ├── [Eyebrow .page-header__eyebrow]  <p> (optional)
@@ -28,8 +25,14 @@ Updated: 2026-03-30
   │           │     └── [Count .page-header__count]  <span> (optional, when count !== null)
   │           ├── [SectionTitle .page-header__section-title]  <p> (optional, when section + title)
   │           ├── [Subtitle .page-header__subtitle]  <p> (optional)
+  │           ├── [Meta .page-header__meta]  <div> (optional, meta slot)
   │           └── [Body .page-header__body]  <div> (optional, default slot)
-  ├── [Actions .page-header__actions]  <div> (optional, actions slot)
+  ├── [ActionsRow .page-header__actions-row]  <div> (optional, when backHref or actions)
+  │     ├── [BackLink .page-header__back]  <a> (optional, when backHref)
+  │     │     ├── [BackIcon]  Icon "arrow-left"
+  │     │     ├── [BackLabel]  <span> visible label text (defaults to "Back")
+  │     │     └── [ContextDot .page-header__context-dot]  <span> (optional, when backIsContextual)
+  │     └── [Actions .page-header__actions]  <div> (optional, actions slot; pushed right via margin-left: auto)
   └── [Banner .page-header__banner]  <div> (optional, banner slot or bannerMessage prop)
         └── [Callout]  Callout primitive (when bannerMessage shortcut used)
 ```
@@ -39,19 +42,23 @@ Updated: 2026-03-30
 | Part | Element | Required | Notes |
 |------|---------|----------|-------|
 | Root | `<header>` | yes | Grid layout, `data-align` attribute |
-| Content | `<div>` | yes | Grid container for back link, breadcrumbs, and title block |
-| BackLink | `<a>` | no | Shown when `backHref` is set |
-| ContextDot | `<span>` | no | Shown when `backIsContextual` is true; `aria-hidden="true"` |
+| Content | `<div>` | yes | Grid container for breadcrumbs and title block |
 | Breadcrumbs | `<div>` | no | Named slot for breadcrumb navigation |
-| TitleBlock | `<div>` | yes | Contains eyebrow, section, title, subtitle, body |
+| TitleBlock | `<div>` | yes | Contains eyebrow, section, title, subtitle, meta, body |
 | Eyebrow | `<p>` | no | Small meta label above title |
 | Section | `<p>` | no | Section label when two-level header (section + title both set) |
 | Title | `<h2..h6>` | yes | Primary heading, level set via `level` prop |
 | Count | `<span>` | no | Badge inline with title, shown when `count !== null` |
 | SectionTitle | `<p>` | no | Secondary title below main heading in two-level header |
 | Subtitle | `<p>` | no | Supporting copy below title |
-| Body | `<div>` | no | Default slot content below subtitle |
-| Actions | `<div>` | no | Page-level action group via named slot |
+| Meta | `<div>` | no | Named slot for metadata content below subtitle |
+| Body | `<div>` | no | Default slot content below meta |
+| ActionsRow | `<div>` | no | Flex row containing back link and actions; rendered when `backHref` or actions slot present |
+| BackLink | `<a>` | no | Shown when `backHref` is set; renders arrow-left Icon + label text |
+| BackIcon | `Icon` | no | Arrow-left icon inside the back link |
+| BackLabel | `<span>` | no | Visible text next to the arrow icon (defaults to `"Back"`) |
+| ContextDot | `<span>` | no | Shown when `backIsContextual` is true; `aria-hidden="true"` |
+| Actions | `<div>` | no | Page-level action group via named slot; pushed right via `margin-left: auto` |
 | Banner | `<div>` | no | Full-width banner spanning all grid columns |
 
 ## 3. Props And Inputs
@@ -66,7 +73,7 @@ Updated: 2026-03-30
 | `subtitle` | `string \| null` | `null` | no | Supporting copy |
 | `eyebrow` | `string \| null` | `null` | no | Small meta label |
 | `backHref` | `string \| null` | `null` | no | Optional back-link target |
-| `backLabel` | `string \| null` | `null` | no | Back-link text; defaults to `"Back"` when `backHref` is set |
+| `backLabel` | `string \| null` | `null` | no | Visible text label next to the arrow-left icon in the back link; defaults to `"Back"` when `backHref` is set |
 | `backIsContextual` | `boolean` | `false` | no | Adds the contextual indicator dot on the back link |
 | `bannerMessage` | `string \| null` | `null` | no | Shortcut banner message rendered via Callout below the header |
 | `bannerTone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"warning"` | no | Tone for the shortcut banner |
@@ -80,7 +87,8 @@ Updated: 2026-03-30
 |------|---------|
 | default | Body content rendered below subtitle in the title block |
 | `breadcrumbs` | Pre-title navigation trail |
-| `actions` | Page-level action buttons |
+| `meta` | Metadata content rendered below subtitle in the title block |
+| `actions` | Page-level action buttons (rendered in actions-row, pushed right) |
 | `banner` | Custom banner content (overrides `bannerMessage` shortcut) |
 
 ### Controlled And Uncontrolled
@@ -99,7 +107,7 @@ Updated: 2026-03-30
 | descriptive | subtitle or eyebrow present | Expanded title block |
 | with-count | `count` is not null | Count badge pill inline with title |
 | actionable | actions slot present | Title and actions share row (between alignment) or stack |
-| with-back | `backHref` set | Back link above breadcrumbs and title |
+| with-back | `backHref` set | Back link with arrow-left icon in actions-row alongside action buttons |
 | with-banner | `bannerMessage` or banner slot | Full-width banner below header body |
 
 ### Component States
@@ -121,7 +129,7 @@ No component-owned events beyond child action behavior.
 - Root: `<header>` element with optional `aria-label`
 - Title: rendered as `<h2>` by default (configurable via `level` prop)
 - Count badge: `aria-label` with the count value
-- Back link: standard `<a>` element
+- Back link: `<a>` element containing arrow-left `Icon` and label `<span>`
 - Context dot: `aria-hidden="true"`
 - Banner via shortcut: Callout with `announceMode="polite"`
 
@@ -195,6 +203,14 @@ No component-owned events beyond child action behavior.
 | `display` | `grid` |
 | `gap` | `var(--poodle-space-stack-md)` |
 
+#### `.page-header__actions-row`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `gap` | `var(--poodle-space-inline-md)` |
+
 #### `.page-header__back`
 
 | Property | Value |
@@ -208,13 +224,13 @@ No component-owned events beyond child action behavior.
 | `line-height` | `1.2` |
 | `text-decoration` | `none` |
 
+The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` containing the `backLabel` text (defaulting to `"Back"`). When `backIsContextual` is true, a context dot is appended.
+
 #### `.page-header__back:hover`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
-| `text-decoration` | `underline` |
-| `text-underline-offset` | `0.12em` |
 
 #### `.page-header__context-dot`
 
@@ -314,15 +330,21 @@ No component-owned events beyond child action behavior.
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `line-height` | `var(--poodle-typography-body-lineHeight)` |
 
+#### `.page-header__meta`
+
+| Property | Value |
+|----------|-------|
+| `margin-top` | `0.125rem` |
+
 #### `.page-header__actions`
 
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--poodle-space-inline-md)` |
-| `justify-content` | `flex-end` |
-| `align-items` | `start` |
+| `gap` | `0.375rem` |
+| `align-items` | `center` |
+| `margin-left` | `auto` |
 
 #### `.page-header__banner`
 
@@ -338,6 +360,18 @@ No component-owned events beyond child action behavior.
 |----------|-------|
 | `grid-template-columns` | `1fr` |
 
+#### `@media (max-width: 45rem)` -- `.page-header__actions-row`
+
+| Property | Value |
+|----------|-------|
+| `flex-wrap` | `wrap` |
+
+#### `@media (max-width: 45rem)` -- `.page-header__actions`
+
+| Property | Value |
+|----------|-------|
+| `margin-left` | `0` |
+
 ### Data Attributes Used for CSS Selectors
 
 | Attribute | Element | Purpose |
@@ -347,12 +381,13 @@ No component-owned events beyond child action behavior.
 ## 9. Svelte Notes
 
 - Uses Svelte 5 `$props()` syntax with `Props` interface
-- Composes `Callout` primitive from `@poodle/svelte-primitives` for banner shortcut
+- Composes `Callout` and `Icon` primitives from `@poodle/svelte-primitives` for banner shortcut and back link arrow
 - `primaryTitle` derived as `title ?? section ?? ""`
 - `hasSectionTitleSplit` derived as `Boolean(section && title)`
 - Heading tag is dynamic via `<svelte:element this={headingTag}>`
 - Banner slot takes priority over `bannerMessage` prop (if both provided, slot wins)
-- Uses `$$slots.breadcrumbs`, `$$slots.actions`, `$$slots.banner`, `$$slots.default` for conditional rendering
+- Back link and actions are grouped in a shared actions-row; back link sits left, actions push right via `margin-left: auto`
+- At tablet breakpoint (max-width: 45rem), actions-row wraps and actions lose their auto margin
 
 ## 10. GPUI Notes
 

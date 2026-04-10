@@ -31,10 +31,10 @@ consequences.
   │     └── [Meta]
   │           ├── [ResultCount]    (optional)
   │           └── [SelectionCount]
-  ├── [Status <p>]             (optional, live region)
   ├── [Toolbar]                (slot, optional)
   ├── [Selection]              (slot, optional)
-  ├── [Body]                   (default slot, shown when state="ready")
+  ├── [Status <p>]             (optional, visually hidden sr-only live region)
+  ├── [Body]                   (default slot, shown when state="ready"; scrollable)
   ├── [State]                  (shown when state!="ready")
   │     ├── [Spinner]          (when state="loading", fallback only)
   │     ├── [StateTitle <strong>]
@@ -52,10 +52,10 @@ consequences.
 | Title | `<h3>` | Picker heading text |
 | Description | `<p>` | Optional subheading below title |
 | Meta | `<div>` | Result count and selection count display |
-| Status | `<p>` | `role="status"`, `aria-live="polite"`, `aria-atomic="true"` |
 | Toolbar | `<div>` | Slot wrapper for search field and filters |
 | Selection | `<div>` | Slot wrapper for selection summary |
-| Body | `<div>` | Default slot, visible only when `state="ready"` |
+| Status | `<p>` | Visually hidden (sr-only); `role="status"`, `aria-live="polite"`, `aria-atomic="true"`; placed after toolbar and selection in DOM order |
+| Body | `<div>` | Default slot, visible only when `state="ready"`; scrollable (`overflow-y: auto`, `min-height: 0`) |
 | State | `<div>` | Fallback state display, visible when `state!="ready"` |
 | Spinner | `<span>` | Wraps `Spinner` primitive (`variant="grid"`, `tone="accent"`), shown in loading state fallback |
 | Footer | `<div>` | Slot wrapper for confirm/cancel actions |
@@ -124,7 +124,7 @@ No internal component state. PickerShell is a layout container.
 
 ### Sizing
 
-- Root uses `display: grid` with `gap: var(--poodle-space-stack-md)`
+- Root uses `display: grid` with `grid-template-rows: auto` and `gap: var(--poodle-space-stack-md)`
 - Padding: `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`
 - Header uses `flex-wrap` with `justify-content: space-between`
 - State area has 1.5x panel-y padding and inner border
@@ -149,6 +149,7 @@ No internal component state. PickerShell is a layout container.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
+| `grid-template-rows` | `auto` |
 | `gap` | `var(--poodle-space-stack-md)` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
@@ -202,9 +203,27 @@ No internal component state. PickerShell is a layout container.
 
 ### `.picker-shell__status`
 
+Status text is visually hidden using the `sr-only` pattern, but remains in the DOM for screen reader announcements.
+
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
+| `position` | `absolute` |
+| `width` | `1px` |
+| `height` | `1px` |
+| `padding` | `0` |
+| `margin` | `-1px` |
+| `overflow` | `hidden` |
+| `clip` | `rect(0, 0, 0, 0)` |
+| `white-space` | `nowrap` |
+| `border` | `0` |
+
+### `.picker-shell__body`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0` |
+| `overflow-y` | `auto` |
 
 ### `.picker-shell__meta`
 
@@ -249,6 +268,10 @@ None.
 
 - Root is `<section class="picker-shell">` with `data-variant` and `data-state` attributes
 - Uses Svelte `$$slots` checks for conditional slot rendering (toolbar, selection, state, footer)
+- Status text is visually hidden (sr-only) but kept in the DOM for screen reader live region announcements
+- Status element is placed after toolbar and selection slots in the DOM order
+- Body area is scrollable with `overflow-y: auto` and `min-height: 0`
+- Grid uses `grid-template-rows: auto` instead of explicit row template
 - State fallback shows `stateTitle` (or "Picker state") and optional `stateMessage` when no `state` slot provided
 - Loading state prepends shared `Spinner` primitive (`variant="grid"`, `tone="accent"`) before state title
 - Imports `Spinner` from `@poodle/svelte-primitives`

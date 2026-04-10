@@ -52,7 +52,7 @@ Updated: 2026-03-30
 | Bar | `<div>` | Flex row, space-between |
 | PlayButton | `<button>` | `aria-label` toggles "Pause" / "Play", SVG icon swaps |
 | MuteButton | `<button>` | `aria-label` toggles "Unmute" / "Mute", SVG icon swaps |
-| VolumeSlider | `<input type="range">` | `0` to `1`, `step="0.01"`, `aria-label="Volume"` |
+| VolumeSlider | `<input type="range">` | `0` to `1`, `step="0.01"`, `aria-label="Volume"`, custom range input styling (track: 0.25rem height, white 50% opacity background, 0.125rem radius; thumb: 0.625rem white circle, no border) |
 | TimeDisplay | `<span>` | `m:ss / m:ss` format, monospace font |
 | FullscreenButton | `<button>` | `aria-label` toggles "Exit fullscreen" / "Fullscreen", SVG icon swaps |
 
@@ -297,9 +297,51 @@ Most colors use hardcoded `rgba(255,255,255,...)` values intentionally.
 
 | Property | Value |
 |----------|-------|
+| `-webkit-appearance` | `none` |
+| `appearance` | `none` |
 | `width` | `3.5rem` |
+| `height` | `1rem` |
+| `background` | `transparent` |
+| `cursor` | `pointer` |
+| `flex-shrink` | `0` |
+
+### `.video-player__volume::-webkit-slider-runnable-track`
+
+| Property | Value |
+|----------|-------|
 | `height` | `0.25rem` |
-| `accent-color` | `white` |
+| `border-radius` | `0.125rem` |
+| `background` | `rgba(255, 255, 255, 0.5)` |
+
+### `.video-player__volume::-moz-range-track`
+
+| Property | Value |
+|----------|-------|
+| `height` | `0.25rem` |
+| `border-radius` | `0.125rem` |
+| `background` | `rgba(255, 255, 255, 0.5)` |
+
+### `.video-player__volume::-webkit-slider-thumb`
+
+| Property | Value |
+|----------|-------|
+| `-webkit-appearance` | `none` |
+| `width` | `0.625rem` |
+| `height` | `0.625rem` |
+| `border-radius` | `50%` |
+| `border` | `none` |
+| `background` | `white` |
+| `margin-top` | `-0.1875rem` |
+
+### `.video-player__volume::-moz-range-thumb`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.625rem` |
+| `height` | `0.625rem` |
+| `border-radius` | `50%` |
+| `border` | `none` |
+| `background` | `white` |
 
 ### `.video-player__time`
 

@@ -25,7 +25,6 @@ Updated: 2026-03-30
         └── [ItemList <ul>]
               └── [Item <li>]*
                     └── [ItemLink <a>] or [ItemButton <button>]
-                          └── [AccentRail ::before]  (pseudo-element)
 ```
 
 ### Parts
@@ -39,7 +38,6 @@ Updated: 2026-03-30
 | Item | `<li>` | List item wrapper |
 | ItemLink | `<a>` | Class `sidebar-nav__item`, rendered when `item.href` is set and item is not disabled |
 | ItemButton | `<button>` | Class `sidebar-nav__item`, rendered when no href or when disabled |
-| AccentRail | `::before` | Pseudo-element on `.sidebar-nav__item`, left-edge accent bar visible on active items |
 
 ## 3. Props And Inputs
 
@@ -86,7 +84,7 @@ Active item is controlled via `value` prop. The component dispatches
 |-------|---------|-----------------|
 | plain list | One untitled group | Items render as one continuous list without extra group chrome |
 | grouped | Multiple groups or titled group | Each group reads as a distinct section through spacing and separators |
-| active | Item value matches `value` | Active item shows accent fill, accent rail, bolder weight, inset box-shadow |
+| active | Item value matches `value` | Active item shows accent fill, left border accent indicator, bolder weight, inset box-shadow |
 | hover | Mouse over non-disabled item | Text color primary, elevated background |
 | disabled | Item `disabled: true` | Reduced opacity, `cursor: not-allowed`, no activation |
 | focus-visible | Keyboard focus on item | Focus ring via `--poodle-border-width-focus` and `--poodle-color-accent-focusRing` |
@@ -111,7 +109,7 @@ Active item is controlled via `value` prop. The component dispatches
 
 ### Sizing
 
-- Root uses `display: grid` with padding `var(--poodle-space-panel-y) 0`
+- Root uses `display: grid` with padding `var(--poodle-space-panel-y) 0.375rem`
 - Groups filtered to remove empty groups before rendering
 - Single untitled groups read as one continuous list
 - Titled or multiple groups visually separate via spacing and border separators
@@ -156,7 +154,7 @@ Active item is controlled via `value` prop. The component dispatches
 | `gap` | `var(--poodle-sidebar-nav-group-gap)` |
 | `min-width` | `0` |
 | `align-content` | `start` |
-| `padding` | `var(--poodle-space-panel-y) 0` |
+| `padding` | `var(--poodle-space-panel-y) 0.375rem` |
 
 ### Size Variants
 
@@ -228,7 +226,8 @@ Active item is controlled via `value` prop. The component dispatches
 | `min-height` | `var(--poodle-sidebar-nav-item-height)` |
 | `padding` | `var(--poodle-sidebar-nav-item-padding-block) var(--poodle-sidebar-nav-item-padding-inline)` |
 | `border` | `0` |
-| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
+| `border-left` | `0.1875rem solid transparent` |
+| `border-radius` | `0.1875rem calc(var(--poodle-radius-control) - 0.125rem) calc(var(--poodle-radius-control) - 0.125rem) 0.1875rem` |
 | `background` | `transparent` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
@@ -239,20 +238,6 @@ Active item is controlled via `value` prop. The component dispatches
 | `text-decoration` | `none` |
 | `cursor` | `pointer` |
 | `transition` | `color, background, box-shadow` via `--poodle-motion-duration-interaction` and `--poodle-motion-easing-standard` |
-
-### `.sidebar-nav__item::before` (Accent Rail)
-
-| Property | Value |
-|----------|-------|
-| `content` | `""` |
-| `position` | `absolute` |
-| `left` | `0.125rem` |
-| `top` | `0.25rem` |
-| `bottom` | `0.25rem` |
-| `width` | `0.125rem` |
-| `border-radius` | `999px` |
-| `background` | `transparent` |
-| `transition` | `background` via motion tokens |
 
 ### `.sidebar-nav__item:hover:not(:disabled)`
 
@@ -269,12 +254,9 @@ Active item is controlled via `value` prop. The component dispatches
 | `font-weight` | `600` |
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
 | `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent)` |
+| `border-left-color` | `var(--poodle-color-accent-base)` |
 
-### `.sidebar-nav__item--active::before`
-
-| Property | Value |
-|----------|-------|
-| `background` | `var(--poodle-color-accent-base)` |
+The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the accent color. This replaces the previous `::before` pseudo-element approach.
 
 ### `.sidebar-nav__item:focus-visible`
 
@@ -307,7 +289,7 @@ None.
 ## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::sidebar_nav`
-- Accent rail is a pseudo-element in CSS; GPUI should render it as a sibling element
+- Active indicator is a left border (not a pseudo-element); GPUI should use a border or equivalent edge element
 - Size/density scaling must match the custom property override tables
 
 ## 11. Parity Checklist
@@ -323,7 +305,7 @@ None.
 
 ### Tier 2: Visual Parity
 
-- [ ] active fill, accent rail, and inset box-shadow match
+- [ ] active fill, left border indicator, and inset box-shadow match
 - [ ] hover background and color match
 - [ ] group separator border matches
 - [ ] group title typography (uppercase, accent color, weight) matches
@@ -342,13 +324,13 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Plain list | One untitled group with items (Overview, Components, Tokens, Guides), `value="components"` | Continuous list with "Components" active, accent rail visible |
+| Plain list | One untitled group with items (Overview, Components, Tokens, Guides), `value="components"` | Continuous list with "Components" active, left border indicator visible |
 
 ### Multiple Groups
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Grouped list | Two groups: "Foundation" (Button, Checkbox, Switch) and "Composites" (DataTable, FormDialog), `value="button"` | Two labelled sections separated by border, "Button" active with accent rail |
+| Grouped list | Two groups: "Foundation" (Button, Checkbox, Switch) and "Composites" (DataTable, FormDialog), `value="button"` | Two labelled sections separated by border, "Button" active with left border indicator |
 
 ### Disabled Items
 

@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-03-26
+Updated: 2026-04-09
 
 ## 1. Purpose
 
@@ -58,6 +58,8 @@ Updated: 2026-03-26
 | `leadingIcon` | `string \| null` | `null` | no | icon registry identifier |
 | `trailingIcon` | `string \| null` | `null` | no | icon registry identifier |
 | `chevron` | `boolean` | `false` | no | renders trailing disclosure chevron indicator |
+| `pressed` | `boolean \| null` | `null` | no | controlled toggle state; when non-null, button acts as a toggle with `aria-pressed` |
+| `defaultPressed` | `boolean` | `false` | no | initial pressed state for uncontrolled toggle mode |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label |
 | `ariaExpanded` | `boolean \| null` | `null` | no | disclosure-state hint for menu and accordion triggers |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -74,7 +76,9 @@ Updated: 2026-03-26
 
 ### Controlled And Uncontrolled
 
-- command-only component, no persistent value model
+- Command actions: no persistent value model for click behavior
+- Toggle mode (controlled): set `pressed` prop; listen to `pressedChange` to update
+- Toggle mode (uncontrolled): set `defaultPressed`; component manages internal state; `pressedChange` fires on each toggle
 
 ## 4. States
 
@@ -89,6 +93,7 @@ Updated: 2026-03-26
 | disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
 | loading | `loading=true` | spinner visible, button disabled |
 | icon-only | no default slot content | square button, no min-width |
+| pressed | `pressed=true` or uncontrolled toggle active | non-primary variants get accent fill, accent border, inverse text; `aria-pressed="true"` |
 
 ## 5. Events
 
@@ -97,6 +102,7 @@ Updated: 2026-03-26
 | `click` | activation completed | `MouseEvent` | suppressed while disabled or loading |
 | `focus` | focus enters root | `FocusEvent` | passthrough |
 | `blur` | focus leaves root | `FocusEvent` | passthrough |
+| `pressedChange` | toggle state changes | `{ pressed: boolean }` | fires when button is in toggle mode (`pressed` non-null or `defaultPressed` set) |
 
 ## 6. Accessibility
 
@@ -110,6 +116,7 @@ Updated: 2026-03-26
 - `aria-expanded`: set from `ariaExpanded` when the button acts as a disclosure trigger
 - `aria-describedby`: from describedBy prop
 - `style`: passes through directly to the native `<button>` when instance-level sizing or CSS-variable overrides are required
+- `aria-pressed`: `"true"` or `"false"` when button is in toggle mode (pressed non-null or defaultPressed set); omitted for non-toggle buttons
 - `aria-busy`: `"true"` when loading
 - `disabled`: set when disabled or loading (`isUnavailable`)
 - Icon spans: `aria-hidden="true"`
@@ -162,8 +169,8 @@ Updated: 2026-03-26
 | `padding` | `0 var(--poodle-space-control-x)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
-| `background` | `var(--poodle-color-background-surface)` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` |
+| `background` | `var(--poodle-button-fill)` (see CSS Custom Properties table for per-variant values) |
+| `box-shadow` | `var(--poodle-button-shadow)` (see CSS Custom Properties table for per-variant values) |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
@@ -176,22 +183,49 @@ Updated: 2026-03-26
 
 ### CSS Custom Properties (variant system)
 
+The secondary variant uses **elevation stacking** via `color-mix` toward `text-primary` (not toward `background-elevated`). This produces a surface that is slightly elevated relative to its container by mixing a small percentage of the text color into the surface color.
+
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
-| `--poodle-button-fill` | `background-surface` | `accent-base` | `transparent` |
-| `--poodle-button-fill-hover` | `color-mix(fill 84%, background-elevated)` | same formula | same formula |
-| `--poodle-button-fill-active` | `color-mix(fill 72%, background-elevated)` | same formula | same formula |
-| `--poodle-button-border` | `border-default` | `color-mix(accent-base 84%, black)` | `transparent` |
+| `--poodle-button-fill` | `var(--poodle-treatment-interactive-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary)))` | `accent-base` | `transparent` |
+| `--poodle-button-fill-hover` | `var(--poodle-treatment-interactive-fill-active, color-mix(in srgb, var(--poodle-surface, ...) 80%, var(--poodle-color-text-primary)))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
+| `--poodle-button-fill-active` | `color-mix(in srgb, var(--poodle-surface, ...) 84%, var(--poodle-color-text-primary))` | `color-mix(in srgb, accent-base 88%, black)` | inherits generic active formula |
+| `--poodle-button-border` | `var(--poodle-treatment-interactive-border, var(--poodle-color-border-default))` | `color-mix(in srgb, accent-base 84%, black)` | `transparent` |
+| `--poodle-button-border-hover` | `var(--poodle-treatment-interactive-border-active, color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary)))` | inherits generic hover formula | `transparent` |
 | `--poodle-button-text` | `text-primary` | `text-inverse` | `text-primary` |
-| `--poodle-button-shadow` | `inset 0 0.0625rem 0 color-mix(white 8%, transparent)` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
+| `--poodle-button-shadow` | `var(--poodle-treatment-interactive-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent))` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
 
 ### Tone: danger
 
-| Selector | `--poodle-button-fill` | `--poodle-button-border` | `--poodle-button-text` | `--poodle-button-shadow` |
-|----------|---------------------|-----------------------|---------------------|-----------------------|
-| `[data-tone="danger"]` (secondary base) | `color-mix(in srgb, status-danger 16%, background-surface)` | `color-mix(in srgb, status-danger 46%, border-default)` | `text-primary` | default |
-| `[data-variant="primary"][data-tone="danger"]` | `status-danger` | `color-mix(in srgb, status-danger 84%, black)` | `text-inverse` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` |
-| `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `status-danger` | `none` |
+Danger tone hover and active states stay within the red/danger color family rather than using the generic hover variable system. Each variant x danger combination defines its own fill, border, and text across idle, hover, and active states.
+
+#### Secondary danger `[data-tone="danger"]`
+
+| Var | Idle | Hover | Active |
+|-----|------|-------|--------|
+| `--poodle-button-fill` | `color-mix(in srgb, status-danger 16%, surface)` | `color-mix(in srgb, status-danger 24%, surface)` | `color-mix(in srgb, status-danger 32%, surface)` |
+| `--poodle-button-border` | `border-default` | `color-mix(in srgb, status-danger 62%, border-default)` | (inherits hover) |
+| `--poodle-button-text` | `text-primary` | (inherits) | (inherits) |
+
+Note: The secondary danger idle border uses `border-default` (matching normal secondary), **not** a danger-tinted border. The danger border tint only appears on hover.
+
+#### Primary danger `[data-variant="primary"][data-tone="danger"]`
+
+| Var | Idle | Hover | Active |
+|-----|------|-------|--------|
+| `--poodle-button-fill` | `status-danger` | `color-mix(in srgb, white 12%, status-danger)` | `color-mix(in srgb, status-danger 88%, black)` |
+| `--poodle-button-border` | `color-mix(in srgb, status-danger 84%, black)` | `color-mix(in srgb, status-danger 72%, black)` | (inherits hover) |
+| `--poodle-button-text` | `text-inverse` | (inherits) | (inherits) |
+| `--poodle-button-shadow` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | (inherits) | (inherits) |
+
+#### Ghost danger `[data-variant="ghost"][data-tone="danger"]`
+
+| Var | Idle | Hover | Active |
+|-----|------|-------|--------|
+| `--poodle-button-fill` | `transparent` | `color-mix(in srgb, status-danger 12%, transparent)` | `color-mix(in srgb, status-danger 18%, transparent)` |
+| `--poodle-button-border` | `transparent` | `color-mix(in srgb, status-danger 28%, transparent)` | (inherits hover) |
+| `--poodle-button-text` | `status-danger` | (inherits) | (inherits) |
+| `--poodle-button-shadow` | `none` | (inherits) | (inherits) |
 
 ### Size adjustments
 
@@ -231,7 +265,8 @@ Both adjustments apply independently.
 | Property | Value |
 |----------|-------|
 | `background` | `var(--poodle-button-fill-hover)` |
-| `border-color` | `color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary))` |
+| `border-color` | `var(--poodle-button-border-hover)` |
+| `box-shadow` | `var(--poodle-treatment-interactive-shadow-active, var(--poodle-button-shadow))` |
 
 ### Active (not disabled)
 
@@ -290,10 +325,25 @@ Loading spinner uses the shared [`Spinner`](./spinner.md) contract with
 `variant="ring"`, `size="sm"`, and `tone="current"` inside the
 `.button__spinner` wrapper.
 
+### Pressed/toggle state `[data-pressed="true"]:not([data-variant="primary"])`
+
+When a button is in toggle mode and pressed, non-primary variants receive accent treatment (primary is already accent-colored, so pressed is purely semantic via `aria-pressed`):
+
+| Var | Value |
+|-----|-------|
+| `--poodle-button-fill` | `var(--poodle-color-accent-base)` |
+| `--poodle-button-fill-hover` | `color-mix(in srgb, white 12%, var(--poodle-color-accent-base))` |
+| `--poodle-button-fill-active` | `color-mix(in srgb, var(--poodle-color-accent-base) 88%, black)` |
+| `--poodle-button-border` | `color-mix(in srgb, var(--poodle-color-accent-base) 85%, black)` |
+| `--poodle-button-text` | `var(--poodle-color-text-inverse)` |
+| `--poodle-button-shadow` | `none` |
+
+Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is set. The `data-pressed` attribute reflects the current pressed state. `aria-pressed` is set to `"true"` or `"false"` accordingly. The `pressedChange` event fires on every toggle.
+
 ## 9. Svelte Notes
 
 - Uses CSS custom properties (`--poodle-button-fill`, etc.) for the variant system
-- `data-variant`, `data-tone`, `data-size`, `data-density`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing` data attributes
+- `data-variant`, `data-tone`, `data-size`, `data-density`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing`, `data-pressed` data attributes
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - `data-tone` only emits when tone is not `"default"` (omitted otherwise)
 - `data-loading` always emits (even as `"false"`)
@@ -302,6 +352,11 @@ Loading spinner uses the shared [`Spinner`](./spinner.md) contract with
 - Icon and spinner supporting visuals resolve through the shared supporting-size mapping rather than a fixed absolute size
 - Supports named slots `leading` and `trailing` for custom icon content
 - Treatment token: `--poodle-treatment-interactive-radius` with fallback to `--poodle-radius-control`
+- Secondary variant uses elevation stacking: `color-mix` toward `var(--poodle-color-text-primary)` rather than toward a separate elevated background token; the surface color (`--poodle-surface` with fallback to `--poodle-color-background-surface`) is mixed at 88% idle / 80% hover / 84% active with text-primary
+- Danger tone defines all three interaction states (idle, hover, active) for fill and border inline in the danger CSS custom properties, keeping hover/active within the red family rather than deferring to generic `--poodle-button-fill-hover`/`--poodle-button-border-hover`
+- `data-pressed` emits the current pressed boolean when button is in toggle mode; omitted entirely for non-toggle buttons
+- `isToggle` derived from `pressed !== null || defaultPressed`; controlled mode when `pressed !== null`, uncontrolled otherwise
+- `pressedChange` event dispatches on every toggle activation, before the `click` event
 - Chevron renders `chevron-down` icon from registry at size `sm`, positioned after all other content
 
 ## 10. GPUI Notes

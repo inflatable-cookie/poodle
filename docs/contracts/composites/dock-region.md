@@ -1,7 +1,7 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-03-18
+Updated: 2026-04-09
 
 ## 1. Purpose
 
@@ -24,7 +24,7 @@ Updated: 2026-03-18
 [Root Region]
   ├── [Strip]
   │     ├── [Tabs (variant="strip", horizontal)]
-  │     └── [CollapseToggle]
+  │     └── [CollapseToggle]  (only when collapsible=true)
   └── [Body] (active panel content)
 ```
 
@@ -33,7 +33,7 @@ Updated: 2026-03-18
 ```text
 [Root Region]
   └── [Strip (vertical)]
-        ├── [CollapseToggle]
+        ├── [CollapseToggle]  (only when collapsible=true)
         └── [Tabs (variant="strip", vertical, icon-only)]
 ```
 
@@ -43,14 +43,14 @@ Updated: 2026-03-18
 [Root Region]
   └── [Strip (horizontal)]
         ├── [Tabs (variant="strip", horizontal, compact icon-only)]
-        └── [CollapseToggle]
+        └── [CollapseToggle]  (only when collapsible=true)
 ```
 
 ### Flexible mode (collapsed hidden)
 
 ```text
 [Root Region]
-  └── [CollapseToggle]
+  └── [CollapseToggle]  (only when collapsible=true)
 ```
 
 ### Static mode
@@ -68,7 +68,7 @@ Updated: 2026-03-18
 | Root Region | yes | `<section>` dock container with `aria-label` |
 | Strip | flexible only | tab/collapse chrome area |
 | Tabs | flexible only | Tabs primitive (variant="strip") |
-| CollapseToggle | flexible only | collapse/expand affordance |
+| CollapseToggle | conditional | collapse/expand affordance; only rendered when `collapsible=true` |
 | Body | flexible expanded only | active panel content slot |
 | Stack | static only | flex container for stacked panels |
 | Stack Item | static only | draggable panel wrapper |
@@ -82,11 +82,15 @@ Updated: 2026-03-18
 |------|------|---------|----------|-------|
 | `edge` | `DockEdge` | `"left"` | no | dock placement: `"left" \| "right" \| "top" \| "bottom"` |
 | `sizing` | `DockSizing` | `"flexible"` | no | `"static"` for fixed stacked panels, `"flexible"` for tabbed/collapsible |
-| `collapsed` | `boolean` | `false` | no | collapse state (flexible mode only) |
+| `collapsible` | `boolean` | `false` | no | when true, renders the CollapseToggle in all flexible-mode postures; when false, no collapse affordance is shown |
+| `collapsed` | `boolean` | `false` | no | collapse state (flexible mode only); meaningful only when `collapsible=true` |
 | `collapsedPosture` | `DockCollapsedPosture` | `"icon-strip"` | no | `"hidden"` or `"icon-strip"` |
 | `emphasis` | `DockEmphasis` | `"standard"` | no | `"standard" \| "quiet" \| "strong"` |
 | `items` | `PanelTabItem[]` | `[]` | no | panel definitions with value, label, icon, closable |
 | `value` | `string \| null` | `null` | no | controlled active panel (flexible mode) |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for Tabs |
+| `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | semantic role used to resolve inherited size scale (default `"chrome"` not `"control"`) |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for Tabs |
 | `ariaLabel` | `string \| null` | `null` | no | region accessible label |
 | `canAcceptPanel` | `(panelId: string, sourceEdge: DockEdge) => boolean \| null` | `null` | no | cross-region drop validation |
 
@@ -316,6 +320,17 @@ type PanelDragData = {
 |----------|-------|
 | `grid-template-rows` | `auto minmax(0, 1fr)` |
 
+#### Expanded Edge-Aware Borders
+
+When flexible and expanded, each edge gets a single border on its inner side:
+
+| Edge | Border |
+|------|--------|
+| `left` | `border-right: 0.0625rem solid var(--poodle-color-border-subtle)` |
+| `right` | `border-left: 0.0625rem solid var(--poodle-color-border-subtle)` |
+| `top` | `border-bottom: 0.0625rem solid var(--poodle-color-border-subtle)` |
+| `bottom` | `border-top: 0.0625rem solid var(--poodle-color-border-subtle)` |
+
 #### `.dock-region__strip[data-orientation="horizontal"]`
 
 | Property | Value |
@@ -370,6 +385,17 @@ type PanelDragData = {
 | Property | Value |
 |----------|-------|
 | `grid-template-rows` | `1fr` |
+
+#### Collapsed Icon-Strip Edge-Aware Borders
+
+When collapsed in icon-strip posture, top/bottom edges get a border on their inner side:
+
+| Edge | Border |
+|------|--------|
+| `top` | `border-bottom: 0.0625rem solid var(--poodle-color-border-subtle)` |
+| `bottom` | `border-top: 0.0625rem solid var(--poodle-color-border-subtle)` |
+
+Left/right edges use the vertical strip's own `border-right` (or `border-left` for right edge) instead of a root-level border.
 
 #### `.dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="left"]`, `[data-edge="right"]`
 
@@ -468,6 +494,11 @@ type PanelDragData = {
 
 - Composes Tabs (`variant="strip"`) and CollapseToggle from `@poodle/svelte-primitives`
 - Does NOT use PanelTabs, PanelHeader, or PanelSurface
+- CollapseToggle is only rendered when `collapsible=true`; in all four flexible
+  postures (expanded, collapsed icon-strip left/right, collapsed icon-strip
+  top/bottom, collapsed hidden) the toggle is conditionally gated
+- `size`, `sizeRole` (default `"chrome"`), and `density` props are passed through
+  to Tabs instances
 - Compact mode uses `ResizeObserver` with `scrollWidth > clientWidth` detection
 - Passes `showTooltips={isCompact}` to Tabs for horizontal icon-only tooltip support
 - `use:observeStrip` Svelte action binds ResizeObserver to the tabs container
@@ -481,6 +512,8 @@ type PanelDragData = {
 - [x] tab activation with `valueChange` event
 - [x] click-to-expand from collapsed state
 - [ ] focus restoration on collapse
+- [ ] `collapsible` prop gates CollapseToggle rendering (default false)
+- [ ] edge-aware borders on expanded and collapsed icon-strip states
 
 ### Tier 2: Visual Parity
 

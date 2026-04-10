@@ -1,37 +1,32 @@
 # BlockEditor
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-04-09
 
 ## 1. Purpose
 
 - Component name: `BlockEditor`
 - Layer: `composites`
-- Summary: extensible block-based content editor with pluggable block types, reordering via drag-and-drop or buttons, and customisable block rendering via slots
-- In scope: block CRUD, type switching, reordering (drag-and-drop + arrow buttons), extensible block type definitions, slotted block content rendering, size and density variants
-- Out of scope: rich text editing within blocks, collaborative editing, undo/redo history, block nesting, server persistence
+- Summary: a pure shell for block-based content editing — provides block CRUD, reordering, and type switching infrastructure with zero built-in block types or block renderers; consumers supply all block types and rendering via props and slots
+- In scope: block CRUD, type switching via Select (ghost variant), reordering (drag-and-drop + arrow buttons), consumer-provided block type definitions, slotted block content rendering, size and density variants
+- Out of scope: built-in block types, built-in block rendering, rich text editing within blocks, collaborative editing, undo/redo history, block nesting, server persistence
 
 ## 2. Anatomy
 
 ```text
-[Root .block-editor]  <div> aria-label
+[Root .block-editor]  <div> aria-label, wraps in UiPresentationProvider
   └── [Block .block-editor__block]  (repeated, keyed by block.id) role="group"
         ├── [Toolbar .block-editor__toolbar]
         │     ├── [ToolbarLeft .block-editor__toolbar-left]
         │     │     ├── [DragGrip .block-editor__drag-grip]  <span> draggable, Icon grip-vertical
-        │     │     └── [TypeSelect .block-editor__type-select]  <select> block type picker
+        │     │     └── [TypeSelect .block-editor__type-select]  Select (variant="ghost", menuMinWidth="10rem")
         │     └── [ToolbarRight .block-editor__toolbar-right]
         │           ├── [MoveUpBtn .block-editor__tool-btn]  <button> Icon arrow-up
         │           ├── [MoveDownBtn .block-editor__tool-btn]  <button> Icon arrow-down
-        │           ├── [AddBtn .block-editor__tool-btn.block-editor__add-btn]  <button> Icon plus
+        │           ├── [AddSelect .block-editor__add-select]  Select (variant="ghost", menuMinWidth="10rem", trigger slot with plus icon)
         │           └── [RemoveBtn .block-editor__tool-btn.block-editor__remove-btn]  <button> Icon x (hidden when 1 block)
         └── [Content .block-editor__content]
-              └── [BlockSlot]  named "block" slot; fallback: built-in renderer per type
-  └── [AddOverlay .block-editor__add-overlay]  (conditional, when showAddMenu)
-        └── [AddMenu .block-editor__add-menu]  grid of block type options
-              └── [AddMenuItem .block-editor__add-menu-item]  <button> (repeated per blockType)
-                    ├── [MenuIcon .block-editor__add-menu-icon]  Icon
-                    └── [MenuLabel]  <span> type label
+              └── [BlockSlot]  named "block" slot; fallback: minimal <textarea>
 ```
 
 ### Parts
@@ -42,14 +37,12 @@ Updated: 2026-03-30
 | Block | `<div>` | yes (repeated) | `role="group"`, `aria-label="{type} block"`, drag-and-drop target |
 | Toolbar | `<div>` | yes (per block) | Flex row, space-between, transparent background |
 | DragGrip | `<span>` | yes (per block) | `draggable="true"`, `aria-hidden="true"`, `grab` cursor |
-| TypeSelect | `<select>` | yes (per block) | Block type picker, `aria-label="Block type"` |
+| TypeSelect | Select | yes (per block) | Poodle Select component, `variant="ghost"`, `menuMinWidth="10rem"`, `ariaLabel="Block type"` |
 | MoveUpBtn | `<button>` | yes (per block) | Disabled when first block or editor disabled |
 | MoveDownBtn | `<button>` | yes (per block) | Disabled when last block or editor disabled |
-| AddBtn | `<button>` | yes (per block) | Opens add menu overlay |
+| AddSelect | Select | yes (per block) | Poodle Select with `variant="ghost"`, `menuMinWidth="10rem"`, custom trigger slot showing a plus icon; selecting a type inserts a new block after the current one |
 | RemoveBtn | `<button>` | no | Hidden when only 1 block remains |
-| Content | `<div>` | yes (per block) | Contains slot or built-in renderer |
-| AddOverlay | `<div>` | no | Fixed overlay backdrop for add menu |
-| AddMenu | `<div>` | no | Grid of block type buttons |
+| Content | `<div>` | yes (per block) | Contains block slot or minimal textarea fallback |
 
 ## 3. Props And Inputs
 
@@ -57,13 +50,13 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `blocks` | `EditorBlock[]` | Single empty paragraph | no | Array of block data objects; bind for two-way |
-| `blockTypes` | `BlockTypeDefinition[]` | Built-in types (paragraph, heading, code, quote, list, image, divider) | no | Defines available block types for the type selector and add menu |
+| `blocks` | `EditorBlock[]` | `[]` | no | Array of block data objects; bind for two-way |
+| `blockTypes` | `BlockTypeDefinition[]` | `[]` | no | Consumer provides all available block types; drives both the type-switch Select and the add-block Select |
 | `disabled` | `boolean` | `false` | no | Disables all editing controls |
 | `ariaLabel` | `string` | `"Block editor"` | no | Accessible label for the root container |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar chrome and nested controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
-| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for shell, toolbar, content, and add-menu spacing |
+| `density` | `ControlDensity \| null` | `null` | no | Explicit density override for shell, toolbar, content, and input spacing |
 
 ### Types
 
@@ -88,21 +81,11 @@ type EditorBlock = {
 
 | Slot | Scope | Purpose |
 |------|-------|---------|
-| `block` | `{ block: EditorBlock, index: number, disabled: boolean, update: (updates: Partial<EditorBlock>) => void }` | Custom rendering for block content; falls back to built-in renderers |
+| `block` | `{ block: EditorBlock, index: number, disabled: boolean, update: (updates: Partial<EditorBlock>) => void }` | Custom rendering for block content; when not provided, falls back to a minimal `<textarea>` |
 
-### Default Block Renderers
+### Fallback Block Renderer
 
-When the `block` slot is not provided, built-in renderers handle these types:
-
-| Type | Renderer | Notes |
-|------|----------|-------|
-| `paragraph` | `<textarea>` | Default fallback for unrecognised types |
-| `heading` | `<input type="text">` | Bold, larger font |
-| `code` | `<textarea>` | Monospace font, elevated background |
-| `quote` | `<textarea>` | Italic, left border accent |
-| `list` | `<textarea>` | Indented left padding |
-| `image` | `<input>` + `<img>` preview | URL input with image preview when content is non-empty |
-| `divider` | `<hr>` | Horizontal rule |
+When the `block` slot is not provided, the only fallback is a minimal `<textarea>` with `placeholder="Type something..."` and `rows="1"`. There are no built-in type-specific renderers (no heading, code, quote, list, image, or divider rendering). Consumers are expected to provide a `block` slot for meaningful rendering.
 
 ### Controlled And Uncontrolled
 
@@ -120,15 +103,12 @@ When the `block` slot is not provided, built-in renderers handle these types:
 | active-block | block receives focus | Block background increases to 72% elevated mix |
 | dragging | drag grip held | Source block at 40% opacity |
 | drag-over | dragging over another block | Target block shows accent box-shadow ring |
-| add-menu-open | add button clicked | Fixed overlay with block type grid |
 
 ### Component States
 
 | State | Description |
 |-------|-------------|
 | `activeBlockId` | ID of the currently focused block |
-| `showAddMenu` | Whether the add menu overlay is visible |
-| `addMenuIndex` | Index of the block after which to insert |
 | `dragSourceIndex` | Index of the block being dragged |
 | `dragOverIndex` | Index of the current drop target |
 
@@ -144,9 +124,9 @@ When the `block` slot is not provided, built-in renderers handle these types:
 
 - Root: `aria-label` from prop (default `"Block editor"`)
 - Each block: `role="group"`, `aria-label="{type} block"`
-- Type select: `aria-label="Block type"`
+- Type-switch Select: `ariaLabel="Block type"`
 - Move buttons: `aria-label="Move up"` / `"Move down"`
-- Add button: `aria-label="Add block after this one"`
+- Add-block Select: `ariaLabel="Add block after this one"`
 - Remove button: `aria-label="Remove block"`
 - Drag grip: `aria-hidden="true"`
 
@@ -170,11 +150,12 @@ When the `block` slot is not provided, built-in renderers handle these types:
 - Blocks: flex column, no explicit border (differentiation via background)
 - Toolbar: flex row, space-between
 - Content: padded area with min-height `1.5rem`
-- Add menu: fixed position, grid layout
 
 ### Composition
 
-- Composes: `Icon` primitive, `UiPresentationProvider`
+- Composes: `Icon`, `Select`, `UiPresentationProvider` from `@poodle/svelte-primitives`
+- Both the type-switch and add-block controls use Select with `variant="ghost"` and `native={false}`
+- The add-block Select uses a custom trigger slot containing a plus icon styled as a tool button
 - Parent expectations: content editing surfaces, form sections
 - Resizing rules: blocks fill parent width; content areas are flexible
 
@@ -195,10 +176,6 @@ When the `block` slot is not provided, built-in renderers handle these types:
 | `--poodle-block-editor-content-y` | `0.375rem` |
 | `--poodle-block-editor-input-x` | `0.375rem` |
 | `--poodle-block-editor-input-y` | `0.25rem` |
-| `--poodle-block-editor-menu-gap` | `0.25rem` |
-| `--poodle-block-editor-menu-pad` | `0.5rem` |
-| `--poodle-block-editor-menu-item-pad` | `0.5rem` |
-| `--poodle-block-editor-menu-min-width` | `16rem` |
 
 #### `.block-editor` (Root)
 
@@ -346,15 +323,13 @@ When the `block` slot is not provided, built-in renderers handle these types:
 
 | Property | Value |
 |----------|-------|
-| `min-height` | `var(--poodle-block-editor-control-size)` |
-| `padding` | `0.0625rem var(--poodle-block-editor-input-x)` |
-| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `transparent` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font` | `inherit` |
-| `font-size` | `var(--poodle-typography-label-size)` |
-| `cursor` | `pointer` |
+| `flex-shrink` | `0` |
+
+#### `.block-editor__add-select`
+
+| Property | Value |
+|----------|-------|
+| `flex-shrink` | `0` |
 
 #### `.block-editor__content`
 
@@ -363,7 +338,7 @@ When the `block` slot is not provided, built-in renderers handle these types:
 | `padding` | `var(--poodle-block-editor-content-y) var(--poodle-block-editor-content-x)` |
 | `min-height` | `1.5rem` |
 
-#### `.block-editor__input` (Default)
+#### `.block-editor__input` (Fallback textarea)
 
 | Property | Value |
 |----------|-------|
@@ -378,149 +353,29 @@ When the `block` slot is not provided, built-in renderers handle these types:
 | `outline` | `none` |
 | `resize` | `vertical` |
 
-#### `.block-editor__input--heading`
-
-| Property | Value |
-|----------|-------|
-| `font-size` | `1.125rem` |
-| `font-weight` | `700` |
-
-#### `.block-editor__input--code`
-
-| Property | Value |
-|----------|-------|
-| `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.8125rem` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `padding` | `calc(var(--poodle-block-editor-input-y) * 2) calc(var(--poodle-block-editor-input-x) * 1.5)` |
-
-#### `.block-editor__input--quote`
-
-| Property | Value |
-|----------|-------|
-| `border-left` | `0.1875rem solid var(--poodle-color-border-default)` |
-| `padding-left` | `calc(var(--poodle-block-editor-input-x) + 0.25rem)` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-style` | `italic` |
-
-#### `.block-editor__input--list`
-
-| Property | Value |
-|----------|-------|
-| `padding-left` | `calc(var(--poodle-block-editor-input-x) + 0.625rem)` |
-
-#### `.block-editor__input--image-url`
-
-| Property | Value |
-|----------|-------|
-| `font-size` | `0.75rem` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-family` | `var(--poodle-typography-code-family)` |
-
-#### `.block-editor__divider`
-
-| Property | Value |
-|----------|-------|
-| `border` | `0` |
-| `border-top` | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| `margin` | `0.5rem 0` |
-
-#### `.block-editor__image-block`
-
-| Property | Value |
-|----------|-------|
-| `display` | `flex` |
-| `flex-direction` | `column` |
-| `gap` | `var(--poodle-block-editor-content-y)` |
-
-#### `.block-editor__image-preview img`
-
-| Property | Value |
-|----------|-------|
-| `max-width` | `100%` |
-| `max-height` | `16rem` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `object-fit` | `contain` |
-
-#### `.block-editor__add-overlay`
-
-| Property | Value |
-|----------|-------|
-| `position` | `fixed` |
-| `inset` | `0` |
-| `z-index` | `var(--poodle-overlay-z-menu, 100)` |
-
-#### `.block-editor__add-menu`
-
-| Property | Value |
-|----------|-------|
-| `position` | `fixed` |
-| `display` | `grid` |
-| `grid-template-columns` | `repeat(auto-fill, minmax(6rem, 1fr))` |
-| `gap` | `var(--poodle-block-editor-menu-gap)` |
-| `padding` | `var(--poodle-block-editor-menu-pad)` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
-| `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `var(--poodle-color-background-elevated)` |
-| `box-shadow` | `var(--poodle-elevation-overlay)` |
-| `min-width` | `var(--poodle-block-editor-menu-min-width)` |
-
-#### `.block-editor__add-menu-item`
-
-| Property | Value |
-|----------|-------|
-| `display` | `flex` |
-| `align-items` | `center` |
-| `gap` | `var(--poodle-block-editor-content-y)` |
-| `padding` | `var(--poodle-block-editor-menu-item-pad)` |
-| `border` | `0` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `transparent` |
-| `color` | `var(--poodle-color-text-primary)` |
-| `cursor` | `pointer` |
-| `font` | `inherit` |
-| `font-size` | `var(--poodle-typography-label-size)` |
-| `text-align` | `left` |
-| `transition` | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
-
-#### `.block-editor__add-menu-item:hover`
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
-
-#### `.block-editor__add-menu-icon`
-
-| Property | Value |
-|----------|-------|
-| `font-size` | `0.875rem` |
-| `width` | `var(--poodle-block-editor-control-size)` |
-| `text-align` | `center` |
-
 ### Size Adjustments
 
-| Size | `control-size` | `menu-min-width` |
-|------|---------------|-----------------|
-| `xs` | `1.25rem` | `13rem` |
-| `sm` | `1.5rem` | (default) |
-| `md` | `1.75rem` | (default) |
-| `lg` | `2rem` | `18rem` |
-| `xl` | `2.25rem` | `20rem` |
+| Size | `control-size` |
+|------|---------------|
+| `xs` | `1.25rem` |
+| `sm` | `1.5rem` |
+| `md` | `1.75rem` |
+| `lg` | `2rem` |
+| `xl` | `2.25rem` |
 
 ### Density Adjustments
 
-| Density | `shell-x` | `shell-y` | `stack-gap` | `toolbar-y` | `toolbar-x` | `content-x` | `content-y` | `input-x` | `input-y` | `menu-pad` | `menu-item-pad` |
-|---------|-----------|-----------|-------------|-------------|-------------|-------------|-------------|-----------|-----------|-----------|----------------|
-| `compact` | `0.625rem` | `0.625rem` | `0.375rem` | `0.1875rem` | `0.25rem` | `0.375rem` | `0.25rem` | `0.25rem` | `0.1875rem` | `0.375rem` | `0.375rem` |
-| `default` | `0.75rem` | `0.75rem` | `0.5rem` | `0.25rem` | `0.375rem` | `0.5rem` | `0.375rem` | `0.375rem` | `0.25rem` | `0.5rem` | `0.5rem` |
-| `comfortable` | `1rem` | `1rem` | `0.625rem` | `0.3125rem` | `0.5rem` | `0.625rem` | `0.5rem` | `0.5rem` | `0.3125rem` | `0.625rem` | `0.625rem` |
+| Density | `shell-x` | `shell-y` | `stack-gap` | `toolbar-y` | `toolbar-x` | `content-x` | `content-y` | `input-x` | `input-y` |
+|---------|-----------|-----------|-------------|-------------|-------------|-------------|-------------|-----------|-----------|
+| `compact` | `0.625rem` | `0.625rem` | `0.375rem` | `0.1875rem` | `0.25rem` | `0.375rem` | `0.25rem` | `0.25rem` | `0.1875rem` |
+| `default` | `0.75rem` | `0.75rem` | `0.5rem` | `0.25rem` | `0.375rem` | `0.5rem` | `0.375rem` | `0.375rem` | `0.25rem` |
+| `comfortable` | `1rem` | `1rem` | `0.625rem` | `0.3125rem` | `0.5rem` | `0.625rem` | `0.5rem` | `0.5rem` | `0.3125rem` |
 
 ### Data Attributes Used for CSS Selectors
 
 | Attribute | Element | Purpose |
 |-----------|---------|---------|
-| `data-type` | `.block-editor__block` | Block type identifier (paragraph, heading, code, etc.) |
+| `data-type` | `.block-editor__block` | Block type identifier (consumer-defined string) |
 | `data-size` | `.block-editor` root | Drives size variant custom properties |
 | `data-density` | `.block-editor` root | Drives density variant custom properties |
 
@@ -537,9 +392,11 @@ When the `block` slot is not provided, built-in renderers handle these types:
 
 - Uses `createEventDispatcher` for `change` event
 - Wraps in `UiPresentationProvider` to propagate resolved size and density to child controls
-- Composes `Icon` primitive from `@poodle/svelte-primitives`
+- Composes `Icon`, `Select`, and `UiPresentationProvider` from `@poodle/svelte-primitives`
+- Block type options are derived from `blockTypes` prop, mapped to `SelectOption[]` with `value`, `label`, and `icon`
+- Type-switch per block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, bound to `block.type`
+- Add-block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, `value={null}`, and a trigger slot containing a plus icon styled as a tool button; selecting a value calls `addBlock(value, index)`
 - New block IDs generated with `crypto.randomUUID()`
-- Add menu positioned via `getBoundingClientRect()` of the add button
 - Native HTML drag-and-drop for block reordering
 - `focusin` event on blocks tracks `activeBlockId`
 - After adding a block, uses `tick().then()` to set `activeBlockId` on the new block
@@ -554,36 +411,36 @@ When the `block` slot is not provided, built-in renderers handle these types:
 
 ### Tier 1: Strict Parity
 
-- [ ] all props have the same meaning and defaults
+- [ ] all props have the same meaning and defaults (`blocks=[]`, `blockTypes=[]`)
 - [ ] event name and payload matches
 - [ ] EditorBlock and BlockTypeDefinition types are identical
 - [ ] block CRUD operations produce same results
 - [ ] move up/down boundary checks match
 - [ ] remove disabled when single block remaining
+- [ ] type-switch and add-block both use Select with ghost variant
 
 ### Tier 2: Visual Parity
 
 - [ ] block background opacity (42% / 72%) matches
 - [ ] drag-over ring and dragging opacity match
 - [ ] toolbar button sizing and spacing match
-- [ ] add menu grid layout matches
 - [ ] disabled state opacity matches
 
 ### Tier 3: Implementation Freedom
 
 - [ ] drag-and-drop mechanics stay internal
-- [ ] add menu positioning stays internal
+- [ ] Select menu positioning delegated to Select primitive
 
 ## 12. Specimen Definitions
-
-### Default Block Types
-
-| Label | Props / Config | Expected Visual |
-|-------|---------------|-----------------|
-| Default block types | Uses built-in `blockTypes` and default slot rendering | Shows heading, paragraph, quote, code, list, divider, and paragraph blocks with toolbars |
 
 ### Custom Block Types with Slot Rendering
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Custom block types | Consumer provides custom `blockTypes` (text, callout, embed) and a `block` slot with custom rendering | Callout has accent left border, embed uses monospace URL input |
+| Custom block types | Consumer provides custom `blockTypes` (text, callout, embed) and a `block` slot with custom rendering | Blocks shown with Select-based type switcher and add-block menu; callout has accent left border, embed uses monospace URL input |
+
+### Minimal (No Block Slot)
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Minimal fallback | Consumer provides `blockTypes` but no `block` slot | Each block renders a plain textarea fallback with "Type something..." placeholder |

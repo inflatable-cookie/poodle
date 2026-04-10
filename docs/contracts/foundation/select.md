@@ -1,7 +1,7 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-04-01
+Updated: 2026-04-09
 
 ## 1. Purpose
 
@@ -45,7 +45,7 @@ Updated: 2026-04-01
   ├── [Trigger Button .select__trigger]  <button> (non-searchable)
   │     ├── [Value/Slot .select__value | slot:trigger]
   │     ├── [Clear Button .select__clear]  <button> (clearable + has selection)
-  │     └── [Indicator .select__indicator]  <span> (decorative chevron)
+  │     └── [Indicator .select__indicator]  <span> (conditional: hidden when variant="ghost")
   ├── [Hidden Input]  <input type="hidden"> (when name prop set, for form submission)
   └── [Listbox .select__listbox]  <div role="listbox"> (conditional, when open)
         ├── [Group .select__group]  <div role="group"> (grouped options)
@@ -63,7 +63,7 @@ Updated: 2026-04-01
 |------|----------|-------------|---------------|
 | Root | yes | styled wrapper providing field chrome | background, border, radius, shadow, focus ring |
 | Control | native mode | native `<select>` element | typography, text color, appearance reset |
-| Indicator | yes | decorative disclosure chevron (Icon component) | icon color |
+| Indicator | conditional | decorative disclosure chevron (Icon component); always present in native and searchable custom mode, hidden in non-searchable custom when `variant="ghost"` | icon color |
 | Trigger Area | custom + searchable | combobox container with ARIA role | position |
 | Trigger Button | custom + non-searchable | button that opens the dropdown | typography, text color |
 | Input | custom + searchable | text query input for filtering | border, background, typography |
@@ -115,6 +115,8 @@ Updated: 2026-04-01
 | `loadItems` | `(() => Promise<LegacySelectItem[]>) \| null` | `null` | no | deprecated lazy flat option loader; use `loadOptions` |
 | `loadGroups` | `(() => Promise<LegacySelectGroup[]>) \| null` | `null` | no | deprecated lazy grouped option loader; use `loadOptions` |
 | `loadKey` | `string \| null` | `null` | no | invalidates cached lazy options when it changes |
+| `variant` | `"default" \| "ghost"` | `"default"` | no | visual variant; `"ghost"` strips border, background, box-shadow, padding, min-height, and hides the chevron indicator |
+| `menuMinWidth` | `string \| null` | `null` | no | minimum width for the dropdown listbox (e.g. `"12rem"`); when set, listbox uses `width: max-content` instead of matching trigger width, and viewport-aware horizontal anchor flipping occurs (right-anchors if menu would overflow right edge) |
 | `onchange` | `((value: string) => void) \| null` | `null` | no | callback prop for existing caller styles; `valueChange` remains the canonical event |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -164,6 +166,7 @@ The component automatically determines whether to render a native `<select>` or 
 | open (custom) | dropdown is visible | `data-open="true"` on root, listbox rendered |
 | highlighted (custom) | keyboard nav or hover over option | `data-highlighted="true"` on option, accent background mix |
 | empty results (custom) | searchable query matches no options | empty message or empty slot rendered in listbox |
+| ghost variant | `variant="ghost"` | no border, background, box-shadow, padding, or min-height on root; no chevron indicator on non-searchable trigger; focus-within treatment fully transparent |
 
 ### Component States
 
@@ -329,6 +332,63 @@ The component automatically determines whether to render a native `<select>` or 
 | `font-weight` | `normal` |
 | `color` | `var(--poodle-color-text-primary)` |
 
+### Ghost variant `.select[data-variant="ghost"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0` |
+| `padding` | `0` |
+| `border` | `0` |
+| `border-radius` | `0` |
+| `background` | `transparent` |
+| `box-shadow` | `none` |
+
+### Ghost variant -- focus-within
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `transparent` |
+| `background` | `transparent` |
+| `box-shadow` | `none` |
+
+### Ghost variant -- trigger area
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0` |
+| `min-height` | `0` |
+
+### Ghost variant -- trigger button
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0` |
+| `padding` | `0` |
+| `line-height` | `1` |
+
+### Ghost variant -- indicator
+
+The chevron indicator is **not rendered** in non-searchable custom mode when `variant="ghost"`.
+
+### Listbox -- auto-width `.select__listbox--auto-width`
+
+When `menuMinWidth` is set, the listbox detaches from the trigger's width:
+
+| Property | Value |
+|----------|-------|
+| `right` | `auto` (instead of `-0.0625rem`) |
+| `width` | `max-content` |
+| `min-width` | value of `menuMinWidth` prop (set via inline style) |
+
+### Listbox -- align-end `.select__listbox--align-end`
+
+Applied when viewport-aware horizontal flipping determines the menu would overflow the right edge:
+
+| Property | Value |
+|----------|-------|
+| `left` | `auto` |
+| `right` | `-0.0625rem` |
+
 ### Size adjustments
 
 | Size | min-height | padding | control height | font-size |
@@ -363,6 +423,8 @@ The component automatically determines whether to render a native `<select>` or 
 - `aria-activedescendant` on the input/trigger tracks the currently highlighted option by referencing its stable id (`{listboxId}-option-{index}`)
 - Searchable mode: client-side filtering matches query against option labels (case-insensitive substring)
 - Freeform mode: when `freeform=true` and `searchable=true`, the query text becomes the selected value on commit if no option is highlighted
+- `data-variant` attribute on root reflects the `variant` prop; ghost variant strips all field chrome (border, background, shadow, padding, min-height) and hides the chevron indicator on non-searchable triggers
+- `menuMinWidth` prop sets an inline `min-width` style on the listbox and switches it to `width: max-content` (class `select__listbox--auto-width`); on open, viewport-aware horizontal anchor flipping checks whether left-anchoring would overflow the right edge and applies `select__listbox--align-end` if so
 - Three named slots available in custom mode:
   - `option` -- slot props: `{ option, highlighted, selected, index }` -- custom rendering for each option row
   - `trigger` -- slot props: `{ selectedOption, open, placeholder }` -- custom trigger button content (non-searchable only)

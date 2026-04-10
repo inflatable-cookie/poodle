@@ -1,7 +1,7 @@
 # MarkdownEditor
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-04-09
 
 ## 1. Purpose
 
@@ -62,6 +62,7 @@ Updated: 2026-03-30
 | `ariaLabel` | `string` | `"Markdown editor"` | no | Accessible label for the textarea |
 | `minHeight` | `string` | `"12rem"` | no | CSS min-height for the textarea (applied via inline style) |
 | `mode` | `"edit" \| "preview" \| "split"` | `"edit"` | no | Active view mode |
+| `renderHtml` | `((markdown: string) => string) \| null` | `null` | no | Custom markdown-to-HTML renderer; when provided, replaces the built-in `marked` library fallback |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar and mode controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for toolbar and pane spacing |
@@ -318,9 +319,9 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `blockquote` | padding | `0.375rem 0.75rem` |
 | `blockquote` | border-left | `0.1875rem solid var(--poodle-color-border-default)` |
 | `blockquote` | color | `var(--poodle-color-text-secondary)` |
+| `ul`, `ol` | margin | `0 0 0.5rem` |
+| `ul`, `ol` | padding-left | `1.25rem` |
 | `li` | margin | `0 0 0.125rem` |
-| `li` | padding-left | `0.25rem` |
-| `li` | list-style | `disc inside` |
 | `hr` | border | `0` |
 | `hr` | border-top | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `hr` | margin | `0.75rem 0` |
@@ -358,7 +359,12 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 - Uses `Icon` primitive for toolbar button icons (bold, italic, heading, link, code, quote, list)
 - `insertMarkdown(before, after)` manipulates textarea selection to wrap or prepend markdown syntax
 - `insertLine(prefix)` prefixes the current line with markdown syntax (heading, quote, list)
-- `renderMarkdown()` is a safe subset HTML renderer (escapes HTML, no raw passthrough): headings, bold, italic, inline code, links, images, blockquotes, lists, horizontal rules, line breaks
+- Built-in markdown rendering uses the `marked` library (`import { marked } from "marked"`)
+  called with `marked.parse(value, { async: false })` — tree-shakes out when the
+  component is not used in a bundle
+- `renderHtml` prop: when provided (non-null), replaces the built-in `marked` renderer;
+  the reactive derivation is `previewHtml = renderHtml ? renderHtml(value) : marked.parse(value, { async: false })`
+- Preview uses `{@html previewHtml}` for reactive rendering
 - `tick()` used after insertion to restore cursor selection
 - `mode` is reactive; changing it shows/hides textarea and preview
 - `handleInput()` dispatches `change` event on every textarea input
@@ -388,7 +394,8 @@ Not yet implemented.
 
 ### Tier 3: Implementation Freedom
 
-- [ ] Markdown rendering engine may differ
+- [ ] Built-in markdown rendering engine may differ (Svelte uses `marked`)
+- [ ] `renderHtml` callback allows consumer to override rendering entirely
 - [ ] Text insertion mechanics may differ
 - [ ] Cursor restoration approach may differ
 
