@@ -63,8 +63,35 @@ impl IntoElement for BlockEditor {
         let gap = resolve_px(theme, self.spec.block_gap_token());
         let radius = resolve_radius(theme, "radius.surface");
         let muted = resolve_color(theme, "color.text.secondary");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let hover_bg = resolve_color(theme, "color.background.elevated");
         let separator = resolve_color(theme, "color.border.subtle");
+
+        // When spec.blocks is populated, render them as text children using the
+        // consumer-provided block type definitions to show the type label.
+        // Otherwise fall back to self.children (legacy API).
+        let use_spec_blocks = !self.spec.blocks.is_empty();
+        let children: Vec<AnyElement> = if use_spec_blocks {
+            self.spec.blocks.iter().map(|block| {
+                // Find the block type definition for display
+                let type_label = self.spec.block_types.iter()
+                    .find(|t| t.block_type == block.block_type)
+                    .map(|t| t.label.clone())
+                    .unwrap_or_else(|| block.block_type.clone());
+                div().flex().flex_col().gap(px(2.0))
+                    .child(
+                        div().text_size(px(11.0)).text_color(muted)
+                            .child(type_label)
+                    )
+                    .child(
+                        div().text_size(px(14.0)).text_color(text_primary)
+                            .child(block.content.clone())
+                    )
+                    .into_any_element()
+            }).collect()
+        } else {
+            self.children
+        };
 
         let mut el = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
@@ -72,10 +99,10 @@ impl IntoElement for BlockEditor {
             .px(px(pad_x)).py(px(pad_y))
             .min_h(px(120.0));
 
-        let block_count = self.children.len();
+        let block_count = children.len();
 
         // Wrap each child block with a hover-revealed toolbar
-        for (i, child) in self.children.into_iter().enumerate() {
+        for (i, child) in children.into_iter().enumerate() {
             let block_row = div()
                 .flex().flex_row().items_start().gap(px(4.0))
                 .group("block-row")

@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{SliderSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, SliderSpec};
 use poodle_gpui_components::{Slider, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -74,6 +74,70 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().text_sm()
                         .text_color(color_to_hsla(text_secondary))
                         .child(format!("Opacity: {:.0}%", opacity))
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(12.0))
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Xs),
+                                theme,
+                            ).with_id("slider-size-xs")
+                        )
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Sm),
+                                theme,
+                            ).with_id("slider-size-sm")
+                        )
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Md),
+                                theme,
+                            ).with_id("slider-size-md")
+                        )
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Lg),
+                                theme,
+                            ).with_id("slider-size-lg")
+                        )
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_size(ControlSize::Xl),
+                                theme,
+                            ).with_id("slider-size-xl")
+                        )
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(ControlDensity::Compact),
+                                theme,
+                            ).with_id("slider-density-compact")
+                        )
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(ControlDensity::Default),
+                                theme,
+                            ).with_id("slider-density-default")
+                        )
+                        .child(
+                            Slider::from_spec(
+                                SliderSpec::new(60.0).with_bounds(0.0, 100.0).with_density(ControlDensity::Comfortable),
+                                theme,
+                            ).with_id("slider-density-comfortable")
+                        )
                 )
         )
         // --- Disabled ---

@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{SwitchSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, SwitchSpec, EyebrowSpec};
 use poodle_gpui_components::{Switch, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -44,6 +44,62 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     }
                     col
                 })
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().gap(px(16.0)).items_center()
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_size(ControlSize::Xs);
+                            spec.label = Some("Xs".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-size-xs")
+                        })
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_size(ControlSize::Sm);
+                            spec.label = Some("Sm".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-size-sm")
+                        })
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_size(ControlSize::Md);
+                            spec.label = Some("Md".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-size-md")
+                        })
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_size(ControlSize::Lg);
+                            spec.label = Some("Lg".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-size-lg")
+                        })
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_size(ControlSize::Xl);
+                            spec.label = Some("Xl".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-size-xl")
+                        })
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_density(ControlDensity::Compact);
+                            spec.label = Some("compact: Option".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-density-compact")
+                        })
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_density(ControlDensity::Default);
+                            spec.label = Some("default: Option".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-density-default")
+                        })
+                        .child({
+                            let mut spec = SwitchSpec::new().with_checked(true).with_density(ControlDensity::Comfortable);
+                            spec.label = Some("comfortable: Option".to_string());
+                            Switch::from_spec(spec, theme).with_id("switch-density-comfortable")
+                        })
+                )
         )
         // --- States ---
         .child(

@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_primitives::EyebrowSpec;
-use poodle_composites::BlockEditorSpec;
+use poodle_composites::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 use poodle_gpui_components::{BlockEditor, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
@@ -76,6 +76,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .child("This is a callout block with custom styling.")
                                 )
                         )
+                )
+        )
+        // --- Consumer-driven block types ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Consumer-driven block types"), theme))
+                .child(
+                    BlockEditor::from_spec(
+                        BlockEditorSpec::new()
+                            .with_block_types(vec![
+                                BlockTypeDefinition::new("heading", "Heading", "heading-1"),
+                                BlockTypeDefinition::new("paragraph", "Paragraph", "text"),
+                                BlockTypeDefinition::new("quote", "Quote", "quote"),
+                                BlockTypeDefinition::new("code", "Code", "code"),
+                            ])
+                            .with_blocks(vec![
+                                EditorBlock::new("b1", "heading")
+                                    .with_content("Project Roadmap"),
+                                EditorBlock::new("b2", "paragraph")
+                                    .with_content("Each block knows its type. The editor shell displays the type label above the content."),
+                                EditorBlock::new("b3", "quote")
+                                    .with_content("\"Pure shell components let consumers own the block vocabulary.\""),
+                                EditorBlock::new("b4", "code")
+                                    .with_content("const blocks: EditorBlock[] = [];"),
+                            ]),
+                        theme,
+                    )
                 )
         )
 }

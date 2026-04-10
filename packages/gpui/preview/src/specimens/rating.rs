@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{EyebrowSpec, RatingSpec};
+use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, RatingSpec};
 use poodle_gpui_components::{Eyebrow, Rating};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -31,6 +31,54 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .text_size(px(12.0))
                         .text_color(color_to_hsla(text_primary))
                         .child(format!("Rating: {} / 5", interactive_rating))
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_size(ControlSize::Xs),
+                            theme,
+                        ))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_size(ControlSize::Sm),
+                            theme,
+                        ))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_size(ControlSize::Md),
+                            theme,
+                        ))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_size(ControlSize::Lg),
+                            theme,
+                        ))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_size(ControlSize::Xl),
+                            theme,
+                        ))
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_density(ControlDensity::Compact),
+                            theme,
+                        ))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_density(ControlDensity::Default),
+                            theme,
+                        ))
+                        .child(Rating::from_spec(
+                            RatingSpec::new().with_value(3.0).with_density(ControlDensity::Comfortable),
+                            theme,
+                        ))
                 )
         )
         // --- 10-star scale ---
