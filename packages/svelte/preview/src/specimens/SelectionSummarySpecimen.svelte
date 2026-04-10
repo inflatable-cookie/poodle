@@ -17,14 +17,13 @@
   <SpecimenGroup label="Multiple items selected">
     <SelectionSummary
       {items}
-      selectionMode="multiple"
       on:remove={(e) => (items = items.filter((i) => i.id !== e.detail.id))}
       on:clear={() => (items = [])}
     />
   </SpecimenGroup>
 
   <SpecimenGroup label="Single item">
-    <SelectionSummary items={[{ id: "1", label: "Primary button" }]} selectionMode="single" />
+    <SelectionSummary items={[{ id: "1", label: "Primary button" }]} />
   </SpecimenGroup>
 
   <SpecimenGroup label="Sizes">

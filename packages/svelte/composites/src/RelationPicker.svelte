@@ -350,7 +350,6 @@
         <SelectionSummary
           slot="selection"
           items={selectedItems}
-          {selectionMode}
           on:remove={(event) => setSelection(selectedIds.filter((id) => id !== event.detail.id))}
           on:clear={() => setSelection([])}
         />
