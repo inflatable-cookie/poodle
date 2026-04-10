@@ -45,7 +45,7 @@ mod video_player;
 pub use action_discovery_panel::ActionDiscoveryPanelSpec;
 pub use app_header::AppHeaderSpec;
 pub use audio_player::AudioPlayerSpec;
-pub use block_editor::BlockEditorSpec;
+pub use block_editor::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 pub use card_radio_group::CardRadioGroupSpec;
 pub use command_palette::CommandPaletteSpec;
 pub use confirm_action::ConfirmActionSpec;
