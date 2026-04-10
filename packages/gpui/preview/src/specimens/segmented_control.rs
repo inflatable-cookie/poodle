@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{SegmentedControlSpec, ChoiceOption, EyebrowSpec};
+use poodle_primitives::{ChoiceOption, ControlDensity, ControlSize, EyebrowSpec, SegmentedControlSpec};
 use poodle_gpui_components::{SegmentedControl, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -68,6 +68,64 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     SegmentedControl::from_spec(disabled_opt_spec, theme)
                         .with_id("seg-disabled-opt")
                 )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for (id, size) in [
+                        ("seg-size-xs", ControlSize::Xs),
+                        ("seg-size-sm", ControlSize::Sm),
+                        ("seg-size-md", ControlSize::Md),
+                        ("seg-size-lg", ControlSize::Lg),
+                        ("seg-size-xl", ControlSize::Xl),
+                    ] {
+                        let opts = vec![
+                            ChoiceOption::new("grid", "Grid"),
+                            ChoiceOption::new("list", "List"),
+                            ChoiceOption::new("table", "Table"),
+                        ];
+                        col = col.child(
+                            SegmentedControl::from_spec(
+                                SegmentedControlSpec::new(opts).with_default_value("grid"),
+                                theme,
+                            )
+                            .with_id(id)
+                            .size(size)
+                        );
+                    }
+                    col
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let mut col = div().flex().flex_col().gap(px(8.0));
+                    for (id, density) in [
+                        ("seg-density-compact", ControlDensity::Compact),
+                        ("seg-density-default", ControlDensity::Default),
+                        ("seg-density-comfortable", ControlDensity::Comfortable),
+                    ] {
+                        let opts = vec![
+                            ChoiceOption::new("grid", "Grid"),
+                            ChoiceOption::new("list", "List"),
+                            ChoiceOption::new("table", "Table"),
+                        ];
+                        col = col.child(
+                            SegmentedControl::from_spec(
+                                SegmentedControlSpec::new(opts).with_default_value("grid"),
+                                theme,
+                            )
+                            .with_id(id)
+                            .density(density)
+                        );
+                    }
+                    col
+                })
         )
         // --- Fully disabled ---
         .child(
