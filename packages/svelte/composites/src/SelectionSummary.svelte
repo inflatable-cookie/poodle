@@ -25,21 +25,23 @@
 
 <section class="selection-summary" aria-label="Current selection" data-size={resolvedSize} data-density={resolvedDensity}>
   <div class="selection-summary__chips">
-    {#each visibleItems as item}
-      <button
-        type="button"
-        class="selection-summary__chip"
-        on:click={() => dispatch("remove", { id: item.id })}
-        aria-label={`Remove ${item.label}`}
-      >
-        {item.label}
-        <span aria-hidden="true"><Icon name="x" /></span>
-      </button>
-    {/each}
-    {#if overflowCount > 0}
-      <span class="selection-summary__overflow">+{overflowCount} more</span>
-    {/if}
-    {#if items.length > 0}
+    {#if items.length === 0}
+      <span class="selection-summary__empty">No selection</span>
+    {:else}
+      {#each visibleItems as item}
+        <button
+          type="button"
+          class="selection-summary__chip"
+          on:click={() => dispatch("remove", { id: item.id })}
+          aria-label={`Remove ${item.label}`}
+        >
+          {item.label}
+          <span aria-hidden="true"><Icon name="x" /></span>
+        </button>
+      {/each}
+      {#if overflowCount > 0}
+        <span class="selection-summary__overflow">+{overflowCount} more</span>
+      {/if}
       <button type="button" class="selection-summary__clear" on:click={() => dispatch("clear")}>Clear</button>
     {/if}
   </div>
@@ -66,6 +68,11 @@
     color: var(--poodle-color-text-primary);
     cursor: pointer;
     font: inherit;
+  }
+
+  .selection-summary__empty {
+    color: var(--poodle-color-text-tertiary);
+    font-style: italic;
   }
 
   .selection-summary__clear {
