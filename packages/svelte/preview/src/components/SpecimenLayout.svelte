@@ -2,6 +2,8 @@
   import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
+  /** When true, size/density variants render without a Surface wrapper. */
+  export let bareVariants = false;
 
   const tabs: TabItem[] = [
     { value: "examples", label: "Examples" },
@@ -28,21 +30,37 @@
     {#if activeTab === "examples"}
       <slot />
     {:else if activeTab === "sizes"}
-      <Surface tone="panel" border="subtle" padding="md">
+      {#if bareVariants}
         <div class="specimen-layout__variants">
           {#each controlSizes as size}
             <slot name="sizes" {size} />
           {/each}
         </div>
-      </Surface>
+      {:else}
+        <Surface tone="panel" border="subtle" padding="md">
+          <div class="specimen-layout__variants">
+            {#each controlSizes as size}
+              <slot name="sizes" {size} />
+            {/each}
+          </div>
+        </Surface>
+      {/if}
     {:else if activeTab === "densities"}
-      <Surface tone="panel" border="subtle" padding="md">
+      {#if bareVariants}
         <div class="specimen-layout__variants">
           {#each densities as density}
             <slot name="densities" {density} />
           {/each}
         </div>
-      </Surface>
+      {:else}
+        <Surface tone="panel" border="subtle" padding="md">
+          <div class="specimen-layout__variants">
+            {#each densities as density}
+              <slot name="densities" {density} />
+            {/each}
+          </div>
+        </Surface>
+      {/if}
     {/if}
   </div>
 </div>
@@ -64,6 +82,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 </style>

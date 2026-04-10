@@ -26,6 +26,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+    margin-bottom: 0.25rem;
   }
 
   .specimen-group__content {

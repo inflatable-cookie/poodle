@@ -17,7 +17,7 @@ function handleClick(event: MouseEvent): void {
 }`;
 </script>
 
-<SpecimenLayout>
+<SpecimenLayout bareVariants>
   <SpecimenGroup bare label="Block with language label">
     <Code source={tsExample} language="typescript" />
   </SpecimenGroup>
