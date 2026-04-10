@@ -391,13 +391,11 @@
   .reorderable-list[data-density="compact"] {
     --poodle-reorderable-list-gap: 0.0625rem;
     --poodle-reorderable-list-item-gap: 0.375rem;
-    --poodle-reorderable-list-item-y: 0.375rem;
   }
 
   .reorderable-list[data-density="comfortable"] {
     --poodle-reorderable-list-gap: 0.1875rem;
     --poodle-reorderable-list-item-gap: 0.625rem;
-    --poodle-reorderable-list-item-y: 0.625rem;
   }
 
   .reorderable-list[data-disabled="true"] {
