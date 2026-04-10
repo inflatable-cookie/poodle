@@ -300,6 +300,6 @@
   .menu[data-size="xl"] .menu__meta { font-size: 0.8125rem; }
 
   /* Density variants */
-  .menu[data-density="compact"] .menu__item { padding: 0.25rem 0.375rem; }
-  .menu[data-density="comfortable"] .menu__item { padding: 0.5rem 0.75rem; }
+  .menu[data-density="compact"] .menu__item { padding-inline: 0.375rem; }
+  .menu[data-density="comfortable"] .menu__item { padding-inline: 0.75rem; }
 </style>

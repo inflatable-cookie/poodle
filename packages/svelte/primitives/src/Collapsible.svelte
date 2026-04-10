@@ -197,6 +197,6 @@
   }
 
   /* Density variants */
-  .collapsible[data-density="compact"] { padding: 0.375rem 0.5rem; }
-  .collapsible[data-density="comfortable"] { padding: 0.75rem 1rem; }
+  .collapsible[data-density="compact"] { padding-inline: 0.5rem; }
+  .collapsible[data-density="comfortable"] { padding-inline: 1rem; }
 </style>

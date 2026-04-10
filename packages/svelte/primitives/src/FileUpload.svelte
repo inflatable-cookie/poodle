@@ -549,6 +549,6 @@
   }
 
   /* Density variants */
-  .file-upload[data-density="compact"] { padding: 0.75rem; }
-  .file-upload[data-density="comfortable"] { padding: 1.25rem; }
+  .file-upload[data-density="compact"] { padding-inline: 0.75rem; }
+  .file-upload[data-density="comfortable"] { padding-inline: 1.25rem; }
 </style>

@@ -160,6 +160,6 @@
   }
 
   /* Density variants */
-  .media-upload-status-panel[data-density="compact"] { padding: 0.5rem; }
-  .media-upload-status-panel[data-density="comfortable"] { padding: 1rem; }
+  .media-upload-status-panel[data-density="compact"] { padding-inline: 0.5rem; }
+  .media-upload-status-panel[data-density="comfortable"] { padding-inline: 1rem; }
 </style>

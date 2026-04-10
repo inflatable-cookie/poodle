@@ -525,8 +525,8 @@
   }
 
   /* Density variants */
-  .video-player[data-density="compact"] .video-player__controls { padding: 0.25rem 0.375rem; gap: 0.25rem; }
-  .video-player[data-density="comfortable"] .video-player__controls { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+  .video-player[data-density="compact"] .video-player__controls { padding-inline: 0.375rem; gap: 0.25rem; }
+  .video-player[data-density="comfortable"] .video-player__controls { padding-inline: 0.75rem; gap: 0.5rem; }
 
   .video-player[data-density="compact"] .video-player__bar-left,
   .video-player[data-density="compact"] .video-player__bar-right {

@@ -422,6 +422,6 @@
   }
 
   /* Density variants */
-  .menubar[data-density="compact"] .menubar__item { padding: 0.25rem 0.5rem; }
-  .menubar[data-density="comfortable"] .menubar__item { padding: 0.375rem 0.75rem; }
+  .menubar[data-density="compact"] .menubar__item { padding-inline: 0.5rem; }
+  .menubar[data-density="comfortable"] .menubar__item { padding-inline: 0.75rem; }
 </style>

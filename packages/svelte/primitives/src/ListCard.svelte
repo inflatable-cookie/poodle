@@ -467,8 +467,8 @@
   .list-card[data-size="xl"] .list-card__leading { width: 2.75rem; height: 2.75rem; font-size: 1.125rem; }
 
   /* Density variants */
-  .list-card[data-density="compact"] { padding: 0.375rem 0.5rem; }
-  .list-card[data-density="comfortable"] { padding: 0.875rem 1.125rem; }
+  .list-card[data-density="compact"] { padding-inline: 0.5rem; }
+  .list-card[data-density="comfortable"] { padding-inline: 1.125rem; }
 
   .list-card__sash {
     position: absolute;

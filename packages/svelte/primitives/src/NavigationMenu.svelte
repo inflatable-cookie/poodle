@@ -239,6 +239,6 @@
   }
 
   /* Density variants */
-  .navigation-menu[data-density="compact"] .navigation-menu__trigger { padding: 0.25rem 0.5rem; }
-  .navigation-menu[data-density="comfortable"] .navigation-menu__trigger { padding: 0.375rem 0.75rem; }
+  .navigation-menu[data-density="compact"] .navigation-menu__trigger { padding-inline: 0.5rem; }
+  .navigation-menu[data-density="comfortable"] .navigation-menu__trigger { padding-inline: 0.75rem; }
 </style>

@@ -261,10 +261,10 @@
   .card-radio-group[data-density="compact"] {
     gap: 0.5rem;
   }
-  .card-radio-group[data-density="compact"] .card-radio-group__option :global(.card) { padding: 0.5rem; }
+  .card-radio-group[data-density="compact"] .card-radio-group__option :global(.card) { padding-inline: 0.5rem; }
 
   .card-radio-group[data-density="comfortable"] {
     gap: 1rem;
   }
-  .card-radio-group[data-density="comfortable"] .card-radio-group__option :global(.card) { padding: 1rem; }
+  .card-radio-group[data-density="comfortable"] .card-radio-group__option :global(.card) { padding-inline: 1rem; }
 </style>

@@ -97,6 +97,6 @@
   }
 
   /* Density variants */
-  .collapse-toggle[data-density="compact"] { padding: 0.125rem; }
-  .collapse-toggle[data-density="comfortable"] { padding: 0.375rem; }
+  .collapse-toggle[data-density="compact"] { padding-inline: 0.125rem; }
+  .collapse-toggle[data-density="comfortable"] { padding-inline: 0.375rem; }
 </style>

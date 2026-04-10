@@ -266,6 +266,6 @@
   .callout[data-size="xl"] { gap: 1rem; }
 
   /* Density variants */
-  .callout[data-density="compact"] { padding: 0.375rem 0.5rem; }
-  .callout[data-density="comfortable"] { padding: 1rem 1.25rem; }
+  .callout[data-density="compact"] { padding-inline: 0.5rem; }
+  .callout[data-density="comfortable"] { padding-inline: 1.25rem; }
 </style>

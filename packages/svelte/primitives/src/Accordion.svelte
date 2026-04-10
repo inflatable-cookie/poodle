@@ -221,6 +221,6 @@
   }
 
   /* Density variants */
-  .accordion[data-density="compact"] .accordion__item { padding: 0.375rem 0.5rem; }
-  .accordion[data-density="comfortable"] .accordion__item { padding: 0.75rem 1rem; }
+  .accordion[data-density="compact"] .accordion__item { padding-inline: 0.5rem; }
+  .accordion[data-density="comfortable"] .accordion__item { padding-inline: 1rem; }
 </style>

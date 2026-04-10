@@ -308,6 +308,6 @@
   }
 
   /* Density variants */
-  .context-menu[data-density="compact"] .context-menu__item { padding: 0.25rem 0.375rem; }
-  .context-menu[data-density="comfortable"] .context-menu__item { padding: 0.5rem 0.75rem; }
+  .context-menu[data-density="compact"] .context-menu__item { padding-inline: 0.375rem; }
+  .context-menu[data-density="comfortable"] .context-menu__item { padding-inline: 0.75rem; }
 </style>

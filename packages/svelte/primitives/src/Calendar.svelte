@@ -492,7 +492,7 @@
 
   /* Density variants */
   .calendar[data-density="compact"] .calendar__grid { gap: 0.0625rem; }
-  .calendar[data-density="compact"] .calendar__cell { padding: 0.0625rem; }
+  .calendar[data-density="compact"] .calendar__cell { padding-inline: 0.0625rem; }
   .calendar[data-density="comfortable"] .calendar__grid { gap: 0.1875rem; }
-  .calendar[data-density="comfortable"] .calendar__cell { padding: 0.1875rem; }
+  .calendar[data-density="comfortable"] .calendar__cell { padding-inline: 0.1875rem; }
 </style>
