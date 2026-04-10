@@ -39,9 +39,9 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // ── Token resolution ──
     let track_fill = resolve_color(theme, spec.track_fill_token());
-    let border_default = resolve_color(theme, "semantic.color.border.default");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let border_default = resolve_color(theme, "color.border.default");
+    let accent = resolve_color(theme, "color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
     let gap = rem_to_px(control_space_x_rem(spec.density));
     let label_size = rem_to_px(size_font_rem(effective_size));
 
@@ -108,7 +108,7 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     // Contract: disabled → opacity from state-opacity-disabled token
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         root = root.opacity(opacity).disabled(true);
     }
 

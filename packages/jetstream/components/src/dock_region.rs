@@ -17,9 +17,9 @@ pub fn js_dock_region(spec: &DockRegionSpec, theme: &JetstreamThemeProvider, con
     let strip_py = rem_to_px(panel_space_y_rem(spec.density) - 0.5);
     let tab_gap = rem_to_px(0.25);
 
-    let fill = resolve_color(theme, "semantic.color.background.panel");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
+    let fill = resolve_color(theme, "color.background.panel");
+    let border = resolve_color(theme, "color.border.subtle");
+    let muted = resolve_color(theme, "color.text.secondary");
 
     let mut el = ui_element::div()
         .bg(fill)

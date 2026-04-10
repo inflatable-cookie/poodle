@@ -60,10 +60,10 @@ impl IntoElement for Field {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let description_color = resolve_color(theme, spec.description_color_token());
         let error_color = resolve_color(theme, spec.error_color_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         let mut col = div().flex().flex_col().gap(px(4.0));
 

@@ -49,10 +49,10 @@ impl IntoElement for Meter {
         let spec = &self.spec;
 
         // Svelte: fill uses status-success, not generic fill_token
-        let success_color = resolve_color(theme, "semantic.color.status.success");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let radius = resolve_radius(theme, "semantic.radius.pill");
+        let success_color = resolve_color(theme, "color.status.success");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let radius = resolve_radius(theme, "radius.pill");
         let progress = spec.normalized_progress();
 
         // Svelte: track bg = color-mix(surface 96%, text-primary)

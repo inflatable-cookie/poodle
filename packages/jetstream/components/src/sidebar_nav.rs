@@ -27,13 +27,13 @@ pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> 
         poodle_primitives::ControlDensity::Comfortable => (0.875, 0.875, 0.4375, 0.25),
     };
 
-    let pad_y = resolve_px(theme, "semantic.space.panel.y");
+    let pad_y = resolve_px(theme, "space.panel.y");
     let item_color = resolve_color(theme, spec.item_color_token());
     let item_active_color = resolve_color(theme, spec.item_active_color_token());
     let group_title_color = resolve_color(theme, spec.group_title_color_token());
     let separator_color = resolve_color(theme, spec.separator_color_token());
     let accent = resolve_color(theme, spec.active_indicator_color_token());
-    let ctrl_radius = resolve_radius(theme, "semantic.radius.control");
+    let ctrl_radius = resolve_radius(theme, "radius.control");
     let item_radius = ctrl_radius - rem_to_px(0.125);
 
     let visible_groups = spec.visible_groups();

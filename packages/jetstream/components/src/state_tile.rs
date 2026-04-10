@@ -9,9 +9,9 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub fn js_state_tile(spec: &StateTileSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
     let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
     let trend_color = resolve_color(theme, spec.trend_color_token());
 
     let pad_x = rem_to_px(1.0);
@@ -69,7 +69,7 @@ pub fn js_state_tile(spec: &StateTileSpec, theme: &JetstreamThemeProvider) -> Js
     // Sparkline placeholder
     if spec.has_sparkline {
         let sparkline_h = rem_to_px(2.0);
-        let sparkline_bg = resolve_color(theme, "semantic.color.background.subtle");
+        let sparkline_bg = resolve_color(theme, "color.background.subtle");
 
         el = el.child(
             ui_element::div()

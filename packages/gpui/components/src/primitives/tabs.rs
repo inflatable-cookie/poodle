@@ -82,14 +82,14 @@ impl Tabs {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
         let inline_padding = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
-        let control_y = resolve_px(theme, "semantic.space.control.y");
+        let control_y = resolve_px(theme, "space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border = resolve_color(theme, self.spec.list_border_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let radius = resolve_radius(theme, "semantic.radius.control");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let radius = resolve_radius(theme, "radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
 
         let hover_bg = elevated;
@@ -192,15 +192,15 @@ impl Tabs {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
         let inline_padding = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
-        let control_y = resolve_px(theme, "semantic.space.control.y");
+        let control_y = resolve_px(theme, "space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border = resolve_color(theme, self.spec.list_border_token());
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let radius = resolve_radius(theme, "semantic.radius.control");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let radius = resolve_radius(theme, "radius.control");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
@@ -298,7 +298,7 @@ impl Tabs {
 
             // Closable tab: label + close button in a flex row
             if tab_def.is_closable {
-                let icon_muted = resolve_color(&self.theme, "semantic.color.icon.muted");
+                let icon_muted = resolve_color(&self.theme, "color.icon.muted");
                 tab = tab
                     .flex()
                     .items_center()
@@ -330,9 +330,9 @@ impl Tabs {
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
         let border_subtle = resolve_color(theme, self.spec.list_border_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let pill_radius = resolve_radius(theme, "semantic.radius.pill");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let pill_radius = resolve_radius(theme, "radius.pill");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
@@ -443,7 +443,7 @@ impl IntoElement for Tabs {
         };
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
-        let panel_padding = resolve_px(&self.theme, "semantic.space.panel.y");
+        let panel_padding = resolve_px(&self.theme, "space.panel.y");
 
         // Content pane
         let mut wrapper = div().flex().flex_col().child(tab_row);

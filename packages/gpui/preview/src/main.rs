@@ -76,14 +76,14 @@ impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = &self.state.theme;
 
-        let canvas_bg = theme.resolve_color("semantic.color.background.canvas");
-        let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
-        let panel_bg = theme.resolve_color("semantic.color.background.panel");
-        let text_primary = theme.resolve_color("semantic.color.text.primary");
-        let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-        let accent = theme.resolve_color("semantic.color.accent.base");
-        let border_subtle = theme.resolve_color("semantic.color.border.subtle");
-        let border = theme.resolve_color("semantic.color.border.default");
+        let canvas_bg = theme.resolve_color("color.background.canvas");
+        let elevated_bg = theme.resolve_color("color.background.elevated");
+        let panel_bg = theme.resolve_color("color.background.panel");
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let accent = theme.resolve_color("color.accent.base");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let border = theme.resolve_color("color.border.default");
 
         // Compute remaining height for the content area so scroll containers
         // get a definite pixel height (required for gpui content-mask hit testing).
@@ -183,7 +183,7 @@ impl PreviewRoot {
         border: poodle_tokens::typed::ColorValue,
     ) -> Div {
         // Svelte computed: bg srgb(0.094, 0.094, 0.094 / 0.9), border srgb(0.776, 0.776, 0.776 / 0.116)
-        let canvas_bg = self.state.theme.resolve_color("semantic.color.background.canvas");
+        let canvas_bg = self.state.theme.resolve_color("color.background.canvas");
 
         let pill = |text: &str| {
             div()
@@ -282,9 +282,9 @@ impl PreviewRoot {
         group_id: &'static str,
         cx: &mut Context<Self>,
     ) -> Div {
-        let text_primary = self.state.theme.resolve_color("semantic.color.text.primary");
-        let border_default = self.state.theme.resolve_color("semantic.color.border.default");
-        let canvas_bg = self.state.theme.resolve_color("semantic.color.background.canvas");
+        let text_primary = self.state.theme.resolve_color("color.text.primary");
+        let border_default = self.state.theme.resolve_color("color.border.default");
+        let canvas_bg = self.state.theme.resolve_color("color.background.canvas");
 
         let mut toggle_row = div().flex().gap(px(4.0));
 
@@ -458,11 +458,11 @@ impl PreviewRoot {
         cx: &mut Context<Self>,
     ) -> Div {
         let theme = &self.state.theme;
-        let border_subtle = theme.resolve_color("semantic.color.border.subtle");
-        let text_primary = theme.resolve_color("semantic.color.text.primary");
-        let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-        let accent = theme.resolve_color("semantic.color.accent.base");
-        let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let accent = theme.resolve_color("color.accent.base");
+        let elevated_bg = theme.resolve_color("color.background.elevated");
 
         let active_idx = match which {
             Section::Primitives => self.state.active_primitive,
@@ -641,9 +641,9 @@ impl PreviewRoot {
     /// Demo section with segmented control for screen switching.
     fn render_demo_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
-        let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-        let accent = theme.resolve_color("semantic.color.accent.base");
-        let border = theme.resolve_color("semantic.color.border.default");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let accent = theme.resolve_color("color.accent.base");
+        let border = theme.resolve_color("color.border.default");
 
         // Segmented control for demo screens
         let mut seg = div()

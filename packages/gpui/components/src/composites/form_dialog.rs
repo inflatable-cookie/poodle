@@ -55,13 +55,13 @@ impl IntoElement for FormDialog {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
-        let title_color = resolve_color(theme, "semantic.color.text.primary");
-        let _muted_color = resolve_color(theme, "semantic.color.text.muted");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let panel_bg = resolve_color(theme, "semantic.color.background.panel");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let actions_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let title_color = resolve_color(theme, "color.text.primary");
+        let _muted_color = resolve_color(theme, "color.text.muted");
+        let accent = resolve_color(theme, "color.accent.base");
+        let panel_bg = resolve_color(theme, "color.background.panel");
+        let control_radius = resolve_radius(theme, "radius.control");
+        let actions_gap = resolve_px(theme, "space.inline.sm");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         // Cancel button — text-style action
         let cancel_btn = div()

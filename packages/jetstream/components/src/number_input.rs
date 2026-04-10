@@ -19,9 +19,9 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
     let btn_gap = rem_to_px(0.25);
 
     let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let fill = resolve_color(theme, "semantic.color.background.surface");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let radius = resolve_radius(theme, "radius.control");
+    let fill = resolve_color(theme, "color.background.surface");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let value_text = format!("{}", spec.value);
 

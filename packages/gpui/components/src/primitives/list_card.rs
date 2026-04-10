@@ -97,7 +97,7 @@ impl IntoElement for ListCard {
 
         // ── Resolve tokens ──────────────────────────────────────────
         let surface = resolve_color(theme, spec.fill_token());
-        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let panel = resolve_color(theme, "color.background.panel");
         let fill = color_mix(surface, panel, 0.88);
         let hover_fill = color_mix(surface, panel, 0.82);
         let border_subtle = resolve_color(theme, spec.border_token());
@@ -111,7 +111,7 @@ impl IntoElement for ListCard {
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
 
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = resolve_px(theme, "typography.body.size");
         let accent = resolve_color(theme, spec.leading_tint_bg_token());
         let leading_tint_bg = color_mix(accent, panel, 0.12);
         let leading_solid_bg = resolve_color(theme, spec.leading_solid_bg_token());
@@ -200,7 +200,7 @@ impl IntoElement for ListCard {
         let sash_el = spec.sash.as_ref().map(|sash_text| {
             let sash_bg = spec.sash_color.as_ref()
                 .and_then(|c| parse_hex_to_hsla(c))
-                .unwrap_or_else(|| resolve_color(theme, "semantic.color.status.success"));
+                .unwrap_or_else(|| resolve_color(theme, "color.status.success"));
 
             div()
                 .absolute()

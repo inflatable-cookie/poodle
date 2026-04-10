@@ -21,11 +21,11 @@ use poodle_tokens::themes::ThemeDefinition;
 pub struct JetstreamThemeProvider {
     scale_factor: f32,
     /// Color overrides from the active theme definition. Keys are semantic
-    /// token paths (e.g. "semantic.color.background.canvas"), values are
+    /// token paths (e.g. "color.background.canvas"), values are
     /// pre-parsed RGBA colors.
     color_overrides: HashMap<String, ColorValue>,
     /// Space/size overrides from density and control-size definitions.
-    /// Keys are semantic token paths (e.g. "semantic.space.panel.x"),
+    /// Keys are semantic token paths (e.g. "space.panel.x"),
     /// values are raw CSS strings (e.g. "0.75rem") parsed at resolve time.
     space_overrides: HashMap<String, String>,
 }
@@ -92,14 +92,14 @@ impl JetstreamThemeProvider {
 
     /// Look up a semantic token in the theme's color overrides.
     /// Tokens use short names like "background.canvas"; override keys use
-    /// full paths like "semantic.color.background.canvas".
+    /// full paths like "color.background.canvas".
     fn match_override(&self, token: &str) -> Option<ColorValue> {
         // Try to find the token in our pre-parsed override map.
-        // The override keys are "semantic.color.<segment>" and the tokens
+        // The override keys are "color.<segment>" and the tokens
         // passed in contain the segment (e.g. "background.canvas").
         for (key, color) in &self.color_overrides {
-            // Strip "semantic.color." prefix to get the segment.
-            if let Some(segment) = key.strip_prefix("semantic.color.") {
+            // Strip "color." prefix to get the segment.
+            if let Some(segment) = key.strip_prefix("color.") {
                 if token.contains(segment) {
                     return Some(*color);
                 }
@@ -411,9 +411,9 @@ mod tests {
     #[test]
     fn resolve_linear_color_converts_srgb() {
         let theme = JetstreamThemeProvider::default();
-        let linear = theme.resolve_linear_color("semantic.color.text.primary");
+        let linear = theme.resolve_linear_color("color.text.primary");
         // Linear values should be lower than sRGB for values > 0.04045.
-        let srgb = theme.resolve_color("semantic.color.text.primary");
+        let srgb = theme.resolve_color("color.text.primary");
         assert!(linear.x <= srgb.0 || srgb.0 <= 0.04045);
         assert!(linear.w > 0.0); // alpha should be preserved
     }

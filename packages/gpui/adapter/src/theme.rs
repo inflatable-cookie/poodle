@@ -4,7 +4,7 @@
 //! semantic token paths to typed values using the `poodle-tokens::typed` module.
 //!
 //! The token paths passed to `resolve_*` methods are semantic path strings
-//! (e.g., `"semantic.color.accent.base"`, `"semantic.radius.control"`).
+//! (e.g., `"color.accent.base"`, `"radius.control"`).
 //! The provider checks theme overrides first, then falls back to the
 //! typed constant defaults from the light theme baseline.
 
@@ -132,7 +132,7 @@ impl GpuiThemeProvider {
     /// 3. Direct hex/rgba parsing (for inline values)
     /// 4. Black fallback
     pub fn resolve_color_value(&self, token: &str) -> ColorValue {
-        // 1. Check theme overrides (token is a semantic path like "semantic.color.accent.base")
+        // 1. Check theme overrides (token is a semantic path like "color.accent.base")
         for &(path, value) in &self.overrides {
             if path == token {
                 if let Some(color) = Self::parse_hex_color(value) {
@@ -145,25 +145,25 @@ impl GpuiThemeProvider {
         }
         // 2. Fall back to typed constant defaults (light theme baseline)
         match token {
-            "semantic.color.background.canvas" => typed::semantic::COLOR_BACKGROUND_CANVAS,
-            "semantic.color.background.surface" => typed::semantic::COLOR_BACKGROUND_SURFACE,
-            "semantic.color.background.panel" => typed::semantic::COLOR_BACKGROUND_PANEL,
-            "semantic.color.background.elevated" => typed::semantic::COLOR_BACKGROUND_ELEVATED,
-            "semantic.color.background.overlay" => typed::semantic::COLOR_BACKGROUND_OVERLAY,
-            "semantic.color.text.primary" => typed::semantic::COLOR_TEXT_PRIMARY,
-            "semantic.color.text.secondary" => typed::semantic::COLOR_TEXT_SECONDARY,
-            "semantic.color.text.inverse" => typed::semantic::COLOR_TEXT_INVERSE,
-            "semantic.color.border.subtle" => typed::semantic::COLOR_BORDER_SUBTLE,
-            "semantic.color.border.default" => typed::semantic::COLOR_BORDER_DEFAULT,
-            "semantic.color.border.strong" => typed::semantic::COLOR_BORDER_STRONG,
-            "semantic.color.accent.base" => typed::semantic::COLOR_ACCENT_BASE,
-            "semantic.color.accent.hover" => typed::semantic::COLOR_ACCENT_HOVER,
-            "semantic.color.accent.focusRing" => typed::semantic::COLOR_ACCENT_FOCUS_RING,
-            "semantic.color.status.success" => typed::semantic::COLOR_STATUS_SUCCESS,
-            "semantic.color.status.warning" => typed::semantic::COLOR_STATUS_WARNING,
-            "semantic.color.status.danger" => typed::semantic::COLOR_STATUS_DANGER,
-            "semantic.color.icon.primary" => typed::semantic::COLOR_ICON_PRIMARY,
-            "semantic.color.icon.muted" => typed::semantic::COLOR_ICON_MUTED,
+            "color.background.canvas" => typed::semantic::COLOR_BACKGROUND_CANVAS,
+            "color.background.surface" => typed::semantic::COLOR_BACKGROUND_SURFACE,
+            "color.background.panel" => typed::semantic::COLOR_BACKGROUND_PANEL,
+            "color.background.elevated" => typed::semantic::COLOR_BACKGROUND_ELEVATED,
+            "color.background.overlay" => typed::semantic::COLOR_BACKGROUND_OVERLAY,
+            "color.text.primary" => typed::semantic::COLOR_TEXT_PRIMARY,
+            "color.text.secondary" => typed::semantic::COLOR_TEXT_SECONDARY,
+            "color.text.inverse" => typed::semantic::COLOR_TEXT_INVERSE,
+            "color.border.subtle" => typed::semantic::COLOR_BORDER_SUBTLE,
+            "color.border.default" => typed::semantic::COLOR_BORDER_DEFAULT,
+            "color.border.strong" => typed::semantic::COLOR_BORDER_STRONG,
+            "color.accent.base" => typed::semantic::COLOR_ACCENT_BASE,
+            "color.accent.hover" => typed::semantic::COLOR_ACCENT_HOVER,
+            "color.accent.focusRing" => typed::semantic::COLOR_ACCENT_FOCUS_RING,
+            "color.status.success" => typed::semantic::COLOR_STATUS_SUCCESS,
+            "color.status.warning" => typed::semantic::COLOR_STATUS_WARNING,
+            "color.status.danger" => typed::semantic::COLOR_STATUS_DANGER,
+            "color.icon.primary" => typed::semantic::COLOR_ICON_PRIMARY,
+            "color.icon.muted" => typed::semantic::COLOR_ICON_MUTED,
             // 3. Direct hex/rgba parsing (for inline color values)
             _ => {
                 if let Some(color) = Self::parse_hex_color(token) {
@@ -192,32 +192,32 @@ impl GpuiThemeProvider {
         }
         // Fall back to typed constant defaults
         match token {
-            "semantic.space.stack.sm" => typed::semantic::SPACE_STACK_SM.as_f32(),
-            "semantic.space.stack.md" => typed::semantic::SPACE_STACK_MD.as_f32(),
-            "semantic.space.stack.lg" => typed::semantic::SPACE_STACK_LG.as_f32(),
-            "semantic.space.inline.sm" => typed::semantic::SPACE_INLINE_SM.as_f32(),
-            "semantic.space.inline.md" => typed::semantic::SPACE_INLINE_MD.as_f32(),
-            "semantic.space.inline.lg" => typed::semantic::SPACE_INLINE_LG.as_f32(),
-            "semantic.space.panel.x" => typed::semantic::SPACE_PANEL_X.as_f32(),
-            "semantic.space.panel.y" => typed::semantic::SPACE_PANEL_Y.as_f32(),
-            "semantic.space.control.x" => typed::semantic::SPACE_CONTROL_X.as_f32(),
-            "semantic.space.control.y" => typed::semantic::SPACE_CONTROL_Y.as_f32(),
-            "semantic.size.control.height" => typed::semantic::SIZE_CONTROL_HEIGHT.as_f32(),
-            "semantic.size.control.minWidth" => typed::semantic::SIZE_CONTROL_MIN_WIDTH.as_f32(),
-            "semantic.size.icon.sm" => typed::semantic::SIZE_ICON_SM.as_f32(),
-            "semantic.size.icon.md" => typed::semantic::SIZE_ICON_MD.as_f32(),
-            "semantic.size.icon.lg" => typed::semantic::SIZE_ICON_LG.as_f32(),
-            "semantic.size.panel.header" => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
-            "semantic.icon.size.default" => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
+            "space.stack.sm" => typed::semantic::SPACE_STACK_SM.as_f32(),
+            "space.stack.md" => typed::semantic::SPACE_STACK_MD.as_f32(),
+            "space.stack.lg" => typed::semantic::SPACE_STACK_LG.as_f32(),
+            "space.inline.sm" => typed::semantic::SPACE_INLINE_SM.as_f32(),
+            "space.inline.md" => typed::semantic::SPACE_INLINE_MD.as_f32(),
+            "space.inline.lg" => typed::semantic::SPACE_INLINE_LG.as_f32(),
+            "space.panel.x" => typed::semantic::SPACE_PANEL_X.as_f32(),
+            "space.panel.y" => typed::semantic::SPACE_PANEL_Y.as_f32(),
+            "space.control.x" => typed::semantic::SPACE_CONTROL_X.as_f32(),
+            "space.control.y" => typed::semantic::SPACE_CONTROL_Y.as_f32(),
+            "size.control.height" => typed::semantic::SIZE_CONTROL_HEIGHT.as_f32(),
+            "size.control.minWidth" => typed::semantic::SIZE_CONTROL_MIN_WIDTH.as_f32(),
+            "size.icon.sm" => typed::semantic::SIZE_ICON_SM.as_f32(),
+            "size.icon.md" => typed::semantic::SIZE_ICON_MD.as_f32(),
+            "size.icon.lg" => typed::semantic::SIZE_ICON_LG.as_f32(),
+            "size.panel.header" => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
+            "icon.size.default" => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
             // Typography sizes
-            "semantic.typography.body.size" => typed::semantic::TYPOGRAPHY_BODY_SIZE.as_f32(),
-            "semantic.typography.body.lineHeight" => typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.as_f32(),
-            "semantic.typography.label.size" => typed::semantic::TYPOGRAPHY_LABEL_SIZE.as_f32(),
-            "semantic.typography.label.lineHeight" => typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.as_f32(),
-            "semantic.typography.heading.size" => typed::semantic::TYPOGRAPHY_HEADING_SIZE.as_f32(),
-            "semantic.typography.heading.lineHeight" => typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.as_f32(),
-            "semantic.typography.code.size" => typed::semantic::TYPOGRAPHY_CODE_SIZE.as_f32(),
-            "semantic.typography.code.lineHeight" => typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.as_f32(),
+            "typography.body.size" => typed::semantic::TYPOGRAPHY_BODY_SIZE.as_f32(),
+            "typography.body.lineHeight" => typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.as_f32(),
+            "typography.label.size" => typed::semantic::TYPOGRAPHY_LABEL_SIZE.as_f32(),
+            "typography.label.lineHeight" => typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.as_f32(),
+            "typography.heading.size" => typed::semantic::TYPOGRAPHY_HEADING_SIZE.as_f32(),
+            "typography.heading.lineHeight" => typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.as_f32(),
+            "typography.code.size" => typed::semantic::TYPOGRAPHY_CODE_SIZE.as_f32(),
+            "typography.code.lineHeight" => typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.as_f32(),
             // Direct dimension parsing for inline values
             _ => Self::parse_dimension(token).unwrap_or(0.0),
         }
@@ -243,8 +243,8 @@ impl ThemeProvider for GpuiThemeProvider {
             }
         }
         match token {
-            "semantic.border.width.default" => typed::semantic::BORDER_WIDTH_DEFAULT.as_f32(),
-            "semantic.border.width.focus" => typed::semantic::BORDER_WIDTH_FOCUS.as_f32(),
+            "border.width.default" => typed::semantic::BORDER_WIDTH_DEFAULT.as_f32(),
+            "border.width.focus" => typed::semantic::BORDER_WIDTH_FOCUS.as_f32(),
             _ => Self::parse_dimension(token).unwrap_or(0.0),
         }
     }
@@ -259,9 +259,9 @@ impl ThemeProvider for GpuiThemeProvider {
             }
         }
         match token {
-            "semantic.radius.control" => typed::semantic::RADIUS_CONTROL.as_f32(),
-            "semantic.radius.surface" => typed::semantic::RADIUS_SURFACE.as_f32(),
-            "semantic.radius.pill" => typed::semantic::RADIUS_PILL.as_f32(),
+            "radius.control" => typed::semantic::RADIUS_CONTROL.as_f32(),
+            "radius.surface" => typed::semantic::RADIUS_SURFACE.as_f32(),
+            "radius.pill" => typed::semantic::RADIUS_PILL.as_f32(),
             _ => Self::parse_dimension(token).unwrap_or(0.0),
         }
     }
@@ -276,8 +276,8 @@ impl ThemeProvider for GpuiThemeProvider {
             }
         }
         match token {
-            "semantic.state.opacity.disabled" => typed::semantic::STATE_OPACITY_DISABLED,
-            "semantic.state.opacity.muted" => typed::semantic::STATE_OPACITY_MUTED,
+            "state.opacity.disabled" => typed::semantic::STATE_OPACITY_DISABLED,
+            "state.opacity.muted" => typed::semantic::STATE_OPACITY_MUTED,
             _ => token.parse::<f32>().unwrap_or(1.0),
         }
     }

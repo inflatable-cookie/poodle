@@ -83,32 +83,32 @@ impl IntoElement for Menu {
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let item_font_size = px(rem_to_px(size_font_rem(effective_size)));
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let item_min_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(4.0);
         let item_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let menu_pad = px(rem_to_px(panel_space_y_rem(self.spec.density) * 0.5));
 
         let overlay_radius = resolve_radius(theme, self.spec.overlay_radius_token());
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
         // Contract: item radius = control - 0.125rem
         let item_radius = control_radius - px(2.0);
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
 
         // Matches Svelte treatment-surface-elevated values
         let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
         let border = Hsla { a: border_default.a * 0.22, ..border_default };
         let text_primary = resolve_color(theme, self.spec.item_text_token());
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, self.spec.item_highlight_token());
         // Item hover: accent at 16% mixed into elevated
         let item_hover = color_mix(accent, elevated_bg, 0.16);
         // Separator: border-subtle at 48% (treatment-surface-divider)
         let separator_color = Hsla { a: border_subtle.a * 0.48, ..border_subtle };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
         // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()

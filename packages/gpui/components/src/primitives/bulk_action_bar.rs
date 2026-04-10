@@ -63,14 +63,14 @@ impl IntoElement for BulkActionBar {
         let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
         let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
         let density_gap = px(rem_to_px(control_space_x_rem(spec.density)));
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let btn_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_pad = resolve_px(theme, "semantic.space.control.x");
+        let base_pad = resolve_px(theme, "space.control.x");
         let btn_pad_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         // ── Resolve tokens ──────────────────────────────────────────
         let accent = resolve_color(theme, spec.fill_token());
-        let panel_bg = resolve_color(theme, "semantic.color.background.panel");
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let fill = color_mix(accent, panel_bg, 0.10);
         let border = resolve_color(theme, spec.border_token());
         let radius = resolve_radius(theme, spec.radius_token());
@@ -86,7 +86,7 @@ impl IntoElement for BulkActionBar {
         let pad_y = density_pad_y;
         let control_height = btn_height;
         let control_pad_x = btn_pad_x;
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let elevated = resolve_color(theme, "color.background.elevated");
         let body_size = body_font;
         let label_size = body_font;
 

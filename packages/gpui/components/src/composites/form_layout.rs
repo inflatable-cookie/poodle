@@ -50,11 +50,11 @@ fn callout_banner(
     message: &str,
     tone_color: Hsla,
 ) -> impl IntoElement {
-    let panel_bg = resolve_color(theme, "semantic.color.background.panel");
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let inline_pad = resolve_px(theme, "semantic.space.inline.md");
-    let stack_pad = resolve_px(theme, "semantic.space.stack.sm");
-    let body_size = resolve_px(theme, "semantic.typography.body.size");
+    let panel_bg = resolve_color(theme, "color.background.panel");
+    let radius = resolve_radius(theme, "radius.control");
+    let inline_pad = resolve_px(theme, "space.inline.md");
+    let stack_pad = resolve_px(theme, "space.stack.sm");
+    let body_size = resolve_px(theme, "typography.body.size");
 
     // Tone-colored background: 12% tone over panel
     let callout_bg = color_mix(tone_color, panel_bg, 0.12);
@@ -78,15 +78,15 @@ impl IntoElement for FormLayout {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let error_color = resolve_color(theme, "semantic.color.status.danger");
-        let success_color = resolve_color(theme, "semantic.color.status.success");
-        let row_gap = resolve_px(theme, "semantic.space.stack.md");
-        let column_gap = resolve_px(theme, "semantic.space.inline.md");
-        let section_gap = resolve_px(theme, "semantic.space.stack.lg");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let error_color = resolve_color(theme, "color.status.danger");
+        let success_color = resolve_color(theme, "color.status.success");
+        let row_gap = resolve_px(theme, "space.stack.md");
+        let column_gap = resolve_px(theme, "space.inline.md");
+        let section_gap = resolve_px(theme, "space.stack.lg");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
 
         let mut el = div().flex().flex_col().gap(section_gap).w_full();
 

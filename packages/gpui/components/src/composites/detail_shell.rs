@@ -63,14 +63,14 @@ impl IntoElement for DetailShell {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
 
         let body_bg = resolve_color(theme, spec.body_fill_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border = resolve_color(theme, "color.border.subtle");
 
         let mut shell = div()
             .w_full()
@@ -154,7 +154,7 @@ impl IntoElement for DetailShell {
                 .child(
                     div()
                         .text_size(body_size)
-                        .text_color(resolve_color(theme, "semantic.color.status.danger"))
+                        .text_color(resolve_color(theme, "color.status.danger"))
                         .child("An error occurred loading this content."),
                 ),
             DetailState::Empty => div()

@@ -7,8 +7,8 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::ScrollShellSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     let children = vec![
         label("Scrollable content line 1").text_color(text_primary).text_size(13.0),

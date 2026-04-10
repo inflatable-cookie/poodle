@@ -37,9 +37,9 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
 
     // ── Token resolution ──
     let indicator_fill = resolve_color(theme, spec.indicator_fill_token());
-    let border_default = resolve_color(theme, "semantic.color.border.default");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
+    let border_default = resolve_color(theme, "color.border.default");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_inverse = resolve_color(theme, "color.text.inverse");
     let gap = rem_to_px(control_space_x_rem(spec.density));
     let label_size = rem_to_px(size_font_rem(effective_size));
 
@@ -52,7 +52,7 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Contract: indicator border = accent-base when checked, border-default when unchecked
     let indicator_border = if is_checked { indicator_fill } else { border_default };
     // Contract: indicator bg = accent-base when checked, background-surface when unchecked
-    let surface = resolve_color(theme, "semantic.color.background.surface");
+    let surface = resolve_color(theme, "color.background.surface");
     let indicator_bg = if is_checked { indicator_fill } else { surface };
 
     // ── Indicator (contract: 1.125rem = 18px, border-radius 0.3125rem = 5px) ──
@@ -105,7 +105,7 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
 
     // Contract: disabled → opacity from state-opacity-disabled token
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         root = root.opacity(opacity).disabled(true);
     }
 

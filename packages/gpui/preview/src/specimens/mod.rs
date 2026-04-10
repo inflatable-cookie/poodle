@@ -148,9 +148,9 @@ pub fn specimen_card(
     theme: &GpuiThemeProvider,
     content: impl IntoElement,
 ) -> Div {
-    let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
-    let border_default = theme.resolve_color("semantic.color.border.default");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let elevated_bg = theme.resolve_color("color.background.elevated");
+    let border_default = theme.resolve_color("color.border.default");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     // Match Svelte app.css .panel treatment:
     //   fill: color-mix(elevated 94%, transparent)
@@ -198,8 +198,8 @@ pub fn simple_specimen(
     label: &str,
     theme: &GpuiThemeProvider,
 ) -> Div {
-    let accent = theme.resolve_color("semantic.color.accent.base");
-    let border = theme.resolve_color("semantic.color.border.default");
+    let accent = theme.resolve_color("color.accent.base");
+    let border = theme.resolve_color("color.border.default");
 
     div()
         .h(px(32.0))

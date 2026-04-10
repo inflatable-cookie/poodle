@@ -12,7 +12,7 @@ pub fn js_surface(spec: &SurfaceSpec, theme: &JetstreamThemeProvider, children: 
 
     let mut el = ui_element::div()
         .bg(bg)
-        .rounded(resolve_radius(theme, "semantic.radius.surface"));
+        .rounded(resolve_radius(theme, "radius.surface"));
 
     if let Some(border_token) = spec.resolved_border_color() {
         let border_color = resolve_color(theme, border_token);

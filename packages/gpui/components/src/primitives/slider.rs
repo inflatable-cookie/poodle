@@ -71,15 +71,15 @@ impl IntoElement for Slider {
 
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let accent = resolve_color(theme, spec.range_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let border = resolve_color(theme, "color.border.default");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
         // Track/thumb scale with effective size
         let track_f: f32 = match effective_size {
             ControlSize::Xs => 4.0,
@@ -90,7 +90,7 @@ impl IntoElement for Slider {
         };
         let track_height = px(track_f);
         let track_radius = px(track_f / 2.0);
-        let thumb_f = theme.resolve_space("semantic.size.icon.md");
+        let thumb_f = theme.resolve_space("size.icon.md");
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
         let label_font_size = px(rem_to_px(size_font_rem(effective_size)));

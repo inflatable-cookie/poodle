@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{ChoiceOption, SegmentedControlSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let options = vec![
         ChoiceOption::new("grid", "Grid"),

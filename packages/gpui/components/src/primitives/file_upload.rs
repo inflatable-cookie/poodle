@@ -66,15 +66,15 @@ impl IntoElement for FileUpload {
         // Contract: panel padding from density
         let panel_padding_x = px(rem_to_px(panel_space_x_rem(spec.density)));
         let panel_padding_y = px(rem_to_px(panel_space_y_rem(spec.density)));
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
         let dropzone_radius = resolve_radius(theme, spec.radius_token());
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
 
         let fill = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
         let text_color = resolve_color(theme, spec.text_color_token());
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
         let focus_border = resolve_color(theme, spec.focus_border_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let body_size = body_font;
@@ -93,7 +93,7 @@ impl IntoElement for FileUpload {
 
         // Contract: browse button with accent border
         let browse_btn = div()
-            .px(resolve_px(theme, "semantic.space.inline.md"))
+            .px(resolve_px(theme, "space.inline.md"))
             .py(px(6.0))
             .rounded(control_radius)
             .border_1()

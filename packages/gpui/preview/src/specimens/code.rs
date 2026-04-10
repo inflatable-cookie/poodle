@@ -6,7 +6,7 @@ use poodle_gpui_components::{Code, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     let ts_source = "import { Button } from \"@poodle/svelte-primitives\";\n\nfunction handleClick(event: MouseEvent): void {\n  console.log(\"Button clicked\", event);\n}";
 

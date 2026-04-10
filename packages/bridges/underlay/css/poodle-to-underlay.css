@@ -14,21 +14,21 @@
  * become the canonical source of token meaning.
  */
 :root {
-  --underlay-color-canvas: var(--poodle-semantic-color-background-canvas);
-  --underlay-color-surface: var(--poodle-semantic-color-background-surface);
-  --underlay-color-panel: var(--poodle-semantic-color-background-panel);
-  --underlay-color-text-primary: var(--poodle-semantic-color-text-primary);
-  --underlay-color-text-secondary: var(--poodle-semantic-color-text-secondary);
-  --underlay-color-border-default: var(--poodle-semantic-color-border-default);
-  --underlay-color-accent: var(--poodle-semantic-color-accent-base);
-  --underlay-space-panel-x: var(--poodle-semantic-space-panel-x);
-  --underlay-space-panel-y: var(--poodle-semantic-space-panel-y);
-  --underlay-size-control-height: var(--poodle-semantic-size-control-height);
-  --underlay-size-panel-header: var(--poodle-semantic-size-panel-header);
-  --underlay-radius-control: var(--poodle-semantic-radius-control);
-  --underlay-radius-surface: var(--poodle-semantic-radius-surface);
-  --underlay-elevation-surface: var(--poodle-semantic-elevation-surface);
-  --underlay-elevation-overlay: var(--poodle-semantic-elevation-overlay);
-  --underlay-motion-interaction: var(--poodle-semantic-motion-duration-interaction);
-  --underlay-motion-overlay: var(--poodle-semantic-motion-duration-overlay);
+  --underlay-color-canvas: var(--poodle-color-background-canvas);
+  --underlay-color-surface: var(--poodle-color-background-surface);
+  --underlay-color-panel: var(--poodle-color-background-panel);
+  --underlay-color-text-primary: var(--poodle-color-text-primary);
+  --underlay-color-text-secondary: var(--poodle-color-text-secondary);
+  --underlay-color-border-default: var(--poodle-color-border-default);
+  --underlay-color-accent: var(--poodle-color-accent-base);
+  --underlay-space-panel-x: var(--poodle-space-panel-x);
+  --underlay-space-panel-y: var(--poodle-space-panel-y);
+  --underlay-size-control-height: var(--poodle-size-control-height);
+  --underlay-size-panel-header: var(--poodle-size-panel-header);
+  --underlay-radius-control: var(--poodle-radius-control);
+  --underlay-radius-surface: var(--poodle-radius-surface);
+  --underlay-elevation-surface: var(--poodle-elevation-surface);
+  --underlay-elevation-overlay: var(--poodle-elevation-overlay);
+  --underlay-motion-interaction: var(--poodle-motion-duration-interaction);
+  --underlay-motion-overlay: var(--poodle-motion-duration-overlay);
 }

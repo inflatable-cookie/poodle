@@ -12,8 +12,8 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_hover_card(spec: &HoverCardSpec, theme: &JetstreamThemeProvider, content: Option<JsEl>) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
 
     // Contract: panel padding 0.75rem 0.5rem
     let pad_x = rem_to_px(0.75);

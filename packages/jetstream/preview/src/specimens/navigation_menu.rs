@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{NavigationMenuEntry, NavigationMenuSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let items = vec![
         NavigationMenuEntry::new("docs", "Docs"),

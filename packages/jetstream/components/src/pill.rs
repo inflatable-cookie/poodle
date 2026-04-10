@@ -57,7 +57,7 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .pt(pad_y).pb(pad_y);
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity);
     }
 

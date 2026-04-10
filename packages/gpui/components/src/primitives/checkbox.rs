@@ -68,28 +68,28 @@ impl IntoElement for Checkbox {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         // Contract: gap = space-inline-sm
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
+        let body_size = resolve_px(theme, "typography.body.size");
         // Contract: indicator scales with effective size — base 1.125rem at Md,
         // proportional to control height ratio
         let indicator_base = 18.0_f32; // 1.125rem at Md
         let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
         let indicator_size = px(indicator_base * scale);
         let indicator_radius = px(5.0 * scale); // 0.3125rem scaled
-        let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
+        let focus_ring_color = resolve_color(theme, "color.accent.focusRing");
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let accent = if let Some(ref hex) = spec.selected_color {
             crate::theme_ext::parse_hex_color(hex)
                 .unwrap_or_else(|| resolve_color(theme, spec.indicator_fill_token()))
         } else {
             resolve_color(theme, spec.indicator_fill_token())
         };
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let _elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let border = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_inverse = resolve_color(theme, "color.text.inverse");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let _elevated = resolve_color(theme, "color.background.elevated");
 
         let state = spec.current_state();
         let is_checked = matches!(state, CheckState::Checked | CheckState::Mixed);

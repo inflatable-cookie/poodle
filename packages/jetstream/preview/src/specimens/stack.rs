@@ -7,9 +7,9 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{Alignment, PaddingScale, StackSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let item = |text: &str| label(text).text_color(text_primary).text_size(13.0)
         .px(8.0).py(4.0).bg(tint(accent, 0.12)).rounded(4.0);

@@ -7,8 +7,8 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Default blocks ---
@@ -59,14 +59,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )
                         .with_child(
                             div()
-                                .bg(color_to_hsla(theme.resolve_color("semantic.color.accent.base")).opacity(0.08))
+                                .bg(color_to_hsla(theme.resolve_color("color.accent.base")).opacity(0.08))
                                 .border_l_2()
-                                .border_color(color_to_hsla(theme.resolve_color("semantic.color.accent.base")))
+                                .border_color(color_to_hsla(theme.resolve_color("color.accent.base")))
                                 .rounded(px(4.0))
                                 .px(px(12.0)).py(px(8.0))
                                 .child(
                                     div().text_size(px(12.0)).font_weight(FontWeight::SEMIBOLD)
-                                        .text_color(color_to_hsla(theme.resolve_color("semantic.color.accent.base")))
+                                        .text_color(color_to_hsla(theme.resolve_color("color.accent.base")))
                                         .mb(px(4.0))
                                         .child("Callout")
                                 )

@@ -78,19 +78,19 @@ impl IntoElement for Pill {
         //   - Info/Warning: neutral fill and border (no Svelte overrides)
         //   - Badge: accent-base at 18% fill (except neutral badge: desaturated)
         //   - Badge border: always transparent
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let surface_bg = resolve_color(theme, "color.background.surface");
         let text_color = resolve_color(theme, spec.text_color_token());
         let tone_color = resolve_color(theme, spec.tone_color_token());
-        let accent_base = resolve_color(theme, "semantic.color.accent.base");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let accent_base = resolve_color(theme, "color.accent.base");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
 
         let bg = match spec.appearance {
             PillAppearance::Badge => {
                 match spec.tone {
                     // Neutral badge: desaturated surface (96% surface + 4% text-primary)
                     PillTone::Neutral => {
-                        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+                        let text_primary = resolve_color(theme, "color.text.primary");
                         surface_bg.blend(text_primary.opacity(0.04))
                     }
                     // All other badges: accent-base at 18%
@@ -135,14 +135,14 @@ impl IntoElement for Pill {
             PillAppearance::Badge => {
                 match spec.tone {
                     PillTone::Neutral => text_secondary,
-                    _ => resolve_color(theme, "semantic.color.text.primary"),
+                    _ => resolve_color(theme, "color.text.primary"),
                 }
             }
             _ => text_color,
         };
 
-        let radius = resolve_radius(theme, "semantic.radius.pill");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let radius = resolve_radius(theme, "radius.pill");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let inline_gap = px(4.0);
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
@@ -193,7 +193,7 @@ impl IntoElement for Pill {
         }
 
         if spec.is_removable {
-            let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
+            let icon_muted = resolve_color(theme, "color.icon.muted");
             let remove_id = SharedString::from("poodle-pill-remove");
             let mut remove_btn = div()
                 .id(remove_id)

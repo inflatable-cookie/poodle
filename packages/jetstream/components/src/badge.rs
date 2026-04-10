@@ -37,15 +37,15 @@ pub fn js_badge(spec: &BadgeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // - muted: bg = color-mix(surface 78%, elevated), text = text-secondary
     let (bg, text_color) = match spec.variant {
         BadgeVariant::Accent => {
-            let accent: Color = resolve_color(theme, "semantic.color.accent.base").into();
-            let text = resolve_color(theme, "semantic.color.text.primary");
+            let accent: Color = resolve_color(theme, "color.accent.base").into();
+            let text = resolve_color(theme, "color.text.primary");
             // color-mix(accent 18%, transparent) = accent with 18% opacity
             (accent.with_alpha(accent.a * 0.18), text)
         }
         BadgeVariant::Muted => {
-            let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
-            let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
-            let text = resolve_color(theme, "semantic.color.text.secondary");
+            let surface: Color = resolve_color(theme, "color.background.surface").into();
+            let elevated: Color = resolve_color(theme, "color.background.elevated").into();
+            let text = resolve_color(theme, "color.text.secondary");
             // color-mix(surface 78%, elevated)
             (surface.mix(elevated, 0.78), text)
         }

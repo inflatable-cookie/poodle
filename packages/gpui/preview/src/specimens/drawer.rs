@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let right_open = state.specimens.is_on("drawer-right-open");
     let left_open = state.specimens.is_on("drawer-left-open");

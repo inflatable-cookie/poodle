@@ -3,7 +3,7 @@
     "size": {
       "default": {
         "$type": "dimension",
-        "$value": "{semantic.size.icon.md}"
+        "$value": "{size.icon.md}"
       }
     },
     "stroke": {

@@ -77,14 +77,14 @@ impl IntoElement for Callout {
         let panel_y = density_pad_y;
 
         let tone_color = resolve_color(theme, spec.fill_token());
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let inline_md = resolve_px(theme, "semantic.space.inline.md");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let radius = resolve_radius(theme, "radius.surface");
+        let control_radius = resolve_radius(theme, "radius.control");
+        let inline_md = resolve_px(theme, "space.inline.md");
         let body_size = body_font;
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = resolve_px(theme, "typography.label.size");
 
         // Tone icon name
         let icon_name = match spec.tone {
@@ -95,9 +95,9 @@ impl IntoElement for Callout {
             _ => "info",
         };
 
-        let panel_bg = resolve_color(theme, "semantic.color.background.panel");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let panel_bg = resolve_color(theme, "color.background.panel");
+        let border_default = resolve_color(theme, "color.border.default");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
 
         // Matches Svelte Callout.svelte:
         //   Neutral fill: color-mix(panel 94%, transparent)

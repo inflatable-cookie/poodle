@@ -7,7 +7,7 @@ use poodle_primitives::MenubarSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_menubar(spec: &MenubarSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let mut el = ui_element::div().flex_row().items_center().gap(2.0);
 

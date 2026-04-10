@@ -66,10 +66,10 @@ impl IntoElement for HoverCard {
         let spec = &self.spec;
 
         // Contract: padding var(--poodle-space-panel-y) var(--poodle-space-panel-x)
-        let panel_x = resolve_px(theme, "semantic.space.panel.x");
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
+        let panel_x = resolve_px(theme, "space.panel.x");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let radius = resolve_radius(theme, "radius.surface");
 
         // Matches Svelte treatment-surface-elevated values
         let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
@@ -90,7 +90,7 @@ impl IntoElement for HoverCard {
         // Surface: role="dialog", tabindex="-1", aria-label from spec
         // Escape key clears timers and closes the surface
         if spec.is_open {
-            let panel_y = resolve_px(theme, "semantic.space.panel.y");
+            let panel_y = resolve_px(theme, "space.panel.y");
             let mut surface = div()
                 .id("poodle-hover-card-surface")
                 .focusable()

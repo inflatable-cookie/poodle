@@ -7,9 +7,9 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let accent = theme.resolve_color("semantic.color.accent.base");
-    let border = theme.resolve_color("semantic.color.border.subtle");
-    let success = theme.resolve_color("semantic.color.status.success");
+    let accent = theme.resolve_color("color.accent.base");
+    let border = theme.resolve_color("color.border.subtle");
+    let success = theme.resolve_color("color.status.success");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Layout structure ---

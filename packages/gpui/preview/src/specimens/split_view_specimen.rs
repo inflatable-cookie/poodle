@@ -7,7 +7,7 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let h_split_spec = SplitViewSpec::new(SplitOrientation::Horizontal)
         .with_default_ratio(0.5);

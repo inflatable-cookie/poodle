@@ -69,26 +69,26 @@ impl IntoElement for NavigationMenu {
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let trigger_height_offset = px(rem_to_px(size_height_offset_rem(effective_size)));
         let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let density_panel_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));
         let density_panel_y = px(rem_to_px(panel_space_y_rem(self.spec.density)));
 
-        let control_height = resolve_px(theme, "semantic.size.control.height");
+        let control_height = resolve_px(theme, "size.control.height");
         let trigger_radius = resolve_radius(theme, self.spec.trigger_radius_token());
         let viewport_radius = resolve_radius(theme, self.spec.viewport_radius_token());
         let viewport_gap = theme.resolve_space(self.spec.viewport_gap_token());
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let surface = resolve_color(theme, "semantic.color.background.surface");
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
+        let accent = resolve_color(theme, "color.accent.base");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let surface = resolve_color(theme, "color.background.surface");
+        let panel = resolve_color(theme, "color.background.panel");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let border_default = resolve_color(theme, "color.border.default");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
         // Contract: trigger bg 88% surface, border 72% border-subtle
         let trigger_bg = color_mix(surface, gpui::transparent_black(), 0.88);

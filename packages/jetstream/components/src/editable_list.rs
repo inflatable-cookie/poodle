@@ -47,8 +47,8 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
     let input_border = resolve_color(theme, spec.input_border_token());
     let remove_color = resolve_color(theme, spec.remove_color_token());
     let counter_color = resolve_color(theme, spec.counter_color_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let ctrl_radius = resolve_radius(theme, "semantic.radius.control");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let ctrl_radius = resolve_radius(theme, "radius.control");
     let ctrl_height = rem_to_px(control_height_rem(effective_size));
     let ctrl_px = rem_to_px(control_space_x_rem(spec.density));
 
@@ -103,7 +103,7 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
                     .items_center()
                     .child(
                         ui_element::label(&spec.placeholder)
-                            .text_color(resolve_color(theme, "semantic.color.text.secondary"))
+                            .text_color(resolve_color(theme, "color.text.secondary"))
                             .text_size(font_size)
                     )
             )

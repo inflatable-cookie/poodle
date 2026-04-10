@@ -8,7 +8,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{FieldSetSpec, TextInputSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
         // With legend

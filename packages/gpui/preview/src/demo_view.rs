@@ -47,10 +47,10 @@ fn render_overview_shell(theme: &GpuiThemeProvider) -> Div {
     content = content.child(Callout::from_spec(callout_spec, theme));
 
     // State tiles grid — each tile is a Surface with elevated tone
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let success = theme.resolve_color("semantic.color.status.success");
-    let warning = theme.resolve_color("semantic.color.status.warning");
-    let danger = theme.resolve_color("semantic.color.status.danger");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let success = theme.resolve_color("color.status.success");
+    let warning = theme.resolve_color("color.status.warning");
+    let danger = theme.resolve_color("color.status.danger");
 
     let tiles = [
         ("Active projects", "12", success),
@@ -219,8 +219,8 @@ fn render_browse_screen(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn render_detail_screen(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let mut content = div().flex().flex_col().gap(px(12.0));
 
@@ -324,7 +324,7 @@ fn render_picker_screen(theme: &GpuiThemeProvider) -> Div {
     }
 
     // Selection summary + confirm button
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
     let confirm_spec = ButtonSpec::new()
         .with_variant(ButtonVariant::Primary)
         .with_label("Confirm");
@@ -347,10 +347,10 @@ fn render_picker_screen(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let surface_bg = theme.resolve_color("semantic.color.background.surface");
-    let border = theme.resolve_color("semantic.color.border.default");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let surface_bg = theme.resolve_color("color.background.surface");
+    let border = theme.resolve_color("color.border.default");
 
     let mut content = div().flex().flex_col().gap(px(0.0));
 

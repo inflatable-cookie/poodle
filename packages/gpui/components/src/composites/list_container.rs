@@ -29,11 +29,11 @@ impl IntoElement for ListContainer {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let stack_gap = resolve_px(theme, "semantic.space.stack.md");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let stack_gap = resolve_px(theme, "space.stack.md");
 
         let mut container = div().flex().flex_col().gap(stack_gap).w_full();
 
@@ -65,7 +65,7 @@ impl IntoElement for ListContainer {
             ListContainerState::Error => {
                 let title = spec.error_title.as_deref().unwrap_or("Unable to load list");
                 container = container.child(
-                    div().text_size(body_size).text_color(resolve_color(theme, "semantic.color.status.danger"))
+                    div().text_size(body_size).text_color(resolve_color(theme, "color.status.danger"))
                         .child(title.to_string())
                 );
             }

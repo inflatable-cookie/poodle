@@ -7,8 +7,8 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let border = theme.resolve_color("semantic.color.border.subtle");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let border = theme.resolve_color("color.border.subtle");
 
     div().flex().flex_col().gap(px(24.0)).max_w(px(400.0))
         // --- Drag to reorder ---

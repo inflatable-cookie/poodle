@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let dismissed_info = state.specimens.is_on("callout-dismissed-info");
     let dismissed_warning = state.specimens.is_on("callout-dismissed-warning");

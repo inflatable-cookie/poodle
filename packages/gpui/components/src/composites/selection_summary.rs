@@ -74,11 +74,11 @@ impl IntoElement for SelectionSummary {
         let _item_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let gap = resolve_px(theme, spec.gap_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let bg = resolve_color(theme, "semantic.color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border = resolve_color(theme, "color.border.subtle");
+        let accent = resolve_color(theme, "color.accent.base");
+        let bg = resolve_color(theme, "color.background.surface");
 
         let mut container = div()
             .w_full()

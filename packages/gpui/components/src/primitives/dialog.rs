@@ -84,17 +84,17 @@ impl IntoElement for Dialog {
         let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
         let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
 
-        let actions_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let actions_gap = resolve_px(theme, "space.inline.sm");
         let panel_x = density_pad_x;
         let panel_y = density_pad_y;
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let radius = resolve_radius(theme, "radius.surface");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
 
         // Matches Svelte treatment-surface-elevated values:
         //   fill: color-mix(elevated 94%, transparent)
@@ -102,7 +102,7 @@ impl IntoElement for Dialog {
         let bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
         let border = Hsla { a: border_default.a * 0.22, ..border_default };
 
-        let stack_lg = resolve_px(theme, "semantic.space.stack.lg");
+        let stack_lg = resolve_px(theme, "space.stack.lg");
 
         let mut dialog = div()
             .id("poodle-dialog")

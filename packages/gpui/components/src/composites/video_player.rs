@@ -46,9 +46,9 @@ impl IntoElement for VideoPlayer {
 
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let overlay = resolve_color(&self.theme, self.spec.overlay_fill_token());
-        let radius = resolve_radius(&self.theme, "semantic.radius.surface");
-        let border_color = resolve_color(&self.theme, "semantic.color.border.default");
-        let text_color = resolve_color(&self.theme, "semantic.color.text.inverse");
+        let radius = resolve_radius(&self.theme, "radius.surface");
+        let border_color = resolve_color(&self.theme, "color.border.default");
+        let text_color = resolve_color(&self.theme, "color.text.inverse");
 
         // ── Big centered play/pause overlay button ──────────────────────
         let big_play_icon_name = if self.spec.is_playing { "pause" } else { "play" };

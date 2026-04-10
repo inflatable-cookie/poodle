@@ -47,8 +47,8 @@ impl Table {
         let shell_border = color_mix(shell_border_raw, transparent, 0.22);
 
         // Svelte: header bg = color-mix(surface 91%, text-primary)
-        let surface = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let surface = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let header_fill = color_mix(surface, text_primary, 0.91);
 
         // Contract: 72% header border
@@ -68,7 +68,7 @@ impl Table {
             cell_border,
             caption_text: resolve_color(theme, spec.caption_text_token()),
             empty_text: resolve_color(theme, spec.empty_text_token()),
-            label_size: resolve_px(theme, "semantic.typography.label.size"),
+            label_size: resolve_px(theme, "typography.label.size"),
             spec,
         }
     }
@@ -93,8 +93,8 @@ impl Table {
         let shell_border = color_mix(shell_border_raw, transparent, 0.22);
 
         // Svelte: header bg = color-mix(surface 91%, text-primary)
-        let surface = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let surface = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let header_fill = color_mix(surface, text_primary, 0.91);
 
         // Contract: 72% header border
@@ -114,7 +114,7 @@ impl Table {
             cell_border,
             caption_text: resolve_color(theme, spec.caption_text_token()),
             empty_text: resolve_color(theme, spec.empty_text_token()),
-            label_size: resolve_px(theme, "semantic.typography.label.size"),
+            label_size: resolve_px(theme, "typography.label.size"),
             spec,
         }
     }

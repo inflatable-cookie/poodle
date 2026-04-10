@@ -39,8 +39,8 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
         (ButtonVariant::Ghost, _) => Color::TRANSPARENT,
         (ButtonVariant::Secondary, true) => {
             // Danger secondary: color-mix(status-danger 16%, background-surface)
-            let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
-            let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
+            let danger: Color = resolve_color(theme, "color.status.danger").into();
+            let surface: Color = resolve_color(theme, "color.background.surface").into();
             danger.mix(surface, 0.16)
         }
         _ => resolve_color(theme, spec.resolved_fill_token()).into(),
@@ -52,18 +52,18 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
         (ButtonVariant::Ghost, _) => Color::TRANSPARENT,
         (ButtonVariant::Secondary, true) => {
             // Danger secondary: color-mix(status-danger 46%, border-default)
-            let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
-            let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
+            let danger: Color = resolve_color(theme, "color.status.danger").into();
+            let border_default: Color = resolve_color(theme, "color.border.default").into();
             danger.mix(border_default, 0.46)
         }
         _ => resolve_color(theme, spec.resolved_border_token()).into(),
     };
 
     // Hover/active colors (contract: mix fill with elevated)
-    let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
+    let elevated: Color = resolve_color(theme, "color.background.elevated").into();
     let hover_fill = fill.mix(elevated, 0.84);
     let active_fill = fill.mix(elevated, 0.72);
-    let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
+    let text_primary: Color = resolve_color(theme, "color.text.primary").into();
     let hover_border = border_color.mix(text_primary, 0.78);
 
     // ── Sizing via presentation helpers (size_role resolves effective size) ──

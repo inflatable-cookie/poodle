@@ -225,7 +225,7 @@ mod tests {
     #[test]
     fn jetstream_adapter_exposes_theme() {
         let adapter = JetstreamAdapter::new(JetstreamThemeProvider::default());
-        let color = adapter.theme().resolve_color("semantic.color.accent.base");
+        let color = adapter.theme().resolve_color("color.accent.base");
         assert!(color.0 >= 0.0 && color.0 <= 1.0);
     }
 

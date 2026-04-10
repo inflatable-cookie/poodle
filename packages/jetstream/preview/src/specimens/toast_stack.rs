@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_composites::{Toast, ToastStackSpec, ToastTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let toasts = vec![
         Toast::new("1", "File saved").with_message("Changes saved successfully.").with_tone(ToastTone::Success),

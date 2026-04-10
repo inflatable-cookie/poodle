@@ -58,7 +58,7 @@ impl IntoElement for ScrollShell {
         let spec = &self.spec;
         let padding = spec.resolved_padding();
 
-        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+        let surface_radius = resolve_radius(theme, "radius.surface");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let id_str = spec.label.as_deref().unwrap_or("scroll-shell");

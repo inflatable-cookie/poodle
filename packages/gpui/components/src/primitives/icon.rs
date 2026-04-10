@@ -70,7 +70,7 @@ impl IntoElement for Icon {
         // GPUI's svg() element requires an explicit text_color to render —
         // it does NOT inherit from the parent. We must set it here.
         let color = self.color.unwrap_or_else(|| {
-            resolve_color(&self.theme, "semantic.color.icon.primary")
+            resolve_color(&self.theme, "color.icon.primary")
         });
 
         svg()

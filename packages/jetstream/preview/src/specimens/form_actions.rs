@@ -8,7 +8,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{ButtonSpec, ButtonVariant, FormActionAlign, FormActionsSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let btn = |label: &str, variant: ButtonVariant| {
         js_button(&ButtonSpec::new().with_variant(variant).with_label(label), theme)

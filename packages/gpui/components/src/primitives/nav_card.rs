@@ -67,8 +67,8 @@ impl NavCard {
             arrow_color,
             disabled_opacity,
             focus_ring_color,
-            body_size: resolve_px(theme, "semantic.typography.body.size"),
-            label_size: resolve_px(theme, "semantic.typography.label.size"),
+            body_size: resolve_px(theme, "typography.body.size"),
+            label_size: resolve_px(theme, "typography.label.size"),
             icon: None,
             on_click: None,
         }

@@ -7,8 +7,8 @@ use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_empty_state(spec: &EmptyStateSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
     let gap = resolve_px(theme, spec.layout_gap_token());
 
     let mut el = ui_element::div()

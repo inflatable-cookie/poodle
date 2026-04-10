@@ -76,11 +76,11 @@ impl IntoElement for SplitButton {
         let base_border = resolve_color(theme, spec.border_token());
         let text_color = resolve_color(theme, spec.text_token());
         let separator_color = resolve_color(theme, spec.separator_token());
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let radius = resolve_radius(theme, spec.radius_token());
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -88,7 +88,7 @@ impl IntoElement for SplitButton {
         // Size-aware layout values via presentation helpers
         let base_height = resolve_px(theme, spec.control_height_token());
         let height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_pad_x = resolve_px(theme, "semantic.space.control.x");
+        let base_pad_x = resolve_px(theme, "space.control.x");
         let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let font_size = rem_to_px(size_font_rem(effective_size));
 
@@ -96,7 +96,7 @@ impl IntoElement for SplitButton {
         let (fill, border_color) = match spec.variant {
             ButtonVariant::Primary => (base_fill, color_mix_black(base_fill, 0.84)),
             ButtonVariant::Ghost => {
-                let surface = resolve_color(theme, "semantic.color.background.surface");
+                let surface = resolve_color(theme, "color.background.surface");
                 (Hsla { a: surface.a * 0.42, ..surface }, gpui::transparent_black())
             }
             _ => (base_fill, base_border),
@@ -234,9 +234,9 @@ impl IntoElement for SplitButton {
         // ── Menu overlay (when open) ──────────────────────────────
         if spec.is_open && !spec.items.is_empty() {
             let menu_fill = resolve_color(theme, spec.overlay_fill_token());
-            let menu_border = resolve_color(theme, "semantic.color.border.default");
-            let menu_radius = resolve_radius(theme, "semantic.radius.surface");
-            let item_text = resolve_color(theme, "semantic.color.text.primary");
+            let menu_border = resolve_color(theme, "color.border.default");
+            let menu_radius = resolve_radius(theme, "radius.surface");
+            let item_text = resolve_color(theme, "color.text.primary");
 
             let mut menu = div()
                 .bg(menu_fill).border_1().border_color(menu_border)
@@ -266,7 +266,7 @@ impl IntoElement for SplitButton {
                             .text_size(body_size).text_color(item_text)
                             .rounded(px(4.0));
                         if !is_disabled {
-                            let accent = resolve_color(theme, "semantic.color.accent.base");
+                            let accent = resolve_color(theme, "color.accent.base");
                             let hover_bg = Hsla { a: 0.08, ..accent };
                             item_el = item_el.cursor_pointer().hover(move |s| s.bg(hover_bg));
                         } else {

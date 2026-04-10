@@ -16,9 +16,9 @@ pub fn js_action_discovery_panel(spec: &ActionDiscoveryPanelSpec, theme: &Jetstr
     let pad_y = rem_to_px(panel_space_y_rem(spec.density));
     let gap = resolve_px(theme, spec.gap_token());
 
-    let fill = resolve_color(theme, "semantic.color.background.elevated");
-    let _text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let fill = resolve_color(theme, "color.background.elevated");
+    let _text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
 
     let mut el = ui_element::div()
         .bg(fill)

@@ -13,7 +13,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     // Build toast list, filtering out dismissed ones
     let toasts: Vec<Toast> = vec![
@@ -114,7 +114,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().relative().h(px(220.0)).w_full()
                         .overflow_hidden()
                         .border_1()
-                        .border_color(color_to_hsla(theme.resolve_color("semantic.color.border.subtle")))
+                        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
                         .rounded(px(6.0))
                         .child(
                             ToastStack::from_spec(

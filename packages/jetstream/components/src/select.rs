@@ -26,12 +26,12 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
 
-    let fill = resolve_color(theme, "semantic.color.background.surface");
-    let border_color = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
-    let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
+    let fill = resolve_color(theme, "color.background.surface");
+    let border_color = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.control");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let muted = resolve_color(theme, "color.text.secondary");
+    let icon_muted = resolve_color(theme, "color.icon.muted");
 
     // Hover state
     let border_c: Color = border_color.into();
@@ -80,7 +80,7 @@ pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> JsEl {
     );
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity).disabled(true);
     }
 

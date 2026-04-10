@@ -9,17 +9,17 @@
 
   const semanticPaths = Object.keys(cssVars) as SemanticTokenPath[];
   const keySemanticPaths: SemanticTokenPath[] = [
-    "semantic.color.background.canvas",
-    "semantic.color.background.panel",
-    "semantic.color.background.elevated",
-    "semantic.color.text.primary",
-    "semantic.color.text.secondary",
-    "semantic.color.border.default",
-    "semantic.color.accent.base",
-    "semantic.color.status.success",
-    "semantic.size.control.height",
-    "semantic.space.control.x",
-    "semantic.space.control.y",
+    "color.background.canvas",
+    "color.background.panel",
+    "color.background.elevated",
+    "color.text.primary",
+    "color.text.secondary",
+    "color.border.default",
+    "color.accent.base",
+    "color.status.success",
+    "size.control.height",
+    "space.control.x",
+    "space.control.y",
   ];
 
   let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";

@@ -84,7 +84,7 @@ impl IntoElement for SplitView {
         let spec = &self.spec;
         let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let border = resolve_color(theme, "color.border.default");
         let ratio = spec.current_ratio();
         let is_horizontal = spec.orientation == SplitOrientation::Horizontal;
 
@@ -119,8 +119,8 @@ impl IntoElement for SplitView {
 
         // Divider
         if !spec.is_primary_collapsed && !spec.is_secondary_collapsed {
-            let icon_color = resolve_color(theme, "semantic.color.icon.primary");
-            let surface_bg = resolve_color(theme, "semantic.color.surface.raised");
+            let icon_color = resolve_color(theme, "color.icon.primary");
+            let surface_bg = resolve_color(theme, "color.surface.raised");
 
             // Determine chevron direction based on orientation
             let chevron_name = if is_horizontal {
@@ -173,7 +173,7 @@ impl IntoElement for SplitView {
             }
 
             divider = divider.hover(|s| {
-                s.bg(resolve_color(theme, "semantic.color.accent.base").opacity(0.3))
+                s.bg(resolve_color(theme, "color.accent.base").opacity(0.3))
             });
 
             container = container.child(divider);

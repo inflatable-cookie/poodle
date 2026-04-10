@@ -54,7 +54,7 @@ impl IntoElement for FieldSet {
 
         let legend_color = resolve_color(theme, spec.legend_color_token());
         let gap = resolve_px(theme, spec.gap_token());
-        let stack_sm = resolve_px(theme, "semantic.space.stack.sm");
+        let stack_sm = resolve_px(theme, "space.stack.sm");
 
         let mut root = div().flex().flex_col();
 

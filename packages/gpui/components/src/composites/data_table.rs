@@ -88,10 +88,10 @@ impl IntoElement for DataTable {
         let body_size = px(font_size);
 
         let header_bg = resolve_color(theme, spec.header_fill_token());
-        let border_color = resolve_color(theme, "semantic.color.border.subtle");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let border_color = resolve_color(theme, "color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
 
         // Wrap handlers in Rc for sharing across closures
         let on_sort: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =

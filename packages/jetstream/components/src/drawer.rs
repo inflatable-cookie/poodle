@@ -23,8 +23,8 @@ pub fn js_drawer(spec: &DrawerSpec, theme: &JetstreamThemeProvider, content: Opt
 
     let fill = resolve_color(theme, spec.surface_fill_token());
     let backdrop: Color = resolve_color(theme, spec.backdrop_fill_token()).into();
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let title_color = resolve_color(theme, "semantic.color.text.primary");
+    let border = resolve_color(theme, "color.border.default");
+    let title_color = resolve_color(theme, "color.text.primary");
 
     // Close icon
     let close_icon = ui_element::icon("x")

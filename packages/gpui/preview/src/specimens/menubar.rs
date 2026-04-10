@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     // Track which menu is open and last selected action
     let active_menu = state.specimens.text.get("menubar-active").cloned();

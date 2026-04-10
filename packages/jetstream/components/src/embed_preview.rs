@@ -9,12 +9,12 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub fn js_embed_preview(spec: &EmbedPreviewSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
     let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let danger_color = resolve_color(theme, "semantic.color.status.danger");
-    let success_color = resolve_color(theme, "semantic.color.status.success");
-    let subtle_bg = resolve_color(theme, "semantic.color.background.subtle");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let danger_color = resolve_color(theme, "color.status.danger");
+    let success_color = resolve_color(theme, "color.status.success");
+    let subtle_bg = resolve_color(theme, "color.background.subtle");
 
     let pad_x = rem_to_px(1.0);
     let pad_y = rem_to_px(0.75);

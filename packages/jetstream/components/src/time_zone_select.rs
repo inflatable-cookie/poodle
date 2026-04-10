@@ -23,13 +23,13 @@ pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProv
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
 
-    let fill = resolve_color(theme, "semantic.color.background.surface");
+    let fill = resolve_color(theme, "color.background.surface");
     let border_color = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
-    let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
-    let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+    let radius = resolve_radius(theme, "radius.control");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let muted = resolve_color(theme, "color.text.secondary");
+    let icon_muted = resolve_color(theme, "color.icon.muted");
+    let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
     // Focus-within: border becomes focusRing color, shadow at 28% opacity
     let focus_ring_c: Color = focus_ring.into();
@@ -72,7 +72,7 @@ pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProv
 
     // Disabled state
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         shell = shell.opacity(opacity).disabled(true);
     }
 

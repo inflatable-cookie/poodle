@@ -20,12 +20,12 @@ pub fn js_alert_dialog(spec: &AlertDialogSpec, theme: &JetstreamThemeProvider) -
     let space_x = rem_to_px(panel_space_x_rem(spec.density) + 0.5);
     let space_y = rem_to_px(panel_space_y_rem(spec.density) + 0.5);
 
-    let fill = resolve_color(theme, "semantic.color.background.elevated");
+    let fill = resolve_color(theme, "color.background.elevated");
     let backdrop: Color = resolve_color(theme, spec.backdrop_fill_token()).into();
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let title_color = resolve_color(theme, "semantic.color.text.primary");
-    let desc_color = resolve_color(theme, "semantic.color.text.secondary");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
+    let title_color = resolve_color(theme, "color.text.primary");
+    let desc_color = resolve_color(theme, "color.text.secondary");
 
     let mut panel = ui_element::div()
         .bg(fill)

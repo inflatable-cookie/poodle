@@ -71,16 +71,16 @@ impl IntoElement for TriStateSwitch {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
 
-        let border_color = resolve_color(theme, "semantic.color.border.default");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let danger = resolve_color(theme, "semantic.color.status.danger");
-        let success = resolve_color(theme, "semantic.color.status.success");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let border_color = resolve_color(theme, "color.border.default");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let danger = resolve_color(theme, "color.status.danger");
+        let success = resolve_color(theme, "color.status.success");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);

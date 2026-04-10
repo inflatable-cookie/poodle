@@ -71,14 +71,14 @@ impl IntoElement for Switch {
         let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
 
         // Contract: gap = space-inline-sm
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let accent = resolve_color(theme, "color.accent.base");
+        let border = resolve_color(theme, "color.border.default");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         let is_checked = spec.current_checked();
         let is_interactive = !spec.is_disabled && !spec.is_read_only;
@@ -95,7 +95,7 @@ impl IntoElement for Switch {
         // Svelte: track = calc(icon-default * 2 + 0.125rem) wide × calc(icon-default + 0.25rem) tall
         // Base values at Md (icon-default = 16px): track = 34px × 20px, thumb = 14px
         // Scale proportionally with effective_size
-        let icon_default = resolve_px(theme, "semantic.size.icon.md");
+        let icon_default = resolve_px(theme, "size.icon.md");
         let track_w = (icon_default * 2.0 + px(2.0)) * scale;
         let track_h = (icon_default + px(4.0)) * scale;
         let track_radius = track_h / 2.0;            // pill
@@ -106,7 +106,7 @@ impl IntoElement for Switch {
 
         // Thumb travel = thumb_size distance
         let knob_offset = if is_checked { thumb_size + track_padding } else { track_padding };
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
         // Svelte: off-track = text-primary 18% + surface, on-track = accent 24% + surface
         // Custom colors override the track fill entirely

@@ -93,11 +93,11 @@ impl IntoElement for DockRegion {
         let tab_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let strip_fill = resolve_color(theme, spec.strip_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let _text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let border = resolve_color(theme, "color.border.default");
+        let _text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
+        let hover_bg = resolve_color(theme, "color.background.elevated");
 
         let current_value = spec.current_value().map(|s| s.to_string());
         let is_horizontal_edge = matches!(spec.edge, DockEdge::Left | DockEdge::Right);

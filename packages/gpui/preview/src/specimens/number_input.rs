@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     // Track quantity value (stored as string, parsed to f64)
     let quantity_str = state.specimens.text.get("number-input-quantity").cloned()

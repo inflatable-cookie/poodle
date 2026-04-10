@@ -172,7 +172,7 @@ pub fn js_duration_input(
 
     // ── Invalid state ──
     if spec.validation_state == ValidationState::Invalid {
-        let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
+        let danger: Color = resolve_color(theme, "color.status.danger").into();
         root = root.border_color(danger);
     }
 

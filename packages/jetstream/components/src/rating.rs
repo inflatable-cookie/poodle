@@ -19,7 +19,7 @@ pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> JsEl {
     }
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity);
     }
 

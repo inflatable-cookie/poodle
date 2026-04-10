@@ -60,11 +60,11 @@ impl Pagination {
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         // Contract: height = control-height + size offset - 0.125rem
         let button_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(2.0);
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
-        let base_pad = resolve_px(theme, "semantic.space.control.x");
+        let base_pad = resolve_px(theme, "space.control.x");
         let button_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         Self {

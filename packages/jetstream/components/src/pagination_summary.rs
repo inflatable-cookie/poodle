@@ -7,7 +7,7 @@ use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 pub fn js_pagination_summary(spec: &PaginationSummarySpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_color = resolve_color(theme, "semantic.color.text.secondary");
+    let text_color = resolve_color(theme, "color.text.secondary");
 
     let text = format!("Showing {} – {} of {}", spec.start_index(), spec.end_index(), spec.total_items);
 

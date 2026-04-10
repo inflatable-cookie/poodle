@@ -77,13 +77,13 @@ impl IntoElement for TabStrip {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
+        let border = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
+        let hover_bg = resolve_color(theme, "color.background.elevated");
         let gap = theme.resolve_space(self.spec.item_gap_token());
 
         let current_value = self.spec.current_value().map(|s| s.to_string());

@@ -7,9 +7,9 @@ use poodle_primitives::CalendarSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_calendar(_spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let muted = resolve_color(theme, "color.text.secondary");
+    let border = resolve_color(theme, "color.border.subtle");
 
     let mut el = ui_element::div()
         .flex_col().gap(4.0)

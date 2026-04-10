@@ -7,9 +7,9 @@ use poodle_primitives::PaginationSpec;
 use crate::theme_ext::resolve_color;
 
 pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let muted = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let mut el = ui_element::div().flex_row().items_center().gap(4.0);
 

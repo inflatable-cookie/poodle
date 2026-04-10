@@ -14,23 +14,23 @@ pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvide
     let font_size = rem_to_px(size_font_rem(effective_size));
     let title_size = rem_to_px(size_font_rem(effective_size) + 0.1875);
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let gap = resolve_px(theme, "semantic.space.stack.md");
-    let action_gap = resolve_px(theme, "semantic.space.inline.sm");
+    let gap = resolve_px(theme, "space.stack.md");
+    let action_gap = resolve_px(theme, "space.inline.sm");
 
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
     let confirm_fill = resolve_color(theme, spec.confirm_fill_token());
-    let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let surface = resolve_color(theme, "semantic.color.background.surface");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let ctrl_radius = resolve_radius(theme, "semantic.radius.control");
+    let text_inverse = resolve_color(theme, "color.text.inverse");
+    let border = resolve_color(theme, "color.border.default");
+    let surface = resolve_color(theme, "color.background.surface");
+    let radius = resolve_radius(theme, "radius.surface");
+    let ctrl_radius = resolve_radius(theme, "radius.control");
     let btn_height = rem_to_px(control_height_rem(effective_size));
 
     if !spec.is_open {
         // Closed state: show only trigger button
         let trigger_tone = if spec.is_destructive() {
-            resolve_color(theme, "semantic.color.status.danger")
+            resolve_color(theme, "color.status.danger")
         } else {
             text_primary
         };

@@ -72,9 +72,9 @@ pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> 
     let _fill: Color = resolve_color(theme, spec.fill_token()).into(); // used by file list items at runtime
     let border_color: Color = resolve_color(theme, spec.border_token()).into();
     let _text_primary: Color = resolve_color(theme, spec.text_color_token()).into(); // used by file name labels at runtime
-    let text_secondary: Color = resolve_color(theme, "semantic.color.text.secondary").into();
-    let text_tertiary: Color = resolve_color(theme, "semantic.color.text.tertiary").into();
-    let accent: Color = resolve_color(theme, "semantic.color.accent.base").into();
+    let text_secondary: Color = resolve_color(theme, "color.text.secondary").into();
+    let text_tertiary: Color = resolve_color(theme, "color.text.tertiary").into();
+    let accent: Color = resolve_color(theme, "color.accent.base").into();
     let radius = resolve_radius(theme, spec.radius_token());
 
     // ── Sizing ──
@@ -137,7 +137,7 @@ pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> 
 
     // Hover state
     if !spec.is_disabled {
-        let panel_bg: Color = resolve_color(theme, "semantic.color.background.panel").into();
+        let panel_bg: Color = resolve_color(theme, "color.background.panel").into();
         let hover_bg = Color::new(panel_bg.r, panel_bg.g, panel_bg.b, panel_bg.a * 0.50);
         let focus_border: Color = resolve_color(theme, spec.focus_border_token()).into();
         dropzone = dropzone

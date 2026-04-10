@@ -48,11 +48,11 @@ impl IntoElement for CardRadioGroup {
 
         let unselected_fill = resolve_color(theme, spec.unselected_fill_token());
         let border = resolve_color(theme, spec.border_token());
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let text_color = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let radius = resolve_radius(theme, "radius.surface");
+        let text_color = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let body_size = px(font_size);
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
@@ -138,7 +138,7 @@ impl IntoElement for CardRadioGroup {
                 .child(content);
 
             if is_option_disabled {
-                let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+                let opacity = resolve_opacity(theme, "state.opacity.disabled");
                 card = card
                     .opacity(opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
@@ -157,7 +157,7 @@ impl IntoElement for CardRadioGroup {
             el = el.child(card);
         }
         if spec.is_disabled {
-            let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+            let opacity = resolve_opacity(theme, "state.opacity.disabled");
             el = el.opacity(opacity);
         }
         el.into_any_element()

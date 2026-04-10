@@ -14,10 +14,10 @@ pub fn js_form_shell(
 ) -> JsEl {
     let stack_gap = resolve_px(theme, spec.stack_gap_token());
     let section_gap = resolve_px(theme, spec.section_gap_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let danger_color = resolve_color(theme, "semantic.color.status.danger");
-    let pending_color = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let danger_color = resolve_color(theme, "color.status.danger");
+    let pending_color = resolve_color(theme, "color.accent.base");
 
     let title_size = rem_to_px(1.125);
     let desc_size = rem_to_px(0.8125);

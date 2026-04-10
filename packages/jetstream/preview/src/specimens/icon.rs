@@ -7,9 +7,9 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{IconSize, IconSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let danger = resolve_color(theme, "semantic.color.status.danger");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
+    let danger = resolve_color(theme, "color.status.danger");
 
     div().flex_col().gap(24.0)
         // Sizes

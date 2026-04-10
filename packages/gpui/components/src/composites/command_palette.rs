@@ -90,14 +90,14 @@ impl IntoElement for CommandPalette {
         let body_size = px(font_size);
 
         let results_bg = resolve_color(theme, spec.results_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let text_muted = resolve_color(theme, "semantic.color.text.muted");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let border = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let text_muted = resolve_color(theme, "color.text.muted");
+        let accent = resolve_color(theme, "color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "color.background.elevated");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
         let mut palette = div()
             .flex()
@@ -163,7 +163,7 @@ impl IntoElement for CommandPalette {
                     div()
                         .p(px(16.0))
                         .text_size(body_size)
-                        .text_color(resolve_color(theme, "semantic.color.status.danger"))
+                        .text_color(resolve_color(theme, "color.status.danger"))
                         .child("Error loading commands"),
                 );
                 return palette.into_any_element();

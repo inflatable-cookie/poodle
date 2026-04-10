@@ -28,7 +28,7 @@ use crate::theme_ext::resolve_color;
 /// - Label font-size: 0.75rem (12px), font-weight 600, line-height 1.3
 pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let status_color = resolve_color(theme, spec.status_color_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     // Contract: dot dimensions (via spec helper rem values → px)
     let dot_size = rem_to_px(spec.dot_size_rem());
@@ -92,7 +92,7 @@ mod tests {
         );
         // Neutral status should resolve to text-secondary, not accent-base
         let dot = &el.children[0];
-        let expected: jetstream_runtime::game_ui::Color = resolve_color(&theme, "semantic.color.text.secondary").into();
+        let expected: jetstream_runtime::game_ui::Color = resolve_color(&theme, "color.text.secondary").into();
         assert_eq!(dot.style.background, Some(expected));
     }
 }

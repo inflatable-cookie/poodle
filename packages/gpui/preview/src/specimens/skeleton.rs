@@ -6,7 +6,7 @@ use poodle_gpui_components::{Skeleton, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let border = theme.resolve_color("semantic.color.border.default");
+    let border = theme.resolve_color("color.border.default");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Basic shapes ---

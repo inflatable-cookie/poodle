@@ -5,63 +5,63 @@ export const themes = {
     "selector": "[data-theme=\"dark\"]",
     "description": "Dark neutral application theme.",
     "overrides": {
-      "semantic.color.background.canvas": "#0e1012",
-      "semantic.color.background.surface": "#15181b",
-      "semantic.color.background.panel": "#1b1f23",
-      "semantic.color.background.elevated": "#20252a",
-      "semantic.color.background.overlay": "rgba(8, 10, 13, 0.78)",
-      "semantic.color.text.primary": "#eef2f6",
-      "semantic.color.text.secondary": "#99a4b0",
-      "semantic.color.text.inverse": "#161a1f",
-      "semantic.color.border.subtle": "rgba(227, 232, 238, 0.12)",
-      "semantic.color.border.default": "rgba(227, 232, 238, 0.22)",
-      "semantic.color.border.strong": "rgba(227, 232, 238, 0.42)",
-      "semantic.color.accent.base": "#f0b24d",
-      "semantic.color.accent.hover": "#ffca73",
-      "semantic.color.accent.focusRing": "#ffca73",
-      "semantic.color.icon.primary": "#eef2f6",
-      "semantic.color.icon.muted": "#99a4b0"
+      "color.background.canvas": "#0e1012",
+      "color.background.surface": "#15181b",
+      "color.background.panel": "#1b1f23",
+      "color.background.elevated": "#20252a",
+      "color.background.overlay": "rgba(8, 10, 13, 0.78)",
+      "color.text.primary": "#eef2f6",
+      "color.text.secondary": "#99a4b0",
+      "color.text.inverse": "#161a1f",
+      "color.border.subtle": "rgba(227, 232, 238, 0.12)",
+      "color.border.default": "rgba(227, 232, 238, 0.22)",
+      "color.border.strong": "rgba(227, 232, 238, 0.42)",
+      "color.accent.base": "#f0b24d",
+      "color.accent.hover": "#ffca73",
+      "color.accent.focusRing": "#ffca73",
+      "color.icon.primary": "#eef2f6",
+      "color.icon.muted": "#99a4b0"
     }
   },
   "light": {
     "selector": "[data-theme=\"light\"]",
     "description": "Default neutral application theme.",
     "overrides": {
-      "semantic.color.background.canvas": "#e7eef5",
-      "semantic.color.background.surface": "#dbe5ef",
-      "semantic.color.background.panel": "#f7fafd",
-      "semantic.color.background.elevated": "#fcfdff",
-      "semantic.color.text.primary": "#131a22",
-      "semantic.color.text.secondary": "#314255",
-      "semantic.color.border.subtle": "#c9d4e0",
-      "semantic.color.border.default": "#75869b",
-      "semantic.color.icon.primary": "#131a22",
-      "semantic.color.icon.muted": "#314255"
+      "color.background.canvas": "#e7eef5",
+      "color.background.surface": "#dbe5ef",
+      "color.background.panel": "#f7fafd",
+      "color.background.elevated": "#fcfdff",
+      "color.text.primary": "#131a22",
+      "color.text.secondary": "#314255",
+      "color.border.subtle": "#c9d4e0",
+      "color.border.default": "#75869b",
+      "color.icon.primary": "#131a22",
+      "color.icon.muted": "#314255"
     }
   },
   "loophole-studio": {
     "selector": "[data-theme=\"loophole-studio\"]",
     "description": "Downstream workstation-oriented theme tuned for Aura and Spark shell surfaces.",
     "overrides": {
-      "semantic.color.background.canvas": "#111111",
-      "semantic.color.background.surface": "#181818",
-      "semantic.color.background.panel": "#202020",
-      "semantic.color.background.elevated": "#292929",
-      "semantic.color.background.overlay": "rgba(8, 8, 8, 0.82)",
-      "semantic.color.text.primary": "#efefef",
-      "semantic.color.text.secondary": "#a6a6a6",
-      "semantic.color.text.inverse": "#151515",
-      "semantic.color.border.subtle": "rgba(198, 198, 198, 0.14)",
-      "semantic.color.border.default": "rgba(198, 198, 198, 0.24)",
-      "semantic.color.border.strong": "rgba(198, 198, 198, 0.42)",
-      "semantic.color.accent.base": "#97d14d",
-      "semantic.color.accent.hover": "#b5e36f",
-      "semantic.color.accent.focusRing": "#b5e36f",
-      "semantic.color.status.success": "#97d14d",
-      "semantic.color.status.warning": "#f0ba55",
-      "semantic.color.status.danger": "#ef7c72",
-      "semantic.color.icon.primary": "#efefef",
-      "semantic.color.icon.muted": "#a6a6a6"
+      "color.background.canvas": "#111111",
+      "color.background.surface": "#181818",
+      "color.background.panel": "#202020",
+      "color.background.elevated": "#292929",
+      "color.background.overlay": "rgba(8, 8, 8, 0.82)",
+      "color.text.primary": "#efefef",
+      "color.text.secondary": "#a6a6a6",
+      "color.text.inverse": "#151515",
+      "color.border.subtle": "rgba(198, 198, 198, 0.14)",
+      "color.border.default": "rgba(198, 198, 198, 0.24)",
+      "color.border.strong": "rgba(198, 198, 198, 0.42)",
+      "color.accent.base": "#97d14d",
+      "color.accent.hover": "#b5e36f",
+      "color.accent.focusRing": "#b5e36f",
+      "color.status.success": "#97d14d",
+      "color.status.warning": "#f0ba55",
+      "color.status.danger": "#ef7c72",
+      "color.icon.primary": "#efefef",
+      "color.icon.muted": "#a6a6a6"
     }
   }
 } as const;
@@ -71,36 +71,36 @@ export const densityModes = {
     "selector": "[data-density=\"comfortable\"]",
     "description": "Relaxed spacing for content-heavy product layouts.",
     "overrides": {
-      "semantic.space.panel.x": "1.25rem",
-      "semantic.space.panel.y": "1rem",
-      "semantic.space.control.x": "1rem",
-      "semantic.space.control.y": "0.75rem",
-      "semantic.space.stack.md": "1rem",
-      "semantic.space.stack.lg": "1.5rem"
+      "space.panel.x": "1.25rem",
+      "space.panel.y": "1rem",
+      "space.control.x": "1rem",
+      "space.control.y": "0.75rem",
+      "space.stack.md": "1rem",
+      "space.stack.lg": "1.5rem"
     }
   },
   "compact": {
     "selector": "[data-density=\"compact\"]",
     "description": "Tighter spacing for dense workstation layouts.",
     "overrides": {
-      "semantic.space.panel.x": "0.75rem",
-      "semantic.space.panel.y": "0.5rem",
-      "semantic.space.control.x": "0.5rem",
-      "semantic.space.control.y": "0.25rem",
-      "semantic.space.stack.md": "0.5rem",
-      "semantic.space.stack.lg": "1rem"
+      "space.panel.x": "0.75rem",
+      "space.panel.y": "0.5rem",
+      "space.control.x": "0.5rem",
+      "space.control.y": "0.25rem",
+      "space.stack.md": "0.5rem",
+      "space.stack.lg": "1rem"
     }
   },
   "default": {
     "selector": "[data-density=\"default\"]",
     "description": "Balanced spacing for the standard product presentation.",
     "overrides": {
-      "semantic.space.panel.x": "1rem",
-      "semantic.space.panel.y": "0.75rem",
-      "semantic.space.control.x": "0.75rem",
-      "semantic.space.control.y": "0.5rem",
-      "semantic.space.stack.md": "0.75rem",
-      "semantic.space.stack.lg": "1.25rem"
+      "space.panel.x": "1rem",
+      "space.panel.y": "0.75rem",
+      "space.control.x": "0.75rem",
+      "space.control.y": "0.5rem",
+      "space.stack.md": "0.75rem",
+      "space.stack.lg": "1.25rem"
     }
   }
 } as const;
@@ -110,45 +110,45 @@ export const controlSizes = {
     "selector": "[data-control-size=\"lg\"]",
     "description": "Large control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "2.75rem",
-      "semantic.size.control.minWidth": "7rem",
-      "semantic.size.icon.default": "1.25rem"
+      "size.control.height": "2.75rem",
+      "size.control.minWidth": "7rem",
+      "size.icon.default": "1.25rem"
     }
   },
   "md": {
     "selector": "[data-control-size=\"md\"]",
     "description": "Default control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "2.25rem",
-      "semantic.size.control.minWidth": "6rem",
-      "semantic.size.icon.default": "1rem"
+      "size.control.height": "2.25rem",
+      "size.control.minWidth": "6rem",
+      "size.icon.default": "1rem"
     }
   },
   "sm": {
     "selector": "[data-control-size=\"sm\"]",
     "description": "Small control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "1.75rem",
-      "semantic.size.control.minWidth": "5.25rem",
-      "semantic.size.icon.default": "0.75rem"
+      "size.control.height": "1.75rem",
+      "size.control.minWidth": "5.25rem",
+      "size.icon.default": "0.75rem"
     }
   },
   "xl": {
     "selector": "[data-control-size=\"xl\"]",
     "description": "Extra-large control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "3.25rem",
-      "semantic.size.control.minWidth": "8rem",
-      "semantic.size.icon.default": "1.5rem"
+      "size.control.height": "3.25rem",
+      "size.control.minWidth": "8rem",
+      "size.icon.default": "1.5rem"
     }
   },
   "xs": {
     "selector": "[data-control-size=\"xs\"]",
     "description": "Extra-small control size overlay.",
     "overrides": {
-      "semantic.size.control.height": "1.5rem",
-      "semantic.size.control.minWidth": "4.5rem",
-      "semantic.size.icon.default": "0.625rem"
+      "size.control.height": "1.5rem",
+      "size.control.minWidth": "4.5rem",
+      "size.icon.default": "0.625rem"
     }
   }
 } as const;

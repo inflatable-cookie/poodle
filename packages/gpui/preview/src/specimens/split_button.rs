@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
     let last_action = state.specimens.text.get("split-btn-action")
         .cloned()
         .unwrap_or_else(|| String::from("(none)"));
@@ -173,7 +173,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .overflow_hidden()
                         .rounded(px(8.0))
                         .border_1()
-                        .border_color(color_to_hsla(theme.resolve_color("semantic.color.border.subtle")))
+                        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
                         .p(px(12.0))
                         .child(div().h(px(60.0))) // spacer
                         .child(

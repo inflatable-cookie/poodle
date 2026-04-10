@@ -56,8 +56,8 @@ impl IntoElement for Progress {
         let bar_height = px(8.0 + rem_to_px(size_height_offset_rem(effective_size)) * 0.5);
 
         let accent = resolve_color(theme, spec.indicator_fill_token());
-        let surface = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let surface = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
         // Contract: track bg = color-mix(surface 96%, text-primary)
         let track_bg = color_mix(surface, text_primary, 0.96);
 

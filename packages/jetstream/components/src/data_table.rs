@@ -17,12 +17,12 @@ pub fn js_data_table(spec: &DataTableSpec, theme: &JetstreamThemeProvider) -> Js
     let header_py = rem_to_px(panel_space_y_rem(spec.density));
     let row_py = rem_to_px(panel_space_y_rem(spec.density) - 0.125);
 
-    let fill = resolve_color(theme, "semantic.color.background.surface");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let fill = resolve_color(theme, "color.background.surface");
+    let border = resolve_color(theme, "color.border.subtle");
     let header_fill = resolve_color(theme, spec.header_fill_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let radius = resolve_radius(theme, "radius.surface");
 
     let mut el = ui_element::div()
         .bg(fill)

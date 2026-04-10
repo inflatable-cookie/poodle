@@ -60,10 +60,10 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
 
     let fill = resolve_color(theme, spec.fill_token());
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
     let text_primary = resolve_color(theme, spec.control_color_token());
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
 
     let track_height = rem_to_px(0.25);
 
@@ -94,7 +94,7 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
 
     // Seek slider (represented as a track bar)
     let seek_progress = spec.progress();
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let accent = resolve_color(theme, "color.accent.base");
     let seek_track = ui_element::div()
         .min_h(track_height).self_stretch().rounded(999.0)
         .bg(text_primary)

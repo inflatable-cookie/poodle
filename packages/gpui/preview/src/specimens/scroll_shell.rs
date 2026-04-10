@@ -6,8 +6,8 @@ use poodle_gpui_components::{Eyebrow, ScrollShell};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let border = theme.resolve_color("semantic.color.border.default");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let border = theme.resolve_color("color.border.default");
 
     let surface_row = |label: &str| {
         div()

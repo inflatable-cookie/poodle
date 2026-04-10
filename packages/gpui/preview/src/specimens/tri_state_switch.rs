@@ -33,7 +33,7 @@ fn state_label(state: CheckState) -> &'static str {
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let filter_state = state_from_key(state.specimens.selected("tri-state-filter"));
 

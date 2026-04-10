@@ -45,7 +45,7 @@ impl IntoElement for ReorderableList {
         let _fill = resolve_color(theme, spec.fill_token());
         let gap = resolve_px(theme, spec.item_gap_token());
         let handle_color = resolve_color(theme, spec.handle_color_token());
-        let drag_bg = resolve_color(theme, "semantic.color.surface.raised");
+        let drag_bg = resolve_color(theme, "color.surface.raised");
 
         let mut el = div().flex().flex_col().gap(gap);
         for (idx, child) in self.children.into_iter().enumerate() {
@@ -63,7 +63,7 @@ impl IntoElement for ReorderableList {
                 .child(grip_icon);
 
             let row_id = SharedString::from(format!("poodle-reorder-item-{}", idx));
-            let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+            let focus_ring = resolve_color(theme, "color.accent.focusRing");
             let row = div()
                 .id(row_id)
                 .focusable()
@@ -81,7 +81,7 @@ impl IntoElement for ReorderableList {
             el = el.child(row);
         }
         if spec.is_disabled {
-            let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+            let opacity = resolve_opacity(theme, "state.opacity.disabled");
             el = el.opacity(opacity);
         }
         el.into_any_element()

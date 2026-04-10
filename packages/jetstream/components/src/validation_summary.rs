@@ -8,10 +8,10 @@ use crate::theme_ext::resolve_color;
 
 pub fn js_validation_summary(spec: &ValidationSummarySpec, theme: &JetstreamThemeProvider) -> JsEl {
     let border = resolve_color(theme, spec.border_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let danger_color = resolve_color(theme, "semantic.color.status.danger");
-    let accent_color = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let danger_color = resolve_color(theme, "color.status.danger");
+    let accent_color = resolve_color(theme, "color.accent.base");
 
     let font_size = rem_to_px(0.8125);
     let small_size = rem_to_px(0.75);

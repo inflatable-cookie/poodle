@@ -89,13 +89,13 @@ impl IntoElement for RelationPicker {
         let inline_padding = px(panel_px);
         let inline_gap = px(item_gap);
         let body_size = px(font_size);
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
 
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
-        let bg = resolve_color(theme, "semantic.color.background.elevated");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border = resolve_color(theme, "color.border.subtle");
+        let bg = resolve_color(theme, "color.background.elevated");
+        let accent = resolve_color(theme, "color.accent.base");
 
         let mut container = div()
             .flex()
@@ -221,7 +221,7 @@ impl IntoElement for RelationPicker {
                         .child(
                             div()
                                 .text_size(body_size)
-                                .text_color(resolve_color(theme, "semantic.color.status.danger"))
+                                .text_color(resolve_color(theme, "color.status.danger"))
                                 .child("Failed to load items."),
                         ),
                 );

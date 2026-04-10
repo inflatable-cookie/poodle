@@ -17,11 +17,11 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
     let seg_py = rem_to_px(0.25);
 
     let selected_fill = resolve_color(theme, spec.selected_fill_token());
-    let bg = resolve_color(theme, "semantic.color.background.surface");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let text_muted = resolve_color(theme, "semantic.color.text.secondary");
-    let radius = resolve_radius(theme, "semantic.radius.control");
+    let bg = resolve_color(theme, "color.background.surface");
+    let border = resolve_color(theme, "color.border.subtle");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let text_muted = resolve_color(theme, "color.text.secondary");
+    let radius = resolve_radius(theme, "radius.control");
 
     let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
@@ -49,7 +49,7 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
     }
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity);
     }
 

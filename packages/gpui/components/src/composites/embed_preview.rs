@@ -32,14 +32,14 @@ impl IntoElement for EmbedPreview {
         let theme = &self.theme;
         let fill = resolve_color(theme, self.spec.fill_token());
         let border = resolve_color(theme, self.spec.border_token());
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let title_color = resolve_color(theme, "semantic.color.text.primary");
-        let desc_color = resolve_color(theme, "semantic.color.text.secondary");
-        let danger_color = resolve_color(theme, "semantic.color.status.danger");
-        let success_color = resolve_color(theme, "semantic.color.status.success");
-        let subtle_bg = resolve_color(theme, "semantic.color.background.subtle");
-        let gap = resolve_px(theme, "semantic.space.inline.sm");
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let radius = resolve_radius(theme, "radius.surface");
+        let title_color = resolve_color(theme, "color.text.primary");
+        let desc_color = resolve_color(theme, "color.text.secondary");
+        let danger_color = resolve_color(theme, "color.status.danger");
+        let success_color = resolve_color(theme, "color.status.success");
+        let subtle_bg = resolve_color(theme, "color.background.subtle");
+        let gap = resolve_px(theme, "space.inline.sm");
+        let label_size = resolve_px(theme, "typography.label.size");
 
         // Surface container with border and radius
         let mut el = div()
@@ -194,7 +194,7 @@ impl IntoElement for EmbedPreview {
                             .text_size(px(11.0))
                             .font_weight(FontWeight::MEDIUM)
                             .text_color(success_color)
-                            .bg(resolve_color(theme, "semantic.color.background.subtle"))
+                            .bg(resolve_color(theme, "color.background.subtle"))
                             .rounded(px(4.0))
                             .px(px(6.0))
                             .py(px(2.0))

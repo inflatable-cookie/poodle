@@ -17,8 +17,8 @@ pub fn js_bulk_action_bar(spec: &BulkActionBarSpec, theme: &JetstreamThemeProvid
     let gap = rem_to_px(0.5);
     let btn_px = rem_to_px(control_space_x_rem(spec.density));
 
-    let fill = resolve_color(theme, "semantic.color.background.elevated");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let fill = resolve_color(theme, "color.background.elevated");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let mut el = ui_element::div()
         .bg(fill)

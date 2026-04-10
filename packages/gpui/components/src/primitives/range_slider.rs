@@ -56,11 +56,11 @@ impl IntoElement for RangeSlider {
         let spec = &self.spec;
 
         let accent = resolve_color(theme, spec.range_fill_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
+        let border = resolve_color(theme, "color.border.default");
         let surface_bg = resolve_color(theme, spec.track_fill_token());
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -77,7 +77,7 @@ impl IntoElement for RangeSlider {
         let track_radius = px(track_height_f / 2.0);
 
         // Thumb dimensions
-        let thumb_f = theme.resolve_space("semantic.size.icon.md");
+        let thumb_f = theme.resolve_space("size.icon.md");
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
         let label_font_size = px(rem_to_px(size_font_rem(effective_size)));

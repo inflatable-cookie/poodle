@@ -13,8 +13,8 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_muted = theme.resolve_color("semantic.color.text.muted");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_muted = theme.resolve_color("color.text.muted");
 
     let last_clicked = state.specimens.text.get("list-card-clicked").cloned();
 

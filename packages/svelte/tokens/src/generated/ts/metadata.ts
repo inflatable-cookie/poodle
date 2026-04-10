@@ -63,20 +63,20 @@ export const manifest = {
 
 export const aliases = [
   {
-    "from": "semantic.color.accent.base",
-    "to": "semantic.color.accent.base",
+    "from": "color.accent.base",
+    "to": "color.accent.base",
     "note": "Reserved for downstream bridges that need brand-accent mapping."
   },
   {
-    "from": "semantic.size.control.height",
-    "to": "semantic.size.control.height",
+    "from": "size.control.height",
+    "to": "size.control.height",
     "note": "Control height stays semantic so density and size overlays can override it."
   }
 ] as const;
 
 export const deprecations = [
   {
-    "path": "semantic.color.border.default",
+    "path": "color.border.default",
     "status": "active",
     "replacement": null,
     "note": "Bootstrap file proves lifecycle metadata wiring."

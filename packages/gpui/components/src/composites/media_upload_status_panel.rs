@@ -35,13 +35,13 @@ impl IntoElement for MediaUploadStatusPanel {
 
         let body_size = px(font_size);
         let label_size = px(font_size * 0.85);
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let success = resolve_color(theme, "semantic.color.status.success");
-        let danger = resolve_color(theme, "semantic.color.status.danger");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
+        let success = resolve_color(theme, "color.status.success");
+        let danger = resolve_color(theme, "color.status.danger");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let radius = resolve_radius(theme, "radius.surface");
 
         let (status_text, status_color) = match spec.step {
             MediaUploadStep::Checking => ("Checking file...", text_secondary),

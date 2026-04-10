@@ -29,9 +29,9 @@ use crate::specimens;
 
 /// Build the entire shell as a pure JsEl tree.
 pub fn build_shell(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
-    let bg_panel = resolve_color(theme, "semantic.color.background.panel");
-    let bg_surface = resolve_color(theme, "semantic.color.background.surface");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let bg_panel = resolve_color(theme, "color.background.panel");
+    let bg_surface = resolve_color(theme, "color.background.surface");
+    let border = resolve_color(theme, "color.border.subtle");
 
     div().flex_col().grow().bg(bg_panel)
         .child(build_tab_bar(state, theme, bg_surface, border))
@@ -50,9 +50,9 @@ fn build_tab_bar(
     bg_surface: glam::Vec4,
     border: glam::Vec4,
 ) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let mut bar = div().flex_row().w_full().h(44.0).px(8.0).gap(4.0)
         .items_center()
@@ -91,7 +91,7 @@ fn build_controls_bar(
     bg_surface: glam::Vec4,
     border: glam::Vec4,
 ) -> JsEl {
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
 
     let mut bar = div().flex_row().w_full().h(56.0).px(16.0).gap(24.0)
         .items_center()
@@ -137,11 +137,11 @@ fn build_toggle_group(
     active: usize,
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let bg_canvas = resolve_color(theme, "semantic.color.background.canvas");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
+    let border = resolve_color(theme, "color.border.subtle");
+    let bg_canvas = resolve_color(theme, "color.background.canvas");
 
     let mut row = div().flex_row().gap(2.0);
     for (i, &option) in options.iter().enumerate() {
@@ -169,10 +169,10 @@ fn build_toggle_group(
 
 /// A single state probe toggle (checkbox-style button).
 fn build_probe_toggle(name: &str, checked: bool, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
+    let border = resolve_color(theme, "color.border.subtle");
 
     let indicator = if checked { "✓ " } else { "○ " };
     let display = format!("{indicator}{name}");
@@ -197,9 +197,9 @@ fn build_sidebar(
     bg_surface: glam::Vec4,
     border: glam::Vec4,
 ) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let mut sidebar = div().flex_col().w(224.0).flex_shrink_0().self_stretch()
         .py(4.0).gap(1.0)

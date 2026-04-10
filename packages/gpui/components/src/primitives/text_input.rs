@@ -165,9 +165,9 @@ impl IntoElement for TextInput {
 
         // Contract: validation state border colors
         let effective_border = match spec.validation_state {
-            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
-            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
-            ValidationState::Pending => resolve_color(theme, "semantic.color.accent.base"),
+            ValidationState::Invalid => resolve_color(theme, "color.status.danger"),
+            ValidationState::Valid => resolve_color(theme, "color.status.success"),
+            ValidationState::Pending => resolve_color(theme, "color.accent.base"),
             _ => border,
         };
 
@@ -238,21 +238,21 @@ impl IntoElement for TextInput {
         // Validation indicator (circle-check, circle-x, or spinner)
         match spec.validation_state {
             ValidationState::Valid => {
-                let success_color = resolve_color(theme, "semantic.color.status.success");
+                let success_color = resolve_color(theme, "color.status.success");
                 inner = inner.child(
                     Icon::from_spec(IconSpec::new("circle-check").with_size(IconSize::Sm), theme)
                         .with_color(success_color),
                 );
             }
             ValidationState::Invalid => {
-                let danger_color = resolve_color(theme, "semantic.color.status.danger");
+                let danger_color = resolve_color(theme, "color.status.danger");
                 inner = inner.child(
                     Icon::from_spec(IconSpec::new("circle-x").with_size(IconSize::Sm), theme)
                         .with_color(danger_color),
                 );
             }
             ValidationState::Pending => {
-                let accent_color = resolve_color(theme, "semantic.color.accent.base");
+                let accent_color = resolve_color(theme, "color.accent.base");
                 inner = inner.child(
                     Spinner::from_spec(
                         SpinnerSpec::new()

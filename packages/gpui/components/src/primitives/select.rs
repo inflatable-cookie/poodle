@@ -87,21 +87,21 @@ impl IntoElement for Select {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_padding = resolve_px(theme, "semantic.space.control.x");
+        let base_padding = resolve_px(theme, "space.control.x");
         let inline_padding = base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
+        let control_radius = resolve_radius(theme, "radius.control");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let surface_raw = resolve_color(theme, "semantic.color.background.surface");
-        let elevated_raw = resolve_color(theme, "semantic.color.background.elevated");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let border_default = resolve_color(theme, "color.border.default");
+        let surface_raw = resolve_color(theme, "color.background.surface");
+        let elevated_raw = resolve_color(theme, "color.background.elevated");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
 
         // Svelte treatment-interactive-subtle values for trigger
@@ -126,8 +126,8 @@ impl IntoElement for Select {
             "poodle-select".to_string()
         };
 
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let icon_muted = resolve_color(theme, "color.icon.muted");
 
         // Trigger button
         let mut trigger = div()

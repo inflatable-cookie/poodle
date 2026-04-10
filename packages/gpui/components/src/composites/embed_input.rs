@@ -34,12 +34,12 @@ impl IntoElement for EmbedInput {
         let spec = &self.spec;
         let fill = resolve_color(theme, spec.fill_token());
         let border = resolve_color(theme, spec.border_token());
-        let radius = resolve_radius(theme, "semantic.radius.control");
-        let text_color = resolve_color(theme, "semantic.color.text.primary");
-        let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let radius = resolve_radius(theme, "radius.control");
+        let text_color = resolve_color(theme, "color.text.primary");
+        let placeholder_color = resolve_color(theme, "color.text.secondary");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let status_color = resolve_color(theme, spec.status_text_color_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         let display = if spec.value.is_empty() {
             spec.placeholder.as_deref().unwrap_or("Paste URL or embed code...")
@@ -73,7 +73,7 @@ impl IntoElement for EmbedInput {
 
         if spec.is_disabled {
             textarea = textarea
-                .opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"))
+                .opacity(resolve_opacity(theme, "state.opacity.disabled"))
                 .cursor_not_allowed();
         }
 

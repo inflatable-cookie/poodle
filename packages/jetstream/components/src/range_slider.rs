@@ -27,7 +27,7 @@ pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -
     el = el.child(track);
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity);
     }
 

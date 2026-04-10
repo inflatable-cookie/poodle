@@ -6,9 +6,9 @@ use poodle_gpui_components::{Eyebrow, ResizeHandle};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let panel_bg = theme.resolve_color("semantic.color.background.panel");
-    let border_subtle = theme.resolve_color("semantic.color.border.subtle");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let panel_bg = theme.resolve_color("color.background.panel");
+    let border_subtle = theme.resolve_color("color.border.subtle");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Horizontal split (vertical handle — drag left/right) ---

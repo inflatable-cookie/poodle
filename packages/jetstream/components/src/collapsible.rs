@@ -11,7 +11,7 @@ pub fn js_collapsible(spec: &CollapsibleSpec, theme: &JetstreamThemeProvider, co
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let gap = resolve_px(theme, spec.content_gap_token());
     let is_open = spec.current_open();
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let text_color = resolve_color(theme, "color.text.primary");
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Icon size: one step smaller than control font for chrome feel
     let icon_size = rem_to_px(0.875); // 14px equivalent

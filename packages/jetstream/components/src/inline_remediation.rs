@@ -22,10 +22,10 @@ fn tone_icon(tone: StatusTone) -> &'static str {
 pub fn js_inline_remediation(spec: &InlineRemediationSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let border = resolve_color(theme, spec.border_token());
     let tone_color: Color = resolve_color(theme, spec.border_token()).into();
-    let panel: Color = resolve_color(theme, "semantic.color.background.panel").into();
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent_color = resolve_color(theme, "semantic.color.accent.base");
+    let panel: Color = resolve_color(theme, "color.background.panel").into();
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let accent_color = resolve_color(theme, "color.accent.base");
 
     let fill = tone_color.mix(panel, 0.08);
     let font_size = rem_to_px(0.8125);

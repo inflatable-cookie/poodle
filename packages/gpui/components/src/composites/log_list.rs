@@ -37,10 +37,10 @@ impl LogLevel {
 
     fn badge_fill_token(self) -> &'static str {
         match self {
-            Self::Debug => "semantic.color.text.secondary",
-            Self::Info  => "semantic.color.accent.base",
-            Self::Warn  => "semantic.color.warning.base",
-            Self::Error => "semantic.color.danger.base",
+            Self::Debug => "color.text.secondary",
+            Self::Info  => "color.accent.base",
+            Self::Warn  => "color.warning.base",
+            Self::Error => "color.danger.base",
         }
     }
 }
@@ -99,9 +99,9 @@ impl IntoElement for LogList {
         let fill = resolve_color(theme, self.spec.fill_token());
         let label_size = px(font_size);
         let gap = resolve_px(theme, self.spec.entry_gap_token());
-        let border_color = resolve_color(theme, "semantic.color.border.subtle");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let border_color = resolve_color(theme, "color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
 
         // ── Toolbar ──────────────────────────────────────────────
         let filter_icon = Icon::from_spec(
@@ -139,7 +139,7 @@ impl IntoElement for LogList {
             .px(px(4.0))
             .py(px(2.0))
             .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
-            .focus(move |s| s.border_color(resolve_color(theme, "semantic.color.accent.focusRing")))
+            .focus(move |s| s.border_color(resolve_color(theme, "color.accent.focusRing")))
             .child(filter_icon)
             .child(
                 div()
@@ -167,7 +167,7 @@ impl IntoElement for LogList {
             .px(px(4.0))
             .py(px(2.0))
             .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
-            .focus(move |s| s.border_color(resolve_color(theme, "semantic.color.accent.focusRing")))
+            .focus(move |s| s.border_color(resolve_color(theme, "color.accent.focusRing")))
             .child(search_icon)
             .child(
                 div()

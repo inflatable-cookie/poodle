@@ -110,9 +110,9 @@ impl IntoElement for SidebarNav {
         let separator_color = resolve_color(theme, spec.separator_color_token());
         let active_indicator_color = resolve_color(theme, spec.active_indicator_color_token());
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let control_radius = resolve_radius(theme, "radius.control");
         let item_radius = px(control_radius.0 - 2.0); // contract: calc(radius-control - 0.125rem)
 
         // Active item background: accent at 10% opacity

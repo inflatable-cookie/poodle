@@ -62,7 +62,7 @@ impl IntoElement for DetailSection {
         let spec = &self.spec;
 
         let section_gap = resolve_px(theme, spec.section_gap_token());
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let body_size = resolve_px(theme, "typography.body.size");
         let body_gap = resolve_px(theme, spec.body_gap_token());
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let title_body_gap = resolve_px(theme, spec.title_body_gap_token());

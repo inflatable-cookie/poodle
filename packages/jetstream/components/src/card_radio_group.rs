@@ -49,11 +49,11 @@ pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProv
     let selected_fill = resolve_color(theme, spec.selected_fill_token());
     let unselected_fill = resolve_color(theme, spec.unselected_fill_token());
     let border_color = resolve_color(theme, spec.border_token());
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let accent = resolve_color(theme, "color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let text_inverse = resolve_color(theme, "color.text.inverse");
+    let radius = resolve_radius(theme, "radius.surface");
 
     let current_value = spec.current_value();
 

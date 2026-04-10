@@ -46,18 +46,18 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
     let validation = spec.effective_validation_state();
 
     // ── Token resolution ──
-    let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
-    let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
-    let text_secondary: Color = resolve_color(theme, "semantic.color.text.secondary").into();
-    let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
-    let accent: Color = resolve_color(theme, "semantic.color.accent.base").into();
-    let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
-    let radius = resolve_radius(theme, "semantic.radius.control");
+    let surface: Color = resolve_color(theme, "color.background.surface").into();
+    let text_primary: Color = resolve_color(theme, "color.text.primary").into();
+    let text_secondary: Color = resolve_color(theme, "color.text.secondary").into();
+    let border_default: Color = resolve_color(theme, "color.border.default").into();
+    let accent: Color = resolve_color(theme, "color.accent.base").into();
+    let danger: Color = resolve_color(theme, "color.status.danger").into();
+    let radius = resolve_radius(theme, "radius.control");
 
     // Validation-dependent border
     let slot_border = match validation {
         ValidationState::Invalid => danger,
-        ValidationState::Valid => resolve_color(theme, "semantic.color.status.success").into(),
+        ValidationState::Valid => resolve_color(theme, "color.status.success").into(),
         ValidationState::Pending => accent,
         ValidationState::None => border_default,
     };
@@ -140,7 +140,7 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
 
         let mut outer = wrapper;
         if spec.is_disabled {
-            let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+            let opacity = resolve_opacity(theme, "state.opacity.disabled");
             outer = outer.opacity(opacity).disabled(true);
         }
         return outer;
@@ -148,7 +148,7 @@ pub fn js_code_input(spec: &CodeInputSpec, theme: &JetstreamThemeProvider) -> Js
 
     // ── Disabled state ──
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         root = root.opacity(opacity).disabled(true);
     }
 

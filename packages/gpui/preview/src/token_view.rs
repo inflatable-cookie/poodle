@@ -8,7 +8,7 @@ use crate::style_bridge::color_to_hsla;
 
 /// Render the token inspector view.
 pub fn render_token_inspector(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     div()
         .flex()
@@ -21,35 +21,35 @@ pub fn render_token_inspector(theme: &GpuiThemeProvider) -> Div {
                     .child(format!("Active theme: {}", theme.theme_name)))
         )
         .child(render_color_section("Background Colors", theme, &[
-            ("canvas", "semantic.color.background.canvas", semantic::COLOR_BACKGROUND_CANVAS),
-            ("surface", "semantic.color.background.surface", semantic::COLOR_BACKGROUND_SURFACE),
-            ("panel", "semantic.color.background.panel", semantic::COLOR_BACKGROUND_PANEL),
-            ("elevated", "semantic.color.background.elevated", semantic::COLOR_BACKGROUND_ELEVATED),
-            ("overlay", "semantic.color.background.overlay", semantic::COLOR_BACKGROUND_OVERLAY),
+            ("canvas", "color.background.canvas", semantic::COLOR_BACKGROUND_CANVAS),
+            ("surface", "color.background.surface", semantic::COLOR_BACKGROUND_SURFACE),
+            ("panel", "color.background.panel", semantic::COLOR_BACKGROUND_PANEL),
+            ("elevated", "color.background.elevated", semantic::COLOR_BACKGROUND_ELEVATED),
+            ("overlay", "color.background.overlay", semantic::COLOR_BACKGROUND_OVERLAY),
         ]))
         .child(render_color_section("Text Colors", theme, &[
-            ("primary", "semantic.color.text.primary", semantic::COLOR_TEXT_PRIMARY),
-            ("secondary", "semantic.color.text.secondary", semantic::COLOR_TEXT_SECONDARY),
-            ("inverse", "semantic.color.text.inverse", semantic::COLOR_TEXT_INVERSE),
+            ("primary", "color.text.primary", semantic::COLOR_TEXT_PRIMARY),
+            ("secondary", "color.text.secondary", semantic::COLOR_TEXT_SECONDARY),
+            ("inverse", "color.text.inverse", semantic::COLOR_TEXT_INVERSE),
         ]))
         .child(render_color_section("Border Colors", theme, &[
-            ("subtle", "semantic.color.border.subtle", semantic::COLOR_BORDER_SUBTLE),
-            ("default", "semantic.color.border.default", semantic::COLOR_BORDER_DEFAULT),
-            ("strong", "semantic.color.border.strong", semantic::COLOR_BORDER_STRONG),
+            ("subtle", "color.border.subtle", semantic::COLOR_BORDER_SUBTLE),
+            ("default", "color.border.default", semantic::COLOR_BORDER_DEFAULT),
+            ("strong", "color.border.strong", semantic::COLOR_BORDER_STRONG),
         ]))
         .child(render_color_section("Accent Colors", theme, &[
-            ("base", "semantic.color.accent.base", semantic::COLOR_ACCENT_BASE),
-            ("hover", "semantic.color.accent.hover", semantic::COLOR_ACCENT_HOVER),
-            ("focus ring", "semantic.color.accent.focusRing", semantic::COLOR_ACCENT_FOCUS_RING),
+            ("base", "color.accent.base", semantic::COLOR_ACCENT_BASE),
+            ("hover", "color.accent.hover", semantic::COLOR_ACCENT_HOVER),
+            ("focus ring", "color.accent.focusRing", semantic::COLOR_ACCENT_FOCUS_RING),
         ]))
         .child(render_color_section("Status Colors", theme, &[
-            ("success", "semantic.color.status.success", semantic::COLOR_STATUS_SUCCESS),
-            ("warning", "semantic.color.status.warning", semantic::COLOR_STATUS_WARNING),
-            ("danger", "semantic.color.status.danger", semantic::COLOR_STATUS_DANGER),
+            ("success", "color.status.success", semantic::COLOR_STATUS_SUCCESS),
+            ("warning", "color.status.warning", semantic::COLOR_STATUS_WARNING),
+            ("danger", "color.status.danger", semantic::COLOR_STATUS_DANGER),
         ]))
         .child(render_color_section("Icon Colors", theme, &[
-            ("primary", "semantic.color.icon.primary", semantic::COLOR_ICON_PRIMARY),
-            ("muted", "semantic.color.icon.muted", semantic::COLOR_ICON_MUTED),
+            ("primary", "color.icon.primary", semantic::COLOR_ICON_PRIMARY),
+            ("muted", "color.icon.muted", semantic::COLOR_ICON_MUTED),
         ]))
         .child(render_space_section("Spacing", theme, &[
             ("stack-sm", semantic::SPACE_STACK_SM),
@@ -90,9 +90,9 @@ fn render_color_section(
     theme: &GpuiThemeProvider,
     tokens: &[(&str, &str, &str)],
 ) -> Div {
-    let border = theme.resolve_color("semantic.color.border.default");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let elevated_bg = theme.resolve_color("semantic.color.background.elevated");
+    let border = theme.resolve_color("color.border.default");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let elevated_bg = theme.resolve_color("color.background.elevated");
 
     let mut section = div()
         .flex()
@@ -142,8 +142,8 @@ fn render_space_section(
     theme: &GpuiThemeProvider,
     tokens: &[(&str, &str)],
 ) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let accent = theme.resolve_color("semantic.color.accent.base");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let accent = theme.resolve_color("color.accent.base");
 
     let mut section = div()
         .flex()
@@ -183,7 +183,7 @@ fn render_size_section(
     theme: &GpuiThemeProvider,
     tokens: &[(&str, &str)],
 ) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let mut section = div()
         .flex()
@@ -214,7 +214,7 @@ fn render_misc_section(
     theme: &GpuiThemeProvider,
     tokens: &[(&str, &str)],
 ) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let mut section = div()
         .flex()
@@ -239,7 +239,7 @@ fn render_misc_section(
 }
 
 fn render_typography_section(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let families = [
         ("body", semantic::TYPOGRAPHY_BODY_FAMILY, semantic::TYPOGRAPHY_BODY_SIZE, semantic::TYPOGRAPHY_BODY_WEIGHT),

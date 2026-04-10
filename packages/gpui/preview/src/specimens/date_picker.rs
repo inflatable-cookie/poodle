@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     let default_open = state.specimens.is_on("date-picker-default-open");
     let default_selected = state.specimens.text.get("date-picker-default-value").cloned();

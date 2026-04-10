@@ -7,8 +7,8 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_composites::ShellStatusBarSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_color = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_color = resolve_color(theme, "color.text.secondary");
 
     let leading = vec![
         label("main").text_color(text_color).text_size(11.0),

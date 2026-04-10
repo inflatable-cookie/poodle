@@ -8,8 +8,8 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     let code_value = state.specimens.text.get("code-input-code").cloned()
         .unwrap_or_default();

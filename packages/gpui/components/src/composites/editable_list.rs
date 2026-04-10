@@ -111,19 +111,19 @@ impl IntoElement for EditableList {
         };
 
         // ── Token resolution ──────────────────────────────────────
-        let text_color = resolve_color(theme, "semantic.color.text.primary");
-        let secondary_color = resolve_color(theme, "semantic.color.text.secondary");
-        let muted_color = resolve_color(theme, "semantic.color.text.muted");
+        let text_color = resolve_color(theme, "color.text.primary");
+        let secondary_color = resolve_color(theme, "color.text.secondary");
+        let muted_color = resolve_color(theme, "color.text.muted");
         let input_border = resolve_color(theme, spec.input_border_token());
         let input_fill = resolve_color(theme, spec.input_fill_token());
         let _focus_ring = resolve_color(theme, spec.input_focus_ring_token());
         let remove_color = resolve_color(theme, spec.remove_color_token());
         let remove_hover_color = resolve_color(theme, spec.remove_hover_color_token());
         let counter_color = resolve_color(theme, spec.counter_color_token());
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "semantic.color.surface.raised");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "color.surface.raised");
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = px(rem_to_px(size_font_rem(effective_size) * 0.92));
 

@@ -48,6 +48,6 @@ impl StatusIndicatorSpec {
 
     /// Contract: label color token.
     pub fn label_color_token(&self) -> &'static str {
-        "semantic.color.text.primary"
+        "color.text.primary"
     }
 }

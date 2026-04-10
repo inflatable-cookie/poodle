@@ -69,11 +69,11 @@ impl IntoElement for ConfirmAction {
         let pad_y = rem_to_px(panel_space_y_rem(spec.density));
         let gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let fill = resolve_color(theme, "semantic.color.background.elevated");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let title_color = resolve_color(theme, "semantic.color.text.primary");
-        let msg_color = resolve_color(theme, "semantic.color.text.secondary");
+        let fill = resolve_color(theme, "color.background.elevated");
+        let border = resolve_color(theme, "color.border.default");
+        let radius = resolve_radius(theme, "radius.surface");
+        let title_color = resolve_color(theme, "color.text.primary");
+        let msg_color = resolve_color(theme, "color.text.secondary");
         let confirm_fill = resolve_color(theme, spec.confirm_fill_token());
         let body_size = px(font_size);
 
@@ -100,8 +100,8 @@ impl IntoElement for ConfirmAction {
         dialog = dialog.child(div().text_size(px(18.0)).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
         dialog = dialog.child(div().text_size(body_size).text_color(msg_color).child(spec.message.clone()));
 
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let hover_fill = resolve_color(theme, "semantic.color.background.elevated");
+        let control_radius = resolve_radius(theme, "radius.control");
+        let hover_fill = resolve_color(theme, "color.background.elevated");
 
         let mut cancel_btn = div()
             .id("poodle-confirm-cancel")

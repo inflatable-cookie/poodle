@@ -73,26 +73,26 @@ impl IntoElement for RadioGroup {
 
         // Svelte: indicator = calc(icon-default + 0.125rem) ≈ 18px, dot = calc(icon-default * 0.5) = 8px
         // Scale proportionally with effective_size
-        let icon_default = resolve_px(theme, "semantic.size.icon.md");
+        let icon_default = resolve_px(theme, "size.icon.md");
         let indicator_size = (icon_default + px(2.0)) * scale;
         let dot_size = icon_default * 0.5 * scale;
 
         // Contract: gap per orientation
         let group_gap = resolve_px(theme, spec.option_gap_token());
-        let option_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let option_gap = resolve_px(theme, "space.inline.sm");
 
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let accent = if let Some(ref hex) = spec.selected_color {
             crate::theme_ext::parse_hex_color(hex)
-                .unwrap_or_else(|| resolve_color(theme, "semantic.color.accent.base"))
+                .unwrap_or_else(|| resolve_color(theme, "color.accent.base"))
         } else {
-            resolve_color(theme, "semantic.color.accent.base")
+            resolve_color(theme, "color.accent.base")
         };
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let border = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         let current_value = spec.current_value().map(|s| s.to_string());
 

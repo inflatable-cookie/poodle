@@ -6,8 +6,8 @@ use poodle_gpui_components::{HoverCard, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let accent = theme.resolve_color("semantic.color.accent.base");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let accent = theme.resolve_color("color.accent.base");
 
     // --- Group: Default (top placement) ---
     let top_spec = HoverCardSpec::new()

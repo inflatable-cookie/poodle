@@ -72,13 +72,13 @@ impl IntoElement for AppHeader {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let inline_padding = resolve_px(theme, "space.inline.md");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         let bg = resolve_color(theme, spec.background_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let border = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
 
         let mut header = div()
             .flex()

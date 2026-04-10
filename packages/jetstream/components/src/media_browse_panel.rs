@@ -19,11 +19,11 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
         poodle_primitives::ControlDensity::Comfortable => (0.75, 0.5, 0.875),
     };
 
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let panel_bg = resolve_color(theme, "semantic.color.background.panel");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let border_subtle = resolve_color(theme, "color.border.subtle");
+    let radius = resolve_radius(theme, "radius.surface");
+    let panel_bg = resolve_color(theme, "color.background.panel");
 
     // Root
     let mut el = ui_element::div()
@@ -49,7 +49,7 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
             .min_h(rem_to_px(18.0))
             .child(
                 ui_element::label(error)
-                    .text_color(resolve_color(theme, "semantic.color.status.danger"))
+                    .text_color(resolve_color(theme, "color.status.danger"))
                     .text_size(label_font)
             );
         return el.child(state);
@@ -86,7 +86,7 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
             ui_element::div()
                 .self_stretch().min_h(rem_to_px(6.0))
                 .bg(panel_bg)
-                .rounded(resolve_radius(theme, "semantic.radius.control"))
+                .rounded(resolve_radius(theme, "radius.control"))
         );
 
         // Label

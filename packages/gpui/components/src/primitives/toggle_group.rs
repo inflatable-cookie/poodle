@@ -57,19 +57,19 @@ impl IntoElement for ToggleGroup {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         let gap = resolve_px(theme, spec.item_gap_token());
-        let radius = resolve_radius(theme, "semantic.radius.control");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let surface = resolve_color(theme, "semantic.color.background.surface");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let radius = resolve_radius(theme, "radius.control");
+        let accent = resolve_color(theme, "color.accent.base");
+        let surface = resolve_color(theme, "color.background.surface");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         // Size-aware item height and padding
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let item_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_pad_x = resolve_px(theme, "semantic.space.control.x");
+        let base_pad_x = resolve_px(theme, "space.control.x");
         let item_pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         // Contract: selected = accent 22% tinted bg, accent 42% border

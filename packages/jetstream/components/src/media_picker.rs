@@ -27,12 +27,12 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
     };
 
     let fill = resolve_color(theme, spec.fill_token());
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let ctrl_radius = resolve_radius(theme, "semantic.radius.control");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let gap = resolve_px(theme, "semantic.space.stack.sm");
+    let radius = resolve_radius(theme, "radius.surface");
+    let ctrl_radius = resolve_radius(theme, "radius.control");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let border = resolve_color(theme, "color.border.default");
+    let gap = resolve_px(theme, "space.stack.sm");
 
     // Root: dialog body content
     let mut el = ui_element::div()
@@ -91,7 +91,7 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
                 ui_element::div()
                     .w(thumb_size).h(thumb_size)
                     .rounded(rem_to_px(0.25))
-                    .bg(resolve_color(theme, "semantic.color.background.panel"))
+                    .bg(resolve_color(theme, "color.background.panel"))
             )
             .child(
                 ui_element::label(&format!("Item {}", i + 1))

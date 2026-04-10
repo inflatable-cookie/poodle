@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_composites::{MediaBrowseItem, MediaBrowsePanelSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let items = vec![
         MediaBrowseItem::new("a", "Approval still", "image").with_meta("1920x1080"),

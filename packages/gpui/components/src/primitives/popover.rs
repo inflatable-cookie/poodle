@@ -75,11 +75,11 @@ impl IntoElement for Popover {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let panel_x = resolve_px(theme, "semantic.space.panel.x");
-        let panel_y = resolve_px(theme, "semantic.space.panel.y");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let panel_x = resolve_px(theme, "space.panel.x");
+        let panel_y = resolve_px(theme, "space.panel.y");
+        let radius = resolve_radius(theme, "radius.surface");
 
         // Matches Svelte treatment-surface-elevated values
         let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };

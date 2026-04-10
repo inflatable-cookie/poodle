@@ -9,9 +9,9 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let border = theme.resolve_color("semantic.color.border.default");
-    let bg_surface = theme.resolve_color("semantic.color.background.surface");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let border = theme.resolve_color("color.border.default");
+    let bg_surface = theme.resolve_color("color.background.surface");
 
     // 1. UNDERLINE VARIANT (DEFAULT, WITH PANEL)
     let underline_tabs = vec![

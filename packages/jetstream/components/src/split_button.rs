@@ -22,8 +22,8 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
     let fill = resolve_color(theme, spec.fill_token());
     let border = resolve_color(theme, spec.border_token());
     let separator = resolve_color(theme, spec.separator_token());
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let radius = resolve_radius(theme, "radius.control");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let label = spec.label.as_deref().unwrap_or("");
 
@@ -54,7 +54,7 @@ pub fn js_split_button(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) -
     );
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity);
     }
 

@@ -42,12 +42,12 @@ pub fn js_tri_state_switch(
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Semantic color tokens ──
-    let danger: Color = resolve_color(theme, "semantic.color.status.danger").into();
-    let success: Color = resolve_color(theme, "semantic.color.status.success").into();
-    let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
-    let text_secondary: Color = resolve_color(theme, "semantic.color.text.secondary").into();
-    let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
-    let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
+    let danger: Color = resolve_color(theme, "color.status.danger").into();
+    let success: Color = resolve_color(theme, "color.status.success").into();
+    let text_primary: Color = resolve_color(theme, "color.text.primary").into();
+    let text_secondary: Color = resolve_color(theme, "color.text.secondary").into();
+    let surface: Color = resolve_color(theme, "color.background.surface").into();
+    let border_default: Color = resolve_color(theme, "color.border.default").into();
 
     // Per-state colors (with optional overrides)
     let excluded_color = danger;
@@ -163,7 +163,7 @@ pub fn js_tri_state_switch(
 
     // ── Disabled state ──
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         root = root.opacity(opacity).disabled(true);
     }
 

@@ -90,14 +90,14 @@ impl IntoElement for ColorPicker {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
         let trigger_radius = resolve_radius(theme, spec.trigger_radius_token());
         let surface_radius = resolve_radius(theme, spec.surface_radius_token());
 
         let border = resolve_color(theme, spec.border_token());
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
@@ -271,7 +271,7 @@ impl IntoElement for ColorPicker {
                     .h(px(28.0))
                     .px(px(8.0))
                     .rounded(px(4.0))
-                    .bg(resolve_color(theme, "semantic.color.background.surface"))
+                    .bg(resolve_color(theme, "color.background.surface"))
                     .border_1()
                     .border_color(border)
                     .flex()

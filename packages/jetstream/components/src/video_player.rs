@@ -16,7 +16,7 @@ fn format_time(seconds: f64) -> String {
 
 pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let radius = resolve_radius(theme, "radius.surface");
 
     // Size-driven button dimensions from contract
     let btn_size = rem_to_px(match effective_size {
@@ -67,7 +67,7 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
     let white_90 = glam::Vec4::new(1.0, 1.0, 1.0, 0.9);
     let white_80 = glam::Vec4::new(1.0, 1.0, 1.0, 0.8);
     let white_20 = glam::Vec4::new(1.0, 1.0, 1.0, 0.2);
-    let accent = crate::theme_ext::resolve_color(theme, "semantic.color.accent.base");
+    let accent = crate::theme_ext::resolve_color(theme, "color.accent.base");
 
     let track_height = rem_to_px(0.25);
 

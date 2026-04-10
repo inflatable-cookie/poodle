@@ -12,10 +12,10 @@ pub fn js_list_container(
     theme: &JetstreamThemeProvider,
     content: Option<JsEl>,
 ) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let danger_color = resolve_color(theme, "semantic.color.status.danger");
-    let stack_gap = resolve_px(theme, "semantic.space.stack.md");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let danger_color = resolve_color(theme, "color.status.danger");
+    let stack_gap = resolve_px(theme, "space.stack.md");
 
     let heading_size = rem_to_px(1.125);
     let body_size = rem_to_px(0.8125);

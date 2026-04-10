@@ -17,11 +17,11 @@ pub fn js_command_palette(spec: &CommandPaletteSpec, theme: &JetstreamThemeProvi
     let item_py = rem_to_px(panel_space_y_rem(spec.density) - 0.375);
     let gap = rem_to_px(0.5);
 
-    let fill = resolve_color(theme, "semantic.color.background.elevated");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let text_muted = resolve_color(theme, "semantic.color.text.secondary");
+    let fill = resolve_color(theme, "color.background.elevated");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let text_muted = resolve_color(theme, "color.text.secondary");
 
     let mut el = ui_element::div()
         .bg(fill)

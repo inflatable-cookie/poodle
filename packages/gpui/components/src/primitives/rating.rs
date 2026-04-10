@@ -65,7 +65,7 @@ impl IntoElement for Rating {
         let active_color = resolve_color(theme, spec.active_color_token());
         let inactive_color = resolve_color(theme, spec.inactive_color_token());
         let filled = spec.filled_count();
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
 
         let is_interactive = !spec.is_readonly && !spec.is_disabled;
 

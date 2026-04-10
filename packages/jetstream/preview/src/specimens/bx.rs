@@ -7,9 +7,9 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{BoxSpec, PaddingScale};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let border = resolve_color(theme, "color.border.subtle");
 
     div().flex_col().gap(24.0)
         .child(group("With padding", secondary,

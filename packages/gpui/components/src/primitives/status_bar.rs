@@ -63,8 +63,8 @@ impl IntoElement for StatusBar {
         let spec = &self.spec;
 
         let bg = resolve_color(theme, spec.background_token());
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+        let border = resolve_color(theme, "color.border.default");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
 
         let mut bar = div()
             .flex()

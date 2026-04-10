@@ -68,18 +68,18 @@ impl IntoElement for SegmentedControl {
         // Contract: root bg = color-mix(surface 93%, text-primary)
         // Contract: root border = color-mix(border-subtle 84%, transparent)
         // Contract: inner radius = calc(radius-control - 0.125rem)
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
         let inner_radius = (control_radius - px(2.0)).max(px(0.0));
 
         let accent = resolve_color(theme, self.spec.selected_fill_token());
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let text_inverse = resolve_color(theme, "color.text.inverse");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
         // Contract: root bg = surface 93% mix with text-primary
         let root_bg = color_mix(surface_bg, text_primary, 0.93);

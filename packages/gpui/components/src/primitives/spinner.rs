@@ -49,7 +49,7 @@ impl IntoElement for Spinner {
         } else if let Some(token) = spec.tone_color_token() {
             resolve_color(theme, token)
         } else {
-            resolve_color(theme, "semantic.color.text.primary")
+            resolve_color(theme, "color.text.primary")
         };
 
         match spec.variant {

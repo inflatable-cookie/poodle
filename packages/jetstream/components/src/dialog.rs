@@ -22,10 +22,10 @@ pub fn js_dialog(spec: &DialogSpec, theme: &JetstreamThemeProvider, content: Opt
 
     let fill = resolve_color(theme, spec.surface_fill_token());
     let backdrop_fill: Color = resolve_color(theme, spec.backdrop_fill_token()).into();
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let title_color = resolve_color(theme, "semantic.color.text.primary");
-    let desc_color = resolve_color(theme, "semantic.color.text.secondary");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
+    let title_color = resolve_color(theme, "color.text.primary");
+    let desc_color = resolve_color(theme, "color.text.secondary");
 
     // Dialog panel
     let mut panel = ui_element::div()

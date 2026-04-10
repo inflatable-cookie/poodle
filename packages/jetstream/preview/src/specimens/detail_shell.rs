@@ -7,8 +7,8 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_composites::DetailShellSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
         .child(group("With header and content", secondary,

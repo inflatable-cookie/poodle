@@ -66,8 +66,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let sizes: &[(&str, IconSize)] = &[
         ("sm", IconSize::Sm),
@@ -98,12 +98,12 @@ fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let accent = theme.resolve_color("semantic.color.accent.base");
-    let success = theme.resolve_color("semantic.color.status.success");
-    let warning = theme.resolve_color("semantic.color.status.warning");
-    let danger = theme.resolve_color("semantic.color.status.danger");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let accent = theme.resolve_color("color.accent.base");
+    let success = theme.resolve_color("color.status.success");
+    let warning = theme.resolve_color("color.status.warning");
+    let danger = theme.resolve_color("color.status.danger");
 
     let items: &[(&str, &str, poodle_tokens::typed::ColorValue)] = &[
         ("check", "Primary", text_primary),
@@ -134,8 +134,8 @@ fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn render_accessibility_section(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     div().flex().flex_col().gap(px(8.0))
         .child(
@@ -171,8 +171,8 @@ fn render_accessibility_section(theme: &GpuiThemeProvider) -> Div {
 }
 
 fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let mut gallery = div()
         .flex()

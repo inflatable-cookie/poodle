@@ -87,18 +87,18 @@ impl IntoElement for Accordion {
         let density_gap = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let text_inverse = resolve_color(theme, "color.text.inverse");
+        let surface_bg = resolve_color(theme, "color.background.surface");
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
-        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+        let surface_radius = resolve_radius(theme, "radius.surface");
         let panel_pad_x = density_pad_x;
         let panel_pad_y = density_pad_y;
         let stack_md = density_gap;
         let heading_size = title_font;
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
+        let label_size = resolve_px(theme, "typography.label.size");
 
         // Item background: color-mix(surface 93%, text-primary)
         let item_bg = color_mix(surface_bg, text_primary, 0.93);

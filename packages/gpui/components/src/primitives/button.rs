@@ -86,8 +86,8 @@ impl IntoElement for Button {
         let base_fill = resolve_color(theme, spec.resolved_fill_token());
         let base_text = resolve_color(theme, spec.resolved_text_token());
         let base_border = resolve_color(theme, spec.resolved_border_token());
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let radius = resolve_radius(theme, spec.radius_token());
 
         // ── Resolve effective size from size + size_role ────────
@@ -118,9 +118,9 @@ impl IntoElement for Button {
         let (fill, border_color, text_color) = match (spec.variant, spec.tone) {
             (ButtonVariant::Secondary, ButtonTone::Danger) => {
                 // fill: color-mix(status-danger 16%, background-surface)
-                let danger = resolve_color(theme, "semantic.color.status.danger");
-                let surface = resolve_color(theme, "semantic.color.background.surface");
-                let border_default = resolve_color(theme, "semantic.color.border.default");
+                let danger = resolve_color(theme, "color.status.danger");
+                let surface = resolve_color(theme, "color.background.surface");
+                let border_default = resolve_color(theme, "color.border.default");
                 let fill = color_mix(danger, surface, 0.16);
                 // border: color-mix(status-danger 46%, border-default)
                 let border = color_mix(danger, border_default, 0.46);
@@ -151,7 +151,7 @@ impl IntoElement for Button {
         // produces ~22% text-primary. We replicate by mixing the resolved border-default
         // token with text-primary so the ghost gets a visible border on hover.
         let hover_border = if is_ghost {
-            let border_default = resolve_color(theme, "semantic.color.border.default");
+            let border_default = resolve_color(theme, "color.border.default");
             color_mix(border_default, text_primary, 0.78)
         } else {
             color_mix(border_color, text_primary, 0.78)

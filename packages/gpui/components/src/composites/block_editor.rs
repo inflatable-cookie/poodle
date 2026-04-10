@@ -61,10 +61,10 @@ impl IntoElement for BlockEditor {
         let fill = resolve_color(theme, self.spec.fill_token());
         let border = resolve_color(theme, self.spec.border_token());
         let gap = resolve_px(theme, self.spec.block_gap_token());
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let muted = resolve_color(theme, "semantic.color.text.secondary");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let separator = resolve_color(theme, "semantic.color.border.subtle");
+        let radius = resolve_radius(theme, "radius.surface");
+        let muted = resolve_color(theme, "color.text.secondary");
+        let hover_bg = resolve_color(theme, "color.background.elevated");
+        let separator = resolve_color(theme, "color.border.subtle");
 
         let mut el = div()
             .bg(fill).border_1().border_color(border).rounded(radius)
@@ -142,7 +142,7 @@ impl IntoElement for BlockEditor {
         );
 
         if self.spec.is_disabled {
-            el = el.opacity(resolve_opacity(theme, "semantic.state.opacity.disabled"));
+            el = el.opacity(resolve_opacity(theme, "state.opacity.disabled"));
         }
         el.into_any_element()
     }

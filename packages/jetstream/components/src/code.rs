@@ -18,7 +18,7 @@ pub fn js_code(spec: &CodeSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
     let text_color = resolve_color(theme, spec.text_color_token());
     let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let radius = resolve_radius(theme, "radius.surface");
 
     ui_element::label(&spec.content)
         .bg(fill)

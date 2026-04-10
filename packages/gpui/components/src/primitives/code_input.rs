@@ -125,15 +125,15 @@ impl IntoElement for CodeInput {
         };
 
         // ── Token resolution ──────────────────────────────────────
-        let border_color = resolve_color(theme, "semantic.color.border.default");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent_border = resolve_color(theme, "semantic.color.accent.border");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
-        let danger_color = resolve_color(theme, "semantic.color.status.danger");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let border_color = resolve_color(theme, "color.border.default");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent_border = resolve_color(theme, "color.accent.border");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let danger_color = resolve_color(theme, "color.status.danger");
+        let control_radius = resolve_radius(theme, "radius.control");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
 
         let effective_validation = spec.effective_validation_state();
         let is_invalid = effective_validation == ValidationState::Invalid;

@@ -17,8 +17,8 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
     let gap = rem_to_px(0.375);
     let item_gap = rem_to_px(0.375);
 
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let mut el = ui_element::div().flex_col().gap(gap);
 

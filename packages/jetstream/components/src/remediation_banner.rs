@@ -23,9 +23,9 @@ pub fn js_remediation_banner(spec: &RemediationBannerSpec, theme: &JetstreamThem
     let border = resolve_color(theme, spec.border_token());
     let tone_color: Color = resolve_color(theme, spec.border_token()).into();
     let panel: Color = resolve_color(theme, spec.background_token()).into();
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let fill = tone_color.mix(panel, 0.08);
 

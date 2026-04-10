@@ -25,8 +25,8 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let tone_color: Color = resolve_color(theme, spec.fill_token()).into();
     let icon_color = resolve_color(theme, spec.icon_color_token());
     let border_color = resolve_color(theme, spec.border_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let panel: Color = resolve_color(theme, "semantic.color.background.panel").into();
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let panel: Color = resolve_color(theme, "color.background.panel").into();
 
     let fill = tone_color.mix(panel, 0.12);
 

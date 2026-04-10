@@ -9,9 +9,9 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 pub fn js_embed_input(spec: &EmbedInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
     let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
+    let radius = resolve_radius(theme, "radius.control");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let placeholder_color = resolve_color(theme, "color.text.secondary");
     let status_color = resolve_color(theme, spec.status_text_color_token());
 
     let font_size = rem_to_px(0.8125);
@@ -56,7 +56,7 @@ pub fn js_embed_input(spec: &EmbedInputSpec, theme: &JetstreamThemeProvider) -> 
             .min_h(rem_to_px(1.25));
 
         if let Some(ref parsed) = parsed {
-            let pill_bg = resolve_color(theme, "semantic.color.background.subtle");
+            let pill_bg = resolve_color(theme, "color.background.subtle");
             status_row = status_row.child(
                 ui_element::label(&parsed.provider)
                     .text_color(status_color).text_size(status_font)

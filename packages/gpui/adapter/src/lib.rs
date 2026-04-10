@@ -278,7 +278,7 @@ mod tests {
     #[test]
     fn gpui_adapter_exposes_theme() {
         let adapter = GpuiAdapter::new(GpuiThemeProvider::default());
-        let color = adapter.theme().resolve_color("semantic.color.accent.base");
+        let color = adapter.theme().resolve_color("color.accent.base");
         // Default theme resolves from typed token constants
         assert!(color.0 >= 0.0 && color.0 <= 1.0);
     }

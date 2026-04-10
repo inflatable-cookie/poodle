@@ -36,9 +36,9 @@ pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     let tone_color: Color = resolve_color(theme, spec.fill_token()).into();
     let border_color = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let panel: Color = resolve_color(theme, "semantic.color.background.panel").into();
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let panel: Color = resolve_color(theme, "color.background.panel").into();
 
     // Contract: fill = color-mix(tone ~10%, panel ~90%)
     let fill = tone_color.mix(panel, 0.10);

@@ -42,10 +42,10 @@ impl IntoElement for AudioPlayer {
 
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let control_color = resolve_color(&self.theme, self.spec.control_color_token());
-        let radius = resolve_radius(&self.theme, "semantic.radius.surface");
-        let muted_color = resolve_color(&self.theme, "semantic.color.text.secondary");
-        let accent = resolve_color(&self.theme, "semantic.color.accent.base");
-        let focus_ring = resolve_color(&self.theme, "semantic.color.accent.focusRing");
+        let radius = resolve_radius(&self.theme, "radius.surface");
+        let muted_color = resolve_color(&self.theme, "color.text.secondary");
+        let accent = resolve_color(&self.theme, "color.accent.base");
+        let focus_ring = resolve_color(&self.theme, "color.accent.focusRing");
         let hover_bg = color_mix(accent, fill, 0.12);
 
         // Play / Pause icon
@@ -64,7 +64,7 @@ impl IntoElement for AudioPlayer {
             .h(px(4.0))
             .flex_grow()
             .rounded(px(2.0))
-            .bg(resolve_color(&self.theme, "semantic.color.border.default"))
+            .bg(resolve_color(&self.theme, "color.border.default"))
             .child(
                 div()
                     .h_full()

@@ -66,7 +66,7 @@ impl IntoElement for DurationInput {
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let base_pad = resolve_px(theme, "semantic.space.control.x");
+        let base_pad = resolve_px(theme, "space.control.x");
         let control_padding_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let control_radius = resolve_radius(theme, spec.radius_token());
         let body_size = resolve_px(theme, spec.body_size_token());

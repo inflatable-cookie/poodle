@@ -6,7 +6,7 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let success = theme.resolve_color("semantic.color.status.success");
+    let success = theme.resolve_color("color.status.success");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Basic label-value pairs ---

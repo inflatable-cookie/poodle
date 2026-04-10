@@ -6,7 +6,7 @@ use poodle_gpui_components::{Meter, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
         // --- Default (50%) ---

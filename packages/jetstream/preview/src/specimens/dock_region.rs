@@ -7,8 +7,8 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_composites::{DockEdge, DockRegionSpec, PanelTabItem};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     let tabs = vec![
         PanelTabItem::new("files", "Files"),

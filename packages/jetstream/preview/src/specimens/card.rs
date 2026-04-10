@@ -7,8 +7,8 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{CardLayout, CardSpec, CardVariant};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
         // Default variant
@@ -28,7 +28,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         // Horizontal layout
         .child(group("Horizontal layout", secondary,
             js_card(&CardSpec::new().with_layout(CardLayout::Horizontal), theme, vec![
-                div().w(48.0).h(48.0).rounded(8.0).bg(resolve_color(theme, "semantic.color.accent.base")),
+                div().w(48.0).h(48.0).rounded(8.0).bg(resolve_color(theme, "color.accent.base")),
                 div().flex_col().gap(4.0)
                     .child(label("Horizontal card").text_color(text_primary).text_size(14.0))
                     .child(label("Content beside media.").text_color(secondary).text_size(13.0)),

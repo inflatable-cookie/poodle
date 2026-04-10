@@ -7,8 +7,8 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::PopoverSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
         // With text content
@@ -25,7 +25,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 div().flex_col().gap(8.0).p(12.0)
                     .child(label("Settings").text_color(text_primary).text_size(14.0))
                     .child(label("Adjust your preferences below.").text_color(secondary).text_size(13.0))
-                    .child(div().h(1.0).bg(resolve_color(theme, "semantic.color.border.subtle")))
+                    .child(div().h(1.0).bg(resolve_color(theme, "color.border.subtle")))
                     .child(label("Option A").text_color(text_primary).text_size(13.0))
                     .child(label("Option B").text_color(text_primary).text_size(13.0))
             ))

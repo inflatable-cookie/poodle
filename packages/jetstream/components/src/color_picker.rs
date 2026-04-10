@@ -26,8 +26,8 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
 
     let border_color = resolve_color(theme, spec.border_token());
     let trigger_radius = resolve_radius(theme, spec.trigger_radius_token());
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let muted = resolve_color(theme, "color.text.secondary");
 
     // Trigger border is 62% opacity of border-default per contract
     let trigger_border = tint(border_color, 0.62);
@@ -38,7 +38,7 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
     // representative fill — the runtime overlay replaces it with the
     // real parsed color.
     let accent_fill: jetstream_runtime::game_ui::Color =
-        resolve_color(theme, "semantic.color.accent.base").into();
+        resolve_color(theme, "color.accent.base").into();
     let preview = ui_element::div()
         .grow()
         .rounded(rem_to_px(0.125))
@@ -75,7 +75,7 @@ pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -
                 .border(1.0)
                 .border_color(border_color)
                 .rounded(trigger_radius)
-                .bg(resolve_color(theme, "semantic.color.background.surface"))
+                .bg(resolve_color(theme, "color.background.surface"))
                 .flex_row()
                 .items_center()
                 .child(

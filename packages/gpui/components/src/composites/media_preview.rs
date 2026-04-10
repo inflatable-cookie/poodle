@@ -78,16 +78,16 @@ impl IntoElement for MediaPreview {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let inline_padding = resolve_px(theme, "space.inline.md");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
+        let control_radius = resolve_radius(theme, "radius.control");
 
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border = resolve_color(theme, "color.border.subtle");
+        let accent = resolve_color(theme, "color.accent.base");
 
         let mut container = div()
             .w_full()

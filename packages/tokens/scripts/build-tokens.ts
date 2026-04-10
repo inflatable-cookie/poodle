@@ -198,20 +198,21 @@ function setNested(target: JsonObject, pathParts: string[], value: TokenValue): 
 
 function entriesToObject(entries: ResolvedTokenEntry[], stripPrefix: string): JsonObject {
   return entries.reduce<JsonObject>((accumulator, entry) => {
-    const pathParts = entry.path.replace(`${stripPrefix}.`, "").split(".");
+    const stripped = stripPrefix ? entry.path.replace(`${stripPrefix}.`, "") : entry.path;
+    const pathParts = stripped.split(".");
     setNested(accumulator, pathParts, entry.resolvedValue);
     return accumulator;
   }, {});
 }
 
 function cssVarName(tokenPath: string): string {
-  const normalized = tokenPath.replace(/^(primitives|semantic)\./, "");
+  const normalized = tokenPath.replace(/^primitives\./, "");
   return `--poodle-${normalized.replace(/\./g, "-")}`;
 }
 
 function rustConstName(tokenPath: string, stripPrefix: string): string {
-  return tokenPath
-    .replace(`${stripPrefix}.`, "")
+  const stripped = stripPrefix ? tokenPath.replace(`${stripPrefix}.`, "") : tokenPath;
+  return stripped
     .replace(/[^a-zA-Z0-9]+/g, "_")
     .replace(/([a-z])([A-Z])/g, "$1_$2")
     .toUpperCase();
@@ -277,14 +278,14 @@ const schema = {
 };
 
 const baseEntries = collectTokenEntries(schema.primitives, ["primitives"]).concat(
-  collectTokenEntries(schema.semantic, ["semantic"]),
+  collectTokenEntries(schema.semantic, []),
 );
 const resolvedBaseEntries = resolveEntries(baseEntries);
 const primitiveEntries = resolvedBaseEntries.filter((entry) =>
   entry.path.startsWith("primitives."),
 );
 const semanticEntries = resolvedBaseEntries.filter((entry) =>
-  entry.path.startsWith("semantic."),
+  !entry.path.startsWith("primitives."),
 );
 
 function resolveModeEntries(modeEntries: TokenEntry[]): ResolvedTokenEntry[] {
@@ -294,10 +295,7 @@ function resolveModeEntries(modeEntries: TokenEntry[]): ResolvedTokenEntry[] {
 
 const themeDefinitions = Object.entries(schema.modes.themes).map<NamedModeDefinition>(
   ([name, value]) => {
-    const modeEntries = collectTokenEntries(value).map((entry) => ({
-      ...entry,
-      path: `semantic.${entry.path}`,
-    }));
+    const modeEntries = collectTokenEntries(value);
 
     return {
       name,
@@ -310,10 +308,7 @@ const themeDefinitions = Object.entries(schema.modes.themes).map<NamedModeDefini
 
 const densityDefinitions = Object.entries(schema.modes.density).map<NamedModeDefinition>(
   ([name, value]) => {
-    const modeEntries = collectTokenEntries(value).map((entry) => ({
-      ...entry,
-      path: `semantic.${entry.path}`,
-    }));
+    const modeEntries = collectTokenEntries(value);
     return {
       name,
       selector: densityMetadata[name].selector,
@@ -325,10 +320,7 @@ const densityDefinitions = Object.entries(schema.modes.density).map<NamedModeDef
 
 const controlSizeDefinitions = Object.entries(schema.modes.controlSize).map<NamedModeDefinition>(
   ([name, value]) => {
-    const modeEntries = collectTokenEntries(value).map((entry) => ({
-      ...entry,
-      path: `semantic.${entry.path}`,
-    }));
+    const modeEntries = collectTokenEntries(value);
     return {
       name,
       selector: controlSizeMetadata[name].selector,
@@ -377,7 +369,7 @@ writeFile(
 export const tokens = ${JSON.stringify(
     {
       primitives: entriesToObject(primitiveEntries, "primitives"),
-      semantic: entriesToObject(semanticEntries, "semantic"),
+      semantic: entriesToObject(semanticEntries, ""),
     },
     null,
     2,
@@ -686,7 +678,7 @@ ${buildRustConstants(primitiveEntries, "primitives")}
 writeFile(
   "rust/semantic.rs",
   `${formatHeader("//")}
-${buildRustSemanticPathConstants(semanticEntries, "semantic")}
+${buildRustSemanticPathConstants(semanticEntries, "")}
 `,
 );
 
@@ -868,6 +860,6 @@ writeFile(
   `${formatHeader("//")}
 use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 
-${buildTypedRustConstants(semanticEntries, "semantic")}
+${buildTypedRustConstants(semanticEntries, "")}
 `,
 );

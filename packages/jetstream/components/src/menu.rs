@@ -17,10 +17,10 @@ pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let menu_py = rem_to_px(0.25);
     let item_gap = rem_to_px(0.5);
 
-    let fill = resolve_color(theme, "semantic.color.background.elevated");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let fill = resolve_color(theme, "color.background.elevated");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let mut el = ui_element::div()
         .bg(fill)

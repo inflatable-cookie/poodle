@@ -6,10 +6,10 @@ pub const CANONICAL_FORMAT: &str = "W3C DTCG 2025.10";
 pub const ARTIFACT_BASELINE: &str = "Style Dictionary 4.x target shapes with bootstrap local emission script";
 
 pub const ALIASES: &[(&str, &str)] = &[
-    ("semantic.color.accent.base", "semantic.color.accent.base"),
-    ("semantic.size.control.height", "semantic.size.control.height"),
+    ("color.accent.base", "color.accent.base"),
+    ("size.control.height", "size.control.height"),
 ];
 
 pub const DEPRECATIONS: &[(&str, &str)] = &[
-    ("semantic.color.border.default", "active"),
+    ("color.border.default", "active"),
 ];

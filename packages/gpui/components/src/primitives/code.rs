@@ -75,11 +75,11 @@ impl IntoElement for Code {
         // ── Block mode ────────────────────────────────────────
         let panel_x = density_pad_x;
         let panel_y = density_pad_y;
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
 
         let border = resolve_color(theme, spec.border_token());
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let radius = resolve_radius(theme, "radius.surface");
 
         let mut el = div()
             .rounded(radius)
@@ -149,7 +149,7 @@ impl IntoElement for Code {
         }
 
         // Highlight line background color
-        let highlight_bg = resolve_color(theme, "semantic.color.accent.base").opacity(0.1);
+        let highlight_bg = resolve_color(theme, "color.accent.base").opacity(0.1);
 
         // Content with optional line numbers and highlight
         if spec.show_line_numbers || !spec.highlight_lines.is_empty() {

@@ -63,11 +63,11 @@ impl IntoElement for MediaThumbnail {
         let spec = &self.spec;
 
         let frame_bg = resolve_color(theme, spec.frame_fill_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border = resolve_color(theme, "color.border.subtle");
+        let accent = resolve_color(theme, "color.accent.base");
+        let body_size = resolve_px(theme, "typography.body.size");
 
         // Aspect ratio sizing
         let (frame_w, frame_h) = match spec.aspect_ratio {

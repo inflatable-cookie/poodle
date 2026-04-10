@@ -22,9 +22,9 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let container_h = rem_to_px(control_height_rem(effective_size) * 0.56);
 
     let accent: Color = resolve_color(theme, spec.range_fill_token()).into();
-    let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
-    let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
-    let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
+    let surface: Color = resolve_color(theme, "color.background.surface").into();
+    let border_default: Color = resolve_color(theme, "color.border.default").into();
+    let elevated: Color = resolve_color(theme, "color.background.elevated").into();
 
     // Contract: track bg = color-mix(surface 88%, accent)
     let track_bg = surface.mix(accent, 0.88);
@@ -61,7 +61,7 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
         );
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity).disabled(true);
     }
 

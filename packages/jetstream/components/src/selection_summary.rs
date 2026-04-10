@@ -16,9 +16,9 @@ pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeP
     let gap = resolve_px(theme, spec.gap_token());
     let chip_radius = rem_to_px(0.25);
 
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let chip_bg = resolve_color(theme, "semantic.color.background.surface");
-    let chip_border = resolve_color(theme, "semantic.color.border.subtle");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let chip_bg = resolve_color(theme, "color.background.surface");
+    let chip_border = resolve_color(theme, "color.border.subtle");
 
     let mut el = ui_element::div().flex_row().items_center().gap(gap).flex_wrap();
 

@@ -157,9 +157,9 @@ mod tests {
     #[test]
     fn theme_provider_resolves_values() {
         let theme = MockTheme;
-        let color = theme.resolve_color("semantic.color.accent.base");
+        let color = theme.resolve_color("color.accent.base");
         assert_eq!(color, ColorValue(0.5, 0.5, 0.5, 1.0));
-        assert_eq!(theme.resolve_space("semantic.space.stack.md"), 8.0);
+        assert_eq!(theme.resolve_space("space.stack.md"), 8.0);
     }
 
     #[test]

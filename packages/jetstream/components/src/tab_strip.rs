@@ -9,9 +9,9 @@ use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_tab_strip(spec: &TabStripSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let gap = resolve_px(theme, spec.item_gap_token());
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let text_muted = resolve_color(theme, "semantic.color.text.secondary");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let text_muted = resolve_color(theme, "color.text.secondary");
+    let border = resolve_color(theme, "color.border.subtle");
 
     let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 

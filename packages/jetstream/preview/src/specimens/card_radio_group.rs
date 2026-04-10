@@ -8,7 +8,7 @@ use poodle_composites::CardRadioGroupSpec;
 use poodle_primitives::ChoiceOption;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let options = vec![
         ChoiceOption::new("free", "Free").with_description("Basic access with limits."),

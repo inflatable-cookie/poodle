@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::CheckboxSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     fn cb(label: &str) -> CheckboxSpec {
         let mut s = CheckboxSpec::new();

@@ -60,7 +60,7 @@ impl IntoElement for PasswordRequirements {
         let text_color = resolve_color(theme, spec.text_color_token());
         let met_color = resolve_color(theme, spec.met_color_token());
         let error_color = resolve_color(theme, spec.error_color_token());
-        let radius = resolve_radius(theme, "semantic.radius.panel");
+        let radius = resolve_radius(theme, "radius.panel");
 
         let body_font = px(rem_to_px(0.875));   // 14px — matches Svelte 0.875rem
         let title_font = px(rem_to_px(0.875));   // same base

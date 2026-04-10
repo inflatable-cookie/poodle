@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::{ColumnAlign, TableColumn, TableRow, TableSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let columns = vec![
         TableColumn::new("name", "Name").with_row_header(true),

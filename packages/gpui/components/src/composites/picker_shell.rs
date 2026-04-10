@@ -76,15 +76,15 @@ impl IntoElement for PickerShell {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "semantic.space.inline.md");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let inline_padding = resolve_px(theme, "space.inline.md");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let control_radius = resolve_radius(theme, "radius.control");
         let footer_gap = resolve_px(theme, spec.footer_gap_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
-        let bg = resolve_color(theme, "semantic.color.background.elevated");
-        let _accent = resolve_color(theme, "semantic.color.accent.base");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border = resolve_color(theme, "color.border.subtle");
+        let bg = resolve_color(theme, "color.background.elevated");
+        let _accent = resolve_color(theme, "color.accent.base");
 
         let mut shell = div()
             .flex()
@@ -188,7 +188,7 @@ impl IntoElement for PickerShell {
                 .child(
                     div()
                         .text_size(body_size)
-                        .text_color(resolve_color(theme, "semantic.color.status.danger"))
+                        .text_color(resolve_color(theme, "color.status.danger"))
                         .child("Search failed."),
                 ),
             BrowseState::Empty | BrowseState::NoResults => div()

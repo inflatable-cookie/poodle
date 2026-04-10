@@ -8,9 +8,9 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_media_thumbnail(spec: &MediaThumbnailSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.frame_fill_token());
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_color = resolve_color(theme, "semantic.color.text.secondary");
+    let border = resolve_color(theme, "color.border.subtle");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_color = resolve_color(theme, "color.text.secondary");
 
     let mut el = ui_element::div()
         .bg(fill)

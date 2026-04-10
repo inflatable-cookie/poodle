@@ -9,11 +9,11 @@ use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
-    let text_inverse = theme.resolve_color("semantic.color.text.inverse");
-    let surface_bg = theme.resolve_color("semantic.color.background.surface");
-    let border_default = theme.resolve_color("semantic.color.border.default");
-    let control_radius = theme.resolve_space("semantic.radius.control");
+    let text_primary = theme.resolve_color("color.text.primary");
+    let text_inverse = theme.resolve_color("color.text.inverse");
+    let surface_bg = theme.resolve_color("color.background.surface");
+    let border_default = theme.resolve_color("color.border.default");
+    let control_radius = theme.resolve_space("radius.control");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Ring ---

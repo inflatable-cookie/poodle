@@ -86,11 +86,11 @@
     "icon": {
       "primary": {
         "$type": "color",
-        "$value": "{semantic.color.text.primary}"
+        "$value": "{color.text.primary}"
       },
       "muted": {
         "$type": "color",
-        "$value": "{semantic.color.text.secondary}"
+        "$value": "{color.text.secondary}"
       }
     }
   }

@@ -19,8 +19,8 @@ pub fn js_reorderable_list(
 
     let fill = resolve_color(theme, spec.fill_token());
     let handle_color = resolve_color(theme, spec.handle_color_token());
-    let drag_bg = resolve_color(theme, "semantic.color.background.elevated");
-    let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+    let drag_bg = resolve_color(theme, "color.background.elevated");
+    let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
     let icon_size = rem_to_px(1.0);
     let row_py = rem_to_px(0.125);

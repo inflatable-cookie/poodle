@@ -20,12 +20,12 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(effective_size)));
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let radius = resolve_radius(theme, "radius.control");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     // Hover state: subtle background
-    let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
-    let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
+    let surface: Color = resolve_color(theme, "color.background.surface").into();
+    let elevated: Color = resolve_color(theme, "color.background.elevated").into();
     let hover_bg = surface.mix(elevated, 0.84);
 
     let icon_name = spec.icon.as_deref().unwrap_or("help-circle");
@@ -47,7 +47,7 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
         );
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity).disabled(true);
     }
 

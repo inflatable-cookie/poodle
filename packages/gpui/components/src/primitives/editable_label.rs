@@ -94,8 +94,8 @@ impl IntoElement for EditableLabel {
         let pad_y = px(rem_to_px(0.375));
 
         // Contract: hover hint border in display mode
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let default_border = resolve_color(theme, "semantic.color.border.default");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let default_border = resolve_color(theme, "color.border.default");
         let hover_border = color_mix(default_border, surface_bg, 0.72);
         let hover_bg = color_mix(surface_bg, gpui::transparent_black(), 0.52);
 

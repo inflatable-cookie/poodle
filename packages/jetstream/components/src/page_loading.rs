@@ -22,11 +22,11 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
 
     let backdrop = resolve_color(theme, spec.backdrop_fill_token());
     let accent = resolve_color(theme, spec.progress_fill_token());
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let surface_bg = resolve_color(theme, "color.background.surface");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
 
     let spinner_size = rem_to_px(2.0);
 

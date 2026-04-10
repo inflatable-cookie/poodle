@@ -63,7 +63,7 @@ impl AlertDialog {
             padding_y: density_pad_y,
             border_color: resolve_color(theme, spec.border_token()),
             body_size: body_font,
-            heading_size: resolve_px(theme, "semantic.typography.heading.size"),
+            heading_size: resolve_px(theme, "typography.heading.size"),
             brand_raised: theme.brand_raised,
             on_confirm: None,
             on_cancel: None,

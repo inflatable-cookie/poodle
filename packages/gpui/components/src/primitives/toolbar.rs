@@ -53,9 +53,9 @@ impl IntoElement for Toolbar {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let bg = resolve_color(theme, "semantic.color.background.surface");
-        let border_raw = resolve_color(theme, "semantic.color.border.default");
-        let panel = resolve_color(theme, "semantic.color.background.panel");
+        let bg = resolve_color(theme, "color.background.surface");
+        let border_raw = resolve_color(theme, "color.border.default");
+        let panel = resolve_color(theme, "color.background.panel");
         let gap = px(rem_to_px(control_space_x_rem(spec.density)));
         let padding = px(rem_to_px(panel_space_y_rem(spec.density) * 0.5));
 

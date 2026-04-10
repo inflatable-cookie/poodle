@@ -8,7 +8,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     let selected_date = state.specimens.text.get("calendar-selected").cloned();
     let nav_month = state.specimens.text.get("calendar-nav-month").cloned();

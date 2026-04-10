@@ -10,7 +10,7 @@ pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Optio
     let label_size = resolve_px(theme, spec.label_typography_token());
     let desc_color = resolve_color(theme, spec.description_color_token());
     let error_color = resolve_color(theme, spec.error_color_token());
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let text_primary = resolve_color(theme, "color.text.primary");
     let row_gap = resolve_px(theme, spec.row_gap_token());
 
     let mut el = ui_element::div()

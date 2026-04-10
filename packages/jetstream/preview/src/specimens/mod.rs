@@ -148,12 +148,12 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
         }
         Section::Demo => {
             // Placeholder until demo screens are implemented as real components
-            let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+            let text_secondary = resolve_color(theme, "color.text.secondary");
             label("Demo screens — coming soon")
                 .text_color(text_secondary).text_size(13.0)
         }
         Section::Tokens => {
-            let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+            let text_secondary = resolve_color(theme, "color.text.secondary");
             label("Token inspector — coming soon")
                 .text_color(text_secondary).text_size(13.0)
         }
@@ -164,11 +164,11 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
 
 /// Build the full specimen page for a selected component.
 fn build_specimen_page(entry: &ComponentEntry, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let bg_elevated = resolve_color(theme, "semantic.color.background.elevated");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let bg_elevated = resolve_color(theme, "color.background.elevated");
+    let border = resolve_color(theme, "color.border.subtle");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let mut page = div().flex_col().gap(16.0);
 
@@ -354,11 +354,11 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
 
 /// Build the catalogue landing page when no component is selected.
 fn build_catalogue_landing(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let bg_elevated = resolve_color(theme, "semantic.color.background.elevated");
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let bg_elevated = resolve_color(theme, "color.background.elevated");
+    let border = resolve_color(theme, "color.border.subtle");
+    let accent = resolve_color(theme, "color.accent.base");
 
     let components = component_registry::components_for_section(state.section);
     let specimen_count = component_registry::specimen_count(state.section);

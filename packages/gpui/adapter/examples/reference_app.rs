@@ -33,8 +33,8 @@ fn main() {
 
     // 2. Resolve tokens through the theme provider
     let theme = adapter.theme();
-    let accent = theme.resolve_color("semantic.color.accent.base");
-    let space = theme.resolve_space("semantic.space.stack.md");
+    let accent = theme.resolve_color("color.accent.base");
+    let space = theme.resolve_space("space.stack.md");
     println!("Theme resolution:");
     println!("  accent color: rgba({:.2}, {:.2}, {:.2}, {:.2})", accent.0, accent.1, accent.2, accent.3);
     println!("  stack-md space: {:.1}px\n", space);

@@ -8,7 +8,7 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub fn js_metric_tile(spec: &MetricTileSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
-    let border = resolve_color(theme, "semantic.color.border.subtle");
+    let border = resolve_color(theme, "color.border.subtle");
     let radius = resolve_radius(theme, spec.radius_token());
     let label_color = resolve_color(theme, spec.label_color_token());
     let value_color = resolve_color(theme, spec.value_color_token());

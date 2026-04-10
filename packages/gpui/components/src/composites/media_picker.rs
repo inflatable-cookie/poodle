@@ -116,11 +116,11 @@ impl IntoElement for MediaPicker {
         let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
 
         let fill = resolve_color(theme, self.spec.fill_token());
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let border_color = resolve_color(theme, "semantic.color.border.subtle");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let radius = resolve_radius(theme, "radius.surface");
+        let border_color = resolve_color(theme, "color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
         let label_size = px(font_size);
 
         // ── Dialog wrapper ───────────────────────────────────────
@@ -324,7 +324,7 @@ impl IntoElement for MediaPicker {
                 .rounded(px(6.0))
                 .border(border_w)
                 .border_color(selected_border)
-                .bg(resolve_color(theme, "semantic.color.background.surface"))
+                .bg(resolve_color(theme, "color.background.surface"))
                 .flex()
                 .flex_col()
                 .items_center()

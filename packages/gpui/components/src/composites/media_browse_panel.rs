@@ -34,10 +34,10 @@ impl IntoElement for MediaBrowsePanel {
 
         let body_size = px(font_size);
         let label_size = px(font_size);
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
 
         let mut panel = div().flex().flex_col().gap(px(item_gap)).w_full();
 
@@ -48,7 +48,7 @@ impl IntoElement for MediaBrowsePanel {
             );
         } else if let Some(ref error) = spec.error {
             panel = panel.child(
-                div().text_size(body_size).text_color(resolve_color(theme, "semantic.color.status.danger"))
+                div().text_size(body_size).text_color(resolve_color(theme, "color.status.danger"))
                     .child(error.clone())
             );
         } else if spec.items.is_empty() {

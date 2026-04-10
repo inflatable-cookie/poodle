@@ -7,7 +7,7 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_primary = theme.resolve_color("semantic.color.text.primary");
+    let text_primary = theme.resolve_color("color.text.primary");
 
     div().flex().flex_col().gap(px(24.0))
         // --- Full app header ---
@@ -135,7 +135,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         div().flex().items_center().gap(px(8.0))
                             .child(
                                 div().w(px(20.0)).h(px(20.0)).rounded(px(4.0))
-                                    .bg(color_to_hsla(theme.resolve_color("semantic.color.accent.base")))
+                                    .bg(color_to_hsla(theme.resolve_color("color.accent.base")))
                             )
                             .child(
                                 div().text_sm().font_weight(FontWeight::SEMIBOLD)

@@ -62,9 +62,9 @@ impl IntoElement for Surface {
         let is_elevated = spec.is_elevated || spec.tone == SurfaceTone::Elevated;
 
         // Colors from token system
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+        let panel = resolve_color(theme, "color.background.panel");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
 
         // ── Background ──────────────────────────────────────────
         // Matches Svelte app.css treatment values:
@@ -95,7 +95,7 @@ impl IntoElement for Surface {
             let final_border = match spec.border {
                 SurfaceBorder::Subtle => {
                     if is_elevated {
-                        let border_default = resolve_color(theme, "semantic.color.border.default");
+                        let border_default = resolve_color(theme, "color.border.default");
                         Hsla { a: border_default.a * 0.22, ..border_default }
                     } else {
                         Hsla { a: border_color.a * 0.30, ..border_color }

@@ -9,7 +9,7 @@ use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let title_value = state.specimens.text.get("editable-label-title").cloned()
         .unwrap_or_else(|| "My project title".to_string());

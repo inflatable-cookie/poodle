@@ -10,10 +10,10 @@ pub fn js_media_upload_status_panel(spec: &MediaUploadStatusPanelSpec, theme: &J
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
 
-    let gap = resolve_px(theme, "semantic.space.stack.sm");
-    let pad_y = resolve_px(theme, "semantic.space.panel.y");
-    let pad_x = resolve_px(theme, "semantic.space.panel.x");
-    let action_gap = resolve_px(theme, "semantic.space.inline.sm");
+    let gap = resolve_px(theme, "space.stack.sm");
+    let pad_y = resolve_px(theme, "space.panel.y");
+    let pad_x = resolve_px(theme, "space.panel.x");
+    let action_gap = resolve_px(theme, "space.inline.sm");
 
     // Size-driven progress dimensions from contract
     let progress_height = rem_to_px(match effective_size {
@@ -38,13 +38,13 @@ pub fn js_media_upload_status_panel(spec: &MediaUploadStatusPanelSpec, theme: &J
         poodle_primitives::ControlDensity::Comfortable => (rem_to_px(1.0), rem_to_px(1.0)),
     };
 
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let success = resolve_color(theme, "semantic.color.status.success");
-    let danger = resolve_color(theme, "semantic.color.status.danger");
-    let warning = resolve_color(theme, "semantic.color.status.warning");
-    let surface = resolve_color(theme, "semantic.color.background.surface");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let accent = resolve_color(theme, "color.accent.base");
+    let success = resolve_color(theme, "color.status.success");
+    let danger = resolve_color(theme, "color.status.danger");
+    let warning = resolve_color(theme, "color.status.warning");
+    let surface = resolve_color(theme, "color.background.surface");
 
     // Root
     let mut el = ui_element::div()

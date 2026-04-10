@@ -82,15 +82,15 @@ impl IntoElement for Drawer {
         let density_pad = px(rem_to_px(panel_space_x_rem(spec.density)));
         let body_font = px(rem_to_px(size_font_rem(effective_size)));
 
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
         let panel_padding = density_pad;
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let body_size = resolve_px(theme, "semantic.typography.body.size");
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
 
         // Matches Svelte treatment-surface-elevated values:
         //   fill: color-mix(elevated 94%, transparent)

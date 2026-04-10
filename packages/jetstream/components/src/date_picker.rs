@@ -7,11 +7,11 @@ use poodle_primitives::DatePickerSpec;
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_date_picker(spec: &DatePickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let fill = resolve_color(theme, "semantic.color.background.surface");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.control");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let muted = resolve_color(theme, "semantic.color.text.secondary");
+    let fill = resolve_color(theme, "color.background.surface");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.control");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let muted = resolve_color(theme, "color.text.secondary");
 
     let display = spec.value.as_deref().unwrap_or("Select date...");
     let display_color = if spec.value.is_some() { text_color } else { muted };

@@ -27,5 +27,5 @@ pub fn resolve_vec4(theme: &dyn ThemeProvider, token: &str) -> Vec4 {
 }
 
 pub fn canvas_background(theme: &dyn ThemeProvider) -> Vec4 {
-    resolve_vec4(theme, "semantic.color.background.canvas")
+    resolve_vec4(theme, "color.background.canvas")
 }

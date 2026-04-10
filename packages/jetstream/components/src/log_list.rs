@@ -17,16 +17,16 @@ pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let entry_gap = resolve_px(theme, spec.entry_gap_token());
 
     let fill = resolve_color(theme, spec.fill_token());
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let border = resolve_color(theme, "color.border.subtle");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
     let code_font_size = rem_to_px(0.8125);
 
     // Token colors for log levels
-    let info_color = resolve_color(theme, "semantic.color.accent.base");
-    let warn_color = resolve_color(theme, "semantic.color.status.warning");
-    let error_color = resolve_color(theme, "semantic.color.status.danger");
+    let info_color = resolve_color(theme, "color.accent.base");
+    let warn_color = resolve_color(theme, "color.status.warning");
+    let error_color = resolve_color(theme, "color.status.danger");
 
     // Root
     let mut el = ui_element::div()

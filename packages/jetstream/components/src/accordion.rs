@@ -64,12 +64,12 @@ fn render_item(
     theme: &JetstreamThemeProvider,
 ) -> JsEl {
     // ── Token resolution ──
-    let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-    let surface = resolve_color(theme, "semantic.color.background.surface");
-    let elevated = resolve_color(theme, "semantic.color.background.elevated");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let border_subtle = resolve_color(theme, "color.border.subtle");
+    let surface = resolve_color(theme, "color.background.surface");
+    let elevated = resolve_color(theme, "color.background.elevated");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let radius = resolve_radius(theme, "radius.surface");
 
     // Contract: item border = color-mix(border-subtle 36%, transparent)
     let item_border = tint(border_subtle, 0.36);
@@ -138,7 +138,7 @@ fn render_item(
 
     // Contract: disabled items reduce opacity
     if item.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity).disabled(true);
     }
 

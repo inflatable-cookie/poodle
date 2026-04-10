@@ -73,7 +73,7 @@ impl IntoElement for PageHeader {
 
         let gap = resolve_px(theme, spec.gap_token());
         let body_size = px(font_size);
-        let heading_size = resolve_px(theme, "semantic.typography.heading.size");
+        let heading_size = resolve_px(theme, "typography.heading.size");
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());
 

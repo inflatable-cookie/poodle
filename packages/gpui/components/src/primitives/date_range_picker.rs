@@ -75,21 +75,21 @@ impl IntoElement for DateRangePicker {
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_pad = resolve_px(theme, "semantic.space.inline.md");
+        let base_pad = resolve_px(theme, "space.inline.md");
         let inline_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
-        let inline_gap = resolve_px(theme, "semantic.space.inline.sm");
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let inline_gap = resolve_px(theme, "space.inline.sm");
+        let control_radius = resolve_radius(theme, "radius.control");
 
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let icon_muted = resolve_color(theme, "color.icon.muted");
+        let accent = resolve_color(theme, "color.accent.base");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         // Contract: hover = color-mix(surface 84%, elevated)
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
@@ -128,7 +128,7 @@ impl IntoElement for DateRangePicker {
             .text_size(body_size);
 
         // Focus ring
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if is_disabled {

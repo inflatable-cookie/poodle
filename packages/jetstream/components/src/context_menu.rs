@@ -12,10 +12,10 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_context_menu(spec: &ContextMenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let fill = resolve_color(theme, "semantic.color.background.elevated");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let fill = resolve_color(theme, "color.background.elevated");
+    let border = resolve_color(theme, "color.border.default");
+    let radius = resolve_radius(theme, "radius.surface");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Contract: panel padding-y 0.25rem, min-width 10rem, item padding 0.375rem 0.75rem, gap 0.5rem

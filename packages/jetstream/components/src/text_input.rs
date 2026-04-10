@@ -25,11 +25,11 @@ pub fn js_text_input(spec: &TextInputSpec, theme: &JetstreamThemeProvider) -> Js
     let border_color = resolve_color(theme, spec.border_token());
     let radius = resolve_radius(theme, spec.radius_token());
     let text_color = resolve_color(theme, spec.text_color_token());
-    let placeholder_color = resolve_color(theme, "semantic.color.text.secondary");
+    let placeholder_color = resolve_color(theme, "color.text.secondary");
 
     // Hover border: contract color-mix(border 78%, text-primary)
     let border_c: Color = border_color.into();
-    let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
+    let text_primary: Color = resolve_color(theme, "color.text.primary").into();
     let hover_border = border_c.mix(text_primary, 0.78);
 
     let display_value = spec.value.as_deref()

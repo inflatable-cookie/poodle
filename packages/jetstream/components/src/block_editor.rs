@@ -27,11 +27,11 @@ pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -
 
     let fill = resolve_color(theme, spec.fill_token());
     let border = resolve_color(theme, spec.border_token());
-    let radius = resolve_radius(theme, "semantic.radius.surface");
-    let ctrl_radius = resolve_radius(theme, "semantic.radius.control");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
-    let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let elevated = resolve_color(theme, "semantic.color.background.elevated");
+    let radius = resolve_radius(theme, "radius.surface");
+    let ctrl_radius = resolve_radius(theme, "radius.control");
+    let text_primary = resolve_color(theme, "color.text.primary");
+    let text_secondary = resolve_color(theme, "color.text.secondary");
+    let elevated = resolve_color(theme, "color.background.elevated");
 
     let block_bg = tint(elevated, 0.42);
 

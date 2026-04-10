@@ -12,8 +12,8 @@ use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub fn js_tooltip(spec: &TooltipSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.fill_token());
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let radius = resolve_radius(theme, "semantic.radius.surface");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let radius = resolve_radius(theme, "radius.surface");
 
     let content = spec.content.as_deref().unwrap_or("");
 

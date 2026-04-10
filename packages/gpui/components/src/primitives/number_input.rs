@@ -209,9 +209,9 @@ impl IntoElement for NumberInput {
 
         // Svelte: validation state border colors
         let effective_border = match spec.validation_state {
-            ValidationState::Invalid => resolve_color(theme, "semantic.color.status.danger"),
-            ValidationState::Valid => resolve_color(theme, "semantic.color.status.success"),
-            ValidationState::Pending => resolve_color(theme, "semantic.color.accent.base"),
+            ValidationState::Invalid => resolve_color(theme, "color.status.danger"),
+            ValidationState::Valid => resolve_color(theme, "color.status.success"),
+            ValidationState::Pending => resolve_color(theme, "color.accent.base"),
             _ => border,
         };
 

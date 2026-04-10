@@ -31,11 +31,11 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
     // - default: border-default full color
     let color = match spec.tone {
         poodle_primitives::RuleTone::Subtle => {
-            let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
+            let border_subtle = resolve_color(theme, "color.border.subtle");
             tint(border_subtle, 0.72) // color-mix with 72% opacity
         }
         poodle_primitives::RuleTone::Default => {
-            resolve_color(theme, "semantic.color.border.default")
+            resolve_color(theme, "color.border.default")
         }
     };
 

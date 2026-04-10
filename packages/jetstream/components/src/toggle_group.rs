@@ -26,13 +26,13 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
-    let accent: Color = resolve_color(theme, "semantic.color.accent.base").into();
-    let border_subtle: Color = resolve_color(theme, "semantic.color.border.subtle").into();
-    let border_default: Color = resolve_color(theme, "semantic.color.border.default").into();
-    let text_primary: Color = resolve_color(theme, "semantic.color.text.primary").into();
-    let surface: Color = resolve_color(theme, "semantic.color.background.surface").into();
-    let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
-    let radius = resolve_radius(theme, "semantic.radius.control");
+    let accent: Color = resolve_color(theme, "color.accent.base").into();
+    let border_subtle: Color = resolve_color(theme, "color.border.subtle").into();
+    let border_default: Color = resolve_color(theme, "color.border.default").into();
+    let text_primary: Color = resolve_color(theme, "color.text.primary").into();
+    let surface: Color = resolve_color(theme, "color.background.surface").into();
+    let elevated: Color = resolve_color(theme, "color.background.elevated").into();
+    let radius = resolve_radius(theme, "radius.control");
 
     // Contract: gap resolved from density
     let gap = rem_to_px(control_space_x_rem(spec.density)) * 0.5;

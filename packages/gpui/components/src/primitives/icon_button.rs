@@ -76,11 +76,11 @@ impl IntoElement for IconButton {
         let base_fill = resolve_color(theme, spec.variant.fill_token(tone));
         let text_color = resolve_color(theme, spec.variant.text_token(tone));
         let base_border = resolve_color(theme, spec.variant.border_token(tone));
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let radius = resolve_radius(theme, "semantic.radius.control");
-        let focus_ring_color = resolve_color(theme, "semantic.color.accent.focusRing");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let elevated = resolve_color(theme, "color.background.elevated");
+        let accent = resolve_color(theme, "color.accent.base");
+        let radius = resolve_radius(theme, "radius.control");
+        let focus_ring_color = resolve_color(theme, "color.accent.focusRing");
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -181,7 +181,7 @@ impl IntoElement for IconButton {
 
         // ── Interactive states ────────────────────────────────────
         if is_unavailable {
-            let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+            let opacity = resolve_opacity(theme, "state.opacity.disabled");
             el = el.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
         } else {
             el = el

@@ -152,17 +152,17 @@ impl IntoElement for Calendar {
         let cell_size = px(rem_to_px(control_height_rem(effective_size)));
         let cal_font = px(rem_to_px(size_font_rem(effective_size)));
 
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
 
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let text_inverse = resolve_color(theme, "semantic.color.text.inverse");
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let icon_muted = resolve_color(theme, "semantic.color.icon.muted");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let accent = resolve_color(theme, "color.accent.base");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let text_inverse = resolve_color(theme, "color.text.inverse");
+        let surface_bg = resolve_color(theme, "color.background.surface");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border = resolve_color(theme, "color.border.default");
+        let icon_muted = resolve_color(theme, "color.icon.muted");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = cal_font;
 
         // Contract: hover = color-mix(accent 8%, surface)
@@ -218,7 +218,7 @@ impl IntoElement for Calendar {
             year
         );
 
-        let surface_radius = resolve_radius(theme, "semantic.radius.surface");
+        let surface_radius = resolve_radius(theme, "radius.surface");
 
         // Build the calendar container
         // Contract: padding 0.75rem (12px), radius-surface, gap 0.25rem (4px)
@@ -239,7 +239,7 @@ impl IntoElement for Calendar {
             .border_1()
             .border_color(border);
 
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         cal = cal.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
 
         if spec.is_disabled {

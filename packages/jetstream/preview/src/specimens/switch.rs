@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_primitives::SwitchSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     fn sw(checked: bool, label: &str) -> SwitchSpec {
         let mut s = SwitchSpec::new();

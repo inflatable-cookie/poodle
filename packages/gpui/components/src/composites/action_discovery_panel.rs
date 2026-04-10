@@ -76,13 +76,13 @@ impl IntoElement for ActionDiscoveryPanel {
         let panel_py = rem_to_px(panel_space_y_rem(spec.density));
         let item_gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let text_muted = resolve_color(theme, "semantic.color.text.muted");
-        let border = resolve_color(theme, "semantic.color.border.default");
-        let disabled_opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let text_muted = resolve_color(theme, "color.text.muted");
+        let border = resolve_color(theme, "color.border.default");
+        let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let hover_bg = resolve_color(theme, "color.background.elevated");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let body_size = px(font_size);
         let gap = theme.resolve_space(spec.gap_token());
 
@@ -104,7 +104,7 @@ impl IntoElement for ActionDiscoveryPanel {
                             .gap(px(12.0))
                             .p(px(14.0))
                             .rounded(px(6.0))
-                            .bg(resolve_color(theme, "semantic.color.background.surface").opacity(0.72))
+                            .bg(resolve_color(theme, "color.background.surface").opacity(0.72))
                             .child(
                                 div()
                                     .flex_grow()
@@ -141,7 +141,7 @@ impl IntoElement for ActionDiscoveryPanel {
                     div()
                         .px(px(panel_px)).py(px(panel_py))
                         .text_size(body_size)
-                        .text_color(resolve_color(theme, "semantic.color.status.danger"))
+                        .text_color(resolve_color(theme, "color.status.danger"))
                         .child("Failed to load actions"),
                 );
                 return panel.into_any_element();
@@ -228,8 +228,8 @@ impl IntoElement for ActionDiscoveryPanel {
                             .px(px(4.0))
                             .py(px(1.0))
                             .rounded(px(3.0))
-                            .bg(resolve_color(theme, "semantic.color.accent.base").opacity(0.12))
-                            .text_color(resolve_color(theme, "semantic.color.accent.base"))
+                            .bg(resolve_color(theme, "color.accent.base").opacity(0.12))
+                            .text_color(resolve_color(theme, "color.accent.base"))
                             .child(badge.clone()),
                     );
                 }

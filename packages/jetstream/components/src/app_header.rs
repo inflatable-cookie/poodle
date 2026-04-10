@@ -8,8 +8,8 @@ use crate::theme_ext::resolve_color;
 
 pub fn js_app_header(spec: &AppHeaderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let fill = resolve_color(theme, spec.background_token());
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let border = resolve_color(theme, "color.border.subtle");
+    let text_color = resolve_color(theme, "color.text.primary");
 
     let mut el = ui_element::div()
         .bg(fill)

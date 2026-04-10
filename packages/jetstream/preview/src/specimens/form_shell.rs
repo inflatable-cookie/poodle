@@ -8,8 +8,8 @@ use poodle_composites::FormShellSpec;
 use poodle_composites::FormSectionSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
-    let text_primary = resolve_color(theme, "semantic.color.text.primary");
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let text_primary = resolve_color(theme, "color.text.primary");
 
     let sections = vec![
         FormSectionSpec::new("details", "Project Details", vec![

@@ -14,8 +14,8 @@ pub fn js_shell_status_bar(
     trailing: Vec<JsEl>,
 ) -> JsEl {
     let bg = resolve_color(theme, spec.background_token());
-    let border = resolve_color(theme, "semantic.color.border.subtle");
-    let text_color = resolve_color(theme, "semantic.color.text.secondary");
+    let border = resolve_color(theme, "color.border.subtle");
+    let text_color = resolve_color(theme, "color.text.secondary");
 
     let bar_height = rem_to_px(1.5);
     let pad_x = rem_to_px(0.5);

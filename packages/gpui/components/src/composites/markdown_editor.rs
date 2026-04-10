@@ -54,11 +54,11 @@ impl IntoElement for MarkdownEditor {
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let border = resolve_color(&self.theme, self.spec.border_token());
         let toolbar_fill = resolve_color(&self.theme, self.spec.toolbar_fill_token());
-        let radius = resolve_radius(&self.theme, "semantic.radius.surface");
-        let text_color = resolve_color(&self.theme, "semantic.color.text.primary");
-        let muted = resolve_color(&self.theme, "semantic.color.text.secondary");
-        let hover_bg = resolve_color(&self.theme, "semantic.color.bg.hover");
-        let active_bg = resolve_color(&self.theme, "semantic.color.bg.active");
+        let radius = resolve_radius(&self.theme, "radius.surface");
+        let text_color = resolve_color(&self.theme, "color.text.primary");
+        let muted = resolve_color(&self.theme, "color.text.secondary");
+        let hover_bg = resolve_color(&self.theme, "color.bg.hover");
+        let active_bg = resolve_color(&self.theme, "color.bg.active");
         let body_size = px(font_size);
 
         let display = if self.spec.value.is_empty() { self.spec.placeholder.as_deref().unwrap_or("Type here...") } else { &self.spec.value };
@@ -233,7 +233,7 @@ impl IntoElement for MarkdownEditor {
         el = el.child(content_area);
 
         if self.spec.is_disabled {
-            el = el.opacity(resolve_opacity(&self.theme, "semantic.state.opacity.disabled"));
+            el = el.opacity(resolve_opacity(&self.theme, "state.opacity.disabled"));
         }
         el.into_any_element()
     }

@@ -1101,19 +1101,19 @@ fn build_draw_theme(poodle_theme: &dyn ThemeProvider) -> Theme {
     let resolve = |token: &str| -> Vec4 { theme_bridge::resolve_vec4(poodle_theme, token) };
 
     Theme {
-        text_color: resolve("semantic.color.text.primary"),
+        text_color: resolve("color.text.primary"),
         text_size: 14.0,
-        button_bg: resolve("semantic.color.background.surface"),
-        button_hover_bg: resolve("semantic.color.accent.hover"),
-        button_pressed_bg: resolve("semantic.color.accent.base"),
-        panel_bg: resolve("semantic.color.background.panel"),
-        focus_color: resolve("semantic.color.accent.focus"),
-        slider_track: resolve("semantic.color.border.subtle"),
-        slider_fill: resolve("semantic.color.accent.base"),
-        progress_track: resolve("semantic.color.border.subtle"),
-        progress_fill: resolve("semantic.color.accent.base"),
-        input_bg: resolve("semantic.color.background.canvas"),
-        input_border: resolve("semantic.color.border.default"),
+        button_bg: resolve("color.background.surface"),
+        button_hover_bg: resolve("color.accent.hover"),
+        button_pressed_bg: resolve("color.accent.base"),
+        panel_bg: resolve("color.background.panel"),
+        focus_color: resolve("color.accent.focus"),
+        slider_track: resolve("color.border.subtle"),
+        slider_fill: resolve("color.accent.base"),
+        progress_track: resolve("color.border.subtle"),
+        progress_fill: resolve("color.accent.base"),
+        input_bg: resolve("color.background.canvas"),
+        input_border: resolve("color.border.default"),
     }
 }
 

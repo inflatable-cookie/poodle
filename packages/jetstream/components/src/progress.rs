@@ -32,7 +32,7 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Track height is currently fixed per contract but the plumbing is ready.
     let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let accent = resolve_color(theme, spec.indicator_fill_token());
-    let surface = resolve_color(theme, "semantic.color.background.surface");
+    let surface = resolve_color(theme, "color.background.surface");
 
     // Contract: track bg = color-mix(surface 80%, elevated)
     let track_bg = tint(surface, 0.80);

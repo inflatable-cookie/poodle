@@ -23,8 +23,8 @@ pub fn js_tabs(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
 
     let indicator = resolve_color(theme, spec.indicator_token());
     let border = resolve_color(theme, spec.list_border_token());
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
-    let text_muted = resolve_color(theme, "semantic.color.text.secondary");
+    let text_color = resolve_color(theme, "color.text.primary");
+    let text_muted = resolve_color(theme, "color.text.secondary");
 
     let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 

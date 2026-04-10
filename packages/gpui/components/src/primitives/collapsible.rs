@@ -72,19 +72,19 @@ impl IntoElement for Collapsible {
         let title_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let heading_size = title_font;
-        let label_size = resolve_px(theme, "semantic.typography.label.size");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let border_color = resolve_color(theme, "semantic.color.border.subtle");
-        let _panel_bg = resolve_color(theme, "semantic.color.background.panel");
-        let radius = resolve_radius(theme, "semantic.radius.surface");
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let border_color = resolve_color(theme, "color.border.subtle");
+        let _panel_bg = resolve_color(theme, "color.background.panel");
+        let radius = resolve_radius(theme, "radius.surface");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let panel_pad = density_pad_x;
 
         // Svelte: border = color-mix(border-subtle 42%, transparent)
         let root_border = Hsla { a: border_color.a * 0.42, ..border_color };
         // Svelte: bg = color-mix(surface 88%, text-primary)
-        let surface_bg = resolve_color(theme, "semantic.color.background.surface");
+        let surface_bg = resolve_color(theme, "color.background.surface");
         let root_bg = color_mix(surface_bg, text_primary, 0.88);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
@@ -181,7 +181,7 @@ impl IntoElement for Collapsible {
 
         // ── Disabled ──
         if spec.is_disabled {
-            let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+            let opacity = resolve_opacity(theme, "state.opacity.disabled");
             root = root.opacity(opacity);
         }
 

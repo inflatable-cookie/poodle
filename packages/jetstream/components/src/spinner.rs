@@ -62,9 +62,9 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> JsEl {
     // ── Tone color resolution ──
     // Contract: current = currentColor (inherit), accent = accent-base, muted = text-secondary
     let tone_color: Color = match spec.tone {
-        SpinnerTone::Current => resolve_color(theme, "semantic.color.text.primary").into(),
-        SpinnerTone::Accent => resolve_color(theme, "semantic.color.accent.base").into(),
-        SpinnerTone::Muted => resolve_color(theme, "semantic.color.text.secondary").into(),
+        SpinnerTone::Current => resolve_color(theme, "color.text.primary").into(),
+        SpinnerTone::Accent => resolve_color(theme, "color.accent.base").into(),
+        SpinnerTone::Muted => resolve_color(theme, "color.text.secondary").into(),
     };
 
     match spec.variant {

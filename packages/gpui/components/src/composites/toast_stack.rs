@@ -82,7 +82,7 @@ impl IntoElement for ToastStack {
         let title_color = resolve_color(theme, spec.title_color_token());
         let message_color = resolve_color(theme, spec.message_color_token());
         let dismiss_color = resolve_color(theme, spec.dismiss_color_token());
-        let accent = resolve_color(theme, "semantic.color.accent.base");
+        let accent = resolve_color(theme, "color.accent.base");
 
         // Container positioned at the chosen corner
         let mut container = div()

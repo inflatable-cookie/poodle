@@ -7,7 +7,7 @@ use poodle_jetstream_components::theme_ext::*;
 use poodle_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let sections = vec![
         ActionDiscoverySection::new("nav", "Navigation", vec![]),

@@ -20,7 +20,7 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
     let padding_y = resolve_px(theme, spec.padding_y_token());
 
     // Hover state colors (contract: fill 92% + elevated 8%)
-    let elevated: Color = resolve_color(theme, "semantic.color.background.elevated").into();
+    let elevated: Color = resolve_color(theme, "color.background.elevated").into();
     let hover_fill = fill.mix(elevated, 0.92);
 
     let mut el = ui_element::div()

@@ -91,10 +91,10 @@ impl IntoElement for Card {
             _ => (padding_x, padding_y),
         };
 
-        let border_subtle = resolve_color(theme, "semantic.color.border.subtle");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let elevated = resolve_color(theme, "semantic.color.background.elevated");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let border_default = resolve_color(theme, "color.border.default");
+        let panel = resolve_color(theme, "color.background.panel");
+        let elevated = resolve_color(theme, "color.background.elevated");
 
         // Match Svelte Card.svelte + app.css treatment values:
         // Default/Outlined: treatment-surface-fill = color-mix(panel 96%, elevated)

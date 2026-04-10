@@ -17,9 +17,9 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
     let gap = rem_to_px(0.75);
     let item_gap = rem_to_px(0.375);
 
-    let accent = resolve_color(theme, "semantic.color.accent.base");
-    let border = resolve_color(theme, "semantic.color.border.default");
-    let text_color = resolve_color(theme, "semantic.color.text.primary");
+    let accent = resolve_color(theme, "color.accent.base");
+    let border = resolve_color(theme, "color.border.default");
+    let text_color = resolve_color(theme, "color.text.primary");
     let selected_value = spec.value.as_deref().or(spec.default_value.as_deref());
 
     let mut el = match spec.orientation {
@@ -55,7 +55,7 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
     }
 
     if spec.is_disabled {
-        let opacity = resolve_opacity(theme, "semantic.state.opacity.disabled");
+        let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity);
     }
 

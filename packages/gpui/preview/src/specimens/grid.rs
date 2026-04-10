@@ -6,7 +6,7 @@ use poodle_gpui_components::{Eyebrow, Grid, Surface};
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let text_secondary = theme.resolve_color("semantic.color.text.secondary");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let surface_md = |label: &str| {
         let spec = SurfaceSpec::new()

@@ -8,7 +8,7 @@ use poodle_composites::{ValidationSummaryEntry, ValidationSummarySpec};
 use poodle_primitives::ValidationState;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
-    let secondary = resolve_color(theme, "semantic.color.text.secondary");
+    let secondary = resolve_color(theme, "color.text.secondary");
 
     let entries = vec![
         ValidationSummaryEntry::new(

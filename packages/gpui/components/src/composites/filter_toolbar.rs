@@ -84,10 +84,10 @@ impl IntoElement for FilterToolbar {
         let inline_padding = px(panel_px);
         let body_size = px(font_size);
         let gap = resolve_px(theme, spec.gap_token());
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let text_secondary = resolve_color(theme, "semantic.color.text.secondary");
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let border = resolve_color(theme, "semantic.color.border.subtle");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let accent = resolve_color(theme, "color.accent.base");
+        let border = resolve_color(theme, "color.border.subtle");
 
         let block_padding = px(panel_py);
 

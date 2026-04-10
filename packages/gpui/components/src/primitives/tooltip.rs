@@ -58,12 +58,12 @@ impl IntoElement for Tooltip {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let elevated_bg = resolve_color(theme, "semantic.color.background.elevated");
-        let border_default = resolve_color(theme, "semantic.color.border.default");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
-        let stack_gap = resolve_px(theme, "semantic.space.stack.sm");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let border_default = resolve_color(theme, "color.border.default");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let stack_gap = resolve_px(theme, "space.stack.sm");
         // Contract: border-radius = calc(control-radius - 0.125rem)
-        let tooltip_radius = resolve_radius(theme, "semantic.radius.control") - px(rem_to_px(spec.radius_inset_rem()));
+        let tooltip_radius = resolve_radius(theme, "radius.control") - px(rem_to_px(spec.radius_inset_rem()));
 
         // Matches Svelte treatment-surface-elevated values
         let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };

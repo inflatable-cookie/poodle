@@ -80,18 +80,18 @@ impl IntoElement for Menubar {
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
-        let base_height = resolve_px(theme, "semantic.size.control.height");
+        let base_height = resolve_px(theme, "size.control.height");
         let trigger_min_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
-        let accent = resolve_color(theme, "semantic.color.accent.base");
-        let panel = resolve_color(theme, "semantic.color.background.panel");
-        let text_primary = resolve_color(theme, "semantic.color.text.primary");
+        let accent = resolve_color(theme, "color.accent.base");
+        let panel = resolve_color(theme, "color.background.panel");
+        let text_primary = resolve_color(theme, "color.text.primary");
         let border_subtle = resolve_color(theme, self.spec.list_border_token());
         let list_radius = resolve_radius(theme, self.spec.list_radius_token());
-        let control_radius = resolve_radius(theme, "semantic.radius.control");
+        let control_radius = resolve_radius(theme, "radius.control");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
-        let focus_ring = resolve_color(theme, "semantic.color.accent.focusRing");
+        let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let _gap = theme.resolve_space(self.spec.trigger_gap_token());
 
         // Contract: list border 72% border-subtle, bg 96% panel
