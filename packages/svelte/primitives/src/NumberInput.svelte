@@ -379,31 +379,15 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
-  .number-input__field[data-size="xs"] {
-    height: var(--poodle-size-control-height);
-  }
+  .number-input__field[data-size="xs"] { height: 1.5rem; }
+  .number-input__field[data-size="xs"] .number-input__control { font-size: 0.75rem; }
 
-  .number-input__field[data-size="xs"] .number-input__control {
-    font-size: 0.75rem;
-  }
+  .number-input__field[data-size="sm"] { height: 1.75rem; }
+  .number-input__field[data-size="sm"] .number-input__control { font-size: 0.8125rem; }
 
-  .number-input__field[data-size="sm"] {
-    height: var(--poodle-size-control-height);
-  }
+  .number-input__field[data-size="lg"] { height: 2.75rem; }
+  .number-input__field[data-size="lg"] .number-input__control { font-size: 0.9375rem; }
 
-  .number-input__field[data-size="lg"] {
-    height: var(--poodle-size-control-height);
-  }
-
-  .number-input__field[data-size="lg"] .number-input__control {
-    font-size: 0.9375rem;
-  }
-
-  .number-input__field[data-size="xl"] {
-    height: var(--poodle-size-control-height);
-  }
-
-  .number-input__field[data-size="xl"] .number-input__control {
-    font-size: 1rem;
-  }
+  .number-input__field[data-size="xl"] { height: 3.25rem; }
+  .number-input__field[data-size="xl"] .number-input__control { font-size: 1rem; }
 </style>
