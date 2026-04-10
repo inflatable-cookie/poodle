@@ -147,7 +147,6 @@ export const compositeComponents: ComponentEntry[] = [
   entry("PageHeader", "composite", C, "Page-level header with title, actions, and breadcrumbs.", true),
   entry("PickerShell", "composite", C, "Container for search-and-select picker workflows.", true),
   entry("RelationPicker", "composite", C, "Searchable picker for selecting related items.", true),
-  entry("ReorderableList", "composite", C, "Deprecated: use EditableList. Drag-and-drop reorderable list with keyboard support.", true),
   entry("SelectionSummary", "composite", C, "Summary display of current selection state.", true),
   entry("SidebarNav", "composite", C, "Grouped sidebar navigation list with active item state and clearer section separation.", true),
   entry("MetricTile", "composite", C, "Compact label-value tile for metrics and KPIs.", true),

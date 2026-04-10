@@ -2735,60 +2735,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <RelationPicker title="Select Users" {items} bind:selectedIds={selected} on:confirm={(e) => save(e.detail.selectedIds)} />`,
   },
 
-  "reorderable-list": {
-    props: [
-      { name: "items", type: "EditableListItem[]", default: "[]", description: "Deprecated: use EditableList. Array of reorderable items." },
-      { name: "ariaLabel", type: "string", default: '"Reorderable list"', description: "Accessible label for the list." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether reordering is disabled." },
-      { name: "dirty", type: "boolean", default: "false", description: "Whether the current order differs from the committed baseline." },
-      { name: "submitting", type: "boolean", default: "false", description: "Whether submit is in progress; disables interaction and shows saving state." },
-      { name: "errorMessage", type: "string | null", default: "null", description: "Optional submit error surfaced above the list." },
-      { name: "infoMessage", type: "string | null", default: "null", description: "Optional workflow guidance surfaced above the list." },
-      { name: "longListThreshold", type: "number | null", default: "50", description: "Shows the built-in large-list guidance when item count exceeds the threshold. Pass null or 0 to disable." },
-      { name: "longListWarningText", type: "string | null", default: "null", description: "Optional custom copy for the large-list guidance panel." },
-      { name: "windowSize", type: "number | null", default: "null", description: "Optional page window size for very large reorder sessions." },
-      { name: "submitLabel", type: "string", default: '"Save Order"', description: "Submit button label when workflow chrome is shown." },
-      { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Cancel button label when workflow chrome is shown." },
-      { name: "onsubmit", type: "() => void | Promise<void>", default: "null", description: "Optional submit callback; enables workflow chrome." },
-      { name: "oncancel", type: "() => void", default: "null", description: "Optional cancel callback; enables workflow chrome." },
-      { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit semantic control size override for row and handle geometry." },
-      { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
-      { name: "density", type: 'ControlDensity | null', default: "null", description: "Explicit density override for row padding and list spacing." },
-    ],
-    slots: [
-      { name: "item", description: "Custom item renderer. Receives slot props: item, index." },
-    ],
-    events: [
-      { name: "reorder", payload: "{ items: EditableListItem[] }", description: "Fires when items are reordered." },
-      { name: "submit", payload: "void", description: "Fires when the submit action is triggered." },
-      { name: "cancel", payload: "void", description: "Fires when the cancel action is triggered." },
-    ],
-    usage: `<!-- Deprecated: use EditableList instead -->
-<script lang="ts">
-  import { EditableList } from "@poodle/svelte-composites";
-
-  let items = [
-    { id: "1", label: "First" },
-    { id: "2", label: "Second" },
-    { id: "3", label: "Third" },
-  ];
-  let baseline = items.map((item) => item.id);
-  $: dirty = items.some((item, index) => item.id !== baseline[index]);
-
-  async function saveOrder() {
-    baseline = items.map((item) => item.id);
-  }
-</script>
-
-<EditableList
-  bind:items
-  {dirty}
-  onsubmit={saveOrder}
-  oncancel={() => (items = baseline.map((id) => items.find((item) => item.id === id)!))}
-  on:reorder={(e) => (items = e.detail.items)}
-/>`,
-  },
-
   "resize-handle": {
     props: [
       { name: "orientation", type: "SplitOrientation", default: '"horizontal"', description: "Orientation of the resize handle." },

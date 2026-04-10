@@ -40,7 +40,6 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `page-loading.md`
 - `picker-shell.md`
 - `relation-picker.md`
-- `reorderable-list.md`
 - `selection-summary.md`
 - `sidebar-nav.md`
 - `split-view.md`

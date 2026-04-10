@@ -57,7 +57,6 @@ export { default as PageHeader } from "./PageHeader.svelte";
 export { default as PickerShell } from "./PickerShell.svelte";
 export { default as RelationPicker } from "./RelationPicker.svelte";
 export { ResizeHandle } from "@poodle/svelte-primitives";
-export { default as ReorderableList } from "./ReorderableList.svelte";
 export { default as SelectionSummary } from "./SelectionSummary.svelte";
 export { default as SidebarNav } from "./SidebarNav.svelte";
 export { default as SplitView } from "./SplitView.svelte";
@@ -128,7 +127,6 @@ export type {
   PickerItem,
   PickerVariant,
   EditableListItem,
-  ReorderableItem,
   SelectionMode,
   SidebarNavGroup,
   SidebarNavItem,

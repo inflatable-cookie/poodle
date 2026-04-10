@@ -206,7 +206,6 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   region: RegionSpecimen,
   "resize-handle": ResizeHandleSpecimen,
   "relation-picker": RelationPickerSpecimen,
-  "reorderable-list": EditableListSpecimen,
   "scroll-shell": ScrollShellSpecimen,
   "segmented-control": SegmentedControlSpecimen,
   select: SelectSpecimen,

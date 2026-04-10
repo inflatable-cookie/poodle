@@ -45,7 +45,6 @@ and data components.
 - `PickerShell`
 - `RelationPicker`
 - `ResizeHandle`
-- `ReorderableList` (deprecated, use `EditableList`)
 - `SelectionSummary`
 - `SidebarNav`
 - `SplitView`

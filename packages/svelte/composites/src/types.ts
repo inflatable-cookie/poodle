@@ -276,8 +276,6 @@ export type EditableListItem = {
   label: string;
 };
 
-/** @deprecated Use EditableListItem instead. */
-export type ReorderableItem = EditableListItem;
 
 export type {
   ActiveSort,

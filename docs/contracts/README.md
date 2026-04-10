@@ -156,7 +156,6 @@ above it in downstream repos such as Loophole.
 - `composites/page-loading.md`
 - `composites/picker-shell.md`
 - `composites/relation-picker.md`
-- `composites/reorderable-list.md`
 - `composites/selection-summary.md`
 - `composites/sidebar-nav.md`
 - `composites/split-view.md`

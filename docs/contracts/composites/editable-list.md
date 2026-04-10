@@ -525,10 +525,6 @@ Standalone component. Uses `Button` for workflow chrome (header and window nav).
 - Remove button uses `stopPropagation` to prevent drag initiation
 - `item` slot uses Svelte 5 `Snippet` type
 
-### Backward Compatibility
-
-`ReorderableList` is preserved as a deprecated re-export with the same interface and `reorderable-list` CSS class names. New code should use `EditableList` directly.
-
 ## 10. GPUI Notes
 
 Not yet implemented. Reordering behavior may need a simplified drag-and-drop or move-up/move-down button approach. Text input and add button compose from primitives.
