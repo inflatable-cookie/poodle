@@ -345,7 +345,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--poodle-size-icon-default) + 0.5rem);
+    width: calc(var(--poodle-size-icon-md) + 0.5rem);
     min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);

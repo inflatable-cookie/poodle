@@ -282,20 +282,11 @@
     width: var(--poodle-size-control-height);
   }
 
-  .button[data-icon-only][data-size="xs"] {
-    width: calc(var(--poodle-size-control-height) - 0.5rem);
-  }
-
-  .button[data-icon-only][data-size="sm"] {
-    width: calc(var(--poodle-size-control-height) - 0.375rem);
-  }
-
-  .button[data-icon-only][data-size="lg"] {
-    width: calc(var(--poodle-size-control-height) + 0.375rem);
-  }
-
+  .button[data-icon-only][data-size="xs"],
+  .button[data-icon-only][data-size="sm"],
+  .button[data-icon-only][data-size="lg"],
   .button[data-icon-only][data-size="xl"] {
-    width: calc(var(--poodle-size-control-height) + 0.5rem);
+    width: var(--poodle-size-control-height);
   }
 
   .button[data-variant="primary"] {

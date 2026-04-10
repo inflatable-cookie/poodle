@@ -1,9 +1,10 @@
 use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BulkActionTone {
     Default,
+    Warning,
     Danger,
 }
 
@@ -18,6 +19,10 @@ pub struct BulkAction {
     pub id: String,
     pub label: String,
     pub tone: BulkActionTone,
+    /// When true, the action renders in a disabled state and does not
+    /// fire on click. Useful for gating destructive operations until
+    /// the selection meets some precondition.
+    pub is_disabled: bool,
 }
 
 impl BulkAction {
@@ -26,11 +31,17 @@ impl BulkAction {
             id: id.into(),
             label: label.into(),
             tone: BulkActionTone::Default,
+            is_disabled: false,
         }
     }
 
     pub fn with_tone(mut self, tone: BulkActionTone) -> Self {
         self.tone = tone;
+        self
+    }
+
+    pub fn with_disabled(mut self, is_disabled: bool) -> Self {
+        self.is_disabled = is_disabled;
         self
     }
 }
@@ -40,6 +51,16 @@ pub struct BulkActionBarSpec {
     pub selection_count: usize,
     pub total_count: Option<usize>,
     pub actions: Vec<BulkAction>,
+    /// When true, render a select-all affordance in the summary region.
+    /// Label text shifts between "Select all" and "Deselect all" based
+    /// on `all_selected`.
+    pub show_select_all: bool,
+    /// Current all-selected state. Read by the bar to toggle the
+    /// select-all label / visual indicator.
+    pub all_selected: bool,
+    /// When true, the bar renders in a loading state — action buttons
+    /// are dimmed and interactive handlers are suppressed.
+    pub loading: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -51,6 +72,9 @@ impl Default for BulkActionBarSpec {
             selection_count: 0,
             total_count: None,
             actions: Vec::new(),
+            show_select_all: false,
+            all_selected: false,
+            loading: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -81,6 +105,37 @@ impl BulkActionBarSpec {
     pub fn add_action(mut self, action: BulkAction) -> Self {
         self.actions.push(action);
         self
+    }
+
+    pub fn with_show_select_all(mut self, show: bool) -> Self {
+        self.show_select_all = show;
+        self
+    }
+
+    pub fn with_all_selected(mut self, all_selected: bool) -> Self {
+        self.all_selected = all_selected;
+        self
+    }
+
+    pub fn with_loading(mut self, loading: bool) -> Self {
+        self.loading = loading;
+        self
+    }
+
+    pub fn select_all_label(&self) -> &'static str {
+        if self.all_selected { "Deselect all" } else { "Select all" }
+    }
+
+    pub fn warning_border_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_WARNING
+    }
+
+    pub fn warning_text_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_WARNING
+    }
+
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
     }
 
     pub fn summary_text(&self) -> String {

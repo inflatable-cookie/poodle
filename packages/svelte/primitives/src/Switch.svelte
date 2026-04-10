@@ -123,6 +123,7 @@
 
 <style>
   .switch {
+    --switch-unit: var(--poodle-size-icon-md);
     --poodle-switch-off-color: var(--poodle-color-text-primary);
     --poodle-switch-on-color: var(--poodle-color-accent-base);
     --poodle-switch-off-track: color-mix(in srgb, var(--poodle-switch-off-color) 18%, var(--poodle-color-background-surface));
@@ -163,8 +164,8 @@
   .switch__track {
     display: inline-flex;
     align-items: center;
-    width: calc(var(--poodle-size-icon-default) * 2 + 0.125rem);
-    height: calc(var(--poodle-size-icon-default) + 0.25rem);
+    width: calc(var(--switch-unit) * 2 + 0.125rem);
+    height: calc(var(--switch-unit) + 0.25rem);
     padding: 0.125rem;
     border: 0.0625rem solid var(--poodle-switch-off-border);
     border-radius: 999px;
@@ -177,8 +178,8 @@
   }
 
   .switch__thumb {
-    width: calc(var(--poodle-size-icon-default) - 0.125rem);
-    height: calc(var(--poodle-size-icon-default) - 0.125rem);
+    width: calc(var(--switch-unit) - 0.125rem);
+    height: calc(var(--switch-unit) - 0.125rem);
     border-radius: 999px;
     background: var(--poodle-switch-off-thumb);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
@@ -195,7 +196,7 @@
 
   .switch__control:checked ~ .switch__track .switch__thumb {
     background: var(--poodle-switch-on-thumb);
-    transform: translateX(calc(var(--poodle-size-icon-default) - 0.125rem));
+    transform: translateX(calc(var(--switch-unit) - 0.125rem));
   }
 
   .switch__control:focus-visible + .switch__track {
@@ -237,65 +238,69 @@
     gap: var(--poodle-space-inline-md);
   }
 
-  /* Size variants — scale track and thumb proportionally */
+  /* Size variants — set --switch-unit per size, geometry calcs use it */
+  .switch[data-size="xs"] { --switch-unit: var(--poodle-size-icon-xs); }
   .switch[data-size="xs"] .switch__track {
-    width: calc(var(--poodle-size-icon-default) * 1.75);
-    height: calc(var(--poodle-size-icon-default) * 0.875);
+    width: calc(var(--switch-unit) * 1.75);
+    height: calc(var(--switch-unit) * 0.875);
     padding: 0.0625rem;
   }
 
   .switch[data-size="xs"] .switch__thumb {
-    width: calc(var(--poodle-size-icon-default) * 0.75 - 0.125rem);
-    height: calc(var(--poodle-size-icon-default) * 0.75 - 0.125rem);
+    width: calc(var(--switch-unit) * 0.75 - 0.125rem);
+    height: calc(var(--switch-unit) * 0.75 - 0.125rem);
   }
 
   .switch[data-size="xs"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--poodle-size-icon-default) * 0.875));
+    transform: translateX(calc(var(--switch-unit) * 0.875));
   }
 
+  .switch[data-size="sm"] { --switch-unit: var(--poodle-size-icon-sm); }
   .switch[data-size="sm"] .switch__track {
-    width: calc(var(--poodle-size-icon-default) * 1.875);
-    height: calc(var(--poodle-size-icon-default) + 0.125rem);
+    width: calc(var(--switch-unit) * 1.875);
+    height: calc(var(--switch-unit) + 0.125rem);
     padding: 0.09375rem;
   }
 
   .switch[data-size="sm"] .switch__thumb {
-    width: calc(var(--poodle-size-icon-default) - 0.1875rem);
-    height: calc(var(--poodle-size-icon-default) - 0.1875rem);
+    width: calc(var(--switch-unit) - 0.1875rem);
+    height: calc(var(--switch-unit) - 0.1875rem);
   }
 
   .switch[data-size="sm"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--poodle-size-icon-default) - 0.0625rem));
+    transform: translateX(calc(var(--switch-unit) - 0.0625rem));
   }
 
+  .switch[data-size="lg"] { --switch-unit: var(--poodle-size-icon-lg); }
   .switch[data-size="lg"] .switch__track {
-    width: calc(var(--poodle-size-icon-default) * 2.25 + 0.25rem);
-    height: calc(var(--poodle-size-icon-default) + 0.5rem);
+    width: calc(var(--switch-unit) * 2.25 + 0.25rem);
+    height: calc(var(--switch-unit) + 0.5rem);
     padding: 0.1875rem;
   }
 
   .switch[data-size="lg"] .switch__thumb {
-    width: var(--poodle-size-icon-default);
-    height: var(--poodle-size-icon-default);
+    width: var(--switch-unit);
+    height: var(--switch-unit);
   }
 
   .switch[data-size="lg"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--poodle-size-icon-default) + 0.0625rem));
+    transform: translateX(calc(var(--switch-unit) + 0.0625rem));
   }
 
+  .switch[data-size="xl"] { --switch-unit: var(--poodle-size-icon-xl); }
   .switch[data-size="xl"] .switch__track {
-    width: calc(var(--poodle-size-icon-default) * 2.5 + 0.375rem);
-    height: calc(var(--poodle-size-icon-default) + 0.75rem);
+    width: calc(var(--switch-unit) * 2.5 + 0.375rem);
+    height: calc(var(--switch-unit) + 0.75rem);
     padding: 0.25rem;
   }
 
   .switch[data-size="xl"] .switch__thumb {
-    width: calc(var(--poodle-size-icon-default) + 0.125rem);
-    height: calc(var(--poodle-size-icon-default) + 0.125rem);
+    width: calc(var(--switch-unit) + 0.125rem);
+    height: calc(var(--switch-unit) + 0.125rem);
   }
 
   .switch[data-size="xl"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--poodle-size-icon-default) + 0.125rem));
+    transform: translateX(calc(var(--switch-unit) + 0.125rem));
   }
 
   /* Label size variants */

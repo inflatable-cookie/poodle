@@ -6,13 +6,14 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI bulk-action bar component backed by `BulkActionBarSpec`.
 pub struct BulkActionBar {
     spec: BulkActionBarSpec,
     theme: GpuiThemeProvider,
     on_action: Option<Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_select_all: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for BulkActionBar {
@@ -22,7 +23,7 @@ impl std::ops::Deref for BulkActionBar {
 
 impl BulkActionBar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: BulkActionBarSpec::new(), theme: theme.clone(), on_action: None }
+        Self { spec: BulkActionBarSpec::new(), theme: theme.clone(), on_action: None, on_select_all: None }
     }
 
     pub fn from_spec(spec: BulkActionBarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -30,6 +31,7 @@ impl BulkActionBar {
             spec,
             theme: theme.clone(),
             on_action: None,
+            on_select_all: None,
         }
     }
 
@@ -40,12 +42,25 @@ impl BulkActionBar {
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn show_select_all(mut self, v: bool) -> Self { self.spec.show_select_all = v; self }
+    pub fn all_selected(mut self, v: bool) -> Self { self.spec.all_selected = v; self }
+    pub fn loading(mut self, v: bool) -> Self { self.spec.loading = v; self }
 
     pub fn on_action(
         mut self,
         handler: impl Fn(&str, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_action = Some(Rc::new(handler));
+        self
+    }
+
+    /// Click handler for the "Select all" / "Deselect all" affordance.
+    /// Matches the Div::on_click signature so cx.listener passes through.
+    pub fn on_select_all(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_select_all = Some(Rc::new(handler));
         self
     }
 }
@@ -81,6 +96,9 @@ impl IntoElement for BulkActionBar {
         let button_radius = resolve_radius(theme, spec.button_radius_token());
         let danger_border_raw = resolve_color(theme, spec.danger_border_token());
         let danger_text = resolve_color(theme, spec.danger_text_token());
+        let warning_border_raw = resolve_color(theme, spec.warning_border_token());
+        let warning_text = resolve_color(theme, spec.warning_text_token());
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let gap = density_gap;
         let pad_x = density_pad_x;
         let pad_y = density_pad_y;
@@ -92,12 +110,16 @@ impl IntoElement for BulkActionBar {
 
         // Danger button border: 65% danger mixed with default border
         let danger_border = color_mix(danger_border_raw, button_border, 0.65);
+        let warning_border = color_mix(warning_border_raw, button_border, 0.65);
 
         // ── Summary section (left) ──────────────────────────────────
         let summary = {
-            let mut row = div().flex().flex_row().items_center().gap(px(4.0));
+            let mut row = div().flex().flex_row().items_center().gap(gap);
+
+            // Count + label block
+            let mut count_block = div().flex().flex_row().items_center().gap(px(4.0));
             let count_text = format!("{}", spec.selection_count);
-            row = row.child(
+            count_block = count_block.child(
                 div()
                     .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
@@ -106,7 +128,7 @@ impl IntoElement for BulkActionBar {
             );
             match spec.total_count {
                 Some(total) => {
-                    row = row.child(
+                    count_block = count_block.child(
                         div()
                             .text_size(body_size)
                             .text_color(total_text_color)
@@ -114,7 +136,7 @@ impl IntoElement for BulkActionBar {
                     );
                 }
                 None => {
-                    row = row.child(
+                    count_block = count_block.child(
                         div()
                             .text_size(body_size)
                             .text_color(text_color)
@@ -122,6 +144,31 @@ impl IntoElement for BulkActionBar {
                     );
                 }
             }
+            row = row.child(count_block);
+
+            // Select-all affordance (link-style text button)
+            if spec.show_select_all {
+                let accent_color = resolve_color(theme, "color.accent.base");
+                let mut select_all_btn = div()
+                    .id("poodle-bulk-select-all")
+                    .text_size(body_size)
+                    .font_weight(FontWeight::MEDIUM)
+                    .text_color(accent_color)
+                    .cursor_pointer()
+                    .child(spec.select_all_label());
+
+                if let Some(ref handler) = self.on_select_all {
+                    if !spec.loading {
+                        let handler = handler.clone();
+                        select_all_btn = select_all_btn.on_click(move |event, window, cx| {
+                            handler(event, window, cx);
+                        });
+                    }
+                }
+
+                row = row.child(select_all_btn);
+            }
+
             row
         };
 
@@ -129,11 +176,16 @@ impl IntoElement for BulkActionBar {
         let actions = {
             let mut row = div().flex().flex_row().items_center().gap(gap);
             for action in &spec.actions {
-                let is_danger = action.tone == BulkActionTone::Danger;
-                let btn_border = if is_danger { danger_border } else { button_border };
-                let btn_text = if is_danger { danger_text } else { text_color };
+                let (btn_border, btn_text) = match action.tone {
+                    BulkActionTone::Danger => (danger_border, danger_text),
+                    BulkActionTone::Warning => (warning_border, warning_text),
+                    BulkActionTone::Default => (button_border, text_color),
+                };
                 let btn_id = SharedString::from(format!("bulk-action-{}", action.id));
 
+                // An action is interactive only if neither it nor the bar
+                // is in a disabled/loading state.
+                let is_action_disabled = action.is_disabled || spec.loading;
                 let hover_fill = color_mix(button_fill, elevated, 0.84);
 
                 let mut btn = div()
@@ -147,19 +199,25 @@ impl IntoElement for BulkActionBar {
                     .bg(button_fill)
                     .border_1()
                     .border_color(btn_border)
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(hover_fill))
                     .text_size(label_size)
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(btn_text)
                     .child(action.label.clone());
 
-                if let Some(ref handler) = self.on_action {
-                    let handler = handler.clone();
-                    let action_id = action.id.clone();
-                    btn = btn.on_click(move |_event, window, cx| {
-                        handler(&action_id, window, cx);
-                    });
+                if is_action_disabled {
+                    btn = btn
+                        .opacity(disabled_opacity)
+                        .cursor(CursorStyle::OperationNotAllowed);
+                } else {
+                    btn = btn.cursor_pointer().hover(move |s| s.bg(hover_fill));
+
+                    if let Some(ref handler) = self.on_action {
+                        let handler = handler.clone();
+                        let action_id = action.id.clone();
+                        btn = btn.on_click(move |_event, window, cx| {
+                            handler(&action_id, window, cx);
+                        });
+                    }
                 }
 
                 row = row.child(btn);

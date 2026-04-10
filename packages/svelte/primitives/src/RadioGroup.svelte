@@ -120,8 +120,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(var(--poodle-size-icon-default) + 0.125rem);
-    height: calc(var(--poodle-size-icon-default) + 0.125rem);
+    width: calc(var(--poodle-size-icon-md) + 0.125rem);
+    height: calc(var(--poodle-size-icon-md) + 0.125rem);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: 999px;
     background: var(--poodle-color-background-surface);
@@ -131,8 +131,8 @@
   }
 
   .radio-group__dot {
-    width: calc(var(--poodle-size-icon-default) * 0.5);
-    height: calc(var(--poodle-size-icon-default) * 0.5);
+    width: calc(var(--poodle-size-icon-md) * 0.5);
+    height: calc(var(--poodle-size-icon-md) * 0.5);
     border-radius: 999px;
     background: transparent;
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
@@ -170,42 +170,42 @@
 
   /* Size variants */
   .radio-group[data-size="xs"] .radio-group__indicator {
-    width: calc(var(--poodle-size-icon-default) - 0.125rem);
-    height: calc(var(--poodle-size-icon-default) - 0.125rem);
+    width: calc(var(--poodle-size-icon-xs) + 0.25rem);
+    height: calc(var(--poodle-size-icon-xs) + 0.25rem);
   }
 
   .radio-group[data-size="xs"] .radio-group__dot {
-    width: calc(var(--poodle-size-icon-default) * 0.4);
-    height: calc(var(--poodle-size-icon-default) * 0.4);
+    width: 0.4rem;
+    height: 0.4rem;
   }
 
   .radio-group[data-size="sm"] .radio-group__indicator {
-    width: var(--poodle-size-icon-default);
-    height: var(--poodle-size-icon-default);
+    width: calc(var(--poodle-size-icon-sm) + 0.25rem);
+    height: calc(var(--poodle-size-icon-sm) + 0.25rem);
   }
 
   .radio-group[data-size="sm"] .radio-group__dot {
-    width: calc(var(--poodle-size-icon-default) * 0.45);
-    height: calc(var(--poodle-size-icon-default) * 0.45);
+    width: 0.45rem;
+    height: 0.45rem;
   }
 
   .radio-group[data-size="lg"] .radio-group__indicator {
-    width: calc(var(--poodle-size-icon-default) + 0.375rem);
-    height: calc(var(--poodle-size-icon-default) + 0.375rem);
+    width: calc(var(--poodle-size-icon-lg) + 0.125rem);
+    height: calc(var(--poodle-size-icon-lg) + 0.125rem);
   }
 
   .radio-group[data-size="lg"] .radio-group__dot {
-    width: calc(var(--poodle-size-icon-default) * 0.55);
-    height: calc(var(--poodle-size-icon-default) * 0.55);
+    width: 0.55rem;
+    height: 0.55rem;
   }
 
   .radio-group[data-size="xl"] .radio-group__indicator {
-    width: calc(var(--poodle-size-icon-default) + 0.625rem);
-    height: calc(var(--poodle-size-icon-default) + 0.625rem);
+    width: calc(var(--poodle-size-icon-xl) + 0.125rem);
+    height: calc(var(--poodle-size-icon-xl) + 0.125rem);
   }
 
   .radio-group[data-size="xl"] .radio-group__dot {
-    width: calc(var(--poodle-size-icon-default) * 0.6);
-    height: calc(var(--poodle-size-icon-default) * 0.6);
+    width: 0.6rem;
+    height: 0.6rem;
   }
 </style>
