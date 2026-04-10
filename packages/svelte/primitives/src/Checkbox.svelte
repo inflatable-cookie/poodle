@@ -159,6 +159,7 @@
   .checkbox[data-size="xs"] .checkbox__indicator {
     width: var(--poodle-size-icon-xs);
     height: var(--poodle-size-icon-xs);
+    border-radius: 0.1875rem;
   }
 
   .checkbox[data-size="xs"] .checkbox__mark {
@@ -169,6 +170,7 @@
   .checkbox[data-size="sm"] .checkbox__indicator {
     width: var(--poodle-size-icon-sm);
     height: var(--poodle-size-icon-sm);
+    border-radius: 0.25rem;
   }
 
   .checkbox[data-size="sm"] .checkbox__mark {
@@ -179,6 +181,7 @@
   .checkbox[data-size="lg"] .checkbox__indicator {
     width: var(--poodle-size-icon-lg);
     height: var(--poodle-size-icon-lg);
+    border-radius: 0.375rem;
   }
 
   .checkbox[data-size="lg"] .checkbox__mark {
@@ -189,6 +192,7 @@
   .checkbox[data-size="xl"] .checkbox__indicator {
     width: var(--poodle-size-icon-xl);
     height: var(--poodle-size-icon-xl);
+    border-radius: 0.4375rem;
   }
 
   .checkbox[data-size="xl"] .checkbox__mark {
