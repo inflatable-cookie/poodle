@@ -30,7 +30,7 @@ function handleClick(event: MouseEvent): void {
     <Code source={cssExample} language="css" maxHeight="6rem" />
   </SpecimenGroup>
 
-  <SpecimenGroup bare label="Inline code">
+  <SpecimenGroup label="Inline code">
     <p>Use <Code source="npm install" inline /> to install dependencies.</p>
   </SpecimenGroup>
 
