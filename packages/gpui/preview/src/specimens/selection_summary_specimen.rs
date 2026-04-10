@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_composites::{SelectionSummarySpec, SelectionSummaryItem};
-use poodle_primitives::EyebrowSpec;
+use poodle_primitives::{ControlSize, EyebrowSpec};
 use poodle_gpui_components::{SelectionSummary, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 
@@ -53,5 +53,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                 )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let items = || vec![
+                        SelectionSummaryItem::new("1", "Button"),
+                        SelectionSummaryItem::new("2", "Card"),
+                        SelectionSummaryItem::new("3", "Dialog"),
+                    ];
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Xs))
+                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Sm))
+                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Md))
+                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Lg))
+                        .child(SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme).with_size(ControlSize::Xl))
+                })
         )
 }

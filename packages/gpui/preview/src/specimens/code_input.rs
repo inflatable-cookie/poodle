@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CodeInputSpec, EyebrowSpec};
+use poodle_primitives::{CodeInputSpec, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{CodeInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -62,6 +62,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         this.state.specimens.text.insert("code-input-pin".to_string(), val.to_string());
                         cx.notify();
                     }))
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).size(ControlSize::Xs))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).size(ControlSize::Sm))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).size(ControlSize::Md))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).size(ControlSize::Lg))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).size(ControlSize::Xl))
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).density(ControlDensity::Compact))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).density(ControlDensity::Default))
+                        .child(CodeInput::from_spec(CodeInputSpec::new().with_length(4), theme).density(ControlDensity::Comfortable))
                 )
         )
         // --- Disabled ---

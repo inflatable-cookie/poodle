@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ChoiceOption, EyebrowSpec};
+use poodle_primitives::{ChoiceOption, ControlSize, EyebrowSpec};
 use poodle_composites::CardRadioGroupSpec;
 use poodle_gpui_components::{CardRadioGroup, Eyebrow};
 use crate::app_state::AppState;
@@ -75,6 +75,53 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .child(format!("Selected: {}", selected_size.as_deref().unwrap_or("")))
                             )
                         })
+                })
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let items = || vec![
+                        ChoiceOption::new("a", "Option A").with_description("First option"),
+                        ChoiceOption::new("b", "Option B").with_description("Second option"),
+                    ];
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            CardRadioGroup::from_spec(
+                                CardRadioGroupSpec::new(items()).with_value("a"),
+                                theme,
+                            )
+                            .with_size(ControlSize::Xs)
+                        )
+                        .child(
+                            CardRadioGroup::from_spec(
+                                CardRadioGroupSpec::new(items()).with_value("a"),
+                                theme,
+                            )
+                            .with_size(ControlSize::Sm)
+                        )
+                        .child(
+                            CardRadioGroup::from_spec(
+                                CardRadioGroupSpec::new(items()).with_value("a"),
+                                theme,
+                            )
+                            .with_size(ControlSize::Md)
+                        )
+                        .child(
+                            CardRadioGroup::from_spec(
+                                CardRadioGroupSpec::new(items()).with_value("a"),
+                                theme,
+                            )
+                            .with_size(ControlSize::Lg)
+                        )
+                        .child(
+                            CardRadioGroup::from_spec(
+                                CardRadioGroupSpec::new(items()).with_value("a"),
+                                theme,
+                            )
+                            .with_size(ControlSize::Xl)
+                        )
                 })
         )
         // --- Disabled ---

@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{Button, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -231,6 +231,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("size-xl")
+                        )
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().gap(px(8.0)).flex_wrap().items_center()
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Compact"),
+                                theme,
+                            )
+                            .with_id("density-compact")
+                            .density(ControlDensity::Compact)
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Default"),
+                                theme,
+                            )
+                            .with_id("density-default")
+                            .density(ControlDensity::Default)
+                        )
+                        .child(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Comfortable"),
+                                theme,
+                            )
+                            .with_id("density-comfortable")
+                            .density(ControlDensity::Comfortable)
                         )
                 )
         )

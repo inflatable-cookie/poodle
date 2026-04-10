@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{DurationInputSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, DurationInputSpec, EyebrowSpec};
 use poodle_gpui_components::{DurationInput, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 
@@ -40,6 +40,30 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_show_seconds(false),
                         theme,
                     ).with_id("duration-hm")
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-size-xs").size(ControlSize::Xs))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-size-sm").size(ControlSize::Sm))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-size-md").size(ControlSize::Md))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-size-lg").size(ControlSize::Lg))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-size-xl").size(ControlSize::Xl))
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-density-compact").with_density(ControlDensity::Compact))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-density-default").with_density(ControlDensity::Default))
+                        .child(DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme).with_id("duration-density-comfortable").with_density(ControlDensity::Comfortable))
                 )
         )
         // --- Disabled ---

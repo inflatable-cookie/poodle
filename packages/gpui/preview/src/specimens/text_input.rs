@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
 use poodle_gpui_components::{Field, TextInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -104,6 +104,70 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                     )
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Extra small"),
+                                theme,
+                            ).size(ControlSize::Xs)
+                        )
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Small"),
+                                theme,
+                            ).size(ControlSize::Sm)
+                        )
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Medium"),
+                                theme,
+                            ).size(ControlSize::Md)
+                        )
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Large"),
+                                theme,
+                            ).size(ControlSize::Lg)
+                        )
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Extra large"),
+                                theme,
+                            ).size(ControlSize::Xl)
+                        )
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Compact"),
+                                theme,
+                            ).density(ControlDensity::Compact)
+                        )
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Default"),
+                                theme,
+                            ).density(ControlDensity::Default)
+                        )
+                        .child(
+                            TextInput::from_spec(
+                                TextInputSpec::new().with_placeholder("Comfortable"),
+                                theme,
+                            ).density(ControlDensity::Comfortable)
+                        )
                 )
         )
         // --- Disabled ---

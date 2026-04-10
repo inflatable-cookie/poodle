@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{NumberInputSpec, ValidationState, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, NumberInputSpec, ValidationState, EyebrowSpec};
 use poodle_gpui_components::{NumberInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -88,6 +88,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div().text_sm()
                         .text_color(color_to_hsla(text_secondary))
                         .child(format!("Price: ${:.2}", price))
+                )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Xs))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Sm))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Md))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Lg))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).size(ControlSize::Xl))
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).density(ControlDensity::Compact))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).density(ControlDensity::Default))
+                        .child(NumberInput::from_spec(NumberInputSpec::new(1.0), theme).density(ControlDensity::Comfortable))
                 )
         )
         // --- Disabled ---

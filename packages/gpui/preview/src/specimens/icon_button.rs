@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonVariant, ControlSize, IconButtonSpec, EyebrowSpec};
+use poodle_primitives::{ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, EyebrowSpec};
 use poodle_gpui_components::{IconButton, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -158,6 +158,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("size-xl")
+                        )
+                )
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child(
+                    div().flex().gap(px(8.0)).items_center()
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_icon("star")
+                                    .with_aria_label("Compact"),
+                                theme,
+                            )
+                            .with_id("density-compact")
+                            .density(ControlDensity::Compact)
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_icon("star")
+                                    .with_aria_label("Default"),
+                                theme,
+                            )
+                            .with_id("density-default")
+                            .density(ControlDensity::Default)
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_icon("star")
+                                    .with_aria_label("Comfortable"),
+                                theme,
+                            )
+                            .with_id("density-comfortable")
+                            .density(ControlDensity::Comfortable)
                         )
                 )
         )

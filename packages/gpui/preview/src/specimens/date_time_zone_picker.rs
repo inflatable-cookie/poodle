@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{DateTimeZonePickerSpec, EyebrowSpec};
+use poodle_primitives::{ControlDensity, ControlSize, DateTimeZonePickerSpec, EyebrowSpec};
 use poodle_gpui_components::{DateTimeZonePicker, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
@@ -40,6 +40,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                 )
+        )
+        // --- Sizes ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+                .child({
+                    let make_spec = || DateTimeZonePickerSpec::new()
+                        .with_value("2026-03-23T14:30:00")
+                        .with_time_zone("America/New_York");
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Xs))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Sm))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Md))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Lg))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).size(ControlSize::Xl))
+                })
+        )
+        // --- Densities ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
+                .child({
+                    let make_spec = || DateTimeZonePickerSpec::new()
+                        .with_value("2026-03-23T14:30:00")
+                        .with_time_zone("America/New_York");
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).with_density(ControlDensity::Compact))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).with_density(ControlDensity::Default))
+                        .child(DateTimeZonePicker::from_spec(make_spec(), theme).with_density(ControlDensity::Comfortable))
+                })
         )
         // --- Disabled ---
         .child(
