@@ -23,8 +23,57 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Future ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Future"), theme))
-                .child(time_ago_row("in 5 minutes", "2026-03-23T11:05:00Z", theme, text_secondary))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Future timestamp"), theme))
+                .child(time_ago_row("In 5 minutes", "2026-03-23T11:05:00Z", theme, text_secondary))
+        )
+        // --- Long format ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Long format"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(
+                            div().flex().items_center().gap(px(8.0))
+                                .child(
+                                    div().text_xs().text_color(color_to_hsla(text_secondary)).min_w(px(128.0))
+                                        .child("2 minutes ago:")
+                                )
+                                .child(
+                                    TimeAgo::from_spec(
+                                        TimeAgoSpec::new()
+                                            .with_timestamp("2026-03-23T10:58:00Z")
+                                            .with_short(false),
+                                        theme,
+                                    )
+                                )
+                        )
+                        .child(
+                            div().flex().items_center().gap(px(8.0))
+                                .child(
+                                    div().text_xs().text_color(color_to_hsla(text_secondary)).min_w(px(128.0))
+                                        .child("2 days ago:")
+                                )
+                                .child(
+                                    TimeAgo::from_spec(
+                                        TimeAgoSpec::new()
+                                            .with_timestamp("2026-03-21T11:00:00Z")
+                                            .with_short(false),
+                                        theme,
+                                    )
+                                )
+                        )
+                )
+        )
+        // --- From ISO string ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("From ISO string"), theme))
+                .child(
+                    TimeAgo::from_spec(
+                        TimeAgoSpec::new().with_timestamp("2026-03-14T00:00:00Z"),
+                        theme,
+                    )
+                )
         )
         // --- Static (no live update) ---
         .child(

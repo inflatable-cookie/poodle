@@ -34,6 +34,7 @@ impl TimeAgo {
     // ── Forwarded spec builders ───────────────────────────────
     pub fn timestamp(mut self, v: impl Into<String>) -> Self { self.spec.timestamp = v.into(); self }
     pub fn live(mut self, v: bool) -> Self { self.spec.live = v; self }
+    pub fn short(mut self, v: bool) -> Self { self.spec.short = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
 
 }
@@ -50,7 +51,7 @@ impl IntoElement for TimeAgo {
         let display = if spec.timestamp.is_empty() {
             "just now".to_string()
         } else {
-            relative_time(&spec.timestamp).unwrap_or_else(|| spec.timestamp.clone())
+            relative_time(&spec.timestamp, spec.short).unwrap_or_else(|| spec.timestamp.clone())
         };
 
         div()
@@ -67,7 +68,7 @@ impl IntoElement for TimeAgo {
 /// Supports formats: "YYYY-MM-DDThh:mm:ss", "YYYY-MM-DDThh:mm:ssZ",
 /// "YYYY-MM-DD hh:mm:ss", and "YYYY-MM-DD".
 /// Returns `None` if parsing fails, allowing the caller to fall back.
-fn relative_time(timestamp: &str) -> Option<String> {
+fn relative_time(timestamp: &str, short: bool) -> Option<String> {
     let ts = timestamp.trim();
     // Strip trailing 'Z' if present (treat as UTC either way).
     let ts = ts.strip_suffix('Z').unwrap_or(ts);
@@ -126,16 +127,13 @@ fn relative_time(timestamp: &str) -> Option<String> {
         .as_secs() as i64;
 
     let diff = now_epoch - ts_epoch;
+    let is_future = diff < 0;
+    let abs_diff = diff.unsigned_abs();
 
-    if diff < 0 {
-        // Future timestamps: show "just now" rather than negative values.
-        return Some("just now".to_string());
-    }
-
-    Some(format_duration(diff as u64))
+    Some(format_duration(abs_diff, short, is_future))
 }
 
-fn format_duration(seconds: u64) -> String {
+fn format_duration(seconds: u64, short: bool, is_future: bool) -> String {
     const MINUTE: u64 = 60;
     const HOUR: u64 = 3600;
     const DAY: u64 = 86400;
@@ -143,20 +141,43 @@ fn format_duration(seconds: u64) -> String {
     const MONTH: u64 = 30 * DAY;
     const YEAR: u64 = 365 * DAY;
 
-    if seconds < MINUTE {
-        "just now".to_string()
+    if seconds < 5 {
+        return if short { "now".to_string() } else { "just now".to_string() };
+    }
+
+    let (value, unit_short, unit_long_singular, unit_long_plural) = if seconds < MINUTE {
+        (seconds, "s", "second", "seconds")
     } else if seconds < HOUR {
-        format!("{}m ago", seconds / MINUTE)
+        (seconds / MINUTE, "m", "minute", "minutes")
     } else if seconds < DAY {
-        format!("{}h ago", seconds / HOUR)
+        (seconds / HOUR, "h", "hour", "hours")
     } else if seconds < WEEK {
-        format!("{}d ago", seconds / DAY)
+        let d = seconds / DAY;
+        if !short && !is_future && d == 1 {
+            return "yesterday".to_string();
+        }
+        (d, "d", "day", "days")
     } else if seconds < MONTH {
-        format!("{}w ago", seconds / WEEK)
+        (seconds / WEEK, "w", "week", "weeks")
     } else if seconds < YEAR {
-        format!("{}mo ago", seconds / MONTH)
+        (seconds / MONTH, "mo", "month", "months")
     } else {
-        format!("{}y ago", seconds / YEAR)
+        (seconds / YEAR, "y", "year", "years")
+    };
+
+    if short {
+        if is_future {
+            format!("in {}{}", value, unit_short)
+        } else {
+            format!("{}{} ago", value, unit_short)
+        }
+    } else {
+        let unit = if value == 1 { unit_long_singular } else { unit_long_plural };
+        if is_future {
+            format!("in {} {}", value, unit)
+        } else {
+            format!("{} {} ago", value, unit)
+        }
     }
 }
 

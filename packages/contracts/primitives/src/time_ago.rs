@@ -4,6 +4,9 @@ use poodle_tokens::semantic;
 pub struct TimeAgoSpec {
     pub timestamp: String,
     pub live: bool,
+    /// When true (default), renders compact forms like "2m ago".
+    /// When false, renders long forms like "2 minutes ago".
+    pub short: bool,
     pub aria_label: Option<String>,
 }
 
@@ -12,6 +15,7 @@ impl Default for TimeAgoSpec {
         Self {
             timestamp: String::new(),
             live: false,
+            short: true,
             aria_label: None,
         }
     }
@@ -29,6 +33,11 @@ impl TimeAgoSpec {
 
     pub fn with_live(mut self, live: bool) -> Self {
         self.live = live;
+        self
+    }
+
+    pub fn with_short(mut self, short: bool) -> Self {
+        self.short = short;
         self
     }
 
