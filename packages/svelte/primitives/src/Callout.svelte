@@ -106,7 +106,7 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: var(--poodle-space-inline-md);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.625rem var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-callout-border);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-callout-fill);

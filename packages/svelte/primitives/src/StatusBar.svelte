@@ -26,7 +26,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.375rem var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
     color: var(--poodle-color-text-secondary);

@@ -10,14 +10,39 @@ pub enum DetailItemLayout {
     Stacked,
 }
 
+/// Visual presentation mode.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum DetailItemPresentation {
+    /// Plain label-value pair with no container chrome.
+    #[default]
+    Simple,
+    /// Elevated card-like styling with background and padding.
+    Surface,
+}
+
+/// Column span in a parent grid.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DetailItemSpan {
+    /// Spans all columns via `grid-column: 1 / -1`.
+    Full,
+    /// Spans half the available columns.
+    Half,
+}
+
 #[derive(Clone)]
 pub struct DetailItemSpec {
     pub label: String,
     pub description: Option<String>,
     pub value: Option<String>,
+    /// Display text when value is null and no slot content is provided.
+    pub empty_text: String,
     pub truncate_value: bool,
     pub aria_label: Option<String>,
     pub layout: DetailItemLayout,
+    /// Visual presentation: Simple (default) or Surface (elevated card).
+    pub presentation: DetailItemPresentation,
+    /// Optional column span in a parent grid.
+    pub span: Option<DetailItemSpan>,
 }
 
 impl DetailItemSpec {

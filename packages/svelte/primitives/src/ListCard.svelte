@@ -238,7 +238,7 @@
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-md);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.625rem var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent);
     border-radius: var(--poodle-radius-control);
     background: color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary));

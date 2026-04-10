@@ -178,7 +178,7 @@
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
     gap: var(--poodle-space-inline-md);
     align-items: center;
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.625rem var(--poodle-space-panel-x);
     border-radius: calc(var(--poodle-radius-surface) - 0.0625rem);
     background: color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary));
   }

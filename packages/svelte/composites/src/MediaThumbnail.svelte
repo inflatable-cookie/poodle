@@ -144,14 +144,14 @@
     place-items: center;
     width: 100%;
     height: 100%;
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.5rem var(--poodle-space-panel-x);
   }
 
   .media-thumbnail__state {
     gap: var(--poodle-space-stack-sm);
     align-content: end;
     justify-items: start;
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.5rem var(--poodle-space-panel-x);
     text-align: left;
     background:
       linear-gradient(180deg, transparent, color-mix(in srgb, var(--poodle-color-background-panel) 46%, transparent)),

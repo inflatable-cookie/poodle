@@ -88,7 +88,7 @@
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.625rem var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-panel)) 82%, var(--poodle-color-background-elevated));

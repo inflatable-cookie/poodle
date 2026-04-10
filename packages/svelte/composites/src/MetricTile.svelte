@@ -65,7 +65,7 @@
   .state-tile {
     display: grid;
     gap: var(--poodle-space-inline-sm);
-    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    padding: 0.625rem var(--poodle-space-panel-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
