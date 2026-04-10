@@ -19,7 +19,7 @@
   <Tabs
     value={activeTab}
     items={tabs}
-    variant="pill"
+    variant="text"
     size="sm"
     density="compact"
     ariaLabel="Specimen view"
