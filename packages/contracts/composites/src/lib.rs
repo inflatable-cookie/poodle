@@ -68,7 +68,7 @@ pub use media_picker::MediaPickerSpec;
 pub use media_preview::MediaPreviewSpec;
 pub use media_thumbnail::MediaThumbnailSpec;
 pub use media_upload_status_panel::{MediaUploadStatusPanelSpec, MediaUploadStep};
-pub use metric_tile::MetricTileSpec;
+pub use metric_tile::{MetricTileSpec, MetricTrend};
 pub use page_header::{PageHeaderAlign, PageHeaderSpec};
 pub use page_loading::PageLoadingSpec;
 pub use pagination_summary::PaginationSummarySpec;

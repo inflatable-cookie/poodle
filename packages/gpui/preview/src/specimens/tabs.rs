@@ -78,11 +78,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
+    // 2b. CARD VARIANT WITH COUNTS — icons + count badges on each tab.
+    let counts_tabs = vec![
+        TabDefinition::new("inbox", "Inbox").with_icon("inbox").with_count(12),
+        TabDefinition::new("drafts", "Drafts").with_icon("file-text").with_count(3),
+        TabDefinition::new("sent", "Sent").with_icon("send"),
+        TabDefinition::new("spam", "Spam").with_icon("alert-triangle").with_count(47),
+    ];
+    let counts_value = state.specimens.text.get("tabs-counts-value")
+        .map(|s| s.as_str())
+        .unwrap_or("inbox")
+        .to_string();
+    let counts_spec = TabsSpec::new(counts_tabs)
+        .with_variant(TabVariant::Card)
+        .with_value(&counts_value)
+        .with_aria_label("Mailbox folders");
+    let counts_component = Tabs::from_spec(counts_spec, theme)
+        .with_id("specimen-card-counts")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state.specimens.text.insert("tabs-counts-value".to_string(), val.to_string());
+            cx.notify();
+        }));
+
     // 3. PILL VARIANT (WITH ICONS)
     let pill_tabs = vec![
-        TabDefinition::new("home", "Home"),
-        TabDefinition::new("settings", "Settings"),
-        TabDefinition::new("users", "Users"),
+        TabDefinition::new("home", "Home").with_icon("home"),
+        TabDefinition::new("settings", "Settings").with_icon("settings"),
+        TabDefinition::new("users", "Users").with_icon("users"),
     ];
 
     let pill_value = state.specimens.text.get("tabs-pill-value")
@@ -129,9 +151,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // 4. UNDERLINE WITH ICONS (NO PANEL)
     let underline_icon_tabs = vec![
-        TabDefinition::new("home", "Home"),
-        TabDefinition::new("settings", "Settings"),
-        TabDefinition::new("users", "Users"),
+        TabDefinition::new("home", "Home").with_icon("home"),
+        TabDefinition::new("settings", "Settings").with_icon("settings"),
+        TabDefinition::new("users", "Users").with_icon("users"),
     ];
 
     let underline_icon_value = state.specimens.text.get("tabs-underline-icon-value")
@@ -259,6 +281,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Card variant (closable, reorderable)"), theme))
                 .child(card_component)
+        )
+
+        // 2b. Card variant with counts and icons
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Card variant with counts, separators"), theme))
+                .child(counts_component)
         )
 
         // 3. Pill variant

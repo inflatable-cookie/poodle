@@ -38,6 +38,18 @@ pub struct ListCardSpec {
     pub sash: Option<String>,
     pub sash_color: Option<String>,
     pub aria_label: Option<String>,
+    /// Optional navigation target. When set, the card implicitly
+    /// becomes interactive and the consumer is expected to treat a
+    /// click as navigation to this href. Matches Svelte `href` prop.
+    pub href: Option<String>,
+    /// When true the card renders a leading checkbox slot indicating
+    /// that it participates in a multi-select group.
+    pub is_selectable: bool,
+    /// Current selection state when `is_selectable` is true.
+    pub is_selected: bool,
+    /// When true the card renders a trailing drag handle used to
+    /// reorder items in a list.
+    pub show_reorder_handle: bool,
 }
 
 impl Default for ListCardSpec {
@@ -55,6 +67,10 @@ impl Default for ListCardSpec {
             sash: None,
             sash_color: None,
             aria_label: None,
+            href: None,
+            is_selectable: false,
+            is_selected: false,
+            show_reorder_handle: false,
         }
     }
 }
@@ -122,6 +138,32 @@ impl ListCardSpec {
     pub fn with_aria_label(mut self, label: impl Into<String>) -> Self {
         self.aria_label = Some(label.into());
         self
+    }
+
+    pub fn with_href(mut self, href: impl Into<String>) -> Self {
+        self.href = Some(href.into());
+        // A card with an href is implicitly interactive.
+        self.is_interactive = true;
+        self
+    }
+
+    pub fn with_selectable(mut self, selectable: bool) -> Self {
+        self.is_selectable = selectable;
+        self
+    }
+
+    pub fn with_selected(mut self, selected: bool) -> Self {
+        self.is_selected = selected;
+        self
+    }
+
+    pub fn with_reorder_handle(mut self, show: bool) -> Self {
+        self.show_reorder_handle = show;
+        self
+    }
+
+    pub fn has_href(&self) -> bool {
+        self.href.is_some()
     }
 
     // ── Token methods ──────────────────────────────────────────

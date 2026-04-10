@@ -705,6 +705,11 @@ pub struct TabDefinition {
     pub label: String,
     pub is_disabled: bool,
     pub is_closable: bool,
+    /// Optional leading icon name (Lucide icon identifier). When set,
+    /// the tab renders the icon before the label.
+    pub icon: Option<String>,
+    /// Optional count shown as a badge next to the label, e.g. "12".
+    pub count: Option<u32>,
 }
 
 impl TabDefinition {
@@ -714,6 +719,8 @@ impl TabDefinition {
             label: label.into(),
             is_disabled: false,
             is_closable: false,
+            icon: None,
+            count: None,
         }
     }
 
@@ -724,6 +731,16 @@ impl TabDefinition {
 
     pub fn with_closable(mut self, is_closable: bool) -> Self {
         self.is_closable = is_closable;
+        self
+    }
+
+    pub fn with_icon(mut self, icon: impl Into<String>) -> Self {
+        self.icon = Some(icon.into());
+        self
+    }
+
+    pub fn with_count(mut self, count: u32) -> Self {
+        self.count = Some(count);
         self
     }
 }

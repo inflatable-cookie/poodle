@@ -475,6 +475,101 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
         )
 
+        // -- Selectable (multi-select checkbox) --
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Selectable (multi-select)"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Alice Chen")
+                                    .with_subtitle("alice@example.com")
+                                    .with_selectable(true)
+                                    .with_selected(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("user").with_size(IconSize::Sm),
+                                    theme,
+                                ).with_color(gpui::white())
+                            )
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Bob Martinez")
+                                    .with_subtitle("bob@example.com")
+                                    .with_selectable(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("user").with_size(IconSize::Sm),
+                                    theme,
+                                ).with_color(gpui::white())
+                            )
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Carol Patel")
+                                    .with_subtitle("carol@example.com")
+                                    .with_selectable(true)
+                                    .with_selected(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("user").with_size(IconSize::Sm),
+                                    theme,
+                                ).with_color(gpui::white())
+                            )
+                        )
+                )
+        )
+
+        // -- Reorder handle --
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Reorder handle"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("design-system")
+                                    .with_subtitle("Primary rubric")
+                                    .with_reorder_handle(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("hash").with_size(IconSize::Sm),
+                                    theme,
+                                ).with_color(gpui::white())
+                            )
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("accessibility")
+                                    .with_subtitle("WCAG AA baseline")
+                                    .with_reorder_handle(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("hash").with_size(IconSize::Sm),
+                                    theme,
+                                ).with_color(gpui::white())
+                            )
+                        )
+                )
+        )
+
         // -- Static list card --
         .child(
             div().flex().flex_col().gap(px(8.0))

@@ -8,10 +8,63 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
+use poodle_primitives::{ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
 
+use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem, control_space_x_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+
+/// Build the inner label composite for a tab: optional leading icon,
+/// the label text, and an optional trailing count badge. Shared by all
+/// four Tab variants (Underline / Card / Pill / Block) so they render
+/// consistently.
+fn build_tab_label(
+    tab_def: &TabDefinition,
+    theme: &GpuiThemeProvider,
+    text_color: Hsla,
+) -> AnyElement {
+    // Fast path: no decoration — just the label string.
+    if tab_def.icon.is_none() && tab_def.count.is_none() {
+        return div().child(tab_def.label.clone()).into_any_element();
+    }
+
+    let mut inner = div().flex().items_center().gap(px(6.0));
+
+    if let Some(ref icon_name) = tab_def.icon {
+        inner = inner.child(
+            Icon::from_spec(
+                IconSpec::new(icon_name.clone()).with_size(IconSize::Sm),
+                theme,
+            )
+            .with_color(text_color),
+        );
+    }
+
+    inner = inner.child(div().child(tab_def.label.clone()));
+
+    if let Some(count) = tab_def.count {
+        // Mix text_color with the surface for the badge background so
+        // the chip tone follows the tab's active/inactive state.
+        let surface = resolve_color(theme, "color.background.surface");
+        let badge_bg = crate::theme_ext::color_mix(text_color, surface, 0.14);
+        inner = inner.child(
+            div()
+                .flex()
+                .items_center()
+                .justify_center()
+                .min_w(px(18.0))
+                .px(px(5.0))
+                .rounded(px(9.0))
+                .bg(badge_bg)
+                .text_size(px(10.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(text_color)
+                .child(format!("{count}")),
+        );
+    }
+
+    inner.into_any_element()
+}
 
 /// A real GPUI tabs component backed by `TabsSpec`.
 pub struct Tabs {
@@ -179,7 +232,8 @@ impl Tabs {
                 }
             }
 
-            tab = tab.child(tab_def.label.clone());
+            let label_color = if is_active { text_primary } else { text_secondary };
+            tab = tab.child(build_tab_label(tab_def, theme, label_color));
             tab_row = tab_row.child(tab);
         }
 
@@ -297,6 +351,7 @@ impl Tabs {
                 }
             }
 
+            let label_color = if is_active { text_primary } else { text_secondary };
             // Closable tab: label + close button in a flex row
             if tab_def.is_closable {
                 let icon_muted = resolve_color(&self.theme, "color.icon.muted");
@@ -304,7 +359,7 @@ impl Tabs {
                     .flex()
                     .items_center()
                     .gap(px(6.0))
-                    .child(tab_def.label.clone())
+                    .child(build_tab_label(tab_def, theme, label_color))
                     .child(
                         div()
                             .text_size(px(11.0))
@@ -312,7 +367,7 @@ impl Tabs {
                             .child("×"),
                     );
             } else {
-                tab = tab.child(tab_def.label.clone());
+                tab = tab.child(build_tab_label(tab_def, theme, label_color));
             }
             tab_row = tab_row.child(tab);
         }
@@ -448,7 +503,8 @@ impl Tabs {
                 }
             }
 
-            tab = tab.child(tab_def.label.clone());
+            let label_color = if is_active { text_primary } else { text_secondary };
+            tab = tab.child(build_tab_label(tab_def, theme, label_color));
             tab_row = tab_row.child(tab);
         }
 
@@ -560,7 +616,8 @@ impl Tabs {
                 }
             }
 
-            tab = tab.child(tab_def.label.clone());
+            let label_color = if is_active { text_primary } else { text_secondary };
+            tab = tab.child(build_tab_label(tab_def, theme, label_color));
             tabs = tabs.child(tab);
         }
 

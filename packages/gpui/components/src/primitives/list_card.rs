@@ -62,6 +62,14 @@ impl ListCard {
     pub fn subtitle(mut self, v: impl Into<String>) -> Self { self.spec.subtitle = Some(v.into()); self }
     pub fn interactive(mut self, v: bool) -> Self { self.spec.is_interactive = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn href(mut self, v: impl Into<String>) -> Self {
+        self.spec.href = Some(v.into());
+        self.spec.is_interactive = true;
+        self
+    }
+    pub fn selectable(mut self, v: bool) -> Self { self.spec.is_selectable = v; self }
+    pub fn selected(mut self, v: bool) -> Self { self.spec.is_selected = v; self }
+    pub fn reorder_handle(mut self, v: bool) -> Self { self.spec.show_reorder_handle = v; self }
 
 
     pub fn with_leading(mut self, element: impl IntoElement) -> Self {
@@ -238,9 +246,31 @@ impl IntoElement for ListCard {
             .rounded(radius)
             .bg(fill)
             .border_1()
-            .border_color(border)
-            .child(leading_el)
-            .child(body);
+            .border_color(border);
+
+        // Optional selection checkbox as the first child.
+        if spec.is_selectable {
+            let accent_base = resolve_color(theme, "color.accent.base");
+            let surface = resolve_color(theme, "color.background.surface");
+            let box_bg = if spec.is_selected { accent_base } else { surface };
+            let box_border = if spec.is_selected {
+                accent_base
+            } else {
+                border_subtle
+            };
+            root = root.child(
+                div()
+                    .flex_shrink_0()
+                    .w(px(16.0))
+                    .h(px(16.0))
+                    .rounded(px(3.0))
+                    .border_1()
+                    .border_color(box_border)
+                    .bg(box_bg),
+            );
+        }
+
+        root = root.child(leading_el).child(body);
 
         if has_sash {
             root = root.relative().overflow_hidden();
@@ -252,6 +282,35 @@ impl IntoElement for ListCard {
 
         if let Some(trailing) = self.trailing {
             root = root.child(trailing);
+        }
+
+        // Reorder drag handle (last child before the sash overlay).
+        if spec.show_reorder_handle {
+            let handle_color = resolve_color(theme, "color.text.secondary");
+            // Three stacked dots as a visual grab indicator.
+            let dot = |color: Hsla| {
+                div().w(px(3.0)).h(px(3.0)).rounded(px(1.5)).bg(color)
+            };
+            let col = move || {
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(2.0))
+                    .child(dot(handle_color))
+                    .child(dot(handle_color))
+                    .child(dot(handle_color))
+            };
+            root = root.child(
+                div()
+                    .flex()
+                    .flex_shrink_0()
+                    .items_center()
+                    .gap(px(2.0))
+                    .opacity(0.6)
+                    .cursor(CursorStyle::OpenHand)
+                    .child(col())
+                    .child(col()),
+            );
         }
 
         if let Some(sash) = sash_el {
