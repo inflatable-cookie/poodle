@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { Menu, Button, type MenuItem } from "@poodle/svelte-primitives";
-  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@poodle/svelte-primitives";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const fileItems: MenuItem[] = [
@@ -30,26 +29,33 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="With shortcuts">
-    <Menu items={fileItems} ariaLabel="File menu" on:action={(e) => (lastAction = e.detail.value)}>
-      <Button variant="secondary" slot="trigger">File</Button>
-    </Menu>
-    {#if lastAction}
-      <p>Last action: <strong>{lastAction}</strong></p>
-    {/if}
-  </SpecimenGroup>
+  <Surface tone="panel" border="subtle" padding="md">
+    <div class="specimen">
+      <div class="specimen__row">
+        <Eyebrow>With shortcuts</Eyebrow>
+        <Menu items={fileItems} ariaLabel="File menu" on:action={(e) => (lastAction = e.detail.value)}>
+          <Button variant="secondary" slot="trigger">File</Button>
+        </Menu>
+        {#if lastAction}
+          <span class="specimen__hint">Last: {lastAction}</span>
+        {/if}
+      </div>
 
-  <SpecimenGroup label="With checkboxes">
-    <Menu items={settingsItems} ariaLabel="Settings menu">
-      <Button variant="secondary" slot="trigger">Settings</Button>
-    </Menu>
-  </SpecimenGroup>
+      <div class="specimen__row">
+        <Eyebrow>With checkboxes</Eyebrow>
+        <Menu items={settingsItems} ariaLabel="Settings menu">
+          <Button variant="secondary" slot="trigger">Settings</Button>
+        </Menu>
+      </div>
 
-  <SpecimenGroup label="Destructive Action">
-    <Menu items={destructiveItems} ariaLabel="Item actions" triggerAriaLabel="Item actions">
-      <Button variant="secondary" slot="trigger">Actions</Button>
-    </Menu>
-  </SpecimenGroup>
+      <div class="specimen__row">
+        <Eyebrow>Destructive action</Eyebrow>
+        <Menu items={destructiveItems} ariaLabel="Item actions">
+          <Button variant="secondary" slot="trigger">Actions</Button>
+        </Menu>
+      </div>
+    </div>
+  </Surface>
 
   <svelte:fragment slot="sizes" let:size>
     <Menu items={fileItems} {size} ariaLabel={size + " menu"}>
@@ -63,3 +69,23 @@
     </Menu>
   </svelte:fragment>
 </SpecimenLayout>
+
+<style>
+  .specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .specimen__hint {
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
+</style>
