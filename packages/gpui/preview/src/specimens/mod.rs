@@ -4,6 +4,8 @@
 //! mirroring the Svelte preview's per-component specimen pages.
 
 // ── Structural ────────────────────────────────────────────
+pub(crate) mod specimen_layout;
+
 mod bx;
 mod stack;
 mod grid;

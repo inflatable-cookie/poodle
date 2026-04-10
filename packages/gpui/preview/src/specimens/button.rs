@@ -1,9 +1,11 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec};
+use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::{Button, Eyebrow};
+use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
@@ -15,7 +17,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_default();
 
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Variants ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -176,102 +178,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
-        // --- Sizes ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(
-                    div().flex().gap(px(8.0)).flex_wrap().items_end()
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_size(ControlSize::Xs)
-                                    .with_label("Extra small"),
-                                theme,
-                            )
-                            .with_id("size-xs")
-                        )
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_size(ControlSize::Sm)
-                                    .with_label("Small"),
-                                theme,
-                            )
-                            .with_id("size-sm")
-                        )
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_size(ControlSize::Md)
-                                    .with_label("Medium"),
-                                theme,
-                            )
-                            .with_id("size-md")
-                        )
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_size(ControlSize::Lg)
-                                    .with_label("Large"),
-                                theme,
-                            )
-                            .with_id("size-lg")
-                        )
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_size(ControlSize::Xl)
-                                    .with_label("Extra large"),
-                                theme,
-                            )
-                            .with_id("size-xl")
-                        )
-                )
-        )
-        // --- Densities ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(
-                    div().flex().gap(px(8.0)).flex_wrap().items_center()
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_label("Compact"),
-                                theme,
-                            )
-                            .with_id("density-compact")
-                            .density(ControlDensity::Compact)
-                        )
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_label("Default"),
-                                theme,
-                            )
-                            .with_id("density-default")
-                            .density(ControlDensity::Default)
-                        )
-                        .child(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Primary)
-                                    .with_label("Comfortable"),
-                                theme,
-                            )
-                            .with_id("density-comfortable")
-                            .density(ControlDensity::Comfortable)
-                        )
-                )
-        )
+        // (Sizes and Densities moved into the SpecimenLayout tabs below.)
         // --- States ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -414,4 +321,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 })
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "button",
+        examples,
+        // Sizes pane: one button per size.
+        |size, theme: &GpuiThemeProvider| {
+            Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_size(size)
+                    .with_label("Enabled"),
+                theme,
+            )
+            .with_id(format!("specimen-size-{:?}", size))
+            .into_any_element()
+        },
+        // Densities pane: one button per density.
+        |density, theme: &GpuiThemeProvider| {
+            Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_label("Toggle"),
+                theme,
+            )
+            .with_id(format!("specimen-density-{:?}", density))
+            .density(density)
+            .into_any_element()
+        },
+    )
 }
