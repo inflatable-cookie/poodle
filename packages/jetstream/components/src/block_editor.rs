@@ -49,7 +49,7 @@ pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -
     }
 
     // Render placeholder blocks based on block_count
-    let count = if spec.block_count == 0 { 1 } else { spec.block_count };
+    let count = if spec.block_count() == 0 { 1 } else { spec.block_count() };
     for i in 0..count {
         let mut block = ui_element::div()
             .flex_col()

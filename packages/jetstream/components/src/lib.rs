@@ -157,7 +157,9 @@ pub mod pagination_summary;
 pub mod picker_shell;
 pub mod relation_picker;
 pub mod remediation_banner;
-pub mod reorderable_list;
+// reorderable_list merged into editable_list on the contract side.
+// The jetstream stub module remains on disk but is no longer exported.
+// pub mod reorderable_list;
 pub mod selection_summary;
 pub mod shell_status_bar;
 pub mod sidebar_nav;

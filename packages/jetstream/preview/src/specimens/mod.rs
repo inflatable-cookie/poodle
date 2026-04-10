@@ -89,7 +89,8 @@ pub mod rating;
 pub mod region;
 pub mod relation_picker;
 pub mod remediation_banner;
-pub mod reorderable_list;
+// reorderable_list merged into editable_list on the contract side.
+// pub mod reorderable_list;
 pub mod resize_handle;
 pub mod scroll_shell;
 pub mod segmented_control;
@@ -311,7 +312,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "region" => Some(region::render(theme)),
         "relation-picker" => Some(relation_picker::render(theme)),
         "remediation-banner" => Some(remediation_banner::render(theme)),
-        "reorderable-list" => Some(reorderable_list::render(theme)),
+        // "reorderable-list" => merged into "editable-list"
         "resize-handle" => Some(resize_handle::render(theme)),
         "scroll-shell" => Some(scroll_shell::render(theme)),
         "segmented-control" => Some(segmented_control::render(theme)),

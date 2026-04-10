@@ -13,7 +13,7 @@ use poodle_composites::{
     MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec,
     MediaThumbnailSpec, MediaUploadStatusPanelSpec, MetricTileSpec,
     PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec,
-    RelationPickerSpec, RemediationBannerSpec, ReorderableListSpec,
+    RelationPickerSpec, RemediationBannerSpec,
     SelectionSummarySpec, ShellStatusBarSpec, SidebarNavSpec, SplitViewSpec,
     StateTileSpec, ToastHostSpec, ToastStackSpec, ValidationSummarySpec,
     VideoPlayerSpec,
@@ -264,14 +264,6 @@ impl RenderComponent<EmbedPreviewSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<ReorderableListSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &ReorderableListSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("reorderable-list", "ReorderableListSpec", WidgetKind::List, mapped)
-    }
-}
-
 impl RenderComponent<BreadcrumbsSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &BreadcrumbsSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
@@ -456,7 +448,7 @@ mod tests {
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
     #[test] fn embed_preview() { assert_eq!(a().render(&EmbedPreviewSpec::new(), &s(), &t()).spec_type, "EmbedPreviewSpec"); }
-    #[test] fn reorderable_list() { assert_eq!(a().render(&ReorderableListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
+    #[test] fn editable_list() { assert_eq!(a().render(&EditableListSpec::new(), &s(), &t()).widget_kind, WidgetKind::List); }
     #[test] fn breadcrumbs() { assert_eq!(a().render(&BreadcrumbsSpec::new(vec![]), &s(), &t()).spec_type, "BreadcrumbsSpec"); }
     #[test] fn card_radio_group() { assert_eq!(a().render(&CardRadioGroupSpec::new(vec![]), &s(), &t()).spec_type, "CardRadioGroupSpec"); }
     #[test] fn order_by() { assert_eq!(a().render(&OrderBySpec::new(), &s(), &t()).spec_type, "OrderBySpec"); }
