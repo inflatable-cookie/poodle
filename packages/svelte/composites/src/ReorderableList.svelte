@@ -1,3 +1,7 @@
+<!--
+  @deprecated Use EditableList instead.
+  This component is kept for backward compatibility. New code should import EditableList directly.
+-->
 <script lang="ts" generics="T extends { id: string; label?: string }">
   import { createEventDispatcher } from "svelte";
   import type { Snippet } from "svelte";

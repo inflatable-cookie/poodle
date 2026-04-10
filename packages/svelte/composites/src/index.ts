@@ -127,6 +127,7 @@ export type {
   ParsedEmbed,
   PickerItem,
   PickerVariant,
+  EditableListItem,
   ReorderableItem,
   SelectionMode,
   SidebarNavGroup,

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { ReorderableList } from "@poodle/svelte-composites";
-  import type { ReorderableItem } from "@poodle/svelte-composites";
+  import { EditableList } from "@poodle/svelte-composites";
+  import type { EditableListItem } from "@poodle/svelte-composites";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
-  let tags: ReorderableItem[] = [
+  let tags: EditableListItem[] = [
     { id: "1", label: "svelte" },
     { id: "2", label: "typescript" },
     { id: "3", label: "design-system" },
@@ -12,7 +12,7 @@
 
 <div class="specimen">
   <SpecimenGroup label="Editable + reorderable">
-    <ReorderableList
+    <EditableList
       bind:items={tags}
       editable
       ariaLabel="Tags"
@@ -22,7 +22,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With max items (5)">
-    <ReorderableList
+    <EditableList
       items={[{ id: "a", label: "Item A" }, { id: "b", label: "Item B" }]}
       editable
       maxItems={5}
@@ -32,7 +32,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Removable only (no reorder, no add)">
-    <ReorderableList
+    <EditableList
       items={[{ id: "x", label: "First item" }, { id: "y", label: "Second item" }]}
       reorderable={false}
       removable
@@ -41,7 +41,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
-    <ReorderableList
+    <EditableList
       items={tags}
       editable
       disabled

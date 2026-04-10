@@ -1100,20 +1100,40 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "editable-list": {
     props: [
-      { name: "items", type: "ReorderableItem[]", default: "[]", description: "Array of list items." },
-      { name: "addLabel", type: "string", default: '"Add item"', description: "Label for the add button." },
-      { name: "placeholder", type: "string", default: '"New item"', description: "Placeholder text for new item input." },
-      { name: "maxItems", type: "number | null", default: "null", description: "Maximum number of items allowed." },
+      { name: "items", type: "EditableListItem[]", default: "[]", description: "Array of list items (two-way bindable)." },
+      { name: "ariaLabel", type: "string", default: '"Editable list"', description: "Accessible label for the list." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the list is disabled." },
-      { name: "ariaLabel", type: "string", default: '"List"', description: "Accessible label for the list." },
       { name: "reorderable", type: "boolean", default: "true", description: "Whether items can be reordered by dragging." },
+      { name: "editable", type: "boolean", default: "false", description: "Show add-item input and remove buttons." },
+      { name: "addLabel", type: "string", default: '"Add item"', description: "Label for the add button." },
+      { name: "addPlaceholder", type: "string", default: '"New item"', description: "Placeholder text for new item input." },
+      { name: "maxItems", type: "number | null", default: "null", description: "Maximum number of items allowed." },
+      { name: "removable", type: "boolean", default: "false", description: "Show remove buttons without enabling add input." },
+      { name: "dirty", type: "boolean", default: "false", description: "Whether the current order differs from the committed baseline." },
+      { name: "submitting", type: "boolean", default: "false", description: "Whether submit is in progress; disables interaction and shows saving state." },
+      { name: "errorMessage", type: "string | null", default: "null", description: "Optional submit error surfaced above the list." },
+      { name: "infoMessage", type: "string | null", default: "null", description: "Optional workflow guidance surfaced above the list." },
+      { name: "longListThreshold", type: "number | null", default: "50", description: "Shows built-in large-list guidance when item count exceeds the threshold." },
+      { name: "longListWarningText", type: "string | null", default: "null", description: "Custom copy for the large-list guidance panel." },
+      { name: "windowSize", type: "number | null", default: "null", description: "Optional page window size for very large lists." },
+      { name: "submitLabel", type: "string", default: '"Save Order"', description: "Submit button label when workflow chrome is shown." },
+      { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Cancel button label when workflow chrome is shown." },
+      { name: "onsubmit", type: "() => void | Promise<void>", default: "null", description: "Optional submit callback; enables workflow chrome." },
+      { name: "oncancel", type: "() => void", default: "null", description: "Optional cancel callback; enables workflow chrome." },
       { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit semantic control size override for list rows and add controls." },
       { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
       { name: "density", type: 'ControlDensity | null', default: "null", description: "Explicit density override for row and add-control spacing." },
     ],
-    slots: [],
+    slots: [
+      { name: "item", description: "Custom item renderer. Receives slot props: item." },
+    ],
     events: [
-      { name: "change", payload: "{ items: ReorderableItem[] }", description: "Fires when the list items change." },
+      { name: "reorder", payload: "{ items: EditableListItem[] }", description: "Fires when items are reordered." },
+      { name: "add", payload: "{ item: EditableListItem }", description: "Fires when a new item is added." },
+      { name: "remove", payload: "{ id: string }", description: "Fires when an item is removed." },
+      { name: "change", payload: "{ items: EditableListItem[] }", description: "Fires when the list items change (add or remove)." },
+      { name: "submit", payload: "void", description: "Fires when the submit action is triggered." },
+      { name: "cancel", payload: "void", description: "Fires when the cancel action is triggered." },
     ],
     usage: `<script lang="ts">
   import { EditableList } from "@poodle/svelte-composites";
@@ -1124,7 +1144,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<EditableList bind:items addLabel="Add step" placeholder="New step" />`,
+<EditableList bind:items editable addLabel="Add step" addPlaceholder="New step" />`,
   },
 
   "embed-input": {
@@ -2717,7 +2737,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "reorderable-list": {
     props: [
-      { name: "items", type: "ReorderableItem[]", default: "[]", description: "Array of reorderable items." },
+      { name: "items", type: "EditableListItem[]", default: "[]", description: "Deprecated: use EditableList. Array of reorderable items." },
       { name: "ariaLabel", type: "string", default: '"Reorderable list"', description: "Accessible label for the list." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether reordering is disabled." },
       { name: "dirty", type: "boolean", default: "false", description: "Whether the current order differs from the committed baseline." },
@@ -2739,12 +2759,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "item", description: "Custom item renderer. Receives slot props: item, index." },
     ],
     events: [
-      { name: "reorder", payload: "{ items: ReorderableItem[] }", description: "Fires when items are reordered." },
+      { name: "reorder", payload: "{ items: EditableListItem[] }", description: "Fires when items are reordered." },
       { name: "submit", payload: "void", description: "Fires when the submit action is triggered." },
       { name: "cancel", payload: "void", description: "Fires when the cancel action is triggered." },
     ],
-    usage: `<script lang="ts">
-  import { ReorderableList } from "@poodle/svelte-composites";
+    usage: `<!-- Deprecated: use EditableList instead -->
+<script lang="ts">
+  import { EditableList } from "@poodle/svelte-composites";
 
   let items = [
     { id: "1", label: "First" },
@@ -2759,7 +2780,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   }
 </script>
 
-<ReorderableList
+<EditableList
   bind:items
   {dirty}
   onsubmit={saveOrder}

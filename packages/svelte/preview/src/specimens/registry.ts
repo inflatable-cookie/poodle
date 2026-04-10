@@ -78,7 +78,6 @@ import RadioGroupSpecimen from "./RadioGroupSpecimen.svelte";
 import RangeSliderSpecimen from "./RangeSliderSpecimen.svelte";
 import RatingSpecimen from "./RatingSpecimen.svelte";
 import RegionSpecimen from "./RegionSpecimen.svelte";
-import ReorderableListSpecimen from "./ReorderableListSpecimen.svelte";
 import RelationPickerSpecimen from "./RelationPickerSpecimen.svelte";
 import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
@@ -207,7 +206,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   region: RegionSpecimen,
   "resize-handle": ResizeHandleSpecimen,
   "relation-picker": RelationPickerSpecimen,
-  "reorderable-list": ReorderableListSpecimen,
+  "reorderable-list": EditableListSpecimen,
   "scroll-shell": ScrollShellSpecimen,
   "segmented-control": SegmentedControlSpecimen,
   select: SelectSpecimen,

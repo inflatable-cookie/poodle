@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { ReorderableList } from "@poodle/svelte-composites";
+  import { EditableList } from "@poodle/svelte-composites";
   import { UiPresentationProvider } from "@poodle/svelte-primitives";
-  import type { ReorderableItem } from "@poodle/svelte-composites";
+  import type { EditableListItem } from "@poodle/svelte-composites";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
-  let items: ReorderableItem[] = [
+  let items: EditableListItem[] = [
     { id: "1", label: "First item" },
     { id: "2", label: "Second item" },
     { id: "3", label: "Third item" },
@@ -12,19 +12,19 @@
     { id: "5", label: "Fifth item" },
   ];
   let lastReorder = "";
-  let compactItems: ReorderableItem[] = [
+  let compactItems: EditableListItem[] = [
     { id: "c1", label: "Kick" },
     { id: "c2", label: "Snare" },
     { id: "c3", label: "Bass" },
   ];
-  let sessionItems: ReorderableItem[] = [
+  let sessionItems: EditableListItem[] = [
     { id: "s1", label: "Intro" },
     { id: "s2", label: "Body" },
     { id: "s3", label: "Summary" },
   ];
   let baselineItems = sessionItems.map((item) => item.id);
   let submitError = "";
-  let windowedItems: ReorderableItem[] = Array.from({ length: 12 }, (_, index) => ({
+  let windowedItems: EditableListItem[] = Array.from({ length: 12 }, (_, index) => ({
     id: `w${index + 1}`,
     label: `Window item ${index + 1}`,
   }));
@@ -40,14 +40,14 @@
   function cancelSession() {
     sessionItems = baselineItems
       .map((id) => sessionItems.find((item) => item.id === id))
-      .filter(Boolean) as ReorderableItem[];
+      .filter(Boolean) as EditableListItem[];
     submitError = "";
   }
 </script>
 
 <div class="specimen">
   <SpecimenGroup label="Drag to reorder (or Alt+Arrow keys)">
-    <ReorderableList
+    <EditableList
       bind:items
       ariaLabel="Reorderable items"
       on:reorder={(e) => (lastReorder = e.detail.items.map(i => i.label).join(", "))}
@@ -55,7 +55,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Workflow shell">
-    <ReorderableList
+    <EditableList
       bind:items={sessionItems}
       ariaLabel="Reorder page sections"
       dirty={isDirty}
@@ -66,7 +66,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Large-list session">
-    <ReorderableList
+    <EditableList
       bind:items={windowedItems}
       ariaLabel="Windowed reorder list"
       longListThreshold={8}
@@ -75,7 +75,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
-    <ReorderableList
+    <EditableList
       items={[{ id: "a", label: "Locked item A" }, { id: "b", label: "Locked item B" }]}
       disabled
     />
@@ -90,8 +90,8 @@
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="specimen__stack">
-        <ReorderableList bind:items={compactItems} ariaLabel="Compact reorderable items" />
-        <ReorderableList items={compactItems} ariaLabel="Prominent reorderable items" sizeRole="prominent" />
+        <EditableList bind:items={compactItems} ariaLabel="Compact reorderable items" />
+        <EditableList items={compactItems} ariaLabel="Prominent reorderable items" sizeRole="prominent" />
       </div>
     </UiPresentationProvider>
   </SpecimenGroup>

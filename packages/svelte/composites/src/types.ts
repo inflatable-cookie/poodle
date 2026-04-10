@@ -271,10 +271,13 @@ export type CardRadioItem = {
   disabled?: boolean;
 };
 
-export type ReorderableItem = {
+export type EditableListItem = {
   id: string;
   label: string;
 };
+
+/** @deprecated Use EditableListItem instead. */
+export type ReorderableItem = EditableListItem;
 
 export type {
   ActiveSort,

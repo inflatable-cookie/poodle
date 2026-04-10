@@ -646,7 +646,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "MetricTile",
       "MediaUploadStatusPanel",
       "PageLoading",
-      "ReorderableList",
       "SidebarNav",
       "ToastHost",
       "VideoPlayer",
