@@ -207,6 +207,7 @@
     const baseline = currentValue ?? parsedMin ?? 0;
     const nextValue = clampIfNeeded(snapToStep(baseline + delta, parsedMin ?? 0, resolvedStep));
     commitValue(nextValue);
+    draftValue = formatNumber(nextValue, precision);
     dispatch(eventName, { value: coerceOutgoingValue(nextValue) });
   }
 </script>
