@@ -1,13 +1,10 @@
 <script lang="ts">
   import { Button } from "@poodle/svelte-primitives";
-  import type { ControlDensity } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let clickLog = "No button clicked yet.";
   let intent = "save";
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 
   let boldPressed = false;
   let italicPressed = false;
@@ -19,7 +16,7 @@
   }
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Variants">
     <div class="specimen__row">
       <Button variant="primary" on:click={() => log("Primary")}>Primary</Button>
@@ -49,25 +46,6 @@
       <Button chevron on:click={() => log("Chevron")}>Options</Button>
       <Button variant="primary" chevron on:click={() => log("Primary chevron")}>Actions</Button>
       <Button leadingIcon="filter" chevron on:click={() => log("Icon + chevron")}>Filter</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__row">
-      {#each controlSizes as size}
-        <Button variant="primary" leadingIcon="plus" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Button variant="secondary" leadingIcon="download" {density} on:click={() => log(`Density ${density}`)}>Action</Button>
-        </div>
-      {/each}
     </div>
   </SpecimenGroup>
 
@@ -147,33 +125,22 @@
   </SpecimenGroup>
 
   <p class="specimen__log">{clickLog}</p>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <Button variant="primary" leadingIcon="plus" {size} on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <Button variant="secondary" leadingIcon="download" {density} on:click={() => log(`Density ${density}`)}>Action</Button>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .specimen__row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
   }
 
   .specimen__log {

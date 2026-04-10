@@ -1,11 +1,8 @@
 <script lang="ts">
   import { TextInput, Field } from "@poodle/svelte-primitives";
-  import type { ControlDensity, InputValidationStatus, ValidationState } from "@poodle/svelte-primitives";
+  import type { InputValidationStatus, ValidationState } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let name = "";
   let email = "invalid-email";
@@ -44,7 +41,7 @@
   }
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Default">
     <Field id="name-field" label="Name" description="Enter your full name.">
       <TextInput
@@ -53,25 +50,6 @@
         on:valueChange={(event) => (name = event.detail.value)}
       />
     </Field>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
-      {#each controlSizes as size}
-        <TextInput id={"size-" + size} placeholder={size.toUpperCase()} {size} />
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <TextInput id={"density-" + density} placeholder="Type here" {density} />
-        </div>
-      {/each}
-    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="With validation">
@@ -221,36 +199,17 @@
       />
     </Field>
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <TextInput id={"size-" + size} placeholder={size.toUpperCase()} {size} />
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <TextInput id={"density-" + density} placeholder="Type here" {density} />
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 24rem;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
-  }
-
   .specimen__hint {
     margin: 0;
     font-size: 0.75rem;

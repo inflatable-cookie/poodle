@@ -523,6 +523,18 @@ pub enum DialogKind {
     AlertDialog,
 }
 
+/// Width preset for the Dialog surface. Each preset maps to a
+/// `min(<rem>, 100%)` rule in the Svelte implementation:
+/// Sm = 24rem, Md = 34rem (default), Lg = 48rem, Xl = 64rem, Full = 100%.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DialogWidth {
+    Sm,
+    Md,
+    Lg,
+    Xl,
+    Full,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DrawerEdge {
     Left,

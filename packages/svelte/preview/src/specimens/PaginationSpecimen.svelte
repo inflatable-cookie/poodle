@@ -1,11 +1,7 @@
 <script lang="ts">
   import { Pagination } from "@poodle/svelte-primitives";
-  import type { ControlDensity } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let page1 = 1;
   let page2 = 5;
@@ -17,7 +13,7 @@
   const totalPagesForLimit3 = Math.ceil(totalItems / limit3);
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Default">
     <Pagination
       currentPage={page1}
@@ -26,25 +22,6 @@
       on:pageChange={(e) => (page1 = e.detail.page)}
     />
     <p>Page <strong>{page1}</strong> of 10</p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
-      {#each controlSizes as size}
-        <Pagination currentPage={1} totalPages={10} ariaLabel={size + " pagination"} {size} />
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Pagination totalPages={10} {density} />
-        </div>
-      {/each}
-    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Middle of range">
@@ -100,32 +77,12 @@
       ariaLabel="Standalone pagination"
     />
   </SpecimenGroup>
-</div>
 
-<style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+  <svelte:fragment slot="sizes" let:size>
+    <Pagination currentPage={1} totalPages={10} ariaLabel={size + " pagination"} {size} />
+  </svelte:fragment>
 
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
-  }
-
-</style>
+  <svelte:fragment slot="densities" let:density>
+    <Pagination totalPages={10} {density} />
+  </svelte:fragment>
+</SpecimenLayout>

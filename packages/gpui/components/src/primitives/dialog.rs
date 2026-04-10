@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, DialogKind, DialogSpec, SemanticControlSizeRole};
+use poodle_primitives::{ControlDensity, ControlSize, DialogKind, DialogSpec, DialogWidth, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -18,7 +18,14 @@ pub struct Dialog {
     actions: Option<AnyElement>,
     /// Content slot — body content between description and actions.
     content: Option<AnyElement>,
-    /// Called when the dialog should close (Escape key, backdrop click).
+    /// Optional header override. When set, replaces the default
+    /// title/description rendering entirely.
+    header: Option<AnyElement>,
+    /// Optional footer override. When set, replaces the default actions
+    /// row (including its layout) with a fully custom footer.
+    footer: Option<AnyElement>,
+    /// Called when the dialog should close (Escape key, backdrop click,
+    /// or the close button).
     on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
@@ -29,7 +36,15 @@ impl std::ops::Deref for Dialog {
 
 impl Dialog {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DialogSpec::new(), theme: theme.clone(), actions: None, content: None, on_close: None }
+        Self {
+            spec: DialogSpec::new(),
+            theme: theme.clone(),
+            actions: None,
+            content: None,
+            header: None,
+            footer: None,
+            on_close: None,
+        }
     }
 
     pub fn from_spec(spec: DialogSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,6 +53,8 @@ impl Dialog {
             theme: theme.clone(),
             actions: None,
             content: None,
+            header: None,
+            footer: None,
             on_close: None,
         }
     }
@@ -54,6 +71,10 @@ impl Dialog {
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn width(mut self, v: DialogWidth) -> Self { self.spec.width = v; self }
+    pub fn bare(mut self, v: bool) -> Self { self.spec.bare = v; self }
+    pub fn show_close_button(mut self, v: bool) -> Self { self.spec.show_close_button = v; self }
+    pub fn close_label(mut self, v: impl Into<String>) -> Self { self.spec.close_label = v.into(); self }
 
     /// Called when the dialog should close (Escape, backdrop click).
     pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
@@ -70,6 +91,22 @@ impl Dialog {
     /// Add an actions row (e.g., Cancel + Confirm buttons).
     pub fn with_actions(mut self, actions: impl IntoElement) -> Self {
         self.actions = Some(actions.into_any_element());
+        self
+    }
+
+    /// Custom header override. Replaces the default title/description
+    /// region entirely. The close button (when enabled) is still
+    /// rendered as a sibling in the top-right corner.
+    pub fn with_header(mut self, header: impl IntoElement) -> Self {
+        self.header = Some(header.into_any_element());
+        self
+    }
+
+    /// Custom footer override. Replaces the default actions row
+    /// (including margin-top, gap, and justification) with a fully
+    /// custom footer element.
+    pub fn with_footer(mut self, footer: impl IntoElement) -> Self {
+        self.footer = Some(footer.into_any_element());
         self
     }
 }
@@ -104,12 +141,22 @@ impl IntoElement for Dialog {
 
         let stack_lg = resolve_px(theme, "space.stack.lg");
 
+        // Resolve configured width preset. Full maps to "fill container"
+        // (max_w_full only, no fixed width); everything else converts
+        // the rem value directly to pixels.
+        let width_px = px(rem_to_px(spec.surface_width_rem()));
+        let is_full_width = spec.is_full_width();
+
         let mut dialog = div()
             .id("poodle-dialog")
             .focusable()
-            .px(panel_x)
-            .py(panel_y)
             .rounded(radius);
+
+        // Bare mode: drop the default padding — the consumer's content
+        // extends to the full surface edges.
+        if !spec.bare {
+            dialog = dialog.px(panel_x).py(panel_y);
+        }
 
         // Brand-raised treatment: gradient fill for elevated surface
         if theme.brand_raised {
@@ -137,50 +184,108 @@ impl IntoElement for Dialog {
             ])
             .flex()
             .flex_col()
-            // Svelte: width min(34rem, 100%) = 544px
-            .w(px(544.0))
             .max_w_full()
             // Svelte: gap 0.375rem (6px)
             .gap(px(6.0))
+            .overflow_hidden()
             .occlude();
 
-        // Svelte: title font 1rem (16px), weight 600
-        if let Some(ref title) = spec.title {
-            dialog = dialog.child(
-                div()
-                    .text_size(heading_size)
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(text_primary)
-                    .child(title.clone()),
-            );
+        if !is_full_width {
+            dialog = dialog.w(width_px);
+        } else {
+            dialog = dialog.w_full();
         }
 
-        // Description: 0.875rem (14px)
-        if let Some(ref description) = spec.description {
-            dialog = dialog.child(
-                div()
-                    .text_size(body_size)
-                    .text_color(text_secondary)
-                    .child(description.clone()),
-            );
-        }
+        // Bare mode: consumer owns the full surface — skip header,
+        // description, and the default actions/footer chrome.
+        if spec.bare {
+            if let Some(content) = self.content {
+                dialog = dialog.child(content);
+            }
+        } else {
+            // Capture whether a custom header was supplied BEFORE moving it
+            // into the header row — the description fallback needs to know.
+            let had_custom_header = self.header.is_some();
+            let has_header_content = had_custom_header || spec.title.is_some();
 
-        // Content slot — body content between description and actions
-        if let Some(content) = self.content {
-            dialog = dialog.child(content);
-        }
+            if has_header_content || spec.show_close_button {
+                let mut header_row = div().flex().items_start().justify_between().gap(actions_gap);
 
-        // Actions slot — Svelte: margin-top stack-lg, flex-wrap, justify-end
-        if let Some(actions) = self.actions {
-            dialog = dialog.child(
-                div()
-                    .flex()
-                    .flex_wrap()
-                    .gap(actions_gap)
-                    .justify_end()
-                    .mt(stack_lg)
-                    .child(actions),
-            );
+                if let Some(header_el) = self.header {
+                    header_row = header_row.child(div().flex_1().child(header_el));
+                } else if let Some(ref title) = spec.title {
+                    header_row = header_row.child(
+                        div()
+                            .flex_1()
+                            .text_size(heading_size)
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(text_primary)
+                            .child(title.clone()),
+                    );
+                } else {
+                    // No header content but a close button — still reserve
+                    // the flex-1 child so the close button anchors right.
+                    header_row = header_row.child(div().flex_1());
+                }
+
+                if spec.show_close_button {
+                    let close_id = SharedString::from("poodle-dialog-close");
+                    let mut close_button = div()
+                        .id(close_id)
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .w(px(24.0))
+                        .h(px(24.0))
+                        .rounded(radius)
+                        .text_size(body_size)
+                        .text_color(text_secondary)
+                        .cursor_pointer()
+                        .child("×");
+                    if let Some(ref handler) = self.on_close {
+                        let handler = handler.clone();
+                        close_button = close_button.on_click(move |_event, window, cx| {
+                            handler(window, cx);
+                        });
+                    }
+                    header_row = header_row.child(close_button);
+                }
+
+                dialog = dialog.child(header_row);
+            }
+
+            // Description: only emitted when no custom header is in use
+            // (a custom header is expected to carry its own secondary copy).
+            if !had_custom_header {
+                if let Some(ref description) = spec.description {
+                    dialog = dialog.child(
+                        div()
+                            .text_size(body_size)
+                            .text_color(text_secondary)
+                            .child(description.clone()),
+                    );
+                }
+            }
+
+            // Content slot — body content between description and actions
+            if let Some(content) = self.content {
+                dialog = dialog.child(content);
+            }
+
+            // Footer: custom footer replaces the default actions row.
+            if let Some(footer) = self.footer {
+                dialog = dialog.child(div().mt(stack_lg).child(footer));
+            } else if let Some(actions) = self.actions {
+                dialog = dialog.child(
+                    div()
+                        .flex()
+                        .flex_wrap()
+                        .gap(actions_gap)
+                        .justify_end()
+                        .mt(stack_lg)
+                        .child(actions),
+                );
+            }
         }
 
         // Escape key on dialog surface

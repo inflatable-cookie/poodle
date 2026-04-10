@@ -1,9 +1,8 @@
 <script lang="ts">
   import { SplitButton } from "@poodle/svelte-primitives";
-  import type { ControlDensity, MenuItem } from "@poodle/svelte-primitives";
+  import type { MenuItem } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastAction = "";
   let submitIntent = "save-close";
@@ -45,7 +44,7 @@
   }
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Primary variant">
     <SplitButton
       variant="primary"
@@ -74,17 +73,6 @@
       on:click={() => (lastAction = "Delete clicked")}
       on:action={(e) => (lastAction = `Delete: ${e.detail.value}`)}
     >Delete</SplitButton>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <SplitButton variant="primary" items={saveItems} {density}>Save</SplitButton>
-        </div>
-      {/each}
-    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Loading state">
@@ -129,34 +117,13 @@
       <p>{lastAction}</p>
     </SpecimenGroup>
   {/if}
-</div>
+
+  <svelte:fragment slot="densities" let:density>
+    <SplitButton variant="primary" items={saveItems} {density}>Save</SplitButton>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
-  }
-
   .specimen__form {
     display: flex;
     align-items: center;

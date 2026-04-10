@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, DialogKind, SemanticControlSizeRole};
+use crate::types::{ControlDensity, ControlSize, DialogKind, DialogWidth, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DialogSpec {
@@ -12,6 +12,15 @@ pub struct DialogSpec {
     pub dismiss_on_escape: bool,
     pub dismiss_on_backdrop: bool,
     pub aria_label: Option<String>,
+    /// Width preset for the dialog surface. Defaults to Md (34rem).
+    pub width: DialogWidth,
+    /// When true, strips the default chrome (title/description/padding)
+    /// so the consumer can render fully custom content end-to-end.
+    pub bare: bool,
+    /// When true, renders a close affordance (×) in the header area.
+    pub show_close_button: bool,
+    /// Accessible label applied to the close button.
+    pub close_label: String,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -28,6 +37,10 @@ impl Default for DialogSpec {
             dismiss_on_escape: true,
             dismiss_on_backdrop: true,
             aria_label: None,
+            width: DialogWidth::Md,
+            bare: false,
+            show_close_button: false,
+            close_label: "Close dialog".to_string(),
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -78,6 +91,43 @@ impl DialogSpec {
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
         self
+    }
+
+    pub fn with_width(mut self, width: DialogWidth) -> Self {
+        self.width = width;
+        self
+    }
+
+    pub fn with_bare(mut self, bare: bool) -> Self {
+        self.bare = bare;
+        self
+    }
+
+    pub fn with_show_close_button(mut self, show_close_button: bool) -> Self {
+        self.show_close_button = show_close_button;
+        self
+    }
+
+    pub fn with_close_label(mut self, close_label: impl Into<String>) -> Self {
+        self.close_label = close_label.into();
+        self
+    }
+
+    /// Surface width in rem for the configured width preset. Matches the
+    /// Svelte CSS values exactly (`min(<rem>, 100%)` — the caller clamps
+    /// against the viewport).
+    pub fn surface_width_rem(&self) -> f32 {
+        match self.width {
+            DialogWidth::Sm => 24.0,
+            DialogWidth::Md => 34.0,
+            DialogWidth::Lg => 48.0,
+            DialogWidth::Xl => 64.0,
+            DialogWidth::Full => f32::INFINITY,
+        }
+    }
+
+    pub fn is_full_width(&self) -> bool {
+        matches!(self.width, DialogWidth::Full)
     }
 
     pub fn current_open(&self) -> bool {

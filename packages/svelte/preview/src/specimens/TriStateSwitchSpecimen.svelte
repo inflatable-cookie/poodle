@@ -1,17 +1,16 @@
 <script lang="ts">
   import {
     TriStateSwitch,
-    Eyebrow,
     UiPresentationProvider,
     type TriStateValue,
   } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let filter: TriStateValue = "default";
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Default">
     <TriStateSwitch
       value={filter}
@@ -26,14 +25,6 @@
       options={{ excluded: "Hide", default: "All", included: "Show" }}
       ariaLabel="Visibility filter"
     />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Semantic sizes">
-    <div class="specimen__row">
-      {#each controlSizes as size}
-        <TriStateSwitch value="default" {size} ariaLabel={`Tri-state switch at ${size}`} />
-      {/each}
-    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Chrome vs prominent role offset">
@@ -60,15 +51,13 @@
       on:valueChange={(e) => (filter = e.detail.value)}
     />
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <TriStateSwitch value="default" {size} ariaLabel={`Tri-state switch at ${size}`} />
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .specimen__row {
     display: flex;
     flex-wrap: wrap;

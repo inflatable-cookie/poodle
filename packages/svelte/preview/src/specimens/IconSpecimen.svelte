@@ -1,11 +1,10 @@
 <script lang="ts">
   import { Icon, IconProvider } from "@poodle/svelte-primitives";
-  import type { ControlDensity, IconSet } from "@poodle/svelte-primitives";
+  import type { IconSet } from "@poodle/svelte-primitives";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const allIconNames = Object.keys(iconNodes as unknown as IconSet).sort();
   const iconSizes = ["xs", "sm", "md", "lg", "xl"] as const;
@@ -32,7 +31,7 @@
   ];
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="hint">
       Import individual icons from <code>@poodle/icons-lucide</code>.
@@ -52,19 +51,6 @@
       <code>import {"{"} star, heart, settings {"}"} from "@poodle/icons-lucide";</code>
       <br />
       <code>&lt;Icon icon={"{star}"} size="lg" /&gt;</code>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="density-stack">
-      {#each densities as density}
-        <div class="density-row">
-          <span class="density-label">{density}</span>
-          <Icon icon={star} {density} />
-          <Icon icon={heart} {density} />
-          <Icon icon={settings} {density} />
-        </div>
-      {/each}
     </div>
   </SpecimenGroup>
 
@@ -154,15 +140,25 @@
       </div>
     </IconProvider>
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <div class="size-demo">
+      <Icon icon={star} {size} />
+      <Icon icon={heart} {size} />
+      <Icon icon={settings} {size} />
+    </div>
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <div class="size-demo">
+      <Icon icon={star} {density} />
+      <Icon icon={heart} {density} />
+      <Icon icon={settings} {density} />
+    </div>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .hint {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
@@ -209,25 +205,6 @@
     font-family: var(--poodle-typography-code-family);
     color: var(--poodle-color-text-muted);
     min-width: 1.5rem;
-  }
-
-  .density-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .density-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .density-label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
   }
 
   .color-row {

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { Menubar, type MenubarItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { Menubar, type MenubarItem } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const items: MenubarItem[] = [
     {
@@ -40,12 +39,10 @@
     },
   ];
 
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
-
   let lastAction = "";
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Application menu bar">
     <Menubar {items} ariaLabel="Application menu" on:action={(e) => (lastAction = e.detail.value)} />
     {#if lastAction}
@@ -53,49 +50,11 @@
     {/if}
   </SpecimenGroup>
 
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
-      {#each controlSizes as size}
-        <Menubar {items} ariaLabel={size + " menu bar"} {size} />
-      {/each}
-    </div>
-  </SpecimenGroup>
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Menubar {items} ariaLabel="{density} menu bar" {density} />
-        </div>
-      {/each}
-    </div>
-  </SpecimenGroup>
-</div>
+  <svelte:fragment slot="sizes" let:size>
+    <Menubar {items} ariaLabel={size + " menu bar"} {size} />
+  </svelte:fragment>
 
-<style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
-  }
-
-</style>
+  <svelte:fragment slot="densities" let:density>
+    <Menubar {items} ariaLabel="{density} menu bar" {density} />
+  </svelte:fragment>
+</SpecimenLayout>

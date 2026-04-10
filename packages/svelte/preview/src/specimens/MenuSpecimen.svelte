@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { Menu, Button, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { Menu, Button, type MenuItem } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const fileItems: MenuItem[] = [
     { value: "new", label: "New file", shortcutLabel: "⌘N" },
@@ -27,12 +26,10 @@
     { value: "delete", label: "Delete", tone: "danger" },
   ];
 
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
-
   let lastAction = "";
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="With shortcuts">
     <Menu items={fileItems} ariaLabel="File menu" on:action={(e) => (lastAction = e.detail.value)}>
       <Button variant="secondary" slot="trigger">File</Button>
@@ -40,29 +37,6 @@
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__row">
-      {#each controlSizes as size}
-        <Menu items={fileItems} ariaLabel={size + " menu"} {size}>
-          <Button variant="secondary" slot="trigger">{size.toUpperCase()}</Button>
-        </Menu>
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Menu items={fileItems} ariaLabel="{density} menu" {density}>
-            <Button variant="secondary" slot="trigger">{density}</Button>
-          </Menu>
-        </div>
-      {/each}
-    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="With checkboxes">
@@ -76,33 +50,16 @@
       <Button variant="secondary" slot="trigger">Actions</Button>
     </Menu>
   </SpecimenGroup>
-</div>
 
-<style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+  <svelte:fragment slot="sizes" let:size>
+    <Menu items={fileItems} ariaLabel={size + " menu"} {size}>
+      <Button variant="secondary" slot="trigger">{size.toUpperCase()}</Button>
+    </Menu>
+  </svelte:fragment>
 
-  .specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
-  }
-
-</style>
+  <svelte:fragment slot="densities" let:density>
+    <Menu items={fileItems} ariaLabel="{density} menu" {density}>
+      <Button variant="secondary" slot="trigger">{density}</Button>
+    </Menu>
+  </svelte:fragment>
+</SpecimenLayout>

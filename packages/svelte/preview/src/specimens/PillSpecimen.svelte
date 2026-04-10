@@ -1,14 +1,10 @@
 <script lang="ts">
   import { Pill } from "@poodle/svelte-primitives";
-  import type { ControlDensity } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
-
-  const pillSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Tones">
     <div class="specimen__row">
       <Pill tone="neutral" sizeRole="control">Neutral</Pill>
@@ -16,25 +12,6 @@
       <Pill tone="success" sizeRole="control">Success</Pill>
       <Pill tone="warning" sizeRole="control">Warning</Pill>
       <Pill tone="danger" sizeRole="control">Danger</Pill>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__row">
-      {#each pillSizes as size}
-        <Pill {size}>{size.toUpperCase()}</Pill>
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Pill {density}>Label</Pill>
-        </div>
-      {/each}
     </div>
   </SpecimenGroup>
 
@@ -72,32 +49,21 @@
       <Pill accent="#ef4444" sizeRole="control">Danger-ish</Pill>
     </div>
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <Pill {size}>{size.toUpperCase()}</Pill>
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <Pill {density}>Label</Pill>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
   }
 </style>

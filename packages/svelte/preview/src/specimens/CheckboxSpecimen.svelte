@@ -1,18 +1,14 @@
 <script lang="ts">
   import { Checkbox } from "@poodle/svelte-primitives";
-  import type { ControlDensity } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let notifications = true;
   let marketing = false;
   let terms = false;
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Default">
     <Checkbox
       label="Enable email notifications"
@@ -31,25 +27,6 @@
     />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__row">
-      {#each controlSizes as size}
-        <Checkbox label="Accept terms" {size} />
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Densities">
-    <div class="specimen__stack">
-      {#each densities as density}
-        <div class="specimen__row">
-          <span class="specimen__label">{density}</span>
-          <Checkbox id={"density-" + density} label="Option" {density} />
-        </div>
-      {/each}
-    </div>
-  </SpecimenGroup>
-
   <SpecimenGroup label="States">
     <Checkbox label="Disabled unchecked" disabled />
     <Checkbox label="Disabled checked" checked={true} disabled />
@@ -61,32 +38,12 @@
     <Checkbox label="Billable feature" checked={true} selectedColor="#22c55e" />
     <Checkbox label="Requires moderation" checked={true} selectedColor="#f59e0b" />
   </SpecimenGroup>
-</div>
 
-<style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+  <svelte:fragment slot="sizes" let:size>
+    <Checkbox label="Accept terms" {size} />
+  </svelte:fragment>
 
-  .specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .specimen__label {
-    font-size: 0.75rem;
-    font-family: var(--poodle-typography-code-family);
-    color: var(--poodle-color-text-muted);
-    min-width: 6rem;
-  }
-</style>
+  <svelte:fragment slot="densities" let:density>
+    <Checkbox id={"density-" + density} label="Option" {density} />
+  </svelte:fragment>
+</SpecimenLayout>

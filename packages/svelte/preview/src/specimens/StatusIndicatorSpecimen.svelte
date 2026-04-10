@@ -1,11 +1,10 @@
 <script lang="ts">
   import { StatusIndicator } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="All statuses">
     <div class="status-list">
       <StatusIndicator status="neutral" label="Neutral" />
@@ -14,14 +13,6 @@
       <StatusIndicator status="warning" label="Warning" />
       <StatusIndicator status="danger" label="Danger" />
       <StatusIndicator status="pending" label="Pending" />
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="status-list">
-      {#each controlSizes as size}
-        <StatusIndicator status="success" label={size.toUpperCase()} {size} />
-      {/each}
     </div>
   </SpecimenGroup>
 
@@ -38,15 +29,13 @@
   <SpecimenGroup label="Slot content">
     <StatusIndicator status="success">Build passing</StatusIndicator>
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <StatusIndicator status="success" label={size.toUpperCase()} {size} />
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .status-list {
     display: flex;
     flex-direction: column;

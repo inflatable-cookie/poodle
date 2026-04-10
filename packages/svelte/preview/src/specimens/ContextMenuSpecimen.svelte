@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { ContextMenu, type MenuItem, type ControlDensity } from "@poodle/svelte-primitives";
+  import { ContextMenu, type MenuItem } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const densities: ControlDensity[] = ["compact", "default", "comfortable"];
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const items: MenuItem[] = [
     { value: "cut", label: "Cut", shortcutLabel: "⌘X" },
@@ -14,12 +13,10 @@
     { value: "delete", label: "Delete", disabled: true },
   ];
 
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
-
   let lastAction = "";
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Right-click the area below">
     <ContextMenu {items} on:action={(e) => (lastAction = e.detail.value)}>
       <div class="target-area">
@@ -31,44 +28,24 @@
     {/if}
   </SpecimenGroup>
 
-  <SpecimenGroup label="Sizes">
-    <div class="specimen__row">
-      {#each controlSizes as size}
-        <ContextMenu {items} {size}>
-          <div class="target-area target-area--small">
-            <p>{size.toUpperCase()}</p>
-          </div>
-        </ContextMenu>
-      {/each}
-    </div>
-  </SpecimenGroup>
-  <SpecimenGroup label="Densities">
-    <div class="specimen__row">
-      {#each densities as density}
-        <ContextMenu {items} {density}>
-          <div class="target-area target-area--small">
-            <p>{density}</p>
-          </div>
-        </ContextMenu>
-      {/each}
-    </div>
-  </SpecimenGroup>
-</div>
+  <svelte:fragment slot="sizes" let:size>
+    <ContextMenu {items} {size}>
+      <div class="target-area target-area--small">
+        <p>{size.toUpperCase()}</p>
+      </div>
+    </ContextMenu>
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <ContextMenu {items} {density}>
+      <div class="target-area target-area--small">
+        <p>{density}</p>
+      </div>
+    </ContextMenu>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
   .target-area {
     display: flex;
     align-items: center;

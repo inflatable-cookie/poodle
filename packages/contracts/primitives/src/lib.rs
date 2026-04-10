@@ -171,7 +171,7 @@ pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
     AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlDensity, ControlSize, DateRangeValue,
-    DateTimeRangeValue, DateTimeValue, DialogKind, Dimension, Direction, DrawerEdge,
+    DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
     FormActionAlign, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation,
     Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus, RuleTone,
     SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder,
