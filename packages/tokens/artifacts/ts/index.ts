@@ -286,6 +286,12 @@ export const tokens = {
         "lineHeight": "1rem",
         "weight": "500"
       },
+      "caption": {
+        "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+        "size": "0.6875rem",
+        "lineHeight": "1rem",
+        "weight": "500"
+      },
       "heading": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
         "size": "1rem",
@@ -451,6 +457,10 @@ export const tokenPaths = [
   "typography.label.size",
   "typography.label.lineHeight",
   "typography.label.weight",
+  "typography.caption.family",
+  "typography.caption.size",
+  "typography.caption.lineHeight",
+  "typography.caption.weight",
   "typography.heading.family",
   "typography.heading.size",
   "typography.heading.lineHeight",
@@ -528,6 +538,10 @@ export const cssVars = {
   "typography.label.size": "--poodle-typography-label-size",
   "typography.label.lineHeight": "--poodle-typography-label-lineHeight",
   "typography.label.weight": "--poodle-typography-label-weight",
+  "typography.caption.family": "--poodle-typography-caption-family",
+  "typography.caption.size": "--poodle-typography-caption-size",
+  "typography.caption.lineHeight": "--poodle-typography-caption-lineHeight",
+  "typography.caption.weight": "--poodle-typography-caption-weight",
   "typography.heading.family": "--poodle-typography-heading-family",
   "typography.heading.size": "--poodle-typography-heading-size",
   "typography.heading.lineHeight": "--poodle-typography-heading-lineHeight",

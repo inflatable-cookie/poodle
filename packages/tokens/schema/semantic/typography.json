@@ -36,6 +36,24 @@
         "$value": "{primitives.typography.font.weight.medium}"
       }
     },
+    "caption": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{primitives.typography.font.family.sans}"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.size.xs}"
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": "{primitives.typography.font.lineHeight.sm}"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": "{primitives.typography.font.weight.medium}"
+      }
+    },
     "heading": {
       "family": {
         "$type": "fontFamily",
