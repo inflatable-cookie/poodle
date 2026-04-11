@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::AudioPlayerSpec;
-use poodle_components::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use poodle_specs::AudioPlayerSpec;
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use poodle_gpui_components::{AudioPlayer, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

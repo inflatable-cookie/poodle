@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::{MediaBrowsePanelSpec, MediaBrowseItem};
-use poodle_components::EyebrowSpec;
+use poodle_specs::{MediaBrowsePanelSpec, MediaBrowseItem};
+use poodle_specs::EyebrowSpec;
 use poodle_gpui_components::{MediaBrowsePanel, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

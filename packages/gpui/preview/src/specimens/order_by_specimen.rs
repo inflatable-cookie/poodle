@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{OrderBySpec, SortField, ActiveSort, SortDirection, EyebrowSpec};
+use poodle_specs::{OrderBySpec, SortField, ActiveSort, SortDirection, EyebrowSpec};
 use poodle_gpui_components::{OrderBy, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::TimeAgoSpec;
+use poodle_specs::TimeAgoSpec;
 
 use crate::theme_ext::resolve_color;
 

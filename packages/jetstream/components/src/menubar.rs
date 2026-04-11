@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::MenubarSpec;
+use poodle_specs::MenubarSpec;
 
 use crate::theme_ext::resolve_color;
 

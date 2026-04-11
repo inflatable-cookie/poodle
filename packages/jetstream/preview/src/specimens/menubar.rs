@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::menubar::js_menubar;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{MenubarEntry, MenubarSpec, MenuEntry};
+use poodle_specs::{MenubarEntry, MenubarSpec, MenuEntry};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

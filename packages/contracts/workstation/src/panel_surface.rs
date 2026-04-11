@@ -1,4 +1,4 @@
-use poodle_components::PaddingScale;
+use poodle_specs::PaddingScale;
 use poodle_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

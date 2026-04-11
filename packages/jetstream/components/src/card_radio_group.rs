@@ -1,7 +1,7 @@
 //! CardRadioGroup — Jetstream card radio group backed by CardRadioGroupSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::CardRadioGroupSpec;
+use poodle_specs::CardRadioGroupSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_radius};
@@ -11,39 +11,39 @@ pub fn js_card_radio_group(spec: &CardRadioGroupSpec, theme: &JetstreamThemeProv
 
     // Size-driven indicator dimensions from contract
     let indicator_size = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.875,
-        poodle_components::ControlSize::Sm => 1.0,
-        poodle_components::ControlSize::Md => 1.125,
-        poodle_components::ControlSize::Lg => 1.25,
-        poodle_components::ControlSize::Xl => 1.375,
+        poodle_specs::ControlSize::Xs => 0.875,
+        poodle_specs::ControlSize::Sm => 1.0,
+        poodle_specs::ControlSize::Md => 1.125,
+        poodle_specs::ControlSize::Lg => 1.25,
+        poodle_specs::ControlSize::Xl => 1.375,
     });
     let dot_size = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.25,
-        poodle_components::ControlSize::Sm => 0.375,
-        poodle_components::ControlSize::Md => 0.375,
-        poodle_components::ControlSize::Lg => 0.4375,
-        poodle_components::ControlSize::Xl => 0.5,
+        poodle_specs::ControlSize::Xs => 0.25,
+        poodle_specs::ControlSize::Sm => 0.375,
+        poodle_specs::ControlSize::Md => 0.375,
+        poodle_specs::ControlSize::Lg => 0.4375,
+        poodle_specs::ControlSize::Xl => 0.5,
     });
     let title_font = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.75,
-        poodle_components::ControlSize::Sm => 0.8125,
-        poodle_components::ControlSize::Md => 0.9375,
-        poodle_components::ControlSize::Lg => 1.0625,
-        poodle_components::ControlSize::Xl => 1.125,
+        poodle_specs::ControlSize::Xs => 0.75,
+        poodle_specs::ControlSize::Sm => 0.8125,
+        poodle_specs::ControlSize::Md => 0.9375,
+        poodle_specs::ControlSize::Lg => 1.0625,
+        poodle_specs::ControlSize::Xl => 1.125,
     });
     let desc_font = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.6875,
-        poodle_components::ControlSize::Sm => 0.75,
-        poodle_components::ControlSize::Md => 0.8125,
-        poodle_components::ControlSize::Lg => 0.875,
-        poodle_components::ControlSize::Xl => 0.9375,
+        poodle_specs::ControlSize::Xs => 0.6875,
+        poodle_specs::ControlSize::Sm => 0.75,
+        poodle_specs::ControlSize::Md => 0.8125,
+        poodle_specs::ControlSize::Lg => 0.875,
+        poodle_specs::ControlSize::Xl => 0.9375,
     });
 
     // Density-driven grid gap from contract
     let grid_gap = rem_to_px(match spec.density {
-        poodle_components::ControlDensity::Compact => 0.5,
-        poodle_components::ControlDensity::Default => 0.75,
-        poodle_components::ControlDensity::Comfortable => 1.0,
+        poodle_specs::ControlDensity::Compact => 0.5,
+        poodle_specs::ControlDensity::Default => 0.75,
+        poodle_specs::ControlDensity::Comfortable => 1.0,
     });
 
     let selected_fill = resolve_color(theme, spec.selected_fill_token());

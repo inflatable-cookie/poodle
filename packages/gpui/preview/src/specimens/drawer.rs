@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
+use poodle_specs::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::{Drawer, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

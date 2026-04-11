@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{FormActionAlign, FormActionsSpec};
+use poodle_specs::{FormActionAlign, FormActionsSpec};
 
 use crate::theme_ext::resolve_px;
 

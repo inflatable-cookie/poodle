@@ -13,7 +13,7 @@
 //! 6. Command and workspace — workspace shell, command palette, docks
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_components::{
+use poodle_specs::{
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec,
     EmptyStateSpec, FilterToolbarSpec, FormShellSpec, InlineRemediationSpec,
     LogListSpec, MediaPreviewSpec, MediaThumbnailSpec,
@@ -21,7 +21,7 @@ use poodle_components::{
     RemediationBannerSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
     ValidationSummarySpec,
 };
-use poodle_components::{
+use poodle_specs::{
     AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
     FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec,
     SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
@@ -154,8 +154,8 @@ fn render_detail_and_review(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
     screen.push(a.render(&DetailShellSpec::new(), &s, t));
     screen.push(a.render(&DetailSectionSpec::new().with_title("Overview"), &s, t));
     screen.push(a.render(&DetailSectionSpec::new().with_title("Media"), &s, t));
-    screen.push(a.render(&MediaThumbnailSpec::new(poodle_components::MediaKind::Image), &s, t));
-    screen.push(a.render(&MediaPreviewSpec::new(poodle_components::MediaKind::Audio, "Track preview"), &s, t));
+    screen.push(a.render(&MediaThumbnailSpec::new(poodle_specs::MediaKind::Image), &s, t));
+    screen.push(a.render(&MediaPreviewSpec::new(poodle_specs::MediaKind::Audio, "Track preview"), &s, t));
     screen.push(a.render(&BreadcrumbsSpec::new(vec![]), &s, t));
     screen.push(a.render(&AccordionSpec::new(vec![]), &s, t));
     screen.push(a.render(&BoxSpec::new(), &s, t));

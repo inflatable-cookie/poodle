@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{ChoiceOption, EyebrowSpec};
-use poodle_components::CardRadioGroupSpec;
+use poodle_specs::{ChoiceOption, EyebrowSpec};
+use poodle_specs::CardRadioGroupSpec;
 use poodle_gpui_components::{CardRadioGroup, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

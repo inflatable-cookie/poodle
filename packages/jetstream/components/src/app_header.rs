@@ -1,7 +1,7 @@
 //! AppHeader — Jetstream app header backed by AppHeaderSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::AppHeaderSpec;
+use poodle_specs::AppHeaderSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

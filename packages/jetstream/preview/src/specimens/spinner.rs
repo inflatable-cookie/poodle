@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::spinner::js_spinner;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{SpinnerSpec, SpinnerVariant, SpinnerSize, SpinnerTone};
+use poodle_specs::{SpinnerSpec, SpinnerVariant, SpinnerSize, SpinnerTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

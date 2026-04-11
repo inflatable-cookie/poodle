@@ -1,7 +1,7 @@
 //! PageLoading — Jetstream loading overlay with spinner and message backed by PageLoadingSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::PageLoadingSpec;
+use poodle_specs::PageLoadingSpec;
 
 use crate::presentation::{
     control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px,

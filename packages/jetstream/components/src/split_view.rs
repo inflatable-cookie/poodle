@@ -1,7 +1,7 @@
 //! SplitView — Jetstream split view backed by SplitViewSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{SplitOrientation, SplitViewSpec};
+use poodle_specs::{SplitOrientation, SplitViewSpec};
 
 use crate::presentation::resolve_semantic_size;
 

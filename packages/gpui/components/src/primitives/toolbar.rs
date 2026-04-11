@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{Alignment, ControlDensity, ControlSize, SemanticControlSizeRole, ToolbarSpec};
+use poodle_specs::{Alignment, ControlDensity, ControlSize, SemanticControlSizeRole, ToolbarSpec};
 
 use crate::presentation::{rem_to_px, control_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color};

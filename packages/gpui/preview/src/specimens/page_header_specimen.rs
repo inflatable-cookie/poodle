@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::PageHeaderSpec;
-use poodle_components::{
+use poodle_specs::PageHeaderSpec;
+use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec,
     PillAppearance, PillSpec, PillTone, StatusTone, TimeAgoSpec,
 };

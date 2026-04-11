@@ -5,7 +5,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::field_set::js_field_set;
 use poodle_jetstream_components::text_input::js_text_input;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{FieldSetSpec, TextInputSpec};
+use poodle_specs::{FieldSetSpec, TextInputSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

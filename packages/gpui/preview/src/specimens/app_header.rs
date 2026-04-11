@@ -1,8 +1,8 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::AppHeaderSpec;
+use poodle_specs::AppHeaderSpec;
 use poodle_gpui_components::{AppHeader, Button, IconButton, Eyebrow};
-use poodle_components::{ButtonSpec, ButtonVariant, ControlSize, IconButtonSpec, EyebrowSpec};
+use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, IconButtonSpec, EyebrowSpec};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 

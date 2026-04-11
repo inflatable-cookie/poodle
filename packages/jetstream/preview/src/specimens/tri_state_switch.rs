@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tri_state_switch::js_tri_state_switch;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{CheckState, ControlSize, TriStateSwitchSpec};
+use poodle_specs::{CheckState, ControlSize, TriStateSwitchSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

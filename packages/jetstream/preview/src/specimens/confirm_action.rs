@@ -4,8 +4,8 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::confirm_action::js_confirm_action;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::ConfirmActionSpec;
-use poodle_components::StatusTone;
+use poodle_specs::ConfirmActionSpec;
+use poodle_specs::StatusTone;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

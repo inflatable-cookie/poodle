@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use super::calendar::Calendar;
@@ -180,8 +180,8 @@ impl IntoElement for DateRangePicker {
 
         // Range calendar dropdown when open
         if is_open {
-            let mut cal_spec = poodle_components::CalendarSpec::new()
-                .with_mode(poodle_components::CalendarMode::Range);
+            let mut cal_spec = poodle_specs::CalendarSpec::new()
+                .with_mode(poodle_specs::CalendarMode::Range);
             cal_spec.week_starts_on = spec.week_starts_on.clone();
             cal_spec.range_value = Some(range.clone());
 

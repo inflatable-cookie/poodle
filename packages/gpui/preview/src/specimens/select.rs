@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec, ValidationState};
+use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec, ValidationState};
 use poodle_gpui_components::{Select, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

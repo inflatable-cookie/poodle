@@ -3,7 +3,7 @@
 use std::rc::Rc;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};

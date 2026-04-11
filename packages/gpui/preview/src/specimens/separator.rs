@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{SeparatorSpec, SeparatorOrientation, EyebrowSpec};
+use poodle_specs::{SeparatorSpec, SeparatorOrientation, EyebrowSpec};
 use poodle_gpui_components::{Separator, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 

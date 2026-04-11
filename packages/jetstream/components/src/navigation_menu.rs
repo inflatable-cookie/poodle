@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::NavigationMenuSpec;
+use poodle_specs::NavigationMenuSpec;
 
 use crate::theme_ext::resolve_color;
 

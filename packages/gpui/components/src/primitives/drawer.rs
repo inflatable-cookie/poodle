@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem};
 use crate::theme_ext::{resolve_color, resolve_px};

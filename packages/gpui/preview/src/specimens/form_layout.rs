@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_components::{ButtonSpec, ButtonVariant, TextInputSpec, CheckboxSpec, EyebrowSpec};
+use poodle_specs::{ButtonSpec, ButtonVariant, TextInputSpec, CheckboxSpec, EyebrowSpec};
 use poodle_gpui_components::{Button, TextInput, Checkbox, FormLayout, Field, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;

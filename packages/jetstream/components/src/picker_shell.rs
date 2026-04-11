@@ -1,7 +1,7 @@
 //! PickerShell — Jetstream picker shell backed by PickerShellSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::PickerShellSpec;
+use poodle_specs::PickerShellSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};

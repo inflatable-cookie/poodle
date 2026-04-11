@@ -6,7 +6,7 @@
 //! All structural primitives map to Widget::Panel in Jetstream.
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_components::{
+use poodle_specs::{
     BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
     SurfaceSpec,
 };
@@ -17,7 +17,7 @@ use crate::{JetstreamAdapter, JetstreamNodeHandle, JetstreamTarget, WidgetKind};
 
 /// Resolve an `Inset` (horizontal/vertical token pair) into `JetstreamEdges`
 /// using the theme's `resolve_space` method.
-fn resolve_inset(inset: &poodle_components::Inset, theme: &dyn ThemeProvider) -> JetstreamEdges {
+fn resolve_inset(inset: &poodle_specs::Inset, theme: &dyn ThemeProvider) -> JetstreamEdges {
     let h = inset.horizontal.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
     let v = inset.vertical.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
     JetstreamEdges {
@@ -223,7 +223,7 @@ impl RenderComponent<CallOutSpec> for JetstreamAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_components::*;
+    use poodle_specs::*;
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 

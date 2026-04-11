@@ -9,7 +9,7 @@ path = "src/lib.rs"
 
 [dependencies]
 gpui = "0.2.2"
-poodle-components = { path = "../../contracts/components" }
+poodle-specs = { path = "../../contracts/components" }
 poodle-gpui = { path = "../adapter" }
 poodle-adapter = { path = "../../contracts/adapter" }
 

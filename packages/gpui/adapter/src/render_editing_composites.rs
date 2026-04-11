@@ -8,14 +8,14 @@
 //! StateTile, ToastStack, EmptyState
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_components::{
+use poodle_specs::{
     AudioPlayerSpec, BlockEditorSpec, CardRadioGroupSpec,
     EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
     LogListSpec, MarkdownEditorSpec, MediaPickerSpec,
     PageHeaderSpec, PageLoadingSpec,
     StateTileSpec, ToastStackSpec, VideoPlayerSpec,
 };
-use poodle_components::{
+use poodle_specs::{
     BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec,
 };
 use poodle_style::StyleDescriptor;
@@ -170,8 +170,8 @@ impl RenderComponent<EmptyStateSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_components::*;
-    use poodle_components::{BreadcrumbsSpec, ChoiceOption, ListCardSpec, NavCardSpec, OrderBySpec};
+    use poodle_specs::*;
+    use poodle_specs::{BreadcrumbsSpec, ChoiceOption, ListCardSpec, NavCardSpec, OrderBySpec};
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 

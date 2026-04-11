@@ -6,9 +6,9 @@
 //! ALL dimensions from contract. ZERO hardcoded values.
 
 use jetstream_runtime::ui_element::{self, JsEl};
-use poodle_components::ControlSize;
+use poodle_specs::ControlSize;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{AccordionItemSpec, AccordionSpec, ControlDensity};
+use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity};
 
 use crate::presentation::{
     panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
@@ -148,7 +148,7 @@ fn render_item(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_components::AccordionSelectionValue;
+    use poodle_specs::AccordionSelectionValue;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

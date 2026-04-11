@@ -4,7 +4,7 @@
 //! InlineRemediationSpec, ConfirmActionSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_components::{
+use poodle_specs::{
     ConfirmActionSpec, FormShellSpec, InlineRemediationSpec, RemediationBannerSpec,
     ValidationSummarySpec,
 };
@@ -56,7 +56,7 @@ impl RenderComponent<ConfirmActionSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_components::*;
+    use poodle_specs::*;
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 

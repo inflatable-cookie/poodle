@@ -3,8 +3,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
-use poodle_components::AudioPlayerSpec;
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::AudioPlayerSpec;
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};

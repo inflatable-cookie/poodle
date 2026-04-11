@@ -1,7 +1,7 @@
 //! DataTable — Jetstream data table backed by DataTableSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::DataTableSpec;
+use poodle_specs::DataTableSpec;
 
 use crate::presentation::{
     control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,

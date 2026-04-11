@@ -6,7 +6,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ColorPickerSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{ColorPickerSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -246,9 +246,9 @@ impl IntoElement for ColorPicker {
             // Only render when show_input is true (default)
             if spec.show_input {
                 let mode_label = match spec.default_mode {
-                    poodle_components::ColorInputMode::Hex => "HEX",
-                    poodle_components::ColorInputMode::Rgb => "RGB",
-                    poodle_components::ColorInputMode::Hsl => "HSL",
+                    poodle_specs::ColorInputMode::Hex => "HEX",
+                    poodle_specs::ColorInputMode::Rgb => "RGB",
+                    poodle_specs::ColorInputMode::Hsl => "HSL",
                 };
 
                 // Mode label

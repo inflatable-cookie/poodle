@@ -9,9 +9,9 @@
 //! This serves as the "downstream reference-app adoption proof" for g07.
 
 use poodle_adapter::{AdapterManifest, RenderComponent, ThemeProvider};
-use poodle_components::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
+use poodle_specs::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
 use poodle_gpui::{GpuiAdapter, GpuiThemeProvider};
-use poodle_components::{ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
+use poodle_specs::{ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
 use poodle_style::StyleDescriptor;
 use poodle_workstation::{AppHeaderSpec, WorkspaceShellSpec};
 

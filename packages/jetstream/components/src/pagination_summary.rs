@@ -1,7 +1,7 @@
 //! PaginationSummary — Jetstream pagination summary backed by PaginationSummarySpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::PaginationSummarySpec;
+use poodle_specs::PaginationSummarySpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{CalendarWeekStart, ControlDensity, ControlSize, DatePickerSpec, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{CalendarWeekStart, ControlDensity, ControlSize, DatePickerSpec, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::calendar::Calendar;
 use super::icon::Icon;
@@ -188,7 +188,7 @@ impl IntoElement for DatePicker {
 
         // Calendar dropdown when open
         if is_open {
-            let mut cal_spec = poodle_components::CalendarSpec::new()
+            let mut cal_spec = poodle_specs::CalendarSpec::new()
                 .with_week_start(spec.week_starts_on.clone());
 
             if let Some(val) = spec.current_value() {

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::icon_button::js_icon_button;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::IconButtonSpec;
+use poodle_specs::IconButtonSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

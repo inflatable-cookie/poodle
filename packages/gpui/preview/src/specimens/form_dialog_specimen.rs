@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui_components::{Button, Eyebrow, Field, FormDialog, TextInput};
-use poodle_components::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, TextInputSpec};
+use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, TextInputSpec};
 use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

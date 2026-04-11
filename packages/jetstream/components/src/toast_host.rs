@@ -3,7 +3,7 @@
 //! Wraps a ToastStack and positions it at the chosen screen corner.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{ToastHostPlacement, ToastHostSpec, ToastStackSpec};
+use poodle_specs::{ToastHostPlacement, ToastHostSpec, ToastStackSpec};
 
 use crate::presentation::rem_to_px;
 use crate::toast_stack::js_toast_stack;

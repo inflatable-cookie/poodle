@@ -1,11 +1,11 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{
+use poodle_specs::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec,
     TableSortDirection,
 };
-use poodle_components::{ControlSize, EyebrowSpec, StatusTone};
+use poodle_specs::{ControlSize, EyebrowSpec, StatusTone};
 use poodle_gpui_components::{DataTable, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

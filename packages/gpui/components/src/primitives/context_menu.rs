@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ContextMenuSpec, ControlDensity, ControlSize, MenuSpec, SemanticControlSizeRole};
+use poodle_specs::{ContextMenuSpec, ControlDensity, ControlSize, MenuSpec, SemanticControlSizeRole};
 
 use super::menu::Menu;
 

@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
-use poodle_components::{ButtonVariant, EyebrowSpec};
+use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
+use poodle_specs::{ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::{EmptyState, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

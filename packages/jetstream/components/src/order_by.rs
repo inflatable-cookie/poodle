@@ -1,7 +1,7 @@
 //! OrderBy — Jetstream sort control backed by OrderBySpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::OrderBySpec;
+use poodle_specs::OrderBySpec;
 
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem,

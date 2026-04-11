@@ -4,7 +4,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{CheckState, ControlSize, TriStateSwitchSpec};
+use poodle_specs::{CheckState, ControlSize, TriStateSwitchSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
 use crate::theme_ext::{color_mix, parse_hex_color, resolve_color, resolve_opacity, resolve_px};
@@ -44,8 +44,8 @@ impl TriStateSwitch {
     pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn on_change(
         mut self,

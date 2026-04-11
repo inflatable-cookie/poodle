@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::MediaPickerSpec;
-use poodle_components::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use poodle_specs::MediaPickerSpec;
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use poodle_gpui_components::{MediaPicker, MediaPickerItem, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

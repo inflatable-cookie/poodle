@@ -1,7 +1,7 @@
 use gpui::*;
-use poodle_components::{EmbedPreviewSpec, ParsedEmbed};
+use poodle_specs::{EmbedPreviewSpec, ParsedEmbed};
 use poodle_gpui_components::{EmbedPreview, Eyebrow};
-use poodle_components::EyebrowSpec;
+use poodle_specs::EyebrowSpec;
 use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

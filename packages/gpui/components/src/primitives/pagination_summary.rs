@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::PaginationSummarySpec;
+use poodle_specs::PaginationSummarySpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

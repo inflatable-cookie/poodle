@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::table::js_table;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{ColumnAlign, TableColumn, TableRow, TableSpec};
+use poodle_specs::{ColumnAlign, TableColumn, TableRow, TableSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

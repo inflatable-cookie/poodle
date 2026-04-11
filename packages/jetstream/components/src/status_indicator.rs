@@ -7,7 +7,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::StatusIndicatorSpec;
+use poodle_specs::StatusIndicatorSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
@@ -66,7 +66,7 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_components::StatusTone;
+    use poodle_specs::StatusTone;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

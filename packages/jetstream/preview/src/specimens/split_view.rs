@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::split_view::js_split_view;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{SplitOrientation, SplitViewSpec};
+use poodle_specs::{SplitOrientation, SplitViewSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

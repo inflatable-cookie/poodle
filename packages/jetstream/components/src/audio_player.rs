@@ -1,7 +1,7 @@
 //! AudioPlayer — Jetstream audio player backed by AudioPlayerSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::AudioPlayerSpec;
+use poodle_specs::AudioPlayerSpec;
 
 use crate::presentation::{
     control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
@@ -22,39 +22,39 @@ pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -
 
     // Size-driven dimensions from contract
     let button_size = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 1.5,
-        poodle_components::ControlSize::Sm => 1.75,
-        poodle_components::ControlSize::Md => 2.0,
-        poodle_components::ControlSize::Lg => 2.25,
-        poodle_components::ControlSize::Xl => 2.5,
+        poodle_specs::ControlSize::Xs => 1.5,
+        poodle_specs::ControlSize::Sm => 1.75,
+        poodle_specs::ControlSize::Md => 2.0,
+        poodle_specs::ControlSize::Lg => 2.25,
+        poodle_specs::ControlSize::Xl => 2.5,
     });
     let icon_size = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.875,
-        poodle_components::ControlSize::Sm => 1.0,
-        poodle_components::ControlSize::Md => 1.0,
-        poodle_components::ControlSize::Lg => 1.125,
-        poodle_components::ControlSize::Xl => 1.25,
+        poodle_specs::ControlSize::Xs => 0.875,
+        poodle_specs::ControlSize::Sm => 1.0,
+        poodle_specs::ControlSize::Md => 1.0,
+        poodle_specs::ControlSize::Lg => 1.125,
+        poodle_specs::ControlSize::Xl => 1.25,
     });
     let time_width = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 2.0,
-        poodle_components::ControlSize::Sm => 2.5,
-        poodle_components::ControlSize::Md => 2.5,
-        poodle_components::ControlSize::Lg => 2.75,
-        poodle_components::ControlSize::Xl => 3.0,
+        poodle_specs::ControlSize::Xs => 2.0,
+        poodle_specs::ControlSize::Sm => 2.5,
+        poodle_specs::ControlSize::Md => 2.5,
+        poodle_specs::ControlSize::Lg => 2.75,
+        poodle_specs::ControlSize::Xl => 3.0,
     });
     let volume_width = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 3.0,
-        poodle_components::ControlSize::Sm => 4.0,
-        poodle_components::ControlSize::Md => 4.0,
-        poodle_components::ControlSize::Lg => 4.5,
-        poodle_components::ControlSize::Xl => 5.0,
+        poodle_specs::ControlSize::Xs => 3.0,
+        poodle_specs::ControlSize::Sm => 4.0,
+        poodle_specs::ControlSize::Md => 4.0,
+        poodle_specs::ControlSize::Lg => 4.5,
+        poodle_specs::ControlSize::Xl => 5.0,
     });
 
     // Density-driven spacing from contract
     let gap = rem_to_px(match spec.density {
-        poodle_components::ControlDensity::Compact => 0.375,
-        poodle_components::ControlDensity::Default => 0.5,
-        poodle_components::ControlDensity::Comfortable => 0.625,
+        poodle_specs::ControlDensity::Compact => 0.375,
+        poodle_specs::ControlDensity::Default => 0.5,
+        poodle_specs::ControlDensity::Comfortable => 0.625,
     });
     let pad_y = rem_to_px(panel_space_y_rem(spec.density));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));

@@ -8,10 +8,10 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::ButtonSpec;
-use poodle_components::ButtonTone;
-use poodle_components::ButtonVariant;
-use poodle_components::ControlSize;
+use poodle_specs::ButtonSpec;
+use poodle_specs::ButtonTone;
+use poodle_specs::ButtonVariant;
+use poodle_specs::ControlSize;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,

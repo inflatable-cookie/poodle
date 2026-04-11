@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{EditableLabelSpec, EyebrowSpec};
+use poodle_specs::{EditableLabelSpec, EyebrowSpec};
 use poodle_gpui_components::{EditableLabel, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

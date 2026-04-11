@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionAlign, FormActionsSpec};
+use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionAlign, FormActionsSpec};
 use poodle_gpui_components::{Button, Eyebrow, FormActions};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

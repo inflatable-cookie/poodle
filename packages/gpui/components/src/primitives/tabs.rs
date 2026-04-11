@@ -8,7 +8,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
+use poodle_specs::{ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem, control_space_x_rem};
@@ -106,8 +106,8 @@ impl Tabs {
     pub fn activation_mode(mut self, v: TabActivationMode) -> Self { self.spec.activation_mode = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
 
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {

@@ -4,10 +4,10 @@ use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{
+use poodle_specs::{
     BrowseState, DrillDownItem, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode,
 };
-use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::{Icon, Spinner};

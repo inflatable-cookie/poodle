@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tabs::js_tabs;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{TabDefinition, TabsSpec};
+use poodle_specs::{TabDefinition, TabsSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

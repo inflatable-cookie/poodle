@@ -7,7 +7,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{SeparatorOrientation, SeparatorSpec};
+use poodle_specs::{SeparatorOrientation, SeparatorSpec};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, tint};
@@ -30,11 +30,11 @@ pub fn js_separator(spec: &SeparatorSpec, theme: &JetstreamThemeProvider) -> JsE
     // - subtle: color-mix(border-subtle 72%, transparent)
     // - default: border-default full color
     let color = match spec.tone {
-        poodle_components::RuleTone::Subtle => {
+        poodle_specs::RuleTone::Subtle => {
             let border_subtle = resolve_color(theme, "color.border.subtle");
             tint(border_subtle, 0.72) // color-mix with 72% opacity
         }
-        poodle_components::RuleTone::Default => {
+        poodle_specs::RuleTone::Default => {
             resolve_color(theme, "color.border.default")
         }
     };

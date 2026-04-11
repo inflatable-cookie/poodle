@@ -1,7 +1,7 @@
 //! EmbedInput — Jetstream URL input with parsed embed preview pills backed by EmbedInputSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::EmbedInputSpec;
+use poodle_specs::EmbedInputSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};

@@ -8,7 +8,7 @@ description = "Jetstream rendering adapter for Poodle — maps shared contract s
 poodle-adapter = { path = "../../contracts/adapter" }
 poodle-events = { path = "../../contracts/events" }
 poodle-layout = { path = "../../contracts/layout" }
-poodle-components = { path = "../../contracts/components" }
+poodle-specs = { path = "../../contracts/components" }
 poodle-workstation = { path = "../../contracts/workstation" }
 poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }

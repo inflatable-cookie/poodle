@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::{AspectRatio, MediaPreviewSpec, MediaKind, MediaState};
-use poodle_components::EyebrowSpec;
+use poodle_specs::{AspectRatio, MediaPreviewSpec, MediaKind, MediaState};
+use poodle_specs::EyebrowSpec;
 use poodle_gpui_components::{MediaPreview, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

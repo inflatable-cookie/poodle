@@ -1,7 +1,7 @@
 //! MediaBrowsePanel — Jetstream media browse panel backed by MediaBrowsePanelSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::MediaBrowsePanelSpec;
+use poodle_specs::MediaBrowsePanelSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_radius, tint};
@@ -14,9 +14,9 @@ pub fn js_media_browse_panel(spec: &MediaBrowsePanelSpec, theme: &JetstreamTheme
 
     // Density-driven spacing from contract
     let (grid_gap, item_gap, item_pad) = match spec.density {
-        poodle_components::ControlDensity::Compact => (0.375, 0.25, 0.5),
-        poodle_components::ControlDensity::Default => (0.5, 0.375, 0.75),
-        poodle_components::ControlDensity::Comfortable => (0.75, 0.5, 0.875),
+        poodle_specs::ControlDensity::Compact => (0.375, 0.25, 0.5),
+        poodle_specs::ControlDensity::Default => (0.5, 0.375, 0.75),
+        poodle_specs::ControlDensity::Comfortable => (0.75, 0.5, 0.875),
     };
 
     let text_secondary = resolve_color(theme, "color.text.secondary");

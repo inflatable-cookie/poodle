@@ -29,7 +29,7 @@
 //!
 //! ```rust,ignore
 //! use poodle_jetstream_components::button::js_button;
-//! use poodle_components::ButtonSpec;
+//! use poodle_specs::ButtonSpec;
 //!
 //! let el = js_button(&ButtonSpec::new().with_label("Save"), &theme);
 //! ```

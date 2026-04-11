@@ -6,7 +6,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlDensity, ControlSize, MenuSpec, MenubarEntry, MenubarSpec, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, MenuSpec, MenubarEntry, MenubarSpec, SemanticControlSizeRole};
 
 use super::menu::Menu;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem};

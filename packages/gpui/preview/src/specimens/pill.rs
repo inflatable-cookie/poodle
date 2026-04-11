@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlSize, PillAppearance, PillFont, PillSize, PillSpec, PillTone, EyebrowSpec};
+use poodle_specs::{ControlSize, PillAppearance, PillFont, PillSize, PillSpec, PillTone, EyebrowSpec};
 use poodle_gpui_components::{Pill, Eyebrow};
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;

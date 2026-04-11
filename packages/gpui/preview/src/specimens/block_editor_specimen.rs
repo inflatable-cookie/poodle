@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::EyebrowSpec;
-use poodle_components::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
+use poodle_specs::EyebrowSpec;
+use poodle_specs::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 use poodle_gpui_components::{BlockEditor, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;

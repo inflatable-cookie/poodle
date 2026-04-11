@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{
+use poodle_specs::{
     IconSize, IconSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone,
 };
 

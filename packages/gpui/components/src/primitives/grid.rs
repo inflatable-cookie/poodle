@@ -5,7 +5,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{Dimension, GridSpec, PaddingScale};
+use poodle_specs::{Dimension, GridSpec, PaddingScale};
 
 use crate::theme_ext::resolve_px;
 

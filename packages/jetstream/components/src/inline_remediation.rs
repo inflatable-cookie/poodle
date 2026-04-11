@@ -2,8 +2,8 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::InlineRemediationSpec;
-use poodle_components::StatusTone;
+use poodle_specs::InlineRemediationSpec;
+use poodle_specs::StatusTone;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

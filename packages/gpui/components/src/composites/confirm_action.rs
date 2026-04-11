@@ -5,8 +5,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::ConfirmActionSpec;
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::ConfirmActionSpec;
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

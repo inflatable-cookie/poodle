@@ -8,8 +8,8 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{Toast, ToastHostPlacement, ToastHostSpec, ToastPosition, ToastStackSpec, ToastTone};
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{Toast, ToastHostPlacement, ToastHostSpec, ToastPosition, ToastStackSpec, ToastTone};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use super::ToastStack;
 

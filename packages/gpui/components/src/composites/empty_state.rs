@@ -3,7 +3,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
+use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -128,7 +128,7 @@ impl IntoElement for EmptyState {
             let mut actions_row = div().flex().gap(inline_gap).items_center();
 
             for action in &spec.actions {
-                let is_primary = action.variant == poodle_components::ButtonVariant::Primary;
+                let is_primary = action.variant == poodle_specs::ButtonVariant::Primary;
                 let label = action.label.clone();
                 let action_id = SharedString::from(format!("empty-action-{}", action.id));
 

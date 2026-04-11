@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{CalendarMode, CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
@@ -251,7 +251,7 @@ impl IntoElement for Calendar {
 
         // Determine week-start offset (Sunday = 0, Monday = 1)
         let week_start_offset: u32 = match spec.week_starts_on {
-            poodle_components::CalendarWeekStart::Monday => 1,
+            poodle_specs::CalendarWeekStart::Monday => 1,
             _ => 0,
         };
 

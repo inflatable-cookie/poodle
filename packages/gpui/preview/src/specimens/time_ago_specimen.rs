@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{TimeAgoSpec, EyebrowSpec};
+use poodle_specs::{TimeAgoSpec, EyebrowSpec};
 use poodle_gpui_components::{TimeAgo, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 

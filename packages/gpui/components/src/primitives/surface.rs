@@ -3,7 +3,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
+use poodle_specs::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 

@@ -1,8 +1,8 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{DetailShellSpec, DetailState, DetailSectionSpec};
+use poodle_specs::{DetailShellSpec, DetailState, DetailSectionSpec};
 use poodle_gpui_components::{DetailShell, DetailItem, DetailSection, Button, Eyebrow};
-use poodle_components::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_specs::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 

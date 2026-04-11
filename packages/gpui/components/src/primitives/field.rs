@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{FieldSpec, ValidationState};
+use poodle_specs::{FieldSpec, ValidationState};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

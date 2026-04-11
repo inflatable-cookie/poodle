@@ -12,12 +12,12 @@ use poodle_gpui_components::{
     Field, PaginationSummary, Pill, Progress, Separator,
     StatusBar, Surface, TextInput,
 };
-use poodle_components::{DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec};
-use poodle_components::{
+use poodle_specs::{DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec};
+use poodle_specs::{
     ButtonSpec, ButtonVariant, CallOutSpec, CheckboxSpec, FieldSpec,
     PillSpec, ProgressSpec, SeparatorSpec, StatusTone, SurfaceSpec, SurfaceTone, TextInputSpec,
 };
-use poodle_components::{AppHeaderSpec, ShellStatusBarSpec};
+use poodle_specs::{AppHeaderSpec, ShellStatusBarSpec};
 
 use crate::app_state::DemoScreen;
 use crate::style_bridge::color_to_hsla;

@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{HoverCardSpec, OverlayPlacement, EyebrowSpec};
+use poodle_specs::{HoverCardSpec, OverlayPlacement, EyebrowSpec};
 use poodle_gpui_components::{HoverCard, Eyebrow};
 use crate::style_bridge::color_to_hsla;
 

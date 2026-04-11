@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::PaginationSummarySpec;
-use poodle_components::EyebrowSpec;
+use poodle_specs::PaginationSummarySpec;
+use poodle_specs::EyebrowSpec;
 use poodle_gpui_components::{PaginationSummary, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

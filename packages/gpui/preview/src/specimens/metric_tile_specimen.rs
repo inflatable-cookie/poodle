@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::{MetricTileSpec, MetricTrend};
-use poodle_components::EyebrowSpec;
+use poodle_specs::{MetricTileSpec, MetricTrend};
+use poodle_specs::EyebrowSpec;
 use poodle_gpui_components::{Eyebrow, MetricTile};
 use poodle_gpui::GpuiThemeProvider;
 

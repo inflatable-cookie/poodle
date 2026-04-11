@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole};
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::number_input::js_number_input;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::NumberInputSpec;
+use poodle_specs::NumberInputSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

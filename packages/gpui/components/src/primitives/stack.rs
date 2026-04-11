@@ -4,7 +4,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{Alignment, LayoutJustify, PaddingScale, StackDirection, StackSpec};
+use poodle_specs::{Alignment, LayoutJustify, PaddingScale, StackDirection, StackSpec};
 
 use crate::theme_ext::resolve_px;
 

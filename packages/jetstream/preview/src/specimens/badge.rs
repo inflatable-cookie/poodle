@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::badge::js_badge;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{BadgeSpec, BadgeVariant};
+use poodle_specs::{BadgeSpec, BadgeVariant};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

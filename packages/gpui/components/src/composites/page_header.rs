@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{PageHeaderAlign, PageHeaderSpec};
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{PageHeaderAlign, PageHeaderSpec};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px};
@@ -89,7 +89,7 @@ impl PageHeader {
         self
     }
     pub fn back_is_contextual(mut self, v: bool) -> Self { self.spec.back_is_contextual = v; self }
-    pub fn banner(mut self, message: impl Into<String>, tone: poodle_components::StatusTone) -> Self {
+    pub fn banner(mut self, message: impl Into<String>, tone: poodle_specs::StatusTone) -> Self {
         self.spec.banner_message = Some(message.into());
         self.spec.banner_tone = tone;
         self

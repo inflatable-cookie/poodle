@@ -1,7 +1,7 @@
 //! MediaPreview — Jetstream media preview backed by MediaPreviewSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::MediaPreviewSpec;
+use poodle_specs::MediaPreviewSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};

@@ -8,7 +8,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{CardLayout, CardSpec};
+use poodle_specs::{CardLayout, CardSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

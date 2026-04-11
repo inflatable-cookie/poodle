@@ -7,8 +7,8 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{SidebarNavGroup, SidebarNavSpec};
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{SidebarNavGroup, SidebarNavSpec};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius, focus_ring_shadow};

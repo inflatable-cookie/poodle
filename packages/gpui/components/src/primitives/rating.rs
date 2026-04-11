@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, RatingSpec, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, RatingSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};

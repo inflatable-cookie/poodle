@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{TimeFieldSpec, EyebrowSpec};
+use poodle_specs::{TimeFieldSpec, EyebrowSpec};
 use poodle_gpui_components::{TimeField, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

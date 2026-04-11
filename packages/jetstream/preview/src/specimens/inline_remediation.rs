@@ -4,8 +4,8 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::inline_remediation::js_inline_remediation;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::{InlineRemediationSpec, RemediationAction};
-use poodle_components::StatusTone;
+use poodle_specs::{InlineRemediationSpec, RemediationAction};
+use poodle_specs::StatusTone;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

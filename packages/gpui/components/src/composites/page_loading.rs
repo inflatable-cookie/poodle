@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{PageLoadingPresentation, PageLoadingSpec};
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{PageLoadingPresentation, PageLoadingSpec};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};

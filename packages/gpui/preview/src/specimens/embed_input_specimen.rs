@@ -1,8 +1,8 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{EmbedInputSpec, ParsedEmbed};
+use poodle_specs::{EmbedInputSpec, ParsedEmbed};
 use poodle_gpui_components::{EmbedInput, Eyebrow, Field};
-use poodle_components::{EyebrowSpec, FieldSpec};
+use poodle_specs::{EyebrowSpec, FieldSpec};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;
 

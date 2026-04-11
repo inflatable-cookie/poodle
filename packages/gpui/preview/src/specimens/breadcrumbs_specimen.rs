@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_components::{BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec};
+use poodle_specs::{BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec};
 use poodle_gpui_components::{Breadcrumbs, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

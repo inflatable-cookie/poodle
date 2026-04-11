@@ -5,7 +5,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
+use poodle_specs::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 use crate::presentation::rem_to_px;

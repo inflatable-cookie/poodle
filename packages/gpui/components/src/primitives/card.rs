@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{CardLayout, CardSpec, CardVariant};
+use poodle_specs::{CardLayout, CardSpec, CardVariant};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Card {

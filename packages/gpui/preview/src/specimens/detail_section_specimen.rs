@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_components::DetailSectionSpec;
-use poodle_components::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_specs::DetailSectionSpec;
+use poodle_specs::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
 use poodle_gpui_components::{DetailItem, DetailSection, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

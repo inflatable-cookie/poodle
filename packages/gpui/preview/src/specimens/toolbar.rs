@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{
+use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, SeparatorSpec,
     SeparatorOrientation, RuleTone, ToolbarSpec,
 };

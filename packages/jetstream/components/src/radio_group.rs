@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::{Orientation, RadioGroupSpec};
+use poodle_specs::{Orientation, RadioGroupSpec};
 
 use crate::presentation::{
     control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem,

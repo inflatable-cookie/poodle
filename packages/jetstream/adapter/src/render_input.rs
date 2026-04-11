@@ -4,7 +4,7 @@
 //! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_components::{
+use poodle_specs::{
     CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec,
     TextInputSpec, TimeFieldSpec,
 };
@@ -156,7 +156,7 @@ impl RenderComponent<TimeFieldSpec> for JetstreamAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_components::*;
+    use poodle_specs::*;
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 

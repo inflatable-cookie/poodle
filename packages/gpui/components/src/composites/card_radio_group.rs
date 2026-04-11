@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::CardRadioGroupSpec;
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::CardRadioGroupSpec;
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 

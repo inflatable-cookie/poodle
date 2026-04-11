@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{Direction, EyebrowSpec, ScrollShellSpec};
+use poodle_specs::{Direction, EyebrowSpec, ScrollShellSpec};
 use poodle_gpui_components::{Eyebrow, ScrollShell};
 use crate::style_bridge::color_to_hsla;
 

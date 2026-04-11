@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::theme_ext::resolve_color;
 

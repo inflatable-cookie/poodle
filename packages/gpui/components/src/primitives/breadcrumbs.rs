@@ -5,7 +5,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_space_x_rem};
 use crate::theme_ext::resolve_color;

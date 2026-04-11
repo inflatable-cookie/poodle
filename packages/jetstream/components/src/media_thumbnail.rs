@@ -1,7 +1,7 @@
 //! MediaThumbnail — Jetstream media thumbnail backed by MediaThumbnailSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::MediaThumbnailSpec;
+use poodle_specs::MediaThumbnailSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};

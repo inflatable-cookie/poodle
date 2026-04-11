@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{ControlDensity, ControlSize, ProgressSpec, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, ProgressSpec, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color};

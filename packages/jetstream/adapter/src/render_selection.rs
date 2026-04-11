@@ -4,7 +4,7 @@
 //! RangeSliderSpec, SegmentedControlSpec, TriStateSwitchSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_components::{
+use poodle_specs::{
     CheckboxSpec, RadioGroupSpec, RangeSliderSpec, SegmentedControlSpec, SelectSpec, SliderSpec,
     SwitchSpec, TriStateSwitchSpec,
 };
@@ -107,7 +107,7 @@ impl RenderComponent<TriStateSwitchSpec> for JetstreamAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_components::*;
+    use poodle_specs::*;
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 

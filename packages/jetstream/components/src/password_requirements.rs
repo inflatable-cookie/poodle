@@ -8,7 +8,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::PasswordRequirementsSpec;
+use poodle_specs::PasswordRequirementsSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
@@ -193,7 +193,7 @@ fn build_requirement_item(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_components::PasswordRequirementsPolicy;
+    use poodle_specs::PasswordRequirementsPolicy;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

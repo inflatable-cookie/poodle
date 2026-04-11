@@ -3,7 +3,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec, RemediationAction};
+use poodle_specs::{MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec, RemediationAction};
 
 use crate::composites::MediaThumbnail;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -50,7 +50,7 @@ impl MediaPreview {
     pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
     pub fn metadata(mut self, v: Vec<String>) -> Self { self.spec.metadata = v; self }
     pub fn footer_actions(mut self, v: Vec<RemediationAction>) -> Self { self.spec.footer_actions = v; self }
-    pub fn aspect_ratio(mut self, v: poodle_components::AspectRatio) -> Self { self.spec.aspect_ratio = v; self }
+    pub fn aspect_ratio(mut self, v: poodle_specs::AspectRatio) -> Self { self.spec.aspect_ratio = v; self }
     pub fn badge(mut self, v: impl Into<String>) -> Self { self.spec.badge = Some(v.into()); self }
     pub fn thumbnail_meta(mut self, v: impl Into<String>) -> Self { self.spec.thumbnail_meta = Some(v.into()); self }
     pub fn state_title(mut self, v: impl Into<String>) -> Self { self.spec.state_title = Some(v.into()); self }

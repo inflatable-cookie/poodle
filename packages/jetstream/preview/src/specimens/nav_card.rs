@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::nav_card::js_nav_card;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::NavCardSpec;
+use poodle_specs::NavCardSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

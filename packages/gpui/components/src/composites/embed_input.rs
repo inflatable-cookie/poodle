@@ -3,8 +3,8 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::EmbedInputSpec;
-use poodle_components::{PillSize, PillSpec, PillTone};
+use poodle_specs::EmbedInputSpec;
+use poodle_specs::{PillSize, PillSpec, PillTone};
 use crate::primitives::Pill;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 

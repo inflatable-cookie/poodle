@@ -3,8 +3,8 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
-use poodle_components::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
+use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};

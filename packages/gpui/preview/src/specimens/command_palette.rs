@@ -1,8 +1,8 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{CommandPaletteSpec, CommandActionItem};
-use poodle_components::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use poodle_specs::{CommandPaletteSpec, CommandActionItem};
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use poodle_gpui_components::{CommandPalette, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

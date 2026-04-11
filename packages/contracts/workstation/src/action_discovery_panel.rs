@@ -1,4 +1,4 @@
-use poodle_components::StatusTone;
+use poodle_specs::StatusTone;
 use poodle_tokens::semantic;
 
 use crate::types::{ActionDiscoverySection, DiscoveryState};

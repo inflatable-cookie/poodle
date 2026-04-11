@@ -4,7 +4,7 @@
 //! `packages/svelte/primitives/src/presentation.ts` and ensure all GPUI
 //! components resolve size, density, and layout offsets identically.
 
-use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// Resolve a semantic size role against a base size to get the effective control size.
 ///

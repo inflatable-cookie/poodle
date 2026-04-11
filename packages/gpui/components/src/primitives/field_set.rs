@@ -3,7 +3,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::FieldSetSpec;
+use poodle_specs::FieldSetSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

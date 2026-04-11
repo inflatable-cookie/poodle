@@ -1,8 +1,8 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::ShellStatusBarSpec;
+use poodle_specs::ShellStatusBarSpec;
 use poodle_gpui_components::{StatusBar, Eyebrow};
-use poodle_components::{StatusIndicatorSpec, StatusTone, EyebrowSpec};
+use poodle_specs::{StatusIndicatorSpec, StatusTone, EyebrowSpec};
 use poodle_gpui_components::StatusIndicator;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::ShellStatusBarSpec;
+use poodle_specs::ShellStatusBarSpec;
 
 use crate::theme_ext::resolve_color;
 

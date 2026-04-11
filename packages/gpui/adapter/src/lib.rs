@@ -47,7 +47,7 @@ pub use style_map::{
 pub use theme::GpuiThemeProvider;
 
 use poodle_adapter::{AdapterManifest, RenderTarget};
-pub use poodle_components::FieldRelationships;
+pub use poodle_specs::FieldRelationships;
 
 /// Opaque handle to a rendered GPUI element.
 ///

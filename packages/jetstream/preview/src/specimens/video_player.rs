@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::video_player::js_video_player;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_components::VideoPlayerSpec;
+use poodle_specs::VideoPlayerSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

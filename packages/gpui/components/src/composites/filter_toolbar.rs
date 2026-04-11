@@ -9,8 +9,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::FilterToolbarSpec;
-use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::FilterToolbarSpec;
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use crate::primitives::Icon;
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};

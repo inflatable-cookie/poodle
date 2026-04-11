@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_components::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue, EyebrowSpec};
+use poodle_specs::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue, EyebrowSpec};
 use poodle_gpui_components::{Accordion, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;

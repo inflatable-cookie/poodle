@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::{CodeSpec, EyebrowSpec};
+use poodle_specs::{CodeSpec, EyebrowSpec};
 use poodle_gpui_components::{Code, Eyebrow};
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;

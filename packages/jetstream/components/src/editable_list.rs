@@ -1,7 +1,7 @@
 //! EditableList — Jetstream editable list backed by EditableListSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_components::EditableListSpec;
+use poodle_specs::EditableListSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
@@ -15,32 +15,32 @@ pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider)
 
     // Size-driven remove button size from contract
     let remove_size = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 1.0,
-        poodle_components::ControlSize::Sm => 1.125,
-        poodle_components::ControlSize::Md => 1.25,
-        poodle_components::ControlSize::Lg => 1.375,
-        poodle_components::ControlSize::Xl => 1.5,
+        poodle_specs::ControlSize::Xs => 1.0,
+        poodle_specs::ControlSize::Sm => 1.125,
+        poodle_specs::ControlSize::Md => 1.25,
+        poodle_specs::ControlSize::Lg => 1.375,
+        poodle_specs::ControlSize::Xl => 1.5,
     });
     let item_x = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.5,
-        poodle_components::ControlSize::Sm => 0.625,
-        poodle_components::ControlSize::Md => 0.625,
-        poodle_components::ControlSize::Lg => 0.75,
-        poodle_components::ControlSize::Xl => 0.875,
+        poodle_specs::ControlSize::Xs => 0.5,
+        poodle_specs::ControlSize::Sm => 0.625,
+        poodle_specs::ControlSize::Md => 0.625,
+        poodle_specs::ControlSize::Lg => 0.75,
+        poodle_specs::ControlSize::Xl => 0.875,
     });
     let add_x = rem_to_px(match effective_size {
-        poodle_components::ControlSize::Xs => 0.625,
-        poodle_components::ControlSize::Sm => 0.75,
-        poodle_components::ControlSize::Md => 0.75,
-        poodle_components::ControlSize::Lg => 0.875,
-        poodle_components::ControlSize::Xl => 1.0,
+        poodle_specs::ControlSize::Xs => 0.625,
+        poodle_specs::ControlSize::Sm => 0.75,
+        poodle_specs::ControlSize::Md => 0.75,
+        poodle_specs::ControlSize::Lg => 0.875,
+        poodle_specs::ControlSize::Xl => 1.0,
     });
 
     // Density-driven spacing from contract
     let (list_gap, static_gap, item_y, add_gap) = match spec.density {
-        poodle_components::ControlDensity::Compact => (0.375, 0.0625, 0.375, 0.25),
-        poodle_components::ControlDensity::Default => (0.5, 0.125, 0.5, 0.375),
-        poodle_components::ControlDensity::Comfortable => (0.625, 0.1875, 0.625, 0.5),
+        poodle_specs::ControlDensity::Compact => (0.375, 0.0625, 0.375, 0.25),
+        poodle_specs::ControlDensity::Default => (0.5, 0.125, 0.5, 0.375),
+        poodle_specs::ControlDensity::Comfortable => (0.625, 0.1875, 0.625, 0.5),
     };
 
     let input_fill = resolve_color(theme, spec.input_fill_token());

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_components::DetailSectionSpec;
+use poodle_specs::DetailSectionSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px};
 
