@@ -8,7 +8,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::ConfirmActionSpec;
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct ConfirmAction {
     spec: ConfirmActionSpec,
@@ -124,7 +124,8 @@ impl IntoElement for ConfirmAction {
                 },
             ]);
 
-        dialog = dialog.child(div().text_size(px(18.0)).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
+        let heading_size = resolve_px(theme, "typography.heading.size");
+        dialog = dialog.child(div().text_size(heading_size).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
         dialog = dialog.child(div().text_size(body_size).text_color(msg_color).child(spec.message.clone()));
 
         // Optional body content slot (matches Svelte default slot)
@@ -134,13 +135,15 @@ impl IntoElement for ConfirmAction {
 
         let control_radius = resolve_radius(theme, "radius.control");
         let hover_fill = resolve_color(theme, "color.background.elevated");
+        let btn_gap_lg = resolve_px(theme, "space.inline.lg");
+        let btn_gap_sm = resolve_px(theme, "space.inline.sm");
 
         let mut cancel_btn = div()
             .id("poodle-confirm-cancel")
             .text_size(body_size)
             .text_color(title_color)
             .cursor_pointer()
-            .px(px(12.0)).py(px(6.0))
+            .px(btn_gap_lg).py(btn_gap_sm)
             .rounded(control_radius)
             .hover(move |s| s.bg(hover_fill))
             .child(spec.cancel_label.clone());
@@ -157,7 +160,7 @@ impl IntoElement for ConfirmAction {
             .text_color(gpui::white())
             .bg(confirm_fill)
             .rounded(control_radius)
-            .px(px(12.0)).py(px(6.0))
+            .px(btn_gap_lg).py(btn_gap_sm)
             .cursor_pointer()
             .font_weight(FontWeight::MEDIUM)
             .child(spec.confirm_label.clone());

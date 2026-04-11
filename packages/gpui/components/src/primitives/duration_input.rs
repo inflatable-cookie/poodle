@@ -70,6 +70,8 @@ impl IntoElement for DurationInput {
         let control_padding_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let control_radius = resolve_radius(theme, spec.radius_token());
         let body_size = resolve_px(theme, spec.body_size_token());
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let radius_sm = resolve_radius(theme, "radius.control");
 
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, spec.fill_token());
@@ -118,12 +120,12 @@ impl IntoElement for DurationInput {
                 .items_center()
                 .gap(px(2.0)) // 0.125rem
                 .p(px(2.0))
-                .rounded(px(3.0)) // 0.1875rem
+                .rounded(radius_sm)
                 .child(
-                    // Label: 0.5625rem, uppercase, secondary, line-height 1
+                    // Label: caption-size (≈11px), uppercase, secondary, line-height 1
                     div()
-                        .text_size(px(9.0)) // 0.5625rem
-                        .line_height(px(9.0))
+                        .text_size(caption_size)
+                        .line_height(caption_size)
                         .text_color(text_secondary)
                         .child(label.to_string()),
                 )

@@ -47,8 +47,10 @@ impl IntoElement for VideoPlayer {
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let overlay = resolve_color(&self.theme, self.spec.overlay_fill_token());
         let radius = resolve_radius(&self.theme, "radius.surface");
+        let radius_control = resolve_radius(&self.theme, "radius.control");
         let border_color = resolve_color(&self.theme, "color.border.default");
         let text_color = resolve_color(&self.theme, "color.text.inverse");
+        let label_size = crate::theme_ext::resolve_px(&self.theme, "typography.label.size");
 
         // ── Big centered play/pause overlay button ──────────────────────
         let big_play_icon_name = if self.spec.is_playing { "pause" } else { "play" };
@@ -139,7 +141,7 @@ impl IntoElement for VideoPlayer {
             div()
                 .cursor_pointer()
                 .w(px(28.0)).h(px(28.0))
-                .rounded(px(4.0))
+                .rounded(radius_control)
                 .flex().items_center().justify_center()
                 .hover(|s| s.bg(text_color.opacity(0.15)))
                 .child(child)
@@ -150,7 +152,7 @@ impl IntoElement for VideoPlayer {
             .flex().flex_row().items_center().gap(px(8.0)).flex_grow()
             .child(ctrl_btn(play_icon.into_any_element()))
             .child(track_bar)
-            .child(div().text_size(px(12.0)).text_color(text_color).child(time));
+            .child(div().text_size(label_size).text_color(text_color).child(time));
 
         // Right group: mute + fullscreen + captions
         let mut right_group = div()
