@@ -1,7 +1,21 @@
+export type ComponentTag =
+  | "control"
+  | "input"
+  | "layout"
+  | "display"
+  | "overlay"
+  | "navigation"
+  | "data"
+  | "media"
+  | "feedback"
+  | "form"
+  | "workstation";
+
 export type ComponentEntry = {
   slug: string;
   displayName: string;
   packageName: string;
+  tag: ComponentTag;
   description: string;
   hasSpecimen: boolean;
 };
@@ -14,6 +28,7 @@ function slug(name: string): string {
 
 function entry(
   displayName: string,
+  tag: ComponentTag,
   description: string,
   hasSpecimen = false,
 ): ComponentEntry {
@@ -21,132 +36,192 @@ function entry(
     slug: slug(displayName),
     displayName,
     packageName: "@poodle/svelte",
+    tag,
     description,
     hasSpecimen,
   };
 }
 
 export const allComponents: ComponentEntry[] = [
-  entry("Accordion", "Expandable disclosure panels with single or multiple selection.", true),
-  entry("ActionDiscoveryPanel", "Grouped action list with keyboard navigation, shortcuts, and badges.", true),
-  entry("AlertDialog", "Focused confirmation modal for destructive or dangerous actions.", true),
-  entry("AppHeader", "Top-level application header with branding and global actions.", true),
-  entry("AudioPlayer", "Audio playback with transport controls, volume, and speed.", true),
-  entry("BlockEditor", "Block-based content editor shell with pluggable block types.", true),
-  entry("Box", "Generic layout container with configurable padding and alignment.", true),
-  entry("Breadcrumbs", "Hierarchical navigation trail showing current location.", true),
-  entry("BulkActionBar", "Action bar for batch operations on selected items.", true),
-  entry("Button", "Primary interactive control for triggering actions.", true),
-  entry("Calendar", "Date grid for picking a single date or a date range via mode prop.", true),
-  entry("Callout", "Informational block with tone, optional dismissal, actions, and ARIA announcements.", true),
-  entry("Card", "Contained surface for grouped content with optional header and actions.", true),
-  entry("CardRadioGroup", "Radio selection across rich card options with keyboard navigation.", true),
-  entry("Checkbox", "Boolean toggle with label, supporting indeterminate state.", true),
-  entry("Code", "Syntax-highlighted code display with copy button and line numbers.", true),
-  entry("CodeInput", "Code entry with visual digit slots, mask mode, and Field integration.", true),
-  entry("CollapseToggle", "Directional chevron toggle for collapsing/expanding regions.", true),
-  entry("Collapsible", "Show/hide content toggle without accordion grouping.", true),
-  entry("ColorPicker", "Color selection with native picker, hex input, and swatches.", true),
-  entry("CommandPalette", "Keyboard-driven command search and execution overlay.", true),
-  entry("ConfirmAction", "Trigger element with confirmation prompt before executing dangerous actions.", true),
-  entry("ContextMenu", "Right-click triggered menu overlay.", true),
-  entry("DataTable", "Feature-rich table with sorting, selection, and pagination.", true),
-  entry("DatePicker", "Date selection with calendar popup.", true),
-  entry("DateRangePicker", "Start and end date selection with dual calendar.", true),
-  entry("DateTimePicker", "Combined date and time selection.", true),
-  entry("DateTimeRangePicker", "Start/end date-time range selection.", true),
-  entry("DateTimeZonePicker", "Date-time picker with timezone awareness.", true),
-  entry("DetailItem", "Label-value pair for metadata display.", true),
-  entry("DetailSection", "Titled section for grouping detail content.", true),
-  entry("DetailShell", "Full detail page layout with header, sections, and sidebar.", true),
-  entry("Dialog", "Modal overlay for confirmations, forms, or alerts.", true),
-  entry("DockRegion", "Collapsible dock container for panels with tabs, collapse, and drag-and-drop.", true),
-  entry("Drawer", "Slide-out panel from a screen edge.", true),
-  entry("DurationInput", "Segmented hours/minutes/seconds duration entry.", true),
-  entry("EditableLabel", "Inline text that becomes editable on interaction.", true),
-  entry("EditableList", "Unified editable/reorderable list with add, remove, drag-and-drop, workflow chrome, and windowing.", true),
-  entry("EmbedInput", "URL or embed code input with provider detection and parsing.", true),
-  entry("EmbedPreview", "Rich preview card for embedded content with aspect ratio and loading states.", true),
-  entry("EmptyState", "Placeholder for empty data views with messaging and actions.", true),
-  entry("Eyebrow", "Small uppercase label used for section categorization.", true),
-  entry("Field", "Form field wrapper with label, help text, hint, and validation.", true),
-  entry("FieldSet", "Semantic fieldset grouping with legend and grid layout for related form fields.", true),
-  entry("FileUpload", "File input with drag-and-drop, type filtering, and upload progress.", true),
-  entry("FilterToolbar", "Toolbar with filter controls for data views.", true),
-  entry("FormActions", "Action row for form submit, cancel, and secondary actions.", true),
-  entry("FormDialog", "Modal dialog with embedded form, validation, and submit/cancel actions.", true),
-  entry("FormLayout", "Responsive form grid with error messaging and field layout.", true),
-  entry("Grid", "CSS Grid layout container.", true),
-  entry("HoverCard", "Rich preview card triggered by hover or focus.", true),
-  entry("Icon", "SVG icon accepting direct node data or string names.", true),
-  entry("IconButton", "Button variant displaying only an icon.", true),
-  entry("IconProvider", "Context provider that supplies a bulk icon set for string-based icon lookups.", true),
-  entry("ListCard", "Structured list item card with leading/trailing slots.", true),
-  entry("ListContainer", "List-page shell with header, filters, batch actions, and pagination.", true),
-  entry("LogList", "Operational log viewer and audit activity list with filtering.", true),
-  entry("MarkdownEditor", "Markdown authoring with formatting toolbar and live preview.", true),
-  entry("MediaBrowsePanel", "Browsable media grid with search, pagination, and upload.", true),
-  entry("MediaPicker", "Dialog for browsing and selecting media assets with upload.", true),
-  entry("MediaPreview", "Media asset preview with metadata and fallback.", true),
-  entry("MediaThumbnail", "Compact media thumbnail with overlay metadata.", true),
-  entry("MediaUploadStatusPanel", "Upload progress panel with file status and actions.", true),
-  entry("Menu", "Dropdown menu with items, separators, and keyboard navigation.", true),
-  entry("Menubar", "Horizontal menu bar with dropdown sub-menus.", true),
-  entry("MetaBar", "Inline metadata ribbon for compact header facts and status context.", true),
-  entry("MetaItem", "Compact labeled metadata item for use inside inline ribbons.", true),
-  entry("Meter", "Visual gauge for scalar values within a known range.", true),
-  entry("MetricTile", "Compact label-value tile for metrics and KPIs.", true),
-  entry("NavCard", "Navigation-oriented card link with icon, badge, and arrow.", true),
-  entry("NavigationMenu", "Horizontal navigation with dropdown sub-menus.", true),
-  entry("NumberInput", "Numeric input with optional steppers.", true),
-  entry("OrderBy", "Sort-control toolbar for data views with direction toggle.", true),
-  entry("PageHeader", "Page-level header with title, actions, and breadcrumbs.", true),
-  entry("PageLoading", "Full-viewport loading overlay with spinner, progress, and cancel.", true),
-  entry("Pagination", "Page navigation controls for paged data sets.", true),
-  entry("PaginationSummary", "Textual summary of pagination state.", true),
-  entry("PasswordRequirements", "UI-only password-policy checklist driven by caller-supplied requirements.", true),
-  entry("PickerShell", "Container for search-and-select picker workflows.", true),
-  entry("Pill", "Small inline label chip with tone and size variants.", true),
-  entry("Popover", "Anchored overlay for contextual content.", true),
-  entry("Progress", "Determinate or indeterminate progress indicator.", true),
-  entry("RadioGroup", "Single-selection option group.", true),
-  entry("RangeSlider", "Dual-thumb slider for selecting a numeric range.", true),
-  entry("Rating", "Star-based rating input or display.", true),
-  entry("Region", "Dashed placeholder block for designating layout areas.", true),
-  entry("RelationPicker", "Searchable picker for selecting related items.", true),
-  entry("ResizeHandle", "Drag and keyboard resize handle for split layouts.", true),
-  entry("ScrollShell", "Scrollable container with overflow management.", true),
-  entry("SegmentedControl", "Inline toggle between mutually exclusive options.", true),
-  entry("Select", "Dropdown selection from a list of options.", true),
-  entry("SelectionSummary", "Summary display of current selection state.", true),
-  entry("Separator", "Visual divider between content sections.", true),
-  entry("SidebarNav", "Grouped sidebar navigation list with active item state.", true),
-  entry("Skeleton", "Placeholder loading shape for content.", true),
-  entry("Slider", "Single-thumb slider for selecting a numeric value.", true),
-  entry("Spacer", "Flexible space for pushing layout elements apart.", true),
-  entry("Spinner", "Animated loading indicator with ring and CLI-grid variants.", true),
-  entry("SplitButton", "Button with primary action and dropdown menu of secondary actions.", true),
-  entry("SplitView", "Resizable split pane layout with collapse toggles and drag-to-collapse.", true),
-  entry("Stack", "Vertical flex layout container.", true),
-  entry("StatusBar", "Bottom status bar with leading and trailing slots.", true),
-  entry("StatusIndicator", "Colored dot or icon indicating status.", true),
-  entry("Surface", "Themed container with background, border, and padding variants.", true),
-  entry("Switch", "Toggle switch for on/off states.", true),
-  entry("Table", "Static data table with headers, rows, and alignment.", true),
-  entry("Tabs", "Tabbed interface with underline, card, pill, and strip variants.", true),
-  entry("TextInput", "Single or multi-line text input with search, slug, and multiline modes.", true),
-  entry("TimeAgo", "Live-updating relative timestamp display.", true),
-  entry("TimeInput", "Time-of-day input with hour/minute selection.", true),
-  entry("TimeZoneSelect", "Timezone selection dropdown.", true),
-  entry("ToastHost", "Store-aware toast host that applies timer policy and fixed viewport layout.", true),
-  entry("ToastStack", "Stacked transient notification manager.", true),
-  entry("ToggleGroup", "Group of mutually exclusive toggle buttons.", true),
-  entry("Toolbar", "Horizontal action bar with grouped controls.", true),
-  entry("Tooltip", "Hover/focus-triggered informational overlay.", true),
-  entry("TriStateSwitch", "Three-position switch for on/off/indeterminate.", true),
-  entry("VideoPlayer", "Video playback with overlay controls, fullscreen, and captions.", true),
+  // Control
+  entry("Button", "control", "Primary interactive control for triggering actions.", true),
+  entry("IconButton", "control", "Button variant displaying only an icon.", true),
+  entry("SplitButton", "control", "Button with primary action and dropdown menu.", true),
+  entry("Checkbox", "control", "Boolean toggle with label, supporting indeterminate state.", true),
+  entry("Switch", "control", "Toggle switch for on/off states.", true),
+  entry("TriStateSwitch", "control", "Three-position switch for on/off/indeterminate.", true),
+  entry("RadioGroup", "control", "Single-selection option group.", true),
+  entry("SegmentedControl", "control", "Inline toggle between mutually exclusive options.", true),
+  entry("ToggleGroup", "control", "Group of mutually exclusive toggle buttons.", true),
+  entry("CollapseToggle", "control", "Directional chevron toggle for collapsing/expanding regions.", true),
+
+  // Input
+  entry("TextInput", "input", "Single or multi-line text input with search, slug, and multiline modes.", true),
+  entry("NumberInput", "input", "Numeric input with optional steppers.", true),
+  entry("Select", "input", "Dropdown selection from a list of options.", true),
+  entry("ColorPicker", "input", "Color selection with native picker, hex input, and swatches.", true),
+  entry("DatePicker", "input", "Date selection with calendar popup.", true),
+  entry("DateRangePicker", "input", "Start and end date selection with dual calendar.", true),
+  entry("DateTimePicker", "input", "Combined date and time selection.", true),
+  entry("DateTimeRangePicker", "input", "Start/end date-time range selection.", true),
+  entry("DateTimeZonePicker", "input", "Date-time picker with timezone awareness.", true),
+  entry("TimeInput", "input", "Time-of-day input with hour/minute selection.", true),
+  entry("TimeZoneSelect", "input", "Timezone selection dropdown.", true),
+  entry("DurationInput", "input", "Segmented hours/minutes/seconds duration entry.", true),
+  entry("Calendar", "input", "Date grid for picking a single date or a date range.", true),
+  entry("CodeInput", "input", "Code entry with visual digit slots and mask mode.", true),
+  entry("EditableLabel", "input", "Inline text that becomes editable on interaction.", true),
+  entry("Slider", "input", "Single-thumb slider for selecting a numeric value.", true),
+  entry("RangeSlider", "input", "Dual-thumb slider for selecting a numeric range.", true),
+  entry("Rating", "input", "Star-based rating input or display.", true),
+  entry("FileUpload", "input", "File input with drag-and-drop, type filtering, and upload progress.", true),
+  entry("EmbedInput", "input", "URL or embed code input with provider detection and parsing.", true),
+
+  // Layout
+  entry("Box", "layout", "Generic layout container with configurable padding and alignment.", true),
+  entry("Grid", "layout", "CSS Grid layout container.", true),
+  entry("Stack", "layout", "Vertical flex layout container.", true),
+  entry("Spacer", "layout", "Flexible space for pushing layout elements apart.", true),
+  entry("Separator", "layout", "Visual divider between content sections.", true),
+  entry("Surface", "layout", "Themed container with background, border, and padding variants.", true),
+  entry("Region", "layout", "Dashed placeholder block for designating layout areas.", true),
+  entry("ScrollShell", "layout", "Scrollable container with overflow management.", true),
+  entry("SplitView", "layout", "Resizable split pane layout with collapse toggles.", true),
+  entry("ResizeHandle", "layout", "Drag and keyboard resize handle for split layouts.", true),
+
+  // Display
+  entry("Eyebrow", "display", "Small uppercase label used for section categorization.", true),
+  entry("Pill", "display", "Small inline label chip with tone and size variants.", true),
+  entry("StatusIndicator", "display", "Colored dot or icon indicating status.", true),
+  entry("Icon", "display", "SVG icon accepting direct node data or string names.", true),
+  entry("IconProvider", "display", "Context provider for bulk icon set lookups.", true),
+  entry("Skeleton", "display", "Placeholder loading shape for content.", true),
+  entry("Spinner", "display", "Animated loading indicator with ring and grid variants.", true),
+  entry("Code", "display", "Syntax-highlighted code display with copy button.", true),
+  entry("TimeAgo", "display", "Live-updating relative timestamp display.", true),
+  entry("MetricTile", "display", "Compact label-value tile for metrics and KPIs.", true),
+  entry("DetailItem", "display", "Label-value pair for metadata display.", true),
+  entry("MetaBar", "display", "Inline metadata ribbon for compact header facts.", true),
+  entry("MetaItem", "display", "Compact labeled metadata item for inline ribbons.", true),
+  entry("EmbedPreview", "display", "Rich preview card for embedded content.", true),
+
+  // Overlay
+  entry("Dialog", "overlay", "Modal overlay for confirmations, forms, or alerts.", true),
+  entry("AlertDialog", "overlay", "Focused confirmation modal for destructive actions.", true),
+  entry("Drawer", "overlay", "Slide-out panel from a screen edge.", true),
+  entry("Popover", "overlay", "Anchored overlay for contextual content.", true),
+  entry("HoverCard", "overlay", "Rich preview card triggered by hover or focus.", true),
+  entry("Tooltip", "overlay", "Hover/focus-triggered informational overlay.", true),
+  entry("Menu", "overlay", "Dropdown menu with items, separators, and keyboard navigation.", true),
+  entry("ContextMenu", "overlay", "Right-click triggered menu overlay.", true),
+  entry("Menubar", "overlay", "Horizontal menu bar with dropdown sub-menus.", true),
+  entry("ConfirmAction", "overlay", "Trigger with confirmation prompt before executing.", true),
+  entry("FormDialog", "overlay", "Modal dialog with embedded form and submit/cancel.", true),
+  entry("CommandPalette", "overlay", "Keyboard-driven command search and execution overlay.", true),
+
+  // Navigation
+  entry("Tabs", "navigation", "Tabbed interface with underline, card, pill, and strip variants.", true),
+  entry("Breadcrumbs", "navigation", "Hierarchical navigation trail showing current location.", true),
+  entry("Pagination", "navigation", "Page navigation controls for paged data sets.", true),
+  entry("PaginationSummary", "navigation", "Textual summary of pagination state.", true),
+  entry("NavigationMenu", "navigation", "Horizontal navigation with dropdown sub-menus.", true),
+  entry("SidebarNav", "navigation", "Grouped sidebar navigation list with active item state.", true),
+  entry("NavCard", "navigation", "Navigation-oriented card link with icon, badge, and arrow.", true),
+
+  // Data
+  entry("Table", "data", "Static data table with headers, rows, and alignment.", true),
+  entry("DataTable", "data", "Feature-rich table with sorting, selection, and pagination.", true),
+  entry("ListCard", "data", "Structured list item card with leading/trailing slots.", true),
+  entry("ListContainer", "data", "List-page shell with header, filters, and pagination.", true),
+  entry("EditableList", "data", "Editable/reorderable list with add, remove, and drag-and-drop.", true),
+  entry("Card", "data", "Contained surface for grouped content.", true),
+  entry("CardRadioGroup", "data", "Radio selection across rich card options.", true),
+  entry("Accordion", "data", "Expandable disclosure panels with single or multiple selection.", true),
+  entry("Collapsible", "data", "Show/hide content toggle without accordion grouping.", true),
+  entry("OrderBy", "data", "Sort-control toolbar for data views.", true),
+  entry("SelectionSummary", "data", "Summary display of current selection state.", true),
+  entry("FilterToolbar", "data", "Toolbar with filter controls for data views.", true),
+  entry("LogList", "data", "Operational log viewer and audit activity list.", true),
+  entry("RelationPicker", "data", "Searchable picker for selecting related items.", true),
+  entry("PickerShell", "data", "Container for search-and-select picker workflows.", true),
+
+  // Media
+  entry("AudioPlayer", "media", "Audio playback with transport controls, volume, and speed.", true),
+  entry("VideoPlayer", "media", "Video playback with overlay controls and fullscreen.", true),
+  entry("MediaPicker", "media", "Dialog for browsing and selecting media assets.", true),
+  entry("MediaBrowsePanel", "media", "Browsable media grid with search and pagination.", true),
+  entry("MediaPreview", "media", "Media asset preview with metadata and fallback.", true),
+  entry("MediaThumbnail", "media", "Compact media thumbnail with overlay metadata.", true),
+  entry("MediaUploadStatusPanel", "media", "Upload progress panel with file status.", true),
+
+  // Feedback
+  entry("Callout", "feedback", "Informational block with tone and optional actions.", true),
+  entry("Progress", "feedback", "Determinate or indeterminate progress indicator.", true),
+  entry("Meter", "feedback", "Visual gauge for scalar values within a known range.", true),
+  entry("EmptyState", "feedback", "Placeholder for empty data views with messaging.", true),
+  entry("PageLoading", "feedback", "Full-viewport loading overlay with spinner.", true),
+  entry("ToastStack", "feedback", "Stacked transient notification manager.", true),
+  entry("ToastHost", "feedback", "Store-aware toast host with timer policy.", true),
+  entry("BulkActionBar", "feedback", "Action bar for batch operations on selected items.", true),
+  entry("PasswordRequirements", "feedback", "Password-policy checklist driven by caller rules.", true),
+
+  // Form
+  entry("Field", "form", "Form field wrapper with label, help text, and validation.", true),
+  entry("FieldSet", "form", "Semantic fieldset with legend and grid layout.", true),
+  entry("FormActions", "form", "Action row for form submit, cancel, and secondary actions.", true),
+  entry("FormLayout", "form", "Responsive form grid with error messaging.", true),
+  entry("BlockEditor", "form", "Block-based content editor shell with pluggable types.", true),
+  entry("MarkdownEditor", "form", "Markdown authoring with formatting toolbar and preview.", true),
+
+  // Workstation
+  entry("AppHeader", "workstation", "Top-level application header with branding and actions.", true),
+  entry("PageHeader", "workstation", "Page-level header with title, actions, and breadcrumbs.", true),
+  entry("StatusBar", "workstation", "Bottom status bar with leading and trailing slots.", true),
+  entry("DockRegion", "workstation", "Collapsible dock container with tabs and drag-and-drop.", true),
+  entry("Toolbar", "workstation", "Horizontal action bar with grouped controls.", true),
+  entry("ActionDiscoveryPanel", "workstation", "Grouped action list with keyboard navigation.", true),
+  entry("DetailSection", "workstation", "Titled section for grouping detail content.", true),
+  entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+export const tagLabels: Record<ComponentTag, string> = {
+  control: "Controls",
+  input: "Inputs",
+  layout: "Layout",
+  display: "Display",
+  overlay: "Overlays",
+  navigation: "Navigation",
+  data: "Data",
+  media: "Media",
+  feedback: "Feedback",
+  form: "Form",
+  workstation: "Workstation",
+};
+
+export const tagOrder: ComponentTag[] = [
+  "control",
+  "input",
+  "layout",
+  "display",
+  "overlay",
+  "navigation",
+  "data",
+  "media",
+  "feedback",
+  "form",
+  "workstation",
+];
 
 export function findComponent(slug: string): ComponentEntry | undefined {
   return allComponents.find((c) => c.slug === slug);
+}
+
+export function componentsByTag(): { tag: ComponentTag; label: string; items: ComponentEntry[] }[] {
+  return tagOrder
+    .map((tag) => ({
+      tag,
+      label: tagLabels[tag],
+      items: allComponents.filter((c) => c.tag === tag),
+    }))
+    .filter((group) => group.items.length > 0);
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { SidebarNav } from "@poodle/svelte";
-  import { allComponents, findComponent } from "../component-registry";
+  import { allComponents, componentsByTag, findComponent } from "../component-registry";
   import CatalogueLanding from "../pages/CatalogueLanding.svelte";
   import ComponentPage from "../pages/ComponentPage.svelte";
   import { specimenMap } from "../specimens/registry";
@@ -9,14 +9,15 @@
 
   $: entry = activeComponent ? findComponent(activeComponent) : undefined;
   $: specimen = entry?.slug ? specimenMap[entry.slug] ?? null : null;
-  $: navGroups = [{
-    id: "components",
-    items: allComponents.map((component) => ({
+  $: navGroups = componentsByTag().map((group) => ({
+    id: group.tag,
+    label: group.label,
+    items: group.items.map((component) => ({
       value: component.slug,
       label: component.displayName,
       href: `#components/${component.slug}`,
     })),
-  }];
+  }));
 </script>
 
 <div class="catalogue-layout">
