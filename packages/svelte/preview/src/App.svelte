@@ -44,9 +44,7 @@
   let density: DensityName = "compact";
   let controlSize: ControlSizeName = "sm";
   let appearanceTreatment: AppearanceTreatmentName = "system";
-  let disabled = false;
-  let invalid = true;
-  let busy = false;
+  let componentSearch = "";
   let route: Route = { section: "components" };
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = {};
   let previewModeKey = "";
@@ -158,23 +156,24 @@
       {density}
       {controlSize}
       {appearanceTreatment}
-      {disabled}
-      {invalid}
-      {busy}
+      search={componentSearch}
       onThemeChange={(value) => (theme = value as ThemeName)}
       onDensityChange={(value) => (density = value as DensityName)}
       onControlSizeChange={(value) => (controlSize = value as ControlSizeName)}
       onAppearanceTreatmentChange={(value) => (appearanceTreatment = value as AppearanceTreatmentName)}
-      onDisabledChange={(checked) => (disabled = checked)}
-      onInvalidChange={(checked) => (invalid = checked)}
-      onBusyChange={(checked) => (busy = checked)}
+      onSearchChange={(value) => {
+        componentSearch = value;
+        if (activeSection !== "components") {
+          navigateToSection("components");
+        }
+      }}
     />
 
     <main class="app-main">
       {#key `${theme}:${activeSection}`}
         <IconProvider icons={iconNodes as unknown as IconSet}>
           {#if activeSection === "components"}
-            <ComponentsSection activeComponent={route.component} />
+            <ComponentsSection activeComponent={route.component} search={componentSearch} />
           {:else if activeSection === "tokens"}
             <TokensSection {liveTokenValues} />
           {:else if activeSection === "treatments"}

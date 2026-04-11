@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
-    Checkbox,
     Eyebrow,
+    TextInput,
     ToggleGroup,
     type ToggleGroupOption,
   } from "@poodle/svelte";
@@ -15,16 +15,12 @@
   export let density: string;
   export let controlSize: string;
   export let appearanceTreatment: string = "system";
-  export let disabled = false;
-  export let invalid = true;
-  export let busy = false;
+  export let search: string = "";
   export let onThemeChange: (value: string) => void = () => {};
   export let onDensityChange: (value: string) => void = () => {};
   export let onControlSizeChange: (value: string) => void = () => {};
   export let onAppearanceTreatmentChange: (value: string) => void = () => {};
-  export let onDisabledChange: (checked: boolean) => void = () => {};
-  export let onInvalidChange: (checked: boolean) => void = () => {};
-  export let onBusyChange: (checked: boolean) => void = () => {};
+  export let onSearchChange: (value: string) => void = () => {};
 
   type ThemeName = keyof typeof themes;
   type DensityName = keyof typeof densityModes;
@@ -91,25 +87,16 @@
     />
   </div>
 
-  <div class="display-controls__group">
-    <Eyebrow>State probes</Eyebrow>
-    <div class="display-controls__probes">
-      <Checkbox
-        checked={disabled}
-        label="Disabled"
-        on:checkedChange={(event) => onDisabledChange(event.detail.checked)}
-      />
-      <Checkbox
-        checked={invalid}
-        label="Invalid"
-        on:checkedChange={(event) => onInvalidChange(event.detail.checked)}
-      />
-      <Checkbox
-        checked={busy}
-        label="Busy"
-        on:checkedChange={(event) => onBusyChange(event.detail.checked)}
-      />
-    </div>
+  <div class="display-controls__group display-controls__group--search">
+    <Eyebrow>Search</Eyebrow>
+    <TextInput
+      type="search"
+      placeholder="Find component..."
+      value={search}
+      ariaLabel="Search components"
+      on:valueChange={(event) => onSearchChange(event.detail.value)}
+      on:clear={() => onSearchChange("")}
+    />
   </div>
 </div>
 
@@ -130,9 +117,8 @@
     gap: 0.375rem;
   }
 
-  .display-controls__probes {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  .display-controls__group--search {
+    flex: 1;
+    min-width: 10rem;
   }
 </style>

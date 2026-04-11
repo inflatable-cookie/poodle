@@ -1,11 +1,12 @@
 <script lang="ts">
   import { SidebarNav } from "@poodle/svelte";
-  import { allComponents, componentsByTag, findComponent } from "../component-registry";
+  import { allComponents, componentsByTag, findComponent, type ComponentEntry } from "../component-registry";
   import CatalogueLanding from "../pages/CatalogueLanding.svelte";
   import ComponentPage from "../pages/ComponentPage.svelte";
   import { specimenMap } from "../specimens/registry";
 
   export let activeComponent: string | undefined = undefined;
+  export let search: string = "";
 
   let contentElement: HTMLDivElement;
 
@@ -14,15 +15,25 @@
     contentElement.scrollTop = 0;
   }
   $: specimen = entry?.slug ? specimenMap[entry.slug] ?? null : null;
-  $: navGroups = componentsByTag().map((group) => ({
-    id: group.tag,
-    label: group.label,
-    items: group.items.map((component) => ({
-      value: component.slug,
-      label: component.displayName,
-      href: `#components/${component.slug}`,
-    })),
-  }));
+
+  $: searchLower = search.trim().toLowerCase();
+  $: filteredComponents = searchLower
+    ? allComponents.filter((c) => c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower))
+    : allComponents;
+
+  $: navGroups = componentsByTag()
+    .map((group) => ({
+      id: group.tag,
+      label: group.label,
+      items: group.items
+        .filter((c) => !searchLower || c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower))
+        .map((component) => ({
+          value: component.slug,
+          label: component.displayName,
+          href: `#components/${component.slug}`,
+        })),
+    }))
+    .filter((group) => group.items.length > 0);
 </script>
 
 <div class="catalogue-layout">
@@ -38,7 +49,7 @@
     {#if entry}
       <ComponentPage {entry} specimenComponent={specimen} />
     {:else}
-      <CatalogueLanding components={allComponents} />
+      <CatalogueLanding components={filteredComponents} />
     {/if}
   </div>
 </div>
