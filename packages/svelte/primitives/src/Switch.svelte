@@ -252,7 +252,7 @@
   }
 
   .switch[data-size="xs"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--switch-unit) * 0.875));
+    transform: translateX(0.5rem);
   }
 
   .switch[data-size="sm"] { --switch-unit: var(--poodle-size-icon-sm); }
@@ -268,7 +268,7 @@
   }
 
   .switch[data-size="sm"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--switch-unit) - 0.0625rem));
+    transform: translateX(0.53125rem);
   }
 
   .switch[data-size="lg"] { --switch-unit: var(--poodle-size-icon-lg); }
@@ -300,7 +300,7 @@
   }
 
   .switch[data-size="xl"] .switch__control:checked ~ .switch__track .switch__thumb {
-    transform: translateX(calc(var(--switch-unit) + 0.125rem));
+    transform: translateX(1.875rem);
   }
 
   /* Label size variants */
