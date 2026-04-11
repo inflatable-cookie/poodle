@@ -60,6 +60,7 @@
     <RadioGroup
       options={planOptions}
       defaultValue="pro"
+      orientation="horizontal"
       {size}
       ariaLabel={"Plan at " + size}
     />
@@ -69,6 +70,7 @@
     <RadioGroup
       options={planOptions}
       defaultValue="pro"
+      orientation="horizontal"
       {density}
       ariaLabel={"Plan at " + density + " density"}
     />
