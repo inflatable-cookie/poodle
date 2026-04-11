@@ -151,8 +151,14 @@ impl IntoElement for SplitView {
 
             if is_horizontal {
                 primary_pane = primary_pane.h_full();
+                if let Some(min) = spec.min_primary_size {
+                    primary_pane = primary_pane.min_w(px(min));
+                }
             } else {
                 primary_pane = primary_pane.w_full();
+                if let Some(min) = spec.min_primary_size {
+                    primary_pane = primary_pane.min_h(px(min));
+                }
             }
 
             if let Some(primary) = self.primary {
@@ -364,8 +370,14 @@ impl IntoElement for SplitView {
 
             if is_horizontal {
                 secondary_pane = secondary_pane.h_full();
+                if let Some(min) = spec.min_secondary_size {
+                    secondary_pane = secondary_pane.min_w(px(min));
+                }
             } else {
                 secondary_pane = secondary_pane.w_full();
+                if let Some(min) = spec.min_secondary_size {
+                    secondary_pane = secondary_pane.min_h(px(min));
+                }
             }
 
             if let Some(secondary) = self.secondary {

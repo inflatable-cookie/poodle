@@ -6,7 +6,7 @@ use poodle_composites::{PageLoadingPresentation, PageLoadingSpec};
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Spinner;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct PageLoading {
     spec: PageLoadingSpec,
@@ -80,25 +80,56 @@ impl IntoElement for PageLoading {
             .px(px(pad_x)).py(px(pad_y))
             .flex().flex_col().items_center().gap(px(item_gap * 2.0));
 
-        // Spinner
-        card = card.child(
-            Spinner::from_spec(
-                SpinnerSpec::new()
-                    .with_variant(SpinnerVariant::Ring)
-                    .with_size(SpinnerSize::Lg)
-                    .with_tone(SpinnerTone::Accent),
-                theme,
-            )
-            .with_color(accent),
-        );
+        // Progress affordance: if a determinate value is provided,
+        // render a linear progress bar whose fill ratio honours
+        // spec.value / spec.max. Otherwise fall back to the
+        // indeterminate ring spinner.
+        if let Some(value) = self.spec.value {
+            let max = if self.spec.max > 0.0 { self.spec.max } else { 1.0 };
+            let ratio = (value / max).clamp(0.0, 1.0) as f32;
+            let track_bg = resolve_color(theme, "color.background.elevated");
+            let track_radius = resolve_radius(theme, "radius.pill");
+            // No dedicated progress.track token exists; size.icon.xs
+            // is the closest semantic proxy for a thin indicator rail.
+            let track_height = resolve_px(theme, "size.icon.xs");
+            let track_width = resolve_px(theme, "size.control.minWidth");
+            card = card.child(
+                div()
+                    .w(track_width)
+                    .h(track_height)
+                    .bg(track_bg)
+                    .rounded(track_radius)
+                    .overflow_hidden()
+                    .child(
+                        div()
+                            .h_full()
+                            .w(relative(ratio))
+                            .bg(accent)
+                            .rounded(track_radius),
+                    ),
+            );
+        } else {
+            card = card.child(
+                Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Ring)
+                        .with_size(SpinnerSize::Lg)
+                        .with_tone(SpinnerTone::Accent),
+                    theme,
+                )
+                .with_color(accent),
+            );
+        }
 
         // Message
         if let Some(ref msg) = self.spec.message {
             card = card.child(div().text_size(body_size).text_color(text_color).child(msg.clone()));
         }
 
-        // Cancel button
-        if let Some(handler) = self.on_cancel {
+        // Cancel button — gated on spec.can_cancel so the contract
+        // field actually controls visibility, not just the handler.
+        if self.spec.can_cancel {
+            if let Some(handler) = self.on_cancel {
             let muted = resolve_color(theme, "color.text.secondary");
             let hover_bg = resolve_color(theme, "color.background.elevated");
             let control_radius = resolve_radius(theme, "radius.control");
@@ -116,6 +147,7 @@ impl IntoElement for PageLoading {
                         handler(window, cx);
                     })
             );
+            }
         }
 
         // Branch on presentation: Inline renders the card on its

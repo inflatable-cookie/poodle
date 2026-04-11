@@ -177,11 +177,12 @@ impl IntoElement for ConfirmAction {
         dialog = dialog.child(actions);
 
         // Backdrop overlay — full-viewport scrim with centered dialog
+        let backdrop_fill = resolve_color(theme, spec.backdrop_fill_token());
         let backdrop = div()
             .id("poodle-confirm-backdrop")
             .absolute()
             .inset_0()
-            .bg(hsla(0.0, 0.0, 0.0, 0.5))
+            .bg(backdrop_fill)
             .flex()
             .items_center()
             .justify_center()
