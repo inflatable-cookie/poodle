@@ -26,7 +26,7 @@ impl Default for SegmentedControlSpec {
             options: Vec::new(),
             is_disabled: false,
             aria_label: None,
-            equal_width: false,
+            equal_width: true,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,

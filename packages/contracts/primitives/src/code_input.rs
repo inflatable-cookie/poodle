@@ -32,7 +32,7 @@ impl Default for CodeInputSpec {
             value: None,
             default_value: String::new(),
             name: String::from("code"),
-            label: String::from("Verification code"),
+            label: String::from("Authenticator code"),
             hint: None,
             error: None,
             mask: false,

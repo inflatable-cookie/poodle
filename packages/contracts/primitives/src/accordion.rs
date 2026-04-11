@@ -22,7 +22,7 @@ impl Default for AccordionSpec {
             value: None,
             default_value: None,
             allow_multiple: false,
-            is_collapsible: false,
+            is_collapsible: true,
             aria_label: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
