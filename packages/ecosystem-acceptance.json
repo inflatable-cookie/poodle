@@ -105,8 +105,7 @@
       "adoptionModel": "matrix-only",
       "status": "matrix-only",
       "coveredPackages": [
-        "poodle-primitives",
-        "poodle-composites",
+        "poodle-specs",
         "poodle-workstation",
         "poodle-gpui",
         "poodle-gpui-components",

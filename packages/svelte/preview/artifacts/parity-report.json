@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-10T11:55:09.121Z",
+  "generatedAt": "2026-04-11T17:59:33.287Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -148,8 +148,7 @@
       "suiteId": "gpui-target-matrix",
       "status": "matrix-only",
       "coveredPackages": [
-        "poodle-primitives",
-        "poodle-composites",
+        "poodle-specs",
         "poodle-workstation",
         "poodle-gpui",
         "poodle-gpui-components",
@@ -178,25 +177,38 @@
   "packageSurfaceCoverage": {
     "summary": [
       {
-        "packageName": "@poodle/svelte-primitives",
-        "exportCount": 98,
-        "componentCount": 84,
-        "helperCount": 14,
-        "previewedCount": 98,
+        "packageName": "@poodle/svelte",
+        "exportCount": 153,
+        "componentCount": 124,
+        "helperCount": 29,
+        "previewedCount": 153,
         "contractOnlyCount": 0
       },
       {
-        "packageName": "@poodle/svelte-composites",
-        "exportCount": 65,
-        "componentCount": 40,
-        "helperCount": 25,
-        "previewedCount": 65,
+        "packageName": "@poodle/svelte",
+        "exportCount": 153,
+        "componentCount": 124,
+        "helperCount": 29,
+        "previewedCount": 153,
         "contractOnlyCount": 0
       }
     ],
     "exports": [
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Accordion",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "ActionDiscoveryPanel",
         "kind": "component",
         "status": "previewed",
@@ -209,7 +221,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "AlertDialog",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "AppHeader",
         "kind": "component",
         "status": "previewed",
@@ -222,11 +247,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "AudioPlayer",
         "kind": "component",
         "status": "previewed",
-        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -235,7 +260,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "BlockEditor",
         "kind": "component",
         "status": "previewed",
@@ -248,11 +273,24 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Box",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "Breadcrumbs",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -261,11 +299,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "BulkActionBar",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -274,11 +312,50 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Button",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Calendar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Callout",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "Card",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -287,7 +364,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "CardRadioGroup",
         "kind": "component",
         "status": "previewed",
@@ -300,7 +377,85 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Checkbox",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Code",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "CodeInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "CollapseToggle",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Collapsible",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "ColorPicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "CommandPalette",
         "kind": "component",
         "status": "previewed",
@@ -313,7 +468,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "compressImage",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "computeFileHash",
         "kind": "helper",
         "status": "previewed",
@@ -326,7 +494,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "ConfirmAction",
         "kind": "component",
         "status": "previewed",
@@ -339,7 +507,46 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "ContextMenu",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "controlHeightRem",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "controlSpaceXRem",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "createResetMediaBrowseState",
         "kind": "helper",
         "status": "previewed",
@@ -352,7 +559,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "DataTable",
         "kind": "component",
         "status": "previewed",
@@ -365,7 +572,72 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "DatePicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "DateRangePicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "DateTimePicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "DateTimeRangePicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "DateTimeZonePicker",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "DebugDialog",
         "kind": "component",
         "status": "previewed",
@@ -378,11 +650,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "DetailItem",
+        "packageName": "@poodle/svelte",
+        "exportName": "DEFAULT_COMPRESSION",
         "kind": "helper",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -391,7 +663,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "DetailItem",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "DetailSection",
         "kind": "component",
         "status": "previewed",
@@ -404,7 +689,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "DetailShell",
         "kind": "component",
         "status": "previewed",
@@ -417,7 +702,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "detectParsedEmbed",
         "kind": "helper",
         "status": "previewed",
@@ -430,7 +715,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Dialog",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "DockRegion",
         "kind": "component",
         "status": "previewed",
@@ -443,7 +741,46 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Drawer",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "DurationInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "EditableLabel",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "EditableList",
         "kind": "component",
         "status": "previewed",
@@ -456,7 +793,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "EmbedInput",
         "kind": "component",
         "status": "previewed",
@@ -469,7 +806,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "EmbedPreview",
         "kind": "component",
         "status": "previewed",
@@ -482,7 +819,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "EmptyState",
         "kind": "component",
         "status": "previewed",
@@ -495,7 +832,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "ErrorBoundary",
         "kind": "component",
         "status": "previewed",
@@ -508,7 +845,59 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Eyebrow",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Field",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "FieldSet",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "FileUpload",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "FilterToolbar",
         "kind": "component",
         "status": "previewed",
@@ -521,7 +910,59 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "FormActions",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "formatDisplayDate",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "formatDisplayDateTime",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "formatFileSize",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "FormDialog",
         "kind": "component",
         "status": "previewed",
@@ -534,7 +975,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "FormLayout",
         "kind": "component",
         "status": "previewed",
@@ -547,7 +988,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "getProviderAccent",
         "kind": "helper",
         "status": "previewed",
@@ -560,7 +1001,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "getThumbnailUrl",
         "kind": "helper",
         "status": "previewed",
@@ -573,7 +1014,85 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "getUiPresentation",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Grid",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "HoverCard",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Icon",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "IconButton",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "IconProvider",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "InlineListSection",
         "kind": "component",
         "status": "previewed",
@@ -586,11 +1105,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "ListCard",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -599,7 +1118,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "ListCardCounter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "ListContainer",
         "kind": "component",
         "status": "previewed",
@@ -612,7 +1144,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "ListGrid",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "loadMediaBrowsePage",
         "kind": "helper",
         "status": "previewed",
@@ -625,7 +1170,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "LogList",
         "kind": "component",
         "status": "previewed",
@@ -638,7 +1183,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "lookupMeta",
         "kind": "helper",
         "status": "previewed",
@@ -651,7 +1196,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "MarkdownEditor",
         "kind": "component",
         "status": "previewed",
@@ -664,7 +1209,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "MediaBrowsePanel",
         "kind": "component",
         "status": "previewed",
@@ -677,7 +1222,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "MediaPicker",
         "kind": "component",
         "status": "previewed",
@@ -690,7 +1235,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "MediaPreview",
         "kind": "component",
         "status": "previewed",
@@ -703,7 +1248,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "MediaThumbnail",
         "kind": "component",
         "status": "previewed",
@@ -716,7 +1261,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "MediaUploadStatusPanel",
         "kind": "component",
         "status": "previewed",
@@ -729,7 +1274,33 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Menu",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Menubar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "mergeMediaBrowseItems",
         "kind": "helper",
         "status": "previewed",
@@ -742,7 +1313,46 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "MetaBar",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "MetaItem",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Meter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "MetricTile",
         "kind": "component",
         "status": "previewed",
@@ -755,11 +1365,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "NavCard",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -768,11 +1378,37 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "NavigationMenu",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "NumberInput",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "OrderBy",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -781,7 +1417,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "PageHeader",
         "kind": "component",
         "status": "previewed",
@@ -794,7 +1430,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "PageLoading",
         "kind": "component",
         "status": "previewed",
@@ -807,11 +1443,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "PaginationSummary",
-        "kind": "helper",
+        "packageName": "@poodle/svelte",
+        "exportName": "Pagination",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -820,7 +1456,46 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "PaginationSummary",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "panelSpaceXRem",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "panelSpaceYRem",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "parseEmbed",
         "kind": "helper",
         "status": "previewed",
@@ -833,7 +1508,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "parseWorkspaceLayoutSnapshot",
         "kind": "helper",
         "status": "previewed",
@@ -846,7 +1521,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "PasswordRequirements",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "PickerShell",
         "kind": "component",
         "status": "previewed",
@@ -861,7 +1549,98 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "Pill",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Popover",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Progress",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "RadioGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
+        "sectionIds": [
+          "form-suite"
+        ],
+        "sectionTitles": [
+          "Form baseline and validation posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "RangeSlider",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Rating",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Region",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "RelationPicker",
         "kind": "component",
         "status": "previewed",
@@ -876,7 +1655,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "renderEmbed",
         "kind": "helper",
         "status": "previewed",
@@ -889,11 +1668,11 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "ResizeHandle",
-        "kind": "helper",
+        "kind": "component",
         "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
         "sectionIds": [
           "catalog-hub"
         ],
@@ -902,7 +1681,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportName": "resolveEmbedParseState",
         "kind": "helper",
         "status": "previewed",
@@ -915,7 +1694,33 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "resolveSemanticControlSize",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "resolveSupportingVisualSize",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "runMediaUploadWorkflow",
         "kind": "helper",
         "status": "previewed",
@@ -928,7 +1733,46 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
+        "exportName": "ScrollShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "SegmentedControl",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "Select",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "SelectionSummary",
         "kind": "component",
         "status": "previewed",
@@ -943,1073 +1787,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "serializeWorkspaceLayoutSnapshot",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "SidebarNav",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "SplitView",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Workspace suite exercises shell hierarchy, docking, split layout, and header posture.",
-        "sectionIds": [
-          "workspace-suite"
-        ],
-        "sectionTitles": [
-          "Headers, dock orchestration, and workspace shell posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "StatusBar",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Composite package helper re-exports remain reviewable through the catalogue and suite surfaces.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "ToastHost",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "ToastStack",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Notification suite exercises transient toast stack posture alongside banner remediation.",
-        "sectionIds": [
-          "notification-suite"
-        ],
-        "sectionTitles": [
-          "Banners, toasts, skeletons, and remediation"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "uploadMediaWithKnownHash",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
-        "sectionIds": [
-          "media-suite"
-        ],
-        "sectionTitles": [
-          "Preview framing, embeds, and fallback posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-composites",
-        "exportName": "VideoPlayer",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Accordion",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "AlertDialog",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Box",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Breadcrumbs",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "BulkActionBar",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Button",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Calendar",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Callout",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Card",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Checkbox",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Code",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "CodeInput",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "CollapseToggle",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Collapsible",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ColorPicker",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "compressImage",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ContextMenu",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "controlHeightRem",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "controlSpaceXRem",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DatePicker",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DateRangePicker",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DateTimePicker",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DateTimeRangePicker",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DateTimeZonePicker",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DEFAULT_COMPRESSION",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DetailItem",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Dialog",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Drawer",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "DurationInput",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "EditableLabel",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Eyebrow",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Field",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "FieldSet",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "FileUpload",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "FormActions",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "formatDisplayDate",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "formatDisplayDateTime",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "formatFileSize",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "getUiPresentation",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Grid",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "HoverCard",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Icon",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "IconButton",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "IconProvider",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ListCard",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ListCardCounter",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ListGrid",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Menu",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Feedback, menu, and toolbar primitives exercised through notification-facing specimens.",
-        "sectionIds": [
-          "notification-suite"
-        ],
-        "sectionTitles": [
-          "Banners, toasts, skeletons, and remediation"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Menubar",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "MetaBar",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "MetaItem",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Meter",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "NavCard",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "NavigationMenu",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "NumberInput",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "OrderBy",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Pagination",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "PaginationSummary",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "panelSpaceXRem",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "panelSpaceYRem",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "PasswordRequirements",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Pill",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Popover",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Progress",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "RadioGroup",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Form and validation screen now exercises the broader field, text-entry, selection, and remediation primitive set directly.",
-        "sectionIds": [
-          "form-suite"
-        ],
-        "sectionTitles": [
-          "Form baseline and validation posture"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "RangeSlider",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Rating",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Region",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ResizeHandle",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "resolveSemanticControlSize",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "resolveSupportingVisualSize",
-        "kind": "helper",
-        "status": "previewed",
-        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "ScrollShell",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Every public primitive export is directly reviewable from the catalogue.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "SegmentedControl",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Additional workflow and overlay primitives previewed in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "Select",
-        "kind": "component",
-        "status": "previewed",
-        "note": "Foundational disclosure, control, and chip primitives exercised directly in catalogue specimens.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Separator",
         "kind": "component",
         "status": "previewed",
@@ -2022,7 +1800,33 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
+        "exportName": "serializeWorkspaceLayoutSnapshot",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Workspace suite exercises public layout snapshot round-tripping through the shell state review surface.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "SidebarNav",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "Skeleton",
         "kind": "component",
         "status": "previewed",
@@ -2035,7 +1839,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Slider",
         "kind": "component",
         "status": "previewed",
@@ -2048,7 +1852,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Spacer",
         "kind": "component",
         "status": "previewed",
@@ -2061,7 +1865,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Spinner",
         "kind": "component",
         "status": "previewed",
@@ -2074,7 +1878,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "SplitButton",
         "kind": "component",
         "status": "previewed",
@@ -2087,7 +1891,20 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
+        "exportName": "SplitView",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Workspace suite exercises shell hierarchy, docking, split layout, and header posture.",
+        "sectionIds": [
+          "workspace-suite"
+        ],
+        "sectionTitles": [
+          "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "Stack",
         "kind": "component",
         "status": "previewed",
@@ -2100,7 +1917,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "StatusBar",
         "kind": "component",
         "status": "previewed",
@@ -2113,7 +1930,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "StatusIndicator",
         "kind": "component",
         "status": "previewed",
@@ -2126,7 +1943,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Surface",
         "kind": "component",
         "status": "previewed",
@@ -2139,7 +1956,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Switch",
         "kind": "component",
         "status": "previewed",
@@ -2152,7 +1969,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Table",
         "kind": "component",
         "status": "previewed",
@@ -2165,7 +1982,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Tabs",
         "kind": "component",
         "status": "previewed",
@@ -2178,7 +1995,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "TextInput",
         "kind": "component",
         "status": "previewed",
@@ -2191,7 +2008,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "TimeAgo",
         "kind": "component",
         "status": "previewed",
@@ -2204,8 +2021,8 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
-        "exportName": "TimeField",
+        "packageName": "@poodle/svelte",
+        "exportName": "TimeInput",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
@@ -2217,7 +2034,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "TimeZoneSelect",
         "kind": "component",
         "status": "previewed",
@@ -2230,7 +2047,33 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
+        "exportName": "ToastHost",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "ToastStack",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Notification suite exercises transient toast stack posture alongside banner remediation.",
+        "sectionIds": [
+          "notification-suite"
+        ],
+        "sectionTitles": [
+          "Banners, toasts, skeletons, and remediation"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
         "exportName": "ToggleGroup",
         "kind": "component",
         "status": "previewed",
@@ -2243,7 +2086,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Toolbar",
         "kind": "component",
         "status": "previewed",
@@ -2256,7 +2099,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "Tooltip",
         "kind": "component",
         "status": "previewed",
@@ -2269,7 +2112,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "TriStateSwitch",
         "kind": "component",
         "status": "previewed",
@@ -2282,7 +2125,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "type FileUploadValidationError",
         "kind": "helper",
         "status": "previewed",
@@ -2295,7 +2138,7 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "type ImageCompressionOptions",
         "kind": "helper",
         "status": "previewed",
@@ -2308,8 +2151,34 @@
         ]
       },
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportName": "UiPresentationProvider",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "uploadMediaWithKnownHash",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",
+        "sectionIds": [
+          "media-suite"
+        ],
+        "sectionTitles": [
+          "Preview framing, embeds, and fallback posture"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "VideoPlayer",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
@@ -2417,7 +2286,7 @@
       "sectionId": "form-suite",
       "title": "Form baseline and validation posture",
       "layer": "components",
-      "packageName": "@poodle/svelte-primitives",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
       "harnessCoverage": {
@@ -2489,7 +2358,7 @@
       "sectionId": "table-suite",
       "title": "Selection, sorting, and bulk actions",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
       "harnessCoverage": {
@@ -2537,7 +2406,7 @@
       "sectionId": "browse-suite",
       "title": "Lists, grids, filters, and search depth",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
       "harnessCoverage": {
@@ -2585,7 +2454,7 @@
       "sectionId": "detail-suite",
       "title": "Detail display, cards, headers, and navigation",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
       "harnessCoverage": {
@@ -2633,7 +2502,7 @@
       "sectionId": "picker-suite",
       "title": "Picker, relation, and selection workflows",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
       "harnessCoverage": {
@@ -2681,7 +2550,7 @@
       "sectionId": "media-suite",
       "title": "Preview framing, embeds, and fallback posture",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
       "harnessCoverage": {
@@ -2729,7 +2598,7 @@
       "sectionId": "notification-suite",
       "title": "Banners, toasts, skeletons, and remediation",
       "layer": "components",
-      "packageName": "@poodle/svelte-primitives + @poodle/svelte-composites",
+      "packageName": "@poodle/svelte + @poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
       "harnessCoverage": {
@@ -2777,7 +2646,7 @@
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "harnessCoverage": {
@@ -2825,7 +2694,7 @@
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
       "layer": "components",
-      "packageName": "@poodle/svelte-composites",
+      "packageName": "@poodle/svelte",
       "contractRoot": "docs/contracts/components/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "harnessCoverage": {

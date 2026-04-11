@@ -123,7 +123,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "poodle-composites",
+      "name": "poodle-specs",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",
@@ -142,15 +142,6 @@
     },
     {
       "name": "poodle-layout",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "contract-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "poodle-primitives",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",

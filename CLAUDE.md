@@ -71,7 +71,7 @@ The **Svelte implementation** (`packages/svelte/primitives/src/`) is the proof r
 - When implementing a Jetstream component:
   1. **Read the full contract** (`docs/contracts/components/<component>.md`) — every section
   2. Cross-reference the **Svelte implementation** for visual reference
-  3. Ensure `poodle_primitives` Spec struct has every prop and token method the contract requires
+  3. Ensure `poodle_specs` Spec struct has every prop and token method the contract requires
   4. Implement `js_<component>()` in `packages/jetstream/components/src/` resolving ALL values from tokens
   5. Verify: zero hardcoded pixel values, all anatomy parts present, ARIA attributes applied
   6. Write the specimen in `packages/jetstream/preview/src/specimens/` showing all contract states
@@ -94,7 +94,7 @@ ComponentSpec (e.g. ButtonSpec)
 ### Key Crates
 
 - `poodle-tokens` — semantic token definitions, themes (dark, light, loophole-studio)
-- `poodle-primitives` — component spec structs (ButtonSpec, CheckboxSpec, etc.)
+- `poodle-specs` — component spec structs (ButtonSpec, CheckboxSpec, etc.)
 - `poodle-adapter` — `ThemeProvider` trait
 - `poodle-jetstream` (adapter) — `JetstreamThemeProvider` for token resolution
 - `poodle-jetstream-components` — Jetstream component implementations (`js_button`, `js_checkbox`, etc.)

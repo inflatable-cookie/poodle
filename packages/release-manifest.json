@@ -64,8 +64,8 @@
       "channel": "preview"
     },
     {
-      "name": "poodle-composites",
-      "path": "packages/contracts/composites",
+      "name": "poodle-specs",
+      "path": "packages/contracts/components",
       "kind": "contract-crate",
       "language": "rust",
       "publicIntent": true,
@@ -82,14 +82,6 @@
     {
       "name": "poodle-layout",
       "path": "packages/contracts/layout",
-      "kind": "contract-crate",
-      "language": "rust",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "poodle-primitives",
-      "path": "packages/contracts/primitives",
       "kind": "contract-crate",
       "language": "rust",
       "publicIntent": true,

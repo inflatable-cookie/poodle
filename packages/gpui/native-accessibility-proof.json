@@ -55,7 +55,7 @@
         "tab-strip",
         "tabs",
         "text-input",
-        "time-field",
+        "time-input",
         "tooltip"
       ],
       "exportNames": [
@@ -96,7 +96,7 @@
         "TabStripSpec",
         "TabsSpec",
         "TextInputSpec",
-        "TimeFieldSpec",
+        "TimeInputSpec",
         "TooltipSpec"
       ],
       "focusEntryStatus": "explicit",
