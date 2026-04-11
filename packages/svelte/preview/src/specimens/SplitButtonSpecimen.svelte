@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { SplitButton } from "@poodle/svelte-primitives";
+  import { SplitButton, Eyebrow, Surface } from "@poodle/svelte-primitives";
   import type { MenuItem } from "@poodle/svelte-primitives";
-  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastAction = "";
-  let submitIntent = "save-close";
-  let submittedWith = "";
 
   const saveItems: MenuItem[] = [
     { value: "save-draft", label: "Save as draft" },
@@ -20,131 +17,68 @@
     { value: "json", label: "Export as JSON" },
     { value: "pdf", label: "Export as PDF" },
   ];
-
-  const submitItems: MenuItem[] = [
-    { value: "save", label: "Save changes" },
-    { value: "save-close", label: "Save & close" },
-  ];
-
-  const constrainedItems: MenuItem[] = [
-    { value: "restart", label: "Restart worker" },
-    { value: "requeue", label: "Requeue job" },
-    { value: "silence", label: "Silence alerts" },
-    { value: "export", label: "Export logs" },
-    { value: "archive", label: "Archive queue" },
-  ];
-
-  function handleIntentAction(value: string): void {
-    submitIntent = value;
-  }
-
-  function handleSubmit(event: SubmitEvent): void {
-    event.preventDefault();
-    submittedWith = submitIntent;
-  }
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Primary variant">
-    <SplitButton
-      variant="primary"
-      items={saveItems}
-      on:click={() => (lastAction = "Primary save clicked")}
-      on:action={(e) => (lastAction = `Action: ${e.detail.value}`)}
-    >Save</SplitButton>
-  </SpecimenGroup>
+  <Surface tone="panel" border="subtle" padding="md">
+    <div class="specimen">
+      <div class="specimen__row">
+        <Eyebrow>Primary</Eyebrow>
+        <SplitButton variant="primary" items={saveItems} on:click={() => (lastAction = "Save")} on:action={(e) => (lastAction = e.detail.value)}>Save</SplitButton>
+      </div>
 
-  <SpecimenGroup label="Secondary variant">
-    <SplitButton
-      variant="secondary"
-      items={exportItems}
-      on:click={() => (lastAction = "Export clicked")}
-      on:action={(e) => (lastAction = `Export: ${e.detail.value}`)}
-    >Export</SplitButton>
-  </SpecimenGroup>
+      <div class="specimen__row">
+        <Eyebrow>Secondary</Eyebrow>
+        <SplitButton variant="secondary" items={exportItems} on:click={() => (lastAction = "Export")} on:action={(e) => (lastAction = e.detail.value)}>Export</SplitButton>
+      </div>
 
-  <SpecimenGroup label="Danger tone">
-    <SplitButton
-      tone="danger"
-      items={[
-        { value: "delete-selected", label: "Delete selected" },
-        { value: "delete-all", label: "Delete all" },
-      ]}
-      on:click={() => (lastAction = "Delete clicked")}
-      on:action={(e) => (lastAction = `Delete: ${e.detail.value}`)}
-    >Delete</SplitButton>
-  </SpecimenGroup>
+      <div class="specimen__row">
+        <Eyebrow>Danger</Eyebrow>
+        <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} on:click={() => (lastAction = "Delete")} on:action={(e) => (lastAction = e.detail.value)}>Delete</SplitButton>
+      </div>
 
-  <SpecimenGroup label="Loading state">
-    <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
-  </SpecimenGroup>
+      <div class="specimen__row">
+        <Eyebrow>Loading</Eyebrow>
+        <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
+      </div>
 
-  <SpecimenGroup label="Disabled">
-    <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
-  </SpecimenGroup>
+      <div class="specimen__row">
+        <Eyebrow>Disabled</Eyebrow>
+        <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
+      </div>
 
-  <SpecimenGroup label="Submit semantics">
-    <form class="specimen__form" on:submit={handleSubmit}>
-      <input type="hidden" name="intent" value={submitIntent} />
-      <SplitButton
-        type="submit"
-        variant="primary"
-        items={submitItems}
-        on:action={(e) => handleIntentAction(e.detail.value)}
-      >
-        {submitIntent === "save" ? "Save changes" : "Save & close"}
-      </SplitButton>
-    </form>
-    {#if submittedWith}
-      <p>Submitted with intent: {submittedWith}</p>
-    {/if}
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Constrained scroll container">
-    <div class="specimen__well">
-      <div class="specimen__spacer"></div>
-      <SplitButton
-        variant="secondary"
-        items={constrainedItems}
-        on:click={() => (lastAction = "Queue action clicked")}
-        on:action={(e) => (lastAction = `Queue action: ${e.detail.value}`)}
-      >Queue actions</SplitButton>
+      {#if lastAction}
+        <p class="specimen__hint">Last action: <strong>{lastAction}</strong></p>
+      {/if}
     </div>
-  </SpecimenGroup>
+  </Surface>
 
-  {#if lastAction}
-    <SpecimenGroup label="Last action">
-      <p>{lastAction}</p>
-    </SpecimenGroup>
-  {/if}
+  <svelte:fragment slot="sizes" let:size>
+    <SplitButton variant="primary" items={saveItems} {size}>Save</SplitButton>
+  </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <SplitButton variant="primary" {density} items={saveItems}>Save</SplitButton>
+    <SplitButton variant="primary" items={saveItems} {density}>Save</SplitButton>
   </svelte:fragment>
 </SpecimenLayout>
 
 <style>
-  .specimen__form {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .specimen__well {
+  .specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    max-height: 12rem;
-    padding: 1rem;
-    overflow: auto;
-    border: 1px solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
-    border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 92%, transparent);
   }
 
-  .specimen__spacer {
-    min-height: 8rem;
+  .specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
   }
 
-  p { margin: 0; }
+  .specimen__hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
 </style>
