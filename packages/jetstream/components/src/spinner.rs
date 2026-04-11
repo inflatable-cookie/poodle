@@ -8,7 +8,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_components::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

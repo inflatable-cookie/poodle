@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlSize, Orientation, RadioGroupSpec};
+use poodle_components::{ChoiceOption, ControlSize, Orientation, RadioGroupSpec};
 
 use crate::presentation::{control_height_rem, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
@@ -43,8 +43,8 @@ impl RadioGroup {
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();

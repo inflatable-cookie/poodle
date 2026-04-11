@@ -1,7 +1,7 @@
 //! ReorderableList — Jetstream draggable list items with grip handles backed by ReorderableListSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::ReorderableListSpec;
+use poodle_components::ReorderableListSpec;
 
 use crate::presentation::{
     control_space_x_rem, rem_to_px, resolve_semantic_size,

@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{DatePickerSpec, EyebrowSpec};
+use poodle_components::{DatePickerSpec, EyebrowSpec};
 use poodle_gpui_components::{DatePicker, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

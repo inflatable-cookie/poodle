@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{CheckboxSpec, EyebrowSpec};
+use poodle_components::{CheckboxSpec, EyebrowSpec};
 use poodle_gpui_components::{Checkbox, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

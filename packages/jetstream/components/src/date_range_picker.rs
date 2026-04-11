@@ -9,7 +9,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::DateRangePickerSpec;
+use poodle_components::DateRangePickerSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,

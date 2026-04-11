@@ -4,8 +4,8 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::remediation_banner::js_remediation_banner;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::{RemediationBannerSpec, RemediationAction};
-use poodle_primitives::StatusTone;
+use poodle_components::{RemediationBannerSpec, RemediationAction};
+use poodle_components::StatusTone;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

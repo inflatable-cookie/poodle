@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{EyebrowSpec, PaginationSpec, PaginationVariant};
+use poodle_components::{EyebrowSpec, PaginationSpec, PaginationVariant};
 use poodle_gpui_components::{Eyebrow, Pagination};
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;

@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::ScrollShellSpec;
+use poodle_components::ScrollShellSpec;
 
 pub fn js_scroll_shell(_spec: &ScrollShellSpec, _theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
     let mut el = ui_element::div()

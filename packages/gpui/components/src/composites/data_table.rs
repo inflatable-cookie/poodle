@@ -3,11 +3,11 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{
+use poodle_components::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec,
     TableSortDirection,
 };
-use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, StatusTone};
+use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, StatusTone};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
@@ -302,14 +302,14 @@ impl IntoElement for DataTable {
                 .py(cell_py)
                 .cursor_pointer();
 
-            let box_bg = if check_state == poodle_primitives::CheckState::Checked
-                || check_state == poodle_primitives::CheckState::Mixed
+            let box_bg = if check_state == poodle_components::CheckState::Checked
+                || check_state == poodle_components::CheckState::Mixed
             {
                 accent
             } else {
                 surface_bg
             };
-            let box_border = if check_state == poodle_primitives::CheckState::Unchecked {
+            let box_border = if check_state == poodle_components::CheckState::Unchecked {
                 border_color
             } else {
                 accent
@@ -320,7 +320,7 @@ impl IntoElement for DataTable {
                 .border_1()
                 .border_color(box_border)
                 .bg(box_bg);
-            if check_state == poodle_primitives::CheckState::Mixed {
+            if check_state == poodle_components::CheckState::Mixed {
                 check_box = check_box
                     .flex().items_center().justify_center()
                     .child(div().w(px(8.0)).h(px(2.0)).bg(gpui::white()));
@@ -329,7 +329,7 @@ impl IntoElement for DataTable {
 
             if let Some(ref handler) = on_select_all {
                 let handler = handler.clone();
-                let next = check_state != poodle_primitives::CheckState::Checked;
+                let next = check_state != poodle_components::CheckState::Checked;
                 check_cell = check_cell.on_click(move |_event, window, cx| {
                     handler(next, window, cx);
                 });
@@ -368,8 +368,8 @@ impl IntoElement for DataTable {
 
             if is_sorted {
                 let sort_icon_name = match spec.sort_direction {
-                    poodle_composites::TableSortDirection::Asc => "arrow-up",
-                    poodle_composites::TableSortDirection::Desc => "arrow-down",
+                    poodle_components::TableSortDirection::Asc => "arrow-up",
+                    poodle_components::TableSortDirection::Desc => "arrow-down",
                 };
                 header_cell = header_cell
                     .flex().items_center().gap(gap_sm)

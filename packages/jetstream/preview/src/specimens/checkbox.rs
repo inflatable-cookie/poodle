@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::checkbox::js_checkbox;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::CheckboxSpec;
+use poodle_components::CheckboxSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

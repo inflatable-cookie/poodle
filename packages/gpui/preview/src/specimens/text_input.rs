@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
+use poodle_components::{FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
 use poodle_gpui_components::{Field, TextInput, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

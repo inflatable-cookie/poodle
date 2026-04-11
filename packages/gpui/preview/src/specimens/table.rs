@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{TableSpec, TableColumn, TableRow, ColumnAlign, EyebrowSpec};
+use poodle_components::{TableSpec, TableColumn, TableRow, ColumnAlign, EyebrowSpec};
 use poodle_gpui_components::{Table, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

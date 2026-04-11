@@ -3,8 +3,8 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
-use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, SkeletonSpec};
+use poodle_components::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
+use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole, SkeletonSpec};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Skeleton;

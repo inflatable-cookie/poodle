@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{DetailShellSpec, DetailState, ScrollOwner};
-use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_components::{DetailShellSpec, DetailState, ScrollOwner};
+use poodle_components::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px};

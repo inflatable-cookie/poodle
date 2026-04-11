@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{FileUploadSpec, EyebrowSpec};
+use poodle_components::{FileUploadSpec, EyebrowSpec};
 use poodle_gpui_components::{FileUpload, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

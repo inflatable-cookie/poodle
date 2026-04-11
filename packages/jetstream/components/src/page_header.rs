@@ -1,7 +1,7 @@
 //! PageHeader — Jetstream page header backed by PageHeaderSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::PageHeaderSpec;
+use poodle_components::PageHeaderSpec;
 
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem,

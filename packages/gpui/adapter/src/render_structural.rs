@@ -6,7 +6,7 @@
 //! - BannerSpec, CallOutSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{
+use poodle_components::{
     BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
     SurfaceSpec,
 };
@@ -15,7 +15,7 @@ use poodle_style::StyleDescriptor;
 use crate::style_map::map_style;
 use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
 
-fn resolve_inset_padding(theme: &dyn ThemeProvider, inset: &poodle_primitives::Inset) -> crate::GpuiEdges {
+fn resolve_inset_padding(theme: &dyn ThemeProvider, inset: &poodle_components::Inset) -> crate::GpuiEdges {
     let h = inset.horizontal.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
     let v = inset.vertical.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
     crate::GpuiEdges { top: v, right: h, bottom: v, left: h }
@@ -221,7 +221,7 @@ impl RenderComponent<CallOutSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::{
+    use poodle_components::{
         BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
         SurfaceSpec,
     };

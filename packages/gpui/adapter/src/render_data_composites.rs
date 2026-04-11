@@ -5,7 +5,7 @@
 //! SelectionSummarySpec, PaginationSummarySpec, MediaThumbnailSpec, MediaPreviewSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_composites::{
+use poodle_components::{
     DataTableSpec, DetailSectionSpec, DetailShellSpec, FilterToolbarSpec,
     MediaPreviewSpec, MediaThumbnailSpec, PaginationSummarySpec, PickerShellSpec,
     RelationPickerSpec, SelectionSummarySpec,
@@ -98,7 +98,7 @@ impl RenderComponent<MediaPreviewSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_composites::*;
+    use poodle_components::*;
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 

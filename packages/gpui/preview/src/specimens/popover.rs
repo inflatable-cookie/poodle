@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement, EyebrowSpec};
+use poodle_components::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement, EyebrowSpec};
 use poodle_gpui_components::{Button, Popover, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

@@ -6,8 +6,7 @@ description = "Poodle component implementations for Jetstream — token-resolved
 
 [dependencies]
 poodle-adapter = { path = "../../contracts/adapter" }
-poodle-composites = { path = "../../contracts/composites" }
-poodle-primitives = { path = "../../contracts/primitives" }
+poodle-components = { path = "../../contracts/components" }
 poodle-tokens = { path = "../../contracts/tokens" }
 poodle-jetstream = { path = "../adapter" }
 jetstream-runtime = { path = "../../../../jetstream/crates/jetstream-runtime" }

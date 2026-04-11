@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_composites::{PageLoadingPresentation, PageLoadingSpec};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::{PageLoadingPresentation, PageLoadingSpec};
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{PageLoading, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

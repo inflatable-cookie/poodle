@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem, EyebrowSpec};
+use poodle_components::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem, EyebrowSpec};
 use poodle_gpui_components::{SplitButton, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

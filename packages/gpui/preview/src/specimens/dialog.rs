@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec, PillAppearance, PillSpec, PillTone};
+use poodle_components::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec, PillAppearance, PillSpec, PillTone};
 use poodle_gpui_components::{Button, Dialog, Eyebrow, Pill};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

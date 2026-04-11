@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::media_thumbnail::js_media_thumbnail;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::{MediaKind, MediaThumbnailSpec};
+use poodle_components::{MediaKind, MediaThumbnailSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

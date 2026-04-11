@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::SkeletonSpec;
+use poodle_components::SkeletonSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

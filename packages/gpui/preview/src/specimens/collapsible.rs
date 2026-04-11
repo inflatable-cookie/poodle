@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CollapsibleSpec, EyebrowSpec};
+use poodle_components::{CollapsibleSpec, EyebrowSpec};
 use poodle_gpui_components::{Collapsible, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

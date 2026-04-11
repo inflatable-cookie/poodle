@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{FieldSetSpec, FieldSpec, TextInputSpec, SpaceScale, EyebrowSpec};
+use poodle_components::{FieldSetSpec, FieldSpec, TextInputSpec, SpaceScale, EyebrowSpec};
 use poodle_gpui_components::{FieldSet, Field, TextInput, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec};
+use poodle_components::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec};
 use poodle_gpui_components::{Eyebrow, TriStateSwitch};
 
 use crate::app_state::AppState;

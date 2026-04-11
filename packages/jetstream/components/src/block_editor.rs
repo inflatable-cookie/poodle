@@ -1,7 +1,7 @@
 //! BlockEditor — Jetstream block editor backed by BlockEditorSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::BlockEditorSpec;
+use poodle_components::BlockEditorSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_radius, tint};
@@ -11,18 +11,18 @@ pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -
 
     // Size-driven control size from contract
     let control_size = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 1.25,
-        poodle_primitives::ControlSize::Sm => 1.5,
-        poodle_primitives::ControlSize::Md => 1.75,
-        poodle_primitives::ControlSize::Lg => 2.0,
-        poodle_primitives::ControlSize::Xl => 2.25,
+        poodle_components::ControlSize::Xs => 1.25,
+        poodle_components::ControlSize::Sm => 1.5,
+        poodle_components::ControlSize::Md => 1.75,
+        poodle_components::ControlSize::Lg => 2.0,
+        poodle_components::ControlSize::Xl => 2.25,
     });
 
     // Density-driven spacing from contract
     let (shell_x, shell_y, stack_gap, toolbar_y, toolbar_x, content_x, content_y) = match spec.density {
-        poodle_primitives::ControlDensity::Compact => (0.625, 0.625, 0.375, 0.1875, 0.25, 0.375, 0.25),
-        poodle_primitives::ControlDensity::Default => (0.75, 0.75, 0.5, 0.25, 0.375, 0.5, 0.375),
-        poodle_primitives::ControlDensity::Comfortable => (1.0, 1.0, 0.625, 0.3125, 0.5, 0.625, 0.5),
+        poodle_components::ControlDensity::Compact => (0.625, 0.625, 0.375, 0.1875, 0.25, 0.375, 0.25),
+        poodle_components::ControlDensity::Default => (0.75, 0.75, 0.5, 0.25, 0.375, 0.5, 0.375),
+        poodle_components::ControlDensity::Comfortable => (1.0, 1.0, 0.625, 0.3125, 0.5, 0.625, 0.5),
     };
 
     let fill = resolve_color(theme, spec.fill_token());

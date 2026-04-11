@@ -8,7 +8,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{CheckState, TriStateSwitchSpec};
+use poodle_components::{CheckState, TriStateSwitchSpec};
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -17,11 +17,11 @@ use crate::presentation::{
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// Track inset in rem, derived from density.
-fn track_inset_rem(density: poodle_primitives::ControlDensity) -> f32 {
+fn track_inset_rem(density: poodle_components::ControlDensity) -> f32 {
     match density {
-        poodle_primitives::ControlDensity::Compact => 0.125,
-        poodle_primitives::ControlDensity::Default => 0.1875,
-        poodle_primitives::ControlDensity::Comfortable => 0.25,
+        poodle_components::ControlDensity::Compact => 0.125,
+        poodle_components::ControlDensity::Default => 0.1875,
+        poodle_components::ControlDensity::Comfortable => 0.25,
     }
 }
 

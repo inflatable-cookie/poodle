@@ -5,7 +5,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, DurationInputSpec, SemanticControlSizeRole, ValidationState};
+use poodle_components::{ControlDensity, ControlSize, DurationInputSpec, SemanticControlSizeRole, ValidationState};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offset_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};

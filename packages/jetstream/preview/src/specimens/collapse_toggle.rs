@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::collapse_toggle::js_collapse_toggle;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::CollapseToggleSpec;
+use poodle_components::CollapseToggleSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

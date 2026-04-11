@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::hover_card::js_hover_card;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::HoverCardSpec;
+use poodle_components::HoverCardSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{HoverCardSpec, OverlayPlacement};
+use poodle_components::{HoverCardSpec, OverlayPlacement};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};

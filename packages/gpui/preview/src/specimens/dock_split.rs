@@ -1,10 +1,10 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::{
+use poodle_components::{
     DockRegionSpec, DockEdge, PanelTabItem,
     SplitViewSpec, SplitOrientation,
 };
-use poodle_primitives::EyebrowSpec;
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{DockRegion, SplitView, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

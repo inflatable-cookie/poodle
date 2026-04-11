@@ -1,6 +1,6 @@
 //! poodle-gpui-components — Real renderable GPUI components backed by Poodle spec structs.
 //!
-//! Each component wraps a spec from `poodle_primitives`, resolves tokens through
+//! Each component wraps a spec from `poodle_components`, resolves tokens through
 //! `GpuiThemeProvider`, and implements `IntoElement` to produce interactive gpui elements.
 
 pub mod presentation;
@@ -14,8 +14,8 @@ pub use primitives::*;
 // Re-export all composites
 pub use composites::*;
 
-// Re-export common types from poodle_primitives for ergonomic imports
-pub use poodle_primitives::{
+// Re-export common types from poodle_components for ergonomic imports
+pub use poodle_components::{
     ButtonTone, ButtonVariant, ControlDensity, ControlSize, IconSize, IconSpec,
     SemanticControlSizeRole, StatusTone, ValidationState,
 };

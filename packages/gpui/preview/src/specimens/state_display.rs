@@ -1,11 +1,11 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::{
+use poodle_components::{
     EmptyStateSpec, EmptyStateVariant, RemediationAction,
     MetricTileSpec,
     Toast, ToastTone, ToastStackSpec,
 };
-use poodle_primitives::{ButtonVariant, EyebrowSpec};
+use poodle_components::{ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::{EmptyState, MetricTile, ToastStack, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

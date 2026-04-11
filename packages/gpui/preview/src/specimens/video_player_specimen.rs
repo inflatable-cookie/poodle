@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_composites::{VideoPlayerSpec, AspectRatio};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::{VideoPlayerSpec, AspectRatio};
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{VideoPlayer, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::toast_stack::js_toast_stack;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::{Toast, ToastStackSpec, ToastTone};
+use poodle_components::{Toast, ToastStackSpec, ToastTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

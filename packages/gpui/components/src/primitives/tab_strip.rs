@@ -6,7 +6,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
+use poodle_components::{IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
 
 use super::icon::Icon;
 

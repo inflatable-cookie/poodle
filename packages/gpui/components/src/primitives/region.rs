@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::RegionSpec;
+use poodle_components::RegionSpec;
 
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 

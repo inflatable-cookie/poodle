@@ -4,7 +4,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_components::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use super::icon::Icon;
 use super::spinner::Spinner;
@@ -41,8 +41,8 @@ impl IconButton {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
     pub fn pressed(mut self, v: bool) -> Self { self.spec.is_pressed = Some(v); self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());

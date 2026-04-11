@@ -5,7 +5,7 @@
 //! TriStateSwitch
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{
+use poodle_components::{
     BadgeSpec, CheckboxSpec, MeterSpec, ProgressSpec, RadioGroupSpec, RangeSliderSpec, RatingSpec,
     SegmentedControlSpec, SelectSpec, SkeletonSpec, SliderSpec, StatusIndicatorSpec, SwitchSpec,
     TriStateSwitchSpec,
@@ -167,7 +167,7 @@ impl RenderComponent<TriStateSwitchSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::*;
+    use poodle_components::*;
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 

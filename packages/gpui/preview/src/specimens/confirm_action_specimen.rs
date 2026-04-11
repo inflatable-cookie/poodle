@@ -1,8 +1,8 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::ConfirmActionSpec;
+use poodle_components::ConfirmActionSpec;
 use poodle_gpui_components::{Button, ConfirmAction, Eyebrow};
-use poodle_primitives::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, StatusTone};
+use poodle_components::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, StatusTone};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;

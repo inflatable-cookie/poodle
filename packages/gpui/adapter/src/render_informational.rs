@@ -5,7 +5,7 @@
 //! DateRangePicker, DateTimePicker, DateTimeRangePicker
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{
+use poodle_components::{
     CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     PillSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
@@ -260,7 +260,7 @@ impl RenderComponent<DateTimeRangePickerSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::*;
+    use poodle_components::*;
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 

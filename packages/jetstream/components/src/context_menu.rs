@@ -5,7 +5,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::ContextMenuSpec;
+use poodle_components::ContextMenuSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_radius};

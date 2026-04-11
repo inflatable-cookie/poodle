@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ProgressSpec, EyebrowSpec};
+use poodle_components::{ProgressSpec, EyebrowSpec};
 use poodle_gpui_components::{Progress, Eyebrow};
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;

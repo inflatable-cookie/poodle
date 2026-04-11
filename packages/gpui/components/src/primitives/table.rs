@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ColumnAlign, TableColumn, TableRow, TableSpec};
+use poodle_components::{ColumnAlign, TableColumn, TableRow, TableSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 

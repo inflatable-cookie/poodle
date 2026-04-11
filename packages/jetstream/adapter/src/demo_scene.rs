@@ -7,8 +7,8 @@
 //! 4. Pause dialog — modal overlay with actions
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_composites::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
-use poodle_primitives::{
+use poodle_components::{ConfirmActionSpec, PageHeaderSpec, StateTileSpec, ToastStackSpec};
+use poodle_components::{
     BadgeSpec, ButtonSpec, DialogSpec, MenuSpec, ProgressSpec, SelectSpec, SeparatorSpec,
     SliderSpec, SpinnerSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec,
     TextInputSpec,

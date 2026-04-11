@@ -1,7 +1,7 @@
 use gpui::*;
-use poodle_composites::LogListSpec;
+use poodle_components::LogListSpec;
 use poodle_gpui_components::{LogList, LogEntry, LogLevel, Eyebrow};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::EyebrowSpec;
 use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_composites::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{MediaThumbnail, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

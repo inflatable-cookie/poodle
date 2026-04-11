@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ToggleGroupOption, EyebrowSpec};
+use poodle_components::{ToggleGroupOption, EyebrowSpec};
 use poodle_gpui_components::{ToggleGroup, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -79,7 +79,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     ToggleGroup::new(multi_options, theme)
                         .default_value(vec!["design".to_string(), "docs".to_string()])
-                        .selection_mode(poodle_primitives::ToggleGroupSelectionMode::Multiple)
+                        .selection_mode(poodle_components::ToggleGroupSelectionMode::Multiple)
                 )
                 .child(
                     div().text_sm().text_color(color_to_hsla(text_secondary))

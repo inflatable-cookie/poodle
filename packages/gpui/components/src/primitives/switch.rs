@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, SwitchSpec, SwitchTone};
+use poodle_components::{ControlSize, SwitchSpec, SwitchTone};
 
 use crate::presentation::{control_height_rem, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
@@ -46,8 +46,8 @@ impl Switch {
     pub fn right_tone(mut self, v: SwitchTone) -> Self { self.spec.right_tone = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());

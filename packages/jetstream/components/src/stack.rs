@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{Alignment, StackSpec};
+use poodle_components::{Alignment, StackSpec};
 
 use crate::theme_ext::resolve_px;
 

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::separator::js_separator;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
+use poodle_components::{RuleTone, SeparatorOrientation, SeparatorSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

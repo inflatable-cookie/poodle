@@ -7,7 +7,7 @@
 //! Identical to the GPUI presentation module — both runtimes must produce
 //! the same resolved values for a given (size, role, density) input.
 
-use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// Resolve a semantic size role against a base size to get the effective control size.
 ///

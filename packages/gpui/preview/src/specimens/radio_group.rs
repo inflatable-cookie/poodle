@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ChoiceOption, EyebrowSpec, Orientation, RadioGroupSpec};
+use poodle_components::{ChoiceOption, EyebrowSpec, Orientation, RadioGroupSpec};
 use poodle_gpui_components::{RadioGroup, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

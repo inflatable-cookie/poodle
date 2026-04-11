@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{LeadingFill, LeadingShape, ListCardSpec};
+use poodle_components::{LeadingFill, LeadingShape, ListCardSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 

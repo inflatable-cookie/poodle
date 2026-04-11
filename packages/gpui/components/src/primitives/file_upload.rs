@@ -6,7 +6,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, FileUploadSpec, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_components::{ControlDensity, ControlSize, FileUploadSpec, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};

@@ -52,7 +52,7 @@ pub const WORKSTATION_EXPORTS: &[&str] = &[
 
 #[cfg(test)]
 mod tests {
-    use poodle_primitives::OverlayPlacement;
+    use poodle_components::OverlayPlacement;
     use poodle_tokens::semantic;
 
     use super::{

@@ -7,7 +7,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, EditableLabelSpec};
+use poodle_components::{ControlSize, EditableLabelSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
@@ -49,8 +49,8 @@ impl EditableLabel {
     pub fn editing(mut self, v: bool) -> Self { self.spec.is_editing = v; self }
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());

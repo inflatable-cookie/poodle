@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{ActionDiscoveryPanel, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;

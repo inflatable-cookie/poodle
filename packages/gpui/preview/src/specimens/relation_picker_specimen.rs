@@ -1,9 +1,9 @@
 use gpui::*;
-use poodle_composites::{
+use poodle_components::{
     BrowseState, DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel,
     PickerItemSpec, RelationPickerSpec, SelectionMode,
 };
-use poodle_primitives::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use poodle_components::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use poodle_gpui_components::{DrillEnterArgs, Eyebrow, RelationPicker};
 use crate::app_state::AppState;
 use crate::PreviewRoot;

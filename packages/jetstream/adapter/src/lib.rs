@@ -14,7 +14,7 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (poodle-primitives, poodle-composites, poodle-workstation)
+//! Shared Contract Layer (poodle-components, poodle-workstation)
 //!     │
 //!     ▼
 //! poodle-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)

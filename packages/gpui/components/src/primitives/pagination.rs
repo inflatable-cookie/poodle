@@ -7,7 +7,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec, SemanticControlSizeRole};
+use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
@@ -92,7 +92,7 @@ impl Pagination {
     pub fn total_pages(mut self, v: usize) -> Self { self.spec.total_pages = v; self }
     pub fn sibling_count(mut self, v: usize) -> Self { self.spec.sibling_count = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn variant(mut self, v: poodle_primitives::PaginationVariant) -> Self { self.spec.variant = v; self }
+    pub fn variant(mut self, v: poodle_components::PaginationVariant) -> Self { self.spec.variant = v; self }
     pub fn standalone(mut self, v: bool) -> Self { self.spec.standalone = v; self }
     pub fn info_text(mut self, v: impl Into<String>) -> Self { self.spec.info_text = Some(v.into()); self }
     pub fn page_size(mut self, v: usize) -> Self { self.spec.page_size = Some(v); self }
@@ -305,7 +305,7 @@ impl IntoElement for Pagination {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        use poodle_primitives::PaginationVariant;
+        use poodle_components::PaginationVariant;
 
         let visible = self.spec.visible_pages();
         let is_first = self.spec.is_first_page();

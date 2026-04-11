@@ -1,7 +1,7 @@
 //! MediaPicker — Jetstream media picker backed by MediaPickerSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::MediaPickerSpec;
+use poodle_components::MediaPickerSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_radius, resolve_px};
@@ -12,18 +12,18 @@ pub fn js_media_picker(spec: &MediaPickerSpec, theme: &JetstreamThemeProvider) -
 
     // Size-driven thumb dimensions from contract
     let thumb_size = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 3.5,
-        poodle_primitives::ControlSize::Sm => 4.25,
-        poodle_primitives::ControlSize::Md => 4.5,
-        poodle_primitives::ControlSize::Lg => 5.0,
-        poodle_primitives::ControlSize::Xl => 5.5,
+        poodle_components::ControlSize::Xs => 3.5,
+        poodle_components::ControlSize::Sm => 4.25,
+        poodle_components::ControlSize::Md => 4.5,
+        poodle_components::ControlSize::Lg => 5.0,
+        poodle_components::ControlSize::Xl => 5.5,
     });
 
     // Density-driven spacing from contract
     let (grid_gap, item_pad) = match spec.density {
-        poodle_primitives::ControlDensity::Compact => (0.25, 0.25),
-        poodle_primitives::ControlDensity::Default => (0.375, 0.375),
-        poodle_primitives::ControlDensity::Comfortable => (0.5, 0.5),
+        poodle_components::ControlDensity::Compact => (0.25, 0.25),
+        poodle_components::ControlDensity::Default => (0.375, 0.375),
+        poodle_components::ControlDensity::Comfortable => (0.5, 0.5),
     };
 
     let fill = resolve_color(theme, spec.fill_token());

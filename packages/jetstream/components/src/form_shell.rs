@@ -1,7 +1,7 @@
 //! FormShell — Jetstream form container with sections and submission backed by FormShellSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::FormShellSpec;
+use poodle_components::FormShellSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};

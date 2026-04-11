@@ -4,7 +4,7 @@
 //! and operational composites — full parity with GPUI adapter.
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_composites::{
+use poodle_components::{
     ActionDiscoveryPanelSpec, AppHeaderSpec, AudioPlayerSpec, BlockEditorSpec,
     CardRadioGroupSpec, CommandPaletteSpec, ConfirmActionSpec, DataTableSpec,
     DetailSectionSpec, DetailShellSpec, DockRegionSpec, EditableListSpec,
@@ -18,7 +18,7 @@ use poodle_composites::{
     StateTileSpec, ToastHostSpec, ToastStackSpec, ValidationSummarySpec,
     VideoPlayerSpec,
 };
-use poodle_primitives::{
+use poodle_components::{
     BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec,
 };
 use poodle_style::StyleDescriptor;
@@ -405,8 +405,8 @@ impl RenderComponent<SidebarNavSpec> for JetstreamAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_composites::*;
-    use poodle_primitives::{BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec};
+    use poodle_components::*;
+    use poodle_components::{BreadcrumbsSpec, ListCardSpec, NavCardSpec, OrderBySpec};
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 
@@ -442,8 +442,8 @@ mod tests {
     #[test] fn audio_player() { assert_eq!(a().render(&AudioPlayerSpec::new("audio.mp3"), &s(), &t()).spec_type, "AudioPlayerSpec"); }
     #[test] fn video_player() { assert_eq!(a().render(&VideoPlayerSpec::new("video.mp4"), &s(), &t()).spec_type, "VideoPlayerSpec"); }
     #[test] fn media_picker() { assert_eq!(a().render(&MediaPickerSpec::new("Pick"), &s(), &t()).spec_type, "MediaPickerSpec"); }
-    #[test] fn media_thumbnail() { assert_eq!(a().render(&MediaThumbnailSpec::new(poodle_composites::MediaKind::Image), &s(), &t()).widget_kind, WidgetKind::Image); }
-    #[test] fn media_preview() { assert_eq!(a().render(&MediaPreviewSpec::new(poodle_composites::MediaKind::Image, "Preview"), &s(), &t()).spec_type, "MediaPreviewSpec"); }
+    #[test] fn media_thumbnail() { assert_eq!(a().render(&MediaThumbnailSpec::new(poodle_components::MediaKind::Image), &s(), &t()).widget_kind, WidgetKind::Image); }
+    #[test] fn media_preview() { assert_eq!(a().render(&MediaPreviewSpec::new(poodle_components::MediaKind::Image, "Preview"), &s(), &t()).spec_type, "MediaPreviewSpec"); }
     #[test] fn markdown_editor() { assert_eq!(a().render(&MarkdownEditorSpec::new(), &s(), &t()).spec_type, "MarkdownEditorSpec"); }
     #[test] fn block_editor() { assert_eq!(a().render(&BlockEditorSpec::new(), &s(), &t()).spec_type, "BlockEditorSpec"); }
     #[test] fn embed_input() { assert_eq!(a().render(&EmbedInputSpec::new(), &s(), &t()).spec_type, "EmbedInputSpec"); }
@@ -458,13 +458,13 @@ mod tests {
     #[test] fn action_discovery_panel() { assert_eq!(a().render(&ActionDiscoveryPanelSpec::default(), &s(), &t()).spec_type, "ActionDiscoveryPanelSpec"); }
     #[test] fn app_header() { assert_eq!(a().render(&AppHeaderSpec::default(), &s(), &t()).spec_type, "AppHeaderSpec"); }
     #[test] fn command_palette() { assert_eq!(a().render(&CommandPaletteSpec::default(), &s(), &t()).spec_type, "CommandPaletteSpec"); }
-    #[test] fn dock_region() { assert_eq!(a().render(&DockRegionSpec::new(poodle_composites::DockEdge::Left, vec![]), &s(), &t()).spec_type, "DockRegionSpec"); }
+    #[test] fn dock_region() { assert_eq!(a().render(&DockRegionSpec::new(poodle_components::DockEdge::Left, vec![]), &s(), &t()).spec_type, "DockRegionSpec"); }
     #[test] fn editable_list() { assert_eq!(a().render(&EditableListSpec::new(), &s(), &t()).spec_type, "EditableListSpec"); }
     #[test] fn list_container() { assert_eq!(a().render(&ListContainerSpec::default(), &s(), &t()).spec_type, "ListContainerSpec"); }
     #[test] fn media_browse_panel() { assert_eq!(a().render(&MediaBrowsePanelSpec::new(), &s(), &t()).spec_type, "MediaBrowsePanelSpec"); }
     #[test] fn media_upload_status_panel() { assert_eq!(a().render(&MediaUploadStatusPanelSpec::new(), &s(), &t()).spec_type, "MediaUploadStatusPanelSpec"); }
     #[test] fn metric_tile() { assert_eq!(a().render(&MetricTileSpec::new("L", "V"), &s(), &t()).spec_type, "MetricTileSpec"); }
     #[test] fn shell_status_bar() { assert_eq!(a().render(&ShellStatusBarSpec::default(), &s(), &t()).spec_type, "ShellStatusBarSpec"); }
-    #[test] fn split_view() { assert_eq!(a().render(&SplitViewSpec::new(poodle_composites::SplitOrientation::Horizontal), &s(), &t()).spec_type, "SplitViewSpec"); }
+    #[test] fn split_view() { assert_eq!(a().render(&SplitViewSpec::new(poodle_components::SplitOrientation::Horizontal), &s(), &t()).spec_type, "SplitViewSpec"); }
     #[test] fn toast_host() { assert_eq!(a().render(&ToastHostSpec::new(), &s(), &t()).spec_type, "ToastHostSpec"); }
 }

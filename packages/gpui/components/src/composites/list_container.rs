@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{ListContainerSpec, ListContainerState};
+use poodle_components::{ListContainerSpec, ListContainerState};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

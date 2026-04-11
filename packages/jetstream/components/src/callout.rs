@@ -6,7 +6,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{CallOutSpec, StatusTone};
+use poodle_components::{CallOutSpec, StatusTone};
 
 use crate::presentation::{
     control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,

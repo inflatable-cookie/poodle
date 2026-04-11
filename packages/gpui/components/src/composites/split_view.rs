@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{SplitOrientation, SplitViewSpec};
-use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_components::{SplitOrientation, SplitViewSpec};
+use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use crate::presentation::resolve_semantic_size;
 use crate::primitives::Icon;

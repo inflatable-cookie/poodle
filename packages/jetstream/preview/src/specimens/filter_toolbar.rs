@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::filter_toolbar::js_filter_toolbar;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::FilterToolbarSpec;
+use poodle_components::FilterToolbarSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

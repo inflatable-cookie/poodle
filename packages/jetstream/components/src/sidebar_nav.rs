@@ -1,7 +1,7 @@
 //! SidebarNav — Jetstream sidebar navigation backed by SidebarNavSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::SidebarNavSpec;
+use poodle_components::SidebarNavSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_radius, resolve_px, tint};
@@ -11,20 +11,20 @@ pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> 
 
     // Size-driven dimensions from contract
     let item_height = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 1.375,
-        poodle_primitives::ControlSize::Sm => 1.625,
-        poodle_primitives::ControlSize::Md => 1.875,
-        poodle_primitives::ControlSize::Lg => 2.125,
-        poodle_primitives::ControlSize::Xl => 2.375,
+        poodle_components::ControlSize::Xs => 1.375,
+        poodle_components::ControlSize::Sm => 1.625,
+        poodle_components::ControlSize::Md => 1.875,
+        poodle_components::ControlSize::Lg => 2.125,
+        poodle_components::ControlSize::Xl => 2.375,
     });
     let item_font = rem_to_px(size_font_rem(effective_size));
     let title_font = rem_to_px(size_font_rem(effective_size) * 0.75);
 
     // Density-driven spacing from contract
     let (group_gap, item_px, item_py, title_gap) = match spec.density {
-        poodle_primitives::ControlDensity::Compact => (0.625, 0.5, 0.3125, 0.125),
-        poodle_primitives::ControlDensity::Default => (0.75, 0.75, 0.375, 0.1875),
-        poodle_primitives::ControlDensity::Comfortable => (0.875, 0.875, 0.4375, 0.25),
+        poodle_components::ControlDensity::Compact => (0.625, 0.5, 0.3125, 0.125),
+        poodle_components::ControlDensity::Default => (0.75, 0.75, 0.375, 0.1875),
+        poodle_components::ControlDensity::Comfortable => (0.875, 0.875, 0.4375, 0.25),
     };
 
     let pad_y = resolve_px(theme, "space.panel.y");

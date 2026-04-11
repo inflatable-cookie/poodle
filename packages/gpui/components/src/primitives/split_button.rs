@@ -4,7 +4,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{
+use poodle_components::{
     ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SplitButtonSpec, SplitMenuItem,
 };
 
@@ -49,8 +49,8 @@ impl SplitButton {
     pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn menu_aria_label(mut self, v: impl Into<String>) -> Self { self.spec.menu_aria_label = v.into(); self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {

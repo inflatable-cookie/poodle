@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
-use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_components::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
+use poodle_components::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px};

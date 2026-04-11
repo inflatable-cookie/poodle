@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::{ListContainerSpec, ListContainerState};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::{ListContainerSpec, ListContainerState};
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{ListContainer, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

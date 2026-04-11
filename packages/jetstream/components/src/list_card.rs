@@ -1,7 +1,7 @@
 //! ListCard — Jetstream list card backed by ListCardSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::ListCardSpec;
+use poodle_components::ListCardSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_radius};

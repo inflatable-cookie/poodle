@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CodeInputSpec, EyebrowSpec};
+use poodle_components::{CodeInputSpec, EyebrowSpec};
 use poodle_gpui_components::{CodeInput, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

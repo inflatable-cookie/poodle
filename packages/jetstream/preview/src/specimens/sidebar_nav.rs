@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::sidebar_nav::js_sidebar_nav;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
+use poodle_components::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

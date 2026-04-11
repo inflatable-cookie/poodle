@@ -1,7 +1,7 @@
 //! MarkdownEditor — Jetstream markdown editor backed by MarkdownEditorSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::MarkdownEditorSpec;
+use poodle_components::MarkdownEditorSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_radius, tint};
@@ -11,25 +11,25 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
 
     // Size-driven tool button size from contract
     let tool_size = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 1.5,
-        poodle_primitives::ControlSize::Sm => 1.75,
-        poodle_primitives::ControlSize::Md => 2.0,
-        poodle_primitives::ControlSize::Lg => 2.25,
-        poodle_primitives::ControlSize::Xl => 2.5,
+        poodle_components::ControlSize::Xs => 1.5,
+        poodle_components::ControlSize::Sm => 1.75,
+        poodle_components::ControlSize::Md => 2.0,
+        poodle_components::ControlSize::Lg => 2.25,
+        poodle_components::ControlSize::Xl => 2.5,
     });
     let mode_px = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 0.375,
-        poodle_primitives::ControlSize::Sm => 0.5,
-        poodle_primitives::ControlSize::Md => 0.5,
-        poodle_primitives::ControlSize::Lg => 0.625,
-        poodle_primitives::ControlSize::Xl => 0.75,
+        poodle_components::ControlSize::Xs => 0.375,
+        poodle_components::ControlSize::Sm => 0.5,
+        poodle_components::ControlSize::Md => 0.5,
+        poodle_components::ControlSize::Lg => 0.625,
+        poodle_components::ControlSize::Xl => 0.75,
     });
 
     // Density-driven spacing from contract
     let (toolbar_y, toolbar_x, tool_gap, pane_pad) = match spec.density {
-        poodle_primitives::ControlDensity::Compact => (0.25, 0.375, 0.0625, 0.625),
-        poodle_primitives::ControlDensity::Default => (0.375, 0.5, 0.125, 0.75),
-        poodle_primitives::ControlDensity::Comfortable => (0.5, 0.625, 0.1875, 0.875),
+        poodle_components::ControlDensity::Compact => (0.25, 0.375, 0.0625, 0.625),
+        poodle_components::ControlDensity::Default => (0.375, 0.5, 0.125, 0.75),
+        poodle_components::ControlDensity::Comfortable => (0.5, 0.625, 0.1875, 0.875),
     };
 
     let fill = resolve_color(theme, spec.fill_token());

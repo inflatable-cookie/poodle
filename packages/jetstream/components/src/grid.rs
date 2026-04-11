@@ -6,7 +6,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::GridSpec;
+use poodle_components::GridSpec;
 
 use crate::theme_ext::resolve_px;
 

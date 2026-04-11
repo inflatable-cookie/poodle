@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{Orientation, ResizeHandleSpec};
+use poodle_components::{Orientation, ResizeHandleSpec};
 
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity};
 

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{RuleTone, SeparatorOrientation, SeparatorSpec};
+use poodle_components::{RuleTone, SeparatorOrientation, SeparatorSpec};
 
 use crate::theme_ext::resolve_color;
 

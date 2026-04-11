@@ -7,7 +7,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec, SemanticControlSizeRole};
+use poodle_components::{ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem, panel_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};

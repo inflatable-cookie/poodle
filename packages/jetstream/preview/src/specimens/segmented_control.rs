@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::segmented_control::js_segmented_control;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{ChoiceOption, SegmentedControlSpec};
+use poodle_components::{ChoiceOption, SegmentedControlSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

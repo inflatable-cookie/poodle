@@ -4,8 +4,8 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::card_radio_group::js_card_radio_group;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::CardRadioGroupSpec;
-use poodle_primitives::ChoiceOption;
+use poodle_components::CardRadioGroupSpec;
+use poodle_components::ChoiceOption;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

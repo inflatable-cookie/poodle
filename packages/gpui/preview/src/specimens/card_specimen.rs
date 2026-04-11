@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{SurfaceSpec, SurfaceTone, SurfaceBorder, EyebrowSpec};
+use poodle_components::{SurfaceSpec, SurfaceTone, SurfaceBorder, EyebrowSpec};
 use poodle_gpui_components::{Surface, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;

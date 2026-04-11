@@ -1,7 +1,7 @@
 //! DetailSection — Jetstream detail section backed by DetailSectionSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::DetailSectionSpec;
+use poodle_components::DetailSectionSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};

@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{TabsSpec, TabDefinition, TabVariant, TabStripSpec, TabStripItem, Orientation, EyebrowSpec};
+use poodle_components::{TabsSpec, TabDefinition, TabVariant, TabStripSpec, TabStripItem, Orientation, EyebrowSpec};
 use poodle_gpui_components::{Tabs, TabStrip, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

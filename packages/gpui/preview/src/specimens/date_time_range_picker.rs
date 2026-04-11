@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, EyebrowSpec};
+use poodle_components::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, EyebrowSpec};
 use poodle_gpui_components::{DateTimeRangePicker, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

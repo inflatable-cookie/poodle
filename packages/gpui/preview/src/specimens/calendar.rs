@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{CalendarMode, CalendarSpec, DateRangeValue, EyebrowSpec};
+use poodle_components::{CalendarMode, CalendarSpec, DateRangeValue, EyebrowSpec};
 use poodle_gpui_components::{Calendar, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

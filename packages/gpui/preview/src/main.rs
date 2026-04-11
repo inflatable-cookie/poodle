@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{TabDefinition, TabsSpec, TabVariant};
+use poodle_components::{TabDefinition, TabsSpec, TabVariant};
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {

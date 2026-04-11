@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{
+use poodle_components::{
     Alignment, EyebrowSpec, LayoutJustify, PaddingScale, StackDirection, StackSpec,
     SurfaceBorder, SurfaceSpec, SurfaceTone,
 };

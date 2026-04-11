@@ -6,7 +6,7 @@
 //!   - Optional secondary slot below the grid
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::FilterToolbarSpec;
+use poodle_components::FilterToolbarSpec;
 
 use crate::presentation::resolve_semantic_size;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};

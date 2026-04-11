@@ -23,7 +23,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize};
+use poodle_components::{ControlDensity, ControlSize};
 
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;

@@ -6,7 +6,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_components::{CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::resolve_semantic_size;

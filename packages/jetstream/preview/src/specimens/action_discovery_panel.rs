@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::action_discovery_panel::js_action_discovery_panel;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::{ActionDiscoveryPanelSpec, ActionDiscoverySection};
+use poodle_components::{ActionDiscoveryPanelSpec, ActionDiscoverySection};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

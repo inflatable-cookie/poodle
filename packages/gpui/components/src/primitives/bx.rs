@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{BoxSpec, Dimension, Overflow, PaddingScale};
+use poodle_components::{BoxSpec, Dimension, Overflow, PaddingScale};
 
 use crate::theme_ext::resolve_px;
 

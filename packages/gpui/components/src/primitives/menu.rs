@@ -6,7 +6,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement, SemanticControlSizeRole};
+use poodle_components::{ControlDensity, ControlSize, IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement, SemanticControlSizeRole};
 
 use super::icon::Icon;
 

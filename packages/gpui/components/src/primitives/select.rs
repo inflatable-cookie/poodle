@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec, SelectVariant};
+use poodle_components::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec, SelectVariant};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
@@ -48,8 +48,8 @@ impl Select {
     pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
     pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
     pub fn mode(mut self, v: SelectMode) -> Self { self.spec.mode = v; self }
     pub fn searchable(mut self, v: bool) -> Self { self.spec.searchable = v; self }
     pub fn freeform(mut self, v: bool) -> Self { self.spec.freeform = v; self }
@@ -113,7 +113,7 @@ impl IntoElement for Select {
         // tones — when set, the trigger advertises the state and
         // the closed-state border switches to the matching status
         // colour.
-        use poodle_primitives::ValidationState;
+        use poodle_components::ValidationState;
         let validation_border = match spec.validation_state {
             ValidationState::Invalid => Some(resolve_color(theme, "color.status.danger")),
             ValidationState::Valid => Some(resolve_color(theme, "color.status.success")),

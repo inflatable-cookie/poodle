@@ -3,7 +3,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{FormActionAlign, FormActionsSpec};
+use poodle_components::{FormActionAlign, FormActionsSpec};
 
 
 /// A real GPUI form actions bar backed by `FormActionsSpec`.

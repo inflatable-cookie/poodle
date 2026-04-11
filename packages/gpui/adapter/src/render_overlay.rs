@@ -4,7 +4,7 @@
 //! Menu, ContextMenu, Tabs, TabStrip, NavigationMenu, Menubar
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{
+use poodle_components::{
     AccordionSpec, CollapsibleSpec, ContextMenuSpec, DialogSpec, DrawerSpec, HoverCardSpec,
     MenuSpec, MenubarSpec, NavigationMenuSpec, PopoverSpec, TabStripSpec, TabsSpec, TooltipSpec,
 };
@@ -125,7 +125,7 @@ impl RenderComponent<MenubarSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::*;
+    use poodle_components::*;
     use poodle_style::StyleDescriptor;
     use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 

@@ -3,8 +3,8 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
-use poodle_primitives::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
+use poodle_components::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
+use poodle_components::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};

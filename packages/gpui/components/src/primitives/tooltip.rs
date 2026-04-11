@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{OverlayPlacement, TooltipSpec};
+use poodle_components::{OverlayPlacement, TooltipSpec};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};

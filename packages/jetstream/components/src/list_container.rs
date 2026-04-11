@@ -2,7 +2,7 @@
 //! backed by ListContainerSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::{ListContainerSpec, ListContainerState};
+use poodle_components::{ListContainerSpec, ListContainerState};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};

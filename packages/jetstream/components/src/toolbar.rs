@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{Alignment, ToolbarSpec};
+use poodle_components::{Alignment, ToolbarSpec};
 
 use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::resolve_px;

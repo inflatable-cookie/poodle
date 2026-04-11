@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_composites::{MetricTileSpec, MetricTrend};
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_components::{MetricTileSpec, MetricTrend};
+use poodle_components::{IconSize, IconSpec};
 
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};

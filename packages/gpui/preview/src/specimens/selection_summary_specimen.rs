@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_composites::{SelectionSummarySpec, SelectionSummaryItem};
-use poodle_primitives::EyebrowSpec;
+use poodle_components::{SelectionSummarySpec, SelectionSummaryItem};
+use poodle_components::EyebrowSpec;
 use poodle_gpui_components::{SelectionSummary, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

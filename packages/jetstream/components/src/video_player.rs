@@ -1,7 +1,7 @@
 //! VideoPlayer — Jetstream video player backed by VideoPlayerSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::VideoPlayerSpec;
+use poodle_components::VideoPlayerSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::resolve_radius;
@@ -20,46 +20,46 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
 
     // Size-driven button dimensions from contract
     let btn_size = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 1.25,
-        poodle_primitives::ControlSize::Sm => 1.5,
-        poodle_primitives::ControlSize::Md => 1.75,
-        poodle_primitives::ControlSize::Lg => 2.125,
-        poodle_primitives::ControlSize::Xl => 2.25,
+        poodle_components::ControlSize::Xs => 1.25,
+        poodle_components::ControlSize::Sm => 1.5,
+        poodle_components::ControlSize::Md => 1.75,
+        poodle_components::ControlSize::Lg => 2.125,
+        poodle_components::ControlSize::Xl => 2.25,
     });
     let icon_size = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 0.75,
-        poodle_primitives::ControlSize::Sm => 0.875,
-        poodle_primitives::ControlSize::Md => 0.875,
-        poodle_primitives::ControlSize::Lg => 1.0,
-        poodle_primitives::ControlSize::Xl => 1.125,
+        poodle_components::ControlSize::Xs => 0.75,
+        poodle_components::ControlSize::Sm => 0.875,
+        poodle_components::ControlSize::Md => 0.875,
+        poodle_components::ControlSize::Lg => 1.0,
+        poodle_components::ControlSize::Xl => 1.125,
     });
     let volume_width = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 2.5,
-        poodle_primitives::ControlSize::Sm => 3.0,
-        poodle_primitives::ControlSize::Md => 3.5,
-        poodle_primitives::ControlSize::Lg => 4.0,
-        poodle_primitives::ControlSize::Xl => 4.5,
+        poodle_components::ControlSize::Xs => 2.5,
+        poodle_components::ControlSize::Sm => 3.0,
+        poodle_components::ControlSize::Md => 3.5,
+        poodle_components::ControlSize::Lg => 4.0,
+        poodle_components::ControlSize::Xl => 4.5,
     });
     let time_font = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 0.5625,
-        poodle_primitives::ControlSize::Sm => 0.625,
-        poodle_primitives::ControlSize::Md => 0.6875,
-        poodle_primitives::ControlSize::Lg => 0.75,
-        poodle_primitives::ControlSize::Xl => 0.8125,
+        poodle_components::ControlSize::Xs => 0.5625,
+        poodle_components::ControlSize::Sm => 0.625,
+        poodle_components::ControlSize::Md => 0.6875,
+        poodle_components::ControlSize::Lg => 0.75,
+        poodle_components::ControlSize::Xl => 0.8125,
     });
     let big_play_size = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 3.0,
-        poodle_primitives::ControlSize::Sm => 3.5,
-        poodle_primitives::ControlSize::Md => 4.0,
-        poodle_primitives::ControlSize::Lg => 4.5,
-        poodle_primitives::ControlSize::Xl => 5.0,
+        poodle_components::ControlSize::Xs => 3.0,
+        poodle_components::ControlSize::Sm => 3.5,
+        poodle_components::ControlSize::Md => 4.0,
+        poodle_components::ControlSize::Lg => 4.5,
+        poodle_components::ControlSize::Xl => 5.0,
     });
 
     // Density-driven spacing from contract
     let bar_gap = rem_to_px(match spec.density {
-        poodle_primitives::ControlDensity::Compact => 0.25,
-        poodle_primitives::ControlDensity::Default => 0.375,
-        poodle_primitives::ControlDensity::Comfortable => 0.5,
+        poodle_components::ControlDensity::Compact => 0.25,
+        poodle_components::ControlDensity::Default => 0.375,
+        poodle_components::ControlDensity::Comfortable => 0.5,
     });
 
     // Video player uses black background regardless of theme

@@ -1,7 +1,7 @@
 //! ActionDiscoveryPanel — Jetstream keyboard shortcut panel backed by ActionDiscoveryPanelSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::ActionDiscoveryPanelSpec;
+use poodle_components::ActionDiscoveryPanelSpec;
 
 use crate::presentation::{
     panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,

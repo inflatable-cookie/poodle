@@ -8,7 +8,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::IconButtonSpec;
+use poodle_components::IconButtonSpec;
 
 use crate::presentation::{
     control_height_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,

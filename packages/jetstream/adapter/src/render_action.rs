@@ -3,7 +3,7 @@
 //! g08.004: ButtonSpec, IconButtonSpec, FormActionsSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{ButtonSpec, FormActionsSpec, IconButtonSpec, ToolbarSpec};
+use poodle_components::{ButtonSpec, FormActionsSpec, IconButtonSpec, ToolbarSpec};
 use poodle_style::StyleDescriptor;
 
 use crate::style_map::{map_style, JetstreamColor};
@@ -111,7 +111,7 @@ impl RenderComponent<ToolbarSpec> for JetstreamAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::*;
+    use poodle_components::*;
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 

@@ -1,6 +1,6 @@
 use gpui::*;
-use poodle_composites::{MediaUploadStatusPanelSpec, MediaUploadStep};
-use poodle_primitives::{ControlSize, EyebrowSpec};
+use poodle_components::{MediaUploadStatusPanelSpec, MediaUploadStep};
+use poodle_components::{ControlSize, EyebrowSpec};
 use poodle_gpui_components::{MediaUploadStatusPanel, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

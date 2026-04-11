@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::date_time_zone_picker::js_date_time_zone_picker;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::DateTimeZonePickerSpec;
+use poodle_components::DateTimeZonePickerSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::rating::js_rating;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::RatingSpec;
+use poodle_components::RatingSpec;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

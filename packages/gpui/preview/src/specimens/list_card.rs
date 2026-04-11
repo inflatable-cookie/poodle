@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{
+use poodle_components::{
     ListCardSpec, LeadingShape, LeadingFill,
     StatusIndicatorSpec, StatusTone, PillSpec, PillTone,
     IconSpec, IconSize, ContextMenuSpec, MenuEntry, MenuItemKind,

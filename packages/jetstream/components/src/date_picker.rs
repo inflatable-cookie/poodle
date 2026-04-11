@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::DatePickerSpec;
+use poodle_components::DatePickerSpec;
 
 use crate::theme_ext::{resolve_color, resolve_radius};
 

@@ -1,8 +1,8 @@
 use gpui::*;
-use poodle_primitives::{TooltipSpec, ButtonSpec, ButtonVariant, EyebrowSpec};
+use poodle_components::{TooltipSpec, ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_gpui_components::{Tooltip, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::OverlayPlacement;
+use poodle_components::OverlayPlacement;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // ── Default ──────────────────────────────────────────────────────

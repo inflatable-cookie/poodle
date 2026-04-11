@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ColorPickerSpec, ColorInputMode, EyebrowSpec};
+use poodle_components::{ColorPickerSpec, ColorInputMode, EyebrowSpec};
 use poodle_gpui_components::{ColorPicker, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

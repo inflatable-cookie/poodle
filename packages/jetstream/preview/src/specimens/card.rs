@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::card::js_card;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{CardLayout, CardSpec, CardVariant};
+use poodle_components::{CardLayout, CardSpec, CardVariant};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

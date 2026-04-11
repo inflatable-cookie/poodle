@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{EyebrowSpec, SliderSpec};
+use poodle_components::{EyebrowSpec, SliderSpec};
 use poodle_gpui_components::{Slider, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;

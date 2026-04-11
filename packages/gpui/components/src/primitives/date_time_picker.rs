@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CalendarWeekStart, ControlDensity, ControlSize, DateTimePickerSpec, DateTimeValue, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_components::{CalendarWeekStart, ControlDensity, ControlSize, DateTimePickerSpec, DateTimeValue, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};

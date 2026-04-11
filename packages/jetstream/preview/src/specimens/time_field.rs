@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::time_field::js_time_field;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{ControlSize, TimeFieldSpec};
+use poodle_components::{ControlSize, TimeFieldSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

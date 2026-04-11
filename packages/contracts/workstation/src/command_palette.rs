@@ -1,4 +1,4 @@
-use poodle_primitives::OverlayPlacement;
+use poodle_components::OverlayPlacement;
 use poodle_tokens::semantic;
 
 use crate::types::{CommandActionItem, DiscoveryState};

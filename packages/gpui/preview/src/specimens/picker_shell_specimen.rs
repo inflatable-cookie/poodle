@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_composites::{PickerShellSpec, PickerVariant, BrowseState, SelectionMode};
-use poodle_primitives::{TextInputSpec, EyebrowSpec};
+use poodle_components::{PickerShellSpec, PickerVariant, BrowseState, SelectionMode};
+use poodle_components::{TextInputSpec, EyebrowSpec};
 use poodle_gpui_components::{PickerShell, TextInput, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::style_bridge::color_to_hsla;

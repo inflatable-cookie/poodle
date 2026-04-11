@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::navigation_menu::js_navigation_menu;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{NavigationMenuEntry, NavigationMenuSpec};
+use poodle_components::{NavigationMenuEntry, NavigationMenuSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

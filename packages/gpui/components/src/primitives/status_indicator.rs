@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{StatusIndicatorSpec, StatusTone};
+use poodle_components::{StatusIndicatorSpec, StatusTone};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

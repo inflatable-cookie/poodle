@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::date_time_range_picker::js_date_time_range_picker;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue};
+use poodle_components::{DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

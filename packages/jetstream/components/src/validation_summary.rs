@@ -1,7 +1,7 @@
 //! ValidationSummary — Jetstream error/warning validation list backed by ValidationSummarySpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::ValidationSummarySpec;
+use poodle_components::ValidationSummarySpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

@@ -13,7 +13,7 @@
 //! ## Architecture
 //!
 //! ```text
-//! Shared Contract Layer (poodle-primitives, poodle-composites, poodle-workstation)
+//! Shared Contract Layer (poodle-components, poodle-workstation)
 //!     │
 //!     ▼
 //! poodle-adapter traits (ThemeProvider, RenderComponent, AdapterManifest)
@@ -47,7 +47,7 @@ pub use style_map::{
 pub use theme::GpuiThemeProvider;
 
 use poodle_adapter::{AdapterManifest, RenderTarget};
-pub use poodle_primitives::FieldRelationships;
+pub use poodle_components::FieldRelationships;
 
 /// Opaque handle to a rendered GPUI element.
 ///

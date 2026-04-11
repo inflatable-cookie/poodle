@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{EyebrowSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_components::{EyebrowSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 use poodle_gpui_components::{Eyebrow, Spinner};
 
 use crate::PreviewRoot;

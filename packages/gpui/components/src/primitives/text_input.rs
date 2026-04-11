@@ -6,7 +6,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState};
+use poodle_components::{ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState};
 
 use super::icon::Icon;
 use super::spinner::Spinner;
@@ -69,8 +69,8 @@ impl TextInput {
     pub fn submit_enabled(mut self, v: bool) -> Self { self.spec.submit_enabled = v; self }
     pub fn cancel_enabled(mut self, v: bool) -> Self { self.spec.cancel_enabled = v; self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_primitives::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_primitives::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size_role(mut self, v: poodle_components::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
+    pub fn density(mut self, v: poodle_components::ControlDensity) -> Self { self.spec.density = v; self }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());

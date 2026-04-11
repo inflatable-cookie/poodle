@@ -4,7 +4,7 @@
 //! using GPUI's svg() element at the correct token-resolved size.
 
 use gpui::*;
-use poodle_primitives::{IconSize, IconSpec};
+use poodle_components::{IconSize, IconSpec};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

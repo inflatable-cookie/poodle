@@ -4,7 +4,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{CollapsibleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_components::{CollapsibleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};

@@ -1,7 +1,7 @@
 use gpui::*;
-use poodle_composites::FilterToolbarSpec;
+use poodle_components::FilterToolbarSpec;
 use poodle_gpui_components::{Button, FilterToolbar, Eyebrow, IconButton, Select, TextInput};
-use poodle_primitives::{
+use poodle_components::{
     ButtonSpec, ButtonVariant, ChoiceOption, ControlSize, EyebrowSpec, IconButtonSpec,
     SelectSpec, TextInputSpec,
 };

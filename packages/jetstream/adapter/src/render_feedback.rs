@@ -7,7 +7,7 @@
 //! DatePickerSpec, DateRangePickerSpec, DateTimePickerSpec, DateTimeRangePickerSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{
+use poodle_components::{
     BadgeSpec, CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
     DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
     MeterSpec, PillSpec, ProgressSpec, RatingSpec, SkeletonSpec,
@@ -405,7 +405,7 @@ impl RenderComponent<DateTimeRangePickerSpec> for JetstreamAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::*;
+    use poodle_components::*;
     use poodle_style::StyleDescriptor;
     use crate::{JetstreamAdapter, WidgetKind, theme::JetstreamThemeProvider};
 

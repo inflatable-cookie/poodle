@@ -1,6 +1,6 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_primitives::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
+use poodle_components::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
 use poodle_gpui_components::{Eyebrow, StatusIndicator};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {

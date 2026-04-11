@@ -8,7 +8,7 @@
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::ToggleGroupSpec;
+use poodle_components::ToggleGroupSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -122,7 +122,7 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_primitives::ToggleGroupOption;
+    use poodle_components::ToggleGroupOption;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

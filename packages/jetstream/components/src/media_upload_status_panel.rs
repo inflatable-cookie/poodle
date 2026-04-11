@@ -1,7 +1,7 @@
 //! MediaUploadStatusPanel — Jetstream media upload status panel backed by MediaUploadStatusPanelSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::{MediaUploadStatusPanelSpec, MediaUploadStep};
+use poodle_components::{MediaUploadStatusPanelSpec, MediaUploadStep};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px, tint};
@@ -17,25 +17,25 @@ pub fn js_media_upload_status_panel(spec: &MediaUploadStatusPanelSpec, theme: &J
 
     // Size-driven progress dimensions from contract
     let progress_height = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 0.25,
-        poodle_primitives::ControlSize::Sm => 0.3125,
-        poodle_primitives::ControlSize::Md => 0.375,
-        poodle_primitives::ControlSize::Lg => 0.4375,
-        poodle_primitives::ControlSize::Xl => 0.5,
+        poodle_components::ControlSize::Xs => 0.25,
+        poodle_components::ControlSize::Sm => 0.3125,
+        poodle_components::ControlSize::Md => 0.375,
+        poodle_components::ControlSize::Lg => 0.4375,
+        poodle_components::ControlSize::Xl => 0.5,
     });
     let progress_max_width = rem_to_px(match effective_size {
-        poodle_primitives::ControlSize::Xs => 11.0,
-        poodle_primitives::ControlSize::Sm => 12.5,
-        poodle_primitives::ControlSize::Md => 14.0,
-        poodle_primitives::ControlSize::Lg => 15.5,
-        poodle_primitives::ControlSize::Xl => 17.0,
+        poodle_components::ControlSize::Xs => 11.0,
+        poodle_components::ControlSize::Sm => 12.5,
+        poodle_components::ControlSize::Md => 14.0,
+        poodle_components::ControlSize::Lg => 15.5,
+        poodle_components::ControlSize::Xl => 17.0,
     });
 
     // Density-driven padding from contract
     let (final_pad_y, final_pad_x) = match spec.density {
-        poodle_primitives::ControlDensity::Compact => (rem_to_px(0.5), rem_to_px(0.5)),
-        poodle_primitives::ControlDensity::Default => (pad_y, pad_x),
-        poodle_primitives::ControlDensity::Comfortable => (rem_to_px(1.0), rem_to_px(1.0)),
+        poodle_components::ControlDensity::Compact => (rem_to_px(0.5), rem_to_px(0.5)),
+        poodle_components::ControlDensity::Default => (pad_y, pad_x),
+        poodle_components::ControlDensity::Comfortable => (rem_to_px(1.0), rem_to_px(1.0)),
     };
 
     let text_secondary = resolve_color(theme, "color.text.secondary");

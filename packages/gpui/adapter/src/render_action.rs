@@ -7,7 +7,7 @@
 //! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
-use poodle_primitives::{
+use poodle_components::{
     ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
     NumberInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
 };
@@ -297,7 +297,7 @@ impl RenderComponent<ToolbarSpec> for GpuiAdapter {
 #[cfg(test)]
 mod tests {
     use poodle_adapter::RenderComponent;
-    use poodle_primitives::{
+    use poodle_components::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
         NumberInputSpec, TextInputSpec,
         TimeFieldSpec, ToolbarSpec,

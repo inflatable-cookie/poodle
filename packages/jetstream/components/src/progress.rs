@@ -7,7 +7,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::ProgressSpec;
+use poodle_components::ProgressSpec;
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, tint};

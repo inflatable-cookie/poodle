@@ -2,7 +2,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::{FieldSpec, ValidationState};
+use poodle_components::{FieldSpec, ValidationState};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 

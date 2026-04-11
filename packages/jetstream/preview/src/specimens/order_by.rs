@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::order_by::js_order_by;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{ActiveSort, OrderBySpec, SortDirection, SortField};
+use poodle_components::{ActiveSort, OrderBySpec, SortDirection, SortField};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

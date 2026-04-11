@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::accordion::js_accordion;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_primitives::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
+use poodle_components::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");

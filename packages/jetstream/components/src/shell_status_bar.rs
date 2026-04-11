@@ -2,7 +2,7 @@
 //! backed by ShellStatusBarSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_composites::ShellStatusBarSpec;
+use poodle_components::ShellStatusBarSpec;
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;

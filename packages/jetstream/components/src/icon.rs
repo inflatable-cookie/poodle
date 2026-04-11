@@ -8,7 +8,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_primitives::IconSpec;
+use poodle_components::IconSpec;
 
 use crate::theme_ext::resolve_px;
 

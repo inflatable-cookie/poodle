@@ -1,5 +1,5 @@
 use gpui::*;
-use poodle_primitives::{BulkActionBarSpec, BulkAction, BulkActionTone, EyebrowSpec};
+use poodle_components::{BulkActionBarSpec, BulkAction, BulkActionTone, EyebrowSpec};
 use poodle_gpui_components::{BulkActionBar, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 

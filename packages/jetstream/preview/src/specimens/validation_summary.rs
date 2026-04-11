@@ -4,8 +4,8 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::validation_summary::js_validation_summary;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_composites::{ValidationSummaryEntry, ValidationSummarySpec};
-use poodle_primitives::ValidationState;
+use poodle_components::{ValidationSummaryEntry, ValidationSummarySpec};
+use poodle_components::ValidationState;
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
