@@ -102,6 +102,7 @@ impl IntoElement for CommandPalette {
         let radius_control = resolve_radius(theme, "radius.control");
         let radius_surface = resolve_radius(theme, "radius.surface");
         let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_lg = resolve_px(theme, "space.inline.lg");
 
         let mut palette = div()
             .flex()
@@ -133,7 +134,7 @@ impl IntoElement for CommandPalette {
             .flex()
             .items_center()
             .px(inline_padding)
-            .py(px(8.0))
+            .py(gap_sm)
             .border_b_1()
             .border_color(border)
             .child(
@@ -155,7 +156,7 @@ impl IntoElement for CommandPalette {
             DiscoveryState::Loading => {
                 palette = palette.child(
                     div()
-                        .p(px(16.0))
+                        .p(gap_lg)
                         .text_size(body_size)
                         .text_color(text_secondary)
                         .child("Searching\u{2026}"),
@@ -165,7 +166,7 @@ impl IntoElement for CommandPalette {
             DiscoveryState::Error => {
                 palette = palette.child(
                     div()
-                        .p(px(16.0))
+                        .p(gap_lg)
                         .text_size(body_size)
                         .text_color(resolve_color(theme, "color.status.danger"))
                         .child("Error loading commands"),
@@ -175,7 +176,7 @@ impl IntoElement for CommandPalette {
             DiscoveryState::Empty | DiscoveryState::NoResults => {
                 palette = palette.child(
                     div()
-                        .p(px(16.0))
+                        .p(gap_lg)
                         .text_size(body_size)
                         .text_color(text_secondary)
                         .child("No matching commands"),
@@ -225,7 +226,7 @@ impl IntoElement for CommandPalette {
                 .items_center()
                 .justify_between()
                 .px(inline_padding)
-                .py(px(6.0))
+                .py(gap_sm)
                 .mx(px(4.0))
                 .rounded(radius_control)
                 .text_size(body_size);

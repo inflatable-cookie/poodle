@@ -40,6 +40,7 @@ impl IntoElement for EmbedPreview {
         let subtle_bg = resolve_color(theme, "color.background.subtle");
         let gap = resolve_px(theme, "space.inline.sm");
         let gap_md = resolve_px(theme, "space.inline.md");
+        let gap_lg = resolve_px(theme, "space.inline.lg");
         let label_size = resolve_px(theme, "typography.label.size");
         let radius_control = resolve_radius(theme, "radius.control");
 
@@ -49,8 +50,8 @@ impl IntoElement for EmbedPreview {
             .border_1()
             .border_color(border)
             .rounded(radius)
-            .px(px(16.0))
-            .py(px(12.0))
+            .px(gap_lg)
+            .py(gap_md)
             .flex()
             .flex_col()
             .gap(gap)
@@ -90,7 +91,7 @@ impl IntoElement for EmbedPreview {
         if let Some(ref error) = self.spec.error {
             el = el.child(
                 div()
-                    .py(px(16.0))
+                    .py(gap_lg)
                     .flex()
                     .flex_col()
                     .items_center()
@@ -113,7 +114,7 @@ impl IntoElement for EmbedPreview {
         if self.spec.parsed.is_none() {
             el = el.child(
                 div()
-                    .py(px(16.0))
+                    .py(gap_lg)
                     .flex()
                     .flex_col()
                     .items_center()
@@ -155,9 +156,9 @@ impl IntoElement for EmbedPreview {
                 .flex_col()
                 .items_center()
                 .justify_center()
-                .gap(px(8.0))
-                .px(px(16.0))
-                .py(px(20.0))
+                .gap(gap)
+                .px(gap_lg)
+                .py(gap_lg)
                 .child(
                     Icon::from_spec(
                         IconSpec::new("monitor-play").with_size(IconSize::Lg),
@@ -198,7 +199,7 @@ impl IntoElement for EmbedPreview {
                             .text_color(success_color)
                             .bg(resolve_color(theme, "color.background.subtle"))
                             .rounded(radius_control)
-                            .px(px(6.0))
+                            .px(gap)
                             .py(px(2.0))
                             .child(provider_label),
                     ),
@@ -214,8 +215,8 @@ impl IntoElement for EmbedPreview {
                     .bg(subtle_bg)
                     .border_1()
                     .border_color(border)
-                    .px(px(16.0))
-                    .py(px(12.0))
+                    .px(gap_lg)
+                    .py(gap_md)
                     .flex()
                     .flex_col()
                     .gap(gap)

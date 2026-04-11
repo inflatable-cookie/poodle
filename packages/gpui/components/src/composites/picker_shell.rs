@@ -77,6 +77,9 @@ impl IntoElement for PickerShell {
         let spec = &self.spec;
 
         let inline_padding = resolve_px(theme, "space.inline.md");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
+        let gap_lg = resolve_px(theme, "space.inline.lg");
         let body_size = resolve_px(theme, "typography.body.size");
         let label_size = resolve_px(theme, "typography.label.size");
         let control_radius = resolve_radius(theme, "radius.control");
@@ -116,7 +119,7 @@ impl IntoElement for PickerShell {
         let mut header = div()
             .w_full()
             .px(inline_padding)
-            .py(px(10.0))
+            .py(gap_md)
             .flex()
             .flex_col()
             .gap(px(2.0))
@@ -148,7 +151,7 @@ impl IntoElement for PickerShell {
                 div()
                     .w_full()
                     .px(inline_padding)
-                    .py(px(8.0))
+                    .py(gap_sm)
                     .border_b_1()
                     .border_color(border)
                     .child(search),
@@ -163,8 +166,8 @@ impl IntoElement for PickerShell {
                 .flex_col()
                 .items_center()
                 .justify_center()
-                .gap(px(8.0))
-                .py(px(24.0))
+                .gap(gap_sm)
+                .py(gap_lg)
                 .child(
                     Spinner::from_spec(
                         SpinnerSpec::new()
@@ -185,7 +188,7 @@ impl IntoElement for PickerShell {
                 .flex()
                 .items_center()
                 .justify_center()
-                .py(px(24.0))
+                .py(gap_lg)
                 .child(
                     div()
                         .text_size(body_size)
@@ -197,7 +200,7 @@ impl IntoElement for PickerShell {
                 .flex()
                 .items_center()
                 .justify_center()
-                .py(px(24.0))
+                .py(gap_lg)
                 .child(
                     div()
                         .text_size(body_size)
@@ -225,7 +228,7 @@ impl IntoElement for PickerShell {
             .items_center()
             .gap(footer_gap)
             .px(inline_padding)
-            .py(px(8.0))
+            .py(gap_sm)
             .border_t_1()
             .border_color(border);
 
