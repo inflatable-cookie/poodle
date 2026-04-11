@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PickerShell } from "@poodle/svelte-composites";
-  import { Surface } from "@poodle/svelte-primitives";
+  import { PickerShell } from "@poodle/svelte";
+  import { Surface } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

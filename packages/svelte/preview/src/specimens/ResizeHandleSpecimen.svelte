@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ResizeHandle } from "@poodle/svelte-primitives";
+  import { ResizeHandle } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

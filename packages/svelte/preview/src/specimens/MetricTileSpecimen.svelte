@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MetricTile } from "@poodle/svelte-composites";
+  import { MetricTile } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

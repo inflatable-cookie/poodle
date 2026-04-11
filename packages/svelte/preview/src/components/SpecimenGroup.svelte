@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { Eyebrow, Surface } from "@poodle/svelte";
 
   export let label: string;
   /** When true, renders without Surface wrapper — for components that are surfaces themselves. */

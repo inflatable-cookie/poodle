@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@poodle/svelte-primitives";
+  import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let filter: TriStateValue = "default";

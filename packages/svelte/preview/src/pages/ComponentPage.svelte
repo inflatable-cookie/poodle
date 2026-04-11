@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Pill, Separator } from "@poodle/svelte-primitives";
+  import { Eyebrow, Pill, Separator } from "@poodle/svelte";
   import UsageDocs from "../components/UsageDocs.svelte";
   import type { ComponentEntry } from "../component-registry";
   import { componentDocsMap } from "../component-docs";

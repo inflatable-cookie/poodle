@@ -7,8 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@poodle/svelte-composites": "file:../composites",
-    "@poodle/svelte-primitives": "file:../primitives",
+    "@poodle/svelte": "file:../components",
     "@poodle/svelte-tokens": "file:../tokens",
     "svelte": "^5.38.6"
   },

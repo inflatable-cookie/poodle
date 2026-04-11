@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tabs, type TabItem } from "@poodle/svelte-primitives";
+  import { Tabs, type TabItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const basicTabs: TabItem[] = [

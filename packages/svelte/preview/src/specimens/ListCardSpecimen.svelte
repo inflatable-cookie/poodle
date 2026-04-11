@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ContextMenu, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@poodle/svelte-primitives";
+  import { ContextMenu, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@poodle/svelte";
   import { folder, layers, grid2x2 } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 

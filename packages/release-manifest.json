@@ -24,16 +24,8 @@
       "channel": "preview"
     },
     {
-      "name": "@poodle/svelte-primitives",
-      "path": "packages/svelte/primitives",
-      "kind": "runtime-package",
-      "language": "typescript",
-      "publicIntent": true,
-      "channel": "preview"
-    },
-    {
-      "name": "@poodle/svelte-composites",
-      "path": "packages/svelte/composites",
+      "name": "@poodle/svelte",
+      "path": "packages/svelte/components",
       "kind": "runtime-package",
       "language": "typescript",
       "publicIntent": true,

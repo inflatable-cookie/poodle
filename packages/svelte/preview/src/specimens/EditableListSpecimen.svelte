@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { EditableList } from "@poodle/svelte-composites";
-  import type { EditableListItem } from "@poodle/svelte-composites";
+  import { EditableList } from "@poodle/svelte";
+  import type { EditableListItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let tags: EditableListItem[] = [

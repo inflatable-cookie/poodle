@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ToggleGroup, type ToggleGroupOption } from "@poodle/svelte-primitives";
+  import { ToggleGroup, type ToggleGroupOption } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

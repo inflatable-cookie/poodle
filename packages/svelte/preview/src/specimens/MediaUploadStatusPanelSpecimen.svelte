@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { MediaUploadStatusPanel } from "@poodle/svelte-composites";
-  import type { MediaUploadWorkflowStep } from "@poodle/svelte-composites";
+  import { MediaUploadStatusPanel } from "@poodle/svelte";
+  import type { MediaUploadWorkflowStep } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Field, TextInput } from "@poodle/svelte-primitives";
+  import { Field, TextInput } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { MetricTile } from "@poodle/svelte-composites";
-  import { Button, Pill } from "@poodle/svelte-primitives";
+  import { MetricTile } from "@poodle/svelte";
+  import { Button, Pill } from "@poodle/svelte";
   import { applyThemeAttributes } from "@poodle/svelte-tokens/runtime";
   import { onMount } from "svelte";
 

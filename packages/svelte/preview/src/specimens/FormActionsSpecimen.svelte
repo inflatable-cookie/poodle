@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FormActions, Button } from "@poodle/svelte-primitives";
+  import { FormActions, Button } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const dangerItems = [

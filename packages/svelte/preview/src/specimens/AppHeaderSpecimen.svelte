@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button, IconButton, Menubar } from "@poodle/svelte-primitives";
-  import { AppHeader } from "@poodle/svelte-composites";
+  import { Button, IconButton, Menubar } from "@poodle/svelte";
+  import { AppHeader } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const menuItems = [

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { EmptyState } from "@poodle/svelte-composites";
-  import { Button, Icon } from "@poodle/svelte-primitives";
+  import { EmptyState } from "@poodle/svelte";
+  import { Button, Icon } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

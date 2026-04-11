@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Box } from "@poodle/svelte-primitives";
+  import { Box } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

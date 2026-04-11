@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Separator, Surface, Button, Pill } from "@poodle/svelte-primitives";
+  import { Eyebrow, Separator, Surface, Button, Pill } from "@poodle/svelte";
 
   const treatmentRoles = [
     {

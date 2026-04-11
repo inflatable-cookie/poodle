@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EditableLabel } from "@poodle/svelte-primitives";
+  import { EditableLabel } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

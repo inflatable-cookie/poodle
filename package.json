@@ -5,8 +5,7 @@
     "workspaces": [
         "packages/tokens",
         "packages/svelte/tokens",
-        "packages/svelte/primitives",
-        "packages/svelte/composites",
+        "packages/svelte/components",
         "packages/bridges/underlay",
         "packages/svelte/icons-lucide",
         "packages/svelte/preview"

@@ -32,8 +32,8 @@ function entry(
   };
 }
 
-const P = "@poodle/svelte-primitives";
-const C = "@poodle/svelte-composites";
+const P = "@poodle/svelte";
+const C = "@poodle/svelte";
 
 export const primitiveComponents: ComponentEntry[] = [
   entry("Accordion", "primitive", P, "Expandable disclosure panels with single or multiple selection.", true),

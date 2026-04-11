@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { MarkdownEditor } from "@poodle/svelte-composites";
-  import { UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { MarkdownEditor } from "@poodle/svelte";
+  import { UiPresentationProvider } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let content = `# Hello World

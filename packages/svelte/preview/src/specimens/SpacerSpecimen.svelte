@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Spacer, Stack, Surface } from "@poodle/svelte-primitives";
+  import { Spacer, Stack, Surface } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Drawer, Button, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { Drawer, Button, Eyebrow, Surface } from "@poodle/svelte";
 
   let rightOpen = false;
   let leftOpen = false;

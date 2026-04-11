@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Table, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
+  import { Table, type TableColumn, type TableRow } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

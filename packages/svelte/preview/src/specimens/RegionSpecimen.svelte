@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Region, Stack } from "@poodle/svelte-primitives";
+  import { Region, Stack } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

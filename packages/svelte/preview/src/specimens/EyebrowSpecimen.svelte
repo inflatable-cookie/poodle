@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { Eyebrow, Surface } from "@poodle/svelte";
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">

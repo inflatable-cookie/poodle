@@ -9,8 +9,7 @@
       "status": "baseline",
       "coveredPackages": [
         "@poodle/svelte-tokens",
-        "@poodle/svelte-primitives",
-        "@poodle/svelte-composites",
+        "@poodle/svelte",
         "@poodle/icons-lucide",
         "@poodle/svelte-preview"
       ],
@@ -47,8 +46,7 @@
       "coveredPackages": [
         "@poodle/bridge-underlay",
         "@poodle/svelte-tokens",
-        "@poodle/svelte-primitives",
-        "@poodle/svelte-composites"
+        "@poodle/svelte"
       ],
       "evidenceArtifacts": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
@@ -78,13 +76,11 @@
       "status": "proof-backed",
       "coveredPackages": [
         "@poodle/svelte-tokens",
-        "@poodle/svelte-primitives",
-        "@poodle/svelte-composites",
+        "@poodle/svelte",
         "@poodle/icons-lucide"
       ],
       "evidenceArtifacts": [
-        "packages/svelte/primitives/README.md",
-        "packages/svelte/composites/README.md",
+        "packages/svelte/components/README.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "regressionClasses": [
@@ -162,8 +158,7 @@
       "primaryEvidence": [
         "docs/contracts/",
         "packages/contracts/",
-        "packages/svelte/primitives/",
-        "packages/svelte/composites/",
+        "packages/svelte/components/",
         "packages/svelte/icons-lucide/"
       ]
     },

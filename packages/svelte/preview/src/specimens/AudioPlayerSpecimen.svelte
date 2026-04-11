@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { AudioPlayer } from "@poodle/svelte-primitives";
-  import { UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { AudioPlayer } from "@poodle/svelte";
+  import { UiPresentationProvider } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

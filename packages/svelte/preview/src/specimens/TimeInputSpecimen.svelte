@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeInput, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { TimeInput, Eyebrow, Surface } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let time = "";

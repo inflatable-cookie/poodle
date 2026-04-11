@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SplitButton, Eyebrow, Surface } from "@poodle/svelte-primitives";
-  import type { MenuItem } from "@poodle/svelte-primitives";
+  import { SplitButton, Eyebrow, Surface } from "@poodle/svelte";
+  import type { MenuItem } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastAction = "";

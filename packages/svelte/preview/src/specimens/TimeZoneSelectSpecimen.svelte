@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TimeZoneSelect, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { TimeZoneSelect, Eyebrow, Surface } from "@poodle/svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let zone = "";

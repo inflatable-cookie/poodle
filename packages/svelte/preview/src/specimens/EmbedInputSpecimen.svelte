@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { EmbedInput, resolveEmbedParseState } from "@poodle/svelte-composites";
-  import { Field } from "@poodle/svelte-primitives";
-  import type { ParsedEmbed } from "@poodle/svelte-composites";
+  import { EmbedInput, resolveEmbedParseState } from "@poodle/svelte";
+  import { Field } from "@poodle/svelte";
+  import type { ParsedEmbed } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let parsed: ParsedEmbed | null = null;

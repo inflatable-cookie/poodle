@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { UiPresentationProvider } from "@poodle/svelte-primitives";
-  import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte-composites";
+  import { UiPresentationProvider } from "@poodle/svelte";
+  import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let loading = false;

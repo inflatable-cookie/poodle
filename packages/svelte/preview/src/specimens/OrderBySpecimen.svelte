@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { OrderBy, type OrderByValue, type SortField } from "@poodle/svelte-primitives";
+  import { OrderBy, type OrderByValue, type SortField } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

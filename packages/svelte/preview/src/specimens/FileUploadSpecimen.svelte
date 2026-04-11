@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte-primitives";
-  import type { FileUploadItem } from "@poodle/svelte-primitives";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte";
+  import type { FileUploadItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let imageFiles: FileUploadItem[] = [];

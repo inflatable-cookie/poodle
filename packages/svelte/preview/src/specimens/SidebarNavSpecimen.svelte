@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SidebarNav } from "@poodle/svelte-composites";
-  import type { SidebarNavGroup } from "@poodle/svelte-composites";
+  import { SidebarNav } from "@poodle/svelte";
+  import type { SidebarNavGroup } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let catalogueValue = "dock-region";

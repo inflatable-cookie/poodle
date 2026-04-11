@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PaginationSummary } from "@poodle/svelte-primitives";
+  import { PaginationSummary } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

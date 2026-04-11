@@ -26,14 +26,14 @@
     "artifactsSource": "packages/svelte/preview/artifacts/parity-report.json",
     "packages": [
       {
-        "packageName": "@poodle/svelte-primitives",
+        "packageName": "@poodle/svelte",
         "exportCount": 98,
         "previewedCount": 98,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       },
       {
-        "packageName": "@poodle/svelte-composites",
+        "packageName": "@poodle/svelte",
         "exportCount": 65,
         "previewedCount": 65,
         "contractOnlyCount": 0,

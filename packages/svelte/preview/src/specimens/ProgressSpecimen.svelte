@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Progress } from "@poodle/svelte-primitives";
+  import { Progress } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

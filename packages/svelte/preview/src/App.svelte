@@ -13,7 +13,7 @@
     UiPresentationProvider,
     type TabItem,
     type IconSet,
-  } from "@poodle/svelte-primitives";
+  } from "@poodle/svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { onMount } from "svelte";
 

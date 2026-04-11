@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PasswordRequirements } from "@poodle/svelte-primitives";
+  import { PasswordRequirements } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let password = "";

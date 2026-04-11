@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DockRegion } from "@poodle/svelte-composites";
-  import type { PanelTabItem, DockEdge } from "@poodle/svelte-composites";
+  import { DockRegion } from "@poodle/svelte";
+  import type { PanelTabItem, DockEdge } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import { folder, code, list as listIcon, terminal } from "@poodle/icons-lucide";
 

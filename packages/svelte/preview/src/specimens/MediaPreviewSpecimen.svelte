@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MediaPreview } from "@poodle/svelte-composites";
+  import { MediaPreview } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

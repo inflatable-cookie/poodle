@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Grid, Icon, NavCard } from "@poodle/svelte-primitives";
+  import { Grid, Icon, NavCard } from "@poodle/svelte";
   import { house, layers, slidersHorizontal, fileText } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 

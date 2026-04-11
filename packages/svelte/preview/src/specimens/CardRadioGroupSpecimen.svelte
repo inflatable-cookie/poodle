@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { CardRadioGroup } from "@poodle/svelte-composites";
-  import type { CardRadioItem } from "@poodle/svelte-composites";
+  import { CardRadioGroup } from "@poodle/svelte";
+  import type { CardRadioItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;

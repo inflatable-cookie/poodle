@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pagination } from "@poodle/svelte-primitives";
+  import { Pagination } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

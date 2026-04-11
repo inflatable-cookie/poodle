@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte-primitives";
+  import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte";
 
   export let activeTab: "examples" | "sizes" | "densities" = "examples";
   /** When true, size/density variants render without a Surface wrapper. */

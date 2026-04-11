@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Accordion, type AccordionItem } from "@poodle/svelte-primitives";
+  import { Accordion, type AccordionItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const singleItems: AccordionItem[] = [

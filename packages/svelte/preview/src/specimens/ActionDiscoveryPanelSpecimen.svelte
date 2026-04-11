@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { UiPresentationProvider } from "@poodle/svelte-primitives";
-  import { ActionDiscoveryPanel } from "@poodle/svelte-composites";
+  import { UiPresentationProvider } from "@poodle/svelte";
+  import { ActionDiscoveryPanel } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

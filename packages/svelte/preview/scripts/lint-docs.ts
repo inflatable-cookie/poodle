@@ -370,7 +370,7 @@ function validateSveltePackageSurface(
 
 function validatePackageSurfaceCoverage(
   packagePath: string,
-  packageName: "@poodle/svelte-primitives" | "@poodle/svelte-composites" | "@poodle/svelte-composites",
+  packageName: "@poodle/svelte" | "@poodle/svelte" | "@poodle/svelte",
   errors: string[],
 ): void {
   const indexSource = fs.readFileSync(path.join(repoRoot, packagePath, "src", "index.ts"), "utf8");
@@ -3148,10 +3148,10 @@ function validateSharedDemoAppContract(errors: string[]): {
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
-validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@poodle/svelte-primitives", errors);
-validateSveltePackageSurface("packages/svelte/composites", "composites", "@poodle/svelte-composites", errors);
-validatePackageSurfaceCoverage("packages/svelte/primitives", "@poodle/svelte-primitives", errors);
-validatePackageSurfaceCoverage("packages/svelte/composites", "@poodle/svelte-composites", errors);
+validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@poodle/svelte", errors);
+validateSveltePackageSurface("packages/svelte/composites", "composites", "@poodle/svelte", errors);
+validatePackageSurfaceCoverage("packages/svelte/primitives", "@poodle/svelte", errors);
+validatePackageSurfaceCoverage("packages/svelte/composites", "@poodle/svelte", errors);
 validateDocsCatalog(errors);
 validateParityCoverage(errors);
 validateAccessibilityAudit(errors);

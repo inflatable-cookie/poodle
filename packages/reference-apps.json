@@ -8,8 +8,7 @@
       "audience": "teams importing Poodle packages directly",
       "packageEntryPoints": [
         "@poodle/svelte-tokens",
-        "@poodle/svelte-primitives",
-        "@poodle/svelte-composites",
+        "@poodle/svelte",
         "@poodle/icons-lucide"
       ],
       "exampleSectionIds": [
@@ -20,13 +19,12 @@
       ],
       "onboardingSteps": [
         "Read the package and extension-SDK baselines before wiring imports.",
-        "Start from tokens, then primitives, then composites, and add icon packages only where they clarify the UI contract.",
+        "Start from tokens, then components, and add icon packages only where they clarify the UI contract.",
         "Keep app-specific workflows, persistence, and orchestration outside the shared packages."
       ],
       "evidencePaths": [
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
-        "packages/svelte/primitives/README.md",
-        "packages/svelte/composites/README.md",
+        "packages/svelte/components/README.md",
         "packages/svelte/icons-lucide/package.json"
       ],
       "blockers": [
@@ -69,8 +67,7 @@
       "audience": "teams adopting generic shell and dock surfaces while keeping domain widgets downstream-owned",
       "packageEntryPoints": [
         "@poodle/svelte-tokens",
-        "@poodle/svelte-primitives",
-        "@poodle/svelte-composites",
+        "@poodle/svelte",
         "@poodle/icons-lucide"
       ],
       "exampleSectionIds": [
@@ -84,8 +81,7 @@
         "Treat GPUI workstation parity as an explicit adoption blocker, not an implied capability."
       ],
       "evidencePaths": [
-        "packages/svelte/primitives/README.md",
-        "packages/svelte/composites/README.md",
+        "packages/svelte/components/README.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "blockers": [
@@ -145,8 +141,7 @@
       "label": "Direct Svelte adoption",
       "startPaths": [
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
-        "packages/svelte/primitives/README.md",
-        "packages/svelte/composites/README.md",
+        "packages/svelte/components/README.md",
         "packages/svelte/icons-lucide/package.json"
       ],
       "primaryReferenceShapeId": "direct-svelte-consumer",
@@ -172,7 +167,7 @@
       "id": "workstation-adoption",
       "label": "Workstation foundation adoption",
       "startPaths": [
-        "packages/svelte/composites/README.md",
+        "packages/svelte/components/README.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ],
       "primaryReferenceShapeId": "workstation-foundation-consumer",

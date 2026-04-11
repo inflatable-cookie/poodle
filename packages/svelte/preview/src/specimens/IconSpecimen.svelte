@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Icon, IconProvider } from "@poodle/svelte-primitives";
-  import type { IconSet } from "@poodle/svelte-primitives";
+  import { Icon, IconProvider } from "@poodle/svelte";
+  import type { IconSet } from "@poodle/svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
   import { heart, settings, zap, circleCheck, info, triangleAlert, star, search, pencil } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";

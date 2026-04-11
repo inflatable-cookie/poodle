@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageLoading } from "@poodle/svelte-composites";
-  import { Button } from "@poodle/svelte-primitives";
+  import { PageLoading } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let showIndeterminate = false;

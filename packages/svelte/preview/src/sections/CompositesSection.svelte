@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SidebarNav } from "@poodle/svelte-composites";
+  import { SidebarNav } from "@poodle/svelte";
   import { compositeComponents, findComponent } from "../component-registry";
   import CatalogueLanding from "../pages/CatalogueLanding.svelte";
   import ComponentPage from "../pages/ComponentPage.svelte";

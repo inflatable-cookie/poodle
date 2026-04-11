@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { DetailSection } from "@poodle/svelte-composites";
-  import { Button, DetailItem } from "@poodle/svelte-primitives";
+  import { DetailSection } from "@poodle/svelte";
+  import { Button, DetailItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

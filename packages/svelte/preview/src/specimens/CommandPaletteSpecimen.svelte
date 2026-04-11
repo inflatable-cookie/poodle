@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Button, UiPresentationProvider } from "@poodle/svelte-primitives";
-  import { CommandPalette } from "@poodle/svelte-composites";
+  import { Button, UiPresentationProvider } from "@poodle/svelte";
+  import { CommandPalette } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let open = false;

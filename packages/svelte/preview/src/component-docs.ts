@@ -44,7 +44,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | string[] | null }", description: "Fires when the open panel(s) change." },
     ],
     usage: `<script lang="ts">
-  import { Accordion } from "@poodle/svelte-primitives";
+  import { Accordion } from "@poodle/svelte";
 
   const items = [
     { value: "one", title: "Section One", content: "Content for section one." },
@@ -82,7 +82,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { AlertDialog } from "@poodle/svelte-primitives";
+  import { AlertDialog } from "@poodle/svelte";
 
   let open = false;
 </script>
@@ -110,7 +110,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AudioPlayer } from "@poodle/svelte-primitives";
+  import { AudioPlayer } from "@poodle/svelte";
 </script>
 
 <AudioPlayer src="/audio/podcast-episode.mp3" showSpeedControl />`,
@@ -133,7 +133,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ blocks: EditorBlock[] }", description: "Fires when any block content changes." },
     ],
     usage: `<script lang="ts">
-  import { BlockEditor } from "@poodle/svelte-composites";
+  import { BlockEditor } from "@poodle/svelte";
 
   let blocks = [{ type: "paragraph", content: "Start writing..." }];
 </script>
@@ -157,7 +157,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Box } from "@poodle/svelte-primitives";
+  import { Box } from "@poodle/svelte";
 </script>
 
 <Box padding="md" width="100%">
@@ -179,7 +179,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "navigate", payload: "{ value: string }", description: "Fires when a breadcrumb item is clicked." },
     ],
     usage: `<script lang="ts">
-  import { Breadcrumbs } from "@poodle/svelte-primitives";
+  import { Breadcrumbs } from "@poodle/svelte";
 
   const items = [
     { value: "home", label: "Home" },
@@ -213,7 +213,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectAll", payload: "void", description: "Fires when the select-all or deselect-all control is triggered." },
     ],
     usage: `<script lang="ts">
-  import { BulkActionBar } from "@poodle/svelte-primitives";
+  import { BulkActionBar } from "@poodle/svelte";
 
   const actions = [
     { id: "delete", label: "Delete", tone: "danger" },
@@ -262,7 +262,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the button loses focus." },
     ],
     usage: `<script lang="ts">
-  import { Button } from "@poodle/svelte-primitives";
+  import { Button } from "@poodle/svelte";
 </script>
 
 <Button variant="primary" tone="default" leadingIcon="plus" on:click={() => console.log("clicked")}>
@@ -290,7 +290,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "monthChange", payload: "{ month: string }", description: "Fires when the visible month changes." },
     ],
     usage: `<script lang="ts">
-  import { Calendar } from "@poodle/svelte-primitives";
+  import { Calendar } from "@poodle/svelte";
 
   let selectedDate: string | null = null;
 </script>
@@ -323,7 +323,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "dismiss", payload: "void", description: "Fires when the callout is dismissed." },
     ],
     usage: `<script lang="ts">
-  import { Callout } from "@poodle/svelte-primitives";
+  import { Callout } from "@poodle/svelte";
 </script>
 
 <Callout tone="warning" title="Unsaved changes" message="You have unsaved changes that will be lost." dismissible />`,
@@ -346,7 +346,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Card } from "@poodle/svelte-primitives";
+  import { Card } from "@poodle/svelte";
 </script>
 
 <Card variant="default" layout="vertical">
@@ -374,7 +374,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string }", description: "Fires when the selected card changes." },
     ],
     usage: `<script lang="ts">
-  import { CardRadioGroup } from "@poodle/svelte-composites";
+  import { CardRadioGroup } from "@poodle/svelte";
 
   const items = [
     { value: "basic", label: "Basic", description: "For personal use" },
@@ -408,7 +408,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "checkedChange", payload: "{ checked: boolean }", description: "Fires when the checked state changes." },
     ],
     usage: `<script lang="ts">
-  import { Checkbox } from "@poodle/svelte-primitives";
+  import { Checkbox } from "@poodle/svelte";
 
   let agreed = false;
 </script>
@@ -433,7 +433,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Code } from "@poodle/svelte-primitives";
+  import { Code } from "@poodle/svelte";
 
   const source = \`function greet(name: string) {
   return \\\`Hello, \\\${name}!\\\`;
@@ -458,7 +458,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "toggle", payload: "{ isCollapsed: boolean }", description: "Fires when the collapsed state changes." },
     ],
     usage: `<script lang="ts">
-  import { CollapseToggle } from "@poodle/svelte-primitives";
+  import { CollapseToggle } from "@poodle/svelte";
 
   let collapsed = false;
 </script>
@@ -486,7 +486,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Collapsible } from "@poodle/svelte-primitives";
+  import { Collapsible } from "@poodle/svelte";
 </script>
 
 <Collapsible title="Advanced options" description="Configure additional settings">
@@ -515,7 +515,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { ColorPicker } from "@poodle/svelte-primitives";
+  import { ColorPicker } from "@poodle/svelte";
 
   let color = "#6366f1";
   const swatches = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"];
@@ -547,7 +547,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "activeChange", payload: "{ id: string | null }", description: "Fires when the active (highlighted) item changes." },
     ],
     usage: `<script lang="ts">
-  import { CommandPalette } from "@poodle/svelte-composites";
+  import { CommandPalette } from "@poodle/svelte";
 
   let open = false;
   const items = [
@@ -580,7 +580,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the action is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { ConfirmAction } from "@poodle/svelte-composites";
+  import { ConfirmAction } from "@poodle/svelte";
 </script>
 
 <ConfirmAction
@@ -611,7 +611,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { ContextMenu } from "@poodle/svelte-primitives";
+  import { ContextMenu } from "@poodle/svelte";
 
   const items = [
     { value: "copy", label: "Copy" },
@@ -676,7 +676,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "limitChange", payload: "{ limit: number }", description: "Fires when the requested page size changes." },
     ],
     usage: `<script lang="ts">
-  import { DataTable } from "@poodle/svelte-composites";
+  import { DataTable } from "@poodle/svelte";
 
   const columns = [
     { id: "name", label: "Name", sortable: true },
@@ -716,7 +716,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the calendar open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DatePicker } from "@poodle/svelte-primitives";
+  import { DatePicker } from "@poodle/svelte";
 
   let date: string | null = null;
 </script>
@@ -747,7 +747,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateRangePicker } from "@poodle/svelte-primitives";
+  import { DateRangePicker } from "@poodle/svelte";
 
   let range = { start: null, end: null };
 </script>
@@ -778,7 +778,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateTimePicker } from "@poodle/svelte-primitives";
+  import { DateTimePicker } from "@poodle/svelte";
 
   let dateTime = { date: null, time: null };
 </script>
@@ -809,7 +809,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateTimeRangePicker } from "@poodle/svelte-primitives";
+  import { DateTimeRangePicker } from "@poodle/svelte";
 
   let range = { start: { date: null, time: null }, end: { date: null, time: null } };
 </script>
@@ -832,7 +832,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailItem } from "@poodle/svelte-primitives";
+  import { DetailItem } from "@poodle/svelte";
 </script>
 
 <DetailItem label="Email" value="alice@example.com" />
@@ -854,7 +854,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailSection, DetailItem } from "@poodle/svelte-composites";
+  import { DetailSection, DetailItem } from "@poodle/svelte";
 </script>
 
 <DetailSection title="Account Information" description="Basic account details">
@@ -879,7 +879,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { DetailShell, DetailSection } from "@poodle/svelte-composites";
+  import { DetailShell, DetailSection } from "@poodle/svelte";
 </script>
 
 <DetailShell title="User Profile" state="ready">
@@ -922,7 +922,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "requestClose", payload: "void", description: "Fires when a close is requested (Escape or backdrop click)." },
     ],
     usage: `<script lang="ts">
-  import { Dialog, Button } from "@poodle/svelte-primitives";
+  import { Dialog, Button } from "@poodle/svelte";
 
   let open = false;
 </script>
@@ -975,7 +975,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "panelDrop", payload: "{ panel: PanelDragData; targetEdge: DockEdge }", description: "Fires when a panel is dropped onto this dock." },
     ],
     usage: `<script lang="ts">
-  import { DockRegion } from "@poodle/svelte-composites";
+  import { DockRegion } from "@poodle/svelte";
 
   const items = [
     { id: "explorer", label: "Explorer", icon: "folder" },
@@ -1018,7 +1018,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "requestClose", payload: "void", description: "Fires when a close is requested." },
     ],
     usage: `<script lang="ts">
-  import { Drawer, Button } from "@poodle/svelte-primitives";
+  import { Drawer, Button } from "@poodle/svelte";
 
   let open = false;
 </script>
@@ -1055,7 +1055,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ hours: number; minutes: number; seconds: number; totalSeconds: number }", description: "Fires when the duration value changes." },
     ],
     usage: `<script lang="ts">
-  import { DurationInput } from "@poodle/svelte-primitives";
+  import { DurationInput } from "@poodle/svelte";
 
   let hours = 1;
   let minutes = 30;
@@ -1090,7 +1090,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the edit is cancelled." },
     ],
     usage: `<script lang="ts">
-  import { EditableLabel } from "@poodle/svelte-primitives";
+  import { EditableLabel } from "@poodle/svelte";
 
   let name = "Untitled Document";
 </script>
@@ -1136,7 +1136,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the cancel action is triggered." },
     ],
     usage: `<script lang="ts">
-  import { EditableList } from "@poodle/svelte-composites";
+  import { EditableList } from "@poodle/svelte";
 
   let items = [
     { id: "1", label: "First item" },
@@ -1165,7 +1165,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string }", description: "Fires when the input value changes." },
     ],
     usage: `<script lang="ts">
-  import { EmbedInput } from "@poodle/svelte-composites";
+  import { EmbedInput } from "@poodle/svelte";
 
   let url = "";
   let parsed = null;
@@ -1185,7 +1185,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { EmbedPreview } from "@poodle/svelte-composites";
+  import { EmbedPreview } from "@poodle/svelte";
 
   export let parsed;
 </script>
@@ -1208,8 +1208,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { EmptyState } from "@poodle/svelte-composites";
-  import { Button } from "@poodle/svelte-primitives";
+  import { EmptyState } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 </script>
 
 <EmptyState title="No results found" message="Try adjusting your search or filters." size="compact">
@@ -1231,7 +1231,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow } from "@poodle/svelte";
 </script>
 
 <Eyebrow>Featured</Eyebrow>`,
@@ -1256,7 +1256,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Field } from "@poodle/svelte-primitives";
+  import { Field } from "@poodle/svelte";
 
   let email = "";
 </script>
@@ -1283,7 +1283,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FieldSet, Field, TextInput } from "@poodle/svelte-primitives";
+  import { FieldSet, Field, TextInput } from "@poodle/svelte";
 </script>
 
 <FieldSet legend="Address" columns={2}>
@@ -1322,7 +1322,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "remove", payload: "{ item: FileUploadItem }", description: "Fires when a file is removed." },
     ],
     usage: `<script lang="ts">
-  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte-primitives";
+  import { DEFAULT_COMPRESSION, FileUpload } from "@poodle/svelte";
 
   let files = [];
 </script>
@@ -1357,8 +1357,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FilterToolbar } from "@poodle/svelte-composites";
-  import { Select } from "@poodle/svelte-primitives";
+  import { FilterToolbar } from "@poodle/svelte";
+  import { Select } from "@poodle/svelte";
 </script>
 
 <FilterToolbar ariaLabel="User filters" collapsible>
@@ -1377,8 +1377,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormActions } from "@poodle/svelte-primitives";
-  import { Button } from "@poodle/svelte-primitives";
+  import { FormActions } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 
   const dangerItems = [
     {
@@ -1425,7 +1425,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { FormDialog } from "@poodle/svelte-composites";
+  import { FormDialog } from "@poodle/svelte";
 
   let open = false;
   let submitting = false;
@@ -1451,8 +1451,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { FormLayout } from "@poodle/svelte-composites";
-  import { Field, Button } from "@poodle/svelte-primitives";
+  import { FormLayout } from "@poodle/svelte";
+  import { Field, Button } from "@poodle/svelte";
 </script>
 
 <FormLayout columns={2} description="Enter your details below.">
@@ -1482,7 +1482,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Grid } from "@poodle/svelte-primitives";
+  import { Grid } from "@poodle/svelte";
 </script>
 
 <Grid columns="1fr 1fr 1fr" gap="lg" padding="md">
@@ -1509,7 +1509,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { HoverCard } from "@poodle/svelte-primitives";
+  import { HoverCard } from "@poodle/svelte";
 </script>
 
 <HoverCard placement="top">
@@ -1536,7 +1536,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     events: [],
     usage: `<!-- Tree-shakeable: import individual icons from @poodle/icons-lucide -->
 <script lang="ts">
-  import { Icon } from "@poodle/svelte-primitives";
+  import { Icon } from "@poodle/svelte";
   import { search, heart, star } from "@poodle/icons-lucide";
 </script>
 
@@ -1549,7 +1549,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <!-- Bulk icon set via provider -->
 <script lang="ts">
-  import { Icon, IconProvider } from "@poodle/svelte-primitives";
+  import { Icon, IconProvider } from "@poodle/svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -1568,7 +1568,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { IconProvider, Icon } from "@poodle/svelte-primitives";
+  import { IconProvider, Icon } from "@poodle/svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -1606,7 +1606,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the button loses focus." },
     ],
     usage: `<script lang="ts">
-  import { IconButton } from "@poodle/svelte-primitives";
+  import { IconButton } from "@poodle/svelte";
   import { trash2, plus, settings } from "@poodle/icons-lucide";
 </script>
 
@@ -1650,7 +1650,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectedChange", payload: "{ selected: boolean }", description: "Fires when a selectable card toggles state." },
     ],
     usage: `<script lang="ts">
-  import { ListCard } from "@poodle/svelte-primitives";
+  import { ListCard } from "@poodle/svelte";
 </script>
 
 <ListCard title="Alice Johnson" subtitle="Software Engineer" meta="Active" href="/team/alice">
@@ -1671,7 +1671,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { ListCardCounter } from "@poodle/svelte-primitives";
+  import { ListCardCounter } from "@poodle/svelte";
   import { messageSquare } from "lucide-svelte";
 </script>
 
@@ -1709,7 +1709,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte-composites";
+  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte";
 
   const filters: LogFilter[] = [
     {
@@ -1768,7 +1768,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: string }", description: "Fires when the markdown content changes." },
     ],
     usage: `<script lang="ts">
-  import { MarkdownEditor } from "@poodle/svelte-composites";
+  import { MarkdownEditor } from "@poodle/svelte";
 
   let content = "# Hello World\n\nStart writing here...";
 </script>
@@ -1795,7 +1795,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { MediaPicker } from "@poodle/svelte-composites";
+  import { MediaPicker } from "@poodle/svelte";
 
   let open = false;
   const items = [
@@ -1825,7 +1825,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "loadMore", payload: "void", description: "Fires when the load-more action is triggered." },
     ],
     usage: `<script lang="ts">
-  import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte-composites";
+  import { MediaBrowsePanel, type MediaPickerItem } from "@poodle/svelte";
 
   const items: MediaPickerItem[] = [
     { id: "1", label: "Hero banner", kind: "image", meta: "Image" },
@@ -1859,7 +1859,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectUploaded", payload: "void", description: "Fires when the user chooses the newly uploaded media item." },
     ],
     usage: `<script lang="ts">
-  import { MediaUploadStatusPanel } from "@poodle/svelte-composites";
+  import { MediaUploadStatusPanel } from "@poodle/svelte";
 </script>
 
 <MediaUploadStatusPanel
@@ -1893,7 +1893,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MediaPreview } from "@poodle/svelte-composites";
+  import { MediaPreview } from "@poodle/svelte";
 </script>
 
 <MediaPreview
@@ -1927,7 +1927,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MediaThumbnail } from "@poodle/svelte-composites";
+  import { MediaThumbnail } from "@poodle/svelte";
 </script>
 
 <MediaThumbnail kind="video" aspectRatio="landscape" badge="HD" meta="3:24">
@@ -1953,8 +1953,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { Menu } from "@poodle/svelte-primitives";
-  import { Button } from "@poodle/svelte-primitives";
+  import { Menu } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 
   const items = [
     { value: "edit", label: "Edit" },
@@ -1987,7 +1987,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a menu action is selected." },
     ],
     usage: `<script lang="ts">
-  import { Menubar } from "@poodle/svelte-primitives";
+  import { Menubar } from "@poodle/svelte";
 
   const items = [
     { value: "file", label: "File", children: [
@@ -2014,7 +2014,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MetaBar, MetaItem } from "@poodle/svelte-primitives";
+  import { MetaBar, MetaItem } from "@poodle/svelte";
 </script>
 
 <MetaBar ariaLabel="Document metadata">
@@ -2034,7 +2034,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { MetaItem } from "@poodle/svelte-primitives";
+  import { MetaItem } from "@poodle/svelte";
 </script>
 
 <MetaItem label="Updated">March 30, 2026</MetaItem>`,
@@ -2053,7 +2053,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Meter } from "@poodle/svelte-primitives";
+  import { Meter } from "@poodle/svelte";
 </script>
 
 <Meter value={72} min={0} max={100} low={25} high={75} optimum={50} ariaLabel="Disk usage" />`,
@@ -2071,7 +2071,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { MetricTile } from "@poodle/svelte-composites";
+  import { MetricTile } from "@poodle/svelte";
 </script>
 
 <MetricTile label="Revenue" value="$48,200" trend="up" trendLabel="+12.5%" sparklineData={[20, 35, 28, 42, 48]} />`,
@@ -2093,7 +2093,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "click", payload: "MouseEvent", description: "Fires when the card is clicked." },
     ],
     usage: `<script lang="ts">
-  import { NavCard } from "@poodle/svelte-primitives";
+  import { NavCard } from "@poodle/svelte";
 </script>
 
 <NavCard title="Dashboard" description="View your analytics" href="/dashboard" badge="New">
@@ -2118,7 +2118,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the active menu value changes." },
     ],
     usage: `<script lang="ts">
-  import { NavigationMenu } from "@poodle/svelte-primitives";
+  import { NavigationMenu } from "@poodle/svelte";
 
   const items = [
     { value: "products", label: "Products" },
@@ -2166,7 +2166,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],
     usage: `<script lang="ts">
-  import { NumberInput } from "@poodle/svelte-primitives";
+  import { NumberInput } from "@poodle/svelte";
 
   let quantity: number | null = 1;
 </script>
@@ -2192,7 +2192,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "change", payload: "{ value: OrderByValue; sort: ActiveSort | null }", description: "Fires when the sort configuration changes." },
     ],
     usage: `<script lang="ts">
-  import { OrderBy, type OrderByValue } from "@poodle/svelte-primitives";
+  import { OrderBy, type OrderByValue } from "@poodle/svelte";
 
   const fields = [
     { key: "name", label: "Name" },
@@ -2228,8 +2228,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { PageHeader } from "@poodle/svelte-composites";
-  import { Button } from "@poodle/svelte-primitives";
+  import { PageHeader } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 </script>
 
 <PageHeader
@@ -2263,7 +2263,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancel", payload: "void", description: "Fires when the cancel button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { PageLoading } from "@poodle/svelte-composites";
+  import { PageLoading } from "@poodle/svelte";
 </script>
 
 <PageLoading visible presentation="inline" message="Loading your data..." />
@@ -2308,8 +2308,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pageChange", payload: "{ page: number }", description: "Fires when the built-in pagination or pagination summary changes page." },
     ],
     usage: `<script lang="ts">
-  import { ListContainer } from "@poodle/svelte-composites";
-  import { Button, Field, TextInput, Select } from "@poodle/svelte-primitives";
+  import { ListContainer } from "@poodle/svelte";
+  import { Button, Field, TextInput, Select } from "@poodle/svelte";
 
   let page = 1;
 </script>
@@ -2367,7 +2367,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "limitChange", payload: "{ limit: number }", description: "Fires when the page size changes via the limit selector." },
     ],
     usage: `<script lang="ts">
-  import { Pagination } from "@poodle/svelte-primitives";
+  import { Pagination } from "@poodle/svelte";
 
   let page = 1;
   let limit = 25;
@@ -2404,7 +2404,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "pageChange", payload: "{ page: number }", description: "Fires when the page changes." },
     ],
     usage: `<script lang="ts">
-  import { PaginationSummary } from "@poodle/svelte-primitives";
+  import { PaginationSummary } from "@poodle/svelte";
 </script>
 
 <PaginationSummary currentPage={1} totalPages={10} totalItems={50} pageSize={5} />`,
@@ -2433,7 +2433,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { PickerShell } from "@poodle/svelte-composites";
+  import { PickerShell } from "@poodle/svelte";
 </script>
 
 <PickerShell title="Select Items" description="Browse and pick items" resultCount={42} selectionCount={3}>
@@ -2459,7 +2459,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Pill } from "@poodle/svelte-primitives";
+  import { Pill } from "@poodle/svelte";
 </script>
 
 <Pill tone="success" appearance="solid">Active</Pill>
@@ -2491,7 +2491,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "complete", payload: "{ value: string }", description: "Fires when the value reaches the configured length." },
     ],
     usage: `<script lang="ts">
-  import { CodeInput } from "@poodle/svelte-primitives";
+  import { CodeInput } from "@poodle/svelte";
 
   let code = "";
 </script>
@@ -2519,7 +2519,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { PasswordRequirements } from "@poodle/svelte-primitives";
+  import { PasswordRequirements } from "@poodle/svelte";
 
   let password = "";
 
@@ -2556,7 +2556,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Popover, Button } from "@poodle/svelte-primitives";
+  import { Popover, Button } from "@poodle/svelte";
 </script>
 
 <Popover placement="bottom-start">
@@ -2580,7 +2580,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Progress } from "@poodle/svelte-primitives";
+  import { Progress } from "@poodle/svelte";
 </script>
 
 <Progress value={65} max={100} size="sm" ariaLabel="Upload progress" />
@@ -2607,7 +2607,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
     ],
     usage: `<script lang="ts">
-  import { RadioGroup } from "@poodle/svelte-primitives";
+  import { RadioGroup } from "@poodle/svelte";
 
   const options = [
     { value: "sm", label: "Small" },
@@ -2642,7 +2642,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueCommit", payload: "{ value: [number, number] }", description: "Fires when the range value is committed (drag end)." },
     ],
     usage: `<script lang="ts">
-  import { RangeSlider } from "@poodle/svelte-primitives";
+  import { RangeSlider } from "@poodle/svelte";
 
   let priceRange: [number, number] = [20, 80];
 </script>
@@ -2667,7 +2667,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: number | null }", description: "Fires when the rating value changes." },
     ],
     usage: `<script lang="ts">
-  import { Rating } from "@poodle/svelte-primitives";
+  import { Rating } from "@poodle/svelte";
 
   let stars: number | null = 3;
 </script>
@@ -2686,7 +2686,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Region } from "@poodle/svelte-primitives";
+  import { Region } from "@poodle/svelte";
 </script>
 
 <Region label="Sidebar" color="blue" minHeight="200px" />`,
@@ -2721,7 +2721,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "drillContext", payload: "{ context: DrillDownContext }", description: "Fires when a drill-down context changes." },
     ],
     usage: `<script lang="ts">
-  import { RelationPicker } from "@poodle/svelte-composites";
+  import { RelationPicker } from "@poodle/svelte";
 
   const items = [
     { id: "1", label: "Alice" },
@@ -2752,7 +2752,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "resizeStep", payload: "{ delta: number }", description: "Fires when resized via keyboard step." },
     ],
     usage: `<script lang="ts">
-  import { ResizeHandle } from "@poodle/svelte-primitives";
+  import { ResizeHandle } from "@poodle/svelte";
 </script>
 
 <ResizeHandle orientation="horizontal" ariaLabel="Resize sidebar" ariaValueNow={50} />`,
@@ -2773,7 +2773,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "scroll", payload: "Event", description: "Fires when the container is scrolled." },
     ],
     usage: `<script lang="ts">
-  import { ScrollShell } from "@poodle/svelte-primitives";
+  import { ScrollShell } from "@poodle/svelte";
 </script>
 
 <ScrollShell direction="vertical" padding="md" style="max-height: 300px;">
@@ -2799,7 +2799,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected segment changes." },
     ],
     usage: `<script lang="ts">
-  import { SegmentedControl } from "@poodle/svelte-primitives";
+  import { SegmentedControl } from "@poodle/svelte";
 
   const options = [
     { value: "list", label: "List" },
@@ -2854,7 +2854,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the dropdown opens/closes (custom mode only)." },
     ],
     usage: `<script lang="ts">
-  import { Select } from "@poodle/svelte-primitives";
+  import { Select } from "@poodle/svelte";
 
   const fruits = [
     { value: "apple", label: "Apple" },
@@ -2899,7 +2899,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "clear", payload: "void", description: "Fires when all items are cleared." },
     ],
     usage: `<script lang="ts">
-  import { SelectionSummary } from "@poodle/svelte-composites";
+  import { SelectionSummary } from "@poodle/svelte";
 
   const items = [
     { id: "1", label: "Alice" },
@@ -2920,7 +2920,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Separator } from "@poodle/svelte-primitives";
+  import { Separator } from "@poodle/svelte";
 </script>
 
 <p>Section one content</p>
@@ -2942,7 +2942,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when a navigation item is activated." },
     ],
     usage: `<script lang="ts">
-  import { SidebarNav } from "@poodle/svelte-composites";
+  import { SidebarNav } from "@poodle/svelte";
 
   const groups = [
     {
@@ -2974,7 +2974,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Skeleton } from "@poodle/svelte-primitives";
+  import { Skeleton } from "@poodle/svelte";
 </script>
 
 <Skeleton shape="circle" width="48px" height="48px" />
@@ -2995,7 +2995,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Spinner } from "@poodle/svelte-primitives";
+  import { Spinner } from "@poodle/svelte";
 </script>
 
 <Spinner variant="ring" sizeRole="chrome" tone="current" />
@@ -3022,7 +3022,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueCommit", payload: "{ value: number }", description: "Fires when the slider value is committed (drag end)." },
     ],
     usage: `<script lang="ts">
-  import { Slider } from "@poodle/svelte-primitives";
+  import { Slider } from "@poodle/svelte";
 
   let volume = 50;
 </script>
@@ -3038,7 +3038,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Spacer } from "@poodle/svelte-primitives";
+  import { Spacer } from "@poodle/svelte";
 </script>
 
 <div style="display: flex;">
@@ -3070,7 +3070,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ value: string }", description: "Fires when a dropdown menu item is selected." },
     ],
     usage: `<script lang="ts">
-  import { SplitButton } from "@poodle/svelte-primitives";
+  import { SplitButton } from "@poodle/svelte";
 
   const items = [
     { value: "save-draft", label: "Save as Draft" },
@@ -3112,7 +3112,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "secondaryCollapsedChange", payload: "{ isCollapsed: boolean }", description: "Fires when the secondary pane collapse state changes." },
     ],
     usage: `<script lang="ts">
-  import { SplitView } from "@poodle/svelte-composites";
+  import { SplitView } from "@poodle/svelte";
 </script>
 
 <SplitView orientation="horizontal" defaultRatio={0.3} showCollapsePrimary>
@@ -3141,7 +3141,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Stack, Button } from "@poodle/svelte-primitives";
+  import { Stack, Button } from "@poodle/svelte";
 </script>
 
 <Stack direction="row" gap="sm" align="center">
@@ -3161,7 +3161,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { StatusBar } from "@poodle/svelte-primitives";
+  import { StatusBar } from "@poodle/svelte";
 </script>
 
 <StatusBar summary="3 items selected">
@@ -3181,7 +3181,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { StatusIndicator } from "@poodle/svelte-primitives";
+  import { StatusIndicator } from "@poodle/svelte";
 </script>
 
 <StatusIndicator status="success" label="Online" />
@@ -3203,7 +3203,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Surface } from "@poodle/svelte-primitives";
+  import { Surface } from "@poodle/svelte";
 </script>
 
 <Surface tone="panel" border="subtle" padding="lg" elevated>
@@ -3237,7 +3237,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "checkedChange", payload: "{ checked: boolean }", description: "Fires when the checked state changes." },
     ],
     usage: `<script lang="ts">
-  import { Switch } from "@poodle/svelte-primitives";
+  import { Switch } from "@poodle/svelte";
 
   let notifications = true;
 </script>
@@ -3261,7 +3261,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { Table } from "@poodle/svelte-primitives";
+  import { Table } from "@poodle/svelte";
 
   const columns = [
     { key: "name", label: "Name" },
@@ -3302,7 +3302,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "close", payload: "{ value: string }", description: "Fires when a tab close button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { Tabs } from "@poodle/svelte-primitives";
+  import { Tabs } from "@poodle/svelte";
 
   const items = [
     { value: "overview", label: "Overview" },
@@ -3372,7 +3372,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
     ],
     usage: `<script lang="ts">
-  import { TextInput } from "@poodle/svelte-primitives";
+  import { TextInput } from "@poodle/svelte";
 
   let email = "";
   async function validateEmail(value: string) {
@@ -3405,7 +3405,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { TimeAgo } from "@poodle/svelte-primitives";
+  import { TimeAgo } from "@poodle/svelte";
 </script>
 
 <TimeAgo datetime={new Date("2026-03-20T12:00:00Z")} live />`,
@@ -3431,7 +3431,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the time value changes." },
     ],
     usage: `<script lang="ts">
-  import { TimeInput } from "@poodle/svelte-primitives";
+  import { TimeInput } from "@poodle/svelte";
 
   let time = "09:00";
 </script>
@@ -3459,7 +3459,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected time zone changes." },
     ],
     usage: `<script lang="ts">
-  import { TimeZoneSelect } from "@poodle/svelte-primitives";
+  import { TimeZoneSelect } from "@poodle/svelte";
 
   let tz = "America/New_York";
 </script>
@@ -3481,7 +3481,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "action", payload: "{ id: string }", description: "Fires when a toast action button is clicked." },
     ],
     usage: `<script lang="ts">
-  import { ToastStack } from "@poodle/svelte-composites";
+  import { ToastStack } from "@poodle/svelte";
 
   let toasts = [
     { id: "1", title: "Saved", description: "Your changes have been saved." },
@@ -3510,7 +3510,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     usage: `<script lang="ts">
   import { writable } from "svelte/store";
-  import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte-composites";
+  import { ToastHost, type ToastHostStoreItem } from "@poodle/svelte";
 
   const toasts = writable<ToastHostStoreItem[]>([
     { id: "1", variant: "success", title: "Saved", message: "Your settings were updated." },
@@ -3545,7 +3545,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: string | string[] }", description: "Fires when the selected value(s) change." },
     ],
     usage: `<script lang="ts">
-  import { ToggleGroup } from "@poodle/svelte-primitives";
+  import { ToggleGroup } from "@poodle/svelte";
 
   const options = [
     { value: "left", label: "Left" },
@@ -3570,8 +3570,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { Toolbar } from "@poodle/svelte-primitives";
-  import { Button } from "@poodle/svelte-primitives";
+  import { Toolbar } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 </script>
 
 <Toolbar ariaLabel="Formatting">
@@ -3595,8 +3595,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the tooltip open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Tooltip } from "@poodle/svelte-primitives";
-  import { Button } from "@poodle/svelte-primitives";
+  import { Tooltip } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 </script>
 
 <Tooltip content="Save your work" placement="top">
@@ -3622,7 +3622,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "valueChange", payload: "{ value: TriStateValue }", description: "Fires when the tri-state value changes." },
     ],
     usage: `<script lang="ts">
-  import { TriStateSwitch } from "@poodle/svelte-primitives";
+  import { TriStateSwitch } from "@poodle/svelte";
 
   let filter = "default";
 </script>
@@ -3640,7 +3640,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { UiPresentationProvider, Button, Select } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider, Button, Select } from "@poodle/svelte";
 </script>
 
 <UiPresentationProvider density="compact" sizeScale="sm">
@@ -3664,7 +3664,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { VideoPlayer } from "@poodle/svelte-primitives";
+  import { VideoPlayer } from "@poodle/svelte";
 </script>
 
 <VideoPlayer src="/videos/intro.mp4" poster="/images/poster.jpg" showCaptions />`,
@@ -3694,7 +3694,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
     ],
     usage: `<script lang="ts">
-  import { DateTimeZonePicker } from "@poodle/svelte-primitives";
+  import { DateTimeZonePicker } from "@poodle/svelte";
 
   let meeting = { date: null, time: null, timeZone: "America/New_York" };
 </script>
@@ -3718,7 +3718,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "activeChange", payload: "{ id: string | null }", description: "Fires when the active item changes." },
     ],
     usage: `<script lang="ts">
-  import { ActionDiscoveryPanel } from "@poodle/svelte-composites";
+  import { ActionDiscoveryPanel } from "@poodle/svelte";
 
   const items = [
     { id: "copy", label: "Copy", shortcut: "Cmd+C" },
@@ -3743,8 +3743,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     events: [],
     usage: `<script lang="ts">
-  import { AppHeader } from "@poodle/svelte-composites";
-  import { Button } from "@poodle/svelte-primitives";
+  import { AppHeader } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
 </script>
 
 <AppHeader title="My App" subtitle="Dashboard">

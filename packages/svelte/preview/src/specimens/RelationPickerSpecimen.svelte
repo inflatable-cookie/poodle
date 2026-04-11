@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@poodle/svelte-composites";
-  import { UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@poodle/svelte";
+  import { UiPresentationProvider } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const items: PickerItem[] = [

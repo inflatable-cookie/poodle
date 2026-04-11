@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Region } from "@poodle/svelte-primitives";
-  import { SplitView } from "@poodle/svelte-composites";
+  import { Region } from "@poodle/svelte";
+  import { SplitView } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

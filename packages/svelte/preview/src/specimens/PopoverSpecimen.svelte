@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Popover, Button } from "@poodle/svelte-primitives";
+  import { Popover, Button } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

@@ -78,16 +78,7 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
-      "name": "@poodle/svelte-primitives",
-      "channel": "preview",
-      "publicIntent": true,
-      "changeControl": "contract-backed",
-      "requiresReleaseNotes": true,
-      "requiresDeprecationRecord": true,
-      "removalGate": "successor-and-generation-delay"
-    },
-    {
-      "name": "@poodle/svelte-composites",
+      "name": "@poodle/svelte",
       "channel": "preview",
       "publicIntent": true,
       "changeControl": "contract-backed",

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SegmentedControl, type SegmentedControlOption } from "@poodle/svelte-primitives";
+  import { SegmentedControl, type SegmentedControlOption } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

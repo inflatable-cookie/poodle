@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { MediaPicker } from "@poodle/svelte-composites";
-  import { Button, UiPresentationProvider } from "@poodle/svelte-primitives";
-  import type { MediaPickerItem } from "@poodle/svelte-composites";
+  import { MediaPicker } from "@poodle/svelte";
+  import { Button, UiPresentationProvider } from "@poodle/svelte";
+  import type { MediaPickerItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let open: boolean | null = null;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow, Grid, Stack, TextInput, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
+  import { Eyebrow, Grid, Stack, TextInput, Surface, Table, Tabs, type TabItem, type TableColumn, type TableRow } from "@poodle/svelte";
 
   export let activePanelId: "token-summary-section" | "token-inspector" = "token-summary-section";
   export let keySemanticTokens: Array<{ path: string; value: string }> = [];

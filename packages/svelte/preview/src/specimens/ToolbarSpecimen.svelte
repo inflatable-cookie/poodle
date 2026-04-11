@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Toolbar, Button, IconButton, Separator } from "@poodle/svelte-primitives";
+  import { Toolbar, Button, IconButton, Separator } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>

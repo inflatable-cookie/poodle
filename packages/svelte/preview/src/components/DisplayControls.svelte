@@ -4,7 +4,7 @@
     Eyebrow,
     ToggleGroup,
     type ToggleGroupOption,
-  } from "@poodle/svelte-primitives";
+  } from "@poodle/svelte";
   import {
     themes,
     densityModes,

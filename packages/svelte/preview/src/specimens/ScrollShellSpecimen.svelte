@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ScrollShell, Surface } from "@poodle/svelte-primitives";
+  import { ScrollShell, Surface } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

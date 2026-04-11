@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Menubar, type MenubarItem } from "@poodle/svelte-primitives";
+  import { Menubar, type MenubarItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface } from "@poodle/svelte";
 
   let basicOpen = false;
   let formOpen = false;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Eyebrow } from "@poodle/svelte-primitives";
+  import { Eyebrow } from "@poodle/svelte";
   import type { ComponentEntry, ComponentTier } from "../component-registry";
 
   export let tier: ComponentTier;

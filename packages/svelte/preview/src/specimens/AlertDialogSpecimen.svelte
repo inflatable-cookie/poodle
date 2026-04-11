@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/svelte-primitives";
+  import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/svelte";
 
   let dangerOpen: boolean | null = null;
   let warningOpen: boolean | null = null;

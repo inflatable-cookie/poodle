@@ -17,9 +17,8 @@
   },
   "dependencies": {
     "@poodle/icons-lucide": "workspace:*",
-    "@poodle/svelte-composites": "workspace:*",
+    "@poodle/svelte": "workspace:*",
     "lucide-static": "^0.577.0",
-    "@poodle/svelte-primitives": "workspace:*",
     "@poodle/svelte-tokens": "workspace:*",
     "svelte": "^5.38.6"
   },

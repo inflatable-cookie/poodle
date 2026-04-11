@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { PageHeader } from "@poodle/svelte-composites";
-  import { IconButton, MetaBar, Pill, TimeAgo } from "@poodle/svelte-primitives";
+  import { PageHeader } from "@poodle/svelte";
+  import { IconButton, MetaBar, Pill, TimeAgo } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

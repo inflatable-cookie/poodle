@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IconButton } from "@poodle/svelte-primitives";
+  import { IconButton } from "@poodle/svelte";
   import { plus, settings, x, trash2, star, mapPin, ban, refreshCw } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";

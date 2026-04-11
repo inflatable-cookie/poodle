@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Code, MetaBar, MetaItem, Pill } from "@poodle/svelte-primitives";
+  import { Code, MetaBar, MetaItem, Pill } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

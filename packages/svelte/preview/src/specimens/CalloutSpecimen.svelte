@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Callout } from "@poodle/svelte-primitives";
+  import { Callout } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>

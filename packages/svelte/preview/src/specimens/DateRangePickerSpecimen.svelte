@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DateRangePicker } from "@poodle/svelte-primitives";
+  import { DateRangePicker } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

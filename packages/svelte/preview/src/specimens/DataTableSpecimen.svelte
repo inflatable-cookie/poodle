@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { DataTable } from "@poodle/svelte-composites";
-  import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/svelte-composites";
-  import { Pill } from "@poodle/svelte-primitives";
+  import { DataTable } from "@poodle/svelte";
+  import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/svelte";
+  import { Pill } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;

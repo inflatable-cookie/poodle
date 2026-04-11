@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Meter } from "@poodle/svelte-primitives";
+  import { Meter } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ToastStack, type ToastItem } from "@poodle/svelte-composites";
-  import { Button } from "@poodle/svelte-primitives";
+  import { ToastStack, type ToastItem } from "@poodle/svelte";
+  import { Button } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;

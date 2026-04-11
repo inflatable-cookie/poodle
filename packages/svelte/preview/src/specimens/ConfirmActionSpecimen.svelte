@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ConfirmAction } from "@poodle/svelte-composites";
-  import { Button, IconButton } from "@poodle/svelte-primitives";
+  import { ConfirmAction } from "@poodle/svelte";
+  import { Button, IconButton } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   let lastAction = "";
