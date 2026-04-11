@@ -79,28 +79,10 @@
   }
 
   /* Size variants */
-  .time-input[data-size="xs"] {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    font-size: 0.75rem;
-  }
-
-  .time-input[data-size="sm"] {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-  }
-
-  .time-input[data-size="lg"] {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    font-size: 0.9375rem;
-  }
-
-  .time-input[data-size="xl"] {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    font-size: 1rem;
-  }
+  .time-input[data-size="xs"] { min-height: 1.5rem; font-size: 0.75rem; }
+  .time-input[data-size="sm"] { min-height: 1.75rem; font-size: 0.8125rem; }
+  .time-input[data-size="lg"] { min-height: 2.75rem; font-size: 0.9375rem; }
+  .time-input[data-size="xl"] { min-height: 3.25rem; font-size: 1rem; }
 
   /* Density variants */
   .time-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
