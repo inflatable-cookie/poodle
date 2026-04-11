@@ -102,6 +102,7 @@ Updated: 2026-04-09
 | `groups` | `LegacySelectGroup[] \| null` | `null` | no | deprecated compatibility alias for grouped option data using `items` / nested `groups` |
 | `disabled` | `boolean` | `false` | no | disables the select |
 | `required` | `boolean` | `false` | no | forwards native required semantics |
+| `validationState` | `ValidationState` | `"none"` | no | drives trigger border color (`invalid`→danger, `valid`→success, `pending`→accent) and sets `aria-invalid` when `"invalid"` |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `name` | `string \| undefined` | `undefined` | no | form field name; in custom mode a hidden input is rendered for form submission |
@@ -508,4 +509,4 @@ One disabled select with pre-selected value:
 - contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: settings, filters, inspectors, form fields
-- future follow-up: align with Popover overlay rules if GPUI implementation uses custom overlay; consider validation state support if needed
+- future follow-up: align with Popover overlay rules if GPUI implementation uses custom overlay

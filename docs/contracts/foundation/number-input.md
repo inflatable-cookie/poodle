@@ -14,7 +14,7 @@ It covers both:
 
 - numeric bindings for direct number editing
 - string-form bindings for form workflows that need raw string values,
-  validation, or prefix presentation
+  validation, or prefix/suffix presentation (currency, units)
 
 This replaces the old split between `NumberEntry` and `NumberInput`.
 
@@ -32,6 +32,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 - `step: number | string | null`
 - `precision: number | null`
 - `prefix: string | null`
+- `suffix: string | null`
 - `validate: InputValidator | undefined`
 - `validationContext: unknown`
 - `validationState: ValidationState`
@@ -62,6 +63,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 
 <NumberInput bind:value={quantity} min={0} max={100} showSteppers />
 <NumberInput bind:value={formYear} min={1900} max={2100} prefix="FY" />
+<NumberInput bind:value={weight} min={0} suffix="kg" />
 ```
 
 ## Notes

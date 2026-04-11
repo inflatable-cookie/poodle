@@ -29,6 +29,7 @@
   export let ariaLabel: string | null = null;
   export let describedBy: string | null = null;
   export let prefix: string | null = null;
+  export let suffix: string | null = null;
   export let validate: InputValidator | undefined = undefined;
   export let validationContext: unknown = undefined;
   export let validationState: ValidationState = "none";
@@ -212,7 +213,7 @@
   }
 </script>
 
-<div class:with-prefix={Boolean(prefix)} class="number-input">
+<div class:with-prefix={Boolean(prefix)} class:with-suffix={Boolean(suffix)} class="number-input">
   {#if prefix}
     <span class="number-input__prefix">{prefix}</span>
   {/if}
@@ -273,6 +274,10 @@
       </div>
     {/if}
   </div>
+
+  {#if suffix}
+    <span class="number-input__suffix">{suffix}</span>
+  {/if}
 </div>
 
 <style>
@@ -282,7 +287,8 @@
     gap: 0.5rem;
   }
 
-  .number-input__prefix {
+  .number-input__prefix,
+  .number-input__suffix {
     display: inline-flex;
     align-items: center;
     padding: 0 0.75rem;

@@ -17,6 +17,7 @@
     SelectLoadOptions,
     SelectOption,
     SelectOptionGroup,
+    ValidationState,
   } from "./types";
 
   // ── Legacy compat types ──────────────────────────────────────
@@ -66,6 +67,7 @@
   // Behavior
   export let disabled = false;
   export let required = false;
+  export let validationState: ValidationState = "none";
   export let clearable = false;
   /** When true, renders a custom dropdown with search/filter input. */
   export let searchable = false;
@@ -411,6 +413,8 @@
     data-variant={variant}
     data-size={resolvedSize}
     data-density={resolvedDensity}
+    data-validation-state={validationState}
+    aria-invalid={validationState === "invalid" ? "true" : undefined}
   >
     {#if searchable}
       <!-- Searchable: text input trigger -->
@@ -621,7 +625,7 @@
 
 {:else}
   <!-- ═══ NATIVE MODE ═══ -->
-  <div class="select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity} data-validation-state={validationState}>
     <select
       id={selectId}
       {name}
@@ -631,6 +635,7 @@
       {required}
       aria-label={ariaLabel ?? undefined}
       aria-describedby={describedBy ?? undefined}
+      aria-invalid={validationState === "invalid" ? "true" : undefined}
       on:change={handleNativeChange}
     >
       {#if placeholderLabel}
@@ -699,6 +704,18 @@
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .select[data-validation-state="invalid"] {
+    border-color: var(--poodle-color-status-danger);
+  }
+
+  .select[data-validation-state="valid"] {
+    border-color: var(--poodle-color-status-success);
+  }
+
+  .select[data-validation-state="pending"] {
+    border-color: var(--poodle-color-accent-base);
   }
 
   .select:focus-within {
