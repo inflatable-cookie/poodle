@@ -108,6 +108,11 @@ impl MediaPicker {
 impl IntoElement for MediaPicker {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
+        // When closed, render nothing — matches dialog-style composites
+        // (confirm_action, etc.). Callers drive is_open via spec/state.
+        if !self.spec.is_open {
+            return div().into_any_element();
+        }
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let font_size = rem_to_px(size_font_rem(effective_size));
@@ -368,7 +373,22 @@ impl IntoElement for MediaPicker {
         dialog = dialog.child(grid);
 
         // ── Footer with selection count ──────────────────────────
+        // is_multiple shapes the wording: single-select picker shows
+        // "1 selected" / "None selected" (no pluralization ambiguity),
+        // multi-select shows "N items selected".
         let selected = self.spec.selected_count;
+        let is_multi = self.spec.is_multiple;
+        let footer_text = if is_multi {
+            format!(
+                "{} item{} selected",
+                selected,
+                if selected == 1 { "" } else { "s" },
+            )
+        } else if selected == 0 {
+            "None selected".to_string()
+        } else {
+            "1 selected".to_string()
+        };
         let footer = div()
             .flex()
             .items_center()
@@ -382,11 +402,7 @@ impl IntoElement for MediaPicker {
                     .text_size(label_tok)
                     .text_color(text_secondary)
                     .when(selected > 0, |el| el.text_color(text_primary))
-                    .child(format!(
-                        "{} item{} selected",
-                        selected,
-                        if selected == 1 { "" } else { "s" },
-                    )),
+                    .child(footer_text),
             )
             .child({
                 let mut confirm_btn = div()

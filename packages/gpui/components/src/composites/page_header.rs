@@ -18,6 +18,10 @@ pub struct PageHeader {
     breadcrumbs_slot: Option<AnyElement>,
     actions_slot: Option<AnyElement>,
     meta_slot: Option<AnyElement>,
+    /// Fired when the back link is clicked. The spec's `back_href` is
+    /// passed to the handler so callers can route it (GPUI has no
+    /// built-in navigation concept — routing is app-level).
+    on_back: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for PageHeader {
@@ -33,6 +37,7 @@ impl PageHeader {
             breadcrumbs_slot: None,
             actions_slot: None,
             meta_slot: None,
+            on_back: None,
         }
     }
 
@@ -43,6 +48,7 @@ impl PageHeader {
             breadcrumbs_slot: None,
             actions_slot: None,
             meta_slot: None,
+            on_back: None,
         }
     }
 
@@ -88,6 +94,13 @@ impl PageHeader {
         self.spec.banner_tone = tone;
         self
     }
+
+    /// Fired when the back link is clicked. Receives the back_href
+    /// string so the caller can route navigation however it likes.
+    pub fn on_back(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
+        self.on_back = Some(Box::new(handler));
+        self
+    }
 }
 
 impl IntoElement for PageHeader {
@@ -120,23 +133,33 @@ impl IntoElement for PageHeader {
         // Back-navigation link (above everything else).
         if spec.has_back_link() {
             let label = spec.back_label.clone().unwrap_or_default();
+            let href = spec.back_href.clone().unwrap_or_default();
             let back_text_size = if spec.back_is_contextual {
-                px(11.0)
+                resolve_px(theme, "typography.caption.size")
             } else {
                 body_size
             };
-            wrapper = wrapper.child(
-                div()
-                    .w_full()
-                    .mb(gap)
-                    .flex()
-                    .items_center()
-                    .gap(px(4.0))
-                    .text_size(back_text_size)
-                    .text_color(back_color)
-                    .child(div().child("\u{2190}"))
-                    .child(div().child(format!("Back to {label}"))),
-            );
+            let inline_xs = resolve_px(theme, "space.inline.sm");
+            let mut back_row = div()
+                .id("poodle-page-header-back")
+                .w_full()
+                .mb(gap)
+                .flex()
+                .items_center()
+                .gap(inline_xs)
+                .text_size(back_text_size)
+                .text_color(back_color)
+                .cursor_pointer()
+                .child(div().child("\u{2190}"))
+                .child(div().child(format!("Back to {label}")));
+
+            if let Some(handler) = self.on_back {
+                back_row = back_row.on_click(move |_event, window, cx| {
+                    handler(&href, window, cx);
+                });
+            }
+
+            wrapper = wrapper.child(back_row);
         }
 
         // Optional breadcrumbs above
