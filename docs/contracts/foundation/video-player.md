@@ -6,7 +6,7 @@ Updated: 2026-03-30
 ## 1. Purpose
 
 - Component name: `VideoPlayer`
-- Layer: `composites`
+- Layer: `primitives`
 - Summary: a video playback component with custom overlay controls, seek bar,
   volume, fullscreen, and optional captions
 - In scope: play/pause, seek slider, time display, volume slider, mute toggle,

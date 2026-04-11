@@ -8,19 +8,19 @@ Primary repos: `poodle`
 
 ## Goals
 
-- [ ] implement AudioPlayer as a composite for audio file playback with
+- [ ] implement AudioPlayer as a primitive for audio file playback with
   transport controls
-- [ ] implement VideoPlayer as a composite for video playback with standard
+- [ ] implement VideoPlayer as a primitive for video playback with standard
   controls
 
 ## Execution Checklist
 
 - [ ] write contract for AudioPlayer: src, play/pause, seek bar, volume,
   duration display, playback speed, waveform visualization (optional)
-- [ ] implement AudioPlayer composite in `@poodle/svelte-composites`
+- [ ] implement AudioPlayer primitive in `@poodle/svelte-primitives`
 - [ ] write contract for VideoPlayer: src, play/pause, seek bar, volume,
   fullscreen, aspect ratio, poster image, captions/subtitles
-- [ ] implement VideoPlayer composite in `@poodle/svelte-composites`
+- [ ] implement VideoPlayer primitive in `@poodle/svelte-primitives`
 - [ ] create specimens for AudioPlayer and VideoPlayer
 - [ ] register in component-registry.ts and specimen registry
 

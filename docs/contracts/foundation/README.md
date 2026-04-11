@@ -8,6 +8,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 ## Current Contracts
 
 - `accordion.md`
+- `audio-player.md`
 - `alert-dialog.md`
 - `box.md`
 - `breadcrumbs.md`
@@ -95,6 +96,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `treatment-tokens.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`
+- `video-player.md`
 - `date-time-zone-picker.md`
 
 ## Accessibility Rule

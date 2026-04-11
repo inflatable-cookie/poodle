@@ -480,6 +480,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     note: "Every public primitive export is directly reviewable from the catalogue.",
     exportNames: [
       "AlertDialog",
+      "AudioPlayer",
       "Box",
       "Breadcrumbs",
       "BulkActionBar",
@@ -536,6 +537,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Tooltip",
       "TriStateSwitch",
       "UiPresentationProvider",
+      "VideoPlayer",
       "DateTimeZonePicker",
     ],
   },
@@ -633,7 +635,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     sectionIds: ["catalog-hub"],
     note: "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
     exportNames: [
-      "AudioPlayer",
       "BlockEditor",
       "CardRadioGroup",
       "ConfirmAction",
@@ -654,7 +655,6 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "PageLoading",
       "SidebarNav",
       "ToastHost",
-      "VideoPlayer",
     ],
   },
   {

@@ -1,4 +1,5 @@
 export { default as Accordion } from "./Accordion.svelte";
+export { default as AudioPlayer } from "./AudioPlayer.svelte";
 export { default as AlertDialog } from "./AlertDialog.svelte";
 export { default as Box } from "./Box.svelte";
 export { default as Breadcrumbs } from "./Breadcrumbs.svelte";
@@ -88,6 +89,7 @@ export { default as Tooltip } from "./Tooltip.svelte";
 export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
 export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
+export { default as VideoPlayer } from "./VideoPlayer.svelte";
 export { default as DateTimeZonePicker } from "./DateTimeZonePicker.svelte";
 export {
   formatDisplayDate,

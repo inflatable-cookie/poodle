@@ -1,6 +1,5 @@
 export { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";
 export { default as AppHeader } from "./AppHeader.svelte";
-export { default as AudioPlayer } from "./AudioPlayer.svelte";
 export { default as EditableList } from "./EditableList.svelte";
 export { default as ErrorBoundary } from "./ErrorBoundary.svelte";
 export { default as BlockEditor } from "./BlockEditor.svelte";
@@ -64,7 +63,6 @@ export { StatusBar } from "@poodle/svelte-primitives";
 export { default as MetricTile } from "./MetricTile.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
 export { default as ToastHost } from "./ToastHost.svelte";
-export { default as VideoPlayer } from "./VideoPlayer.svelte";
 export {
   parseWorkspaceLayoutSnapshot,
   serializeWorkspaceLayoutSnapshot,

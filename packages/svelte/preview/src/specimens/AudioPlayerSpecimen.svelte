@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AudioPlayer } from "@poodle/svelte-composites";
+  import { AudioPlayer } from "@poodle/svelte-primitives";
   import { UiPresentationProvider } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>

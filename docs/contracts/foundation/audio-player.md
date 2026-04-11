@@ -6,7 +6,7 @@ Updated: 2026-03-30
 ## 1. Purpose
 
 - Component name: `AudioPlayer`
-- Layer: `composites`
+- Layer: `primitives`
 - Summary: audio playback bar with transport controls, seek, volume, and optional speed control
 - In scope: play/pause, seek slider, current/total time display, mute toggle, volume slider, playback speed selector, size and density variants
 - Out of scope: playlist management, waveform visualization, streaming protocol selection, download actions
@@ -313,7 +313,7 @@ No component-owned events are dispatched. All interaction is internal (transport
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `poodle_gpui::composites::audio_player`
+- Expected crate/module surface: `poodle_gpui::primitives::audio_player`
 - Audio playback requires platform-specific audio API integration
 - Slider controls will need custom range input implementations
 

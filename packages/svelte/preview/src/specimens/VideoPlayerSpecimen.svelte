@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { VideoPlayer } from "@poodle/svelte-composites";
+  import { VideoPlayer } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 

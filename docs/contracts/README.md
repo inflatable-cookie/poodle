@@ -37,6 +37,7 @@ above it in downstream repos such as Loophole.
 - `template/component-contract-template.md`
 - `foundation/README.md`
 - `foundation/accordion.md`
+- `foundation/audio-player.md`
 - `foundation/alert-dialog.md`
 - `foundation/box.md`
 - `foundation/breadcrumbs.md`
@@ -124,11 +125,11 @@ above it in downstream repos such as Loophole.
 - `foundation/treatment-tokens.md`
 - `foundation/tri-state-switch.md`
 - `foundation/ui-presentation-provider.md`
+- `foundation/video-player.md`
 - `foundation/date-time-zone-picker.md`
 - `composites/README.md`
 - `composites/action-discovery-panel.md`
 - `composites/app-header.md`
-- `composites/audio-player.md`
 - `composites/block-editor.md`
 - `composites/card-radio-group.md`
 - `composites/command-palette.md`
@@ -165,7 +166,6 @@ above it in downstream repos such as Loophole.
 - `composites/split-view.md`
 - `composites/toast-host.md`
 - `composites/toast-stack.md`
-- `composites/video-player.md`
 
 ## Next Task
 

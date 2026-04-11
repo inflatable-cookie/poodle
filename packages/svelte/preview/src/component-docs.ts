@@ -110,7 +110,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AudioPlayer } from "@poodle/svelte-composites";
+  import { AudioPlayer } from "@poodle/svelte-primitives";
 </script>
 
 <AudioPlayer src="/audio/podcast-episode.mp3" showSpeedControl />`,
@@ -3664,7 +3664,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { VideoPlayer } from "@poodle/svelte-composites";
+  import { VideoPlayer } from "@poodle/svelte-primitives";
 </script>
 
 <VideoPlayer src="/videos/intro.mp4" poster="/images/poster.jpg" showCaptions />`,

@@ -117,12 +117,13 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Tooltip", "primitive", P, "Hover/focus-triggered informational overlay.", true),
   entry("TriStateSwitch", "primitive", P, "Three-position switch for on/off/indeterminate.", true),
   entry("DateTimeZonePicker", "primitive", P, "Date-time picker with timezone awareness.", true),
+  entry("AudioPlayer", "primitive", P, "Audio playback with transport controls, volume, and speed.", true),
+  entry("VideoPlayer", "primitive", P, "Video playback with overlay controls, fullscreen, and captions.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const compositeComponents: ComponentEntry[] = [
   entry("ActionDiscoveryPanel", "composite", C, "Grouped action list with keyboard navigation, shortcuts, and badges.", true),
   entry("AppHeader", "composite", C, "Top-level application header with branding and global actions.", true),
-  entry("AudioPlayer", "composite", C, "Audio playback with transport controls, volume, and speed.", true),
   entry("EditableList", "composite", C, "Unified editable/reorderable list with add, remove, drag-and-drop, workflow chrome, and windowing.", true),
   entry("BlockEditor", "composite", C, "Block-based content editor with paragraph, heading, code, quote, list, image, and divider blocks.", true),
   entry("CardRadioGroup", "composite", C, "Radio selection across rich card options with keyboard navigation.", true),
@@ -152,7 +153,6 @@ export const compositeComponents: ComponentEntry[] = [
   entry("MetricTile", "composite", C, "Compact label-value tile for metrics and KPIs.", true),
   entry("ToastHost", "composite", C, "Store-aware toast host that applies timer policy and fixed viewport layout over ToastStack.", true),
   entry("ToastStack", "composite", C, "Stacked transient notification manager.", true),
-  entry("VideoPlayer", "composite", C, "Video playback with overlay controls, fullscreen, and captions.", true),
   entry("DockRegion", "composite", C, "Collapsible dock container for panels with tabs, collapse, and drag-and-drop.", true),
   entry("SplitView", "composite", C, "Resizable split pane layout with collapse toggles and drag-to-collapse.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));

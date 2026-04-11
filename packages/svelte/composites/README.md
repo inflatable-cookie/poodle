@@ -7,7 +7,6 @@ and data components.
 
 - `ActionDiscoveryPanel`
 - `AppHeader`
-- `AudioPlayer`
 - `Breadcrumbs`
 - `BlockEditor`
 - `BulkActionBar`
@@ -54,7 +53,6 @@ and data components.
 - `StatusBar`
 - `ToastHost`
 - `ToastStack`
-- `VideoPlayer`
 - `computeFileHash`
 - `createResetMediaBrowseState`
 - `detectParsedEmbed`

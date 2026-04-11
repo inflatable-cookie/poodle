@@ -6,6 +6,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 
 - `Accordion`
 - `AlertDialog`
+- `AudioPlayer`
 - `Box`
 - `Breadcrumbs`
 - `BulkActionBar`
@@ -87,6 +88,7 @@ Contract-backed Svelte primitive surface for the first generalized Poodle baseli
 - `Tooltip`
 - `TriStateSwitch`
 - `UiPresentationProvider`
+- `VideoPlayer`
 - `DateTimeZonePicker`
 - `DEFAULT_COMPRESSION`
 - `compressImage`

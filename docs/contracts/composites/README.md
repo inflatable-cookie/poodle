@@ -10,7 +10,6 @@ built from foundation primitives without embedding app-specific workflow logic.
 
 - `action-discovery-panel.md`
 - `app-header.md`
-- `audio-player.md`
 - `block-editor.md`
 - `card-radio-group.md`
 - `command-palette.md`
@@ -47,7 +46,6 @@ built from foundation primitives without embedding app-specific workflow logic.
 - `split-view.md`
 - `toast-host.md`
 - `toast-stack.md`
-- `video-player.md`
 
 ## Composition Rule
 
