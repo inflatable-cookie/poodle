@@ -1,67 +1,47 @@
 <script lang="ts">
-  import {
-    TriStateSwitch,
-    UiPresentationProvider,
-    type TriStateValue,
-  } from "@poodle/svelte-primitives";
-  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@poodle/svelte-primitives";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let filter: TriStateValue = "default";
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Default">
-    <TriStateSwitch
-      value={filter}
-      ariaLabel="Filter mode"
-      on:valueChange={(e) => (filter = e.detail.value)}
-    />
-    <p>Value: <strong>{filter}</strong></p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Custom labels">
-    <TriStateSwitch
-      options={{ excluded: "Hide", default: "All", included: "Show" }}
-      ariaLabel="Visibility filter"
-    />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Chrome vs prominent role offset">
-    <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__row">
-        <TriStateSwitch value="excluded" sizeRole="chrome" ariaLabel="Compact chrome switch" />
-        <TriStateSwitch value="included" sizeRole="control" ariaLabel="Compact control switch" />
-        <TriStateSwitch value="default" sizeRole="prominent" ariaLabel="Compact prominent switch" />
+  <Surface tone="panel" border="subtle" padding="md">
+    <div class="specimen">
+      <div class="specimen__item">
+        <Eyebrow>Default</Eyebrow>
+        <TriStateSwitch value={filter} ariaLabel="Filter mode" on:valueChange={(e) => (filter = e.detail.value)} />
+        <span class="specimen__value">{filter}</span>
       </div>
-    </UiPresentationProvider>
-  </SpecimenGroup>
 
-  <SpecimenGroup label="Disabled">
-    <TriStateSwitch value="included" disabled ariaLabel="Disabled switch" />
-  </SpecimenGroup>
+      <div class="specimen__item">
+        <Eyebrow>Custom labels</Eyebrow>
+        <TriStateSwitch options={{ excluded: "Hide", default: "All", included: "Show" }} ariaLabel="Visibility filter" />
+      </div>
 
-  <SpecimenGroup label="Custom semantic colors">
-    <TriStateSwitch
-      value={filter}
-      excludedColor="#ef4444"
-      defaultColor="#64748b"
-      includedColor="#22c55e"
-      ariaLabel="Filter mode with custom semantic colors"
-      on:valueChange={(e) => (filter = e.detail.value)}
-    />
-  </SpecimenGroup>
+      <div class="specimen__item">
+        <Eyebrow>Custom colors</Eyebrow>
+        <TriStateSwitch value={filter} excludedColor="#ef4444" defaultColor="#64748b" includedColor="#22c55e" ariaLabel="Custom colors" on:valueChange={(e) => (filter = e.detail.value)} />
+      </div>
+
+      <div class="specimen__item">
+        <Eyebrow>Disabled</Eyebrow>
+        <TriStateSwitch value="included" disabled ariaLabel="Disabled" />
+      </div>
+    </div>
+  </Surface>
 
   <svelte:fragment slot="sizes" let:size>
-    <TriStateSwitch value="default" {size} ariaLabel={`Tri-state switch at ${size}`} />
+    <TriStateSwitch value="default" {size} ariaLabel="Switch at {size}" />
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <TriStateSwitch value="default" {density} ariaLabel="Switch at {density}" />
   </svelte:fragment>
 </SpecimenLayout>
 
 <style>
-  .specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
+  .specimen { display: flex; flex-direction: column; gap: 0.75rem; }
+  .specimen__item { display: flex; align-items: center; gap: 0.75rem; }
+  .specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
 </style>
