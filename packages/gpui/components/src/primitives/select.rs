@@ -106,9 +106,22 @@ impl IntoElement for Select {
 
         // Svelte treatment-interactive-subtle values for trigger
         let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
-        let border = Hsla { a: border_default.a * 0.72, ..border_default };
+        let base_border = Hsla { a: border_default.a * 0.72, ..border_default };
         let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
-        let hover_border = Hsla { a: border_default.a * 0.92, ..border_default };
+
+        // Validation-state border colour. Mirrors TextInput's three
+        // tones — when set, the trigger advertises the state and
+        // the closed-state border switches to the matching status
+        // colour.
+        use poodle_primitives::ValidationState;
+        let validation_border = match spec.validation_state {
+            ValidationState::Invalid => Some(resolve_color(theme, "color.status.danger")),
+            ValidationState::Valid => Some(resolve_color(theme, "color.status.success")),
+            ValidationState::Pending => Some(accent),
+            ValidationState::None => None,
+        };
+        let border = validation_border.unwrap_or(base_border);
+        let hover_border = validation_border.unwrap_or(Hsla { a: border_default.a * 0.92, ..border_default });
         // Elevated treatment for dropdown overlay
         let elevated_bg = Hsla { a: elevated_raw.a * 0.94, ..elevated_raw };
         let overlay_border = Hsla { a: border_default.a * 0.22, ..border_default };

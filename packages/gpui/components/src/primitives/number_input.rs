@@ -111,7 +111,14 @@ impl IntoElement for NumberInput {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let stepper_bg = color_mix(elevated, surface_bg, 0.88);
-        let display_value = format!("{}", spec.clamped_value());
+        // Precision-aware display: when `precision` is set, format
+        // with the requested decimal places (e.g. 2 → "3.20").
+        // Otherwise fall back to the clamped value's natural form.
+        let display_value = match spec.precision {
+            Some(p) => format!("{:.*}", p as usize, spec.clamped_value()),
+            None => format!("{}", spec.clamped_value()),
+        };
+        let text_secondary = resolve_color(theme, "color.text.secondary");
 
         // Contract: stepper width 1.25rem (20px), radius = control - 0.125rem (2px)
         let stepper_width = px(20.0);
@@ -196,16 +203,58 @@ impl IntoElement for NumberInput {
             .child(inc_btn)
             .child(dec_btn);
 
-        // Value display — centered in the input area
-        let value_display = div()
+        // Value display — centered in the input area, optionally
+        // flanked by prefix/suffix labels in the text-secondary tone.
+        // When the value is empty and a placeholder is set, the
+        // placeholder is rendered in place of the value in
+        // text-secondary to match Svelte's ::placeholder behaviour.
+        let show_placeholder = display_value == "0"
+            && spec.placeholder.is_some()
+            && spec.value == 0.0;
+        let rendered_text_color = if show_placeholder {
+            text_secondary
+        } else {
+            text_primary
+        };
+        let rendered_text = if show_placeholder {
+            spec.placeholder.clone().unwrap_or(display_value)
+        } else {
+            display_value
+        };
+
+        let mut value_row = div()
             .flex_1()
             .px(control_padding_x)
             .flex()
             .items_center()
+            .gap(px(6.0))
             .text_size(body_size)
-            .line_height(body_line_height)
-            .text_color(text_primary)
-            .child(display_value);
+            .line_height(body_line_height);
+
+        if let Some(ref prefix) = spec.prefix {
+            value_row = value_row.child(
+                div()
+                    .text_color(text_secondary)
+                    .child(prefix.clone()),
+            );
+        }
+
+        value_row = value_row.child(
+            div()
+                .flex_1()
+                .text_color(rendered_text_color)
+                .child(rendered_text),
+        );
+
+        if let Some(ref suffix) = spec.suffix {
+            value_row = value_row.child(
+                div()
+                    .text_color(text_secondary)
+                    .child(suffix.clone()),
+            );
+        }
+
+        let value_display = value_row;
 
         // Svelte: validation state border colors
         let effective_border = match spec.validation_state {

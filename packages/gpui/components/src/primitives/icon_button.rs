@@ -16,7 +16,6 @@ pub struct IconButton {
     spec: IconButtonSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    tone: ButtonTone,
     on_click: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
@@ -27,11 +26,11 @@ impl std::ops::Deref for IconButton {
 
 impl IconButton {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: IconButtonSpec::new(), theme: theme.clone(), id_suffix: None, tone: ButtonTone::Default, on_click: None }
+        Self { spec: IconButtonSpec::new(), theme: theme.clone(), id_suffix: None, on_click: None }
     }
 
     pub fn from_spec(spec: IconButtonSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), id_suffix: None, tone: ButtonTone::Default, on_click: None }
+        Self { spec, theme: theme.clone(), id_suffix: None, on_click: None }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
@@ -51,7 +50,12 @@ impl IconButton {
     }
 
     pub fn tone(mut self, tone: ButtonTone) -> Self {
-        self.tone = tone;
+        self.spec.tone = tone;
+        self
+    }
+
+    pub fn tooltip(mut self, tooltip: impl Into<String>) -> Self {
+        self.spec.tooltip = Some(tooltip.into());
         self
     }
 
@@ -70,7 +74,7 @@ impl IntoElement for IconButton {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
-        let tone = self.tone;
+        let tone = self.spec.tone;
 
         // ── Resolve variant colors ────────────────────────────────
         let base_fill = resolve_color(theme, spec.variant.fill_token(tone));

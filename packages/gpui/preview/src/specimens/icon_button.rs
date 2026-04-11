@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ButtonVariant, IconButtonSpec, EyebrowSpec};
+use poodle_primitives::{ButtonTone, ButtonVariant, IconButtonSpec, EyebrowSpec};
 use poodle_gpui_components::{IconButton, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
@@ -77,6 +77,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             IconButton::from_spec(
                                 IconButtonSpec::new()
                                     .with_variant(ButtonVariant::Primary)
+                                    .with_tone(ButtonTone::Danger)
                                     .with_icon("trash-2")
                                     .with_aria_label("Delete"),
                                 theme,
@@ -87,6 +88,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             IconButton::from_spec(
                                 IconButtonSpec::new()
                                     .with_variant(ButtonVariant::Secondary)
+                                    .with_tone(ButtonTone::Danger)
                                     .with_icon("trash-2")
                                     .with_aria_label("Delete"),
                                 theme,
@@ -97,6 +99,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             IconButton::from_spec(
                                 IconButtonSpec::new()
                                     .with_variant(ButtonVariant::Ghost)
+                                    .with_tone(ButtonTone::Danger)
                                     .with_icon("trash-2")
                                     .with_aria_label("Delete"),
                                 theme,

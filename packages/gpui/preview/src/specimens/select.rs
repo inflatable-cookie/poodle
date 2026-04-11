@@ -1,7 +1,7 @@
 use gpui::*;
 use gpui::prelude::FluentBuilder;
 use poodle_adapter::ThemeProvider;
-use poodle_primitives::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
+use poodle_primitives::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec, ValidationState};
 use poodle_gpui_components::{Select, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
@@ -244,7 +244,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
                 .child({
-                    let mut spec = SelectSpec::new(fruit_options)
+                    let mut spec = SelectSpec::new(fruit_options.clone())
                         .with_placeholder("Choose a fruit")
                         .with_value("banana");
                     spec.is_disabled = true;
@@ -255,5 +255,43 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_id("select-disabled")
                         )
                 })
+        )
+        // --- Validation states ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Validation states"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(12.0)).max_w(px(320.0))
+                        .child(
+                            Select::from_spec(
+                                SelectSpec::new(fruit_options.clone())
+                                    .with_placeholder("Pick one")
+                                    .with_value("apple")
+                                    .with_validation_state(ValidationState::Invalid),
+                                theme,
+                            )
+                            .with_id("select-invalid")
+                        )
+                        .child(
+                            Select::from_spec(
+                                SelectSpec::new(fruit_options.clone())
+                                    .with_placeholder("Pick one")
+                                    .with_value("banana")
+                                    .with_validation_state(ValidationState::Valid),
+                                theme,
+                            )
+                            .with_id("select-valid")
+                        )
+                        .child(
+                            Select::from_spec(
+                                SelectSpec::new(fruit_options)
+                                    .with_placeholder("Pick one")
+                                    .with_value("cherry")
+                                    .with_validation_state(ValidationState::Pending),
+                                theme,
+                            )
+                            .with_id("select-pending")
+                        )
+                )
         )
 }

@@ -117,6 +117,47 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        // --- Prefix (currency) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Prefix (currency)"), theme))
+                .child(
+                    NumberInput::from_spec(
+                        NumberInputSpec::new(29.99)
+                            .with_min(0.0)
+                            .with_step(0.01)
+                            .with_prefix("$")
+                            .with_precision(2),
+                        theme,
+                    )
+                )
+        )
+        // --- Suffix (unit) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Suffix (unit)"), theme))
+                .child(
+                    NumberInput::from_spec(
+                        NumberInputSpec::new(72.0)
+                            .with_min(0.0)
+                            .with_suffix("kg"),
+                        theme,
+                    )
+                )
+        )
+        // --- Precision (3 decimal places) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Precision (3 decimal places)"), theme))
+                .child(
+                    NumberInput::from_spec(
+                        NumberInputSpec::new(3.14159)
+                            .with_step(0.001)
+                            .with_precision(3),
+                        theme,
+                    )
+                )
+        )
         .into_any_element();
 
     specimen_layout(
