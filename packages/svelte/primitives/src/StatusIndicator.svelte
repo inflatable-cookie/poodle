@@ -92,6 +92,10 @@
   .status-indicator[data-size="xl"] .status-indicator__label { font-size: 0.875rem; }
   .status-indicator[data-size="xl"] { gap: 0.5625rem; }
 
+  /* Density variants */
+  .status-indicator[data-density="compact"] { gap: 0.25rem; }
+  .status-indicator[data-density="comfortable"] { gap: 0.625rem; }
+
   @keyframes status-pulse {
     from {
       opacity: 0.55;
