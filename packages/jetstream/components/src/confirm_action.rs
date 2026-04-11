@@ -69,10 +69,10 @@ pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvide
             .text_color(text_primary).text_size(title_size).text_weight(600)
     );
 
-    // Message
-    if !spec.message.is_empty() {
+    // Description
+    if !spec.description.is_empty() {
         card = card.child(
-            ui_element::label(&spec.message)
+            ui_element::label(&spec.description)
                 .text_color(text_secondary).text_size(font_size)
         );
     }

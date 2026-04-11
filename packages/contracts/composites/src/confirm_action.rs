@@ -4,7 +4,7 @@ use poodle_tokens::semantic;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ConfirmActionSpec {
     pub title: String,
-    pub message: String,
+    pub description: String,
     pub confirm_label: String,
     pub cancel_label: String,
     pub tone: StatusTone,
@@ -17,13 +17,13 @@ pub struct ConfirmActionSpec {
 impl ConfirmActionSpec {
     pub fn new(
         title: impl Into<String>,
-        message: impl Into<String>,
+        description: impl Into<String>,
         confirm_label: impl Into<String>,
         cancel_label: impl Into<String>,
     ) -> Self {
         Self {
             title: title.into(),
-            message: message.into(),
+            description: description.into(),
             confirm_label: confirm_label.into(),
             cancel_label: cancel_label.into(),
             tone: StatusTone::Neutral,

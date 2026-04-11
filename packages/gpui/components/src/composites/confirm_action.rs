@@ -126,7 +126,7 @@ impl IntoElement for ConfirmAction {
 
         let heading_size = resolve_px(theme, "typography.heading.size");
         dialog = dialog.child(div().text_size(heading_size).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
-        dialog = dialog.child(div().text_size(body_size).text_color(msg_color).child(spec.message.clone()));
+        dialog = dialog.child(div().text_size(body_size).text_color(msg_color).child(spec.description.clone()));
 
         // Optional body content slot (matches Svelte default slot)
         if let Some(content) = self.content {
