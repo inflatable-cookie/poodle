@@ -275,12 +275,21 @@ impl IntoElement for DataTable {
             .overflow_hidden();
 
         // ── Header row ──
+        // When spec.sticky_header is set, pin the header with
+        // flex_shrink_0 so it isn't compressed out by layout pressure
+        // from a vertically-constrained parent. GPUI doesn't expose
+        // CSS-style `position: sticky`, so full scroll-pinned behaviour
+        // would require splitting the table into header + scrollable
+        // body — this gives the practical effect without that refactor.
         let mut header_row = div()
             .w_full()
             .flex()
             .bg(header_bg)
             .border_b_1()
             .border_color(border_color);
+        if spec.sticky_header {
+            header_row = header_row.flex_shrink_0();
+        }
 
         // Select-all checkbox column
         if spec.selectable {

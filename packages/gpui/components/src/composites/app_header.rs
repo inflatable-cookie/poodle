@@ -75,6 +75,7 @@ impl IntoElement for AppHeader {
         let inline_padding = resolve_px(theme, "space.inline.md");
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let body_size = resolve_px(theme, "typography.body.size");
+        let header_height = resolve_px(theme, "size.panel.header");
 
         let bg = resolve_color(theme, spec.background_token());
         let border = resolve_color(theme, "color.border.default");
@@ -85,11 +86,18 @@ impl IntoElement for AppHeader {
             .items_center()
             .justify_between()
             .w_full()
-            .h(px(44.0))
+            .h(header_height)
             .px(inline_padding)
             .bg(bg)
             .border_b_1()
             .border_color(border);
+
+        // Apply native window drag affordance when the contract
+        // flags the header as a drag region. This lets the user
+        // drag the window by the header on macOS / Windows / Linux.
+        if spec.is_drag_region {
+            header = header.window_control_area(WindowControlArea::Drag);
+        }
 
         // Left section: leading + title
         let mut left = div().flex().items_center().gap(inline_gap).flex_shrink_0();
