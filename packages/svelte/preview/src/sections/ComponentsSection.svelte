@@ -7,7 +7,12 @@
 
   export let activeComponent: string | undefined = undefined;
 
+  let contentElement: HTMLDivElement;
+
   $: entry = activeComponent ? findComponent(activeComponent) : undefined;
+  $: if (activeComponent && contentElement) {
+    contentElement.scrollTop = 0;
+  }
   $: specimen = entry?.slug ? specimenMap[entry.slug] ?? null : null;
   $: navGroups = componentsByTag().map((group) => ({
     id: group.tag,
@@ -29,7 +34,7 @@
     />
   </div>
 
-  <div class="catalogue-content">
+  <div class="catalogue-content" bind:this={contentElement}>
     {#if entry}
       <ComponentPage {entry} specimenComponent={specimen} />
     {:else}
