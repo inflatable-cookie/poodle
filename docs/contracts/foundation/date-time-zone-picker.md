@@ -8,9 +8,9 @@ Updated: 2026-03-30
 - Component name: `DateTimeZonePicker`
 - Layer: `foundation`
 - Summary: a value control that combines a picker trigger with a calendar,
-  time-field, and timezone-select composition in a single overlay surface
+  time-input, and timezone-select composition in a single overlay surface
 - In scope: selected date, local time, timezone, open state, calendar plus
-  time-field and timezone-select composition, placeholder behavior, outside-click
+  time-input and timezone-select composition, placeholder behavior, outside-click
   and Escape dismissal, controlled and uncontrolled value and open state
 - Out of scope: recurrence, timezone conversion workflows, transport schedules,
   booking rules, offset arithmetic
@@ -28,7 +28,7 @@ Updated: 2026-03-30
               └── [Fields .date-time-zone-picker__fields]
                     ├── [Field .date-time-zone-picker__field]
                     │     ├── [Field Label .date-time-zone-picker__label]  <label> ("Time")
-                    │     └── [TimeField] (composed)
+                    │     └── [TimeInput] (composed)
                     └── [Field .date-time-zone-picker__field]
                           ├── [Field Label .date-time-zone-picker__label]  <label> ("Time zone")
                           └── [TimeZoneSelect] (composed)
@@ -46,7 +46,7 @@ Updated: 2026-03-30
 | Fields | yes | vertical stack for time and timezone fields | display, gap |
 | Field | yes | container for label and composed control | display, gap |
 | Field Label | yes | "Time" / "Time zone" heading above field | color, font-family, font-size, font-weight, letter-spacing, text-transform |
-| TimeField | yes | composed time-field primitive | delegated to TimeField contract |
+| TimeInput | yes | composed time-input primitive | delegated to TimeInput contract |
 | TimeZoneSelect | yes | composed timezone-select primitive | delegated to TimeZoneSelect contract |
 
 ## 3. Props And Inputs
@@ -126,7 +126,7 @@ TimeZoneOption: {
 - Trigger accessible name from external label or `ariaLabel` prop
 - Disabled: `disabled` attribute on trigger button
 - Module-level `nextDateTimeZonePickerId` counter generates unique ids for ARIA relationships
-- TimeField receives `ariaLabel` "Time"; TimeZoneSelect receives `ariaLabel` "Time zone"
+- TimeInput receives `ariaLabel` "Time"; TimeZoneSelect receives `ariaLabel` "Time zone"
 
 ### Keyboard
 
@@ -158,7 +158,7 @@ TimeZoneOption: {
 
 - parent expectations: publishing flows, appointments, scheduler setup,
   localized reminders
-- child expectations: composes Calendar, TimeField, and TimeZoneSelect
+- child expectations: composes Calendar, TimeInput, and TimeZoneSelect
   internally; no child slots
 - resizing rules: trigger stretches to parent width; value text truncates with
   ellipsis
@@ -296,7 +296,7 @@ TimeZoneOption: {
   operates in controlled mode; otherwise `defaultValue` seeds internal state
 - Same pattern for `open`/`defaultOpen`
 - Outside click handler closes the overlay; Escape key closes the overlay
-- Composes `Calendar`, `TimeField`, and `TimeZoneSelect` internally
+- Composes `Calendar`, `TimeInput`, and `TimeZoneSelect` internally
 - Public value uses contract-owned local date, local time, and timezone string
   fields rather than timestamps
 - Hosts may provide curated `timeZoneOptions` when product policy requires them;
@@ -313,8 +313,8 @@ TimeZoneOption: {
   accessibility APIs
 - `color-mix` formulas for surface border (72%), background (98%), and trigger
   hover (86%) must be replicated or approximated
-- Calendar, TimeField, and TimeZoneSelect composition: GPUI delegates to its own
-  calendar, time-field, and timezone-select primitives
+- Calendar, TimeInput, and TimeZoneSelect composition: GPUI delegates to its own
+  calendar, time-input, and timezone-select primitives
 - Field label typography must match: label-family, 0.6875rem, weight 600,
   0.04em tracking, uppercase
 - Timezone option ordering may differ due to platform timezone registries;

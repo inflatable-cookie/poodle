@@ -8,8 +8,8 @@ Updated: 2026-03-30
 - Component name: `DateTimePicker`
 - Layer: `foundation`
 - Summary: a value control that combines a picker trigger with a calendar and
-  time-field composition in a single overlay surface
-- In scope: selected date, selected time, open state, calendar plus time-field
+  time-input composition in a single overlay surface
+- In scope: selected date, selected time, open state, calendar plus time-input
   composition, placeholder behavior, outside-click and Escape dismissal,
   controlled and uncontrolled value and open state
 - Out of scope: timezone selection, recurring schedules, booking availability,
@@ -27,7 +27,7 @@ Updated: 2026-03-30
               ├── [Calendar] (composed)
               └── [Time Section .date-time-picker__time-section]
                     ├── [Time Label .date-time-picker__time-label]  <span>
-                    └── [TimeField] (composed)
+                    └── [TimeInput] (composed)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -41,7 +41,7 @@ Updated: 2026-03-30
 | Calendar | yes | composed calendar primitive | delegated to Calendar contract |
 | Time Section | yes | container for time label and time field | display, gap |
 | Time Label | yes | "Time" heading above time field | color, font-family, font-size, font-weight, letter-spacing, text-transform |
-| TimeField | yes | composed time-field primitive | delegated to TimeField contract |
+| TimeInput | yes | composed time-input primitive | delegated to TimeInput contract |
 
 ## 3. Props And Inputs
 
@@ -139,7 +139,7 @@ DateTimeValue: { date: string | null; time: string | null }
 ### Composition
 
 - parent expectations: forms, publishing controls, appointment pickers, scheduler setup
-- child expectations: composes Calendar and TimeField internally; no child slots
+- child expectations: composes Calendar and TimeInput internally; no child slots
 - resizing rules: trigger stretches to parent width; value text truncates with ellipsis
 
 ## 8. Token Usage — Exact Values
@@ -269,7 +269,7 @@ DateTimeValue: { date: string | null; time: string | null }
   operates in controlled mode; otherwise `defaultValue` seeds internal state
 - Same pattern for `open`/`defaultOpen`
 - Outside click handler closes the overlay; Escape key closes the overlay
-- Composes `Calendar` and `TimeField` internally
+- Composes `Calendar` and `TimeInput` internally
 - Partial values are allowed during editing; the public value uses
   `{ date, time }` rather than `Date` instances
 - Value display formats date and time using `locale` prop for localized strings
@@ -284,8 +284,8 @@ DateTimeValue: { date: string | null; time: string | null }
   accessibility APIs
 - `color-mix` formulas for surface border (72%), background (98%), and trigger
   hover (86%) must be replicated or approximated
-- Calendar and TimeField composition: GPUI delegates to its own calendar and
-  time-field primitives
+- Calendar and TimeInput composition: GPUI delegates to its own calendar and
+  time-input primitives
 - Time label typography must match: label-family, 0.6875rem, weight 600,
   0.04em tracking, uppercase
 

@@ -1625,7 +1625,7 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     "slider",
     "status-indicator",
     "switch",
-    "time-field",
+    "time-input",
   ];
   const expectedExportNames = [
     "BadgeSpec",
@@ -1642,7 +1642,7 @@ function validateGpuiSelectionFeedbackDateBaseline(errors: string[]): { selectio
     "SliderSpec",
     "StatusIndicatorSpec",
     "SwitchSpec",
-    "TimeFieldSpec",
+    "TimeInputSpec",
   ];
   const crateRoot = path.join(repoRoot, baseline.cratePath);
   const libSource = fs.readFileSync(path.join(crateRoot, "src", "lib.rs"), "utf8");

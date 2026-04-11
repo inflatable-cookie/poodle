@@ -6,7 +6,7 @@
   import { createEventDispatcher, onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
-  import TimeField from "./TimeField.svelte";
+  import TimeInput from "./TimeInput.svelte";
   import {
     formatDateTimeRangeLabel,
     monthAnchorIso,
@@ -160,7 +160,7 @@
             <label class="date-time-range-picker__time-label" for={`${surfaceId}-start-time`}>
               Start time
             </label>
-            <TimeField
+            <TimeInput
               id={`${surfaceId}-start-time`}
               value={currentValue.start.time}
               disabled={disabled}
@@ -179,7 +179,7 @@
             <label class="date-time-range-picker__time-label" for={`${surfaceId}-end-time`}>
               End time
             </label>
-            <TimeField
+            <TimeInput
               id={`${surfaceId}-end-time`}
               value={currentValue.end.time}
               disabled={disabled}

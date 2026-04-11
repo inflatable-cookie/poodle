@@ -147,6 +147,10 @@
   --poodle-typography-label-size: 0.8125rem;
   --poodle-typography-label-lineHeight: 1rem;
   --poodle-typography-label-weight: 500;
+  --poodle-typography-caption-family: "Inter", "SF Pro Display", system-ui, sans-serif;
+  --poodle-typography-caption-size: 0.6875rem;
+  --poodle-typography-caption-lineHeight: 1rem;
+  --poodle-typography-caption-weight: 500;
   --poodle-typography-heading-family: "Inter", "SF Pro Display", system-ui, sans-serif;
   --poodle-typography-heading-size: 1rem;
   --poodle-typography-heading-lineHeight: 1.5rem;

@@ -531,7 +531,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "StatusBar",
       "Surface",
       "TimeAgo",
-      "TimeField",
+      "TimeInput",
       "TimeZoneSelect",
       "Tooltip",
       "TriStateSwitch",

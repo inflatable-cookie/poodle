@@ -110,7 +110,7 @@ export const primitiveComponents: ComponentEntry[] = [
   entry("Tabs", "primitive", P, "Unified tabbed interface with underline, card, pill, and strip variants. Horizontal and vertical orientation with icons, close, and reorder.", true),
   entry("TextInput", "primitive", P, "Single or multi-line text input with type=\"multiline\" and rows support. type=\"search\" adds automatic search icon and clear button.", true),
   entry("TimeAgo", "primitive", P, "Live-updating relative timestamp display.", true),
-  entry("TimeField", "primitive", P, "Time-of-day input with hour/minute selection.", true),
+  entry("TimeInput", "primitive", P, "Time-of-day input with hour/minute selection.", true),
   entry("TimeZoneSelect", "primitive", P, "Timezone selection dropdown.", true),
   entry("ToggleGroup", "primitive", P, "Group of mutually exclusive toggle buttons.", true),
   entry("Toolbar", "primitive", P, "Horizontal action bar with grouped controls.", true),

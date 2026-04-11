@@ -3411,32 +3411,32 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <TimeAgo datetime={new Date("2026-03-20T12:00:00Z")} live />`,
   },
 
-  "time-field": {
+  "time-input": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "id", type: "string | null", default: "null", description: "HTML id attribute for the field." },
+      { name: "id", type: "string | null", default: "null", description: "HTML id attribute for the input." },
       { name: "value", type: "string | null", default: "null", description: "Controlled time value (e.g. \"14:30\")." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial time value for uncontrolled mode." },
       { name: "min", type: "string | null", default: "null", description: "Minimum allowed time." },
       { name: "max", type: "string | null", default: "null", description: "Maximum allowed time." },
       { name: "step", type: "number", default: "60", description: "Step interval in seconds." },
-      { name: "disabled", type: "boolean", default: "false", description: "Whether the field is disabled." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the time field." },
-      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this field." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the time input." },
+      { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
     ],
     slots: [],
     events: [
       { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the time value changes." },
     ],
     usage: `<script lang="ts">
-  import { TimeField } from "@poodle/svelte-primitives";
+  import { TimeInput } from "@poodle/svelte-primitives";
 
   let time = "09:00";
 </script>
 
-<TimeField id="start-time" bind:value={time} min="08:00" max="18:00" step={60} />`,
+<TimeInput id="start-time" bind:value={time} min="08:00" max="18:00" step={60} />`,
   },
 
   "time-zone-select": {

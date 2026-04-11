@@ -1,11 +1,11 @@
-# Time Field
+# Time Input
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-04-11
 
 ## 1. Purpose
 
-- Component name: `TimeField`
+- Component name: `TimeInput`
 - Layer: `foundation`
 - Summary: a time-only value control for local wall-clock entry using a native
   time input with Poodle field chrome
@@ -17,7 +17,7 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Input .time-field]  <input type="time">
+[Input .time-input]  <input type="time">
 ```
 
 | Part | Required | Description | Token Targets |
@@ -114,7 +114,7 @@ Updated: 2026-03-30
 
 ## 8. Token Usage — Exact Values
 
-### Input `.time-field`
+### Input `.time-input`
 
 | Property | Value |
 |----------|-------|
@@ -170,8 +170,8 @@ Updated: 2026-03-30
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::primitives::time_field`
-- Spec struct: `TimeFieldSpec` in primitives crate
+- expected crate/module surface: `poodle_gpui::primitives::time_input`
+- Spec struct: `TimeInputSpec` in primitives crate
 - GPUI must provide its own time-entry editing UI since there is no native input[type="time"]
 - Must expose time value, min/max constraints, and step through accessibility tree
 - Focus ring treatment must match outline spec

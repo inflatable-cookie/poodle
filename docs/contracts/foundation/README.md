@@ -87,7 +87,7 @@ Foundation contracts define the lowest reusable surface in Poodle.
 - `tabs.md`
 - `text-input.md`
 - `time-ago.md`
-- `time-field.md`
+- `time-input.md`
 - `time-zone-select.md`
 - `toggle-group.md`
 - `toolbar.md`

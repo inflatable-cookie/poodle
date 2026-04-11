@@ -6,7 +6,7 @@
   import { createEventDispatcher, onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
-  import TimeField from "./TimeField.svelte";
+  import TimeInput from "./TimeInput.svelte";
   import TimeZoneSelect from "./TimeZoneSelect.svelte";
   import {
     formatZonedDateTimeLabel,
@@ -153,7 +153,7 @@
             <label class="date-time-zone-picker__label" for={`${surfaceId}-time`}>
               Time
             </label>
-            <TimeField
+            <TimeInput
               id={`${surfaceId}-time`}
               value={currentValue.time}
               disabled={disabled}

@@ -80,7 +80,7 @@ export { default as Tabs } from "./Tabs.svelte";
 export { default as Table } from "./Table.svelte";
 export { default as TimeAgo } from "./TimeAgo.svelte";
 export { default as TextInput } from "./TextInput.svelte";
-export { default as TimeField } from "./TimeField.svelte";
+export { default as TimeInput } from "./TimeInput.svelte";
 export { default as TimeZoneSelect } from "./TimeZoneSelect.svelte";
 export { default as ToggleGroup } from "./ToggleGroup.svelte";
 export { default as Toolbar } from "./Toolbar.svelte";

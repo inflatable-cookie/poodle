@@ -8,10 +8,10 @@ Updated: 2026-03-30
 - Component name: `DateTimeRangePicker`
 - Layer: `foundation`
 - Summary: a bounded range value control that combines a picker trigger with a
-  calendar (range mode) and paired start/end time-field composition in a single overlay
+  calendar (range mode) and paired start/end time-input composition in a single overlay
   surface
 - In scope: selected start and end date values, selected start and end local
-  time values, open state, calendar (range mode) plus paired time-field composition,
+  time values, open state, calendar (range mode) plus paired time-input composition,
   placeholder behavior, outside-click and Escape dismissal, controlled and
   uncontrolled value and open state
 - Out of scope: timezone selection, recurrence, booking availability, transport
@@ -30,10 +30,10 @@ Updated: 2026-03-30
               └── [Times Row .date-time-range-picker__times]
                     ├── [Time Section .date-time-range-picker__time-section]
                     │     ├── [Time Label .date-time-range-picker__time-label]  <span> ("Start time")
-                    │     └── [TimeField] (composed, start)
+                    │     └── [TimeInput] (composed, start)
                     └── [Time Section .date-time-range-picker__time-section]
                           ├── [Time Label .date-time-range-picker__time-label]  <span> ("End time")
-                          └── [TimeField] (composed, end)
+                          └── [TimeInput] (composed, end)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -48,7 +48,7 @@ Updated: 2026-03-30
 | Times Row | yes | horizontal grid for start and end time sections | display, grid-template-columns, gap |
 | Time Section | yes | container for time label and time field | display, gap |
 | Time Label | yes | "Start time" / "End time" heading above time field | color, font-family, font-size, font-weight, letter-spacing, text-transform |
-| TimeField | yes | composed time-field primitives (start and end) | delegated to TimeField contract |
+| TimeInput | yes | composed time-input primitives (start and end) | delegated to TimeInput contract |
 
 ## 3. Props And Inputs
 
@@ -120,7 +120,7 @@ DateTimeRangeValue: {
 - Trigger accessible name from external label or `ariaLabel` prop
 - Disabled: `disabled` attribute on trigger button
 - Module-level `nextDateTimeRangePickerId` counter generates unique ids for ARIA relationships
-- Each TimeField receives a descriptive `ariaLabel` ("Start time", "End time")
+- Each TimeInput receives a descriptive `ariaLabel` ("Start time", "End time")
 
 ### Keyboard
 
@@ -152,7 +152,7 @@ DateTimeRangeValue: {
 
 - parent expectations: report filters, booking windows, publishing ranges,
   scheduled review windows
-- child expectations: composes Calendar (mode="range") and two TimeField instances
+- child expectations: composes Calendar (mode="range") and two TimeInput instances
   internally; no child slots
 - resizing rules: trigger stretches to parent width; value text truncates with
   ellipsis
@@ -292,7 +292,7 @@ DateTimeRangeValue: {
   operates in controlled mode; otherwise `defaultValue` seeds internal state
 - Same pattern for `open`/`defaultOpen`
 - Outside click handler closes the overlay; Escape key closes the overlay
-- Composes `Calendar` with `mode="range"` and two `TimeField` instances internally
+- Composes `Calendar` with `mode="range"` and two `TimeInput` instances internally
 - Public value uses nested local-value objects rather than `Date` instances
 - Partial values are allowed during editing without forcing timezone or
   timestamp normalization into the public contract
@@ -308,8 +308,8 @@ DateTimeRangeValue: {
   accessibility APIs
 - `color-mix` formulas for surface border (72%), background (98%), and trigger
   hover (86%) must be replicated or approximated
-- Calendar and TimeField composition: GPUI delegates to its own
-  calendar (range mode) and time-field primitives
+- Calendar and TimeInput composition: GPUI delegates to its own
+  calendar (range mode) and time-input primitives
 - Two-column time layout: GPUI must replicate the equal-width column grid for
   start and end time sections
 - Time label typography must match: label-family, 0.6875rem, weight 600,

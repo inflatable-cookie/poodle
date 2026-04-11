@@ -1315,7 +1315,7 @@ interface MenuItem {
 **Action:** Button, IconButton, SplitButton
 **Input:** TextInput (including type="search"), NumberInput, CodeInput, DurationInput, ColorPicker
 **Selection:** Checkbox, Switch, RadioGroup, Select, SegmentedControl, ToggleGroup, TriStateSwitch, Slider, RangeSlider, Rating
-**Date/Time:** Calendar, RangeCalendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, TimeField, TimeZoneSelect
+**Date/Time:** Calendar, RangeCalendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DateTimeZonePicker, TimeInput, TimeZoneSelect
 **Layout:** Box, Grid, Stack, Spacer, Separator, Surface, Region, ScrollShell
 **Navigation:** Breadcrumbs, Pagination, PaginationSummary, Tabs, Menu, Menubar, NavigationMenu
 **Overlay:** Dialog, AlertDialog, Drawer, Popover, HoverCard, Tooltip, ContextMenu

@@ -116,7 +116,7 @@ above it in downstream repos such as Loophole.
 - `foundation/tabs.md`
 - `foundation/text-input.md`
 - `foundation/time-ago.md`
-- `foundation/time-field.md`
+- `foundation/time-input.md`
 - `foundation/time-zone-select.md`
 - `foundation/toggle-group.md`
 - `foundation/toolbar.md`

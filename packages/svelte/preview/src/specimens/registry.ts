@@ -99,7 +99,7 @@ import TabsSpecimen from "./TabsSpecimen.svelte";
 import TableSpecimen from "./TableSpecimen.svelte";
 import TimeAgoSpecimen from "./TimeAgoSpecimen.svelte";
 import TextInputSpecimen from "./TextInputSpecimen.svelte";
-import TimeFieldSpecimen from "./TimeFieldSpecimen.svelte";
+import TimeInputSpecimen from "./TimeInputSpecimen.svelte";
 import TimeZoneSelectSpecimen from "./TimeZoneSelectSpecimen.svelte";
 import ToastHostSpecimen from "./ToastHostSpecimen.svelte";
 import ToastStackSpecimen from "./ToastStackSpecimen.svelte";
@@ -226,7 +226,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   tabs: TabsSpecimen,
   "time-ago": TimeAgoSpecimen,
   "text-input": TextInputSpecimen,
-  "time-field": TimeFieldSpecimen,
+  "time-input": TimeInputSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-stack": ToastStackSpecimen,
   "toast-host": ToastHostSpecimen,

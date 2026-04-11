@@ -6,7 +6,7 @@
   import { createEventDispatcher, onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
-  import TimeField from "./TimeField.svelte";
+  import TimeInput from "./TimeInput.svelte";
   import {
     formatDateTimeLabel,
     monthAnchorIso,
@@ -148,7 +148,7 @@
           <label class="date-time-picker__time-label" for={`${surfaceId}-time`}>
             Time
           </label>
-          <TimeField
+          <TimeInput
             id={`${surfaceId}-time`}
             value={currentValue.time}
             disabled={disabled}
