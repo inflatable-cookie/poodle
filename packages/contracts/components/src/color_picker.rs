@@ -21,6 +21,11 @@ pub struct ColorPickerSpec {
     pub default_value: Option<String>,
     pub swatches: Vec<String>,
     pub is_open: bool,
+    /// Uncontrolled initial open state. Honoured when `is_open` is
+    /// false by default and the caller hasn't driven the controlled
+    /// `is_open` flag themselves. Matches the contract doc's
+    /// `defaultOpen` prop.
+    pub default_open: bool,
     pub is_disabled: bool,
     pub show_alpha: bool,
     pub show_input: bool,
@@ -37,6 +42,7 @@ impl Default for ColorPickerSpec {
             default_value: None,
             swatches: Vec::new(),
             is_open: false,
+            default_open: false,
             is_disabled: false,
             show_alpha: false,
             show_input: true,
@@ -71,6 +77,17 @@ impl ColorPickerSpec {
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
         self
+    }
+
+    pub fn with_default_open(mut self, default_open: bool) -> Self {
+        self.default_open = default_open;
+        self
+    }
+
+    /// Resolved effective open state: controlled `is_open` wins,
+    /// otherwise falls through to the uncontrolled `default_open`.
+    pub fn current_open(&self) -> bool {
+        self.is_open || self.default_open
     }
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {

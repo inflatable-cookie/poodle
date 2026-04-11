@@ -1,10 +1,14 @@
 use poodle_tokens::semantic;
 
-use crate::types::{Alignment, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{Alignment, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ToolbarSpec {
     pub alignment: Alignment,
+    /// Layout axis for the toolbar items. Horizontal (default) renders
+    /// items in a row; Vertical renders them stacked in a column.
+    /// Matches the contract doc's `orientation` prop.
+    pub orientation: Orientation,
     pub has_separator: bool,
     pub aria_label: Option<String>,
     pub size: ControlSize,
@@ -16,6 +20,7 @@ impl Default for ToolbarSpec {
     fn default() -> Self {
         Self {
             alignment: Alignment::Start,
+            orientation: Orientation::Horizontal,
             has_separator: false,
             aria_label: None,
             size: ControlSize::Md,
@@ -32,6 +37,11 @@ impl ToolbarSpec {
 
     pub fn with_alignment(mut self, alignment: Alignment) -> Self {
         self.alignment = alignment;
+        self
+    }
+
+    pub fn with_orientation(mut self, orientation: Orientation) -> Self {
+        self.orientation = orientation;
         self
     }
 

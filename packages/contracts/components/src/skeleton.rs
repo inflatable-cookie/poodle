@@ -1,11 +1,32 @@
 use poodle_tokens::semantic;
 
+/// Predefined layout skeleton for common patterns. Matches the
+/// contract doc's `preset` prop — when set, the component renders a
+/// layout composition of multiple Skeleton children instead of a
+/// single shape.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum SkeletonPreset {
+    TableRow,
+    Card,
+    ListItem,
+    DetailSection,
+    AvatarLine,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct SkeletonSpec {
     pub shape: String,
     pub width: Option<String>,
     pub height: Option<String>,
     pub is_animated: bool,
+    /// Optional preset layout. When set, the shape/width/height
+    /// fields are ignored and the component renders the preset's
+    /// internal children composition.
+    pub preset: Option<SkeletonPreset>,
+    /// Line count for the `DetailSection` preset. Ignored for
+    /// other presets and for single-shape mode. Defaults to 3 to
+    /// match the Svelte reference.
+    pub lines: u32,
 }
 
 impl Default for SkeletonSpec {
@@ -15,6 +36,8 @@ impl Default for SkeletonSpec {
             width: None,
             height: None,
             is_animated: true,
+            preset: None,
+            lines: 3,
         }
     }
 }
@@ -41,6 +64,16 @@ impl SkeletonSpec {
 
     pub fn with_animated(mut self, is_animated: bool) -> Self {
         self.is_animated = is_animated;
+        self
+    }
+
+    pub fn with_preset(mut self, preset: SkeletonPreset) -> Self {
+        self.preset = Some(preset);
+        self
+    }
+
+    pub fn with_lines(mut self, lines: u32) -> Self {
+        self.lines = lines;
         self
     }
 
