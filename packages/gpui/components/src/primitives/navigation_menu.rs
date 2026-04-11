@@ -89,6 +89,7 @@ impl IntoElement for NavigationMenu {
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let body_size = resolve_px(theme, "typography.body.size");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
 
         // Contract: trigger bg 88% surface, border 72% border-subtle
         let trigger_bg = color_mix(surface, gpui::transparent_black(), 0.88);
@@ -116,7 +117,7 @@ impl IntoElement for NavigationMenu {
             .flex()
             .flex_wrap()
             .items_center()
-            .gap(px(4.0)); // 0.25rem
+            .gap(gap_sm);
 
         for item in &self.spec.items {
             let is_active = current_value.as_deref() == Some(item.value.as_str());

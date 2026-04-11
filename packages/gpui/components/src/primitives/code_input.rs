@@ -9,7 +9,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, CodeInputSpec, ValidationState};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, focus_ring_shadow};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, focus_ring_shadow};
 
 /// A real GPUI code input component backed by `CodeInputSpec`.
 pub struct CodeInput {
@@ -156,7 +156,8 @@ impl IntoElement for CodeInput {
         };
 
         // ── Build outer wrapper (label + slots + hint/error) ──────
-        let mut wrapper = div().flex().flex_col().gap(px(4.0));
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let mut wrapper = div().flex().flex_col().gap(gap_sm);
 
         // Label
         if !spec.label.is_empty() {

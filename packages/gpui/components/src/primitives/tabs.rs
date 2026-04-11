@@ -23,6 +23,7 @@ fn build_tab_label(
     theme: &GpuiThemeProvider,
     text_color: Hsla,
 ) -> AnyElement {
+    let caption_size = resolve_px(theme, "typography.caption.size");
     // Fast path: no decoration — just the label string.
     if tab_def.icon.is_none() && tab_def.count.is_none() {
         return div().child(tab_def.label.clone()).into_any_element();
@@ -56,7 +57,7 @@ fn build_tab_label(
                 .px(px(5.0))
                 .rounded(px(9.0))
                 .bg(badge_bg)
-                .text_size(px(10.0))
+                .text_size(caption_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_color)
                 .child(format!("{count}")),
@@ -355,14 +356,16 @@ impl Tabs {
             // Closable tab: label + close button in a flex row
             if tab_def.is_closable {
                 let icon_muted = resolve_color(&self.theme, "color.icon.muted");
+                let gap_sm = resolve_px(theme, "space.inline.sm");
+                let caption_size = resolve_px(theme, "typography.caption.size");
                 tab = tab
                     .flex()
                     .items_center()
-                    .gap(px(6.0))
+                    .gap(gap_sm)
                     .child(build_tab_label(tab_def, theme, label_color))
                     .child(
                         div()
-                            .text_size(px(11.0))
+                            .text_size(caption_size)
                             .text_color(icon_muted)
                             .child("×"),
                     );

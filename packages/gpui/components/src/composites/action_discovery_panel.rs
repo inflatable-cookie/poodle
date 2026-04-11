@@ -8,7 +8,7 @@ use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole, Sk
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Skeleton;
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI action discovery panel backed by `ActionDiscoveryPanelSpec`.
 ///
@@ -85,6 +85,10 @@ impl IntoElement for ActionDiscoveryPanel {
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let body_size = px(font_size);
         let gap = theme.resolve_space(spec.gap_token());
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let radius_control = resolve_radius(theme, "radius.control");
 
         let mut panel = div()
             .flex()
@@ -94,16 +98,16 @@ impl IntoElement for ActionDiscoveryPanel {
 
         match spec.state {
             DiscoveryState::Loading => {
-                let mut skeletons = div().flex().flex_col().gap(px(8.0));
+                let mut skeletons = div().flex().flex_col().gap(gap_sm);
                 for _ in 0..5 {
                     skeletons = skeletons.child(
                         div()
                             .flex()
                             .items_center()
                             .justify_between()
-                            .gap(px(12.0))
+                            .gap(gap_md)
                             .p(px(14.0))
-                            .rounded(px(6.0))
+                            .rounded(radius_control)
                             .bg(resolve_color(theme, "color.background.surface").opacity(0.72))
                             .child(
                                 div()
@@ -131,7 +135,7 @@ impl IntoElement for ActionDiscoveryPanel {
                     div()
                         .flex()
                         .flex_col()
-                        .gap(px(8.0))
+                        .gap(gap_sm)
                         .child(skeletons),
                 );
                 return panel.into_any_element();
@@ -201,7 +205,7 @@ impl IntoElement for ActionDiscoveryPanel {
                     .justify_between()
                     .px(px(panel_px * 0.5))
                     .py(px(panel_py * 0.5))
-                    .rounded(px(4.0))
+                    .rounded(radius_control)
                     .text_size(body_size)
                     .text_color(text_primary);
 
@@ -218,16 +222,16 @@ impl IntoElement for ActionDiscoveryPanel {
                 }
 
                 // Left: title + badge
-                let mut left = div().flex().items_center().gap(px(6.0));
+                let mut left = div().flex().items_center().gap(gap_sm);
                 left = left.child(action.title.clone());
 
                 if let Some(ref badge) = action.badge {
                     left = left.child(
                         div()
-                            .text_size(px(12.0))
-                            .px(px(4.0))
+                            .text_size(label_size)
+                            .px(gap_sm)
                             .py(px(1.0))
-                            .rounded(px(3.0))
+                            .rounded(radius_control)
                             .bg(resolve_color(theme, "color.accent.base").opacity(0.12))
                             .text_color(resolve_color(theme, "color.accent.base"))
                             .child(badge.clone()),
@@ -240,7 +244,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 if let Some(ref shortcut) = action.shortcut {
                     row = row.child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(text_muted)
                             .child(shortcut.clone()),
                     );
