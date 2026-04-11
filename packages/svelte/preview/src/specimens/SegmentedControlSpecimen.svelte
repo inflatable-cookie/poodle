@@ -52,6 +52,10 @@
     <SegmentedControl options={viewOptions} defaultValue="list" ariaLabel="Disabled control" disabled />
   </SpecimenGroup>
 
+  <svelte:fragment slot="sizes" let:size>
+    <SegmentedControl options={viewOptions} defaultValue="grid" {size} ariaLabel="{size} view mode" />
+  </svelte:fragment>
+
   <svelte:fragment slot="densities" let:density>
     <SegmentedControl options={viewOptions} defaultValue="grid" {density} ariaLabel="{density} view mode" />
   </svelte:fragment>
