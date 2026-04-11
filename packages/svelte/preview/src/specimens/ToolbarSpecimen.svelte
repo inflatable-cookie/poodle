@@ -1,40 +1,46 @@
 <script lang="ts">
-  import { Toolbar, Button, Separator, UiPresentationProvider } from "@poodle/svelte-primitives";
+  import { Toolbar, Button, IconButton, Separator } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="specimen">
-  <SpecimenGroup label="Chrome role inside a small toolbar">
-    <UiPresentationProvider density="compact" sizeScale="sm">
-      <Toolbar ariaLabel="Formatting toolbar">
-        <Button variant="ghost" sizeRole="chrome" leadingIcon="bold" ariaLabel="Bold" />
-        <Button variant="ghost" sizeRole="chrome" leadingIcon="italic" ariaLabel="Italic" />
-        <Button variant="ghost" sizeRole="chrome" leadingIcon="underline" ariaLabel="Underline" />
-        <Separator orientation="vertical" />
-        <Button variant="ghost" sizeRole="chrome" leadingIcon="text-align-start" ariaLabel="Align left" />
-        <Button variant="ghost" sizeRole="chrome" leadingIcon="text-align-center" ariaLabel="Align center" />
-        <Button variant="ghost" sizeRole="chrome" leadingIcon="text-align-end" ariaLabel="Align right" />
-      </Toolbar>
-    </UiPresentationProvider>
+<SpecimenLayout bareVariants>
+  <SpecimenGroup bare label="Formatting toolbar">
+    <Toolbar ariaLabel="Formatting toolbar">
+      <IconButton icon="bold" ariaLabel="Bold" variant="ghost" />
+      <IconButton icon="italic" ariaLabel="Italic" variant="ghost" />
+      <IconButton icon="underline" ariaLabel="Underline" variant="ghost" />
+      <Separator orientation="vertical" />
+      <IconButton icon="align-left" ariaLabel="Align left" variant="ghost" />
+      <IconButton icon="align-center" ariaLabel="Align center" variant="ghost" />
+      <IconButton icon="align-right" ariaLabel="Align right" variant="ghost" />
+    </Toolbar>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Prominent role offset in the same context">
-    <UiPresentationProvider density="compact" sizeScale="sm">
-      <Toolbar ariaLabel="Actions toolbar">
-        <Button variant="secondary" sizeRole="chrome">Discard</Button>
-        <Button variant="secondary" sizeRole="chrome">Save draft</Button>
-        <Separator orientation="vertical" />
-        <Button sizeRole="prominent">Publish</Button>
-      </Toolbar>
-    </UiPresentationProvider>
+  <SpecimenGroup bare label="Actions toolbar">
+    <Toolbar ariaLabel="Actions toolbar">
+      <Button variant="secondary">Discard</Button>
+      <Button variant="secondary">Save draft</Button>
+      <Separator orientation="vertical" />
+      <Button variant="primary">Publish</Button>
+    </Toolbar>
   </SpecimenGroup>
-</div>
 
-<style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+  <svelte:fragment slot="sizes" let:size>
+    <Toolbar ariaLabel="Toolbar at {size}">
+      <IconButton icon="bold" ariaLabel="Bold" variant="ghost" {size} />
+      <IconButton icon="italic" ariaLabel="Italic" variant="ghost" {size} />
+      <Separator orientation="vertical" />
+      <Button variant="secondary" {size}>Save</Button>
+    </Toolbar>
+  </svelte:fragment>
 
-</style>
+  <svelte:fragment slot="densities" let:density>
+    <Toolbar ariaLabel="Toolbar at {density}">
+      <IconButton icon="bold" ariaLabel="Bold" variant="ghost" {density} />
+      <IconButton icon="italic" ariaLabel="Italic" variant="ghost" {density} />
+      <Separator orientation="vertical" />
+      <Button variant="secondary" {density}>Save</Button>
+    </Toolbar>
+  </svelte:fragment>
+</SpecimenLayout>
