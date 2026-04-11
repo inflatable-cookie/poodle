@@ -1,15 +1,14 @@
 <script lang="ts">
   import { Tooltip, Button } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Default">
-    <div class="specimen__row">
-      <Tooltip content="Save your changes">
-        <Button variant="secondary">Hover me</Button>
-      </Tooltip>
-    </div>
+    <Tooltip content="Save your changes">
+      <Button variant="secondary">Hover me</Button>
+    </Tooltip>
   </SpecimenGroup>
 
   <SpecimenGroup label="Placements">
@@ -28,15 +27,21 @@
       </Tooltip>
     </div>
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <Tooltip content="Tooltip at {size}">
+      <Button variant="secondary" {size}>Hover ({size})</Button>
+    </Tooltip>
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <Tooltip content="Tooltip at {density}">
+      <Button variant="secondary" {density}>Hover ({density})</Button>
+    </Tooltip>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .specimen__row {
     display: flex;
     flex-wrap: wrap;
