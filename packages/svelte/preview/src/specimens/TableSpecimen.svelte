@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Table, type TableColumn, type TableRow } from "@poodle/svelte-primitives";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isRowHeader: true },
@@ -28,29 +29,38 @@
   ];
 </script>
 
-<div class="specimen">
-  <SpecimenGroup label="Standard table">
+<SpecimenLayout bareVariants>
+  <SpecimenGroup bare label="Standard table">
     <Table {columns} {rows} ariaLabel="Team members" />
   </SpecimenGroup>
 
-  <SpecimenGroup label="With caption">
+  <SpecimenGroup bare label="With caption">
     <Table {columns} {rows} caption="Q1 team allocation" ariaLabel="Team allocation table" />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Minimal key-value">
+  <SpecimenGroup bare label="Minimal key-value">
     <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Package info" />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Empty state">
+  <SpecimenGroup bare label="Empty state">
     <Table {columns} rows={[]} ariaLabel="Empty table" emptyMessage="No team members found." />
   </SpecimenGroup>
-</div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <div class="variant-block">
+      <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Table at {size}" {size} />
+    </div>
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <div class="variant-block">
+      <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Table at {density}" {density} />
+    </div>
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
-  .specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+  .variant-block {
+    width: 100%;
   }
-
 </style>
