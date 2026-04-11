@@ -78,6 +78,7 @@ impl IntoElement for PickerShell {
 
         let inline_padding = resolve_px(theme, "space.inline.md");
         let body_size = resolve_px(theme, "typography.body.size");
+        let label_size = resolve_px(theme, "typography.label.size");
         let control_radius = resolve_radius(theme, "radius.control");
         let footer_gap = resolve_px(theme, spec.footer_gap_token());
         let text_primary = resolve_color(theme, "color.text.primary");
@@ -133,7 +134,7 @@ impl IntoElement for PickerShell {
         if let Some(ref description) = spec.description {
             header = header.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .child(description.clone()),
             );
@@ -244,7 +245,7 @@ impl IntoElement for PickerShell {
 
         footer = footer.child(
             div()
-                .text_size(px(12.0))
+                .text_size(label_size)
                 .text_color(text_secondary)
                 .child(selection_label),
         );
@@ -253,7 +254,7 @@ impl IntoElement for PickerShell {
         if let Some(count) = spec.result_count {
             footer = footer.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_secondary.opacity(0.7))
                     .child(format!("{} result{}", count, if count == 1 { "" } else { "s" })),
             );

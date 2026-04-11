@@ -11,7 +11,7 @@ use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, Semanti
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::{Icon, Spinner};
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI relation picker component backed by `RelationPickerSpec`.
 ///
@@ -130,6 +130,8 @@ impl IntoElement for RelationPicker {
         let inline_gap = px(item_gap);
         let body_size = px(font_size);
         let control_radius = resolve_radius(theme, "radius.control");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
 
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -170,7 +172,7 @@ impl IntoElement for RelationPicker {
                 .w_full()
                 .flex()
                 .items_center()
-                .gap(px(4.0))
+                .gap(gap_sm)
                 .px(inline_padding)
                 .py(px(6.0))
                 .border_b_1()
@@ -180,7 +182,7 @@ impl IntoElement for RelationPicker {
             {
                 let mut root_el = div()
                     .id("relation-picker-breadcrumb-root")
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .cursor_pointer()
                     .child("Root");
@@ -207,7 +209,7 @@ impl IntoElement for RelationPicker {
                 let seg_id = SharedString::from(format!("relation-picker-breadcrumb-{}", idx));
                 let mut seg_el = div()
                     .id(seg_id)
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_primary)
                     .cursor_pointer()
                     .child(segment.clone());
@@ -345,7 +347,7 @@ impl IntoElement for RelationPicker {
                             if let Some(ref desc) = item.description {
                                 content = content.child(
                                     div()
-                                        .text_size(px(12.0))
+                                        .text_size(label_size)
                                         .text_color(text_secondary)
                                         .child(desc.clone()),
                                 );
@@ -355,7 +357,7 @@ impl IntoElement for RelationPicker {
                             if let Some(count) = item.count {
                                 row = row.child(
                                     div()
-                                        .text_size(px(12.0))
+                                        .text_size(label_size)
                                         .text_color(text_secondary.opacity(0.7))
                                         .child(format!("{} items", count)),
                                 );
@@ -398,7 +400,7 @@ impl IntoElement for RelationPicker {
                                 .border_color(border)
                                 .child(
                                     div()
-                                        .text_size(px(12.0))
+                                        .text_size(label_size)
                                         .text_color(text_secondary)
                                         .child(format!(
                                             "{} {}",
@@ -477,7 +479,7 @@ impl IntoElement for RelationPicker {
                     if let Some(ref desc) = item.description {
                         item_content = item_content.child(
                             div()
-                                .text_size(px(12.0))
+                                .text_size(label_size)
                                 .text_color(text_secondary)
                                 .child(desc.clone()),
                         );
@@ -489,7 +491,7 @@ impl IntoElement for RelationPicker {
                     if let Some(ref meta) = item.meta {
                         item_el = item_el.child(
                             div()
-                                .text_size(px(12.0))
+                                .text_size(label_size)
                                 .text_color(text_secondary.opacity(0.7))
                                 .child(meta.clone()),
                         );
@@ -533,7 +535,7 @@ impl IntoElement for RelationPicker {
                 .border_color(border)
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(format!("{} of {} selected", count, total_for_footer)),
                 ),

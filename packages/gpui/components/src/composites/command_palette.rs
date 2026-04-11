@@ -7,7 +7,7 @@ use poodle_composites::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
 use poodle_primitives::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI command palette backed by `CommandPaletteSpec`.
 ///
@@ -98,13 +98,17 @@ impl IntoElement for CommandPalette {
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let hover_bg = resolve_color(theme, "color.background.elevated");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let radius_control = resolve_radius(theme, "radius.control");
+        let radius_surface = resolve_radius(theme, "radius.surface");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
 
         let mut palette = div()
             .flex()
             .flex_col()
             .w(px(480.0))
             .max_h(px(400.0))
-            .rounded(px(8.0))
+            .rounded(radius_surface)
             .bg(results_bg)
             .border_1()
             .border_color(border)
@@ -199,7 +203,7 @@ impl IntoElement for CommandPalette {
                         div()
                             .px(inline_padding)
                             .py(px(4.0))
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(text_muted)
                             .child(group_name.to_string()),
@@ -223,7 +227,7 @@ impl IntoElement for CommandPalette {
                 .px(inline_padding)
                 .py(px(6.0))
                 .mx(px(4.0))
-                .rounded(px(4.0))
+                .rounded(radius_control)
                 .text_size(body_size);
 
             if is_active {
@@ -245,16 +249,16 @@ impl IntoElement for CommandPalette {
             }
 
             // Left: title + badge
-            let mut left = div().flex().items_center().gap(px(6.0));
+            let mut left = div().flex().items_center().gap(gap_sm);
             left = left.child(action.title.clone());
 
             if let Some(ref badge) = action.badge {
                 left = left.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .px(px(4.0))
                         .py(px(1.0))
-                        .rounded(px(3.0))
+                        .rounded(radius_control)
                         .bg(accent.opacity(0.12))
                         .text_color(accent)
                         .child(badge.clone()),
@@ -267,7 +271,7 @@ impl IntoElement for CommandPalette {
             if let Some(ref shortcut) = action.shortcut {
                 row = row.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_muted)
                         .child(shortcut.clone()),
                 );
