@@ -1,24 +1,34 @@
-export type SectionId = "primitives" | "composites" | "tokens" | "treatments";
+export type SectionId = "components" | "tokens" | "treatments";
 
 export type Route = {
   section: SectionId;
   component?: string;
 };
 
-const validSections: SectionId[] = ["primitives", "composites", "tokens", "treatments"];
+const validSections: SectionId[] = ["components", "tokens", "treatments"];
+
+/** Legacy section aliases that redirect to the unified components section. */
+const sectionAliases: Record<string, SectionId> = {
+  primitives: "components",
+  composites: "components",
+};
 
 export function parseRoute(hash: string): Route {
   const raw = hash.replace(/^#/, "").trim();
 
   if (!raw) {
-    return { section: "primitives" };
+    return { section: "components" };
   }
 
   const segments = raw.split("/").filter(Boolean);
-  const section = segments[0] as SectionId;
+  let section = segments[0] as SectionId;
+
+  if (sectionAliases[section]) {
+    section = sectionAliases[section];
+  }
 
   if (!validSections.includes(section)) {
-    return { section: "primitives" };
+    return { section: "components" };
   }
 
   if (segments.length >= 2) {
@@ -42,7 +52,7 @@ export function navigateTo(route: Route): void {
   }
 
   const hash = buildHash(route);
-  const currentHash = window.location.hash || "#primitives";
+  const currentHash = window.location.hash || "#components";
 
   if (hash !== currentHash) {
     window.location.hash = hash;

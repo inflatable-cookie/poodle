@@ -1,20 +1,20 @@
 <script lang="ts">
   import { SidebarNav } from "@poodle/svelte";
-  import { primitiveComponents, findComponent } from "../component-registry";
+  import { allComponents, findComponent } from "../component-registry";
   import CatalogueLanding from "../pages/CatalogueLanding.svelte";
   import ComponentPage from "../pages/ComponentPage.svelte";
   import { specimenMap } from "../specimens/registry";
 
   export let activeComponent: string | undefined = undefined;
 
-  $: entry = activeComponent ? findComponent(activeComponent, "primitive") : undefined;
+  $: entry = activeComponent ? findComponent(activeComponent) : undefined;
   $: specimen = entry?.slug ? specimenMap[entry.slug] ?? null : null;
   $: navGroups = [{
-    id: "primitives",
-    items: primitiveComponents.map((component) => ({
+    id: "components",
+    items: allComponents.map((component) => ({
       value: component.slug,
       label: component.displayName,
-      href: `#primitives/${component.slug}`,
+      href: `#components/${component.slug}`,
     })),
   }];
 </script>
@@ -22,7 +22,7 @@
 <div class="catalogue-layout">
   <div class="catalogue-sidebar">
     <SidebarNav
-      ariaLabel="Primitive components"
+      ariaLabel="Components"
       groups={navGroups}
       value={activeComponent ?? null}
     />
@@ -32,7 +32,7 @@
     {#if entry}
       <ComponentPage {entry} specimenComponent={specimen} />
     {:else}
-      <CatalogueLanding tier="primitive" components={primitiveComponents} />
+      <CatalogueLanding components={allComponents} />
     {/if}
   </div>
 </div>

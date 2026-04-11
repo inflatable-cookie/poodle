@@ -18,8 +18,7 @@
   import { onMount } from "svelte";
 
   import DisplayControls from "./components/DisplayControls.svelte";
-  import PrimitivesSection from "./sections/PrimitivesSection.svelte";
-  import CompositesSection from "./sections/CompositesSection.svelte";
+  import ComponentsSection from "./sections/ComponentsSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
   import TreatmentsSection from "./sections/TreatmentsSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
@@ -31,8 +30,7 @@
   type SemanticTokenPath = keyof typeof cssVars;
 
   const topTabs: TabItem[] = [
-    { value: "primitives", label: "Primitives" },
-    { value: "composites", label: "Composites" },
+    { value: "components", label: "Components" },
     { value: "tokens", label: "Tokens" },
     { value: "treatments", label: "Treatments" },
   ];
@@ -49,7 +47,7 @@
   let disabled = false;
   let invalid = true;
   let busy = false;
-  let route: Route = { section: "primitives" };
+  let route: Route = { section: "components" };
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = {};
   let previewModeKey = "";
   let appliedPreviewModeKey = "";
@@ -111,7 +109,7 @@
       density,
       controlSize,
     });
-    const hash = window.location.hash || "#primitives";
+    const hash = window.location.hash || "#components";
     const nextUrl = `${window.location.pathname}?${searchParams.toString()}${hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl !== currentUrl) {
@@ -175,10 +173,8 @@
     <main class="app-main">
       {#key `${theme}:${activeSection}`}
         <IconProvider icons={iconNodes as unknown as IconSet}>
-          {#if activeSection === "primitives"}
-            <PrimitivesSection activeComponent={route.component} />
-          {:else if activeSection === "composites"}
-            <CompositesSection activeComponent={route.component} />
+          {#if activeSection === "components"}
+            <ComponentsSection activeComponent={route.component} />
           {:else if activeSection === "tokens"}
             <TokensSection {liveTokenValues} />
           {:else if activeSection === "treatments"}
