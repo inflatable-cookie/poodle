@@ -325,6 +325,15 @@ Three muted pills in a horizontal row:
 - approvers: pending
 - downstream adopters: metadata displays, labels, status tags, card headers
 - future follow-up: add dismissible-chip semantics separately if needed
+
+## Rust Spec Note
+
+`poodle-specs` currently exposes BOTH `PillSpec` (the full primitive) AND a
+legacy `BadgeSpec` struct. `BadgeSpec` is the pre-consolidation Rust shape
+that predates `PillAppearance::Badge` — new code should use `PillSpec` with
+`appearance = PillAppearance::Badge` instead. The legacy `BadgeSpec` is
+retained for backward compatibility with existing consumers and will be
+removed in a future cleanup pass.
 ### Tone: warning `.pill[data-tone="warning"]`
 
 | Custom Property | Value |

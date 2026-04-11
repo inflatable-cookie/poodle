@@ -218,3 +218,11 @@ The `aria-label` on the `<footer>` is resolved as:
 - downstream adopters: workspace shells, IDE-style editors, admin dashboards
 - future follow-up: connection state indicators, sync status, interactive
   status items
+
+## Rust Spec Note
+
+The `poodle-specs` Rust type for this component is `ShellStatusBarSpec`
+(file: `packages/contracts/components/src/shell_status_bar.rs`). The Rust
+filename predates the doc rename from `ShellStatusBar` to `StatusBar`;
+future refactors may align the Rust filename/type name with the doc, but
+both refer to the same contract.

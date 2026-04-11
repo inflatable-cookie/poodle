@@ -43,6 +43,31 @@ Use this template for every new Poodle component before implementation begins.
 - use `variant` for semantic appearance families
 - use `size` only when the component opts into shared control sizes
 
+### Cross-Renderer Naming Convention
+
+The markdown contract doc is the source of truth and uses camelCase. Each
+renderer applies its local naming convention without that counting as drift:
+
+| Doc (camelCase) | Rust `poodle-specs` (snake_case) | Notes |
+|-----------------|----------------------------------|-------|
+| `isDisabled` | `is_disabled` | `is*` booleans keep the prefix |
+| `isLoading` | `is_loading` | |
+| `isOpen` | `is_open` | |
+| `onClick` | — | event handlers live on component builders, not specs |
+| `defaultValue` | `default_value` | multi-word props convert segment-by-segment |
+| `ariaLabel` | `aria_label` | |
+| `backHref` | `back_href` | |
+
+A doc prop `fooBar` and a Rust field `foo_bar` are considered matching by
+convention and must NOT be flagged as drift by audits. Only treat a field
+as missing when there is no snake_case field whose name matches the doc's
+camelCase prop under segment-by-segment conversion.
+
+Some docs document user-facing booleans without the `is` prefix (e.g.
+`disabled`, `loading`, `collapsed`) as a brevity convention. In those cases
+the Rust field keeps the `is_*` prefix (`is_disabled`) and the two still
+match — the prefix stripping is a documented part of the convention.
+
 ### Controlled And Uncontrolled
 
 Document whether the component supports:

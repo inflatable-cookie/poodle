@@ -243,3 +243,11 @@ Updated: 2026-04-11
   DateTimePicker composite
 - future follow-up: consider custom time picker overlay for consistency if
   browser-native pickers prove too inconsistent
+
+## Rust Spec Note
+
+The `poodle-specs` Rust type for this component is `TimeFieldSpec`
+(file: `packages/contracts/components/src/time_field.rs`). The Rust
+filename predates the doc rename from `TimeField` to `TimeInput`;
+future refactors may align the Rust filename/type name with the doc,
+but both refer to the same contract.
