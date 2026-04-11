@@ -27,7 +27,7 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <Toolbar ariaLabel="Toolbar at {size}">
+    <Toolbar ariaLabel="Toolbar at {size}" {size}>
       <IconButton icon="bold" ariaLabel="Bold" variant="ghost" {size} />
       <IconButton icon="italic" ariaLabel="Italic" variant="ghost" {size} />
       <Separator orientation="vertical" />
@@ -36,7 +36,7 @@
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Toolbar ariaLabel="Toolbar at {density}">
+    <Toolbar ariaLabel="Toolbar at {density}" {density}>
       <IconButton icon="bold" ariaLabel="Bold" variant="ghost" {density} />
       <IconButton icon="italic" ariaLabel="Italic" variant="ghost" {density} />
       <Separator orientation="vertical" />
