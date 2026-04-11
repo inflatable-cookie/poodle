@@ -10,7 +10,7 @@ use poodle_composites::EditableListSpec;
 use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use super::super::primitives::Icon;
 
 /// A real GPUI editable list component backed by `EditableListSpec`.
@@ -124,6 +124,8 @@ impl IntoElement for EditableList {
         let hover_bg = resolve_color(theme, "color.surface.raised");
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let control_radius = resolve_radius(theme, "radius.control");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = px(rem_to_px(size_font_rem(effective_size) * 0.92));
 
@@ -140,7 +142,7 @@ impl IntoElement for EditableList {
                 .flex()
                 .flex_row()
                 .items_center()
-                .gap(px(8.0))
+                .gap(gap_md)
                 .px(px(item_pad_x))
                 .py(px(item_pad_y))
                 .rounded(control_radius)
@@ -186,7 +188,7 @@ impl IntoElement for EditableList {
                 .justify_center()
                 .flex_shrink_0()
                 .size(px(remove_size))
-                .rounded(px(4.0))
+                .rounded(control_radius)
                 .cursor_pointer()
                 .text_color(remove_color)
                 .hover(move |s| s.text_color(rh).bg(hover_bg))
@@ -253,7 +255,7 @@ impl IntoElement for EditableList {
                 .flex()
                 .flex_row()
                 .items_center()
-                .gap(px(6.0))
+                .gap(gap_sm)
                 .h(control_height)
                 .px(px(add_pad_x))
                 .border_1()

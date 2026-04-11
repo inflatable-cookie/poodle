@@ -39,7 +39,9 @@ impl IntoElement for EmbedPreview {
         let success_color = resolve_color(theme, "color.status.success");
         let subtle_bg = resolve_color(theme, "color.background.subtle");
         let gap = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
         let label_size = resolve_px(theme, "typography.label.size");
+        let radius_control = resolve_radius(theme, "radius.control");
 
         // Surface container with border and radius
         let mut el = div()
@@ -59,24 +61,24 @@ impl IntoElement for EmbedPreview {
             let skeleton_bar = div()
                 .w_full()
                 .h(px(12.0))
-                .rounded(px(4.0))
+                .rounded(radius_control)
                 .bg(subtle_bg);
             let skeleton_bar_short = div()
                 .w(px(160.0))
                 .h(px(12.0))
-                .rounded(px(4.0))
+                .rounded(radius_control)
                 .bg(subtle_bg);
             let skeleton_bar_medium = div()
                 .w(px(240.0))
                 .h(px(12.0))
-                .rounded(px(4.0))
+                .rounded(radius_control)
                 .bg(subtle_bg);
 
             el = el.child(
                 div()
                     .flex()
                     .flex_col()
-                    .gap(px(8.0))
+                    .gap(gap_md)
                     .py(px(4.0))
                     .child(skeleton_bar)
                     .child(skeleton_bar_medium)
@@ -93,14 +95,14 @@ impl IntoElement for EmbedPreview {
                     .flex_col()
                     .items_center()
                     .justify_center()
-                    .gap(px(6.0))
+                    .gap(gap)
                     .child(
                         Icon::from_spec(IconSpec::new("alert-circle").with_size(IconSize::Lg), theme)
                             .with_color(danger_color),
                     )
                     .child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(desc_color)
                             .child(error.clone()),
                     ),
@@ -116,14 +118,14 @@ impl IntoElement for EmbedPreview {
                     .flex_col()
                     .items_center()
                     .justify_center()
-                    .gap(px(6.0))
+                    .gap(gap)
                     .child(
                         Icon::from_spec(IconSpec::new("monitor-play").with_size(IconSize::Lg), theme)
                             .with_color(desc_color.opacity(0.7)),
                     )
                     .child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(desc_color)
                             .child(self.spec.empty_message.clone()),
                     ),
@@ -172,7 +174,7 @@ impl IntoElement for EmbedPreview {
                 )
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(desc_color)
                         .child(embed_url),
                 );
@@ -181,7 +183,7 @@ impl IntoElement for EmbedPreview {
                 div()
                     .flex()
                     .items_center()
-                    .gap(px(6.0))
+                    .gap(gap)
                     .child(
                         Icon::from_spec(
                             IconSpec::new("link").with_size(IconSize::Sm),
@@ -191,11 +193,11 @@ impl IntoElement for EmbedPreview {
                     )
                     .child(
                         div()
-                            .text_size(px(11.0))
+                            .text_size(label_size)
                             .font_weight(FontWeight::MEDIUM)
                             .text_color(success_color)
                             .bg(resolve_color(theme, "color.background.subtle"))
-                            .rounded(px(4.0))
+                            .rounded(radius_control)
                             .px(px(6.0))
                             .py(px(2.0))
                             .child(provider_label),
@@ -216,7 +218,7 @@ impl IntoElement for EmbedPreview {
                     .py(px(12.0))
                     .flex()
                     .flex_col()
-                    .gap(px(6.0))
+                    .gap(gap)
                     .child(
                         div()
                             .text_size(label_size)
@@ -226,7 +228,7 @@ impl IntoElement for EmbedPreview {
                     )
                     .child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(desc_color)
                             .child(parsed.original_embed.clone().unwrap_or_default()),
                     ),
@@ -236,7 +238,7 @@ impl IntoElement for EmbedPreview {
 
         el = el.child(
             div()
-                .text_size(px(12.0))
+                .text_size(label_size)
                 .text_color(success_color)
                 .child(parsed.original_url.clone().unwrap_or_else(|| parsed.id.clone())),
         );

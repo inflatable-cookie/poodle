@@ -11,7 +11,7 @@ use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, Semanti
 
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
-use crate::theme_ext::{color_mix, resolve_color};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI data table component backed by `DataTableSpec`.
 ///
@@ -158,6 +158,13 @@ impl IntoElement for DataTable {
         // Compact mode halves the cell vertical padding.
         let cell_py = if spec.compact { px(6.0) } else { px(12.0) };
 
+        let radius_control = resolve_radius(theme, "radius.control");
+        let radius_pill = resolve_radius(theme, "radius.pill");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
+        let icon_sm = resolve_px(theme, "size.icon.sm");
+
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
@@ -187,22 +194,22 @@ impl IntoElement for DataTable {
         // same set for the header and every row.
         let visible_columns: Vec<TableColumnSpec> = spec.visible_columns().cloned().collect();
 
-        let mut outer = div().w_full().flex().flex_col().gap(px(8.0));
+        let mut outer = div().w_full().flex().flex_col().gap(gap_md);
 
         // ── Optional header toolbar (column visibility + export) ──
         if spec.show_column_visibility || spec.show_export {
-            let mut toolbar_row = div().flex().items_center().justify_end().gap(px(8.0));
+            let mut toolbar_row = div().flex().items_center().justify_end().gap(gap_md);
 
             if spec.show_column_visibility {
                 toolbar_row = toolbar_row.child(
                     div()
                         .id("dt-toolbar-columns")
-                        .flex().items_center().gap(px(4.0))
+                        .flex().items_center().gap(gap_sm)
                         .px(px(10.0)).py(px(6.0))
                         .border_1().border_color(border_color)
-                        .rounded(px(4.0))
+                        .rounded(radius_control)
                         .cursor_pointer()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(
                             Icon::from_spec(
@@ -218,12 +225,12 @@ impl IntoElement for DataTable {
                 toolbar_row = toolbar_row.child(
                     div()
                         .id("dt-toolbar-export")
-                        .flex().items_center().gap(px(4.0))
+                        .flex().items_center().gap(gap_sm)
                         .px(px(10.0)).py(px(6.0))
                         .border_1().border_color(border_color)
-                        .rounded(px(4.0))
+                        .rounded(radius_control)
                         .cursor_pointer()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(
                             Icon::from_spec(
@@ -240,16 +247,16 @@ impl IntoElement for DataTable {
 
         // ── Optional filter chip row ──
         if spec.has_filters() {
-            let mut filter_row = div().flex().flex_wrap().gap(px(6.0));
+            let mut filter_row = div().flex().flex_wrap().gap(gap_sm);
             for filter in &spec.filters {
                 let chip_bg = accent.opacity(accent.a * 0.12);
                 filter_row = filter_row.child(
                     div()
-                        .flex().items_center().gap(px(6.0))
+                        .flex().items_center().gap(gap_sm)
                         .px(px(8.0)).py(px(3.0))
-                        .rounded(px(12.0))
+                        .rounded(radius_pill)
                         .bg(chip_bg)
-                        .text_size(px(11.0))
+                        .text_size(label_size)
                         .text_color(accent)
                         .child(format!("{}: {}", filter.column_id, filter.value)),
                 );
@@ -263,7 +270,7 @@ impl IntoElement for DataTable {
             .flex_col()
             .border_1()
             .border_color(border_color)
-            .rounded(px(4.0))
+            .rounded(radius_control)
             .overflow_hidden();
 
         // ── Header row ──
@@ -298,8 +305,8 @@ impl IntoElement for DataTable {
                 accent
             };
             let mut check_box = div()
-                .w(px(14.0)).h(px(14.0))
-                .rounded(px(3.0))
+                .w(icon_sm).h(icon_sm)
+                .rounded(radius_control)
                 .border_1()
                 .border_color(box_border)
                 .bg(box_bg);
@@ -337,7 +344,7 @@ impl IntoElement for DataTable {
             let mut header_cell = div()
                 .px(inline_padding)
                 .py(px(panel_py))
-                .text_size(px(font_size * 0.85))
+                .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_secondary)
                 .when(col.align_end, |el| el.text_right());
@@ -355,7 +362,7 @@ impl IntoElement for DataTable {
                     poodle_composites::TableSortDirection::Desc => "arrow-down",
                 };
                 header_cell = header_cell
-                    .flex().items_center().gap(px(4.0))
+                    .flex().items_center().gap(gap_sm)
                     .child(label)
                     .child(
                         Icon::from_spec(
@@ -394,7 +401,7 @@ impl IntoElement for DataTable {
                     .w(px(120.0))
                     .px(inline_padding)
                     .py(px(12.0))
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_secondary),
             );
         }
@@ -472,8 +479,8 @@ impl IntoElement for DataTable {
                         .cursor_pointer()
                         .child(
                             div()
-                                .w(px(14.0)).h(px(14.0))
-                                .rounded(px(3.0))
+                                .w(icon_sm).h(icon_sm)
+                                .rounded(radius_control)
                                 .border_1()
                                 .border_color(box_border)
                                 .bg(box_bg),
@@ -558,9 +565,9 @@ impl IntoElement for DataTable {
                                 .flex_shrink_0()
                                 .px(px(8.0))
                                 .py(px(2.0))
-                                .rounded(px(10.0))
+                                .rounded(radius_pill)
                                 .bg(tone_bg)
-                                .text_size(px(11.0))
+                                .text_size(label_size)
                                 .font_weight(FontWeight::SEMIBOLD)
                                 .text_color(fg)
                                 .child(cell_value),
@@ -581,7 +588,7 @@ impl IntoElement for DataTable {
                         .w(px(120.0))
                         .px(inline_padding)
                         .py(cell_py)
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(accent)
                         .cursor_pointer()
                         .hover(|s| s.font_weight(FontWeight::SEMIBOLD))
@@ -630,6 +637,9 @@ impl IntoElement for DataTable {
                 accent,
                 border_color,
                 inline_padding,
+                label_size,
+                radius_control,
+                gap_md,
                 on_page_change.clone(),
             );
             outer = outer.child(pager);
@@ -645,6 +655,9 @@ fn render_pager(
     accent: Hsla,
     border_color: Hsla,
     inline_padding: Pixels,
+    label_size: Pixels,
+    radius_control: Pixels,
+    gap_md: Pixels,
     on_page_change: Option<std::rc::Rc<dyn Fn(u32, &mut Window, &mut App)>>,
 ) -> Div {
     let first = pagination.first_item();
@@ -662,12 +675,12 @@ fn render_pager(
         .justify_between()
         .px(inline_padding)
         .py(px(8.0))
-        .text_size(px(12.0))
+        .text_size(label_size)
         .text_color(text_secondary);
 
     pager = pager.child(div().child(summary_text));
 
-    let mut controls = div().flex().items_center().gap(px(8.0));
+    let mut controls = div().flex().items_center().gap(gap_md);
 
     let prev_enabled = current_page > 1;
     let next_enabled = current_page < total_pages;
@@ -679,10 +692,10 @@ fn render_pager(
             .id(SharedString::from(id.to_string()))
             .px(px(8.0))
             .py(px(4.0))
-            .rounded(px(4.0))
+            .rounded(radius_control)
             .border_1()
             .border_color(border_color)
-            .text_size(px(11.0))
+            .text_size(label_size)
             .child(label);
 
         if enabled {
@@ -708,7 +721,7 @@ fn render_pager(
 
     controls = controls.child(
         div()
-            .text_size(px(11.0))
+            .text_size(label_size)
             .text_color(text_secondary)
             .child(format!("Page {current_page} of {total_pages}")),
     );

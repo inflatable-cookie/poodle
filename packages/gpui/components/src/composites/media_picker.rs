@@ -8,7 +8,7 @@ use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, Semanti
 use poodle_composites::MediaPickerSpec;
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// Which tab is active in the media picker.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -122,6 +122,9 @@ impl IntoElement for MediaPicker {
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, "color.accent.base");
         let label_size = px(font_size);
+        let label_tok = resolve_px(theme, "typography.label.size");
+        let radius_control = resolve_radius(theme, "radius.control");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
 
         // ── Dialog wrapper ───────────────────────────────────────
         let mut dialog = div()
@@ -210,7 +213,7 @@ impl IntoElement for MediaPicker {
                 .id("media-picker-tab-browse")
                 .flex()
                 .items_center()
-                .gap(px(4.0))
+                .gap(gap_sm)
                 .child(browse_icon)
                 .child("Browse");
             if let Some(ref handler) = on_tab_change {
@@ -227,7 +230,7 @@ impl IntoElement for MediaPicker {
                 .id("media-picker-tab-upload")
                 .flex()
                 .items_center()
-                .gap(px(4.0))
+                .gap(gap_sm)
                 .child(upload_icon)
                 .child("Upload");
             if let Some(ref handler) = on_tab_change {
@@ -257,12 +260,12 @@ impl IntoElement for MediaPicker {
         let search_bar = div()
             .flex()
             .items_center()
-            .gap(px(6.0))
+            .gap(gap_sm)
             .mx(px(16.0))
             .my(px(10.0))
             .px(px(10.0))
             .py(px(6.0))
-            .rounded(px(6.0))
+            .rounded(radius_control)
             .border_1()
             .border_color(border_color)
             .child(search_icon)
@@ -281,7 +284,7 @@ impl IntoElement for MediaPicker {
             dialog = dialog.child(
                 div()
                     .px(px(16.0))
-                    .text_size(px(11.0))
+                    .text_size(label_tok)
                     .text_color(text_secondary)
                     .child(format!("Accepted: {}", types)),
             );
@@ -321,7 +324,7 @@ impl IntoElement for MediaPicker {
                 .id(item_id)
                 .w(px(96.0))
                 .h(px(96.0))
-                .rounded(px(6.0))
+                .rounded(radius_control)
                 .border(border_w)
                 .border_color(selected_border)
                 .bg(resolve_color(theme, "color.background.surface"))
@@ -329,7 +332,7 @@ impl IntoElement for MediaPicker {
                 .flex_col()
                 .items_center()
                 .justify_center()
-                .gap(px(4.0))
+                .gap(gap_sm)
                 .cursor_pointer()
                 .child({
                     let icon = Icon::from_spec(
@@ -340,7 +343,7 @@ impl IntoElement for MediaPicker {
                 })
                 .child(
                     div()
-                        .text_size(px(10.0))
+                        .text_size(label_tok)
                         .text_color(text_secondary)
                         .max_w(px(80.0))
                         .overflow_x_hidden()
@@ -374,7 +377,7 @@ impl IntoElement for MediaPicker {
             .border_color(border_color)
             .child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_tok)
                     .text_color(text_secondary)
                     .when(selected > 0, |el| el.text_color(text_primary))
                     .child(format!(
@@ -388,7 +391,7 @@ impl IntoElement for MediaPicker {
                     .id("media-picker-confirm")
                     .px(px(14.0))
                     .py(px(6.0))
-                    .rounded(px(6.0))
+                    .rounded(radius_control)
                     .bg(accent)
                     .text_color(gpui::white())
                     .text_size(label_size)
