@@ -155,15 +155,16 @@ impl IntoElement for DataTable {
 
         let inline_padding = px(panel_px);
         let body_size = px(font_size);
-        // Compact mode halves the cell vertical padding.
-        let cell_py = if spec.compact { px(6.0) } else { px(12.0) };
 
         let radius_control = resolve_radius(theme, "radius.control");
         let radius_pill = resolve_radius(theme, "radius.pill");
         let label_size = resolve_px(theme, "typography.label.size");
         let gap_sm = resolve_px(theme, "space.inline.sm");
         let gap_md = resolve_px(theme, "space.inline.md");
+        let gap_lg = resolve_px(theme, "space.inline.lg");
         let icon_sm = resolve_px(theme, "size.icon.sm");
+        // Compact mode uses tighter cell vertical padding.
+        let cell_py = if spec.compact { gap_sm } else { gap_md };
 
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "color.border.subtle");
@@ -205,7 +206,7 @@ impl IntoElement for DataTable {
                     div()
                         .id("dt-toolbar-columns")
                         .flex().items_center().gap(gap_sm)
-                        .px(px(10.0)).py(px(6.0))
+                        .px(gap_md).py(gap_sm)
                         .border_1().border_color(border_color)
                         .rounded(radius_control)
                         .cursor_pointer()
@@ -226,7 +227,7 @@ impl IntoElement for DataTable {
                     div()
                         .id("dt-toolbar-export")
                         .flex().items_center().gap(gap_sm)
-                        .px(px(10.0)).py(px(6.0))
+                        .px(gap_md).py(gap_sm)
                         .border_1().border_color(border_color)
                         .rounded(radius_control)
                         .cursor_pointer()
@@ -253,7 +254,7 @@ impl IntoElement for DataTable {
                 filter_row = filter_row.child(
                     div()
                         .flex().items_center().gap(gap_sm)
-                        .px(px(8.0)).py(px(3.0))
+                        .px(gap_sm).py(px(3.0))
                         .rounded(radius_pill)
                         .bg(chip_bg)
                         .text_size(label_size)
@@ -400,7 +401,7 @@ impl IntoElement for DataTable {
                 div()
                     .w(px(120.0))
                     .px(inline_padding)
-                    .py(px(12.0))
+                    .py(gap_md)
                     .text_size(label_size)
                     .text_color(text_secondary),
             );
@@ -418,7 +419,7 @@ impl IntoElement for DataTable {
                 div()
                     .w_full()
                     .px(inline_padding)
-                    .py(px(24.0))
+                    .py(gap_lg)
                     .text_size(body_size)
                     .text_color(text_secondary)
                     .text_center()
@@ -563,7 +564,7 @@ impl IntoElement for DataTable {
                                 .flex()
                                 .items_center()
                                 .flex_shrink_0()
-                                .px(px(8.0))
+                                .px(gap_sm)
                                 .py(px(2.0))
                                 .rounded(radius_pill)
                                 .bg(tone_bg)
@@ -614,7 +615,7 @@ impl IntoElement for DataTable {
                             div()
                                 .w_full()
                                 .px(inline_padding)
-                                .py(px(8.0))
+                                .py(gap_sm)
                                 .bg(elevated_bg.opacity(0.5))
                                 .border_b_1()
                                 .border_color(border_color.opacity(0.5))
@@ -639,6 +640,7 @@ impl IntoElement for DataTable {
                 inline_padding,
                 label_size,
                 radius_control,
+                gap_sm,
                 gap_md,
                 on_page_change.clone(),
             );
@@ -657,6 +659,7 @@ fn render_pager(
     inline_padding: Pixels,
     label_size: Pixels,
     radius_control: Pixels,
+    gap_sm: Pixels,
     gap_md: Pixels,
     on_page_change: Option<std::rc::Rc<dyn Fn(u32, &mut Window, &mut App)>>,
 ) -> Div {
@@ -674,7 +677,7 @@ fn render_pager(
         .items_center()
         .justify_between()
         .px(inline_padding)
-        .py(px(8.0))
+        .py(gap_sm)
         .text_size(label_size)
         .text_color(text_secondary);
 
@@ -690,7 +693,7 @@ fn render_pager(
      -> AnyElement {
         let mut btn = div()
             .id(SharedString::from(id.to_string()))
-            .px(px(8.0))
+            .px(gap_sm)
             .py(px(4.0))
             .rounded(radius_control)
             .border_1()

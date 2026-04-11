@@ -125,6 +125,8 @@ impl IntoElement for MediaPicker {
         let label_tok = resolve_px(theme, "typography.label.size");
         let radius_control = resolve_radius(theme, "radius.control");
         let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
+        let gap_lg = resolve_px(theme, "space.inline.lg");
 
         // ── Dialog wrapper ───────────────────────────────────────
         let mut dialog = div()
@@ -182,8 +184,8 @@ impl IntoElement for MediaPicker {
 
         let tab_item = |_label: &str, is_active: bool| -> Div {
             let base = div()
-                .px(px(16.0))
-                .py(px(8.0))
+                .px(gap_lg)
+                .py(gap_sm)
                 .text_size(label_size)
                 .font_weight(FontWeight::MEDIUM)
                 .cursor_pointer();
@@ -261,10 +263,10 @@ impl IntoElement for MediaPicker {
             .flex()
             .items_center()
             .gap(gap_sm)
-            .mx(px(16.0))
-            .my(px(10.0))
-            .px(px(10.0))
-            .py(px(6.0))
+            .mx(gap_lg)
+            .my(gap_md)
+            .px(gap_md)
+            .py(gap_sm)
             .rounded(radius_control)
             .border_1()
             .border_color(border_color)
@@ -283,7 +285,7 @@ impl IntoElement for MediaPicker {
         if let Some(ref types) = self.spec.accepted_types {
             dialog = dialog.child(
                 div()
-                    .px(px(16.0))
+                    .px(gap_lg)
                     .text_size(label_tok)
                     .text_color(text_secondary)
                     .child(format!("Accepted: {}", types)),
@@ -304,7 +306,7 @@ impl IntoElement for MediaPicker {
             grid = grid.child(
                 div()
                     .w_full()
-                    .py(px(24.0))
+                    .py(gap_lg)
                     .text_size(label_size)
                     .text_color(text_secondary)
                     .text_center()
@@ -389,8 +391,8 @@ impl IntoElement for MediaPicker {
             .child({
                 let mut confirm_btn = div()
                     .id("media-picker-confirm")
-                    .px(px(14.0))
-                    .py(px(6.0))
+                    .px(gap_md)
+                    .py(gap_sm)
                     .rounded(radius_control)
                     .bg(accent)
                     .text_color(gpui::white())
