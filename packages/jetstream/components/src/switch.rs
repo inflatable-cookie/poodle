@@ -1,6 +1,6 @@
 //! JsSwitch — toggle switch with track and thumb, backed by SwitchSpec.
 //!
-//! Contract: `docs/contracts/foundation/switch.md`
+//! Contract: `docs/contracts/components/switch.md`
 //! Reference: `packages/svelte/primitives/src/Switch.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.

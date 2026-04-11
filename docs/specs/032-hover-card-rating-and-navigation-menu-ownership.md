@@ -67,8 +67,8 @@ outside this utility tranche.
 
 ## Evidence
 
-- `docs/contracts/foundation/hover-card.md`
-- `docs/contracts/foundation/rating.md`
+- `docs/contracts/components/hover-card.md`
+- `docs/contracts/components/rating.md`
 - `packages/svelte/primitives/README.md`
 - `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
 

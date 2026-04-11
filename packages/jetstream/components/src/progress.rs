@@ -1,6 +1,6 @@
 //! JsProgress — progress bar backed by ProgressSpec.
 //!
-//! Contract: `docs/contracts/foundation/progress.md`
+//! Contract: `docs/contracts/components/progress.md`
 //! Reference: `packages/svelte/primitives/src/Progress.svelte`
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.

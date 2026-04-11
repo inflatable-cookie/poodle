@@ -93,12 +93,12 @@ tree.
 
 ## Seed Evidence
 
-- `docs/contracts/composites/card.md`
-- `docs/contracts/composites/page-header.md`
-- `docs/contracts/composites/breadcrumbs.md`
-- `docs/contracts/composites/detail-shell.md`
-- `docs/contracts/composites/detail-section.md`
-- `docs/contracts/composites/detail-item.md`
+- `docs/contracts/components/card.md`
+- `docs/contracts/components/page-header.md`
+- `docs/contracts/components/breadcrumbs.md`
+- `docs/contracts/components/detail-shell.md`
+- `docs/contracts/components/detail-section.md`
+- `docs/contracts/components/detail-item.md`
 - `packages/svelte/composites/src/Card.svelte`
 - `packages/svelte/composites/src/PageHeader.svelte`
 - `packages/svelte/composites/src/Breadcrumbs.svelte`

@@ -201,8 +201,8 @@ The first surfaces proving this rule set are:
 
 - `docs/specs/002-component-contract-template-and-parity-rules.md`
 - `docs/specs/007-underlay-bridge-and-wrapper-preservation-rules.md`
-- `docs/contracts/foundation/README.md`
-- `docs/contracts/composites/README.md`
+- `docs/contracts/components/README.md`
+- `docs/contracts/components/README.md`
 - `docs/contracts/workstation/README.md`
 - `docs/logs/2026-03/11-220500-g01-013-underlay-bridge-and-token-ingestion-baseline.md`
 

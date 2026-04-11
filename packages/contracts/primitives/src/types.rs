@@ -165,7 +165,7 @@ impl Default for SemanticControlSizeRole {
 }
 
 /// Density mode controlling container padding and sibling gaps.
-/// See docs/contracts/foundation/size-and-density.md for the global rules.
+/// See docs/contracts/components/size-and-density.md for the global rules.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ControlDensity {
     Compact,

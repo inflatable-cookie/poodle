@@ -156,9 +156,9 @@ root.
 
 ## Related Contracts
 
-- [ListContainer](../contracts/composites/list-container.md)
-- [FilterToolbar](../contracts/composites/filter-toolbar.md)
-- [PageHeader](../contracts/composites/page-header.md)
+- [ListContainer](../contracts/components/list-container.md)
+- [FilterToolbar](../contracts/components/filter-toolbar.md)
+- [PageHeader](../contracts/components/page-header.md)
 
 ## Next Task
 

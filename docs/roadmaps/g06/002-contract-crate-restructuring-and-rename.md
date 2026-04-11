@@ -17,7 +17,7 @@ renderer-neutral naming, and relocate them from `packages/gpui/` to
 |-----------|-----------|----------|----------|
 | `poodle-gpui-tokens` | `poodle-tokens` | `packages/gpui/tokens/` | `packages/contracts/tokens/` |
 | `poodle-gpui-primitives` | `poodle-primitives` | `packages/gpui/primitives/` | `packages/contracts/primitives/` |
-| `poodle-gpui-composites` | `poodle-composites` | `packages/gpui/composites/` | `packages/contracts/composites/` |
+| `poodle-gpui-composites` | `poodle-composites` | `packages/gpui/composites/` | `packages/contracts/components/` |
 | `poodle-gpui-workstation` | `poodle-workstation` | `packages/gpui/workstation/` | `packages/contracts/workstation/` |
 
 ### Import Updates

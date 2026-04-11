@@ -77,4 +77,4 @@ ContextMenu wraps ListCard as its trigger. Specimen demonstrates the pattern.
 2. `packages/svelte/primitives/src/ListCardCounter.svelte` — new file
 3. `packages/svelte/primitives/src/index.ts` — add export
 4. `packages/svelte/preview/src/specimens/ListCardSpecimen.svelte` — modify
-5. `docs/contracts/foundation/list-card.md` — modify
+5. `docs/contracts/components/list-card.md` — modify

@@ -1,6 +1,6 @@
 //! JsSeparator — horizontal or vertical divider backed by SeparatorSpec.
 //!
-//! Contract: `docs/contracts/foundation/separator.md`
+//! Contract: `docs/contracts/components/separator.md`
 //! Reference: `packages/svelte/primitives/src/Separator.svelte`
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.

@@ -117,10 +117,10 @@ Examples of unacceptable delta:
 
 - `docs/contracts/workstation/command-palette.md`
 - `docs/contracts/workstation/action-discovery-panel.md`
-- `docs/contracts/composites/data-table.md`
-- `docs/contracts/composites/picker-shell.md`
-- `docs/contracts/composites/relation-picker.md`
-- `docs/contracts/composites/toast-stack.md`
+- `docs/contracts/components/data-table.md`
+- `docs/contracts/components/picker-shell.md`
+- `docs/contracts/components/relation-picker.md`
+- `docs/contracts/components/toast-stack.md`
 - `packages/svelte/workstation/src/CommandPalette.svelte`
 - `packages/svelte/workstation/src/ActionDiscoveryPanel.svelte`
 - `packages/svelte/composites/src/DataTable.svelte`

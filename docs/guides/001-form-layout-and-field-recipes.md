@@ -160,10 +160,10 @@ owns the field and text-input capabilities needed to express that workflow.
 
 ## Related Contracts
 
-- [Field](../contracts/foundation/field.md)
-- [TextInput](../contracts/foundation/text-input.md)
-- [FieldSet](../contracts/foundation/field-set.md)
-- [FormLayout](../contracts/composites/form-layout.md)
+- [Field](../contracts/components/field.md)
+- [TextInput](../contracts/components/text-input.md)
+- [FieldSet](../contracts/components/field-set.md)
+- [FormLayout](../contracts/components/form-layout.md)
 
 ## Next Task
 

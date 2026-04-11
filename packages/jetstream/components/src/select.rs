@@ -1,6 +1,6 @@
 //! Select — Jetstream select dropdown backed by SelectSpec.
 //!
-//! Contract: `docs/contracts/foundation/select.md`
+//! Contract: `docs/contracts/components/select.md`
 //! Reference: `packages/svelte/primitives/src/Select.svelte`
 //!
 //! Uses SVG chevron icon and overlay() for the dropdown panel.

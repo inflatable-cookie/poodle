@@ -74,8 +74,8 @@ publishing workflows still need explicit later ownership decisions.
 
 ## Evidence
 
-- `docs/contracts/foundation/time-zone-select.md`
-- `docs/contracts/foundation/date-time-zone-picker.md`
+- `docs/contracts/components/time-zone-select.md`
+- `docs/contracts/components/date-time-zone-picker.md`
 - `packages/svelte/primitives/README.md`
 
 ## Next Task

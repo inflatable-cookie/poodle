@@ -23,10 +23,10 @@ These exist in `poodle-gpui-composites` but not `poodle-composites`:
 
 ## Actions
 
-- [x] Copy 7 missing module files into `packages/contracts/composites/src/`
+- [x] Copy 7 missing module files into `packages/contracts/components/src/`
 - [x] Fix imports: `poodle_gpui_primitives` → `poodle_primitives`,
       `poodle_gpui_tokens` → `poodle_tokens`
-- [x] Register modules in `packages/contracts/composites/src/lib.rs`
+- [x] Register modules in `packages/contracts/components/src/lib.rs`
 - [x] Merge GPUI types.rs additions into contracts types.rs:
   - `DiscoveryState`, `SplitOrientation`, `DockEdge`
   - `CommandActionItem`, `ActionDiscoverySection`, `PanelTabItem`

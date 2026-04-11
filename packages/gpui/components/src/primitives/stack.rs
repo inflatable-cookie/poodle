@@ -1,6 +1,6 @@
 //! Stack — real GPUI component backed by StackSpec.
 //!
-//! Contract: `docs/contracts/foundation/stack.md`
+//! Contract: `docs/contracts/components/stack.md`
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

@@ -120,10 +120,10 @@ For grouped page-level actions:
 
 ## Related Contracts
 
-- [Button](../contracts/foundation/button.md)
-- [IconButton](../contracts/foundation/icon-button.md)
-- [SplitButton](../contracts/foundation/split-button.md)
-- [Menu](../contracts/foundation/menu.md)
+- [Button](../contracts/components/button.md)
+- [IconButton](../contracts/components/icon-button.md)
+- [SplitButton](../contracts/components/split-button.md)
+- [Menu](../contracts/components/menu.md)
 
 ## Next Task
 

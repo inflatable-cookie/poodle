@@ -106,9 +106,9 @@ tree and event system.
 
 ## Seed Evidence
 
-- `docs/contracts/composites/data-table.md`
-- `docs/contracts/composites/bulk-action-bar.md`
-- `docs/contracts/composites/pagination-summary.md`
+- `docs/contracts/components/data-table.md`
+- `docs/contracts/components/bulk-action-bar.md`
+- `docs/contracts/components/pagination-summary.md`
 - `packages/svelte/primitives/src/Checkbox.svelte`
 - `packages/svelte/composites/src/DataTable.svelte`
 - `packages/svelte/composites/src/BulkActionBar.svelte`

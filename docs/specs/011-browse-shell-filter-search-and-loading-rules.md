@@ -93,8 +93,8 @@ the native accessibility tree.
 
 ## Seed Evidence
 
-- `docs/contracts/composites/filter-toolbar.md`
-- `docs/contracts/composites/browse-search-shell.md`
+- `docs/contracts/components/filter-toolbar.md`
+- `docs/contracts/components/browse-search-shell.md`
 - `packages/svelte/composites/src/FilterToolbar.svelte`
 - `packages/svelte/preview/src/App.svelte`
 

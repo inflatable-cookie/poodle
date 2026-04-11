@@ -63,10 +63,10 @@ GPUI must recreate equivalent state and announcement meaning in the native acces
 
 ## Seed Evidence
 
-- `docs/contracts/composites/empty-state.md`
-- `docs/contracts/composites/toast-stack.md`
-- `docs/contracts/foundation/banner.md`
-- `docs/contracts/foundation/skeleton.md`
+- `docs/contracts/components/empty-state.md`
+- `docs/contracts/components/toast-stack.md`
+- `docs/contracts/components/banner.md`
+- `docs/contracts/components/skeleton.md`
 - `packages/svelte/composites/src/EmptyState.svelte`
 - `packages/svelte/composites/src/ToastStack.svelte`
 - `packages/svelte/primitives/src/Banner.svelte`

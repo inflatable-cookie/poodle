@@ -74,9 +74,9 @@ decisions rather than incidental growth.
 
 ## Evidence
 
-- `docs/contracts/foundation/time-field.md`
-- `docs/contracts/foundation/date-time-picker.md`
-- `docs/contracts/foundation/date-time-range-picker.md`
+- `docs/contracts/components/time-field.md`
+- `docs/contracts/components/date-time-picker.md`
+- `docs/contracts/components/date-time-range-picker.md`
 - `docs/specs/030-date-selection-and-calendar-foundation-baseline.md`
 - `docs/specs/034-range-plus-time-foundation-boundary.md`
 - `packages/svelte/primitives/README.md`

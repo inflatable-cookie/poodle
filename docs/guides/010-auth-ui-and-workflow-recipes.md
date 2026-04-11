@@ -151,11 +151,11 @@ place outside Poodle.
 
 ## Related Contracts
 
-- [Card](../contracts/foundation/card.md)
-- [Field](../contracts/foundation/field.md)
-- [TextInput](../contracts/foundation/text-input.md)
-- [CodeInput](../contracts/foundation/code-input.md)
-- [PasswordRequirements](../contracts/foundation/password-requirements.md)
+- [Card](../contracts/components/card.md)
+- [Field](../contracts/components/field.md)
+- [TextInput](../contracts/components/text-input.md)
+- [CodeInput](../contracts/components/code-input.md)
+- [PasswordRequirements](../contracts/components/password-requirements.md)
 
 ## Next Task
 

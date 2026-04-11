@@ -1,6 +1,6 @@
 //! Tooltip — Jetstream tooltip backed by TooltipSpec.
 //!
-//! Contract: `docs/contracts/foundation/tooltip.md`
+//! Contract: `docs/contracts/components/tooltip.md`
 //! Uses overlay() for the tooltip panel. Triggered by on_pointer_enter/leave.
 
 use jetstream_runtime::ui_element::{self, JsEl};

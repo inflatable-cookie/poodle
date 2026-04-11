@@ -1,6 +1,6 @@
 //! ColorPicker — Jetstream color picker trigger backed by ColorPickerSpec.
 //!
-//! Contract: `docs/contracts/foundation/color-picker.md`
+//! Contract: `docs/contracts/components/color-picker.md`
 //! Reference: `packages/svelte/primitives/src/ColorPicker.svelte`
 //!
 //! Renders the trigger button with color preview swatch and optional

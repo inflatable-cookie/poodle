@@ -221,8 +221,7 @@ function parseCargoPoodleMetadata(source: string): {
 
 function validateComponentContracts(errors: string[]): number {
   const componentContractFiles = [
-    ...collectMarkdownFiles(path.join(contractsDir, "foundation")).filter((file) => !file.endsWith("README.md")),
-    ...collectMarkdownFiles(path.join(contractsDir, "composites")).filter((file) => !file.endsWith("README.md")),
+    ...collectMarkdownFiles(path.join(contractsDir, "components")).filter((file) => !file.endsWith("README.md")),
     ...(hasWorkstationContracts
       ? collectMarkdownFiles(workstationContractsPath).filter((file) => !file.endsWith("README.md"))
       : []),
@@ -261,31 +260,19 @@ function validateComponentContracts(errors: string[]): number {
 }
 
 function validateContractIndexes(errors: string[]): void {
-  const foundationContracts = collectMarkdownFiles(path.join(contractsDir, "foundation"))
-    .map((file) => path.basename(file));
-  const compositeContracts = collectMarkdownFiles(path.join(contractsDir, "composites"))
+  const componentContracts = collectMarkdownFiles(path.join(contractsDir, "components"))
     .map((file) => path.basename(file));
   const workstationContracts = hasWorkstationContracts
     ? collectMarkdownFiles(workstationContractsPath).map((file) => path.basename(file))
     : [];
 
   compareLists(
-    "docs/contracts/foundation/README.md current contracts",
+    "docs/contracts/components/README.md current contracts",
     parseBulletList(
-      fs.readFileSync(path.join(contractsDir, "foundation", "README.md"), "utf8"),
+      fs.readFileSync(path.join(contractsDir, "components", "README.md"), "utf8"),
       "## Current Contracts",
     ),
-    foundationContracts.filter((file) => file !== "README.md"),
-    errors,
-  );
-
-  compareLists(
-    "docs/contracts/composites/README.md current contracts",
-    parseBulletList(
-      fs.readFileSync(path.join(contractsDir, "composites", "README.md"), "utf8"),
-      "## Current Contracts",
-    ),
-    compositeContracts.filter((file) => file !== "README.md"),
+    componentContracts.filter((file) => file !== "README.md"),
     errors,
   );
 
@@ -302,15 +289,14 @@ function validateContractIndexes(errors: string[]): void {
   }
 
   compareLists(
-    "docs/contracts/README.md current seed contracts",
+    "docs/contracts/README.md current contracts",
     parseBulletList(
       fs.readFileSync(path.join(contractsDir, "README.md"), "utf8"),
-      "## Current Seed Contracts",
+      "## Current Contracts",
     ),
     [
       "template/component-contract-template.md",
-      ...foundationContracts.map((file) => `foundation/${file}`),
-      ...compositeContracts.map((file) => `composites/${file}`),
+      ...componentContracts.map((file) => `components/${file}`),
       ...workstationContracts.map((file) => `workstation/${file}`),
     ],
     errors,
@@ -319,7 +305,6 @@ function validateContractIndexes(errors: string[]): void {
 
 function validateSveltePackageSurface(
   packagePath: string,
-  contractsLayer: "foundation" | "composites" | "workstation",
   packageName: string,
   errors: string[],
 ): void {
@@ -336,7 +321,7 @@ function validateSveltePackageSurface(
   const componentExports = parseDefaultComponentExports(indexSource);
   const helperExports = parseNamedRootExports(indexSource);
   const contractFiles = new Set(
-    collectMarkdownFiles(path.join(contractsDir, contractsLayer))
+    collectMarkdownFiles(path.join(contractsDir, "components"))
       .map((file) => path.basename(file))
       .filter((file) => file !== "README.md"),
   );
@@ -3148,8 +3133,8 @@ function validateSharedDemoAppContract(errors: string[]): {
 const errors: string[] = [];
 const componentContractCount = validateComponentContracts(errors);
 validateContractIndexes(errors);
-validateSveltePackageSurface("packages/svelte/primitives", "foundation", "@poodle/svelte", errors);
-validateSveltePackageSurface("packages/svelte/composites", "composites", "@poodle/svelte", errors);
+validateSveltePackageSurface("packages/svelte/primitives", "@poodle/svelte", errors);
+validateSveltePackageSurface("packages/svelte/composites", "@poodle/svelte", errors);
 validatePackageSurfaceCoverage("packages/svelte/primitives", "@poodle/svelte", errors);
 validatePackageSurfaceCoverage("packages/svelte/composites", "@poodle/svelte", errors);
 validateDocsCatalog(errors);

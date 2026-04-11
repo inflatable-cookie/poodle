@@ -181,14 +181,14 @@ Product composite authors must define:
 
 The first contracts that explicitly exercise this baseline are:
 
-- `docs/contracts/composites/card.md`
-- `docs/contracts/composites/page-header.md`
-- `docs/contracts/composites/breadcrumbs.md`
-- `docs/contracts/composites/detail-item.md`
-- `docs/contracts/composites/detail-section.md`
-- `docs/contracts/composites/detail-shell.md`
-- `docs/contracts/composites/filter-toolbar.md`
-- `docs/contracts/composites/empty-state.md`
+- `docs/contracts/components/card.md`
+- `docs/contracts/components/page-header.md`
+- `docs/contracts/components/breadcrumbs.md`
+- `docs/contracts/components/detail-item.md`
+- `docs/contracts/components/detail-section.md`
+- `docs/contracts/components/detail-shell.md`
+- `docs/contracts/components/filter-toolbar.md`
+- `docs/contracts/components/empty-state.md`
 
 ## Next Task
 

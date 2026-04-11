@@ -1,6 +1,6 @@
 //! JsAccordion — expandable disclosure panels backed by AccordionSpec.
 //!
-//! Contract: `docs/contracts/foundation/accordion.md`
+//! Contract: `docs/contracts/components/accordion.md`
 //! Reference: `packages/svelte/primitives/src/Accordion.svelte`
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.

@@ -1355,7 +1355,7 @@ Open `http://localhost:4173`. The preview app shows every component specimen wit
 
 ## Contracts
 
-Every component has a contract document in `docs/contracts/foundation/<component>.md` that defines:
+Every component has a contract document in `docs/contracts/components/<component>.md` that defines:
 
 - **Anatomy** — which DOM parts exist and their nesting
 - **Props** — every prop, its type, and default value

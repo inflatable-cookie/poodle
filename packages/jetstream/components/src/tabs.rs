@@ -1,6 +1,6 @@
 //! Tabs — Jetstream tabs backed by TabsSpec.
 //!
-//! Contract: `docs/contracts/foundation/tabs.md`
+//! Contract: `docs/contracts/components/tabs.md`
 //! Reference: `packages/svelte/primitives/src/Tabs.svelte`
 //!
 //! Uses per-side border colors for the active tab indicator (bottom border).

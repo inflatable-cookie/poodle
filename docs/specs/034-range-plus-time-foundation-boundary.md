@@ -69,7 +69,7 @@ need future composite or specialized foundation decisions.
 
 ## Evidence
 
-- `docs/contracts/foundation/date-time-range-picker.md`
+- `docs/contracts/components/date-time-range-picker.md`
 - `docs/specs/031-time-aware-date-foundation-boundary.md`
 - `packages/svelte/primitives/README.md`
 

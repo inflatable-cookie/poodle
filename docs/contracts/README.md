@@ -1,7 +1,7 @@
 # Contracts
 
 Status: active
-Updated: 2026-03-24
+Updated: 2026-04-11
 
 Contracts are the docs-first source of truth for Poodle components.
 
@@ -15,159 +15,156 @@ docs/contracts/
   README.md
   template/
     component-contract-template.md
-  foundation/
-    ...
-  composites/
+  components/
     ...
 ```
 
 ## Grouping Rules
 
-- `foundation/` for low-level reusable primitives and layout surfaces
-- `composites/` for reusable higher-order application components
+- `components/` for all reusable component contracts, from low-level primitives
+  through higher-order application composites
 - workstation semantics are currently expressed through the shared contract
-  crates plus the composite docs above, rather than a separate
+  crates plus the component docs above, rather than a separate
   `docs/contracts/workstation/` subtree
 
 App-specific DAW widgets do not belong in this contract surface. They build
 above it in downstream repos such as Loophole.
 
-## Current Seed Contracts
+## Current Contracts
 
 - `template/component-contract-template.md`
-- `foundation/README.md`
-- `foundation/accordion.md`
-- `foundation/audio-player.md`
-- `foundation/alert-dialog.md`
-- `foundation/box.md`
-- `foundation/breadcrumbs.md`
-- `foundation/bulk-action-bar.md`
-- `foundation/button.md`
-- `foundation/calendar.md`
-- `foundation/callout.md`
-- `foundation/card.md`
-- `foundation/checkbox.md`
-- `foundation/code-input.md`
-- `foundation/code.md`
-- `foundation/collapse-toggle.md`
-- `foundation/collapsible.md`
-- `foundation/color-picker.md`
-- `foundation/context-menu.md`
-- `foundation/date-picker.md`
-- `foundation/date-range-picker.md`
-- `foundation/date-time-picker.md`
-- `foundation/date-time-range-picker.md`
-- `foundation/detail-item.md`
-- `foundation/dialog.md`
-- `foundation/drawer.md`
-- `foundation/duration-input.md`
-- `foundation/editable-label.md`
-- `foundation/eyebrow.md`
-- `foundation/field.md`
-- `foundation/field-set.md`
-- `foundation/file-upload.md`
-- `foundation/format-display-date.md`
-- `foundation/format-file-size.md`
-- `foundation/form-actions.md`
-- `foundation/grid.md`
-- `foundation/hover-card.md`
-- `foundation/icon-button.md`
-- `foundation/icon-provider.md`
-- `foundation/icon.md`
-- `foundation/list-card-counter.md`
-- `foundation/list-card.md`
-- `foundation/list-grid.md`
-- `foundation/menu.md`
-- `foundation/menubar.md`
-- `foundation/meta-bar.md`
-- `foundation/meta-item.md`
-- `foundation/meter.md`
-- `foundation/nav-card.md`
-- `foundation/navigation-menu.md`
-- `foundation/number-input.md`
-- `foundation/order-by.md`
-- `foundation/pagination-summary.md`
-- `foundation/pagination.md`
-- `foundation/password-requirements.md`
-- `foundation/pill.md`
-- `foundation/popover.md`
-- `foundation/progress.md`
-- `foundation/radio-group.md`
-- `foundation/range-slider.md`
-- `foundation/rating.md`
-- `foundation/region.md`
-- `foundation/resize-handle.md`
-- `foundation/scroll-shell.md`
-- `foundation/segmented-control.md`
-- `foundation/select.md`
-- `foundation/separator.md`
-- `foundation/size-and-density.md`
-- `foundation/skeleton.md`
-- `foundation/slider.md`
-- `foundation/spacer.md`
-- `foundation/split-button.md`
-- `foundation/stack.md`
-- `foundation/status-bar.md`
-- `foundation/status-indicator.md`
-- `foundation/spinner.md`
-- `foundation/surface-elevation.md`
-- `foundation/surface.md`
-- `foundation/switch.md`
-- `foundation/table.md`
-- `foundation/tabs.md`
-- `foundation/text-input.md`
-- `foundation/time-ago.md`
-- `foundation/time-input.md`
-- `foundation/time-zone-select.md`
-- `foundation/toggle-group.md`
-- `foundation/toolbar.md`
-- `foundation/tooltip.md`
-- `foundation/treatment-tokens.md`
-- `foundation/tri-state-switch.md`
-- `foundation/ui-presentation-provider.md`
-- `foundation/video-player.md`
-- `foundation/date-time-zone-picker.md`
-- `composites/README.md`
-- `composites/action-discovery-panel.md`
-- `composites/app-header.md`
-- `composites/block-editor.md`
-- `composites/card-radio-group.md`
-- `composites/command-palette.md`
-- `composites/confirm-action.md`
-- `composites/data-table.md`
-- `composites/debug-dialog.md`
-- `composites/detail-section.md`
-- `composites/detail-shell.md`
-- `composites/dock-region.md`
-- `composites/editable-list.md`
-- `composites/embed-input.md`
-- `composites/embed-preview.md`
-- `composites/empty-state.md`
-- `composites/error-boundary.md`
-- `composites/filter-toolbar.md`
-- `composites/form-dialog.md`
-- `composites/form-layout.md`
-- `composites/inline-list-section.md`
-- `composites/list-container.md`
-- `composites/log-list.md`
-- `composites/markdown-editor.md`
-- `composites/media-picker.md`
-- `composites/media-browse-panel.md`
-- `composites/media-preview.md`
-- `composites/media-thumbnail.md`
-- `composites/media-upload-status-panel.md`
-- `composites/metric-tile.md`
-- `composites/page-header.md`
-- `composites/page-loading.md`
-- `composites/picker-shell.md`
-- `composites/relation-picker.md`
-- `composites/selection-summary.md`
-- `composites/sidebar-nav.md`
-- `composites/split-view.md`
-- `composites/toast-host.md`
-- `composites/toast-stack.md`
+- `components/README.md`
+- `components/accordion.md`
+- `components/action-discovery-panel.md`
+- `components/alert-dialog.md`
+- `components/app-header.md`
+- `components/audio-player.md`
+- `components/block-editor.md`
+- `components/box.md`
+- `components/breadcrumbs.md`
+- `components/bulk-action-bar.md`
+- `components/button.md`
+- `components/calendar.md`
+- `components/callout.md`
+- `components/card-radio-group.md`
+- `components/card.md`
+- `components/checkbox.md`
+- `components/code-input.md`
+- `components/code.md`
+- `components/collapse-toggle.md`
+- `components/collapsible.md`
+- `components/color-picker.md`
+- `components/command-palette.md`
+- `components/confirm-action.md`
+- `components/context-menu.md`
+- `components/data-table.md`
+- `components/date-picker.md`
+- `components/date-range-picker.md`
+- `components/date-time-picker.md`
+- `components/date-time-range-picker.md`
+- `components/date-time-zone-picker.md`
+- `components/debug-dialog.md`
+- `components/detail-item.md`
+- `components/detail-section.md`
+- `components/detail-shell.md`
+- `components/dialog.md`
+- `components/dock-region.md`
+- `components/drawer.md`
+- `components/duration-input.md`
+- `components/editable-label.md`
+- `components/editable-list.md`
+- `components/embed-input.md`
+- `components/embed-preview.md`
+- `components/empty-state.md`
+- `components/error-boundary.md`
+- `components/eyebrow.md`
+- `components/field-set.md`
+- `components/field.md`
+- `components/file-upload.md`
+- `components/filter-toolbar.md`
+- `components/form-actions.md`
+- `components/form-dialog.md`
+- `components/form-layout.md`
+- `components/format-display-date.md`
+- `components/format-file-size.md`
+- `components/grid.md`
+- `components/hover-card.md`
+- `components/icon-button.md`
+- `components/icon-provider.md`
+- `components/icon.md`
+- `components/inline-list-section.md`
+- `components/list-card-counter.md`
+- `components/list-card.md`
+- `components/list-container.md`
+- `components/list-grid.md`
+- `components/log-list.md`
+- `components/markdown-editor.md`
+- `components/media-browse-panel.md`
+- `components/media-picker.md`
+- `components/media-preview.md`
+- `components/media-thumbnail.md`
+- `components/media-upload-status-panel.md`
+- `components/menu.md`
+- `components/menubar.md`
+- `components/meta-bar.md`
+- `components/meta-item.md`
+- `components/meter.md`
+- `components/metric-tile.md`
+- `components/nav-card.md`
+- `components/navigation-menu.md`
+- `components/number-input.md`
+- `components/order-by.md`
+- `components/page-header.md`
+- `components/page-loading.md`
+- `components/pagination-summary.md`
+- `components/pagination.md`
+- `components/password-requirements.md`
+- `components/picker-shell.md`
+- `components/pill.md`
+- `components/popover.md`
+- `components/progress.md`
+- `components/radio-group.md`
+- `components/range-slider.md`
+- `components/rating.md`
+- `components/region.md`
+- `components/relation-picker.md`
+- `components/resize-handle.md`
+- `components/scroll-shell.md`
+- `components/segmented-control.md`
+- `components/select.md`
+- `components/selection-summary.md`
+- `components/separator.md`
+- `components/sidebar-nav.md`
+- `components/size-and-density.md`
+- `components/skeleton.md`
+- `components/slider.md`
+- `components/spacer.md`
+- `components/spinner.md`
+- `components/split-button.md`
+- `components/split-view.md`
+- `components/stack.md`
+- `components/status-bar.md`
+- `components/status-indicator.md`
+- `components/surface-elevation.md`
+- `components/surface.md`
+- `components/switch.md`
+- `components/table.md`
+- `components/tabs.md`
+- `components/text-input.md`
+- `components/time-ago.md`
+- `components/time-input.md`
+- `components/time-zone-select.md`
+- `components/toast-host.md`
+- `components/toast-stack.md`
+- `components/toggle-group.md`
+- `components/toolbar.md`
+- `components/tooltip.md`
+- `components/treatment-tokens.md`
+- `components/tri-state-switch.md`
+- `components/ui-presentation-provider.md`
+- `components/video-player.md`
 
 ## Next Task
 
-Keep this top-level index aligned with the foundation and composite contract
-folders whenever contract files are added, removed, or regrouped.
+Keep this top-level index aligned with the components contract folder whenever
+contract files are added, removed, or regrouped.

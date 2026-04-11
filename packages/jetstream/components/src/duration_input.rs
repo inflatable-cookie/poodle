@@ -1,6 +1,6 @@
 //! JsDurationInput — segmented duration entry backed by DurationInputSpec.
 //!
-//! Contract: `docs/contracts/foundation/duration-input.md`
+//! Contract: `docs/contracts/components/duration-input.md`
 //! Reference: `packages/svelte/primitives/src/DurationInput.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.

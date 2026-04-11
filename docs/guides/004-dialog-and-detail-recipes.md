@@ -248,11 +248,11 @@ Those remain host-owned unless Poodle later promotes a narrower generic surface.
 
 ## Related Contracts
 
-- [FormDialog](../contracts/composites/form-dialog.md)
-- [DetailShell](../contracts/composites/detail-shell.md)
-- [DetailSection](../contracts/composites/detail-section.md)
-- [InlineListSection](../contracts/composites/inline-list-section.md)
-- [DetailItem](../contracts/foundation/detail-item.md)
+- [FormDialog](../contracts/components/form-dialog.md)
+- [DetailShell](../contracts/components/detail-shell.md)
+- [DetailSection](../contracts/components/detail-section.md)
+- [InlineListSection](../contracts/components/inline-list-section.md)
+- [DetailItem](../contracts/components/detail-item.md)
 
 ## Next Task
 

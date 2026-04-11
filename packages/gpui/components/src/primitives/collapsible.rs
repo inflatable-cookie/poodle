@@ -1,6 +1,6 @@
 //! Collapsible — real GPUI component backed by CollapsibleSpec.
 //!
-//! Contract: `docs/contracts/foundation/collapsible.md`
+//! Contract: `docs/contracts/components/collapsible.md`
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

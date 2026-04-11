@@ -1,7 +1,7 @@
 //! JsCodeInput — segmented code entry with visual digit slots,
 //! backed by CodeInputSpec.
 //!
-//! Contract: `docs/contracts/foundation/code-input.md`
+//! Contract: `docs/contracts/components/code-input.md`
 //! Reference: `packages/svelte/primitives/src/CodeInput.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.

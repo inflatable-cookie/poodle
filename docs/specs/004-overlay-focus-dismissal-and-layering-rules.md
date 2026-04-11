@@ -206,15 +206,15 @@ Overlay and navigation contracts must define:
 
 The first contracts that explicitly exercise this baseline are:
 
-- `docs/contracts/foundation/select.md`
-- `docs/contracts/foundation/tabs.md`
-- `docs/contracts/foundation/tab-strip.md`
-- `docs/contracts/foundation/menu.md`
-- `docs/contracts/foundation/context-menu.md`
-- `docs/contracts/foundation/tooltip.md`
-- `docs/contracts/foundation/popover.md`
-- `docs/contracts/foundation/dialog.md`
-- `docs/contracts/foundation/drawer.md`
+- `docs/contracts/components/select.md`
+- `docs/contracts/components/tabs.md`
+- `docs/contracts/components/tab-strip.md`
+- `docs/contracts/components/menu.md`
+- `docs/contracts/components/context-menu.md`
+- `docs/contracts/components/tooltip.md`
+- `docs/contracts/components/popover.md`
+- `docs/contracts/components/dialog.md`
+- `docs/contracts/components/drawer.md`
 
 ## Next Task
 

@@ -1,6 +1,6 @@
 //! IconButton — real GPUI component backed by IconButtonSpec.
 //!
-//! Contract: `docs/contracts/foundation/icon-button.md`
+//! Contract: `docs/contracts/components/icon-button.md`
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

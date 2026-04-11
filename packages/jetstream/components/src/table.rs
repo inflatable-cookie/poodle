@@ -1,6 +1,6 @@
 //! Table — Jetstream structured data table backed by TableSpec.
 //!
-//! Contract: `docs/contracts/foundation/table.md`
+//! Contract: `docs/contracts/components/table.md`
 //! Reference: `packages/svelte/primitives/src/Table.svelte` (if present)
 //!
 //! Renders a shell container with column headers, body rows, and optional

@@ -1,6 +1,6 @@
 //! Button — real GPUI component backed by ButtonSpec.
 //!
-//! Implements the button contract (`docs/contracts/foundation/button.md`) exactly,
+//! Implements the button contract (`docs/contracts/components/button.md`) exactly,
 //! resolving all tokens through ButtonSpec + GpuiThemeProvider, and matching the
 //! Svelte implementation's visual output.
 

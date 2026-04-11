@@ -1,6 +1,6 @@
 //! Dialog — Jetstream dialog container backed by DialogSpec.
 //!
-//! Contract: `docs/contracts/foundation/dialog.md`
+//! Contract: `docs/contracts/components/dialog.md`
 //! Uses overlay() for modal rendering with backdrop.
 
 use jetstream_runtime::game_ui::Color;

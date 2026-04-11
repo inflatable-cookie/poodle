@@ -203,12 +203,12 @@ Those stay in host code or in a retained host runtime layer, not in Poodle.
 
 ## Related Contracts
 
-- [PageHeader](../contracts/composites/page-header.md)
-- [ListContainer](../contracts/composites/list-container.md)
-- [FilterToolbar](../contracts/composites/filter-toolbar.md)
-- [FormDialog](../contracts/composites/form-dialog.md)
-- [MetaBar](../contracts/foundation/meta-bar.md)
-- [MetaItem](../contracts/foundation/meta-item.md)
+- [PageHeader](../contracts/components/page-header.md)
+- [ListContainer](../contracts/components/list-container.md)
+- [FilterToolbar](../contracts/components/filter-toolbar.md)
+- [FormDialog](../contracts/components/form-dialog.md)
+- [MetaBar](../contracts/components/meta-bar.md)
+- [MetaItem](../contracts/components/meta-item.md)
 
 ## Next Task
 

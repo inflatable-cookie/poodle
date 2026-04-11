@@ -1,6 +1,6 @@
 //! Card — Jetstream card component backed by CardSpec.
 //!
-//! Contract: `docs/contracts/foundation/card.md`
+//! Contract: `docs/contracts/components/card.md`
 //! Reference: `packages/svelte/primitives/src/Card.svelte`
 //!
 //! Uses Color::mix for hover/active states on interactive cards.

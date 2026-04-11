@@ -19,7 +19,7 @@ milestone implements them from scratch to production quality.
 
 ### detail-section
 
-- [ ] Read contract: `docs/contracts/composites/detail-section.md`
+- [ ] Read contract: `docs/contracts/components/detail-section.md`
 - [ ] Read Svelte implementation
 - [ ] Create spec struct in `poodle-gpui-composites`
 - [ ] Implement component in `poodle-gpui-components`
@@ -28,21 +28,21 @@ milestone implements them from scratch to production quality.
 
 ### metric-tile
 
-- [ ] Read contract: `docs/contracts/composites/metric-tile.md`
+- [ ] Read contract: `docs/contracts/components/metric-tile.md`
 - [ ] Read Svelte implementation
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### page-header
 
-- [ ] Read contract: `docs/contracts/composites/page-header.md`
+- [ ] Read contract: `docs/contracts/components/page-header.md`
 - [ ] Read Svelte implementation
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### toast-stack
 
-- [ ] Read contract: `docs/contracts/composites/toast-stack.md`
+- [ ] Read contract: `docs/contracts/components/toast-stack.md`
 - [ ] Read Svelte implementation
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist

@@ -1,6 +1,6 @@
 //! TimeZoneSelect — Jetstream timezone select backed by TimeZoneSelectSpec.
 //!
-//! Contract: `docs/contracts/foundation/time-zone-select.md`
+//! Contract: `docs/contracts/components/time-zone-select.md`
 //! Reference: `packages/svelte/primitives/src/TimeZoneSelect.svelte`
 //!
 //! Renders a field-chrome shell with a select display and disclosure

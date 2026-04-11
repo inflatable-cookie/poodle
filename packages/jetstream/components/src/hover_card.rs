@@ -1,6 +1,6 @@
 //! HoverCard — Jetstream hover card backed by HoverCardSpec.
 //!
-//! Contract: `docs/contracts/foundation/hover-card.md`
+//! Contract: `docs/contracts/components/hover-card.md`
 //! Uses overlay() and on_pointer_enter/leave for trigger.
 
 use jetstream_runtime::ui_element::{self, JsEl};

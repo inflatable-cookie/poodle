@@ -15,7 +15,7 @@ session, update the implementation to match before proceeding.
 
 ### icon_button
 
-- [ ] Verify contract: `docs/contracts/foundation/icon-button.md`
+- [ ] Verify contract: `docs/contracts/components/icon-button.md`
 - [ ] Replace raw text icon rendering with `PoodleIcon` (SVG icons)
 - [ ] Replace `.opacity()` hover/active with `color_mix` pattern
 - [ ] Resolve radius from spec token
@@ -23,7 +23,7 @@ session, update the implementation to match before proceeding.
 
 ### checkbox
 
-- [ ] Verify contract: `docs/contracts/foundation/checkbox.md`
+- [ ] Verify contract: `docs/contracts/components/checkbox.md`
 - [ ] Resolve indicator size from spec token instead of `px(18.0)`
 - [ ] Resolve gap from spec token instead of `px(8.0)`
 - [ ] Resolve corner radius from spec token
@@ -31,27 +31,27 @@ session, update the implementation to match before proceeding.
 
 ### switch
 
-- [ ] Verify contract: `docs/contracts/foundation/switch.md`
+- [ ] Verify contract: `docs/contracts/components/switch.md`
 - [ ] Resolve track dimensions from spec tokens
 - [ ] Resolve knob size and offset positions from tokens
 - [ ] Resolve gap from spec token
 
 ### text_input
 
-- [ ] Verify contract: `docs/contracts/foundation/text-input.md`
+- [ ] Verify contract: `docs/contracts/components/text-input.md`
 - [ ] Resolve height, padding, radius, gap from spec tokens
 - [ ] Support leading/trailing icon slots via `PoodleIcon`
 
 ### select
 
-- [ ] Verify contract: `docs/contracts/foundation/select.md`
+- [ ] Verify contract: `docs/contracts/components/select.md`
 - [ ] Resolve height, padding, radius from spec tokens
 - [ ] Replace hardcoded hover color with `color_mix`
 - [ ] Verify chevron icons render via `PoodleIcon`
 
 ### tabs
 
-- [ ] Verify contract: `docs/contracts/foundation/tabs.md`
+- [ ] Verify contract: `docs/contracts/components/tabs.md`
 - [ ] Resolve all padding, font size, gap from spec tokens
 - [ ] Replace hardcoded hover color with `color_mix`
 - [ ] Implement Card variant if contract requires it

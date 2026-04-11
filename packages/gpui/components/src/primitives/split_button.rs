@@ -1,6 +1,6 @@
 //! SplitButton — real GPUI component backed by SplitButtonSpec.
 //!
-//! Contract: `docs/contracts/foundation/split-button.md`
+//! Contract: `docs/contracts/components/split-button.md`
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

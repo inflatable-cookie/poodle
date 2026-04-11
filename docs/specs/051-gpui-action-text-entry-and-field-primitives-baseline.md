@@ -102,13 +102,13 @@ controlled or uncontrolled meaning as the shared contracts:
 - `packages/gpui/primitives/src/text_area.rs`
 - `packages/gpui/primitives/src/search_field.rs`
 - `packages/gpui/primitives/src/form_actions.rs`
-- `docs/contracts/foundation/button.md`
-- `docs/contracts/foundation/icon-button.md`
-- `docs/contracts/foundation/field.md`
-- `docs/contracts/foundation/text-input.md`
-- `docs/contracts/foundation/text-area.md`
-- `docs/contracts/foundation/search-field.md`
-- `docs/contracts/foundation/form-actions.md`
+- `docs/contracts/components/button.md`
+- `docs/contracts/components/icon-button.md`
+- `docs/contracts/components/field.md`
+- `docs/contracts/components/text-input.md`
+- `docs/contracts/components/text-area.md`
+- `docs/contracts/components/search-field.md`
+- `docs/contracts/components/form-actions.md`
 
 ## Next Task
 

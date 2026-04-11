@@ -4,7 +4,7 @@ use crate::types::Orientation;
 
 /// Spec for the ResizeHandle component — a draggable divider for resizable panels.
 ///
-/// Contract: `docs/contracts/foundation/resize-handle.md`
+/// Contract: `docs/contracts/components/resize-handle.md`
 ///
 /// Anatomy:
 ///   [Resize Handle]

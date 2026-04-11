@@ -1,6 +1,6 @@
 //! Popover — Jetstream popover container backed by PopoverSpec.
 //!
-//! Contract: `docs/contracts/foundation/popover.md`
+//! Contract: `docs/contracts/components/popover.md`
 //! Uses overlay() to escape parent clip rects and render on top.
 
 use jetstream_runtime::ui_element::{self, JsEl};

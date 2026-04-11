@@ -1,6 +1,6 @@
 //! AlertDialog — Jetstream alert dialog backed by AlertDialogSpec.
 //!
-//! Contract: `docs/contracts/foundation/alert-dialog.md`
+//! Contract: `docs/contracts/components/alert-dialog.md`
 //! Uses overlay() with backdrop. Alert dialogs are not dismissible by backdrop click.
 
 use jetstream_runtime::game_ui::Color;

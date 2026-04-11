@@ -32,8 +32,8 @@ markdown file or preview panel to exist in isolation.
 
 ## Contract Lint Rule
 
-Component contracts under `docs/contracts/foundation/`,
-`docs/contracts/composites/`, and `docs/contracts/workstation/` must satisfy a
+Component contracts under `docs/contracts/components/`,
+`docs/contracts/components/`, and `docs/contracts/workstation/` must satisfy a
 shared lintable structure appropriate to the current seed-contract maturity.
 
 The current required baseline is:
@@ -75,8 +75,8 @@ Contract indexes are part of the docs completeness surface.
 The following files must stay aligned with the actual contract tree:
 
 - `docs/contracts/README.md`
-- `docs/contracts/foundation/README.md`
-- `docs/contracts/composites/README.md`
+- `docs/contracts/components/README.md`
+- `docs/contracts/components/README.md`
 - `docs/contracts/workstation/README.md`
 
 If a contract file exists but is omitted from its layer index, or a layer index

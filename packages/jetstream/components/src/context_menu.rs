@@ -1,6 +1,6 @@
 //! ContextMenu — Jetstream context menu backed by ContextMenuSpec.
 //!
-//! Contract: `docs/contracts/foundation/context-menu.md`
+//! Contract: `docs/contracts/components/context-menu.md`
 //! Uses overlay() for the menu panel.
 
 use jetstream_runtime::ui_element::{self, JsEl};

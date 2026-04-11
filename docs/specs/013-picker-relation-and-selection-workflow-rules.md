@@ -75,9 +75,9 @@ GPUI must recreate equivalent workflow structure and state in the native accessi
 
 ## Seed Evidence
 
-- `docs/contracts/composites/picker-shell.md`
-- `docs/contracts/composites/relation-picker.md`
-- `docs/contracts/composites/selection-summary.md`
+- `docs/contracts/components/picker-shell.md`
+- `docs/contracts/components/relation-picker.md`
+- `docs/contracts/components/selection-summary.md`
 - `packages/svelte/composites/src/PickerShell.svelte`
 - `packages/svelte/composites/src/RelationPicker.svelte`
 - `packages/svelte/composites/src/SelectionSummary.svelte`

@@ -55,7 +55,7 @@ type DocsNavigationEntry = {
   id: DocsSectionId;
   title: string;
   eyebrow: string;
-  layer: "foundation" | "composites" | "workstation" | "tokens";
+  layer: "components" | "workstation" | "tokens";
   packageName: string;
   contractRoot: string;
   summary: string;

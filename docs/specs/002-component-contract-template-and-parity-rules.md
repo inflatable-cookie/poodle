@@ -16,8 +16,8 @@ Poodle component contracts live under `docs/contracts/`.
 
 Each component must belong to exactly one of these contract layers:
 
-- `docs/contracts/foundation/`
-- `docs/contracts/composites/`
+- `docs/contracts/components/`
+- `docs/contracts/components/`
 - `docs/contracts/workstation/`
 
 The template source of truth lives at:
@@ -172,7 +172,7 @@ After first implementation:
 
 The first seed contracts proving this template are:
 
-- `docs/contracts/foundation/button.md`
+- `docs/contracts/components/button.md`
 - `docs/contracts/workstation/panel-surface.md`
 
 ## Next Task

@@ -1,6 +1,6 @@
 //! Drawer — Jetstream slide-out panel backed by DrawerSpec.
 //!
-//! Contract: `docs/contracts/foundation/drawer.md`
+//! Contract: `docs/contracts/components/drawer.md`
 //! Uses overlay() with backdrop, anchored to viewport edge.
 
 use jetstream_runtime::game_ui::Color;

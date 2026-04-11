@@ -1,6 +1,6 @@
 //! Icon — Jetstream icon component backed by IconSpec.
 //!
-//! Contract: `docs/contracts/foundation/icon.md`
+//! Contract: `docs/contracts/components/icon.md`
 //! Reference: `packages/svelte/primitives/src/Icon.svelte`
 //!
 //! Renders an SVG icon via the engine's `icon()` constructor. The icon is

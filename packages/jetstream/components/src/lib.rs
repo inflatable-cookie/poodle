@@ -3,7 +3,7 @@
 //! # CONTRACT ADHERENCE IS MANDATORY
 //!
 //! Every component in this crate MUST faithfully implement its contract from
-//! `docs/contracts/foundation/<component>.md`. Before writing or modifying any
+//! `docs/contracts/components/<component>.md`. Before writing or modifying any
 //! component, read the full contract. The contract defines:
 //!
 //! - **Anatomy**: which parts exist and how they nest

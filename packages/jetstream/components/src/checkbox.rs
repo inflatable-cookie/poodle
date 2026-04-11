@@ -1,6 +1,6 @@
 //! JsCheckbox — checkbox with indicator and label, backed by CheckboxSpec.
 //!
-//! Contract: `docs/contracts/foundation/checkbox.md`
+//! Contract: `docs/contracts/components/checkbox.md`
 //! Reference: `packages/svelte/primitives/src/Checkbox.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.

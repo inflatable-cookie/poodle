@@ -1,6 +1,6 @@
 //! Callout — Jetstream callout/alert component backed by CallOutSpec.
 //!
-//! Contract: `docs/contracts/foundation/callout.md`
+//! Contract: `docs/contracts/components/callout.md`
 //! Uses Color::mix for tinted fill and SVG icon per tone.
 
 use jetstream_runtime::game_ui::Color;

@@ -1,6 +1,6 @@
 //! ToggleGroup — grouped toggle selection control.
 //!
-//! Contract: `docs/contracts/foundation/toggle-group.md`
+//! Contract: `docs/contracts/components/toggle-group.md`
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

@@ -205,15 +205,15 @@ contract explicitly documents an approved delta and a remediation path.
 
 The first seeded contract examples proving this IA and substrate posture are:
 
-- `docs/contracts/foundation/box.md`
-- `docs/contracts/foundation/stack.md`
-- `docs/contracts/foundation/inline.md`
-- `docs/contracts/foundation/grid.md`
-- `docs/contracts/foundation/spacer.md`
-- `docs/contracts/foundation/surface.md`
-- `docs/contracts/foundation/separator.md`
-- `docs/contracts/foundation/scroll-shell.md`
-- `docs/contracts/foundation/button.md`
+- `docs/contracts/components/box.md`
+- `docs/contracts/components/stack.md`
+- `docs/contracts/components/inline.md`
+- `docs/contracts/components/grid.md`
+- `docs/contracts/components/spacer.md`
+- `docs/contracts/components/surface.md`
+- `docs/contracts/components/separator.md`
+- `docs/contracts/components/scroll-shell.md`
+- `docs/contracts/components/button.md`
 - `docs/contracts/workstation/panel-surface.md`
 
 ## Next Task

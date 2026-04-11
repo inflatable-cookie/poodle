@@ -1,6 +1,6 @@
 //! JsTriStateSwitch — ternary exclude/default/include switch backed by TriStateSwitchSpec.
 //!
-//! Contract: `docs/contracts/foundation/tri-state-switch.md`
+//! Contract: `docs/contracts/components/tri-state-switch.md`
 //! Reference: `packages/svelte/primitives/src/TriStateSwitch.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.

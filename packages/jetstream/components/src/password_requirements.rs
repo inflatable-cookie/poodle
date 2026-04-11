@@ -1,6 +1,6 @@
 //! JsPasswordRequirements — password policy checklist backed by PasswordRequirementsSpec.
 //!
-//! Contract: `docs/contracts/foundation/password-requirements.md`
+//! Contract: `docs/contracts/components/password-requirements.md`
 //! Reference: `packages/svelte/primitives/src/PasswordRequirements.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.

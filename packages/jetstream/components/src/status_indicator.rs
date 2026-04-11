@@ -1,6 +1,6 @@
 //! JsStatusIndicator — colored dot with optional label, backed by StatusIndicatorSpec.
 //!
-//! Contract: `docs/contracts/foundation/status-indicator.md`
+//! Contract: `docs/contracts/components/status-indicator.md`
 //! Reference: `packages/svelte/primitives/src/StatusIndicator.svelte`
 //!
 //! ALL dimensions from contract. ZERO hardcoded values.

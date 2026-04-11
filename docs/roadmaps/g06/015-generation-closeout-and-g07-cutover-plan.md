@@ -28,7 +28,7 @@ All 15 milestones completed:
 |-------|------|---------|
 | `poodle-tokens` | `packages/contracts/tokens/` | Token constants + typed module |
 | `poodle-primitives` | `packages/contracts/primitives/` | 64 primitive specs |
-| `poodle-composites` | `packages/contracts/composites/` | 41 composite specs |
+| `poodle-composites` | `packages/contracts/components/` | 41 composite specs |
 | `poodle-workstation` | `packages/contracts/workstation/` | 13 workstation specs |
 | `poodle-layout` | `packages/contracts/layout/` | Layout intent types |
 | `poodle-events` | `packages/contracts/events/` | Semantic event types |

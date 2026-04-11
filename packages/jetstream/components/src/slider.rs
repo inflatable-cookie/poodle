@@ -1,6 +1,6 @@
 //! Slider — Jetstream slider backed by SliderSpec.
 //!
-//! Contract: `docs/contracts/foundation/slider.md`
+//! Contract: `docs/contracts/components/slider.md`
 //! Reference: `packages/svelte/primitives/src/Slider.svelte`
 //!
 //! Uses on_drag for thumb interaction and Color::mix for track background.

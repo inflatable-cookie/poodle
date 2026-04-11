@@ -164,7 +164,7 @@ final substrate posture.
 
 - `docs/research/source-hubs/hub-bits.md`
 - `docs/research/translation-memos/tm-svelte-substrate.md`
-- `docs/contracts/foundation/README.md`
+- `docs/contracts/components/README.md`
 - `packages/svelte/primitives/README.md`
 
 ## Next Task

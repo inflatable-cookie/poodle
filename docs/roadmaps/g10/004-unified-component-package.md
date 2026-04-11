@@ -15,7 +15,7 @@ consumers, making this a safe restructuring.
 ## Goals
 
 - merge @poodle/svelte-primitives and @poodle/svelte-composites into @poodle/svelte
-- merge docs/contracts/foundation/ and docs/contracts/composites/ into docs/contracts/components/
+- merge docs/contracts/components/ and docs/contracts/components/ into docs/contracts/components/
 - unify preview app into a single Components section with tag-based filtering
 - merge Rust contract crates (packages/contracts/primitives and composites)
 - update all imports, registry, parity, lint expectations
@@ -39,10 +39,10 @@ consumers, making this a safe restructuring.
 
 ### Batch 4.2 — Merge Contract Directories
 
-- [ ] create docs/contracts/components/
-- [ ] move all contracts from foundation/ and composites/
-- [ ] update contract READMEs and seed list
-- [ ] update lint-docs.ts expectations
+- [x] create docs/contracts/components/
+- [x] move all contracts from foundation/ and composites/
+- [x] update contract READMEs and seed list
+- [x] update lint-docs.ts expectations
 
 ### Batch 4.3 — Unify Preview App
 
@@ -54,7 +54,7 @@ consumers, making this a safe restructuring.
 
 ### Batch 4.4 — Merge Rust Contract Crates
 
-- [ ] merge packages/contracts/primitives/ and packages/contracts/composites/ into packages/contracts/components/
+- [ ] merge packages/contracts/primitives/ and packages/contracts/components/ into packages/contracts/components/
 - [ ] update Cargo.toml workspace references
 - [ ] update GPUI and Jetstream adapter/component imports
 - [ ] verify cargo check passes

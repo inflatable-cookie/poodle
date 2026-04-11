@@ -81,10 +81,10 @@ need deliberate follow-up rather than incidental growth.
 ## Evidence
 
 - `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
-- `docs/contracts/foundation/calendar.md`
-- `docs/contracts/foundation/range-calendar.md`
-- `docs/contracts/foundation/date-picker.md`
-- `docs/contracts/foundation/date-range-picker.md`
+- `docs/contracts/components/calendar.md`
+- `docs/contracts/components/range-calendar.md`
+- `docs/contracts/components/date-picker.md`
+- `docs/contracts/components/date-range-picker.md`
 - `packages/svelte/primitives/README.md`
 
 ## Next Task

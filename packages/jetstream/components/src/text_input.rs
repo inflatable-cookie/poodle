@@ -1,6 +1,6 @@
 //! TextInput — Jetstream text input backed by TextInputSpec.
 //!
-//! Contract: `docs/contracts/foundation/text-input.md`
+//! Contract: `docs/contracts/components/text-input.md`
 //! Reference: `packages/svelte/primitives/src/TextInput.svelte`
 //!
 //! Uses focus ring and Color::mix for hover state.

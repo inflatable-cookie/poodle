@@ -21,7 +21,7 @@ A specimen that hand-codes colors, sizes, or layout instead of resolving them fr
 
 ### Contracts Are The Source of Truth — NO EXCEPTIONS
 
-**Before writing any component code, read the contract in `docs/contracts/foundation/<component>.md` from start to finish.** The contract is the authoritative specification. Every implementation decision must be traceable to a contract requirement. If something is not in the contract, do not invent it. If something IS in the contract, it MUST be implemented.
+**Before writing any component code, read the contract in `docs/contracts/components/<component>.md` from start to finish.** The contract is the authoritative specification. Every implementation decision must be traceable to a contract requirement. If something is not in the contract, do not invent it. If something IS in the contract, it MUST be implemented.
 
 The contract defines:
 - **Anatomy**: Which DOM/element parts exist (root, indicator, label, panel, etc.) — every part must be present
@@ -66,10 +66,10 @@ The **Svelte implementation** (`packages/svelte/primitives/src/`) is the proof r
 
 ## Development Workflow Rules
 
-- Any changes to Svelte components in `packages/svelte/primitives/src/` must be reflected in the corresponding contract file in `docs/contracts/foundation/`. For example, changes to `Button.svelte` should be mirrored in `docs/contracts/foundation/button.md`. Always keep component implementations and their contracts in sync.
+- Any changes to Svelte components in `packages/svelte/primitives/src/` must be reflected in the corresponding contract file in `docs/contracts/components/`. For example, changes to `Button.svelte` should be mirrored in `docs/contracts/components/button.md`. Always keep component implementations and their contracts in sync.
 
 - When implementing a Jetstream component:
-  1. **Read the full contract** (`docs/contracts/foundation/<component>.md`) — every section
+  1. **Read the full contract** (`docs/contracts/components/<component>.md`) — every section
   2. Cross-reference the **Svelte implementation** for visual reference
   3. Ensure `poodle_primitives` Spec struct has every prop and token method the contract requires
   4. Implement `js_<component>()` in `packages/jetstream/components/src/` resolving ALL values from tokens

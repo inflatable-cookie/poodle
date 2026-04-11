@@ -2416,9 +2416,9 @@
     {
       "sectionId": "form-suite",
       "title": "Form baseline and validation posture",
-      "layer": "foundation",
+      "layer": "components",
       "packageName": "@poodle/svelte-primitives",
-      "contractRoot": "docs/contracts/foundation/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Field wrappers, inputs, search, and action rows with validation and announcement posture.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2488,9 +2488,9 @@
     {
       "sectionId": "table-suite",
       "title": "Selection, sorting, and bulk actions",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Structured rows with visible-scope selection, sort semantics, row actions, and pagination context.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2536,9 +2536,9 @@
     {
       "sectionId": "browse-suite",
       "title": "Lists, grids, filters, and search depth",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Browse shells that separate ready, loading, empty, and no-results posture across list and grid views.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2584,9 +2584,9 @@
     {
       "sectionId": "detail-suite",
       "title": "Detail display, cards, headers, and navigation",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Readonly detail surfaces with breadcrumb context, page headers, cards, and section hierarchy.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2632,9 +2632,9 @@
     {
       "sectionId": "picker-suite",
       "title": "Picker, relation, and selection workflows",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Searchable attach-or-choose flows with selection summaries, commit/cancel rhythm, and keyboard traversal.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2680,9 +2680,9 @@
     {
       "sectionId": "media-suite",
       "title": "Preview framing, embeds, and fallback posture",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Media surfaces that keep framing, metadata, and fallback meaning explicit without owning playback engines.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2728,9 +2728,9 @@
     {
       "sectionId": "notification-suite",
       "title": "Banners, toasts, skeletons, and remediation",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-primitives + @poodle/svelte-composites",
-      "contractRoot": "docs/contracts/foundation/ + docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Persistent and transient state surfaces with loading, remediation, and announcement posture.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2776,9 +2776,9 @@
     {
       "sectionId": "command-suite",
       "title": "Palette search, grouped actions, and inline rediscovery",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "Modal and inline command discovery with grouped results, focus containment, and keyboard movement.",
       "harnessCoverage": {
         "contract": "automated",
@@ -2824,9 +2824,9 @@
     {
       "sectionId": "workspace-suite",
       "title": "Headers, dock orchestration, and workspace shell posture",
-      "layer": "composites",
+      "layer": "components",
       "packageName": "@poodle/svelte-composites",
-      "contractRoot": "docs/contracts/composites/",
+      "contractRoot": "docs/contracts/components/",
       "summary": "App and project headers, docks, tabs, split views, and host-owned layout snapshots.",
       "harnessCoverage": {
         "contract": "automated",

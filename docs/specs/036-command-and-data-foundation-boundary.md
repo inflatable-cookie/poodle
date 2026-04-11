@@ -78,9 +78,9 @@ feature, not a hole: it keeps the primitive layer honest.
 
 ## Evidence
 
-- `docs/contracts/foundation/table.md`
-- `docs/contracts/foundation/pagination.md`
-- `docs/contracts/composites/data-table.md`
+- `docs/contracts/components/table.md`
+- `docs/contracts/components/pagination.md`
+- `docs/contracts/components/data-table.md`
 - `docs/contracts/workstation/command-palette.md`
 - `packages/svelte/primitives/README.md`
 

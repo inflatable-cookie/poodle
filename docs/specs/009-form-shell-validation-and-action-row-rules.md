@@ -107,10 +107,10 @@ nodes and events.
 
 The first concrete evidence for this spec is:
 
-- `docs/contracts/foundation/field.md`
-- `docs/contracts/foundation/form-actions.md`
-- `docs/contracts/foundation/text-input.md`
-- `docs/contracts/foundation/search-field.md`
+- `docs/contracts/components/field.md`
+- `docs/contracts/components/form-actions.md`
+- `docs/contracts/components/text-input.md`
+- `docs/contracts/components/search-field.md`
 - `packages/svelte/primitives/src/Field.svelte`
 - `packages/svelte/primitives/src/TextInput.svelte`
 - `packages/svelte/primitives/src/SearchField.svelte`

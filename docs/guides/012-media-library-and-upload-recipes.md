@@ -170,11 +170,11 @@ multiple apps.
 
 ## Related Contracts
 
-- [MediaPicker](../contracts/composites/media-picker.md)
-- [MediaBrowsePanel](../contracts/composites/media-browse-panel.md)
-- [MediaUploadStatusPanel](../contracts/composites/media-upload-status-panel.md)
-- [MediaPreview](../contracts/composites/media-preview.md)
-- [MediaThumbnail](../contracts/composites/media-thumbnail.md)
+- [MediaPicker](../contracts/components/media-picker.md)
+- [MediaBrowsePanel](../contracts/components/media-browse-panel.md)
+- [MediaUploadStatusPanel](../contracts/components/media-upload-status-panel.md)
+- [MediaPreview](../contracts/components/media-preview.md)
+- [MediaThumbnail](../contracts/components/media-thumbnail.md)
 
 ## Next Task
 

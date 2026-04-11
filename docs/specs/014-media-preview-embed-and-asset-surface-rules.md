@@ -64,9 +64,9 @@ GPUI must recreate equivalent meaning in the native accessibility tree even wher
 
 ## Seed Evidence
 
-- `docs/contracts/composites/media-thumbnail.md`
-- `docs/contracts/composites/media-preview.md`
-- `docs/contracts/composites/embed-shell.md`
+- `docs/contracts/components/media-thumbnail.md`
+- `docs/contracts/components/media-preview.md`
+- `docs/contracts/components/embed-shell.md`
 - `packages/svelte/composites/src/MediaThumbnail.svelte`
 - `packages/svelte/composites/src/MediaPreview.svelte`
 - `packages/svelte/composites/src/EmbedShell.svelte`
