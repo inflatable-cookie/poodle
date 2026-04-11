@@ -91,23 +91,25 @@
     />
   </div>
 
-  <div class="display-controls__group display-controls__group--probes">
+  <div class="display-controls__group">
     <Eyebrow>State probes</Eyebrow>
-    <Checkbox
-      checked={disabled}
-      label="Disabled"
-      on:checkedChange={(event) => onDisabledChange(event.detail.checked)}
-    />
-    <Checkbox
-      checked={invalid}
-      label="Invalid"
-      on:checkedChange={(event) => onInvalidChange(event.detail.checked)}
-    />
-    <Checkbox
-      checked={busy}
-      label="Busy"
-      on:checkedChange={(event) => onBusyChange(event.detail.checked)}
-    />
+    <div class="display-controls__probes">
+      <Checkbox
+        checked={disabled}
+        label="Disabled"
+        on:checkedChange={(event) => onDisabledChange(event.detail.checked)}
+      />
+      <Checkbox
+        checked={invalid}
+        label="Invalid"
+        on:checkedChange={(event) => onInvalidChange(event.detail.checked)}
+      />
+      <Checkbox
+        checked={busy}
+        label="Busy"
+        on:checkedChange={(event) => onBusyChange(event.detail.checked)}
+      />
+    </div>
   </div>
 </div>
 
@@ -128,10 +130,9 @@
     gap: 0.375rem;
   }
 
-  .display-controls__group--probes {
+  .display-controls__probes {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 </style>
