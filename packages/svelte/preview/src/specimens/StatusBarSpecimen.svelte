@@ -4,8 +4,8 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<SpecimenLayout bareVariants>
-  <SpecimenGroup bare label="Default (no chrome)">
+<SpecimenLayout>
+  <SpecimenGroup label="Default (no chrome)">
     <StatusBar>
       <svelte:fragment slot="leading">
         <span class="status-item">main</span>
@@ -19,7 +19,7 @@
     </StatusBar>
   </SpecimenGroup>
 
-  <SpecimenGroup bare label="With chrome">
+  <SpecimenGroup label="With chrome">
     <StatusBar chrome>
       <svelte:fragment slot="leading">
         <span class="status-item">main</span>
@@ -33,7 +33,7 @@
     </StatusBar>
   </SpecimenGroup>
 
-  <SpecimenGroup bare label="Summary only">
+  <SpecimenGroup label="Summary only">
     <StatusBar summary="3 items selected" />
   </SpecimenGroup>
 
