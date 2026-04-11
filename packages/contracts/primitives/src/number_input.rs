@@ -9,6 +9,22 @@ pub struct NumberInputSpec {
     pub max: f64,
     pub step: f64,
     pub is_disabled: bool,
+    /// Read-only display — value can't be edited but is not visually
+    /// dimmed the way disabled is.
+    pub is_read_only: bool,
+    /// When true, the field is required for form submission.
+    pub is_required: bool,
+    /// Number of decimal places to display. `None` means "use the
+    /// value as-is". Matches Svelte `precision`.
+    pub precision: Option<u8>,
+    /// Placeholder text shown when value is empty / at default.
+    pub placeholder: Option<String>,
+    /// Optional prefix label rendered inside the left edge of the
+    /// field (e.g. "$").
+    pub prefix: Option<String>,
+    /// Optional suffix label rendered inside the right edge of the
+    /// field (e.g. "kg").
+    pub suffix: Option<String>,
     pub validation_state: ValidationState,
     pub aria_label: Option<String>,
     pub size: ControlSize,
@@ -24,6 +40,12 @@ impl Default for NumberInputSpec {
             max: f64::INFINITY,
             step: 1.0,
             is_disabled: false,
+            is_read_only: false,
+            is_required: false,
+            precision: None,
+            placeholder: None,
+            prefix: None,
+            suffix: None,
             validation_state: ValidationState::None,
             aria_label: None,
             size: ControlSize::Md,
@@ -54,6 +76,45 @@ impl NumberInputSpec {
     pub fn with_step(mut self, step: f64) -> Self {
         self.step = step;
         self
+    }
+
+    pub fn with_read_only(mut self, is_read_only: bool) -> Self {
+        self.is_read_only = is_read_only;
+        self
+    }
+
+    pub fn with_required(mut self, is_required: bool) -> Self {
+        self.is_required = is_required;
+        self
+    }
+
+    pub fn with_precision(mut self, precision: u8) -> Self {
+        self.precision = Some(precision);
+        self
+    }
+
+    pub fn with_placeholder(mut self, placeholder: impl Into<String>) -> Self {
+        self.placeholder = Some(placeholder.into());
+        self
+    }
+
+    pub fn with_prefix(mut self, prefix: impl Into<String>) -> Self {
+        self.prefix = Some(prefix.into());
+        self
+    }
+
+    pub fn with_suffix(mut self, suffix: impl Into<String>) -> Self {
+        self.suffix = Some(suffix.into());
+        self
+    }
+
+    /// Format the current value honouring `precision`. Caller uses
+    /// this for the visible text.
+    pub fn formatted_value(&self) -> String {
+        match self.precision {
+            Some(p) => format!("{:.*}", p as usize, self.value),
+            None => format!("{}", self.value),
+        }
     }
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {

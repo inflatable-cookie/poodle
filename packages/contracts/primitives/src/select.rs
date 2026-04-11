@@ -64,6 +64,13 @@ pub struct SelectSpec {
     pub menu_min_width: Option<String>,
     /// When true, shows a clear button when a value is selected (custom dropdown only).
     pub clearable: bool,
+    /// When true, the select is required for form submission. Surfaces
+    /// as an Invalid validation state when left unset on submit.
+    /// Matches Svelte `required`.
+    pub is_required: bool,
+    /// Current validation state. Drives border/focus-ring colour the
+    /// same way TextInput does.
+    pub validation_state: crate::types::ValidationState,
 }
 
 impl Default for SelectSpec {
@@ -88,6 +95,8 @@ impl Default for SelectSpec {
             variant: SelectVariant::default(),
             menu_min_width: None,
             clearable: false,
+            is_required: false,
+            validation_state: crate::types::ValidationState::None,
         }
     }
 }
@@ -214,6 +223,16 @@ impl SelectSpec {
     /// Enable the clear button when a value is selected.
     pub fn with_clearable(mut self, clearable: bool) -> Self {
         self.clearable = clearable;
+        self
+    }
+
+    pub fn with_required(mut self, is_required: bool) -> Self {
+        self.is_required = is_required;
+        self
+    }
+
+    pub fn with_validation_state(mut self, state: crate::types::ValidationState) -> Self {
+        self.validation_state = state;
         self
     }
 }

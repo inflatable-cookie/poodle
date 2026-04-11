@@ -1,14 +1,23 @@
-use crate::types::{ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct IconButtonSpec {
     pub variant: ButtonVariant,
+    /// Tone applied to the button fill/foreground. Mirrors
+    /// `ButtonSpec.tone` — Default / Danger etc.
+    pub tone: ButtonTone,
     pub size: ControlSize,
     pub icon: Option<String>,
     pub aria_label: Option<String>,
     pub is_disabled: bool,
     pub is_loading: bool,
     pub is_pressed: Option<bool>,
+    /// Optional tooltip text shown on hover. Pairs with
+    /// `tooltip_placement` for positioning. GPUI doesn't have a
+    /// first-class tooltip primitive yet; this field is carried
+    /// for consumer wiring.
+    pub tooltip: Option<String>,
+    pub tooltip_placement: OverlayPlacement,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
 }
@@ -17,12 +26,15 @@ impl Default for IconButtonSpec {
     fn default() -> Self {
         Self {
             variant: ButtonVariant::Ghost,
+            tone: ButtonTone::Default,
             size: ControlSize::Md,
             icon: None,
             aria_label: None,
             is_disabled: false,
             is_loading: false,
             is_pressed: None,
+            tooltip: None,
+            tooltip_placement: OverlayPlacement::Bottom,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
         }
@@ -36,6 +48,21 @@ impl IconButtonSpec {
 
     pub fn with_variant(mut self, variant: ButtonVariant) -> Self {
         self.variant = variant;
+        self
+    }
+
+    pub fn with_tone(mut self, tone: ButtonTone) -> Self {
+        self.tone = tone;
+        self
+    }
+
+    pub fn with_tooltip(mut self, tooltip: impl Into<String>) -> Self {
+        self.tooltip = Some(tooltip.into());
+        self
+    }
+
+    pub fn with_tooltip_placement(mut self, placement: OverlayPlacement) -> Self {
+        self.tooltip_placement = placement;
         self
     }
 
