@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_composites::CardRadioGroupSpec;
 use poodle_primitives::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{color_mix, resolve_color, resolve_radius, resolve_opacity};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,
@@ -54,6 +54,7 @@ impl IntoElement for CardRadioGroup {
         let accent = resolve_color(theme, "color.accent.base");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let body_size = px(font_size);
+        let label_size = resolve_px(theme, "typography.label.size");
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
         // Selected card: accent-tinted background (color-mix accent 12%)
@@ -110,7 +111,7 @@ impl IntoElement for CardRadioGroup {
             if let Some(ref description) = option.description {
                 content = content.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(description.clone()),
                 );

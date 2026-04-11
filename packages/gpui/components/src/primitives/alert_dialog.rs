@@ -22,6 +22,9 @@ pub struct AlertDialog {
     border_color: Hsla,
     body_size: Pixels,
     heading_size: Pixels,
+    header_gap: Pixels,
+    button_pad_x: Pixels,
+    button_pad_y: Pixels,
     brand_raised: bool,
     on_confirm: Option<Box<dyn Fn(&mut Window, &mut App)>>,
     on_cancel: Option<Box<dyn Fn(&mut Window, &mut App)>>,
@@ -64,6 +67,9 @@ impl AlertDialog {
             border_color: resolve_color(theme, spec.border_token()),
             body_size: body_font,
             heading_size: resolve_px(theme, "typography.heading.size"),
+            header_gap: resolve_px(theme, "space.inline.sm"),
+            button_pad_x: resolve_px(theme, "space.inline.md"),
+            button_pad_y: resolve_px(theme, "space.inline.sm"),
             brand_raised: theme.brand_raised,
             on_confirm: None,
             on_cancel: None,
@@ -108,7 +114,7 @@ impl IntoElement for AlertDialog {
         let mut header = div()
             .flex()
             .flex_col()
-            .gap(px(4.0))
+            .gap(self.header_gap)
             .child(
                 div()
                     .text_size(self.heading_size)
@@ -129,8 +135,8 @@ impl IntoElement for AlertDialog {
         let cancel_btn = div()
             .id("alert-dialog-cancel")
             .cursor_pointer()
-            .px(px(12.0))
-            .py(px(6.0))
+            .px(self.button_pad_x)
+            .py(self.button_pad_y)
             .rounded(self.button_radius)
             .text_size(self.body_size)
             .font_weight(FontWeight::MEDIUM)
@@ -142,8 +148,8 @@ impl IntoElement for AlertDialog {
         let mut confirm_btn = div()
             .id("alert-dialog-confirm")
             .cursor_pointer()
-            .px(px(12.0))
-            .py(px(6.0))
+            .px(self.button_pad_x)
+            .py(self.button_pad_y)
             .rounded(self.button_radius)
             .text_size(self.body_size)
             .font_weight(FontWeight::MEDIUM);

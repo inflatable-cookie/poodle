@@ -109,6 +109,8 @@ impl IntoElement for Menu {
         let separator_color = Hsla { a: border_subtle.a * 0.48, ..border_subtle };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let caption_size = resolve_px(theme, "typography.caption.size");
 
         // Contract: min-width 14rem, padding 0.25rem
         let mut menu = div()
@@ -260,7 +262,7 @@ impl IntoElement for Menu {
             }
 
             // Label + checkbox indicator
-            let mut label_row = div().flex().items_center().gap(px(6.0));
+            let mut label_row = div().flex().items_center().gap(gap_sm);
             if is_checked {
                 label_row = label_row.child(
                     Icon::from_spec(
@@ -277,7 +279,7 @@ impl IntoElement for Menu {
             if let Some(ref shortcut) = item.shortcut_label {
                 row = row.child(
                     div()
-                        .text_size(px(11.0)) // 0.6875rem
+                        .text_size(caption_size)
                         .text_color(text_secondary)
                         .child(shortcut.clone()),
                 );
