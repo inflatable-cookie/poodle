@@ -1,9 +1,11 @@
 <script lang="ts">
   export let summary: string | null = null;
   export let ariaLabel: string | null = null;
+  /** When true, renders with border-top and background. */
+  export let chrome = false;
 </script>
 
-<footer class="status-bar" aria-label={ariaLabel ?? summary ?? "Status"}>
+<footer class="status-bar" class:status-bar--chrome={chrome} aria-label={ariaLabel ?? summary ?? "Status"}>
   <div class="status-bar__leading">
     {#if $$slots.leading}
       <slot name="leading" />
@@ -27,11 +29,14 @@
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
     padding: 0.375rem var(--poodle-space-panel-x);
-    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
+  }
+
+  .status-bar--chrome {
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
+    background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
   .status-bar__leading,
