@@ -35,11 +35,11 @@ impl BlockEditor {
 }
 
 /// Build a small toolbar icon button (20x20, rounded, hover-bg).
-fn toolbar_icon(theme: &GpuiThemeProvider, icon_name: &str, muted: Hsla, hover_bg: Hsla) -> Div {
+fn toolbar_icon(theme: &GpuiThemeProvider, icon_name: &str, muted: Hsla, hover_bg: Hsla, radius: Pixels) -> Div {
     div()
         .cursor(CursorStyle::PointingHand)
         .flex().items_center().justify_center()
-        .w(px(20.0)).h(px(20.0)).rounded(px(4.0))
+        .w(px(20.0)).h(px(20.0)).rounded(radius)
         .hover(move |s| s.bg(hover_bg))
         .child(
             Icon::from_spec(
@@ -62,6 +62,12 @@ impl IntoElement for BlockEditor {
         let border = resolve_color(theme, self.spec.border_token());
         let gap = resolve_px(theme, self.spec.block_gap_token());
         let radius = resolve_radius(theme, "radius.surface");
+        let radius_control = resolve_radius(theme, "radius.control");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let body_size = resolve_px(theme, "typography.body.size");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
         let muted = resolve_color(theme, "color.text.secondary");
         let text_primary = resolve_color(theme, "color.text.primary");
         let hover_bg = resolve_color(theme, "color.background.elevated");
@@ -80,11 +86,11 @@ impl IntoElement for BlockEditor {
                     .unwrap_or_else(|| block.block_type.clone());
                 div().flex().flex_col().gap(px(2.0))
                     .child(
-                        div().text_size(px(11.0)).text_color(muted)
+                        div().text_size(caption_size).text_color(muted)
                             .child(type_label)
                     )
                     .child(
-                        div().text_size(px(14.0)).text_color(text_primary)
+                        div().text_size(body_size).text_color(text_primary)
                             .child(block.content.clone())
                     )
                     .into_any_element()
@@ -104,9 +110,9 @@ impl IntoElement for BlockEditor {
         // Wrap each child block with a hover-revealed toolbar
         for (i, child) in children.into_iter().enumerate() {
             let block_row = div()
-                .flex().flex_row().items_start().gap(px(4.0))
+                .flex().flex_row().items_start().gap(gap_sm)
                 .group("block-row")
-                .py(px(4.0))
+                .py(gap_sm)
                 // Left toolbar: drag handle, block type indicator, move up, move down
                 .child(
                     div()
@@ -114,21 +120,21 @@ impl IntoElement for BlockEditor {
                         .opacity(0.0)
                         .group_hover("block-row", |s| s.opacity(1.0))
                         // Drag handle
-                        .child(toolbar_icon(theme,"grip-vertical", muted, hover_bg))
+                        .child(toolbar_icon(theme,"grip-vertical", muted, hover_bg, radius_control))
                         // Block type indicator (generic block icon)
-                        .child(toolbar_icon(theme,"square", muted, hover_bg))
+                        .child(toolbar_icon(theme,"square", muted, hover_bg, radius_control))
                         // Separator
                         .child(
                             div().w(px(1.0)).h(px(14.0)).bg(separator).mx(px(2.0))
                         )
                         // Move up (disabled style if first block)
                         .child({
-                            let btn = toolbar_icon(theme,"chevron-up", muted, hover_bg);
+                            let btn = toolbar_icon(theme,"chevron-up", muted, hover_bg, radius_control);
                             if i == 0 { btn.opacity(0.35) } else { btn }
                         })
                         // Move down (disabled style if last block)
                         .child({
-                            let btn = toolbar_icon(theme,"chevron-down", muted, hover_bg);
+                            let btn = toolbar_icon(theme,"chevron-down", muted, hover_bg, radius_control);
                             if i == block_count - 1 { btn.opacity(0.35) } else { btn }
                         })
                 )
@@ -141,9 +147,9 @@ impl IntoElement for BlockEditor {
                         .opacity(0.0)
                         .group_hover("block-row", |s| s.opacity(1.0))
                         // Add block below
-                        .child(toolbar_icon(theme,"plus", muted, hover_bg))
+                        .child(toolbar_icon(theme,"plus", muted, hover_bg, radius_control))
                         // Remove block
-                        .child(toolbar_icon(theme,"trash-2", muted, hover_bg))
+                        .child(toolbar_icon(theme,"trash-2", muted, hover_bg, radius_control))
                 );
             el = el.child(block_row);
         }
@@ -151,10 +157,10 @@ impl IntoElement for BlockEditor {
         // "Add block" button at the bottom
         el = el.child(
             div()
-                .flex().flex_row().items_center().justify_center().gap(px(6.0))
-                .py(px(8.0))
+                .flex().flex_row().items_center().justify_center().gap(gap_md)
+                .py(gap_md)
                 .cursor(CursorStyle::PointingHand)
-                .rounded(px(4.0))
+                .rounded(radius_control)
                 .border_1().border_color(separator)
                 .hover(|s| s.bg(hover_bg))
                 .child(
@@ -164,7 +170,7 @@ impl IntoElement for BlockEditor {
                     ).with_color(muted)
                 )
                 .child(
-                    div().text_size(px(12.0)).text_color(muted).child("Add block")
+                    div().text_size(label_size).text_color(muted).child("Add block")
                 )
         );
 

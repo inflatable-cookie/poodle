@@ -7,7 +7,7 @@ use poodle_primitives::{
 };
 
 use super::icon::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI pill component backed by `PillSpec`.
 pub struct Pill {
@@ -143,7 +143,7 @@ impl IntoElement for Pill {
 
         let radius = resolve_radius(theme, "radius.pill");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
-        let inline_gap = px(4.0);
+        let inline_gap = resolve_px(theme, "space.inline.sm");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         // ── Font weight ──────────────────────────────────────────

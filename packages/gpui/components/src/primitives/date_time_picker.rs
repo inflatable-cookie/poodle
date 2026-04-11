@@ -91,6 +91,7 @@ impl IntoElement for DateTimePicker {
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = resolve_px(theme, "typography.label.size");
+        let caption_size = resolve_px(theme, "typography.caption.size");
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
         let value = spec.current_value();
@@ -180,7 +181,7 @@ impl IntoElement for DateTimePicker {
         let mut container = div()
             .flex()
             .flex_col()
-            .gap(px(4.0))
+            .gap(inline_gap)
             .child(trigger);
 
         if is_open {
@@ -200,7 +201,7 @@ impl IntoElement for DateTimePicker {
                         .flex_1()
                         .flex()
                         .justify_center()
-                        .text_size(px(11.0))
+                        .text_size(caption_size)
                         .text_color(text_secondary)
                         .child(*day),
                 );
@@ -219,7 +220,7 @@ impl IntoElement for DateTimePicker {
                             .items_center()
                             .justify_center()
                             .rounded(control_radius)
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(text_secondary)
                             .child("—"),
                     );
@@ -287,7 +288,7 @@ impl IntoElement for DateTimePicker {
                 .justify_between()
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(accent)
                         .cursor_pointer()
                         .child("Today"),
@@ -301,7 +302,7 @@ impl IntoElement for DateTimePicker {
                         .flex()
                         .items_center()
                         .justify_center()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(elevated_bg)
                         .cursor_pointer()
                         .child("Done"),

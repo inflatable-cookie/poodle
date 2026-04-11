@@ -237,6 +237,9 @@ impl IntoElement for SplitButton {
             let menu_border = resolve_color(theme, "color.border.default");
             let menu_radius = resolve_radius(theme, "radius.surface");
             let item_text = resolve_color(theme, "color.text.primary");
+            let radius_control = resolve_radius(theme, "radius.control");
+            let gap_sm = resolve_px(theme, "space.inline.sm");
+            let gap_md = resolve_px(theme, "space.inline.md");
 
             let mut menu = div()
                 .bg(menu_fill).border_1().border_color(menu_border)
@@ -255,16 +258,16 @@ impl IntoElement for SplitButton {
                     },
                 ])
                 .min_w(px(192.0)) // 12rem
-                .py(px(4.0)).mt(px(4.0))
+                .py(gap_sm).mt(gap_sm)
                 .flex().flex_col();
 
             for item in &spec.items {
                 match item {
                     SplitMenuItem::Action { label, is_disabled, .. } => {
                         let mut item_el = div()
-                            .px(px(8.0)).py(px(6.0))
+                            .px(gap_md).py(px(6.0))
                             .text_size(body_size).text_color(item_text)
-                            .rounded(px(4.0));
+                            .rounded(radius_control);
                         if !is_disabled {
                             let accent = resolve_color(theme, "color.accent.base");
                             let hover_bg = Hsla { a: 0.08, ..accent };
@@ -275,7 +278,7 @@ impl IntoElement for SplitButton {
                         menu = menu.child(item_el.child(label.clone()));
                     }
                     SplitMenuItem::Separator => {
-                        menu = menu.child(div().h(px(1.0)).mx(px(4.0)).my(px(4.0)).bg(separator_color));
+                        menu = menu.child(div().h(px(1.0)).mx(gap_sm).my(gap_sm).bg(separator_color));
                     }
                 }
             }

@@ -6,7 +6,7 @@ use poodle_primitives::{CalendarMode, CalendarSpec, CalendarWeekStart, ControlDe
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
 const WEEKDAYS_SUN: [&str; 7] = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -193,6 +193,8 @@ impl IntoElement for Calendar {
         let cal_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let control_radius = resolve_radius(theme, "radius.control");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
 
         let accent = resolve_color(theme, "color.accent.base");
         let text_primary = resolve_color(theme, "color.text.primary");
@@ -282,7 +284,7 @@ impl IntoElement for Calendar {
             .focusable()
             .flex()
             .flex_col()
-            .gap(px(4.0))
+            .gap(gap_sm)
             .p(px(12.0))
             .w(calendar_width)
             .rounded(surface_radius)
@@ -367,7 +369,7 @@ impl IntoElement for Calendar {
             .flex()
             .items_center()
             .justify_between()
-            .py(px(4.0))
+            .py(gap_sm)
             .child(prev_btn)
             .child(
                 div()
@@ -460,7 +462,7 @@ impl IntoElement for Calendar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .text_size(px(11.0))
+                    .text_size(caption_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_secondary)
                     .child(WEEKDAYS_SUN[idx].to_uppercase()),
