@@ -6,7 +6,7 @@ use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, Semanti
 use poodle_composites::LogListSpec;
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A single log entry for display in the LogList.
 ///
@@ -168,6 +168,10 @@ impl IntoElement for LogList {
         let border_color = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
+        let radius_control = resolve_radius(theme, "radius.control");
+        let label_token_size = resolve_px(theme, "typography.label.size");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
 
         // ── Toolbar ──────────────────────────────────────────────
         let filter_icon = Icon::from_spec(
@@ -200,16 +204,16 @@ impl IntoElement for LogList {
             .cursor_pointer()
             .flex()
             .items_center()
-            .gap(px(4.0))
-            .rounded(px(4.0))
-            .px(px(4.0))
+            .gap(gap_sm)
+            .rounded(radius_control)
+            .px(gap_sm)
             .py(px(2.0))
             .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
             .focus(move |s| s.border_color(resolve_color(theme, "color.accent.focusRing")))
             .child(filter_icon)
             .child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_token_size)
                     .text_color(text_secondary)
                     .child(filter_label),
             );
@@ -228,16 +232,16 @@ impl IntoElement for LogList {
             .flex()
             .items_center()
             .justify_end()
-            .gap(px(4.0))
-            .rounded(px(4.0))
-            .px(px(4.0))
+            .gap(gap_sm)
+            .rounded(radius_control)
+            .px(gap_sm)
             .py(px(2.0))
             .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
             .focus(move |s| s.border_color(resolve_color(theme, "color.accent.focusRing")))
             .child(search_icon)
             .child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_token_size)
                     .text_color(text_secondary)
                     .child("Search logs\u{2026}"),
             );
@@ -276,17 +280,17 @@ impl IntoElement for LogList {
             let badge_fill = resolve_color(theme, entry.level.badge_fill_token());
 
             let badge = div()
-                .px(px(4.0))
+                .px(gap_sm)
                 .py(px(1.0))
-                .rounded(px(3.0))
+                .rounded(radius_control)
                 .bg(badge_fill.opacity(0.15))
                 .text_color(badge_fill)
-                .text_size(px(10.0))
+                .text_size(caption_size)
                 .font_weight(FontWeight::BOLD)
                 .child(entry.level.label());
 
             let timestamp = div()
-                .text_size(px(11.0))
+                .text_size(caption_size)
                 .text_color(text_secondary)
                 .min_w(px(70.0))
                 .child(entry.timestamp.clone());
@@ -314,9 +318,9 @@ impl IntoElement for LogList {
                 let mut row = div()
                     .flex()
                     .items_center()
-                    .gap(px(4.0))
+                    .gap(gap_sm)
                     .pl(px(70.0 + 8.0)) // align under the message column
-                    .text_size(px(11.0))
+                    .text_size(caption_size)
                     .text_color(text_secondary);
 
                 if let Some(ref name) = entry.actor_name {

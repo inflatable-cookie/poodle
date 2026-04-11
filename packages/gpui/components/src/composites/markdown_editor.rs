@@ -6,7 +6,7 @@ use poodle_composites::MarkdownEditorSpec;
 use poodle_primitives::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct MarkdownEditor {
     spec: MarkdownEditorSpec,
@@ -55,6 +55,9 @@ impl IntoElement for MarkdownEditor {
         let border = resolve_color(&self.theme, self.spec.border_token());
         let toolbar_fill = resolve_color(&self.theme, self.spec.toolbar_fill_token());
         let radius = resolve_radius(&self.theme, "radius.surface");
+        let radius_control = resolve_radius(&self.theme, "radius.control");
+        let label_size = resolve_px(&self.theme, "typography.label.size");
+        let gap_sm = resolve_px(&self.theme, "space.inline.sm");
         let text_color = resolve_color(&self.theme, "color.text.primary");
         let muted = resolve_color(&self.theme, "color.text.secondary");
         let hover_bg = resolve_color(&self.theme, "color.bg.hover");
@@ -68,7 +71,7 @@ impl IntoElement for MarkdownEditor {
         let toolbar_btn = |icon_name: &str, theme: &GpuiThemeProvider| -> Div {
             div()
                 .flex().items_center().justify_center()
-                .w(px(28.0)).h(px(24.0)).rounded(px(4.0))
+                .w(px(28.0)).h(px(24.0)).rounded(radius_control)
                 .cursor(CursorStyle::PointingHand)
                 .hover(|s| s.bg(hover_bg))
                 .child(
@@ -98,7 +101,7 @@ impl IntoElement for MarkdownEditor {
 
         // Toolbar separator
         let separator = || -> Div {
-            div().w(px(1.0)).h(px(16.0)).bg(border).mx(px(4.0))
+            div().w(px(1.0)).h(px(16.0)).bg(border).mx(gap_sm)
         };
 
         // Helper: mode switcher button
@@ -107,8 +110,8 @@ impl IntoElement for MarkdownEditor {
             let id = SharedString::from(format!("poodle-md-mode-{}", mode_val));
             let mut btn = div()
                 .id(id)
-                .px(px(8.0)).py(px(2.0)).rounded(px(3.0))
-                .text_size(px(12.0))
+                .px(gap_sm).py(px(2.0)).rounded(radius_control)
+                .text_size(label_size)
                 .cursor(CursorStyle::PointingHand)
                 .child(label.to_string());
             if is_active {
@@ -130,7 +133,7 @@ impl IntoElement for MarkdownEditor {
 
         // Toolbar
         el = el.child(
-            div().bg(toolbar_fill).px(px(8.0)).py(px(4.0))
+            div().bg(toolbar_fill).px(gap_sm).py(px(4.0))
                 .flex().flex_row().items_center().gap(px(2.0))
                 .border_b_1().border_color(border)
                 // Text formatting icons
@@ -150,7 +153,7 @@ impl IntoElement for MarkdownEditor {
                 .child(
                     div().flex().flex_row().gap(px(2.0))
                         .px(px(2.0)).py(px(2.0))
-                        .rounded(px(4.0))
+                        .rounded(radius_control)
                         .child(mode_btn("Edit", mode == "edit", "edit", &on_mode_rc))
                         .child(mode_btn("Split", mode == "split", "split", &on_mode_rc))
                         .child(mode_btn("Preview", mode == "preview", "preview", &on_mode_rc))

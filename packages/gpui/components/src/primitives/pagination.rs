@@ -200,7 +200,7 @@ impl Pagination {
             .border_1()
             .border_color(border)
             .rounded(radius)
-            .text_size(px(12.0))
+            .text_size(crate::theme_ext::resolve_px(&self.theme, "typography.label.size"))
             .text_color(text_color)
             .focus(move |s| s.border_color(focus_ring))
             .when(disabled, |el| {
@@ -316,6 +316,10 @@ impl IntoElement for Pagination {
         let text_secondary = crate::theme_ext::resolve_color(theme, "color.text.secondary");
         let border_color = crate::theme_ext::resolve_color(theme, "color.border.subtle");
         let surface_bg = crate::theme_ext::resolve_color(theme, "color.background.surface");
+        let label_size = crate::theme_ext::resolve_px(theme, "typography.label.size");
+        let radius_control = crate::theme_ext::resolve_radius(theme, "radius.control");
+        let gap_sm = crate::theme_ext::resolve_px(theme, "space.inline.sm");
+        let gap_md = crate::theme_ext::resolve_px(theme, "space.inline.md");
 
         // Contract: root gap 0.375rem, pages gap 0.25rem
         let mut root = div()
@@ -323,7 +327,7 @@ impl IntoElement for Pagination {
             .flex_row()
             .flex_wrap()
             .items_center()
-            .gap(px(6.0)); // 0.375rem
+            .gap(gap_md); // 0.375rem
 
         // Standalone mode strips the panel chrome.
         if !self.spec.standalone {
@@ -331,19 +335,19 @@ impl IntoElement for Pagination {
                 .bg(surface_bg)
                 .border_1()
                 .border_color(border_color)
-                .rounded(px(6.0))
+                .rounded(radius_control)
                 .px(px(12.0))
                 .py(px(8.0));
         }
 
         // Info text block (shown on simple/full variants).
         if self.spec.info_text.is_some() || self.spec.page_size.is_some() {
-            let mut info = div().flex().items_center().gap(px(6.0));
+            let mut info = div().flex().items_center().gap(gap_md);
 
             if let Some(ref text) = self.spec.info_text {
                 info = info.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(text.clone()),
                 );
@@ -352,7 +356,7 @@ impl IntoElement for Pagination {
             if let Some(page_size) = self.spec.page_size {
                 info = info.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(format!("{page_size} per page")),
                 );
@@ -376,7 +380,7 @@ impl IntoElement for Pagination {
                 .flex()
                 .flex_row()
                 .items_center()
-                .gap(px(4.0)); // 0.25rem
+                .gap(gap_sm); // 0.25rem
 
             for item in &visible {
                 match item {
@@ -394,7 +398,7 @@ impl IntoElement for Pagination {
             // Simple variant: show "Page X of Y" text between prev/next.
             root = root.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .child(format!("Page {} of {}", current_page, self.spec.total_pages)),
             );
@@ -420,10 +424,10 @@ impl IntoElement for Pagination {
                 div()
                     .flex()
                     .items_center()
-                    .gap(px(6.0))
+                    .gap(gap_md)
                     .child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(text_secondary)
                             .child("Go to"),
                     )
@@ -431,13 +435,13 @@ impl IntoElement for Pagination {
                         div()
                             .w(px(48.0))
                             .h(px(24.0))
-                            .px(px(6.0))
+                            .px(gap_md)
                             .border_1()
                             .border_color(border_color)
-                            .rounded(px(4.0))
+                            .rounded(radius_control)
                             .flex()
                             .items_center()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .child(format!("{current_page}")),
                     ),
             );

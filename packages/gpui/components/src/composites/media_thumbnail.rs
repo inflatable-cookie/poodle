@@ -7,7 +7,7 @@ use poodle_composites::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
 use poodle_primitives::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::primitives::Spinner;
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI media thumbnail component backed by `MediaThumbnailSpec`.
 ///
@@ -68,6 +68,11 @@ impl IntoElement for MediaThumbnail {
         let border = resolve_color(theme, "color.border.subtle");
         let accent = resolve_color(theme, "color.accent.base");
         let body_size = resolve_px(theme, "typography.body.size");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let radius_control = resolve_radius(theme, "radius.control");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
 
         // Aspect ratio sizing
         let (frame_w, frame_h) = match spec.aspect_ratio {
@@ -80,14 +85,14 @@ impl IntoElement for MediaThumbnail {
         let mut container = div()
             .flex()
             .flex_col()
-            .gap(px(6.0))
+            .gap(gap_md)
             .overflow_hidden();
 
         // Thumbnail frame
         let mut frame = div()
             .w(frame_w)
             .h(frame_h)
-            .rounded(px(4.0))
+            .rounded(radius_control)
             .bg(frame_bg)
             .border_1()
             .border_color(border)
@@ -111,7 +116,7 @@ impl IntoElement for MediaThumbnail {
                     .flex()
                     .flex_col()
                     .items_center()
-                    .gap(px(4.0))
+                    .gap(gap_sm)
                     .when(spec.state == MediaState::Loading, |el| {
                         el.child(
                             Spinner::from_spec(
@@ -132,14 +137,14 @@ impl IntoElement for MediaThumbnail {
                     .when(spec.resolved_state_message().is_some(), |el| {
                         el.child(
                             div()
-                                .text_size(px(12.0))
+                                .text_size(label_size)
                                 .text_color(text_secondary.opacity(0.85))
                                 .child(spec.resolved_state_message().unwrap().to_string()),
                         )
                     })
                     .child(
                         div()
-                            .text_size(px(11.0))
+                            .text_size(caption_size)
                             .text_color(text_secondary.opacity(0.7))
                             .child(format!("[{}]", kind_label)),
                     ),
@@ -155,11 +160,11 @@ impl IntoElement for MediaThumbnail {
                     .absolute()
                     .top(px(6.0))
                     .right(px(6.0))
-                    .px(px(6.0))
+                    .px(gap_md)
                     .py(px(2.0))
-                    .rounded(px(4.0))
+                    .rounded(radius_control)
                     .bg(accent)
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(gpui::white())
                     .child(badge_label.clone()),
             );
@@ -185,7 +190,7 @@ impl IntoElement for MediaThumbnail {
             if let Some(ref meta) = spec.meta {
                 caption = caption.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(meta.clone()),
                 );

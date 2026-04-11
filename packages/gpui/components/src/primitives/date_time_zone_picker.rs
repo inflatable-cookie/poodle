@@ -74,6 +74,9 @@ impl IntoElement for DateTimeZonePicker {
         let icon_muted = resolve_color(theme, "color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
+        let label_size = resolve_px(theme, "typography.label.size");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let gap_md = resolve_px(theme, "space.inline.md");
 
         let display_value = spec
             .value
@@ -110,7 +113,7 @@ impl IntoElement for DateTimeZonePicker {
         if !tz_display.is_empty() {
             trigger = trigger.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_secondary)
                     .child(tz_display.to_string()),
             );
@@ -156,7 +159,7 @@ impl IntoElement for DateTimeZonePicker {
             }
         }
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
+        let mut wrapper = div().flex().flex_col().gap(inline_gap).child(trigger);
 
         if spec.is_open {
             let time_display = spec
@@ -172,12 +175,12 @@ impl IntoElement for DateTimeZonePicker {
 
             let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-            let mut weekday_row = div().flex().gap(px(4.0));
+            let mut weekday_row = div().flex().gap(inline_gap);
             for day in &weekdays {
                 weekday_row = weekday_row.child(
                     div()
                         .flex_1()
-                        .text_size(px(11.0))
+                        .text_size(caption_size)
                         .text_color(text_secondary)
                         .child(day.to_string()),
                 );
@@ -187,7 +190,7 @@ impl IntoElement for DateTimeZonePicker {
             let calendar_section = div()
                 .flex()
                 .flex_col()
-                .gap(px(8.0))
+                .gap(gap_md)
                 .child(
                     div()
                         .text_size(body_size)
@@ -202,11 +205,11 @@ impl IntoElement for DateTimeZonePicker {
             let time_section = div()
                 .flex()
                 .flex_col()
-                .gap(px(4.0))
-                .py(px(8.0))
+                .gap(inline_gap)
+                .py(gap_md)
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child("Time"),
                 )
@@ -221,11 +224,11 @@ impl IntoElement for DateTimeZonePicker {
             let timezone_section = div()
                 .flex()
                 .flex_col()
-                .gap(px(4.0))
-                .py(px(8.0))
+                .gap(inline_gap)
+                .py(gap_md)
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child("Time zone"),
                 )
