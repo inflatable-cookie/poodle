@@ -72,4 +72,65 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .disabled(true)
                 )
         )
+        // --- Dirty (unsaved changes) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Dirty (unsaved changes)"), theme))
+                .child(
+                    EditableList::new(theme)
+                        .aria_label("Tags")
+                        .items(vec![
+                            "design-system".to_string(),
+                            "rust".to_string(),
+                            "gpui".to_string(),
+                            "new-tag".to_string(),
+                        ])
+                        .max_items(10)
+                        .dirty(true)
+                )
+        )
+        // --- Submitting state ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Submitting state"), theme))
+                .child(
+                    EditableList::new(theme)
+                        .aria_label("Tags")
+                        .items(vec![
+                            "design-system".to_string(),
+                            "rust".to_string(),
+                            "gpui".to_string(),
+                        ])
+                        .submitting(true)
+                )
+        )
+        // --- With error message ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With error message"), theme))
+                .child(
+                    EditableList::new(theme)
+                        .aria_label("Tags")
+                        .items(vec![
+                            "design-system".to_string(),
+                            "rust".to_string(),
+                        ])
+                        .error_message("Failed to save: 'rust' conflicts with an existing tag.")
+                )
+        )
+        // --- With info message ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With info message"), theme))
+                .child(
+                    EditableList::new(theme)
+                        .aria_label("Tags")
+                        .items(vec![
+                            "design-system".to_string(),
+                            "rust".to_string(),
+                            "gpui".to_string(),
+                        ])
+                        .info_message("Tags are shared across the workspace.")
+                )
+        )
 }

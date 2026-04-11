@@ -47,6 +47,10 @@ impl CommandPalette {
     pub fn state(mut self, v: DiscoveryState) -> Self { self.spec.state = v; self }
     pub fn active_action_id(mut self, v: impl Into<String>) -> Self { self.spec.active_action_id = Some(v.into()); self }
     pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
+    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
+    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
+    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
+    pub fn invocation_hint(mut self, v: impl Into<String>) -> Self { self.spec.invocation_hint = Some(v.into()); self }
     pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
@@ -78,6 +82,12 @@ impl IntoElement for CommandPalette {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        // Closed: render nothing. Consumers that skip the `is_open`
+        // field still render because the default is true.
+        if !self.spec.is_open {
+            return div().into_any_element();
+        }
+
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -129,7 +139,45 @@ impl IntoElement for CommandPalette {
             ])
             .overflow_hidden();
 
-        // Search input row
+        // Optional header: title + description stacked above the
+        // search row. Rendered only when at least one is set.
+        if spec.title.is_some() || spec.description.is_some() {
+            let heading_size = resolve_px(theme, "typography.heading.size");
+            let mut header = div()
+                .flex()
+                .flex_col()
+                .gap(px(2.0))
+                .px(inline_padding)
+                .py(gap_sm)
+                .border_b_1()
+                .border_color(border);
+
+            if let Some(ref title) = spec.title {
+                header = header.child(
+                    div()
+                        .text_size(heading_size)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_primary)
+                        .child(title.clone()),
+                );
+            }
+            if let Some(ref description) = spec.description {
+                header = header.child(
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(description.clone()),
+                );
+            }
+            palette = palette.child(header);
+        }
+
+        // Search input row — placeholder comes from invocation_hint
+        // when set, otherwise the legacy default.
+        let placeholder = spec
+            .invocation_hint
+            .clone()
+            .unwrap_or_else(|| "Type a command\u{2026}".to_string());
         let search_row = div()
             .flex()
             .items_center()
@@ -142,8 +190,8 @@ impl IntoElement for CommandPalette {
                     .flex_1()
                     .text_size(body_size)
                     .text_color(text_primary)
-                    .when(spec.query.is_empty(), |el| {
-                        el.text_color(text_muted).child("Type a command\u{2026}")
+                    .when(spec.query.is_empty(), move |el| {
+                        el.text_color(text_muted).child(placeholder)
                     })
                     .when(!spec.query.is_empty(), |el| {
                         el.child(spec.query.clone())

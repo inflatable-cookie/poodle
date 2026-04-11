@@ -152,10 +152,14 @@ impl Tabs {
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        let mut tab_row = div()
-            .flex()
-            .border_b_1()
-            .border_color(border);
+        // is_bordered (default true) controls whether the underline
+        // indicator line renders under the whole tab list for the
+        // Text/Underline variant. Setting it false gives a flush
+        // layout with no baseline.
+        let mut tab_row = div().flex();
+        if self.spec.is_bordered {
+            tab_row = tab_row.border_b_1().border_color(border);
+        }
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
 

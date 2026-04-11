@@ -112,6 +112,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                 )
         )
+        // --- With title, description, and invocation hint ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With title and invocation hint"), theme))
+                .child(
+                    div().w(px(480.0)).child(
+                        CommandPalette::from_spec(
+                            CommandPaletteSpec::new(vec![
+                                CommandActionItem::new("new-doc", "New document")
+                                    .with_group("Create")
+                                    .with_shortcut("\u{2318}N"),
+                                CommandActionItem::new("new-proj", "New project")
+                                    .with_group("Create")
+                                    .with_shortcut("\u{2318}\u{21E7}N"),
+                                CommandActionItem::new("invite", "Invite collaborator")
+                                    .with_group("Team"),
+                            ])
+                            .with_title("Quick actions")
+                            .with_description("Search and execute workspace commands.")
+                            .with_invocation_hint("Search workspace\u{2026}"),
+                            theme,
+                        )
+                        .with_id("cmd-palette-header")
+                    )
+                )
+        )
         .when(last_executed.is_some(), |d| {
             d.child(
                 div().text_sm().text_color(color_to_hsla(text_secondary))

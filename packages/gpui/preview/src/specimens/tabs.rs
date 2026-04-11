@@ -163,6 +163,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let underline_icon_spec = TabsSpec::new(underline_icon_tabs)
         .with_variant(TabVariant::Underline)
+        .with_bordered(false)
         .with_value(&underline_icon_value)
         .with_aria_label("Icon tabs");
 

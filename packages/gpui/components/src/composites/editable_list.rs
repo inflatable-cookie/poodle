@@ -52,6 +52,10 @@ impl EditableList {
     pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
     pub fn reorderable(mut self, v: bool) -> Self { self.spec.is_reorderable = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = v.into(); self }
+    pub fn dirty(mut self, v: bool) -> Self { self.spec.is_dirty = v; self }
+    pub fn submitting(mut self, v: bool) -> Self { self.spec.is_submitting = v; self }
+    pub fn error_message(mut self, v: impl Into<String>) -> Self { self.spec.error_message = Some(v.into()); self }
+    pub fn info_message(mut self, v: impl Into<String>) -> Self { self.spec.info_message = Some(v.into()); self }
     pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
     pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
@@ -285,24 +289,81 @@ impl IntoElement for EditableList {
             root = root.child(add_row);
         }
 
-        // ── Counter ───────────────────────────────────────────────
-        if spec.shows_counter() {
-            let counter_text = if let Some(max) = spec.max_items {
-                format!("{}/{}", total, max)
-            } else {
-                format!("{} item{}", total, if total == 1 { "" } else { "s" })
-            };
+        // ── Counter + dirty/submitting row ────────────────────────
+        //
+        // The counter row carries three pieces of meta: an optional
+        // dirty dot on the left (warning-tone), an optional "Saving…"
+        // status on the left (during submit), and the item-count
+        // summary on the right. Any combination may be visible.
+        let needs_counter = spec.shows_counter()
+            || spec.is_dirty
+            || spec.is_submitting;
+        if needs_counter {
+            let mut row = div().flex().items_center().w_full();
 
+            // Left cluster: dirty dot + submitting text.
+            let mut left = div().flex().items_center().gap(gap_sm).flex_grow();
+
+            if spec.is_dirty {
+                let warning = resolve_color(
+                    theme,
+                    spec.dirty_indicator_color_token(),
+                );
+                left = left.child(
+                    div()
+                        .w(px(6.0))
+                        .h(px(6.0))
+                        .rounded(px(3.0))
+                        .bg(warning),
+                );
+            }
+
+            if spec.is_submitting {
+                left = left.child(
+                    div()
+                        .text_size(label_size)
+                        .text_color(counter_color)
+                        .child("Saving\u{2026}"),
+                );
+            }
+
+            row = row.child(left);
+
+            if spec.shows_counter() {
+                let counter_text = if let Some(max) = spec.max_items {
+                    format!("{}/{}", total, max)
+                } else {
+                    format!("{} item{}", total, if total == 1 { "" } else { "s" })
+                };
+                row = row.child(
+                    div()
+                        .text_size(label_size)
+                        .text_color(counter_color)
+                        .child(counter_text),
+                );
+            }
+
+            root = root.child(row);
+        }
+
+        // ── Error / Info banners ──────────────────────────────────
+        //
+        // Rendered below the list. Error wins if both are set.
+        if let Some(ref error) = spec.error_message {
+            let danger = resolve_color(theme, spec.error_color_token());
             root = root.child(
                 div()
-                    .flex()
-                    .justify_end()
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .text_color(counter_color)
-                            .child(counter_text),
-                    ),
+                    .text_size(label_size)
+                    .text_color(danger)
+                    .child(error.clone()),
+            );
+        } else if let Some(ref info) = spec.info_message {
+            let info_color = resolve_color(theme, spec.info_color_token());
+            root = root.child(
+                div()
+                    .text_size(label_size)
+                    .text_color(info_color)
+                    .child(info.clone()),
             );
         }
 

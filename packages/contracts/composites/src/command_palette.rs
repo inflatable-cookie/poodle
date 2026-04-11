@@ -33,7 +33,12 @@ impl Default for CommandPaletteSpec {
             state: DiscoveryState::Ready,
             active_action_id: None,
             placement: OverlayPlacement::BottomStart,
-            is_open: false,
+            // Palette defaults to visible so existing consumers that
+            // never touched `is_open` still render. Set to false
+            // explicitly to hide (Svelte `open` is `null`-default but
+            // we can't distinguish a tri-state in Rust without
+            // Option).
+            is_open: true,
             title: None,
             description: None,
             invocation_hint: None,
