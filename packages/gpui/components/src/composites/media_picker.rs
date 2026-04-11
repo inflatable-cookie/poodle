@@ -308,6 +308,15 @@ impl IntoElement for MediaPicker {
             .flex_grow();
 
         if self.thumbnails.is_empty() && self.content.is_none() {
+            // Empty-state copy: prefer spec.empty_message when set,
+            // fall back to the contract default ("No media items
+            // found." per Svelte reference). This honours the
+            // `emptyMessage` prop from the contract doc.
+            let empty_text = self
+                .spec
+                .empty_message
+                .clone()
+                .unwrap_or_else(|| "No media items found.".to_string());
             grid = grid.child(
                 div()
                     .w_full()
@@ -315,7 +324,7 @@ impl IntoElement for MediaPicker {
                     .text_size(label_size)
                     .text_color(text_secondary)
                     .text_center()
-                    .child("No media items"),
+                    .child(empty_text),
             );
         }
 

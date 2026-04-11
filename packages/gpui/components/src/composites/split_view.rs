@@ -142,19 +142,43 @@ impl IntoElement for SplitView {
         }
 
         // Primary pane
+        //
+        // Fixed-size takes precedence over ratio: if spec.primary_size
+        // is set, the primary pane gets that absolute dimension and
+        // secondary fills the remaining space (flex_grow). If
+        // spec.secondary_size is set, primary fills remaining space
+        // and secondary takes the fixed dimension. Falling back to
+        // ratio-based allocation when neither is set.
+        let primary_fixed = spec.primary_size;
+        let secondary_fixed = spec.secondary_size;
         if !spec.is_primary_collapsed {
-            let mut primary_pane = div()
-                .overflow_hidden()
-                .flex_basis(relative(ratio))
-                .flex_shrink()
-                .flex_grow();
+            let mut primary_pane = div().overflow_hidden();
+
+            // Flex allocation: fixed → no grow/shrink; filling → grow;
+            // ratio-based → grow+shrink with flex_basis.
+            if primary_fixed.is_some() {
+                primary_pane = primary_pane.flex_shrink_0();
+            } else if secondary_fixed.is_some() {
+                primary_pane = primary_pane.flex_grow();
+            } else {
+                primary_pane = primary_pane
+                    .flex_basis(relative(ratio))
+                    .flex_shrink()
+                    .flex_grow();
+            }
 
             if is_horizontal {
+                if let Some(size) = primary_fixed {
+                    primary_pane = primary_pane.w(px(size));
+                }
                 primary_pane = primary_pane.h_full();
                 if let Some(min) = spec.min_primary_size {
                     primary_pane = primary_pane.min_w(px(min));
                 }
             } else {
+                if let Some(size) = primary_fixed {
+                    primary_pane = primary_pane.h(px(size));
+                }
                 primary_pane = primary_pane.w_full();
                 if let Some(min) = spec.min_primary_size {
                     primary_pane = primary_pane.min_h(px(min));
@@ -362,18 +386,32 @@ impl IntoElement for SplitView {
         // Secondary pane
         if !spec.is_secondary_collapsed {
             let secondary_ratio = 1.0 - ratio;
-            let mut secondary_pane = div()
-                .overflow_hidden()
-                .flex_basis(relative(secondary_ratio))
-                .flex_shrink()
-                .flex_grow();
+            let mut secondary_pane = div().overflow_hidden();
+
+            // Symmetric to the primary allocation above.
+            if secondary_fixed.is_some() {
+                secondary_pane = secondary_pane.flex_shrink_0();
+            } else if primary_fixed.is_some() {
+                secondary_pane = secondary_pane.flex_grow();
+            } else {
+                secondary_pane = secondary_pane
+                    .flex_basis(relative(secondary_ratio))
+                    .flex_shrink()
+                    .flex_grow();
+            }
 
             if is_horizontal {
+                if let Some(size) = secondary_fixed {
+                    secondary_pane = secondary_pane.w(px(size));
+                }
                 secondary_pane = secondary_pane.h_full();
                 if let Some(min) = spec.min_secondary_size {
                     secondary_pane = secondary_pane.min_w(px(min));
                 }
             } else {
+                if let Some(size) = secondary_fixed {
+                    secondary_pane = secondary_pane.h(px(size));
+                }
                 secondary_pane = secondary_pane.w_full();
                 if let Some(min) = spec.min_secondary_size {
                     secondary_pane = secondary_pane.min_h(px(min));

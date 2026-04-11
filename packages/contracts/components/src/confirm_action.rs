@@ -5,6 +5,11 @@ use poodle_tokens::semantic;
 pub struct ConfirmActionSpec {
     pub title: String,
     pub description: String,
+    /// Label for the default trigger button (the button that opens
+    /// the dialog). Ignored when a custom trigger element is
+    /// provided via a slot / builder. Matches `triggerLabel` prop on
+    /// the contract doc.
+    pub trigger_label: String,
     pub confirm_label: String,
     pub cancel_label: String,
     pub tone: StatusTone,
@@ -24,6 +29,7 @@ impl ConfirmActionSpec {
         Self {
             title: title.into(),
             description: description.into(),
+            trigger_label: String::from("Delete"),
             confirm_label: confirm_label.into(),
             cancel_label: cancel_label.into(),
             tone: StatusTone::Neutral,
@@ -36,6 +42,11 @@ impl ConfirmActionSpec {
 
     pub fn with_tone(mut self, tone: StatusTone) -> Self {
         self.tone = tone;
+        self
+    }
+
+    pub fn with_trigger_label(mut self, trigger_label: impl Into<String>) -> Self {
+        self.trigger_label = trigger_label.into();
         self
     }
 

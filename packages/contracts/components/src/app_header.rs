@@ -3,6 +3,9 @@ use poodle_tokens::semantic;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AppHeaderSpec {
     pub title: Option<String>,
+    /// Secondary text rendered beside the title in baseline alignment.
+    /// Matches the `subtitle` prop on the contract doc.
+    pub subtitle: Option<String>,
     pub is_drag_region: bool,
     pub aria_label: Option<String>,
     pub primary_action_count: usize,
@@ -13,6 +16,7 @@ impl Default for AppHeaderSpec {
     fn default() -> Self {
         Self {
             title: None,
+            subtitle: None,
             is_drag_region: false,
             aria_label: None,
             primary_action_count: 0,
@@ -28,6 +32,11 @@ impl AppHeaderSpec {
 
     pub fn with_title(mut self, title: impl Into<String>) -> Self {
         self.title = Some(title.into());
+        self
+    }
+
+    pub fn with_subtitle(mut self, subtitle: impl Into<String>) -> Self {
+        self.subtitle = Some(subtitle.into());
         self
     }
 

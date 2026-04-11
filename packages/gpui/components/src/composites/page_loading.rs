@@ -80,10 +80,23 @@ impl IntoElement for PageLoading {
             .px(px(pad_x)).py(px(pad_y))
             .flex().flex_col().items_center().gap(px(item_gap * 2.0));
 
-        // Progress affordance: if a determinate value is provided,
-        // render a linear progress bar whose fill ratio honours
-        // spec.value / spec.max. Otherwise fall back to the
-        // indeterminate ring spinner.
+        // Spinner — always rendered per the contract doc
+        // (page-loading.md L72: determinate state shows "Spinner shown
+        // plus progress bar"). The ring spinner provides continuous
+        // motion feedback even when a determinate value is known.
+        card = card.child(
+            Spinner::from_spec(
+                SpinnerSpec::new()
+                    .with_variant(SpinnerVariant::Ring)
+                    .with_size(SpinnerSize::Lg)
+                    .with_tone(SpinnerTone::Accent),
+                theme,
+            )
+            .with_color(accent),
+        );
+
+        // Progress bar — rendered only when a determinate value is
+        // provided. Fill ratio honours spec.value / spec.max.
         if let Some(value) = self.spec.value {
             let max = if self.spec.max > 0.0 { self.spec.max } else { 1.0 };
             let ratio = (value / max).clamp(0.0, 1.0) as f32;
@@ -107,17 +120,6 @@ impl IntoElement for PageLoading {
                             .bg(accent)
                             .rounded(track_radius),
                     ),
-            );
-        } else {
-            card = card.child(
-                Spinner::from_spec(
-                    SpinnerSpec::new()
-                        .with_variant(SpinnerVariant::Ring)
-                        .with_size(SpinnerSize::Lg)
-                        .with_tone(SpinnerTone::Accent),
-                    theme,
-                )
-                .with_color(accent),
             );
         }
 

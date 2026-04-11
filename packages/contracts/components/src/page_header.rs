@@ -32,6 +32,11 @@ pub struct PageHeaderSpec {
     pub banner_tone: StatusTone,
     pub align: PageHeaderAlign,
     pub aria_label: Option<String>,
+    /// Heading level for the title element (1–6). Matches HTML
+    /// <h1>–<h6> semantics. Renderers use this for both accessibility
+    /// semantics and visual sizing hierarchy — higher levels render
+    /// at smaller text sizes. Defaults to 1 (primary page heading).
+    pub level: u8,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -52,6 +57,7 @@ impl PageHeaderSpec {
             banner_tone: StatusTone::Info,
             align: PageHeaderAlign::default(),
             aria_label: None,
+            level: 1,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -75,6 +81,15 @@ impl PageHeaderSpec {
 
     pub fn with_count(mut self, count: u32) -> Self {
         self.count = Some(count);
+        self
+    }
+
+    /// Set the heading level (1–6). Values outside that range are
+    /// clamped. Level 1 is the default and is used for primary page
+    /// titles; higher levels are for nested headings in stacked
+    /// layouts.
+    pub fn with_level(mut self, level: u8) -> Self {
+        self.level = level.clamp(1, 6);
         self
     }
 

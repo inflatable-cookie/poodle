@@ -8,6 +8,16 @@ pub struct SplitViewSpec {
     pub default_ratio: f32,
     pub min_primary_size: Option<f32>,
     pub min_secondary_size: Option<f32>,
+    /// Fixed primary pane size in px. When set, primary uses this
+    /// absolute size and secondary fills the remaining space, bypassing
+    /// ratio-based allocation. Mutually exclusive with
+    /// `secondary_size` at the layout level — setting both is
+    /// caller error; the primary wins.
+    pub primary_size: Option<f32>,
+    /// Fixed secondary pane size in px. When set, secondary uses this
+    /// absolute size and primary fills the remaining space, bypassing
+    /// ratio-based allocation.
+    pub secondary_size: Option<f32>,
     pub is_primary_collapsed: bool,
     pub is_secondary_collapsed: bool,
     /// When true the divider cannot be dragged and the split renders
@@ -33,6 +43,8 @@ impl SplitViewSpec {
             default_ratio: 0.5,
             min_primary_size: None,
             min_secondary_size: None,
+            primary_size: None,
+            secondary_size: None,
             is_primary_collapsed: false,
             is_secondary_collapsed: false,
             is_disabled: false,
@@ -61,6 +73,16 @@ impl SplitViewSpec {
 
     pub fn with_min_secondary_size(mut self, min_secondary_size: f32) -> Self {
         self.min_secondary_size = Some(min_secondary_size);
+        self
+    }
+
+    pub fn with_primary_size(mut self, primary_size: f32) -> Self {
+        self.primary_size = Some(primary_size);
+        self
+    }
+
+    pub fn with_secondary_size(mut self, secondary_size: f32) -> Self {
+        self.secondary_size = Some(secondary_size);
         self
     }
 

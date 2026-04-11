@@ -83,6 +83,7 @@ impl PageHeader {
     // ── New spec builders ────────────────────────────────────
     pub fn section(mut self, v: impl Into<String>) -> Self { self.spec.section = Some(v.into()); self }
     pub fn count(mut self, v: u32) -> Self { self.spec.count = Some(v); self }
+    pub fn level(mut self, v: u8) -> Self { self.spec.level = v.clamp(1, 6); self }
     pub fn back(mut self, href: impl Into<String>, label: impl Into<String>) -> Self {
         self.spec.back_href = Some(href.into());
         self.spec.back_label = Some(label.into());
@@ -116,7 +117,23 @@ impl IntoElement for PageHeader {
 
         let gap = resolve_px(theme, spec.gap_token());
         let body_size = px(font_size);
-        let heading_size = resolve_px(theme, "typography.heading.size");
+        // Heading hierarchy: level 1 uses the primary heading token,
+        // levels 2-6 scale down proportionally. GPUI doesn't have a
+        // dedicated h1/h2/h3 token stack, so we derive from the base
+        // heading size using a simple multiplier per level. This
+        // preserves the visual hierarchy the contract doc requires
+        // (level prop on page-header.md L82) without inventing new
+        // tokens.
+        let heading_base = resolve_px(theme, "typography.heading.size");
+        let level_scale: f32 = match spec.level {
+            1 => 1.0,
+            2 => 0.85,
+            3 => 0.72,
+            4 => 0.62,
+            5 => 0.55,
+            _ => 0.50,
+        };
+        let heading_size = heading_base * level_scale;
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());
 

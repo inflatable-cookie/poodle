@@ -43,6 +43,7 @@ impl AppHeader {
 
     // ── Forwarded spec builders ───────────────────────────────
     pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
+    pub fn subtitle(mut self, v: impl Into<String>) -> Self { self.spec.subtitle = Some(v.into()); self }
     pub fn drag_region(mut self, v: bool) -> Self { self.spec.is_drag_region = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn primary_action_count(mut self, v: usize) -> Self { self.spec.primary_action_count = v; self }
@@ -113,6 +114,19 @@ impl IntoElement for AppHeader {
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_primary)
                     .child(title.clone()),
+            );
+        }
+
+        // Subtitle — rendered next to the title in muted text-secondary
+        // tone. Contract doc calls this "baseline alignment"; the flex
+        // row's align-items center already places them on the same line.
+        if let Some(ref subtitle) = spec.subtitle {
+            let text_secondary = resolve_color(theme, "color.text.secondary");
+            left = left.child(
+                div()
+                    .text_size(body_size)
+                    .text_color(text_secondary)
+                    .child(subtitle.clone()),
             );
         }
 

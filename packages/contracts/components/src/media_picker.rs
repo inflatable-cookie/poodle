@@ -8,6 +8,9 @@ pub struct MediaPickerSpec {
     pub is_multiple: bool,
     pub accepted_types: Option<String>,
     pub selected_count: usize,
+    /// Message shown in the browse grid when no items are available.
+    /// Defaults to `"No media items found."` when None.
+    pub empty_message: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -21,6 +24,7 @@ impl MediaPickerSpec {
             is_multiple: false,
             accepted_types: None,
             selected_count: 0,
+            empty_message: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -44,6 +48,11 @@ impl MediaPickerSpec {
 
     pub fn with_selected_count(mut self, selected_count: usize) -> Self {
         self.selected_count = selected_count;
+        self
+    }
+
+    pub fn with_empty_message(mut self, empty_message: impl Into<String>) -> Self {
+        self.empty_message = Some(empty_message.into());
         self
     }
 

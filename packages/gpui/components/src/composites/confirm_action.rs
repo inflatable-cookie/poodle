@@ -79,12 +79,40 @@ impl ConfirmAction {
 impl IntoElement for ConfirmAction {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
-        // When closed, render only the trigger (if any) — no backdrop.
+        // When closed, render the trigger. Prefer the caller-provided
+        // trigger element; fall back to a default secondary button
+        // using spec.trigger_label so the component behaves usefully
+        // when consumers don't plumb a custom trigger — matches the
+        // Svelte reference which renders a Button when no trigger
+        // slot is present.
         if !self.spec.is_open {
             return if let Some(trigger) = self.trigger {
                 div().child(trigger).into_any_element()
             } else {
-                div().into_any_element()
+                let theme = &self.theme;
+                let surface_bg = resolve_color(theme, "color.background.elevated");
+                let text_color = resolve_color(theme, "color.text.primary");
+                let border_color = resolve_color(theme, "color.border.default");
+                let control_radius = resolve_radius(theme, "radius.control");
+                let body_size = resolve_px(theme, "typography.body.size");
+                let inline_md = resolve_px(theme, "space.inline.md");
+                let inline_sm = resolve_px(theme, "space.inline.sm");
+                div()
+                    .child(
+                        div()
+                            .id("poodle-confirm-trigger")
+                            .cursor_pointer()
+                            .bg(surface_bg)
+                            .text_color(text_color)
+                            .text_size(body_size)
+                            .border_1()
+                            .border_color(border_color)
+                            .rounded(control_radius)
+                            .px(inline_md)
+                            .py(inline_sm)
+                            .child(self.spec.trigger_label.clone()),
+                    )
+                    .into_any_element()
             };
         }
 
