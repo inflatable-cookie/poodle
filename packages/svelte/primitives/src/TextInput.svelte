@@ -829,17 +829,17 @@
   }
 
   /* Size variants */
-  .text-input[data-size="xs"] .text-input__control {
-    font-size: 0.75rem;
-  }
+  .text-input[data-size="xs"] { min-height: 1.5rem; }
+  .text-input[data-size="xs"] .text-input__control { height: calc(1.5rem - 0.125rem); font-size: 0.75rem; }
 
-  .text-input[data-size="lg"] .text-input__control {
-    font-size: 0.9375rem;
-  }
+  .text-input[data-size="sm"] { min-height: 1.75rem; }
+  .text-input[data-size="sm"] .text-input__control { height: calc(1.75rem - 0.125rem); font-size: 0.8125rem; }
 
-  .text-input[data-size="xl"] .text-input__control {
-    font-size: 1rem;
-  }
+  .text-input[data-size="lg"] { min-height: 2.75rem; }
+  .text-input[data-size="lg"] .text-input__control { height: calc(2.75rem - 0.125rem); font-size: 0.9375rem; }
+
+  .text-input[data-size="xl"] { min-height: 3.25rem; }
+  .text-input[data-size="xl"] .text-input__control { height: calc(3.25rem - 0.125rem); font-size: 1rem; }
 
   .text-input {
     --poodle-text-input-padding-inline: calc(
