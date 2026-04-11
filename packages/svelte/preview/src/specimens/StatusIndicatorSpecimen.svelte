@@ -33,6 +33,10 @@
   <svelte:fragment slot="sizes" let:size>
     <StatusIndicator status="success" {size} label={size.toUpperCase()} />
   </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <StatusIndicator status="success" {density} label="Success" />
+  </svelte:fragment>
 </SpecimenLayout>
 
 <style>
