@@ -120,6 +120,9 @@ impl IntoElement for ListCard {
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
 
         let body_size = resolve_px(theme, "typography.body.size");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let icon_md = resolve_px(theme, "size.icon.md");
+        let radius_control = resolve_radius(theme, "radius.control");
         let accent = resolve_color(theme, spec.leading_tint_bg_token());
         let leading_tint_bg = color_mix(accent, panel, 0.12);
         let leading_solid_bg = resolve_color(theme, spec.leading_solid_bg_token());
@@ -179,7 +182,7 @@ impl IntoElement for ListCard {
             if let Some(ref subtitle) = spec.subtitle {
                 col = col.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(subtitle_color)
                         .overflow_x_hidden()
                         .text_ellipsis()
@@ -198,7 +201,7 @@ impl IntoElement for ListCard {
         // ── Meta section ────────────────────────────────────────────
         let meta_el = spec.meta.as_ref().map(|meta| {
             div()
-                .text_size(px(12.0))
+                .text_size(label_size)
                 .text_color(meta_color)
                 .flex_shrink_0()
                 .child(meta.clone())
@@ -261,9 +264,9 @@ impl IntoElement for ListCard {
             root = root.child(
                 div()
                     .flex_shrink_0()
-                    .w(px(16.0))
-                    .h(px(16.0))
-                    .rounded(px(3.0))
+                    .w(icon_md)
+                    .h(icon_md)
+                    .rounded(radius_control)
                     .border_1()
                     .border_color(box_border)
                     .bg(box_bg),

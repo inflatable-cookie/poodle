@@ -221,7 +221,7 @@ impl IntoElement for DateTimeRangePicker {
                         .flex_1()
                         .flex()
                         .justify_center()
-                        .text_size(px(11.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(*day),
                 );
@@ -240,7 +240,7 @@ impl IntoElement for DateTimeRangePicker {
                             .items_center()
                             .justify_center()
                             .rounded(control_radius)
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(text_secondary)
                             .child("—"),
                     );
@@ -320,7 +320,7 @@ impl IntoElement for DateTimeRangePicker {
                 .justify_between()
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(accent)
                         .cursor_pointer()
                         .child("Today"),
@@ -334,7 +334,7 @@ impl IntoElement for DateTimeRangePicker {
                         .flex()
                         .items_center()
                         .justify_center()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(elevated_bg)
                         .cursor_pointer()
                         .child("Done"),
