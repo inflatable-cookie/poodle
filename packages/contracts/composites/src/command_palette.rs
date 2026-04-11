@@ -10,6 +10,16 @@ pub struct CommandPaletteSpec {
     pub state: DiscoveryState,
     pub active_action_id: Option<String>,
     pub placement: OverlayPlacement,
+    /// Visibility state. Matches Svelte `open` prop — when false the
+    /// palette surface is not rendered.
+    pub is_open: bool,
+    /// Optional header title shown above the query field.
+    pub title: Option<String>,
+    /// Optional header description shown under the title.
+    pub description: Option<String>,
+    /// Placeholder for the query field when empty. Matches Svelte
+    /// `invocationHint` prop.
+    pub invocation_hint: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -23,6 +33,10 @@ impl Default for CommandPaletteSpec {
             state: DiscoveryState::Ready,
             active_action_id: None,
             placement: OverlayPlacement::BottomStart,
+            is_open: false,
+            title: None,
+            description: None,
+            invocation_hint: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -50,6 +64,26 @@ impl CommandPaletteSpec {
 
     pub fn with_active_action_id(mut self, active_action_id: impl Into<String>) -> Self {
         self.active_action_id = Some(active_action_id.into());
+        self
+    }
+
+    pub fn with_open(mut self, is_open: bool) -> Self {
+        self.is_open = is_open;
+        self
+    }
+
+    pub fn with_title(mut self, title: impl Into<String>) -> Self {
+        self.title = Some(title.into());
+        self
+    }
+
+    pub fn with_description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
+    }
+
+    pub fn with_invocation_hint(mut self, hint: impl Into<String>) -> Self {
+        self.invocation_hint = Some(hint.into());
         self
     }
 

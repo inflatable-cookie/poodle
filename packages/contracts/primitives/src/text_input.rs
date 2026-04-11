@@ -27,6 +27,22 @@ pub struct TextInputSpec {
     pub resize: String,
     pub submit_enabled: bool,
     pub cancel_enabled: bool,
+    /// When true, the input is required for form submission. Renders
+    /// a subtle affordance (asterisk on the associated Field label)
+    /// and flips to the Invalid validation state when left empty on
+    /// submit attempt. Matches Svelte `required`.
+    pub is_required: bool,
+    /// Optional validation regex pattern. Matches HTML `pattern`
+    /// attribute / Svelte `pattern` prop. GPUI doesn't run the
+    /// validation itself — the caller enforces it — but the field is
+    /// carried so the rendered surface can advertise the constraint.
+    pub pattern: Option<String>,
+    /// Optional autocomplete hint (e.g. "email", "current-password",
+    /// "off"). Carried for consumer wiring.
+    pub autocomplete: Option<String>,
+    /// Optional debounce in milliseconds for the on-change stream.
+    /// 0 means fire on every keystroke. Matches Svelte `debounce`.
+    pub debounce_ms: u32,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -58,6 +74,10 @@ impl Default for TextInputSpec {
             resize: String::from("vertical"),
             submit_enabled: false,
             cancel_enabled: false,
+            is_required: false,
+            pattern: None,
+            autocomplete: None,
+            debounce_ms: 0,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -187,6 +207,26 @@ impl TextInputSpec {
 
     pub fn with_cancel_enabled(mut self, cancel_enabled: bool) -> Self {
         self.cancel_enabled = cancel_enabled;
+        self
+    }
+
+    pub fn with_required(mut self, is_required: bool) -> Self {
+        self.is_required = is_required;
+        self
+    }
+
+    pub fn with_pattern(mut self, pattern: impl Into<String>) -> Self {
+        self.pattern = Some(pattern.into());
+        self
+    }
+
+    pub fn with_autocomplete(mut self, autocomplete: impl Into<String>) -> Self {
+        self.autocomplete = Some(autocomplete.into());
+        self
+    }
+
+    pub fn with_debounce_ms(mut self, debounce_ms: u32) -> Self {
+        self.debounce_ms = debounce_ms;
         self
     }
 

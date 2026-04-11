@@ -11,6 +11,20 @@ pub struct TabsSpec {
     pub orientation: Orientation,
     pub activation_mode: TabActivationMode,
     pub aria_label: Option<String>,
+    /// When true, tabs can be reordered via drag. Defers to the
+    /// consumer to actually commit the new order. Matches Svelte
+    /// `reorderable` prop.
+    pub is_reorderable: bool,
+    /// When true, the Underline variant renders the bottom border
+    /// line under the whole tab list (the default). When false the
+    /// indicator is suppressed — useful for flush layouts. Matches
+    /// Svelte `bordered` prop (default true).
+    pub is_bordered: bool,
+    /// Optional key used to persist the active tab across sessions.
+    /// The consumer owns the actual storage; this field carries the
+    /// key so the render surface can expose a stable id for tests /
+    /// state.
+    pub history_key: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -26,6 +40,9 @@ impl Default for TabsSpec {
             orientation: Orientation::Horizontal,
             activation_mode: TabActivationMode::Automatic,
             aria_label: None,
+            is_reorderable: false,
+            is_bordered: true,
+            history_key: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
@@ -43,6 +60,21 @@ impl TabsSpec {
 
     pub fn with_value(mut self, value: impl Into<String>) -> Self {
         self.value = Some(value.into());
+        self
+    }
+
+    pub fn with_reorderable(mut self, is_reorderable: bool) -> Self {
+        self.is_reorderable = is_reorderable;
+        self
+    }
+
+    pub fn with_bordered(mut self, is_bordered: bool) -> Self {
+        self.is_bordered = is_bordered;
+        self
+    }
+
+    pub fn with_history_key(mut self, history_key: impl Into<String>) -> Self {
+        self.history_key = Some(history_key.into());
         self
     }
 
