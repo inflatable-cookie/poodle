@@ -84,10 +84,12 @@ impl IntoElement for Card {
         let gap = resolve_px(theme, spec.gap_token());
         let padding_x = resolve_px(theme, spec.padding_x_token());
         let padding_y = resolve_px(theme, spec.padding_y_token());
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
 
         // Contract: compact layout uses smaller padding (0.5rem x 0.625rem)
         let (effective_px, effective_py) = match spec.layout {
-            CardLayout::Compact => (px(10.0), px(8.0)), // 0.625rem, 0.5rem
+            CardLayout::Compact => (gap_md, gap_sm),
             _ => (padding_x, padding_y),
         };
 

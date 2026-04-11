@@ -93,6 +93,11 @@ impl IntoElement for ColorPicker {
         let stack_gap = resolve_px(theme, "space.stack.sm");
         let trigger_radius = resolve_radius(theme, spec.trigger_radius_token());
         let surface_radius = resolve_radius(theme, spec.surface_radius_token());
+        let radius_control = resolve_radius(theme, "radius.control");
+        let gap_sm = resolve_px(theme, "space.inline.sm");
+        let gap_md = resolve_px(theme, "space.inline.md");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let label_size = resolve_px(theme, "typography.label.size");
 
         let border = resolve_color(theme, spec.border_token());
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
@@ -191,10 +196,10 @@ impl IntoElement for ColorPicker {
                         spread_radius: px(0.0),
                     },
                 ])
-                .p(px(12.0)) // 0.75rem
+                .p(gap_md)
                 .flex()
                 .flex_col()
-                .gap(px(8.0));
+                .gap(gap_sm);
 
             // Swatch grid — only rendered when caller supplies swatches
             if !spec.swatches.is_empty() {
@@ -249,7 +254,7 @@ impl IntoElement for ColorPicker {
                 // Mode label
                 overlay = overlay.child(
                     div()
-                        .text_size(px(10.0))
+                        .text_size(caption_size)
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(text_secondary)
                         .child(mode_label.to_string())
@@ -269,14 +274,14 @@ impl IntoElement for ColorPicker {
                     .focusable()
                     .w_full()
                     .h(px(28.0))
-                    .px(px(8.0))
-                    .rounded(px(4.0))
+                    .px(gap_sm)
+                    .rounded(radius_control)
                     .bg(resolve_color(theme, "color.background.surface"))
                     .border_1()
                     .border_color(border)
                     .flex()
                     .items_center()
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .text_color(text_primary)
                     .focus(move |s| s.border_color(focus_ring))
                     .child(current.clone());
