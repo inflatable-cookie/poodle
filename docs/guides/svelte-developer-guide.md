@@ -1329,7 +1329,7 @@ interface MenuItem {
 **Forms:** FormLayout, FormDialog, ConfirmAction, EmbedInput
 **Browse:** PageHeader, EmptyState, PageLoading
 **Media:** MediaThumbnail, MediaPreview, MediaPicker, AudioPlayer, VideoPlayer, EmbedPreview
-**Editor:** MarkdownEditor, BlockEditor, EditableList, ReorderableList
+**Editor:** MarkdownEditor, BlockEditor, EditableList
 **Picker:** PickerShell, RelationPicker, CardRadioGroup
 **Layout:** SplitView, DockRegion, AppHeader, StatusBar, ResizeHandle
 **Feedback:** ToastStack, LogList
