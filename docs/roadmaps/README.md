@@ -19,7 +19,7 @@ Roadmaps hold executable milestone work for Poodle.
 - highest on-disk generation folder: `g10`
 - current executable generation plan: `g10`
 - `g09` is complete
-- `g10` is active, `g10.003` complete, next milestone is Jetstream implementation
+- `g10` is active, `g10.004` complete, unified component package is live
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -44,4 +44,4 @@ Do not assume the highest-numbered generation folder is the active one.
 
 ## Next Task
 
-`g10.003` is complete. The next milestone is Jetstream component implementation.
+`g10.004` is complete. Unified component package is live.

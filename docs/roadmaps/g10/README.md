@@ -33,7 +33,7 @@ surface that needs to be made explicit again.
 - `g10.002` complete — recovery/control lane opened, queue frozen, seams
   classified, next milestone compiled
 - `g10.003` complete — Svelte Component Overhaul Closeout
-- `g10.004` active — Unified Component Package
+- `g10.004` complete — Unified Component Package
 
 Three active seams identified:
 - Seam A (Svelte Component Overhaul): actively executing via `g10.003`
@@ -42,5 +42,6 @@ Three active seams identified:
 
 ## Next Task
 
-`g10.004` is active: merge primitives and composites into a single unified
-component package with tag-based categorisation.
+`g10.004` is complete. The unified component package is live. Single
+`@poodle/svelte` package, single `docs/contracts/components/` directory,
+single `poodle-specs` Rust crate, single Components section in preview.

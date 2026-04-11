@@ -4,7 +4,7 @@
 
 - `g10`
   - Status: active
-  - Range: `001` to `003`
+  - Range: `001` to `004`
   - Notes: `g10.001` proved Jetstream feasibility. `g10.002` recovered the
     live queue and classified three seams (Svelte overhaul, Jetstream
     implementation, parity). `g10.003` is the active milestone: Svelte
@@ -75,4 +75,5 @@ When roadmap files disagree:
 
 ## Next Task
 
-`g10.003` is complete. The next milestone is Jetstream component implementation.
+`g10.004` is complete. Unified component package is live across Svelte, contracts,
+and Rust specs.
