@@ -510,7 +510,7 @@
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
-  /* Density variants — gap only, no height changes */
-  .split-button[data-density="compact"] { gap: 0; }
-  .split-button[data-density="comfortable"] { gap: 0; }
+  /* Density variants — horizontal padding */
+  .split-button[data-density="compact"] .split-button__primary { padding-inline: 0.5rem; }
+  .split-button[data-density="comfortable"] .split-button__primary { padding-inline: 1.125rem; }
 </style>
