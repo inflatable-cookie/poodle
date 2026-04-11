@@ -38,28 +38,36 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <StatusBar summary="Status at {size}" {size}>
-      <svelte:fragment slot="trailing">
-        <span class="status-item">UTF-8</span>
-        <span class="status-item">TypeScript</span>
-      </svelte:fragment>
-    </StatusBar>
+    <div class="variant-block">
+      <StatusBar chrome summary="Status bar" {size}>
+        <svelte:fragment slot="trailing">
+          <span class="status-item">UTF-8</span>
+          <span class="status-item">TypeScript</span>
+        </svelte:fragment>
+      </StatusBar>
+    </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <StatusBar summary="Status at {density}" {density}>
-      <svelte:fragment slot="trailing">
-        <span class="status-item">UTF-8</span>
-        <span class="status-item">TypeScript</span>
-      </svelte:fragment>
-    </StatusBar>
+    <div class="variant-block">
+      <StatusBar chrome summary="Status bar" {density}>
+        <svelte:fragment slot="trailing">
+          <span class="status-item">UTF-8</span>
+          <span class="status-item">TypeScript</span>
+        </svelte:fragment>
+      </StatusBar>
+    </div>
   </svelte:fragment>
 </SpecimenLayout>
 
 <style>
   .status-item {
-    font-size: 0.75rem;
+    font-size: inherit;
     color: var(--poodle-color-text-secondary);
     padding: 0 0.375rem;
+  }
+
+  .variant-block {
+    width: 100%;
   }
 </style>
