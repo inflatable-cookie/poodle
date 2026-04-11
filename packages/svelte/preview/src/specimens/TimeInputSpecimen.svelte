@@ -1,34 +1,35 @@
 <script lang="ts">
-  import { TimeInput } from "@poodle/svelte-primitives";
-  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { TimeInput, Eyebrow, Surface } from "@poodle/svelte-primitives";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let time = "";
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Default">
-    <TimeInput
-      id="start-time"
-      ariaLabel="Start time"
-      on:valueChange={(e) => { if (e.detail.value) time = e.detail.value; }}
-    />
-    {#if time}
-      <p>Selected: <strong>{time}</strong></p>
-    {/if}
-  </SpecimenGroup>
+  <Surface tone="panel" border="subtle" padding="md">
+    <div class="specimen">
+      <div class="specimen__item">
+        <Eyebrow>Default</Eyebrow>
+        <TimeInput id="start-time" ariaLabel="Start time" on:valueChange={(e) => { if (e.detail.value) time = e.detail.value; }} />
+        {#if time}<span class="specimen__value">{time}</span>{/if}
+      </div>
 
-  <SpecimenGroup label="With default value">
-    <TimeInput id="meeting-time" defaultValue="14:30" ariaLabel="Meeting time" />
-  </SpecimenGroup>
+      <div class="specimen__item">
+        <Eyebrow>With default value</Eyebrow>
+        <TimeInput id="meeting-time" defaultValue="14:30" ariaLabel="Meeting time" />
+      </div>
 
-  <SpecimenGroup label="With min/max constraints">
-    <TimeInput id="office" defaultValue="09:00" min="08:00" max="18:00" ariaLabel="Office hours" />
-  </SpecimenGroup>
+      <div class="specimen__item">
+        <Eyebrow>With min/max</Eyebrow>
+        <TimeInput id="office" defaultValue="09:00" min="08:00" max="18:00" ariaLabel="Office hours" />
+      </div>
 
-  <SpecimenGroup label="Disabled">
-    <TimeInput id="disabled-time" defaultValue="12:00" disabled ariaLabel="Disabled time" />
-  </SpecimenGroup>
+      <div class="specimen__item">
+        <Eyebrow>Disabled</Eyebrow>
+        <TimeInput id="disabled-time" defaultValue="12:00" disabled ariaLabel="Disabled" />
+      </div>
+    </div>
+  </Surface>
 
   <svelte:fragment slot="sizes" let:size>
     <TimeInput id={"size-" + size} {size} ariaLabel={size} />
@@ -38,3 +39,9 @@
     <TimeInput id={"density-" + density} {density} />
   </svelte:fragment>
 </SpecimenLayout>
+
+<style>
+  .specimen { display: flex; flex-direction: column; gap: 0.75rem; }
+  .specimen__item { display: flex; align-items: center; gap: 0.75rem; }
+  .specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
+</style>
