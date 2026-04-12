@@ -6,17 +6,19 @@
 mod app_state;
 mod component_registry;
 mod demo_view;
+mod parity_evidence;
 mod specimens;
 #[allow(dead_code)]
 mod style_bridge;
 mod token_view;
 
 use std::borrow::Cow;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{TabDefinition, TabVariant, TabsSpec};
+use poodle_specs::{CodeSpec, TabDefinition, TabVariant, TabsSpec, TextInputSpec};
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {
@@ -51,9 +53,14 @@ impl AssetSource for PreviewAssets {
 
 use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
+    TokenPanel,
 };
-use component_registry::{COMPOSITES, PRIMITIVES, SHELLS};
-use poodle_gpui_components::Tabs;
+use component_registry::{
+    component_tag, contract_doc_path, contract_root, find_component, grouped_components,
+    implementation_root, package_name,
+};
+use parity_evidence::component_evidence;
+use poodle_gpui_components::{Code, Tabs, TextInput};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -64,11 +71,44 @@ struct PreviewRoot {
     state: AppState,
 }
 
+struct ContractDocStatus {
+    path: String,
+    exists: bool,
+    status: Option<String>,
+    updated: Option<String>,
+}
+
 impl PreviewRoot {
     fn new() -> Self {
         Self {
             state: AppState::new(),
         }
+    }
+}
+
+fn load_contract_doc_status(slug: &str) -> ContractDocStatus {
+    let path = contract_doc_path(slug);
+    let full_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../..")
+        .join(&path);
+
+    let contents = std::fs::read_to_string(&full_path).ok();
+    let status = contents.as_ref().and_then(|contents| {
+        contents
+            .lines()
+            .find_map(|line| line.strip_prefix("Status: ").map(str::to_string))
+    });
+    let updated = contents.as_ref().and_then(|contents| {
+        contents
+            .lines()
+            .find_map(|line| line.strip_prefix("Updated: ").map(str::to_string))
+    });
+
+    ContractDocStatus {
+        path,
+        exists: full_path.exists(),
+        status,
+        updated,
     }
 }
 
@@ -154,7 +194,8 @@ impl PreviewRoot {
         cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let active_value = self.state.section.label();
-        let tab_defs: Vec<TabDefinition> = Section::ALL
+        let nav_sections = [Section::Components, Section::Tokens, Section::Treatments];
+        let tab_defs: Vec<TabDefinition> = nav_sections
             .iter()
             .map(|s| TabDefinition::new(s.label(), s.label()))
             .collect();
@@ -167,11 +208,9 @@ impl PreviewRoot {
             .with_id("nav-tabs")
             .on_change(cx.listener(|this, val: &str, _w, cx| {
                 match val {
-                    "Primitives" => this.state.section = Section::Primitives,
-                    "Composites" => this.state.section = Section::Composites,
-                    "Shells" => this.state.section = Section::Shells,
-                    "Demo" => this.state.section = Section::Demo,
+                    "Components" => this.state.section = Section::Components,
                     "Tokens" => this.state.section = Section::Tokens,
+                    "Treatments" => this.state.section = Section::Treatments,
                     _ => {}
                 }
                 cx.notify();
@@ -210,7 +249,50 @@ impl PreviewRoot {
             .child(pill(self.state.control_size.label()))
     }
 
-    /// Display controls bar — theme, density, size, treatment toggle groups + state probes.
+    fn review_command(&self) -> String {
+        let mut args = vec![
+            "cargo run --manifest-path packages/gpui/preview/Cargo.toml --".to_string(),
+            format!("--section {}", self.state.section.slug()),
+            format!("--theme {}", self.state.theme_preset.label()),
+            format!("--density {}", self.state.density.label()),
+            format!("--size {}", self.state.control_size.label()),
+            format!("--treatment {}", self.state.appearance_treatment.label()),
+        ];
+
+        if let Some(component_slug) = self.state.active_component_slug.as_deref() {
+            if self.state.section == Section::Components {
+                args.push(format!("--component {}", component_slug));
+            }
+        }
+
+        if self.state.section == Section::Components && !self.state.component_search.is_empty() {
+            args.push(format!("--search {:?}", self.state.component_search));
+        }
+
+        if self.state.section == Section::Demo {
+            args.push(format!(
+                "--demo-screen {}",
+                self.state.active_demo_screen.slug()
+            ));
+        }
+
+        if self.state.section == Section::Tokens {
+            args.push(format!(
+                "--token-panel {}",
+                self.state.active_token_panel.value()
+            ));
+            if !self.state.token_inspector_query.is_empty() {
+                args.push(format!(
+                    "--token-query {:?}",
+                    self.state.token_inspector_query
+                ));
+            }
+        }
+
+        args.join(" ")
+    }
+
+    /// Display controls bar — theme, density, size, treatment toggle groups + catalogue search.
     /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
     fn render_display_controls(
         &self,
@@ -293,8 +375,40 @@ impl PreviewRoot {
                     cx,
                 )
             })
-            // State probes
-            .child(self.render_state_probes(text_secondary, accent, border, cx))
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .min_w(px(240.0))
+                    .flex_1()
+                    .child(
+                        div()
+                            .text_size(px(11.0))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_secondary))
+                            .child("SEARCH"),
+                    )
+                    .child(
+                        TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("component-search")
+                                .with_input_type("search")
+                                .with_placeholder("Find component...")
+                                .with_value(&self.state.component_search)
+                                .with_aria_label("Search components"),
+                            &self.state.theme,
+                        )
+                        .with_id("component-search")
+                        .on_change(cx.listener(
+                            |this, val: &str, _w, cx| {
+                                this.state.component_search = val.to_string();
+                                this.state.section = Section::Components;
+                                cx.notify();
+                            },
+                        )),
+                    ),
+            )
     }
 
     /// A labelled toggle group (uppercase eyebrow + row of individual toggle buttons).
@@ -379,128 +493,221 @@ impl PreviewRoot {
             .child(toggle_row)
     }
 
-    /// State probe checkboxes (disabled, invalid, busy).
-    fn render_state_probes(
-        &self,
-        text_secondary: poodle_tokens::typed::ColorValue,
-        accent: poodle_tokens::typed::ColorValue,
-        border: poodle_tokens::typed::ColorValue,
-        cx: &mut Context<Self>,
-    ) -> Div {
-        let check = |label: &'static str, checked: bool, on_toggle: fn(&mut AppState)| {
-            let box_el = div()
-                .w(px(14.0))
-                .h(px(14.0))
-                .rounded(px(3.0))
-                .border_1()
-                .flex()
-                .items_center()
-                .justify_center();
-
-            let box_el = if checked {
-                box_el
-                    .bg(color_to_hsla(accent))
-                    .border_color(color_to_hsla(accent))
-                    .text_color(gpui::white())
-                    .text_xs()
-                    .child("✓")
-            } else {
-                box_el.border_color(color_to_hsla(border))
-            };
-
-            div()
-                .id(SharedString::from(format!("probe-{}", label)))
-                .flex()
-                .items_center()
-                .gap(px(4.0))
-                .cursor_pointer()
-                .child(box_el)
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(label),
-                )
-                .on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                    on_toggle(&mut this.state);
-                    cx.notify();
-                }))
-        };
-
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(6.0))
-            .child(
-                div()
-                    .text_size(px(11.0))
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("STATE PROBES"),
-            )
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(px(16.0))
-                    .child(check("Disabled", self.state.disabled, |s| {
-                        s.disabled = !s.disabled
-                    }))
-                    .child(check("Invalid", self.state.invalid, |s| {
-                        s.invalid = !s.invalid
-                    }))
-                    .child(check("Busy", self.state.busy, |s| s.busy = !s.busy)),
-            )
-    }
-
     /// Section content router.
     /// `available_h` is the pixel height remaining after top bar + controls.
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let content_h = available_h - px(112.0);
+        let review_state = div().w_full().px(px(24.0)).pt(px(16.0)).child(
+            div()
+                .p(px(14.0))
+                .rounded(px(8.0))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle))
+                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div()
+                        .text_size(px(11.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("REVIEW STATE"),
+                )
+                .child(Code::from_spec(
+                    CodeSpec::new()
+                        .with_language("bash")
+                        .with_content(self.review_command())
+                        .with_copyable(false),
+                    theme,
+                )),
+        );
+
         match self.state.section {
-            Section::Primitives => {
-                self.render_catalogue_section(PRIMITIVES, Section::Primitives, available_h, cx)
-            }
-            Section::Composites => {
-                self.render_catalogue_section(COMPOSITES, Section::Composites, available_h, cx)
-            }
-            Section::Shells => {
-                self.render_catalogue_section(SHELLS, Section::Shells, available_h, cx)
-            }
-            Section::Demo => self.render_demo_section(available_h, cx),
-            Section::Tokens => div().w_full().h(available_h).child(
-                div()
-                    .id("tokens-section")
-                    .size_full()
-                    .overflow_y_scroll()
-                    .child(token_view::render_token_inspector(theme)),
-            ),
+            Section::Components => div()
+                .w_full()
+                .h(available_h)
+                .flex()
+                .flex_col()
+                .child(review_state)
+                .child(self.render_components_section(content_h, cx)),
+            Section::Demo => div()
+                .w_full()
+                .h(available_h)
+                .flex()
+                .flex_col()
+                .child(review_state)
+                .child(self.render_demo_section(content_h, cx)),
+            Section::Tokens => div()
+                .w_full()
+                .h(available_h)
+                .flex()
+                .flex_col()
+                .child(review_state)
+                .child(self.render_tokens_section(content_h, cx)),
+            Section::Treatments => div()
+                .w_full()
+                .h(available_h)
+                .flex()
+                .flex_col()
+                .child(review_state)
+                .child(self.render_treatments_section(content_h)),
         }
     }
 
-    /// Two-column layout: sidebar listing components + content area.
-    /// Both sidebar and content get explicit pixel heights so their
-    /// overflow_y_scroll content-masks have definite bounds for hit testing.
-    fn render_catalogue_section(
-        &self,
-        components: &'static [component_registry::ComponentEntry],
-        which: Section,
-        available_h: Pixels,
-        cx: &mut Context<Self>,
-    ) -> Div {
+    fn render_tokens_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let panel_bg = theme.resolve_color("color.background.panel");
+
+        let tab_defs = vec![
+            TabDefinition::new(TokenPanel::Summary.value(), TokenPanel::Summary.label()),
+            TabDefinition::new(TokenPanel::Inspector.value(), TokenPanel::Inspector.label()),
+        ];
+        let active_tab = self.state.active_token_panel.value();
+        let matching_count = token_view::matching_token_count(&self.state.token_inspector_query);
+
+        div().w_full().h(available_h).child(
+            div()
+                .id("tokens-section")
+                .size_full()
+                .overflow_y_scroll()
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(16.0))
+                        .p(px(24.0))
+                        .max_w(px(1024.0))
+                        .child(
+                            div()
+                                .flex()
+                                .flex_col()
+                                .gap(px(8.0))
+                                .child(
+                                    div()
+                                        .text_size(px(11.0))
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("TOKEN TOOLS"),
+                                )
+                                .child(
+                                    div()
+                                        .text_3xl()
+                                        .font_weight(FontWeight::BOLD)
+                                        .text_color(color_to_hsla(text_primary))
+                                        .child("Runtime values and emitted-token inspection"),
+                                )
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("@poodle/svelte-tokens"),
+                                )
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("packages/tokens/artifacts/css/"),
+                                )
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("packages/tokens/artifacts/ts/"),
+                                ),
+                        )
+                        .child(
+                            Tabs::from_spec(
+                                TabsSpec::new(tab_defs)
+                                    .with_variant(TabVariant::Pill)
+                                    .with_value(active_tab),
+                                theme,
+                            )
+                            .with_id("token-panel-tabs")
+                            .on_change(cx.listener(
+                                |this, val: &str, _w, cx| {
+                                    this.state.active_token_panel = match val {
+                                        "token-inspector" => TokenPanel::Inspector,
+                                        _ => TokenPanel::Summary,
+                                    };
+                                    cx.notify();
+                                },
+                            )),
+                        )
+                        .child(
+                            div()
+                                .p(px(16.0))
+                                .rounded(px(8.0))
+                                .bg(color_to_hsla(panel_bg))
+                                .border_1()
+                                .border_color(color_to_hsla(border_subtle))
+                                .flex()
+                                .flex_col()
+                                .gap(px(16.0))
+                                .when(self.state.active_token_panel == TokenPanel::Summary, |el| {
+                                    el.child(token_view::render_runtime_token_summary(theme))
+                                })
+                                .when(
+                                    self.state.active_token_panel == TokenPanel::Inspector,
+                                    |el| {
+                                        el.child(
+                                            TextInput::from_spec(
+                                                TextInputSpec::new()
+                                                    .with_id("token-inspector-query")
+                                                    .with_input_type("search")
+                                                    .with_placeholder("Filter tokens by path")
+                                                    .with_value(&self.state.token_inspector_query)
+                                                    .with_aria_label("Filter semantic tokens"),
+                                                theme,
+                                            )
+                                            .with_id("token-inspector-query")
+                                            .on_change(cx.listener(|this, val: &str, _w, cx| {
+                                                this.state.token_inspector_query = val.to_string();
+                                                cx.notify();
+                                            })),
+                                        )
+                                        .child(
+                                            div()
+                                                .text_sm()
+                                                .text_color(color_to_hsla(text_secondary))
+                                                .child(format!(
+                                                    "{} semantic tokens shown",
+                                                    matching_count
+                                                )),
+                                        )
+                                        .child(
+                                            token_view::render_token_inspector(
+                                                theme,
+                                                &self.state.token_inspector_query,
+                                            ),
+                                        )
+                                    },
+                                ),
+                        ),
+                ),
+        )
+    }
+
+    /// Unified component catalogue mirroring the Svelte preview information architecture.
+    fn render_components_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         let border_subtle = theme.resolve_color("color.border.subtle");
         let text_primary = theme.resolve_color("color.text.primary");
         let text_secondary = theme.resolve_color("color.text.secondary");
         let accent = theme.resolve_color("color.accent.base");
         let elevated_bg = theme.resolve_color("color.background.elevated");
-
-        let active_idx = match which {
-            Section::Primitives => self.state.active_primitive,
-            Section::Composites => self.state.active_composite,
-            Section::Shells => self.state.active_shell,
-            _ => None,
-        };
+        let groups = grouped_components(&self.state.component_search);
+        let active_component = self
+            .state
+            .active_component_slug
+            .as_deref()
+            .and_then(find_component);
 
         // Sidebar — explicit height so overflow_y_scroll has definite bounds.
         let mut sidebar = div()
@@ -515,46 +722,55 @@ impl PreviewRoot {
             .border_r_1()
             .border_color(color_to_hsla(border_subtle).opacity(0.6));
 
-        for (i, comp) in components.iter().enumerate() {
-            let is_active = active_idx == Some(i);
+        for group in &groups {
+            sidebar = sidebar.child(
+                div()
+                    .px(px(16.0))
+                    .pt(px(10.0))
+                    .pb(px(4.0))
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(group.tag.label()),
+            );
 
-            let mut link = div()
-                .id(SharedString::from(format!("comp-{}", comp.slug)))
-                .px(px(16.0))
-                .py(px(6.0))
-                .text_sm()
-                .cursor_pointer()
-                .border_l_2();
+            for component in &group.items {
+                let slug = component.slug;
+                let is_active = active_component
+                    .map(|active| active.slug == component.slug)
+                    .unwrap_or(false);
 
-            link = if is_active {
-                link.text_color(color_to_hsla(text_primary))
-                    .border_color(color_to_hsla(accent))
-                    .bg(color_to_hsla(accent).opacity(0.08))
-            } else {
-                link.text_color(color_to_hsla(text_secondary))
-                    .border_color(hsla(0.0, 0.0, 0.0, 0.0))
-            };
+                let mut link = div()
+                    .id(SharedString::from(format!("comp-{}", component.slug)))
+                    .px(px(16.0))
+                    .py(px(6.0))
+                    .text_sm()
+                    .cursor_pointer()
+                    .border_l_2();
 
-            link = link.child(comp.display_name);
+                link = if is_active {
+                    link.text_color(color_to_hsla(text_primary))
+                        .border_color(color_to_hsla(accent))
+                        .bg(color_to_hsla(accent).opacity(0.08))
+                } else {
+                    link.text_color(color_to_hsla(text_secondary))
+                        .border_color(hsla(0.0, 0.0, 0.0, 0.0))
+                };
 
-            link = link.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                match which {
-                    Section::Primitives => this.state.active_primitive = Some(i),
-                    Section::Composites => this.state.active_composite = Some(i),
-                    Section::Shells => this.state.active_shell = Some(i),
-                    _ => {}
-                }
-                cx.notify();
-            }));
+                link = link.child(component.display_name);
+                link = link.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                    this.state.active_component_slug = Some(slug.to_string());
+                    cx.notify();
+                }));
 
-            sidebar = sidebar.child(link);
+                sidebar = sidebar.child(link);
+            }
         }
 
         // Outer layout: horizontal flex row with explicit height.
         let mut layout = div().w_full().h(available_h).flex().child(sidebar);
 
-        if let Some(idx) = active_idx {
-            let comp = &components[idx];
+        if let Some(component) = active_component {
             layout = layout.child(
                 div()
                     .id("specimen-content")
@@ -565,67 +781,331 @@ impl PreviewRoot {
                     .gap(px(16.0))
                     .p(px(24.0))
                     .overflow_y_scroll()
-                    .child(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .gap(px(4.0))
-                            .child(div().text_xl().child(comp.display_name))
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(comp.description),
-                            ),
-                    )
+                    .child(self.render_component_page_header(component))
                     .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(self.render_component_specimen(comp.slug, cx)),
+                    .child(self.render_component_specimen(component.slug, cx)),
             );
         } else {
             layout = layout.child(self.render_catalogue_landing(
-                components,
+                &groups,
                 theme,
                 available_h,
                 text_secondary,
                 border_subtle,
                 elevated_bg,
+                cx,
             ));
         }
 
         layout
     }
 
+    fn render_component_page_header(&self, component: &component_registry::ComponentEntry) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let elevated_bg = theme.resolve_color("color.background.elevated");
+        let panel_bg = theme.resolve_color("color.background.panel");
+
+        let meta_pill = |label: String| {
+            div()
+                .px(px(8.0))
+                .py(px(3.0))
+                .rounded(px(999.0))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle))
+                .bg(color_to_hsla(elevated_bg).opacity(0.92))
+                .text_size(px(11.0))
+                .text_color(color_to_hsla(text_secondary))
+                .child(label)
+        };
+
+        let provenance_card = |eyebrow: &'static str, title: String, body: String| {
+            div()
+                .flex_1()
+                .min_w(px(220.0))
+                .p(px(14.0))
+                .rounded(px(8.0))
+                .bg(color_to_hsla(elevated_bg))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle))
+                .flex()
+                .flex_col()
+                .gap(px(6.0))
+                .child(
+                    div()
+                        .text_size(px(11.0))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(eyebrow),
+                )
+                .child(
+                    div()
+                        .text_sm()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(color_to_hsla(text_primary))
+                        .child(title),
+                )
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(body),
+                )
+        };
+
+        let import_snippet = format!(
+            "use {}::{};",
+            package_name().replace('-', "_"),
+            component.display_name
+        );
+        let contract_doc = load_contract_doc_status(component.slug);
+        let evidence = component_evidence(component.display_name);
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(16.0))
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.0))
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(px(8.0))
+                            .flex_wrap()
+                            .child(meta_pill(package_name().to_string()))
+                            .child(meta_pill(component_tag(component.slug).label().to_string()))
+                            .child(meta_pill("contract-backed".to_string())),
+                    )
+                    .child(
+                        div()
+                            .text_3xl()
+                            .font_weight(FontWeight::BOLD)
+                            .text_color(color_to_hsla(text_primary))
+                            .child(component.display_name),
+                    )
+                    .child(
+                        div()
+                            .text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .max_w(px(720.0))
+                            .child(component.description),
+                    ),
+            )
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(10.0))
+                    .child(
+                        div()
+                            .text_sm()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_primary))
+                            .child("Import"),
+                    )
+                    .child(Code::from_spec(
+                        CodeSpec::new()
+                            .with_language("rust")
+                            .with_content(import_snippet)
+                            .with_copyable(false),
+                        theme,
+                    )),
+            )
+            .child(
+                div()
+                    .flex()
+                    .gap(px(12.0))
+                    .flex_wrap()
+                    .child(provenance_card(
+                        "PACKAGE",
+                        package_name().to_string(),
+                        "Public GPUI component surface under review in the native preview."
+                            .to_string(),
+                    ))
+                    .child(provenance_card(
+                        "CONTRACT ROOT",
+                        contract_root().to_string(),
+                        "Semantic ownership lives in the shared component contracts, not in the preview shell."
+                            .to_string(),
+                    ))
+                    .child(provenance_card(
+                        "CONTRACT DOC",
+                        contract_doc.path.clone(),
+                        if contract_doc.exists {
+                            match (&contract_doc.status, &contract_doc.updated) {
+                                (Some(status), Some(updated)) => {
+                                    format!("Present. Status: {}. Updated: {}.", status, updated)
+                                }
+                                (Some(status), None) => {
+                                    format!("Present. Status: {}.", status)
+                                }
+                                _ => "Present in shared contracts.".to_string(),
+                            }
+                        } else {
+                            "Missing. GPUI preview should show that gap, not fake a docs surface."
+                                .to_string()
+                        },
+                    ))
+                    .child(provenance_card(
+                        "IMPLEMENTATION ROOT",
+                        implementation_root(component.slug).to_string(),
+                        "This tells you where the renderable GPUI implementation currently lives."
+                            .to_string(),
+                    )),
+            )
+            .child(
+                div()
+                    .p(px(14.0))
+                    .rounded(px(8.0))
+                    .bg(color_to_hsla(panel_bg))
+                    .border_1()
+                    .border_color(color_to_hsla(border_subtle))
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .child(
+                        div()
+                            .text_size(px(11.0))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_secondary))
+                            .child("DOCS + PARITY"),
+                    )
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(px(8.0))
+                            .flex_wrap()
+                            .child(meta_pill(format!(
+                                "contract doc: {}",
+                                if contract_doc.exists { "present" } else { "missing" }
+                            )))
+                            .when_some(contract_doc.status.clone(), |row, status| {
+                                row.child(meta_pill(format!("status: {}", status)))
+                            })
+                            .when_some(contract_doc.updated.clone(), |row, updated| {
+                                row.child(meta_pill(format!("updated: {}", updated)))
+                            }),
+                    )
+                    .child(
+                        div()
+                            .text_sm()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(if contract_doc.exists {
+                                format!(
+                                    "Shared contract doc found at {}. GPUI still does not mirror Svelte-generated usage docs here.",
+                                    contract_doc.path
+                                )
+                            } else {
+                                format!(
+                                    "No shared contract doc found at {}. Keep the docs gap explicit until the contract exists.",
+                                    contract_doc.path
+                                )
+                            }),
+                    )
+                    .when_some(evidence, |container, evidence| {
+                        let mut section_row = div().flex().flex_wrap().gap(px(6.0));
+                        for title in &evidence.section_titles {
+                            section_row = section_row.child(meta_pill(title.clone()));
+                        }
+
+                        container
+                            .child(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap(px(8.0))
+                                    .flex_wrap()
+                                    .child(meta_pill(format!("status: {}", evidence.status)))
+                                    .child(meta_pill(format!(
+                                        "sections: {}",
+                                        evidence.section_ids.len()
+                                    ))),
+                            )
+                            .child(
+                                div()
+                                    .text_sm()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("Parity note: {}", evidence.note)),
+                            )
+                            .child(section_row)
+                    })
+                    .when(evidence.is_none(), |container| {
+                        container.child(
+                            div()
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child("No matching Svelte parity artifact entry was found for this export yet. The GPUI page still exposes package, contract, specimen, and implementation provenance so the gap stays explicit."),
+                        )
+                    }),
+            )
+    }
+
     /// Landing page grid showing all components as cards.
     fn render_catalogue_landing(
         &self,
-        components: &[component_registry::ComponentEntry],
+        groups: &[component_registry::ComponentGroup],
         _theme: &poodle_gpui::GpuiThemeProvider,
         available_h: Pixels,
         text_secondary: poodle_tokens::typed::ColorValue,
         border: poodle_tokens::typed::ColorValue,
         elevated_bg: poodle_tokens::typed::ColorValue,
+        cx: &mut Context<Self>,
     ) -> Div {
-        let mut grid = div().flex().flex_wrap().gap(px(12.0));
+        let mut landing = div().flex().flex_col().gap(px(20.0));
+        let filtered_count: usize = groups.iter().map(|group| group.items.len()).sum();
 
-        for comp in components {
-            grid = grid.child(
+        for group in groups {
+            let mut grid = div().flex().flex_wrap().gap(px(12.0));
+
+            for component in &group.items {
+                let slug = component.slug;
+                grid = grid.child(
+                    div()
+                        .id(SharedString::from(format!("landing-{}", component.slug)))
+                        .w(px(220.0))
+                        .p(px(12.0))
+                        .rounded(px(8.0))
+                        .bg(color_to_hsla(elevated_bg))
+                        .border_1()
+                        .border_color(color_to_hsla(border))
+                        .flex()
+                        .flex_col()
+                        .gap(px(4.0))
+                        .cursor_pointer()
+                        .child(div().text_sm().child(component.display_name))
+                        .child(
+                            div()
+                                .text_xs()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(component.description),
+                        )
+                        .on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                            this.state.active_component_slug = Some(slug.to_string());
+                            cx.notify();
+                        })),
+                );
+            }
+
+            landing = landing.child(
                 div()
-                    .w(px(200.0))
-                    .p(px(12.0))
-                    .rounded(px(8.0))
-                    .bg(color_to_hsla(elevated_bg))
-                    .border_1()
-                    .border_color(color_to_hsla(border))
                     .flex()
                     .flex_col()
-                    .gap(px(4.0))
-                    .child(div().text_sm().child(comp.display_name))
+                    .gap(px(8.0))
                     .child(
                         div()
-                            .text_xs()
+                            .text_size(px(11.0))
+                            .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_secondary))
-                            .child(comp.description),
-                    ),
+                            .child(group.tag.label()),
+                    )
+                    .child(grid),
             );
         }
 
@@ -642,13 +1122,429 @@ impl PreviewRoot {
                         .p(px(24.0))
                         .child(
                             div()
+                                .text_xl()
+                                .child("Component catalogue"),
+                        )
+                        .child(
+                            div()
                                 .text_sm()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child(format!("{} components", components.len())),
+                                .child("Browse the full Poodle component library. Each component keeps its contract, specimen, and implementation reviewable from one place."),
                         )
-                        .child(grid),
+                        .child(
+                            div()
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("{} components", filtered_count)),
+                        )
+                        .child(landing),
                 ),
         )
+    }
+
+    fn render_treatments_section(&self, available_h: Pixels) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let elevated_bg = theme.resolve_color("color.background.elevated");
+        let panel_bg = theme.resolve_color("color.background.panel");
+        let accent = theme.resolve_color("color.accent.base");
+
+        let card =
+            |eyebrow: &'static str, title: &'static str, body: &'static str, active: bool| {
+                div()
+                    .flex_1()
+                    .min_w(px(220.0))
+                    .p(px(16.0))
+                    .rounded(px(8.0))
+                    .bg(if active {
+                        color_to_hsla(accent).opacity(0.07)
+                    } else {
+                        color_to_hsla(elevated_bg)
+                    })
+                    .border_1()
+                    .border_color(if active {
+                        color_to_hsla(accent).opacity(0.4)
+                    } else {
+                        color_to_hsla(border_subtle)
+                    })
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .child(
+                        div()
+                            .text_size(px(11.0))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(eyebrow),
+                    )
+                    .child(
+                        div()
+                            .text_sm()
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_primary))
+                            .child(title),
+                    )
+                    .child(
+                        div()
+                            .text_sm()
+                            .line_height(relative(1.6))
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(body),
+                    )
+            };
+
+        let section_heading = |title: &'static str| {
+            div()
+                .text_lg()
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(color_to_hsla(text_primary))
+                .child(title)
+        };
+
+        let body = |text: &'static str| {
+            div()
+                .text_sm()
+                .line_height(relative(1.6))
+                .text_color(color_to_hsla(text_secondary))
+                .child(text)
+        };
+
+        let code_panel = |content: &'static str| {
+            Code::from_spec(
+                CodeSpec::new()
+                    .with_language("css")
+                    .with_content(content)
+                    .with_copyable(false),
+                theme,
+            )
+        };
+
+        let role_card = |name: &'static str,
+                         description: &'static str,
+                         variables: &'static [(&'static str, &'static str)],
+                         components: &'static [&'static str]| {
+            let mut role = div()
+                .p(px(16.0))
+                .rounded(px(8.0))
+                .bg(color_to_hsla(elevated_bg))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle))
+                .flex()
+                .flex_col()
+                .gap(px(10.0))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            div()
+                                .text_sm()
+                                .font_weight(FontWeight::SEMIBOLD)
+                                .text_color(color_to_hsla(text_primary))
+                                .child(name),
+                        )
+                        .child(body(description)),
+                );
+
+            if !components.is_empty() {
+                let mut component_row = div().flex().flex_wrap().gap(px(6.0));
+                for component in components {
+                    component_row = component_row.child(
+                        div()
+                            .px(px(8.0))
+                            .py(px(3.0))
+                            .rounded(px(999.0))
+                            .border_1()
+                            .border_color(color_to_hsla(border_subtle))
+                            .bg(color_to_hsla(panel_bg))
+                            .text_size(px(11.0))
+                            .text_color(color_to_hsla(text_secondary))
+                            .child((*component).to_string()),
+                    );
+                }
+                role = role.child(component_row);
+            }
+
+            for (variable, purpose) in variables {
+                role = role.child(
+                    div()
+                        .flex()
+                        .gap(px(12.0))
+                        .items_start()
+                        .child(
+                            div().min_w(px(280.0)).child(Code::from_spec(
+                                CodeSpec::new()
+                                    .with_content(*variable)
+                                    .with_inline(true)
+                                    .with_copyable(false),
+                                theme,
+                            )),
+                        )
+                        .child(
+                            div()
+                                .text_xs()
+                                .line_height(relative(1.5))
+                                .text_color(color_to_hsla(text_secondary))
+                                .child((*purpose).to_string()),
+                        ),
+                );
+            }
+
+            role
+        };
+
+        let step = |number: &'static str, title: &'static str, text: &'static str| {
+            div()
+                .flex()
+                .gap(px(12.0))
+                .items_start()
+                .child(
+                    div()
+                        .w(px(28.0))
+                        .h(px(28.0))
+                        .rounded(px(999.0))
+                        .bg(color_to_hsla(accent).opacity(0.16))
+                        .text_color(color_to_hsla(text_primary))
+                        .font_weight(FontWeight::BOLD)
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .child(number),
+                )
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(4.0))
+                        .child(
+                            div()
+                                .text_sm()
+                                .font_weight(FontWeight::SEMIBOLD)
+                                .text_color(color_to_hsla(text_primary))
+                                .child(title),
+                        )
+                        .child(body(text)),
+                )
+        };
+
+        let rule = |title: &'static str, text: &'static str| {
+            div()
+                .p(px(14.0))
+                .rounded(px(8.0))
+                .bg(color_to_hsla(elevated_bg))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle))
+                .flex()
+                .flex_col()
+                .gap(px(6.0))
+                .child(
+                    div()
+                        .text_sm()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(color_to_hsla(text_primary))
+                        .child(title),
+                )
+                .child(body(text))
+        };
+
+        div()
+            .w_full()
+            .h(available_h)
+            .child(
+                div()
+                    .id("treatments-section")
+                    .size_full()
+                    .flex()
+                    .flex_col()
+                    .gap(px(16.0))
+                    .p(px(24.0))
+                    .max_w(px(920.0))
+                    .child(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .gap(px(8.0))
+                            .child(
+                                div()
+                                    .text_3xl()
+                                    .font_weight(FontWeight::BOLD)
+                                    .text_color(color_to_hsla(text_primary))
+                                    .child("Treatment system"),
+                            )
+                            .child(body(
+                                "Treatments sit between canonical semantic tokens and app-owned wrappers. They let downstream consumers apply cohesive visual branding across component families without redefining token meaning.",
+                            )),
+                    )
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(section_heading("Three-Layer Architecture"))
+                    .child(
+                        div()
+                            .flex()
+                            .gap(px(12.0))
+                            .flex_wrap()
+                            .child(card(
+                                "LAYER 1",
+                                "Canonical Semantic Tokens",
+                                "Typed, narrow values: color, spacing, radius. Never broadened to hold gradients or web-only effects.",
+                                false,
+                            ))
+                            .child(card(
+                                "LAYER 2",
+                                "Appearance Recipes & Treatment Roles",
+                                "Grouped visual overrides scoped to component families. They may include gradients, layered shadows, and other web-only effects.",
+                                true,
+                            ))
+                            .child(card(
+                                "LAYER 3",
+                                "App-Owned Wrappers & Composites",
+                                "Structural brand expression built by composing Poodle primitives without changing core token meaning.",
+                                false,
+                            )),
+                    )
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(section_heading("How Components Consume Treatments"))
+                    .child(body(
+                        "Components reference treatment variables using fallback chains. The treatment variable is tried first; if undefined, the semantic token value is used.",
+                    ))
+                    .child(code_panel(
+                        ".text-input {\n  background: var(\n    --poodle-treatment-interactive-subtle-fill,\n    var(--poodle-color-background-surface)\n  );\n}",
+                    ))
+                    .child(body(
+                        "This means components render with standard token values by default, and treatment values take precedence only when explicitly set. Components never need to know which specific treatment is active.",
+                    ))
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(section_heading("Treatment Roles"))
+                    .child(body(
+                        "Six family-level roles are defined. Components map these into local aliases rather than inventing per-component treatment vocabularies.",
+                    ))
+                    .child(role_card(
+                        "interactive",
+                        "General interactive surfaces such as secondary buttons, toggles, and menu triggers.",
+                        &[
+                            ("--poodle-treatment-interactive-radius", "Border radius"),
+                            ("--poodle-treatment-interactive-fill", "Resting background"),
+                            ("--poodle-treatment-interactive-fill-active", "Hover or active background"),
+                            ("--poodle-treatment-interactive-border", "Resting border color"),
+                            ("--poodle-treatment-interactive-border-active", "Hover or active border color"),
+                        ],
+                        &[
+                            "Button (secondary)",
+                            "IconButton (secondary)",
+                            "SplitButton",
+                            "ToggleGroup",
+                            "SegmentedControl",
+                        ],
+                    ))
+                    .child(role_card(
+                        "interactive-primary",
+                        "Primary action buttons and more prominent call-to-action surfaces.",
+                        &[
+                            ("--poodle-treatment-interactive-primary-radius", "Border radius"),
+                            ("--poodle-treatment-interactive-primary-fill", "Resting background"),
+                            ("--poodle-treatment-interactive-primary-fill-hover", "Hover background"),
+                            ("--poodle-treatment-interactive-primary-border", "Resting border color"),
+                            ("--poodle-treatment-interactive-primary-text", "Text and icon color"),
+                        ],
+                        &["Button (primary)", "SplitButton (primary)", "IconButton (primary)"],
+                    ))
+                    .child(role_card(
+                        "interactive-subtle",
+                        "Text inputs, selects, and search fields that keep their chrome restrained.",
+                        &[
+                            ("--poodle-treatment-interactive-subtle-radius", "Border radius"),
+                            ("--poodle-treatment-interactive-subtle-fill", "Resting background"),
+                            ("--poodle-treatment-interactive-subtle-fill-hover", "Hover background"),
+                            ("--poodle-treatment-interactive-subtle-fill-focus", "Focus background"),
+                            ("--poodle-treatment-interactive-subtle-border-focus", "Focus border"),
+                        ],
+                        &["TextInput", "Select"],
+                    ))
+                    .child(role_card(
+                        "surface",
+                        "Panel backgrounds, card frames, and general container surfaces.",
+                        &[
+                            ("--poodle-treatment-surface-radius", "Border radius"),
+                            ("--poodle-treatment-surface-fill", "Background"),
+                            ("--poodle-treatment-surface-border", "Border color"),
+                            ("--poodle-treatment-surface-shadow", "Shadow"),
+                            ("--poodle-treatment-surface-divider", "Internal divider color"),
+                        ],
+                        &["Surface", "Card", "MetricTile"],
+                    ))
+                    .child(role_card(
+                        "surface-elevated",
+                        "Elevated surfaces such as dialogs, drawers, popovers, and elevated cards.",
+                        &[
+                            ("--poodle-treatment-surface-elevated-radius", "Border radius"),
+                            ("--poodle-treatment-surface-elevated-fill", "Background"),
+                            ("--poodle-treatment-surface-elevated-border", "Border color"),
+                            ("--poodle-treatment-surface-elevated-shadow", "Shadow"),
+                        ],
+                        &["Dialog", "Drawer", "Popover", "Menu", "HoverCard", "Tooltip"],
+                    ))
+                    .child(role_card(
+                        "focus-ring",
+                        "Focus-state treatment for keyboard indicators. It currently uses accent token posture directly and leaves room for future divergence.",
+                        &[],
+                        &[],
+                    ))
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(section_heading("Applying a Treatment"))
+                    .child(body(
+                        "Set a data appearance-treatment attribute on a container element. All descendants inherit treatment values through the scoped override layer.",
+                    ))
+                    .child(code_panel(
+                        "<div data-appearance-treatment=\"brand-raised\">\n  <!-- All Poodle components inside inherit treatment values -->\n</div>",
+                    ))
+                    .child(body(
+                        "Then define scoped overrides for the treatment variables when that attribute is present.",
+                    ))
+                    .child(code_panel(
+                        "[data-appearance-treatment=\"brand-raised\"] {\n  --poodle-treatment-interactive-fill:\n    linear-gradient(180deg, rgba(255,255,255,0.14), transparent),\n    var(--poodle-color-background-elevated);\n  --poodle-treatment-interactive-primary-fill:\n    linear-gradient(180deg, rgba(255,255,255,0.24), transparent),\n    var(--poodle-color-accent-base);\n  --poodle-treatment-surface-fill:\n    linear-gradient(180deg, rgba(255,255,255,0.14), transparent),\n    var(--poodle-color-background-panel);\n  /* ... all other treatment variables */\n}",
+                    ))
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(section_heading("Creating a New Treatment"))
+                    .child(step(
+                        "1",
+                        "Define treatment variables",
+                        "Create a scoped override block that sets the treatment variables for every role you want to affect. Unset variables fall through to semantic-token defaults.",
+                    ))
+                    .child(step(
+                        "2",
+                        "Add theme-specific adjustments",
+                        "Treatments may need per-theme tweaks, especially where shadows and contrast behave differently on light and dark backgrounds.",
+                    ))
+                    .child(step(
+                        "3",
+                        "Register in the preview app",
+                        "Keep the treatment selectable in the preview controls so component review can exercise the same shell under different appearance recipes.",
+                    ))
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(section_heading("Rules"))
+                    .child(rule(
+                        "Token purity",
+                        "Semantic tokens must remain typed and narrow. Do not broaden a color token to hold a gradient.",
+                    ))
+                    .child(rule(
+                        "Family-level roles",
+                        "Prefer shared treatment roles over per-component treatment variables.",
+                    ))
+                    .child(rule(
+                        "Fallback chain",
+                        "Every treatment variable reference must include a semantic token fallback.",
+                    ))
+                    .child(rule(
+                        "Gradient rule",
+                        "Gradients are valid appearance treatments, not canonical colors.",
+                    ))
+                    .child(rule(
+                        "Safe override boundary",
+                        "Downstream apps may scope recipe overrides to subtrees. They must not redefine semantic token meaning.",
+                    )),
+            )
     }
 
     /// Render a single specimen for a specific component by slug.
@@ -656,7 +1552,9 @@ impl PreviewRoot {
         specimens::render_single_specimen(slug, &self.state, cx)
     }
 
-    /// Demo section with segmented control for screen switching.
+    /// Shared demo-contract target.
+    ///
+    /// This is intentionally separate from the current docs-shell parity surface.
     fn render_demo_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         let text_secondary = theme.resolve_color("color.text.secondary");
@@ -733,6 +1631,39 @@ impl PreviewRoot {
             state_row = state_row.child(chip((*state).to_string()));
         }
 
+        let contract_notice = div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .p(px(14.0))
+            .rounded(px(8.0))
+            .border_1()
+            .border_color(color_to_hsla(accent).opacity(0.42))
+            .bg(color_to_hsla(accent).opacity(0.08))
+            .child(
+                div()
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("SHARED DEMO TARGET"),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_primary))
+                    .child("This internal surface represents the contract-owned shared demo app target. It is not the current Svelte docs shell, and it should not be read as proof that the docs-shell rebuild already exists in both runtimes."),
+            )
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap(px(6.0))
+                    .flex_wrap()
+                    .child(chip("docs shell stays separate".to_string()))
+                    .child(chip("contract-owned target".to_string()))
+                    .child(chip("internal review surface".to_string())),
+            );
+
         let context_toolbar = div()
             .flex()
             .items_center()
@@ -753,7 +1684,7 @@ impl PreviewRoot {
                             .text_size(px(11.0))
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_secondary))
-                            .child("CONTEXT TOOLBAR"),
+                            .child("CONTRACT CONTEXT"),
                     )
                     .child(
                         div()
@@ -769,16 +1700,12 @@ impl PreviewRoot {
                     .gap(px(6.0))
                     .child(chip(format!("mode: {}", active_screen.comparison_mode())))
                     .child(chip(format!(
-                        "disabled: {}",
-                        if self.state.disabled { "on" } else { "off" }
+                        "sections: {}",
+                        active_screen.source_sections().len()
                     )))
                     .child(chip(format!(
-                        "invalid: {}",
-                        if self.state.invalid { "on" } else { "off" }
-                    )))
-                    .child(chip(format!(
-                        "busy: {}",
-                        if self.state.busy { "on" } else { "off" }
+                        "states: {}",
+                        active_screen.state_matrix().len()
                     ))),
             );
 
@@ -796,7 +1723,7 @@ impl PreviewRoot {
                     .text_size(px(11.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(color_to_hsla(text_secondary))
-                    .child("COMPANION PANEL"),
+                    .child("CONTRACT PANEL"),
             )
             .child(
                 div()
@@ -815,7 +1742,7 @@ impl PreviewRoot {
                 div()
                     .text_sm()
                     .text_color(color_to_hsla(text_secondary))
-                    .child("Source sections"),
+                    .child("Source sections from current docs shell"),
             )
             .child(section_row)
             .child(
@@ -830,9 +1757,9 @@ impl PreviewRoot {
                     .text_sm()
                     .text_color(color_to_hsla(text_secondary))
                     .child(if active_screen.has_modal_layer() {
-                        "Modal layer is in scope for this screen and should stay visible in parity review."
+                        "Modal layer is part of the contract scope for this screen and should stay visible during target-app review."
                     } else {
-                        "This screen should read clearly without relying on modal-layer posture."
+                        "This screen should read clearly as a contract target without relying on modal-layer posture."
                     }),
             );
 
@@ -847,6 +1774,7 @@ impl PreviewRoot {
                         .flex_col()
                         .gap(px(16.0))
                         .p(px(24.0))
+                        .child(contract_notice)
                         .child(
                             div()
                                 .flex()
@@ -857,7 +1785,7 @@ impl PreviewRoot {
                                         .text_size(px(11.0))
                                         .font_weight(FontWeight::SEMIBOLD)
                                         .text_color(color_to_hsla(text_secondary))
-                                        .child("SCREEN TABS"),
+                                        .child("DEMO SCREENS"),
                                 )
                                 .child(seg),
                         )
@@ -894,6 +1822,10 @@ impl PreviewRoot {
 struct CliArgs {
     section: Option<Section>,
     component: Option<String>,
+    component_search: Option<String>,
+    demo_screen: Option<DemoScreen>,
+    token_panel: Option<TokenPanel>,
+    token_query: Option<String>,
     theme: Option<ThemePreset>,
     density: Option<Density>,
     control_size: Option<ControlSize>,
@@ -905,6 +1837,10 @@ fn parse_cli_args() -> CliArgs {
     let args: Vec<String> = std::env::args().collect();
     let mut section = None;
     let mut component = None;
+    let mut component_search = None;
+    let mut demo_screen = None;
+    let mut token_panel = None;
+    let mut token_query = None;
     let mut theme = None;
     let mut density = None;
     let mut control_size = None;
@@ -917,11 +1853,12 @@ fn parse_cli_args() -> CliArgs {
             "--section" => {
                 if let Some(val) = args.get(i + 1) {
                     section = match val.as_str() {
-                        "primitives" => Some(Section::Primitives),
-                        "composites" => Some(Section::Composites),
-                        "shells" => Some(Section::Shells),
+                        "components" | "primitives" | "composites" | "shells" => {
+                            Some(Section::Components)
+                        }
                         "demo" => Some(Section::Demo),
                         "tokens" => Some(Section::Tokens),
+                        "treatments" => Some(Section::Treatments),
                         _ => None,
                     };
                     i += 1;
@@ -930,6 +1867,42 @@ fn parse_cli_args() -> CliArgs {
             "--component" => {
                 if let Some(val) = args.get(i + 1) {
                     component = Some(val.clone());
+                    i += 1;
+                }
+            }
+            "--search" => {
+                if let Some(val) = args.get(i + 1) {
+                    component_search = Some(val.clone());
+                    i += 1;
+                }
+            }
+            "--demo-screen" => {
+                if let Some(val) = args.get(i + 1) {
+                    demo_screen = match val.as_str() {
+                        "overview" => Some(DemoScreen::OverviewShell),
+                        "form" => Some(DemoScreen::FormAndValidation),
+                        "browse" => Some(DemoScreen::BrowseAndTable),
+                        "detail" => Some(DemoScreen::DetailAndRelatedData),
+                        "picker" => Some(DemoScreen::PickerAndMedia),
+                        "workspace" => Some(DemoScreen::CommandAndWorkspace),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            "--token-panel" => {
+                if let Some(val) = args.get(i + 1) {
+                    token_panel = match val.as_str() {
+                        "token-summary-section" | "summary" => Some(TokenPanel::Summary),
+                        "token-inspector" | "inspector" => Some(TokenPanel::Inspector),
+                        _ => None,
+                    };
+                    i += 1;
+                }
+            }
+            "--token-query" => {
+                if let Some(val) = args.get(i + 1) {
+                    token_query = Some(val.clone());
                     i += 1;
                 }
             }
@@ -993,6 +1966,10 @@ fn parse_cli_args() -> CliArgs {
     CliArgs {
         section,
         component,
+        component_search,
+        demo_screen,
+        token_panel,
+        token_query,
         theme,
         density,
         control_size,
@@ -1073,17 +2050,27 @@ fn main() {
                         root.state.section = section;
                     }
 
+                    if let Some(ref search) = cli.component_search {
+                        root.state.component_search = search.clone();
+                    }
+
+                    if let Some(screen) = cli.demo_screen {
+                        root.state.active_demo_screen = screen;
+                    }
+
+                    if let Some(panel) = cli.token_panel {
+                        root.state.active_token_panel = panel;
+                    }
+
+                    if let Some(ref query) = cli.token_query {
+                        root.state.token_inspector_query = query.clone();
+                    }
+
                     if let Some(ref slug) = cli.component {
-                        // Auto-detect section and select the component
-                        if let Some(idx) = PRIMITIVES.iter().position(|c| c.slug == slug.as_str()) {
-                            root.state.section = Section::Primitives;
-                            root.state.active_primitive = Some(idx);
-                        } else if let Some(idx) = COMPOSITES.iter().position(|c| c.slug == slug.as_str()) {
-                            root.state.section = Section::Composites;
-                            root.state.active_composite = Some(idx);
-                        } else if let Some(idx) = SHELLS.iter().position(|c| c.slug == slug.as_str()) {
-                            root.state.section = Section::Shells;
-                            root.state.active_shell = Some(idx);
+                        // Auto-detect component presence from the unified catalogue.
+                        if find_component(slug).is_some() {
+                            root.state.section = Section::Components;
+                            root.state.active_component_slug = Some(slug.clone());
                         }
                     }
 

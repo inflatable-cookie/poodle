@@ -23,6 +23,7 @@ poodle-workstation = { path = "../../contracts/workstation" }
 poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
+serde_json = "1"
 
 [package.metadata.poodle]
 public-intent = true

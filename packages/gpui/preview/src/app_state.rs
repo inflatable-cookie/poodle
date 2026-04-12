@@ -1,7 +1,7 @@
 //! Application state for the preview app.
 //!
-//! Mirrors the Svelte preview app's state: theme, density, control size,
-//! appearance treatment, state probes, active section, and component selection.
+//! Mirrors the current Svelte preview shell: theme, density, control size,
+//! appearance treatment, component search, active section, and component selection.
 
 use poodle_gpui::GpuiThemeProvider;
 use std::collections::HashMap;
@@ -9,29 +9,28 @@ use std::collections::HashMap;
 /// Which top-level section is active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Section {
-    Primitives,
-    Composites,
-    Shells,
+    Components,
     Demo,
     Tokens,
+    Treatments,
 }
 
 impl Section {
-    pub const ALL: &[Section] = &[
-        Section::Primitives,
-        Section::Composites,
-        Section::Shells,
-        Section::Demo,
-        Section::Tokens,
-    ];
-
     pub fn label(self) -> &'static str {
         match self {
-            Section::Primitives => "Primitives",
-            Section::Composites => "Composites",
-            Section::Shells => "Shells",
+            Section::Components => "Components",
             Section::Demo => "Demo",
             Section::Tokens => "Tokens",
+            Section::Treatments => "Treatments",
+        }
+    }
+
+    pub fn slug(self) -> &'static str {
+        match self {
+            Section::Components => "components",
+            Section::Demo => "demo",
+            Section::Tokens => "tokens",
+            Section::Treatments => "treatments",
         }
     }
 }
@@ -180,6 +179,28 @@ pub enum DemoScreen {
     CommandAndWorkspace,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TokenPanel {
+    Summary,
+    Inspector,
+}
+
+impl TokenPanel {
+    pub fn label(self) -> &'static str {
+        match self {
+            TokenPanel::Summary => "Runtime values",
+            TokenPanel::Inspector => "Inspector",
+        }
+    }
+
+    pub fn value(self) -> &'static str {
+        match self {
+            TokenPanel::Summary => "token-summary-section",
+            TokenPanel::Inspector => "token-inspector",
+        }
+    }
+}
+
 impl DemoScreen {
     pub const ALL: &[DemoScreen] = &[
         DemoScreen::OverviewShell,
@@ -198,6 +219,17 @@ impl DemoScreen {
             DemoScreen::DetailAndRelatedData => "Detail",
             DemoScreen::PickerAndMedia => "Picker",
             DemoScreen::CommandAndWorkspace => "Workspace",
+        }
+    }
+
+    pub fn slug(self) -> &'static str {
+        match self {
+            DemoScreen::OverviewShell => "overview",
+            DemoScreen::FormAndValidation => "form",
+            DemoScreen::BrowseAndTable => "browse",
+            DemoScreen::DetailAndRelatedData => "detail",
+            DemoScreen::PickerAndMedia => "picker",
+            DemoScreen::CommandAndWorkspace => "workspace",
         }
     }
 
@@ -402,12 +434,10 @@ pub struct AppState {
     pub density: Density,
     pub control_size: ControlSize,
     pub appearance_treatment: AppearanceTreatment,
-    pub disabled: bool,
-    pub invalid: bool,
-    pub busy: bool,
-    pub active_primitive: Option<usize>,
-    pub active_composite: Option<usize>,
-    pub active_shell: Option<usize>,
+    pub component_search: String,
+    pub active_component_slug: Option<String>,
+    pub active_token_panel: TokenPanel,
+    pub token_inspector_query: String,
     pub active_demo_screen: DemoScreen,
     #[allow(dead_code)]
     pub debug_clicks: u32,
@@ -418,7 +448,7 @@ impl AppState {
     pub fn new() -> Self {
         let preset = ThemePreset::Dark;
         let density = Density::Compact;
-        let control_size = ControlSize::Md;
+        let control_size = ControlSize::Sm;
         let appearance_treatment = AppearanceTreatment::System;
 
         // Build theme with density + control-size layered on top
@@ -428,18 +458,16 @@ impl AppState {
             .with_control_size(control_size.token_definition());
 
         Self {
-            section: Section::Primitives,
+            section: Section::Components,
             theme,
             theme_preset: preset,
             density,
             control_size,
             appearance_treatment,
-            disabled: false,
-            invalid: true,
-            busy: false,
-            active_primitive: None,
-            active_composite: None,
-            active_shell: None,
+            component_search: String::new(),
+            active_component_slug: None,
+            active_token_panel: TokenPanel::Summary,
+            token_inspector_query: String::new(),
             active_demo_screen: DemoScreen::OverviewShell,
             debug_clicks: 0,
             specimens: SpecimenState::new(),

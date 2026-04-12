@@ -1,11 +1,64 @@
-//! Component registry — mirrors the Svelte preview's component-registry.ts.
+//! Component registry — mirrors the Svelte preview's unified component-registry.ts.
 //!
-//! Lists every primitive, composite, and shell component with display name and description.
+//! The GPUI preview keeps the existing specimen implementation roots, but exposes
+//! them through the same adopter-facing tag groups as the Svelte preview.
 
 pub struct ComponentEntry {
     pub slug: &'static str,
     pub display_name: &'static str,
     pub description: &'static str,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ComponentTag {
+    Control,
+    Input,
+    Layout,
+    Display,
+    Overlay,
+    Navigation,
+    Data,
+    Media,
+    Feedback,
+    Form,
+    Workstation,
+}
+
+impl ComponentTag {
+    const ALL: &[ComponentTag] = &[
+        ComponentTag::Control,
+        ComponentTag::Input,
+        ComponentTag::Layout,
+        ComponentTag::Display,
+        ComponentTag::Overlay,
+        ComponentTag::Navigation,
+        ComponentTag::Data,
+        ComponentTag::Media,
+        ComponentTag::Feedback,
+        ComponentTag::Form,
+        ComponentTag::Workstation,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            ComponentTag::Control => "Controls",
+            ComponentTag::Input => "Inputs",
+            ComponentTag::Layout => "Layout",
+            ComponentTag::Display => "Display",
+            ComponentTag::Overlay => "Overlays",
+            ComponentTag::Navigation => "Navigation",
+            ComponentTag::Data => "Data",
+            ComponentTag::Media => "Media",
+            ComponentTag::Feedback => "Feedback",
+            ComponentTag::Form => "Form",
+            ComponentTag::Workstation => "Workstation",
+        }
+    }
+}
+
+pub struct ComponentGroup {
+    pub tag: ComponentTag,
+    pub items: Vec<&'static ComponentEntry>,
 }
 
 pub static PRIMITIVES: &[ComponentEntry] = &[
@@ -601,3 +654,248 @@ pub static SHELLS: &[ComponentEntry] = &[
         description: "Workstation footer status surface.",
     },
 ];
+
+pub fn component_tag(slug: &str) -> ComponentTag {
+    match slug {
+        "button" | "icon-button" | "split-button" | "checkbox" | "switch" | "tri-state-switch"
+        | "radio-group" | "segmented-control" | "toggle-group" => ComponentTag::Control,
+        "text-input"
+        | "number-input"
+        | "select"
+        | "color-picker"
+        | "date-picker"
+        | "date-range-picker"
+        | "date-time-picker"
+        | "date-time-range-picker"
+        | "date-time-zone-picker"
+        | "time-input"
+        | "time-zone-select"
+        | "duration-input"
+        | "calendar"
+        | "code-input"
+        | "editable-label"
+        | "slider"
+        | "range-slider"
+        | "rating"
+        | "file-upload"
+        | "embed-input" => ComponentTag::Input,
+        "box" | "grid" | "stack" | "spacer" | "separator" | "surface" | "scroll-shell"
+        | "split-view" | "resize-handle" => ComponentTag::Layout,
+        "eyebrow" | "pill" | "status-indicator" | "icon" | "icon-provider" | "skeleton"
+        | "spinner" | "code" | "time-ago" | "metric-tile" | "detail-item" | "meta-bar"
+        | "meta-item" | "embed-preview" => ComponentTag::Display,
+        "dialog" | "alert-dialog" | "drawer" | "popover" | "hover-card" | "tooltip" | "menu"
+        | "context-menu" | "menubar" | "confirm-action" | "form-dialog" | "command-palette" => {
+            ComponentTag::Overlay
+        }
+        "tabs" | "breadcrumbs" | "pagination" | "pagination-summary" | "navigation-menu"
+        | "sidebar-nav" | "nav-card" => ComponentTag::Navigation,
+        "table" | "data-table" | "list-card" | "list-container" | "editable-list" | "card"
+        | "card-radio-group" | "accordion" | "collapsible" | "order-by" | "selection-summary"
+        | "filter-toolbar" | "log-list" | "relation-picker" | "picker-shell" => ComponentTag::Data,
+        "audio-player"
+        | "video-player"
+        | "media-picker"
+        | "media-browse-panel"
+        | "media-preview"
+        | "media-thumbnail"
+        | "media-upload-status-panel" => ComponentTag::Media,
+        "callout"
+        | "progress"
+        | "meter"
+        | "empty-state"
+        | "page-loading"
+        | "toast-stack"
+        | "toast-host"
+        | "bulk-action-bar"
+        | "password-requirements" => ComponentTag::Feedback,
+        "field" | "field-set" | "form-actions" | "form-layout" | "block-editor"
+        | "markdown-editor" => ComponentTag::Form,
+        "app-header"
+        | "page-header"
+        | "status-bar"
+        | "dock-region"
+        | "toolbar"
+        | "action-discovery-panel"
+        | "detail-section"
+        | "detail-shell" => ComponentTag::Workstation,
+        _ => ComponentTag::Workstation,
+    }
+}
+
+pub fn package_name() -> &'static str {
+    "poodle-gpui-components"
+}
+
+pub fn contract_root() -> &'static str {
+    "docs/contracts/components/"
+}
+
+pub fn contract_doc_path(slug: &str) -> String {
+    format!("{}{}.md", contract_root(), slug)
+}
+
+pub fn implementation_root(slug: &str) -> &'static str {
+    match slug {
+        "accordion"
+        | "alert-dialog"
+        | "box"
+        | "bulk-action-bar"
+        | "button"
+        | "calendar"
+        | "callout"
+        | "card"
+        | "checkbox"
+        | "code"
+        | "collapsible"
+        | "color-picker"
+        | "context-menu"
+        | "date-picker"
+        | "date-range-picker"
+        | "date-time-picker"
+        | "date-time-range-picker"
+        | "detail-item"
+        | "dialog"
+        | "drawer"
+        | "duration-input"
+        | "editable-label"
+        | "eyebrow"
+        | "field"
+        | "field-set"
+        | "file-upload"
+        | "form-actions"
+        | "grid"
+        | "hover-card"
+        | "icon"
+        | "icon-button"
+        | "icon-provider"
+        | "list-card"
+        | "menu"
+        | "menubar"
+        | "meter"
+        | "meta-bar"
+        | "meta-item"
+        | "nav-card"
+        | "navigation-menu"
+        | "number-input"
+        | "order-by"
+        | "pagination"
+        | "pagination-summary"
+        | "pill"
+        | "password-requirements"
+        | "code-input"
+        | "popover"
+        | "progress"
+        | "radio-group"
+        | "range-slider"
+        | "rating"
+        | "scroll-shell"
+        | "segmented-control"
+        | "select"
+        | "separator"
+        | "skeleton"
+        | "slider"
+        | "spinner"
+        | "spacer"
+        | "split-button"
+        | "stack"
+        | "status-indicator"
+        | "surface"
+        | "switch"
+        | "table"
+        | "tabs"
+        | "text-input"
+        | "time-ago"
+        | "time-input"
+        | "time-zone-select"
+        | "toggle-group"
+        | "toolbar"
+        | "tooltip"
+        | "tri-state-switch"
+        | "date-time-zone-picker" => "packages/gpui/components/src/primitives/",
+        "audio-player"
+        | "editable-list"
+        | "block-editor"
+        | "breadcrumbs"
+        | "card-radio-group"
+        | "confirm-action"
+        | "data-table"
+        | "embed-input"
+        | "embed-preview"
+        | "empty-state"
+        | "filter-toolbar"
+        | "form-dialog"
+        | "form-layout"
+        | "list-container"
+        | "log-list"
+        | "markdown-editor"
+        | "media-browse-panel"
+        | "media-picker"
+        | "media-preview"
+        | "media-thumbnail"
+        | "media-upload-status-panel"
+        | "page-header"
+        | "page-loading"
+        | "relation-picker"
+        | "selection-summary"
+        | "sidebar-nav"
+        | "metric-tile"
+        | "toast-host"
+        | "toast-stack"
+        | "video-player"
+        | "action-discovery-panel"
+        | "app-header"
+        | "command-palette"
+        | "detail-section"
+        | "detail-shell"
+        | "dock-region"
+        | "picker-shell"
+        | "resize-handle"
+        | "split-view"
+        | "status-bar" => "packages/gpui/components/src/composites/",
+        _ => "packages/gpui/components/src/",
+    }
+}
+
+pub fn all_components() -> Vec<&'static ComponentEntry> {
+    let mut components: Vec<&'static ComponentEntry> = PRIMITIVES
+        .iter()
+        .chain(COMPOSITES.iter())
+        .chain(SHELLS.iter())
+        .collect();
+    components.sort_by(|a, b| a.display_name.cmp(b.display_name));
+    components
+}
+
+pub fn find_component(slug: &str) -> Option<&'static ComponentEntry> {
+    all_components()
+        .into_iter()
+        .find(|component| component.slug == slug)
+}
+
+pub fn grouped_components(search: &str) -> Vec<ComponentGroup> {
+    let query = search.trim().to_ascii_lowercase();
+    let components = all_components();
+
+    ComponentTag::ALL
+        .iter()
+        .filter_map(|tag| {
+            let items: Vec<&'static ComponentEntry> = components
+                .iter()
+                .copied()
+                .filter(|component| component_tag(component.slug) == *tag)
+                .filter(|component| {
+                    query.is_empty()
+                        || component.display_name.to_ascii_lowercase().contains(&query)
+                        || component.description.to_ascii_lowercase().contains(&query)
+                })
+                .collect();
+
+            if items.is_empty() {
+                None
+            } else {
+                Some(ComponentGroup { tag: *tag, items })
+            }
+        })
+        .collect()
+}
