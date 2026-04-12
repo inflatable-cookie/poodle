@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use crate::component_registry::contract_doc_path;
+use serde::Deserialize;
 
 #[derive(Clone, Debug, Default)]
 pub struct ContractUsageDocs {
@@ -33,7 +34,45 @@ pub struct UsageEvent {
     pub description: String,
 }
 
+#[derive(Clone, Debug, Deserialize)]
+struct GeneratedComponentDocs {
+    #[serde(default)]
+    props: Vec<GeneratedPropDoc>,
+    #[serde(default)]
+    slots: Vec<GeneratedSlotDoc>,
+    #[serde(default)]
+    events: Vec<GeneratedEventDoc>,
+    usage: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct GeneratedPropDoc {
+    name: String,
+    #[serde(rename = "type")]
+    type_name: String,
+    default: Option<String>,
+    required: Option<bool>,
+    description: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct GeneratedSlotDoc {
+    name: String,
+    description: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+struct GeneratedEventDoc {
+    name: String,
+    payload: String,
+    description: String,
+}
+
 pub fn load_contract_usage_docs(slug: &str) -> ContractUsageDocs {
+    if let Some(docs) = load_generated_usage_docs(slug) {
+        return docs;
+    }
+
     let path = contract_doc_path(slug);
     let full_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../..")
@@ -53,6 +92,50 @@ pub fn load_contract_usage_docs(slug: &str) -> ContractUsageDocs {
     docs.slots = parse_slots(&contents);
     docs.events = parse_events(&contents);
     docs
+}
+
+fn load_generated_usage_docs(slug: &str) -> Option<ContractUsageDocs> {
+    let full_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../..")
+        .join("packages/svelte/preview/artifacts/component-docs.json");
+
+    let contents = std::fs::read_to_string(full_path).ok()?;
+    let docs_map: std::collections::HashMap<String, GeneratedComponentDocs> =
+        serde_json::from_str(&contents).ok()?;
+    let docs = docs_map.get(slug)?;
+
+    Some(ContractUsageDocs {
+        exists: true,
+        usage: docs.usage.clone(),
+        props: docs
+            .props
+            .iter()
+            .map(|prop| UsageProp {
+                name: prop.name.clone(),
+                type_name: prop.type_name.clone(),
+                default_value: prop.default.clone(),
+                required: prop.required.unwrap_or(false),
+                description: prop.description.clone(),
+            })
+            .collect(),
+        slots: docs
+            .slots
+            .iter()
+            .map(|slot| UsageSlot {
+                name: slot.name.clone(),
+                description: slot.description.clone(),
+            })
+            .collect(),
+        events: docs
+            .events
+            .iter()
+            .map(|event| UsageEvent {
+                name: event.name.clone(),
+                payload: event.payload.clone(),
+                description: event.description.clone(),
+            })
+            .collect(),
+    })
 }
 
 fn usage_block(contents: &str) -> Option<String> {
