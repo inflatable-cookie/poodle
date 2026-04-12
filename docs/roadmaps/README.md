@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-04-09
+Updated: 2026-04-12
 
 Roadmaps hold executable milestone work for Poodle.
 
@@ -19,7 +19,8 @@ Roadmaps hold executable milestone work for Poodle.
 - highest on-disk generation folder: `g10`
 - current executable generation plan: `g10`
 - `g09` is complete
-- `g10` is active, `g10.004` complete, unified component package is live
+- `g10` is active, `g10.005` ready, GPUI parity runway compiled through
+  `g10.007`
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -44,4 +45,6 @@ Do not assume the highest-numbered generation folder is the active one.
 
 ## Next Task
 
-`g10.004` is complete. Unified component package is live.
+Open `g10.005` and execute Batch 5.1: replace the bespoke GPUI component
+sidebar with the real `SidebarNav` shell, then continue through the compiled
+parity runway in `g10.006` and `g10.007`.

@@ -18,6 +18,10 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_specs::{CodeSpec, TabDefinition, TabVariant, TabsSpec, TextInputSpec};
+use poodle_specs::{
+    ControlDensity as SpecControlDensity, ControlSize as SpecControlSize, SemanticControlSizeRole,
+    SidebarNavGroup, SidebarNavItem, SidebarNavSpec,
+};
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {
@@ -55,7 +59,7 @@ use app_state::{
     TokenPanel,
 };
 use component_registry::{contract_doc_path, find_component, grouped_components, package_name};
-use poodle_gpui_components::{Code, Tabs, TextInput};
+use poodle_gpui_components::{Code, SidebarNav, Tabs, TextInput};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -104,6 +108,24 @@ fn load_contract_doc_status(slug: &str) -> ContractDocStatus {
         exists: full_path.exists(),
         status,
         updated,
+    }
+}
+
+fn sidebar_nav_density(density: Density) -> SpecControlDensity {
+    match density {
+        Density::Compact => SpecControlDensity::Compact,
+        Density::Default => SpecControlDensity::Default,
+        Density::Comfortable => SpecControlDensity::Comfortable,
+    }
+}
+
+fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
+    match size {
+        ControlSize::Xs => SpecControlSize::Xs,
+        ControlSize::Sm => SpecControlSize::Sm,
+        ControlSize::Md => SpecControlSize::Md,
+        ControlSize::Lg => SpecControlSize::Lg,
+        ControlSize::Xl => SpecControlSize::Xl,
     }
 }
 
@@ -448,32 +470,67 @@ impl PreviewRoot {
     /// Section content router.
     /// `available_h` is the pixel height remaining after top bar + controls.
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
-        match self.state.section {
-            Section::Components => div()
-                .w_full()
-                .h(available_h)
-                .flex()
-                .flex_col()
-                .child(self.render_components_section(available_h, cx)),
-            Section::Demo => div()
-                .w_full()
-                .h(available_h)
-                .flex()
-                .flex_col()
-                .child(self.render_demo_section(available_h, cx)),
-            Section::Tokens => div()
-                .w_full()
-                .h(available_h)
-                .flex()
-                .flex_col()
-                .child(self.render_tokens_section(available_h, cx)),
-            Section::Treatments => div()
-                .w_full()
-                .h(available_h)
-                .flex()
-                .flex_col()
-                .child(self.render_treatments_section(available_h)),
-        }
+        let show_native_state = self.state.has_native_review_state();
+        let native_state_h = if show_native_state { px(52.0) } else { px(0.0) };
+        let section_h = available_h - native_state_h;
+
+        let section_content = match self.state.section {
+            Section::Components => self.render_components_section(section_h, cx),
+            Section::Demo => self.render_demo_section(section_h, cx),
+            Section::Tokens => self.render_tokens_section(section_h, cx),
+            Section::Treatments => self.render_treatments_section(section_h),
+        };
+
+        div()
+            .w_full()
+            .h(available_h)
+            .flex()
+            .flex_col()
+            .when(show_native_state, |el| {
+                el.child(self.render_native_state_strip(native_state_h))
+            })
+            .child(section_content)
+    }
+
+    fn render_native_state_strip(&self, h: Pixels) -> Div {
+        let theme = &self.state.theme;
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let panel_bg = theme.resolve_color("color.background.panel");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let text_primary = theme.resolve_color("color.text.primary");
+        let command = self.state.native_launch_command();
+
+        div()
+            .w_full()
+            .h(h)
+            .flex()
+            .items_center()
+            .justify_between()
+            .gap(px(12.0))
+            .px(px(16.0))
+            .py(px(8.0))
+            .bg(color_to_hsla(panel_bg))
+            .border_b_1()
+            .border_color(color_to_hsla(border_subtle))
+            .child(
+                div()
+                    .flex_shrink_0()
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("Launch with current state"),
+            )
+            .child(
+                div()
+                    .flex_1()
+                    .min_w(px(0.0))
+                    .overflow_x_hidden()
+                    .text_ellipsis()
+                    .font_family("SF Mono")
+                    .text_size(px(12.0))
+                    .text_color(color_to_hsla(text_primary))
+                    .child(command),
+            )
     }
 
     fn render_tokens_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
@@ -616,9 +673,7 @@ impl PreviewRoot {
     fn render_components_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         let border_subtle = theme.resolve_color("color.border.subtle");
-        let text_primary = theme.resolve_color("color.text.primary");
         let text_secondary = theme.resolve_color("color.text.secondary");
-        let accent = theme.resolve_color("color.accent.base");
         let elevated_bg = theme.resolve_color("color.background.elevated");
         let groups = grouped_components(&self.state.component_search);
         let active_component = self
@@ -626,64 +681,46 @@ impl PreviewRoot {
             .active_component_slug
             .as_deref()
             .and_then(find_component);
-
-        // Sidebar — explicit height so overflow_y_scroll has definite bounds.
-        let mut sidebar = div()
+        let sidebar_groups: Vec<SidebarNavGroup> = groups
+            .iter()
+            .map(|group| {
+                SidebarNavGroup::new(
+                    group.tag.label().to_ascii_lowercase(),
+                    group
+                        .items
+                        .iter()
+                        .map(|component| {
+                            SidebarNavItem::new(component.slug, component.display_name)
+                        })
+                        .collect(),
+                )
+                .with_label(group.tag.label())
+            })
+            .collect();
+        let mut sidebar_spec = SidebarNavSpec::new(sidebar_groups)
+            .with_aria_label("Component catalogue")
+            .with_density(sidebar_nav_density(self.state.density))
+            .with_size(sidebar_nav_size(self.state.control_size))
+            .with_size_role(SemanticControlSizeRole::Chrome);
+        if let Some(active_slug) = self.state.active_component_slug.as_deref() {
+            sidebar_spec = sidebar_spec.with_value(active_slug);
+        }
+        let sidebar = div()
             .id("catalogue-sidebar")
             .w(px(224.0))
             .h(available_h)
             .flex_shrink_0()
-            .flex()
-            .flex_col()
-            .py(px(12.0))
             .overflow_y_scroll()
             .border_r_1()
-            .border_color(color_to_hsla(border_subtle).opacity(0.6));
-
-        for group in &groups {
-            sidebar = sidebar.child(
-                div()
-                    .px(px(16.0))
-                    .pt(px(10.0))
-                    .pb(px(4.0))
-                    .text_size(px(11.0))
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(group.tag.label()),
+            .border_color(color_to_hsla(border_subtle).opacity(0.6))
+            .child(
+                SidebarNav::from_spec(sidebar_spec, theme).on_select(cx.listener(
+                    |this, val: &str, _window, cx| {
+                        this.state.active_component_slug = Some(val.to_string());
+                        cx.notify();
+                    },
+                )),
             );
-
-            for component in &group.items {
-                let slug = component.slug;
-                let is_active = active_component
-                    .map(|active| active.slug == component.slug)
-                    .unwrap_or(false);
-
-                let mut link = div()
-                    .id(SharedString::from(format!("comp-{}", component.slug)))
-                    .px(px(16.0))
-                    .py(px(6.0))
-                    .text_sm()
-                    .cursor_pointer()
-                    .border_l_2();
-
-                link = if is_active {
-                    link.text_color(color_to_hsla(text_primary))
-                        .border_color(color_to_hsla(accent))
-                        .bg(color_to_hsla(accent).opacity(0.08))
-                } else {
-                    link.text_color(color_to_hsla(text_secondary))
-                        .border_color(hsla(0.0, 0.0, 0.0, 0.0))
-                };
-
-                link = link.child(component.display_name);
-                link = link.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                    this.state.active_component_slug = Some(slug.to_string());
-                    cx.notify();
-                }));
-
-                sidebar = sidebar.child(link);
-            }
-        }
 
         // Outer layout: horizontal flex row with explicit height.
         let mut layout = div().w_full().h(available_h).flex().child(sidebar);
@@ -1451,13 +1488,13 @@ impl PreviewRoot {
                     .text_size(px(11.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(color_to_hsla(text_secondary))
-                    .child("SHARED DEMO TARGET"),
+                    .child("Internal demo target"),
             )
             .child(
                 div()
                     .text_sm()
                     .text_color(color_to_hsla(text_primary))
-                    .child("This internal surface represents the contract-owned shared demo app target. It is not the current Svelte docs shell, and it should not be read as proof that the docs-shell rebuild already exists in both runtimes."),
+                    .child("This surface tracks the contract-owned shared demo app target. It is separate from the current docs shell and should not be read as current cross-runtime docs-shell parity."),
             )
             .child(
                 div()
@@ -1490,7 +1527,7 @@ impl PreviewRoot {
                             .text_size(px(11.0))
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_secondary))
-                            .child("CONTRACT CONTEXT"),
+                            .child("Contract notes"),
                     )
                     .child(
                         div()
@@ -1529,7 +1566,7 @@ impl PreviewRoot {
                     .text_size(px(11.0))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(color_to_hsla(text_secondary))
-                    .child("CONTRACT PANEL"),
+                    .child("Contract notes"),
             )
             .child(
                 div()
@@ -1591,7 +1628,7 @@ impl PreviewRoot {
                                         .text_size(px(11.0))
                                         .font_weight(FontWeight::SEMIBOLD)
                                         .text_color(color_to_hsla(text_secondary))
-                                        .child("DEMO SCREENS"),
+                                        .child("Screens"),
                                 )
                                 .child(seg),
                         )
@@ -1608,13 +1645,6 @@ impl PreviewRoot {
                                         .flex()
                                         .flex_col()
                                         .gap(px(12.0))
-                                        .child(
-                                            div()
-                                                .text_size(px(11.0))
-                                                .font_weight(FontWeight::SEMIBOLD)
-                                                .text_color(color_to_hsla(text_secondary))
-                                                .child("PRIMARY CONTENT"),
-                                        )
                                         .child(screen_content),
                                 )
                                 .child(div().w(px(320.0)).flex_shrink_0().child(companion_panel)),

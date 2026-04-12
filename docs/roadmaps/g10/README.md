@@ -1,7 +1,7 @@
 # g10 Jetstream Focus
 
 Status: active
-Updated: 2026-04-09
+Updated: 2026-04-12
 
 ## Context
 
@@ -34,14 +34,26 @@ surface that needs to be made explicit again.
   classified, next milestone compiled
 - `g10.003` complete — Svelte Component Overhaul Closeout
 - `g10.004` complete — Unified Component Package
+- `g10.005` ready — GPUI preview shell, navigation, and native state parity
+- `g10.006` planned — GPUI component page usage docs and shape parity
+- `g10.007` planned — GPUI long-tail component parity sweep and closeout
+  checkpoint
 
 Three active seams identified:
-- Seam A (Svelte Component Overhaul): actively executing via `g10.003`
+- Seam A (Svelte Component Overhaul): complete via `g10.003`
 - Seam B (Jetstream Implementation): planned, not started — own milestone after A
-- Seam C (Parity/Verification): ad-hoc — systematic pass after A freezes
+- Seam C (Parity/Verification): now compiled into `g10.005` to `g10.007`
+
+## Active Runway
+
+- immediate ready card: `g10.005`
+- next planned card: `g10.006`
+- next checkpoint card: `g10.007`
+- planning checkpoint after `g10.007`: decide whether the next active lane is
+  more GPUI parity or Seam B Jetstream implementation
 
 ## Next Task
 
-`g10.004` is complete. The unified component package is live. Single
-`@poodle/svelte` package, single `docs/contracts/components/` directory,
-single `poodle-specs` Rust crate, single Components section in preview.
+`g10.005` is the active ready milestone. Execute Batch 5.1: replace the bespoke
+GPUI component sidebar with the real `SidebarNav` shell while preserving unified
+search and grouping behavior.

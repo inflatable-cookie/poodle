@@ -53,6 +53,5 @@ effigy health
 
 ## Next Task
 
-Use `g10.002` to recover the real live queue, then compile the next bounded
-milestone so Poodle resumes from roadmap authority instead of handoff-only
-momentum.
+Use `g10.005` as the active ready card for the GPUI parity lane, then continue
+through the compiled runway in `g10.006` and `g10.007`.

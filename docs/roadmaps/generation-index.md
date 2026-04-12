@@ -4,11 +4,13 @@
 
 - `g10`
   - Status: active
-  - Range: `001` to `004`
+  - Range: `001` to `007`
   - Notes: `g10.001` proved Jetstream feasibility. `g10.002` recovered the
     live queue and classified three seams (Svelte overhaul, Jetstream
-    implementation, parity). `g10.003` is the active milestone: Svelte
-    Component Overhaul Closeout.
+    implementation, parity). `g10.003` closed the Svelte overhaul.
+    `g10.004` unified the component package. `g10.005` is now the active ready
+    milestone for GPUI preview shell, navigation, and native state parity, with
+    `g10.006` and `g10.007` forming the next bounded parity runway.
 
 ## Completed Foundations
 
@@ -75,5 +77,5 @@ When roadmap files disagree:
 
 ## Next Task
 
-`g10.004` is complete. Unified component package is live across Svelte, contracts,
-and Rust specs.
+`g10.005` is the active ready milestone. Start GPUI preview shell and
+navigation parity with SidebarNav adoption and native continuity work.
