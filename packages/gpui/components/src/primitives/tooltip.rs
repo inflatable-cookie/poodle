@@ -1,8 +1,11 @@
 //! Tooltip — real GPUI component backed by TooltipSpec.
 
 use gpui::*;
+use gpui::StatefulInteractiveElement;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{OverlayPlacement, TooltipSpec};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -16,6 +19,8 @@ pub struct Tooltip {
     theme: GpuiThemeProvider,
     /// The trigger element that the tooltip wraps.
     trigger: Option<AnyElement>,
+    /// Called when the tooltip open state should change from trigger hover.
+    on_open_change: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Tooltip {
@@ -31,6 +36,7 @@ impl Tooltip {
             spec: TooltipSpec::new(),
             theme: theme.clone(),
             trigger: None,
+            on_open_change: None,
         }
     }
 
@@ -39,6 +45,7 @@ impl Tooltip {
             spec,
             theme: theme.clone(),
             trigger: None,
+            on_open_change: None,
         }
     }
 
@@ -69,6 +76,14 @@ impl Tooltip {
         self.trigger = Some(trigger.into_any_element());
         self
     }
+
+    pub fn on_open_change(
+        mut self,
+        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_open_change = Some(std::rc::Rc::new(handler));
+        self
+    }
 }
 
 impl IntoElement for Tooltip {
@@ -77,6 +92,25 @@ impl IntoElement for Tooltip {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let placement_id = match spec.placement {
+            OverlayPlacement::Top => 0_u64,
+            OverlayPlacement::TopStart => 1_u64,
+            OverlayPlacement::TopEnd => 2_u64,
+            OverlayPlacement::Right => 3_u64,
+            OverlayPlacement::RightStart => 4_u64,
+            OverlayPlacement::RightEnd => 5_u64,
+            OverlayPlacement::Bottom => 6_u64,
+            OverlayPlacement::BottomStart => 7_u64,
+            OverlayPlacement::BottomEnd => 8_u64,
+            OverlayPlacement::Left => 9_u64,
+            OverlayPlacement::LeftStart => 10_u64,
+            OverlayPlacement::LeftEnd => 11_u64,
+        };
+        let mut hasher = DefaultHasher::new();
+        spec.content.hash(&mut hasher);
+        spec.aria_label.hash(&mut hasher);
+        placement_id.hash(&mut hasher);
+        let trigger_id = hasher.finish();
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let border_default = resolve_color(theme, "color.border.default");
@@ -100,7 +134,15 @@ impl IntoElement for Tooltip {
 
         // Trigger
         if let Some(trigger) = self.trigger {
-            wrapper = wrapper.child(trigger);
+            let mut trigger_wrapper = div().id(("poodle-tooltip-trigger", trigger_id));
+            trigger_wrapper = trigger_wrapper.child(trigger);
+            if let Some(ref handler) = self.on_open_change {
+                let hover_handler = handler.clone();
+                trigger_wrapper = trigger_wrapper.on_hover(move |hovered, window, cx| {
+                    hover_handler(*hovered, window, cx);
+                });
+            }
+            wrapper = wrapper.child(trigger_wrapper);
         }
 
         // Tooltip bubble (shown when open)

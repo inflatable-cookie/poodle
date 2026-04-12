@@ -1,6 +1,7 @@
 //! HoverCard — real GPUI component backed by HoverCardSpec.
 
 use gpui::*;
+use gpui::StatefulInteractiveElement;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{HoverCardSpec, OverlayPlacement};
 
@@ -80,6 +81,20 @@ impl IntoElement for HoverCard {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let placement_id = match spec.placement {
+            OverlayPlacement::Top => 0_usize,
+            OverlayPlacement::TopStart => 1_usize,
+            OverlayPlacement::TopEnd => 2_usize,
+            OverlayPlacement::Right => 3_usize,
+            OverlayPlacement::RightStart => 4_usize,
+            OverlayPlacement::RightEnd => 5_usize,
+            OverlayPlacement::Bottom => 6_usize,
+            OverlayPlacement::BottomStart => 7_usize,
+            OverlayPlacement::BottomEnd => 8_usize,
+            OverlayPlacement::Left => 9_usize,
+            OverlayPlacement::LeftStart => 10_usize,
+            OverlayPlacement::LeftEnd => 11_usize,
+        };
 
         // Contract: padding var(--poodle-space-panel-y) var(--poodle-space-panel-x)
         let panel_x = resolve_px(theme, "space.panel.x");
@@ -103,7 +118,15 @@ impl IntoElement for HoverCard {
 
         // Trigger (always rendered)
         if let Some(trigger) = self.trigger {
-            wrapper = wrapper.child(trigger);
+            let mut trigger_wrapper = div().id(("poodle-hover-card-trigger", placement_id));
+            trigger_wrapper = trigger_wrapper.child(trigger);
+            if let Some(ref handler) = self.on_open_change {
+                let hover_handler = handler.clone();
+                trigger_wrapper = trigger_wrapper.on_hover(move |hovered, window, cx| {
+                    hover_handler(*hovered, window, cx);
+                });
+            }
+            wrapper = wrapper.child(trigger_wrapper);
         }
 
         // Surface content (shown when open)
@@ -111,10 +134,10 @@ impl IntoElement for HoverCard {
         // Trigger: role="button", tabindex="0", aria-expanded={open}, aria-controls={surface id}
         // Surface: role="dialog", tabindex="-1", aria-label from spec
         // Escape key clears timers and closes the surface
-        if spec.is_open {
+        if spec.current_open() {
             let panel_y = resolve_px(theme, "space.panel.y");
             let mut surface = div()
-                .id("poodle-hover-card-surface")
+                .id(("poodle-hover-card-surface", placement_id))
                 .focusable()
                 .px(panel_x)
                 .py(panel_y)
@@ -151,6 +174,13 @@ impl IntoElement for HoverCard {
 
             if let Some(content) = self.content {
                 surface = surface.child(content);
+            }
+
+            if let Some(ref handler) = self.on_open_change {
+                let hover_handler = handler.clone();
+                surface = surface.on_hover(move |hovered, window, cx| {
+                    hover_handler(*hovered, window, cx);
+                });
             }
 
             // Escape key to close
