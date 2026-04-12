@@ -24,92 +24,110 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(
-                    AppHeader::from_spec(
-                        AppHeaderSpec::new()
-                            .with_title("Poodle Studio")
-                            .with_drag_region(true)
-                            .with_aria_label("Application header"),
-                        theme,
-                    )
-                    .with_primary_actions(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(4.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Ghost)
-                                        .with_label("File")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-file"),
+                    div()
+                        .border_1()
+                        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
+                        .rounded(px(8.0))
+                        .overflow_hidden()
+                        .child(
+                            AppHeader::from_spec(
+                                AppHeaderSpec::new()
+                                    .with_title("Poodle Studio")
+                                    .with_drag_region(true)
+                                    .with_aria_label("Application header"),
+                                theme,
                             )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Ghost)
-                                        .with_label("Edit")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-edit"),
+                            .with_primary_actions(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap(px(4.0))
+                                    .child(
+                                        Button::from_spec(
+                                            ButtonSpec::new()
+                                                .with_variant(ButtonVariant::Ghost)
+                                                .with_label("File")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-file"),
+                                    )
+                                    .child(
+                                        Button::from_spec(
+                                            ButtonSpec::new()
+                                                .with_variant(ButtonVariant::Ghost)
+                                                .with_label("Edit")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-edit"),
+                                    )
+                                    .child(
+                                        Button::from_spec(
+                                            ButtonSpec::new()
+                                                .with_variant(ButtonVariant::Ghost)
+                                                .with_label("View")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-view"),
+                                    )
+                                    .child(
+                                        Button::from_spec(
+                                            ButtonSpec::new()
+                                                .with_variant(ButtonVariant::Ghost)
+                                                .with_label("Help")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-help"),
+                                    ),
                             )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Ghost)
-                                        .with_label("View")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-view"),
-                            )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Ghost)
-                                        .with_label("Help")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-help"),
+                            .with_utility_items(
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap(px(4.0))
+                                    .child(
+                                        IconButton::from_spec(
+                                            IconButtonSpec::new()
+                                                .with_icon("search")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-search"),
+                                    )
+                                    .child(
+                                        IconButton::from_spec(
+                                            IconButtonSpec::new()
+                                                .with_icon("bell")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-bell"),
+                                    )
+                                    .child(
+                                        IconButton::from_spec(
+                                            IconButtonSpec::new()
+                                                .with_icon("settings")
+                                                .with_size(ControlSize::Sm),
+                                            theme,
+                                        )
+                                        .with_id("ah-settings"),
+                                    ),
                             ),
-                    )
-                    .with_utility_items(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(4.0))
-                            .child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("search")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-search"),
-                            )
-                            .child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("bell")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-bell"),
-                            )
-                            .child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("settings")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-settings"),
-                            ),
-                    ),
+                        )
+                        .child(
+                            div()
+                                .h(px(128.0))
+                                .flex()
+                                .items_center()
+                                .justify_center()
+                                .text_sm()
+                                .text_color(color_to_hsla(theme.resolve_color("color.text.muted")))
+                                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
+                                .child("Application content area"),
+                        ),
                 ),
         )
         .child(
@@ -118,46 +136,39 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Project shell header"),
+                    EyebrowSpec::new().with_content("With title, actions, and utility"),
                     theme,
                 ))
                 .child(
-                    AppHeader::from_spec(
-                        AppHeaderSpec::new().with_title("Signals workspace"),
-                        theme,
-                    )
-                    .with_primary_actions(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(6.0))
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Secondary)
-                                        .with_label("Export")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
+                    AppHeader::from_spec(AppHeaderSpec::new().with_title("My Application"), theme)
+                        .with_primary_actions(
+                            div()
+                                .flex()
+                                .items_center()
+                                .gap(px(6.0))
+                                .child(
+                                    Button::from_spec(
+                                        ButtonSpec::new()
+                                            .with_variant(ButtonVariant::Ghost)
+                                            .with_label("New")
+                                            .with_size(ControlSize::Sm),
+                                        theme,
+                                    )
+                                    .with_id("ah-new"),
                                 )
-                                .with_id("ah-export"),
-                            )
-                            .child(
-                                Button::from_spec(
-                                    ButtonSpec::new()
-                                        .with_variant(ButtonVariant::Primary)
-                                        .with_label("New Project")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-new"),
-                            ),
-                    )
-                    .with_utility_items(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(4.0))
-                            .child(
+                                .child(
+                                    Button::from_spec(
+                                        ButtonSpec::new()
+                                            .with_variant(ButtonVariant::Ghost)
+                                            .with_label("Open")
+                                            .with_size(ControlSize::Sm),
+                                        theme,
+                                    )
+                                    .with_id("ah-open"),
+                                ),
+                        )
+                        .with_utility_items(
+                            div().flex().items_center().gap(px(4.0)).child(
                                 IconButton::from_spec(
                                     IconButtonSpec::new()
                                         .with_icon("settings")
@@ -165,18 +176,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     theme,
                                 )
                                 .with_id("ah-settings2"),
-                            )
-                            .child(
-                                IconButton::from_spec(
-                                    IconButtonSpec::new()
-                                        .with_icon("user")
-                                        .with_size(ControlSize::Sm),
-                                    theme,
-                                )
-                                .with_id("ah-user"),
                             ),
-                    ),
+                        ),
                 ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Title only"),
+                    theme,
+                ))
+                .child(AppHeader::from_spec(
+                    AppHeaderSpec::new().with_title("Poodle Workstation"),
+                    theme,
+                )),
         )
         .child(
             div()
@@ -209,7 +225,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .text_sm()
                                     .font_weight(FontWeight::SEMIBOLD)
                                     .text_color(color_to_hsla(text_primary))
-                                    .child("Acme Corp"),
+                                    .child("Poodle Studio"),
                             ),
                     )
                     .with_utility_items(

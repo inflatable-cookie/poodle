@@ -266,7 +266,6 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "code-input" => specimen_card("CodeInput", theme, code_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
         "time-input" => specimen_card("TimeInput", theme, time_field::render(state, cx)),
-        "time-field" => specimen_card("TimeInput", theme, time_field::render(state, cx)),
         "editable-label" => {
             specimen_card("EditableLabel", theme, editable_label::render(state, cx))
         }
@@ -399,7 +398,6 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             pagination_summary_specimen::render(theme),
         ),
         "metric-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
-        "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
         "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
         "toast-stack" => specimen_card("ToastStack", theme, toast_stack_specimen::render(theme)),
         "toast-host" => specimen_card("ToastHost", theme, toast_host::render(theme)),

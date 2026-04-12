@@ -1,11 +1,10 @@
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{CommandPalette, Eyebrow};
-use poodle_specs::{CommandActionItem, CommandPaletteSpec};
+use poodle_gpui_components::{Button, CommandPalette, Eyebrow};
+use poodle_specs::{ButtonSpec, CommandActionItem, CommandPaletteSpec};
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -42,12 +41,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("cmd-palette-query")
         .cloned()
         .unwrap_or_default();
-    let last_executed = state.specimens.text.get("cmd-palette-executed").cloned();
+    let is_open = state.specimens.is_on("cmd-palette-open");
+    let compact_open = state.specimens.is_on("cmd-palette-compact-open");
 
     let mut spec = CommandPaletteSpec::new(actions);
     if !query.is_empty() {
         spec = spec.with_query(&query);
     }
+    spec = spec.with_open(is_open);
 
     div()
         .flex()
@@ -63,25 +64,41 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    div().w(px(480.0)).child(
-                        CommandPalette::from_spec(spec, theme)
-                            .with_id("cmd-palette")
-                            .on_select(cx.listener(|this, val: &str, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("cmd-palette-executed".to_string(), val.to_string());
-                                cx.notify();
-                            }))
-                            .on_query_change(cx.listener(|this, val: &str, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .text
-                                    .insert("cmd-palette-query".to_string(), val.to_string());
-                                cx.notify();
-                            })),
-                    ),
-                ),
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(
+                            "Click below to open the palette. Close with Escape, click outside, or the X button.",
+                        ),
+                )
+                .child(
+                    Button::from_spec(ButtonSpec::new().with_label("Open Command Palette"), theme)
+                        .with_id("cmd-palette-open")
+                        .on_click(cx.listener(|this, _event: &ClickEvent, _window, cx| {
+                            if !this.state.specimens.is_on("cmd-palette-open") {
+                                this.state.specimens.toggle("cmd-palette-open");
+                            }
+                            cx.notify();
+                        })),
+                )
+                .child(div().w(px(480.0)).child(
+                    CommandPalette::from_spec(spec, theme)
+                        .with_id("cmd-palette")
+                        .on_select(cx.listener(|this, val: &str, _w, cx| {
+                            this.state
+                                .specimens
+                                .text
+                                .insert("cmd-palette-query".to_string(), val.to_string());
+                            cx.notify();
+                        }))
+                        .on_query_change(cx.listener(|this, val: &str, _w, cx| {
+                            this.state
+                                .specimens
+                                .text
+                                .insert("cmd-palette-query".to_string(), val.to_string());
+                            cx.notify();
+                        })),
+                )),
         )
         .child(
             div()
@@ -98,6 +115,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(12.0))
                         .child(
+                            Button::from_spec(ButtonSpec::new().with_label("Open compact palette"), theme)
+                                .with_id("cmd-palette-compact-open")
+                                .on_click(cx.listener(|this, _event: &ClickEvent, _window, cx| {
+                                    if !this.state.specimens.is_on("cmd-palette-compact-open") {
+                                        this.state.specimens.toggle("cmd-palette-compact-open");
+                                    }
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
                             div().w(px(420.0)).child(
                                 CommandPalette::from_spec(
                                     CommandPaletteSpec::new(vec![
@@ -108,8 +135,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                             .with_group("File")
                                             .with_shortcut("\u{2318}O"),
                                     ])
+                                    .with_open(compact_open)
                                     .with_size(ControlSize::Sm)
-                                    .with_density(ControlDensity::Compact),
+                                    .with_density(ControlDensity::Compact)
+                                    .with_invocation_hint("Cmd+K"),
                                     theme,
                                 )
                                 .with_id("cmd-palette-compact"),
@@ -123,6 +152,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     )
                                     .with_group("File")
                                     .with_shortcut("\u{2318}S")])
+                                    .with_open(false)
                                     .with_size_role(SemanticControlSizeRole::Prominent)
                                     .with_density(ControlDensity::Compact),
                                     theme,
@@ -132,47 +162,4 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 ),
         )
-        // --- With title, description, and invocation hint ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With title and invocation hint"),
-                    theme,
-                ))
-                .child(
-                    div().w(px(480.0)).child(
-                        CommandPalette::from_spec(
-                            CommandPaletteSpec::new(vec![
-                                CommandActionItem::new("new-doc", "New document")
-                                    .with_group("Create")
-                                    .with_shortcut("\u{2318}N"),
-                                CommandActionItem::new("new-proj", "New project")
-                                    .with_group("Create")
-                                    .with_shortcut("\u{2318}\u{21E7}N"),
-                                CommandActionItem::new("invite", "Invite collaborator")
-                                    .with_group("Team"),
-                            ])
-                            .with_title("Quick actions")
-                            .with_description("Search and execute workspace commands.")
-                            .with_invocation_hint("Search workspace\u{2026}"),
-                            theme,
-                        )
-                        .with_id("cmd-palette-header"),
-                    ),
-                ),
-        )
-        .when(last_executed.is_some(), |d| {
-            d.child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(format!(
-                        "Last executed: {}",
-                        last_executed.as_deref().unwrap_or("")
-                    )),
-            )
-        })
 }

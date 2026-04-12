@@ -9,7 +9,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- Default ---
         .child(
             div()
                 .flex()
@@ -24,7 +23,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Single page ---
         .child(
             div()
                 .flex()
@@ -39,7 +37,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Large dataset ---
         .child(
             div()
                 .flex()
@@ -51,34 +48,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 ))
                 .child(PaginationSummary::from_spec(
                     PaginationSummarySpec::new(5, 20, 1000),
-                    theme,
-                )),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Final partial page"),
-                    theme,
-                ))
-                .child(PaginationSummary::from_spec(
-                    PaginationSummarySpec::new(8, 25, 188),
-                    theme,
-                )),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Empty dataset"),
-                    theme,
-                ))
-                .child(PaginationSummary::from_spec(
-                    PaginationSummarySpec::new(1, 20, 0),
                     theme,
                 )),
         )

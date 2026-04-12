@@ -4,8 +4,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, SelectionSummary};
-use poodle_specs::EyebrowSpec;
-use poodle_specs::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
+use poodle_specs::{ControlSize, EyebrowSpec, SelectionSummaryItem, SelectionSummarySpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -14,7 +13,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- Multiple items selected ---
         .child(
             div()
                 .flex()
@@ -35,7 +33,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
-        // --- Single item ---
         .child(
             div()
                 .flex()
@@ -59,27 +56,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Clear action"),
+                    EyebrowSpec::new().with_content("Sizes"),
                     theme,
                 ))
-                .child(SelectionSummary::from_spec(
-                    SelectionSummarySpec::new(vec![
-                        SelectionSummaryItem::new("1", "Button"),
-                        SelectionSummaryItem::new("2", "Card"),
-                        SelectionSummaryItem::new("3", "Dialog"),
-                    ])
-                    .with_clear_action(RemediationAction::new("clear", "Clear selection")),
-                    theme,
-                )),
+                .child(
+                    div().flex().flex_col().gap(px(16.0)).children(
+                        [
+                            ControlSize::Xs,
+                            ControlSize::Sm,
+                            ControlSize::Md,
+                            ControlSize::Lg,
+                            ControlSize::Xl,
+                        ]
+                        .into_iter()
+                        .map(|size| {
+                            SelectionSummary::from_spec(
+                                SelectionSummarySpec::new(vec![
+                                    SelectionSummaryItem::new("1", "Button"),
+                                    SelectionSummaryItem::new("2", "Card"),
+                                    SelectionSummaryItem::new("3", "Dialog"),
+                                ]),
+                                theme,
+                            )
+                            .with_size(size)
+                        }),
+                    ),
+                ),
         )
-        // --- Many items ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Many items"),
+                    EyebrowSpec::new().with_content("Truncated (max 3 visible)"),
                     theme,
                 ))
                 .child(SelectionSummary::from_spec(
@@ -90,29 +100,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         SelectionSummaryItem::new("d", "Delta"),
                         SelectionSummaryItem::new("e", "Epsilon"),
                         SelectionSummaryItem::new("f", "Zeta"),
-                    ]),
-                    theme,
-                )),
-        )
-        // --- Truncated (max visible = 3) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Truncated (max visible = 3)"),
-                    theme,
-                ))
-                .child(SelectionSummary::from_spec(
-                    SelectionSummarySpec::new(vec![
-                        SelectionSummaryItem::new("1", "Button"),
-                        SelectionSummaryItem::new("2", "Card"),
-                        SelectionSummaryItem::new("3", "Dialog"),
-                        SelectionSummaryItem::new("4", "Select"),
-                        SelectionSummaryItem::new("5", "Switch"),
-                        SelectionSummaryItem::new("6", "Table"),
-                        SelectionSummaryItem::new("7", "Tabs"),
                     ])
                     .with_max_visible_items(3),
                     theme,

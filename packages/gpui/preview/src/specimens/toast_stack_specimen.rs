@@ -1,23 +1,53 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, ToastStack};
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
-use poodle_specs::{Toast, ToastPosition, ToastStackSpec, ToastTone};
+use poodle_gpui_components::{Button, Eyebrow, ToastStack};
+use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
+use poodle_specs::{Toast, ToastStackSpec, ToastTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let mixed_toasts = vec![
-        Toast::new("saved", "Changes saved")
-            .with_tone(ToastTone::Success)
-            .with_message("Your theme and density settings were stored."),
-        Toast::new("sync", "Sync delayed")
-            .with_tone(ToastTone::Warning)
-            .with_message("Background sync will retry in 30 seconds.")
-            .with_action_label("Retry now"),
-        Toast::new("publish", "Publish failed")
-            .with_tone(ToastTone::Danger)
-            .with_message("Check validation errors before publishing again.")
-            .with_action_label("View errors"),
+    let control_sizes = [
+        ControlSize::Xs,
+        ControlSize::Sm,
+        ControlSize::Md,
+        ControlSize::Lg,
+        ControlSize::Xl,
     ];
+
+    let interactive_toasts = vec![
+        Toast::new("1", "Changes saved")
+            .with_tone(ToastTone::Success)
+            .with_message("Your settings have been updated."),
+        Toast::new("2", "New version available")
+            .with_message("Update to v2.1 for the latest features.")
+            .with_action_label("Update"),
+        Toast::new("3", "Rate limit warning")
+            .with_tone(ToastTone::Warning)
+            .with_message("You are approaching your API limit."),
+    ];
+
+    let mut size_stack = div().flex().flex_col().gap(px(16.0));
+    for size in control_sizes {
+        let size_label = match size {
+            ControlSize::Xs => "xs",
+            ControlSize::Sm => "sm",
+            ControlSize::Md => "md",
+            ControlSize::Lg => "lg",
+            ControlSize::Xl => "xl",
+        };
+        size_stack = size_stack.child(
+            div().relative().min_h(px(120.0)).child(
+                ToastStack::from_spec(
+                    ToastStackSpec::new().with_toasts(vec![Toast::new(
+                        format!("size-{size:?}"),
+                        format!("Toast at {size_label}"),
+                    )
+                    .with_message("Chrome scales with size.")]),
+                    theme,
+                )
+                .with_size(size),
+            ),
+        );
+    }
 
     div()
         .flex()
@@ -29,99 +59,34 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Mixed tones"),
+                    EyebrowSpec::new().with_content("Sizes"),
+                    theme,
+                ))
+                .child(size_stack),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Interactive stack"),
+                    theme,
+                ))
+                .child(Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Add toast"),
                     theme,
                 ))
                 .child(
                     div()
                         .relative()
-                        .h(px(220.0))
-                        .w_full()
-                        .overflow_hidden()
+                        .min_h(px(192.0))
                         .child(ToastStack::from_spec(
-                            ToastStackSpec::new().with_toasts(mixed_toasts.clone()),
+                            ToastStackSpec::new().with_toasts(interactive_toasts),
                             theme,
                         )),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Position variants"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .grid()
-                        .grid_cols(2)
-                        .gap(px(12.0))
-                        .child(
-                            div().relative().h(px(180.0)).overflow_hidden().child(
-                                ToastStack::from_spec(
-                                    ToastStackSpec::new()
-                                        .with_toasts(vec![Toast::new("top-left", "Queued")
-                                            .with_message("Two uploads are still processing.")])
-                                        .with_position(ToastPosition::TopLeft),
-                                    theme,
-                                ),
-                            ),
-                        )
-                        .child(
-                            div().relative().h(px(180.0)).overflow_hidden().child(
-                                ToastStack::from_spec(
-                                    ToastStackSpec::new()
-                                        .with_toasts(vec![Toast::new(
-                                            "top-right",
-                                            "New version available",
-                                        )
-                                        .with_action_label("Update")])
-                                        .with_position(ToastPosition::TopRight),
-                                    theme,
-                                ),
-                            ),
-                        ),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Semantic presentation"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(12.0))
-                        .child(
-                            div().relative().h(px(180.0)).overflow_hidden().child(
-                                ToastStack::from_spec(
-                                    ToastStackSpec::new()
-                                        .with_toasts(vec![Toast::new("compact", "Saved")
-                                            .with_tone(ToastTone::Success)
-                                            .with_message("Draft updated.")])
-                                        .with_size(ControlSize::Sm)
-                                        .with_density(ControlDensity::Compact),
-                                    theme,
-                                ),
-                            ),
-                        )
-                        .child(
-                            div().relative().h(px(180.0)).overflow_hidden().child(
-                                ToastStack::from_spec(
-                                    ToastStackSpec::new()
-                                        .with_toasts(mixed_toasts)
-                                        .with_size_role(SemanticControlSizeRole::Prominent),
-                                    theme,
-                                ),
-                            ),
-                        ),
                 ),
         )
 }

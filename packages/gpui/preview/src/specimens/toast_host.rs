@@ -2,10 +2,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, ToastHost};
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole,
-    Toast, ToastHostPlacement, ToastHostSpec, ToastTone,
-};
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec};
+use poodle_specs::{Toast, ToastHostSpec, ToastTone};
 
 use crate::style_bridge::color_to_hsla;
 
@@ -17,21 +15,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         Toast::new("2", "Retry later")
             .with_tone(ToastTone::Warning)
             .with_message("Background sync is delayed."),
-        Toast::new("3", "Publishing failed")
-            .with_tone(ToastTone::Danger)
-            .with_message("This one stays until you dismiss it."),
+        Toast::new("3", "Publishing failed").with_message("Check your connection."),
     ];
 
     div()
         .flex()
         .flex_col()
-        .gap(px(24.0))
+        .gap(px(16.0))
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Runtime host"), theme))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Runtime host"),
+                    theme,
+                ))
                 .child(
                     div()
                         .text_sm()
@@ -47,60 +46,13 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         .child(
             div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Host policies"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .grid()
-                        .grid_cols(2)
-                        .gap(px(12.0))
-                        .child(
-                            div()
-                                .relative()
-                                .min_h(px(220.0))
-                                .border_1()
-                                .border_color(color_to_hsla(theme.resolve_color("color.border.default")))
-                                .rounded(px(8.0))
-                                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
-                                .child(
-                                    ToastHost::from_spec(
-                                        ToastHostSpec::new()
-                                            .with_placement(ToastHostPlacement::BottomEnd),
-                                        theme,
-                                    )
-                                    .toasts(toasts.clone()),
-                                ),
-                        )
-                        .child(
-                            div()
-                                .relative()
-                                .min_h(px(220.0))
-                                .border_1()
-                                .border_color(color_to_hsla(theme.resolve_color("color.border.default")))
-                                .rounded(px(8.0))
-                                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
-                                .child(
-                                    ToastHost::from_spec(
-                                        ToastHostSpec::new()
-                                            .with_placement(ToastHostPlacement::TopStart)
-                                            .with_auto_dismiss_ms(0)
-                                            .with_sticky_tones(vec![
-                                                ToastTone::Warning,
-                                                ToastTone::Danger,
-                                            ])
-                                            .with_size(ControlSize::Sm)
-                                            .with_density(ControlDensity::Compact)
-                                            .with_size_role(SemanticControlSizeRole::Chrome),
-                                        theme,
-                                    )
-                                    .toasts(toasts),
-                                ),
-                        ),
-                ),
+                .relative()
+                .min_h(px(256.0))
+                .border_1()
+                .border_color(color_to_hsla(theme.resolve_color("color.border.default")).opacity(0.82))
+                .rounded(px(8.0))
+                .bg(color_to_hsla(theme.resolve_color("color.background.panel")).opacity(0.96))
+                // GPUI has no dashed border. Keep the Svelte host surface shape anyway.
+                .child(ToastHost::from_spec(ToastHostSpec::new(), theme).toasts(toasts)),
         )
 }

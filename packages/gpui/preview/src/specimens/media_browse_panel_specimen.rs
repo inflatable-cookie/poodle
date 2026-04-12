@@ -40,7 +40,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("State variants"),
+                    EyebrowSpec::new().with_content("Browse panel states"),
                     theme,
                 ))
                 .child(
@@ -53,8 +53,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         .child(MediaBrowsePanel::from_spec(
-                            MediaBrowsePanelSpec::new()
-                                .with_error("Unable to load media results. Check your connection."),
+                            MediaBrowsePanelSpec::new().with_error("Failed to load media"),
                             theme,
                         ))
                         .child(MediaBrowsePanel::from_spec(

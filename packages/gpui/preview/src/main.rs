@@ -809,62 +809,22 @@ impl PreviewRoot {
 
     fn render_contract_doc_summary(&self, contract_doc: &ContractUsageDocs) -> Div {
         let theme = &self.state.theme;
-        let text_primary = theme.resolve_color("color.text.primary");
         let text_secondary = theme.resolve_color("color.text.secondary");
         let border_subtle = theme.resolve_color("color.border.subtle");
 
-        let mut meta = match (&contract_doc.status, &contract_doc.updated) {
-            (Some(status), Some(updated)) => {
-                format!(
-                    "Shared contract doc: {}. Status: {}. Updated: {}.",
-                    contract_doc.path, status, updated
-                )
-            }
-            (Some(status), None) => {
-                format!(
-                    "Shared contract doc: {}. Status: {}.",
-                    contract_doc.path, status
-                )
-            }
-            _ => format!("Shared contract doc: {}.", contract_doc.path),
-        };
-
-        let coverage = format!(
-            "{} props, {} slots, {} events",
-            contract_doc.props.len(),
-            contract_doc.slots.len(),
-            contract_doc.events.len()
-        );
-
-        if let Some(summary) = contract_doc.summary.as_ref() {
-            meta.push(' ');
-            meta.push_str(summary);
+        let mut meta_parts = vec![contract_doc.path.clone()];
+        if let Some(status) = contract_doc.status.as_ref() {
+            meta_parts.push(status.clone());
+        }
+        if let Some(updated) = contract_doc.updated.as_ref() {
+            meta_parts.push(format!("updated {}", updated));
         }
 
         let mut docs = div().flex().flex_col().gap(px(24.0)).child(
             div()
-                .flex()
-                .flex_col()
-                .gap(px(10.0))
-                .child(
-                    div()
-                        .text_lg()
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(color_to_hsla(text_primary))
-                        .child("Docs"),
-                )
-                .child(
-                    div()
-                        .text_sm()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(meta),
-                )
-                .child(
-                    div()
-                        .text_sm()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(format!("Parsed contract coverage: {}.", coverage)),
-                ),
+                .text_xs()
+                .text_color(color_to_hsla(text_secondary))
+                .child(meta_parts.join(" • ")),
         );
 
         if let Some(usage) = contract_doc.usage.as_ref() {
@@ -881,10 +841,6 @@ impl PreviewRoot {
 
         if !contract_doc.events.is_empty() {
             docs = docs.child(self.render_events_table(contract_doc));
-        }
-
-        if let Some(anatomy) = contract_doc.anatomy.as_ref() {
-            docs = docs.child(self.render_doc_code_section("Anatomy", "text", anatomy));
         }
 
         docs.child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))

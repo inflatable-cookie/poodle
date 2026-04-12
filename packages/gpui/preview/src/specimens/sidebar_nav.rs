@@ -7,35 +7,20 @@ use poodle_specs::{EyebrowSpec, SidebarNavGroup, SidebarNavItem, SidebarNavSpec}
 use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let catalogue_groups = vec![
-        SidebarNavGroup::new(
-            "controls",
-            vec![
-                SidebarNavItem::new("button", "Button"),
-                SidebarNavItem::new("icon-button", "IconButton"),
-                SidebarNavItem::new("split-button", "SplitButton"),
-            ],
-        )
-        .with_label("Controls"),
-        SidebarNavGroup::new(
-            "workstation",
-            vec![
-                SidebarNavItem::new("app-header", "AppHeader"),
-                SidebarNavItem::new("dock-region", "DockRegion"),
-                SidebarNavItem::new("split-view", "SplitView"),
-                SidebarNavItem::new("status-bar", "StatusBar"),
-            ],
-        )
-        .with_label("Workstation"),
-    ];
+    let catalogue_groups = vec![SidebarNavGroup::new(
+        "catalogue",
+        vec![
+            SidebarNavItem::new("button", "Button"),
+            SidebarNavItem::new("dock-region", "DockRegion"),
+            SidebarNavItem::new("split-view", "SplitView"),
+            SidebarNavItem::new("tabs", "Tabs"),
+        ],
+    )];
 
     let harness_groups = vec![
         SidebarNavGroup::new(
             "commands",
-            vec![
-                SidebarNavItem::new("shared-commands", "Shared commands"),
-                SidebarNavItem::new("search-index", "Search index"),
-            ],
+            vec![SidebarNavItem::new("shared-commands", "Shared commands")],
         )
         .with_label("Commands"),
         SidebarNavGroup::new(
@@ -49,10 +34,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_label("Runtime"),
         SidebarNavGroup::new(
             "shell",
-            vec![
-                SidebarNavItem::new("shell-kernel", "Shell kernel"),
-                SidebarNavItem::new("workspace-layout", "Workspace layout"),
-            ],
+            vec![SidebarNavItem::new("shell-kernel", "Shell kernel")],
         )
         .with_label("Shell"),
     ];
@@ -67,7 +49,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Component catalogue"),
+                    EyebrowSpec::new().with_content("Single-group catalogue"),
                     theme,
                 ))
                 .child(
@@ -90,7 +72,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Grouped workstation nav"),
+                    EyebrowSpec::new().with_content("Grouped verification nav"),
                     theme,
                 ))
                 .child(

@@ -1,16 +1,43 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, PageLoading};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{
-    ControlDensity, ControlSize, PageLoadingPresentation, PageLoadingSpec, SemanticControlSizeRole,
-};
+use poodle_specs::{PageLoadingPresentation, PageLoadingSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Inline"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .min_h(px(288.0))
+                        .border_1()
+                        .border_color(color_to_hsla(theme.resolve_color("color.border.default")))
+                        .rounded(px(8.0))
+                        // GPUI has no dashed border. Approximate the Svelte inline shell.
+                        .bg(color_to_hsla(
+                            theme.resolve_color("color.background.surface"),
+                        ))
+                        .child(PageLoading::from_spec(
+                            PageLoadingSpec::new()
+                                .with_message("Loading section content...")
+                                .with_presentation(PageLoadingPresentation::Inline),
+                            theme,
+                        )),
+                ),
+        )
         .child(
             div()
                 .flex()
@@ -36,9 +63,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 ))
                 .child(PageLoading::from_spec(
                     PageLoadingSpec::new()
-                        .with_value(60.0)
+                        .with_value(64.0)
                         .with_max(100.0)
-                        .with_message("Uploading files... 60%"),
+                        .with_message("Uploading files... 64%"),
                     theme,
                 )),
         )
@@ -57,72 +84,5 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_can_cancel(true),
                     theme,
                 )),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Determinate with cancel"),
-                    theme,
-                ))
-                .child(PageLoading::from_spec(
-                    PageLoadingSpec::new()
-                        .with_value(35.0)
-                        .with_max(100.0)
-                        .with_message("Importing data... 35%")
-                        .with_can_cancel(true),
-                    theme,
-                )),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Inline presentation (no backdrop)"),
-                    theme,
-                ))
-                .child(PageLoading::from_spec(
-                    PageLoadingSpec::new()
-                        .with_message("Loading this section\u{2026}")
-                        .with_presentation(PageLoadingPresentation::Inline),
-                    theme,
-                )),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Semantic presentation"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(12.0))
-                        .child(PageLoading::from_spec(
-                            PageLoadingSpec::new()
-                                .with_message("Preparing region…")
-                                .with_presentation(PageLoadingPresentation::Inline)
-                                .with_size(ControlSize::Sm)
-                                .with_density(ControlDensity::Compact),
-                            theme,
-                        ))
-                        .child(PageLoading::from_spec(
-                            PageLoadingSpec::new()
-                                .with_value(82.0)
-                                .with_max(100.0)
-                                .with_message("Publishing release… 82%")
-                                .with_can_cancel(true)
-                                .with_size_role(SemanticControlSizeRole::Prominent),
-                            theme,
-                        )),
-                ),
         )
 }
