@@ -71,6 +71,13 @@ pub struct SelectSpec {
     /// Current validation state. Drives border/focus-ring colour the
     /// same way TextInput does.
     pub validation_state: crate::types::ValidationState,
+    /// Temporary label for the current selection before lazy options
+    /// load. Rendered in the trigger when value is set but the
+    /// matching option hasn't loaded yet. Matches `valueLabel`.
+    pub value_label: Option<String>,
+    /// Invalidates cached lazy options when it changes. Callers bump
+    /// this to force a re-fetch from loadOptions. Matches `loadKey`.
+    pub load_key: Option<String>,
 }
 
 impl Default for SelectSpec {
@@ -97,6 +104,8 @@ impl Default for SelectSpec {
             clearable: false,
             is_required: false,
             validation_state: crate::types::ValidationState::None,
+            value_label: None,
+            load_key: None,
         }
     }
 }
@@ -233,6 +242,16 @@ impl SelectSpec {
 
     pub fn with_validation_state(mut self, state: crate::types::ValidationState) -> Self {
         self.validation_state = state;
+        self
+    }
+
+    pub fn with_value_label(mut self, label: impl Into<String>) -> Self {
+        self.value_label = Some(label.into());
+        self
+    }
+
+    pub fn with_load_key(mut self, key: impl Into<String>) -> Self {
+        self.load_key = Some(key.into());
         self
     }
 }

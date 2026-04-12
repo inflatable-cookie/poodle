@@ -16,6 +16,8 @@ pub struct FileUploadSpec {
     /// compressed client-side before upload. The compression itself
     /// is consumer-owned; this flag only drives the "Will compress
     /// images" helper copy.
+    /// Show image thumbnails for uploaded files.
+    pub show_preview: bool,
     pub compress: bool,
     /// Pre-computed validation error to display beneath the drop
     /// zone. Mirrors Svelte's `validate` closure returning a
@@ -36,6 +38,7 @@ impl Default for FileUploadSpec {
             is_disabled: false,
             is_dragging: false,
             max_files: None,
+            show_preview: true,
             compress: false,
             validation_error: None,
             size: ControlSize::Md,
@@ -77,6 +80,11 @@ impl FileUploadSpec {
 
     pub fn with_max_files(mut self, max_files: u32) -> Self {
         self.max_files = Some(max_files);
+        self
+    }
+
+    pub fn with_show_preview(mut self, show_preview: bool) -> Self {
+        self.show_preview = show_preview;
         self
     }
 

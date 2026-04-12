@@ -29,12 +29,27 @@ pub struct PaginationSpec {
     /// When true the component renders without the outer panel chrome
     /// (border + background). Matches Svelte `standalone` prop.
     pub standalone: bool,
+    /// Whether to show the "Showing X to Y of Z" info row.
+    pub show_info: bool,
     /// Optional "showing X of Y" info text rendered alongside simple
-    /// and full variants.
+    /// and full variants. When None and show_info is true, a default
+    /// is derived from total_items / page_size / current_page.
     pub info_text: Option<String>,
+    /// Total item count (not pages). Used with page_size to compute
+    /// totalPages if total_pages is not explicitly set, and for the
+    /// info row "Showing X of Y" text.
+    pub total_items: Option<usize>,
     /// Current page size (items per page) shown alongside the info
     /// text. None suppresses the page-size selector.
     pub page_size: Option<usize>,
+    /// Show a dropdown to change page size.
+    pub show_limit_selector: bool,
+    /// Options presented in the limit selector dropdown.
+    pub limit_options: Vec<usize>,
+    /// Reduced padding and gap for tight layouts.
+    pub is_compact: bool,
+    /// Loading state — dims the component and prevents interaction.
+    pub is_loading: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -49,8 +64,14 @@ impl Default for PaginationSpec {
             aria_label: None,
             variant: PaginationVariant::Numbered,
             standalone: false,
+            show_info: true,
             info_text: None,
+            total_items: None,
             page_size: None,
+            show_limit_selector: false,
+            limit_options: vec![30, 50, 100],
+            is_compact: false,
+            is_loading: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -102,6 +123,36 @@ impl PaginationSpec {
 
     pub fn with_page_size(mut self, page_size: usize) -> Self {
         self.page_size = Some(page_size);
+        self
+    }
+
+    pub fn with_total_items(mut self, total: usize) -> Self {
+        self.total_items = Some(total);
+        self
+    }
+
+    pub fn with_show_info(mut self, v: bool) -> Self {
+        self.show_info = v;
+        self
+    }
+
+    pub fn with_show_limit_selector(mut self, v: bool) -> Self {
+        self.show_limit_selector = v;
+        self
+    }
+
+    pub fn with_limit_options(mut self, options: Vec<usize>) -> Self {
+        self.limit_options = options;
+        self
+    }
+
+    pub fn with_compact(mut self, v: bool) -> Self {
+        self.is_compact = v;
+        self
+    }
+
+    pub fn with_loading(mut self, v: bool) -> Self {
+        self.is_loading = v;
         self
     }
 
