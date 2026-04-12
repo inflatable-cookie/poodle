@@ -1,16 +1,20 @@
 use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, Tooltip};
-use poodle_specs::OverlayPlacement;
-use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, TooltipSpec};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, OverlayPlacement,
+    TooltipSpec,
+};
 use std::time::Duration;
 
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 
 fn update_tooltip_hover(
     root: &WeakEntity<PreviewRoot>,
-    key: &'static str,
-    hovered_key: &'static str,
+    key: &str,
+    hovered_key: &str,
     open: bool,
     cx: &mut App,
 ) {
@@ -31,8 +35,8 @@ fn schedule_tooltip_open(
     window: &mut Window,
     cx: &mut App,
     root: WeakEntity<PreviewRoot>,
-    key: &'static str,
-    hovered_key: &'static str,
+    key: String,
+    hovered_key: String,
     delay_ms: u16,
 ) {
     window
@@ -42,8 +46,8 @@ fn schedule_tooltip_open(
                 .await;
             cx.update(|_window, cx| {
                 root.update(cx, |this, cx| {
-                    if this.state.specimens.is_on(hovered_key) {
-                        this.state.specimens.toggles.insert(key.to_string(), true);
+                    if this.state.specimens.is_on(&hovered_key) {
+                        this.state.specimens.toggles.insert(key.clone(), true);
                         cx.notify();
                     }
                 })
@@ -54,206 +58,50 @@ fn schedule_tooltip_open(
         .detach();
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
-    let theme = &state.theme;
-    let root = cx.weak_entity();
-    let default_open = state.specimens.is_on("tooltip-default-open");
-    let top_open = state.specimens.is_on("tooltip-top-open");
-    let bottom_open = state.specimens.is_on("tooltip-bottom-open");
-    let left_open = state.specimens.is_on("tooltip-left-open");
-    let right_open = state.specimens.is_on("tooltip-right-open");
-    let default_delay_ms = TooltipSpec::new().delay_ms;
-    let placement_delay_ms = TooltipSpec::new().delay_ms;
+fn render_tooltip_case(
+    state: &AppState,
+    theme: &GpuiThemeProvider,
+    root: &WeakEntity<PreviewRoot>,
+    open_key: impl Into<String>,
+    hovered_key: impl Into<String>,
+    tooltip_spec: TooltipSpec,
+    trigger: AnyElement,
+) -> AnyElement {
+    let open_key = open_key.into();
+    let hovered_key = hovered_key.into();
+    let is_open = state.specimens.is_on(&open_key);
+    let delay_ms = tooltip_spec.delay_ms;
 
-    // ── Default ──────────────────────────────────────────────────────
-    let default_spec = TooltipSpec::new()
-        .with_content("Save your changes")
-        .with_placement(OverlayPlacement::Top)
-        .with_open(default_open);
-
-    let default_trigger = Button::from_spec(
-        ButtonSpec::new()
-            .with_variant(ButtonVariant::Secondary)
-            .with_label("Hover me"),
-        theme,
-    )
-    .with_id("tooltip-default-trigger");
-
-    let default_tooltip = Tooltip::from_spec(default_spec, theme)
+    Tooltip::from_spec(tooltip_spec.with_open(is_open), theme)
         .on_open_change({
             let root = root.clone();
+            let open_key = open_key.clone();
+            let hovered_key = hovered_key.clone();
             move |open, window, cx| {
-                update_tooltip_hover(
-                    &root,
-                    "tooltip-default-open",
-                    "tooltip-default-hovered",
-                    open,
-                    cx,
-                );
+                update_tooltip_hover(&root, &open_key, &hovered_key, open, cx);
                 if open {
                     schedule_tooltip_open(
                         window,
                         cx,
                         root.clone(),
-                        "tooltip-default-open",
-                        "tooltip-default-hovered",
-                        default_delay_ms,
+                        open_key.clone(),
+                        hovered_key.clone(),
+                        delay_ms,
                     );
                 }
             }
         })
-        .with_trigger(default_trigger);
+        .with_trigger(trigger)
+        .into_any_element()
+}
 
-    // ── Placements ───────────────────────────────────────────────────
-    let top_tooltip = Tooltip::from_spec(
-        TooltipSpec::new()
-            .with_content("Top tooltip")
-            .with_placement(OverlayPlacement::Top)
-            .with_open(top_open),
-        theme,
-    )
-    .on_open_change({
-        let root = root.clone();
-        move |open, window, cx| {
-            update_tooltip_hover(&root, "tooltip-top-open", "tooltip-top-hovered", open, cx);
-            if open {
-                schedule_tooltip_open(
-                    window,
-                    cx,
-                    root.clone(),
-                    "tooltip-top-open",
-                    "tooltip-top-hovered",
-                    placement_delay_ms,
-                );
-            }
-        }
-    })
-    .with_trigger(
-        Button::from_spec(
-            ButtonSpec::new()
-                .with_variant(ButtonVariant::Ghost)
-                .with_label("Top"),
-            theme,
-        )
-        .with_id("tooltip-top-trigger"),
-    );
-
-    let bottom_tooltip = Tooltip::from_spec(
-        TooltipSpec::new()
-            .with_content("Bottom tooltip")
-            .with_placement(OverlayPlacement::Bottom)
-            .with_open(bottom_open),
-        theme,
-    )
-    .on_open_change({
-        let root = root.clone();
-        move |open, window, cx| {
-            update_tooltip_hover(
-                &root,
-                "tooltip-bottom-open",
-                "tooltip-bottom-hovered",
-                open,
-                cx,
-            );
-            if open {
-                schedule_tooltip_open(
-                    window,
-                    cx,
-                    root.clone(),
-                    "tooltip-bottom-open",
-                    "tooltip-bottom-hovered",
-                    placement_delay_ms,
-                );
-            }
-        }
-    })
-    .with_trigger(
-        Button::from_spec(
-            ButtonSpec::new()
-                .with_variant(ButtonVariant::Ghost)
-                .with_label("Bottom"),
-            theme,
-        )
-        .with_id("tooltip-bottom-trigger"),
-    );
-
-    let left_tooltip = Tooltip::from_spec(
-        TooltipSpec::new()
-            .with_content("Left tooltip")
-            .with_placement(OverlayPlacement::Left)
-            .with_open(left_open),
-        theme,
-    )
-    .on_open_change({
-        let root = root.clone();
-        move |open, window, cx| {
-            update_tooltip_hover(&root, "tooltip-left-open", "tooltip-left-hovered", open, cx);
-            if open {
-                schedule_tooltip_open(
-                    window,
-                    cx,
-                    root.clone(),
-                    "tooltip-left-open",
-                    "tooltip-left-hovered",
-                    placement_delay_ms,
-                );
-            }
-        }
-    })
-    .with_trigger(
-        Button::from_spec(
-            ButtonSpec::new()
-                .with_variant(ButtonVariant::Ghost)
-                .with_label("Left"),
-            theme,
-        )
-        .with_id("tooltip-left-trigger"),
-    );
-
-    let right_tooltip = Tooltip::from_spec(
-        TooltipSpec::new()
-            .with_content("Right tooltip")
-            .with_placement(OverlayPlacement::Right)
-            .with_open(right_open),
-        theme,
-    )
-    .on_open_change({
-        let root = root.clone();
-        move |open, window, cx| {
-            update_tooltip_hover(
-                &root,
-                "tooltip-right-open",
-                "tooltip-right-hovered",
-                open,
-                cx,
-            );
-            if open {
-                schedule_tooltip_open(
-                    window,
-                    cx,
-                    root.clone(),
-                    "tooltip-right-open",
-                    "tooltip-right-hovered",
-                    placement_delay_ms,
-                );
-            }
-        }
-    })
-    .with_trigger(
-        Button::from_spec(
-            ButtonSpec::new()
-                .with_variant(ButtonVariant::Ghost)
-                .with_label("Right"),
-            theme,
-        )
-        .with_id("tooltip-right-trigger"),
-    );
-
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let root = cx.weak_entity();
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // Default
         .child(
             div()
                 .flex()
@@ -264,15 +112,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    div()
-                        .flex()
-                        .flex_wrap()
-                        .gap(px(12.0))
-                        .items_center()
-                        .child(default_tooltip),
+                    div().flex().flex_wrap().gap(px(12.0)).items_center().child(
+                        render_tooltip_case(
+                            state,
+                            theme,
+                            &root,
+                            "tooltip-default-open",
+                            "tooltip-default-hovered",
+                            TooltipSpec::new()
+                                .with_content("Save your changes")
+                                .with_placement(OverlayPlacement::Top),
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("Hover me"),
+                                theme,
+                            )
+                            .with_id("tooltip-default-trigger")
+                            .into_any_element(),
+                        ),
+                    ),
                 ),
         )
-        // Placements
         .child(
             div()
                 .flex()
@@ -288,10 +149,136 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_wrap()
                         .gap(px(12.0))
                         .items_center()
-                        .child(top_tooltip)
-                        .child(bottom_tooltip)
-                        .child(left_tooltip)
-                        .child(right_tooltip),
+                        .child(render_tooltip_case(
+                            state,
+                            theme,
+                            &root,
+                            "tooltip-top-open",
+                            "tooltip-top-hovered",
+                            TooltipSpec::new()
+                                .with_content("Top tooltip")
+                                .with_placement(OverlayPlacement::Top),
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_label("Top"),
+                                theme,
+                            )
+                            .with_id("tooltip-top-trigger")
+                            .into_any_element(),
+                        ))
+                        .child(render_tooltip_case(
+                            state,
+                            theme,
+                            &root,
+                            "tooltip-bottom-open",
+                            "tooltip-bottom-hovered",
+                            TooltipSpec::new()
+                                .with_content("Bottom tooltip")
+                                .with_placement(OverlayPlacement::Bottom),
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_label("Bottom"),
+                                theme,
+                            )
+                            .with_id("tooltip-bottom-trigger")
+                            .into_any_element(),
+                        ))
+                        .child(render_tooltip_case(
+                            state,
+                            theme,
+                            &root,
+                            "tooltip-left-open",
+                            "tooltip-left-hovered",
+                            TooltipSpec::new()
+                                .with_content("Left tooltip")
+                                .with_placement(OverlayPlacement::Left),
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_label("Left"),
+                                theme,
+                            )
+                            .with_id("tooltip-left-trigger")
+                            .into_any_element(),
+                        ))
+                        .child(render_tooltip_case(
+                            state,
+                            theme,
+                            &root,
+                            "tooltip-right-open",
+                            "tooltip-right-hovered",
+                            TooltipSpec::new()
+                                .with_content("Right tooltip")
+                                .with_placement(OverlayPlacement::Right),
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_label("Right"),
+                                theme,
+                            )
+                            .with_id("tooltip-right-trigger")
+                            .into_any_element(),
+                        )),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "tooltip",
+        examples,
+        |size: ControlSize, theme: &GpuiThemeProvider| {
+            let size_label = match size {
+                ControlSize::Xs => "xs",
+                ControlSize::Sm => "sm",
+                ControlSize::Md => "md",
+                ControlSize::Lg => "lg",
+                ControlSize::Xl => "xl",
+            };
+            render_tooltip_case(
+                state,
+                theme,
+                &root,
+                format!("tooltip-size-{size_label}-open"),
+                format!("tooltip-size-{size_label}-hovered"),
+                TooltipSpec::new().with_content(format!("Tooltip at {size_label}")),
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_size(size)
+                        .with_label(format!("Hover ({size_label})")),
+                    theme,
+                )
+                .with_id(format!("tooltip-size-{size_label}-trigger"))
+                .into_any_element(),
+            )
+        },
+        |density: ControlDensity, theme: &GpuiThemeProvider| {
+            let density_label = match density {
+                ControlDensity::Compact => "compact",
+                ControlDensity::Default => "default",
+                ControlDensity::Comfortable => "comfortable",
+            };
+            render_tooltip_case(
+                state,
+                theme,
+                &root,
+                format!("tooltip-density-{density_label}-open"),
+                format!("tooltip-density-{density_label}-hovered"),
+                TooltipSpec::new().with_content(format!("Tooltip at {density_label}")),
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_density(density)
+                        .with_label(format!("Hover ({density_label})")),
+                    theme,
+                )
+                .with_id(format!("tooltip-density-{density_label}-trigger"))
+                .into_any_element(),
+            )
+        },
+    )
 }
