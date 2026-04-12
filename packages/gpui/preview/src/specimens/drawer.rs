@@ -9,6 +9,7 @@ use poodle_specs::{ButtonSpec, ButtonVariant, DrawerEdge, DrawerSpec, EyebrowSpe
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
+    let root_handle = cx.weak_entity();
 
     let trigger = |id: &'static str,
                    key: &'static str,
@@ -75,6 +76,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_description("Configure your preferences."),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("drawer-right-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .text_size(px(14.0))
@@ -127,6 +141,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_title("Navigation"),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("drawer-left-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .text_size(px(14.0))

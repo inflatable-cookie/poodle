@@ -8,8 +8,20 @@ use poodle_specs::{EyebrowSpec, HoverCardSpec, OverlayPlacement};
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let accent = theme.resolve_color("color.accent.base");
+    let border_subtle = theme.resolve_color("color.border.subtle");
 
     div().flex().flex_col().gap(px(24.0))
+        .child(
+            div()
+                .p(px(12.0))
+                .rounded(px(8.0))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle).opacity(0.6))
+                .bg(color_to_hsla(theme.resolve_color("color.background.panel")).opacity(0.8))
+                .text_sm()
+                .text_color(color_to_hsla(text_secondary))
+                .child("Representative open state. Native hover enter/leave behavior is still pending in the GPUI preview stack."),
+        )
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (top placement)"), theme))

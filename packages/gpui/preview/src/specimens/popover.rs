@@ -10,6 +10,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_primary = theme.resolve_color("color.text.primary");
+    let root = cx.weak_entity();
 
     let popover_default_open = state.specimens.is_on("popover-default");
     let popover_top_open = state.specimens.is_on("popover-top");
@@ -26,6 +27,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Quick settings"),
                         theme,
                     )
+                    .on_open_change({
+                        let root = root.clone();
+                        move |open, _window, cx| {
+                            root.update(cx, |this, cx| {
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("popover-default".to_string(), open);
+                                cx.notify();
+                            })
+                            .ok();
+                        }
+                    })
                     .with_trigger(
                         Button::from_spec(
                             ButtonSpec::new()
@@ -69,6 +83,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Help tip"),
                         theme,
                     )
+                    .on_open_change({
+                        let root = root.clone();
+                        move |open, _window, cx| {
+                            root.update(cx, |this, cx| {
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("popover-top".to_string(), open);
+                                cx.notify();
+                            })
+                            .ok();
+                        }
+                    })
                     .with_trigger(
                         Button::from_spec(
                             ButtonSpec::new()

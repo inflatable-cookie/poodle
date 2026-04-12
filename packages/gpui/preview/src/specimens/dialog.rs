@@ -16,6 +16,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let panel_bg = theme.resolve_color("color.background.panel");
     let accent = theme.resolve_color("color.accent.base");
     let border_subtle = theme.resolve_color("color.border.subtle");
+    let root_handle = cx.weak_entity();
 
     let button_row = |label: &'static str, button: AnyElement| {
         div()
@@ -191,6 +192,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-shortcuts-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .flex()
@@ -242,6 +256,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-form-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .flex()
@@ -335,6 +362,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("What's new"),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-changelog-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_header(
                 div()
                     .flex()
@@ -379,6 +419,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-terms-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .text_size(px(13.0))
@@ -443,6 +496,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("Image preview"),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-bare-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .flex()
@@ -584,6 +650,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-scroll-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(log_list)
             .with_actions(
                 div()
@@ -637,6 +716,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_show_close_button(true),
                     theme,
                 )
+                .on_close({
+                    let root = root_handle.clone();
+                    move |_window, cx| {
+                        root.update(cx, |this, cx| {
+                            this.state.specimens.toggles.insert(key.to_string(), false);
+                            cx.notify();
+                        })
+                        .ok();
+                    }
+                })
                 .with_content(
                     div()
                         .text_size(px(13.0))
@@ -664,6 +753,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_dismiss_on_escape(false),
                 theme,
             )
+            .on_close({
+                let root = root_handle.clone();
+                move |_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("dialog-persistent-open".to_string(), false);
+                        cx.notify();
+                    })
+                    .ok();
+                }
+            })
             .with_content(
                 div()
                     .text_size(px(13.0))

@@ -1,10 +1,16 @@
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, Tooltip};
 use poodle_specs::OverlayPlacement;
 use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, TooltipSpec};
 
+use crate::style_bridge::color_to_hsla;
+
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let border_subtle = theme.resolve_color("color.border.subtle");
+
     // ── Default ──────────────────────────────────────────────────────
     let default_spec = TooltipSpec::new()
         .with_content("Save your changes")
@@ -94,6 +100,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
+        .child(
+            div()
+                .p(px(12.0))
+                .rounded(px(8.0))
+                .border_1()
+                .border_color(color_to_hsla(border_subtle).opacity(0.6))
+                .bg(color_to_hsla(theme.resolve_color("color.background.panel")).opacity(0.8))
+                .text_sm()
+                .text_color(color_to_hsla(text_secondary))
+                .child("Representative open state. Native hover-triggered tooltip behavior is still pending in the GPUI preview stack."),
+        )
         // Default
         .child(
             div()
