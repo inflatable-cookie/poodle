@@ -17,8 +17,8 @@ pub struct Drawer {
     content: Option<AnyElement>,
     /// The main area content (shown next to the drawer).
     main_content: Option<AnyElement>,
-    /// Called when the drawer should close (Escape key, backdrop click).
-    on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
+    /// Called when the drawer open state should change.
+    on_open_change: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Drawer {
@@ -35,7 +35,7 @@ impl Drawer {
             theme: theme.clone(),
             content: None,
             main_content: None,
-            on_close: None,
+            on_open_change: None,
         }
     }
 
@@ -45,7 +45,7 @@ impl Drawer {
             theme: theme.clone(),
             content: None,
             main_content: None,
-            on_close: None,
+            on_open_change: None,
         }
     }
 
@@ -109,9 +109,20 @@ impl Drawer {
         self
     }
 
-    /// Called when the drawer should close (Escape, backdrop click).
+    /// Called when the drawer open state should change.
+    pub fn on_open_change(
+        mut self,
+        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_open_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Compatibility shim for close-only listeners.
     pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
-        self.on_close = Some(std::rc::Rc::new(handler));
+        self.on_open_change = Some(std::rc::Rc::new(move |_open, window, cx| {
+            handler(window, cx);
+        }));
         self
     }
 }
@@ -212,11 +223,11 @@ impl IntoElement for Drawer {
 
         // Escape key to close
         if spec.dismiss_on_escape {
-            if let Some(ref handler) = self.on_close {
+            if let Some(ref handler) = self.on_open_change {
                 let esc_handler = handler.clone();
                 drawer_panel = drawer_panel.on_key_down(move |event: &KeyDownEvent, window, cx| {
                     if event.keystroke.key == "escape" {
-                        esc_handler(window, cx);
+                        esc_handler(false, window, cx);
                     }
                 });
             }
@@ -256,10 +267,10 @@ impl IntoElement for Drawer {
 
             // Backdrop click to dismiss
             if spec.dismiss_on_backdrop {
-                if let Some(ref handler) = self.on_close {
+                if let Some(ref handler) = self.on_open_change {
                     let click_handler = handler.clone();
                     backdrop = backdrop.on_click(move |_event, window, cx| {
-                        click_handler(window, cx);
+                        click_handler(false, window, cx);
                     });
                 }
             }

@@ -48,10 +48,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("popover-default-trigger")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggle("popover-default");
-                            cx.notify();
-                        }))
                     )
                     .with_content(
                         div().flex().flex_col().gap(px(4.0)).max_w(px(256.0))
@@ -104,10 +100,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("popover-top-trigger")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggle("popover-top");
-                            cx.notify();
-                        }))
                     )
                     .with_content(
                         div().max_w(px(256.0))

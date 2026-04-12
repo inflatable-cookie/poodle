@@ -192,9 +192,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens
@@ -256,9 +256,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens
@@ -362,9 +362,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("What's new"),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens
@@ -419,9 +419,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens
@@ -496,9 +496,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("Image preview"),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens
@@ -650,9 +650,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_close_button(true),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens
@@ -716,9 +716,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_show_close_button(true),
                     theme,
                 )
-                .on_close({
+                .on_open_change({
                     let root = root_handle.clone();
-                    move |_window, cx| {
+                    move |_open, _window, cx| {
                         root.update(cx, |this, cx| {
                             this.state.specimens.toggles.insert(key.to_string(), false);
                             cx.notify();
@@ -753,9 +753,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_dismiss_on_escape(false),
                 theme,
             )
-            .on_close({
+            .on_open_change({
                 let root = root_handle.clone();
-                move |_window, cx| {
+                move |_open, _window, cx| {
                     root.update(cx, |this, cx| {
                         this.state
                             .specimens

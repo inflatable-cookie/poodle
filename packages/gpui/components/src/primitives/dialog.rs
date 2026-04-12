@@ -28,9 +28,8 @@ pub struct Dialog {
     /// Optional footer override. When set, replaces the default actions
     /// row (including its layout) with a fully custom footer.
     footer: Option<AnyElement>,
-    /// Called when the dialog should close (Escape key, backdrop click,
-    /// or the close button).
-    on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
+    /// Called when the dialog open state should change.
+    on_open_change: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Dialog {
@@ -49,7 +48,7 @@ impl Dialog {
             content: None,
             header: None,
             footer: None,
-            on_close: None,
+            on_open_change: None,
         }
     }
 
@@ -61,7 +60,7 @@ impl Dialog {
             content: None,
             header: None,
             footer: None,
-            on_close: None,
+            on_open_change: None,
         }
     }
 
@@ -127,9 +126,20 @@ impl Dialog {
         self
     }
 
-    /// Called when the dialog should close (Escape, backdrop click).
+    /// Called when the dialog open state should change.
+    pub fn on_open_change(
+        mut self,
+        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_open_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Compatibility shim for close-only listeners.
     pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
-        self.on_close = Some(std::rc::Rc::new(handler));
+        self.on_open_change = Some(std::rc::Rc::new(move |_open, window, cx| {
+            handler(window, cx);
+        }));
         self
     }
 
@@ -301,10 +311,10 @@ impl IntoElement for Dialog {
                         .text_color(text_secondary)
                         .cursor_pointer()
                         .child("×");
-                    if let Some(ref handler) = self.on_close {
+                    if let Some(ref handler) = self.on_open_change {
                         let handler = handler.clone();
                         close_button = close_button.on_click(move |_event, window, cx| {
-                            handler(window, cx);
+                            handler(false, window, cx);
                         });
                     }
                     header_row = header_row.child(close_button);
@@ -349,11 +359,11 @@ impl IntoElement for Dialog {
 
         // Escape key on dialog surface
         if spec.dismiss_on_escape {
-            if let Some(ref handler) = self.on_close {
+            if let Some(ref handler) = self.on_open_change {
                 let esc_handler = handler.clone();
                 dialog = dialog.on_key_down(move |event: &KeyDownEvent, window, cx| {
                     if event.keystroke.key == "escape" {
-                        esc_handler(window, cx);
+                        esc_handler(false, window, cx);
                     }
                 });
             }
@@ -373,10 +383,10 @@ impl IntoElement for Dialog {
 
         // Backdrop click to dismiss
         if spec.dismiss_on_backdrop {
-            if let Some(ref handler) = self.on_close {
+            if let Some(ref handler) = self.on_open_change {
                 let click_handler = handler.clone();
                 backdrop = backdrop.on_click(move |_event, window, cx| {
-                    click_handler(window, cx);
+                    click_handler(false, window, cx);
                 });
             }
         }
