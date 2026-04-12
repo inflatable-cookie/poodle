@@ -19,9 +19,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_specs::{
-    CodeSpec, ColumnAlign, ControlDensity as SpecControlDensity, ControlSize as SpecControlSize,
+    CodeSpec, ControlDensity as SpecControlDensity, ControlSize as SpecControlSize,
     SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, TabDefinition,
-    TabVariant, TableColumn, TableRow, TableSpec, TabsSpec, TextInputSpec,
+    TabVariant, TabsSpec, TextInputSpec,
 };
 
 /// Asset source that loads files from the preview app's directory.
@@ -61,7 +61,7 @@ use app_state::{
 };
 use component_registry::{find_component, grouped_components, package_name};
 use contract_usage_docs::{load_contract_usage_docs, ContractUsageDocs};
-use poodle_gpui_components::{Code, SidebarNav, Table, Tabs, TextInput};
+use poodle_gpui_components::{Code, SidebarNav, Tabs, TextInput};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -825,128 +825,123 @@ impl PreviewRoot {
     }
 
     fn render_props_table(&self, contract_doc: &ContractUsageDocs) -> Div {
-        let theme = &self.state.theme;
-        let text_primary = theme.resolve_color("color.text.primary");
-        let columns = vec![
-            TableColumn::new("prop", "Prop").with_row_header(true),
-            TableColumn::new("type", "Type"),
-            TableColumn::new("default", "Default"),
-            TableColumn::new("description", "Description"),
-        ];
-        let rows = contract_doc
+        let rows: Vec<AnyElement> = contract_doc
             .props
             .iter()
-            .enumerate()
-            .map(|(index, prop)| {
+            .map(|prop| {
                 let name = if prop.required {
                     format!("{}*", prop.name)
                 } else {
                     prop.name.clone()
                 };
-                TableRow::new(
-                    format!("prop-{}", index),
-                    vec![
-                        ("prop".to_string(), name),
-                        ("type".to_string(), prop.type_name.clone()),
-                        (
-                            "default".to_string(),
-                            prop.default_value
-                                .clone()
-                                .unwrap_or_else(|| "—".to_string()),
-                        ),
-                        ("description".to_string(), prop.description.clone()),
-                    ],
-                )
+                self.render_usage_table_row(vec![
+                    self.render_usage_name_cell(name, prop.required)
+                        .into_any_element(),
+                    self.render_usage_code_cell(&prop.type_name)
+                        .into_any_element(),
+                    self.render_usage_code_cell(prop.default_value.as_deref().unwrap_or("—"))
+                        .into_any_element(),
+                    self.render_usage_description_cell(&prop.description)
+                        .into_any_element(),
+                ])
+                .into_any_element()
             })
             .collect();
 
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(10.0))
-            .child(
-                div()
-                    .text_lg()
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_primary))
-                    .child("Props"),
-            )
-            .child(Table::from_spec(
-                TableSpec::new()
-                    .with_columns(columns)
-                    .with_rows(rows)
-                    .with_aria_label("Component props")
-                    .with_empty_message("No props documented."),
-                theme,
-            ))
+        self.render_usage_table_section(
+            "Props",
+            vec![
+                ("Prop", px(160.0)),
+                ("Type", px(220.0)),
+                ("Default", px(120.0)),
+                ("Description", px(0.0)),
+            ],
+            rows,
+        )
     }
 
     fn render_slots_table(&self, contract_doc: &ContractUsageDocs) -> Div {
-        let theme = &self.state.theme;
-        let text_primary = theme.resolve_color("color.text.primary");
-        let columns = vec![
-            TableColumn::new("slot", "Slot").with_row_header(true),
-            TableColumn::new("description", "Description"),
-        ];
-        let rows = contract_doc
+        let rows: Vec<AnyElement> = contract_doc
             .slots
             .iter()
-            .enumerate()
-            .map(|(index, slot)| {
-                TableRow::new(
-                    format!("slot-{}", index),
-                    vec![
-                        ("slot".to_string(), slot.name.clone()),
-                        ("description".to_string(), slot.description.clone()),
-                    ],
-                )
+            .map(|slot| {
+                self.render_usage_table_row(vec![
+                    self.render_usage_name_cell(slot.name.clone(), false)
+                        .into_any_element(),
+                    self.render_usage_description_cell(&slot.description)
+                        .into_any_element(),
+                ])
+                .into_any_element()
             })
             .collect();
 
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(10.0))
-            .child(
-                div()
-                    .text_lg()
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_primary))
-                    .child("Slots"),
-            )
-            .child(Table::from_spec(
-                TableSpec::new()
-                    .with_columns(columns)
-                    .with_rows(rows)
-                    .with_aria_label("Component slots")
-                    .with_empty_message("No slots documented."),
-                theme,
-            ))
+        self.render_usage_table_section(
+            "Slots",
+            vec![("Slot", px(160.0)), ("Description", px(0.0))],
+            rows,
+        )
     }
 
     fn render_events_table(&self, contract_doc: &ContractUsageDocs) -> Div {
-        let theme = &self.state.theme;
-        let text_primary = theme.resolve_color("color.text.primary");
-        let columns = vec![
-            TableColumn::new("event", "Event").with_row_header(true),
-            TableColumn::new("payload", "Payload"),
-            TableColumn::new("description", "Description").with_align(ColumnAlign::Start),
-        ];
-        let rows = contract_doc
+        let rows: Vec<AnyElement> = contract_doc
             .events
             .iter()
-            .enumerate()
-            .map(|(index, event)| {
-                TableRow::new(
-                    format!("event-{}", index),
-                    vec![
-                        ("event".to_string(), event.name.clone()),
-                        ("payload".to_string(), event.payload.clone()),
-                        ("description".to_string(), event.description.clone()),
-                    ],
-                )
+            .map(|event| {
+                self.render_usage_table_row(vec![
+                    self.render_usage_name_cell(event.name.clone(), false)
+                        .into_any_element(),
+                    self.render_usage_code_cell(&event.payload)
+                        .into_any_element(),
+                    self.render_usage_description_cell(&event.description)
+                        .into_any_element(),
+                ])
+                .into_any_element()
             })
             .collect();
+
+        self.render_usage_table_section(
+            "Events",
+            vec![
+                ("Event", px(160.0)),
+                ("Payload", px(220.0)),
+                ("Description", px(0.0)),
+            ],
+            rows,
+        )
+    }
+
+    fn render_usage_table_section(
+        &self,
+        title: &'static str,
+        columns: Vec<(&'static str, Pixels)>,
+        rows: Vec<AnyElement>,
+    ) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+
+        let mut header_row = div()
+            .flex()
+            .items_start()
+            .w_full()
+            .border_b_1()
+            .border_color(color_to_hsla(border_subtle));
+        for (label, width) in columns {
+            let mut cell = div()
+                .px(px(12.0))
+                .py(px(8.0))
+                .text_size(px(11.0))
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(color_to_hsla(text_secondary))
+                .child(label);
+            if width > px(0.0) {
+                cell = cell.w(width).flex_none();
+            } else {
+                cell = cell.flex_1().min_w(px(192.0));
+            }
+            header_row = header_row.child(cell);
+        }
 
         div()
             .flex()
@@ -957,16 +952,85 @@ impl PreviewRoot {
                     .text_lg()
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(color_to_hsla(text_primary))
-                    .child("Events"),
+                    .child(title),
             )
-            .child(Table::from_spec(
-                TableSpec::new()
-                    .with_columns(columns)
-                    .with_rows(rows)
-                    .with_aria_label("Component events")
-                    .with_empty_message("No events documented."),
-                theme,
-            ))
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .w_full()
+                    .overflow_hidden()
+                    .child(header_row)
+                    .children(rows),
+            )
+    }
+
+    fn render_usage_table_row(&self, cells: Vec<AnyElement>) -> Div {
+        let border_subtle = self.state.theme.resolve_color("color.border.subtle");
+        div()
+            .flex()
+            .items_start()
+            .w_full()
+            .border_b_1()
+            .border_color(color_to_hsla(border_subtle).opacity(0.4))
+            .children(cells)
+    }
+
+    fn render_usage_name_cell(&self, text: String, required: bool) -> Div {
+        let text_primary = self.state.theme.resolve_color("color.text.primary");
+        let danger = self.state.theme.resolve_color("color.status.danger");
+        let mut label = div()
+            .flex()
+            .items_center()
+            .gap(px(2.0))
+            .child(text.trim_end_matches('*').to_string());
+        if required {
+            label = label.child(div().text_color(color_to_hsla(danger)).child("*"));
+        }
+        div()
+            .w(px(160.0))
+            .flex_none()
+            .px(px(12.0))
+            .py(px(8.0))
+            .font_family("SF Mono")
+            .text_size(px(12.0))
+            .font_weight(FontWeight::MEDIUM)
+            .text_color(color_to_hsla(text_primary))
+            .child(label)
+    }
+
+    fn render_usage_code_cell(&self, text: &str) -> Div {
+        let text_secondary = self.state.theme.resolve_color("color.text.secondary");
+        let canvas = self.state.theme.resolve_color("color.background.canvas");
+        div()
+            .w(px(220.0))
+            .flex_none()
+            .px(px(12.0))
+            .py(px(8.0))
+            .child(
+                div()
+                    .px(px(4.0))
+                    .py(px(1.0))
+                    .rounded(px(3.0))
+                    .bg(color_to_hsla(canvas).opacity(0.8))
+                    .font_family("SF Mono")
+                    .text_size(px(12.0))
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(text.to_string()),
+            )
+    }
+
+    fn render_usage_description_cell(&self, text: &str) -> Div {
+        let text_secondary = self.state.theme.resolve_color("color.text.secondary");
+        div()
+            .flex_1()
+            .min_w(px(192.0))
+            .px(px(12.0))
+            .py(px(8.0))
+            .text_size(px(13.0))
+            .line_height(relative(1.5))
+            .text_color(color_to_hsla(text_secondary))
+            .child(text.to_string())
     }
 
     /// Landing page grid showing all components as cards.
