@@ -5,10 +5,6 @@ use crate::component_registry::contract_doc_path;
 #[derive(Clone, Debug, Default)]
 pub struct ContractUsageDocs {
     pub exists: bool,
-    pub status: Option<String>,
-    pub updated: Option<String>,
-    pub summary: Option<String>,
-    pub anatomy: Option<String>,
     pub usage: Option<String>,
     pub props: Vec<UsageProp>,
     pub slots: Vec<UsageSlot>,
@@ -52,31 +48,11 @@ pub fn load_contract_usage_docs(slug: &str) -> ContractUsageDocs {
         return docs;
     };
 
-    docs.status = metadata_value(&contents, "Status: ");
-    docs.updated = metadata_value(&contents, "Updated: ");
-    docs.summary = purpose_summary(&contents);
-    docs.anatomy = fenced_block(&named_section(&contents, &["Anatomy"]));
     docs.usage = usage_block(&contents);
     docs.props = parse_props(&contents);
     docs.slots = parse_slots(&contents);
     docs.events = parse_events(&contents);
     docs
-}
-
-fn metadata_value(contents: &str, prefix: &str) -> Option<String> {
-    contents.lines().find_map(|line| {
-        line.strip_prefix(prefix)
-            .map(|value| value.trim().to_string())
-    })
-}
-
-fn purpose_summary(contents: &str) -> Option<String> {
-    let body = named_section(contents, &["Purpose"]);
-    body.lines().find_map(|line| {
-        line.trim()
-            .strip_prefix("- Summary: ")
-            .map(|value| value.trim().to_string())
-    })
 }
 
 fn usage_block(contents: &str) -> Option<String> {
@@ -262,21 +238,10 @@ mod tests {
     fn parses_button_contract_usage_data() {
         let docs = load_contract_usage_docs("button");
         assert!(docs.exists);
-        assert_eq!(docs.status.as_deref(), Some("detailed contract"));
-        assert!(docs
-            .summary
-            .as_deref()
-            .unwrap_or_default()
-            .contains("general action"));
         assert!(docs.props.iter().any(|prop| prop.name == "variant"));
         assert!(docs.props.iter().any(|prop| prop.name == "pressed"));
         assert!(docs.slots.iter().any(|slot| slot.name == "default"));
         assert!(docs.events.iter().any(|event| event.name == "click"));
-        assert!(docs
-            .anatomy
-            .as_deref()
-            .unwrap_or_default()
-            .contains("[Root .button]"));
     }
 
     #[test]
@@ -294,11 +259,6 @@ mod tests {
         assert!(docs.exists);
         assert!(docs.props.iter().any(|prop| prop.name == "title"));
         assert!(docs.slots.iter().any(|slot| slot.name == "media"));
-        assert!(docs
-            .anatomy
-            .as_deref()
-            .unwrap_or_default()
-            .contains("[Card]"));
     }
 
     #[test]
