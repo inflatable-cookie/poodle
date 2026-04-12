@@ -5,6 +5,7 @@
 
 mod app_state;
 mod component_registry;
+mod contract_usage_docs;
 mod demo_view;
 mod specimens;
 #[allow(dead_code)]
@@ -12,15 +13,15 @@ mod style_bridge;
 mod token_view;
 
 use std::borrow::Cow;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{CodeSpec, TabDefinition, TabVariant, TabsSpec, TextInputSpec};
 use poodle_specs::{
-    ControlDensity as SpecControlDensity, ControlSize as SpecControlSize, SemanticControlSizeRole,
-    SidebarNavGroup, SidebarNavItem, SidebarNavSpec,
+    CodeSpec, ColumnAlign, ControlDensity as SpecControlDensity, ControlSize as SpecControlSize,
+    SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, TabDefinition,
+    TabVariant, TableColumn, TableRow, TableSpec, TabsSpec, TextInputSpec,
 };
 
 /// Asset source that loads files from the preview app's directory.
@@ -58,8 +59,9 @@ use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
     TokenPanel,
 };
-use component_registry::{contract_doc_path, find_component, grouped_components, package_name};
-use poodle_gpui_components::{Code, SidebarNav, Tabs, TextInput};
+use component_registry::{find_component, grouped_components, package_name};
+use contract_usage_docs::{load_contract_usage_docs, ContractUsageDocs};
+use poodle_gpui_components::{Code, SidebarNav, Table, Tabs, TextInput};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -70,44 +72,11 @@ struct PreviewRoot {
     state: AppState,
 }
 
-struct ContractDocStatus {
-    path: String,
-    exists: bool,
-    status: Option<String>,
-    updated: Option<String>,
-}
-
 impl PreviewRoot {
     fn new() -> Self {
         Self {
             state: AppState::new(),
         }
-    }
-}
-
-fn load_contract_doc_status(slug: &str) -> ContractDocStatus {
-    let path = contract_doc_path(slug);
-    let full_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../..")
-        .join(&path);
-
-    let contents = std::fs::read_to_string(&full_path).ok();
-    let status = contents.as_ref().and_then(|contents| {
-        contents
-            .lines()
-            .find_map(|line| line.strip_prefix("Status: ").map(str::to_string))
-    });
-    let updated = contents.as_ref().and_then(|contents| {
-        contents
-            .lines()
-            .find_map(|line| line.strip_prefix("Updated: ").map(str::to_string))
-    });
-
-    ContractDocStatus {
-        path,
-        exists: full_path.exists(),
-        status,
-        updated,
     }
 }
 
@@ -799,10 +768,8 @@ impl PreviewRoot {
     fn render_component_page_support(&self, component: &component_registry::ComponentEntry) -> Div {
         let theme = &self.state.theme;
         let text_primary = theme.resolve_color("color.text.primary");
-        let text_secondary = theme.resolve_color("color.text.secondary");
         let border_subtle = theme.resolve_color("color.border.subtle");
-        let panel_bg = theme.resolve_color("color.background.panel");
-        let contract_doc = load_contract_doc_status(component.slug);
+        let contract_doc = load_contract_usage_docs(component.slug);
         let import_snippet = format!(
             "use {}::{};",
             package_name().replace('-', "_"),
@@ -836,58 +803,265 @@ impl PreviewRoot {
                     )),
             )
             .when(contract_doc.exists, |container| {
-                container.child(
+                container.child(self.render_contract_doc_summary(&contract_doc))
+            })
+    }
+
+    fn render_contract_doc_summary(&self, contract_doc: &ContractUsageDocs) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+
+        let mut meta = match (&contract_doc.status, &contract_doc.updated) {
+            (Some(status), Some(updated)) => {
+                format!(
+                    "Shared contract doc: {}. Status: {}. Updated: {}.",
+                    contract_doc.path, status, updated
+                )
+            }
+            (Some(status), None) => {
+                format!(
+                    "Shared contract doc: {}. Status: {}.",
+                    contract_doc.path, status
+                )
+            }
+            _ => format!("Shared contract doc: {}.", contract_doc.path),
+        };
+
+        let coverage = format!(
+            "{} props, {} slots, {} events",
+            contract_doc.props.len(),
+            contract_doc.slots.len(),
+            contract_doc.events.len()
+        );
+
+        if let Some(summary) = contract_doc.summary.as_ref() {
+            meta.push(' ');
+            meta.push_str(summary);
+        }
+
+        let mut docs = div().flex().flex_col().gap(px(24.0)).child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.0))
+                .child(
                     div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(10.0))
-                        .child(
-                            div()
-                                .text_lg()
-                                .font_weight(FontWeight::SEMIBOLD)
-                                .text_color(color_to_hsla(text_primary))
-                                .child("Docs"),
-                        )
-                        .child(
-                            div()
-                                .p(px(14.0))
-                                .rounded(px(8.0))
-                                .bg(color_to_hsla(panel_bg))
-                                .border_1()
-                                .border_color(color_to_hsla(border_subtle))
-                                .flex()
-                                .flex_col()
-                                .gap(px(8.0))
-                                .child(
-                                    div()
-                                        .text_sm()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child(
-                                            match (&contract_doc.status, &contract_doc.updated) {
-                                                (Some(status), Some(updated)) => format!(
-                                                "Shared contract doc: {}. Status: {}. Updated: {}.",
-                                                contract_doc.path, status, updated
-                                            ),
-                                                (Some(status), None) => format!(
-                                                    "Shared contract doc: {}. Status: {}.",
-                                                    contract_doc.path, status
-                                                ),
-                                                _ => format!(
-                                                    "Shared contract doc: {}.",
-                                                    contract_doc.path
-                                                ),
-                                            },
-                                        ),
-                                )
-                                .child(
-                                    div()
-                                        .text_sm()
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Usage docs are not surfaced here yet."),
-                                ),
+                        .text_lg()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(color_to_hsla(text_primary))
+                        .child("Docs"),
+                )
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(meta),
+                )
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Parsed contract coverage: {}.", coverage)),
+                ),
+        );
+
+        if let Some(usage) = contract_doc.usage.as_ref() {
+            docs = docs.child(self.render_doc_code_section("Usage", "md", usage));
+        }
+
+        if !contract_doc.props.is_empty() {
+            docs = docs.child(self.render_props_table(contract_doc));
+        }
+
+        if !contract_doc.slots.is_empty() {
+            docs = docs.child(self.render_slots_table(contract_doc));
+        }
+
+        if !contract_doc.events.is_empty() {
+            docs = docs.child(self.render_events_table(contract_doc));
+        }
+
+        if let Some(anatomy) = contract_doc.anatomy.as_ref() {
+            docs = docs.child(self.render_doc_code_section("Anatomy", "text", anatomy));
+        }
+
+        docs.child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+    }
+
+    fn render_doc_code_section(
+        &self,
+        title: &'static str,
+        language: &'static str,
+        content: &str,
+    ) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(10.0))
+            .child(
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_primary))
+                    .child(title),
+            )
+            .child(Code::from_spec(
+                CodeSpec::new()
+                    .with_language(language)
+                    .with_content(content)
+                    .with_copyable(false),
+                theme,
+            ))
+    }
+
+    fn render_props_table(&self, contract_doc: &ContractUsageDocs) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let columns = vec![
+            TableColumn::new("prop", "Prop").with_row_header(true),
+            TableColumn::new("type", "Type"),
+            TableColumn::new("default", "Default"),
+            TableColumn::new("description", "Description"),
+        ];
+        let rows = contract_doc
+            .props
+            .iter()
+            .enumerate()
+            .map(|(index, prop)| {
+                let name = if prop.required {
+                    format!("{}*", prop.name)
+                } else {
+                    prop.name.clone()
+                };
+                TableRow::new(
+                    format!("prop-{}", index),
+                    vec![
+                        ("prop".to_string(), name),
+                        ("type".to_string(), prop.type_name.clone()),
+                        (
+                            "default".to_string(),
+                            prop.default_value
+                                .clone()
+                                .unwrap_or_else(|| "—".to_string()),
                         ),
+                        ("description".to_string(), prop.description.clone()),
+                    ],
                 )
             })
+            .collect();
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(10.0))
+            .child(
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_primary))
+                    .child("Props"),
+            )
+            .child(Table::from_spec(
+                TableSpec::new()
+                    .with_columns(columns)
+                    .with_rows(rows)
+                    .with_aria_label("Component props")
+                    .with_empty_message("No props documented."),
+                theme,
+            ))
+    }
+
+    fn render_slots_table(&self, contract_doc: &ContractUsageDocs) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let columns = vec![
+            TableColumn::new("slot", "Slot").with_row_header(true),
+            TableColumn::new("description", "Description"),
+        ];
+        let rows = contract_doc
+            .slots
+            .iter()
+            .enumerate()
+            .map(|(index, slot)| {
+                TableRow::new(
+                    format!("slot-{}", index),
+                    vec![
+                        ("slot".to_string(), slot.name.clone()),
+                        ("description".to_string(), slot.description.clone()),
+                    ],
+                )
+            })
+            .collect();
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(10.0))
+            .child(
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_primary))
+                    .child("Slots"),
+            )
+            .child(Table::from_spec(
+                TableSpec::new()
+                    .with_columns(columns)
+                    .with_rows(rows)
+                    .with_aria_label("Component slots")
+                    .with_empty_message("No slots documented."),
+                theme,
+            ))
+    }
+
+    fn render_events_table(&self, contract_doc: &ContractUsageDocs) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let columns = vec![
+            TableColumn::new("event", "Event").with_row_header(true),
+            TableColumn::new("payload", "Payload"),
+            TableColumn::new("description", "Description").with_align(ColumnAlign::Start),
+        ];
+        let rows = contract_doc
+            .events
+            .iter()
+            .enumerate()
+            .map(|(index, event)| {
+                TableRow::new(
+                    format!("event-{}", index),
+                    vec![
+                        ("event".to_string(), event.name.clone()),
+                        ("payload".to_string(), event.payload.clone()),
+                        ("description".to_string(), event.description.clone()),
+                    ],
+                )
+            })
+            .collect();
+
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(10.0))
+            .child(
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_primary))
+                    .child("Events"),
+            )
+            .child(Table::from_spec(
+                TableSpec::new()
+                    .with_columns(columns)
+                    .with_rows(rows)
+                    .with_aria_label("Component events")
+                    .with_empty_message("No events documented."),
+                theme,
+            ))
     }
 
     /// Landing page grid showing all components as cards.
