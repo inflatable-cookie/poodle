@@ -160,34 +160,70 @@ mod tests {
 
     #[test]
     fn control_role_is_identity() {
-        for size in [ControlSize::Xs, ControlSize::Sm, ControlSize::Md, ControlSize::Lg, ControlSize::Xl] {
-            assert_eq!(resolve_semantic_size(size, SemanticControlSizeRole::Control), size);
+        for size in [
+            ControlSize::Xs,
+            ControlSize::Sm,
+            ControlSize::Md,
+            ControlSize::Lg,
+            ControlSize::Xl,
+        ] {
+            assert_eq!(
+                resolve_semantic_size(size, SemanticControlSizeRole::Control),
+                size
+            );
         }
     }
 
     #[test]
     fn chrome_role_shifts_down_one_stop() {
-        assert_eq!(resolve_semantic_size(ControlSize::Xl, SemanticControlSizeRole::Chrome), ControlSize::Lg);
-        assert_eq!(resolve_semantic_size(ControlSize::Lg, SemanticControlSizeRole::Chrome), ControlSize::Md);
-        assert_eq!(resolve_semantic_size(ControlSize::Md, SemanticControlSizeRole::Chrome), ControlSize::Sm);
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Xl, SemanticControlSizeRole::Chrome),
+            ControlSize::Lg
+        );
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Lg, SemanticControlSizeRole::Chrome),
+            ControlSize::Md
+        );
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Md, SemanticControlSizeRole::Chrome),
+            ControlSize::Sm
+        );
     }
 
     #[test]
     fn chrome_role_clamps_at_floor() {
-        assert_eq!(resolve_semantic_size(ControlSize::Sm, SemanticControlSizeRole::Chrome), ControlSize::Sm);
-        assert_eq!(resolve_semantic_size(ControlSize::Xs, SemanticControlSizeRole::Chrome), ControlSize::Xs);
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Sm, SemanticControlSizeRole::Chrome),
+            ControlSize::Sm
+        );
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Xs, SemanticControlSizeRole::Chrome),
+            ControlSize::Xs
+        );
     }
 
     #[test]
     fn prominent_role_shifts_up_one_stop() {
-        assert_eq!(resolve_semantic_size(ControlSize::Xs, SemanticControlSizeRole::Prominent), ControlSize::Sm);
-        assert_eq!(resolve_semantic_size(ControlSize::Sm, SemanticControlSizeRole::Prominent), ControlSize::Md);
-        assert_eq!(resolve_semantic_size(ControlSize::Md, SemanticControlSizeRole::Prominent), ControlSize::Lg);
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Xs, SemanticControlSizeRole::Prominent),
+            ControlSize::Sm
+        );
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Sm, SemanticControlSizeRole::Prominent),
+            ControlSize::Md
+        );
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Md, SemanticControlSizeRole::Prominent),
+            ControlSize::Lg
+        );
     }
 
     #[test]
     fn prominent_role_clamps_at_ceiling() {
-        assert_eq!(resolve_semantic_size(ControlSize::Xl, SemanticControlSizeRole::Prominent), ControlSize::Xl);
+        assert_eq!(
+            resolve_semantic_size(ControlSize::Xl, SemanticControlSizeRole::Prominent),
+            ControlSize::Xl
+        );
     }
 
     // ── control_height_rem ──────────────────────────────────────
@@ -238,15 +274,30 @@ mod tests {
 
     #[test]
     fn supporting_visual_shifts_down_one_stop() {
-        assert_eq!(resolve_supporting_visual_size(ControlSize::Xl), ControlSize::Lg);
-        assert_eq!(resolve_supporting_visual_size(ControlSize::Lg), ControlSize::Md);
-        assert_eq!(resolve_supporting_visual_size(ControlSize::Md), ControlSize::Sm);
+        assert_eq!(
+            resolve_supporting_visual_size(ControlSize::Xl),
+            ControlSize::Lg
+        );
+        assert_eq!(
+            resolve_supporting_visual_size(ControlSize::Lg),
+            ControlSize::Md
+        );
+        assert_eq!(
+            resolve_supporting_visual_size(ControlSize::Md),
+            ControlSize::Sm
+        );
     }
 
     #[test]
     fn supporting_visual_clamps_at_bottom() {
-        assert_eq!(resolve_supporting_visual_size(ControlSize::Sm), ControlSize::Sm);
-        assert_eq!(resolve_supporting_visual_size(ControlSize::Xs), ControlSize::Xs);
+        assert_eq!(
+            resolve_supporting_visual_size(ControlSize::Sm),
+            ControlSize::Sm
+        );
+        assert_eq!(
+            resolve_supporting_visual_size(ControlSize::Xs),
+            ControlSize::Xs
+        );
     }
 
     // ── density helpers ─────────────────────────────────────────

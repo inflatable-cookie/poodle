@@ -1,11 +1,13 @@
-use gpui::*;
-use gpui::prelude::FluentBuilder;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{TabsSpec, TabDefinition, TabVariant, TabStripSpec, TabStripItem, Orientation, EyebrowSpec};
-use poodle_gpui_components::{Tabs, TabStrip, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{Eyebrow, TabStrip, Tabs};
+use poodle_specs::{
+    EyebrowSpec, Orientation, TabDefinition, TabStripItem, TabStripSpec, TabVariant, TabsSpec,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -21,7 +23,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("faq", "FAQ").with_disabled(true),
     ];
 
-    let underline_value = state.specimens.text.get("tabs-underline-value")
+    let underline_value = state
+        .specimens
+        .text
+        .get("tabs-underline-value")
         .map(|s| s.as_str())
         .unwrap_or("overview")
         .to_string();
@@ -34,23 +39,43 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-underline")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-underline-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-underline-value".to_string(), val.to_string());
             cx.notify();
         }))
         .with_content(
             "overview".to_string(),
-            div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
-                .child("Overview content — this is the landing page with a summary of all features.".to_string()),
+            div()
+                .p(px(12.0))
+                .text_size(px(14.0))
+                .text_color(color_to_hsla(text_secondary))
+                .child(
+                    "Overview content — this is the landing page with a summary of all features."
+                        .to_string(),
+                ),
         )
         .with_content(
             "features".to_string(),
-            div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
-                .child("Features content — explore the full feature set and capabilities.".to_string()),
+            div()
+                .p(px(12.0))
+                .text_size(px(14.0))
+                .text_color(color_to_hsla(text_secondary))
+                .child(
+                    "Features content — explore the full feature set and capabilities.".to_string(),
+                ),
         )
         .with_content(
             "pricing".to_string(),
-            div().p(px(12.0)).text_size(px(14.0)).text_color(color_to_hsla(text_secondary))
-                .child("Pricing content — compare plans and find the right fit for your team.".to_string()),
+            div()
+                .p(px(12.0))
+                .text_size(px(14.0))
+                .text_color(color_to_hsla(text_secondary))
+                .child(
+                    "Pricing content — compare plans and find the right fit for your team."
+                        .to_string(),
+                ),
         );
 
     // 2. CARD VARIANT (CLOSABLE, REORDERABLE)
@@ -61,7 +86,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("types.ts", "types.ts").with_closable(true),
     ];
 
-    let card_value = state.specimens.text.get("tabs-card-value")
+    let card_value = state
+        .specimens
+        .text
+        .get("tabs-card-value")
         .map(|s| s.as_str())
         .unwrap_or("index.ts")
         .to_string();
@@ -74,18 +102,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let card_component = Tabs::from_spec(card_spec, theme)
         .with_id("specimen-card")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-card-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-card-value".to_string(), val.to_string());
             cx.notify();
         }));
 
     // 2b. CARD VARIANT WITH COUNTS — icons + count badges on each tab.
     let counts_tabs = vec![
-        TabDefinition::new("inbox", "Inbox").with_icon("inbox").with_count(12),
-        TabDefinition::new("drafts", "Drafts").with_icon("file-text").with_count(3),
+        TabDefinition::new("inbox", "Inbox")
+            .with_icon("inbox")
+            .with_count(12),
+        TabDefinition::new("drafts", "Drafts")
+            .with_icon("file-text")
+            .with_count(3),
         TabDefinition::new("sent", "Sent").with_icon("send"),
-        TabDefinition::new("spam", "Spam").with_icon("alert-triangle").with_count(47),
+        TabDefinition::new("spam", "Spam")
+            .with_icon("alert-triangle")
+            .with_count(47),
     ];
-    let counts_value = state.specimens.text.get("tabs-counts-value")
+    let counts_value = state
+        .specimens
+        .text
+        .get("tabs-counts-value")
         .map(|s| s.as_str())
         .unwrap_or("inbox")
         .to_string();
@@ -96,7 +136,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let counts_component = Tabs::from_spec(counts_spec, theme)
         .with_id("specimen-card-counts")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-counts-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-counts-value".to_string(), val.to_string());
             cx.notify();
         }));
 
@@ -107,7 +150,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("users", "Users").with_icon("users"),
     ];
 
-    let pill_value = state.specimens.text.get("tabs-pill-value")
+    let pill_value = state
+        .specimens
+        .text
+        .get("tabs-pill-value")
         .map(|s| s.as_str())
         .unwrap_or("home")
         .to_string();
@@ -120,7 +166,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let pill_component = Tabs::from_spec(pill_spec, theme)
         .with_id("specimen-pill")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-pill-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-pill-value".to_string(), val.to_string());
             cx.notify();
         }));
 
@@ -132,7 +181,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("trash", "Trash"),
     ];
 
-    let block_value = state.specimens.text.get("tabs-block-value")
+    let block_value = state
+        .specimens
+        .text
+        .get("tabs-block-value")
         .map(|s| s.as_str())
         .unwrap_or("inbox")
         .to_string();
@@ -145,7 +197,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let block_component = Tabs::from_spec(block_spec, theme)
         .with_id("specimen-block")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-block-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-block-value".to_string(), val.to_string());
             cx.notify();
         }));
 
@@ -156,7 +211,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("users", "Users").with_icon("users"),
     ];
 
-    let underline_icon_value = state.specimens.text.get("tabs-underline-icon-value")
+    let underline_icon_value = state
+        .specimens
+        .text
+        .get("tabs-underline-icon-value")
         .map(|s| s.as_str())
         .unwrap_or("home")
         .to_string();
@@ -170,7 +228,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let underline_icon_component = Tabs::from_spec(underline_icon_spec, theme)
         .with_id("specimen-underline-icons")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-underline-icon-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-underline-icon-value".to_string(), val.to_string());
             cx.notify();
         }));
 
@@ -182,15 +243,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabStripItem::new("Cargo.toml", "Cargo.toml"),
     ];
 
-    let strip_value = state.specimens.text.get("tabs-strip-value")
+    let strip_value = state
+        .specimens
+        .text
+        .get("tabs-strip-value")
         .map(|s| s.as_str())
         .unwrap_or("main.rs")
         .to_string();
 
-    let last_strip_closed = state.specimens.text.get("tabs-strip-closed")
+    let last_strip_closed = state
+        .specimens
+        .text
+        .get("tabs-strip-closed")
         .cloned()
         .unwrap_or_default();
-    let last_strip_reorder = state.specimens.text.get("tabs-strip-reorder")
+    let last_strip_reorder = state
+        .specimens
+        .text
+        .get("tabs-strip-reorder")
         .cloned()
         .unwrap_or_default();
 
@@ -202,11 +272,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let strip_component = TabStrip::from_spec(strip_spec, theme)
         .with_id("specimen-strip")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-strip-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-strip-value".to_string(), val.to_string());
             cx.notify();
         }))
         .on_close(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-strip-closed".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-strip-closed".to_string(), val.to_string());
             cx.notify();
         }));
 
@@ -218,7 +294,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabStripItem::new("extensions", "Extensions"),
     ];
 
-    let vertical_value = state.specimens.text.get("tabs-vertical-value")
+    let vertical_value = state
+        .specimens
+        .text
+        .get("tabs-vertical-value")
         .map(|s| s.as_str())
         .unwrap_or("files")
         .to_string();
@@ -231,7 +310,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let vertical_component = TabStrip::from_spec(vertical_spec, theme)
         .with_id("specimen-vertical")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-vertical-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-vertical-value".to_string(), val.to_string());
             cx.notify();
         }));
 
@@ -244,7 +326,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabStripItem::new("output", "Output"),
     ];
 
-    let collapse_value = state.specimens.text.get("tabs-collapse-value")
+    let collapse_value = state
+        .specimens
+        .text
+        .get("tabs-collapse-value")
         .map(|s| s.as_str())
         .unwrap_or("editor")
         .to_string();
@@ -264,58 +349,102 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let collapse_component = TabStrip::from_spec(collapse_spec, theme)
         .with_id("specimen-collapse")
         .on_change(cx.listener(|this, val: &str, _w, cx| {
-            this.state.specimens.text.insert("tabs-collapse-value".to_string(), val.to_string());
+            this.state
+                .specimens
+                .text
+                .insert("tabs-collapse-value".to_string(), val.to_string());
             cx.notify();
         }));
 
     // ASSEMBLE
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // 1. Underline variant (default, with panel)
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Text variant (default, with indicator line)"), theme))
-                .child(underline_component)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Text variant (default, with indicator line)"),
+                    theme,
+                ))
+                .child(underline_component),
         )
-
         // 2. Card variant (closable, reorderable)
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Card variant (closable, reorderable)"), theme))
-                .child(card_component)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Card variant (closable, reorderable)"),
+                    theme,
+                ))
+                .child(card_component),
         )
-
         // 2b. Card variant with counts and icons
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Card variant with counts, separators"), theme))
-                .child(counts_component)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Card variant with counts, separators"),
+                    theme,
+                ))
+                .child(counts_component),
         )
-
         // 3. Pill variant
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Pill variant (with icons)"), theme))
-                .child(pill_component)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Pill variant (with icons)"),
+                    theme,
+                ))
+                .child(pill_component),
         )
-
         // 3b. Block variant
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Block variant (full-width, separators)"), theme))
-                .child(block_component)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Block variant (full-width, separators)"),
+                    theme,
+                ))
+                .child(block_component),
         )
-
         // 4. Underline with icons (no panel)
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Text variant (no border)"), theme))
-                .child(underline_icon_component)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Text variant (no border)"),
+                    theme,
+                ))
+                .child(underline_icon_component),
         )
-
         // 5. Strip variant (horizontal, closable, reorderable)
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant (full-width bar with icons, closable, reorderable)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Strip variant (full-width bar with icons, closable, reorderable)",
+                    ),
+                    theme,
+                ))
                 .child(
                     div()
                         .rounded(px(6.0))
@@ -330,27 +459,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .min_h(px(48.0))
                                 .text_sm()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child("Surface content area")
-                        )
-                )
+                                .child("Surface content area"),
+                        ),
+                ),
         )
         .when(!last_strip_closed.is_empty(), |d| {
             d.child(
-                div().text_sm().text_color(color_to_hsla(text_secondary))
-                    .child(format!("Last closed: {}", last_strip_closed))
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last closed: {}", last_strip_closed)),
             )
         })
         .when(!last_strip_reorder.is_empty(), |d| {
             d.child(
-                div().text_sm().text_color(color_to_hsla(text_secondary))
-                    .child(format!("Last reordered: {}", last_strip_reorder))
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last reordered: {}", last_strip_reorder)),
             )
         })
-
         // 6. Strip variant (vertical)
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant — vertical (icon-only, collapsed panel)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Strip variant — vertical (icon-only, collapsed panel)"),
+                    theme,
+                ))
                 .child(
                     div()
                         .flex()
@@ -367,17 +506,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .bg(color_to_hsla(bg_surface))
                                 .text_sm()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child(format!("Active: {}", vertical_value))
-                        )
-                )
+                                .child(format!("Active: {}", vertical_value)),
+                        ),
+                ),
         )
-
         // 7. Collapse toggle
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Strip variant — collapse toggle (click to toggle orientation)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Strip variant — collapse toggle (click to toggle orientation)",
+                    ),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(8.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(8.0))
                         .child(
                             div()
                                 .flex()
@@ -394,16 +543,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                         .text_xs()
                                         .cursor_pointer()
                                         .text_color(color_to_hsla(text_secondary))
-                                        .child(if panel_collapsed { "Expand" } else { "Collapse" })
+                                        .child(if panel_collapsed {
+                                            "Expand"
+                                        } else {
+                                            "Collapse"
+                                        })
                                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                             this.state.specimens.toggle("tabs-panel-collapsed");
                                             cx.notify();
-                                        }))
+                                        })),
                                 )
                                 .child(
-                                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                                        .child(if panel_collapsed { "Vertical (collapsed)" } else { "Horizontal (expanded)" })
-                                )
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child(if panel_collapsed {
+                                            "Vertical (collapsed)"
+                                        } else {
+                                            "Horizontal (expanded)"
+                                        }),
+                                ),
                         )
                         .child(
                             div()
@@ -411,9 +570,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .border_1()
                                 .border_color(color_to_hsla(border))
                                 .overflow_hidden()
-                                .when(panel_collapsed, |d| {
-                                    d.flex().h(px(120.0))
-                                })
+                                .when(panel_collapsed, |d| d.flex().h(px(120.0)))
                                 .child(collapse_component)
                                 .when(!panel_collapsed, |d| {
                                     d.child(
@@ -423,7 +580,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                             .min_h(px(48.0))
                                             .text_sm()
                                             .text_color(color_to_hsla(text_secondary))
-                                            .child(format!("Panel: {}", collapse_value))
+                                            .child(format!("Panel: {}", collapse_value)),
                                     )
                                 })
                                 .when(panel_collapsed, |d| {
@@ -434,10 +591,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                             .bg(color_to_hsla(bg_surface))
                                             .text_sm()
                                             .text_color(color_to_hsla(text_secondary))
-                                            .child(format!("Panel: {}", collapse_value))
+                                            .child(format!("Panel: {}", collapse_value)),
                                     )
-                                })
-                        )
-                )
+                                }),
+                        ),
+                ),
         )
 }

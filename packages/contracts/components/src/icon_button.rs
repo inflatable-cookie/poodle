@@ -1,4 +1,7 @@
-use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
+use crate::types::{
+    ButtonTone, ButtonVariant, ControlDensity, ControlSize, OverlayPlacement,
+    SemanticControlSizeRole,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct IconButtonSpec {

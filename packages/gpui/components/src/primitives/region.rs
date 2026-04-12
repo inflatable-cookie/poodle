@@ -17,12 +17,17 @@ pub struct Region {
 
 impl std::ops::Deref for Region {
     type Target = RegionSpec;
-    fn deref(&self) -> &RegionSpec { &self.spec }
+    fn deref(&self) -> &RegionSpec {
+        &self.spec
+    }
 }
 
 impl Region {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RegionSpec::new(), theme: theme.clone() }
+        Self {
+            spec: RegionSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: RegionSpec, theme: &GpuiThemeProvider) -> Self {
@@ -33,10 +38,18 @@ impl Region {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
-    pub fn color(mut self, v: impl Into<String>) -> Self { self.spec.color = Some(v.into()); self }
-    pub fn min_height_px(mut self, v: f32) -> Self { self.spec.min_height_px = v; self }
-
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = v.into();
+        self
+    }
+    pub fn color(mut self, v: impl Into<String>) -> Self {
+        self.spec.color = Some(v.into());
+        self
+    }
+    pub fn min_height_px(mut self, v: f32) -> Self {
+        self.spec.min_height_px = v;
+        self
+    }
 }
 
 impl IntoElement for Region {

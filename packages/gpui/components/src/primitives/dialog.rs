@@ -2,9 +2,13 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, DialogKind, DialogSpec, DialogWidth, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, DialogKind, DialogSpec, DialogWidth, SemanticControlSizeRole,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI dialog component backed by `DialogSpec`.
@@ -31,7 +35,9 @@ pub struct Dialog {
 
 impl std::ops::Deref for Dialog {
     type Target = DialogSpec;
-    fn deref(&self) -> &DialogSpec { &self.spec }
+    fn deref(&self) -> &DialogSpec {
+        &self.spec
+    }
 }
 
 impl Dialog {
@@ -60,21 +66,66 @@ impl Dialog {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn kind(mut self, v: DialogKind) -> Self { self.spec.kind = v; self }
-    pub fn dismiss_on_escape(mut self, v: bool) -> Self { self.spec.dismiss_on_escape = v; self }
-    pub fn dismiss_on_backdrop(mut self, v: bool) -> Self { self.spec.dismiss_on_backdrop = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-    pub fn width(mut self, v: DialogWidth) -> Self { self.spec.width = v; self }
-    pub fn bare(mut self, v: bool) -> Self { self.spec.bare = v; self }
-    pub fn show_close_button(mut self, v: bool) -> Self { self.spec.show_close_button = v; self }
-    pub fn close_label(mut self, v: impl Into<String>) -> Self { self.spec.close_label = v.into(); self }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn kind(mut self, v: DialogKind) -> Self {
+        self.spec.kind = v;
+        self
+    }
+    pub fn dismiss_on_escape(mut self, v: bool) -> Self {
+        self.spec.dismiss_on_escape = v;
+        self
+    }
+    pub fn dismiss_on_backdrop(mut self, v: bool) -> Self {
+        self.spec.dismiss_on_backdrop = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
+    pub fn width(mut self, v: DialogWidth) -> Self {
+        self.spec.width = v;
+        self
+    }
+    pub fn bare(mut self, v: bool) -> Self {
+        self.spec.bare = v;
+        self
+    }
+    pub fn show_close_button(mut self, v: bool) -> Self {
+        self.spec.show_close_button = v;
+        self
+    }
+    pub fn close_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.close_label = v.into();
+        self
+    }
 
     /// Called when the dialog should close (Escape, backdrop click).
     pub fn on_close(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
@@ -136,8 +187,14 @@ impl IntoElement for Dialog {
         // Matches Svelte treatment-surface-elevated values:
         //   fill: color-mix(elevated 94%, transparent)
         //   border: color-mix(border-default 22%, transparent)
-        let bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
-        let border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let bg = Hsla {
+            a: elevated_bg.a * 0.94,
+            ..elevated_bg
+        };
+        let border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
 
         let stack_lg = resolve_px(theme, "space.stack.lg");
 
@@ -147,10 +204,7 @@ impl IntoElement for Dialog {
         let width_px = px(rem_to_px(spec.surface_width_rem()));
         let is_full_width = spec.is_full_width();
 
-        let mut dialog = div()
-            .id("poodle-dialog")
-            .focusable()
-            .rounded(radius);
+        let mut dialog = div().id("poodle-dialog").focusable().rounded(radius);
 
         // Bare mode: drop the default padding — the consumer's content
         // extends to the full surface edges.
@@ -165,7 +219,8 @@ impl IntoElement for Dialog {
             dialog = dialog.bg(bg);
         }
 
-        dialog = dialog.border_1()
+        dialog = dialog
+            .border_1()
             .border_color(border)
             // Svelte: elevation-dialog shadow
             .shadow(vec![
@@ -209,7 +264,11 @@ impl IntoElement for Dialog {
             let has_header_content = had_custom_header || spec.title.is_some();
 
             if has_header_content || spec.show_close_button {
-                let mut header_row = div().flex().items_start().justify_between().gap(actions_gap);
+                let mut header_row = div()
+                    .flex()
+                    .items_start()
+                    .justify_between()
+                    .gap(actions_gap);
 
                 if let Some(header_el) = self.header {
                     header_row = header_row.child(div().flex_1().child(header_el));

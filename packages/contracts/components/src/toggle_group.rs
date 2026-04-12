@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ToggleGroupSelectionMode {
@@ -62,17 +62,36 @@ impl Default for ToggleGroupSpec {
 
 impl ToggleGroupSpec {
     pub fn new(options: Vec<ToggleGroupOption>) -> Self {
-        Self { options, ..Self::default() }
+        Self {
+            options,
+            ..Self::default()
+        }
     }
 
-    pub fn with_value(mut self, value: Vec<String>) -> Self { self.value = Some(value); self }
-    pub fn with_default_value(mut self, value: Vec<String>) -> Self { self.default_value = Some(value); self }
-    pub fn with_selection_mode(mut self, mode: ToggleGroupSelectionMode) -> Self { self.selection_mode = mode; self }
-    pub fn with_disabled(mut self, is_disabled: bool) -> Self { self.is_disabled = is_disabled; self }
-    pub fn with_aria_label(mut self, label: impl Into<String>) -> Self { self.aria_label = Some(label.into()); self }
+    pub fn with_value(mut self, value: Vec<String>) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn with_default_value(mut self, value: Vec<String>) -> Self {
+        self.default_value = Some(value);
+        self
+    }
+    pub fn with_selection_mode(mut self, mode: ToggleGroupSelectionMode) -> Self {
+        self.selection_mode = mode;
+        self
+    }
+    pub fn with_disabled(mut self, is_disabled: bool) -> Self {
+        self.is_disabled = is_disabled;
+        self
+    }
+    pub fn with_aria_label(mut self, label: impl Into<String>) -> Self {
+        self.aria_label = Some(label.into());
+        self
+    }
 
     pub fn selected_values(&self) -> &[String] {
-        self.value.as_deref()
+        self.value
+            .as_deref()
             .or(self.default_value.as_deref())
             .unwrap_or(&[])
     }

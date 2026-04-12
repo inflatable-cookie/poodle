@@ -1,25 +1,37 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{ButtonVariant, ButtonTone, SplitButtonSpec, SplitMenuItem, EyebrowSpec};
-use poodle_gpui_components::{SplitButton, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, SplitButton};
+use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, SplitButtonSpec, SplitMenuItem};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let last_action = state.specimens.text.get("split-btn-action")
+    let last_action = state
+        .specimens
+        .text
+        .get("split-btn-action")
         .cloned()
         .unwrap_or_else(|| String::from("(none)"));
 
-    let examples = div().flex().flex_col().gap(px(24.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Primary variant ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Primary variant"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Primary variant"),
+                    theme,
+                ))
                 .child(
                     SplitButton::from_spec(
                         SplitButtonSpec::new()
@@ -34,25 +46,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "click: Save".to_string(),
-                        );
+                        this.state
+                            .specimens
+                            .text
+                            .insert("split-btn-action".to_string(), "click: Save".to_string());
                         cx.notify();
                     }))
-                    .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "dropdown: toggle".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                )
+                    .on_dropdown(cx.listener(
+                        |this, _e: &ClickEvent, _w, cx| {
+                            this.state.specimens.text.insert(
+                                "split-btn-action".to_string(),
+                                "dropdown: toggle".to_string(),
+                            );
+                            cx.notify();
+                        },
+                    )),
+                ),
         )
         // --- Secondary variant ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Secondary variant"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Secondary variant"),
+                    theme,
+                ))
                 .child(
                     SplitButton::from_spec(
                         SplitButtonSpec::new()
@@ -66,25 +86,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "click: Export".to_string(),
-                        );
+                        this.state
+                            .specimens
+                            .text
+                            .insert("split-btn-action".to_string(), "click: Export".to_string());
                         cx.notify();
                     }))
-                    .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "dropdown: toggle".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                )
+                    .on_dropdown(cx.listener(
+                        |this, _e: &ClickEvent, _w, cx| {
+                            this.state.specimens.text.insert(
+                                "split-btn-action".to_string(),
+                                "dropdown: toggle".to_string(),
+                            );
+                            cx.notify();
+                        },
+                    )),
+                ),
         )
         // --- Danger tone ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Danger tone"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Danger tone"),
+                    theme,
+                ))
                 .child(
                     SplitButton::from_spec(
                         SplitButtonSpec::new()
@@ -98,46 +126,60 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "click: Delete".to_string(),
-                        );
+                        this.state
+                            .specimens
+                            .text
+                            .insert("split-btn-action".to_string(), "click: Delete".to_string());
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- Loading state ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading state"), theme))
-                .child(
-                    SplitButton::from_spec(
-                        SplitButtonSpec::new()
-                            .with_variant(ButtonVariant::Primary)
-                            .with_label("Saving...")
-                            .with_loading(true),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Loading state"),
+                    theme,
+                ))
+                .child(SplitButton::from_spec(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_label("Saving...")
+                        .with_loading(true),
+                    theme,
+                )),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
-                .child(
-                    SplitButton::from_spec(
-                        SplitButtonSpec::new()
-                            .with_variant(ButtonVariant::Secondary)
-                            .with_label("Save")
-                            .with_disabled(true),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
+                .child(SplitButton::from_spec(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Save")
+                        .with_disabled(true),
+                    theme,
+                )),
         )
         // --- Submit semantics ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Submit semantics"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Submit semantics"),
+                    theme,
+                ))
                 .child(
                     SplitButton::from_spec(
                         SplitButtonSpec::new()
@@ -156,19 +198,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         );
                         cx.notify();
                     }))
-                    .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "split-btn-action".to_string(),
-                            "dropdown: toggle".to_string(),
-                        );
-                        cx.notify();
-                    }))
-                )
+                    .on_dropdown(cx.listener(
+                        |this, _e: &ClickEvent, _w, cx| {
+                            this.state.specimens.text.insert(
+                                "split-btn-action".to_string(),
+                                "dropdown: toggle".to_string(),
+                            );
+                            cx.notify();
+                        },
+                    )),
+                ),
         )
         // --- Constrained scroll container ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Constrained scroll container"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Constrained scroll container"),
+                    theme,
+                ))
                 .child(
                     div()
                         .max_h(px(120.0))
@@ -197,24 +247,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 );
                                 cx.notify();
                             }))
-                            .on_dropdown(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "split-btn-action".to_string(),
-                                    "dropdown: toggle".to_string(),
-                                );
-                                cx.notify();
-                            }))
-                        )
-                )
+                            .on_dropdown(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "split-btn-action".to_string(),
+                                        "dropdown: toggle".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
+                        ),
+                ),
         )
         // --- Last action ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Last action"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Last action"),
+                    theme,
+                ))
                 .child(
-                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child(format!("Last action: {}", last_action))
-                )
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Last action: {}", last_action)),
+                ),
         )
         .into_any_element();
 

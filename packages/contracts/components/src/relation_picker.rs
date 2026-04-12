@@ -1,5 +1,5 @@
-use crate::picker_shell::PickerShellSpec;
 use crate::composite_types::{BrowseState, PickerItemSpec, PickerVariant, SelectionMode};
+use crate::picker_shell::PickerShellSpec;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// One row in a drill-down level — e.g. a category or subcategory the
@@ -97,7 +97,10 @@ pub struct DrillDownConfig {
 
 impl DrillDownConfig {
     pub fn new(levels: Vec<DrillDownLevel>, leaf_groups: Vec<DrillDownLeafGroup>) -> Self {
-        Self { levels, leaf_groups }
+        Self {
+            levels,
+            leaf_groups,
+        }
     }
 
     /// Given the current navigation path (a list of ids, one per level
@@ -114,7 +117,9 @@ impl DrillDownConfig {
     /// Leaf items under the current path. Returns an empty slice when
     /// the path doesn't address a known leaf group.
     pub fn leaf_items_for(&self, path: &[String]) -> &[PickerItemSpec] {
-        let Some(leaf_id) = path.last() else { return &[]; };
+        let Some(leaf_id) = path.last() else {
+            return &[];
+        };
         self.leaf_groups
             .iter()
             .find(|g| &g.parent_id == leaf_id)

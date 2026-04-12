@@ -1,10 +1,10 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{BlockEditor, Eyebrow};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
-use poodle_gpui_components::{BlockEditor, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("color.text.primary");

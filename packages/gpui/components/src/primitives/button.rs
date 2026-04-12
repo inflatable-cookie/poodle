@@ -6,12 +6,20 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{
+    ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SpinnerSize,
+    SpinnerSpec, SpinnerTone, SpinnerVariant,
+};
 
 use super::icon::Icon;
 use super::spinner::Spinner;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem, size_padding_x_offset_rem};
-use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem,
+    size_padding_x_offset_rem,
+};
+use crate::theme_ext::{
+    color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius,
+};
 
 /// A real GPUI button component backed by `ButtonSpec`.
 pub struct Button {
@@ -23,7 +31,9 @@ pub struct Button {
 
 impl std::ops::Deref for Button {
     type Target = ButtonSpec;
-    fn deref(&self) -> &ButtonSpec { &self.spec }
+    fn deref(&self) -> &ButtonSpec {
+        &self.spec
+    }
 }
 
 impl Button {
@@ -46,19 +56,58 @@ impl Button {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn variant(mut self, v: ButtonVariant) -> Self { self.spec.variant = v; self }
-    pub fn tone(mut self, v: ButtonTone) -> Self { self.spec.tone = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
-    pub fn leading_icon(mut self, v: impl Into<String>) -> Self { self.spec.leading_icon = Some(v.into()); self }
-    pub fn trailing_icon(mut self, v: impl Into<String>) -> Self { self.spec.trailing_icon = Some(v.into()); self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
-    pub fn chevron(mut self, v: bool) -> Self { self.spec.chevron = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn described_by(mut self, v: impl Into<String>) -> Self { self.spec.described_by = Some(v.into()); self }
+    pub fn variant(mut self, v: ButtonVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn tone(mut self, v: ButtonTone) -> Self {
+        self.spec.tone = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn loading(mut self, v: bool) -> Self {
+        self.spec.is_loading = v;
+        self
+    }
+    pub fn leading_icon(mut self, v: impl Into<String>) -> Self {
+        self.spec.leading_icon = Some(v.into());
+        self
+    }
+    pub fn trailing_icon(mut self, v: impl Into<String>) -> Self {
+        self.spec.trailing_icon = Some(v.into());
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
+    pub fn chevron(mut self, v: bool) -> Self {
+        self.spec.chevron = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn described_by(mut self, v: impl Into<String>) -> Self {
+        self.spec.described_by = Some(v.into());
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
@@ -106,8 +155,16 @@ impl IntoElement for Button {
         let has_leading = spec.leading_icon.is_some() || spec.is_loading;
         let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
         let icon_inset = px(2.0);
-        let pad_left = if has_leading { pad_x - icon_inset } else { pad_x };
-        let pad_right = if has_trailing { pad_x - icon_inset } else { pad_x };
+        let pad_left = if has_leading {
+            pad_x - icon_inset
+        } else {
+            pad_x
+        };
+        let pad_right = if has_trailing {
+            pad_x - icon_inset
+        } else {
+            pad_x
+        };
 
         let is_disabled = spec.is_disabled || spec.is_loading;
         let is_ghost = spec.variant == ButtonVariant::Ghost;
@@ -144,14 +201,15 @@ impl IntoElement for Button {
         // Pressed/toggle state (contract §8 Pressed/toggle state):
         // Non-primary variants get accent fill, accent border, inverse text
         let is_pressed = spec.is_toggle_mode() && spec.current_pressed();
-        let (fill, border_color, text_color) = if is_pressed && spec.variant != ButtonVariant::Primary {
-            let accent = resolve_color(theme, "color.accent.base");
-            let text_inverse = resolve_color(theme, "color.text.inverse");
-            let pressed_border = color_mix_black(accent, 0.86);
-            (accent, pressed_border, text_inverse)
-        } else {
-            (fill, border_color, text_color)
-        };
+        let (fill, border_color, text_color) =
+            if is_pressed && spec.variant != ButtonVariant::Primary {
+                let accent = resolve_color(theme, "color.accent.base");
+                let text_inverse = resolve_color(theme, "color.text.inverse");
+                let pressed_border = color_mix_black(accent, 0.86);
+                (accent, pressed_border, text_inverse)
+            } else {
+                (fill, border_color, text_color)
+            };
 
         // ── Hover/active colors (contract §8 Hover/Active) ──────
         // hover fill: color-mix(fill 84%, elevated)
@@ -190,16 +248,18 @@ impl IntoElement for Button {
         // Brand-raised treatment: use gradient fills and elevated shadows
         if theme.brand_raised && !is_ghost && !is_disabled {
             use crate::theme_ext::{
-                brand_raised_primary_fill, brand_raised_interactive_fill,
-                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+                brand_raised_interactive_fill, brand_raised_interactive_shadow,
+                brand_raised_primary_fill, brand_raised_primary_shadow,
             };
             match spec.variant {
                 ButtonVariant::Primary => {
-                    el = el.bg(brand_raised_primary_fill(fill))
+                    el = el
+                        .bg(brand_raised_primary_fill(fill))
                         .shadow(brand_raised_primary_shadow());
                 }
                 _ => {
-                    el = el.bg(brand_raised_interactive_fill(fill))
+                    el = el
+                        .bg(brand_raised_interactive_fill(fill))
                         .shadow(brand_raised_interactive_shadow());
                 }
             }
@@ -207,7 +267,8 @@ impl IntoElement for Button {
             el = el.bg(fill);
         }
 
-        el = el.border_1()
+        el = el
+            .border_1()
             .border_color(border_color)
             .text_color(text_color)
             .flex()
@@ -229,7 +290,10 @@ impl IntoElement for Button {
         // GPUI has no CSS outline equivalent. We approximate with border-color
         // change on focus. Known delta: no outline-offset separation.
         let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
-        el = el.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
+        el = el.focus(move |s| {
+            s.border_color(focus_ring_color)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
+        });
 
         // ── Interactive states ────────────────────────────────────
         let icon_color = text_color;
@@ -240,7 +304,16 @@ impl IntoElement for Button {
         } else {
             el = el
                 .cursor_pointer()
-                .hover(move |s| s.bg(hover_fill).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]))
+                .hover(move |s| {
+                    s.bg(hover_fill)
+                        .border_color(hover_border)
+                        .shadow(vec![gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 1.0, 0.10),
+                            offset: point(px(0.0), px(1.0)),
+                            blur_radius: px(0.0),
+                            spread_radius: px(0.0),
+                        }])
+                })
                 // Contract: active press effect — use relative positioning to avoid layout shift
                 .active(move |s| s.bg(active_fill));
         }
@@ -274,12 +347,7 @@ impl IntoElement for Button {
 
         // ── Label (contract §8 Label) ─────────────────────────────
         if !label_text.is_empty() {
-            el = el.child(
-                div()
-                    .whitespace_nowrap()
-                    .min_w(px(0.0))
-                    .child(label_text),
-            );
+            el = el.child(div().whitespace_nowrap().min_w(px(0.0)).child(label_text));
         }
 
         // ── Trailing icon ────────────────────────────────────────
@@ -297,18 +365,10 @@ impl IntoElement for Button {
         // opacity: 0.5, margin-left: -2px to tighten from gap
         if spec.chevron {
             el = el.child(
-                div()
-                    .flex()
-                    .items_center()
-                    .opacity(0.5)
-                    .ml(px(-2.0))
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new("chevron-down").with_size(IconSize::Sm),
-                            theme,
-                        )
+                div().flex().items_center().opacity(0.5).ml(px(-2.0)).child(
+                    Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
                         .with_color(icon_color),
-                    ),
+                ),
             );
         }
 

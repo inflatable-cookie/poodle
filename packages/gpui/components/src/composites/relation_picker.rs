@@ -1,15 +1,21 @@
 //! RelationPicker — real GPUI component backed by RelationPickerSpec.
 
-use std::rc::Rc;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     BrowseState, DrillDownItem, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode,
 };
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize,
+    SpinnerSpec, SpinnerTone, SpinnerVariant,
+};
+use std::rc::Rc;
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::primitives::{Icon, Spinner};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -41,7 +47,9 @@ pub struct RelationPicker {
 
 impl std::ops::Deref for RelationPicker {
     type Target = RelationPickerSpec;
-    fn deref(&self) -> &RelationPickerSpec { &self.spec }
+    fn deref(&self) -> &RelationPickerSpec {
+        &self.spec
+    }
 }
 
 impl RelationPicker {
@@ -68,17 +76,46 @@ impl RelationPicker {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<PickerItemSpec>) -> Self { self.spec.items = v; self }
-    pub fn selected_ids(mut self, v: Vec<String>) -> Self { self.spec.selected_ids = v; self }
-    pub fn query(mut self, v: impl Into<String>) -> Self { self.spec.query = v.into(); self }
-    pub fn selection_mode(mut self, v: SelectionMode) -> Self { self.spec.selection_mode = v; self }
-    pub fn variant(mut self, v: PickerVariant) -> Self { self.spec.variant = v; self }
-    pub fn state(mut self, v: BrowseState) -> Self { self.spec.state = v; self }
-    pub fn with_drill_path(mut self, path: Vec<String>) -> Self { self.drill_path = path; self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn items(mut self, v: Vec<PickerItemSpec>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn selected_ids(mut self, v: Vec<String>) -> Self {
+        self.spec.selected_ids = v;
+        self
+    }
+    pub fn query(mut self, v: impl Into<String>) -> Self {
+        self.spec.query = v.into();
+        self
+    }
+    pub fn selection_mode(mut self, v: SelectionMode) -> Self {
+        self.spec.selection_mode = v;
+        self
+    }
+    pub fn variant(mut self, v: PickerVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn state(mut self, v: BrowseState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn with_drill_path(mut self, path: Vec<String>) -> Self {
+        self.drill_path = path;
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_select(
         mut self,
@@ -253,15 +290,13 @@ impl IntoElement for RelationPicker {
                         .justify_center()
                         .gap(px(8.0))
                         .py(px(24.0))
-                        .child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Sm)
-                                    .with_tone(SpinnerTone::Accent),
-                                theme,
-                            ),
-                        )
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(SpinnerSize::Sm)
+                                .with_tone(SpinnerTone::Accent),
+                            theme,
+                        ))
                         .child(
                             div()
                                 .text_size(body_size)
@@ -322,9 +357,10 @@ impl IntoElement for RelationPicker {
                             .overflow_y_scroll();
 
                         for item in level_items {
-                            let row_id = SharedString::from(
-                                format!("relation-picker-drill-{}-{}", level_idx, item.id),
-                            );
+                            let row_id = SharedString::from(format!(
+                                "relation-picker-drill-{}-{}",
+                                level_idx, item.id
+                            ));
                             let mut row = div()
                                 .id(row_id)
                                 .w_full()
@@ -437,10 +473,7 @@ impl IntoElement for RelationPicker {
                     .overflow_y_scroll();
 
                 for item in source_items {
-                    let is_selected = spec
-                        .selected_ids
-                        .iter()
-                        .any(|sid| sid == &item.id);
+                    let is_selected = spec.selected_ids.iter().any(|sid| sid == &item.id);
 
                     let item_id = SharedString::from(format!("relation-picker-{}", item.id));
 

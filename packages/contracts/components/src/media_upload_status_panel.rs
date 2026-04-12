@@ -25,12 +25,26 @@ pub struct MediaUploadStatusPanelSpec {
 }
 
 impl MediaUploadStatusPanelSpec {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    pub fn with_step(mut self, step: MediaUploadStep) -> Self { self.step = step; self }
-    pub fn with_duplicate_label(mut self, v: impl Into<String>) -> Self { self.duplicate_label = Some(v.into()); self }
-    pub fn with_upload_progress(mut self, v: f32) -> Self { self.upload_progress = v; self }
-    pub fn with_upload_error(mut self, v: impl Into<String>) -> Self { self.upload_error = Some(v.into()); self }
+    pub fn with_step(mut self, step: MediaUploadStep) -> Self {
+        self.step = step;
+        self
+    }
+    pub fn with_duplicate_label(mut self, v: impl Into<String>) -> Self {
+        self.duplicate_label = Some(v.into());
+        self
+    }
+    pub fn with_upload_progress(mut self, v: f32) -> Self {
+        self.upload_progress = v;
+        self
+    }
+    pub fn with_upload_error(mut self, v: impl Into<String>) -> Self {
+        self.upload_error = Some(v.into());
+        self
+    }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = size;

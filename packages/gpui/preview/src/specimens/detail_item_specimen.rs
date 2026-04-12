@@ -1,9 +1,12 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{DetailItemLayout, DetailItemPresentation, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
-use poodle_gpui_components::{DetailItem, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
+use poodle_gpui_components::{Button, DetailItem, Eyebrow};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlSize, DetailItemLayout, DetailItemPresentation,
+    DetailItemSpec, EyebrowSpec,
+};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let success = theme.resolve_color("color.status.success");

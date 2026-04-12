@@ -4,12 +4,17 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
+use poodle_specs::{
+    ButtonTone, ButtonVariant, ControlSize, IconButtonSpec, IconSize, IconSpec, SpinnerSize,
+    SpinnerSpec, SpinnerTone, SpinnerVariant,
+};
 
 use super::icon::Icon;
 use super::spinner::Spinner;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem};
-use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{
+    color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius,
+};
 
 /// A real GPUI icon button component backed by `IconButtonSpec`.
 pub struct IconButton {
@@ -21,28 +26,67 @@ pub struct IconButton {
 
 impl std::ops::Deref for IconButton {
     type Target = IconButtonSpec;
-    fn deref(&self) -> &IconButtonSpec { &self.spec }
+    fn deref(&self) -> &IconButtonSpec {
+        &self.spec
+    }
 }
 
 impl IconButton {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: IconButtonSpec::new(), theme: theme.clone(), id_suffix: None, on_click: None }
+        Self {
+            spec: IconButtonSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_click: None,
+        }
     }
 
     pub fn from_spec(spec: IconButtonSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), id_suffix: None, on_click: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            id_suffix: None,
+            on_click: None,
+        }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn variant(mut self, v: ButtonVariant) -> Self { self.spec.variant = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn icon(mut self, v: impl Into<String>) -> Self { self.spec.icon = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
-    pub fn pressed(mut self, v: bool) -> Self { self.spec.is_pressed = Some(v); self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn variant(mut self, v: ButtonVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn icon(mut self, v: impl Into<String>) -> Self {
+        self.spec.icon = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn loading(mut self, v: bool) -> Self {
+        self.spec.is_loading = v;
+        self
+    }
+    pub fn pressed(mut self, v: bool) -> Self {
+        self.spec.is_pressed = Some(v);
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -138,16 +182,18 @@ impl IntoElement for IconButton {
         // Brand-raised treatment: gradient fills and elevated shadows
         if theme.brand_raised && !is_ghost && !is_unavailable && !is_pressed {
             use crate::theme_ext::{
-                brand_raised_primary_fill, brand_raised_interactive_fill,
-                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+                brand_raised_interactive_fill, brand_raised_interactive_shadow,
+                brand_raised_primary_fill, brand_raised_primary_shadow,
             };
             match spec.variant {
                 ButtonVariant::Primary => {
-                    el = el.bg(brand_raised_primary_fill(current_fill))
+                    el = el
+                        .bg(brand_raised_primary_fill(current_fill))
                         .shadow(brand_raised_primary_shadow());
                 }
                 _ => {
-                    el = el.bg(brand_raised_interactive_fill(current_fill))
+                    el = el
+                        .bg(brand_raised_interactive_fill(current_fill))
                         .shadow(brand_raised_interactive_shadow());
                 }
             }
@@ -155,9 +201,14 @@ impl IntoElement for IconButton {
             el = el.bg(current_fill);
         }
 
-        el = el.text_color(text_color)
+        el = el
+            .text_color(text_color)
             .border_1()
-            .border_color(if is_pressed { pressed_border } else { border_color })
+            .border_color(if is_pressed {
+                pressed_border
+            } else {
+                border_color
+            })
             .flex()
             .items_center()
             .justify_center();
@@ -181,7 +232,10 @@ impl IntoElement for IconButton {
         }
 
         // ── Focus ring ────────────────────────────────────────────
-        el = el.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
+        el = el.focus(move |s| {
+            s.border_color(focus_ring_color)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
+        });
 
         // ── Interactive states ────────────────────────────────────
         if is_unavailable {
@@ -208,11 +262,8 @@ impl IntoElement for IconButton {
             );
         } else if !icon_name.is_empty() {
             el = el.child(
-                Icon::from_spec(
-                    IconSpec::new(&icon_name).with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(text_color),
+                Icon::from_spec(IconSpec::new(&icon_name).with_size(IconSize::Sm), theme)
+                    .with_color(text_color),
             );
         }
 

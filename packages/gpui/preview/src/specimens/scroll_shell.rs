@@ -1,9 +1,9 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{Direction, EyebrowSpec, ScrollShellSpec};
 use poodle_gpui_components::{Eyebrow, ScrollShell};
-use crate::style_bridge::color_to_hsla;
+use poodle_specs::{Direction, EyebrowSpec, ScrollShellSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -19,17 +19,27 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .flex()
             .items_center()
             .child(
-                div().text_xs()
+                div()
+                    .text_xs()
                     .text_color(color_to_hsla(text_secondary))
                     .child(label.to_string()),
             )
     };
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Vertical scroll ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical scroll"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Vertical scroll"),
+                    theme,
+                ))
                 .child(
                     div().h(px(160.0)).child(
                         ScrollShell::from_spec(
@@ -49,14 +59,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_child(surface_row("Item 9"))
                         .with_child(surface_row("Item 10"))
                         .with_child(surface_row("Item 11"))
-                        .with_child(surface_row("Item 12"))
-                    )
-                )
+                        .with_child(surface_row("Item 12")),
+                    ),
+                ),
         )
         // --- Horizontal scroll ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal scroll"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Horizontal scroll"),
+                    theme,
+                ))
                 .child(
                     div().h(px(40.0)).child(
                         ScrollShell::from_spec(
@@ -66,7 +82,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_child(
-                            div().flex().gap(px(4.0))
+                            div()
+                                .flex()
+                                .gap(px(4.0))
                                 .child(column_item("Column 1", border, text_secondary))
                                 .child(column_item("Column 2", border, text_secondary))
                                 .child(column_item("Column 3", border, text_secondary))
@@ -76,10 +94,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .child(column_item("Column 7", border, text_secondary))
                                 .child(column_item("Column 8", border, text_secondary))
                                 .child(column_item("Column 9", border, text_secondary))
-                                .child(column_item("Column 10", border, text_secondary))
-                        )
-                    )
-                )
+                                .child(column_item("Column 10", border, text_secondary)),
+                        ),
+                    ),
+                ),
         )
 }
 
@@ -98,7 +116,8 @@ fn column_item(
         .items_center()
         .flex_shrink_0()
         .child(
-            div().text_xs()
+            div()
+                .text_xs()
                 .text_color(color_to_hsla(text))
                 .whitespace_nowrap()
                 .child(label.to_string()),

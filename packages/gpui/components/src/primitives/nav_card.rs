@@ -1,7 +1,7 @@
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::NavCardSpec;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct NavCard {
     spec: NavCardSpec,
@@ -27,7 +27,9 @@ pub struct NavCard {
 
 impl std::ops::Deref for NavCard {
     type Target = NavCardSpec;
-    fn deref(&self) -> &NavCardSpec { &self.spec }
+    fn deref(&self) -> &NavCardSpec {
+        &self.spec
+    }
 }
 
 impl NavCard {
@@ -75,10 +77,18 @@ impl NavCard {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn href(mut self, v: impl Into<String>) -> Self { self.spec.href = Some(v.into()); self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn href(mut self, v: impl Into<String>) -> Self {
+        self.spec.href = Some(v.into());
+        self
+    }
 
     pub fn with_icon(mut self, icon: impl IntoElement) -> Self {
         self.icon = Some(icon.into_any_element());
@@ -123,18 +133,13 @@ impl IntoElement for NavCard {
             .children(self.icon);
 
         // Title row with optional badge
-        let mut title_row = div()
-            .flex()
-            .flex_row()
-            .items_center()
-            .gap(px(8.0))
-            .child(
-                div()
-                    .text_size(self.body_size)
-                    .font_weight(FontWeight::BOLD)
-                    .text_color(title_color)
-                    .child(self.spec.title.clone()),
-            );
+        let mut title_row = div().flex().flex_row().items_center().gap(px(8.0)).child(
+            div()
+                .text_size(self.body_size)
+                .font_weight(FontWeight::BOLD)
+                .text_color(title_color)
+                .child(self.spec.title.clone()),
+        );
 
         if let Some(badge) = &self.spec.badge {
             title_row = title_row.child(
@@ -151,7 +156,12 @@ impl IntoElement for NavCard {
         }
 
         // Content column: title row + optional description
-        let mut content = div().flex().flex_col().gap(px(4.0)).flex_grow().child(title_row);
+        let mut content = div()
+            .flex()
+            .flex_col()
+            .gap(px(4.0))
+            .flex_grow()
+            .child(title_row);
 
         if let Some(desc) = &self.spec.description {
             content = content.child(
@@ -189,20 +199,21 @@ impl IntoElement for NavCard {
             .child(content)
             .child(arrow);
 
-        root = root.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
+        root = root.focus(move |s| {
+            s.border_color(focus_ring_color)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
+        });
 
         if is_disabled {
             root = root
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
-            root = root
-                .cursor_pointer()
-                .hover(|style| {
-                    style
-                        .bg(hover_fill.opacity(0.52))
-                        .border_color(hover_border_color.opacity(0.28))
-                });
+            root = root.cursor_pointer().hover(|style| {
+                style
+                    .bg(hover_fill.opacity(0.52))
+                    .border_color(hover_border_color.opacity(0.28))
+            });
 
             // Show arrow on hover via group
             // Note: GPUI hover on child visibility requires the arrow to be

@@ -6,13 +6,19 @@
 //! - Trigger shows title + optional description on left, chevron on right
 //! - Chevron-down icon rotates when item is open
 
-use std::rc::Rc;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
+    IconSize, IconSpec, SemanticControlSizeRole,
+};
+use std::rc::Rc;
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI accordion component backed by `AccordionSpec`.
@@ -26,12 +32,20 @@ pub struct Accordion {
 
 impl std::ops::Deref for Accordion {
     type Target = AccordionSpec;
-    fn deref(&self) -> &AccordionSpec { &self.spec }
+    fn deref(&self) -> &AccordionSpec {
+        &self.spec
+    }
 }
 
 impl Accordion {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: AccordionSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_toggle: None, content: Vec::new() }
+        Self {
+            spec: AccordionSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_toggle: None,
+            content: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: AccordionSpec, theme: &GpuiThemeProvider) -> Self {
@@ -45,19 +59,47 @@ impl Accordion {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<AccordionItemSpec>) -> Self { self.spec.items = v; self }
-    pub fn value(mut self, v: AccordionSelectionValue) -> Self { self.spec.value = Some(v); self }
-    pub fn default_value(mut self, v: AccordionSelectionValue) -> Self { self.spec.default_value = Some(v); self }
-    pub fn allow_multiple(mut self, v: bool) -> Self { self.spec.allow_multiple = v; self }
-    pub fn collapsible(mut self, v: bool) -> Self { self.spec.is_collapsible = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn items(mut self, v: Vec<AccordionItemSpec>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn value(mut self, v: AccordionSelectionValue) -> Self {
+        self.spec.value = Some(v);
+        self
+    }
+    pub fn default_value(mut self, v: AccordionSelectionValue) -> Self {
+        self.spec.default_value = Some(v);
+        self
+    }
+    pub fn allow_multiple(mut self, v: bool) -> Self {
+        self.spec.allow_multiple = v;
+        self
+    }
+    pub fn collapsible(mut self, v: bool) -> Self {
+        self.spec.is_collapsible = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     /// Add content for a specific item value, shown when that item is expanded.
     pub fn with_content(mut self, value: impl Into<String>, content: impl IntoElement) -> Self {
-        self.content.push((value.into(), content.into_any_element()));
+        self.content
+            .push((value.into(), content.into_any_element()));
         self
     }
 
@@ -66,10 +108,7 @@ impl Accordion {
         self
     }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Rc::new(handler));
         self
     }
@@ -103,14 +142,21 @@ impl IntoElement for Accordion {
         // Item background: color-mix(surface 93%, text-primary)
         let item_bg = color_mix(surface_bg, text_primary, 0.93);
         // Item border: border-subtle at 36% opacity
-        let item_border = Hsla { a: border_subtle.a * 0.36, ..border_subtle };
+        let item_border = Hsla {
+            a: border_subtle.a * 0.36,
+            ..border_subtle
+        };
         // Inset shadow highlight: text-inverse at 8% opacity
-        let _inset_highlight = Hsla { a: text_inverse.a * 0.08, ..text_inverse };
+        let _inset_highlight = Hsla {
+            a: text_inverse.a * 0.08,
+            ..text_inverse
+        };
 
         let expanded = self.spec.expanded_values();
 
         // Build content map from the content vec
-        let mut content_map: std::collections::HashMap<String, AnyElement> = std::collections::HashMap::new();
+        let mut content_map: std::collections::HashMap<String, AnyElement> =
+            std::collections::HashMap::new();
         for (key, el) in self.content {
             content_map.insert(key, el);
         }
@@ -134,7 +180,10 @@ impl IntoElement for Accordion {
                 .gap(px(8.0))
                 .cursor_pointer();
 
-            trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            trigger = trigger.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_disabled {
                 trigger = trigger
@@ -171,19 +220,16 @@ impl IntoElement for Accordion {
             // Chevron indicator — always chevron-down, visually rotated when open
             // GPUI doesn't support CSS transform rotation on divs easily,
             // so we use chevron-up when open
-            let chevron_name = if is_open { "chevron-up" } else { "chevron-down" };
+            let chevron_name = if is_open {
+                "chevron-up"
+            } else {
+                "chevron-down"
+            };
             trigger = trigger.child(
-                div()
-                    .flex()
-                    .items_center()
-                    .flex_shrink_0()
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new(chevron_name).with_size(IconSize::Sm),
-                            theme,
-                        )
+                div().flex().items_center().flex_shrink_0().child(
+                    Icon::from_spec(IconSpec::new(chevron_name).with_size(IconSize::Sm), theme)
                         .with_color(text_secondary),
-                    ),
+                ),
             );
 
             // Click + keyboard handler
@@ -228,9 +274,7 @@ impl IntoElement for Accordion {
             // Panel content (when expanded)
             if is_open {
                 if let Some(panel_content) = content_map.remove(&item.value) {
-                    item_card = item_card.child(
-                        div().min_w(px(0.0)).child(panel_content)
-                    );
+                    item_card = item_card.child(div().min_w(px(0.0)).child(panel_content));
                 }
             }
 

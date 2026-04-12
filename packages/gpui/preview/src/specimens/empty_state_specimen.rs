@@ -1,8 +1,8 @@
 use gpui::*;
-use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
-use poodle_specs::{ButtonVariant, EyebrowSpec};
-use poodle_gpui_components::{EmptyState, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{EmptyState, Eyebrow};
+use poodle_specs::{ButtonVariant, EyebrowSpec};
+use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))

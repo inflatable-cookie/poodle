@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// A layout container for filter controls. Unlike the old summary-display
 /// form, this version is a real container: the consumer supplies filter

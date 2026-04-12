@@ -6,11 +6,17 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, TextInputSpec, ValidationState};
+use poodle_specs::{
+    ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
+    TextInputSpec, ValidationState,
+};
 
 use super::icon::Icon;
 use super::spinner::Spinner;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
@@ -26,12 +32,22 @@ pub struct TextInput {
 
 impl std::ops::Deref for TextInput {
     type Target = TextInputSpec;
-    fn deref(&self) -> &TextInputSpec { &self.spec }
+    fn deref(&self) -> &TextInputSpec {
+        &self.spec
+    }
 }
 
 impl TextInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TextInputSpec::new(), theme: theme.clone(), id_suffix: None, on_focus: None, on_change: None, on_submit: None, on_cancel: None }
+        Self {
+            spec: TextInputSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_focus: None,
+            on_change: None,
+            on_submit: None,
+            on_cancel: None,
+        }
     }
 
     pub fn from_spec(spec: TextInputSpec, theme: &GpuiThemeProvider) -> Self {
@@ -47,67 +63,127 @@ impl TextInput {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn id(mut self, v: impl Into<String>) -> Self { self.spec.id = Some(v.into()); self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = v.into(); self }
-    pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = Some(v.into()); self }
-    pub fn name(mut self, v: impl Into<String>) -> Self { self.spec.name = Some(v.into()); self }
-    pub fn input_type(mut self, v: impl Into<String>) -> Self { self.spec.input_type = v.into(); self }
-    pub fn input_mode(mut self, v: impl Into<String>) -> Self { self.spec.input_mode = Some(v.into()); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn read_only(mut self, v: bool) -> Self { self.spec.is_read_only = v; self }
-    pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
-    pub fn error_message_id(mut self, v: impl Into<String>) -> Self { self.spec.error_message_id = Some(v.into()); self }
-    pub fn leading_icon(mut self, v: impl Into<String>) -> Self { self.spec.leading_icon = Some(v.into()); self }
-    pub fn trailing_icon(mut self, v: impl Into<String>) -> Self { self.spec.trailing_icon = Some(v.into()); self }
-    pub fn prefix(mut self, v: impl Into<String>) -> Self { self.spec.prefix = Some(v.into()); self }
-    pub fn suffix(mut self, v: impl Into<String>) -> Self { self.spec.suffix = Some(v.into()); self }
-    pub fn max_length(mut self, v: usize) -> Self { self.spec.max_length = Some(v); self }
-    pub fn show_char_count(mut self, v: bool) -> Self { self.spec.show_char_count = v; self }
-    pub fn submit_enabled(mut self, v: bool) -> Self { self.spec.submit_enabled = v; self }
-    pub fn cancel_enabled(mut self, v: bool) -> Self { self.spec.cancel_enabled = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn id(mut self, v: impl Into<String>) -> Self {
+        self.spec.id = Some(v.into());
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = v.into();
+        self
+    }
+    pub fn placeholder(mut self, v: impl Into<String>) -> Self {
+        self.spec.placeholder = Some(v.into());
+        self
+    }
+    pub fn name(mut self, v: impl Into<String>) -> Self {
+        self.spec.name = Some(v.into());
+        self
+    }
+    pub fn input_type(mut self, v: impl Into<String>) -> Self {
+        self.spec.input_type = v.into();
+        self
+    }
+    pub fn input_mode(mut self, v: impl Into<String>) -> Self {
+        self.spec.input_mode = Some(v.into());
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn read_only(mut self, v: bool) -> Self {
+        self.spec.is_read_only = v;
+        self
+    }
+    pub fn validation_state(mut self, v: ValidationState) -> Self {
+        self.spec.validation_state = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn description_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.description_id = Some(v.into());
+        self
+    }
+    pub fn error_message_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.error_message_id = Some(v.into());
+        self
+    }
+    pub fn leading_icon(mut self, v: impl Into<String>) -> Self {
+        self.spec.leading_icon = Some(v.into());
+        self
+    }
+    pub fn trailing_icon(mut self, v: impl Into<String>) -> Self {
+        self.spec.trailing_icon = Some(v.into());
+        self
+    }
+    pub fn prefix(mut self, v: impl Into<String>) -> Self {
+        self.spec.prefix = Some(v.into());
+        self
+    }
+    pub fn suffix(mut self, v: impl Into<String>) -> Self {
+        self.spec.suffix = Some(v.into());
+        self
+    }
+    pub fn max_length(mut self, v: usize) -> Self {
+        self.spec.max_length = Some(v);
+        self
+    }
+    pub fn show_char_count(mut self, v: bool) -> Self {
+        self.spec.show_char_count = v;
+        self
+    }
+    pub fn submit_enabled(mut self, v: bool) -> Self {
+        self.spec.submit_enabled = v;
+        self
+    }
+    pub fn cancel_enabled(mut self, v: bool) -> Self {
+        self.spec.cancel_enabled = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_focus(
-        mut self,
-        handler: impl Fn(&mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_focus(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
         self.on_focus = Some(Box::new(handler));
         self
     }
 
     /// Called when the input value changes.
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
 
     /// Called when the user presses Enter (submit).
-    pub fn on_submit(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_submit(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_submit = Some(Box::new(handler));
         self
     }
 
     /// Called when the user presses Escape (cancel).
-    pub fn on_cancel(
-        mut self,
-        handler: impl Fn(&mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_cancel(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
         self.on_cancel = Some(Box::new(handler));
         self
     }
@@ -127,7 +203,8 @@ impl IntoElement for TextInput {
         let base_height = resolve_px(theme, spec.control_height_token());
         let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let base_padding = resolve_px(theme, spec.horizontal_padding_token());
-        let inline_padding = base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        let inline_padding =
+            base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let inline_gap = resolve_px(theme, spec.inline_gap_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
@@ -139,10 +216,22 @@ impl IntoElement for TextInput {
         // Svelte treatment-interactive-subtle values:
         //   fill: surface 82%, fill-hover: surface 88%
         //   border: border-default 72%, border-hover: border-default 92%
-        let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
-        let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
-        let border = Hsla { a: border_default.a * 0.72, ..border_default };
-        let hover_border = Hsla { a: border_default.a * 0.92, ..border_default };
+        let surface_bg = Hsla {
+            a: surface_raw.a * 0.82,
+            ..surface_raw
+        };
+        let hover_bg = Hsla {
+            a: surface_raw.a * 0.88,
+            ..surface_raw
+        };
+        let border = Hsla {
+            a: border_default.a * 0.72,
+            ..border_default
+        };
+        let hover_border = Hsla {
+            a: border_default.a * 0.92,
+            ..border_default
+        };
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.placeholder_color_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
@@ -155,7 +244,11 @@ impl IntoElement for TextInput {
         } else {
             value.to_string()
         };
-        let text_col = if is_empty { text_secondary } else { text_primary };
+        let text_col = if is_empty {
+            text_secondary
+        } else {
+            text_primary
+        };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-input-{}", suffix)
@@ -174,11 +267,7 @@ impl IntoElement for TextInput {
         let focus_bg = surface_bg;
 
         // ── Build inner content row ──────────────────────────
-        let mut inner = div()
-            .flex()
-            .items_center()
-            .gap(inline_gap)
-            .size_full();
+        let mut inner = div().flex().items_center().gap(inline_gap).size_full();
 
         // Prefix affix
         if let Some(ref prefix_text) = spec.prefix {
@@ -187,9 +276,12 @@ impl IntoElement for TextInput {
             let separator_color = color_mix(separator_base, gpui::Hsla::transparent_black(), 0.52);
             inner = inner.child(
                 div()
-                    .flex().items_center()
-                    .pr(inline_gap).mr(inline_gap)
-                    .border_r_1().border_color(separator_color)
+                    .flex()
+                    .items_center()
+                    .pr(inline_gap)
+                    .mr(inline_gap)
+                    .border_r_1()
+                    .border_color(separator_color)
                     .text_color(affix_color)
                     .whitespace_nowrap()
                     .child(prefix_text.clone()),
@@ -230,8 +322,11 @@ impl IntoElement for TextInput {
                 format!("{}", char_len)
             };
             inner = inner.child(
-                div().text_color(count_color).text_size(px(11.0))
-                    .whitespace_nowrap().child(count_text),
+                div()
+                    .text_color(count_color)
+                    .text_size(px(11.0))
+                    .whitespace_nowrap()
+                    .child(count_text),
             );
         }
 
@@ -282,9 +377,12 @@ impl IntoElement for TextInput {
             let separator_color = color_mix(separator_base, gpui::Hsla::transparent_black(), 0.52);
             inner = inner.child(
                 div()
-                    .flex().items_center()
-                    .pl(inline_gap).ml(inline_gap)
-                    .border_l_1().border_color(separator_color)
+                    .flex()
+                    .items_center()
+                    .pl(inline_gap)
+                    .ml(inline_gap)
+                    .border_l_1()
+                    .border_color(separator_color)
                     .text_color(affix_color)
                     .whitespace_nowrap()
                     .child(suffix_text.clone()),
@@ -302,7 +400,8 @@ impl IntoElement for TextInput {
 
         // Brand-raised treatment: gradient fill + subtle shadow
         if theme.brand_raised {
-            el = el.bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg))
+            el = el
+                .bg(crate::theme_ext::brand_raised_subtle_fill(surface_bg))
                 .shadow(vec![gpui::BoxShadow {
                     color: hsla(0.0, 0.0, 1.0, 0.08),
                     offset: point(px(0.0), px(-1.0)),
@@ -313,26 +412,41 @@ impl IntoElement for TextInput {
             el = el.bg(surface_bg);
         }
 
-        el = el.border_1()
+        el = el
+            .border_1()
             .border_color(effective_border)
             .text_size(body_size)
             .line_height(body_line_height)
             .text_color(text_primary)
-            .hover(move |s| s.bg(hover_bg).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]))
-            .focus(move |s| s
-                .border_color(focus_ring)
-                .bg(focus_bg)
-                .shadow(vec![gpui::BoxShadow {
-                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
-                    offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(2.0),
-                }])
-            )
+            .hover(move |s| {
+                s.bg(hover_bg)
+                    .border_color(hover_border)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 1.0, 0.10),
+                        offset: point(px(0.0), px(1.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(0.0),
+                    }])
+            })
+            .focus(move |s| {
+                s.border_color(focus_ring)
+                    .bg(focus_bg)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: Hsla {
+                            a: focus_ring.a * 0.28,
+                            ..focus_ring
+                        },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(2.0),
+                    }])
+            })
             .child(inner);
 
         if spec.is_disabled {
-            el = el.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+            el = el
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         // ── Keyboard handlers ─────────────────────────────────
@@ -361,7 +475,10 @@ impl IntoElement for TextInput {
                             handler(&new_val, window, cx);
                         }
                     }
-                } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                } else if key.len() == 1
+                    && !event.keystroke.modifiers.platform
+                    && !event.keystroke.modifiers.control
+                {
                     if let Some(ref handler) = on_change {
                         let new_val = format!("{}{}", current_value, key);
                         handler(&new_val, window, cx);

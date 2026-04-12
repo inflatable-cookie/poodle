@@ -1,12 +1,12 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{CallOutSpec, StatusTone, EyebrowSpec};
-use poodle_gpui_components::{Callout, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Callout, Eyebrow};
+use poodle_specs::{CallOutSpec, EyebrowSpec, StatusTone};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;

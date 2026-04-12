@@ -1,12 +1,12 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{DrawerSpec, DrawerEdge, ButtonSpec, ButtonVariant, EyebrowSpec};
-use poodle_gpui_components::{Drawer, Button, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Button, Drawer, Eyebrow};
+use poodle_specs::{ButtonSpec, ButtonVariant, DrawerEdge, DrawerSpec, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -133,26 +133,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         |size, theme: &GpuiThemeProvider| {
             Drawer::from_spec(
-                DrawerSpec::new().with_title("Drawer").with_description("Drawer body."),
+                DrawerSpec::new()
+                    .with_title("Drawer")
+                    .with_description("Drawer body."),
                 theme,
             )
             .size(size)
-            .with_content(
-                div().text_size(px(12.0))
-                    .child("Drawer body.".to_string())
-            )
+            .with_content(div().text_size(px(12.0)).child("Drawer body.".to_string()))
             .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
             Drawer::from_spec(
-                DrawerSpec::new().with_title("Drawer").with_description("Drawer body."),
+                DrawerSpec::new()
+                    .with_title("Drawer")
+                    .with_description("Drawer body."),
                 theme,
             )
             .with_density(density)
-            .with_content(
-                div().text_size(px(12.0))
-                    .child("Drawer body.".to_string())
-            )
+            .with_content(div().text_size(px(12.0)).child("Drawer body.".to_string()))
             .into_any_element()
         },
     )

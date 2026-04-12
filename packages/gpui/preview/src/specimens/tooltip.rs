@@ -1,8 +1,8 @@
 use gpui::*;
-use poodle_specs::{TooltipSpec, ButtonSpec, ButtonVariant, EyebrowSpec};
-use poodle_gpui_components::{Tooltip, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Button, Eyebrow, Tooltip};
 use poodle_specs::OverlayPlacement;
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, TooltipSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // ── Default ──────────────────────────────────────────────────────
@@ -16,10 +16,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_variant(ButtonVariant::Secondary)
             .with_label("Hover me"),
         theme,
-    ).with_id("tooltip-default-trigger");
+    )
+    .with_id("tooltip-default-trigger");
 
-    let default_tooltip = Tooltip::from_spec(default_spec, theme)
-        .with_trigger(default_trigger);
+    let default_tooltip = Tooltip::from_spec(default_spec, theme).with_trigger(default_trigger);
 
     // ── Placements ───────────────────────────────────────────────────
     let top_tooltip = Tooltip::from_spec(
@@ -28,11 +28,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_placement(OverlayPlacement::Top)
             .with_default_open(true),
         theme,
-    ).with_trigger(
+    )
+    .with_trigger(
         Button::from_spec(
-            ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Top"),
+            ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label("Top"),
             theme,
-        ).with_id("tooltip-top-trigger")
+        )
+        .with_id("tooltip-top-trigger"),
     );
 
     let bottom_tooltip = Tooltip::from_spec(
@@ -41,11 +45,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_placement(OverlayPlacement::Bottom)
             .with_default_open(true),
         theme,
-    ).with_trigger(
+    )
+    .with_trigger(
         Button::from_spec(
-            ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Bottom"),
+            ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label("Bottom"),
             theme,
-        ).with_id("tooltip-bottom-trigger")
+        )
+        .with_id("tooltip-bottom-trigger"),
     );
 
     let left_tooltip = Tooltip::from_spec(
@@ -54,11 +62,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_placement(OverlayPlacement::Left)
             .with_default_open(true),
         theme,
-    ).with_trigger(
+    )
+    .with_trigger(
         Button::from_spec(
-            ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Left"),
+            ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label("Left"),
             theme,
-        ).with_id("tooltip-left-trigger")
+        )
+        .with_id("tooltip-left-trigger"),
     );
 
     let right_tooltip = Tooltip::from_spec(
@@ -67,33 +79,60 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_placement(OverlayPlacement::Right)
             .with_default_open(true),
         theme,
-    ).with_trigger(
+    )
+    .with_trigger(
         Button::from_spec(
-            ButtonSpec::new().with_variant(ButtonVariant::Ghost).with_label("Right"),
+            ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label("Right"),
             theme,
-        ).with_id("tooltip-right-trigger")
+        )
+        .with_id("tooltip-right-trigger"),
     );
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // Default
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_wrap().gap(px(12.0)).items_center()
-                        .child(default_tooltip)
-                )
+                    div()
+                        .flex()
+                        .flex_wrap()
+                        .gap(px(12.0))
+                        .items_center()
+                        .child(default_tooltip),
+                ),
         )
         // Placements
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Placements"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Placements"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_wrap().gap(px(12.0)).items_center()
+                    div()
+                        .flex()
+                        .flex_wrap()
+                        .gap(px(12.0))
+                        .items_center()
                         .child(top_tooltip)
                         .child(bottom_tooltip)
                         .child(left_tooltip)
-                        .child(right_tooltip)
-                )
+                        .child(right_tooltip),
+                ),
         )
 }

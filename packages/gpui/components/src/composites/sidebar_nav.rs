@@ -7,11 +7,13 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{SidebarNavGroup, SidebarNavSpec};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{SidebarNavGroup, SidebarNavSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius, focus_ring_shadow};
+use crate::theme_ext::{
+    color_mix, focus_ring_shadow, resolve_color, resolve_opacity, resolve_radius,
+};
 
 /// A real GPUI sidebar navigation component backed by `SidebarNavSpec`.
 pub struct SidebarNav {
@@ -22,7 +24,9 @@ pub struct SidebarNav {
 
 impl std::ops::Deref for SidebarNav {
     type Target = SidebarNavSpec;
-    fn deref(&self) -> &SidebarNavSpec { &self.spec }
+    fn deref(&self) -> &SidebarNavSpec {
+        &self.spec
+    }
 }
 
 impl SidebarNav {
@@ -43,17 +47,32 @@ impl SidebarNav {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn groups(mut self, v: Vec<SidebarNavGroup>) -> Self { self.spec.groups = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn groups(mut self, v: Vec<SidebarNavGroup>) -> Self {
+        self.spec.groups = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-    pub fn on_select(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_select = Some(Rc::new(handler));
         self
     }
@@ -83,7 +102,7 @@ impl IntoElement for SidebarNav {
                 rem_to_px(0.625),
                 rem_to_px(0.5),
                 rem_to_px(0.3125),
-                0.2_f32,  // letter-spacing em
+                0.2_f32, // letter-spacing em
                 rem_to_px(0.125),
             ),
             ControlDensity::Default => (

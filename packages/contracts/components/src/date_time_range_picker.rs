@@ -1,4 +1,7 @@
-use crate::types::{CalendarWeekStart, ControlDensity, ControlSize, DateTimeRangeValue, DateTimeValue, SemanticControlSizeRole};
+use crate::types::{
+    CalendarWeekStart, ControlDensity, ControlSize, DateTimeRangeValue, DateTimeValue,
+    SemanticControlSizeRole,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DateTimeRangePickerSpec {

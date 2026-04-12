@@ -1,21 +1,31 @@
-use gpui::*;
-use poodle_specs::{DateTimeZonePickerSpec, EyebrowSpec};
-use poodle_gpui_components::{DateTimeZonePicker, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{DateTimeZonePicker, Eyebrow};
+use poodle_specs::{DateTimeZonePickerSpec, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     let is_open = state.specimens.is_on("dtz-picker-open");
 
-    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(320.0))
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child(
                     DateTimeZonePicker::from_spec(
                         DateTimeZonePickerSpec::new()
@@ -27,35 +37,43 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
                         this.state.specimens.toggle("dtz-picker-open");
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- With default value ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With default value"), theme))
-                .child(
-                    DateTimeZonePicker::from_spec(
-                        DateTimeZonePickerSpec::new()
-                            .with_value("2026-03-23T19:30:00")
-                            .with_time_zone("Europe/London"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With default value"),
+                    theme,
+                ))
+                .child(DateTimeZonePicker::from_spec(
+                    DateTimeZonePickerSpec::new()
+                        .with_value("2026-03-23T19:30:00")
+                        .with_time_zone("Europe/London"),
+                    theme,
+                )),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
-                .child(
-                    DateTimeZonePicker::from_spec(
-                        DateTimeZonePickerSpec::new()
-                            .with_value("2026-01-01T00:00:00")
-                            .with_time_zone("UTC")
-                            .with_disabled(true),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
+                .child(DateTimeZonePicker::from_spec(
+                    DateTimeZonePickerSpec::new()
+                        .with_value("2026-01-01T00:00:00")
+                        .with_time_zone("UTC")
+                        .with_disabled(true),
+                    theme,
+                )),
         )
         .into_any_element();
 

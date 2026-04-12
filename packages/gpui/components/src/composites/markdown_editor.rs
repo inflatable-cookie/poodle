@@ -1,12 +1,15 @@
 //! MarkdownEditor — markdown editing with preview backed by MarkdownEditorSpec.
 
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
+use crate::primitives::Icon;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::MarkdownEditorSpec;
 use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct MarkdownEditor {
     spec: MarkdownEditorSpec,
@@ -17,29 +20,55 @@ pub struct MarkdownEditor {
 
 impl std::ops::Deref for MarkdownEditor {
     type Target = MarkdownEditorSpec;
-    fn deref(&self) -> &MarkdownEditorSpec { &self.spec }
+    fn deref(&self) -> &MarkdownEditorSpec {
+        &self.spec
+    }
 }
 
 impl MarkdownEditor {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MarkdownEditorSpec::new(), theme: theme.clone(), on_change: None, on_mode_change: None }
+        Self {
+            spec: MarkdownEditorSpec::new(),
+            theme: theme.clone(),
+            on_change: None,
+            on_mode_change: None,
+        }
     }
     pub fn from_spec(spec: MarkdownEditorSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None, on_mode_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+            on_mode_change: None,
+        }
     }
 
     /// Called when the markdown content changes.
     pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
-        self.on_change = Some(Box::new(handler)); self
+        self.on_change = Some(Box::new(handler));
+        self
     }
 
     /// Called when the editing mode changes (edit/split/preview).
-    pub fn on_mode_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
-        self.on_mode_change = Some(Box::new(handler)); self
+    pub fn on_mode_change(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_mode_change = Some(Box::new(handler));
+        self
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for MarkdownEditor {
@@ -64,21 +93,31 @@ impl IntoElement for MarkdownEditor {
         let active_bg = resolve_color(&self.theme, "color.bg.active");
         let body_size = px(font_size);
 
-        let display = if self.spec.value.is_empty() { self.spec.placeholder.as_deref().unwrap_or("Type here...") } else { &self.spec.value };
-        let color = if self.spec.value.is_empty() { muted } else { text_color };
+        let display = if self.spec.value.is_empty() {
+            self.spec.placeholder.as_deref().unwrap_or("Type here...")
+        } else {
+            &self.spec.value
+        };
+        let color = if self.spec.value.is_empty() {
+            muted
+        } else {
+            text_color
+        };
 
         // Helper: toolbar icon button
         let toolbar_btn = |icon_name: &str, theme: &GpuiThemeProvider| -> Div {
             div()
-                .flex().items_center().justify_center()
-                .w(px(28.0)).h(px(24.0)).rounded(radius_control)
+                .flex()
+                .items_center()
+                .justify_center()
+                .w(px(28.0))
+                .h(px(24.0))
+                .rounded(radius_control)
                 .cursor(CursorStyle::PointingHand)
                 .hover(|s| s.bg(hover_bg))
                 .child(
-                    Icon::from_spec(
-                        IconSpec::new(icon_name).with_size(IconSize::Sm),
-                        theme,
-                    ).with_color(muted)
+                    Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
+                        .with_color(muted),
                 )
         };
 
@@ -86,13 +125,21 @@ impl IntoElement for MarkdownEditor {
         let on_mode_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_mode_change.map(|h| std::rc::Rc::from(h));
 
-        let min_h = self.spec.min_height.as_deref()
+        let min_h = self
+            .spec
+            .min_height
+            .as_deref()
             .and_then(|v| v.trim_end_matches("px").parse::<f32>().ok())
             .unwrap_or(200.0);
 
         let mut el = div()
-            .bg(fill).border_1().border_color(border).rounded(radius)
-            .flex().flex_col().min_h(px(min_h))
+            .bg(fill)
+            .border_1()
+            .border_color(border)
+            .rounded(radius)
+            .flex()
+            .flex_col()
+            .min_h(px(min_h))
             .overflow_hidden();
 
         let mode = self.spec.mode.as_str();
@@ -100,17 +147,20 @@ impl IntoElement for MarkdownEditor {
         let is_preview = mode == "preview" || mode == "split";
 
         // Toolbar separator
-        let separator = || -> Div {
-            div().w(px(1.0)).h(px(16.0)).bg(border).mx(gap_sm)
-        };
+        let separator = || -> Div { div().w(px(1.0)).h(px(16.0)).bg(border).mx(gap_sm) };
 
         // Helper: mode switcher button
-        let mode_btn = |label: &'static str, is_active: bool, mode_val: &'static str,
-                        handler: &Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>| -> Stateful<Div> {
+        let mode_btn = |label: &'static str,
+                        is_active: bool,
+                        mode_val: &'static str,
+                        handler: &Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>|
+         -> Stateful<Div> {
             let id = SharedString::from(format!("poodle-md-mode-{}", mode_val));
             let mut btn = div()
                 .id(id)
-                .px(gap_sm).py(px(2.0)).rounded(radius_control)
+                .px(gap_sm)
+                .py(px(2.0))
+                .rounded(radius_control)
                 .text_size(label_size)
                 .cursor(CursorStyle::PointingHand)
                 .child(label.to_string());
@@ -133,9 +183,16 @@ impl IntoElement for MarkdownEditor {
 
         // Toolbar
         el = el.child(
-            div().bg(toolbar_fill).px(gap_sm).py(px(4.0))
-                .flex().flex_row().items_center().gap(px(2.0))
-                .border_b_1().border_color(border)
+            div()
+                .bg(toolbar_fill)
+                .px(gap_sm)
+                .py(px(4.0))
+                .flex()
+                .flex_row()
+                .items_center()
+                .gap(px(2.0))
+                .border_b_1()
+                .border_color(border)
                 // Text formatting icons
                 .child(toolbar_btn("bold", &self.theme))
                 .child(toolbar_btn("italic", &self.theme))
@@ -151,13 +208,22 @@ impl IntoElement for MarkdownEditor {
                 .child(div().flex_grow())
                 // Mode switcher segment
                 .child(
-                    div().flex().flex_row().gap(px(2.0))
-                        .px(px(2.0)).py(px(2.0))
+                    div()
+                        .flex()
+                        .flex_row()
+                        .gap(px(2.0))
+                        .px(px(2.0))
+                        .py(px(2.0))
                         .rounded(radius_control)
                         .child(mode_btn("Edit", mode == "edit", "edit", &on_mode_rc))
                         .child(mode_btn("Split", mode == "split", "split", &on_mode_rc))
-                        .child(mode_btn("Preview", mode == "preview", "preview", &on_mode_rc))
-                )
+                        .child(mode_btn(
+                            "Preview",
+                            mode == "preview",
+                            "preview",
+                            &on_mode_rc,
+                        )),
+                ),
         );
 
         // Content area: edit pane, preview pane, or both (split)
@@ -168,8 +234,12 @@ impl IntoElement for MarkdownEditor {
             let mut editor_pane = div()
                 .id("poodle-md-editor-pane")
                 .focusable()
-                .px(px(pad_x)).py(px(pad_y)).flex_grow().flex_basis(px(0.0))
-                .text_size(body_size).text_color(color)
+                .px(px(pad_x))
+                .py(px(pad_y))
+                .flex_grow()
+                .flex_basis(px(0.0))
+                .text_size(body_size)
+                .text_color(color)
                 .overflow_y_scroll()
                 .child(display.to_string());
 
@@ -180,23 +250,27 @@ impl IntoElement for MarkdownEditor {
                     self.on_change.map(|h| std::rc::Rc::from(h));
                 if let Some(ref handler) = on_change_rc {
                     let handler = handler.clone();
-                    editor_pane = editor_pane.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let key = event.keystroke.key.as_str();
-                        if key == "enter" {
-                            let new_val = format!("{}\n", current_value);
-                            handler(&new_val, window, cx);
-                        } else if key == "backspace" {
-                            let mut chars: Vec<char> = current_value.chars().collect();
-                            if !chars.is_empty() {
-                                chars.pop();
-                                let new_val: String = chars.into_iter().collect();
+                    editor_pane =
+                        editor_pane.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                            let key = event.keystroke.key.as_str();
+                            if key == "enter" {
+                                let new_val = format!("{}\n", current_value);
+                                handler(&new_val, window, cx);
+                            } else if key == "backspace" {
+                                let mut chars: Vec<char> = current_value.chars().collect();
+                                if !chars.is_empty() {
+                                    chars.pop();
+                                    let new_val: String = chars.into_iter().collect();
+                                    handler(&new_val, window, cx);
+                                }
+                            } else if key.len() == 1
+                                && !event.keystroke.modifiers.platform
+                                && !event.keystroke.modifiers.control
+                            {
+                                let new_val = format!("{}{}", current_value, key);
                                 handler(&new_val, window, cx);
                             }
-                        } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
-                            let new_val = format!("{}{}", current_value, key);
-                            handler(&new_val, window, cx);
-                        }
-                    });
+                        });
                 }
             }
 
@@ -207,9 +281,7 @@ impl IntoElement for MarkdownEditor {
 
         let content_area = if is_edit && is_preview {
             // Vertical divider between panes in split mode
-            content_area.child(
-                div().w(px(1.0)).bg(border)
-            )
+            content_area.child(div().w(px(1.0)).bg(border))
         } else {
             content_area
         };
@@ -221,11 +293,19 @@ impl IntoElement for MarkdownEditor {
             } else {
                 self.spec.value.clone()
             };
-            let preview_text_color = if self.spec.value.is_empty() { muted } else { text_color };
+            let preview_text_color = if self.spec.value.is_empty() {
+                muted
+            } else {
+                text_color
+            };
             let preview_pane = div()
                 .id("poodle-md-preview-pane")
-                .px(px(pad_x)).py(px(pad_y)).flex_grow().flex_basis(px(0.0))
-                .text_size(body_size).text_color(preview_text_color)
+                .px(px(pad_x))
+                .py(px(pad_y))
+                .flex_grow()
+                .flex_basis(px(0.0))
+                .text_size(body_size)
+                .text_color(preview_text_color)
                 .overflow_y_scroll()
                 .child(preview_content);
             content_area.child(preview_pane)

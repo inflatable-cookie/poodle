@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ColorPickerSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Parse a hex color string (e.g. "#ff0000") into an Hsla color.
@@ -32,12 +32,20 @@ pub struct ColorPicker {
 
 impl std::ops::Deref for ColorPicker {
     type Target = ColorPickerSpec;
-    fn deref(&self) -> &ColorPickerSpec { &self.spec }
+    fn deref(&self) -> &ColorPickerSpec {
+        &self.spec
+    }
 }
 
 impl ColorPicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ColorPickerSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None, on_change: None }
+        Self {
+            spec: ColorPickerSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_toggle: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: ColorPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -51,33 +59,54 @@ impl ColorPicker {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn show_alpha(mut self, v: bool) -> Self { self.spec.show_alpha = v; self }
-    pub fn swatches(mut self, v: Vec<String>) -> Self { self.spec.swatches = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn show_alpha(mut self, v: bool) -> Self {
+        self.spec.show_alpha = v;
+        self
+    }
+    pub fn swatches(mut self, v: Vec<String>) -> Self {
+        self.spec.swatches = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
@@ -106,10 +135,7 @@ impl IntoElement for ColorPicker {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
-        let current = spec
-            .current_value()
-            .unwrap_or("#000000")
-            .to_string();
+        let current = spec.current_value().unwrap_or("#000000").to_string();
         let current_color = parse_hex_color(&current);
 
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -133,7 +159,10 @@ impl IntoElement for ColorPicker {
             .border_color(border)
             .cursor_pointer()
             // Contract: focus ring on trigger
-            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            .focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
         if spec.is_disabled {
             trigger = trigger
@@ -203,10 +232,7 @@ impl IntoElement for ColorPicker {
 
             // Swatch grid — only rendered when caller supplies swatches
             if !spec.swatches.is_empty() {
-                let mut grid = div()
-                    .flex()
-                    .flex_wrap()
-                    .gap(stack_gap);
+                let mut grid = div().flex().flex_wrap().gap(stack_gap);
 
                 for (idx, color_hex) in spec.swatches.iter().enumerate() {
                     let swatch_color = parse_hex_color(color_hex);
@@ -257,7 +283,7 @@ impl IntoElement for ColorPicker {
                         .text_size(caption_size)
                         .font_weight(FontWeight::SEMIBOLD)
                         .text_color(text_secondary)
-                        .child(mode_label.to_string())
+                        .child(mode_label.to_string()),
                 );
 
                 let hex_id = SharedString::from(format!(
@@ -294,7 +320,8 @@ impl IntoElement for ColorPicker {
                         let key = event.keystroke.key.as_str();
                         if key == "backspace" {
                             let mut chars: Vec<char> = current_hex.chars().collect();
-                            if chars.len() > 1 { // keep at least "#"
+                            if chars.len() > 1 {
+                                // keep at least "#"
                                 chars.pop();
                                 let new_val: String = chars.into_iter().collect();
                                 change_handler(&new_val, window, cx);

@@ -23,12 +23,20 @@ pub struct TabStrip {
 
 impl std::ops::Deref for TabStrip {
     type Target = TabStripSpec;
-    fn deref(&self) -> &TabStripSpec { &self.spec }
+    fn deref(&self) -> &TabStripSpec {
+        &self.spec
+    }
 }
 
 impl TabStrip {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TabStripSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_change: None, on_close: None }
+        Self {
+            spec: TabStripSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_change: None,
+            on_close: None,
+        }
     }
 
     pub fn from_spec(spec: TabStripSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,30 +50,42 @@ impl TabStrip {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<TabStripItem>) -> Self { self.spec.items = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
-    pub fn reorderable(mut self, v: bool) -> Self { self.spec.is_reorderable = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn items(mut self, v: Vec<TabStripItem>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn orientation(mut self, v: Orientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn reorderable(mut self, v: bool) -> Self {
+        self.spec.is_reorderable = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
 
-    pub fn on_close(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_close(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_close = Some(std::rc::Rc::new(handler));
         self
     }
@@ -121,18 +141,16 @@ impl IntoElement for TabStrip {
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 // Focus ring
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
 
             if is_active {
                 if is_vertical {
-                    tab = tab
-                        .text_color(accent)
-                        .bg(accent.opacity(0.08));
+                    tab = tab.text_color(accent).bg(accent.opacity(0.08));
                 } else {
-                    tab = tab
-                        .text_color(accent)
-                        .border_b_1()
-                        .border_color(accent);
+                    tab = tab.text_color(accent).border_b_1().border_color(accent);
                 }
             } else {
                 tab = tab.text_color(text_secondary);
@@ -143,9 +161,7 @@ impl IntoElement for TabStrip {
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                tab = tab
-                    .cursor_pointer()
-                    .hover(|s| s.bg(hover_bg));
+                tab = tab.cursor_pointer().hover(|s| s.bg(hover_bg));
 
                 if let Some(ref handler) = self.on_change {
                     let handler = handler.clone();
@@ -159,13 +175,18 @@ impl IntoElement for TabStrip {
                     let tvs = tab_values.clone();
                     let current_idx = idx;
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                            Some((current_idx + 1) % tvs.len())
-                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                            Some(if current_idx == 0 { tvs.len() - 1 } else { current_idx - 1 })
-                        } else {
-                            None
-                        };
+                        let next_idx =
+                            if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                                Some((current_idx + 1) % tvs.len())
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                                Some(if current_idx == 0 {
+                                    tvs.len() - 1
+                                } else {
+                                    current_idx - 1
+                                })
+                            } else {
+                                None
+                            };
                         if let Some(i) = next_idx {
                             handler(&tvs[i], window, cx);
                         }
@@ -177,18 +198,22 @@ impl IntoElement for TabStrip {
 
             // Close button for closable tabs
             if item.is_closable {
-                let close_icon = Icon::from_spec(
-                    IconSpec::new("x").with_size(IconSize::Sm),
-                    theme,
-                ).with_color(text_secondary);
+                let close_icon = Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
+                    .with_color(text_secondary);
 
                 let mut close_btn = div()
-                    .id(SharedString::from(format!("{}-close-{}", self.id_prefix, item.value)))
+                    .id(SharedString::from(format!(
+                        "{}-close-{}",
+                        self.id_prefix, item.value
+                    )))
                     .ml(px(4.0))
                     .cursor_pointer()
-                    .w(px(20.0)).h(px(20.0))
+                    .w(px(20.0))
+                    .h(px(20.0))
                     .rounded(px(4.0))
-                    .flex().items_center().justify_center()
+                    .flex()
+                    .items_center()
+                    .justify_center()
                     .hover(|s| s.bg(hover_bg))
                     .child(close_icon);
 

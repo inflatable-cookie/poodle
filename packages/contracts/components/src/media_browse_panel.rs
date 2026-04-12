@@ -12,10 +12,18 @@ pub struct MediaBrowseItem {
 
 impl MediaBrowseItem {
     pub fn new(id: impl Into<String>, label: impl Into<String>, kind: impl Into<String>) -> Self {
-        Self { id: id.into(), label: label.into(), kind: kind.into(), meta: None }
+        Self {
+            id: id.into(),
+            label: label.into(),
+            kind: kind.into(),
+            meta: None,
+        }
     }
 
-    pub fn with_meta(mut self, meta: impl Into<String>) -> Self { self.meta = Some(meta.into()); self }
+    pub fn with_meta(mut self, meta: impl Into<String>) -> Self {
+        self.meta = Some(meta.into());
+        self
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -30,12 +38,26 @@ pub struct MediaBrowsePanelSpec {
 }
 
 impl MediaBrowsePanelSpec {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    pub fn with_items(mut self, items: Vec<MediaBrowseItem>) -> Self { self.items = items; self }
-    pub fn with_loading(mut self, v: bool) -> Self { self.loading = v; self }
-    pub fn with_error(mut self, v: impl Into<String>) -> Self { self.error = Some(v.into()); self }
-    pub fn with_has_more(mut self, v: bool) -> Self { self.has_more = v; self }
+    pub fn with_items(mut self, items: Vec<MediaBrowseItem>) -> Self {
+        self.items = items;
+        self
+    }
+    pub fn with_loading(mut self, v: bool) -> Self {
+        self.loading = v;
+        self
+    }
+    pub fn with_error(mut self, v: impl Into<String>) -> Self {
+        self.error = Some(v.into());
+        self
+    }
+    pub fn with_has_more(mut self, v: bool) -> Self {
+        self.has_more = v;
+        self
+    }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = size;

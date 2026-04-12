@@ -1,12 +1,12 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::ShellStatusBarSpec;
-use poodle_gpui_components::{StatusBar, Eyebrow};
-use poodle_specs::{StatusIndicatorSpec, StatusTone, EyebrowSpec};
-use poodle_gpui_components::StatusIndicator;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::StatusIndicator;
+use poodle_gpui_components::{Eyebrow, StatusBar};
+use poodle_specs::ShellStatusBarSpec;
+use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -19,42 +19,63 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let mut error_indicator = StatusIndicatorSpec::new().with_status(StatusTone::Success);
     error_indicator.label = Some("0 errors".to_string());
 
-    let status_spec = ShellStatusBarSpec::new()
-        .with_summary("Ready");
+    let status_spec = ShellStatusBarSpec::new().with_summary("Ready");
 
     let meta_item = |text: &str| {
-        div().text_xs().text_color(color_to_hsla(text_secondary)).child(text.to_string())
+        div()
+            .text_xs()
+            .text_color(color_to_hsla(text_secondary))
+            .child(text.to_string())
     };
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Default with leading/trailing ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child(
                     StatusBar::from_spec(status_spec, theme)
                         .with_leading_items(
-                            div().flex().items_center().gap(px(8.0))
+                            div()
+                                .flex()
+                                .items_center()
+                                .gap(px(8.0))
                                 .child(StatusIndicator::from_spec(branch_indicator, theme))
-                                .child(StatusIndicator::from_spec(error_indicator, theme))
+                                .child(StatusIndicator::from_spec(error_indicator, theme)),
                         )
                         .with_trailing_items(
-                            div().flex().items_center().gap(px(8.0))
+                            div()
+                                .flex()
+                                .items_center()
+                                .gap(px(8.0))
                                 .child(meta_item("Ln 42, Col 18"))
                                 .child(meta_item("UTF-8"))
-                                .child(meta_item("TypeScript"))
-                        )
-                )
+                                .child(meta_item("TypeScript")),
+                        ),
+                ),
         )
         // --- Summary only ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Summary only"), theme))
-                .child(
-                    StatusBar::from_spec(
-                        ShellStatusBarSpec::new().with_summary("3 items selected"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Summary only"),
+                    theme,
+                ))
+                .child(StatusBar::from_spec(
+                    ShellStatusBarSpec::new().with_summary("3 items selected"),
+                    theme,
+                )),
         )
 }

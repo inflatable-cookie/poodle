@@ -17,12 +17,19 @@ pub struct Switch {
 
 impl std::ops::Deref for Switch {
     type Target = SwitchSpec;
-    fn deref(&self) -> &SwitchSpec { &self.spec }
+    fn deref(&self) -> &SwitchSpec {
+        &self.spec
+    }
 }
 
 impl Switch {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SwitchSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None }
+        Self {
+            spec: SwitchSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: SwitchSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,29 +42,65 @@ impl Switch {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn checked(mut self, v: bool) -> Self { self.spec.checked = Some(v); self }
-    pub fn default_checked(mut self, v: bool) -> Self { self.spec.default_checked = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn read_only(mut self, v: bool) -> Self { self.spec.is_read_only = v; self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn left_label(mut self, v: impl Into<String>) -> Self { self.spec.left_label = Some(v.into()); self }
-    pub fn right_label(mut self, v: impl Into<String>) -> Self { self.spec.right_label = Some(v.into()); self }
-    pub fn left_tone(mut self, v: SwitchTone) -> Self { self.spec.left_tone = v; self }
-    pub fn right_tone(mut self, v: SwitchTone) -> Self { self.spec.right_tone = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn checked(mut self, v: bool) -> Self {
+        self.spec.checked = Some(v);
+        self
+    }
+    pub fn default_checked(mut self, v: bool) -> Self {
+        self.spec.default_checked = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn read_only(mut self, v: bool) -> Self {
+        self.spec.is_read_only = v;
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn left_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.left_label = Some(v.into());
+        self
+    }
+    pub fn right_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.right_label = Some(v.into());
+        self
+    }
+    pub fn left_tone(mut self, v: SwitchTone) -> Self {
+        self.spec.left_tone = v;
+        self
+    }
+    pub fn right_tone(mut self, v: SwitchTone) -> Self {
+        self.spec.right_tone = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -90,10 +133,7 @@ impl IntoElement for Switch {
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-switch-{}", suffix)
         } else {
-            format!(
-                "poodle-switch-{}",
-                spec.label.as_deref().unwrap_or("anon")
-            )
+            format!("poodle-switch-{}", spec.label.as_deref().unwrap_or("anon"))
         };
 
         // Svelte: track = calc(icon-default * 2 + 0.125rem) wide × calc(icon-default + 0.25rem) tall
@@ -102,14 +142,18 @@ impl IntoElement for Switch {
         let icon_default = resolve_px(theme, "size.icon.md");
         let track_w = (icon_default * 2.0 + px(2.0)) * scale;
         let track_h = (icon_default + px(4.0)) * scale;
-        let track_radius = track_h / 2.0;            // pill
+        let track_radius = track_h / 2.0; // pill
         let track_padding = px(2.0 * scale);
 
         let thumb_size = (icon_default - px(2.0)) * scale;
-        let thumb_radius = thumb_size / 2.0;          // circle
+        let thumb_radius = thumb_size / 2.0; // circle
 
         // Thumb travel = thumb_size distance
-        let knob_offset = if is_checked { thumb_size + track_padding } else { track_padding };
+        let knob_offset = if is_checked {
+            thumb_size + track_padding
+        } else {
+            track_padding
+        };
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
 
         // Svelte: off-track = text-primary 18% + surface, on-track = accent 24% + surface.
@@ -155,7 +199,11 @@ impl IntoElement for Switch {
         };
 
         // Contract: checked thumb = accent-base (or tone), unchecked = text-primary (or tone)
-        let knob_color = if is_checked { on_tone_color } else { off_tone_color };
+        let knob_color = if is_checked {
+            on_tone_color
+        } else {
+            off_tone_color
+        };
 
         // Contract: track inset shadow = inset 0 0 0 1px white/8%
         let inset_shadow_color = hsla(0.0, 0.0, 1.0, 0.08);
@@ -183,14 +231,12 @@ impl IntoElement for Switch {
                     .rounded(thumb_radius)
                     .bg(knob_color)
                     // Svelte: 0 0.125rem 0.5rem color-mix(black 18%, transparent)
-                    .shadow(vec![
-                        gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.18),
-                            offset: point(px(0.0), px(2.0)),
-                            blur_radius: px(8.0),
-                            spread_radius: px(0.0),
-                        },
-                    ])
+                    .shadow(vec![gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.18),
+                        offset: point(px(0.0), px(2.0)),
+                        blur_radius: px(8.0),
+                        spread_radius: px(0.0),
+                    }])
                     .absolute()
                     .top(track_padding)
                     .left(knob_offset),
@@ -203,10 +249,15 @@ impl IntoElement for Switch {
             .flex()
             .items_center()
             .gap(inline_gap)
-            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            .focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
         if spec.is_disabled {
-            row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+            row = row
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         } else if spec.is_read_only {
             row = row.cursor_default();
         } else {

@@ -1,15 +1,26 @@
 use gpui::*;
-use poodle_specs::DetailSectionSpec;
-use poodle_specs::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
-use poodle_gpui_components::{DetailItem, DetailSection, Button, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Button, DetailItem, DetailSection, Eyebrow};
+use poodle_specs::DetailSectionSpec;
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlSize, DetailItemLayout, DetailItemSpec, EyebrowSpec,
+};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- With title and rows ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With title and rows"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With title and rows"),
+                    theme,
+                ))
                 .child(
                     DetailSection::from_spec(
                         DetailSectionSpec::new()
@@ -18,53 +29,88 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_body(
-                        div().flex().flex_col()
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Name").with_value("Poodle Design System"), theme))
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Owner").with_value("Clay + Aura"), theme))
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Created").with_value("March 2025"), theme))
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Status").with_value("Active"), theme))
-                    )
-                )
+                        div()
+                            .flex()
+                            .flex_col()
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Name").with_value("Poodle Design System"),
+                                theme,
+                            ))
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Owner").with_value("Clay + Aura"),
+                                theme,
+                            ))
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Created").with_value("March 2025"),
+                                theme,
+                            ))
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Status").with_value("Active"),
+                                theme,
+                            )),
+                    ),
+                ),
         )
         // --- With actions ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With actions"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With actions"),
+                    theme,
+                ))
                 .child(
-                    DetailSection::from_spec(
-                        DetailSectionSpec::new()
-                            .with_title("Billing"),
-                        theme,
-                    )
-                    .with_actions(
-                        Button::from_spec(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Secondary)
-                                .with_size(ControlSize::Sm)
-                                .with_label("Edit"),
-                            theme,
-                        ).with_id("ds-edit")
-                    )
-                    .with_body(
-                        div().flex().flex_col()
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Plan").with_value("Pro"), theme))
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Billing cycle").with_value("Monthly"), theme))
-                            .child(DetailItem::from_spec(DetailItemSpec::new("Next invoice").with_value("April 1, 2026"), theme))
-                    )
-                )
+                    DetailSection::from_spec(DetailSectionSpec::new().with_title("Billing"), theme)
+                        .with_actions(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_size(ControlSize::Sm)
+                                    .with_label("Edit"),
+                                theme,
+                            )
+                            .with_id("ds-edit"),
+                        )
+                        .with_body(
+                            div()
+                                .flex()
+                                .flex_col()
+                                .child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Plan").with_value("Pro"),
+                                    theme,
+                                ))
+                                .child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Billing cycle").with_value("Monthly"),
+                                    theme,
+                                ))
+                                .child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Next invoice").with_value("April 1, 2026"),
+                                    theme,
+                                )),
+                        ),
+                ),
         )
         // --- DetailItem with description ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("DetailItem with description"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("DetailItem with description"),
+                    theme,
+                ))
                 .child(
                     DetailSection::from_spec(
-                        DetailSectionSpec::new()
-                            .with_title("Configuration"),
+                        DetailSectionSpec::new().with_title("Configuration"),
                         theme,
                     )
                     .with_body(
-                        div().flex().flex_col()
+                        div()
+                            .flex()
+                            .flex_col()
                             .child(DetailItem::from_spec(
                                 DetailItemSpec::new("API endpoint")
                                     .with_value("https://api.example.com/v2")
@@ -77,14 +123,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_value("1,000 req/min")
                                     .with_description("Maximum requests per minute."),
                                 theme,
-                            ))
-                    )
-                )
+                            )),
+                    ),
+                ),
         )
         // --- Two-column details ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Two-column details"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Two-column details"),
+                    theme,
+                ))
                 .child(
                     DetailSection::from_spec(
                         DetailSectionSpec::new()
@@ -94,20 +146,43 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_body(
-                        div().flex().flex_wrap().gap(px(4.0))
-                            .child(div().w(px(192.0)).child(
-                                DetailItem::from_spec(DetailItemSpec::new("Route").with_value("local-brokered").with_layout(DetailItemLayout::Stacked), theme)
-                            ))
-                            .child(div().w(px(192.0)).child(
-                                DetailItem::from_spec(DetailItemSpec::new("Posture").with_value("aura-local-brokered").with_layout(DetailItemLayout::Stacked), theme)
-                            ))
-                            .child(div().w(px(192.0)).child(
-                                DetailItem::from_spec(DetailItemSpec::new("Authority").with_value("local").with_layout(DetailItemLayout::Stacked), theme)
-                            ))
-                            .child(div().w(px(192.0)).child(
-                                DetailItem::from_spec(DetailItemSpec::new("Displays").with_value("2").with_layout(DetailItemLayout::Stacked), theme)
-                            ))
-                    )
-                )
+                        div()
+                            .flex()
+                            .flex_wrap()
+                            .gap(px(4.0))
+                            .child(
+                                div().w(px(192.0)).child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Route")
+                                        .with_value("local-brokered")
+                                        .with_layout(DetailItemLayout::Stacked),
+                                    theme,
+                                )),
+                            )
+                            .child(
+                                div().w(px(192.0)).child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Posture")
+                                        .with_value("aura-local-brokered")
+                                        .with_layout(DetailItemLayout::Stacked),
+                                    theme,
+                                )),
+                            )
+                            .child(
+                                div().w(px(192.0)).child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Authority")
+                                        .with_value("local")
+                                        .with_layout(DetailItemLayout::Stacked),
+                                    theme,
+                                )),
+                            )
+                            .child(
+                                div().w(px(192.0)).child(DetailItem::from_spec(
+                                    DetailItemSpec::new("Displays")
+                                        .with_value("2")
+                                        .with_layout(DetailItemLayout::Stacked),
+                                    theme,
+                                )),
+                            ),
+                    ),
+                ),
         )
 }

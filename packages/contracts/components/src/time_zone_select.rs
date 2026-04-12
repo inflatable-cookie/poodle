@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TimeZoneSelectSpec {
@@ -52,9 +52,7 @@ impl TimeZoneSelectSpec {
     }
 
     pub fn trigger_text(&self) -> Option<&str> {
-        self.value
-            .as_deref()
-            .or(self.placeholder.as_deref())
+        self.value.as_deref().or(self.placeholder.as_deref())
     }
 
     pub fn border_token(&self) -> &'static str {

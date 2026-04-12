@@ -3,7 +3,9 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec, RemediationAction};
+use poodle_specs::{
+    MediaKind, MediaPreviewSpec, MediaState, MediaThumbnailSpec, RemediationAction,
+};
 
 use crate::composites::MediaThumbnail;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -21,7 +23,9 @@ pub struct MediaPreview {
 
 impl std::ops::Deref for MediaPreview {
     type Target = MediaPreviewSpec;
-    fn deref(&self) -> &MediaPreviewSpec { &self.spec }
+    fn deref(&self) -> &MediaPreviewSpec {
+        &self.spec
+    }
 }
 
 impl MediaPreview {
@@ -44,18 +48,50 @@ impl MediaPreview {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn kind(mut self, v: MediaKind) -> Self { self.spec.kind = v; self }
-    pub fn state(mut self, v: MediaState) -> Self { self.spec.state = v; self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn metadata(mut self, v: Vec<String>) -> Self { self.spec.metadata = v; self }
-    pub fn footer_actions(mut self, v: Vec<RemediationAction>) -> Self { self.spec.footer_actions = v; self }
-    pub fn aspect_ratio(mut self, v: poodle_specs::AspectRatio) -> Self { self.spec.aspect_ratio = v; self }
-    pub fn badge(mut self, v: impl Into<String>) -> Self { self.spec.badge = Some(v.into()); self }
-    pub fn thumbnail_meta(mut self, v: impl Into<String>) -> Self { self.spec.thumbnail_meta = Some(v.into()); self }
-    pub fn state_title(mut self, v: impl Into<String>) -> Self { self.spec.state_title = Some(v.into()); self }
-    pub fn state_message(mut self, v: impl Into<String>) -> Self { self.spec.state_message = Some(v.into()); self }
-
+    pub fn kind(mut self, v: MediaKind) -> Self {
+        self.spec.kind = v;
+        self
+    }
+    pub fn state(mut self, v: MediaState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn metadata(mut self, v: Vec<String>) -> Self {
+        self.spec.metadata = v;
+        self
+    }
+    pub fn footer_actions(mut self, v: Vec<RemediationAction>) -> Self {
+        self.spec.footer_actions = v;
+        self
+    }
+    pub fn aspect_ratio(mut self, v: poodle_specs::AspectRatio) -> Self {
+        self.spec.aspect_ratio = v;
+        self
+    }
+    pub fn badge(mut self, v: impl Into<String>) -> Self {
+        self.spec.badge = Some(v.into());
+        self
+    }
+    pub fn thumbnail_meta(mut self, v: impl Into<String>) -> Self {
+        self.spec.thumbnail_meta = Some(v.into());
+        self
+    }
+    pub fn state_title(mut self, v: impl Into<String>) -> Self {
+        self.spec.state_title = Some(v.into());
+        self
+    }
+    pub fn state_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.state_message = Some(v.into());
+        self
+    }
 
     pub fn with_media_content(mut self, content: impl IntoElement) -> Self {
         self.media_content = Some(content.into_any_element());
@@ -156,10 +192,7 @@ impl IntoElement for MediaPreview {
 
         // Metadata row
         if spec.thumbnail_meta.is_some() || !spec.metadata.is_empty() {
-            let mut meta_row = div()
-                .flex()
-                .items_center()
-                .gap(inline_gap);
+            let mut meta_row = div().flex().items_center().gap(inline_gap);
 
             let metadata_items = self
                 .spec

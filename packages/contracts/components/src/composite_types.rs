@@ -280,14 +280,19 @@ impl ParsedEmbed {
 
         if trimmed.starts_with('<') && trimmed.contains("iframe") {
             let src = extract_attribute(trimmed, "src");
-            let width = extract_attribute(trimmed, "width").and_then(|value| value.parse::<u32>().ok());
-            let height = extract_attribute(trimmed, "height").and_then(|value| value.parse::<u32>().ok());
+            let width =
+                extract_attribute(trimmed, "width").and_then(|value| value.parse::<u32>().ok());
+            let height =
+                extract_attribute(trimmed, "height").and_then(|value| value.parse::<u32>().ok());
 
             return Some(
-                Self::new("generic", src.clone().unwrap_or_else(|| trimmed.to_string()))
-                    .with_dimensions(width, height)
-                    .with_original_embed(trimmed)
-                    .with_original_url_opt(src),
+                Self::new(
+                    "generic",
+                    src.clone().unwrap_or_else(|| trimmed.to_string()),
+                )
+                .with_dimensions(width, height)
+                .with_original_embed(trimmed)
+                .with_original_url_opt(src),
             );
         }
 
@@ -312,15 +317,26 @@ fn extract_after(input: &str, needle: &str) -> Option<String> {
         .take_while(|ch| ch.is_ascii_alphanumeric() || *ch == '-' || *ch == '_')
         .collect();
 
-    if id.is_empty() { None } else { Some(id) }
+    if id.is_empty() {
+        None
+    } else {
+        Some(id)
+    }
 }
 
 fn extract_digits_after(input: &str, needle: &str) -> Option<String> {
     let start = input.find(needle)? + needle.len();
     let suffix = &input[start..];
-    let id: String = suffix.chars().take_while(|ch| ch.is_ascii_digit()).collect();
+    let id: String = suffix
+        .chars()
+        .take_while(|ch| ch.is_ascii_digit())
+        .collect();
 
-    if id.is_empty() { None } else { Some(id) }
+    if id.is_empty() {
+        None
+    } else {
+        Some(id)
+    }
 }
 
 fn extract_attribute(input: &str, attribute: &str) -> Option<String> {
@@ -339,7 +355,8 @@ fn extract_attribute(input: &str, attribute: &str) -> Option<String> {
 }
 
 fn is_probably_url(input: &str) -> bool {
-    (input.starts_with("http://") || input.starts_with("https://")) && !input.contains(char::is_whitespace)
+    (input.starts_with("http://") || input.starts_with("https://"))
+        && !input.contains(char::is_whitespace)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

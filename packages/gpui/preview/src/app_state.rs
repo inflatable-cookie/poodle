@@ -3,8 +3,8 @@
 //! Mirrors the Svelte preview app's state: theme, density, control size,
 //! appearance treatment, state probes, active section, and component selection.
 
-use std::collections::HashMap;
 use poodle_gpui::GpuiThemeProvider;
+use std::collections::HashMap;
 
 /// Which top-level section is active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -65,9 +65,7 @@ impl ThemePreset {
     pub fn build_theme(self) -> GpuiThemeProvider {
         match self {
             ThemePreset::Default => GpuiThemeProvider::new(),
-            ThemePreset::Dark => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK)
-            }
+            ThemePreset::Dark => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::DARK),
             ThemePreset::Light => {
                 GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::LIGHT)
             }
@@ -120,7 +118,13 @@ pub enum ControlSize {
 
 impl ControlSize {
     /// Order matches Svelte preview: xs, sm, md, lg, xl.
-    pub const ALL: &[ControlSize] = &[ControlSize::Xs, ControlSize::Sm, ControlSize::Md, ControlSize::Lg, ControlSize::Xl];
+    pub const ALL: &[ControlSize] = &[
+        ControlSize::Xs,
+        ControlSize::Sm,
+        ControlSize::Md,
+        ControlSize::Lg,
+        ControlSize::Xl,
+    ];
 
     pub fn label(self) -> &'static str {
         match self {
@@ -287,7 +291,8 @@ impl AppState {
         let appearance_treatment = AppearanceTreatment::System;
 
         // Build theme with density + control-size layered on top
-        let theme = preset.build_theme()
+        let theme = preset
+            .build_theme()
             .with_density(density.token_definition())
             .with_control_size(control_size.token_definition());
 

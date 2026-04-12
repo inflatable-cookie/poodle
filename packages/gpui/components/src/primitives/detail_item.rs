@@ -21,7 +21,9 @@ pub struct DetailItem {
 
 impl std::ops::Deref for DetailItem {
     type Target = DetailItemSpec;
-    fn deref(&self) -> &DetailItemSpec { &self.spec }
+    fn deref(&self) -> &DetailItemSpec {
+        &self.spec
+    }
 }
 
 impl DetailItem {
@@ -55,14 +57,34 @@ impl DetailItem {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn empty_text(mut self, v: impl Into<String>) -> Self { self.spec.empty_text = v.into(); self }
-    pub fn truncate_value(mut self, v: bool) -> Self { self.spec.truncate_value = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn presentation(mut self, v: DetailItemPresentation) -> Self { self.spec.presentation = v; self }
-
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = v.into();
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn empty_text(mut self, v: impl Into<String>) -> Self {
+        self.spec.empty_text = v.into();
+        self
+    }
+    pub fn truncate_value(mut self, v: bool) -> Self {
+        self.spec.truncate_value = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn presentation(mut self, v: DetailItemPresentation) -> Self {
+        self.spec.presentation = v;
+        self
+    }
 
     pub fn with_action(mut self, action: impl IntoElement) -> Self {
         self.action = Some(action.into_any_element());
@@ -90,11 +112,7 @@ impl IntoElement for DetailItem {
                     .child(self.spec.label.clone()),
             )
             .when_some(self.spec.description.as_ref(), |el, desc| {
-                el.child(
-                    div()
-                        .text_color(self.description_color)
-                        .child(desc.clone()),
-                )
+                el.child(div().text_color(self.description_color).child(desc.clone()))
             });
 
         // Inline layout: fixed label width; stacked: full width
@@ -123,9 +141,7 @@ impl IntoElement for DetailItem {
         // Surface presentation adds background, padding, and radius; Simple is plain
         let is_surface = self.spec.presentation == DetailItemPresentation::Surface;
 
-        let mut row = div()
-            .flex()
-            .gap(self.gap);
+        let mut row = div().flex().gap(self.gap);
 
         if is_surface {
             row = row
@@ -141,8 +157,7 @@ impl IntoElement for DetailItem {
             row = row.flex_row().items_center();
         }
 
-        row
-            .child(label_el)
+        row.child(label_el)
             .child(value_block)
             .when_some(self.action, |el, action| el.child(action))
             .into_any_element()

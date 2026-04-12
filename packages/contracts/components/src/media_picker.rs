@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MediaPickerSpec {

@@ -20,12 +20,18 @@ pub struct ScrollShell {
 
 impl std::ops::Deref for ScrollShell {
     type Target = ScrollShellSpec;
-    fn deref(&self) -> &ScrollShellSpec { &self.spec }
+    fn deref(&self) -> &ScrollShellSpec {
+        &self.spec
+    }
 }
 
 impl ScrollShell {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ScrollShellSpec::new(), theme: theme.clone(), children: Vec::new() }
+        Self {
+            spec: ScrollShellSpec::new(),
+            theme: theme.clone(),
+            children: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: ScrollShellSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,12 +43,26 @@ impl ScrollShell {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn direction(mut self, v: Direction) -> Self { self.spec.direction = v; self }
-    pub fn padding(mut self, v: PaddingScale) -> Self { self.spec.padding = v; self }
-    pub fn role(mut self, v: SurfaceRole) -> Self { self.spec.role = Some(v); self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn focusable(mut self, v: bool) -> Self { self.spec.is_focusable = v; self }
-
+    pub fn direction(mut self, v: Direction) -> Self {
+        self.spec.direction = v;
+        self
+    }
+    pub fn padding(mut self, v: PaddingScale) -> Self {
+        self.spec.padding = v;
+        self
+    }
+    pub fn role(mut self, v: SurfaceRole) -> Self {
+        self.spec.role = Some(v);
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn focusable(mut self, v: bool) -> Self {
+        self.spec.is_focusable = v;
+        self
+    }
 
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());
@@ -82,7 +102,10 @@ impl IntoElement for ScrollShell {
 
         // Focus ring for focusable shells
         if spec.is_focusable {
-            el = el.focusable().focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            el = el.focusable().focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
         }
 
         // Padding

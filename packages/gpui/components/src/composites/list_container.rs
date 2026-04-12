@@ -14,7 +14,11 @@ pub struct ListContainer {
 
 impl ListContainer {
     pub fn from_spec(spec: ListContainerSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), content: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            content: None,
+        }
     }
 
     pub fn with_content(mut self, content: impl IntoElement) -> Self {
@@ -76,23 +80,27 @@ impl IntoElement for ListContainer {
         // State-dependent content
         match spec.state {
             ListContainerState::Loading => {
-                let msg = spec.loading_message.as_deref().unwrap_or("Loading items...");
+                let msg = spec
+                    .loading_message
+                    .as_deref()
+                    .unwrap_or("Loading items...");
                 container = container.child(
-                    div().text_size(body_size).text_color(text_secondary)
-                        .child(msg.to_string())
+                    div()
+                        .text_size(body_size)
+                        .text_color(text_secondary)
+                        .child(msg.to_string()),
                 );
             }
             ListContainerState::Error => {
                 let title = spec.error_title.as_deref().unwrap_or("Unable to load list");
                 let danger = resolve_color(theme, "color.status.danger");
-                let mut block = div().flex().flex_col().gap(header_gap)
-                    .child(
-                        div()
-                            .text_size(body_size)
-                            .font_weight(FontWeight::MEDIUM)
-                            .text_color(danger)
-                            .child(title.to_string()),
-                    );
+                let mut block = div().flex().flex_col().gap(header_gap).child(
+                    div()
+                        .text_size(body_size)
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(danger)
+                        .child(title.to_string()),
+                );
                 if let Some(ref msg) = spec.error_message {
                     block = block.child(
                         div()
@@ -105,14 +113,13 @@ impl IntoElement for ListContainer {
             }
             ListContainerState::Empty => {
                 let title = spec.empty_title.as_deref().unwrap_or("Nothing here yet");
-                let mut block = div().flex().flex_col().gap(header_gap)
-                    .child(
-                        div()
-                            .text_size(body_size)
-                            .font_weight(FontWeight::MEDIUM)
-                            .text_color(text_primary)
-                            .child(title.to_string()),
-                    );
+                let mut block = div().flex().flex_col().gap(header_gap).child(
+                    div()
+                        .text_size(body_size)
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(text_primary)
+                        .child(title.to_string()),
+                );
                 if let Some(ref msg) = spec.empty_message {
                     block = block.child(
                         div()

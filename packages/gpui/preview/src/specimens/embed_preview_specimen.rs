@@ -1,8 +1,8 @@
 use gpui::*;
-use poodle_specs::{EmbedPreviewSpec, ParsedEmbed};
+use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{EmbedPreview, Eyebrow};
 use poodle_specs::EyebrowSpec;
-use poodle_gpui::GpuiThemeProvider;
+use poodle_specs::{EmbedPreviewSpec, ParsedEmbed};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0)).max_w(px(560.0))

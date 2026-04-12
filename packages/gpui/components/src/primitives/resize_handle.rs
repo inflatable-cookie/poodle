@@ -19,12 +19,18 @@ pub struct ResizeHandle {
 
 impl std::ops::Deref for ResizeHandle {
     type Target = ResizeHandleSpec;
-    fn deref(&self) -> &ResizeHandleSpec { &self.spec }
+    fn deref(&self) -> &ResizeHandleSpec {
+        &self.spec
+    }
 }
 
 impl ResizeHandle {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ResizeHandleSpec::new(), theme: theme.clone(), id_prefix: "poodle-resize".to_string() }
+        Self {
+            spec: ResizeHandleSpec::new(),
+            theme: theme.clone(),
+            id_prefix: "poodle-resize".to_string(),
+        }
     }
 
     pub fn from_spec(spec: ResizeHandleSpec, theme: &GpuiThemeProvider) -> Self {
@@ -36,12 +42,30 @@ impl ResizeHandle {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn aria_value_now(mut self, v: f32) -> Self { self.spec.aria_value_now = Some(v); self }
-    pub fn aria_value_min(mut self, v: f32) -> Self { self.spec.aria_value_min = v; self }
-    pub fn aria_value_max(mut self, v: f32) -> Self { self.spec.aria_value_max = v; self }
+    pub fn orientation(mut self, v: Orientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn aria_value_now(mut self, v: f32) -> Self {
+        self.spec.aria_value_now = Some(v);
+        self
+    }
+    pub fn aria_value_min(mut self, v: f32) -> Self {
+        self.spec.aria_value_min = v;
+        self
+    }
+    pub fn aria_value_max(mut self, v: f32) -> Self {
+        self.spec.aria_value_max = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -78,13 +102,24 @@ impl IntoElement for ResizeHandle {
             .justify_center()
             .flex_shrink_0()
             // Focus ring
-            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            .focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
         // Visual affordance: 2px line centered in hit target
         let line = if is_horizontal {
-            div().w(px(2.0)).h_full().rounded(px(999.0)).bg(idle_line_color)
+            div()
+                .w(px(2.0))
+                .h_full()
+                .rounded(px(999.0))
+                .bg(idle_line_color)
         } else {
-            div().w_full().h(px(2.0)).rounded(px(999.0)).bg(idle_line_color)
+            div()
+                .w_full()
+                .h(px(2.0))
+                .rounded(px(999.0))
+                .bg(idle_line_color)
         };
 
         if is_horizontal {

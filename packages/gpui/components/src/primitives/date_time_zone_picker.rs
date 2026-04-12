@@ -2,10 +2,16 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, DateTimeZonePickerSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, DateTimeZonePickerSpec, IconSize, IconSpec,
+    SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date-time-zone picker component backed by `DateTimeZonePickerSpec`.
@@ -17,12 +23,18 @@ pub struct DateTimeZonePicker {
 
 impl std::ops::Deref for DateTimeZonePicker {
     type Target = DateTimeZonePickerSpec;
-    fn deref(&self) -> &DateTimeZonePickerSpec { &self.spec }
+    fn deref(&self) -> &DateTimeZonePickerSpec {
+        &self.spec
+    }
 }
 
 impl DateTimeZonePicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DateTimeZonePickerSpec::new(), theme: theme.clone(), on_toggle: None }
+        Self {
+            spec: DateTimeZonePickerSpec::new(),
+            theme: theme.clone(),
+            on_toggle: None,
+        }
     }
 
     pub fn from_spec(spec: DateTimeZonePickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -34,18 +46,36 @@ impl DateTimeZonePicker {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn time_zone(mut self, v: impl Into<String>) -> Self { self.spec.time_zone = Some(v.into()); self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn time_zone(mut self, v: impl Into<String>) -> Self {
+        self.spec.time_zone = Some(v.into());
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
@@ -78,14 +108,8 @@ impl IntoElement for DateTimeZonePicker {
         let caption_size = resolve_px(theme, "typography.caption.size");
         let gap_md = resolve_px(theme, "space.inline.md");
 
-        let display_value = spec
-            .value
-            .as_deref()
-            .unwrap_or("Select date & time...");
-        let tz_display = spec
-            .time_zone
-            .as_deref()
-            .unwrap_or("");
+        let display_value = spec.value.as_deref().unwrap_or("Select date & time...");
+        let tz_display = spec.time_zone.as_deref().unwrap_or("");
         let is_placeholder = spec.value.is_none();
         let text_col = if is_placeholder {
             text_secondary
@@ -108,7 +132,12 @@ impl IntoElement for DateTimeZonePicker {
             .items_center()
             .gap(inline_gap)
             .text_size(body_size)
-            .child(div().flex_1().text_color(text_col).child(display_value.to_string()));
+            .child(
+                div()
+                    .flex_1()
+                    .text_color(text_col)
+                    .child(display_value.to_string()),
+            );
 
         if !tz_display.is_empty() {
             trigger = trigger.child(
@@ -120,14 +149,14 @@ impl IntoElement for DateTimeZonePicker {
         }
 
         trigger = trigger.child(
-            Icon::from_spec(
-                IconSpec::new("calendar").with_size(IconSize::Sm),
-                theme,
-            )
-            .with_color(icon_muted),
+            Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
+                .with_color(icon_muted),
         );
 
-        trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        trigger = trigger.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if spec.is_disabled {
             trigger = trigger
@@ -162,15 +191,9 @@ impl IntoElement for DateTimeZonePicker {
         let mut wrapper = div().flex().flex_col().gap(inline_gap).child(trigger);
 
         if spec.is_open {
-            let time_display = spec
-                .value
-                .as_deref()
-                .unwrap_or("--:--");
+            let time_display = spec.value.as_deref().unwrap_or("--:--");
 
-            let tz_overlay_display = spec
-                .time_zone
-                .as_deref()
-                .unwrap_or("Select timezone...");
+            let tz_overlay_display = spec.time_zone.as_deref().unwrap_or("Select timezone...");
             let tz_has_value = spec.time_zone.is_some();
 
             let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -235,7 +258,11 @@ impl IntoElement for DateTimeZonePicker {
                 .child(
                     div()
                         .text_size(body_size)
-                        .text_color(if tz_has_value { text_primary } else { text_secondary })
+                        .text_color(if tz_has_value {
+                            text_primary
+                        } else {
+                            text_secondary
+                        })
                         .child(tz_overlay_display.to_string()),
                 );
 

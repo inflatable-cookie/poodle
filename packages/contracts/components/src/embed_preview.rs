@@ -55,7 +55,10 @@ impl EmbedPreviewSpec {
     pub fn embed_url(&self) -> Option<String> {
         let parsed = self.parsed.as_ref()?;
         match parsed.provider.as_str() {
-            "youtube" => Some(format!("https://www.youtube-nocookie.com/embed/{}", parsed.id)),
+            "youtube" => Some(format!(
+                "https://www.youtube-nocookie.com/embed/{}",
+                parsed.id
+            )),
             "vimeo" => Some(format!("https://player.vimeo.com/video/{}", parsed.id)),
             _ => parsed.original_url.clone(),
         }

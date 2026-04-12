@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PageHeaderAlign {

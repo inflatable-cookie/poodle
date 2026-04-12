@@ -2,10 +2,15 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CallOutSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, StatusTone};
+use poodle_specs::{
+    CallOutSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole,
+    StatusTone,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI call-out component backed by `CallOutSpec`.
@@ -18,7 +23,9 @@ pub struct Callout {
 
 impl std::ops::Deref for Callout {
     type Target = CallOutSpec;
-    fn deref(&self) -> &CallOutSpec { &self.spec }
+    fn deref(&self) -> &CallOutSpec {
+        &self.spec
+    }
 }
 
 impl Callout {
@@ -41,17 +48,41 @@ impl Callout {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn tone(mut self, v: StatusTone) -> Self { self.spec.tone = v; self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn content(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
+    pub fn tone(mut self, v: StatusTone) -> Self {
+        self.spec.tone = v;
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn content(mut self, v: impl Into<String>) -> Self {
+        self.spec.content = Some(v.into());
+        self
+    }
 
     /// Alias for `content` — some contracts call it `message`.
-    pub fn message(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
+    pub fn message(mut self, v: impl Into<String>) -> Self {
+        self.spec.content = Some(v.into());
+        self
+    }
 
-    pub fn dismissible(mut self, v: bool) -> Self { self.is_dismissible = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn dismissible(mut self, v: bool) -> Self {
+        self.is_dismissible = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_dismiss(
         mut self,
@@ -106,12 +137,18 @@ impl IntoElement for Callout {
         //   Toned border: color-mix(tone 34%, border-default)
         let is_neutral = matches!(spec.tone, StatusTone::Neutral);
         let bg = if is_neutral {
-            Hsla { a: panel_bg.a * 0.94, ..panel_bg }
+            Hsla {
+                a: panel_bg.a * 0.94,
+                ..panel_bg
+            }
         } else {
             color_mix(tone_color, panel_bg, 0.10)
         };
         let border = if is_neutral {
-            Hsla { a: border_subtle.a * 0.88, ..border_subtle }
+            Hsla {
+                a: border_subtle.a * 0.88,
+                ..border_subtle
+            }
         } else {
             color_mix(tone_color, border_default, 0.34)
         };
@@ -129,7 +166,10 @@ impl IntoElement for Callout {
 
         // Icon column — Svelte: circular bg container 1.375rem (22px), surface at 78% opacity
         let icon_container_size = px(22.0);
-        let icon_bg = Hsla { a: surface_bg.a * 0.78, ..surface_bg };
+        let icon_bg = Hsla {
+            a: surface_bg.a * 0.78,
+            ..surface_bg
+        };
         el = el.child(
             div()
                 .flex_shrink_0()
@@ -141,11 +181,8 @@ impl IntoElement for Callout {
                 .items_center()
                 .justify_center()
                 .child(
-                    Icon::from_spec(
-                        IconSpec::new(icon_name).with_size(IconSize::Sm),
-                        theme,
-                    )
-                    .with_color(tone_color),
+                    Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
+                        .with_color(tone_color),
                 ),
         );
 
@@ -192,11 +229,8 @@ impl IntoElement for Callout {
                 .mr(px(-4.0))
                 .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
                 .child(
-                    Icon::from_spec(
-                        IconSpec::new("x").with_size(IconSize::Sm),
-                        theme,
-                    )
-                    .with_color(text_secondary),
+                    Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
+                        .with_color(text_secondary),
                 );
 
             if let Some(handler) = self.on_dismiss {

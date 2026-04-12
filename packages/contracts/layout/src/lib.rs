@@ -35,10 +35,7 @@ pub enum LayoutSizing {
     /// Fixed pixel size.
     Fixed(f32),
     /// Fill available space with min/max constraints.
-    Constrained {
-        min: Option<f32>,
-        max: Option<f32>,
-    },
+    Constrained { min: Option<f32>, max: Option<f32> },
 }
 
 impl Default for LayoutSizing {

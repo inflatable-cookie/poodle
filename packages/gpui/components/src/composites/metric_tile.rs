@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{MetricTileSpec, MetricTrend};
 use poodle_specs::{IconSize, IconSpec};
+use poodle_specs::{MetricTileSpec, MetricTrend};
 
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -19,11 +19,17 @@ pub struct MetricTile {
 
 impl std::ops::Deref for MetricTile {
     type Target = MetricTileSpec;
-    fn deref(&self) -> &MetricTileSpec { &self.spec }
+    fn deref(&self) -> &MetricTileSpec {
+        &self.spec
+    }
 }
 
 impl MetricTile {
-    pub fn new(label: impl Into<String>, value: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
+    pub fn new(
+        label: impl Into<String>,
+        value: impl Into<String>,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
         Self::from_spec(MetricTileSpec::new(label, value), theme)
     }
 
@@ -35,12 +41,30 @@ impl MetricTile {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = v.into(); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn trend(mut self, v: MetricTrend) -> Self { self.spec.trend = Some(v); self }
-    pub fn trend_label(mut self, v: impl Into<String>) -> Self { self.spec.trend_label = Some(v.into()); self }
-    pub fn sparkline(mut self, v: Vec<f32>) -> Self { self.spec.sparkline_data = v; self }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = v.into();
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = v.into();
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn trend(mut self, v: MetricTrend) -> Self {
+        self.spec.trend = Some(v);
+        self
+    }
+    pub fn trend_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.trend_label = Some(v.into());
+        self
+    }
+    pub fn sparkline(mut self, v: Vec<f32>) -> Self {
+        self.spec.sparkline_data = v;
+        self
+    }
 }
 
 impl IntoElement for MetricTile {
@@ -75,22 +99,21 @@ impl IntoElement for MetricTile {
             );
 
         // Value row — includes the trend arrow/label alongside the headline value.
-        let mut value_row = div()
-            .flex()
-            .items_baseline()
-            .gap(px(8.0))
-            .child(
-                div()
-                    .text_size(heading_size)
-                    .font_weight(FontWeight::BOLD)
-                    .line_height(relative(1.2))
-                    .text_color(value_color)
-                    .child(spec.value.clone()),
-            );
+        let mut value_row = div().flex().items_baseline().gap(px(8.0)).child(
+            div()
+                .text_size(heading_size)
+                .font_weight(FontWeight::BOLD)
+                .line_height(relative(1.2))
+                .text_color(value_color)
+                .child(spec.value.clone()),
+        );
 
         if let Some(trend) = spec.trend {
             let trend_color = resolve_color(theme, trend.color_token());
-            let trend_bg = Hsla { a: trend_color.a * 0.12, ..trend_color };
+            let trend_bg = Hsla {
+                a: trend_color.a * 0.12,
+                ..trend_color
+            };
 
             let mut trend_chip = div()
                 .flex()

@@ -15,12 +15,18 @@ pub struct Box {
 
 impl std::ops::Deref for Box {
     type Target = BoxSpec;
-    fn deref(&self) -> &BoxSpec { &self.spec }
+    fn deref(&self) -> &BoxSpec {
+        &self.spec
+    }
 }
 
 impl Box {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: BoxSpec::new(), theme: theme.clone(), children: Vec::new() }
+        Self {
+            spec: BoxSpec::new(),
+            theme: theme.clone(),
+            children: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: BoxSpec, theme: &GpuiThemeProvider) -> Self {
@@ -32,14 +38,34 @@ impl Box {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn padding(mut self, v: PaddingScale) -> Self { self.spec.padding = v; self }
-    pub fn width(mut self, v: Dimension) -> Self { self.spec.width = Some(v); self }
-    pub fn height(mut self, v: Dimension) -> Self { self.spec.height = Some(v); self }
-    pub fn min_width(mut self, v: Dimension) -> Self { self.spec.min_width = Some(v); self }
-    pub fn min_height(mut self, v: Dimension) -> Self { self.spec.min_height = Some(v); self }
-    pub fn overflow(mut self, v: Overflow) -> Self { self.spec.overflow = v; self }
-    pub fn role(mut self, v: impl Into<String>) -> Self { self.spec.role = Some(v.into()); self }
-
+    pub fn padding(mut self, v: PaddingScale) -> Self {
+        self.spec.padding = v;
+        self
+    }
+    pub fn width(mut self, v: Dimension) -> Self {
+        self.spec.width = Some(v);
+        self
+    }
+    pub fn height(mut self, v: Dimension) -> Self {
+        self.spec.height = Some(v);
+        self
+    }
+    pub fn min_width(mut self, v: Dimension) -> Self {
+        self.spec.min_width = Some(v);
+        self
+    }
+    pub fn min_height(mut self, v: Dimension) -> Self {
+        self.spec.min_height = Some(v);
+        self
+    }
+    pub fn overflow(mut self, v: Overflow) -> Self {
+        self.spec.overflow = v;
+        self
+    }
+    pub fn role(mut self, v: impl Into<String>) -> Self {
+        self.spec.role = Some(v.into());
+        self
+    }
 
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());

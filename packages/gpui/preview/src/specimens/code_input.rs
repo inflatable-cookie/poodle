@@ -1,29 +1,47 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{CodeInputSpec, EyebrowSpec};
-use poodle_gpui_components::{CodeInput, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{CodeInput, Eyebrow};
+use poodle_specs::{CodeInputSpec, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_primary = theme.resolve_color("color.text.primary");
 
-    let code_value = state.specimens.text.get("code-input-code").cloned()
+    let code_value = state
+        .specimens
+        .text
+        .get("code-input-code")
+        .cloned()
         .unwrap_or_default();
-    let pin_value = state.specimens.text.get("code-input-pin").cloned()
+    let pin_value = state
+        .specimens
+        .text
+        .get("code-input-pin")
+        .cloned()
         .unwrap_or_default();
     let completed = state.specimens.is_on("code-input-complete");
 
-    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(384.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(384.0))
         // --- 6-digit code ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("6-digit code"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("6-digit code"),
+                    theme,
+                ))
                 .child(
                     CodeInput::from_spec(
                         CodeInputSpec::new()
@@ -32,25 +50,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("code-input-code".to_string(), val.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("code-input-code".to_string(), val.to_string());
                         cx.notify();
                     }))
                     .on_complete(cx.listener(|this, _val: &str, _w, cx| {
-                        this.state.specimens.toggles.insert("code-input-complete".to_string(), true);
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("code-input-complete".to_string(), true);
                         cx.notify();
-                    }))
+                    })),
                 )
                 .child(
                     div()
                         .text_size(px(12.0))
-                        .text_color(color_to_hsla(if completed { text_primary } else { text_secondary }))
-                        .child(if completed { "Code complete!".to_string() } else { format!("Entered: {}", code_value) })
-                )
+                        .text_color(color_to_hsla(if completed {
+                            text_primary
+                        } else {
+                            text_secondary
+                        }))
+                        .child(if completed {
+                            "Code complete!".to_string()
+                        } else {
+                            format!("Entered: {}", code_value)
+                        }),
+                ),
         )
         // --- 4-digit masked ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("4-digit masked"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("4-digit masked"),
+                    theme,
+                ))
                 .child(
                     CodeInput::from_spec(
                         CodeInputSpec::new()
@@ -61,37 +99,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("code-input-pin".to_string(), val.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("code-input-pin".to_string(), val.to_string());
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- With error ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With error"), theme))
-                .child(
-                    CodeInput::from_spec(
-                        CodeInputSpec::new()
-                            .with_value("1234")
-                            .with_error("Invalid code — try again.")
-                            .with_aria_label("Code with error"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With error"),
+                    theme,
+                ))
+                .child(CodeInput::from_spec(
+                    CodeInputSpec::new()
+                        .with_value("1234")
+                        .with_error("Invalid code — try again.")
+                        .with_aria_label("Code with error"),
+                    theme,
+                )),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
-                .child(
-                    CodeInput::from_spec(
-                        CodeInputSpec::new()
-                            .with_value("123")
-                            .with_disabled(true),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
+                .child(CodeInput::from_spec(
+                    CodeInputSpec::new().with_value("123").with_disabled(true),
+                    theme,
+                )),
         )
         .into_any_element();
 

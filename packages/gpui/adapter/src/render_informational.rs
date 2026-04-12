@@ -7,9 +7,8 @@
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
     CalendarSpec, CodeSpec, ColorPickerSpec, DatePickerSpec, DateRangePickerSpec,
-    DateTimePickerSpec, DateTimeRangePickerSpec, DurationInputSpec, EyebrowSpec, FileUploadSpec,
-    PillSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
-    DateTimeZonePickerSpec,
+    DateTimePickerSpec, DateTimeRangePickerSpec, DateTimeZonePickerSpec, DurationInputSpec,
+    EyebrowSpec, FileUploadSpec, PillSpec, SplitButtonSpec, TimeAgoSpec, TimeZoneSelectSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -18,7 +17,12 @@ use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
 
 impl RenderComponent<CodeSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &CodeSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &CodeSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve code block fill color
@@ -45,7 +49,12 @@ impl RenderComponent<CodeSpec> for GpuiAdapter {
 
 impl RenderComponent<ColorPickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &ColorPickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &ColorPickerSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve border color
@@ -65,7 +74,12 @@ impl RenderComponent<ColorPickerSpec> for GpuiAdapter {
 
 impl RenderComponent<FileUploadSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &FileUploadSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &FileUploadSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve fill color
@@ -86,7 +100,12 @@ impl RenderComponent<FileUploadSpec> for GpuiAdapter {
 
 impl RenderComponent<EyebrowSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &EyebrowSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &EyebrowSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve text color
@@ -102,7 +121,12 @@ impl RenderComponent<EyebrowSpec> for GpuiAdapter {
 
 impl RenderComponent<PillSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &PillSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &PillSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve pill fill color
@@ -123,7 +147,12 @@ impl RenderComponent<PillSpec> for GpuiAdapter {
 
 impl RenderComponent<TimeAgoSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &TimeAgoSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &TimeAgoSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve text color
@@ -139,7 +168,12 @@ impl RenderComponent<TimeAgoSpec> for GpuiAdapter {
 
 impl RenderComponent<DurationInputSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &DurationInputSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &DurationInputSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve border color
@@ -156,7 +190,12 @@ impl RenderComponent<DurationInputSpec> for GpuiAdapter {
 
 impl RenderComponent<TimeZoneSelectSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &TimeZoneSelectSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &TimeZoneSelectSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve border color
@@ -173,7 +212,12 @@ impl RenderComponent<TimeZoneSelectSpec> for GpuiAdapter {
 
 impl RenderComponent<DateTimeZonePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &DateTimeZonePickerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &DateTimeZonePickerSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve border color
@@ -193,7 +237,12 @@ impl RenderComponent<DateTimeZonePickerSpec> for GpuiAdapter {
 
 impl RenderComponent<SplitButtonSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, spec: &SplitButtonSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        spec: &SplitButtonSpec,
+        style: &StyleDescriptor,
+        theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
         // Resolve fill color
@@ -219,7 +268,12 @@ impl RenderComponent<SplitButtonSpec> for GpuiAdapter {
 
 impl RenderComponent<CalendarSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, _spec: &CalendarSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        _spec: &CalendarSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("calendar", "CalendarSpec")
     }
@@ -227,7 +281,12 @@ impl RenderComponent<CalendarSpec> for GpuiAdapter {
 
 impl RenderComponent<DatePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, _spec: &DatePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        _spec: &DatePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("date-picker", "DatePickerSpec")
     }
@@ -235,7 +294,12 @@ impl RenderComponent<DatePickerSpec> for GpuiAdapter {
 
 impl RenderComponent<DateRangePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, _spec: &DateRangePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        _spec: &DateRangePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("date-range-picker", "DateRangePickerSpec")
     }
@@ -243,7 +307,12 @@ impl RenderComponent<DateRangePickerSpec> for GpuiAdapter {
 
 impl RenderComponent<DateTimePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, _spec: &DateTimePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        _spec: &DateTimePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("date-time-picker", "DateTimePickerSpec")
     }
@@ -251,7 +320,12 @@ impl RenderComponent<DateTimePickerSpec> for GpuiAdapter {
 
 impl RenderComponent<DateTimeRangePickerSpec> for GpuiAdapter {
     type Target = GpuiTarget;
-    fn render(&self, _spec: &DateTimeRangePickerSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> GpuiElementHandle {
+    fn render(
+        &self,
+        _spec: &DateTimeRangePickerSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("date-time-range-picker", "DateTimeRangePickerSpec")
     }
@@ -259,28 +333,127 @@ impl RenderComponent<DateTimeRangePickerSpec> for GpuiAdapter {
 
 #[cfg(test)]
 mod tests {
+    use crate::{theme::GpuiThemeProvider, GpuiAdapter};
     use poodle_adapter::RenderComponent;
     use poodle_specs::*;
     use poodle_style::StyleDescriptor;
-    use crate::{GpuiAdapter, theme::GpuiThemeProvider};
 
-    fn a() -> GpuiAdapter { GpuiAdapter::new(GpuiThemeProvider::default()) }
-    fn s() -> StyleDescriptor { StyleDescriptor::new() }
-    fn t() -> GpuiThemeProvider { GpuiThemeProvider::default() }
+    fn a() -> GpuiAdapter {
+        GpuiAdapter::new(GpuiThemeProvider::default())
+    }
+    fn s() -> StyleDescriptor {
+        StyleDescriptor::new()
+    }
+    fn t() -> GpuiThemeProvider {
+        GpuiThemeProvider::default()
+    }
 
-    #[test] fn code() { assert_eq!(a().render(&CodeSpec::new(), &s(), &t()).spec_type, "CodeSpec"); }
-    #[test] fn color_picker() { assert_eq!(a().render(&ColorPickerSpec::new(), &s(), &t()).spec_type, "ColorPickerSpec"); }
-    #[test] fn file_upload() { assert_eq!(a().render(&FileUploadSpec::new(), &s(), &t()).spec_type, "FileUploadSpec"); }
-    #[test] fn eyebrow() { assert_eq!(a().render(&EyebrowSpec::new(), &s(), &t()).spec_type, "EyebrowSpec"); }
-    #[test] fn pill() { assert_eq!(a().render(&PillSpec::new(), &s(), &t()).spec_type, "PillSpec"); }
-    #[test] fn time_ago() { assert_eq!(a().render(&TimeAgoSpec::new(), &s(), &t()).spec_type, "TimeAgoSpec"); }
-    #[test] fn duration_input() { assert_eq!(a().render(&DurationInputSpec::new(), &s(), &t()).spec_type, "DurationInputSpec"); }
-    #[test] fn time_zone_select() { assert_eq!(a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type, "TimeZoneSelectSpec"); }
-    #[test] fn date_time_zone_picker() { assert_eq!(a().render(&DateTimeZonePickerSpec::new(), &s(), &t()).spec_type, "DateTimeZonePickerSpec"); }
-    #[test] fn split_button() { assert_eq!(a().render(&SplitButtonSpec::new(), &s(), &t()).spec_type, "SplitButtonSpec"); }
-    #[test] fn calendar() { assert_eq!(a().render(&CalendarSpec::new(), &s(), &t()).spec_type, "CalendarSpec"); }
-    #[test] fn date_picker() { assert_eq!(a().render(&DatePickerSpec::new(), &s(), &t()).spec_type, "DatePickerSpec"); }
-    #[test] fn date_range_picker() { assert_eq!(a().render(&DateRangePickerSpec::new(), &s(), &t()).spec_type, "DateRangePickerSpec"); }
-    #[test] fn date_time_picker() { assert_eq!(a().render(&DateTimePickerSpec::new(), &s(), &t()).spec_type, "DateTimePickerSpec"); }
-    #[test] fn date_time_range_picker() { assert_eq!(a().render(&DateTimeRangePickerSpec::new(), &s(), &t()).spec_type, "DateTimeRangePickerSpec"); }
+    #[test]
+    fn code() {
+        assert_eq!(
+            a().render(&CodeSpec::new(), &s(), &t()).spec_type,
+            "CodeSpec"
+        );
+    }
+    #[test]
+    fn color_picker() {
+        assert_eq!(
+            a().render(&ColorPickerSpec::new(), &s(), &t()).spec_type,
+            "ColorPickerSpec"
+        );
+    }
+    #[test]
+    fn file_upload() {
+        assert_eq!(
+            a().render(&FileUploadSpec::new(), &s(), &t()).spec_type,
+            "FileUploadSpec"
+        );
+    }
+    #[test]
+    fn eyebrow() {
+        assert_eq!(
+            a().render(&EyebrowSpec::new(), &s(), &t()).spec_type,
+            "EyebrowSpec"
+        );
+    }
+    #[test]
+    fn pill() {
+        assert_eq!(
+            a().render(&PillSpec::new(), &s(), &t()).spec_type,
+            "PillSpec"
+        );
+    }
+    #[test]
+    fn time_ago() {
+        assert_eq!(
+            a().render(&TimeAgoSpec::new(), &s(), &t()).spec_type,
+            "TimeAgoSpec"
+        );
+    }
+    #[test]
+    fn duration_input() {
+        assert_eq!(
+            a().render(&DurationInputSpec::new(), &s(), &t()).spec_type,
+            "DurationInputSpec"
+        );
+    }
+    #[test]
+    fn time_zone_select() {
+        assert_eq!(
+            a().render(&TimeZoneSelectSpec::new(), &s(), &t()).spec_type,
+            "TimeZoneSelectSpec"
+        );
+    }
+    #[test]
+    fn date_time_zone_picker() {
+        assert_eq!(
+            a().render(&DateTimeZonePickerSpec::new(), &s(), &t())
+                .spec_type,
+            "DateTimeZonePickerSpec"
+        );
+    }
+    #[test]
+    fn split_button() {
+        assert_eq!(
+            a().render(&SplitButtonSpec::new(), &s(), &t()).spec_type,
+            "SplitButtonSpec"
+        );
+    }
+    #[test]
+    fn calendar() {
+        assert_eq!(
+            a().render(&CalendarSpec::new(), &s(), &t()).spec_type,
+            "CalendarSpec"
+        );
+    }
+    #[test]
+    fn date_picker() {
+        assert_eq!(
+            a().render(&DatePickerSpec::new(), &s(), &t()).spec_type,
+            "DatePickerSpec"
+        );
+    }
+    #[test]
+    fn date_range_picker() {
+        assert_eq!(
+            a().render(&DateRangePickerSpec::new(), &s(), &t())
+                .spec_type,
+            "DateRangePickerSpec"
+        );
+    }
+    #[test]
+    fn date_time_picker() {
+        assert_eq!(
+            a().render(&DateTimePickerSpec::new(), &s(), &t()).spec_type,
+            "DateTimePickerSpec"
+        );
+    }
+    #[test]
+    fn date_time_range_picker() {
+        assert_eq!(
+            a().render(&DateTimeRangePickerSpec::new(), &s(), &t())
+                .spec_type,
+            "DateTimeRangePickerSpec"
+        );
+    }
 }

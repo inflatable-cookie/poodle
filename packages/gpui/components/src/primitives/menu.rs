@@ -6,11 +6,17 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec, OverlayPlacement, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconSize, IconSpec, MenuEntry, MenuItemKind, MenuSpec,
+    OverlayPlacement, SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem, panel_space_y_rem};
+use crate::presentation::{
+    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_height_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menu component backed by `MenuSpec`.
@@ -25,12 +31,21 @@ pub struct Menu {
 
 impl std::ops::Deref for Menu {
     type Target = MenuSpec;
-    fn deref(&self) -> &MenuSpec { &self.spec }
+    fn deref(&self) -> &MenuSpec {
+        &self.spec
+    }
 }
 
 impl Menu {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), selected_value: None, on_select: None, on_close: None }
+        Self {
+            spec: MenuSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            selected_value: None,
+            on_select: None,
+            on_close: None,
+        }
     }
 
     pub fn from_spec(spec: MenuSpec, theme: &GpuiThemeProvider) -> Self {
@@ -55,14 +70,38 @@ impl Menu {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<MenuEntry>) -> Self { self.spec.items = v; self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn items(mut self, v: Vec<MenuEntry>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn placement(mut self, v: OverlayPlacement) -> Self {
+        self.spec.placement = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -84,7 +123,8 @@ impl IntoElement for Menu {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let item_font_size = px(rem_to_px(size_font_rem(effective_size)));
         let base_height = resolve_px(theme, "size.control.height");
-        let item_min_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(4.0);
+        let item_min_height =
+            base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(4.0);
         let item_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
         let menu_pad = px(rem_to_px(panel_space_y_rem(self.spec.density) * 0.5));
 
@@ -98,15 +138,24 @@ impl IntoElement for Menu {
         let border_subtle = resolve_color(theme, "color.border.subtle");
 
         // Matches Svelte treatment-surface-elevated values
-        let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
-        let border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let surface_bg = Hsla {
+            a: elevated_bg.a * 0.94,
+            ..elevated_bg
+        };
+        let border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
         let text_primary = resolve_color(theme, self.spec.item_text_token());
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, self.spec.item_highlight_token());
         // Item hover: accent at 16% mixed into elevated
         let item_hover = color_mix(accent, elevated_bg, 0.16);
         // Separator: border-subtle at 48% (treatment-surface-divider)
-        let separator_color = Hsla { a: border_subtle.a * 0.48, ..border_subtle };
+        let separator_color = Hsla {
+            a: border_subtle.a * 0.48,
+            ..border_subtle
+        };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let gap_sm = resolve_px(theme, "space.inline.sm");
@@ -124,7 +173,8 @@ impl IntoElement for Menu {
             menu = menu.bg(surface_bg);
         }
 
-        menu = menu.border_1()
+        menu = menu
+            .border_1()
             .border_color(border)
             // Contract: elevation-popover shadow
             .shadow(vec![
@@ -144,7 +194,10 @@ impl IntoElement for Menu {
             .p(menu_pad);
 
         // Collect focusable (non-separator, non-disabled) item values for arrow key navigation
-        let focusable_values: Vec<String> = self.spec.items.iter()
+        let focusable_values: Vec<String> = self
+            .spec
+            .items
+            .iter()
             .filter(|i| i.kind != MenuItemKind::Separator && !i.is_disabled)
             .map(|i| i.value.clone())
             .collect();
@@ -187,7 +240,10 @@ impl IntoElement for Menu {
                 .items_center()
                 .justify_between();
 
-            row = row.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            row = row.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             // Keyboard: Enter/Space to select, Escape to close, ArrowUp/ArrowDown to navigate
             if !is_disabled {
@@ -217,7 +273,11 @@ impl IntoElement for Menu {
                     } else if key == "up" || key == "left" {
                         // Move to previous item (wrapping)
                         if let Some(idx) = nav_values.iter().position(|v| v == &val) {
-                            let prev = if idx == 0 { nav_values.len() - 1 } else { idx - 1 };
+                            let prev = if idx == 0 {
+                                nav_values.len() - 1
+                            } else {
+                                idx - 1
+                            };
                             if let Some(ref handler) = nav_select {
                                 handler(&nav_values[prev], window, cx);
                             }
@@ -237,9 +297,11 @@ impl IntoElement for Menu {
             };
 
             if is_active {
-                row = row
-                    .bg(item_hover)
-                    .text_color(if item.is_destructive { danger_color } else { accent });
+                row = row.bg(item_hover).text_color(if item.is_destructive {
+                    danger_color
+                } else {
+                    accent
+                });
             } else if is_disabled {
                 row = row
                     .text_color(text_secondary)
@@ -265,11 +327,8 @@ impl IntoElement for Menu {
             let mut label_row = div().flex().items_center().gap(gap_sm);
             if is_checked {
                 label_row = label_row.child(
-                    Icon::from_spec(
-                        IconSpec::new("check").with_size(IconSize::Sm),
-                        theme,
-                    )
-                    .with_color(accent),
+                    Icon::from_spec(IconSpec::new("check").with_size(IconSize::Sm), theme)
+                        .with_color(accent),
                 );
             }
             label_row = label_row.child(item.label.clone());

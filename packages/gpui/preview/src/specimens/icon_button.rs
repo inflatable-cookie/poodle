@@ -1,28 +1,42 @@
-use gpui::*;
-use gpui::prelude::FluentBuilder;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{ButtonTone, ButtonVariant, IconButtonSpec, EyebrowSpec};
-use poodle_gpui_components::{IconButton, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, IconButton};
+use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, IconButtonSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let last_clicked = state.specimens.text.get("icon-btn-last")
+    let last_clicked = state
+        .specimens
+        .text
+        .get("icon-btn-last")
         .cloned()
         .unwrap_or_default();
 
-    let examples = div().flex().flex_col().gap(px(24.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Variants ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Variants"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Variants"),
+                    theme,
+                ))
                 .child(
-                    div().flex().gap(px(8.0))
+                    div()
+                        .flex()
+                        .gap(px(8.0))
                         .child(
                             IconButton::from_spec(
                                 IconButtonSpec::new()
@@ -32,10 +46,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("add")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert("icon-btn-last".to_string(), "Add".to_string());
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state
+                                        .specimens
+                                        .text
+                                        .insert("icon-btn-last".to_string(), "Add".to_string());
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
                             IconButton::from_spec(
@@ -46,10 +65,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("settings")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert("icon-btn-last".to_string(), "Settings".to_string());
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "icon-btn-last".to_string(),
+                                        "Settings".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
                             IconButton::from_spec(
@@ -60,19 +84,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("close")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert("icon-btn-last".to_string(), "Close".to_string());
-                                cx.notify();
-                            }))
-                        )
-                )
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state
+                                        .specimens
+                                        .text
+                                        .insert("icon-btn-last".to_string(), "Close".to_string());
+                                    cx.notify();
+                                },
+                            )),
+                        ),
+                ),
         )
         // --- Danger tone ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Danger tone"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Danger tone"),
+                    theme,
+                ))
                 .child(
-                    div().flex().gap(px(8.0))
+                    div()
+                        .flex()
+                        .gap(px(8.0))
                         .child(
                             IconButton::from_spec(
                                 IconButtonSpec::new()
@@ -82,7 +119,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Delete"),
                                 theme,
                             )
-                            .with_id("danger-primary")
+                            .with_id("danger-primary"),
                         )
                         .child(
                             IconButton::from_spec(
@@ -93,7 +130,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Delete"),
                                 theme,
                             )
-                            .with_id("danger-secondary")
+                            .with_id("danger-secondary"),
                         )
                         .child(
                             IconButton::from_spec(
@@ -104,16 +141,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Delete"),
                                 theme,
                             )
-                            .with_id("danger-ghost")
-                        )
-                )
+                            .with_id("danger-ghost"),
+                        ),
+                ),
         )
         // --- Toggle (text editor toolbar) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Toggle (text editor toolbar)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Toggle (text editor toolbar)"),
+                    theme,
+                ))
                 .child(
-                    div().flex().gap(px(8.0)).items_center()
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .items_center()
                         .child({
                             let bold = state.specimens.is_on("icon-btn-bold");
                             IconButton::from_spec(
@@ -125,10 +171,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("toggle-bold")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggle("icon-btn-bold");
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("icon-btn-bold");
+                                    cx.notify();
+                                },
+                            ))
                         })
                         .child({
                             let italic = state.specimens.is_on("icon-btn-italic");
@@ -141,10 +189,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("toggle-italic")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggle("icon-btn-italic");
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("icon-btn-italic");
+                                    cx.notify();
+                                },
+                            ))
                         })
                         .child({
                             let underline = state.specimens.is_on("icon-btn-underline");
@@ -157,19 +207,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("toggle-underline")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggle("icon-btn-underline");
-                                cx.notify();
-                            }))
-                        })
-                )
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("icon-btn-underline");
+                                    cx.notify();
+                                },
+                            ))
+                        }),
+                ),
         )
         // --- States ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("States"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("States"),
+                    theme,
+                ))
                 .child(
-                    div().flex().gap(px(8.0)).items_center()
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .items_center()
                         .child({
                             let pinned = state.specimens.is_on("icon-btn-pinned");
                             IconButton::from_spec(
@@ -180,11 +241,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             )
                             .with_id("state-pressed")
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.toggle("icon-btn-pinned");
-                                this.state.specimens.text.insert("icon-btn-last".to_string(), "Pin toggled".to_string());
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("icon-btn-pinned");
+                                    this.state.specimens.text.insert(
+                                        "icon-btn-last".to_string(),
+                                        "Pin toggled".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            ))
                         })
                         .child(
                             IconButton::from_spec(
@@ -194,7 +260,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Settings"),
                                 theme,
                             )
-                            .with_id("state-disabled")
+                            .with_id("state-disabled"),
                         )
                         .child(
                             IconButton::from_spec(
@@ -204,16 +270,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_aria_label("Loading"),
                                 theme,
                             )
-                            .with_id("state-loading")
-                        )
-                )
+                            .with_id("state-loading"),
+                        ),
+                ),
         )
         // --- String name (built-in internals) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("String name (built-in internals)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("String name (built-in internals)"),
+                    theme,
+                ))
                 .child(
-                    div().flex().gap(px(8.0))
+                    div()
+                        .flex()
+                        .gap(px(8.0))
                         .child(
                             IconButton::from_spec(
                                 IconButtonSpec::new()
@@ -221,7 +295,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_icon("plus")
                                     .with_aria_label("Add"),
                                 theme,
-                            ).with_id("str-plus")
+                            )
+                            .with_id("str-plus"),
                         )
                         .child(
                             IconButton::from_spec(
@@ -230,7 +305,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_icon("search")
                                     .with_aria_label("Search"),
                                 theme,
-                            ).with_id("str-search")
+                            )
+                            .with_id("str-search"),
                         )
                         .child(
                             IconButton::from_spec(
@@ -239,15 +315,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_icon("x")
                                     .with_aria_label("Close"),
                                 theme,
-                            ).with_id("str-close")
-                        )
-                )
+                            )
+                            .with_id("str-close"),
+                        ),
+                ),
         )
         // --- Click feedback ---
         .when(!last_clicked.is_empty(), |d| {
             d.child(
-                div().text_sm().text_color(color_to_hsla(text_secondary))
-                    .child(format!("Last action: {}", last_clicked))
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last action: {}", last_clicked)),
             )
         })
         .into_any_element();
@@ -275,7 +354,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_aria_label("Star"),
                 theme,
             )
-            .with_id(SharedString::from(format!("specimen-density-{:?}", density)))
+            .with_id(SharedString::from(format!(
+                "specimen-density-{:?}",
+                density
+            )))
             .density(density)
             .into_any_element()
         },

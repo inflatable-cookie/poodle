@@ -17,27 +17,61 @@ pub struct Stack {
 
 impl std::ops::Deref for Stack {
     type Target = StackSpec;
-    fn deref(&self) -> &StackSpec { &self.spec }
+    fn deref(&self) -> &StackSpec {
+        &self.spec
+    }
 }
 
 impl Stack {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: StackSpec::new(), theme: theme.clone(), children: Vec::new() }
+        Self {
+            spec: StackSpec::new(),
+            theme: theme.clone(),
+            children: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: StackSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), children: Vec::new() }
+        Self {
+            spec,
+            theme: theme.clone(),
+            children: Vec::new(),
+        }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn direction(mut self, v: StackDirection) -> Self { self.spec.direction = v; self }
-    pub fn gap(mut self, v: PaddingScale) -> Self { self.spec.gap = v; self }
-    pub fn align(mut self, v: Alignment) -> Self { self.spec.align = v; self }
-    pub fn justify(mut self, v: LayoutJustify) -> Self { self.spec.justify = Some(v); self }
-    pub fn wrap(mut self, v: bool) -> Self { self.spec.wrap = v; self }
-    pub fn padding(mut self, v: PaddingScale) -> Self { self.spec.padding = v; self }
-    pub fn role(mut self, v: impl Into<String>) -> Self { self.spec.role = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn direction(mut self, v: StackDirection) -> Self {
+        self.spec.direction = v;
+        self
+    }
+    pub fn gap(mut self, v: PaddingScale) -> Self {
+        self.spec.gap = v;
+        self
+    }
+    pub fn align(mut self, v: Alignment) -> Self {
+        self.spec.align = v;
+        self
+    }
+    pub fn justify(mut self, v: LayoutJustify) -> Self {
+        self.spec.justify = Some(v);
+        self
+    }
+    pub fn wrap(mut self, v: bool) -> Self {
+        self.spec.wrap = v;
+        self
+    }
+    pub fn padding(mut self, v: PaddingScale) -> Self {
+        self.spec.padding = v;
+        self
+    }
+    pub fn role(mut self, v: impl Into<String>) -> Self {
+        self.spec.role = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
@@ -57,8 +91,12 @@ impl IntoElement for Stack {
         // Direction
         let mut el = div().flex();
         match spec.direction {
-            StackDirection::Column => { el = el.flex_col(); }
-            StackDirection::Row => { el = el.flex_row(); }
+            StackDirection::Column => {
+                el = el.flex_col();
+            }
+            StackDirection::Row => {
+                el = el.flex_row();
+            }
         }
 
         // Wrap
@@ -73,19 +111,33 @@ impl IntoElement for Stack {
 
         // Cross-axis alignment
         match spec.align {
-            Alignment::Start => { el = el.items_start(); }
-            Alignment::Center => { el = el.items_center(); }
-            Alignment::End => { el = el.items_end(); }
+            Alignment::Start => {
+                el = el.items_start();
+            }
+            Alignment::Center => {
+                el = el.items_center();
+            }
+            Alignment::End => {
+                el = el.items_end();
+            }
             Alignment::Stretch => {} // default
         }
 
         // Main-axis justification
         if let Some(justify) = &spec.justify {
             match justify {
-                LayoutJustify::Start => { el = el.justify_start(); }
-                LayoutJustify::End => { el = el.justify_end(); }
-                LayoutJustify::Center => { el = el.justify_center(); }
-                LayoutJustify::SpaceBetween => { el = el.justify_between(); }
+                LayoutJustify::Start => {
+                    el = el.justify_start();
+                }
+                LayoutJustify::End => {
+                    el = el.justify_end();
+                }
+                LayoutJustify::Center => {
+                    el = el.justify_center();
+                }
+                LayoutJustify::SpaceBetween => {
+                    el = el.justify_between();
+                }
             }
         }
 

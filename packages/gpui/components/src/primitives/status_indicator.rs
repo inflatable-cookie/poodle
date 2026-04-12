@@ -15,12 +15,17 @@ pub struct StatusIndicator {
 
 impl std::ops::Deref for StatusIndicator {
     type Target = StatusIndicatorSpec;
-    fn deref(&self) -> &StatusIndicatorSpec { &self.spec }
+    fn deref(&self) -> &StatusIndicatorSpec {
+        &self.spec
+    }
 }
 
 impl StatusIndicator {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: StatusIndicatorSpec::new(), theme: theme.clone() }
+        Self {
+            spec: StatusIndicatorSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: StatusIndicatorSpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,10 +36,18 @@ impl StatusIndicator {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn status(mut self, v: StatusTone) -> Self { self.spec.status = v; self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn status(mut self, v: StatusTone) -> Self {
+        self.spec.status = v;
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 }
 
 impl IntoElement for StatusIndicator {
@@ -64,7 +77,10 @@ impl IntoElement for StatusIndicator {
                 .flex_shrink_0()
                 // Contract: box-shadow 0 0 0 0.125rem at 18% opacity
                 .shadow(vec![gpui::BoxShadow {
-                    color: Hsla { a: status_color.a * 0.18, ..status_color },
+                    color: Hsla {
+                        a: status_color.a * 0.18,
+                        ..status_color
+                    },
                     offset: point(px(0.0), px(0.0)),
                     blur_radius: px(4.0),
                     spread_radius: px(1.0),

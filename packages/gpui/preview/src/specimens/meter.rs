@@ -1,30 +1,46 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{MeterSpec, EyebrowSpec};
-use poodle_gpui_components::{Meter, Eyebrow};
-use crate::style_bridge::color_to_hsla;
+use poodle_gpui_components::{Eyebrow, Meter};
+use poodle_specs::{EyebrowSpec, MeterSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(320.0))
         // --- Default (50%) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default (50%)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default (50%)"),
+                    theme,
+                ))
                 .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(50.0)
                         .with_max(100.0)
                         .with_aria_label("Storage usage"),
                     theme,
-                ))
+                )),
         )
         // --- With thresholds ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With thresholds"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With thresholds"),
+                    theme,
+                ))
                 .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(82.0)
@@ -36,14 +52,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("82% \u{2014} above high threshold".to_string())
-                )
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("82% \u{2014} above high threshold".to_string()),
+                ),
         )
         // --- Low value (optimal range) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Low value (optimal range)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Low value (optimal range)"),
+                    theme,
+                ))
                 .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(30.0)
@@ -55,14 +79,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("30% \u{2014} within normal range".to_string())
-                )
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("30% \u{2014} within normal range".to_string()),
+                ),
         )
         // --- Custom range (0-500) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom range (0\u{2013}500)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom range (0\u{2013}500)"),
+                    theme,
+                ))
                 .child(Meter::from_spec(
                     MeterSpec::new()
                         .with_value(350.0)
@@ -72,8 +104,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 ))
                 .child(
-                    div().text_sm().text_color(color_to_hsla(text_secondary))
-                        .child("350 / 500 API calls used".to_string())
-                )
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("350 / 500 API calls used".to_string()),
+                ),
         )
 }

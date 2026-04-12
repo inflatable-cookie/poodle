@@ -72,7 +72,10 @@ impl RenderComponent<IconButtonSpec> for GpuiAdapter {
         let _ = &gpui_style;
 
         GpuiElementHandle::new(
-            format!("icon-button-{}", spec.icon.as_deref().unwrap_or("anonymous")),
+            format!(
+                "icon-button-{}",
+                spec.icon.as_deref().unwrap_or("anonymous")
+            ),
             "IconButtonSpec",
         )
     }
@@ -259,10 +262,7 @@ impl RenderComponent<CodeInputSpec> for GpuiAdapter {
         gpui_style.border_color = Some(border.into());
         gpui_style.focus_ring_color = Some(focus_ring.into());
 
-        GpuiElementHandle::new(
-            format!("code-input-{}", spec.length),
-            "CodeInputSpec",
-        )
+        GpuiElementHandle::new(format!("code-input-{}", spec.length), "CodeInputSpec")
     }
 }
 
@@ -299,8 +299,7 @@ mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_specs::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberInputSpec, TextInputSpec,
-        TimeFieldSpec, ToolbarSpec,
+        NumberInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
 

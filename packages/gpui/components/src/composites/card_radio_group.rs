@@ -1,11 +1,14 @@
 //! CardRadioGroup — selectable card group backed by CardRadioGroupSpec.
 
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::CardRadioGroupSpec;
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius, resolve_opacity};
 
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,
@@ -15,24 +18,43 @@ pub struct CardRadioGroup {
 
 impl std::ops::Deref for CardRadioGroup {
     type Target = CardRadioGroupSpec;
-    fn deref(&self) -> &CardRadioGroupSpec { &self.spec }
+    fn deref(&self) -> &CardRadioGroupSpec {
+        &self.spec
+    }
 }
 
 impl CardRadioGroup {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CardRadioGroupSpec::new(Vec::new()), theme: theme.clone(), on_change: None }
+        Self {
+            spec: CardRadioGroupSpec::new(Vec::new()),
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
     pub fn from_spec(spec: CardRadioGroupSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for CardRadioGroup {
@@ -61,17 +83,16 @@ impl IntoElement for CardRadioGroup {
         let selected_fill = color_mix(accent, unselected_fill, 0.12);
 
         // Grid-like layout: flex-wrap with gap
-        let mut el = div()
-            .flex()
-            .flex_row()
-            .flex_wrap()
-            .gap(px(gap))
-;
+        let mut el = div().flex().flex_row().flex_wrap().gap(px(gap));
 
         for (idx, option) in spec.options.iter().enumerate() {
             let is_selected = selected == Some(option.value.as_str());
             let is_option_disabled = spec.is_disabled || option.is_disabled;
-            let fill = if is_selected { selected_fill } else { unselected_fill };
+            let fill = if is_selected {
+                selected_fill
+            } else {
+                unselected_fill
+            };
             let border_c = if is_selected { accent } else { border };
             let bw = if is_selected { 2.0 } else { 1.0 };
 
@@ -92,20 +113,20 @@ impl IntoElement for CardRadioGroup {
                         .w(px(8.0))
                         .h(px(8.0))
                         .rounded(px(999.0))
-                        .bg(if is_selected { accent } else { gpui::transparent_black() }),
+                        .bg(if is_selected {
+                            accent
+                        } else {
+                            gpui::transparent_black()
+                        }),
                 );
 
             // Content: label + optional description
-            let mut content = div()
-                .flex()
-                .flex_col()
-                .gap(px(2.0))
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .text_color(text_color)
-                        .child(option.label.clone()),
-                );
+            let mut content = div().flex().flex_col().gap(px(2.0)).child(
+                div()
+                    .text_size(body_size)
+                    .text_color(text_color)
+                    .child(option.label.clone()),
+            );
 
             // Show description below label if present
             if let Some(ref description) = option.description {

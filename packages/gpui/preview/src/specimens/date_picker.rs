@@ -1,29 +1,47 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{DatePickerSpec, EyebrowSpec};
-use poodle_gpui_components::{DatePicker, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{DatePicker, Eyebrow};
+use poodle_specs::{DatePickerSpec, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_primary = theme.resolve_color("color.text.primary");
 
     let default_open = state.specimens.is_on("date-picker-default-open");
-    let default_selected = state.specimens.text.get("date-picker-default-value").cloned();
+    let default_selected = state
+        .specimens
+        .text
+        .get("date-picker-default-value")
+        .cloned();
 
     let prefilled_open = state.specimens.is_on("date-picker-prefilled-open");
-    let prefilled_selected = state.specimens.text.get("date-picker-prefilled-value").cloned()
+    let prefilled_selected = state
+        .specimens
+        .text
+        .get("date-picker-prefilled-value")
+        .cloned()
         .unwrap_or_else(|| "2026-03-14".to_string());
 
-    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(256.0)) // 16rem
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(256.0)) // 16rem
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child({
                     let mut spec = DatePickerSpec::new();
                     spec.open = Some(default_open);
@@ -38,8 +56,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                         .on_select(cx.listener(|this, date: &str, _w, cx| {
-                            this.state.specimens.text.insert("date-picker-default-value".to_string(), date.to_string());
-                            this.state.specimens.toggles.insert("date-picker-default-open".to_string(), false);
+                            this.state
+                                .specimens
+                                .text
+                                .insert("date-picker-default-value".to_string(), date.to_string());
+                            this.state
+                                .specimens
+                                .toggles
+                                .insert("date-picker-default-open".to_string(), false);
                             cx.notify();
                         }))
                 })
@@ -47,13 +71,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .text_size(px(12.0))
                         .text_color(color_to_hsla(text_primary))
-                        .child(format!("Selected: {}", default_selected.as_deref().unwrap_or("(none)")))
-                )
+                        .child(format!(
+                            "Selected: {}",
+                            default_selected.as_deref().unwrap_or("(none)")
+                        )),
+                ),
         )
         // --- With default value ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With default value"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With default value"),
+                    theme,
+                ))
                 .child({
                     let mut spec = DatePickerSpec::new();
                     spec.value = Some(prefilled_selected.clone());
@@ -66,23 +99,35 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                         .on_select(cx.listener(|this, date: &str, _w, cx| {
-                            this.state.specimens.text.insert("date-picker-prefilled-value".to_string(), date.to_string());
-                            this.state.specimens.toggles.insert("date-picker-prefilled-open".to_string(), false);
+                            this.state.specimens.text.insert(
+                                "date-picker-prefilled-value".to_string(),
+                                date.to_string(),
+                            );
+                            this.state
+                                .specimens
+                                .toggles
+                                .insert("date-picker-prefilled-open".to_string(), false);
                             cx.notify();
                         }))
-                })
+                }),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
                 .child({
                     let mut spec = DatePickerSpec::new();
                     spec.placeholder = "Disabled".to_string();
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled date picker".to_string());
                     DatePicker::from_spec(spec, theme).with_id("disabled")
-                })
+                }),
         )
         .into_any_element();
 

@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// Direction the collapse toggle points when in the "collapsed" position.
 ///

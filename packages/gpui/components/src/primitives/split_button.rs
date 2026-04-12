@@ -9,8 +9,13 @@ use poodle_specs::{
 };
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem, size_padding_x_offset_rem};
-use crate::theme_ext::{color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem,
+    size_padding_x_offset_rem,
+};
+use crate::theme_ext::{
+    color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius,
+};
 
 pub struct SplitButton {
     spec: SplitButtonSpec,
@@ -21,7 +26,9 @@ pub struct SplitButton {
 
 impl std::ops::Deref for SplitButton {
     type Target = SplitButtonSpec;
-    fn deref(&self) -> &SplitButtonSpec { &self.spec }
+    fn deref(&self) -> &SplitButtonSpec {
+        &self.spec
+    }
 }
 
 impl SplitButton {
@@ -35,30 +42,77 @@ impl SplitButton {
     }
 
     pub fn from_spec(spec: SplitButtonSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), on_click: None, on_dropdown: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_click: None,
+            on_dropdown: None,
+        }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn variant(mut self, v: ButtonVariant) -> Self { self.spec.variant = v; self }
-    pub fn tone(mut self, v: ButtonTone) -> Self { self.spec.tone = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn items(mut self, v: Vec<SplitMenuItem>) -> Self { self.spec.items = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn menu_aria_label(mut self, v: impl Into<String>) -> Self { self.spec.menu_aria_label = v.into(); self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn variant(mut self, v: ButtonVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn tone(mut self, v: ButtonTone) -> Self {
+        self.spec.tone = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn items(mut self, v: Vec<SplitMenuItem>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn loading(mut self, v: bool) -> Self {
+        self.spec.is_loading = v;
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn menu_aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.menu_aria_label = v.into();
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
-    pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
+    pub fn on_click(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
         self.on_click = Some(Box::new(handler));
         self
     }
 
-    pub fn on_dropdown(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
+    pub fn on_dropdown(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
         self.on_dropdown = Some(Box::new(handler));
         self
     }
@@ -97,7 +151,13 @@ impl IntoElement for SplitButton {
             ButtonVariant::Primary => (base_fill, color_mix_black(base_fill, 0.84)),
             ButtonVariant::Ghost => {
                 let surface = resolve_color(theme, "color.background.surface");
-                (Hsla { a: surface.a * 0.42, ..surface }, gpui::transparent_black())
+                (
+                    Hsla {
+                        a: surface.a * 0.42,
+                        ..surface
+                    },
+                    gpui::transparent_black(),
+                )
             }
             _ => (base_fill, base_border),
         };
@@ -129,16 +189,18 @@ impl IntoElement for SplitButton {
         // Brand-raised treatment for primary half
         if theme.brand_raised && !is_ghost && !is_unavailable {
             use crate::theme_ext::{
-                brand_raised_primary_fill, brand_raised_interactive_fill,
-                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+                brand_raised_interactive_fill, brand_raised_interactive_shadow,
+                brand_raised_primary_fill, brand_raised_primary_shadow,
             };
             match spec.variant {
                 ButtonVariant::Primary => {
-                    primary = primary.bg(brand_raised_primary_fill(fill))
+                    primary = primary
+                        .bg(brand_raised_primary_fill(fill))
                         .shadow(brand_raised_primary_shadow());
                 }
                 _ => {
-                    primary = primary.bg(brand_raised_interactive_fill(fill))
+                    primary = primary
+                        .bg(brand_raised_interactive_fill(fill))
                         .shadow(brand_raised_interactive_shadow());
                 }
             }
@@ -146,20 +208,27 @@ impl IntoElement for SplitButton {
             primary = primary.bg(fill);
         }
 
-        primary = primary.border_1().border_color(border_color)
+        primary = primary
+            .border_1()
+            .border_color(border_color)
             .rounded_l(radius)
             .text_color(text_color)
             .text_size(px(font_size))
             .font_weight(FontWeight::MEDIUM)
             .line_height(relative(1.0))
-            .flex().items_center().justify_center();
+            .flex()
+            .items_center()
+            .justify_center();
 
         if !is_unavailable {
             primary = primary
                 .cursor_pointer()
                 .hover(move |s| s.bg(hover_fill).border_color(hover_border))
                 .active(move |s| s.bg(active_fill))
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
         }
 
         if !label_text.is_empty() {
@@ -167,7 +236,11 @@ impl IntoElement for SplitButton {
         }
 
         // ── Divider (60% height, centered) ────────────────────────
-        let divider = div().w(px(1.0)).h(relative(0.6)).my_auto().bg(separator_color);
+        let divider = div()
+            .w(px(1.0))
+            .h(relative(0.6))
+            .my_auto()
+            .bg(separator_color);
 
         // ── Toggle half ───────────────────────────────────────────
         let mut toggle = div()
@@ -179,16 +252,18 @@ impl IntoElement for SplitButton {
         // Brand-raised treatment for toggle half
         if theme.brand_raised && !is_ghost && !is_unavailable {
             use crate::theme_ext::{
-                brand_raised_primary_fill, brand_raised_interactive_fill,
-                brand_raised_primary_shadow, brand_raised_interactive_shadow,
+                brand_raised_interactive_fill, brand_raised_interactive_shadow,
+                brand_raised_primary_fill, brand_raised_primary_shadow,
             };
             match spec.variant {
                 ButtonVariant::Primary => {
-                    toggle = toggle.bg(brand_raised_primary_fill(fill))
+                    toggle = toggle
+                        .bg(brand_raised_primary_fill(fill))
                         .shadow(brand_raised_primary_shadow());
                 }
                 _ => {
-                    toggle = toggle.bg(brand_raised_interactive_fill(fill))
+                    toggle = toggle
+                        .bg(brand_raised_interactive_fill(fill))
                         .shadow(brand_raised_interactive_shadow());
                 }
             }
@@ -196,16 +271,23 @@ impl IntoElement for SplitButton {
             toggle = toggle.bg(fill);
         }
 
-        toggle = toggle.border_1().border_color(border_color)
+        toggle = toggle
+            .border_1()
+            .border_color(border_color)
             .rounded_r(radius)
             .text_color(text_color)
-            .flex().items_center().justify_center();
+            .flex()
+            .items_center()
+            .justify_center();
 
         if !is_unavailable {
             toggle = toggle
                 .cursor_pointer()
                 .hover(move |s| s.bg(hover_fill))
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
         }
 
         toggle = toggle.child(
@@ -216,7 +298,9 @@ impl IntoElement for SplitButton {
         // ── Disabled/loading ──────────────────────────────────────
         if is_unavailable {
             let opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-            root = root.opacity(opacity).cursor(CursorStyle::OperationNotAllowed);
+            root = root
+                .opacity(opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         // ── Click handlers on halves ────────────────────────────────
@@ -242,8 +326,11 @@ impl IntoElement for SplitButton {
             let gap_md = resolve_px(theme, "space.inline.md");
 
             let mut menu = div()
-                .bg(menu_fill).border_1().border_color(menu_border)
-                .rounded(menu_radius).shadow(vec![
+                .bg(menu_fill)
+                .border_1()
+                .border_color(menu_border)
+                .rounded(menu_radius)
+                .shadow(vec![
                     gpui::BoxShadow {
                         color: hsla(0.0, 0.0, 0.0, 0.10),
                         offset: point(px(0.0), px(4.0)),
@@ -258,27 +345,35 @@ impl IntoElement for SplitButton {
                     },
                 ])
                 .min_w(px(192.0)) // 12rem
-                .py(gap_sm).mt(gap_sm)
-                .flex().flex_col();
+                .py(gap_sm)
+                .mt(gap_sm)
+                .flex()
+                .flex_col();
 
             for item in &spec.items {
                 match item {
-                    SplitMenuItem::Action { label, is_disabled, .. } => {
+                    SplitMenuItem::Action {
+                        label, is_disabled, ..
+                    } => {
                         let mut item_el = div()
-                            .px(gap_md).py(px(6.0))
-                            .text_size(body_size).text_color(item_text)
+                            .px(gap_md)
+                            .py(px(6.0))
+                            .text_size(body_size)
+                            .text_color(item_text)
                             .rounded(radius_control);
                         if !is_disabled {
                             let accent = resolve_color(theme, "color.accent.base");
                             let hover_bg = Hsla { a: 0.08, ..accent };
                             item_el = item_el.cursor_pointer().hover(move |s| s.bg(hover_bg));
                         } else {
-                            item_el = item_el.opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
+                            item_el = item_el
+                                .opacity(resolve_opacity(theme, spec.disabled_opacity_token()));
                         }
                         menu = menu.child(item_el.child(label.clone()));
                     }
                     SplitMenuItem::Separator => {
-                        menu = menu.child(div().h(px(1.0)).mx(gap_sm).my(gap_sm).bg(separator_color));
+                        menu =
+                            menu.child(div().h(px(1.0)).mx(gap_sm).my(gap_sm).bg(separator_color));
                     }
                 }
             }

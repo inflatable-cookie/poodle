@@ -1,19 +1,28 @@
-use gpui::*;
-use poodle_specs::{SwitchSpec, SwitchTone, EyebrowSpec};
-use poodle_gpui_components::{Switch, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, Switch};
+use poodle_specs::{EyebrowSpec, SwitchSpec, SwitchTone};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
-    let examples = div().flex().flex_col().gap(px(24.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child({
                     let items: &[(&str, &str, bool)] = &[
                         ("switch-dark-mode", "Dark mode", true),
@@ -32,25 +41,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         let init_key_owned = init_key.clone();
                         let mut spec = SwitchSpec::new().with_checked(is_on);
                         spec.label = Some(label.to_string());
-                        col = col.child(
-                            Switch::from_spec(spec, theme)
-                                .with_id(key)
-                                .on_change(cx.listener(move |this, _checked: &bool, _w, cx| {
-                                    if !this.state.specimens.is_on(&init_key_owned) {
-                                        this.state.specimens.toggle(&init_key_owned);
-                                    }
-                                    this.state.specimens.toggle(&key_owned);
-                                    cx.notify();
-                                }))
-                        );
+                        col = col.child(Switch::from_spec(spec, theme).with_id(key).on_change(
+                            cx.listener(move |this, _checked: &bool, _w, cx| {
+                                if !this.state.specimens.is_on(&init_key_owned) {
+                                    this.state.specimens.toggle(&init_key_owned);
+                                }
+                                this.state.specimens.toggle(&key_owned);
+                                cx.notify();
+                            }),
+                        ));
                     }
                     col
-                })
+                }),
         )
         // --- States ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("States"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("States"),
+                    theme,
+                ))
                 .child({
                     let mut col = div().flex().flex_col().gap(px(10.0));
 
@@ -73,12 +86,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     col = col.child(Switch::from_spec(spec, theme).with_id("sw-readonly-on"));
 
                     col
-                })
+                }),
         )
         // --- Custom colors ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom colors"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom colors"),
+                    theme,
+                ))
                 .child({
                     let mut col = div().flex().flex_col().gap(px(10.0));
 
@@ -97,12 +116,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     col = col.child(Switch::from_spec(spec, theme).with_id("sw-custom-amber"));
 
                     col
-                })
+                }),
         )
         // --- Dual labels and tones ---
         .child(
-            div().flex().flex_col().gap(px(10.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Dual labels and tones"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(10.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Dual labels and tones"),
+                    theme,
+                ))
                 .child({
                     let mut col = div().flex().flex_col().gap(px(10.0));
 
@@ -117,7 +142,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Publication status"),
                             theme,
                         )
-                        .with_id("sw-dual-publish")
+                        .with_id("sw-dual-publish"),
                     );
 
                     col = col.child(
@@ -131,11 +156,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Access status"),
                             theme,
                         )
-                        .with_id("sw-dual-access")
+                        .with_id("sw-dual-access"),
                     );
 
                     col
-                })
+                }),
         )
         .into_any_element();
 

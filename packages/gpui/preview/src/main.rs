@@ -16,7 +16,7 @@ use std::path::PathBuf;
 
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{TabDefinition, TabsSpec, TabVariant};
+use poodle_specs::{TabDefinition, TabVariant, TabsSpec};
 
 /// Asset source that loads files from the preview app's directory.
 struct PreviewAssets {
@@ -114,7 +114,12 @@ impl Render for PreviewRoot {
                     .border_b_1()
                     .border_color(color_to_hsla(border_subtle))
                     // Title — bold, 16px
-                    .child(div().text_size(px(16.0)).font_weight(FontWeight::BOLD).child("Poodle"))
+                    .child(
+                        div()
+                            .text_size(px(16.0))
+                            .font_weight(FontWeight::BOLD)
+                            .child("Poodle"),
+                    )
                     // Nav tabs (pill style)
                     .child(self.render_nav_tabs(text_secondary, accent, cx))
                     // Spacer
@@ -123,17 +128,15 @@ impl Render for PreviewRoot {
                     .child(self.render_status_pills(text_secondary, border)),
             )
             // ── Display controls bar ─────────────────────────────────
-            .child(
-                self.render_display_controls(
-                    text_secondary,
-                    accent,
-                    border,
-                    border_subtle,
-                    panel_bg,
-                    controls_h,
-                    cx,
-                ),
-            )
+            .child(self.render_display_controls(
+                text_secondary,
+                accent,
+                border,
+                border_subtle,
+                panel_bg,
+                controls_h,
+                cx,
+            ))
             // ── Main content area ────────────────────────────────────
             // Section content is a direct child of root — no intermediate wrapper.
             // Each section is given an explicit pixel height so overflow_y_scroll
@@ -240,7 +243,15 @@ impl PreviewRoot {
                     .iter()
                     .map(|p| (p.label(), self.state.theme_preset == *p))
                     .collect();
-                self.render_toggle_group("Theme", text_secondary, &opts, accent, border, "theme", cx)
+                self.render_toggle_group(
+                    "Theme",
+                    text_secondary,
+                    &opts,
+                    accent,
+                    border,
+                    "theme",
+                    cx,
+                )
             })
             // Density group
             .child({
@@ -248,7 +259,15 @@ impl PreviewRoot {
                     .iter()
                     .map(|d| (d.label(), self.state.density == *d))
                     .collect();
-                self.render_toggle_group("Density", text_secondary, &opts, accent, border, "density", cx)
+                self.render_toggle_group(
+                    "Density",
+                    text_secondary,
+                    &opts,
+                    accent,
+                    border,
+                    "density",
+                    cx,
+                )
             })
             // Size group
             .child({
@@ -264,7 +283,15 @@ impl PreviewRoot {
                     .iter()
                     .map(|t| (t.label(), self.state.appearance_treatment == *t))
                     .collect();
-                self.render_toggle_group("Treatment", text_secondary, &opts, accent, border, "treatment", cx)
+                self.render_toggle_group(
+                    "Treatment",
+                    text_secondary,
+                    &opts,
+                    accent,
+                    border,
+                    "treatment",
+                    cx,
+                )
             })
             // State probes
             .child(self.render_state_probes(text_secondary, accent, border, cx))
@@ -431,19 +458,23 @@ impl PreviewRoot {
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         match self.state.section {
-            Section::Primitives => self.render_catalogue_section(PRIMITIVES, Section::Primitives, available_h, cx),
-            Section::Composites => self.render_catalogue_section(COMPOSITES, Section::Composites, available_h, cx),
-            Section::Shells => self.render_catalogue_section(SHELLS, Section::Shells, available_h, cx),
-            Section::Demo => self.render_demo_section(available_h, cx),
-            Section::Tokens => {
-                div().w_full().h(available_h).child(
-                    div()
-                        .id("tokens-section")
-                        .size_full()
-                        .overflow_y_scroll()
-                        .child(token_view::render_token_inspector(theme)),
-                )
+            Section::Primitives => {
+                self.render_catalogue_section(PRIMITIVES, Section::Primitives, available_h, cx)
             }
+            Section::Composites => {
+                self.render_catalogue_section(COMPOSITES, Section::Composites, available_h, cx)
+            }
+            Section::Shells => {
+                self.render_catalogue_section(SHELLS, Section::Shells, available_h, cx)
+            }
+            Section::Demo => self.render_demo_section(available_h, cx),
+            Section::Tokens => div().w_full().h(available_h).child(
+                div()
+                    .id("tokens-section")
+                    .size_full()
+                    .overflow_y_scroll()
+                    .child(token_view::render_token_inspector(theme)),
+            ),
         }
     }
 
@@ -506,27 +537,21 @@ impl PreviewRoot {
 
             link = link.child(comp.display_name);
 
-            link = link.on_click(
-                cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                    match which {
-                        Section::Primitives => this.state.active_primitive = Some(i),
-                        Section::Composites => this.state.active_composite = Some(i),
-                        Section::Shells => this.state.active_shell = Some(i),
-                        _ => {}
-                    }
-                    cx.notify();
-                }),
-            );
+            link = link.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
+                match which {
+                    Section::Primitives => this.state.active_primitive = Some(i),
+                    Section::Composites => this.state.active_composite = Some(i),
+                    Section::Shells => this.state.active_shell = Some(i),
+                    _ => {}
+                }
+                cx.notify();
+            }));
 
             sidebar = sidebar.child(link);
         }
 
         // Outer layout: horizontal flex row with explicit height.
-        let mut layout = div()
-            .w_full()
-            .h(available_h)
-            .flex()
-            .child(sidebar);
+        let mut layout = div().w_full().h(available_h).flex().child(sidebar);
 
         if let Some(idx) = active_idx {
             let comp = &components[idx];
@@ -553,18 +578,18 @@ impl PreviewRoot {
                                     .child(comp.description),
                             ),
                     )
-                    .child(
-                        div()
-                            .h(px(1.0))
-                            .w_full()
-                            .bg(color_to_hsla(border_subtle)),
-                    )
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
                     .child(self.render_component_specimen(comp.slug, cx)),
             );
         } else {
-            layout = layout.child(
-                self.render_catalogue_landing(components, theme, available_h, text_secondary, border_subtle, elevated_bg),
-            );
+            layout = layout.child(self.render_catalogue_landing(
+                components,
+                theme,
+                available_h,
+                text_secondary,
+                border_subtle,
+                elevated_bg,
+            ));
         }
 
         layout
@@ -604,37 +629,30 @@ impl PreviewRoot {
             );
         }
 
-        div()
-            .flex_1()
-            .h(available_h)
-            .child(
-                div()
-                    .id("catalogue-landing")
-                    .size_full()
-                    .overflow_y_scroll()
-                    .child(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .gap(px(16.0))
-                            .p(px(24.0))
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("{} components", components.len())),
-                            )
-                            .child(grid),
-                    ),
-            )
+        div().flex_1().h(available_h).child(
+            div()
+                .id("catalogue-landing")
+                .size_full()
+                .overflow_y_scroll()
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(16.0))
+                        .p(px(24.0))
+                        .child(
+                            div()
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("{} components", components.len())),
+                        )
+                        .child(grid),
+                ),
+        )
     }
 
     /// Render a single specimen for a specific component by slug.
-    fn render_component_specimen(
-        &self,
-        slug: &str,
-        cx: &mut Context<Self>,
-    ) -> Div {
+    fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
         specimens::render_single_specimen(slug, &self.state, cx)
     }
 
@@ -800,7 +818,15 @@ fn parse_cli_args() -> CliArgs {
         i += 1;
     }
 
-    CliArgs { section, component, theme, density, control_size, treatment, screenshot }
+    CliArgs {
+        section,
+        component,
+        theme,
+        density,
+        control_size,
+        treatment,
+        screenshot,
+    }
 }
 
 fn main() {

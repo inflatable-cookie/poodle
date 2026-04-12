@@ -1,8 +1,12 @@
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole};
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use poodle_specs::{
+    AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole,
+};
 
 pub struct AlertDialog {
     spec: AlertDialogSpec,
@@ -32,7 +36,9 @@ pub struct AlertDialog {
 
 impl std::ops::Deref for AlertDialog {
     type Target = AlertDialogSpec;
-    fn deref(&self) -> &AlertDialogSpec { &self.spec }
+    fn deref(&self) -> &AlertDialogSpec {
+        &self.spec
+    }
 }
 
 impl AlertDialog {
@@ -78,16 +84,46 @@ impl AlertDialog {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn tone(mut self, v: AlertDialogTone) -> Self { self.spec.tone = v; self }
-    pub fn confirm_label(mut self, v: impl Into<String>) -> Self { self.spec.confirm_label = v.into(); self }
-    pub fn cancel_label(mut self, v: impl Into<String>) -> Self { self.spec.cancel_label = v.into(); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn tone(mut self, v: AlertDialogTone) -> Self {
+        self.spec.tone = v;
+        self
+    }
+    pub fn confirm_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.confirm_label = v.into();
+        self
+    }
+    pub fn cancel_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.cancel_label = v.into();
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_confirm(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
         self.on_confirm = Some(Box::new(handler));
@@ -111,17 +147,13 @@ impl IntoElement for AlertDialog {
         }
 
         // Header
-        let mut header = div()
-            .flex()
-            .flex_col()
-            .gap(self.header_gap)
-            .child(
-                div()
-                    .text_size(self.heading_size)
-                    .text_color(self.title_color)
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .child(self.spec.title.clone()),
-            );
+        let mut header = div().flex().flex_col().gap(self.header_gap).child(
+            div()
+                .text_size(self.heading_size)
+                .text_color(self.title_color)
+                .font_weight(FontWeight::SEMIBOLD)
+                .child(self.spec.title.clone()),
+        );
         if let Some(ref desc) = self.spec.description {
             header = header.child(
                 div()
@@ -187,7 +219,9 @@ impl IntoElement for AlertDialog {
 
         // Brand-raised treatment: gradient fill for dialog surface
         if self.brand_raised {
-            dialog_card = dialog_card.bg(crate::theme_ext::brand_raised_surface_fill(self.dialog_fill));
+            dialog_card = dialog_card.bg(crate::theme_ext::brand_raised_surface_fill(
+                self.dialog_fill,
+            ));
         } else {
             dialog_card = dialog_card.bg(self.dialog_fill);
         }

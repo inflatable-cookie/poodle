@@ -1,11 +1,11 @@
 use gpui::*;
-use poodle_specs::FilterToolbarSpec;
-use poodle_gpui_components::{Button, FilterToolbar, Eyebrow, IconButton, Select, TextInput};
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, ChoiceOption, ControlSize, EyebrowSpec, IconButtonSpec,
-    SelectSpec, TextInputSpec,
-};
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Button, Eyebrow, FilterToolbar, IconButton, Select, TextInput};
+use poodle_specs::FilterToolbarSpec;
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ChoiceOption, ControlSize, EyebrowSpec, IconButtonSpec, SelectSpec,
+    TextInputSpec,
+};
 
 /// Static filter option sets reused across specimen sections.
 fn status_options() -> Vec<ChoiceOption> {
@@ -46,20 +46,26 @@ fn search_input(theme: &GpuiThemeProvider, id: &str) -> AnyElement {
 }
 
 fn select_input(theme: &GpuiThemeProvider, id: &str, options: Vec<ChoiceOption>) -> AnyElement {
-    Select::from_spec(
-        SelectSpec::new(options).with_default_value("all"),
-        theme,
-    )
-    .with_id(id.to_string())
-    .into_any_element()
+    Select::from_spec(SelectSpec::new(options).with_default_value("all"), theme)
+        .with_id(id.to_string())
+        .into_any_element()
 }
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Responsive grid layout ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Responsive grid layout"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Responsive grid layout"),
+                    theme,
+                ))
                 .child(
                     FilterToolbar::from_spec(
                         FilterToolbarSpec::new()
@@ -71,13 +77,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_child(search_input(theme, "filter-search"))
                     .with_child(select_input(theme, "filter-status", status_options()))
                     .with_child(select_input(theme, "filter-type", type_options()))
-                    .with_child(select_input(theme, "filter-owner", owner_options()))
-                )
+                    .with_child(select_input(
+                        theme,
+                        "filter-owner",
+                        owner_options(),
+                    )),
+                ),
         )
         // --- Sizes ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Sizes"),
+                    theme,
+                ))
                 .child({
                     let sizes: &[(&str, ControlSize)] = &[
                         ("xs", ControlSize::Xs),
@@ -98,16 +114,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 theme,
                             )
                             .with_child(search_input(theme, &format!("size-search-{key}")))
-                            .with_child(select_input(theme, &format!("size-status-{key}"), status_options()))
+                            .with_child(select_input(
+                                theme,
+                                &format!("size-status-{key}"),
+                                status_options(),
+                            )),
                         );
                     }
                     col
-                })
+                }),
         )
         // --- Collapsible with actions (expanded) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Collapsible with actions"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Collapsible with actions"),
+                    theme,
+                ))
                 .child(
                     FilterToolbar::from_spec(
                         FilterToolbarSpec::new()
@@ -119,20 +145,32 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_actions(
                         IconButton::from_spec(
-                            IconButtonSpec::new().with_icon("refresh-cw").with_aria_label("Refresh"),
+                            IconButtonSpec::new()
+                                .with_icon("refresh-cw")
+                                .with_aria_label("Refresh"),
                             theme,
                         )
-                        .with_id("ft-refresh-1")
+                        .with_id("ft-refresh-1"),
                     )
                     .with_child(search_input(theme, "col-search"))
                     .with_child(select_input(theme, "col-status", status_options()))
-                    .with_child(select_input(theme, "col-type", type_options()))
-                )
+                    .with_child(select_input(
+                        theme,
+                        "col-type",
+                        type_options(),
+                    )),
+                ),
         )
         // --- Explicit collapsed state ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Explicit collapsed state"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Explicit collapsed state"),
+                    theme,
+                ))
                 .child(
                     FilterToolbar::from_spec(
                         FilterToolbarSpec::new()
@@ -144,19 +182,31 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_actions(
                         IconButton::from_spec(
-                            IconButtonSpec::new().with_icon("refresh-cw").with_aria_label("Refresh"),
+                            IconButtonSpec::new()
+                                .with_icon("refresh-cw")
+                                .with_aria_label("Refresh"),
                             theme,
                         )
-                        .with_id("ft-refresh-2")
+                        .with_id("ft-refresh-2"),
                     )
                     .with_child(search_input(theme, "col2-search"))
-                    .with_child(select_input(theme, "col2-status", status_options()))
-                )
+                    .with_child(select_input(
+                        theme,
+                        "col2-status",
+                        status_options(),
+                    )),
+                ),
         )
         // --- With secondary slot ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With secondary slot"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With secondary slot"),
+                    theme,
+                ))
                 .child(
                     FilterToolbar::from_spec(
                         FilterToolbarSpec::new()
@@ -175,8 +225,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_label("Reset all"),
                             theme,
                         )
-                        .with_id("proj-reset")
-                    )
-                )
+                        .with_id("proj-reset"),
+                    ),
+                ),
         )
 }

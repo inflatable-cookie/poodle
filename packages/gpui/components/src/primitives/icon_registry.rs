@@ -109,22 +109,10 @@ pub static ICON_REGISTRY: LazyLock<HashMap<&'static str, IconDefinition>> = Lazy
     // --- Navigation ---
     icon!("arrow-left", path!("m12 19-7-7 7-7"), path!("M19 12H5"));
     icon!("arrow-right", path!("M5 12h14"), path!("m12 5 7 7-7 7"));
-    icon!(
-        "chevron-down",
-        path!("m6 9 6 6 6-6")
-    );
-    icon!(
-        "chevron-left",
-        path!("m15 18-6-6 6-6")
-    );
-    icon!(
-        "chevron-right",
-        path!("m9 18 6-6-6-6")
-    );
-    icon!(
-        "chevron-up",
-        path!("m18 15-6-6-6 6")
-    );
+    icon!("chevron-down", path!("m6 9 6 6 6-6"));
+    icon!("chevron-left", path!("m15 18-6-6 6-6"));
+    icon!("chevron-right", path!("m9 18 6-6-6-6"));
+    icon!("chevron-up", path!("m18 15-6-6-6 6"));
     icon!(
         "menu",
         path!("M4 5h16"),
@@ -222,11 +210,7 @@ pub static ICON_REGISTRY: LazyLock<HashMap<&'static str, IconDefinition>> = Lazy
         rect!(3.0, 4.0, 18.0, 18.0, 2.0, 0.0),
         path!("M3 10h18")
     );
-    icon!(
-        "clock",
-        circle!(12.0, 12.0, 10.0),
-        path!("M12 6v6l4 2")
-    );
+    icon!("clock", circle!(12.0, 12.0, 10.0), path!("M12 6v6l4 2"));
     icon!(
         "eye",
         path!("M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"),
@@ -237,10 +221,7 @@ pub static ICON_REGISTRY: LazyLock<HashMap<&'static str, IconDefinition>> = Lazy
         path!("M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"),
         path!("M14 2v5a1 1 0 0 0 1 1h5")
     );
-    icon!(
-        "filter",
-        path!("M22 3H2l8 9.46V19l4 2v-8.54z")
-    );
+    icon!("filter", path!("M22 3H2l8 9.46V19l4 2v-8.54z"));
     icon!(
         "folder",
         path!("M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z")

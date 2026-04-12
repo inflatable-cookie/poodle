@@ -23,12 +23,20 @@ pub struct PickerShell {
 
 impl std::ops::Deref for PickerShell {
     type Target = PickerShellSpec;
-    fn deref(&self) -> &PickerShellSpec { &self.spec }
+    fn deref(&self) -> &PickerShellSpec {
+        &self.spec
+    }
 }
 
 impl PickerShell {
     pub fn new(title: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PickerShellSpec::new(title), theme: theme.clone(), search_slot: None, results_slot: None, actions_slot: None }
+        Self {
+            spec: PickerShellSpec::new(title),
+            theme: theme.clone(),
+            search_slot: None,
+            results_slot: None,
+            actions_slot: None,
+        }
     }
 
     pub fn from_spec(spec: PickerShellSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,16 +50,42 @@ impl PickerShell {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn variant(mut self, v: PickerVariant) -> Self { self.spec.variant = v; self }
-    pub fn selection_mode(mut self, v: SelectionMode) -> Self { self.spec.selection_mode = v; self }
-    pub fn state(mut self, v: BrowseState) -> Self { self.spec.state = v; self }
-    pub fn query(mut self, v: impl Into<String>) -> Self { self.spec.query = v.into(); self }
-    pub fn result_count(mut self, v: usize) -> Self { self.spec.result_count = Some(v); self }
-    pub fn selected_count(mut self, v: usize) -> Self { self.spec.selected_count = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn variant(mut self, v: PickerVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn selection_mode(mut self, v: SelectionMode) -> Self {
+        self.spec.selection_mode = v;
+        self
+    }
+    pub fn state(mut self, v: BrowseState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn query(mut self, v: impl Into<String>) -> Self {
+        self.spec.query = v.into();
+        self
+    }
+    pub fn result_count(mut self, v: usize) -> Self {
+        self.spec.result_count = Some(v);
+        self
+    }
+    pub fn selected_count(mut self, v: usize) -> Self {
+        self.spec.selected_count = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_search(mut self, search: impl IntoElement) -> Self {
         self.search_slot = Some(search.into_any_element());
@@ -112,7 +146,9 @@ impl IntoElement for PickerShell {
                         blur_radius: px(8.0),
                         spread_radius: px(0.0),
                     },
-                ]).min_w(px(320.0)).max_w(px(480.0))
+                ])
+                .min_w(px(320.0))
+                .max_w(px(480.0))
             });
 
         // Header
@@ -168,15 +204,13 @@ impl IntoElement for PickerShell {
                 .justify_center()
                 .gap(gap_sm)
                 .py(gap_lg)
-                .child(
-                    Spinner::from_spec(
-                        SpinnerSpec::new()
-                            .with_variant(SpinnerVariant::Grid)
-                            .with_size(SpinnerSize::Md)
-                            .with_tone(SpinnerTone::Accent),
-                        theme,
-                    ),
-                )
+                .child(Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Grid)
+                        .with_size(SpinnerSize::Md)
+                        .with_tone(SpinnerTone::Accent),
+                    theme,
+                ))
                 .child(
                     div()
                         .text_size(body_size)
@@ -208,10 +242,7 @@ impl IntoElement for PickerShell {
                         .child("No results found."),
                 ),
             BrowseState::Ready => {
-                let mut area = div()
-                    .w_full()
-                    .max_h(px(240.0))
-                    .overflow_hidden();
+                let mut area = div().w_full().max_h(px(240.0)).overflow_hidden();
                 if let Some(results) = self.results_slot {
                     area = area.child(results);
                 }
@@ -259,7 +290,11 @@ impl IntoElement for PickerShell {
                 div()
                     .text_size(label_size)
                     .text_color(text_secondary.opacity(0.7))
-                    .child(format!("{} result{}", count, if count == 1 { "" } else { "s" })),
+                    .child(format!(
+                        "{} result{}",
+                        count,
+                        if count == 1 { "" } else { "s" }
+                    )),
             );
         }
 

@@ -1,7 +1,9 @@
 use crate::{FormActionAlign, StatusTone, ValidationState};
 use poodle_tokens::semantic;
 
-use crate::composite_types::{FormActionLayout, FormFieldState, FormSectionSpec, FormStatusSummary};
+use crate::composite_types::{
+    FormActionLayout, FormFieldState, FormSectionSpec, FormStatusSummary,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FormShellSpec {

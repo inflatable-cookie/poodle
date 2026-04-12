@@ -71,7 +71,10 @@ impl GpuiThemeProvider {
     ///
     /// Control-size overrides adjust control height, min-width, and
     /// default icon size for the given size stop.
-    pub fn with_control_size(mut self, size: &poodle_tokens::density::ControlSizeDefinition) -> Self {
+    pub fn with_control_size(
+        mut self,
+        size: &poodle_tokens::density::ControlSizeDefinition,
+    ) -> Self {
         self.overrides.extend_from_slice(size.overrides);
         self
     }
@@ -215,7 +218,9 @@ impl GpuiThemeProvider {
             "typography.label.size" => typed::semantic::TYPOGRAPHY_LABEL_SIZE.as_f32(),
             "typography.label.lineHeight" => typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.as_f32(),
             "typography.heading.size" => typed::semantic::TYPOGRAPHY_HEADING_SIZE.as_f32(),
-            "typography.heading.lineHeight" => typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.as_f32(),
+            "typography.heading.lineHeight" => {
+                typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.as_f32()
+            }
             "typography.code.size" => typed::semantic::TYPOGRAPHY_CODE_SIZE.as_f32(),
             "typography.code.lineHeight" => typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.as_f32(),
             // Direct dimension parsing for inline values

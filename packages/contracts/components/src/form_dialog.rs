@@ -62,19 +62,58 @@ impl FormDialogSpec {
         }
     }
 
-    pub fn with_open(mut self, open: bool) -> Self { self.open = Some(open); self }
-    pub fn with_subtitle(mut self, v: impl Into<String>) -> Self { self.subtitle = Some(v.into()); self }
-    pub fn with_description(mut self, v: impl Into<String>) -> Self { self.description = Some(v.into()); self }
-    pub fn with_submit_label(mut self, v: impl Into<String>) -> Self { self.submit_label = v.into(); self }
-    pub fn with_cancel_label(mut self, v: impl Into<String>) -> Self { self.cancel_label = v.into(); self }
-    pub fn with_submitting(mut self, v: bool) -> Self { self.is_submitting = v; self }
-    pub fn with_disabled(mut self, v: bool) -> Self { self.is_disabled = v; self }
-    pub fn with_error(mut self, v: impl Into<String>) -> Self { self.error = Some(v.into()); self }
-    pub fn with_success(mut self, v: impl Into<String>) -> Self { self.success = Some(v.into()); self }
-    pub fn with_aria_label(mut self, v: impl Into<String>) -> Self { self.aria_label = Some(v.into()); self }
-    pub fn with_columns(mut self, v: u32) -> Self { self.columns = v; self }
-    pub fn with_bare(mut self, v: bool) -> Self { self.is_bare = v; self }
-    pub fn with_show_default_actions(mut self, v: bool) -> Self { self.show_default_actions = v; self }
+    pub fn with_open(mut self, open: bool) -> Self {
+        self.open = Some(open);
+        self
+    }
+    pub fn with_subtitle(mut self, v: impl Into<String>) -> Self {
+        self.subtitle = Some(v.into());
+        self
+    }
+    pub fn with_description(mut self, v: impl Into<String>) -> Self {
+        self.description = Some(v.into());
+        self
+    }
+    pub fn with_submit_label(mut self, v: impl Into<String>) -> Self {
+        self.submit_label = v.into();
+        self
+    }
+    pub fn with_cancel_label(mut self, v: impl Into<String>) -> Self {
+        self.cancel_label = v.into();
+        self
+    }
+    pub fn with_submitting(mut self, v: bool) -> Self {
+        self.is_submitting = v;
+        self
+    }
+    pub fn with_disabled(mut self, v: bool) -> Self {
+        self.is_disabled = v;
+        self
+    }
+    pub fn with_error(mut self, v: impl Into<String>) -> Self {
+        self.error = Some(v.into());
+        self
+    }
+    pub fn with_success(mut self, v: impl Into<String>) -> Self {
+        self.success = Some(v.into());
+        self
+    }
+    pub fn with_aria_label(mut self, v: impl Into<String>) -> Self {
+        self.aria_label = Some(v.into());
+        self
+    }
+    pub fn with_columns(mut self, v: u32) -> Self {
+        self.columns = v;
+        self
+    }
+    pub fn with_bare(mut self, v: bool) -> Self {
+        self.is_bare = v;
+        self
+    }
+    pub fn with_show_default_actions(mut self, v: bool) -> Self {
+        self.show_default_actions = v;
+        self
+    }
 
     /// Effective description: subtitle takes precedence, then description.
     pub fn effective_description(&self) -> Option<&str> {
@@ -85,7 +124,16 @@ impl FormDialogSpec {
         self.is_submitting
     }
 
-    pub fn with_size(mut self, size: ControlSize) -> Self { self.size = size; self }
-    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self { self.size_role = size_role; self }
-    pub fn with_density(mut self, density: ControlDensity) -> Self { self.density = density; self }
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
 }

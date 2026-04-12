@@ -4,7 +4,9 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ChoiceOption, ControlSize, SegmentedControlSpec};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
 /// A real GPUI segmented control component backed by `SegmentedControlSpec`.
@@ -17,12 +19,19 @@ pub struct SegmentedControl {
 
 impl std::ops::Deref for SegmentedControl {
     type Target = SegmentedControlSpec;
-    fn deref(&self) -> &SegmentedControlSpec { &self.spec }
+    fn deref(&self) -> &SegmentedControlSpec {
+        &self.spec
+    }
 }
 
 impl SegmentedControl {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SegmentedControlSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_change: None }
+        Self {
+            spec: SegmentedControlSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: SegmentedControlSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,26 +44,49 @@ impl SegmentedControl {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn options(mut self, v: Vec<ChoiceOption>) -> Self { self.spec.options = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn equal_width(mut self, v: bool) -> Self { self.spec.equal_width = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn options(mut self, v: Vec<ChoiceOption>) -> Self {
+        self.spec.options = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn equal_width(mut self, v: bool) -> Self {
+        self.spec.equal_width = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
@@ -85,7 +117,10 @@ impl IntoElement for SegmentedControl {
         // Contract: root bg = surface 93% mix with text-primary
         let root_bg = color_mix(surface_bg, text_primary, 0.93);
         // Contract: root border = border-subtle 84%
-        let root_border = Hsla { a: border_subtle.a * 0.84, ..border_subtle };
+        let root_border = Hsla {
+            a: border_subtle.a * 0.84,
+            ..border_subtle
+        };
 
         let hover_bg = color_mix(surface_bg, elevated, 0.84);
 
@@ -110,10 +145,13 @@ impl IntoElement for SegmentedControl {
             .h(control_height);
 
         if is_disabled {
-            row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+            row = row
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
-        let option_values: Vec<String> = self.spec.options.iter().map(|o| o.value.clone()).collect();
+        let option_values: Vec<String> =
+            self.spec.options.iter().map(|o| o.value.clone()).collect();
 
         for (i, option) in self.spec.options.iter().enumerate() {
             let is_selected = current_value.as_deref() == Some(&option.value);
@@ -130,11 +168,16 @@ impl IntoElement for SegmentedControl {
                 .h(segment_height)
                 .text_size(segment_font_size)
                 .font_weight(FontWeight::SEMIBOLD)
-                .flex().items_center().justify_center()
+                .flex()
+                .items_center()
+                .justify_center()
                 .whitespace_nowrap()
                 .overflow_x_hidden()
                 .text_ellipsis()
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
 
             // equal_width: every segment takes an equal share of the row.
             if self.spec.equal_width {
@@ -145,19 +188,25 @@ impl IntoElement for SegmentedControl {
                 // Contract: selected segment with inset shadow
                 // Brand-raised treatment: gradient fill for selected segment
                 if theme.brand_raised && !is_disabled && !is_opt_disabled {
-                    use crate::theme_ext::{brand_raised_primary_fill, brand_raised_primary_shadow};
-                    seg = seg.bg(brand_raised_primary_fill(accent)).text_color(text_inverse).rounded(inner_radius)
+                    use crate::theme_ext::{
+                        brand_raised_primary_fill, brand_raised_primary_shadow,
+                    };
+                    seg = seg
+                        .bg(brand_raised_primary_fill(accent))
+                        .text_color(text_inverse)
+                        .rounded(inner_radius)
                         .shadow(brand_raised_primary_shadow());
                 } else {
-                    seg = seg.bg(accent).text_color(text_inverse).rounded(inner_radius)
-                        .shadow(vec![
-                            gpui::BoxShadow {
-                                color: hsla(0.0, 0.0, 0.0, 0.12),
-                                offset: point(px(0.0), px(1.0)),
-                                blur_radius: px(2.0),
-                                spread_radius: px(0.0),
-                            },
-                        ]);
+                    seg = seg
+                        .bg(accent)
+                        .text_color(text_inverse)
+                        .rounded(inner_radius)
+                        .shadow(vec![gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.12),
+                            offset: point(px(0.0), px(1.0)),
+                            blur_radius: px(2.0),
+                            spread_radius: px(0.0),
+                        }]);
                 }
             } else {
                 // Contract: unselected text = text-secondary
@@ -165,9 +214,7 @@ impl IntoElement for SegmentedControl {
             }
 
             if !is_disabled && !is_opt_disabled {
-                seg = seg
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(hover_bg));
+                seg = seg.cursor_pointer().hover(move |s| s.bg(hover_bg));
 
                 if let Some(ref handler) = self.on_change {
                     let handler = handler.clone();
@@ -186,7 +233,11 @@ impl IntoElement for SegmentedControl {
                         let next_idx = if event.keystroke.key == "right" {
                             Some((current_idx + 1) % nav_values.len())
                         } else if event.keystroke.key == "left" {
-                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
+                            Some(if current_idx == 0 {
+                                nav_values.len() - 1
+                            } else {
+                                current_idx - 1
+                            })
                         } else {
                             None
                         };
@@ -202,12 +253,7 @@ impl IntoElement for SegmentedControl {
                 let prev_selected = current_value.as_deref()
                     == self.spec.options.get(i - 1).map(|o| o.value.as_str());
                 if !prev_selected {
-                    row = row.child(
-                        div()
-                            .w(px(1.0))
-                            .h_full()
-                            .bg(root_border),
-                    );
+                    row = row.child(div().w(px(1.0)).h_full().bg(root_border));
                 }
             }
 

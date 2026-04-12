@@ -1,8 +1,8 @@
-use gpui::*;
-use poodle_specs::{FieldSpec, TextInputSpec, ValidationState, EyebrowSpec};
-use poodle_gpui_components::{Field, TextInput, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_gpui_components::{Eyebrow, Field, TextInput};
+use poodle_specs::{EyebrowSpec, FieldSpec, TextInputSpec, ValidationState};
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;

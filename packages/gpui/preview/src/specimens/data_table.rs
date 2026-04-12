@@ -1,15 +1,14 @@
-use gpui::*;
-use gpui::prelude::FluentBuilder;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{
-    DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec,
-    TableSortDirection,
-};
-use poodle_specs::{ControlSize, EyebrowSpec, StatusTone};
-use poodle_gpui_components::{DataTable, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{DataTable, Eyebrow};
+use poodle_specs::{ControlSize, EyebrowSpec, StatusTone};
+use poodle_specs::{
+    DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
+};
 
 fn make_columns() -> Vec<TableColumnSpec> {
     vec![
@@ -22,24 +21,33 @@ fn make_columns() -> Vec<TableColumnSpec> {
 
 fn make_rows() -> Vec<TableRowSpec> {
     vec![
-        TableRowSpec::new("1", vec![
-            ("name".into(), "Alice Chen".into()),
-            ("email".into(), "alice@example.com".into()),
-            ("role".into(), "Engineer".into()),
-            ("status".into(), "Active".into()),
-        ]),
-        TableRowSpec::new("2", vec![
-            ("name".into(), "Bob Martinez".into()),
-            ("email".into(), "bob@example.com".into()),
-            ("role".into(), "Designer".into()),
-            ("status".into(), "Active".into()),
-        ]),
-        TableRowSpec::new("3", vec![
-            ("name".into(), "Carol Patel".into()),
-            ("email".into(), "carol@example.com".into()),
-            ("role".into(), "PM".into()),
-            ("status".into(), "On leave".into()),
-        ]),
+        TableRowSpec::new(
+            "1",
+            vec![
+                ("name".into(), "Alice Chen".into()),
+                ("email".into(), "alice@example.com".into()),
+                ("role".into(), "Engineer".into()),
+                ("status".into(), "Active".into()),
+            ],
+        ),
+        TableRowSpec::new(
+            "2",
+            vec![
+                ("name".into(), "Bob Martinez".into()),
+                ("email".into(), "bob@example.com".into()),
+                ("role".into(), "Designer".into()),
+                ("status".into(), "Active".into()),
+            ],
+        ),
+        TableRowSpec::new(
+            "3",
+            vec![
+                ("name".into(), "Carol Patel".into()),
+                ("email".into(), "carol@example.com".into()),
+                ("role".into(), "PM".into()),
+                ("status".into(), "On leave".into()),
+            ],
+        ),
     ]
 }
 
@@ -55,43 +63,64 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ];
 
     let rows = vec![
-        TableRowSpec::new("1", vec![
-            ("name".into(), "Alice Chen".into()),
-            ("email".into(), "alice@example.com".into()),
-            ("role".into(), "Engineer".into()),
-            ("status".into(), "Active".into()),
-        ]),
-        TableRowSpec::new("2", vec![
-            ("name".into(), "Bob Martinez".into()),
-            ("email".into(), "bob@example.com".into()),
-            ("role".into(), "Designer".into()),
-            ("status".into(), "Active".into()),
-        ]),
-        TableRowSpec::new("3", vec![
-            ("name".into(), "Carol Patel".into()),
-            ("email".into(), "carol@example.com".into()),
-            ("role".into(), "PM".into()),
-            ("status".into(), "On leave".into()),
-        ]),
-        TableRowSpec::new("4", vec![
-            ("name".into(), "Dan Okoro".into()),
-            ("email".into(), "dan@example.com".into()),
-            ("role".into(), "Engineer".into()),
-            ("status".into(), "Active".into()),
-        ]),
-        TableRowSpec::new("5", vec![
-            ("name".into(), "Eve Nakamura".into()),
-            ("email".into(), "eve@example.com".into()),
-            ("role".into(), "Designer".into()),
-            ("status".into(), "Active".into()),
-        ]),
+        TableRowSpec::new(
+            "1",
+            vec![
+                ("name".into(), "Alice Chen".into()),
+                ("email".into(), "alice@example.com".into()),
+                ("role".into(), "Engineer".into()),
+                ("status".into(), "Active".into()),
+            ],
+        ),
+        TableRowSpec::new(
+            "2",
+            vec![
+                ("name".into(), "Bob Martinez".into()),
+                ("email".into(), "bob@example.com".into()),
+                ("role".into(), "Designer".into()),
+                ("status".into(), "Active".into()),
+            ],
+        ),
+        TableRowSpec::new(
+            "3",
+            vec![
+                ("name".into(), "Carol Patel".into()),
+                ("email".into(), "carol@example.com".into()),
+                ("role".into(), "PM".into()),
+                ("status".into(), "On leave".into()),
+            ],
+        ),
+        TableRowSpec::new(
+            "4",
+            vec![
+                ("name".into(), "Dan Okoro".into()),
+                ("email".into(), "dan@example.com".into()),
+                ("role".into(), "Engineer".into()),
+                ("status".into(), "Active".into()),
+            ],
+        ),
+        TableRowSpec::new(
+            "5",
+            vec![
+                ("name".into(), "Eve Nakamura".into()),
+                ("email".into(), "eve@example.com".into()),
+                ("role".into(), "Designer".into()),
+                ("status".into(), "Active".into()),
+            ],
+        ),
     ];
 
     // Track sort state
-    let sort_col = state.specimens.text.get("dt-sort-col")
+    let sort_col = state
+        .specimens
+        .text
+        .get("dt-sort-col")
         .cloned()
         .unwrap_or_else(|| "name".to_string());
-    let sort_dir_str = state.specimens.text.get("dt-sort-dir")
+    let sort_dir_str = state
+        .specimens
+        .text
+        .get("dt-sort-dir")
         .cloned()
         .unwrap_or_else(|| "asc".to_string());
     let sort_dir = if sort_dir_str == "desc" {
@@ -101,7 +130,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     };
 
     // Track last action
-    let last_action = state.specimens.text.get("dt-last-action")
+    let last_action = state
+        .specimens
+        .text
+        .get("dt-last-action")
         .cloned()
         .unwrap_or_default();
 
@@ -119,11 +151,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TableColumnSpec::new("status", "Status"),
     ];
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- With sorting, column visibility, and export ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With sorting, column visibility, and export"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With sorting, column visibility, and export"),
+                    theme,
+                ))
                 .child(
                     DataTable::from_spec(
                         DataTableSpec::new(columns, rows)
@@ -133,20 +174,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .on_sort(cx.listener(|this, col_id: &str, _w, cx| {
-                        let current_col = this.state.specimens.text.get("dt-sort-col")
+                        let current_col = this
+                            .state
+                            .specimens
+                            .text
+                            .get("dt-sort-col")
                             .cloned()
                             .unwrap_or_else(|| "name".to_string());
-                        let current_dir = this.state.specimens.text.get("dt-sort-dir")
+                        let current_dir = this
+                            .state
+                            .specimens
+                            .text
+                            .get("dt-sort-dir")
                             .cloned()
                             .unwrap_or_else(|| "asc".to_string());
 
                         if col_id == current_col {
                             // Toggle direction
                             let new_dir = if current_dir == "asc" { "desc" } else { "asc" };
-                            this.state.specimens.text.insert("dt-sort-dir".to_string(), new_dir.to_string());
+                            this.state
+                                .specimens
+                                .text
+                                .insert("dt-sort-dir".to_string(), new_dir.to_string());
                         } else {
-                            this.state.specimens.text.insert("dt-sort-col".to_string(), col_id.to_string());
-                            this.state.specimens.text.insert("dt-sort-dir".to_string(), "asc".to_string());
+                            this.state
+                                .specimens
+                                .text
+                                .insert("dt-sort-col".to_string(), col_id.to_string());
+                            this.state
+                                .specimens
+                                .text
+                                .insert("dt-sort-dir".to_string(), "asc".to_string());
                         }
                         cx.notify();
                     }))
@@ -157,25 +215,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             format!("Clicked row {}", row_id),
                         );
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // Status line
         .when(!last_action.is_empty(), |d| {
             d.child(
-                div().text_sm().text_color(color_to_hsla(text_secondary))
-                    .child(last_action)
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(last_action),
             )
         })
         .child(
-            div().text_sm().text_color(color_to_hsla(text_secondary))
-                .child(format!("{} of 5 selected", selected_count))
+            div()
+                .text_sm()
+                .text_color(color_to_hsla(text_secondary))
+                .child(format!("{} of 5 selected", selected_count)),
         )
-
         // --- Sizes ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Sizes"),
+                    theme,
+                ))
                 .child({
                     let sizes: &[(&str, ControlSize)] = &[
                         ("xs", ControlSize::Xs),
@@ -191,85 +258,101 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 div()
                                     .text_size(px(11.0))
                                     .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("size = {}", key))
+                                    .child(format!("size = {}", key)),
                             )
-                            .child(
-                                DataTable::from_spec(
-                                    DataTableSpec::new(make_columns(), make_rows())
-                                        .with_aria_label(format!("Data table at {}", key))
-                                        .with_size(size),
-                                    theme,
-                                )
-                            );
+                            .child(DataTable::from_spec(
+                                DataTableSpec::new(make_columns(), make_rows())
+                                    .with_aria_label(format!("Data table at {}", key))
+                                    .with_size(size),
+                                theme,
+                            ));
                     }
                     col
-                })
+                }),
         )
         // --- With filters and pagination (compact + striped + sticky header) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With filters and pagination"), theme))
-                .child(
-                    DataTable::from_spec(
-                        DataTableSpec::new(make_columns(), make_rows())
-                            .with_filters(vec![
-                                TableFilter::new("name", "Alice"),
-                                TableFilter::new("role", "Engineer"),
-                            ])
-                            .with_pagination(TablePagination::new(1, 10, 42))
-                            .with_compact(true)
-                            .with_striped(true)
-                            .with_sticky_header(true)
-                            .with_show_row_actions(false)
-                            .with_aria_label("Directory table"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With filters and pagination"),
+                    theme,
+                ))
+                .child(DataTable::from_spec(
+                    DataTableSpec::new(make_columns(), make_rows())
+                        .with_filters(vec![
+                            TableFilter::new("name", "Alice"),
+                            TableFilter::new("role", "Engineer"),
+                        ])
+                        .with_pagination(TablePagination::new(1, 10, 42))
+                        .with_compact(true)
+                        .with_striped(true)
+                        .with_sticky_header(true)
+                        .with_show_row_actions(false)
+                        .with_aria_label("Directory table"),
+                    theme,
+                )),
         )
         // --- With column visibility, export, and row selection ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Column visibility + export + row selection"), theme))
-                .child(
-                    DataTable::from_spec(
-                        DataTableSpec::new(make_columns(), make_rows())
-                            .with_selectable(true)
-                            .with_selected_row_ids(vec!["1".to_string(), "3".to_string()])
-                            .with_hidden_column_ids(vec!["email".to_string()])
-                            .with_show_column_visibility(true)
-                            .with_show_export(true)
-                            .with_show_row_actions(false)
-                            .with_aria_label("Team members"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Column visibility + export + row selection"),
+                    theme,
+                ))
+                .child(DataTable::from_spec(
+                    DataTableSpec::new(make_columns(), make_rows())
+                        .with_selectable(true)
+                        .with_selected_row_ids(vec!["1".to_string(), "3".to_string()])
+                        .with_hidden_column_ids(vec!["email".to_string()])
+                        .with_show_column_visibility(true)
+                        .with_show_export(true)
+                        .with_show_row_actions(false)
+                        .with_aria_label("Team members"),
+                    theme,
+                )),
         )
         // --- Custom cells and expanded rows ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom cells and expanded rows"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom cells and expanded rows"),
+                    theme,
+                ))
                 .child({
                     let incident_columns = vec![
-                        TableColumnSpec::new("status", "Status")
-                            .with_width_rem(7.0),
+                        TableColumnSpec::new("status", "Status").with_width_rem(7.0),
                         TableColumnSpec::new("endpoint", "Endpoint"),
-                        TableColumnSpec::new("owner", "Owner")
-                            .with_width_rem(10.0),
+                        TableColumnSpec::new("owner", "Owner").with_width_rem(10.0),
                     ];
 
                     let incident_rows = vec![
-                        TableRowSpec::new("incident-1", vec![
-                            ("status".into(), "Open".into()),
-                            ("endpoint".into(), "POST /api/orders".into()),
-                            ("owner".into(), "Alice".into()),
-                        ])
+                        TableRowSpec::new(
+                            "incident-1",
+                            vec![
+                                ("status".into(), "Open".into()),
+                                ("endpoint".into(), "POST /api/orders".into()),
+                                ("owner".into(), "Alice".into()),
+                            ],
+                        )
                         .with_summary("Active incident — last updated 2026-03-27 11:18 UTC.")
                         .with_cell_tone("status", StatusTone::Danger),
-                        TableRowSpec::new("incident-2", vec![
-                            ("status".into(), "Resolved".into()),
-                            ("endpoint".into(), "GET /api/catalog".into()),
-                            ("owner".into(), "Bob".into()),
-                        ])
+                        TableRowSpec::new(
+                            "incident-2",
+                            vec![
+                                ("status".into(), "Resolved".into()),
+                                ("endpoint".into(), "GET /api/catalog".into()),
+                                ("owner".into(), "Bob".into()),
+                            ],
+                        )
                         .with_summary("Resolved 2026-03-27 09:42 UTC — rollback completed.")
                         .with_cell_tone("status", StatusTone::Success),
                     ];
@@ -281,18 +364,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_aria_label("Active incidents"),
                         theme,
                     )
-                })
+                }),
         )
         // --- Empty state ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
-                .child(
-                    DataTable::from_spec(
-                        DataTableSpec::new(empty_columns, vec![])
-                            .with_empty_message("No team members match the current filters."),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Empty state"),
+                    theme,
+                ))
+                .child(DataTable::from_spec(
+                    DataTableSpec::new(empty_columns, vec![])
+                        .with_empty_message("No team members match the current filters."),
+                    theme,
+                )),
         )
 }

@@ -5,7 +5,6 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{FormActionAlign, FormActionsSpec};
 
-
 /// A real GPUI form actions bar backed by `FormActionsSpec`.
 ///
 /// Lays out action buttons (submit, cancel, etc.) with configurable alignment.
@@ -17,12 +16,18 @@ pub struct FormActions {
 
 impl std::ops::Deref for FormActions {
     type Target = FormActionsSpec;
-    fn deref(&self) -> &FormActionsSpec { &self.spec }
+    fn deref(&self) -> &FormActionsSpec {
+        &self.spec
+    }
 }
 
 impl FormActions {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: FormActionsSpec::new(), theme: theme.clone(), actions: Vec::new() }
+        Self {
+            spec: FormActionsSpec::new(),
+            theme: theme.clone(),
+            actions: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: FormActionsSpec, theme: &GpuiThemeProvider) -> Self {
@@ -34,8 +39,10 @@ impl FormActions {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn align(mut self, v: FormActionAlign) -> Self { self.spec.align = v; self }
-
+    pub fn align(mut self, v: FormActionAlign) -> Self {
+        self.spec.align = v;
+        self
+    }
 
     /// Add an action element (typically a Button).
     pub fn with_action(mut self, action: impl IntoElement) -> Self {

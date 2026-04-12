@@ -1,12 +1,12 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{ChoiceOption, EyebrowSpec, Orientation, RadioGroupSpec};
-use poodle_gpui_components::{RadioGroup, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, RadioGroup};
+use poodle_specs::{ChoiceOption, EyebrowSpec, Orientation, RadioGroupSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -26,40 +26,64 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ];
 
     // Read current selections from specimen state, defaulting to contract initial values
-    let plan_value = state.specimens.text.get("radio-plan")
+    let plan_value = state
+        .specimens
+        .text
+        .get("radio-plan")
         .cloned()
         .unwrap_or_else(|| "pro".to_string());
-    let size_value = state.specimens.text.get("radio-size")
+    let size_value = state
+        .specimens
+        .text
+        .get("radio-size")
         .cloned()
         .unwrap_or_else(|| "md".to_string());
 
-    let examples = div().flex().flex_col().gap(px(24.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Vertical (default) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical (default)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Vertical (default)"),
+                    theme,
+                ))
                 .child(
                     RadioGroup::from_spec(
-                        RadioGroupSpec::new(plan_options.clone())
-                            .with_value(plan_value.clone()),
+                        RadioGroupSpec::new(plan_options.clone()).with_value(plan_value.clone()),
                         theme,
                     )
                     .with_id("radio-plan")
                     .on_change(cx.listener(|this, value: &str, _w, cx| {
-                        this.state.specimens.text.insert("radio-plan".to_string(), value.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("radio-plan".to_string(), value.to_string());
                         cx.notify();
-                    }))
+                    })),
                 )
                 .child(
-                    div().text_sm()
+                    div()
+                        .text_sm()
                         .text_color(color_to_hsla(text_secondary))
-                        .child(format!("Selected: {}", plan_value))
-                )
+                        .child(format!("Selected: {}", plan_value)),
+                ),
         )
         // --- Horizontal ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Horizontal"),
+                    theme,
+                ))
                 .child(
                     RadioGroup::from_spec(
                         RadioGroupSpec::new(size_options)
@@ -69,33 +93,47 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                     .with_id("radio-size")
                     .on_change(cx.listener(|this, value: &str, _w, cx| {
-                        this.state.specimens.text.insert("radio-size".to_string(), value.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("radio-size".to_string(), value.to_string());
                         cx.notify();
-                    }))
+                    })),
                 )
                 .child(
-                    div().text_sm()
+                    div()
+                        .text_sm()
                         .text_color(color_to_hsla(text_secondary))
-                        .child(format!("Selected: {}", size_value))
-                )
+                        .child(format!("Selected: {}", size_value)),
+                ),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
                 .child({
-                    let mut spec = RadioGroupSpec::new(plan_options.clone())
-                        .with_value("free");
+                    let mut spec = RadioGroupSpec::new(plan_options.clone()).with_value("free");
                     spec.is_disabled = true;
 
-                    RadioGroup::from_spec(spec, theme)
-                        .with_id("radio-disabled")
-                })
+                    RadioGroup::from_spec(spec, theme).with_id("radio-disabled")
+                }),
         )
         // --- Custom selected color ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom selected color"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom selected color"),
+                    theme,
+                ))
                 .child(
                     RadioGroup::from_spec(
                         RadioGroupSpec::new(vec![
@@ -103,24 +141,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             ChoiceOption::new("pro", "Pro"),
                             ChoiceOption::new("enterprise", "Enterprise"),
                         ])
-                            .with_value(plan_value.clone())
-                            .with_selected_color("#22c55e"),
+                        .with_value(plan_value.clone())
+                        .with_selected_color("#22c55e"),
                         theme,
                     )
                     .with_id("radio-custom-color")
                     .on_change(cx.listener(|this, value: &str, _w, cx| {
-                        this.state.specimens.text.insert("radio-plan".to_string(), value.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("radio-plan".to_string(), value.to_string());
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         .into_any_element();
 
-    let make_options = || vec![
-        ChoiceOption::new("free", "Free"),
-        ChoiceOption::new("pro", "Pro"),
-        ChoiceOption::new("enterprise", "Enterprise"),
-    ];
+    let make_options = || {
+        vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro"),
+            ChoiceOption::new("enterprise", "Enterprise"),
+        ]
+    };
 
     specimen_layout(
         state,

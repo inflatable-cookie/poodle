@@ -24,12 +24,20 @@ pub struct Popover {
 
 impl std::ops::Deref for Popover {
     type Target = PopoverSpec;
-    fn deref(&self) -> &PopoverSpec { &self.spec }
+    fn deref(&self) -> &PopoverSpec {
+        &self.spec
+    }
 }
 
 impl Popover {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PopoverSpec::new(), theme: theme.clone(), trigger: None, content: None, on_open_change: None }
+        Self {
+            spec: PopoverSpec::new(),
+            theme: theme.clone(),
+            trigger: None,
+            content: None,
+            on_open_change: None,
+        }
     }
 
     pub fn from_spec(spec: PopoverSpec, theme: &GpuiThemeProvider) -> Self {
@@ -43,13 +51,30 @@ impl Popover {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
-    pub fn dismiss_on_outside_interact(mut self, v: bool) -> Self { self.spec.dismiss_on_outside_interact = v; self }
-    pub fn initial_focus(mut self, v: PopoverInitialFocus) -> Self { self.spec.initial_focus = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn placement(mut self, v: OverlayPlacement) -> Self {
+        self.spec.placement = v;
+        self
+    }
+    pub fn dismiss_on_outside_interact(mut self, v: bool) -> Self {
+        self.spec.dismiss_on_outside_interact = v;
+        self
+    }
+    pub fn initial_focus(mut self, v: PopoverInitialFocus) -> Self {
+        self.spec.initial_focus = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
         self.trigger = Some(trigger.into_any_element());
@@ -62,7 +87,10 @@ impl Popover {
     }
 
     /// Called when the popover open state should change (e.g., Escape to close).
-    pub fn on_open_change(mut self, handler: impl Fn(bool, &mut Window, &mut App) + 'static) -> Self {
+    pub fn on_open_change(
+        mut self,
+        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
         self.on_open_change = Some(std::rc::Rc::new(handler));
         self
     }
@@ -82,8 +110,14 @@ impl IntoElement for Popover {
         let radius = resolve_radius(theme, "radius.surface");
 
         // Matches Svelte treatment-surface-elevated values
-        let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
-        let border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let surface_bg = Hsla {
+            a: elevated_bg.a * 0.94,
+            ..elevated_bg
+        };
+        let border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
 
         let mut wrapper = div().flex().flex_col().gap(px(spec.offset as f32));
 
@@ -111,23 +145,24 @@ impl IntoElement for Popover {
                     surface = surface.bg(surface_bg);
                 }
 
-                surface = surface.border_1()
-                        .border_color(border)
-                        // Contract: elevation-popover shadow
-                        .shadow(vec![
-                            gpui::BoxShadow {
-                                color: hsla(0.0, 0.0, 0.0, 0.10),
-                                offset: point(px(0.0), px(4.0)),
-                                blur_radius: px(16.0),
-                                spread_radius: px(0.0),
-                            },
-                            gpui::BoxShadow {
-                                color: hsla(0.0, 0.0, 0.0, 0.06),
-                                offset: point(px(0.0), px(1.0)),
-                                blur_radius: px(4.0),
-                                spread_radius: px(0.0),
-                            },
-                        ])
+                surface = surface
+                    .border_1()
+                    .border_color(border)
+                    // Contract: elevation-popover shadow
+                    .shadow(vec![
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.10),
+                            offset: point(px(0.0), px(4.0)),
+                            blur_radius: px(16.0),
+                            spread_radius: px(0.0),
+                        },
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.06),
+                            offset: point(px(0.0), px(1.0)),
+                            blur_radius: px(4.0),
+                            spread_radius: px(0.0),
+                        },
+                    ])
                     .px(panel_x)
                     .py(panel_y)
                     // Contract: min-width 14rem, max-width min(24rem, 90vw)

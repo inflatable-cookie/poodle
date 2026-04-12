@@ -2,9 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{
-    IconSize, IconSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone,
-};
+use poodle_specs::{IconSize, IconSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
 use super::icon::Icon;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -18,12 +16,18 @@ pub struct Pill {
 
 impl std::ops::Deref for Pill {
     type Target = PillSpec;
-    fn deref(&self) -> &PillSpec { &self.spec }
+    fn deref(&self) -> &PillSpec {
+        &self.spec
+    }
 }
 
 impl Pill {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PillSpec::new(), theme: theme.clone(), on_remove: None }
+        Self {
+            spec: PillSpec::new(),
+            theme: theme.clone(),
+            on_remove: None,
+        }
     }
 
     pub fn from_spec(spec: PillSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,16 +39,42 @@ impl Pill {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
-    pub fn tone(mut self, v: PillTone) -> Self { self.spec.tone = v; self }
-    pub fn appearance(mut self, v: PillAppearance) -> Self { self.spec.appearance = v; self }
-    pub fn size(mut self, v: PillSize) -> Self { self.spec.size = v; self }
-    pub fn font(mut self, v: PillFont) -> Self { self.spec.font = v; self }
-    pub fn muted(mut self, v: bool) -> Self { self.spec.is_muted = v; self }
-    pub fn removable(mut self, v: bool) -> Self { self.spec.is_removable = v; self }
-    pub fn selected(mut self, v: bool) -> Self { self.spec.is_selected = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = v.into();
+        self
+    }
+    pub fn tone(mut self, v: PillTone) -> Self {
+        self.spec.tone = v;
+        self
+    }
+    pub fn appearance(mut self, v: PillAppearance) -> Self {
+        self.spec.appearance = v;
+        self
+    }
+    pub fn size(mut self, v: PillSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn font(mut self, v: PillFont) -> Self {
+        self.spec.font = v;
+        self
+    }
+    pub fn muted(mut self, v: bool) -> Self {
+        self.spec.is_muted = v;
+        self
+    }
+    pub fn removable(mut self, v: bool) -> Self {
+        self.spec.is_removable = v;
+        self
+    }
+    pub fn selected(mut self, v: bool) -> Self {
+        self.spec.is_selected = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
 
     pub fn on_remove(
         mut self,
@@ -111,7 +141,10 @@ impl IntoElement for Pill {
 
         // Subtle appearance: reduce fill to 50% opacity (Svelte: color-mix 50%, transparent)
         let bg = if spec.appearance == PillAppearance::Subtle {
-            Hsla { a: bg.a * 0.5, ..bg }
+            Hsla {
+                a: bg.a * 0.5,
+                ..bg
+            }
         } else {
             bg
         };
@@ -132,12 +165,10 @@ impl IntoElement for Pill {
 
         // Text color: badges use primary for toned, secondary for neutral
         let text_color = match spec.appearance {
-            PillAppearance::Badge => {
-                match spec.tone {
-                    PillTone::Neutral => text_secondary,
-                    _ => resolve_color(theme, "color.text.primary"),
-                }
-            }
+            PillAppearance::Badge => match spec.tone {
+                PillTone::Neutral => text_secondary,
+                _ => resolve_color(theme, "color.text.primary"),
+            },
             _ => text_color,
         };
 
@@ -179,7 +210,10 @@ impl IntoElement for Pill {
         };
         el = el.child(display_label);
 
-        el = el.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        el = el.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         // Muted: reduced opacity (Svelte: opacity 0.72)
         if spec.is_muted {
@@ -201,11 +235,8 @@ impl IntoElement for Pill {
                 .flex()
                 .items_center()
                 .child(
-                    Icon::from_spec(
-                        IconSpec::new("x").with_size(IconSize::Sm),
-                        theme,
-                    )
-                    .with_color(icon_muted),
+                    Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
+                        .with_color(icon_muted),
                 );
 
             if let Some(handler) = self.on_remove {

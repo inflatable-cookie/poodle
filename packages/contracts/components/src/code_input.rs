@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
+use poodle_tokens::semantic;
 
 /// CodeInput -- a segmented code entry field with visual digit slots.
 ///
@@ -136,7 +136,11 @@ impl CodeInputSpec {
 
     /// Whether the code has been fully entered (all digits filled).
     pub fn is_complete(&self) -> bool {
-        let sanitized_len = self.current_value().chars().filter(|c| c.is_ascii_digit()).count();
+        let sanitized_len = self
+            .current_value()
+            .chars()
+            .filter(|c| c.is_ascii_digit())
+            .count();
         sanitized_len >= self.length
     }
 
@@ -147,7 +151,11 @@ impl CodeInputSpec {
 
     /// Count of filled digit positions.
     pub fn filled_count(&self) -> usize {
-        self.current_value().chars().filter(|c| c.is_ascii_digit()).count().min(self.length)
+        self.current_value()
+            .chars()
+            .filter(|c| c.is_ascii_digit())
+            .count()
+            .min(self.length)
     }
 
     // ── Token methods ────────────────────────────────────────

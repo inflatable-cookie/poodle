@@ -16,7 +16,9 @@ pub struct FieldSet {
 
 impl std::ops::Deref for FieldSet {
     type Target = FieldSetSpec;
-    fn deref(&self) -> &FieldSetSpec { &self.spec }
+    fn deref(&self) -> &FieldSetSpec {
+        &self.spec
+    }
 }
 
 impl FieldSet {
@@ -36,8 +38,14 @@ impl FieldSet {
         }
     }
 
-    pub fn legend(mut self, v: impl Into<String>) -> Self { self.spec.legend = Some(v.into()); self }
-    pub fn columns(mut self, v: u8) -> Self { self.spec.columns = v; self }
+    pub fn legend(mut self, v: impl Into<String>) -> Self {
+        self.spec.legend = Some(v.into());
+        self
+    }
+    pub fn columns(mut self, v: u8) -> Self {
+        self.spec.columns = v;
+        self
+    }
 
     pub fn with_child(mut self, child: impl IntoElement + 'static) -> Self {
         self.children.push(child.into_any_element());

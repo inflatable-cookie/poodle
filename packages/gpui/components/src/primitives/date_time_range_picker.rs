@@ -2,10 +2,16 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CalendarWeekStart, ControlDensity, ControlSize, DateTimeRangePickerSpec, DateTimeRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    CalendarWeekStart, ControlDensity, ControlSize, DateTimeRangePickerSpec, DateTimeRangeValue,
+    IconSize, IconSpec, SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date-time range picker backed by `DateTimeRangePickerSpec`.
@@ -20,12 +26,19 @@ pub struct DateTimeRangePicker {
 
 impl std::ops::Deref for DateTimeRangePicker {
     type Target = DateTimeRangePickerSpec;
-    fn deref(&self) -> &DateTimeRangePickerSpec { &self.spec }
+    fn deref(&self) -> &DateTimeRangePickerSpec {
+        &self.spec
+    }
 }
 
 impl DateTimeRangePicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DateTimeRangePickerSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None }
+        Self {
+            spec: DateTimeRangePickerSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_toggle: None,
+        }
     }
 
     pub fn from_spec(spec: DateTimeRangePickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,37 +51,67 @@ impl DateTimeRangePicker {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: DateTimeRangeValue) -> Self { self.spec.value = Some(v); self }
-    pub fn default_value(mut self, v: DateTimeRangeValue) -> Self { self.spec.default_value = v; self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = v.into(); self }
-    pub fn week_starts_on(mut self, v: CalendarWeekStart) -> Self { self.spec.week_starts_on = v; self }
-    pub fn locale(mut self, v: impl Into<String>) -> Self { self.spec.locale = v.into(); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: DateTimeRangeValue) -> Self {
+        self.spec.value = Some(v);
+        self
+    }
+    pub fn default_value(mut self, v: DateTimeRangeValue) -> Self {
+        self.spec.default_value = v;
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn placeholder(mut self, v: impl Into<String>) -> Self {
+        self.spec.placeholder = v.into();
+        self
+    }
+    pub fn week_starts_on(mut self, v: CalendarWeekStart) -> Self {
+        self.spec.week_starts_on = v;
+        self
+    }
+    pub fn locale(mut self, v: impl Into<String>) -> Self {
+        self.spec.locale = v.into();
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
 
     /// Format a DateTimeValue into a display string.
-    fn format_datetime(
-        date: Option<&str>,
-        time: Option<&str>,
-    ) -> Option<String> {
+    fn format_datetime(date: Option<&str>, time: Option<&str>) -> Option<String> {
         match (date, time) {
             (Some(d), Some(t)) => Some(format!("{} {}", d, t)),
             (Some(d), None) => Some(d.to_string()),
@@ -106,14 +149,9 @@ impl IntoElement for DateTimeRangePicker {
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
 
         let value = spec.current_value();
-        let start_text = Self::format_datetime(
-            value.start.date.as_deref(),
-            value.start.time.as_deref(),
-        );
-        let end_text = Self::format_datetime(
-            value.end.date.as_deref(),
-            value.end.time.as_deref(),
-        );
+        let start_text =
+            Self::format_datetime(value.start.date.as_deref(), value.start.time.as_deref());
+        let end_text = Self::format_datetime(value.end.date.as_deref(), value.end.time.as_deref());
 
         let has_value = start_text.is_some() || end_text.is_some();
         let display_text = if has_value {
@@ -151,16 +189,17 @@ impl IntoElement for DateTimeRangePicker {
 
         // Focus ring
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        trigger = trigger.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if is_disabled {
             trigger = trigger
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
-            trigger = trigger
-                .cursor_pointer()
-                .hover(|s| s.bg(hover_bg));
+            trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
         }
 
         let text_col = if has_value {
@@ -172,11 +211,8 @@ impl IntoElement for DateTimeRangePicker {
         trigger = trigger
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
-                Icon::from_spec(
-                    IconSpec::new("calendar").with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(icon_muted),
+                Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
+                    .with_color(icon_muted),
             );
 
         if let Some(handler) = self.on_toggle {
@@ -198,11 +234,7 @@ impl IntoElement for DateTimeRangePicker {
             }
         }
 
-        let mut container = div()
-            .flex()
-            .flex_col()
-            .gap(px(4.0))
-            .child(trigger);
+        let mut container = div().flex().flex_col().gap(px(4.0)).child(trigger);
 
         if is_open {
             let section_padding = resolve_px(theme, "space.stack.md");
@@ -211,10 +243,7 @@ impl IntoElement for DateTimeRangePicker {
             let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
             // Weekday header row
-            let mut weekday_row = div()
-                .flex()
-                .items_center()
-                .gap(px(2.0));
+            let mut weekday_row = div().flex().items_center().gap(px(2.0));
             for day in &weekdays {
                 weekday_row = weekday_row.child(
                     div()
@@ -265,10 +294,7 @@ impl IntoElement for DateTimeRangePicker {
                 .child(grid);
 
             // Separator
-            let separator = div()
-                .w_full()
-                .h(px(1.0))
-                .bg(border);
+            let separator = div().w_full().h(px(1.0)).bg(border);
 
             // Time fields row — two TimeField sections side by side
             let start_time_display = value.start.time.as_deref().unwrap_or("--:--");

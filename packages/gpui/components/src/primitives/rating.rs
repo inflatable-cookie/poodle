@@ -4,10 +4,12 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, RatingSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconSize, IconSpec, RatingSpec, SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI rating component backed by `RatingSpec`.
@@ -19,12 +21,18 @@ pub struct Rating {
 
 impl std::ops::Deref for Rating {
     type Target = RatingSpec;
-    fn deref(&self) -> &RatingSpec { &self.spec }
+    fn deref(&self) -> &RatingSpec {
+        &self.spec
+    }
 }
 
 impl Rating {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RatingSpec::new(), theme: theme.clone(), on_change: None }
+        Self {
+            spec: RatingSpec::new(),
+            theme: theme.clone(),
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: RatingSpec, theme: &GpuiThemeProvider) -> Self {
@@ -36,18 +44,36 @@ impl Rating {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: f64) -> Self { self.spec.value = v; self }
-    pub fn readonly(mut self, v: bool) -> Self { self.spec.is_readonly = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn precision(mut self, v: f64) -> Self { self.spec.precision = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: f64) -> Self {
+        self.spec.value = v;
+        self
+    }
+    pub fn readonly(mut self, v: bool) -> Self {
+        self.spec.is_readonly = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn precision(mut self, v: f64) -> Self {
+        self.spec.precision = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&usize, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -113,11 +139,14 @@ impl IntoElement for Rating {
                     let cb_key = cb.clone();
                     let current_i = i;
                     let max = spec.max;
-                    star_wrapper = star_wrapper
-                        .on_key_down(move |event: &KeyDownEvent, window, cx| {
-                            let new_val = if event.keystroke.key == "right" || event.keystroke.key == "up" {
+                    star_wrapper =
+                        star_wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                            let new_val = if event.keystroke.key == "right"
+                                || event.keystroke.key == "up"
+                            {
                                 Some(((current_i + 1) as usize + 1).min(max as usize))
-                            } else if event.keystroke.key == "left" || event.keystroke.key == "down" {
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "down"
+                            {
                                 Some((current_i as usize).max(1))
                             } else {
                                 None

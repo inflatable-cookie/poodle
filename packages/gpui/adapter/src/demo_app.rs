@@ -14,18 +14,17 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec,
-    EmptyStateSpec, FilterToolbarSpec, FormShellSpec, InlineRemediationSpec,
-    LogListSpec, MediaPreviewSpec, MediaThumbnailSpec,
-    PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec, RelationPickerSpec,
-    RemediationBannerSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
-    ValidationSummarySpec,
+    AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
+    FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SelectSpec, SeparatorSpec,
+    SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextInputSpec,
+    ToolbarSpec,
 };
 use poodle_specs::{
-    AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
-    FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec,
-    SelectSpec, SeparatorSpec, SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
-    SwitchSpec, TabsSpec, TextInputSpec, ToolbarSpec,
+    ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmptyStateSpec,
+    FilterToolbarSpec, FormShellSpec, InlineRemediationSpec, LogListSpec, MediaPreviewSpec,
+    MediaThumbnailSpec, PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec,
+    RelationPickerSpec, RemediationBannerSpec, SelectionSummarySpec, StateTileSpec, ToastStackSpec,
+    ValidationSummarySpec,
 };
 use poodle_style::StyleDescriptor;
 use poodle_workstation::{
@@ -117,9 +116,17 @@ fn render_form_and_validation(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScr
     screen.push(a.render(&SwitchSpec::new(), &s, t));
     screen.push(a.render(&ButtonSpec::new(), &s, t));
     screen.push(a.render(&ValidationSummarySpec::new(vec![]), &s, t));
-    screen.push(a.render(&RemediationBannerSpec::new("Fix required", "Please correct the errors."), &s, t));
+    screen.push(a.render(
+        &RemediationBannerSpec::new("Fix required", "Please correct the errors."),
+        &s,
+        t,
+    ));
     screen.push(a.render(&InlineRemediationSpec::new("Field is required."), &s, t));
-    screen.push(a.render(&ConfirmActionSpec::new("Confirm", "Are you sure?", "Yes", "No"), &s, t));
+    screen.push(a.render(
+        &ConfirmActionSpec::new("Confirm", "Are you sure?", "Yes", "No"),
+        &s,
+        t,
+    ));
     screen.push(a.render(&ToolbarSpec::new(), &s, t));
 
     screen
@@ -154,8 +161,16 @@ fn render_detail_and_review(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScree
     screen.push(a.render(&DetailShellSpec::new(), &s, t));
     screen.push(a.render(&DetailSectionSpec::new().with_title("Overview"), &s, t));
     screen.push(a.render(&DetailSectionSpec::new().with_title("Media"), &s, t));
-    screen.push(a.render(&MediaThumbnailSpec::new(poodle_specs::MediaKind::Image), &s, t));
-    screen.push(a.render(&MediaPreviewSpec::new(poodle_specs::MediaKind::Audio, "Track preview"), &s, t));
+    screen.push(a.render(
+        &MediaThumbnailSpec::new(poodle_specs::MediaKind::Image),
+        &s,
+        t,
+    ));
+    screen.push(a.render(
+        &MediaPreviewSpec::new(poodle_specs::MediaKind::Audio, "Track preview"),
+        &s,
+        t,
+    ));
     screen.push(a.render(&BreadcrumbsSpec::new(vec![]), &s, t));
     screen.push(a.render(&AccordionSpec::new(vec![]), &s, t));
     screen.push(a.render(&BoxSpec::new(), &s, t));
@@ -214,7 +229,11 @@ mod tests {
         let screens = render_all_screens(&adapter());
         assert_eq!(screens.len(), 6);
         for screen in &screens {
-            assert!(screen.component_count() > 0, "Screen '{}' has no components", screen.id);
+            assert!(
+                screen.component_count() > 0,
+                "Screen '{}' has no components",
+                screen.id
+            );
         }
     }
 
@@ -285,6 +304,9 @@ mod tests {
         let screens = render_all_screens(&adapter());
         let total: usize = screens.iter().map(|s| s.component_count()).sum();
         // At least 60 component renders across all 6 screens
-        assert!(total >= 60, "Total component count {total} is below expected minimum");
+        assert!(
+            total >= 60,
+            "Total component count {total} is below expected minimum"
+        );
     }
 }

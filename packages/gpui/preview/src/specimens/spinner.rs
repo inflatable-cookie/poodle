@@ -1,11 +1,11 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{EyebrowSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 use poodle_gpui_components::{Eyebrow, Spinner};
+use poodle_specs::{EyebrowSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
-use crate::PreviewRoot;
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -15,134 +15,172 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let border_default = theme.resolve_color("color.border.default");
     let control_radius = theme.resolve_space("radius.control");
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Ring ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Ring"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Ring"),
+                    theme,
+                ))
                 .child(
-                    div().flex().items_center().gap(px(16.0))
-                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Xs), theme))
-                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Sm), theme))
-                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Md), theme))
-                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Lg), theme))
-                        .child(Spinner::from_spec(SpinnerSpec::new().with_size(SpinnerSize::Xl), theme))
-                )
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(16.0))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new().with_size(SpinnerSize::Xs),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new().with_size(SpinnerSize::Sm),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new().with_size(SpinnerSize::Md),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new().with_size(SpinnerSize::Lg),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new().with_size(SpinnerSize::Xl),
+                            theme,
+                        )),
+                ),
         )
         // --- CLI grid ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("CLI grid"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("CLI grid"),
+                    theme,
+                ))
                 .child(
-                    div().flex().items_center().gap(px(16.0))
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(16.0))
                         // Svelte: xs=muted, sm=current, md=accent, lg=current, xl=current
-                        .child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Xs)
-                                    .with_tone(SpinnerTone::Muted),
-                                theme,
-                            )
-                        )
-                        .child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Sm)
-                                    .with_tone(SpinnerTone::Current),
-                                theme,
-                            )
-                        )
-                        .child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Md)
-                                    .with_tone(SpinnerTone::Accent),
-                                theme,
-                            )
-                        )
-                        .child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Lg)
-                                    .with_tone(SpinnerTone::Current),
-                                theme,
-                            )
-                        )
-                        .child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(SpinnerSize::Xl)
-                                    .with_tone(SpinnerTone::Current),
-                                theme,
-                            )
-                        )
-                )
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(SpinnerSize::Xs)
+                                .with_tone(SpinnerTone::Muted),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(SpinnerSize::Sm)
+                                .with_tone(SpinnerTone::Current),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(SpinnerSize::Md)
+                                .with_tone(SpinnerTone::Accent),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(SpinnerSize::Lg)
+                                .with_tone(SpinnerTone::Current),
+                            theme,
+                        ))
+                        .child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(SpinnerSize::Xl)
+                                .with_tone(SpinnerTone::Current),
+                            theme,
+                        )),
+                ),
         )
         // --- Context tones ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Context tones"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Context tones"),
+                    theme,
+                ))
                 .child(
-                    div().flex().items_center().gap(px(12.0))
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(12.0))
                         // Inverse chip: dark text on light bg
                         .child(
                             div()
-                                .min_w(px(40.0)).min_h(px(40.0))
+                                .min_w(px(40.0))
+                                .min_h(px(40.0))
                                 .p(px(8.0))
-                                .flex().items_center().justify_center()
+                                .flex()
+                                .items_center()
+                                .justify_center()
                                 .border_1()
                                 .border_color(color_to_hsla(border_default))
                                 .rounded(px(control_radius))
                                 .bg(color_to_hsla(text_primary))
                                 .text_color(color_to_hsla(text_inverse))
-                                .child(
-                                    Spinner::from_spec(
-                                        SpinnerSpec::new().with_tone(SpinnerTone::Current),
-                                        theme,
-                                    )
-                                )
+                                .child(Spinner::from_spec(
+                                    SpinnerSpec::new().with_tone(SpinnerTone::Current),
+                                    theme,
+                                )),
                         )
                         // Accent chip
                         .child(
                             div()
-                                .min_w(px(40.0)).min_h(px(40.0))
+                                .min_w(px(40.0))
+                                .min_h(px(40.0))
                                 .p(px(8.0))
-                                .flex().items_center().justify_center()
+                                .flex()
+                                .items_center()
+                                .justify_center()
                                 .border_1()
                                 .border_color(color_to_hsla(border_default))
                                 .rounded(px(control_radius))
                                 .bg(color_to_hsla(surface_bg))
-                                .child(
-                                    Spinner::from_spec(
-                                        SpinnerSpec::new().with_tone(SpinnerTone::Accent),
-                                        theme,
-                                    )
-                                )
+                                .child(Spinner::from_spec(
+                                    SpinnerSpec::new().with_tone(SpinnerTone::Accent),
+                                    theme,
+                                )),
                         )
                         // Muted grid chip
                         .child(
                             div()
-                                .min_w(px(40.0)).min_h(px(40.0))
+                                .min_w(px(40.0))
+                                .min_h(px(40.0))
                                 .p(px(8.0))
-                                .flex().items_center().justify_center()
+                                .flex()
+                                .items_center()
+                                .justify_center()
                                 .border_1()
                                 .border_color(color_to_hsla(border_default))
                                 .rounded(px(control_radius))
                                 .bg(color_to_hsla(surface_bg))
-                                .child(
-                                    Spinner::from_spec(
-                                        SpinnerSpec::new()
-                                            .with_variant(SpinnerVariant::Grid)
-                                            .with_tone(SpinnerTone::Muted),
-                                        theme,
-                                    )
-                                )
-                        )
-                )
+                                .child(Spinner::from_spec(
+                                    SpinnerSpec::new()
+                                        .with_variant(SpinnerVariant::Grid)
+                                        .with_tone(SpinnerTone::Muted),
+                                    theme,
+                                )),
+                        ),
+                ),
         )
 }

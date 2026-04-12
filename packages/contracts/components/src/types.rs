@@ -208,7 +208,9 @@ impl ButtonVariant {
     pub fn fill_token(self, tone: ButtonTone) -> &'static str {
         match (self, tone) {
             (Self::Ghost, _) => semantic::COLOR_BACKGROUND_SURFACE, // transparent in component
-            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
+            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => {
+                semantic::COLOR_STATUS_DANGER
+            }
             (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_BACKGROUND_SURFACE,
             (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
             (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BACKGROUND_SURFACE,
@@ -219,7 +221,9 @@ impl ButtonVariant {
     pub fn border_token(self, tone: ButtonTone) -> &'static str {
         match (self, tone) {
             (Self::Ghost, _) => semantic::COLOR_BORDER_SUBTLE, // transparent in component
-            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => semantic::COLOR_STATUS_DANGER,
+            (Self::Primary, ButtonTone::Danger) | (Self::Danger, _) => {
+                semantic::COLOR_STATUS_DANGER
+            }
             (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
             (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
             (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,

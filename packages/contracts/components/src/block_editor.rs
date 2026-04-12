@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// A single block type definition (provided by the consumer).
 ///
@@ -17,7 +17,11 @@ pub struct BlockTypeDefinition {
 }
 
 impl BlockTypeDefinition {
-    pub fn new(block_type: impl Into<String>, label: impl Into<String>, icon: impl Into<String>) -> Self {
+    pub fn new(
+        block_type: impl Into<String>,
+        label: impl Into<String>,
+        icon: impl Into<String>,
+    ) -> Self {
         Self {
             block_type: block_type.into(),
             label: label.into(),

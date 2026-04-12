@@ -1,6 +1,8 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{
+    ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole,
+};
 
 /// A menu item for the split button dropdown.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -27,7 +29,11 @@ impl SplitMenuItem {
     }
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
-        if let Self::Action { is_disabled: ref mut d, .. } = self {
+        if let Self::Action {
+            is_disabled: ref mut d,
+            ..
+        } = self
+        {
             *d = is_disabled;
         }
         self

@@ -166,7 +166,11 @@ where
                 .rounded(px(6.0))
                 .bg(color_to_hsla(panel_bg).alpha(0.4));
             for (density, label) in ALL_DENSITIES {
-                col = col.child(variant_row(*label, densities_row(*density, theme), text_secondary));
+                col = col.child(variant_row(
+                    *label,
+                    densities_row(*density, theme),
+                    text_secondary,
+                ));
             }
             col
         }
@@ -186,7 +190,11 @@ where
 
 /// Single variant row: small label column on the left, the specimen body
 /// on the right. Used inside the Sizes and Densities panes.
-fn variant_row(label: &'static str, body: AnyElement, label_color: poodle_tokens::typed::ColorValue) -> Div {
+fn variant_row(
+    label: &'static str,
+    body: AnyElement,
+    label_color: poodle_tokens::typed::ColorValue,
+) -> Div {
     div()
         .flex()
         .items_start()

@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// A single navigation item in a sidebar group.
 #[derive(Clone, Debug, Eq, PartialEq)]

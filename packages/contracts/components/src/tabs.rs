@@ -1,6 +1,9 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole, TabActivationMode, TabDefinition, TabVariant};
+use crate::types::{
+    ControlDensity, ControlSize, Orientation, SemanticControlSizeRole, TabActivationMode,
+    TabDefinition, TabVariant,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TabsSpec {

@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// EditableList -- an add/remove/reorder list with inline text entry.
 #[derive(Clone, Debug, Eq, PartialEq)]

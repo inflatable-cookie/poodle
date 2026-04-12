@@ -19,12 +19,19 @@ pub struct EmptyState {
 
 impl std::ops::Deref for EmptyState {
     type Target = EmptyStateSpec;
-    fn deref(&self) -> &EmptyStateSpec { &self.spec }
+    fn deref(&self) -> &EmptyStateSpec {
+        &self.spec
+    }
 }
 
 impl EmptyState {
     pub fn new(title: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: EmptyStateSpec::new(title), theme: theme.clone(), illustration: None, on_action: None }
+        Self {
+            spec: EmptyStateSpec::new(title),
+            theme: theme.clone(),
+            illustration: None,
+            on_action: None,
+        }
     }
 
     pub fn from_spec(spec: EmptyStateSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,13 +44,30 @@ impl EmptyState {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn message(mut self, v: impl Into<String>) -> Self { self.spec.message = Some(v.into()); self }
-    pub fn variant(mut self, v: EmptyStateVariant) -> Self { self.spec.variant = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn actions(mut self, v: Vec<RemediationAction>) -> Self { self.spec.actions = v; self }
-    pub fn compact(mut self, v: bool) -> Self { self.spec.compact = v; self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn message(mut self, v: impl Into<String>) -> Self {
+        self.spec.message = Some(v.into());
+        self
+    }
+    pub fn variant(mut self, v: EmptyStateVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn actions(mut self, v: Vec<RemediationAction>) -> Self {
+        self.spec.actions = v;
+        self
+    }
+    pub fn compact(mut self, v: bool) -> Self {
+        self.spec.compact = v;
+        self
+    }
 
     pub fn with_illustration(mut self, illustration: impl IntoElement) -> Self {
         self.illustration = Some(illustration.into_any_element());
@@ -78,7 +102,11 @@ impl IntoElement for EmptyState {
         // Compact mode halves the vertical padding and reduces the
         // title size, suitable for embedding in tight containers.
         let vertical_padding = if spec.compact { px(24.0) } else { px(48.0) };
-        let title_size = if spec.compact { body_size } else { heading_size };
+        let title_size = if spec.compact {
+            body_size
+        } else {
+            heading_size
+        };
 
         let mut container = div()
             .w_full()
@@ -140,13 +168,9 @@ impl IntoElement for EmptyState {
                     .rounded(control_radius)
                     .text_size(body_size)
                     .font_weight(FontWeight::MEDIUM)
-                    .when(is_primary, |el| {
-                        el.bg(accent).text_color(gpui::white())
-                    })
+                    .when(is_primary, |el| el.bg(accent).text_color(gpui::white()))
                     .when(!is_primary, |el| {
-                        el.border_1()
-                            .border_color(accent)
-                            .text_color(accent)
+                        el.border_1().border_color(accent).text_color(accent)
                     })
                     .when(action.is_disabled, |el| el.opacity(0.5))
                     .child(label);

@@ -21,12 +21,19 @@ pub struct StatusBar {
 
 impl std::ops::Deref for StatusBar {
     type Target = ShellStatusBarSpec;
-    fn deref(&self) -> &ShellStatusBarSpec { &self.spec }
+    fn deref(&self) -> &ShellStatusBarSpec {
+        &self.spec
+    }
 }
 
 impl StatusBar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ShellStatusBarSpec::new(), theme: theme.clone(), leading_items: None, trailing_items: None }
+        Self {
+            spec: ShellStatusBarSpec::new(),
+            theme: theme.clone(),
+            leading_items: None,
+            trailing_items: None,
+        }
     }
 
     pub fn from_spec(spec: ShellStatusBarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -39,10 +46,18 @@ impl StatusBar {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn summary(mut self, v: impl Into<String>) -> Self { self.spec.summary = Some(v.into()); self }
-    pub fn leading_item_count(mut self, v: usize) -> Self { self.spec.leading_item_count = v; self }
-    pub fn trailing_item_count(mut self, v: usize) -> Self { self.spec.trailing_item_count = v; self }
-
+    pub fn summary(mut self, v: impl Into<String>) -> Self {
+        self.spec.summary = Some(v.into());
+        self
+    }
+    pub fn leading_item_count(mut self, v: usize) -> Self {
+        self.spec.leading_item_count = v;
+        self
+    }
+    pub fn trailing_item_count(mut self, v: usize) -> Self {
+        self.spec.trailing_item_count = v;
+        self
+    }
 
     pub fn with_leading_items(mut self, items: impl IntoElement) -> Self {
         self.leading_items = Some(items.into_any_element());

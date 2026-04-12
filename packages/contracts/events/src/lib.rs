@@ -25,36 +25,28 @@ pub enum SemanticEvent {
     /// DatePicker, TimePicker, ColorPicker, etc.
     /// - GPUI: `on_change` handler
     /// - Jetstream: `UiEvent::ValueChanged` / `UiEvent::TextChanged`
-    ValueChanged {
-        value: EventValue,
-    },
+    ValueChanged { value: EventValue },
 
     /// Focus moved to or from a component.
     ///
     /// Emitted by: Any focusable component
     /// - GPUI: `on_focus` / `on_blur` handlers
     /// - Jetstream: `UiEvent::FocusGained` / `UiEvent::FocusLost`
-    FocusChanged {
-        gained: bool,
-    },
+    FocusChanged { gained: bool },
 
     /// An overlay or disclosure component opened or closed.
     ///
     /// Emitted by: Dialog, Drawer, Popover, Accordion, Collapsible, Menu, Select
     /// - GPUI: State change handlers
     /// - Jetstream: `ScreenStack` push/pop for modals, widget state for others
-    OpenChanged {
-        open: bool,
-    },
+    OpenChanged { open: bool },
 
     /// A selection changed in a single-or-multi-select context.
     ///
     /// Emitted by: Select, RadioGroup, SegmentedControl, Tabs, TabStrip
     /// - GPUI: Selection change handlers
     /// - Jetstream: `UiEvent::ValueChanged` with selection payload
-    SelectionChanged {
-        value: EventValue,
-    },
+    SelectionChanged { value: EventValue },
 
     /// A form was submitted.
     ///
@@ -75,9 +67,7 @@ pub enum SemanticEvent {
     /// Emitted by: Any hoverable component (Button, Tooltip trigger, etc.)
     /// - GPUI: `on_mouse_enter` / `on_mouse_leave`
     /// - Jetstream: Not supported (gamepad/touch primary) — adapters may skip
-    Hovered {
-        entered: bool,
-    },
+    Hovered { entered: bool },
 
     /// A drag operation started, moved, or ended.
     ///
@@ -104,19 +94,14 @@ pub enum SemanticEvent {
     /// Emitted by: Focus system, list navigation, grid navigation
     /// - GPUI: Arrow key handlers
     /// - Jetstream: Gamepad d-pad / `InputSystem` directional actions
-    Navigate {
-        direction: NavigateDirection,
-    },
+    Navigate { direction: NavigateDirection },
 
     /// Scroll position changed.
     ///
     /// Emitted by: ScrollShell, DataTable
     /// - GPUI: Scroll event handlers
     /// - Jetstream: `UiEvent::ScrollChanged`
-    ScrollChanged {
-        offset_x: f32,
-        offset_y: f32,
-    },
+    ScrollChanged { offset_x: f32, offset_y: f32 },
 }
 
 /// The payload of a value-change or selection-change event.

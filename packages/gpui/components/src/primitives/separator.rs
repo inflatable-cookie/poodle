@@ -14,22 +14,39 @@ pub struct Separator {
 
 impl std::ops::Deref for Separator {
     type Target = SeparatorSpec;
-    fn deref(&self) -> &SeparatorSpec { &self.spec }
+    fn deref(&self) -> &SeparatorSpec {
+        &self.spec
+    }
 }
 
 impl Separator {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SeparatorSpec::default(), theme: theme.clone() }
+        Self {
+            spec: SeparatorSpec::default(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: SeparatorSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn orientation(mut self, v: SeparatorOrientation) -> Self { self.spec.orientation = v; self }
-    pub fn decorative(mut self, v: bool) -> Self { self.spec.decorative = v; self }
-    pub fn tone(mut self, v: RuleTone) -> Self { self.spec.tone = v; self }
+    pub fn orientation(mut self, v: SeparatorOrientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn decorative(mut self, v: bool) -> Self {
+        self.spec.decorative = v;
+        self
+    }
+    pub fn tone(mut self, v: RuleTone) -> Self {
+        self.spec.tone = v;
+        self
+    }
 }
 
 impl IntoElement for Separator {
@@ -40,7 +57,10 @@ impl IntoElement for Separator {
 
         // Contract: subtle tone applies 72% opacity approximation
         let color = match self.spec.tone {
-            RuleTone::Subtle => Hsla { a: raw_color.a * 0.72, ..raw_color },
+            RuleTone::Subtle => Hsla {
+                a: raw_color.a * 0.72,
+                ..raw_color
+            },
             RuleTone::Default => raw_color,
         };
 

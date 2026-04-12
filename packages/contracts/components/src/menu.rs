@@ -1,6 +1,8 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, MenuEntry, MenuItemKind, OverlayPlacement, SemanticControlSizeRole};
+use crate::types::{
+    ControlDensity, ControlSize, MenuEntry, MenuItemKind, OverlayPlacement, SemanticControlSizeRole,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MenuSpec {

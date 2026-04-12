@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// How the user enters edit mode. Matches `activationMode` prop.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

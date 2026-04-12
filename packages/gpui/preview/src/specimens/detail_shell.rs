@@ -1,10 +1,12 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{DetailShellSpec, DetailState, DetailSectionSpec};
-use poodle_gpui_components::{DetailShell, DetailItem, DetailSection, Button, Eyebrow};
-use poodle_specs::{DetailItemLayout, DetailItemSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec};
 use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
+use poodle_gpui_components::{Button, DetailItem, DetailSection, DetailShell, Eyebrow};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlSize, DetailItemLayout, DetailItemSpec, EyebrowSpec,
+};
+use poodle_specs::{DetailSectionSpec, DetailShellSpec, DetailState};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let accent = theme.resolve_color("color.accent.base");
@@ -333,7 +335,8 @@ fn region_block(
         .items_center()
         .px(px(8.0))
         .child(
-            div().text_xs()
+            div()
+                .text_xs()
                 .text_color(color_to_hsla(accent))
                 .child(label.to_string()),
         )

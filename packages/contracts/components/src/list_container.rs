@@ -12,7 +12,9 @@ pub enum ListContainerState {
 }
 
 impl Default for ListContainerState {
-    fn default() -> Self { Self::Ready }
+    fn default() -> Self {
+        Self::Ready
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -57,19 +59,64 @@ impl ListContainerSpec {
         }
     }
 
-    pub fn with_subtitle(mut self, v: impl Into<String>) -> Self { self.subtitle = Some(v.into()); self }
-    pub fn with_eyebrow(mut self, v: impl Into<String>) -> Self { self.eyebrow = Some(v.into()); self }
-    pub fn with_state(mut self, v: ListContainerState) -> Self { self.state = v; self }
-    pub fn with_loading_message(mut self, v: impl Into<String>) -> Self { self.loading_message = Some(v.into()); self }
-    pub fn with_error_title(mut self, v: impl Into<String>) -> Self { self.error_title = Some(v.into()); self }
-    pub fn with_error_message(mut self, v: impl Into<String>) -> Self { self.error_message = Some(v.into()); self }
-    pub fn with_empty_title(mut self, v: impl Into<String>) -> Self { self.empty_title = Some(v.into()); self }
-    pub fn with_empty_message(mut self, v: impl Into<String>) -> Self { self.empty_message = Some(v.into()); self }
-    pub fn with_current_page(mut self, v: usize) -> Self { self.current_page = v; self }
-    pub fn with_total_pages(mut self, v: usize) -> Self { self.total_pages = v; self }
-    pub fn with_total_items(mut self, v: usize) -> Self { self.total_items = Some(v); self }
-    pub fn with_page_size(mut self, v: usize) -> Self { self.page_size = Some(v); self }
-    pub fn with_show_pagination_summary(mut self, v: bool) -> Self { self.show_pagination_summary = v; self }
-    pub fn with_sibling_count(mut self, v: usize) -> Self { self.sibling_count = v; self }
-    pub fn with_pagination_aria_label(mut self, v: impl Into<String>) -> Self { self.pagination_aria_label = Some(v.into()); self }
+    pub fn with_subtitle(mut self, v: impl Into<String>) -> Self {
+        self.subtitle = Some(v.into());
+        self
+    }
+    pub fn with_eyebrow(mut self, v: impl Into<String>) -> Self {
+        self.eyebrow = Some(v.into());
+        self
+    }
+    pub fn with_state(mut self, v: ListContainerState) -> Self {
+        self.state = v;
+        self
+    }
+    pub fn with_loading_message(mut self, v: impl Into<String>) -> Self {
+        self.loading_message = Some(v.into());
+        self
+    }
+    pub fn with_error_title(mut self, v: impl Into<String>) -> Self {
+        self.error_title = Some(v.into());
+        self
+    }
+    pub fn with_error_message(mut self, v: impl Into<String>) -> Self {
+        self.error_message = Some(v.into());
+        self
+    }
+    pub fn with_empty_title(mut self, v: impl Into<String>) -> Self {
+        self.empty_title = Some(v.into());
+        self
+    }
+    pub fn with_empty_message(mut self, v: impl Into<String>) -> Self {
+        self.empty_message = Some(v.into());
+        self
+    }
+    pub fn with_current_page(mut self, v: usize) -> Self {
+        self.current_page = v;
+        self
+    }
+    pub fn with_total_pages(mut self, v: usize) -> Self {
+        self.total_pages = v;
+        self
+    }
+    pub fn with_total_items(mut self, v: usize) -> Self {
+        self.total_items = Some(v);
+        self
+    }
+    pub fn with_page_size(mut self, v: usize) -> Self {
+        self.page_size = Some(v);
+        self
+    }
+    pub fn with_show_pagination_summary(mut self, v: bool) -> Self {
+        self.show_pagination_summary = v;
+        self
+    }
+    pub fn with_sibling_count(mut self, v: usize) -> Self {
+        self.sibling_count = v;
+        self
+    }
+    pub fn with_pagination_aria_label(mut self, v: impl Into<String>) -> Self {
+        self.pagination_aria_label = Some(v.into());
+        self
+    }
 }

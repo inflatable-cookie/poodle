@@ -1,14 +1,17 @@
 //! MediaPicker — media selection/upload interface backed by MediaPickerSpec.
 
-use std::rc::Rc;
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
+use crate::primitives::Icon;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 use poodle_specs::MediaPickerSpec;
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use std::rc::Rc;
 
 /// Which tab is active in the media picker.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -39,7 +42,9 @@ pub struct MediaPicker {
 
 impl std::ops::Deref for MediaPicker {
     type Target = MediaPickerSpec;
-    fn deref(&self) -> &MediaPickerSpec { &self.spec }
+    fn deref(&self) -> &MediaPickerSpec {
+        &self.spec
+    }
 }
 
 impl MediaPicker {
@@ -68,16 +73,20 @@ impl MediaPicker {
         }
     }
     pub fn with_content(mut self, c: impl IntoElement) -> Self {
-        self.content = Some(c.into_any_element()); self
+        self.content = Some(c.into_any_element());
+        self
     }
     pub fn with_active_tab(mut self, tab: MediaPickerTab) -> Self {
-        self.active_tab = tab; self
+        self.active_tab = tab;
+        self
     }
     pub fn with_thumbnail(mut self, thumb: MediaPickerItem) -> Self {
-        self.thumbnails.push(thumb); self
+        self.thumbnails.push(thumb);
+        self
     }
     pub fn with_thumbnails(mut self, thumbs: impl IntoIterator<Item = MediaPickerItem>) -> Self {
-        self.thumbnails.extend(thumbs); self
+        self.thumbnails.extend(thumbs);
+        self
     }
     pub fn on_select(
         mut self,
@@ -100,9 +109,18 @@ impl MediaPicker {
         self.on_tab_change = Some(Rc::new(handler));
         self
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for MediaPicker {
@@ -175,10 +193,8 @@ impl IntoElement for MediaPicker {
                     .child(self.spec.title.clone()),
             )
             .child({
-                let close_icon = Icon::from_spec(
-                    IconSpec::new("x").with_size(IconSize::Sm),
-                    theme,
-                ).with_color(text_secondary);
+                let close_icon = Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
+                    .with_color(text_secondary);
                 div().cursor_pointer().child(close_icon)
             });
 
@@ -195,23 +211,25 @@ impl IntoElement for MediaPicker {
                 .font_weight(FontWeight::MEDIUM)
                 .cursor_pointer();
             if is_active {
-                base.text_color(accent)
-                    .border_b_2()
-                    .border_color(accent)
+                base.text_color(accent).border_b_2().border_color(accent)
             } else {
                 base.text_color(text_secondary)
             }
         };
 
-        let browse_icon = Icon::from_spec(
-            IconSpec::new("image").with_size(IconSize::Sm),
-            theme,
-        ).with_color(if browse_active { accent } else { text_secondary });
+        let browse_icon = Icon::from_spec(IconSpec::new("image").with_size(IconSize::Sm), theme)
+            .with_color(if browse_active {
+                accent
+            } else {
+                text_secondary
+            });
 
-        let upload_icon = Icon::from_spec(
-            IconSpec::new("upload").with_size(IconSize::Sm),
-            theme,
-        ).with_color(if !browse_active { accent } else { text_secondary });
+        let upload_icon = Icon::from_spec(IconSpec::new("upload").with_size(IconSize::Sm), theme)
+            .with_color(if !browse_active {
+                accent
+            } else {
+                text_secondary
+            });
 
         let on_tab_change = self.on_tab_change;
 
@@ -259,10 +277,8 @@ impl IntoElement for MediaPicker {
         dialog = dialog.child(tabs);
 
         // ── Search input area ────────────────────────────────────
-        let search_icon = Icon::from_spec(
-            IconSpec::new("search").with_size(IconSize::Sm),
-            theme,
-        ).with_color(text_secondary);
+        let search_icon = Icon::from_spec(IconSpec::new("search").with_size(IconSize::Sm), theme)
+            .with_color(text_secondary);
 
         let search_bar = div()
             .flex()
@@ -331,7 +347,11 @@ impl IntoElement for MediaPicker {
         let on_select = self.on_select;
 
         for thumb in &self.thumbnails {
-            let selected_border = if thumb.is_selected { accent } else { border_color };
+            let selected_border = if thumb.is_selected {
+                accent
+            } else {
+                border_color
+            };
             let border_w = if thumb.is_selected { px(2.0) } else { px(1.0) };
 
             let item_id = SharedString::from(format!("media-picker-thumb-{}", thumb.id));
@@ -351,10 +371,9 @@ impl IntoElement for MediaPicker {
                 .gap(gap_sm)
                 .cursor_pointer()
                 .child({
-                    let icon = Icon::from_spec(
-                        IconSpec::new("image").with_size(IconSize::Md),
-                        theme,
-                    ).with_color(text_secondary);
+                    let icon =
+                        Icon::from_spec(IconSpec::new("image").with_size(IconSize::Md), theme)
+                            .with_color(text_secondary);
                     icon
                 })
                 .child(
@@ -377,7 +396,9 @@ impl IntoElement for MediaPicker {
             grid = grid.child(item);
         }
 
-        if let Some(c) = self.content { grid = grid.child(c); }
+        if let Some(c) = self.content {
+            grid = grid.child(c);
+        }
 
         dialog = dialog.child(grid);
 

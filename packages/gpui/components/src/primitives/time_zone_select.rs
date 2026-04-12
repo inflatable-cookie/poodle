@@ -2,11 +2,16 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, TimeZoneSelectSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, TimeZoneSelectSpec,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use super::icon::Icon;
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI timezone select dropdown component backed by `TimeZoneSelectSpec`.
 pub struct TimeZoneSelect {
@@ -17,12 +22,18 @@ pub struct TimeZoneSelect {
 
 impl std::ops::Deref for TimeZoneSelect {
     type Target = TimeZoneSelectSpec;
-    fn deref(&self) -> &TimeZoneSelectSpec { &self.spec }
+    fn deref(&self) -> &TimeZoneSelectSpec {
+        &self.spec
+    }
 }
 
 impl TimeZoneSelect {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TimeZoneSelectSpec::new(), theme: theme.clone(), on_toggle: None }
+        Self {
+            spec: TimeZoneSelectSpec::new(),
+            theme: theme.clone(),
+            on_toggle: None,
+        }
     }
 
     pub fn from_spec(spec: TimeZoneSelectSpec, theme: &GpuiThemeProvider) -> Self {
@@ -34,18 +45,36 @@ impl TimeZoneSelect {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = Some(v.into()); self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn placeholder(mut self, v: impl Into<String>) -> Self {
+        self.spec.placeholder = Some(v.into());
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
@@ -105,12 +134,21 @@ impl IntoElement for TimeZoneSelect {
             .child(div().text_color(text_col).child(trigger_text))
             .child(
                 Icon::from_spec(
-                    IconSpec::new(if spec.is_open { "chevron-up" } else { "chevron-down" }).with_size(IconSize::Sm),
+                    IconSpec::new(if spec.is_open {
+                        "chevron-up"
+                    } else {
+                        "chevron-down"
+                    })
+                    .with_size(IconSize::Sm),
                     theme,
-                ).with_color(text_secondary),
+                )
+                .with_color(text_secondary),
             );
 
-        trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        trigger = trigger.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if spec.is_disabled {
             trigger = trigger

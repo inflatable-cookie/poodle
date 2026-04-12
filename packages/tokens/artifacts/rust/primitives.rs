@@ -69,7 +69,8 @@ pub const RADIUS_LG: &str = "0.625rem";
 pub const RADIUS_PILL: &str = "999rem";
 pub const STATE_OPACITY_DISABLED: &str = "0.48";
 pub const STATE_OPACITY_MUTED: &str = "0.72";
-pub const TYPOGRAPHY_FONT_FAMILY_SANS: &str = "\"Inter\", \"SF Pro Display\", system-ui, sans-serif";
+pub const TYPOGRAPHY_FONT_FAMILY_SANS: &str =
+    "\"Inter\", \"SF Pro Display\", system-ui, sans-serif";
 pub const TYPOGRAPHY_FONT_FAMILY_MONO: &str = "\"IBM Plex Mono\", \"SFMono-Regular\", monospace";
 pub const TYPOGRAPHY_FONT_WEIGHT_REGULAR: &str = "400";
 pub const TYPOGRAPHY_FONT_WEIGHT_MEDIUM: &str = "500";

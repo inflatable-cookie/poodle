@@ -1,11 +1,11 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::ConfirmActionSpec;
-use poodle_gpui_components::{Button, ConfirmAction, Eyebrow};
-use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, StatusTone};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{Button, ConfirmAction, Eyebrow};
+use poodle_specs::ConfirmActionSpec;
+use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, StatusTone};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -24,11 +24,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Default trigger (danger) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default trigger (danger)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default trigger (danger)"),
+                    theme,
+                ))
                 .child(
                     ConfirmAction::from_spec(
                         ConfirmActionSpec::new(
@@ -50,26 +59,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-danger-trigger")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggles.insert("confirm-action-danger-open".to_string(), true);
-                            cx.notify();
-                        }))
+                        .on_click(cx.listener(
+                            |this, _e: &ClickEvent, _w, cx| {
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("confirm-action-danger-open".to_string(), true);
+                                cx.notify();
+                            },
+                        )),
                     )
                     .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-danger-open".to_string(), false);
-                        this.state.specimens.text.insert("confirm-action-last".to_string(), "Record deleted".to_string());
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-danger-open".to_string(), false);
+                        this.state.specimens.text.insert(
+                            "confirm-action-last".to_string(),
+                            "Record deleted".to_string(),
+                        );
                         cx.notify();
                     }))
                     .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-danger-open".to_string(), false);
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-danger-open".to_string(), false);
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- Warning tone ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Warning tone"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Warning tone"),
+                    theme,
+                ))
                 .child(
                     ConfirmAction::from_spec(
                         ConfirmActionSpec::new(
@@ -90,26 +119,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-warning-trigger")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggles.insert("confirm-action-warning-open".to_string(), true);
-                            cx.notify();
-                        }))
+                        .on_click(cx.listener(
+                            |this, _e: &ClickEvent, _w, cx| {
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("confirm-action-warning-open".to_string(), true);
+                                cx.notify();
+                            },
+                        )),
                     )
                     .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-warning-open".to_string(), false);
-                        this.state.specimens.text.insert("confirm-action-last".to_string(), "Project archived".to_string());
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-warning-open".to_string(), false);
+                        this.state.specimens.text.insert(
+                            "confirm-action-last".to_string(),
+                            "Project archived".to_string(),
+                        );
                         cx.notify();
                     }))
                     .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-warning-open".to_string(), false);
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-warning-open".to_string(), false);
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- Custom trigger slot (ghost button) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom trigger slot"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Custom trigger slot"),
+                    theme,
+                ))
                 .child(
                     ConfirmAction::from_spec(
                         ConfirmActionSpec::new(
@@ -130,26 +179,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-ghost-trigger")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggles.insert("confirm-action-ghost-open".to_string(), true);
-                            cx.notify();
-                        }))
+                        .on_click(cx.listener(
+                            |this, _e: &ClickEvent, _w, cx| {
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("confirm-action-ghost-open".to_string(), true);
+                                cx.notify();
+                            },
+                        )),
                     )
                     .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-ghost-open".to_string(), false);
-                        this.state.specimens.text.insert("confirm-action-last".to_string(), "Filters cleared".to_string());
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-ghost-open".to_string(), false);
+                        this.state.specimens.text.insert(
+                            "confirm-action-last".to_string(),
+                            "Filters cleared".to_string(),
+                        );
                         cx.notify();
                     }))
                     .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-ghost-open".to_string(), false);
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-ghost-open".to_string(), false);
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- With body content ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With body content"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With body content"),
+                    theme,
+                ))
                 .child(
                     ConfirmAction::from_spec(
                         ConfirmActionSpec::new(
@@ -171,10 +240,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("confirm-body-trigger")
-                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggles.insert("confirm-action-body-open".to_string(), true);
-                            cx.notify();
-                        }))
+                        .on_click(cx.listener(
+                            |this, _e: &ClickEvent, _w, cx| {
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("confirm-action-body-open".to_string(), true);
+                                cx.notify();
+                            },
+                        )),
                     )
                     .with_content({
                         let code_bg = {
@@ -183,7 +257,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             h
                         };
                         div()
-                            .px(px(12.0)).py(px(8.0))
+                            .px(px(12.0))
+                            .py(px(8.0))
                             .rounded(px(6.0))
                             .bg(code_bg)
                             .text_size(px(13.0))
@@ -191,28 +266,43 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .child("pk_live_abc123...xyz789")
                     })
                     .on_confirm(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-body-open".to_string(), false);
-                        this.state.specimens.text.insert("confirm-action-last".to_string(), "Key revoked".to_string());
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-body-open".to_string(), false);
+                        this.state
+                            .specimens
+                            .text
+                            .insert("confirm-action-last".to_string(), "Key revoked".to_string());
                         cx.notify();
                     }))
                     .on_cancel(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state.specimens.toggles.insert("confirm-action-body-open".to_string(), false);
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("confirm-action-body-open".to_string(), false);
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- Last action (only when a confirm has fired) ---
         .child({
             if last_action.is_empty() {
                 div()
             } else {
-                div().flex().flex_col().gap(px(8.0))
-                    .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Last action"), theme))
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.0))
+                    .child(Eyebrow::from_spec(
+                        EyebrowSpec::new().with_content("Last action"),
+                        theme,
+                    ))
                     .child(
                         div()
                             .text_size(px(13.0))
                             .text_color(color_to_hsla(text_secondary))
-                            .child(last_action)
+                            .child(last_action),
                     )
             }
         })

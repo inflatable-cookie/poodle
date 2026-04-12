@@ -1,10 +1,10 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{SplitViewSpec, SplitOrientation};
-use poodle_specs::EyebrowSpec;
-use poodle_gpui_components::{SplitView, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
+use poodle_gpui_components::{Eyebrow, SplitView};
+use poodle_specs::EyebrowSpec;
+use poodle_specs::{SplitOrientation, SplitViewSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -14,8 +14,18 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // Small helper: coloured region block used as a stand-in for
     // Svelte's <Region> primitive (which is a simple labelled swatch).
     let region = move |label: &'static str, hue: f32| {
-        let region_bg = Hsla { h: hue / 360.0, s: 0.55, l: 0.35, a: 0.22 };
-        let region_text = Hsla { h: hue / 360.0, s: 0.65, l: 0.78, a: 1.0 };
+        let region_bg = Hsla {
+            h: hue / 360.0,
+            s: 0.55,
+            l: 0.35,
+            a: 0.22,
+        };
+        let region_text = Hsla {
+            h: hue / 360.0,
+            s: 0.65,
+            l: 0.78,
+            a: 1.0,
+        };
         div()
             .size_full()
             .flex()
@@ -40,26 +50,42 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .overflow_hidden()
     };
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Basic horizontal layout ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic horizontal layout"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Basic horizontal layout"),
+                    theme,
+                ))
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Horizontal).with_default_ratio(0.5),
+                            SplitViewSpec::new(SplitOrientation::Horizontal)
+                                .with_default_ratio(0.5),
                             theme,
                         )
                         .with_primary(region("Sidebar", 220.0))
-                        .with_secondary(region("Main content", 140.0))
-                    )
-                )
+                        .with_secondary(region("Main content", 140.0)),
+                    ),
+                ),
         )
         // --- Basic vertical layout ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic vertical layout"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Basic vertical layout"),
+                    theme,
+                ))
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
@@ -67,14 +93,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_primary(region("Editor", 220.0))
-                        .with_secondary(region("Terminal", 280.0))
-                    )
-                )
+                        .with_secondary(region("Terminal", 280.0)),
+                    ),
+                ),
         )
         // --- Horizontal with collapse toggles ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal with collapse toggles"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Horizontal with collapse toggles"),
+                    theme,
+                ))
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
@@ -85,14 +117,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_primary(region("Primary", 220.0))
-                        .with_secondary(region("Secondary", 140.0))
-                    )
-                )
+                        .with_secondary(region("Secondary", 140.0)),
+                    ),
+                ),
         )
         // --- Vertical with collapse toggles ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical with collapse toggles"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Vertical with collapse toggles"),
+                    theme,
+                ))
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
@@ -103,14 +141,20 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_primary(region("Top", 220.0))
-                        .with_secondary(region("Bottom", 280.0))
-                    )
-                )
+                        .with_secondary(region("Bottom", 280.0)),
+                    ),
+                ),
         )
         // --- Nested splits (IDE-style layout) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Nested splits (IDE-style layout)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Nested splits (IDE-style layout)"),
+                    theme,
+                ))
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
@@ -128,15 +172,21 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 theme,
                             )
                             .with_primary(region("Editor", 140.0))
-                            .with_secondary(region("Terminal", 280.0))
-                        )
-                    )
-                )
+                            .with_secondary(region("Terminal", 280.0)),
+                        ),
+                    ),
+                ),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
@@ -148,15 +198,15 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         )
                         .with_primary(region("Left", 220.0))
-                        .with_secondary(region("Right", 140.0))
-                    )
+                        .with_secondary(region("Right", 140.0)),
+                    ),
                 )
                 .child(
                     div()
                         .text_size(px(11.0))
                         .text_color(color_to_hsla(text_secondary))
-                        .child("Drag cursor and hover state disabled.")
-                )
+                        .child("Drag cursor and hover state disabled."),
+                ),
         )
         .child({
             let _ = panel_bg;

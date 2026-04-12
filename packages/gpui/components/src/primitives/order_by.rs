@@ -1,8 +1,13 @@
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_padding_x_offset_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, OrderBySpec, SemanticControlSizeRole, SortDirection};
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem, control_space_x_rem, control_height_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use poodle_specs::{
+    ControlDensity, ControlSize, OrderBySpec, SemanticControlSizeRole, SortDirection,
+};
 
 pub struct OrderBy {
     spec: OrderBySpec,
@@ -26,7 +31,9 @@ pub struct OrderBy {
 
 impl std::ops::Deref for OrderBy {
     type Target = OrderBySpec;
-    fn deref(&self) -> &OrderBySpec { &self.spec }
+    fn deref(&self) -> &OrderBySpec {
+        &self.spec
+    }
 }
 
 impl OrderBy {
@@ -73,9 +80,18 @@ impl OrderBy {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_sort(
         mut self,
@@ -111,11 +127,7 @@ impl IntoElement for OrderBy {
 
         // Field buttons
         let on_sort = self.on_sort;
-        let mut fields_row = div()
-            .flex()
-            .flex_row()
-            .items_center()
-            .gap(self.gap);
+        let mut fields_row = div().flex().flex_row().items_center().gap(self.gap);
 
         for field in &self.spec.fields {
             let is_active = self.spec.is_field_active(&field.value);
@@ -178,7 +190,10 @@ impl IntoElement for OrderBy {
 
             {
                 let focus_ring_color = self.focus_ring_color;
-                btn = btn.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
+                btn = btn.focus(move |s| {
+                    s.border_color(focus_ring_color)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
+                });
             }
 
             if field_disabled {
@@ -195,7 +210,8 @@ impl IntoElement for OrderBy {
                 }
 
                 if let Some(ref on_sort) = on_sort {
-                    let on_sort_ptr = on_sort as *const Box<dyn Fn(&str, &SortDirection, &mut Window, &mut App)>;
+                    let on_sort_ptr =
+                        on_sort as *const Box<dyn Fn(&str, &SortDirection, &mut Window, &mut App)>;
                     let field_value = field_value.clone();
                     let next_direction = if is_active {
                         match current_direction {

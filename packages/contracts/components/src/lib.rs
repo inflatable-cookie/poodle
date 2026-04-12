@@ -11,6 +11,7 @@ mod call_out;
 mod card;
 mod checkbox;
 mod code;
+mod code_input;
 mod collapse_toggle;
 mod collapsible;
 mod color_picker;
@@ -19,6 +20,7 @@ mod date_picker;
 mod date_range_picker;
 mod date_time_picker;
 mod date_time_range_picker;
+mod date_time_zone_picker;
 mod detail_item;
 mod dialog;
 mod drawer;
@@ -49,7 +51,6 @@ mod order_by;
 mod pagination;
 mod password_requirements;
 mod pill;
-mod code_input;
 mod popover;
 mod progress;
 mod radio_group;
@@ -71,18 +72,17 @@ mod status_indicator;
 mod surface;
 mod switch;
 mod tab_strip;
-mod tabs;
 mod table;
+mod tabs;
 mod text_input;
 mod time_ago;
 mod time_field;
 mod time_zone_select;
-mod toolbar;
 mod toggle_group;
+mod toolbar;
 mod tooltip;
 mod tri_state_switch;
 mod types;
-mod date_time_zone_picker;
 
 // Composite modules
 mod action_discovery_panel;
@@ -91,8 +91,8 @@ mod audio_player;
 mod block_editor;
 mod card_radio_group;
 mod command_palette;
-mod confirm_action;
 mod composite_types;
+mod confirm_action;
 mod data_table;
 mod detail_section;
 mod detail_shell;
@@ -141,9 +141,10 @@ pub use call_out::CallOutSpec;
 pub use card::{CardLayout, CardSpec, CardVariant};
 pub use checkbox::CheckboxSpec;
 pub use code::CodeSpec;
+pub use code_input::CodeInputSpec;
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;
-pub use color_picker::{ColorPickerSpec, ColorInputMode};
+pub use color_picker::{ColorInputMode, ColorPickerSpec};
 pub use context_menu::ContextMenuSpec;
 pub use date_picker::DatePickerSpec;
 pub use date_range_picker::DateRangePickerSpec;
@@ -179,7 +180,6 @@ pub use order_by::{ActiveSort, OrderBySpec, SortDirection, SortField};
 pub use pagination::{PageItem, PaginationSpec, PaginationVariant};
 pub use password_requirements::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
-pub use code_input::CodeInputSpec;
 pub use popover::PopoverSpec;
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
@@ -208,8 +208,8 @@ pub use status_indicator::StatusIndicatorSpec;
 pub use surface::SurfaceSpec;
 pub use switch::{SwitchSpec, SwitchTone};
 pub use tab_strip::TabStripSpec;
-pub use tabs::TabsSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
+pub use tabs::TabsSpec;
 /// Deprecated: use `TextInputSpec` with `rows > 1` instead.
 pub type TextAreaSpec = TextInputSpec;
 pub use text_input::TextInputSpec;
@@ -219,21 +219,20 @@ pub use time_zone_select::TimeZoneSelectSpec;
 pub use toolbar::ToolbarSpec;
 /// Deprecated: Toggle has been superseded by Button with `pressed` prop.
 pub type ToggleSpec = ButtonSpec;
+pub use date_time_zone_picker::DateTimeZonePickerSpec;
 pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
-pub use date_time_zone_picker::DateTimeZonePickerSpec;
 /// Deprecated: Use `DateTimeZonePickerSpec` instead.
 pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
     AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlDensity, ControlSize, DateRangeValue,
     DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
-    FormActionAlign, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry, Orientation,
-    Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus, RuleTone,
-    SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder,
-    SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, TabVariant,
-    ValidationState,
+    FormActionAlign, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
+    Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus, RuleTone,
+    SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder, SurfaceRole,
+    SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, TabVariant, ValidationState,
 };
 
 // Composite exports
@@ -243,6 +242,14 @@ pub use audio_player::AudioPlayerSpec;
 pub use block_editor::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 pub use card_radio_group::CardRadioGroupSpec;
 pub use command_palette::CommandPaletteSpec;
+pub use composite_types::{
+    ActionDiscoverySection, AnnouncementMode, AspectRatio, BrowseState, CommandActionItem,
+    DiscoveryState, DockEdge, EmptyStateVariant, FormActionLayout, FormFieldState, FormSectionSpec,
+    FormStatusSummary, MediaKind, MediaState, MinColumnWidth, PanelTabItem, ParsedEmbed,
+    PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
+    SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableFilter, TablePagination,
+    TableRowSpec, TableSortDirection, ValidationSummaryEntry,
+};
 pub use confirm_action::ConfirmActionSpec;
 pub use data_table::DataTableSpec;
 pub use detail_section::DetailSectionSpec;
@@ -258,7 +265,7 @@ pub use inline_remediation::InlineRemediationSpec;
 pub use list_container::{ListContainerSpec, ListContainerState};
 pub use log_list::LogListSpec;
 pub use markdown_editor::MarkdownEditorSpec;
-pub use media_browse_panel::{MediaBrowsePanelSpec, MediaBrowseItem};
+pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::MediaPickerSpec;
 pub use media_preview::MediaPreviewSpec;
 pub use media_thumbnail::MediaThumbnailSpec;
@@ -279,16 +286,6 @@ pub use split_view::SplitViewSpec;
 pub use state_tile::StateTileSpec;
 pub use toast_host::{ToastHostPlacement, ToastHostSpec};
 pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
-pub use composite_types::{
-    ActionDiscoverySection, AnnouncementMode, AspectRatio, BrowseState,
-    CommandActionItem, DiscoveryState, DockEdge, EmptyStateVariant, FormActionLayout,
-    FormFieldState, FormSectionSpec, FormStatusSummary, MediaKind, MediaState, MinColumnWidth,
-    PanelTabItem, PickerItemSpec, PickerVariant, RemediationAction, ScrollOwner, SelectionMode,
-    SelectionSummaryItem, SplitOrientation, TableColumnSpec, TableFilter, TablePagination,
-    TableRowSpec, TableSortDirection,
-    ParsedEmbed,
-    ValidationSummaryEntry,
-};
 pub use validation_summary::ValidationSummarySpec;
 pub use video_player::VideoPlayerSpec;
 
@@ -376,20 +373,19 @@ mod tests {
         PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
         SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
         StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
-        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec,
-        TimeFieldSpec, TooltipSpec, ValidationState,
+        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeFieldSpec,
+        TooltipSpec, ValidationState,
     };
 
     use super::{
         AnnouncementMode, AspectRatio, BrowseState, DataTableSpec, DetailShellSpec, DetailState,
-        EmptyStateSpec, EmptyStateVariant, FilterToolbarSpec, FormFieldState, FormSectionSpec,
-        FormShellSpec, InlineRemediationSpec, MediaKind,
-        MediaPreviewSpec, MediaState, MediaThumbnailSpec, PaginationSummarySpec,
+        EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec, EmptyStateVariant, FilterToolbarSpec,
+        FormFieldState, FormSectionSpec, FormShellSpec, InlineRemediationSpec, MediaKind,
+        MediaPreviewSpec, MediaState, MediaThumbnailSpec, PaginationSummarySpec, ParsedEmbed,
         PickerItemSpec, PickerShellSpec, PickerVariant, RelationPickerSpec, RemediationAction,
-        RemediationBannerSpec, SelectionMode, SelectionSummaryItem,
-        SelectionSummarySpec, TableColumnSpec, TableRowSpec, TableSortDirection,
-        ValidationSummaryEntry, ValidationSummarySpec,
-        EmbedInputSpec, EmbedPreviewSpec, ParsedEmbed,
+        RemediationBannerSpec, SelectionMode, SelectionSummaryItem, SelectionSummarySpec,
+        TableColumnSpec, TableRowSpec, TableSortDirection, ValidationSummaryEntry,
+        ValidationSummarySpec,
     };
 
     #[test]
@@ -1033,7 +1029,10 @@ mod tests {
         assert!(thumbnail.shows_fallback_copy());
         assert!(thumbnail.caption_visible());
         assert_eq!(thumbnail.resolved_state_title(), "Preview unavailable");
-        assert_eq!(thumbnail.resolved_state_message(), Some("This file cannot be previewed."));
+        assert_eq!(
+            thumbnail.resolved_state_message(),
+            Some("This file cannot be previewed.")
+        );
         assert_eq!(
             thumbnail.frame_fill_token(),
             semantic::COLOR_BACKGROUND_SURFACE
@@ -1042,7 +1041,10 @@ mod tests {
         assert!(preview.has_footer_actions());
         assert!(preview.shows_fallback_copy());
         assert_eq!(preview.badge.as_deref(), Some("WIP"));
-        assert_eq!(embed.parsed.as_ref().map(|parsed| parsed.provider.as_str()), Some("youtube"));
+        assert_eq!(
+            embed.parsed.as_ref().map(|parsed| parsed.provider.as_str()),
+            Some("youtube")
+        );
         assert_eq!(embed.error.as_deref(), None);
     }
 
@@ -1051,7 +1053,10 @@ mod tests {
         let youtube_short = ParsedEmbed::detect("https://youtu.be/dQw4w9WgXcQ").unwrap();
         let youtube = ParsedEmbed::detect("https://www.youtube.com/watch?v=dQw4w9WgXcQ").unwrap();
         let vimeo = ParsedEmbed::detect("https://vimeo.com/123456").unwrap();
-        let iframe = ParsedEmbed::detect(r#"<iframe src="https://example.com/embed/1" width="640" height="480"></iframe>"#).unwrap();
+        let iframe = ParsedEmbed::detect(
+            r#"<iframe src="https://example.com/embed/1" width="640" height="480"></iframe>"#,
+        )
+        .unwrap();
         let restricted = EmbedInputSpec::new()
             .with_value("https://example.com/file.zip")
             .with_providers(vec![String::from("youtube"), String::from("vimeo")])
@@ -1064,11 +1069,17 @@ mod tests {
         assert_eq!(vimeo.provider, "vimeo");
         assert_eq!(vimeo.id, "123456");
         assert_eq!(iframe.provider, "generic");
-        assert_eq!(iframe.original_url.as_deref(), Some("https://example.com/embed/1"));
+        assert_eq!(
+            iframe.original_url.as_deref(),
+            Some("https://example.com/embed/1")
+        );
         assert_eq!(iframe.width, Some(640));
         assert_eq!(iframe.height, Some(480));
         assert_eq!(restricted.parsed, None);
-        assert_eq!(restricted.error.as_deref(), Some("Provider \"generic\" is not allowed"));
+        assert_eq!(
+            restricted.error.as_deref(),
+            Some("Provider \"generic\" is not allowed")
+        );
     }
 
     #[test]

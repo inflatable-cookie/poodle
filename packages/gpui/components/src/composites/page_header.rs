@@ -2,10 +2,12 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{PageHeaderAlign, PageHeaderSpec};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{PageHeaderAlign, PageHeaderSpec};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px};
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI page header component backed by `PageHeaderSpec`.
@@ -26,7 +28,9 @@ pub struct PageHeader {
 
 impl std::ops::Deref for PageHeader {
     type Target = PageHeaderSpec;
-    fn deref(&self) -> &PageHeaderSpec { &self.spec }
+    fn deref(&self) -> &PageHeaderSpec {
+        &self.spec
+    }
 }
 
 impl PageHeader {
@@ -53,15 +57,38 @@ impl PageHeader {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn subtitle(mut self, v: impl Into<String>) -> Self { self.spec.subtitle = Some(v.into()); self }
-    pub fn eyebrow(mut self, v: impl Into<String>) -> Self { self.spec.eyebrow = Some(v.into()); self }
-    pub fn align(mut self, v: PageHeaderAlign) -> Self { self.spec.align = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn subtitle(mut self, v: impl Into<String>) -> Self {
+        self.spec.subtitle = Some(v.into());
+        self
+    }
+    pub fn eyebrow(mut self, v: impl Into<String>) -> Self {
+        self.spec.eyebrow = Some(v.into());
+        self
+    }
+    pub fn align(mut self, v: PageHeaderAlign) -> Self {
+        self.spec.align = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_breadcrumbs(mut self, breadcrumbs: impl IntoElement) -> Self {
         self.breadcrumbs_slot = Some(breadcrumbs.into_any_element());
@@ -81,15 +108,27 @@ impl PageHeader {
     }
 
     // ── New spec builders ────────────────────────────────────
-    pub fn section(mut self, v: impl Into<String>) -> Self { self.spec.section = Some(v.into()); self }
-    pub fn count(mut self, v: u32) -> Self { self.spec.count = Some(v); self }
-    pub fn level(mut self, v: u8) -> Self { self.spec.level = v.clamp(1, 6); self }
+    pub fn section(mut self, v: impl Into<String>) -> Self {
+        self.spec.section = Some(v.into());
+        self
+    }
+    pub fn count(mut self, v: u32) -> Self {
+        self.spec.count = Some(v);
+        self
+    }
+    pub fn level(mut self, v: u8) -> Self {
+        self.spec.level = v.clamp(1, 6);
+        self
+    }
     pub fn back(mut self, href: impl Into<String>, label: impl Into<String>) -> Self {
         self.spec.back_href = Some(href.into());
         self.spec.back_label = Some(label.into());
         self
     }
-    pub fn back_is_contextual(mut self, v: bool) -> Self { self.spec.back_is_contextual = v; self }
+    pub fn back_is_contextual(mut self, v: bool) -> Self {
+        self.spec.back_is_contextual = v;
+        self
+    }
     pub fn banner(mut self, message: impl Into<String>, tone: poodle_specs::StatusTone) -> Self {
         self.spec.banner_message = Some(message.into());
         self.spec.banner_tone = tone;
@@ -181,9 +220,7 @@ impl IntoElement for PageHeader {
 
         // Optional breadcrumbs above
         if let Some(breadcrumbs) = self.breadcrumbs_slot {
-            wrapper = wrapper.child(
-                div().w_full().mb(gap).child(breadcrumbs),
-            );
+            wrapper = wrapper.child(div().w_full().mb(gap).child(breadcrumbs));
         }
 
         // Section label (rendered above the main row, distinct from eyebrow)
@@ -205,11 +242,7 @@ impl IntoElement for PageHeader {
             PageHeaderAlign::Start => false,
         };
 
-        let mut main_row = div()
-            .w_full()
-            .flex()
-            .items_center()
-            .gap(header_gap);
+        let mut main_row = div().w_full().flex().items_center().gap(header_gap);
 
         if justify {
             main_row = main_row.justify_between();
@@ -262,7 +295,12 @@ impl IntoElement for PageHeader {
 
         if let Some(actions) = self.actions_slot {
             main_row = main_row.child(
-                div().flex().items_center().flex_shrink_0().gap(px(6.0)).child(actions),
+                div()
+                    .flex()
+                    .items_center()
+                    .flex_shrink_0()
+                    .gap(px(6.0))
+                    .child(actions),
             );
         }
 
@@ -270,15 +308,19 @@ impl IntoElement for PageHeader {
 
         // Metadata row (MetaBar or similar) below the main header row.
         if let Some(meta) = self.meta_slot {
-            wrapper = wrapper.child(
-                div().w_full().mt(gap).child(meta),
-            );
+            wrapper = wrapper.child(div().w_full().mt(gap).child(meta));
         }
 
         // Banner row
         if let Some(ref message) = spec.banner_message {
-            let banner_bg = Hsla { a: banner_color.a * 0.12, ..banner_color };
-            let banner_border = Hsla { a: banner_color.a * 0.38, ..banner_color };
+            let banner_bg = Hsla {
+                a: banner_color.a * 0.12,
+                ..banner_color
+            };
+            let banner_border = Hsla {
+                a: banner_color.a * 0.38,
+                ..banner_color
+            };
             wrapper = wrapper.child(
                 div()
                     .w_full()

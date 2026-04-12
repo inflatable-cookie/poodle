@@ -1,6 +1,8 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ChoiceOption, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
+use crate::types::{
+    ChoiceOption, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RadioGroupSpec {

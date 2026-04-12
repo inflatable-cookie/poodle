@@ -1,11 +1,11 @@
 //! EmbedPreview — preview of embedded content backed by EmbedPreviewSpec.
 
+use crate::primitives::Icon;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EmbedPreviewSpec;
 use poodle_specs::{IconSize, IconSpec};
-use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct EmbedPreview {
     spec: EmbedPreviewSpec,
@@ -14,15 +14,23 @@ pub struct EmbedPreview {
 
 impl std::ops::Deref for EmbedPreview {
     type Target = EmbedPreviewSpec;
-    fn deref(&self) -> &EmbedPreviewSpec { &self.spec }
+    fn deref(&self) -> &EmbedPreviewSpec {
+        &self.spec
+    }
 }
 
 impl EmbedPreview {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: EmbedPreviewSpec::new(), theme: theme.clone() }
+        Self {
+            spec: EmbedPreviewSpec::new(),
+            theme: theme.clone(),
+        }
     }
     pub fn from_spec(spec: EmbedPreviewSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
     }
 }
 
@@ -98,8 +106,11 @@ impl IntoElement for EmbedPreview {
                     .justify_center()
                     .gap(gap)
                     .child(
-                        Icon::from_spec(IconSpec::new("alert-circle").with_size(IconSize::Lg), theme)
-                            .with_color(danger_color),
+                        Icon::from_spec(
+                            IconSpec::new("alert-circle").with_size(IconSize::Lg),
+                            theme,
+                        )
+                        .with_color(danger_color),
                     )
                     .child(
                         div()
@@ -121,8 +132,11 @@ impl IntoElement for EmbedPreview {
                     .justify_center()
                     .gap(gap)
                     .child(
-                        Icon::from_spec(IconSpec::new("monitor-play").with_size(IconSize::Lg), theme)
-                            .with_color(desc_color.opacity(0.7)),
+                        Icon::from_spec(
+                            IconSpec::new("monitor-play").with_size(IconSize::Lg),
+                            theme,
+                        )
+                        .with_color(desc_color.opacity(0.7)),
                     )
                     .child(
                         div()
@@ -147,7 +161,11 @@ impl IntoElement for EmbedPreview {
 
             let media_frame = div()
                 .w_full()
-                .min_h(if self.spec.effective_aspect_ratio().is_some() { px(200.0) } else { px(160.0) })
+                .min_h(if self.spec.effective_aspect_ratio().is_some() {
+                    px(200.0)
+                } else {
+                    px(160.0)
+                })
                 .rounded(radius)
                 .bg(subtle_bg)
                 .border_1()
@@ -160,11 +178,8 @@ impl IntoElement for EmbedPreview {
                 .px(gap_lg)
                 .py(gap_lg)
                 .child(
-                    Icon::from_spec(
-                        IconSpec::new("monitor-play").with_size(IconSize::Lg),
-                        theme,
-                    )
-                    .with_color(success_color),
+                    Icon::from_spec(IconSpec::new("monitor-play").with_size(IconSize::Lg), theme)
+                        .with_color(success_color),
                 )
                 .child(
                     div()
@@ -180,30 +195,29 @@ impl IntoElement for EmbedPreview {
                         .child(embed_url),
                 );
 
-            el = el.child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(gap)
-                    .child(
-                        Icon::from_spec(
-                            IconSpec::new("link").with_size(IconSize::Sm),
-                            theme,
+            el = el
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(gap)
+                        .child(
+                            Icon::from_spec(IconSpec::new("link").with_size(IconSize::Sm), theme)
+                                .with_color(success_color),
                         )
-                        .with_color(success_color),
-                    )
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .font_weight(FontWeight::MEDIUM)
-                            .text_color(success_color)
-                            .bg(resolve_color(theme, "color.background.subtle"))
-                            .rounded(radius_control)
-                            .px(gap)
-                            .py(px(2.0))
-                            .child(provider_label),
-                    ),
-            ).child(media_frame);
+                        .child(
+                            div()
+                                .text_size(label_size)
+                                .font_weight(FontWeight::MEDIUM)
+                                .text_color(success_color)
+                                .bg(resolve_color(theme, "color.background.subtle"))
+                                .rounded(radius_control)
+                                .px(gap)
+                                .py(px(2.0))
+                                .child(provider_label),
+                        ),
+                )
+                .child(media_frame);
             return el.into_any_element();
         }
 
@@ -238,10 +252,12 @@ impl IntoElement for EmbedPreview {
         }
 
         el = el.child(
-            div()
-                .text_size(label_size)
-                .text_color(success_color)
-                .child(parsed.original_url.clone().unwrap_or_else(|| parsed.id.clone())),
+            div().text_size(label_size).text_color(success_color).child(
+                parsed
+                    .original_url
+                    .clone()
+                    .unwrap_or_else(|| parsed.id.clone()),
+            ),
         );
 
         el.into_any_element()

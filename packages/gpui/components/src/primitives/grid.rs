@@ -18,12 +18,18 @@ pub struct Grid {
 
 impl std::ops::Deref for Grid {
     type Target = GridSpec;
-    fn deref(&self) -> &GridSpec { &self.spec }
+    fn deref(&self) -> &GridSpec {
+        &self.spec
+    }
 }
 
 impl Grid {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: GridSpec::new(), theme: theme.clone(), children: Vec::new() }
+        Self {
+            spec: GridSpec::new(),
+            theme: theme.clone(),
+            children: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: GridSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,12 +41,26 @@ impl Grid {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn columns(mut self, v: Dimension) -> Self { self.spec.columns = v; self }
-    pub fn rows(mut self, v: Dimension) -> Self { self.spec.rows = Some(v); self }
-    pub fn gap(mut self, v: PaddingScale) -> Self { self.spec.gap = v; self }
-    pub fn padding(mut self, v: PaddingScale) -> Self { self.spec.padding = v; self }
-    pub fn role(mut self, v: impl Into<String>) -> Self { self.spec.role = Some(v.into()); self }
-
+    pub fn columns(mut self, v: Dimension) -> Self {
+        self.spec.columns = v;
+        self
+    }
+    pub fn rows(mut self, v: Dimension) -> Self {
+        self.spec.rows = Some(v);
+        self
+    }
+    pub fn gap(mut self, v: PaddingScale) -> Self {
+        self.spec.gap = v;
+        self
+    }
+    pub fn padding(mut self, v: PaddingScale) -> Self {
+        self.spec.padding = v;
+        self
+    }
+    pub fn role(mut self, v: impl Into<String>) -> Self {
+        self.spec.role = Some(v.into());
+        self
+    }
 
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());
@@ -65,7 +85,11 @@ impl Grid {
         }
         // Count space-separated tracks
         let count = cols_str.split_whitespace().count();
-        if count > 0 { count } else { 1 }
+        if count > 0 {
+            count
+        } else {
+            1
+        }
     }
 }
 

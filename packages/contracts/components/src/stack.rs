@@ -48,14 +48,38 @@ impl StackSpec {
         Self::default()
     }
 
-    pub fn with_direction(mut self, direction: StackDirection) -> Self { self.direction = direction; self }
-    pub fn with_gap(mut self, gap: PaddingScale) -> Self { self.gap = gap; self }
-    pub fn with_align(mut self, align: Alignment) -> Self { self.align = align; self }
-    pub fn with_justify(mut self, justify: LayoutJustify) -> Self { self.justify = Some(justify); self }
-    pub fn with_wrap(mut self, wrap: bool) -> Self { self.wrap = wrap; self }
-    pub fn with_padding(mut self, padding: PaddingScale) -> Self { self.padding = padding; self }
-    pub fn with_role(mut self, role: impl Into<String>) -> Self { self.role = Some(role.into()); self }
-    pub fn with_aria_label(mut self, label: impl Into<String>) -> Self { self.aria_label = Some(label.into()); self }
+    pub fn with_direction(mut self, direction: StackDirection) -> Self {
+        self.direction = direction;
+        self
+    }
+    pub fn with_gap(mut self, gap: PaddingScale) -> Self {
+        self.gap = gap;
+        self
+    }
+    pub fn with_align(mut self, align: Alignment) -> Self {
+        self.align = align;
+        self
+    }
+    pub fn with_justify(mut self, justify: LayoutJustify) -> Self {
+        self.justify = Some(justify);
+        self
+    }
+    pub fn with_wrap(mut self, wrap: bool) -> Self {
+        self.wrap = wrap;
+        self
+    }
+    pub fn with_padding(mut self, padding: PaddingScale) -> Self {
+        self.padding = padding;
+        self
+    }
+    pub fn with_role(mut self, role: impl Into<String>) -> Self {
+        self.role = Some(role.into());
+        self
+    }
+    pub fn with_aria_label(mut self, label: impl Into<String>) -> Self {
+        self.aria_label = Some(label.into());
+        self
+    }
 
     pub fn resolved_gap(&self) -> Option<&'static str> {
         match self.direction {

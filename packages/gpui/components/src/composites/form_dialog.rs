@@ -2,12 +2,12 @@
 //! Composes with the Dialog primitive for consistent surface rendering
 //! and FormLayout for structured form content.
 
+use crate::composites::FormLayout;
+use crate::primitives::Dialog;
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use crate::primitives::Dialog;
-use crate::composites::FormLayout;
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 pub struct FormDialog {
     theme: GpuiThemeProvider,
@@ -62,18 +62,54 @@ impl FormDialog {
             on_cancel: None,
         }
     }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.title = Some(v.into()); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.description = Some(v.into()); self }
-    pub fn subtitle(mut self, v: impl Into<String>) -> Self { self.subtitle = Some(v.into()); self }
-    pub fn submit_label(mut self, v: impl Into<String>) -> Self { self.submit_label = v.into(); self }
-    pub fn cancel_label(mut self, v: impl Into<String>) -> Self { self.cancel_label = v.into(); self }
-    pub fn submitting(mut self, v: bool) -> Self { self.submitting = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.disabled = v; self }
-    pub fn error_message(mut self, v: impl Into<String>) -> Self { self.error_message = Some(v.into()); self }
-    pub fn success_message(mut self, v: impl Into<String>) -> Self { self.success_message = Some(v.into()); self }
-    pub fn bare(mut self, v: bool) -> Self { self.bare = v; self }
-    pub fn columns(mut self, v: u32) -> Self { self.columns = v; self }
-    pub fn show_default_actions(mut self, v: bool) -> Self { self.show_default_actions = v; self }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.title = Some(v.into());
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.description = Some(v.into());
+        self
+    }
+    pub fn subtitle(mut self, v: impl Into<String>) -> Self {
+        self.subtitle = Some(v.into());
+        self
+    }
+    pub fn submit_label(mut self, v: impl Into<String>) -> Self {
+        self.submit_label = v.into();
+        self
+    }
+    pub fn cancel_label(mut self, v: impl Into<String>) -> Self {
+        self.cancel_label = v.into();
+        self
+    }
+    pub fn submitting(mut self, v: bool) -> Self {
+        self.submitting = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.disabled = v;
+        self
+    }
+    pub fn error_message(mut self, v: impl Into<String>) -> Self {
+        self.error_message = Some(v.into());
+        self
+    }
+    pub fn success_message(mut self, v: impl Into<String>) -> Self {
+        self.success_message = Some(v.into());
+        self
+    }
+    pub fn bare(mut self, v: bool) -> Self {
+        self.bare = v;
+        self
+    }
+    pub fn columns(mut self, v: u32) -> Self {
+        self.columns = v;
+        self
+    }
+    pub fn show_default_actions(mut self, v: bool) -> Self {
+        self.show_default_actions = v;
+        self
+    }
 
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());
@@ -222,17 +258,12 @@ impl IntoElement for FormDialog {
 
             if self.submitting {
                 submit_btn = submit_btn.child(
-                    div()
-                        .flex()
-                        .flex_row()
-                        .gap(px(6.0))
-                        .items_center()
-                        .child(
-                            div()
-                                .text_size(body_size)
-                                .text_color(color_mix(gpui::white(), accent, 0.8))
-                                .child("Submitting\u{2026}"),
-                        ),
+                    div().flex().flex_row().gap(px(6.0)).items_center().child(
+                        div()
+                            .text_size(body_size)
+                            .text_color(color_mix(gpui::white(), accent, 0.8))
+                            .child("Submitting\u{2026}"),
+                    ),
                 );
             } else {
                 submit_btn = submit_btn.child(self.submit_label);

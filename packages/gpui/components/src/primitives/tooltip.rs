@@ -20,12 +20,18 @@ pub struct Tooltip {
 
 impl std::ops::Deref for Tooltip {
     type Target = TooltipSpec;
-    fn deref(&self) -> &TooltipSpec { &self.spec }
+    fn deref(&self) -> &TooltipSpec {
+        &self.spec
+    }
 }
 
 impl Tooltip {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TooltipSpec::new(), theme: theme.clone(), trigger: None }
+        Self {
+            spec: TooltipSpec::new(),
+            theme: theme.clone(),
+            trigger: None,
+        }
     }
 
     pub fn from_spec(spec: TooltipSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,12 +43,26 @@ impl Tooltip {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn content(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn content(mut self, v: impl Into<String>) -> Self {
+        self.spec.content = Some(v.into());
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn placement(mut self, v: OverlayPlacement) -> Self {
+        self.spec.placement = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     /// Set the trigger element that the tooltip wraps.
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
@@ -63,11 +83,18 @@ impl IntoElement for Tooltip {
         let text_primary = resolve_color(theme, "color.text.primary");
         let stack_gap = resolve_px(theme, "space.stack.sm");
         // Contract: border-radius = calc(control-radius - 0.125rem)
-        let tooltip_radius = resolve_radius(theme, "radius.control") - px(rem_to_px(spec.radius_inset_rem()));
+        let tooltip_radius =
+            resolve_radius(theme, "radius.control") - px(rem_to_px(spec.radius_inset_rem()));
 
         // Matches Svelte treatment-surface-elevated values
-        let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
-        let tooltip_border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let fill = Hsla {
+            a: elevated_bg.a * 0.94,
+            ..elevated_bg
+        };
+        let tooltip_border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
 
         let mut wrapper = div().flex().flex_col().gap(stack_gap);
 
@@ -85,14 +112,13 @@ impl IntoElement for Tooltip {
                 let tooltip_font_size = px(rem_to_px(spec.font_size_rem()));
                 let tooltip_max_w = px(rem_to_px(spec.max_width_rem()));
 
-                let mut tooltip_bubble = div()
-                        .px(tooltip_px)
-                        .py(tooltip_py)
-                        .rounded(tooltip_radius);
+                let mut tooltip_bubble =
+                    div().px(tooltip_px).py(tooltip_py).rounded(tooltip_radius);
 
                 // Brand-raised treatment: gradient fill for elevated surface
                 if theme.brand_raised {
-                    tooltip_bubble = tooltip_bubble.bg(crate::theme_ext::brand_raised_surface_fill(fill));
+                    tooltip_bubble =
+                        tooltip_bubble.bg(crate::theme_ext::brand_raised_surface_fill(fill));
                 } else {
                     tooltip_bubble = tooltip_bubble.bg(fill);
                 }
@@ -102,14 +128,12 @@ impl IntoElement for Tooltip {
                         .border_1()
                         .border_color(tooltip_border)
                         // Contract: elevation-tooltip shadow
-                        .shadow(vec![
-                            gpui::BoxShadow {
-                                color: hsla(0.0, 0.0, 0.0, 0.12),
-                                offset: point(px(0.0), px(2.0)),
-                                blur_radius: px(8.0),
-                                spread_radius: px(0.0),
-                            },
-                        ])
+                        .shadow(vec![gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.12),
+                            offset: point(px(0.0), px(2.0)),
+                            blur_radius: px(8.0),
+                            spread_radius: px(0.0),
+                        }])
                         // Contract: font 0.6875rem, max-width 16rem
                         .text_size(tooltip_font_size)
                         .text_color(text_primary)

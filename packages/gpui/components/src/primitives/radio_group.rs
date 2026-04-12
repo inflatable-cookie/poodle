@@ -17,12 +17,19 @@ pub struct RadioGroup {
 
 impl std::ops::Deref for RadioGroup {
     type Target = RadioGroupSpec;
-    fn deref(&self) -> &RadioGroupSpec { &self.spec }
+    fn deref(&self) -> &RadioGroupSpec {
+        &self.spec
+    }
 }
 
 impl RadioGroup {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RadioGroupSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_change: None }
+        Self {
+            spec: RadioGroupSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: RadioGroupSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,26 +42,53 @@ impl RadioGroup {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn options(mut self, v: Vec<ChoiceOption>) -> Self { self.spec.options = v; self }
-    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn options(mut self, v: Vec<ChoiceOption>) -> Self {
+        self.spec.options = v;
+        self
+    }
+    pub fn orientation(mut self, v: Orientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn description_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.description_id = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -116,32 +150,42 @@ impl IntoElement for RadioGroup {
             // Contract: indicator = circle, border-default, surface bg
             // Checked: border-color = accent (NOT fill), dot bg = accent
             let mut indicator = div()
-                .w(indicator_size).h(indicator_size)
+                .w(indicator_size)
+                .h(indicator_size)
                 .rounded(px(999.0))
                 .bg(surface_bg)
                 .border_1()
                 .border_color(if is_selected { accent } else { border })
-                .flex().items_center().justify_center()
+                .flex()
+                .items_center()
+                .justify_center()
                 .flex_shrink_0();
 
             // Contract: dot always present, transparent when unchecked, accent when checked
-            indicator = indicator.child(
-                div()
-                    .w(dot_size).h(dot_size)
-                    .rounded(px(999.0))
-                    .bg(if is_selected { accent } else { gpui::transparent_black() })
-            );
+            indicator = indicator.child(div().w(dot_size).h(dot_size).rounded(px(999.0)).bg(
+                if is_selected {
+                    accent
+                } else {
+                    gpui::transparent_black()
+                },
+            ));
 
             let mut row = div()
                 .id(option_id)
                 .focusable()
-                .flex().items_center()
+                .flex()
+                .items_center()
                 .gap(option_gap)
                 .min_w(px(0.0))
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
 
             if is_disabled {
-                row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+                row = row
+                    .opacity(disabled_opacity)
+                    .cursor(CursorStyle::OperationNotAllowed);
             } else {
                 row = row.cursor_pointer();
 
@@ -161,11 +205,17 @@ impl IntoElement for RadioGroup {
                         .on_key_down(move |event: &KeyDownEvent, window, cx| {
                             if event.keystroke.key == "space" || event.keystroke.key == "enter" {
                                 key_handler(&val2, window, cx);
-                            } else if event.keystroke.key == "down" || event.keystroke.key == "right" {
+                            } else if event.keystroke.key == "down"
+                                || event.keystroke.key == "right"
+                            {
                                 let next = (current_idx + 1) % ovs.len();
                                 arrow_handler(&ovs[next], window, cx);
                             } else if event.keystroke.key == "up" || event.keystroke.key == "left" {
-                                let prev = if current_idx == 0 { ovs.len() - 1 } else { current_idx - 1 };
+                                let prev = if current_idx == 0 {
+                                    ovs.len() - 1
+                                } else {
+                                    current_idx - 1
+                                };
                                 arrow_handler(&ovs[prev], window, cx);
                             }
                         });
@@ -180,7 +230,7 @@ impl IntoElement for RadioGroup {
                     .text_size(body_size)
                     .text_color(text_primary)
                     .whitespace_nowrap()
-                    .child(option.label.clone())
+                    .child(option.label.clone()),
             );
 
             group = group.child(row);

@@ -1,15 +1,14 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{
-    EmptyStateSpec, EmptyStateVariant, RemediationAction,
-    MetricTileSpec,
-    Toast, ToastTone, ToastStackSpec,
-};
-use poodle_specs::{ButtonVariant, EyebrowSpec};
-use poodle_gpui_components::{EmptyState, MetricTile, ToastStack, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{EmptyState, Eyebrow, MetricTile, ToastStack};
+use poodle_specs::{ButtonVariant, EyebrowSpec};
+use poodle_specs::{
+    EmptyStateSpec, EmptyStateVariant, MetricTileSpec, RemediationAction, Toast, ToastStackSpec,
+    ToastTone,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -17,15 +16,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // Build toast list, filtering out dismissed ones
     let toasts: Vec<Toast> = vec![
-        ("t1", "Changes saved", Some("Your settings have been updated."), ToastTone::Success, None),
-        ("t2", "Build failed", Some("Check the logs for more details."), ToastTone::Danger, Some("View logs")),
-        ("t3", "New version available", Some("v2.4.0 is ready to install."), ToastTone::Info, Some("Update now")),
-    ].into_iter()
+        (
+            "t1",
+            "Changes saved",
+            Some("Your settings have been updated."),
+            ToastTone::Success,
+            None,
+        ),
+        (
+            "t2",
+            "Build failed",
+            Some("Check the logs for more details."),
+            ToastTone::Danger,
+            Some("View logs"),
+        ),
+        (
+            "t3",
+            "New version available",
+            Some("v2.4.0 is ready to install."),
+            ToastTone::Info,
+            Some("Update now"),
+        ),
+    ]
+    .into_iter()
     .filter(|(id, _, _, _, _)| !state.specimens.is_on(&format!("toast-dismissed-{}", id)))
     .map(|(id, title, msg, tone, action)| {
         let mut t = Toast::new(id, title).with_tone(tone);
-        if let Some(m) = msg { t = t.with_message(m); }
-        if let Some(a) = action { t = t.with_action_label(a); }
+        if let Some(m) = msg {
+            t = t.with_message(m);
+        }
+        if let Some(a) = action {
+            t = t.with_action_label(a);
+        }
         t
     })
     .collect();

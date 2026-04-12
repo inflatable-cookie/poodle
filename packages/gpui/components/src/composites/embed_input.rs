@@ -1,12 +1,12 @@
 //! EmbedInput — URL input for embedding external content backed by EmbedInputSpec.
 
+use crate::primitives::Pill;
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EmbedInputSpec;
 use poodle_specs::{PillSize, PillSpec, PillTone};
-use crate::primitives::Pill;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct EmbedInput {
     spec: EmbedInputSpec,
@@ -15,15 +15,23 @@ pub struct EmbedInput {
 
 impl std::ops::Deref for EmbedInput {
     type Target = EmbedInputSpec;
-    fn deref(&self) -> &EmbedInputSpec { &self.spec }
+    fn deref(&self) -> &EmbedInputSpec {
+        &self.spec
+    }
 }
 
 impl EmbedInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: EmbedInputSpec::new(), theme: theme.clone() }
+        Self {
+            spec: EmbedInputSpec::new(),
+            theme: theme.clone(),
+        }
     }
     pub fn from_spec(spec: EmbedInputSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
     }
 }
 
@@ -42,11 +50,17 @@ impl IntoElement for EmbedInput {
         let body_size = resolve_px(theme, "typography.body.size");
 
         let display = if spec.value.is_empty() {
-            spec.placeholder.as_deref().unwrap_or("Paste URL or embed code...")
+            spec.placeholder
+                .as_deref()
+                .unwrap_or("Paste URL or embed code...")
         } else {
             &spec.value
         };
-        let color = if spec.value.is_empty() { placeholder_color } else { text_color };
+        let color = if spec.value.is_empty() {
+            placeholder_color
+        } else {
+            text_color
+        };
         let (parsed, error) = spec.resolved_parse_state();
 
         // Multi-line text area (min 3 rows ~72px) for URL / embed code
@@ -77,7 +91,12 @@ impl IntoElement for EmbedInput {
                 .cursor_not_allowed();
         }
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0)).w_full().child(textarea);
+        let mut wrapper = div()
+            .flex()
+            .flex_col()
+            .gap(px(4.0))
+            .w_full()
+            .child(textarea);
 
         if error.is_some() || parsed.is_some() {
             let status_area = div()
@@ -89,18 +108,20 @@ impl IntoElement for EmbedInput {
                 .text_size(px(12.0))
                 .text_color(status_color)
                 .when(parsed.is_some(), |el| {
-                    el.child(
-                        Pill::from_spec(
-                            PillSpec::new()
-                                .with_label(parsed.clone().unwrap().provider)
-                                .with_tone(PillTone::Success)
-                                .with_size(PillSize::Sm),
-                            theme,
-                        ),
-                    )
+                    el.child(Pill::from_spec(
+                        PillSpec::new()
+                            .with_label(parsed.clone().unwrap().provider)
+                            .with_tone(PillTone::Success)
+                            .with_size(PillSize::Sm),
+                        theme,
+                    ))
                 })
                 .when(error.is_some() || parsed.is_some(), |el| {
-                    el.child(error.clone().unwrap_or_else(|| String::from("Embed detected")))
+                    el.child(
+                        error
+                            .clone()
+                            .unwrap_or_else(|| String::from("Embed detected")),
+                    )
                 });
             wrapper = wrapper.child(status_area);
         }

@@ -1,10 +1,10 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{ButtonSpec, ButtonVariant, PopoverSpec, OverlayPlacement, EyebrowSpec};
-use poodle_gpui_components::{Button, Popover, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{Button, Eyebrow, Popover};
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, OverlayPlacement, PopoverSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;

@@ -1,9 +1,9 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{AccordionSpec, AccordionItemSpec, AccordionSelectionValue, EyebrowSpec};
-use poodle_gpui_components::{Accordion, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{Accordion, Eyebrow};
+use poodle_specs::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -29,8 +29,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let single_expanded: Option<String> = if !single_initialized {
         Some("getting-started".to_string())
     } else {
-        single_items.iter()
-            .find(|item| state.specimens.is_on(&format!("{single_key_prefix}{}", item.value)))
+        single_items
+            .iter()
+            .find(|item| {
+                state
+                    .specimens
+                    .is_on(&format!("{single_key_prefix}{}", item.value))
+            })
             .map(|item| item.value.clone())
     };
 
@@ -94,8 +99,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let multi_expanded: Vec<String> = if !multi_initialized {
         vec!["design".to_string(), "keyboard".to_string()]
     } else {
-        multi_items.iter()
-            .filter(|item| state.specimens.is_on(&format!("{multi_key_prefix}{}", item.value)))
+        multi_items
+            .iter()
+            .filter(|item| {
+                state
+                    .specimens
+                    .is_on(&format!("{multi_key_prefix}{}", item.value))
+            })
             .map(|item| item.value.clone())
             .collect()
     };
@@ -136,15 +146,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
     }
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Single selection"), theme))
-                .child(single_accordion)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Single selection"),
+                    theme,
+                ))
+                .child(single_accordion),
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiple selection"), theme))
-                .child(multi_accordion)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Multiple selection"),
+                    theme,
+                ))
+                .child(multi_accordion),
         )
 }

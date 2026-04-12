@@ -6,7 +6,10 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ActionDiscoveryPanelSpec, ActionDiscoverySection, DiscoveryState};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, SkeletonSpec};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::primitives::Skeleton;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -23,12 +26,19 @@ pub struct ActionDiscoveryPanel {
 
 impl std::ops::Deref for ActionDiscoveryPanel {
     type Target = ActionDiscoveryPanelSpec;
-    fn deref(&self) -> &ActionDiscoveryPanelSpec { &self.spec }
+    fn deref(&self) -> &ActionDiscoveryPanelSpec {
+        &self.spec
+    }
 }
 
 impl ActionDiscoveryPanel {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ActionDiscoveryPanelSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_select: None }
+        Self {
+            spec: ActionDiscoveryPanelSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_select: None,
+        }
     }
 
     pub fn from_spec(spec: ActionDiscoveryPanelSpec, theme: &GpuiThemeProvider) -> Self {
@@ -41,23 +51,37 @@ impl ActionDiscoveryPanel {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn sections(mut self, v: Vec<ActionDiscoverySection>) -> Self { self.spec.sections = v; self }
-    pub fn state(mut self, v: DiscoveryState) -> Self { self.spec.state = v; self }
-    pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = Some(v.into()); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn sections(mut self, v: Vec<ActionDiscoverySection>) -> Self {
+        self.spec.sections = v;
+        self
+    }
+    pub fn state(mut self, v: DiscoveryState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn empty_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.empty_message = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_select(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_select = Some(Box::new(handler));
         self
     }
@@ -90,11 +114,7 @@ impl IntoElement for ActionDiscoveryPanel {
         let label_size = resolve_px(theme, "typography.label.size");
         let radius_control = resolve_radius(theme, "radius.control");
 
-        let mut panel = div()
-            .flex()
-            .flex_col()
-            .gap(px(gap))
-            .size_full();
+        let mut panel = div().flex().flex_col().gap(px(gap)).size_full();
 
         match spec.state {
             DiscoveryState::Loading => {
@@ -109,41 +129,24 @@ impl IntoElement for ActionDiscoveryPanel {
                             .p(px(14.0))
                             .rounded(radius_control)
                             .bg(resolve_color(theme, "color.background.surface").opacity(0.72))
-                            .child(
-                                div()
-                                    .flex_grow()
-                                    .child(
-                                        Skeleton::from_spec(
-                                            SkeletonSpec::new().with_width("160").with_animated(true),
-                                            theme,
-                                        ),
-                                    ),
-                            )
-                            .child(
-                                div()
-                                    .flex_none()
-                                    .child(
-                                        Skeleton::from_spec(
-                                            SkeletonSpec::new().with_width("56").with_animated(true),
-                                            theme,
-                                        ),
-                                    ),
-                            ),
+                            .child(div().flex_grow().child(Skeleton::from_spec(
+                                SkeletonSpec::new().with_width("160").with_animated(true),
+                                theme,
+                            )))
+                            .child(div().flex_none().child(Skeleton::from_spec(
+                                SkeletonSpec::new().with_width("56").with_animated(true),
+                                theme,
+                            ))),
                     );
                 }
-                panel = panel.child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(gap_sm)
-                        .child(skeletons),
-                );
+                panel = panel.child(div().flex().flex_col().gap(gap_sm).child(skeletons));
                 return panel.into_any_element();
             }
             DiscoveryState::Error => {
                 panel = panel.child(
                     div()
-                        .px(px(panel_px)).py(px(panel_py))
+                        .px(px(panel_px))
+                        .py(px(panel_py))
                         .text_size(body_size)
                         .text_color(resolve_color(theme, "color.status.danger"))
                         .child("Failed to load actions"),
@@ -151,13 +154,11 @@ impl IntoElement for ActionDiscoveryPanel {
                 return panel.into_any_element();
             }
             DiscoveryState::Empty | DiscoveryState::NoResults => {
-                let msg = spec
-                    .empty_message
-                    .as_deref()
-                    .unwrap_or("No actions found");
+                let msg = spec.empty_message.as_deref().unwrap_or("No actions found");
                 panel = panel.child(
                     div()
-                        .px(px(panel_px)).py(px(panel_py))
+                        .px(px(panel_px))
+                        .py(px(panel_py))
                         .text_size(body_size)
                         .text_color(text_secondary)
                         .child(msg.to_string()),
@@ -195,8 +196,7 @@ impl IntoElement for ActionDiscoveryPanel {
 
             // Action items
             for action in &section.actions {
-                let action_id =
-                    SharedString::from(format!("{}-{}", self.id_prefix, action.id));
+                let action_id = SharedString::from(format!("{}-{}", self.id_prefix, action.id));
 
                 let mut row = div()
                     .id(action_id)
@@ -209,16 +209,17 @@ impl IntoElement for ActionDiscoveryPanel {
                     .text_size(body_size)
                     .text_color(text_primary);
 
-                row = row.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                row = row.focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
 
                 if action.is_disabled {
                     row = row
                         .opacity(disabled_opacity)
                         .cursor(CursorStyle::OperationNotAllowed);
                 } else {
-                    row = row
-                        .cursor_pointer()
-                        .hover(|s| s.bg(hover_bg));
+                    row = row.cursor_pointer().hover(|s| s.bg(hover_bg));
                 }
 
                 // Left: title + badge
@@ -254,12 +255,7 @@ impl IntoElement for ActionDiscoveryPanel {
             }
 
             // Section separator
-            section_el = section_el.child(
-                div()
-                    .h(px(1.0))
-                    .w_full()
-                    .bg(border),
-            );
+            section_el = section_el.child(div().h(px(1.0)).w_full().bg(border));
 
             panel = panel.child(section_el);
         }

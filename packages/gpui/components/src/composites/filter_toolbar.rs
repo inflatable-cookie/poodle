@@ -12,8 +12,8 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::FilterToolbarSpec;
 use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
-use crate::primitives::Icon;
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
+use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct FilterToolbar {
@@ -31,7 +31,9 @@ pub struct FilterToolbar {
 
 impl std::ops::Deref for FilterToolbar {
     type Target = FilterToolbarSpec;
-    fn deref(&self) -> &FilterToolbarSpec { &self.spec }
+    fn deref(&self) -> &FilterToolbarSpec {
+        &self.spec
+    }
 }
 
 impl FilterToolbar {
@@ -58,16 +60,46 @@ impl FilterToolbar {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = v.into(); self }
-    pub fn summary_text(mut self, v: impl Into<String>) -> Self { self.spec.summary_text = Some(v.into()); self }
-    pub fn collapsible(mut self, v: bool) -> Self { self.spec.collapsible = v; self }
-    pub fn collapsed(mut self, v: bool) -> Self { self.spec.collapsed = v; self }
-    pub fn columns(mut self, v: u32) -> Self { self.spec.columns = v; self }
-    pub fn min_item_width_rem(mut self, v: f32) -> Self { self.spec.min_item_width_rem = v; self }
-    pub fn sticky(mut self, v: bool) -> Self { self.spec.sticky = v; self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = v.into();
+        self
+    }
+    pub fn summary_text(mut self, v: impl Into<String>) -> Self {
+        self.spec.summary_text = Some(v.into());
+        self
+    }
+    pub fn collapsible(mut self, v: bool) -> Self {
+        self.spec.collapsible = v;
+        self
+    }
+    pub fn collapsed(mut self, v: bool) -> Self {
+        self.spec.collapsed = v;
+        self
+    }
+    pub fn columns(mut self, v: u32) -> Self {
+        self.spec.columns = v;
+        self
+    }
+    pub fn min_item_width_rem(mut self, v: f32) -> Self {
+        self.spec.min_item_width_rem = v;
+        self
+    }
+    pub fn sticky(mut self, v: bool) -> Self {
+        self.spec.sticky = v;
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     /// Append a filter control child (TextInput, Select, etc.).
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
@@ -120,7 +152,10 @@ impl IntoElement for FilterToolbar {
         let body_size = resolve_px(theme, "typography.body.size");
 
         let elevated_bg = resolve_color(theme, spec.background_token());
-        let bg = Hsla { a: elevated_bg.a * spec.background_opacity(), ..elevated_bg };
+        let bg = Hsla {
+            a: elevated_bg.a * spec.background_opacity(),
+            ..elevated_bg
+        };
         let border = resolve_color(theme, spec.border_token());
         let radius = resolve_radius(theme, spec.radius_token());
         let summary_color = resolve_color(theme, spec.summary_color_token());
@@ -143,33 +178,31 @@ impl IntoElement for FilterToolbar {
 
         // Sticky elevation — reuse dialog shadow for now as a soft elevation.
         if spec.sticky {
-            toolbar = toolbar.shadow(vec![
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.06),
-                    offset: point(px(0.0), px(2.0)),
-                    blur_radius: px(8.0),
-                    spread_radius: px(0.0),
-                },
-            ]);
+            toolbar = toolbar.shadow(vec![gpui::BoxShadow {
+                color: hsla(0.0, 0.0, 0.0, 0.06),
+                offset: point(px(0.0), px(2.0)),
+                blur_radius: px(8.0),
+                spread_radius: px(0.0),
+            }]);
         }
 
         // ── Header row ───────────────────────────────────────────
-        let needs_header = spec.collapsible || spec.summary_text.is_some() || self.actions.is_some();
+        let needs_header =
+            spec.collapsible || spec.summary_text.is_some() || self.actions.is_some();
 
         if needs_header {
-            let mut header_row = div()
-                .flex()
-                .items_center()
-                .gap(inline_md);
+            let mut header_row = div().flex().items_center().gap(inline_md);
 
             // Collapse toggle (chevron)
             if spec.collapsible {
-                let chevron_name = if is_expanded { "chevron-down" } else { "chevron-right" };
-                let icon = Icon::from_spec(
-                    IconSpec::new(chevron_name).with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(icon_muted);
+                let chevron_name = if is_expanded {
+                    "chevron-down"
+                } else {
+                    "chevron-right"
+                };
+                let icon =
+                    Icon::from_spec(IconSpec::new(chevron_name).with_size(IconSize::Sm), theme)
+                        .with_color(icon_muted);
 
                 let mut toggle_btn = div()
                     .id("filter-toolbar-toggle")
@@ -209,7 +242,12 @@ impl IntoElement for FilterToolbar {
             // Actions slot
             if let Some(actions) = self.actions {
                 header_row = header_row.child(
-                    div().flex().items_center().gap(px(6.0)).flex_shrink_0().child(actions)
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(6.0))
+                        .flex_shrink_0()
+                        .child(actions),
                 );
             }
 
@@ -227,11 +265,7 @@ impl IntoElement for FilterToolbar {
             // doesn't have CSS grid so flex-wrap with min-width on each
             // child is the closest equivalent to the Svelte implementation.
             let min_item_width = px(rem_to_px(spec.min_item_width_rem));
-            let mut grid = div()
-                .flex()
-                .flex_wrap()
-                .gap(inline_md)
-                .w_full();
+            let mut grid = div().flex().flex_wrap().gap(inline_md).w_full();
 
             for child in self.children {
                 grid = grid.child(

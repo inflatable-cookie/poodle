@@ -14,22 +14,44 @@ pub struct Spinner {
 
 impl std::ops::Deref for Spinner {
     type Target = SpinnerSpec;
-    fn deref(&self) -> &SpinnerSpec { &self.spec }
+    fn deref(&self) -> &SpinnerSpec {
+        &self.spec
+    }
 }
 
 impl Spinner {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SpinnerSpec::new(), theme: theme.clone(), color_override: None }
+        Self {
+            spec: SpinnerSpec::new(),
+            theme: theme.clone(),
+            color_override: None,
+        }
     }
 
     pub fn from_spec(spec: SpinnerSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), color_override: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            color_override: None,
+        }
     }
 
-    pub fn variant(mut self, variant: SpinnerVariant) -> Self { self.spec.variant = variant; self }
-    pub fn size(mut self, size: SpinnerSize) -> Self { self.spec.size = size; self }
-    pub fn tone(mut self, tone: SpinnerTone) -> Self { self.spec.tone = tone; self }
-    pub fn aria_label(mut self, aria_label: impl Into<String>) -> Self { self.spec.aria_label = Some(aria_label.into()); self }
+    pub fn variant(mut self, variant: SpinnerVariant) -> Self {
+        self.spec.variant = variant;
+        self
+    }
+    pub fn size(mut self, size: SpinnerSize) -> Self {
+        self.spec.size = size;
+        self
+    }
+    pub fn tone(mut self, tone: SpinnerTone) -> Self {
+        self.spec.tone = tone;
+        self
+    }
+    pub fn aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(aria_label.into());
+        self
+    }
 
     pub fn with_color(mut self, color: Hsla) -> Self {
         self.color_override = Some(color);
@@ -64,9 +86,9 @@ impl IntoElement for Spinner {
                         "spinner-ring",
                         Animation::new(Duration::from_millis(800)).repeat(),
                         |svg, delta| {
-                            svg.with_transformation(
-                                Transformation::rotate(gpui::radians(delta * std::f32::consts::TAU))
-                            )
+                            svg.with_transformation(Transformation::rotate(gpui::radians(
+                                delta * std::f32::consts::TAU,
+                            )))
                         },
                     )
                     .into_any_element()
@@ -102,7 +124,10 @@ impl IntoElement for Spinner {
                                 .rounded(px(2.0))
                                 .bg(color)
                                 .with_animation(
-                                    SharedString::from(format!("spinner-grid-{}-{}", row_idx, col_idx)),
+                                    SharedString::from(format!(
+                                        "spinner-grid-{}-{}",
+                                        row_idx, col_idx
+                                    )),
                                     Animation::new(Duration::from_millis(1240))
                                         .repeat()
                                         .with_easing(gpui::linear),
@@ -116,7 +141,8 @@ impl IntoElement for Spinner {
                                             })
                                             .fold(f32::INFINITY, f32::min);
                                         let normalized = (nearest / 1.6).min(1.0);
-                                        let smooth = 1.0 - (normalized * normalized * (3.0 - 2.0 * normalized));
+                                        let smooth = 1.0
+                                            - (normalized * normalized * (3.0 - 2.0 * normalized));
                                         let opacity = 0.2 + smooth * 0.56;
                                         el.opacity(opacity)
                                     },

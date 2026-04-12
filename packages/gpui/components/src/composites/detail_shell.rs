@@ -21,12 +21,19 @@ pub struct DetailShell {
 
 impl std::ops::Deref for DetailShell {
     type Target = DetailShellSpec;
-    fn deref(&self) -> &DetailShellSpec { &self.spec }
+    fn deref(&self) -> &DetailShellSpec {
+        &self.spec
+    }
 }
 
 impl DetailShell {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DetailShellSpec::new(), theme: theme.clone(), header_slot: None, content_slot: None }
+        Self {
+            spec: DetailShellSpec::new(),
+            theme: theme.clone(),
+            header_slot: None,
+            content_slot: None,
+        }
     }
 
     pub fn from_spec(spec: DetailShellSpec, theme: &GpuiThemeProvider) -> Self {
@@ -39,11 +46,22 @@ impl DetailShell {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn scroll_owner(mut self, v: ScrollOwner) -> Self { self.spec.scroll_owner = v; self }
-    pub fn state(mut self, v: DetailState) -> Self { self.spec.state = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn scroll_owner(mut self, v: ScrollOwner) -> Self {
+        self.spec.scroll_owner = v;
+        self
+    }
+    pub fn state(mut self, v: DetailState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_header(mut self, header: impl IntoElement) -> Self {
         self.header_slot = Some(header.into_any_element());
@@ -110,11 +128,7 @@ impl IntoElement for DetailShell {
         // Body section — state-dependent
         let body = match spec.state {
             DetailState::Ready => {
-                let mut content_area = div()
-                    .w_full()
-                    .flex_grow()
-                    .px(px(16.0))
-                    .py(px(12.0));
+                let mut content_area = div().w_full().flex_grow().px(px(16.0)).py(px(12.0));
                 if let Some(content) = self.content_slot {
                     content_area = content_area.child(content);
                 }
@@ -129,15 +143,13 @@ impl IntoElement for DetailShell {
                 .justify_center()
                 .gap(px(8.0))
                 .py(px(32.0))
-                .child(
-                    Spinner::from_spec(
-                        SpinnerSpec::new()
-                            .with_variant(SpinnerVariant::Grid)
-                            .with_size(SpinnerSize::Md)
-                            .with_tone(SpinnerTone::Accent),
-                        theme,
-                    ),
-                )
+                .child(Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Grid)
+                        .with_size(SpinnerSize::Md)
+                        .with_tone(SpinnerTone::Accent),
+                    theme,
+                ))
                 .child(
                     div()
                         .text_size(body_size)

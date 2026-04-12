@@ -5,9 +5,11 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{
+    BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, SemanticControlSizeRole,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_space_x_rem};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::resolve_color;
 
 pub struct Breadcrumbs {
@@ -23,7 +25,9 @@ pub struct Breadcrumbs {
 
 impl std::ops::Deref for Breadcrumbs {
     type Target = BreadcrumbsSpec;
-    fn deref(&self) -> &BreadcrumbsSpec { &self.spec }
+    fn deref(&self) -> &BreadcrumbsSpec {
+        &self.spec
+    }
 }
 
 impl Breadcrumbs {
@@ -54,15 +58,24 @@ impl Breadcrumbs {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<BreadcrumbItem>) -> Self { self.spec.items = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn items(mut self, v: Vec<BreadcrumbItem>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-    pub fn on_navigate(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_navigate(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_navigate = Some(std::rc::Rc::new(handler));
         self
     }
@@ -109,12 +122,8 @@ impl IntoElement for Breadcrumbs {
         for (i, item) in visible_items.iter().enumerate() {
             if i > 0 {
                 // Contract: separator opacity 0.4
-                container = container.child(
-                    div()
-                        .text_color(separator_color)
-                        .opacity(0.4)
-                        .child("/"),
-                );
+                container =
+                    container.child(div().text_color(separator_color).opacity(0.4).child("/"));
             }
 
             let is_current = item.is_current || i == last_index;

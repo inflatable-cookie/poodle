@@ -1,18 +1,21 @@
-use gpui::*;
-use gpui::prelude::FluentBuilder;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{MenuSpec, MenuEntry, MenuItemKind, EyebrowSpec};
-use poodle_gpui_components::{Menu, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, Menu};
+use poodle_specs::{EyebrowSpec, MenuEntry, MenuItemKind, MenuSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
-    let last_action = state.specimens.text.get("menu-last-action")
+    let last_action = state
+        .specimens
+        .text
+        .get("menu-last-action")
         .cloned()
         .unwrap_or_default();
 
@@ -23,7 +26,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         MenuEntry::new("save", "Save").with_shortcut_label("\u{2318}S"),
         MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
         MenuEntry::new("export", "Export as PDF"),
-        MenuEntry::new("print", "Print\u{2026}").with_shortcut_label("\u{2318}P").with_disabled(true),
+        MenuEntry::new("print", "Print\u{2026}")
+            .with_shortcut_label("\u{2318}P")
+            .with_disabled(true),
     ];
 
     let file_spec = MenuSpec::new(file_items)
@@ -49,11 +54,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_default_open(true)
         .with_aria_label("Settings menu");
 
-    let examples = div().flex().flex_col().gap(px(24.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // With shortcuts
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With shortcuts"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With shortcuts"),
+                    theme,
+                ))
                 .child(
                     Menu::from_spec(file_spec, theme)
                         .with_id("specimen-menu-shortcuts")
@@ -63,20 +77,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 format!("Selected: {}", val),
                             );
                             cx.notify();
-                        }))
-                )
+                        })),
+                ),
         )
         // With checkboxes
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With checkboxes"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With checkboxes"),
+                    theme,
+                ))
                 .child(
                     Menu::from_spec(settings_spec, theme)
                         .with_id("specimen-menu-checkboxes")
                         .on_select(cx.listener(|this, val: &str, _w, cx| {
                             match val {
-                                "theme" => { this.state.specimens.toggle("menu-dark-mode"); },
-                                "notifications" => { this.state.specimens.toggle("menu-notifications"); },
+                                "theme" => {
+                                    this.state.specimens.toggle("menu-dark-mode");
+                                }
+                                "notifications" => {
+                                    this.state.specimens.toggle("menu-notifications");
+                                }
                                 _ => {}
                             }
                             this.state.specimens.text.insert(
@@ -84,13 +108,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 format!("Selected: {}", val),
                             );
                             cx.notify();
-                        }))
-                )
+                        })),
+                ),
         )
         // With destructive item
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With destructive item"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With destructive item"),
+                    theme,
+                ))
                 .child(
                     Menu::from_spec(
                         MenuSpec::new(vec![
@@ -106,14 +136,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_aria_label("Item actions"),
                         theme,
                     )
-                    .with_id("specimen-menu-destructive")
-                )
+                    .with_id("specimen-menu-destructive"),
+                ),
         )
         // --- Last action feedback ---
         .when(!last_action.is_empty(), |d| {
             d.child(
-                div().text_sm().text_color(color_to_hsla(text_secondary))
-                    .child(last_action)
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(last_action),
             )
         })
         .into_any_element();

@@ -1,34 +1,47 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Breadcrumbs, Button, Eyebrow, PageHeader, Pill, TimeAgo};
 use poodle_specs::PageHeaderSpec;
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlSize, BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec,
+    BreadcrumbItem, BreadcrumbsSpec, ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec,
     PillAppearance, PillSpec, PillTone, StatusTone, TimeAgoSpec,
 };
-use poodle_gpui_components::{Button, Breadcrumbs, Eyebrow, PageHeader, Pill, TimeAgo};
-use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Basic ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic"), theme))
-                .child(
-                    PageHeader::from_spec(
-                        PageHeaderSpec::new("Components")
-                            .with_subtitle("Browse and manage your component library."),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Basic"),
+                    theme,
+                ))
+                .child(PageHeader::from_spec(
+                    PageHeaderSpec::new("Components")
+                        .with_subtitle("Browse and manage your component library."),
+                    theme,
+                )),
         )
         // --- With back link and actions ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With back link and actions"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With back link and actions"),
+                    theme,
+                ))
                 .child(
                     PageHeader::from_spec(
                         PageHeaderSpec::new("Media Library")
@@ -37,7 +50,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_actions(
-                        div().flex().gap(px(6.0))
+                        div()
+                            .flex()
+                            .gap(px(6.0))
                             .child(
                                 Button::from_spec(
                                     ButtonSpec::new()
@@ -45,7 +60,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Upload")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-media-upload")
+                                )
+                                .with_id("ph-media-upload"),
                             )
                             .child(
                                 Button::from_spec(
@@ -54,15 +70,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Settings")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-media-settings")
-                            )
-                    )
-                )
+                                )
+                                .with_id("ph-media-settings"),
+                            ),
+                    ),
+                ),
         )
         // --- With eyebrow and actions ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With eyebrow and actions"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With eyebrow and actions"),
+                    theme,
+                ))
                 .child(
                     PageHeader::from_spec(
                         PageHeaderSpec::new("Button")
@@ -71,7 +94,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_actions(
-                        div().flex().gap(px(6.0))
+                        div()
+                            .flex()
+                            .gap(px(6.0))
                             .child(
                                 Button::from_spec(
                                     ButtonSpec::new()
@@ -79,7 +104,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("View source")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-source")
+                                )
+                                .with_id("ph-source"),
                             )
                             .child(
                                 Button::from_spec(
@@ -88,28 +114,39 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Edit")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-edit")
-                            )
-                    )
-                )
+                                )
+                                .with_id("ph-edit"),
+                            ),
+                    ),
+                ),
         )
         // --- With count ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With count"), theme))
-                .child(
-                    PageHeader::from_spec(
-                        PageHeaderSpec::new("Users")
-                            .with_count(128)
-                            .with_back("/dashboard", "Dashboard"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With count"),
+                    theme,
+                ))
+                .child(PageHeader::from_spec(
+                    PageHeaderSpec::new("Users")
+                        .with_count(128)
+                        .with_back("/dashboard", "Dashboard"),
+                    theme,
+                )),
         )
         // --- Section and banner ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Section and banner"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Section and banner"),
+                    theme,
+                ))
                 .child(
                     PageHeader::from_spec(
                         PageHeaderSpec::new("Nightly Sync")
@@ -120,7 +157,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_actions(
-                        div().flex().gap(px(6.0))
+                        div()
+                            .flex()
+                            .gap(px(6.0))
                             .child(
                                 Button::from_spec(
                                     ButtonSpec::new()
@@ -128,7 +167,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Run now")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-sync-run")
+                                )
+                                .with_id("ph-sync-run"),
                             )
                             .child(
                                 Button::from_spec(
@@ -137,15 +177,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Edit")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-sync-edit")
-                            )
-                    )
-                )
+                                )
+                                .with_id("ph-sync-edit"),
+                            ),
+                    ),
+                ),
         )
         // --- With MetaBar ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With MetaBar"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With MetaBar"),
+                    theme,
+                ))
                 .child(
                     PageHeader::from_spec(
                         PageHeaderSpec::new("Nightly Sync")
@@ -154,35 +201,41 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                     .with_meta(
-                        div().flex().items_center().gap(px(12.0))
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(px(12.0))
+                            .child(Pill::from_spec(
+                                PillSpec::new()
+                                    .with_label("Active")
+                                    .with_tone(PillTone::Success)
+                                    .with_appearance(PillAppearance::Badge),
+                                theme,
+                            ))
                             .child(
-                                Pill::from_spec(
-                                    PillSpec::new()
-                                        .with_label("Active")
-                                        .with_tone(PillTone::Success)
-                                        .with_appearance(PillAppearance::Badge),
-                                    theme,
-                                )
+                                div()
+                                    .text_size(px(13.0))
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child("Every 6 hours"),
                             )
                             .child(
-                                div().text_size(px(13.0)).text_color(color_to_hsla(text_secondary))
-                                    .child("Every 6 hours")
-                            )
-                            .child(
-                                div().flex().items_center().gap(px(4.0))
+                                div()
+                                    .flex()
+                                    .items_center()
+                                    .gap(px(4.0))
                                     .text_size(px(13.0))
                                     .text_color(color_to_hsla(text_secondary))
                                     .child(div().child("Last run"))
-                                    .child(
-                                        TimeAgo::from_spec(
-                                            TimeAgoSpec::new().with_timestamp("2026-03-30T08:15:00Z"),
-                                            theme,
-                                        )
-                                    )
-                            )
+                                    .child(TimeAgo::from_spec(
+                                        TimeAgoSpec::new().with_timestamp("2026-03-30T08:15:00Z"),
+                                        theme,
+                                    )),
+                            ),
                     )
                     .with_actions(
-                        div().flex().gap(px(6.0))
+                        div()
+                            .flex()
+                            .gap(px(6.0))
                             .child(
                                 Button::from_spec(
                                     ButtonSpec::new()
@@ -190,7 +243,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Run now")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-meta-run")
+                                )
+                                .with_id("ph-meta-run"),
                             )
                             .child(
                                 Button::from_spec(
@@ -199,42 +253,51 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_label("Edit schedule")
                                         .with_size(ControlSize::Sm),
                                     theme,
-                                ).with_id("ph-meta-edit")
-                            )
-                    )
-                )
+                                )
+                                .with_id("ph-meta-edit"),
+                            ),
+                    ),
+                ),
         )
         // --- Title only ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Title only"), theme))
-                .child(
-                    PageHeader::from_spec(
-                        PageHeaderSpec::new("Settings"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Title only"),
+                    theme,
+                ))
+                .child(PageHeader::from_spec(
+                    PageHeaderSpec::new("Settings"),
+                    theme,
+                )),
         )
         // --- With breadcrumbs ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With breadcrumbs"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With breadcrumbs"),
+                    theme,
+                ))
                 .child(
                     PageHeader::from_spec(
                         PageHeaderSpec::new("Button")
                             .with_subtitle("Primary interactive control for triggering actions."),
                         theme,
                     )
-                    .with_breadcrumbs(
-                        Breadcrumbs::from_spec(
-                            BreadcrumbsSpec::new(vec![
-                                BreadcrumbItem::new("home", "Home"),
-                                BreadcrumbItem::new("components", "Components"),
-                                BreadcrumbItem::new("primitives", "Primitives"),
-                            ]),
-                            theme,
-                        )
-                    )
-                )
+                    .with_breadcrumbs(Breadcrumbs::from_spec(
+                        BreadcrumbsSpec::new(vec![
+                            BreadcrumbItem::new("home", "Home"),
+                            BreadcrumbItem::new("components", "Components"),
+                            BreadcrumbItem::new("primitives", "Primitives"),
+                        ]),
+                        theme,
+                    )),
+                ),
         )
 }

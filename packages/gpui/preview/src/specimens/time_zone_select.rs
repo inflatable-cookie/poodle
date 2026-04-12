@@ -1,21 +1,31 @@
-use gpui::*;
-use poodle_specs::{TimeZoneSelectSpec, EyebrowSpec};
-use poodle_gpui_components::{TimeZoneSelect, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, TimeZoneSelect};
+use poodle_specs::{EyebrowSpec, TimeZoneSelectSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     let is_open = state.specimens.is_on("tz-select-open");
 
-    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(320.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(320.0))
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child(
                     TimeZoneSelect::from_spec(
                         TimeZoneSelectSpec::new()
@@ -26,33 +36,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
                         this.state.specimens.toggle("tz-select-open");
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
         // --- With pre-selected zone ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With pre-selected zone"), theme))
-                .child(
-                    TimeZoneSelect::from_spec(
-                        TimeZoneSelectSpec::new()
-                            .with_value("America/New_York"),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With pre-selected zone"),
+                    theme,
+                ))
+                .child(TimeZoneSelect::from_spec(
+                    TimeZoneSelectSpec::new().with_value("America/New_York"),
+                    theme,
+                )),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
-                .child(
-                    TimeZoneSelect::from_spec(
-                        TimeZoneSelectSpec::new()
-                            .with_value("Europe/London")
-                            .with_disabled(true),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
+                .child(TimeZoneSelect::from_spec(
+                    TimeZoneSelectSpec::new()
+                        .with_value("Europe/London")
+                        .with_disabled(true),
+                    theme,
+                )),
         )
         .into_any_element();
 

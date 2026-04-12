@@ -1,11 +1,15 @@
 //! Code — real GPUI component backed by CodeSpec.
 
+use crate::primitives::Icon;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CodeSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
-use crate::primitives::Icon;
+use poodle_specs::{
+    CodeSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI code display component backed by `CodeSpec`.
@@ -16,12 +20,17 @@ pub struct Code {
 
 impl std::ops::Deref for Code {
     type Target = CodeSpec;
-    fn deref(&self) -> &CodeSpec { &self.spec }
+    fn deref(&self) -> &CodeSpec {
+        &self.spec
+    }
 }
 
 impl Code {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CodeSpec::new(), theme: theme.clone() }
+        Self {
+            spec: CodeSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: CodeSpec, theme: &GpuiThemeProvider) -> Self {
@@ -32,16 +41,46 @@ impl Code {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn content(mut self, v: impl Into<String>) -> Self { self.spec.content = v.into(); self }
-    pub fn language(mut self, v: impl Into<String>) -> Self { self.spec.language = Some(v.into()); self }
-    pub fn show_line_numbers(mut self, v: bool) -> Self { self.spec.show_line_numbers = v; self }
-    pub fn copyable(mut self, v: bool) -> Self { self.spec.is_copyable = v; self }
-    pub fn highlight_lines(mut self, v: Vec<usize>) -> Self { self.spec.highlight_lines = v; self }
-    pub fn max_height(mut self, v: f64) -> Self { self.spec.max_height = Some(v); self }
-    pub fn inline(mut self, v: bool) -> Self { self.spec.is_inline = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn content(mut self, v: impl Into<String>) -> Self {
+        self.spec.content = v.into();
+        self
+    }
+    pub fn language(mut self, v: impl Into<String>) -> Self {
+        self.spec.language = Some(v.into());
+        self
+    }
+    pub fn show_line_numbers(mut self, v: bool) -> Self {
+        self.spec.show_line_numbers = v;
+        self
+    }
+    pub fn copyable(mut self, v: bool) -> Self {
+        self.spec.is_copyable = v;
+        self
+    }
+    pub fn highlight_lines(mut self, v: Vec<usize>) -> Self {
+        self.spec.highlight_lines = v;
+        self
+    }
+    pub fn max_height(mut self, v: f64) -> Self {
+        self.spec.max_height = Some(v);
+        self
+    }
+    pub fn inline(mut self, v: bool) -> Self {
+        self.spec.is_inline = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for Code {
@@ -122,15 +161,19 @@ impl IntoElement for Code {
                 toolbar = toolbar.child(
                     div()
                         .cursor_pointer()
-                        .w(px(24.0)).h(px(24.0))
+                        .w(px(24.0))
+                        .h(px(24.0))
                         .rounded(px(4.0))
-                        .flex().items_center().justify_center()
+                        .flex()
+                        .items_center()
+                        .justify_center()
                         .hover(|s| s.bg(fill.opacity(0.8)))
                         .child(
                             Icon::from_spec(
                                 IconSpec::new("clipboard-copy").with_size(IconSize::Sm),
                                 theme,
-                            ).with_color(text_secondary)
+                            )
+                            .with_color(text_secondary),
                         ),
                 );
             }
@@ -169,11 +212,7 @@ impl IntoElement for Code {
 
                 if spec.show_line_numbers {
                     let line_number = format!("{:>3} ", line_num_1based);
-                    row = row.child(
-                        div()
-                            .text_color(text_color.opacity(0.4))
-                            .child(line_number),
-                    );
+                    row = row.child(div().text_color(text_color.opacity(0.4)).child(line_number));
                 }
 
                 row = row.child(div().child(line_text));

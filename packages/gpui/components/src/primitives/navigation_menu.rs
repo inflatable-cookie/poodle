@@ -7,9 +7,14 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec, SemanticControlSizeRole,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem, size_height_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI navigation menu component backed by `NavigationMenuSpec`.
@@ -22,12 +27,19 @@ pub struct NavigationMenu {
 
 impl std::ops::Deref for NavigationMenu {
     type Target = NavigationMenuSpec;
-    fn deref(&self) -> &NavigationMenuSpec { &self.spec }
+    fn deref(&self) -> &NavigationMenuSpec {
+        &self.spec
+    }
 }
 
 impl NavigationMenu {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: NavigationMenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_change: None }
+        Self {
+            spec: NavigationMenuSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: NavigationMenuSpec, theme: &GpuiThemeProvider) -> Self {
@@ -40,23 +52,41 @@ impl NavigationMenu {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<NavigationMenuEntry>) -> Self { self.spec.items = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn items(mut self, v: Vec<NavigationMenuEntry>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -113,11 +143,7 @@ impl IntoElement for NavigationMenu {
             self.on_change.map(|h| std::rc::Rc::from(h));
 
         // Contract: list = inline-flex, flex-wrap, gap 0.25rem
-        let mut nav_row = div()
-            .flex()
-            .flex_wrap()
-            .items_center()
-            .gap(gap_sm);
+        let mut nav_row = div().flex().flex_wrap().items_center().gap(gap_sm);
 
         for item in &self.spec.items {
             let is_active = current_value.as_deref() == Some(item.value.as_str());
@@ -150,16 +176,17 @@ impl IntoElement for NavigationMenu {
                     .text_color(text_primary);
             }
 
-            trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            trigger = trigger.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_disabled {
                 trigger = trigger
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                trigger = trigger
-                    .cursor_pointer()
-                    .hover(|s| s.bg(hover_bg));
+                trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
 
                 if let Some(ref handler) = on_change_rc {
                     let handler = handler.clone();
@@ -175,10 +202,7 @@ impl IntoElement for NavigationMenu {
         }
 
         // Contract: root is grid with gap 0.5rem
-        let mut wrapper = div()
-            .flex()
-            .flex_col()
-            .gap(px(viewport_gap));
+        let mut wrapper = div().flex().flex_col().gap(px(viewport_gap));
         wrapper = wrapper.child(nav_row);
 
         // Viewport: show description for active item with border/radius/bg/shadow

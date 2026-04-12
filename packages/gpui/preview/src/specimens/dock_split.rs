@@ -1,21 +1,21 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{
-    DockRegionSpec, DockEdge, PanelTabItem,
-    SplitViewSpec, SplitOrientation,
-};
-use poodle_specs::EyebrowSpec;
-use poodle_gpui_components::{DockRegion, SplitView, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{DockRegion, Eyebrow, SplitView};
+use poodle_specs::EyebrowSpec;
+use poodle_specs::{DockEdge, DockRegionSpec, PanelTabItem, SplitOrientation, SplitViewSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let hover_bg = theme.resolve_color("color.background.hover");
 
-    let active_tab = state.specimens.text.get("dock-active-tab")
+    let active_tab = state
+        .specimens
+        .text
+        .get("dock-active-tab")
         .cloned()
         .unwrap_or_else(|| "explorer".to_string());
 
@@ -64,7 +64,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // --- Interactive collapse toggle ---
     let toggle_collapsed = state.specimens.is_on("dock-toggle-collapsed");
-    let toggle_tab = state.specimens.text.get("dock-toggle-tab")
+    let toggle_tab = state
+        .specimens
+        .text
+        .get("dock-toggle-tab")
         .cloned()
         .unwrap_or_else(|| "explorer".to_string());
 
@@ -80,7 +83,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .with_value(&toggle_tab);
 
     // --- Right edge dock ---
-    let right_tab = state.specimens.text.get("dock-right-tab")
+    let right_tab = state
+        .specimens
+        .text
+        .get("dock-right-tab")
         .cloned()
         .unwrap_or_else(|| "outline".to_string());
 
@@ -95,7 +101,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // --- Bottom edge dock ---
     let bottom_collapsed = state.specimens.is_on("dock-bottom-collapsed");
-    let bottom_tab = state.specimens.text.get("dock-bottom-tab")
+    let bottom_tab = state
+        .specimens
+        .text
+        .get("dock-bottom-tab")
         .cloned()
         .unwrap_or_else(|| "terminal".to_string());
 
@@ -111,10 +120,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .with_value(&bottom_tab);
 
     // --- Splits ---
-    let h_split_spec = SplitViewSpec::new(SplitOrientation::Horizontal)
-        .with_default_ratio(0.5);
-    let v_split_spec = SplitViewSpec::new(SplitOrientation::Vertical)
-        .with_default_ratio(0.5);
+    let h_split_spec = SplitViewSpec::new(SplitOrientation::Horizontal).with_default_ratio(0.5);
+    let v_split_spec = SplitViewSpec::new(SplitOrientation::Vertical).with_default_ratio(0.5);
 
     // Content for the active tab
     let tab_content = match active_tab.as_str() {
@@ -124,225 +131,335 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         _ => "Panel content",
     };
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Static dock -- horizontal (top edge) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static dock \u{2014} horizontal (top edge)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Static dock \u{2014} horizontal (top edge)"),
+                    theme,
+                ))
                 .child(
                     div().h(px(100.0)).child(
-                        DockRegion::from_spec(top_spec, theme)
-                            .with_content(
-                                div().p(px(8.0))
-                                    .child(
-                                        div().text_xs().text_color(color_to_hsla(text_secondary))
-                                            .child("Output: Build succeeded in 2.3s")
-                                    )
-                            )
-                    )
-                )
+                        DockRegion::from_spec(top_spec, theme).with_content(
+                            div().p(px(8.0)).child(
+                                div()
+                                    .text_xs()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child("Output: Build succeeded in 2.3s"),
+                            ),
+                        ),
+                    ),
+                ),
         )
-
         // --- Static dock -- vertical (left edge) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static dock \u{2014} vertical (left edge)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Static dock \u{2014} vertical (left edge)"),
+                    theme,
+                ))
                 .child(
                     div().h(px(120.0)).flex().child(
                         div().w(px(200.0)).h_full().child(
-                            DockRegion::from_spec(static_left_spec, theme)
-                                .with_content(
-                                    div().p(px(8.0))
-                                        .child(
-                                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                                .child("Files: index.ts, package.json, README.md")
-                                        )
-                                )
-                        )
-                    )
-                )
+                            DockRegion::from_spec(static_left_spec, theme).with_content(
+                                div().p(px(8.0)).child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Files: index.ts, package.json, README.md"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
         )
-
         // --- Flexible dock -- expanded (left edge) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flexible dock \u{2014} expanded (left edge)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Flexible dock \u{2014} expanded (left edge)"),
+                    theme,
+                ))
                 .child(
                     div().h(px(160.0)).flex().child(
                         div().w(px(220.0)).h_full().child(
                             DockRegion::from_spec(flex_expanded_spec, theme)
                                 .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                    this.state.specimens.text.insert("dock-active-tab".to_string(), tab_id.to_string());
+                                    this.state
+                                        .specimens
+                                        .text
+                                        .insert("dock-active-tab".to_string(), tab_id.to_string());
                                     cx.notify();
                                 }))
                                 .with_content(
-                                    div().p(px(8.0))
-                                        .child(
-                                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                                .whitespace_nowrap()
-                                                .child(tab_content.to_string())
-                                        )
-                                )
-                        )
-                    )
-                )
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .whitespace_nowrap()
+                                            .child(tab_content.to_string()),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
         )
-
         // --- Flexible dock -- collapsed icon-strip (left edge) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flexible dock \u{2014} collapsed icon-strip (left edge)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Flexible dock \u{2014} collapsed icon-strip (left edge)"),
+                    theme,
+                ))
                 .child(
                     div().h(px(100.0)).flex().child(
-                        DockRegion::from_spec(flex_collapsed_spec, theme)
-                            .with_content(div())
-                    )
-                )
+                        DockRegion::from_spec(flex_collapsed_spec, theme).with_content(div()),
+                    ),
+                ),
         )
-
         // --- Interactive collapse toggle ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Interactive collapse toggle (click to toggle)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Interactive collapse toggle (click to toggle)"),
+                    theme,
+                ))
                 .child(
-                    div().h(px(if toggle_collapsed { 60.0 } else { 160.0 })).flex().child(
-                        div().w(px(if toggle_collapsed { 48.0 } else { 220.0 })).h_full().child(
-                            DockRegion::from_spec(toggle_spec, theme)
-                                .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                    this.state.specimens.text.insert("dock-toggle-tab".to_string(), tab_id.to_string());
-                                    // Expand when a tab is clicked while collapsed
-                                    this.state.specimens.toggles.insert("dock-toggle-collapsed".to_string(), false);
-                                    cx.notify();
-                                }))
-                                .with_content(
-                                    div().p(px(8.0))
-                                        .child(
-                                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                                .child(format!("Active: {}", toggle_tab))
-                                        )
-                                )
-                        )
-                    )
-                    .child(
-                        div().ml(px(8.0)).flex().items_start().child(
-                            div().id("dock-toggle-btn")
-                                .px(px(8.0)).py(px(4.0))
-                                .text_xs()
-                                .text_color(color_to_hsla(text_secondary))
-                                .rounded(px(4.0))
-                                .cursor(CursorStyle::PointingHand)
-                                .hover(|s| s.bg(color_to_hsla(hover_bg)))
-                                .child(if toggle_collapsed { "Expand \u{25B8}" } else { "Collapse \u{25C2}" })
-                                .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                    this.state.specimens.toggle("dock-toggle-collapsed");
-                                    cx.notify();
-                                }))
-                        )
-                    )
-                )
-        )
-
-        // --- Right edge dock ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Flexible dock \u{2014} right edge"), theme))
-                .child(
-                    div().h(px(120.0)).flex().justify_end().child(
-                        div().w(px(200.0)).h_full().child(
-                            DockRegion::from_spec(flex_right_spec, theme)
-                                .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                    this.state.specimens.text.insert("dock-right-tab".to_string(), tab_id.to_string());
-                                    cx.notify();
-                                }))
-                                .with_content(
-                                    div().p(px(8.0))
-                                        .child(
-                                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                                .child(format!("Active: {}", right_tab))
-                                        )
-                                )
-                        )
-                    )
-                )
-        )
-
-        // --- Bottom edge dock ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Bottom edge dock (click to toggle)"), theme))
-                .child(
-                    div().flex().flex_col()
+                    div()
+                        .h(px(if toggle_collapsed { 60.0 } else { 160.0 }))
+                        .flex()
                         .child(
-                            div().h(px(if bottom_collapsed { 36.0 } else { 120.0 })).child(
-                                DockRegion::from_spec(bottom_spec, theme)
-                                    .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
-                                        this.state.specimens.text.insert("dock-bottom-tab".to_string(), tab_id.to_string());
-                                        this.state.specimens.toggles.insert("dock-bottom-collapsed".to_string(), false);
-                                        cx.notify();
-                                    }))
-                                    .with_content(
-                                        div().p(px(8.0))
-                                            .child(
-                                                div().text_xs().text_color(color_to_hsla(text_secondary))
-                                                    .child(format!("Terminal: {}", bottom_tab))
-                                            )
-                                    )
-                            )
+                            div()
+                                .w(px(if toggle_collapsed { 48.0 } else { 220.0 }))
+                                .h_full()
+                                .child(
+                                    DockRegion::from_spec(toggle_spec, theme)
+                                        .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
+                                            this.state.specimens.text.insert(
+                                                "dock-toggle-tab".to_string(),
+                                                tab_id.to_string(),
+                                            );
+                                            // Expand when a tab is clicked while collapsed
+                                            this.state
+                                                .specimens
+                                                .toggles
+                                                .insert("dock-toggle-collapsed".to_string(), false);
+                                            cx.notify();
+                                        }))
+                                        .with_content(
+                                            div().p(px(8.0)).child(
+                                                div()
+                                                    .text_xs()
+                                                    .text_color(color_to_hsla(text_secondary))
+                                                    .child(format!("Active: {}", toggle_tab)),
+                                            ),
+                                        ),
+                                ),
                         )
                         .child(
-                            div().mt(px(4.0)).child(
-                                div().id("dock-bottom-toggle-btn")
-                                    .px(px(8.0)).py(px(4.0))
+                            div().ml(px(8.0)).flex().items_start().child(
+                                div()
+                                    .id("dock-toggle-btn")
+                                    .px(px(8.0))
+                                    .py(px(4.0))
                                     .text_xs()
                                     .text_color(color_to_hsla(text_secondary))
                                     .rounded(px(4.0))
                                     .cursor(CursorStyle::PointingHand)
                                     .hover(|s| s.bg(color_to_hsla(hover_bg)))
-                                    .child(if bottom_collapsed { "Show panel \u{25B4}" } else { "Hide panel \u{25BE}" })
+                                    .child(if toggle_collapsed {
+                                        "Expand \u{25B8}"
+                                    } else {
+                                        "Collapse \u{25C2}"
+                                    })
+                                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                        this.state.specimens.toggle("dock-toggle-collapsed");
+                                        cx.notify();
+                                    })),
+                            ),
+                        ),
+                ),
+        )
+        // --- Right edge dock ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Flexible dock \u{2014} right edge"),
+                    theme,
+                ))
+                .child(
+                    div().h(px(120.0)).flex().justify_end().child(
+                        div().w(px(200.0)).h_full().child(
+                            DockRegion::from_spec(flex_right_spec, theme)
+                                .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
+                                    this.state
+                                        .specimens
+                                        .text
+                                        .insert("dock-right-tab".to_string(), tab_id.to_string());
+                                    cx.notify();
+                                }))
+                                .with_content(
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child(format!("Active: {}", right_tab)),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+        )
+        // --- Bottom edge dock ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Bottom edge dock (click to toggle)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .child(
+                            div()
+                                .h(px(if bottom_collapsed { 36.0 } else { 120.0 }))
+                                .child(
+                                    DockRegion::from_spec(bottom_spec, theme)
+                                        .on_tab_change(cx.listener(|this, tab_id: &str, _w, cx| {
+                                            this.state.specimens.text.insert(
+                                                "dock-bottom-tab".to_string(),
+                                                tab_id.to_string(),
+                                            );
+                                            this.state
+                                                .specimens
+                                                .toggles
+                                                .insert("dock-bottom-collapsed".to_string(), false);
+                                            cx.notify();
+                                        }))
+                                        .with_content(
+                                            div().p(px(8.0)).child(
+                                                div()
+                                                    .text_xs()
+                                                    .text_color(color_to_hsla(text_secondary))
+                                                    .child(format!("Terminal: {}", bottom_tab)),
+                                            ),
+                                        ),
+                                ),
+                        )
+                        .child(
+                            div().mt(px(4.0)).child(
+                                div()
+                                    .id("dock-bottom-toggle-btn")
+                                    .px(px(8.0))
+                                    .py(px(4.0))
+                                    .text_xs()
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .rounded(px(4.0))
+                                    .cursor(CursorStyle::PointingHand)
+                                    .hover(|s| s.bg(color_to_hsla(hover_bg)))
+                                    .child(if bottom_collapsed {
+                                        "Show panel \u{25B4}"
+                                    } else {
+                                        "Hide panel \u{25BE}"
+                                    })
                                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                                         this.state.specimens.toggle("dock-bottom-collapsed");
                                         cx.notify();
-                                    }))
-                            )
-                        )
-                )
+                                    })),
+                            ),
+                        ),
+                ),
         )
-
         // --- Horizontal split ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal split"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Horizontal split"),
+                    theme,
+                ))
                 .child(
                     div().h(px(100.0)).child(
                         SplitView::from_spec(h_split_spec, theme)
                             .with_primary(
-                                div().p(px(8.0))
-                                    .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Primary pane"))
+                                div().p(px(8.0)).child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Primary pane"),
+                                ),
                             )
                             .with_secondary(
-                                div().p(px(8.0))
-                                    .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Secondary pane"))
-                            )
-                    )
-                )
+                                div().p(px(8.0)).child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Secondary pane"),
+                                ),
+                            ),
+                    ),
+                ),
         )
-
         // --- Vertical split ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical split"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Vertical split"),
+                    theme,
+                ))
                 .child(
                     div().h(px(120.0)).child(
                         SplitView::from_spec(v_split_spec, theme)
                             .with_primary(
-                                div().p(px(8.0))
-                                    .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Primary pane"))
+                                div().p(px(8.0)).child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Primary pane"),
+                                ),
                             )
                             .with_secondary(
-                                div().p(px(8.0))
-                                    .child(div().text_xs().text_color(color_to_hsla(text_secondary)).child("Secondary pane"))
-                            )
-                    )
-                )
+                                div().p(px(8.0)).child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Secondary pane"),
+                                ),
+                            ),
+                    ),
+                ),
         )
 }

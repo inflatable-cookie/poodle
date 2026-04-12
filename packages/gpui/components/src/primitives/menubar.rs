@@ -6,10 +6,14 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, MenuSpec, MenubarEntry, MenubarSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, MenuSpec, MenubarEntry, MenubarSpec, SemanticControlSizeRole,
+};
 
 use super::menu::Menu;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, control_space_x_rem};
+use crate::presentation::{
+    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menubar component backed by `MenubarSpec`.
@@ -23,12 +27,20 @@ pub struct Menubar {
 
 impl std::ops::Deref for Menubar {
     type Target = MenubarSpec;
-    fn deref(&self) -> &MenubarSpec { &self.spec }
+    fn deref(&self) -> &MenubarSpec {
+        &self.spec
+    }
 }
 
 impl Menubar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MenubarSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_select: None, on_trigger: None }
+        Self {
+            spec: MenubarSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_select: None,
+            on_trigger: None,
+        }
     }
 
     pub fn from_spec(spec: MenubarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,32 +54,47 @@ impl Menubar {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<MenubarEntry>) -> Self { self.spec.items = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn items(mut self, v: Vec<MenubarEntry>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_select(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_select = Some(Box::new(handler));
         self
     }
 
     /// Called when a menubar trigger is clicked to open/close a menu.
-    pub fn on_trigger(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_trigger(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_trigger = Some(Box::new(handler));
         self
     }
@@ -81,7 +108,8 @@ impl IntoElement for Menubar {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
         let base_height = resolve_px(theme, "size.control.height");
-        let trigger_min_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
+        let trigger_min_height =
+            base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
         let accent = resolve_color(theme, "color.accent.base");
@@ -137,7 +165,10 @@ impl IntoElement for Menubar {
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary);
 
-            trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            trigger = trigger.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_active {
                 trigger = trigger.bg(trigger_hover);
@@ -148,9 +179,7 @@ impl IntoElement for Menubar {
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                trigger = trigger
-                    .cursor_pointer()
-                    .hover(|s| s.bg(trigger_hover));
+                trigger = trigger.cursor_pointer().hover(|s| s.bg(trigger_hover));
 
                 // Click to open/close menu for this trigger
                 if let Some(ref handler) = on_trigger_rc {

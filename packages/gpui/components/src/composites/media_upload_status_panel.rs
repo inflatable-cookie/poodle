@@ -2,10 +2,12 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{MediaUploadStatusPanelSpec, MediaUploadStep};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{MediaUploadStatusPanelSpec, MediaUploadStep};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_radius};
 
 pub struct MediaUploadStatusPanel {
@@ -15,11 +17,23 @@ pub struct MediaUploadStatusPanel {
 
 impl MediaUploadStatusPanel {
     pub fn from_spec(spec: MediaUploadStatusPanelSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone() }
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for MediaUploadStatusPanel {
@@ -55,33 +69,53 @@ impl IntoElement for MediaUploadStatusPanel {
         let mut panel = div()
             .w_full()
             .rounded(radius)
-            .bg(Hsla { a: surface_bg.a * 0.82, ..surface_bg })
-            .border_1().border_color(Hsla { a: text_secondary.a * 0.2, ..text_secondary })
+            .bg(Hsla {
+                a: surface_bg.a * 0.82,
+                ..surface_bg
+            })
+            .border_1()
+            .border_color(Hsla {
+                a: text_secondary.a * 0.2,
+                ..text_secondary
+            })
             .p(px(pad))
-            .flex().flex_col().gap(px(item_gap));
+            .flex()
+            .flex_col()
+            .gap(px(item_gap));
 
         panel = panel.child(
-            div().text_size(body_size).font_weight(FontWeight::SEMIBOLD)
+            div()
+                .text_size(body_size)
+                .font_weight(FontWeight::SEMIBOLD)
                 .text_color(status_color)
-                .child(status_text)
+                .child(status_text),
         );
 
         // Progress bar for uploading step
         if spec.step == MediaUploadStep::Uploading {
             let progress_pct = spec.upload_progress.clamp(0.0, 100.0);
             panel = panel.child(
-                div().w_full().h(px(4.0)).rounded(px(2.0))
-                    .bg(Hsla { a: text_secondary.a * 0.2, ..text_secondary })
+                div()
+                    .w_full()
+                    .h(px(4.0))
+                    .rounded(px(2.0))
+                    .bg(Hsla {
+                        a: text_secondary.a * 0.2,
+                        ..text_secondary
+                    })
                     .child(
                         div()
-                            .h(px(4.0)).rounded(px(2.0))
+                            .h(px(4.0))
+                            .rounded(px(2.0))
                             .bg(accent)
-                            .w(px(progress_pct / 100.0 * 200.0)) // approximate width
-                    )
+                            .w(px(progress_pct / 100.0 * 200.0)), // approximate width
+                    ),
             );
             panel = panel.child(
-                div().text_size(label_size).text_color(text_secondary)
-                    .child(format!("{}%", progress_pct as u32))
+                div()
+                    .text_size(label_size)
+                    .text_color(text_secondary)
+                    .child(format!("{}%", progress_pct as u32)),
             );
         }
 
@@ -89,8 +123,10 @@ impl IntoElement for MediaUploadStatusPanel {
         if spec.step == MediaUploadStep::Duplicate {
             if let Some(ref label) = spec.duplicate_label {
                 panel = panel.child(
-                    div().text_size(label_size).text_color(text_primary)
-                        .child(label.clone())
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_primary)
+                        .child(label.clone()),
                 );
             }
         }
@@ -99,8 +135,10 @@ impl IntoElement for MediaUploadStatusPanel {
         if spec.step == MediaUploadStep::Error {
             if let Some(ref error) = spec.upload_error {
                 panel = panel.child(
-                    div().text_size(label_size).text_color(text_secondary)
-                        .child(error.clone())
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(error.clone()),
                 );
             }
         }

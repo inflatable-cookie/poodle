@@ -2,10 +2,13 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    CalendarMode, CalendarSpec, CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue,
+    IconSize, IconSpec, SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
@@ -31,7 +34,9 @@ pub struct Calendar {
 
 impl std::ops::Deref for Calendar {
     type Target = CalendarSpec;
-    fn deref(&self) -> &CalendarSpec { &self.spec }
+    fn deref(&self) -> &CalendarSpec {
+        &self.spec
+    }
 }
 
 impl Calendar {
@@ -58,41 +63,68 @@ impl Calendar {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn visible_month(mut self, v: impl Into<String>) -> Self { self.spec.visible_month = Some(v.into()); self }
-    pub fn week_starts_on(mut self, v: CalendarWeekStart) -> Self { self.spec.week_starts_on = v; self }
-    pub fn locale(mut self, v: impl Into<String>) -> Self { self.spec.locale = v.into(); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn visible_month(mut self, v: impl Into<String>) -> Self {
+        self.spec.visible_month = Some(v.into());
+        self
+    }
+    pub fn week_starts_on(mut self, v: CalendarWeekStart) -> Self {
+        self.spec.week_starts_on = v;
+        self
+    }
+    pub fn locale(mut self, v: impl Into<String>) -> Self {
+        self.spec.locale = v.into();
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_select(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_select = Some(std::rc::Rc::new(handler));
         self
     }
 
     /// Called when prev/next month navigation is clicked.
-    pub fn on_navigate(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_navigate(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_navigate = Some(std::rc::Rc::new(handler));
         self
     }
 
     /// Fluent shortcut for entering range mode.
-    pub fn mode(mut self, mode: CalendarMode) -> Self { self.spec.mode = mode; self }
+    pub fn mode(mut self, mode: CalendarMode) -> Self {
+        self.spec.mode = mode;
+        self
+    }
 
     /// Seed the initial range value for range mode.
     pub fn default_range(mut self, range: DateRangeValue) -> Self {
@@ -243,7 +275,11 @@ impl IntoElement for Calendar {
             let days_since_epoch = now / 86400;
             // Approximate date calculation
             let (ty, tm, td) = Self::days_to_ymd(days_since_epoch as i64);
-            if ty == year && tm == month { Some(td) } else { None }
+            if ty == year && tm == month {
+                Some(td)
+            } else {
+                None
+            }
         };
 
         let days_count = Self::days_in_month(year, month);
@@ -262,8 +298,18 @@ impl IntoElement for Calendar {
         };
 
         let month_names = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
         ];
         let month_label = format!(
             "{} {}",
@@ -293,7 +339,10 @@ impl IntoElement for Calendar {
             .border_color(border);
 
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        cal = cal.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        cal = cal.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if spec.is_disabled {
             cal = cal
@@ -303,11 +352,19 @@ impl IntoElement for Calendar {
 
         // Compute prev/next month strings for navigation
         let prev_month_str = {
-            let (py, pm) = if month == 1 { (year - 1, 12) } else { (year, month - 1) };
+            let (py, pm) = if month == 1 {
+                (year - 1, 12)
+            } else {
+                (year, month - 1)
+            };
             format!("{:04}-{:02}", py, pm)
         };
         let next_month_str = {
-            let (ny, nm) = if month == 12 { (year + 1, 1) } else { (year, month + 1) };
+            let (ny, nm) = if month == 12 {
+                (year + 1, 1)
+            } else {
+                (year, month + 1)
+            };
             format!("{:04}-{:02}", ny, nm)
         };
 
@@ -325,11 +382,8 @@ impl IntoElement for Calendar {
             .cursor_pointer()
             .hover(move |s| s.bg(nav_btn_hover))
             .child(
-                Icon::from_spec(
-                    IconSpec::new("chevron-left").with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(icon_muted),
+                Icon::from_spec(IconSpec::new("chevron-left").with_size(IconSize::Sm), theme)
+                    .with_color(icon_muted),
             );
 
         if let Some(ref handler) = self.on_navigate {
@@ -399,15 +453,22 @@ impl IntoElement for Calendar {
                 let key = event.keystroke.key.as_str();
                 match key {
                     "left" | "right" | "up" | "down" => {
-                        let current_day = key_selected.as_deref()
+                        let current_day = key_selected
+                            .as_deref()
                             .and_then(|s| {
                                 let parts: Vec<&str> = s.split('-').collect();
                                 if parts.len() == 3 {
                                     let sy = parts[0].parse::<i32>().ok()?;
                                     let sm = parts[1].parse::<u32>().ok()?;
                                     let sd = parts[2].parse::<u32>().ok()?;
-                                    if sy == key_year && sm == key_month { Some(sd) } else { None }
-                                } else { None }
+                                    if sy == key_year && sm == key_month {
+                                        Some(sd)
+                                    } else {
+                                        None
+                                    }
+                                } else {
+                                    None
+                                }
                             })
                             .unwrap_or(1);
 
@@ -422,7 +483,8 @@ impl IntoElement for Calendar {
                         let new_day = current_day as i32 + delta;
                         if new_day >= 1 && new_day <= key_days as i32 {
                             if let Some(ref handler) = key_select {
-                                let date_str = format!("{:04}-{:02}-{:02}", key_year, key_month, new_day);
+                                let date_str =
+                                    format!("{:04}-{:02}-{:02}", key_year, key_month, new_day);
                                 handler(&date_str, window, cx);
                             }
                         } else if new_day < 1 {
@@ -476,7 +538,11 @@ impl IntoElement for Calendar {
         let rows = (total_cells + 6) / 7;
 
         // Compute previous month's days for leading outside-month cells
-        let (prev_year, prev_month) = if month == 1 { (year - 1, 12) } else { (year, month - 1) };
+        let (prev_year, prev_month) = if month == 1 {
+            (year - 1, 12)
+        } else {
+            (year, month - 1)
+        };
         let prev_month_days = Self::days_in_month(prev_year, prev_month);
 
         for row in 0..rows {
@@ -520,10 +586,9 @@ impl IntoElement for Calendar {
                     let is_today = today_day == Some(day_num);
 
                     // Range-mode state for this cell
-                    let is_range_start = is_range_mode
-                        && range_start_iso.as_deref() == Some(&date_iso);
-                    let is_range_end = is_range_mode
-                        && range_end_iso.as_deref() == Some(&date_iso);
+                    let is_range_start =
+                        is_range_mode && range_start_iso.as_deref() == Some(&date_iso);
+                    let is_range_end = is_range_mode && range_end_iso.as_deref() == Some(&date_iso);
                     let is_in_range = is_range_mode
                         && match (range_start_iso.as_deref(), range_end_iso.as_deref()) {
                             (Some(s), Some(e)) => date_iso.as_str() > s && date_iso.as_str() < e,
@@ -552,9 +617,7 @@ impl IntoElement for Calendar {
                     } else if is_in_range {
                         // Interior range days: accent 20% mix with surface.
                         let in_range_bg = color_mix(accent, surface_bg, 0.20);
-                        cell = cell
-                            .bg(in_range_bg)
-                            .text_color(text_primary);
+                        cell = cell.bg(in_range_bg).text_color(text_primary);
                         if is_today {
                             cell = cell
                                 .border_1()

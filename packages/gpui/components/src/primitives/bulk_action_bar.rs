@@ -1,11 +1,17 @@
 //! BulkActionBar — real GPUI component backed by BulkActionBarSpec.
 
-use std::rc::Rc;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{
+    BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize,
+    SemanticControlSizeRole,
+};
+use std::rc::Rc;
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI bulk-action bar component backed by `BulkActionBarSpec`.
@@ -18,12 +24,19 @@ pub struct BulkActionBar {
 
 impl std::ops::Deref for BulkActionBar {
     type Target = BulkActionBarSpec;
-    fn deref(&self) -> &BulkActionBarSpec { &self.spec }
+    fn deref(&self) -> &BulkActionBarSpec {
+        &self.spec
+    }
 }
 
 impl BulkActionBar {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: BulkActionBarSpec::new(), theme: theme.clone(), on_action: None, on_select_all: None }
+        Self {
+            spec: BulkActionBarSpec::new(),
+            theme: theme.clone(),
+            on_action: None,
+            on_select_all: None,
+        }
     }
 
     pub fn from_spec(spec: BulkActionBarSpec, theme: &GpuiThemeProvider) -> Self {
@@ -36,20 +49,44 @@ impl BulkActionBar {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn selection_count(mut self, v: usize) -> Self { self.spec.selection_count = v; self }
-    pub fn total_count(mut self, v: usize) -> Self { self.spec.total_count = Some(v); self }
-    pub fn actions(mut self, v: Vec<BulkAction>) -> Self { self.spec.actions = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-    pub fn show_select_all(mut self, v: bool) -> Self { self.spec.show_select_all = v; self }
-    pub fn all_selected(mut self, v: bool) -> Self { self.spec.all_selected = v; self }
-    pub fn loading(mut self, v: bool) -> Self { self.spec.loading = v; self }
+    pub fn selection_count(mut self, v: usize) -> Self {
+        self.spec.selection_count = v;
+        self
+    }
+    pub fn total_count(mut self, v: usize) -> Self {
+        self.spec.total_count = Some(v);
+        self
+    }
+    pub fn actions(mut self, v: Vec<BulkAction>) -> Self {
+        self.spec.actions = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
+    pub fn show_select_all(mut self, v: bool) -> Self {
+        self.spec.show_select_all = v;
+        self
+    }
+    pub fn all_selected(mut self, v: bool) -> Self {
+        self.spec.all_selected = v;
+        self
+    }
+    pub fn loading(mut self, v: bool) -> Self {
+        self.spec.loading = v;
+        self
+    }
 
-    pub fn on_action(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_action(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_action = Some(Rc::new(handler));
         self
     }

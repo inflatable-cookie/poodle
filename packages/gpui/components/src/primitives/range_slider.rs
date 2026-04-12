@@ -18,12 +18,17 @@ pub struct RangeSlider {
 
 impl std::ops::Deref for RangeSlider {
     type Target = RangeSliderSpec;
-    fn deref(&self) -> &RangeSliderSpec { &self.spec }
+    fn deref(&self) -> &RangeSliderSpec {
+        &self.spec
+    }
 }
 
 impl RangeSlider {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: RangeSliderSpec::default(), theme: theme.clone() }
+        Self {
+            spec: RangeSliderSpec::default(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: RangeSliderSpec, theme: &GpuiThemeProvider) -> Self {
@@ -34,18 +39,50 @@ impl RangeSlider {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn low(mut self, v: f64) -> Self { self.spec.low = v; self }
-    pub fn high(mut self, v: f64) -> Self { self.spec.high = v; self }
-    pub fn min(mut self, v: f64) -> Self { self.spec.min = v; self }
-    pub fn max(mut self, v: f64) -> Self { self.spec.max = v; self }
-    pub fn step(mut self, v: f64) -> Self { self.spec.step = v; self }
-    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn low(mut self, v: f64) -> Self {
+        self.spec.low = v;
+        self
+    }
+    pub fn high(mut self, v: f64) -> Self {
+        self.spec.high = v;
+        self
+    }
+    pub fn min(mut self, v: f64) -> Self {
+        self.spec.min = v;
+        self
+    }
+    pub fn max(mut self, v: f64) -> Self {
+        self.spec.max = v;
+        self
+    }
+    pub fn step(mut self, v: f64) -> Self {
+        self.spec.step = v;
+        self
+    }
+    pub fn orientation(mut self, v: Orientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for RangeSlider {
@@ -173,7 +210,10 @@ impl IntoElement for RangeSlider {
             .child(track)
             .child(labels);
 
-        wrapper = wrapper.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        wrapper = wrapper.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if spec.is_disabled {
             wrapper = wrapper

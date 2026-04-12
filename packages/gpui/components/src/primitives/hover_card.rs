@@ -18,12 +18,20 @@ pub struct HoverCard {
 
 impl std::ops::Deref for HoverCard {
     type Target = HoverCardSpec;
-    fn deref(&self) -> &HoverCardSpec { &self.spec }
+    fn deref(&self) -> &HoverCardSpec {
+        &self.spec
+    }
 }
 
 impl HoverCard {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: HoverCardSpec::new(), theme: theme.clone(), trigger: None, content: None, on_open_change: None }
+        Self {
+            spec: HoverCardSpec::new(),
+            theme: theme.clone(),
+            trigger: None,
+            content: None,
+            on_open_change: None,
+        }
     }
 
     pub fn from_spec(spec: HoverCardSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,9 +45,14 @@ impl HoverCard {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
-    pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
-
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
+    pub fn placement(mut self, v: OverlayPlacement) -> Self {
+        self.spec.placement = v;
+        self
+    }
 
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
         self.trigger = Some(trigger.into_any_element());
@@ -52,7 +65,10 @@ impl HoverCard {
     }
 
     /// Called when the hover card open state should change (e.g., Escape to close).
-    pub fn on_open_change(mut self, handler: impl Fn(bool, &mut Window, &mut App) + 'static) -> Self {
+    pub fn on_open_change(
+        mut self,
+        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
         self.on_open_change = Some(std::rc::Rc::new(handler));
         self
     }
@@ -72,8 +88,14 @@ impl IntoElement for HoverCard {
         let radius = resolve_radius(theme, "radius.surface");
 
         // Matches Svelte treatment-surface-elevated values
-        let fill = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
-        let border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let fill = Hsla {
+            a: elevated_bg.a * 0.94,
+            ..elevated_bg
+        };
+        let border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
 
         // Contract: 0.5rem (8px) gap between trigger and surface
         let trigger_gap = px(rem_to_px(0.5));
@@ -105,7 +127,8 @@ impl IntoElement for HoverCard {
                 surface = surface.bg(fill);
             }
 
-            surface = surface.border_1()
+            surface = surface
+                .border_1()
                 .border_color(border)
                 // Contract: elevation-popover shadow
                 .shadow(vec![

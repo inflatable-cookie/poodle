@@ -9,9 +9,9 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EditableListSpec;
 use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, control_height_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use super::super::primitives::Icon;
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI editable list component backed by `EditableListSpec`.
 pub struct EditableList {
@@ -23,7 +23,9 @@ pub struct EditableList {
 
 impl std::ops::Deref for EditableList {
     type Target = EditableListSpec;
-    fn deref(&self) -> &EditableListSpec { &self.spec }
+    fn deref(&self) -> &EditableListSpec {
+        &self.spec
+    }
 }
 
 impl EditableList {
@@ -46,19 +48,58 @@ impl EditableList {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn add_label(mut self, v: impl Into<String>) -> Self { self.spec.add_label = v.into(); self }
-    pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = v.into(); self }
-    pub fn max_items(mut self, v: usize) -> Self { self.spec.max_items = Some(v); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn reorderable(mut self, v: bool) -> Self { self.spec.is_reorderable = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = v.into(); self }
-    pub fn dirty(mut self, v: bool) -> Self { self.spec.is_dirty = v; self }
-    pub fn submitting(mut self, v: bool) -> Self { self.spec.is_submitting = v; self }
-    pub fn error_message(mut self, v: impl Into<String>) -> Self { self.spec.error_message = Some(v.into()); self }
-    pub fn info_message(mut self, v: impl Into<String>) -> Self { self.spec.info_message = Some(v.into()); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn add_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.add_label = v.into();
+        self
+    }
+    pub fn placeholder(mut self, v: impl Into<String>) -> Self {
+        self.spec.placeholder = v.into();
+        self
+    }
+    pub fn max_items(mut self, v: usize) -> Self {
+        self.spec.max_items = Some(v);
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn reorderable(mut self, v: bool) -> Self {
+        self.spec.is_reorderable = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = v.into();
+        self
+    }
+    pub fn dirty(mut self, v: bool) -> Self {
+        self.spec.is_dirty = v;
+        self
+    }
+    pub fn submitting(mut self, v: bool) -> Self {
+        self.spec.is_submitting = v;
+        self
+    }
+    pub fn error_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.error_message = Some(v.into());
+        self
+    }
+    pub fn info_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.info_message = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     // ── Content builders ──────────────────────────────────────
     pub fn items(mut self, items: Vec<String>) -> Self {
@@ -133,7 +174,11 @@ impl IntoElement for EditableList {
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = px(rem_to_px(size_font_rem(effective_size) * 0.92));
 
-        let total = if !self.items.is_empty() { self.items.len() } else { self.children.len() };
+        let total = if !self.items.is_empty() {
+            self.items.len()
+        } else {
+            self.children.len()
+        };
 
         // ── Root container ────────────────────────────────────────
         let mut root = div().flex().flex_col().gap(px(root_gap)).w_full();
@@ -158,7 +203,8 @@ impl IntoElement for EditableList {
                 let grip_icon = Icon::from_spec(
                     IconSpec::new("grip-vertical").with_size(IconSize::Sm),
                     theme,
-                ).with_color(muted_color);
+                )
+                .with_color(muted_color);
 
                 let handle = div()
                     .flex()
@@ -181,10 +227,9 @@ impl IntoElement for EditableList {
 
             // Remove button — only when is_editable or is_removable
             if spec.is_editable || spec.is_removable {
-                let remove_icon = Icon::from_spec(
-                    IconSpec::new("x").with_size(IconSize::Sm),
-                    theme,
-                ).with_color(remove_color);
+                let remove_icon =
+                    Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
+                        .with_color(remove_color);
 
                 let rh = remove_hover_color;
                 let remove_btn = div()
@@ -213,14 +258,15 @@ impl IntoElement for EditableList {
                 .text_ellipsis()
                 .whitespace_nowrap()
                 .child(item_text.clone());
-            items_container = items_container
-                .child(build_item_row(label.into_any_element(), spec.is_reorderable));
+            items_container = items_container.child(build_item_row(
+                label.into_any_element(),
+                spec.is_reorderable,
+            ));
         }
 
         // Custom child elements
         for child in self.children {
-            items_container = items_container
-                .child(build_item_row(child, spec.is_reorderable));
+            items_container = items_container.child(build_item_row(child, spec.is_reorderable));
         }
 
         if total > 0 {
@@ -228,9 +274,8 @@ impl IntoElement for EditableList {
         }
 
         // ── Add-item input row (only when editable) ─────────────
-        let can_add = spec.is_editable
-            && !spec.is_disabled
-            && spec.max_items.map_or(true, |max| total < max);
+        let can_add =
+            spec.is_editable && !spec.is_disabled && spec.max_items.map_or(true, |max| total < max);
 
         if can_add {
             // Text input field
@@ -253,10 +298,8 @@ impl IntoElement for EditableList {
                 );
 
             // Add button
-            let plus_icon = Icon::from_spec(
-                IconSpec::new("plus").with_size(IconSize::Sm),
-                theme,
-            ).with_color(text_color);
+            let plus_icon = Icon::from_spec(IconSpec::new("plus").with_size(IconSize::Sm), theme)
+                .with_color(text_color);
 
             let add_btn = div()
                 .flex()
@@ -298,9 +341,7 @@ impl IntoElement for EditableList {
         // dirty dot on the left (warning-tone), an optional "Saving…"
         // status on the left (during submit), and the item-count
         // summary on the right. Any combination may be visible.
-        let needs_counter = spec.shows_counter()
-            || spec.is_dirty
-            || spec.is_submitting;
+        let needs_counter = spec.shows_counter() || spec.is_dirty || spec.is_submitting;
         if needs_counter {
             let mut row = div().flex().items_center().w_full();
 
@@ -308,17 +349,8 @@ impl IntoElement for EditableList {
             let mut left = div().flex().items_center().gap(gap_sm).flex_grow();
 
             if spec.is_dirty {
-                let warning = resolve_color(
-                    theme,
-                    spec.dirty_indicator_color_token(),
-                );
-                left = left.child(
-                    div()
-                        .w(px(6.0))
-                        .h(px(6.0))
-                        .rounded(px(3.0))
-                        .bg(warning),
-                );
+                let warning = resolve_color(theme, spec.dirty_indicator_color_token());
+                left = left.child(div().w(px(6.0)).h(px(6.0)).rounded(px(3.0)).bg(warning));
             }
 
             if spec.is_submitting {

@@ -1,10 +1,13 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec, PillAppearance, PillSpec, PillTone};
-use poodle_gpui_components::{Button, Dialog, Eyebrow, Pill};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{Button, Dialog, Eyebrow, Pill};
+use poodle_specs::{
+    ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec,
+    PillAppearance, PillSpec, PillTone,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;

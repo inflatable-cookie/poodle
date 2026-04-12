@@ -23,12 +23,18 @@ pub struct Icon {
 
 impl std::ops::Deref for Icon {
     type Target = IconSpec;
-    fn deref(&self) -> &IconSpec { &self.spec }
+    fn deref(&self) -> &IconSpec {
+        &self.spec
+    }
 }
 
 impl Icon {
     pub fn new(name: impl Into<String>, theme: &poodle_gpui::GpuiThemeProvider) -> Self {
-        Self { spec: IconSpec::new(name), theme: theme.clone(), color: None }
+        Self {
+            spec: IconSpec::new(name),
+            theme: theme.clone(),
+            color: None,
+        }
     }
 
     pub fn from_spec(spec: IconSpec, theme: &poodle_gpui::GpuiThemeProvider) -> Self {
@@ -40,10 +46,18 @@ impl Icon {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn name(mut self, v: impl Into<String>) -> Self { self.spec.name = v.into(); self }
-    pub fn size(mut self, v: IconSize) -> Self { self.spec.size = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn name(mut self, v: impl Into<String>) -> Self {
+        self.spec.name = v.into();
+        self
+    }
+    pub fn size(mut self, v: IconSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     /// Create a small icon for use inside buttons.
     pub fn button_icon(name: impl Into<String>, theme: &poodle_gpui::GpuiThemeProvider) -> Self {
@@ -69,9 +83,9 @@ impl IntoElement for Icon {
 
         // GPUI's svg() element requires an explicit text_color to render —
         // it does NOT inherit from the parent. We must set it here.
-        let color = self.color.unwrap_or_else(|| {
-            resolve_color(&self.theme, "color.icon.primary")
-        });
+        let color = self
+            .color
+            .unwrap_or_else(|| resolve_color(&self.theme, "color.icon.primary"));
 
         svg()
             .path(shared_path)

@@ -5,9 +5,13 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, TimeFieldSpec, ValidationState};
+use poodle_specs::{
+    ControlDensity, ControlSize, SemanticControlSizeRole, TimeFieldSpec, ValidationState,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI time field component backed by `TimeFieldSpec`.
@@ -20,12 +24,19 @@ pub struct TimeField {
 
 impl std::ops::Deref for TimeField {
     type Target = TimeFieldSpec;
-    fn deref(&self) -> &TimeFieldSpec { &self.spec }
+    fn deref(&self) -> &TimeFieldSpec {
+        &self.spec
+    }
 }
 
 impl TimeField {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TimeFieldSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None }
+        Self {
+            spec: TimeFieldSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: TimeFieldSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,18 +49,54 @@ impl TimeField {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn min(mut self, v: impl Into<String>) -> Self { self.spec.min = Some(v.into()); self }
-    pub fn max(mut self, v: impl Into<String>) -> Self { self.spec.max = Some(v.into()); self }
-    pub fn step(mut self, v: u32) -> Self { self.spec.step = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn described_by(mut self, v: impl Into<String>) -> Self { self.spec.described_by = Some(v.into()); self }
-    pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn min(mut self, v: impl Into<String>) -> Self {
+        self.spec.min = Some(v.into());
+        self
+    }
+    pub fn max(mut self, v: impl Into<String>) -> Self {
+        self.spec.max = Some(v.into());
+        self
+    }
+    pub fn step(mut self, v: u32) -> Self {
+        self.spec.step = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn described_by(mut self, v: impl Into<String>) -> Self {
+        self.spec.described_by = Some(v.into());
+        self
+    }
+    pub fn validation_state(mut self, v: ValidationState) -> Self {
+        self.spec.validation_state = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -116,15 +163,17 @@ impl IntoElement for TimeField {
             .text_size(body_size)
             .text_color(text_primary)
             // Contract: focus = border + shadow ring at 28% opacity
-            .focus(move |s| s
-                .border_color(focus_ring)
-                .shadow(vec![gpui::BoxShadow {
-                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+            .focus(move |s| {
+                s.border_color(focus_ring).shadow(vec![gpui::BoxShadow {
+                    color: Hsla {
+                        a: focus_ring.a * 0.28,
+                        ..focus_ring
+                    },
                     offset: point(px(0.0), px(0.0)),
                     blur_radius: px(0.0),
                     spread_radius: px(2.0),
                 }])
-            );
+            });
 
         if spec.is_disabled {
             field = field
@@ -147,10 +196,18 @@ impl IntoElement for TimeField {
                     };
                     // Parse HH:MM
                     let parts: Vec<&str> = current_display.split(':').collect();
-                    let h = parts.first().and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
-                    let m = parts.get(1).and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
+                    let h = parts
+                        .first()
+                        .and_then(|s| s.parse::<i64>().ok())
+                        .unwrap_or(0);
+                    let m = parts
+                        .get(1)
+                        .and_then(|s| s.parse::<i64>().ok())
+                        .unwrap_or(0);
                     let mut total_mins = h * 60 + m + delta;
-                    if total_mins < 0 { total_mins += 24 * 60; }
+                    if total_mins < 0 {
+                        total_mins += 24 * 60;
+                    }
                     total_mins %= 24 * 60;
                     let new_val = format!("{:02}:{:02}", total_mins / 60, total_mins % 60);
                     handler(&new_val, window, cx);
@@ -159,11 +216,7 @@ impl IntoElement for TimeField {
         }
 
         // Time value display
-        field = field.child(
-            div()
-                .text_color(text_col)
-                .child(display_text),
-        );
+        field = field.child(div().text_color(text_col).child(display_text));
 
         field.into_any_element()
     }

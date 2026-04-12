@@ -15,12 +15,17 @@ pub struct Eyebrow {
 
 impl std::ops::Deref for Eyebrow {
     type Target = EyebrowSpec;
-    fn deref(&self) -> &EyebrowSpec { &self.spec }
+    fn deref(&self) -> &EyebrowSpec {
+        &self.spec
+    }
 }
 
 impl Eyebrow {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: EyebrowSpec::new(), theme: theme.clone() }
+        Self {
+            spec: EyebrowSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: EyebrowSpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,8 +36,10 @@ impl Eyebrow {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn content(mut self, v: impl Into<String>) -> Self { self.spec.content = Some(v.into()); self }
-
+    pub fn content(mut self, v: impl Into<String>) -> Self {
+        self.spec.content = Some(v.into());
+        self
+    }
 }
 
 impl IntoElement for Eyebrow {

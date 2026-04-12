@@ -7,10 +7,16 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec,
+    SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Pagination {
@@ -36,7 +42,9 @@ pub struct Pagination {
 
 impl std::ops::Deref for Pagination {
     type Target = PaginationSpec;
-    fn deref(&self) -> &PaginationSpec { &self.spec }
+    fn deref(&self) -> &PaginationSpec {
+        &self.spec
+    }
 }
 
 impl Pagination {
@@ -62,7 +70,8 @@ impl Pagination {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
         let base_height = resolve_px(theme, "size.control.height");
         // Contract: height = control-height + size offset - 0.125rem
-        let button_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(2.0);
+        let button_height =
+            base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(2.0);
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
         let base_pad = resolve_px(theme, "space.control.x");
         let button_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
@@ -88,17 +97,50 @@ impl Pagination {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn current_page(mut self, v: usize) -> Self { self.spec.current_page = v; self }
-    pub fn total_pages(mut self, v: usize) -> Self { self.spec.total_pages = v; self }
-    pub fn sibling_count(mut self, v: usize) -> Self { self.spec.sibling_count = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn variant(mut self, v: poodle_specs::PaginationVariant) -> Self { self.spec.variant = v; self }
-    pub fn standalone(mut self, v: bool) -> Self { self.spec.standalone = v; self }
-    pub fn info_text(mut self, v: impl Into<String>) -> Self { self.spec.info_text = Some(v.into()); self }
-    pub fn page_size(mut self, v: usize) -> Self { self.spec.page_size = Some(v); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn current_page(mut self, v: usize) -> Self {
+        self.spec.current_page = v;
+        self
+    }
+    pub fn total_pages(mut self, v: usize) -> Self {
+        self.spec.total_pages = v;
+        self
+    }
+    pub fn sibling_count(mut self, v: usize) -> Self {
+        self.spec.sibling_count = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn variant(mut self, v: poodle_specs::PaginationVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn standalone(mut self, v: bool) -> Self {
+        self.spec.standalone = v;
+        self
+    }
+    pub fn info_text(mut self, v: impl Into<String>) -> Self {
+        self.spec.info_text = Some(v.into());
+        self
+    }
+    pub fn page_size(mut self, v: usize) -> Self {
+        self.spec.page_size = Some(v);
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_page_change(
         mut self,
@@ -146,15 +188,11 @@ impl Pagination {
                     .cursor(CursorStyle::OperationNotAllowed)
             })
             .when(!disabled, |el| {
-                el.cursor_pointer()
-                    .hover(|style| style.bg(hover_fill))
+                el.cursor_pointer().hover(|style| style.bg(hover_fill))
             })
             .child(
-                Icon::from_spec(
-                    IconSpec::new(icon_name).with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(text_color),
+                Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
+                    .with_color(text_color),
             );
 
         // Wire click handler for navigation
@@ -200,7 +238,10 @@ impl Pagination {
             .border_1()
             .border_color(border)
             .rounded(radius)
-            .text_size(crate::theme_ext::resolve_px(&self.theme, "typography.label.size"))
+            .text_size(crate::theme_ext::resolve_px(
+                &self.theme,
+                "typography.label.size",
+            ))
             .text_color(text_color)
             .focus(move |s| s.border_color(focus_ring))
             .when(disabled, |el| {
@@ -262,12 +303,9 @@ impl Pagination {
             .font_weight(FontWeight::SEMIBOLD)
             // Focus ring
             .focus(move |s| s.border_color(focus_ring))
-            .when(is_current, |el| {
-                el.font_weight(FontWeight::BOLD)
-            })
+            .when(is_current, |el| el.font_weight(FontWeight::BOLD))
             .when(!is_current, |el| {
-                el.cursor_pointer()
-                    .hover(|style| style.bg(hover_fill))
+                el.cursor_pointer().hover(|style| style.bg(hover_fill))
             })
             .child(page.to_string());
 
@@ -341,8 +379,16 @@ impl IntoElement for Pagination {
 
         // Standalone mode strips the panel chrome.
         if !self.spec.standalone {
-            let pad_x = if self.spec.is_compact { px(8.0) } else { px(12.0) };
-            let pad_y = if self.spec.is_compact { px(4.0) } else { px(8.0) };
+            let pad_x = if self.spec.is_compact {
+                px(8.0)
+            } else {
+                px(12.0)
+            };
+            let pad_y = if self.spec.is_compact {
+                px(4.0)
+            } else {
+                px(8.0)
+            };
             root = root
                 .bg(surface_bg)
                 .border_1()
@@ -378,7 +424,11 @@ impl IntoElement for Pagination {
         }
 
         // Prev button — label differs between simple and numbered variants.
-        let prev_page = if current_page > 1 { current_page - 1 } else { 1 };
+        let prev_page = if current_page > 1 {
+            current_page - 1
+        } else {
+            1
+        };
         let prev_id = "poodle-pg-prev";
         if self.spec.is_simple() {
             root = root.child(self.render_text_nav_button("Prev", is_first, prev_page, prev_id));
@@ -388,11 +438,7 @@ impl IntoElement for Pagination {
 
         // Numbered pages only render on Numbered and Full variants.
         if !self.spec.is_simple() {
-            let mut pages_container = div()
-                .flex()
-                .flex_row()
-                .items_center()
-                .gap(gap_sm); // 0.25rem
+            let mut pages_container = div().flex().flex_row().items_center().gap(gap_sm); // 0.25rem
 
             for item in &visible {
                 match item {
@@ -412,7 +458,10 @@ impl IntoElement for Pagination {
                 div()
                     .text_size(label_size)
                     .text_color(text_secondary)
-                    .child(format!("Page {} of {}", current_page, self.spec.total_pages)),
+                    .child(format!(
+                        "Page {} of {}",
+                        current_page, self.spec.total_pages
+                    )),
             );
         }
 

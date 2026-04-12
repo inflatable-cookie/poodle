@@ -8,8 +8,10 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{Toast, ToastHostPlacement, ToastHostSpec, ToastPosition, ToastStackSpec, ToastTone};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{
+    Toast, ToastHostPlacement, ToastHostSpec, ToastPosition, ToastStackSpec, ToastTone,
+};
 
 use super::ToastStack;
 
@@ -28,7 +30,9 @@ pub struct ToastHost {
 
 impl std::ops::Deref for ToastHost {
     type Target = ToastHostSpec;
-    fn deref(&self) -> &ToastHostSpec { &self.spec }
+    fn deref(&self) -> &ToastHostSpec {
+        &self.spec
+    }
 }
 
 impl ToastHost {
@@ -53,32 +57,53 @@ impl ToastHost {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn placement(mut self, v: ToastHostPlacement) -> Self { self.spec.placement = v; self }
-    pub fn auto_dismiss_ms(mut self, v: u32) -> Self { self.spec.auto_dismiss_ms = v; self }
-    pub fn sticky_tones(mut self, v: Vec<ToastTone>) -> Self { self.spec.sticky_tones = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = v.into(); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn placement(mut self, v: ToastHostPlacement) -> Self {
+        self.spec.placement = v;
+        self
+    }
+    pub fn auto_dismiss_ms(mut self, v: u32) -> Self {
+        self.spec.auto_dismiss_ms = v;
+        self
+    }
+    pub fn sticky_tones(mut self, v: Vec<ToastTone>) -> Self {
+        self.spec.sticky_tones = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = v.into();
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     /// Set the list of toasts to display.
-    pub fn toasts(mut self, v: Vec<Toast>) -> Self { self.toasts = v; self }
+    pub fn toasts(mut self, v: Vec<Toast>) -> Self {
+        self.toasts = v;
+        self
+    }
 
     /// Add a single toast to the display list.
-    pub fn add_toast(mut self, toast: Toast) -> Self { self.toasts.push(toast); self }
+    pub fn add_toast(mut self, toast: Toast) -> Self {
+        self.toasts.push(toast);
+        self
+    }
 
-    pub fn on_dismiss(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_dismiss(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_dismiss = Some(Rc::new(handler));
         self
     }
 
-    pub fn on_action(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_action(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_action = Some(Rc::new(handler));
         self
     }
@@ -94,12 +119,10 @@ impl IntoElement for ToastHost {
         }
 
         let padding = px(16.0); // 1rem
-        let width = px(448.0);  // min(28rem, calc(100vw - 2rem))
+        let width = px(448.0); // min(28rem, calc(100vw - 2rem))
 
         // ── Position the host container at the chosen corner ──────
-        let mut container = div()
-            .absolute()
-            .w(width);
+        let mut container = div().absolute().w(width);
 
         match self.spec.placement {
             ToastHostPlacement::BottomEnd => {

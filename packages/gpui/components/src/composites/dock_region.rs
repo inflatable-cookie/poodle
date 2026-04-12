@@ -2,10 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI dock region backed by `DockRegionSpec`.
@@ -24,12 +24,21 @@ pub struct DockRegion {
 
 impl std::ops::Deref for DockRegion {
     type Target = DockRegionSpec;
-    fn deref(&self) -> &DockRegionSpec { &self.spec }
+    fn deref(&self) -> &DockRegionSpec {
+        &self.spec
+    }
 }
 
 impl DockRegion {
     pub fn new(edge: DockEdge, items: Vec<PanelTabItem>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DockRegionSpec::new(edge, items), theme: theme.clone(), id_prefix: String::new(), content: None, on_tab_change: None, on_collapse_toggle: None }
+        Self {
+            spec: DockRegionSpec::new(edge, items),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            content: None,
+            on_tab_change: None,
+            on_collapse_toggle: None,
+        }
     }
 
     pub fn from_spec(spec: DockRegionSpec, theme: &GpuiThemeProvider) -> Self {
@@ -44,16 +53,42 @@ impl DockRegion {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn edge(mut self, v: DockEdge) -> Self { self.spec.edge = v; self }
-    pub fn collapsed(mut self, v: bool) -> Self { self.spec.is_collapsed = v; self }
-    pub fn tabs_placement(mut self, v: DockTabsPlacement) -> Self { self.spec.tabs_placement = v; self }
-    pub fn items(mut self, v: Vec<PanelTabItem>) -> Self { self.spec.items = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn edge(mut self, v: DockEdge) -> Self {
+        self.spec.edge = v;
+        self
+    }
+    pub fn collapsed(mut self, v: bool) -> Self {
+        self.spec.is_collapsed = v;
+        self
+    }
+    pub fn tabs_placement(mut self, v: DockTabsPlacement) -> Self {
+        self.spec.tabs_placement = v;
+        self
+    }
+    pub fn items(mut self, v: Vec<PanelTabItem>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -130,7 +165,12 @@ impl IntoElement for DockRegion {
 
         if is_tabs_on_edge {
             // Vertical tab strip along the edge
-            tabs_strip = tabs_strip.flex().flex_col().gap(px(tab_gap * 0.25)).py(px(tab_gap * 0.5)).w(px(36.0));
+            tabs_strip = tabs_strip
+                .flex()
+                .flex_col()
+                .gap(px(tab_gap * 0.25))
+                .py(px(tab_gap * 0.5))
+                .w(px(36.0));
         } else {
             // Horizontal tab strip on top
             tabs_strip = tabs_strip
@@ -156,19 +196,21 @@ impl IntoElement for DockRegion {
                 .rounded(px(3.0));
 
             if is_tabs_on_edge {
-                tab = tab.w_full().py(px(tab_gap * 0.75)).text_size(px(font_size * 0.85));
+                tab = tab
+                    .w_full()
+                    .py(px(tab_gap * 0.75))
+                    .text_size(px(font_size * 0.85));
             } else {
-                tab = tab.px(px(tab_gap)).py(px(tab_gap * 0.5)).text_size(px(font_size * 0.85));
+                tab = tab
+                    .px(px(tab_gap))
+                    .py(px(tab_gap * 0.5))
+                    .text_size(px(font_size * 0.85));
             }
 
             if is_active {
-                tab = tab
-                    .bg(accent.opacity(0.10))
-                    .text_color(accent);
+                tab = tab.bg(accent.opacity(0.10)).text_color(accent);
             } else {
-                tab = tab
-                    .text_color(text_secondary)
-                    .hover(|s| s.bg(hover_bg));
+                tab = tab.text_color(text_secondary).hover(|s| s.bg(hover_bg));
             }
 
             tab = tab.child(item.label.clone());
@@ -196,18 +238,14 @@ impl IntoElement for DockRegion {
         if is_tabs_on_edge && spec.edge == DockEdge::Right {
             // Content first, then tabs on the right
             if let Some(content) = self.content {
-                region = region.child(
-                    div().flex_1().overflow_hidden().child(content),
-                );
+                region = region.child(div().flex_1().overflow_hidden().child(content));
             }
             region = region.child(tabs_strip);
         } else {
             // Tabs first, then content
             region = region.child(tabs_strip);
             if let Some(content) = self.content {
-                region = region.child(
-                    div().flex_1().overflow_hidden().child(content),
-                );
+                region = region.child(div().flex_1().overflow_hidden().child(content));
             }
         }
 

@@ -8,12 +8,11 @@
 //! the mapping logic to be tested and compiled without a GPUI runtime dependency.
 
 use poodle_layout::{
-    CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutOverflow,
-    LayoutSizing, MainAxisAlignment,
+    CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment,
 };
 use poodle_style::{
-    BorderDescriptor, CornerRadii, CursorHint, FontFamily, StyleDescriptor,
-    TypographyDescriptor,
+    BorderDescriptor, CornerRadii, CursorHint, FontFamily, StyleDescriptor, TypographyDescriptor,
 };
 use poodle_tokens::typed::{ColorValue, ShadowValue};
 
@@ -266,9 +265,7 @@ fn map_sizing(sizing: &LayoutSizing) -> (GpuiLength, f32, f32, Option<f32>, Opti
         LayoutSizing::Fit => (GpuiLength::Auto, 0.0, 1.0, None, None),
         LayoutSizing::Grow => (GpuiLength::Auto, 1.0, 1.0, None, None),
         LayoutSizing::Fixed(px) => (GpuiLength::Definite(*px), 0.0, 0.0, None, None),
-        LayoutSizing::Constrained { min, max } => {
-            (GpuiLength::Auto, 1.0, 1.0, *min, *max)
-        }
+        LayoutSizing::Constrained { min, max } => (GpuiLength::Auto, 1.0, 1.0, *min, *max),
     }
 }
 
@@ -387,8 +384,13 @@ pub fn map_style(desc: &StyleDescriptor) -> GpuiStyle {
 
 #[cfg(test)]
 mod tests {
-    use poodle_layout::{LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing, MainAxisAlignment, CrossAxisAlignment};
-    use poodle_style::{CursorHint, StyleDescriptor, TypographyDescriptor, FontFamily, CornerRadii};
+    use poodle_layout::{
+        CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutSizing,
+        MainAxisAlignment,
+    };
+    use poodle_style::{
+        CornerRadii, CursorHint, FontFamily, StyleDescriptor, TypographyDescriptor,
+    };
     use poodle_tokens::typed::ColorValue;
 
     use super::*;
@@ -494,12 +496,27 @@ mod tests {
     #[test]
     fn cursor_mapping_covers_all_variants() {
         assert_eq!(map_cursor(&CursorHint::Default), GpuiCursorStyle::Arrow);
-        assert_eq!(map_cursor(&CursorHint::Pointer), GpuiCursorStyle::PointingHand);
+        assert_eq!(
+            map_cursor(&CursorHint::Pointer),
+            GpuiCursorStyle::PointingHand
+        );
         assert_eq!(map_cursor(&CursorHint::Text), GpuiCursorStyle::IBeam);
-        assert_eq!(map_cursor(&CursorHint::NotAllowed), GpuiCursorStyle::NotAllowed);
+        assert_eq!(
+            map_cursor(&CursorHint::NotAllowed),
+            GpuiCursorStyle::NotAllowed
+        );
         assert_eq!(map_cursor(&CursorHint::Grab), GpuiCursorStyle::OpenHand);
-        assert_eq!(map_cursor(&CursorHint::Grabbing), GpuiCursorStyle::ClosedHand);
-        assert_eq!(map_cursor(&CursorHint::ColResize), GpuiCursorStyle::ResizeColumn);
-        assert_eq!(map_cursor(&CursorHint::RowResize), GpuiCursorStyle::ResizeRow);
+        assert_eq!(
+            map_cursor(&CursorHint::Grabbing),
+            GpuiCursorStyle::ClosedHand
+        );
+        assert_eq!(
+            map_cursor(&CursorHint::ColResize),
+            GpuiCursorStyle::ResizeColumn
+        );
+        assert_eq!(
+            map_cursor(&CursorHint::RowResize),
+            GpuiCursorStyle::ResizeRow
+        );
     }
 }

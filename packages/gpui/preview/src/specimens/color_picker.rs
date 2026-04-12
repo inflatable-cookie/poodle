@@ -1,53 +1,83 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{ColorPickerSpec, ColorInputMode, EyebrowSpec};
-use poodle_gpui_components::{ColorPicker, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{ColorPicker, Eyebrow};
+use poodle_specs::{ColorInputMode, ColorPickerSpec, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
     let swatches = vec![
-        "#ef4444".to_string(), "#f97316".to_string(), "#eab308".to_string(),
-        "#22c55e".to_string(), "#3b82f6".to_string(), "#6366f1".to_string(),
-        "#8b5cf6".to_string(), "#ec4899".to_string(),
+        "#ef4444".to_string(),
+        "#f97316".to_string(),
+        "#eab308".to_string(),
+        "#22c55e".to_string(),
+        "#3b82f6".to_string(),
+        "#6366f1".to_string(),
+        "#8b5cf6".to_string(),
+        "#ec4899".to_string(),
     ];
 
     // --- Basic picker ---
     let basic_open = state.specimens.is_on("color-picker-basic-open");
-    let basic_value = state.specimens.text.get("color-picker-basic-value")
+    let basic_value = state
+        .specimens
+        .text
+        .get("color-picker-basic-value")
         .cloned()
         .unwrap_or_else(|| "#6366f1".to_string());
 
     // --- With swatches ---
     let swatches_open = state.specimens.is_on("color-picker-swatches-open");
-    let swatches_value = state.specimens.text.get("color-picker-swatches-value")
+    let swatches_value = state
+        .specimens
+        .text
+        .get("color-picker-swatches-value")
         .cloned()
         .unwrap_or_else(|| "#6366f1".to_string());
 
     // --- With alpha ---
     let alpha_open = state.specimens.is_on("color-picker-alpha-open");
-    let alpha_value = state.specimens.text.get("color-picker-alpha-value")
+    let alpha_value = state
+        .specimens
+        .text
+        .get("color-picker-alpha-value")
         .cloned()
         .unwrap_or_else(|| "#3b82f6".to_string());
 
     // --- Default open ---
-    let open_value = state.specimens.text.get("color-picker-open-value")
+    let open_value = state
+        .specimens
+        .text
+        .get("color-picker-open-value")
         .cloned()
         .unwrap_or_else(|| "#22c55e".to_string());
 
-    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(420.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(420.0))
         // --- Basic picker ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic picker"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Basic picker"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(4.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(4.0))
                         .child(
                             ColorPicker::from_spec(
                                 ColorPickerSpec::new()
@@ -60,22 +90,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 this.state.specimens.toggle("color-picker-basic-open");
                                 cx.notify();
                             }))
-                            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                this.state.specimens.text.insert("color-picker-basic-value".to_string(), val.to_string());
-                                cx.notify();
-                            }))
+                            .on_change(cx.listener(
+                                |this, val: &str, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "color-picker-basic-value".to_string(),
+                                        val.to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child(format!("Selected: {}", basic_value))
-                        )
-                )
+                            div()
+                                .text_xs()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("Selected: {}", basic_value)),
+                        ),
+                ),
         )
-
         // --- With swatches ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With swatches"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With swatches"),
+                    theme,
+                ))
                 .child(
                     ColorPicker::from_spec(
                         ColorPickerSpec::new()
@@ -90,18 +132,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         cx.notify();
                     }))
                     .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("color-picker-swatches-value".to_string(), val.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("color-picker-swatches-value".to_string(), val.to_string());
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
-
         // --- With alpha ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With alpha"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With alpha"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(4.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(4.0))
                         .child(
                             ColorPicker::from_spec(
                                 ColorPickerSpec::new()
@@ -115,22 +168,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 this.state.specimens.toggle("color-picker-alpha-open");
                                 cx.notify();
                             }))
-                            .on_change(cx.listener(|this, val: &str, _w, cx| {
-                                this.state.specimens.text.insert("color-picker-alpha-value".to_string(), val.to_string());
-                                cx.notify();
-                            }))
+                            .on_change(cx.listener(
+                                |this, val: &str, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "color-picker-alpha-value".to_string(),
+                                        val.to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child(format!("Selected: {}", alpha_value))
-                        )
-                )
+                            div()
+                                .text_xs()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("Selected: {}", alpha_value)),
+                        ),
+                ),
         )
-
         // --- Default open, RGB mode ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default open, RGB mode"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default open, RGB mode"),
+                    theme,
+                ))
                 .child(
                     ColorPicker::from_spec(
                         ColorPickerSpec::new()
@@ -141,16 +206,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                     .with_id("open")
                     .on_change(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert("color-picker-open-value".to_string(), val.to_string());
+                        this.state
+                            .specimens
+                            .text
+                            .insert("color-picker-open-value".to_string(), val.to_string());
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
-
         // --- Preview only (no input) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Preview only (no input)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Preview only (no input)"),
+                    theme,
+                ))
                 .child(
                     ColorPicker::from_spec(
                         ColorPickerSpec::new()
@@ -159,14 +232,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_open(true),
                         theme,
                     )
-                    .with_id("preview")
-                )
+                    .with_id("preview"),
+                ),
         )
-
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
                 .child(
                     ColorPicker::from_spec(
                         ColorPickerSpec::new()
@@ -174,8 +252,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_disabled(true),
                         theme,
                     )
-                    .with_id("disabled")
-                )
+                    .with_id("disabled"),
+                ),
         )
         .into_any_element();
 
@@ -185,22 +263,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "color-picker",
         examples,
         |size, theme: &GpuiThemeProvider| {
-            ColorPicker::from_spec(
-                ColorPickerSpec::new().with_value("#6366f1"),
-                theme,
-            )
-            .with_id(format!("specimen-size-{:?}", size))
-            .size(size)
-            .into_any_element()
+            ColorPicker::from_spec(ColorPickerSpec::new().with_value("#6366f1"), theme)
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
-            ColorPicker::from_spec(
-                ColorPickerSpec::new().with_value("#6366f1"),
-                theme,
-            )
-            .with_id(format!("specimen-density-{:?}", density))
-            .with_density(density)
-            .into_any_element()
+            ColorPicker::from_spec(ColorPickerSpec::new().with_value("#6366f1"), theme)
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
         },
     )
 }

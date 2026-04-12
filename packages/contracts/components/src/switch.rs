@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// Tone for a Switch's left/right labels. Resolves to a token-side color
 /// used to tint the corresponding track side (off-color for `left_tone`,

@@ -6,7 +6,10 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{CommandActionItem, CommandPaletteSpec, DiscoveryState};
 use poodle_specs::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI command palette backed by `CommandPaletteSpec`.
@@ -23,12 +26,20 @@ pub struct CommandPalette {
 
 impl std::ops::Deref for CommandPalette {
     type Target = CommandPaletteSpec;
-    fn deref(&self) -> &CommandPaletteSpec { &self.spec }
+    fn deref(&self) -> &CommandPaletteSpec {
+        &self.spec
+    }
 }
 
 impl CommandPalette {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CommandPaletteSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_select: None, on_query_change: None }
+        Self {
+            spec: CommandPaletteSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_select: None,
+            on_query_change: None,
+        }
     }
 
     pub fn from_spec(spec: CommandPaletteSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,29 +53,61 @@ impl CommandPalette {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn query(mut self, v: impl Into<String>) -> Self { self.spec.query = v.into(); self }
-    pub fn actions(mut self, v: Vec<CommandActionItem>) -> Self { self.spec.actions = v; self }
-    pub fn state(mut self, v: DiscoveryState) -> Self { self.spec.state = v; self }
-    pub fn active_action_id(mut self, v: impl Into<String>) -> Self { self.spec.active_action_id = Some(v.into()); self }
-    pub fn placement(mut self, v: OverlayPlacement) -> Self { self.spec.placement = v; self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn invocation_hint(mut self, v: impl Into<String>) -> Self { self.spec.invocation_hint = Some(v.into()); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn query(mut self, v: impl Into<String>) -> Self {
+        self.spec.query = v.into();
+        self
+    }
+    pub fn actions(mut self, v: Vec<CommandActionItem>) -> Self {
+        self.spec.actions = v;
+        self
+    }
+    pub fn state(mut self, v: DiscoveryState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn active_action_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.active_action_id = Some(v.into());
+        self
+    }
+    pub fn placement(mut self, v: OverlayPlacement) -> Self {
+        self.spec.placement = v;
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn invocation_hint(mut self, v: impl Into<String>) -> Self {
+        self.spec.invocation_hint = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_select(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_select(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_select = Some(Box::new(handler));
         self
     }
@@ -193,9 +236,7 @@ impl IntoElement for CommandPalette {
                     .when(spec.query.is_empty(), move |el| {
                         el.text_color(text_muted).child(placeholder)
                     })
-                    .when(!spec.query.is_empty(), |el| {
-                        el.child(spec.query.clone())
-                    }),
+                    .when(!spec.query.is_empty(), |el| el.child(spec.query.clone())),
             );
         palette = palette.child(search_row);
 
@@ -235,11 +276,7 @@ impl IntoElement for CommandPalette {
         }
 
         // Group actions by group name
-        let mut results_list = div()
-            .flex()
-            .flex_col()
-            .py(px(4.0))
-            .overflow_y_hidden();
+        let mut results_list = div().flex().flex_col().py(px(4.0)).overflow_y_hidden();
 
         let mut current_group: Option<&str> = None;
 
@@ -264,8 +301,7 @@ impl IntoElement for CommandPalette {
                 .active_action_id
                 .as_deref()
                 .map_or(false, |id| id == action.id);
-            let action_el_id =
-                SharedString::from(format!("{}-{}", self.id_prefix, action.id));
+            let action_el_id = SharedString::from(format!("{}-{}", self.id_prefix, action.id));
 
             let mut row = div()
                 .id(action_el_id)
@@ -285,16 +321,17 @@ impl IntoElement for CommandPalette {
                 row = row.text_color(text_primary);
             }
 
-            row = row.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            row = row.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if action.is_disabled {
                 row = row
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                row = row
-                    .cursor_pointer()
-                    .hover(|s| s.bg(hover_bg));
+                row = row.cursor_pointer().hover(|s| s.bg(hover_bg));
             }
 
             // Left: title + badge

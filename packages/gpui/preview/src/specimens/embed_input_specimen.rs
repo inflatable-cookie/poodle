@@ -1,10 +1,10 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{EmbedInputSpec, ParsedEmbed};
-use poodle_gpui_components::{EmbedInput, Eyebrow, Field};
-use poodle_specs::{EyebrowSpec, FieldSpec};
 use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
+use poodle_gpui_components::{EmbedInput, Eyebrow, Field};
+use poodle_specs::{EmbedInputSpec, ParsedEmbed};
+use poodle_specs::{EyebrowSpec, FieldSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -174,19 +174,29 @@ fn provider_header_row(
     border_subtle: poodle_tokens::typed::ColorValue,
 ) -> Div {
     let _ = theme;
-    div().flex()
-        .border_b_1().border_color(color_to_hsla(border_subtle))
+    div()
+        .flex()
+        .border_b_1()
+        .border_color(color_to_hsla(border_subtle))
         .child(
-            div().flex_1().px(px(10.0)).py(px(6.0))
-                .text_size(px(11.0)).font_weight(FontWeight::SEMIBOLD)
+            div()
+                .flex_1()
+                .px(px(10.0))
+                .py(px(6.0))
+                .text_size(px(11.0))
+                .font_weight(FontWeight::SEMIBOLD)
                 .text_color(color_to_hsla(text_secondary))
-                .child("Provider")
+                .child("Provider"),
         )
         .child(
-            div().flex_grow().px(px(10.0)).py(px(6.0))
-                .text_size(px(11.0)).font_weight(FontWeight::SEMIBOLD)
+            div()
+                .flex_grow()
+                .px(px(10.0))
+                .py(px(6.0))
+                .text_size(px(11.0))
+                .font_weight(FontWeight::SEMIBOLD)
                 .text_color(color_to_hsla(text_secondary))
-                .child("Detected patterns")
+                .child("Detected patterns"),
         )
 }
 
@@ -208,7 +218,8 @@ fn provider_row(
 
     let code_chip = |text: &str| {
         div()
-            .px(px(4.0)).py(px(1.0))
+            .px(px(4.0))
+            .py(px(1.0))
             .rounded(px(3.0))
             .bg(code_bg)
             .text_size(px(11.0))
@@ -221,22 +232,30 @@ fn provider_row(
         row = row.border_b_1().border_color(color_to_hsla(border_subtle));
     }
 
-    row
-        .child(
-            div().flex_1().px(px(10.0)).py(px(6.0))
-                .child(code_chip(provider))
-        )
-        .child(
-            div().flex_grow().px(px(10.0)).py(px(6.0))
-                .text_size(px(11.0))
-                .text_color(color_to_hsla(text_secondary))
-                .child(patterns.to_string())
-        )
+    row.child(
+        div()
+            .flex_1()
+            .px(px(10.0))
+            .py(px(6.0))
+            .child(code_chip(provider)),
+    )
+    .child(
+        div()
+            .flex_grow()
+            .px(px(10.0))
+            .py(px(6.0))
+            .text_size(px(11.0))
+            .text_color(color_to_hsla(text_secondary))
+            .child(patterns.to_string()),
+    )
 }
 
 fn example_row(label: impl Into<String>, spec: EmbedInputSpec, theme: &GpuiThemeProvider) -> Div {
     let label = label.into();
-    div().flex().flex_col().gap(px(4.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(4.0))
         .child(
             div()
                 .text_size(px(12.0))

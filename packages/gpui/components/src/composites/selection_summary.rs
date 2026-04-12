@@ -2,10 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI selection summary component backed by `SelectionSummarySpec`.
@@ -21,12 +21,19 @@ pub struct SelectionSummary {
 
 impl std::ops::Deref for SelectionSummary {
     type Target = SelectionSummarySpec;
-    fn deref(&self) -> &SelectionSummarySpec { &self.spec }
+    fn deref(&self) -> &SelectionSummarySpec {
+        &self.spec
+    }
 }
 
 impl SelectionSummary {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SelectionSummarySpec::default(), theme: theme.clone(), on_remove: None, on_clear: None }
+        Self {
+            spec: SelectionSummarySpec::default(),
+            theme: theme.clone(),
+            on_remove: None,
+            on_clear: None,
+        }
     }
 
     pub fn from_spec(spec: SelectionSummarySpec, theme: &GpuiThemeProvider) -> Self {
@@ -39,13 +46,30 @@ impl SelectionSummary {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn items(mut self, v: Vec<SelectionSummaryItem>) -> Self { self.spec.items = v; self }
-    pub fn clear_action(mut self, v: RemediationAction) -> Self { self.spec.clear_action = Some(v); self }
-    pub fn max_visible_items(mut self, v: usize) -> Self { self.spec.max_visible_items = Some(v); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn items(mut self, v: Vec<SelectionSummaryItem>) -> Self {
+        self.spec.items = v;
+        self
+    }
+    pub fn clear_action(mut self, v: RemediationAction) -> Self {
+        self.spec.clear_action = Some(v);
+        self
+    }
+    pub fn max_visible_items(mut self, v: usize) -> Self {
+        self.spec.max_visible_items = Some(v);
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_remove(
         mut self,
@@ -81,12 +105,7 @@ impl IntoElement for SelectionSummary {
         let accent = resolve_color(theme, "color.accent.base");
         let bg = resolve_color(theme, "color.background.surface");
 
-        let mut container = div()
-            .w_full()
-            .flex()
-            .flex_wrap()
-            .items_center()
-            .gap(gap);
+        let mut container = div().w_full().flex().flex_wrap().items_center().gap(gap);
 
         // Selected item pills — clamped by max_visible_items if set.
         let visible_count = spec.visible_item_count();

@@ -15,12 +15,17 @@ pub struct Meter {
 
 impl std::ops::Deref for Meter {
     type Target = MeterSpec;
-    fn deref(&self) -> &MeterSpec { &self.spec }
+    fn deref(&self) -> &MeterSpec {
+        &self.spec
+    }
 }
 
 impl Meter {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MeterSpec::new(), theme: theme.clone() }
+        Self {
+            spec: MeterSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: MeterSpec, theme: &GpuiThemeProvider) -> Self {
@@ -31,14 +36,34 @@ impl Meter {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: f64) -> Self { self.spec.value = v; self }
-    pub fn min(mut self, v: f64) -> Self { self.spec.min = v; self }
-    pub fn max(mut self, v: f64) -> Self { self.spec.max = v; self }
-    pub fn low(mut self, v: f64) -> Self { self.spec.low = Some(v); self }
-    pub fn high(mut self, v: f64) -> Self { self.spec.high = Some(v); self }
-    pub fn optimum(mut self, v: f64) -> Self { self.spec.optimum = Some(v); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn value(mut self, v: f64) -> Self {
+        self.spec.value = v;
+        self
+    }
+    pub fn min(mut self, v: f64) -> Self {
+        self.spec.min = v;
+        self
+    }
+    pub fn max(mut self, v: f64) -> Self {
+        self.spec.max = v;
+        self
+    }
+    pub fn low(mut self, v: f64) -> Self {
+        self.spec.low = Some(v);
+        self
+    }
+    pub fn high(mut self, v: f64) -> Self {
+        self.spec.high = Some(v);
+        self
+    }
+    pub fn optimum(mut self, v: f64) -> Self {
+        self.spec.optimum = Some(v);
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 }
 
 impl IntoElement for Meter {

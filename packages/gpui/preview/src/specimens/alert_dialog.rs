@@ -1,11 +1,13 @@
-use gpui::*;
-use gpui::prelude::FluentBuilder;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec};
-use poodle_gpui_components::{AlertDialog, Button, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{AlertDialog, Button, Eyebrow};
+use poodle_specs::{
+    AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -14,7 +16,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let danger_open = state.specimens.is_on("alert-danger-open");
     let warning_open = state.specimens.is_on("alert-warning-open");
     let body_open = state.specimens.is_on("alert-body-open");
-    let last_action = state.specimens.text.get("alert-last-action").cloned()
+    let last_action = state
+        .specimens
+        .text
+        .get("alert-last-action")
+        .cloned()
         .unwrap_or_default();
 
     div().flex().flex_col().gap(px(24.0))

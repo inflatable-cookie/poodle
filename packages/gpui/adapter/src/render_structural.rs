@@ -15,10 +15,24 @@ use poodle_style::StyleDescriptor;
 use crate::style_map::map_style;
 use crate::{GpuiAdapter, GpuiElementHandle, GpuiTarget};
 
-fn resolve_inset_padding(theme: &dyn ThemeProvider, inset: &poodle_specs::Inset) -> crate::GpuiEdges {
-    let h = inset.horizontal.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
-    let v = inset.vertical.map(|t| theme.resolve_space(t)).unwrap_or(0.0);
-    crate::GpuiEdges { top: v, right: h, bottom: v, left: h }
+fn resolve_inset_padding(
+    theme: &dyn ThemeProvider,
+    inset: &poodle_specs::Inset,
+) -> crate::GpuiEdges {
+    let h = inset
+        .horizontal
+        .map(|t| theme.resolve_space(t))
+        .unwrap_or(0.0);
+    let v = inset
+        .vertical
+        .map(|t| theme.resolve_space(t))
+        .unwrap_or(0.0);
+    crate::GpuiEdges {
+        top: v,
+        right: h,
+        bottom: v,
+        left: h,
+    }
 }
 
 impl RenderComponent<BoxSpec> for GpuiAdapter {
@@ -109,10 +123,7 @@ impl RenderComponent<SurfaceSpec> for GpuiAdapter {
         }
 
         GpuiElementHandle::new(
-            format!(
-                "surface-{}",
-                spec.label.as_deref().unwrap_or("anonymous")
-            ),
+            format!("surface-{}", spec.label.as_deref().unwrap_or("anonymous")),
             "SurfaceSpec",
         )
     }
@@ -183,10 +194,7 @@ impl RenderComponent<BannerSpec> for GpuiAdapter {
         gpui_style.border_color = Some(border.into());
 
         GpuiElementHandle::new(
-            format!(
-                "banner-{}",
-                spec.title.as_deref().unwrap_or("anonymous")
-            ),
+            format!("banner-{}", spec.title.as_deref().unwrap_or("anonymous")),
             "BannerSpec",
         )
     }
@@ -209,10 +217,7 @@ impl RenderComponent<CallOutSpec> for GpuiAdapter {
         gpui_style.border_color = Some(border.into());
 
         GpuiElementHandle::new(
-            format!(
-                "callout-{}",
-                spec.title.as_deref().unwrap_or("anonymous")
-            ),
+            format!("callout-{}", spec.title.as_deref().unwrap_or("anonymous")),
             "CallOutSpec",
         )
     }

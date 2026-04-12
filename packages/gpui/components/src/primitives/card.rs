@@ -1,7 +1,7 @@
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{CardLayout, CardSpec, CardVariant};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Card {
     spec: CardSpec,
@@ -14,7 +14,9 @@ pub struct Card {
 
 impl std::ops::Deref for Card {
     type Target = CardSpec;
-    fn deref(&self) -> &CardSpec { &self.spec }
+    fn deref(&self) -> &CardSpec {
+        &self.spec
+    }
 }
 
 impl Card {
@@ -41,11 +43,26 @@ impl Card {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn variant(mut self, v: CardVariant) -> Self { self.spec.variant = v; self }
-    pub fn layout(mut self, v: CardLayout) -> Self { self.spec.layout = v; self }
-    pub fn interactive(mut self) -> Self { self.spec.is_interactive = true; self }
-    pub fn selected(mut self) -> Self { self.spec.is_selected = true; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
+    pub fn variant(mut self, v: CardVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn layout(mut self, v: CardLayout) -> Self {
+        self.spec.layout = v;
+        self
+    }
+    pub fn interactive(mut self) -> Self {
+        self.spec.is_interactive = true;
+        self
+    }
+    pub fn selected(mut self) -> Self {
+        self.spec.is_selected = true;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -78,7 +95,9 @@ impl IntoElement for Card {
 
         // ── Resolve tokens at render time ─────────────────────
         let radius = resolve_radius(theme, spec.radius_token());
-        let selected_border_color = spec.selected_border_token().map(|t| resolve_color(theme, t));
+        let selected_border_color = spec
+            .selected_border_token()
+            .map(|t| resolve_color(theme, t));
         let _disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let gap = resolve_px(theme, spec.gap_token());
@@ -102,20 +121,28 @@ impl IntoElement for Card {
         // Default/Outlined: treatment-surface-fill = color-mix(panel 96%, elevated)
         // Elevated: treatment-surface-elevated-fill = color-mix(elevated 94%, transparent)
         let fill = match spec.variant {
-            CardVariant::Elevated => Hsla { a: elevated.a * 0.94, ..elevated },
+            CardVariant::Elevated => Hsla {
+                a: elevated.a * 0.94,
+                ..elevated
+            },
             _ => color_mix(panel, elevated, 0.96),
         };
 
         // Border: Default subtle at 18%, Outlined at 76% border-default,
         // Elevated uses treatment-surface-elevated-border
         let border_color = match spec.variant {
-            CardVariant::Default => Some(Hsla { a: border_subtle.a * 0.18, ..border_subtle }),
-            CardVariant::Outlined => {
-                Some(Hsla { a: border_default.a * 0.76, ..border_default })
-            }
-            CardVariant::Elevated => {
-                Some(Hsla { a: border_default.a * 0.22, ..border_default })
-            }
+            CardVariant::Default => Some(Hsla {
+                a: border_subtle.a * 0.18,
+                ..border_subtle
+            }),
+            CardVariant::Outlined => Some(Hsla {
+                a: border_default.a * 0.76,
+                ..border_default
+            }),
+            CardVariant::Elevated => Some(Hsla {
+                a: border_default.a * 0.22,
+                ..border_default
+            }),
         };
 
         // Hover fill: treatment-surface-hover-fill
@@ -126,7 +153,10 @@ impl IntoElement for Card {
         };
 
         // Footer divider: 52% border-subtle mixed with transparent
-        let footer_divider = Hsla { a: border_subtle.a * 0.52, ..border_subtle };
+        let footer_divider = Hsla {
+            a: border_subtle.a * 0.52,
+            ..border_subtle
+        };
 
         let is_horizontal = matches!(spec.layout, CardLayout::Horizontal);
         let card_id = SharedString::from(self.id_prefix.clone());
@@ -145,7 +175,10 @@ impl IntoElement for Card {
             .gap(gap)
             .overflow_hidden()
             // Focus ring
-            .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            .focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
         // Layout direction
         if is_horizontal {
@@ -157,7 +190,9 @@ impl IntoElement for Card {
         // Border + shadow
         if let Some(sel_border) = selected_border_color {
             // Selected: accent border + shadow ring
-            el = el.border_1().border_color(sel_border)
+            el = el
+                .border_1()
+                .border_color(sel_border)
                 .shadow(vec![gpui::BoxShadow {
                     color: sel_border,
                     offset: point(px(0.0), px(0.0)),
@@ -190,7 +225,10 @@ impl IntoElement for Card {
             }
             // Svelte treatment-surface-shadow: inset 1px border-subtle at 18%
             el = el.shadow(vec![gpui::BoxShadow {
-                color: Hsla { a: border_subtle.a * 0.18, ..border_subtle },
+                color: Hsla {
+                    a: border_subtle.a * 0.18,
+                    ..border_subtle
+                },
                 offset: point(px(0.0), px(0.0)),
                 blur_radius: px(0.0),
                 spread_radius: px(1.0),
@@ -204,20 +242,12 @@ impl IntoElement for Card {
 
         // Header slot
         if let Some(header) = self.header {
-            el = el.child(
-                div()
-                    .flex_shrink_0()
-                    .child(header),
-            );
+            el = el.child(div().flex_shrink_0().child(header));
         }
 
         // Body slot
         if let Some(body) = self.body {
-            el = el.child(
-                div()
-                    .flex_grow()
-                    .child(body),
-            );
+            el = el.child(div().flex_grow().child(body));
         }
 
         // Footer slot — with top divider per contract

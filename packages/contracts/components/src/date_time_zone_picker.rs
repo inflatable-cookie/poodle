@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct DateTimeZonePickerSpec {

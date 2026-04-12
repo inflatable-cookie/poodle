@@ -1,15 +1,13 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{
-    ListCardSpec, LeadingShape, LeadingFill,
-    StatusIndicatorSpec, StatusTone, PillSpec, PillTone,
-    IconSpec, IconSize, ContextMenuSpec, MenuEntry, MenuItemKind,
-    EyebrowSpec,
-};
-use poodle_gpui_components::{ListCard, StatusIndicator, Pill, Icon, ContextMenu, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{ContextMenu, Eyebrow, Icon, ListCard, Pill, StatusIndicator};
+use poodle_specs::{
+    ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, LeadingFill, LeadingShape, ListCardSpec,
+    MenuEntry, MenuItemKind, PillSpec, PillTone, StatusIndicatorSpec, StatusTone,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -18,13 +16,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let last_clicked = state.specimens.text.get("list-card-clicked").cloned();
 
-    div().flex().flex_col().gap(px(24.0)).max_w(px(440.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(440.0))
         // -- Interactive list cards --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Interactive list cards"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Interactive list cards"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -38,15 +49,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("folder").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "list-card-clicked".to_string(),
-                                    "design-system-v2.figma".to_string(),
-                                );
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "list-card-clicked".to_string(),
+                                        "design-system-v2.figma".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
                             ListCard::from_spec(
@@ -61,15 +75,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("folder").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "list-card-clicked".to_string(),
-                                    "component-specs.pdf".to_string(),
-                                );
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "list-card-clicked".to_string(),
+                                        "component-specs.pdf".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
                             ListCard::from_spec(
@@ -84,25 +101,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("folder").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "list-card-clicked".to_string(),
-                                    "brand-assets.zip".to_string(),
-                                );
-                                cx.notify();
-                            }))
-                        )
-                )
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "list-card-clicked".to_string(),
+                                        "brand-assets.zip".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
+                        ),
+                ),
         )
-
         // -- Rounded-square leading --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Rounded-square leading (thumbnails)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Rounded-square leading (thumbnails)"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -117,8 +145,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("layout-grid").with_size(IconSize::Md),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
-                            )
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -134,20 +163,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("image").with_size(IconSize::Md),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
-                            )
-                        )
-                )
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        ),
+                ),
         )
-
         // -- With badges --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With badges"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With badges"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child({
-                            let mut status = StatusIndicatorSpec::new().with_status(StatusTone::Success);
+                            let mut status =
+                                StatusIndicatorSpec::new().with_status(StatusTone::Success);
                             status.aria_label = Some("Active".to_string());
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -157,12 +196,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             )
                             .with_leading(StatusIndicator::from_spec(status, theme))
                             .with_trailing(Pill::from_spec(
-                                PillSpec::new().with_label("Active").with_tone(PillTone::Success),
+                                PillSpec::new()
+                                    .with_label("Active")
+                                    .with_tone(PillTone::Success),
                                 theme,
                             ))
                         })
                         .child({
-                            let mut status = StatusIndicatorSpec::new().with_status(StatusTone::Warning);
+                            let mut status =
+                                StatusIndicatorSpec::new().with_status(StatusTone::Warning);
                             status.aria_label = Some("Degraded".to_string());
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -172,12 +214,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             )
                             .with_leading(StatusIndicator::from_spec(status, theme))
                             .with_trailing(Pill::from_spec(
-                                PillSpec::new().with_label("Degraded").with_tone(PillTone::Warning),
+                                PillSpec::new()
+                                    .with_label("Degraded")
+                                    .with_tone(PillTone::Warning),
                                 theme,
                             ))
                         })
                         .child({
-                            let mut status = StatusIndicatorSpec::new().with_status(StatusTone::Danger);
+                            let mut status =
+                                StatusIndicatorSpec::new().with_status(StatusTone::Danger);
                             status.aria_label = Some("Down".to_string());
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -187,19 +232,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             )
                             .with_leading(StatusIndicator::from_spec(status, theme))
                             .with_trailing(Pill::from_spec(
-                                PillSpec::new().with_label("Down").with_tone(PillTone::Danger),
+                                PillSpec::new()
+                                    .with_label("Down")
+                                    .with_tone(PillTone::Danger),
                                 theme,
                             ))
-                        })
-                )
+                        }),
+                ),
         )
-
         // -- With footer counters --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With footer counters"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With footer counters"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -211,13 +266,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("bar-chart").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
                             .with_footer(
-                                div().flex().gap(px(12.0))
+                                div()
+                                    .flex()
+                                    .gap(px(12.0))
                                     .child(counter_item("12 views", "eye", text_muted, theme))
-                                    .child(counter_item("3 shares", "share", text_muted, theme))
-                            )
+                                    .child(counter_item("3 shares", "share", text_muted, theme)),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -230,24 +288,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("book").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
                             .with_footer(
-                                div().flex().gap(px(12.0))
+                                div()
+                                    .flex()
+                                    .gap(px(12.0))
                                     .child(counter_item("156 reads", "eye", text_muted, theme))
                                     .child(counter_item("24 edits", "pencil", text_muted, theme))
-                                    .child(counter_item("8 comments", "message-circle", text_muted, theme))
-                            )
-                        )
-                )
+                                    .child(counter_item(
+                                        "8 comments",
+                                        "message-circle",
+                                        text_muted,
+                                        theme,
+                                    )),
+                            ),
+                        ),
+                ),
         )
-
         // -- Solid fill with accent colors --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Solid fill with accent colors"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Solid fill with accent colors"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -262,8 +336,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("palette").with_size(IconSize::Md),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
+                                )
+                                .with_color(gpui::white()),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -279,8 +354,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("type").with_size(IconSize::Md),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
+                                )
+                                .with_color(gpui::white()),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -296,16 +372,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("ruler").with_size(IconSize::Md),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
-                        )
-                )
+                                )
+                                .with_color(gpui::white()),
+                            ),
+                        ),
+                ),
         )
-
         // -- With context menu --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With context menu"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With context menu"),
+                    theme,
+                ))
                 .child(
                     ContextMenu::from_spec(
                         ContextMenuSpec::new(vec![
@@ -331,25 +413,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             Icon::from_spec(
                                 IconSpec::new("file-text").with_size(IconSize::Sm),
                                 theme,
-                            ).with_color(color_to_hsla(text_muted))
-                        )
+                            )
+                            .with_color(color_to_hsla(text_muted)),
+                        ),
                     )
                     .on_select(cx.listener(|this, val: &str, _w, cx| {
-                        this.state.specimens.text.insert(
-                            "list-card-clicked".to_string(),
-                            format!("Action: {}", val),
-                        );
+                        this.state
+                            .specimens
+                            .text
+                            .insert("list-card-clicked".to_string(), format!("Action: {}", val));
                         cx.notify();
-                    }))
-                )
+                    })),
+                ),
         )
-
         // -- Not live (draft state) --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Not live (dashed border, interactive)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Not live (dashed border, interactive)"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -362,12 +453,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("file-text").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
                             .with_trailing(Pill::from_spec(
-                                PillSpec::new().with_label("Draft").with_tone(PillTone::Neutral),
+                                PillSpec::new()
+                                    .with_label("Draft")
+                                    .with_tone(PillTone::Neutral),
                                 theme,
-                            ))
+                            )),
                         )
                         .child(
                             ListCard::from_spec(
@@ -382,22 +476,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("clock").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
                             .with_trailing(Pill::from_spec(
-                                PillSpec::new().with_label("Scheduled").with_tone(PillTone::Info),
+                                PillSpec::new()
+                                    .with_label("Scheduled")
+                                    .with_tone(PillTone::Info),
                                 theme,
-                            ))
-                        )
-                )
+                            )),
+                        ),
+                ),
         )
-
         // -- Corner sash badges --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Corner sash badges"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Corner sash badges"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -411,15 +516,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("layers").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "list-card-clicked".to_string(),
-                                    "Free tier plan".to_string(),
-                                );
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "list-card-clicked".to_string(),
+                                        "Free tier plan".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
                             ListCard::from_spec(
@@ -438,15 +546,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("grid-2x2").with_size(IconSize::Md),
                                     theme,
-                                ).with_color(gpui::white())
+                                )
+                                .with_color(gpui::white()),
                             )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "list-card-clicked".to_string(),
-                                    "Premium integration".to_string(),
-                                );
-                                cx.notify();
-                            }))
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "list-card-clicked".to_string(),
+                                        "Premium integration".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
                         )
                         .child(
                             ListCard::from_spec(
@@ -462,25 +573,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("file-text").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(color_to_hsla(text_muted))
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             )
-                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "list-card-clicked".to_string(),
-                                    "Legacy connector".to_string(),
-                                );
-                                cx.notify();
-                            }))
-                        )
-                )
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.text.insert(
+                                        "list-card-clicked".to_string(),
+                                        "Legacy connector".to_string(),
+                                    );
+                                    cx.notify();
+                                },
+                            )),
+                        ),
+                ),
         )
-
         // -- Selectable (multi-select checkbox) --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Selectable (multi-select)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Selectable (multi-select)"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -494,8 +616,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("user").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
+                                )
+                                .with_color(gpui::white()),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -509,8 +632,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("user").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
+                                )
+                                .with_color(gpui::white()),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -525,18 +649,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("user").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
-                        )
-                )
+                                )
+                                .with_color(gpui::white()),
+                            ),
+                        ),
+                ),
         )
-
         // -- Reorder handle --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Reorder handle"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Reorder handle"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(6.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
                         .child(
                             ListCard::from_spec(
                                 ListCardSpec::new()
@@ -549,8 +682,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("hash").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
+                                )
+                                .with_color(gpui::white()),
+                            ),
                         )
                         .child(
                             ListCard::from_spec(
@@ -564,16 +698,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Icon::from_spec(
                                     IconSpec::new("hash").with_size(IconSize::Sm),
                                     theme,
-                                ).with_color(gpui::white())
-                            )
-                        )
-                )
+                                )
+                                .with_color(gpui::white()),
+                            ),
+                        ),
+                ),
         )
-
         // -- Static list card --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Static list card"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Static list card"),
+                    theme,
+                ))
                 .child(
                     ListCard::from_spec(
                         ListCardSpec::new()
@@ -583,28 +723,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_leading(
-                        Icon::from_spec(
-                            IconSpec::new("settings").with_size(IconSize::Sm),
-                            theme,
-                        ).with_color(color_to_hsla(text_muted))
-                    )
-                )
+                        Icon::from_spec(IconSpec::new("settings").with_size(IconSize::Sm), theme)
+                            .with_color(color_to_hsla(text_muted)),
+                    ),
+                ),
         )
-
         // -- Last clicked indicator --
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Last click"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Last click"),
+                    theme,
+                ))
                 .child(
-                    div().flex().items_center().gap(px(6.0))
-                        .child(
-                            div().text_xs().text_color(color_to_hsla(text_secondary))
-                                .child(match last_clicked {
-                                    Some(ref name) => format!("Last clicked: {}", name),
-                                    None => "Click an interactive card above.".to_string(),
-                                })
-                        )
-                )
+                    div().flex().items_center().gap(px(6.0)).child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(match last_clicked {
+                                Some(ref name) => format!("Last clicked: {}", name),
+                                None => "Click an interactive card above.".to_string(),
+                            }),
+                    ),
+                ),
         )
 }
 
@@ -619,13 +763,13 @@ fn counter_item(
         .items_center()
         .gap(px(4.0))
         .child(
-            Icon::from_spec(
-                IconSpec::new(icon_name).with_size(IconSize::Sm),
-                theme,
-            ).with_color(color_to_hsla(color))
+            Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
+                .with_color(color_to_hsla(color)),
         )
         .child(
-            div().text_size(px(11.0)).text_color(color_to_hsla(color))
-                .child(label.to_string())
+            div()
+                .text_size(px(11.0))
+                .text_color(color_to_hsla(color))
+                .child(label.to_string()),
         )
 }

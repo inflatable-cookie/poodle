@@ -1,12 +1,15 @@
 //! LogList — timestamped log entry list backed by LogListSpec.
 
-use gpui::*;
-use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
-use poodle_specs::LogListSpec;
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_specs::LogListSpec;
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 /// A single log entry for display in the LogList.
 ///
@@ -75,9 +78,7 @@ impl LogEntry {
 
     /// Whether any of the audit-style fields are populated.
     pub fn is_audit(&self) -> bool {
-        self.actor_name.is_some()
-            || self.resource_label.is_some()
-            || self.action.is_some()
+        self.actor_name.is_some() || self.resource_label.is_some() || self.action.is_some()
     }
 }
 
@@ -104,8 +105,8 @@ impl LogLevel {
     fn badge_fill_token(self) -> &'static str {
         match self {
             Self::Debug => "color.text.secondary",
-            Self::Info  => "color.accent.base",
-            Self::Warn  => "color.warning.base",
+            Self::Info => "color.accent.base",
+            Self::Warn => "color.warning.base",
             Self::Error => "color.danger.base",
         }
     }
@@ -122,34 +123,67 @@ pub struct LogList {
 
 impl std::ops::Deref for LogList {
     type Target = LogListSpec;
-    fn deref(&self) -> &LogListSpec { &self.spec }
+    fn deref(&self) -> &LogListSpec {
+        &self.spec
+    }
 }
 
 impl LogList {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: LogListSpec::new(), theme: theme.clone(), entries: Vec::new(), children: Vec::new(), on_filter_change: None, on_search: None }
+        Self {
+            spec: LogListSpec::new(),
+            theme: theme.clone(),
+            entries: Vec::new(),
+            children: Vec::new(),
+            on_filter_change: None,
+            on_search: None,
+        }
     }
     pub fn from_spec(spec: LogListSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), entries: Vec::new(), children: Vec::new(), on_filter_change: None, on_search: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            entries: Vec::new(),
+            children: Vec::new(),
+            on_filter_change: None,
+            on_search: None,
+        }
     }
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
-        self.children.push(child.into_any_element()); self
+        self.children.push(child.into_any_element());
+        self
     }
     pub fn with_entry(mut self, entry: LogEntry) -> Self {
-        self.entries.push(entry); self
+        self.entries.push(entry);
+        self
     }
     pub fn with_entries(mut self, entries: impl IntoIterator<Item = LogEntry>) -> Self {
-        self.entries.extend(entries); self
+        self.entries.extend(entries);
+        self
     }
-    pub fn on_filter_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
-        self.on_filter_change = Some(Box::new(handler)); self
+    pub fn on_filter_change(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_filter_change = Some(Box::new(handler));
+        self
     }
     pub fn on_search(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
-        self.on_search = Some(Box::new(handler)); self
+        self.on_search = Some(Box::new(handler));
+        self
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for LogList {
@@ -174,15 +208,11 @@ impl IntoElement for LogList {
         let gap_sm = resolve_px(theme, "space.inline.sm");
 
         // ── Toolbar ──────────────────────────────────────────────
-        let filter_icon = Icon::from_spec(
-            IconSpec::new("filter").with_size(IconSize::Sm),
-            theme,
-        ).with_color(text_secondary);
+        let filter_icon = Icon::from_spec(IconSpec::new("filter").with_size(IconSize::Sm), theme)
+            .with_color(text_secondary);
 
-        let search_icon = Icon::from_spec(
-            IconSpec::new("search").with_size(IconSize::Sm),
-            theme,
-        ).with_color(text_secondary);
+        let search_icon = Icon::from_spec(IconSpec::new("search").with_size(IconSize::Sm), theme)
+            .with_color(text_secondary);
 
         let mut toolbar = div()
             .flex()
@@ -194,7 +224,9 @@ impl IntoElement for LogList {
             .border_color(border_color);
 
         // Filter level button
-        let filter_label: SharedString = self.spec.filter_level
+        let filter_label: SharedString = self
+            .spec
+            .filter_level
             .clone()
             .unwrap_or_else(|| "All levels".into())
             .into();
@@ -324,7 +356,11 @@ impl IntoElement for LogList {
                     .text_color(text_secondary);
 
                 if let Some(ref name) = entry.actor_name {
-                    let color = if entry.actor_href.is_some() { accent } else { text_secondary };
+                    let color = if entry.actor_href.is_some() {
+                        accent
+                    } else {
+                        text_secondary
+                    };
                     row = row.child(
                         div()
                             .text_color(color)
@@ -349,12 +385,12 @@ impl IntoElement for LogList {
                 }
 
                 if let Some(ref label) = entry.resource_label {
-                    let color = if entry.resource_href.is_some() { accent } else { text_secondary };
-                    row = row.child(
-                        div()
-                            .text_color(color)
-                            .child(label.clone()),
-                    );
+                    let color = if entry.resource_href.is_some() {
+                        accent
+                    } else {
+                        text_secondary
+                    };
+                    row = row.child(div().text_color(color).child(label.clone()));
                 }
 
                 Some(row)
@@ -362,11 +398,7 @@ impl IntoElement for LogList {
                 None
             };
 
-            let mut entry_block = div()
-                .flex()
-                .flex_col()
-                .py(px(2.0))
-                .child(top_row);
+            let mut entry_block = div().flex().flex_col().py(px(2.0)).child(top_row);
             if let Some(audit) = audit_row {
                 entry_block = entry_block.child(audit);
             }
@@ -375,7 +407,9 @@ impl IntoElement for LogList {
         }
 
         // Append any extra children
-        for child in self.children { rows = rows.child(child); }
+        for child in self.children {
+            rows = rows.child(child);
+        }
 
         // ── Scroll-to-bottom hint ────────────────────────────────
         let mut container = div()
@@ -388,10 +422,9 @@ impl IntoElement for LogList {
             .child(rows);
 
         if self.spec.auto_scroll {
-            let arrow_icon = Icon::from_spec(
-                IconSpec::new("arrow-down").with_size(IconSize::Sm),
-                theme,
-            ).with_color(text_secondary);
+            let arrow_icon =
+                Icon::from_spec(IconSpec::new("arrow-down").with_size(IconSize::Sm), theme)
+                    .with_color(text_secondary);
 
             container = container.child(
                 div()

@@ -8,10 +8,16 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec};
+use poodle_specs::{
+    ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant,
+    TabsSpec,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem, control_space_x_rem};
+use crate::presentation::{
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Build the inner label composite for a tab: optional leading icon,
@@ -79,12 +85,20 @@ pub struct Tabs {
 
 impl std::ops::Deref for Tabs {
     type Target = TabsSpec;
-    fn deref(&self) -> &TabsSpec { &self.spec }
+    fn deref(&self) -> &TabsSpec {
+        &self.spec
+    }
 }
 
 impl Tabs {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TabsSpec::default(), theme: theme.clone(), id_prefix: String::new(), on_change: None, content: Vec::new() }
+        Self {
+            spec: TabsSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            on_change: None,
+            content: Vec::new(),
+        }
     }
 
     pub fn from_spec(spec: TabsSpec, theme: &GpuiThemeProvider) -> Self {
@@ -98,27 +112,53 @@ impl Tabs {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn tabs(mut self, v: Vec<TabDefinition>) -> Self { self.spec.tabs = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn variant(mut self, v: TabVariant) -> Self { self.spec.variant = v; self }
-    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
-    pub fn activation_mode(mut self, v: TabActivationMode) -> Self { self.spec.activation_mode = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn tabs(mut self, v: Vec<TabDefinition>) -> Self {
+        self.spec.tabs = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn variant(mut self, v: TabVariant) -> Self {
+        self.spec.variant = v;
+        self
+    }
+    pub fn orientation(mut self, v: Orientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn activation_mode(mut self, v: TabActivationMode) -> Self {
+        self.spec.activation_mode = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(std::rc::Rc::new(handler));
         self
     }
@@ -173,11 +213,15 @@ impl Tabs {
                 .focusable()
                 .px(inline_padding)
                 .py(control_y)
-                .text_size(label_size).font_weight(FontWeight::SEMIBOLD);
+                .text_size(label_size)
+                .font_weight(FontWeight::SEMIBOLD);
 
             if is_active {
                 // Svelte: pill-shaped highlight with accent 18% bg, text-primary color
-                let active_bg = Hsla { a: accent.a * 0.18, ..accent };
+                let active_bg = Hsla {
+                    a: accent.a * 0.18,
+                    ..accent
+                };
                 // Brand-raised treatment: gradient fill for active underline tab
                 if theme.brand_raised && !is_disabled {
                     tab = tab
@@ -198,16 +242,17 @@ impl Tabs {
                 tab = tab.text_color(text_secondary);
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            tab = tab.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_disabled {
                 tab = tab
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                tab = tab
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(hover_bg));
+                tab = tab.cursor_pointer().hover(move |s| s.bg(hover_bg));
 
                 if let Some(ref handler) = self.on_change {
                     let handler = handler.clone();
@@ -223,13 +268,18 @@ impl Tabs {
                     let nav_values = tab_values.clone();
                     let current_idx = idx;
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                            Some((current_idx + 1) % nav_values.len())
-                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
-                        } else {
-                            None
-                        };
+                        let next_idx =
+                            if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                                Some((current_idx + 1) % nav_values.len())
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                                Some(if current_idx == 0 {
+                                    nav_values.len() - 1
+                                } else {
+                                    current_idx - 1
+                                })
+                            } else {
+                                None
+                            };
                         if let Some(i) = next_idx {
                             handler(&nav_values[i], window, cx);
                         }
@@ -237,7 +287,11 @@ impl Tabs {
                 }
             }
 
-            let label_color = if is_active { text_primary } else { text_secondary };
+            let label_color = if is_active {
+                text_primary
+            } else {
+                text_secondary
+            };
             tab = tab.child(build_tab_label(tab_def, theme, label_color));
             tab_row = tab_row.child(tab);
         }
@@ -266,10 +320,7 @@ impl Tabs {
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        let mut tab_row = div()
-            .flex()
-            .items_end()
-            .gap(px(2.0)); // small gap between card tabs
+        let mut tab_row = div().flex().items_end().gap(px(2.0)); // small gap between card tabs
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
 
@@ -282,14 +333,21 @@ impl Tabs {
                 .id(tab_id)
                 .px(inline_padding)
                 .py(control_y)
-                .text_size(label_size).font_weight(FontWeight::SEMIBOLD)
+                .text_size(label_size)
+                .font_weight(FontWeight::SEMIBOLD)
                 .border_1()
                 .rounded(radius);
 
             // Svelte: default = surface 92% fill, border-subtle 68% border
             // Selected = accent 32% + border-subtle border, text-primary color
-            let card_default_bg = Hsla { a: surface_bg.a * 0.92, ..surface_bg };
-            let card_default_border = Hsla { a: border.a * 0.68, ..border };
+            let card_default_bg = Hsla {
+                a: surface_bg.a * 0.92,
+                ..surface_bg
+            };
+            let card_default_border = Hsla {
+                a: border.a * 0.68,
+                ..border
+            };
             let card_selected_border = {
                 use crate::theme_ext::color_mix;
                 color_mix(accent, border, 0.32)
@@ -300,7 +358,9 @@ impl Tabs {
                 if theme.brand_raised && !is_disabled {
                     tab = tab
                         .text_color(text_primary)
-                        .bg(crate::theme_ext::brand_raised_interactive_fill(card_default_bg))
+                        .bg(crate::theme_ext::brand_raised_interactive_fill(
+                            card_default_bg,
+                        ))
                         .border_color(card_selected_border);
                 } else {
                     tab = tab
@@ -315,16 +375,17 @@ impl Tabs {
                     .border_color(card_default_border);
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            tab = tab.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_disabled {
                 tab = tab
                     .opacity(disabled_opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else if !is_active {
-                tab = tab
-                    .cursor_pointer()
-                    .hover(move |s| s.bg(elevated));
+                tab = tab.cursor_pointer().hover(move |s| s.bg(elevated));
             }
 
             if !is_disabled {
@@ -342,13 +403,18 @@ impl Tabs {
                     let nav_values = tab_values.clone();
                     let current_idx = idx;
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                            Some((current_idx + 1) % nav_values.len())
-                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
-                        } else {
-                            None
-                        };
+                        let next_idx =
+                            if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                                Some((current_idx + 1) % nav_values.len())
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                                Some(if current_idx == 0 {
+                                    nav_values.len() - 1
+                                } else {
+                                    current_idx - 1
+                                })
+                            } else {
+                                None
+                            };
                         if let Some(i) = next_idx {
                             handler(&nav_values[i], window, cx);
                         }
@@ -356,7 +422,11 @@ impl Tabs {
                 }
             }
 
-            let label_color = if is_active { text_primary } else { text_secondary };
+            let label_color = if is_active {
+                text_primary
+            } else {
+                text_secondary
+            };
             // Closable tab: label + close button in a flex row
             if tab_def.is_closable {
                 let icon_muted = resolve_color(&self.theme, "color.icon.muted");
@@ -388,7 +458,9 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        let inline_padding = px(rem_to_px(control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size)));
+        let inline_padding = px(rem_to_px(
+            control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size),
+        ));
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -409,11 +481,8 @@ impl Tabs {
         let hover_bg = elevated.opacity(elevated.a * self.spec.block_hover_bg_opacity());
 
         // Selected item background: accent mixed into surface.
-        let selected_bg = crate::theme_ext::color_mix(
-            accent,
-            surface_bg,
-            self.spec.block_selected_accent_mix(),
-        );
+        let selected_bg =
+            crate::theme_ext::color_mix(accent, surface_bg, self.spec.block_selected_accent_mix());
         let selected_hover_bg = crate::theme_ext::color_mix(
             accent,
             surface_bg,
@@ -466,7 +535,10 @@ impl Tabs {
                 tab = tab.text_color(text_secondary);
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            tab = tab.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_disabled {
                 tab = tab
@@ -496,13 +568,18 @@ impl Tabs {
                     let nav_values = tab_values.clone();
                     let current_idx = idx;
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                            Some((current_idx + 1) % nav_values.len())
-                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
-                        } else {
-                            None
-                        };
+                        let next_idx =
+                            if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                                Some((current_idx + 1) % nav_values.len())
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                                Some(if current_idx == 0 {
+                                    nav_values.len() - 1
+                                } else {
+                                    current_idx - 1
+                                })
+                            } else {
+                                None
+                            };
                         if let Some(i) = next_idx {
                             handler(&nav_values[i], window, cx);
                         }
@@ -510,7 +587,11 @@ impl Tabs {
                 }
             }
 
-            let label_color = if is_active { text_primary } else { text_secondary };
+            let label_color = if is_active {
+                text_primary
+            } else {
+                text_secondary
+            };
             tab = tab.child(build_tab_label(tab_def, theme, label_color));
             tab_row = tab_row.child(tab);
         }
@@ -524,7 +605,9 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        let control_x = px(rem_to_px(control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size)));
+        let control_x = px(rem_to_px(
+            control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size),
+        ));
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -538,7 +621,8 @@ impl Tabs {
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
         // Container border: border-subtle with 68% opacity
-        let container_border = border_subtle.opacity(border_subtle.a * self.spec.pill_border_opacity());
+        let container_border =
+            border_subtle.opacity(border_subtle.a * self.spec.pill_border_opacity());
 
         // Svelte: padding 0.1875rem (3px), gap 0.125rem (2px), border 2px
         let mut tabs = div()
@@ -578,15 +662,16 @@ impl Tabs {
                         .bg(crate::theme_ext::brand_raised_interactive_fill(active_bg))
                         .text_color(text_primary);
                 } else {
-                    tab = tab
-                        .bg(active_bg)
-                        .text_color(text_primary);
+                    tab = tab.bg(active_bg).text_color(text_primary);
                 }
             } else {
                 tab = tab.text_color(text_secondary);
             }
 
-            tab = tab.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+            tab = tab.focus(move |s| {
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+            });
 
             if is_disabled {
                 tab = tab
@@ -609,13 +694,18 @@ impl Tabs {
                     let nav_values = tab_values.clone();
                     let current_idx = idx;
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let next_idx = if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                            Some((current_idx + 1) % nav_values.len())
-                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                            Some(if current_idx == 0 { nav_values.len() - 1 } else { current_idx - 1 })
-                        } else {
-                            None
-                        };
+                        let next_idx =
+                            if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                                Some((current_idx + 1) % nav_values.len())
+                            } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
+                                Some(if current_idx == 0 {
+                                    nav_values.len() - 1
+                                } else {
+                                    current_idx - 1
+                                })
+                            } else {
+                                None
+                            };
                         if let Some(i) = next_idx {
                             handler(&nav_values[i], window, cx);
                         }
@@ -623,7 +713,11 @@ impl Tabs {
                 }
             }
 
-            let label_color = if is_active { text_primary } else { text_secondary };
+            let label_color = if is_active {
+                text_primary
+            } else {
+                text_secondary
+            };
             tab = tab.child(build_tab_label(tab_def, theme, label_color));
             tabs = tabs.child(tab);
         }

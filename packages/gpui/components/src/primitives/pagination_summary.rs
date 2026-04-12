@@ -19,12 +19,24 @@ pub struct PaginationSummary {
 
 impl std::ops::Deref for PaginationSummary {
     type Target = PaginationSummarySpec;
-    fn deref(&self) -> &PaginationSummarySpec { &self.spec }
+    fn deref(&self) -> &PaginationSummarySpec {
+        &self.spec
+    }
 }
 
 impl PaginationSummary {
-    pub fn new(page: usize, page_size: usize, total_items: usize, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: PaginationSummarySpec::new(page, page_size, total_items), theme: theme.clone(), prev_slot: None, next_slot: None }
+    pub fn new(
+        page: usize,
+        page_size: usize,
+        total_items: usize,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
+        Self {
+            spec: PaginationSummarySpec::new(page, page_size, total_items),
+            theme: theme.clone(),
+            prev_slot: None,
+            next_slot: None,
+        }
     }
 
     pub fn from_spec(spec: PaginationSummarySpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,10 +49,18 @@ impl PaginationSummary {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn page(mut self, v: usize) -> Self { self.spec.page = v; self }
-    pub fn page_size(mut self, v: usize) -> Self { self.spec.page_size = v; self }
-    pub fn total_items(mut self, v: usize) -> Self { self.spec.total_items = v; self }
-
+    pub fn page(mut self, v: usize) -> Self {
+        self.spec.page = v;
+        self
+    }
+    pub fn page_size(mut self, v: usize) -> Self {
+        self.spec.page_size = v;
+        self
+    }
+    pub fn total_items(mut self, v: usize) -> Self {
+        self.spec.total_items = v;
+        self
+    }
 
     pub fn with_prev(mut self, prev: impl IntoElement) -> Self {
         self.prev_slot = Some(prev.into_any_element());
@@ -75,10 +95,7 @@ impl IntoElement for PaginationSummary {
             format!("Showing {}\u{2013}{} of {}", start, end, total)
         };
 
-        let mut container = div()
-            .flex()
-            .items_center()
-            .gap(gap);
+        let mut container = div().flex().items_center().gap(gap);
 
         // Prev button slot
         if let Some(prev) = self.prev_slot {

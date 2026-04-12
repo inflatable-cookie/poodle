@@ -7,8 +7,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 
-use crate::theme_ext::{resolve_color, resolve_radius};
 use crate::presentation::rem_to_px;
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 /// A real GPUI password requirements checklist backed by `PasswordRequirementsSpec`.
 pub struct PasswordRequirements {
@@ -18,7 +18,9 @@ pub struct PasswordRequirements {
 
 impl std::ops::Deref for PasswordRequirements {
     type Target = PasswordRequirementsSpec;
-    fn deref(&self) -> &PasswordRequirementsSpec { &self.spec }
+    fn deref(&self) -> &PasswordRequirementsSpec {
+        &self.spec
+    }
 }
 
 impl PasswordRequirements {
@@ -37,13 +39,34 @@ impl PasswordRequirements {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn password(mut self, v: impl Into<String>) -> Self { self.spec.password = v.into(); self }
-    pub fn requirements(mut self, v: PasswordRequirementsPolicy) -> Self { self.spec.requirements = Some(v); self }
-    pub fn loading(mut self, v: bool) -> Self { self.spec.is_loading = v; self }
-    pub fn error(mut self, v: impl Into<String>) -> Self { self.spec.error = Some(v.into()); self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn hint(mut self, v: impl Into<String>) -> Self { self.spec.hint = Some(v.into()); self }
-    pub fn loading_label(mut self, v: impl Into<String>) -> Self { self.spec.loading_label = v.into(); self }
+    pub fn password(mut self, v: impl Into<String>) -> Self {
+        self.spec.password = v.into();
+        self
+    }
+    pub fn requirements(mut self, v: PasswordRequirementsPolicy) -> Self {
+        self.spec.requirements = Some(v);
+        self
+    }
+    pub fn loading(mut self, v: bool) -> Self {
+        self.spec.is_loading = v;
+        self
+    }
+    pub fn error(mut self, v: impl Into<String>) -> Self {
+        self.spec.error = Some(v.into());
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn hint(mut self, v: impl Into<String>) -> Self {
+        self.spec.hint = Some(v.into());
+        self
+    }
+    pub fn loading_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.loading_label = v.into();
+        self
+    }
 }
 
 impl IntoElement for PasswordRequirements {
@@ -62,10 +85,10 @@ impl IntoElement for PasswordRequirements {
         let error_color = resolve_color(theme, spec.error_color_token());
         let radius = resolve_radius(theme, "radius.panel");
 
-        let body_font = px(rem_to_px(0.875));   // 14px — matches Svelte 0.875rem
-        let title_font = px(rem_to_px(0.875));   // same base
+        let body_font = px(rem_to_px(0.875)); // 14px — matches Svelte 0.875rem
+        let title_font = px(rem_to_px(0.875)); // same base
         let line_height = relative(1.5);
-        let padding = px(rem_to_px(1.0));         // 16px
+        let padding = px(rem_to_px(1.0)); // 16px
 
         // ── Outer container ───────────────────────────────────────
         let mut container = div()

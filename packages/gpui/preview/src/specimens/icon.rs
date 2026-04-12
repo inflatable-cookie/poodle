@@ -1,12 +1,12 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, EyebrowSpec};
-use poodle_gpui_components::{Icon, Eyebrow};
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, Icon};
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, IconSize, IconSpec};
 
 /// Bridge from the full ControlSize spectrum (Xs/Sm/Md/Lg/Xl) down to
 /// the narrower IconSize (Sm/Md/Lg). Xs collapses to Sm; Xl collapses
@@ -22,30 +22,95 @@ fn control_to_icon_size(size: ControlSize) -> IconSize {
 /// A curated set of icon names to display in the gallery.
 const SPECIMEN_ICONS: &[&str] = &[
     // Navigation
-    "arrow-left", "arrow-right", "arrow-up", "arrow-down",
-    "chevron-down", "chevron-left", "chevron-right", "chevron-up",
-    "menu", "x", "corner-up-left", "move",
+    "arrow-left",
+    "arrow-right",
+    "arrow-up",
+    "arrow-down",
+    "chevron-down",
+    "chevron-left",
+    "chevron-right",
+    "chevron-up",
+    "menu",
+    "x",
+    "corner-up-left",
+    "move",
     // Actions
-    "check", "copy", "download", "edit", "external-link",
-    "minus", "plus", "save", "trash-2", "upload",
-    "refresh-cw", "redo", "undo", "share",
+    "check",
+    "copy",
+    "download",
+    "edit",
+    "external-link",
+    "minus",
+    "plus",
+    "save",
+    "trash-2",
+    "upload",
+    "refresh-cw",
+    "redo",
+    "undo",
+    "share",
     // Status
-    "alert-circle", "alert-triangle", "check-circle", "info",
-    "loader", "ban", "shield", "shield-check",
+    "alert-circle",
+    "alert-triangle",
+    "check-circle",
+    "info",
+    "loader",
+    "ban",
+    "shield",
+    "shield-check",
     // Objects
-    "bell", "calendar", "clock", "eye", "eye-off",
-    "file", "file-text", "filter", "folder", "folder-open",
-    "globe", "hash", "image", "layers", "link",
-    "lock", "unlock", "mail", "map-pin", "message-circle",
-    "monitor", "paperclip", "search", "settings", "tag",
-    "terminal", "type", "user", "users", "zap",
+    "bell",
+    "calendar",
+    "clock",
+    "eye",
+    "eye-off",
+    "file",
+    "file-text",
+    "filter",
+    "folder",
+    "folder-open",
+    "globe",
+    "hash",
+    "image",
+    "layers",
+    "link",
+    "lock",
+    "unlock",
+    "mail",
+    "map-pin",
+    "message-circle",
+    "monitor",
+    "paperclip",
+    "search",
+    "settings",
+    "tag",
+    "terminal",
+    "type",
+    "user",
+    "users",
+    "zap",
     // Media
-    "play", "pause", "volume-2", "mic",
+    "play",
+    "pause",
+    "volume-2",
+    "mic",
     // More
-    "bookmark", "code", "database", "git-branch",
-    "heart", "home", "key", "layout-grid",
-    "list", "maximize", "minimize", "palette",
-    "pencil", "pie-chart", "bar-chart", "star",
+    "bookmark",
+    "code",
+    "database",
+    "git-branch",
+    "heart",
+    "home",
+    "key",
+    "layout-grid",
+    "list",
+    "maximize",
+    "minimize",
+    "palette",
+    "pencil",
+    "pie-chart",
+    "bar-chart",
+    "star",
 ];
 
 /// Icon names used in the sizes section.
@@ -54,30 +119,58 @@ const SIZE_ICONS: &[&str] = &["star", "heart", "settings", "search"];
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
-    let examples = div().flex().flex_col().gap(px(24.0))
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Direct import / tree-shakeable demo ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Direct import \u{2014} tree-shakeable"), theme))
-                .child(render_sizes_section(theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Direct import \u{2014} tree-shakeable"),
+                    theme,
+                ))
+                .child(render_sizes_section(theme)),
         )
         // --- Color Inheritance ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Color inheritance"), theme))
-                .child(render_color_inheritance_section(theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Color inheritance"),
+                    theme,
+                ))
+                .child(render_color_inheritance_section(theme)),
         )
         // --- Accessibility ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Accessibility"), theme))
-                .child(render_accessibility_section(theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Accessibility"),
+                    theme,
+                ))
+                .child(render_accessibility_section(theme)),
         )
         // --- All Icons ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(&format!("All icons ({})", SPECIMEN_ICONS.len())), theme))
-                .child(render_icon_gallery(theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content(&format!("All icons ({})", SPECIMEN_ICONS.len())),
+                    theme,
+                ))
+                .child(render_icon_gallery(theme)),
         )
         .into_any_element();
 
@@ -144,16 +237,22 @@ fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
     let mut container = div().flex().flex_col().gap(px(12.0));
 
     for &(size_label, size) in sizes {
-        let mut row = div().flex().gap(px(16.0)).items_center()
-            .child(
-                div().w(px(24.0)).text_xs().text_color(color_to_hsla(text_secondary))
-                    .child(size_label.to_string())
-            );
+        let mut row = div().flex().gap(px(16.0)).items_center().child(
+            div()
+                .w(px(24.0))
+                .text_xs()
+                .text_color(color_to_hsla(text_secondary))
+                .child(size_label.to_string()),
+        );
 
         for &icon_name in SIZE_ICONS {
             row = row.child(
-                div().text_color(color_to_hsla(text_primary))
-                    .child(Icon::from_spec(IconSpec::new(icon_name).with_size(size), theme))
+                div()
+                    .text_color(color_to_hsla(text_primary))
+                    .child(Icon::from_spec(
+                        IconSpec::new(icon_name).with_size(size),
+                        theme,
+                    )),
             );
         }
 
@@ -184,15 +283,25 @@ fn render_color_inheritance_section(theme: &GpuiThemeProvider) -> Div {
 
     for &(icon_name, label, color) in items {
         row = row.child(
-            div().flex().flex_col().items_center().gap(px(4.0))
+            div()
+                .flex()
+                .flex_col()
+                .items_center()
+                .gap(px(4.0))
                 .child(
-                    div().text_color(color_to_hsla(color))
-                        .child(Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Md), theme))
+                    div()
+                        .text_color(color_to_hsla(color))
+                        .child(Icon::from_spec(
+                            IconSpec::new(icon_name).with_size(IconSize::Md),
+                            theme,
+                        )),
                 )
                 .child(
-                    div().text_size(px(10.0)).text_color(color_to_hsla(text_secondary))
-                        .child(label.to_string())
-                )
+                    div()
+                        .text_size(px(10.0))
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(label.to_string()),
+                ),
         );
     }
 
@@ -203,36 +312,51 @@ fn render_accessibility_section(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_primary = theme.resolve_color("color.text.primary");
 
-    div().flex().flex_col().gap(px(8.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
         .child(
-            div().flex().items_center().gap(px(8.0))
+            div()
+                .flex()
+                .items_center()
+                .gap(px(8.0))
                 .child(
-                    div().text_color(color_to_hsla(text_primary))
+                    div()
+                        .text_color(color_to_hsla(text_primary))
                         .child(Icon::from_spec(
                             IconSpec::new("search")
                                 .with_size(IconSize::Md)
                                 .with_aria_label("Search"),
                             theme,
-                        ))
+                        )),
                 )
                 .child(
-                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child("With aria-label=\"Search\" \u{2014} announced by screen readers")
-                )
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("With aria-label=\"Search\" \u{2014} announced by screen readers"),
+                ),
         )
         .child(
-            div().flex().items_center().gap(px(8.0))
+            div()
+                .flex()
+                .items_center()
+                .gap(px(8.0))
                 .child(
-                    div().text_color(color_to_hsla(text_primary))
+                    div()
+                        .text_color(color_to_hsla(text_primary))
                         .child(Icon::from_spec(
                             IconSpec::new("chevron-right").with_size(IconSize::Md),
                             theme,
-                        ))
+                        )),
                 )
                 .child(
-                    div().text_xs().text_color(color_to_hsla(text_secondary))
-                        .child("Without aria-label \u{2014} hidden from assistive technology")
-                )
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("Without aria-label \u{2014} hidden from assistive technology"),
+                ),
         )
 }
 
@@ -240,10 +364,7 @@ fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    let mut gallery = div()
-        .flex()
-        .flex_wrap()
-        .gap(px(6.0));
+    let mut gallery = div().flex().flex_wrap().gap(px(6.0));
 
     for &name in SPECIMEN_ICONS {
         gallery = gallery.child(
@@ -255,18 +376,21 @@ fn render_icon_gallery(theme: &GpuiThemeProvider) -> Div {
                 .w(px(64.0))
                 .py(px(6.0))
                 .child(
-                    div().text_color(color_to_hsla(text_primary))
-                        .child(Icon::from_spec(IconSpec::new(name).with_size(IconSize::Md), theme))
+                    div()
+                        .text_color(color_to_hsla(text_primary))
+                        .child(Icon::from_spec(
+                            IconSpec::new(name).with_size(IconSize::Md),
+                            theme,
+                        )),
                 )
                 .child(
-                    div().text_color(color_to_hsla(text_secondary))
+                    div()
+                        .text_color(color_to_hsla(text_secondary))
                         .overflow_hidden()
                         .w_full()
                         .text_center()
-                        .child(
-                            div().text_size(px(9.0)).child(name.to_string())
-                        )
-                )
+                        .child(div().text_size(px(9.0)).child(name.to_string())),
+                ),
         );
     }
 

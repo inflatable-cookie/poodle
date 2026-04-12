@@ -16,12 +16,17 @@ pub struct TimeAgo {
 
 impl std::ops::Deref for TimeAgo {
     type Target = TimeAgoSpec;
-    fn deref(&self) -> &TimeAgoSpec { &self.spec }
+    fn deref(&self) -> &TimeAgoSpec {
+        &self.spec
+    }
 }
 
 impl TimeAgo {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TimeAgoSpec::new(), theme: theme.clone() }
+        Self {
+            spec: TimeAgoSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: TimeAgoSpec, theme: &GpuiThemeProvider) -> Self {
@@ -32,11 +37,22 @@ impl TimeAgo {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn timestamp(mut self, v: impl Into<String>) -> Self { self.spec.timestamp = v.into(); self }
-    pub fn live(mut self, v: bool) -> Self { self.spec.live = v; self }
-    pub fn short(mut self, v: bool) -> Self { self.spec.short = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn timestamp(mut self, v: impl Into<String>) -> Self {
+        self.spec.timestamp = v.into();
+        self
+    }
+    pub fn live(mut self, v: bool) -> Self {
+        self.spec.live = v;
+        self
+    }
+    pub fn short(mut self, v: bool) -> Self {
+        self.spec.short = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 }
 
 impl IntoElement for TimeAgo {
@@ -121,10 +137,7 @@ fn relative_time(timestamp: &str, short: bool) -> Option<String> {
     // Convert parsed date/time to approximate Unix epoch seconds.
     let ts_epoch = datetime_to_epoch(year, month, day, hour, minute, second);
 
-    let now_epoch = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .ok()?
-        .as_secs() as i64;
+    let now_epoch = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs() as i64;
 
     let diff = now_epoch - ts_epoch;
     let is_future = diff < 0;
@@ -142,7 +155,11 @@ fn format_duration(seconds: u64, short: bool, is_future: bool) -> String {
     const YEAR: u64 = 365 * DAY;
 
     if seconds < 5 {
-        return if short { "now".to_string() } else { "just now".to_string() };
+        return if short {
+            "now".to_string()
+        } else {
+            "just now".to_string()
+        };
     }
 
     let (value, unit_short, unit_long_singular, unit_long_plural) = if seconds < MINUTE {
@@ -172,7 +189,11 @@ fn format_duration(seconds: u64, short: bool, is_future: bool) -> String {
             format!("{}{} ago", value, unit_short)
         }
     } else {
-        let unit = if value == 1 { unit_long_singular } else { unit_long_plural };
+        let unit = if value == 1 {
+            unit_long_singular
+        } else {
+            unit_long_plural
+        };
         if is_future {
             format!("in {} {}", value, unit)
         } else {

@@ -19,12 +19,19 @@ pub struct DetailSection {
 
 impl std::ops::Deref for DetailSection {
     type Target = DetailSectionSpec;
-    fn deref(&self) -> &DetailSectionSpec { &self.spec }
+    fn deref(&self) -> &DetailSectionSpec {
+        &self.spec
+    }
 }
 
 impl DetailSection {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DetailSectionSpec::new(), theme: theme.clone(), actions_slot: None, body_slot: None }
+        Self {
+            spec: DetailSectionSpec::new(),
+            theme: theme.clone(),
+            actions_slot: None,
+            body_slot: None,
+        }
     }
 
     pub fn from_spec(spec: DetailSectionSpec, theme: &GpuiThemeProvider) -> Self {
@@ -37,11 +44,22 @@ impl DetailSection {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn separated(mut self, v: bool) -> Self { self.spec.is_separated = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn separated(mut self, v: bool) -> Self {
+        self.spec.is_separated = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 
     pub fn with_actions(mut self, actions: impl IntoElement) -> Self {
         self.actions_slot = Some(actions.into_any_element());
@@ -85,7 +103,8 @@ impl IntoElement for DetailSection {
         }
 
         // Header row: title block on left, actions on right
-        let has_header = spec.title.is_some() || spec.description.is_some() || self.actions_slot.is_some();
+        let has_header =
+            spec.title.is_some() || spec.description.is_some() || self.actions_slot.is_some();
         if has_header {
             let mut header = div()
                 .w_full()
@@ -120,9 +139,7 @@ impl IntoElement for DetailSection {
             header = header.child(title_block);
 
             if let Some(actions) = self.actions_slot {
-                header = header.child(
-                    div().flex().items_center().flex_shrink_0().child(actions),
-                );
+                header = header.child(div().flex().items_center().flex_shrink_0().child(actions));
             }
 
             section = section.child(header);
@@ -132,13 +149,10 @@ impl IntoElement for DetailSection {
         // When columns > 1, use flex-wrap layout for grid approximation
         if let Some(body) = self.body_slot {
             if self.spec.columns > 1 {
-                section = section.child(
-                    div().w_full().flex().flex_wrap().gap(body_gap).child(body),
-                );
+                section =
+                    section.child(div().w_full().flex().flex_wrap().gap(body_gap).child(body));
             } else {
-                section = section.child(
-                    div().w_full().flex().flex_col().gap(body_gap).child(body),
-                );
+                section = section.child(div().w_full().flex().flex_col().gap(body_gap).child(body));
             }
         }
 

@@ -1,9 +1,9 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{SurfaceSpec, SurfaceTone, SurfaceBorder, EyebrowSpec};
-use poodle_gpui_components::{Surface, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
-use crate::style_bridge::color_to_hsla;
+use poodle_gpui_components::{Eyebrow, Surface};
+use poodle_specs::{EyebrowSpec, SurfaceBorder, SurfaceSpec, SurfaceTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("color.text.primary");

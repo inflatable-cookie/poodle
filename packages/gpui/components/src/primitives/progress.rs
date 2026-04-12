@@ -19,12 +19,17 @@ pub struct Progress {
 
 impl std::ops::Deref for Progress {
     type Target = ProgressSpec;
-    fn deref(&self) -> &ProgressSpec { &self.spec }
+    fn deref(&self) -> &ProgressSpec {
+        &self.spec
+    }
 }
 
 impl Progress {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ProgressSpec::new(), theme: theme.clone() }
+        Self {
+            spec: ProgressSpec::new(),
+            theme: theme.clone(),
+        }
     }
 
     pub fn from_spec(spec: ProgressSpec, theme: &GpuiThemeProvider) -> Self {
@@ -35,14 +40,38 @@ impl Progress {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: f64) -> Self { self.spec.value = Some(v); self }
-    pub fn max(mut self, v: f64) -> Self { self.spec.max = v; self }
-    pub fn indeterminate(mut self, v: bool) -> Self { self.spec.is_indeterminate = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn value_text(mut self, v: impl Into<String>) -> Self { self.spec.value_text = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: f64) -> Self {
+        self.spec.value = Some(v);
+        self
+    }
+    pub fn max(mut self, v: f64) -> Self {
+        self.spec.max = v;
+        self
+    }
+    pub fn indeterminate(mut self, v: bool) -> Self {
+        self.spec.is_indeterminate = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn value_text(mut self, v: impl Into<String>) -> Self {
+        self.spec.value_text = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for Progress {

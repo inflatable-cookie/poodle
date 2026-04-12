@@ -8,7 +8,9 @@ use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, re
 
 fn parse_hex_to_hsla(hex: &str) -> Option<Hsla> {
     let hex = hex.trim_start_matches('#');
-    if hex.len() < 6 { return None; }
+    if hex.len() < 6 {
+        return None;
+    }
     let r = u8::from_str_radix(&hex[0..2], 16).ok()? as f32 / 255.0;
     let g = u8::from_str_radix(&hex[2..4], 16).ok()? as f32 / 255.0;
     let b = u8::from_str_radix(&hex[4..6], 16).ok()? as f32 / 255.0;
@@ -28,7 +30,9 @@ pub struct ListCard {
 
 impl std::ops::Deref for ListCard {
     type Target = ListCardSpec;
-    fn deref(&self) -> &ListCardSpec { &self.spec }
+    fn deref(&self) -> &ListCardSpec {
+        &self.spec
+    }
 }
 
 impl ListCard {
@@ -58,19 +62,39 @@ impl ListCard {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = v.into(); self }
-    pub fn subtitle(mut self, v: impl Into<String>) -> Self { self.spec.subtitle = Some(v.into()); self }
-    pub fn interactive(mut self, v: bool) -> Self { self.spec.is_interactive = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = v.into();
+        self
+    }
+    pub fn subtitle(mut self, v: impl Into<String>) -> Self {
+        self.spec.subtitle = Some(v.into());
+        self
+    }
+    pub fn interactive(mut self, v: bool) -> Self {
+        self.spec.is_interactive = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
     pub fn href(mut self, v: impl Into<String>) -> Self {
         self.spec.href = Some(v.into());
         self.spec.is_interactive = true;
         self
     }
-    pub fn selectable(mut self, v: bool) -> Self { self.spec.is_selectable = v; self }
-    pub fn selected(mut self, v: bool) -> Self { self.spec.is_selected = v; self }
-    pub fn reorder_handle(mut self, v: bool) -> Self { self.spec.show_reorder_handle = v; self }
-
+    pub fn selectable(mut self, v: bool) -> Self {
+        self.spec.is_selectable = v;
+        self
+    }
+    pub fn selected(mut self, v: bool) -> Self {
+        self.spec.is_selected = v;
+        self
+    }
+    pub fn reorder_handle(mut self, v: bool) -> Self {
+        self.spec.show_reorder_handle = v;
+        self
+    }
 
     pub fn with_leading(mut self, element: impl IntoElement) -> Self {
         self.leading = Some(element.into_any_element());
@@ -209,7 +233,9 @@ impl IntoElement for ListCard {
 
         // ── Sash badge ────────────────────────────────────────────
         let sash_el = spec.sash.as_ref().map(|sash_text| {
-            let sash_bg = spec.sash_color.as_ref()
+            let sash_bg = spec
+                .sash_color
+                .as_ref()
                 .and_then(|c| parse_hex_to_hsla(c))
                 .unwrap_or_else(|| resolve_color(theme, "color.status.success"));
 
@@ -238,7 +264,10 @@ impl IntoElement for ListCard {
         // When href present: rendered as anchor (link semantics)
         // Non-interactive: no role (generic container)
         let mut root = div()
-            .id(SharedString::from(format!("poodle-list-card-{}", spec.title)))
+            .id(SharedString::from(format!(
+                "poodle-list-card-{}",
+                spec.title
+            )))
             .w_full()
             .px(px(12.0))
             .py(px(10.0))
@@ -255,7 +284,11 @@ impl IntoElement for ListCard {
         if spec.is_selectable {
             let accent_base = resolve_color(theme, "color.accent.base");
             let surface = resolve_color(theme, "color.background.surface");
-            let box_bg = if spec.is_selected { accent_base } else { surface };
+            let box_bg = if spec.is_selected {
+                accent_base
+            } else {
+                surface
+            };
             let box_border = if spec.is_selected {
                 accent_base
             } else {
@@ -291,9 +324,7 @@ impl IntoElement for ListCard {
         if spec.show_reorder_handle {
             let handle_color = resolve_color(theme, "color.text.secondary");
             // Three stacked dots as a visual grab indicator.
-            let dot = |color: Hsla| {
-                div().w(px(3.0)).h(px(3.0)).rounded(px(1.5)).bg(color)
-            };
+            let dot = |color: Hsla| div().w(px(3.0)).h(px(3.0)).rounded(px(1.5)).bg(color);
             let col = move || {
                 div()
                     .flex()
@@ -320,7 +351,10 @@ impl IntoElement for ListCard {
             root = root.child(sash);
         }
 
-        root = root.focus(move |s| s.border_color(focus_ring_color).shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color)));
+        root = root.focus(move |s| {
+            s.border_color(focus_ring_color)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
+        });
 
         // ── Interactive hover state ─────────────────────────────────
         if is_interactive {

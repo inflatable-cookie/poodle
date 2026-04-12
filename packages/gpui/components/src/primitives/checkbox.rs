@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{CheckState, CheckboxSpec, ControlSize};
 
-use crate::presentation::{resolve_semantic_size, control_height_rem};
+use crate::presentation::{control_height_rem, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
@@ -17,30 +17,75 @@ pub struct Checkbox {
 
 impl std::ops::Deref for Checkbox {
     type Target = CheckboxSpec;
-    fn deref(&self) -> &CheckboxSpec { &self.spec }
+    fn deref(&self) -> &CheckboxSpec {
+        &self.spec
+    }
 }
 
 impl Checkbox {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CheckboxSpec::new(), theme: theme.clone(), id_suffix: None, on_change: None }
+        Self {
+            spec: CheckboxSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: CheckboxSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), id_suffix: None, on_change: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            id_suffix: None,
+            on_change: None,
+        }
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn checked(mut self, v: bool) -> Self { self.spec.checked = Some(v); self }
-    pub fn default_checked(mut self, v: bool) -> Self { self.spec.default_checked = v; self }
-    pub fn mixed(mut self, v: bool) -> Self { self.spec.is_mixed = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn read_only(mut self, v: bool) -> Self { self.spec.is_read_only = v; self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn checked(mut self, v: bool) -> Self {
+        self.spec.checked = Some(v);
+        self
+    }
+    pub fn default_checked(mut self, v: bool) -> Self {
+        self.spec.default_checked = v;
+        self
+    }
+    pub fn mixed(mut self, v: bool) -> Self {
+        self.spec.is_mixed = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn read_only(mut self, v: bool) -> Self {
+        self.spec.is_read_only = v;
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn description_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.description_id = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
@@ -48,10 +93,7 @@ impl Checkbox {
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -142,10 +184,7 @@ impl IntoElement for Checkbox {
                     _ => {}
                 }
             } else {
-                ind = ind
-                    .bg(surface_bg)
-                    .border_1()
-                    .border_color(border);
+                ind = ind.bg(surface_bg).border_1().border_color(border);
             }
 
             ind
@@ -159,22 +198,27 @@ impl IntoElement for Checkbox {
             .items_center()
             .gap(inline_gap)
             // Svelte: focus-visible outline with offset — approximate with border + shadow ring
-            .focus(move |s| s
-                .border_color(focus_ring_color)
-                .shadow(vec![gpui::BoxShadow {
-                    color: Hsla { a: focus_ring_color.a * 0.28, ..focus_ring_color },
-                    offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(2.0),
-                }])
-            );
+            .focus(move |s| {
+                s.border_color(focus_ring_color)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: Hsla {
+                            a: focus_ring_color.a * 0.28,
+                            ..focus_ring_color
+                        },
+                        offset: point(px(0.0), px(0.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(2.0),
+                    }])
+            });
 
         if is_interactive {
             row = row.cursor_pointer();
         }
 
         if spec.is_disabled {
-            row = row.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
+            row = row
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
         }
 
         row = row.child(indicator);

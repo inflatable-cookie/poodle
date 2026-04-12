@@ -1,17 +1,20 @@
-use gpui::*;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::EyebrowSpec;
-use poodle_specs::MarkdownEditorSpec;
-use poodle_gpui_components::{MarkdownEditor, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{Eyebrow, MarkdownEditor};
+use poodle_specs::EyebrowSpec;
+use poodle_specs::MarkdownEditorSpec;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    let md_mode = state.specimens.text.get("editor-md-mode")
+    let md_mode = state
+        .specimens
+        .text
+        .get("editor-md-mode")
         .cloned()
         .unwrap_or_else(|| "split".to_string());
     let md_value = state.specimens.text.get("editor-md-value")

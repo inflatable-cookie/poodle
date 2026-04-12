@@ -20,12 +20,19 @@ pub struct Slider {
 
 impl std::ops::Deref for Slider {
     type Target = SliderSpec;
-    fn deref(&self) -> &SliderSpec { &self.spec }
+    fn deref(&self) -> &SliderSpec {
+        &self.spec
+    }
 }
 
 impl Slider {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SliderSpec::default(), theme: theme.clone(), id: None, on_change: None }
+        Self {
+            spec: SliderSpec::default(),
+            theme: theme.clone(),
+            id: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: SliderSpec, theme: &GpuiThemeProvider) -> Self {
@@ -48,18 +55,50 @@ impl Slider {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: f64) -> Self { self.spec.value = v; self }
-    pub fn min(mut self, v: f64) -> Self { self.spec.min = v; self }
-    pub fn max(mut self, v: f64) -> Self { self.spec.max = v; self }
-    pub fn step(mut self, v: f64) -> Self { self.spec.step = v; self }
-    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn value_text(mut self, v: impl Into<String>) -> Self { self.spec.value_text = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn value(mut self, v: f64) -> Self {
+        self.spec.value = v;
+        self
+    }
+    pub fn min(mut self, v: f64) -> Self {
+        self.spec.min = v;
+        self
+    }
+    pub fn max(mut self, v: f64) -> Self {
+        self.spec.max = v;
+        self
+    }
+    pub fn step(mut self, v: f64) -> Self {
+        self.spec.step = v;
+        self
+    }
+    pub fn orientation(mut self, v: Orientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn value_text(mut self, v: impl Into<String>) -> Self {
+        self.spec.value_text = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for Slider {
@@ -128,14 +167,12 @@ impl IntoElement for Slider {
                     .border_1()
                     .border_color(border)
                     // Svelte: 0 0.125rem 0.5rem shadow
-                    .shadow(vec![
-                        gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.18),
-                            offset: point(px(0.0), px(2.0)),
-                            blur_radius: px(8.0),
-                            spread_radius: px(0.0),
-                        },
-                    ]),
+                    .shadow(vec![gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.18),
+                        offset: point(px(0.0), px(2.0)),
+                        blur_radius: px(8.0),
+                        spread_radius: px(0.0),
+                    }]),
             );
 
         // Value labels
@@ -151,10 +188,12 @@ impl IntoElement for Slider {
 
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
-        let slider_id: SharedString = self.id.unwrap_or_else(|| SharedString::from(format!(
-            "poodle-slider-{}",
-            SLIDER_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-        )));
+        let slider_id: SharedString = self.id.unwrap_or_else(|| {
+            SharedString::from(format!(
+                "poodle-slider-{}",
+                SLIDER_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+            ))
+        });
 
         let on_change = self.on_change;
         let min = spec.min;
@@ -169,31 +208,38 @@ impl IntoElement for Slider {
             .flex()
             .flex_col()
             .gap(stack_gap)
-            .cursor(if is_disabled { CursorStyle::OperationNotAllowed } else { CursorStyle::PointingHand })
+            .cursor(if is_disabled {
+                CursorStyle::OperationNotAllowed
+            } else {
+                CursorStyle::PointingHand
+            })
             .child(track)
             .child(labels);
 
-        wrapper = wrapper.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        wrapper = wrapper.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if is_disabled {
-            wrapper = wrapper
-                .opacity(disabled_opacity);
+            wrapper = wrapper.opacity(disabled_opacity);
         } else if let Some(on_change) = on_change {
             // Compute value from click position using Pixels arithmetic
-            let compute_value = move |pos_x: Pixels, origin_x: Pixels, width: Pixels| -> Option<f64> {
-                let local = pos_x - origin_x;
-                // Use px division: local / width gives a ratio
-                // Pixels supports Div<Pixels> -> f32 via: local / width
-                let ratio_f32 = local / width;
-                let ratio = (ratio_f32 as f64).clamp(0.0, 1.0);
-                let raw = min + ratio * (max - min);
-                let stepped = if step > 0.0 {
-                    (raw / step).round() * step
-                } else {
-                    raw
+            let compute_value =
+                move |pos_x: Pixels, origin_x: Pixels, width: Pixels| -> Option<f64> {
+                    let local = pos_x - origin_x;
+                    // Use px division: local / width gives a ratio
+                    // Pixels supports Div<Pixels> -> f32 via: local / width
+                    let ratio_f32 = local / width;
+                    let ratio = (ratio_f32 as f64).clamp(0.0, 1.0);
+                    let raw = min + ratio * (max - min);
+                    let stepped = if step > 0.0 {
+                        (raw / step).round() * step
+                    } else {
+                        raw
+                    };
+                    Some(stepped.clamp(min, max))
                 };
-                Some(stepped.clamp(min, max))
-            };
 
             let on_change = std::rc::Rc::new(on_change);
             let on_change_drag = on_change.clone();
@@ -202,14 +248,18 @@ impl IntoElement for Slider {
             wrapper = wrapper
                 .on_mouse_down(MouseButton::Left, move |event, window, cx| {
                     let bounds = window.bounds();
-                    if let Some(val) = compute_value(event.position.x, bounds.origin.x, bounds.size.width) {
+                    if let Some(val) =
+                        compute_value(event.position.x, bounds.origin.x, bounds.size.width)
+                    {
                         on_change(&val, window, cx);
                     }
                 })
                 .on_mouse_move(move |event, window, cx| {
                     if event.pressed_button == Some(MouseButton::Left) {
                         let bounds = window.bounds();
-                        if let Some(val) = compute_drag(event.position.x, bounds.origin.x, bounds.size.width) {
+                        if let Some(val) =
+                            compute_drag(event.position.x, bounds.origin.x, bounds.size.width)
+                        {
                             on_change_drag(&val, window, cx);
                         }
                     }

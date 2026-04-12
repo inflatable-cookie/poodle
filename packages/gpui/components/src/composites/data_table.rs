@@ -4,12 +4,16 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec,
-    TableSortDirection,
+    ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, StatusTone,
 };
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, StatusTone};
+use poodle_specs::{
+    DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
+};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
 use crate::primitives::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -35,11 +39,17 @@ pub struct DataTable {
 
 impl std::ops::Deref for DataTable {
     type Target = DataTableSpec;
-    fn deref(&self) -> &DataTableSpec { &self.spec }
+    fn deref(&self) -> &DataTableSpec {
+        &self.spec
+    }
 }
 
 impl DataTable {
-    pub fn new(columns: Vec<TableColumnSpec>, rows: Vec<TableRowSpec>, theme: &GpuiThemeProvider) -> Self {
+    pub fn new(
+        columns: Vec<TableColumnSpec>,
+        rows: Vec<TableRowSpec>,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
         Self {
             spec: DataTableSpec::new(columns, rows),
             theme: theme.clone(),
@@ -66,32 +76,61 @@ impl DataTable {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn columns(mut self, v: Vec<TableColumnSpec>) -> Self { self.spec.columns = v; self }
-    pub fn rows(mut self, v: Vec<TableRowSpec>) -> Self { self.spec.rows = v; self }
-    pub fn selected_row_ids(mut self, v: Vec<String>) -> Self { self.spec.selected_row_ids = v; self }
-    pub fn sort_column_id(mut self, v: impl Into<String>) -> Self { self.spec.sort_column_id = Some(v.into()); self }
-    pub fn sort_direction(mut self, v: TableSortDirection) -> Self { self.spec.sort_direction = v; self }
-    pub fn row_action_label(mut self, v: impl Into<String>) -> Self { self.spec.row_action_label = v.into(); self }
-    pub fn show_row_actions(mut self, v: bool) -> Self { self.spec.show_row_actions = v; self }
-    pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = Some(v.into()); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = v.into(); self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn columns(mut self, v: Vec<TableColumnSpec>) -> Self {
+        self.spec.columns = v;
+        self
+    }
+    pub fn rows(mut self, v: Vec<TableRowSpec>) -> Self {
+        self.spec.rows = v;
+        self
+    }
+    pub fn selected_row_ids(mut self, v: Vec<String>) -> Self {
+        self.spec.selected_row_ids = v;
+        self
+    }
+    pub fn sort_column_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.sort_column_id = Some(v.into());
+        self
+    }
+    pub fn sort_direction(mut self, v: TableSortDirection) -> Self {
+        self.spec.sort_direction = v;
+        self
+    }
+    pub fn row_action_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.row_action_label = v.into();
+        self
+    }
+    pub fn show_row_actions(mut self, v: bool) -> Self {
+        self.spec.show_row_actions = v;
+        self
+    }
+    pub fn empty_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.empty_message = Some(v.into());
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = v.into();
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-
-    pub fn on_row_click(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_row_click(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_row_click = Some(Box::new(handler));
         self
     }
 
-    pub fn on_sort(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_sort(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_sort = Some(Box::new(handler));
         self
     }
@@ -129,16 +168,46 @@ impl DataTable {
     }
 
     // ── Forwarded spec builders for the new fields ─────────────
-    pub fn selectable(mut self, v: bool) -> Self { self.spec.selectable = v; self }
-    pub fn hidden_column_ids(mut self, v: Vec<String>) -> Self { self.spec.hidden_column_ids = v; self }
-    pub fn show_column_visibility(mut self, v: bool) -> Self { self.spec.show_column_visibility = v; self }
-    pub fn show_export(mut self, v: bool) -> Self { self.spec.show_export = v; self }
-    pub fn filters(mut self, v: Vec<TableFilter>) -> Self { self.spec.filters = v; self }
-    pub fn pagination(mut self, v: TablePagination) -> Self { self.spec.pagination = Some(v); self }
-    pub fn expanded_row_ids(mut self, v: Vec<String>) -> Self { self.spec.expanded_row_ids = v; self }
-    pub fn compact(mut self, v: bool) -> Self { self.spec.compact = v; self }
-    pub fn striped(mut self, v: bool) -> Self { self.spec.striped = v; self }
-    pub fn sticky_header(mut self, v: bool) -> Self { self.spec.sticky_header = v; self }
+    pub fn selectable(mut self, v: bool) -> Self {
+        self.spec.selectable = v;
+        self
+    }
+    pub fn hidden_column_ids(mut self, v: Vec<String>) -> Self {
+        self.spec.hidden_column_ids = v;
+        self
+    }
+    pub fn show_column_visibility(mut self, v: bool) -> Self {
+        self.spec.show_column_visibility = v;
+        self
+    }
+    pub fn show_export(mut self, v: bool) -> Self {
+        self.spec.show_export = v;
+        self
+    }
+    pub fn filters(mut self, v: Vec<TableFilter>) -> Self {
+        self.spec.filters = v;
+        self
+    }
+    pub fn pagination(mut self, v: TablePagination) -> Self {
+        self.spec.pagination = Some(v);
+        self
+    }
+    pub fn expanded_row_ids(mut self, v: Vec<String>) -> Self {
+        self.spec.expanded_row_ids = v;
+        self
+    }
+    pub fn compact(mut self, v: bool) -> Self {
+        self.spec.compact = v;
+        self
+    }
+    pub fn striped(mut self, v: bool) -> Self {
+        self.spec.striped = v;
+        self
+    }
+    pub fn sticky_header(mut self, v: bool) -> Self {
+        self.spec.sticky_header = v;
+        self
+    }
 }
 
 impl IntoElement for DataTable {
@@ -205,9 +274,13 @@ impl IntoElement for DataTable {
                 toolbar_row = toolbar_row.child(
                     div()
                         .id("dt-toolbar-columns")
-                        .flex().items_center().gap(gap_sm)
-                        .px(gap_md).py(gap_sm)
-                        .border_1().border_color(border_color)
+                        .flex()
+                        .items_center()
+                        .gap(gap_sm)
+                        .px(gap_md)
+                        .py(gap_sm)
+                        .border_1()
+                        .border_color(border_color)
                         .rounded(radius_control)
                         .cursor_pointer()
                         .text_size(label_size)
@@ -216,7 +289,8 @@ impl IntoElement for DataTable {
                             Icon::from_spec(
                                 IconSpec::new("columns").with_size(IconSize::Sm),
                                 theme,
-                            ).with_color(text_secondary),
+                            )
+                            .with_color(text_secondary),
                         )
                         .child("Columns"),
                 );
@@ -226,9 +300,13 @@ impl IntoElement for DataTable {
                 toolbar_row = toolbar_row.child(
                     div()
                         .id("dt-toolbar-export")
-                        .flex().items_center().gap(gap_sm)
-                        .px(gap_md).py(gap_sm)
-                        .border_1().border_color(border_color)
+                        .flex()
+                        .items_center()
+                        .gap(gap_sm)
+                        .px(gap_md)
+                        .py(gap_sm)
+                        .border_1()
+                        .border_color(border_color)
                         .rounded(radius_control)
                         .cursor_pointer()
                         .text_size(label_size)
@@ -237,7 +315,8 @@ impl IntoElement for DataTable {
                             Icon::from_spec(
                                 IconSpec::new("download").with_size(IconSize::Sm),
                                 theme,
-                            ).with_color(text_secondary),
+                            )
+                            .with_color(text_secondary),
                         )
                         .child("Export"),
                 );
@@ -253,8 +332,11 @@ impl IntoElement for DataTable {
                 let chip_bg = accent.opacity(accent.a * 0.12);
                 filter_row = filter_row.child(
                     div()
-                        .flex().items_center().gap(gap_sm)
-                        .px(gap_sm).py(px(3.0))
+                        .flex()
+                        .items_center()
+                        .gap(gap_sm)
+                        .px(gap_sm)
+                        .py(px(3.0))
                         .rounded(radius_pill)
                         .bg(chip_bg)
                         .text_size(label_size)
@@ -298,7 +380,9 @@ impl IntoElement for DataTable {
             let mut check_cell = div()
                 .id(check_id)
                 .w(px(40.0))
-                .flex().items_center().justify_center()
+                .flex()
+                .items_center()
+                .justify_center()
                 .py(cell_py)
                 .cursor_pointer();
 
@@ -315,14 +399,17 @@ impl IntoElement for DataTable {
                 accent
             };
             let mut check_box = div()
-                .w(icon_sm).h(icon_sm)
+                .w(icon_sm)
+                .h(icon_sm)
                 .rounded(radius_control)
                 .border_1()
                 .border_color(box_border)
                 .bg(box_bg);
             if check_state == poodle_specs::CheckState::Mixed {
                 check_box = check_box
-                    .flex().items_center().justify_center()
+                    .flex()
+                    .items_center()
+                    .justify_center()
                     .child(div().w(px(8.0)).h(px(2.0)).bg(gpui::white()));
             }
             check_cell = check_cell.child(check_box);
@@ -372,13 +459,16 @@ impl IntoElement for DataTable {
                     poodle_specs::TableSortDirection::Desc => "arrow-down",
                 };
                 header_cell = header_cell
-                    .flex().items_center().gap(gap_sm)
+                    .flex()
+                    .items_center()
+                    .gap(gap_sm)
                     .child(label)
                     .child(
                         Icon::from_spec(
                             IconSpec::new(sort_icon_name).with_size(IconSize::Sm),
                             theme,
-                        ).with_color(text_secondary),
+                        )
+                        .with_color(text_secondary),
                     );
             } else {
                 header_cell = header_cell.child(label);
@@ -420,10 +510,7 @@ impl IntoElement for DataTable {
 
         // Data rows or empty message
         if spec.rows.is_empty() {
-            let empty_msg = spec
-                .empty_message
-                .as_deref()
-                .unwrap_or("No data available");
+            let empty_msg = spec.empty_message.as_deref().unwrap_or("No data available");
             table = table.child(
                 div()
                     .w_full()
@@ -438,10 +525,7 @@ impl IntoElement for DataTable {
             let striped_bg = color_mix(elevated_bg, surface_bg, 0.40);
 
             for (row_index, row) in spec.rows.iter().enumerate() {
-                let is_selected = spec
-                    .selected_row_ids
-                    .iter()
-                    .any(|sid| sid == &row.id);
+                let is_selected = spec.selected_row_ids.iter().any(|sid| sid == &row.id);
                 let is_expanded = spec.is_row_expanded(&row.id);
                 let is_striped = spec.striped && row_index % 2 == 1;
 
@@ -484,12 +568,15 @@ impl IntoElement for DataTable {
                     let mut check_cell = div()
                         .id(check_id)
                         .w(px(40.0))
-                        .flex().items_center().justify_center()
+                        .flex()
+                        .items_center()
+                        .justify_center()
                         .py(cell_py)
                         .cursor_pointer()
                         .child(
                             div()
-                                .w(icon_sm).h(icon_sm)
+                                .w(icon_sm)
+                                .h(icon_sm)
                                 .rounded(radius_control)
                                 .border_1()
                                 .border_color(box_border)
@@ -511,27 +598,35 @@ impl IntoElement for DataTable {
                 // Expand chevron
                 if has_expandable {
                     let expand_id = SharedString::from(format!("dt-row-expand-{}", row.id));
-                    let chevron_name = if is_expanded { "chevron-down" } else { "chevron-right" };
+                    let chevron_name = if is_expanded {
+                        "chevron-down"
+                    } else {
+                        "chevron-right"
+                    };
                     let mut expand_cell = div()
                         .id(expand_id)
                         .w(px(32.0))
-                        .flex().items_center().justify_center()
+                        .flex()
+                        .items_center()
+                        .justify_center()
                         .py(cell_py)
                         .child(
                             Icon::from_spec(
                                 IconSpec::new(chevron_name).with_size(IconSize::Sm),
                                 theme,
-                            ).with_color(text_secondary),
+                            )
+                            .with_color(text_secondary),
                         );
 
                     if let Some(ref handler) = on_row_expand {
                         let handler = handler.clone();
                         let row_id = row.id.clone();
-                        expand_cell = expand_cell
-                            .cursor_pointer()
-                            .on_click(move |_event, window, cx| {
-                                handler(&row_id, window, cx);
-                            });
+                        expand_cell =
+                            expand_cell
+                                .cursor_pointer()
+                                .on_click(move |_event, window, cx| {
+                                    handler(&row_id, window, cx);
+                                });
                     }
 
                     data_row = data_row.child(expand_cell);
@@ -607,10 +702,9 @@ impl IntoElement for DataTable {
                     if let Some(ref handler) = on_row_click {
                         let handler = handler.clone();
                         let row_id = row.id.clone();
-                        action_btn = action_btn
-                            .on_click(move |_event, window, cx| {
-                                handler(&row_id, window, cx);
-                            });
+                        action_btn = action_btn.on_click(move |_event, window, cx| {
+                            handler(&row_id, window, cx);
+                        });
                     }
                     data_row = data_row.child(action_btn);
                 }
@@ -697,7 +791,10 @@ fn render_pager(
     let prev_enabled = current_page > 1;
     let next_enabled = current_page < total_pages;
 
-    let page_button = |id: &str, label: &'static str, enabled: bool, new_page: u32,
+    let page_button = |id: &str,
+                       label: &'static str,
+                       enabled: bool,
+                       new_page: u32,
                        handler: Option<std::rc::Rc<dyn Fn(u32, &mut Window, &mut App)>>|
      -> AnyElement {
         let mut btn = div()

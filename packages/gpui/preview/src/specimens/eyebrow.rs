@@ -1,9 +1,9 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::EyebrowSpec;
 use poodle_gpui_components::Eyebrow;
-use crate::style_bridge::color_to_hsla;
+use poodle_specs::EyebrowSpec;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");

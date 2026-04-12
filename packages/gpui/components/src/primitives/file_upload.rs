@@ -6,10 +6,14 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, FileUploadSpec, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, FileUploadSpec, IconSize, IconSpec, SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem};
+use crate::presentation::{
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI file upload drop zone component backed by `FileUploadSpec`.
@@ -21,12 +25,18 @@ pub struct FileUpload {
 
 impl std::ops::Deref for FileUpload {
     type Target = FileUploadSpec;
-    fn deref(&self) -> &FileUploadSpec { &self.spec }
+    fn deref(&self) -> &FileUploadSpec {
+        &self.spec
+    }
 }
 
 impl FileUpload {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: FileUploadSpec::new(), theme: theme.clone(), id_suffix: None }
+        Self {
+            spec: FileUploadSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+        }
     }
 
     pub fn from_spec(spec: FileUploadSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,18 +48,51 @@ impl FileUpload {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn accept(mut self, v: impl Into<String>) -> Self { self.spec.accept = Some(v.into()); self }
-    pub fn max_size(mut self, v: u64) -> Self { self.spec.max_size = Some(v); self }
-    pub fn max_files(mut self, v: u32) -> Self { self.spec.max_files = Some(v); self }
-    pub fn multiple(mut self, v: bool) -> Self { self.spec.is_multiple = v; self }
-    pub fn compress(mut self, v: bool) -> Self { self.spec.compress = v; self }
-    pub fn validation_error(mut self, v: impl Into<String>) -> Self { self.spec.validation_error = Some(v.into()); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn dragging(mut self, v: bool) -> Self { self.spec.is_dragging = v; self }
+    pub fn accept(mut self, v: impl Into<String>) -> Self {
+        self.spec.accept = Some(v.into());
+        self
+    }
+    pub fn max_size(mut self, v: u64) -> Self {
+        self.spec.max_size = Some(v);
+        self
+    }
+    pub fn max_files(mut self, v: u32) -> Self {
+        self.spec.max_files = Some(v);
+        self
+    }
+    pub fn multiple(mut self, v: bool) -> Self {
+        self.spec.is_multiple = v;
+        self
+    }
+    pub fn compress(mut self, v: bool) -> Self {
+        self.spec.compress = v;
+        self
+    }
+    pub fn validation_error(mut self, v: impl Into<String>) -> Self {
+        self.spec.validation_error = Some(v.into());
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn dragging(mut self, v: bool) -> Self {
+        self.spec.is_dragging = v;
+        self
+    }
 
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -118,23 +161,18 @@ impl IntoElement for FileUpload {
             .text_color(text_secondary);
 
         if let Some(ref accept) = spec.accept {
-            helper_block = helper_block.child(
-                div().child(format!("Accepted: {}", accept)),
-            );
+            helper_block = helper_block.child(div().child(format!("Accepted: {}", accept)));
         }
 
         if let Some(max_files) = spec.max_files {
             if spec.is_multiple {
-                helper_block = helper_block.child(
-                    div().child(format!("Up to {max_files} files")),
-                );
+                helper_block = helper_block.child(div().child(format!("Up to {max_files} files")));
             }
         }
 
         if spec.compress {
-            helper_block = helper_block.child(
-                div().child("Images will be compressed before upload"),
-            );
+            helper_block =
+                helper_block.child(div().child("Images will be compressed before upload"));
         }
 
         // Contract: dropzone fill when dragging uses accent at 8% opacity
@@ -145,11 +183,8 @@ impl IntoElement for FileUpload {
         };
 
         // Contract: upload icon — Md size for dropzone prominence
-        let upload_icon = Icon::from_spec(
-            IconSpec::new("upload").with_size(IconSize::Md),
-            theme,
-        )
-        .with_color(text_secondary);
+        let upload_icon = Icon::from_spec(IconSpec::new("upload").with_size(IconSize::Md), theme)
+            .with_color(text_secondary);
 
         // Contract: min-height 8rem, dashed border (solid here — GPUI has no dashed)
         let mut zone = div()

@@ -8,7 +8,9 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlSize, IconSize, IconSpec, NumberInputSpec, ValidationState};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI numeric input component with +/- stepper buttons backed by `NumberInputSpec`.
@@ -23,12 +25,21 @@ pub struct NumberInput {
 
 impl std::ops::Deref for NumberInput {
     type Target = NumberInputSpec;
-    fn deref(&self) -> &NumberInputSpec { &self.spec }
+    fn deref(&self) -> &NumberInputSpec {
+        &self.spec
+    }
 }
 
 impl NumberInput {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: NumberInputSpec::default(), theme: theme.clone(), id_suffix: None, on_increment: None, on_decrement: None, on_change: None }
+        Self {
+            spec: NumberInputSpec::default(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_increment: None,
+            on_decrement: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: NumberInputSpec, theme: &GpuiThemeProvider) -> Self {
@@ -43,16 +54,46 @@ impl NumberInput {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: f64) -> Self { self.spec.value = v; self }
-    pub fn min(mut self, v: f64) -> Self { self.spec.min = v; self }
-    pub fn max(mut self, v: f64) -> Self { self.spec.max = v; self }
-    pub fn step(mut self, v: f64) -> Self { self.spec.step = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: f64) -> Self {
+        self.spec.value = v;
+        self
+    }
+    pub fn min(mut self, v: f64) -> Self {
+        self.spec.min = v;
+        self
+    }
+    pub fn max(mut self, v: f64) -> Self {
+        self.spec.max = v;
+        self
+    }
+    pub fn step(mut self, v: f64) -> Self {
+        self.spec.step = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn validation_state(mut self, v: ValidationState) -> Self {
+        self.spec.validation_state = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -76,10 +117,7 @@ impl NumberInput {
     }
 
     /// Called when the value changes (from stepper or direct editing).
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&f64, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&f64, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -97,7 +135,8 @@ impl IntoElement for NumberInput {
 
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let base_padding_x = resolve_px(theme, spec.horizontal_padding_token());
-        let control_padding_x = base_padding_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        let control_padding_x =
+            base_padding_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let control_radius = resolve_radius(theme, spec.radius_token());
         let body_size_f = rem_to_px(size_font_rem(effective_size));
         let body_size = px(body_size_f);
@@ -149,11 +188,8 @@ impl IntoElement for NumberInput {
             .cursor_pointer()
             .hover(move |s| s.bg(elevated))
             .child(
-                Icon::from_spec(
-                    IconSpec::new("chevron-up").with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(text_primary),
+                Icon::from_spec(IconSpec::new("chevron-up").with_size(IconSize::Sm), theme)
+                    .with_color(text_primary),
             );
 
         if !spec.is_disabled {
@@ -178,11 +214,8 @@ impl IntoElement for NumberInput {
             .cursor_pointer()
             .hover(move |s| s.bg(elevated))
             .child(
-                Icon::from_spec(
-                    IconSpec::new("chevron-down").with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(text_primary),
+                Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
+                    .with_color(text_primary),
             );
 
         if !spec.is_disabled {
@@ -208,9 +241,8 @@ impl IntoElement for NumberInput {
         // When the value is empty and a placeholder is set, the
         // placeholder is rendered in place of the value in
         // text-secondary to match Svelte's ::placeholder behaviour.
-        let show_placeholder = display_value == "0"
-            && spec.placeholder.is_some()
-            && spec.value == 0.0;
+        let show_placeholder =
+            display_value == "0" && spec.placeholder.is_some() && spec.value == 0.0;
         let rendered_text_color = if show_placeholder {
             text_secondary
         } else {
@@ -232,11 +264,7 @@ impl IntoElement for NumberInput {
             .line_height(body_line_height);
 
         if let Some(ref prefix) = spec.prefix {
-            value_row = value_row.child(
-                div()
-                    .text_color(text_secondary)
-                    .child(prefix.clone()),
-            );
+            value_row = value_row.child(div().text_color(text_secondary).child(prefix.clone()));
         }
 
         value_row = value_row.child(
@@ -247,11 +275,7 @@ impl IntoElement for NumberInput {
         );
 
         if let Some(ref suffix) = spec.suffix {
-            value_row = value_row.child(
-                div()
-                    .text_color(text_secondary)
-                    .child(suffix.clone()),
-            );
+            value_row = value_row.child(div().text_color(text_secondary).child(suffix.clone()));
         }
 
         let value_display = value_row;
@@ -278,15 +302,17 @@ impl IntoElement for NumberInput {
             .items_center()
             .overflow_hidden()
             // Svelte: focus-within = border + shadow ring
-            .focus(move |s| s
-                .border_color(focus_ring)
-                .shadow(vec![gpui::BoxShadow {
-                    color: Hsla { a: focus_ring.a * 0.28, ..focus_ring },
+            .focus(move |s| {
+                s.border_color(focus_ring).shadow(vec![gpui::BoxShadow {
+                    color: Hsla {
+                        a: focus_ring.a * 0.28,
+                        ..focus_ring
+                    },
                     offset: point(px(0.0), px(0.0)),
                     blur_radius: px(0.0),
                     spread_radius: px(2.0),
                 }])
-            )
+            })
             .child(value_display)
             .child(steppers);
 

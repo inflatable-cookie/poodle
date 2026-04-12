@@ -6,10 +6,14 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, CodeInputSpec, ValidationState};
+use poodle_specs::{
+    CodeInputSpec, ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState,
+};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, focus_ring_shadow};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::theme_ext::{
+    focus_ring_shadow, resolve_color, resolve_opacity, resolve_px, resolve_radius,
+};
 
 /// A real GPUI code input component backed by `CodeInputSpec`.
 pub struct CodeInput {
@@ -24,7 +28,9 @@ pub struct CodeInput {
 
 impl std::ops::Deref for CodeInput {
     type Target = CodeInputSpec;
-    fn deref(&self) -> &CodeInputSpec { &self.spec }
+    fn deref(&self) -> &CodeInputSpec {
+        &self.spec
+    }
 }
 
 impl CodeInput {
@@ -51,20 +57,62 @@ impl CodeInput {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn length(mut self, v: usize) -> Self { self.spec.length = v; self }
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = v.into(); self }
-    pub fn name(mut self, v: impl Into<String>) -> Self { self.spec.name = v.into(); self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
-    pub fn hint(mut self, v: impl Into<String>) -> Self { self.spec.hint = Some(v.into()); self }
-    pub fn error(mut self, v: impl Into<String>) -> Self { self.spec.error = Some(v.into()); self }
-    pub fn mask(mut self, v: bool) -> Self { self.spec.mask = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn length(mut self, v: usize) -> Self {
+        self.spec.length = v;
+        self
+    }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = v.into();
+        self
+    }
+    pub fn name(mut self, v: impl Into<String>) -> Self {
+        self.spec.name = v.into();
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = v.into();
+        self
+    }
+    pub fn hint(mut self, v: impl Into<String>) -> Self {
+        self.spec.hint = Some(v.into());
+        self
+    }
+    pub fn error(mut self, v: impl Into<String>) -> Self {
+        self.spec.error = Some(v.into());
+        self
+    }
+    pub fn mask(mut self, v: bool) -> Self {
+        self.spec.mask = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn validation_state(mut self, v: ValidationState) -> Self {
+        self.spec.validation_state = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
@@ -112,15 +160,15 @@ impl IntoElement for CodeInput {
 
         // ── Gap between slots (density-aware) ─────────────────────
         let slot_gap = match spec.density {
-            ControlDensity::Compact => px(4.0),       // 0.25rem
-            ControlDensity::Default => px(6.0),       // ~space-inline-sm
-            ControlDensity::Comfortable => px(10.0),  // space-inline-md
+            ControlDensity::Compact => px(4.0),      // 0.25rem
+            ControlDensity::Default => px(6.0),      // ~space-inline-sm
+            ControlDensity::Comfortable => px(10.0), // space-inline-md
         };
 
         // ── Split gap: extra margin after middle digit for 6-digit codes ─
         let split_extra_margin = match spec.density {
             ControlDensity::Compact => px(8.0),
-            ControlDensity::Default => px(12.0),     // space-inline-md = 0.75rem
+            ControlDensity::Default => px(12.0), // space-inline-md = 0.75rem
             ControlDensity::Comfortable => px(16.0),
         };
 
@@ -138,16 +186,30 @@ impl IntoElement for CodeInput {
         let effective_validation = spec.effective_validation_state();
         let is_invalid = effective_validation == ValidationState::Invalid;
 
-        let slot_border = if is_invalid { danger_color } else { border_color };
-        let active_slot_border = if is_invalid { danger_color } else { accent_border };
+        let slot_border = if is_invalid {
+            danger_color
+        } else {
+            border_color
+        };
+        let active_slot_border = if is_invalid {
+            danger_color
+        } else {
+            accent_border
+        };
         let active_ring_color = if is_invalid { danger_color } else { focus_ring };
 
         // ── Sanitize value (digits only, clamped to length) ───────
         let current_value = spec.current_value();
-        let digits: Vec<char> = current_value.chars().filter(|c| c.is_ascii_digit()).take(spec.length).collect();
+        let digits: Vec<char> = current_value
+            .chars()
+            .filter(|c| c.is_ascii_digit())
+            .take(spec.length)
+            .collect();
 
         // ── Determine active slot index ───────────────────────────
-        let active_idx = self.active_index.unwrap_or(digits.len().min(spec.length.saturating_sub(1)));
+        let active_idx = self
+            .active_index
+            .unwrap_or(digits.len().min(spec.length.saturating_sub(1)));
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-code-input-{}", suffix)
@@ -183,9 +245,16 @@ impl IntoElement for CodeInput {
         row = row.focus(move |s| s.shadow(focus_ring_shadow(focus_color)));
 
         for i in 0..spec.length {
-            let digit = digits.get(i).map(|c| {
-                if spec.mask { "\u{2022}".to_string() } else { c.to_string() }
-            }).unwrap_or_default();
+            let digit = digits
+                .get(i)
+                .map(|c| {
+                    if spec.mask {
+                        "\u{2022}".to_string()
+                    } else {
+                        c.to_string()
+                    }
+                })
+                .unwrap_or_default();
             let is_active = i == active_idx;
 
             let mut slot = div()
@@ -246,7 +315,10 @@ impl IntoElement for CodeInput {
                                 handler(&new_val, window, cx);
                             }
                         }
-                    } else if key.len() == 1 && !event.keystroke.modifiers.platform && !event.keystroke.modifiers.control {
+                    } else if key.len() == 1
+                        && !event.keystroke.modifiers.platform
+                        && !event.keystroke.modifiers.control
+                    {
                         let ch = key.chars().next().unwrap();
                         if ch.is_ascii_digit() && current_val.len() < length {
                             let new_val = format!("{}{}", current_val, ch);

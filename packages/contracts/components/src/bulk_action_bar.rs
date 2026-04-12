@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BulkActionTone {
@@ -123,7 +123,11 @@ impl BulkActionBarSpec {
     }
 
     pub fn select_all_label(&self) -> &'static str {
-        if self.all_selected { "Deselect all" } else { "Select all" }
+        if self.all_selected {
+            "Deselect all"
+        } else {
+            "Select all"
+        }
     }
 
     pub fn warning_border_token(&self) -> &'static str {

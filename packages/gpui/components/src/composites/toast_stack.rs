@@ -4,10 +4,10 @@ use std::rc::Rc;
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{Toast, ToastPosition, ToastStackSpec};
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{Toast, ToastPosition, ToastStackSpec};
 
-use crate::presentation::{resolve_semantic_size, size_font_rem, rem_to_px};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI toast stack component backed by `ToastStackSpec`.
@@ -22,12 +22,19 @@ pub struct ToastStack {
 
 impl std::ops::Deref for ToastStack {
     type Target = ToastStackSpec;
-    fn deref(&self) -> &ToastStackSpec { &self.spec }
+    fn deref(&self) -> &ToastStackSpec {
+        &self.spec
+    }
 }
 
 impl ToastStack {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ToastStackSpec::new(), theme: theme.clone(), on_dismiss: None, on_action: None }
+        Self {
+            spec: ToastStackSpec::new(),
+            theme: theme.clone(),
+            on_dismiss: None,
+            on_action: None,
+        }
     }
 
     pub fn from_spec(spec: ToastStackSpec, theme: &GpuiThemeProvider) -> Self {
@@ -40,25 +47,33 @@ impl ToastStack {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn toasts(mut self, v: Vec<Toast>) -> Self { self.spec.toasts = v; self }
-    pub fn position(mut self, v: ToastPosition) -> Self { self.spec.position = v; self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn toasts(mut self, v: Vec<Toast>) -> Self {
+        self.spec.toasts = v;
+        self
+    }
+    pub fn position(mut self, v: ToastPosition) -> Self {
+        self.spec.position = v;
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
-
-    pub fn on_dismiss(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_dismiss(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_dismiss = Some(Rc::new(handler));
         self
     }
 
-    pub fn on_action(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_action(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_action = Some(Rc::new(handler));
         self
     }
@@ -85,12 +100,7 @@ impl IntoElement for ToastStack {
         let accent = resolve_color(theme, "color.accent.base");
 
         // Container positioned at the chosen corner
-        let mut container = div()
-            .absolute()
-            .flex()
-            .flex_col()
-            .gap(gap)
-            .w(px(360.0));
+        let mut container = div().absolute().flex().flex_col().gap(gap).w(px(360.0));
 
         // Position based on spec
         match spec.position {
@@ -110,22 +120,16 @@ impl IntoElement for ToastStack {
 
         for toast in &spec.toasts {
             let tone_color = resolve_color(theme, spec.tone_color(&toast.tone));
-            let dismiss_element_id =
-                SharedString::from(format!("toast-dismiss-{}", toast.id));
+            let dismiss_element_id = SharedString::from(format!("toast-dismiss-{}", toast.id));
 
             // Build the content column: title + optional message
-            let mut content_col = div()
-                .flex()
-                .flex_col()
-                .gap(px(2.0))
-                .flex_grow()
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(title_color)
-                        .child(toast.title.clone()),
-                );
+            let mut content_col = div().flex().flex_col().gap(px(2.0)).flex_grow().child(
+                div()
+                    .text_size(body_size)
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(title_color)
+                    .child(toast.title.clone()),
+            );
 
             if let Some(ref message) = toast.message {
                 content_col = content_col.child(
@@ -138,8 +142,7 @@ impl IntoElement for ToastStack {
 
             // Optional action button
             if let Some(ref action_label) = toast.action_label {
-                let action_element_id =
-                    SharedString::from(format!("toast-action-{}", toast.id));
+                let action_element_id = SharedString::from(format!("toast-action-{}", toast.id));
 
                 let mut action_btn = div()
                     .id(action_element_id)
@@ -190,11 +193,7 @@ impl IntoElement for ToastStack {
                 .overflow_hidden()
                 .child(
                     // Left accent bar
-                    div()
-                        .w(px(4.0))
-                        .h_full()
-                        .bg(tone_color)
-                        .flex_shrink_0(),
+                    div().w(px(4.0)).h_full().bg(tone_color).flex_shrink_0(),
                 )
                 .child(
                     // Content area with padding

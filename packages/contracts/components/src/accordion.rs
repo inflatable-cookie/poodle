@@ -1,6 +1,9 @@
 use poodle_tokens::semantic;
 
-use crate::types::{AccordionItemSpec, AccordionSelectionValue, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{
+    AccordionItemSpec, AccordionSelectionValue, ControlDensity, ControlSize,
+    SemanticControlSizeRole,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AccordionSpec {

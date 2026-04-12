@@ -2,8 +2,8 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{SplitOrientation, SplitViewSpec};
 use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{SplitOrientation, SplitViewSpec};
 
 use crate::presentation::resolve_semantic_size;
 use crate::primitives::Icon;
@@ -31,7 +31,9 @@ pub struct SplitView {
 
 impl std::ops::Deref for SplitView {
     type Target = SplitViewSpec;
-    fn deref(&self) -> &SplitViewSpec { &self.spec }
+    fn deref(&self) -> &SplitViewSpec {
+        &self.spec
+    }
 }
 
 impl SplitView {
@@ -60,20 +62,58 @@ impl SplitView {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn orientation(mut self, v: SplitOrientation) -> Self { self.spec.orientation = v; self }
-    pub fn ratio(mut self, v: f32) -> Self { self.spec.ratio = Some(v); self }
-    pub fn default_ratio(mut self, v: f32) -> Self { self.spec.default_ratio = v; self }
-    pub fn min_primary_size(mut self, v: f32) -> Self { self.spec.min_primary_size = Some(v); self }
-    pub fn min_secondary_size(mut self, v: f32) -> Self { self.spec.min_secondary_size = Some(v); self }
-    pub fn primary_collapsed(mut self, v: bool) -> Self { self.spec.is_primary_collapsed = v; self }
-    pub fn secondary_collapsed(mut self, v: bool) -> Self { self.spec.is_secondary_collapsed = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn show_collapse_primary(mut self, v: bool) -> Self { self.spec.show_collapse_primary = v; self }
-    pub fn show_collapse_secondary(mut self, v: bool) -> Self { self.spec.show_collapse_secondary = v; self }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
-
+    pub fn orientation(mut self, v: SplitOrientation) -> Self {
+        self.spec.orientation = v;
+        self
+    }
+    pub fn ratio(mut self, v: f32) -> Self {
+        self.spec.ratio = Some(v);
+        self
+    }
+    pub fn default_ratio(mut self, v: f32) -> Self {
+        self.spec.default_ratio = v;
+        self
+    }
+    pub fn min_primary_size(mut self, v: f32) -> Self {
+        self.spec.min_primary_size = Some(v);
+        self
+    }
+    pub fn min_secondary_size(mut self, v: f32) -> Self {
+        self.spec.min_secondary_size = Some(v);
+        self
+    }
+    pub fn primary_collapsed(mut self, v: bool) -> Self {
+        self.spec.is_primary_collapsed = v;
+        self
+    }
+    pub fn secondary_collapsed(mut self, v: bool) -> Self {
+        self.spec.is_secondary_collapsed = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn show_collapse_primary(mut self, v: bool) -> Self {
+        self.spec.show_collapse_primary = v;
+        self
+    }
+    pub fn show_collapse_secondary(mut self, v: bool) -> Self {
+        self.spec.show_collapse_secondary = v;
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_primary(mut self, content: impl IntoElement) -> Self {
         self.primary = Some(content.into_any_element());
@@ -137,7 +177,8 @@ impl IntoElement for SplitView {
         // Disabled treatment: dim the entire split and forbid the
         // col/row-resize cursor on the divider below.
         if spec.is_disabled {
-            let disabled_opacity = crate::theme_ext::resolve_opacity(theme, "state.opacity.disabled");
+            let disabled_opacity =
+                crate::theme_ext::resolve_opacity(theme, "state.opacity.disabled");
             container = container.opacity(disabled_opacity);
         }
 
@@ -220,11 +261,8 @@ impl IntoElement for SplitView {
                                 chevron: &str,
                                 handler: Option<&Box<dyn Fn(bool, &mut Window, &mut App)>>|
              -> AnyElement {
-                let icon = Icon::from_spec(
-                    IconSpec::new(chevron).with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(icon_color);
+                let icon = Icon::from_spec(IconSpec::new(chevron).with_size(IconSize::Sm), theme)
+                    .with_color(icon_color);
 
                 let mut btn = div()
                     .id(SharedString::from(id))
@@ -375,9 +413,8 @@ impl IntoElement for SplitView {
             }
 
             if !spec.is_disabled {
-                divider = divider.hover(|s| {
-                    s.bg(resolve_color(theme, "color.accent.base").opacity(0.3))
-                });
+                divider =
+                    divider.hover(|s| s.bg(resolve_color(theme, "color.accent.base").opacity(0.3)));
             }
 
             container = container.child(divider);

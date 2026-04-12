@@ -3,12 +3,15 @@
 //! Renders an AlertDialog-style overlay with backdrop, trigger button,
 //! and confirm/cancel actions.
 
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::ConfirmActionSpec;
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
-use crate::presentation::{resolve_semantic_size, size_font_rem, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct ConfirmAction {
     spec: ConfirmActionSpec,
@@ -24,7 +27,9 @@ pub struct ConfirmAction {
 
 impl std::ops::Deref for ConfirmAction {
     type Target = ConfirmActionSpec;
-    fn deref(&self) -> &ConfirmActionSpec { &self.spec }
+    fn deref(&self) -> &ConfirmActionSpec {
+        &self.spec
+    }
 }
 
 impl ConfirmAction {
@@ -39,7 +44,14 @@ impl ConfirmAction {
         }
     }
     pub fn from_spec(spec: ConfirmActionSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), trigger: None, content: None, on_confirm: None, on_cancel: None }
+        Self {
+            spec,
+            theme: theme.clone(),
+            trigger: None,
+            content: None,
+            on_confirm: None,
+            on_cancel: None,
+        }
     }
 
     /// Set a trigger element (e.g. a button) that opens the confirmation dialog.
@@ -56,24 +68,42 @@ impl ConfirmAction {
 
     /// Set the open state via spec. Included as a fluent shortcut alongside
     /// `ConfirmActionSpec::with_open`.
-    pub fn open(mut self, v: bool) -> Self { self.spec.is_open = v; self }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.is_open = v;
+        self
+    }
 
     /// Fired when the confirm button is clicked. Signature matches
     /// `Div::on_click` so specimen code can pass `cx.listener(...)` directly.
-    pub fn on_confirm(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
+    pub fn on_confirm(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
         self.on_confirm = Some(Box::new(handler));
         self
     }
 
     /// Fired when the cancel button is clicked. Signature matches
     /// `Div::on_click` so specimen code can pass `cx.listener(...)` directly.
-    pub fn on_cancel(mut self, handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self {
+    pub fn on_cancel(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
         self.on_cancel = Some(Box::new(handler));
         self
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for ConfirmAction {
@@ -133,9 +163,15 @@ impl IntoElement for ConfirmAction {
         let body_size = px(font_size);
 
         let mut dialog = div()
-            .bg(fill).border_1().border_color(border).rounded(radius)
-            .px(px(pad_x)).py(px(pad_y))
-            .flex().flex_col().gap(px(gap * 2.0))
+            .bg(fill)
+            .border_1()
+            .border_color(border)
+            .rounded(radius)
+            .px(px(pad_x))
+            .py(px(pad_y))
+            .flex()
+            .flex_col()
+            .gap(px(gap * 2.0))
             .min_w(px(360.0))
             .shadow(vec![
                 gpui::BoxShadow {
@@ -153,8 +189,19 @@ impl IntoElement for ConfirmAction {
             ]);
 
         let heading_size = resolve_px(theme, "typography.heading.size");
-        dialog = dialog.child(div().text_size(heading_size).text_color(title_color).font_weight(FontWeight::SEMIBOLD).child(spec.title.clone()));
-        dialog = dialog.child(div().text_size(body_size).text_color(msg_color).child(spec.description.clone()));
+        dialog = dialog.child(
+            div()
+                .text_size(heading_size)
+                .text_color(title_color)
+                .font_weight(FontWeight::SEMIBOLD)
+                .child(spec.title.clone()),
+        );
+        dialog = dialog.child(
+            div()
+                .text_size(body_size)
+                .text_color(msg_color)
+                .child(spec.description.clone()),
+        );
 
         // Optional body content slot (matches Svelte default slot)
         if let Some(content) = self.content {
@@ -171,7 +218,8 @@ impl IntoElement for ConfirmAction {
             .text_size(body_size)
             .text_color(title_color)
             .cursor_pointer()
-            .px(btn_gap_lg).py(btn_gap_sm)
+            .px(btn_gap_lg)
+            .py(btn_gap_sm)
             .rounded(control_radius)
             .hover(move |s| s.bg(hover_fill))
             .child(spec.cancel_label.clone());
@@ -188,7 +236,8 @@ impl IntoElement for ConfirmAction {
             .text_color(gpui::white())
             .bg(confirm_fill)
             .rounded(control_radius)
-            .px(btn_gap_lg).py(btn_gap_sm)
+            .px(btn_gap_lg)
+            .py(btn_gap_sm)
             .cursor_pointer()
             .font_weight(FontWeight::MEDIUM)
             .child(spec.confirm_label.clone());
@@ -199,7 +248,12 @@ impl IntoElement for ConfirmAction {
             });
         }
 
-        let actions = div().flex().flex_row().flex_wrap().gap(px(gap)).justify_end()
+        let actions = div()
+            .flex()
+            .flex_row()
+            .flex_wrap()
+            .gap(px(gap))
+            .justify_end()
             .child(cancel_btn)
             .child(confirm_btn);
         dialog = dialog.child(actions);
@@ -220,10 +274,7 @@ impl IntoElement for ConfirmAction {
         // If a trigger is provided, render it alongside the backdrop.
         // The trigger is what the user clicks to open the confirmation.
         if let Some(trigger) = self.trigger {
-            div()
-                .child(trigger)
-                .child(backdrop)
-                .into_any_element()
+            div().child(trigger).child(backdrop).into_any_element()
         } else {
             backdrop.into_any_element()
         }

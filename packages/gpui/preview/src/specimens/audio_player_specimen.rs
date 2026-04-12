@@ -1,8 +1,8 @@
 use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{AudioPlayer, Eyebrow};
 use poodle_specs::AudioPlayerSpec;
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
-use poodle_gpui_components::{AudioPlayer, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))

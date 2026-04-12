@@ -1,9 +1,11 @@
-use gpui::*;
-use poodle_specs::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState};
-use poodle_specs::EyebrowSpec;
-use poodle_gpui_components::{ActionDiscoveryPanel, Eyebrow};
 use crate::app_state::AppState;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_gpui_components::{ActionDiscoveryPanel, Eyebrow};
+use poodle_specs::EyebrowSpec;
+use poodle_specs::{
+    ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem, DiscoveryState,
+};
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -23,16 +25,20 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             "edit",
             "Edit",
             vec![
-                CommandActionItem::new("find-in-files", "Find in Files").with_shortcut("\u{21E7}\u{2318}F"),
-                CommandActionItem::new("find-and-replace", "Find and Replace").with_shortcut("\u{2318}H"),
+                CommandActionItem::new("find-in-files", "Find in Files")
+                    .with_shortcut("\u{21E7}\u{2318}F"),
+                CommandActionItem::new("find-and-replace", "Find and Replace")
+                    .with_shortcut("\u{2318}H"),
             ],
         ),
         ActionDiscoverySection::new(
             "view",
             "View",
             vec![
-                CommandActionItem::new("toggle-terminal", "Toggle Terminal").with_shortcut("\u{2318}`"),
-                CommandActionItem::new("toggle-sidebar", "Toggle Sidebar").with_shortcut("\u{2318}B"),
+                CommandActionItem::new("toggle-terminal", "Toggle Terminal")
+                    .with_shortcut("\u{2318}`"),
+                CommandActionItem::new("toggle-sidebar", "Toggle Sidebar")
+                    .with_shortcut("\u{2318}B"),
             ],
         ),
     ];
@@ -56,41 +62,57 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         ActionDiscoverySection::new(
             "tools",
             "Tools",
-            vec![
-                CommandActionItem::new("run-linter", "Run Linter").with_shortcut("\u{2318}L"),
-            ],
+            vec![CommandActionItem::new("run-linter", "Run Linter").with_shortcut("\u{2318}L")],
         ),
     ];
 
     let desc_spec = ActionDiscoveryPanelSpec::new(desc_sections);
 
     // --- Empty state ---
-    let empty_spec = ActionDiscoveryPanelSpec::new(vec![])
-        .with_state(DiscoveryState::Empty);
+    let empty_spec = ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Empty);
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Grouped actions"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Grouped actions"),
+                    theme,
+                ))
                 .child(
                     ActionDiscoveryPanel::from_spec(grouped_spec, theme)
-                        .with_id("action-disc-grouped")
-                )
+                        .with_id("action-disc-grouped"),
+                ),
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With descriptions and badges"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With descriptions and badges"),
+                    theme,
+                ))
                 .child(
-                    ActionDiscoveryPanel::from_spec(desc_spec, theme)
-                        .with_id("action-disc-desc")
-                )
+                    ActionDiscoveryPanel::from_spec(desc_spec, theme).with_id("action-disc-desc"),
+                ),
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty state"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Empty state"),
+                    theme,
+                ))
                 .child(
-                    ActionDiscoveryPanel::from_spec(empty_spec, theme)
-                        .with_id("action-disc-empty")
-                )
+                    ActionDiscoveryPanel::from_spec(empty_spec, theme).with_id("action-disc-empty"),
+                ),
         )
 }

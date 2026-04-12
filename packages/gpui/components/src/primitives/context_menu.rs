@@ -2,7 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ContextMenuSpec, ControlDensity, ControlSize, MenuSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ContextMenuSpec, ControlDensity, ControlSize, MenuSpec, SemanticControlSizeRole,
+};
 
 use super::menu::Menu;
 
@@ -24,12 +26,22 @@ pub struct ContextMenu {
 
 impl std::ops::Deref for ContextMenu {
     type Target = ContextMenuSpec;
-    fn deref(&self) -> &ContextMenuSpec { &self.spec }
+    fn deref(&self) -> &ContextMenuSpec {
+        &self.spec
+    }
 }
 
 impl ContextMenu {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: ContextMenuSpec::default(), theme: theme.clone(), id_prefix: String::new(), selected_value: None, trigger: None, on_select: None, on_close: None }
+        Self {
+            spec: ContextMenuSpec::default(),
+            theme: theme.clone(),
+            id_prefix: String::new(),
+            selected_value: None,
+            trigger: None,
+            on_select: None,
+            on_close: None,
+        }
     }
 
     pub fn from_spec(spec: ContextMenuSpec, theme: &GpuiThemeProvider) -> Self {
@@ -45,11 +57,26 @@ impl ContextMenu {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn menu(mut self, v: MenuSpec) -> Self { self.spec.menu = v; self }
-    pub fn anchor_point(mut self, v: (i32, i32)) -> Self { self.spec.anchor_point = Some(v); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn menu(mut self, v: MenuSpec) -> Self {
+        self.spec.menu = v;
+        self
+    }
+    pub fn anchor_point(mut self, v: (i32, i32)) -> Self {
+        self.spec.anchor_point = Some(v);
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     /// Set the trigger element (the right-click target that opens the menu).
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
@@ -87,8 +114,7 @@ impl IntoElement for ContextMenu {
         inner_menu_spec.size = self.spec.size;
         inner_menu_spec.size_role = self.spec.size_role;
         inner_menu_spec.density = self.spec.density;
-        let mut menu = Menu::from_spec(inner_menu_spec, &self.theme)
-            .with_id(self.id_prefix);
+        let mut menu = Menu::from_spec(inner_menu_spec, &self.theme).with_id(self.id_prefix);
 
         if let Some(selected) = self.selected_value {
             menu = menu.with_selected(selected);

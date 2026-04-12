@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// Tone for a toast notification.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]

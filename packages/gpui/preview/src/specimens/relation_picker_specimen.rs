@@ -1,23 +1,25 @@
+use crate::app_state::AppState;
+use crate::PreviewRoot;
 use gpui::*;
+use poodle_gpui_components::{DrillEnterArgs, Eyebrow, RelationPicker};
 use poodle_specs::{
     BrowseState, DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel,
     PickerItemSpec, RelationPickerSpec, SelectionMode,
 };
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
-use poodle_gpui_components::{DrillEnterArgs, Eyebrow, RelationPicker};
-use crate::app_state::AppState;
-use crate::PreviewRoot;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
-    let items = || vec![
-        PickerItemSpec::new("btn", "Button"),
-        PickerItemSpec::new("chk", "Checkbox"),
-        PickerItemSpec::new("sel", "Select"),
-        PickerItemSpec::new("dlg", "Dialog"),
-        PickerItemSpec::new("tbl", "Table"),
-    ];
+    let items = || {
+        vec![
+            PickerItemSpec::new("btn", "Button"),
+            PickerItemSpec::new("chk", "Checkbox"),
+            PickerItemSpec::new("sel", "Select"),
+            PickerItemSpec::new("dlg", "Dialog"),
+            PickerItemSpec::new("tbl", "Table"),
+        ]
+    };
 
     // Drill-down fixture: Categories → Subcategories → leaf primitives.
     let drill_config = DrillDownConfig::new(
@@ -94,10 +96,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             ),
             DrillDownLeafGroup::new(
                 "forms",
-                vec![
-                    PickerItemSpec::new("dd-formlayout", "FormLayout")
-                        .with_description("Responsive form grid"),
-                ],
+                vec![PickerItemSpec::new("dd-formlayout", "FormLayout")
+                    .with_description("Responsive form grid")],
             ),
             DrillDownLeafGroup::new(
                 "containers",
@@ -121,52 +121,74 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .map(|s| s.split('/').map(|x| x.to_string()).collect())
         .unwrap_or_default();
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Multiple selection ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Multiple selection"), theme))
-                .child(
-                    RelationPicker::from_spec(
-                        RelationPickerSpec::new(items())
-                            .with_selected_ids(vec!["btn".to_string(), "dlg".to_string()])
-                            .with_selection_mode(SelectionMode::Multiple)
-                            .with_state(BrowseState::Ready),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Multiple selection"),
+                    theme,
+                ))
+                .child(RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_selected_ids(vec!["btn".to_string(), "dlg".to_string()])
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Ready),
+                    theme,
+                )),
         )
         // --- Single selection ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Single selection"), theme))
-                .child(
-                    RelationPicker::from_spec(
-                        RelationPickerSpec::new(items())
-                            .with_selected_ids(vec!["sel".to_string()])
-                            .with_selection_mode(SelectionMode::Single)
-                            .with_state(BrowseState::Ready),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Single selection"),
+                    theme,
+                ))
+                .child(RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_selected_ids(vec!["sel".to_string()])
+                        .with_selection_mode(SelectionMode::Single)
+                        .with_state(BrowseState::Ready),
+                    theme,
+                )),
         )
         // --- Loading state ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Loading state"), theme))
-                .child(
-                    RelationPicker::from_spec(
-                        RelationPickerSpec::new(items())
-                            .with_selection_mode(SelectionMode::Multiple)
-                            .with_state(BrowseState::Loading),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Loading state"),
+                    theme,
+                ))
+                .child(RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Loading),
+                    theme,
+                )),
         )
         // --- Drill-down (Category → Subcategory → Items) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Drill-down (Category \u{2192} Subcategory \u{2192} Items)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Drill-down (Category \u{2192} Subcategory \u{2192} Items)"),
+                    theme,
+                ))
                 .child(
                     RelationPicker::from_spec(
                         RelationPickerSpec::new(Vec::new())
@@ -189,44 +211,56 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         } else {
                             format!("{}/{}", current, args.item_id)
                         };
-                        this.state.specimens.text.insert("relation-picker-drill-path".to_string(), next);
-                        cx.notify();
-                    }))
-                    .on_breadcrumb_click(cx.listener(|this, depth: &usize, _w, cx| {
-                        let current = this
-                            .state
+                        this.state
                             .specimens
                             .text
-                            .get("relation-picker-drill-path")
-                            .cloned()
-                            .unwrap_or_default();
-                        let segs: Vec<&str> = if current.is_empty() {
-                            Vec::new()
-                        } else {
-                            current.split('/').collect()
-                        };
-                        let kept: Vec<&str> = segs.into_iter().take(*depth).collect();
-                        let next = kept.join("/");
-                        this.state.specimens.text.insert("relation-picker-drill-path".to_string(), next);
+                            .insert("relation-picker-drill-path".to_string(), next);
                         cx.notify();
                     }))
-                )
+                    .on_breadcrumb_click(cx.listener(
+                        |this, depth: &usize, _w, cx| {
+                            let current = this
+                                .state
+                                .specimens
+                                .text
+                                .get("relation-picker-drill-path")
+                                .cloned()
+                                .unwrap_or_default();
+                            let segs: Vec<&str> = if current.is_empty() {
+                                Vec::new()
+                            } else {
+                                current.split('/').collect()
+                            };
+                            let kept: Vec<&str> = segs.into_iter().take(*depth).collect();
+                            let next = kept.join("/");
+                            this.state
+                                .specimens
+                                .text
+                                .insert("relation-picker-drill-path".to_string(), next);
+                            cx.notify();
+                        },
+                    )),
+                ),
         )
         // --- Semantic presentation (chrome size role, comfortable density) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic presentation"), theme))
-                .child(
-                    RelationPicker::from_spec(
-                        RelationPickerSpec::new(items())
-                            .with_selected_ids(vec!["btn".to_string()])
-                            .with_selection_mode(SelectionMode::Multiple)
-                            .with_state(BrowseState::Ready)
-                            .with_size(ControlSize::Sm)
-                            .with_size_role(SemanticControlSizeRole::Chrome)
-                            .with_density(ControlDensity::Comfortable),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Semantic presentation"),
+                    theme,
+                ))
+                .child(RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_selected_ids(vec!["btn".to_string()])
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Ready)
+                        .with_size(ControlSize::Sm)
+                        .with_size_role(SemanticControlSizeRole::Chrome)
+                        .with_density(ControlDensity::Comfortable),
+                    theme,
+                )),
         )
 }

@@ -1,12 +1,12 @@
-use gpui::*;
-use gpui::prelude::FluentBuilder;
-use poodle_adapter::ThemeProvider;
-use poodle_specs::{CommandPaletteSpec, CommandActionItem};
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
-use poodle_gpui_components::{CommandPalette, Eyebrow};
 use crate::app_state::AppState;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
+use gpui::*;
+use poodle_adapter::ThemeProvider;
+use poodle_gpui_components::{CommandPalette, Eyebrow};
+use poodle_specs::{CommandActionItem, CommandPaletteSpec};
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -36,47 +36,67 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_shortcut("\u{2318}B"),
     ];
 
-    let query = state.specimens.text.get("cmd-palette-query")
+    let query = state
+        .specimens
+        .text
+        .get("cmd-palette-query")
         .cloned()
         .unwrap_or_default();
-    let last_executed = state.specimens.text.get("cmd-palette-executed")
-        .cloned();
+    let last_executed = state.specimens.text.get("cmd-palette-executed").cloned();
 
     let mut spec = CommandPaletteSpec::new(actions);
     if !query.is_empty() {
         spec = spec.with_query(&query);
     }
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Command Palette"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Command Palette"),
+                    theme,
+                ))
                 .child(
                     div().w(px(480.0)).child(
                         CommandPalette::from_spec(spec, theme)
                             .with_id("cmd-palette")
                             .on_select(cx.listener(|this, val: &str, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "cmd-palette-executed".to_string(),
-                                    val.to_string(),
-                                );
+                                this.state
+                                    .specimens
+                                    .text
+                                    .insert("cmd-palette-executed".to_string(), val.to_string());
                                 cx.notify();
                             }))
                             .on_query_change(cx.listener(|this, val: &str, _w, cx| {
-                                this.state.specimens.text.insert(
-                                    "cmd-palette-query".to_string(),
-                                    val.to_string(),
-                                );
+                                this.state
+                                    .specimens
+                                    .text
+                                    .insert("cmd-palette-query".to_string(), val.to_string());
                                 cx.notify();
-                            }))
-                    )
-                )
+                            })),
+                    ),
+                ),
         )
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic presentation"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Semantic presentation"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(12.0))
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(12.0))
                         .child(
                             div().w(px(420.0)).child(
                                 CommandPalette::from_spec(
@@ -92,30 +112,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_density(ControlDensity::Compact),
                                     theme,
                                 )
-                                .with_id("cmd-palette-compact")
-                            )
+                                .with_id("cmd-palette-compact"),
+                            ),
                         )
                         .child(
                             div().w(px(480.0)).child(
                                 CommandPalette::from_spec(
-                                    CommandPaletteSpec::new(vec![
-                                        CommandActionItem::new("save", "Save")
-                                            .with_group("File")
-                                            .with_shortcut("\u{2318}S"),
-                                    ])
+                                    CommandPaletteSpec::new(vec![CommandActionItem::new(
+                                        "save", "Save",
+                                    )
+                                    .with_group("File")
+                                    .with_shortcut("\u{2318}S")])
                                     .with_size_role(SemanticControlSizeRole::Prominent)
                                     .with_density(ControlDensity::Compact),
                                     theme,
                                 )
-                                .with_id("cmd-palette-prominent")
-                            )
-                        )
-                )
+                                .with_id("cmd-palette-prominent"),
+                            ),
+                        ),
+                ),
         )
         // --- With title, description, and invocation hint ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With title and invocation hint"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With title and invocation hint"),
+                    theme,
+                ))
                 .child(
                     div().w(px(480.0)).child(
                         CommandPalette::from_spec(
@@ -134,14 +160,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_invocation_hint("Search workspace\u{2026}"),
                             theme,
                         )
-                        .with_id("cmd-palette-header")
-                    )
-                )
+                        .with_id("cmd-palette-header"),
+                    ),
+                ),
         )
         .when(last_executed.is_some(), |d| {
             d.child(
-                div().text_sm().text_color(color_to_hsla(text_secondary))
-                    .child(format!("Last executed: {}", last_executed.as_deref().unwrap_or("")))
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(format!(
+                        "Last executed: {}",
+                        last_executed.as_deref().unwrap_or("")
+                    )),
             )
         })
 }

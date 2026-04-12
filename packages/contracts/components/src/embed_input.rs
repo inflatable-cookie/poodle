@@ -69,8 +69,16 @@ impl EmbedInputSpec {
         let parsed = ParsedEmbed::detect(&self.value);
 
         if let Some(ref parsed) = parsed {
-            if !self.providers.is_empty() && !self.providers.iter().any(|provider| provider == &parsed.provider) {
-                return (None, Some(format!("Provider \"{}\" is not allowed", parsed.provider)));
+            if !self.providers.is_empty()
+                && !self
+                    .providers
+                    .iter()
+                    .any(|provider| provider == &parsed.provider)
+            {
+                return (
+                    None,
+                    Some(format!("Provider \"{}\" is not allowed", parsed.provider)),
+                );
             }
         }
 

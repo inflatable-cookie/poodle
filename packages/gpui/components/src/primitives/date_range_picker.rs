@@ -2,11 +2,17 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    CalendarWeekStart, ControlDensity, ControlSize, DateRangePickerSpec, DateRangeValue, IconSize,
+    IconSpec, SemanticControlSizeRole,
+};
 
-use super::icon::Icon;
 use super::calendar::Calendar;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
+use super::icon::Icon;
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date range picker backed by `DateRangePickerSpec`.
@@ -22,12 +28,19 @@ pub struct DateRangePicker {
 
 impl std::ops::Deref for DateRangePicker {
     type Target = DateRangePickerSpec;
-    fn deref(&self) -> &DateRangePickerSpec { &self.spec }
+    fn deref(&self) -> &DateRangePickerSpec {
+        &self.spec
+    }
 }
 
 impl DateRangePicker {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DateRangePickerSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None }
+        Self {
+            spec: DateRangePickerSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_toggle: None,
+        }
     }
 
     pub fn from_spec(spec: DateRangePickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -40,28 +53,61 @@ impl DateRangePicker {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: DateRangeValue) -> Self { self.spec.value = Some(v); self }
-    pub fn default_value(mut self, v: DateRangeValue) -> Self { self.spec.default_value = v; self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = v.into(); self }
-    pub fn week_starts_on(mut self, v: CalendarWeekStart) -> Self { self.spec.week_starts_on = v; self }
-    pub fn locale(mut self, v: impl Into<String>) -> Self { self.spec.locale = v.into(); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn value(mut self, v: DateRangeValue) -> Self {
+        self.spec.value = Some(v);
+        self
+    }
+    pub fn default_value(mut self, v: DateRangeValue) -> Self {
+        self.spec.default_value = v;
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn placeholder(mut self, v: impl Into<String>) -> Self {
+        self.spec.placeholder = v.into();
+        self
+    }
+    pub fn week_starts_on(mut self, v: CalendarWeekStart) -> Self {
+        self.spec.week_starts_on = v;
+        self
+    }
+    pub fn locale(mut self, v: impl Into<String>) -> Self {
+        self.spec.locale = v.into();
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
@@ -129,16 +175,17 @@ impl IntoElement for DateRangePicker {
 
         // Focus ring
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        trigger = trigger.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        trigger = trigger.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         if is_disabled {
             trigger = trigger
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
-            trigger = trigger
-                .cursor_pointer()
-                .hover(|s| s.bg(hover_bg));
+            trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
         }
 
         let text_col = if is_placeholder {
@@ -150,11 +197,8 @@ impl IntoElement for DateRangePicker {
         trigger = trigger
             .child(div().text_color(text_col).flex_1().child(display_text))
             .child(
-                Icon::from_spec(
-                    IconSpec::new("calendar").with_size(IconSize::Sm),
-                    theme,
-                )
-                .with_color(icon_muted),
+                Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
+                    .with_color(icon_muted),
             );
 
         if let Some(handler) = self.on_toggle {
@@ -180,8 +224,8 @@ impl IntoElement for DateRangePicker {
 
         // Range calendar dropdown when open
         if is_open {
-            let mut cal_spec = poodle_specs::CalendarSpec::new()
-                .with_mode(poodle_specs::CalendarMode::Range);
+            let mut cal_spec =
+                poodle_specs::CalendarSpec::new().with_mode(poodle_specs::CalendarMode::Range);
             cal_spec.week_starts_on = spec.week_starts_on.clone();
             cal_spec.range_value = Some(range.clone());
 

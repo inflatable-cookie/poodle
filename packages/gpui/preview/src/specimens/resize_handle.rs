@@ -1,20 +1,31 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, Orientation, ResizeHandleSpec};
 use poodle_gpui_components::{Eyebrow, ResizeHandle};
-use crate::style_bridge::color_to_hsla;
+use poodle_specs::{EyebrowSpec, Orientation, ResizeHandleSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let panel_bg = theme.resolve_color("color.background.panel");
     let border_subtle = theme.resolve_color("color.border.subtle");
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Horizontal split (vertical handle — drag left/right) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Horizontal split (vertical handle \u{2014} drag left/right)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Horizontal split (vertical handle \u{2014} drag left/right)",
+                    ),
+                    theme,
+                ))
                 .child(
                     div()
                         .flex()
@@ -32,12 +43,19 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         .child(pane("Right", text_secondary, panel_bg)),
-                )
+                ),
         )
         // --- Vertical split (horizontal handle — drag up/down) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Vertical split (horizontal handle \u{2014} drag up/down)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Vertical split (horizontal handle \u{2014} drag up/down)"),
+                    theme,
+                ))
                 .child(
                     div()
                         .flex()
@@ -55,12 +73,18 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         .child(pane("Bottom", text_secondary, panel_bg)),
-                )
+                ),
         )
         // --- Disabled (horizontal split) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled (horizontal split)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled (horizontal split)"),
+                    theme,
+                ))
                 .child(
                     div()
                         .flex()
@@ -79,12 +103,18 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         .child(pane("Right", text_secondary, panel_bg)),
-                )
+                ),
         )
         // --- Disabled (vertical split) ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled (vertical split)"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled (vertical split)"),
+                    theme,
+                ))
                 .child(
                     div()
                         .flex()
@@ -103,7 +133,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             theme,
                         ))
                         .child(pane("Bottom", text_secondary, panel_bg)),
-                )
+                ),
         )
 }
 

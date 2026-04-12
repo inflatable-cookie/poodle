@@ -1,8 +1,8 @@
 use gpui::*;
-use poodle_specs::{MediaBrowsePanelSpec, MediaBrowseItem};
-use poodle_specs::EyebrowSpec;
-use poodle_gpui_components::{MediaBrowsePanel, Eyebrow};
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{Eyebrow, MediaBrowsePanel};
+use poodle_specs::EyebrowSpec;
+use poodle_specs::{MediaBrowseItem, MediaBrowsePanelSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let items = vec![
@@ -12,42 +12,54 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         MediaBrowseItem::new("4", "Quarterly report", "document").with_meta("Document"),
     ];
 
-    div().flex().flex_col().gap(px(24.0))
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
         // --- Browse panel ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Browse panel"), theme))
-                .child(
-                    MediaBrowsePanel::from_spec(
-                        MediaBrowsePanelSpec::new()
-                            .with_items(items.clone())
-                            .with_has_more(true),
-                        theme,
-                    )
-                )
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Browse panel"),
+                    theme,
+                ))
+                .child(MediaBrowsePanel::from_spec(
+                    MediaBrowsePanelSpec::new()
+                        .with_items(items.clone())
+                        .with_has_more(true),
+                    theme,
+                )),
         )
         // --- Semantic presentation ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Semantic presentation"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Semantic presentation"),
+                    theme,
+                ))
                 .child(
-                    div().flex().flex_col().gap(px(12.0))
-                        .child(
-                            MediaBrowsePanel::from_spec(
-                                MediaBrowsePanelSpec::new()
-                                    .with_items(items.clone())
-                                    .with_has_more(true),
-                                theme,
-                            )
-                        )
-                        .child(
-                            MediaBrowsePanel::from_spec(
-                                MediaBrowsePanelSpec::new()
-                                    .with_items(items)
-                                    .with_has_more(true),
-                                theme,
-                            )
-                        )
-                )
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(12.0))
+                        .child(MediaBrowsePanel::from_spec(
+                            MediaBrowsePanelSpec::new()
+                                .with_items(items.clone())
+                                .with_has_more(true),
+                            theme,
+                        ))
+                        .child(MediaBrowsePanel::from_spec(
+                            MediaBrowsePanelSpec::new()
+                                .with_items(items)
+                                .with_has_more(true),
+                            theme,
+                        )),
+                ),
         )
 }

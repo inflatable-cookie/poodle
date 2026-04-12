@@ -1,6 +1,8 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{
+    ButtonTone, ButtonVariant, ControlDensity, ControlSize, SemanticControlSizeRole,
+};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ButtonSpec {

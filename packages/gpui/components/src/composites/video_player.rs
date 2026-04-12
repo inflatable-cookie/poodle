@@ -1,13 +1,15 @@
 //! VideoPlayer — video playback controls backed by VideoPlayerSpec.
 //! GPUI cannot play video — this renders the UI chrome only.
 
-use gpui::*;
-use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
-use poodle_specs::VideoPlayerSpec;
-use crate::presentation::{resolve_semantic_size, panel_space_x_rem, panel_space_y_rem, control_space_x_rem, rem_to_px};
+use crate::presentation::{
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+};
 use crate::primitives::Icon;
 use crate::theme_ext::{resolve_color, resolve_radius};
+use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_specs::VideoPlayerSpec;
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
 
 pub struct VideoPlayer {
     spec: VideoPlayerSpec,
@@ -17,23 +19,42 @@ pub struct VideoPlayer {
 
 impl std::ops::Deref for VideoPlayer {
     type Target = VideoPlayerSpec;
-    fn deref(&self) -> &VideoPlayerSpec { &self.spec }
+    fn deref(&self) -> &VideoPlayerSpec {
+        &self.spec
+    }
 }
 
 impl VideoPlayer {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: VideoPlayerSpec::new(""), theme: theme.clone(), has_captions: false }
+        Self {
+            spec: VideoPlayerSpec::new(""),
+            theme: theme.clone(),
+            has_captions: false,
+        }
     }
     pub fn from_spec(spec: VideoPlayerSpec, theme: &GpuiThemeProvider) -> Self {
-        Self { spec, theme: theme.clone(), has_captions: false }
+        Self {
+            spec,
+            theme: theme.clone(),
+            has_captions: false,
+        }
     }
     pub fn with_captions(mut self, has_captions: bool) -> Self {
         self.has_captions = has_captions;
         self
     }
-    pub fn with_size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 }
 
 impl IntoElement for VideoPlayer {
@@ -53,11 +74,16 @@ impl IntoElement for VideoPlayer {
         let label_size = crate::theme_ext::resolve_px(&self.theme, "typography.label.size");
 
         // ── Big centered play/pause overlay button ──────────────────────
-        let big_play_icon_name = if self.spec.is_playing { "pause" } else { "play" };
+        let big_play_icon_name = if self.spec.is_playing {
+            "pause"
+        } else {
+            "play"
+        };
         let big_play_icon = Icon::from_spec(
             IconSpec::new(big_play_icon_name).with_size(IconSize::Lg),
             &self.theme,
-        ).with_color(text_color);
+        )
+        .with_color(text_color);
 
         let big_play_button = div()
             .flex()
@@ -82,11 +108,16 @@ impl IntoElement for VideoPlayer {
         // ── Bottom control bar icons ────────────────────────────────────
 
         // Play / Pause small icon
-        let play_icon_name = if self.spec.is_playing { "pause" } else { "play" };
+        let play_icon_name = if self.spec.is_playing {
+            "pause"
+        } else {
+            "play"
+        };
         let play_icon = Icon::from_spec(
             IconSpec::new(play_icon_name).with_size(IconSize::Sm),
             &self.theme,
-        ).with_color(text_color);
+        )
+        .with_color(text_color);
 
         // Progress / seek bar (same pattern as audio_player track_bar)
         let progress_pct = (self.spec.progress() * 100.0).clamp(0.0, 100.0);
@@ -104,21 +135,34 @@ impl IntoElement for VideoPlayer {
             );
 
         // Time label
-        let time = format!("{:.0}s / {:.0}s", self.spec.current_time, self.spec.duration);
+        let time = format!(
+            "{:.0}s / {:.0}s",
+            self.spec.current_time, self.spec.duration
+        );
 
         // Mute / unmute icon (volume == 0 treated as muted)
-        let mute_icon_name = if self.spec.volume <= 0.0 { "volume-x" } else { "volume-2" };
+        let mute_icon_name = if self.spec.volume <= 0.0 {
+            "volume-x"
+        } else {
+            "volume-2"
+        };
         let mute_icon = Icon::from_spec(
             IconSpec::new(mute_icon_name).with_size(IconSize::Sm),
             &self.theme,
-        ).with_color(text_color);
+        )
+        .with_color(text_color);
 
         // Fullscreen icon
-        let fullscreen_icon_name = if self.spec.is_fullscreen { "minimize-2" } else { "maximize-2" };
+        let fullscreen_icon_name = if self.spec.is_fullscreen {
+            "minimize-2"
+        } else {
+            "maximize-2"
+        };
         let fullscreen_icon = Icon::from_spec(
             IconSpec::new(fullscreen_icon_name).with_size(IconSize::Sm),
             &self.theme,
-        ).with_color(text_color);
+        )
+        .with_color(text_color);
 
         // Captions icon (only shown when captions are available)
         let captions_icon = if self.has_captions {
@@ -127,7 +171,8 @@ impl IntoElement for VideoPlayer {
                     Icon::from_spec(
                         IconSpec::new("subtitles").with_size(IconSize::Sm),
                         &self.theme,
-                    ).with_color(text_color),
+                    )
+                    .with_color(text_color),
                 ),
             )
         } else {
@@ -140,23 +185,38 @@ impl IntoElement for VideoPlayer {
         let ctrl_btn = |child: AnyElement| -> Div {
             div()
                 .cursor_pointer()
-                .w(px(28.0)).h(px(28.0))
+                .w(px(28.0))
+                .h(px(28.0))
                 .rounded(radius_control)
-                .flex().items_center().justify_center()
+                .flex()
+                .items_center()
+                .justify_center()
                 .hover(|s| s.bg(text_color.opacity(0.15)))
                 .child(child)
         };
 
         // Left group: play + seek + time
         let left_group = div()
-            .flex().flex_row().items_center().gap(px(8.0)).flex_grow()
+            .flex()
+            .flex_row()
+            .items_center()
+            .gap(px(8.0))
+            .flex_grow()
             .child(ctrl_btn(play_icon.into_any_element()))
             .child(track_bar)
-            .child(div().text_size(label_size).text_color(text_color).child(time));
+            .child(
+                div()
+                    .text_size(label_size)
+                    .text_color(text_color)
+                    .child(time),
+            );
 
         // Right group: mute + fullscreen + captions
         let mut right_group = div()
-            .flex().flex_row().items_center().gap(px(4.0))
+            .flex()
+            .flex_row()
+            .items_center()
+            .gap(px(4.0))
             .child(ctrl_btn(mute_icon.into_any_element()))
             .child(ctrl_btn(fullscreen_icon.into_any_element()));
 

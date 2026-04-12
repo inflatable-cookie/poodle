@@ -41,9 +41,7 @@ impl CardRadioGroupSpec {
     }
 
     pub fn current_value(&self) -> Option<&str> {
-        self.value
-            .as_deref()
-            .or(self.default_value.as_deref())
+        self.value.as_deref().or(self.default_value.as_deref())
     }
 
     pub fn selected_fill_token(&self) -> &'static str {

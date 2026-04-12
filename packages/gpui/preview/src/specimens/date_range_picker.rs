@@ -1,10 +1,10 @@
-use gpui::*;
-use poodle_specs::{DateRangePickerSpec, DateRangeValue, EyebrowSpec};
-use poodle_gpui_components::{DateRangePicker, Eyebrow};
-use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
+use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::{DateRangePicker, Eyebrow};
+use poodle_specs::{DateRangePickerSpec, DateRangeValue, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -12,27 +12,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let default_open = state.specimens.is_on("date-range-picker-default-open");
     let prefilled_open = state.specimens.is_on("date-range-picker-prefilled-open");
 
-    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(320.0)) // 20rem
+    let examples = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .max_w(px(320.0)) // 20rem
         // --- Default ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Default"),
+                    theme,
+                ))
                 .child({
-                    let mut spec = DateRangePickerSpec::new()
-                        .with_open(default_open);
+                    let mut spec = DateRangePickerSpec::new().with_open(default_open);
                     spec.aria_label = Some("Select date range".to_string());
                     DateRangePicker::from_spec(spec, theme)
                         .with_id("default")
                         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                            this.state.specimens.toggle("date-range-picker-default-open");
+                            this.state
+                                .specimens
+                                .toggle("date-range-picker-default-open");
                             cx.notify();
                         }))
-                })
+                }),
         )
         // --- With default range ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With default range"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With default range"),
+                    theme,
+                ))
                 .child({
                     let range = DateRangeValue::new(
                         Some("2026-03-01".to_string()),
@@ -45,21 +62,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     DateRangePicker::from_spec(spec, theme)
                         .with_id("with-range")
                         .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
-                            this.state.specimens.toggle("date-range-picker-prefilled-open");
+                            this.state
+                                .specimens
+                                .toggle("date-range-picker-prefilled-open");
                             cx.notify();
                         }))
-                })
+                }),
         )
         // --- Disabled ---
         .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Disabled"), theme))
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
                 .child({
                     let mut spec = DateRangePickerSpec::new();
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled range picker".to_string());
                     DateRangePicker::from_spec(spec, theme).with_id("disabled")
-                })
+                }),
         )
         .into_any_element();
 

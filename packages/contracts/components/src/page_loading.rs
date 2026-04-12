@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// Presentation mode for PageLoading. Controls whether the loader
 /// renders as a full-viewport overlay (the default) or as an inline

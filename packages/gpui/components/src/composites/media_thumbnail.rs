@@ -3,7 +3,7 @@
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{MediaThumbnailSpec, AspectRatio, MediaKind, MediaState};
+use poodle_specs::{AspectRatio, MediaKind, MediaState, MediaThumbnailSpec};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::primitives::Spinner;
@@ -21,12 +21,18 @@ pub struct MediaThumbnail {
 
 impl std::ops::Deref for MediaThumbnail {
     type Target = MediaThumbnailSpec;
-    fn deref(&self) -> &MediaThumbnailSpec { &self.spec }
+    fn deref(&self) -> &MediaThumbnailSpec {
+        &self.spec
+    }
 }
 
 impl MediaThumbnail {
     pub fn new(kind: MediaKind, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: MediaThumbnailSpec::new(kind), theme: theme.clone(), image_content: None }
+        Self {
+            spec: MediaThumbnailSpec::new(kind),
+            theme: theme.clone(),
+            image_content: None,
+        }
     }
 
     pub fn from_spec(spec: MediaThumbnailSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,16 +44,42 @@ impl MediaThumbnail {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn kind(mut self, v: MediaKind) -> Self { self.spec.kind = v; self }
-    pub fn state(mut self, v: MediaState) -> Self { self.spec.state = v; self }
-    pub fn aspect_ratio(mut self, v: AspectRatio) -> Self { self.spec.aspect_ratio = v; self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn meta(mut self, v: impl Into<String>) -> Self { self.spec.meta = Some(v.into()); self }
-    pub fn badge_label(mut self, v: impl Into<String>) -> Self { self.spec.badge_label = Some(v.into()); self }
-    pub fn state_title(mut self, v: impl Into<String>) -> Self { self.spec.state_title = Some(v.into()); self }
-    pub fn state_message(mut self, v: impl Into<String>) -> Self { self.spec.state_message = Some(v.into()); self }
-    pub fn show_caption(mut self, v: bool) -> Self { self.spec.show_caption = v; self }
-
+    pub fn kind(mut self, v: MediaKind) -> Self {
+        self.spec.kind = v;
+        self
+    }
+    pub fn state(mut self, v: MediaState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn aspect_ratio(mut self, v: AspectRatio) -> Self {
+        self.spec.aspect_ratio = v;
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn meta(mut self, v: impl Into<String>) -> Self {
+        self.spec.meta = Some(v.into());
+        self
+    }
+    pub fn badge_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.badge_label = Some(v.into());
+        self
+    }
+    pub fn state_title(mut self, v: impl Into<String>) -> Self {
+        self.spec.state_title = Some(v.into());
+        self
+    }
+    pub fn state_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.state_message = Some(v.into());
+        self
+    }
+    pub fn show_caption(mut self, v: bool) -> Self {
+        self.spec.show_caption = v;
+        self
+    }
 
     pub fn with_image(mut self, image: impl IntoElement) -> Self {
         self.image_content = Some(image.into_any_element());
@@ -82,11 +114,7 @@ impl IntoElement for MediaThumbnail {
             AspectRatio::Video => (px(280.0), px(157.0)),
         };
 
-        let mut container = div()
-            .flex()
-            .flex_col()
-            .gap(gap_md)
-            .overflow_hidden();
+        let mut container = div().flex().flex_col().gap(gap_md).overflow_hidden();
 
         // Thumbnail frame
         let mut frame = div()
@@ -118,15 +146,17 @@ impl IntoElement for MediaThumbnail {
                     .items_center()
                     .gap(gap_sm)
                     .when(spec.state == MediaState::Loading, |el| {
-                        el.child(
-                            Spinner::from_spec(
-                                SpinnerSpec::new()
-                                    .with_variant(SpinnerVariant::Grid)
-                                    .with_size(if spec.show_caption { SpinnerSize::Md } else { SpinnerSize::Sm })
-                                    .with_tone(SpinnerTone::Accent),
-                                theme,
-                            ),
-                        )
+                        el.child(Spinner::from_spec(
+                            SpinnerSpec::new()
+                                .with_variant(SpinnerVariant::Grid)
+                                .with_size(if spec.show_caption {
+                                    SpinnerSize::Md
+                                } else {
+                                    SpinnerSize::Sm
+                                })
+                                .with_tone(SpinnerTone::Accent),
+                            theme,
+                        ))
                     })
                     .child(
                         div()

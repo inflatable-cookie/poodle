@@ -9,9 +9,9 @@
 //! This serves as the "downstream reference-app adoption proof" for g07.
 
 use poodle_adapter::{AdapterManifest, RenderComponent, ThemeProvider};
-use poodle_specs::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
 use poodle_gpui::{GpuiAdapter, GpuiThemeProvider};
 use poodle_specs::{ButtonSpec, StackSpec, SurfaceSpec, TextInputSpec};
+use poodle_specs::{DataTableSpec, DetailShellSpec, FormShellSpec, PageHeaderSpec};
 use poodle_style::StyleDescriptor;
 use poodle_workstation::{AppHeaderSpec, WorkspaceShellSpec};
 
@@ -36,7 +36,10 @@ fn main() {
     let accent = theme.resolve_color("color.accent.base");
     let space = theme.resolve_space("space.stack.md");
     println!("Theme resolution:");
-    println!("  accent color: rgba({:.2}, {:.2}, {:.2}, {:.2})", accent.0, accent.1, accent.2, accent.3);
+    println!(
+        "  accent color: rgba({:.2}, {:.2}, {:.2}, {:.2})",
+        accent.0, accent.1, accent.2, accent.3
+    );
     println!("  stack-md space: {:.1}px\n", space);
 
     // 3. Build and render component specs

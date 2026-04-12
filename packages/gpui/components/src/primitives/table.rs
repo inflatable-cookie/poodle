@@ -22,7 +22,9 @@ pub struct Table {
 
 impl std::ops::Deref for Table {
     type Target = TableSpec;
-    fn deref(&self) -> &TableSpec { &self.spec }
+    fn deref(&self) -> &TableSpec {
+        &self.spec
+    }
 }
 
 impl Table {
@@ -120,12 +122,26 @@ impl Table {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn columns(mut self, v: Vec<TableColumn>) -> Self { self.spec.columns = v; self }
-    pub fn rows(mut self, v: Vec<TableRow>) -> Self { self.spec.rows = v; self }
-    pub fn caption(mut self, v: impl Into<String>) -> Self { self.spec.caption = Some(v.into()); self }
-    pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = v.into(); self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-
+    pub fn columns(mut self, v: Vec<TableColumn>) -> Self {
+        self.spec.columns = v;
+        self
+    }
+    pub fn rows(mut self, v: Vec<TableRow>) -> Self {
+        self.spec.rows = v;
+        self
+    }
+    pub fn caption(mut self, v: impl Into<String>) -> Self {
+        self.spec.caption = Some(v.into());
+        self
+    }
+    pub fn empty_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.empty_message = v.into();
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 }
 
 impl IntoElement for Table {

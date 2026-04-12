@@ -1,4 +1,6 @@
-use crate::types::{CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole};
+use crate::types::{
+    CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole,
+};
 
 /// Selection mode for Calendar.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -80,7 +82,9 @@ impl CalendarSpec {
     }
 
     pub fn current_range_value(&self) -> &DateRangeValue {
-        self.range_value.as_ref().unwrap_or(&self.default_range_value)
+        self.range_value
+            .as_ref()
+            .unwrap_or(&self.default_range_value)
     }
 
     pub fn effective_visible_month(&self) -> Option<&str> {

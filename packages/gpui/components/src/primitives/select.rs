@@ -2,10 +2,15 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec, SelectVariant};
+use poodle_specs::{
+    ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec, SelectVariant,
+};
 
 use super::icon::Icon;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI select/dropdown component backed by `SelectSpec`.
@@ -19,12 +24,20 @@ pub struct Select {
 
 impl std::ops::Deref for Select {
     type Target = SelectSpec;
-    fn deref(&self) -> &SelectSpec { &self.spec }
+    fn deref(&self) -> &SelectSpec {
+        &self.spec
+    }
 }
 
 impl Select {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: SelectSpec::default(), theme: theme.clone(), id_suffix: None, on_toggle: None, on_change: None }
+        Self {
+            spec: SelectSpec::default(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_toggle: None,
+            on_change: None,
+        }
     }
 
     pub fn from_spec(spec: SelectSpec, theme: &GpuiThemeProvider) -> Self {
@@ -38,40 +51,82 @@ impl Select {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self { self.spec.value = Some(v.into()); self }
-    pub fn default_value(mut self, v: impl Into<String>) -> Self { self.spec.default_value = Some(v.into()); self }
-    pub fn placeholder(mut self, v: impl Into<String>) -> Self { self.spec.placeholder = Some(v.into()); self }
-    pub fn options(mut self, v: Vec<ChoiceOption>) -> Self { self.spec.options = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn description_id(mut self, v: impl Into<String>) -> Self { self.spec.description_id = Some(v.into()); self }
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
-    pub fn mode(mut self, v: SelectMode) -> Self { self.spec.mode = v; self }
-    pub fn searchable(mut self, v: bool) -> Self { self.spec.searchable = v; self }
-    pub fn freeform(mut self, v: bool) -> Self { self.spec.freeform = v; self }
-    pub fn empty_message(mut self, v: impl Into<String>) -> Self { self.spec.empty_message = v.into(); self }
+    pub fn value(mut self, v: impl Into<String>) -> Self {
+        self.spec.value = Some(v.into());
+        self
+    }
+    pub fn default_value(mut self, v: impl Into<String>) -> Self {
+        self.spec.default_value = Some(v.into());
+        self
+    }
+    pub fn placeholder(mut self, v: impl Into<String>) -> Self {
+        self.spec.placeholder = Some(v.into());
+        self
+    }
+    pub fn options(mut self, v: Vec<ChoiceOption>) -> Self {
+        self.spec.options = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn description_id(mut self, v: impl Into<String>) -> Self {
+        self.spec.description_id = Some(v.into());
+        self
+    }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
+    pub fn mode(mut self, v: SelectMode) -> Self {
+        self.spec.mode = v;
+        self
+    }
+    pub fn searchable(mut self, v: bool) -> Self {
+        self.spec.searchable = v;
+        self
+    }
+    pub fn freeform(mut self, v: bool) -> Self {
+        self.spec.freeform = v;
+        self
+    }
+    pub fn empty_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.empty_message = v.into();
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
         self
     }
 
-    pub fn on_toggle(
-        mut self,
-        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_toggle(mut self, handler: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self {
         self.on_toggle = Some(Box::new(handler));
         self
     }
 
-    pub fn on_change(
-        mut self,
-        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    pub fn on_change(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
         self
     }
@@ -90,7 +145,8 @@ impl IntoElement for Select {
         let base_height = resolve_px(theme, "size.control.height");
         let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let base_padding = resolve_px(theme, "space.control.x");
-        let inline_padding = base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        let inline_padding =
+            base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let control_radius = resolve_radius(theme, "radius.control");
         let stack_gap = resolve_px(theme, "space.stack.sm");
@@ -105,9 +161,18 @@ impl IntoElement for Select {
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
 
         // Svelte treatment-interactive-subtle values for trigger
-        let surface_bg = Hsla { a: surface_raw.a * 0.82, ..surface_raw };
-        let base_border = Hsla { a: border_default.a * 0.72, ..border_default };
-        let hover_bg = Hsla { a: surface_raw.a * 0.88, ..surface_raw };
+        let surface_bg = Hsla {
+            a: surface_raw.a * 0.82,
+            ..surface_raw
+        };
+        let base_border = Hsla {
+            a: border_default.a * 0.72,
+            ..border_default
+        };
+        let hover_bg = Hsla {
+            a: surface_raw.a * 0.88,
+            ..surface_raw
+        };
 
         // Validation-state border colour. Mirrors TextInput's three
         // tones — when set, the trigger advertises the state and
@@ -121,14 +186,23 @@ impl IntoElement for Select {
             ValidationState::None => None,
         };
         let border = validation_border.unwrap_or(base_border);
-        let hover_border = validation_border.unwrap_or(Hsla { a: border_default.a * 0.92, ..border_default });
+        let hover_border = validation_border.unwrap_or(Hsla {
+            a: border_default.a * 0.92,
+            ..border_default
+        });
         // Elevated treatment for dropdown overlay
-        let elevated_bg = Hsla { a: elevated_raw.a * 0.94, ..elevated_raw };
-        let overlay_border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let elevated_bg = Hsla {
+            a: elevated_raw.a * 0.94,
+            ..elevated_raw
+        };
+        let overlay_border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
 
-        let trigger_text = spec.trigger_text().unwrap_or(
-            spec.placeholder.as_deref().unwrap_or("Select..."),
-        );
+        let trigger_text = spec
+            .trigger_text()
+            .unwrap_or(spec.placeholder.as_deref().unwrap_or("Select..."));
         let is_placeholder = spec.trigger_text().is_none();
         let is_open = spec.current_open();
         let is_disabled = spec.is_disabled;
@@ -144,9 +218,7 @@ impl IntoElement for Select {
         let is_ghost = spec.variant == SelectVariant::Ghost;
 
         // Trigger button — ghost variant strips all field chrome
-        let mut trigger = div()
-            .id(SharedString::from(id_str))
-            .focusable();
+        let mut trigger = div().id(SharedString::from(id_str)).focusable();
 
         if is_ghost {
             // Ghost: no border, background, padding, min-height, or shadow
@@ -168,22 +240,35 @@ impl IntoElement for Select {
                 trigger = trigger.bg(surface_bg);
             }
 
-            trigger = trigger.border_1()
+            trigger = trigger
+                .border_1()
                 .border_color(if is_open { accent } else { border })
                 .flex()
                 .items_center()
                 .justify_between()
                 .gap(inline_gap)
                 .text_size(body_size)
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
         }
 
         if is_disabled {
-            trigger = trigger.opacity(disabled_opacity).cursor(CursorStyle::OperationNotAllowed);
-        } else if !is_ghost {
             trigger = trigger
-                .cursor_pointer()
-                .hover(move |s| s.bg(hover_bg).border_color(hover_border).shadow(vec![gpui::BoxShadow { color: hsla(0.0, 0.0, 1.0, 0.10), offset: point(px(0.0), px(1.0)), blur_radius: px(0.0), spread_radius: px(0.0) }]));
+                .opacity(disabled_opacity)
+                .cursor(CursorStyle::OperationNotAllowed);
+        } else if !is_ghost {
+            trigger = trigger.cursor_pointer().hover(move |s| {
+                s.bg(hover_bg)
+                    .border_color(hover_border)
+                    .shadow(vec![gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 1.0, 0.10),
+                        offset: point(px(0.0), px(1.0)),
+                        blur_radius: px(0.0),
+                        spread_radius: px(0.0),
+                    }])
+            });
         } else {
             trigger = trigger.cursor_pointer();
         }
@@ -196,15 +281,22 @@ impl IntoElement for Select {
 
         // Contract: indicator uses icon-muted color, not text-secondary with opacity
         trigger = trigger.child(
-            div().text_color(text_col).flex_1().child(trigger_text.to_string()),
+            div()
+                .text_color(text_col)
+                .flex_1()
+                .child(trigger_text.to_string()),
         );
 
         // Ghost variant hides the chevron indicator
         if !is_ghost {
             trigger = trigger.child(
                 Icon::from_spec(
-                    IconSpec::new(if is_open { "chevron-up" } else { "chevron-down" })
-                        .with_size(IconSize::Sm),
+                    IconSpec::new(if is_open {
+                        "chevron-up"
+                    } else {
+                        "chevron-down"
+                    })
+                    .with_size(IconSize::Sm),
                     theme,
                 )
                 .with_color(icon_muted),
@@ -218,7 +310,9 @@ impl IntoElement for Select {
             self.on_change.map(|h| std::rc::Rc::from(h));
 
         // Collect selectable option values for keyboard navigation
-        let selectable_values: Vec<String> = spec.options.iter()
+        let selectable_values: Vec<String> = spec
+            .options
+            .iter()
             .filter(|o| !o.is_disabled)
             .map(|o| o.value.clone())
             .collect();
@@ -263,7 +357,8 @@ impl IntoElement for Select {
                             }
                         } else if !nav_values.is_empty() {
                             // Navigate between options
-                            let current_idx = current_sel.as_deref()
+                            let current_idx = current_sel
+                                .as_deref()
                                 .and_then(|cv| nav_values.iter().position(|v| v == cv));
                             let next_idx = match key {
                                 "down" => match current_idx {
@@ -285,7 +380,12 @@ impl IntoElement for Select {
             });
         }
 
-        let mut wrapper = div().flex().flex_col().gap(stack_gap).min_w(px(128.0)).child(trigger);
+        let mut wrapper = div()
+            .flex()
+            .flex_col()
+            .gap(stack_gap)
+            .min_w(px(128.0))
+            .child(trigger);
 
         // Dropdown list (when open)
         // Note: GPUI always renders a custom dropdown (no native mode).
@@ -294,9 +394,7 @@ impl IntoElement for Select {
             let option_selected = color_mix(accent, elevated_bg, 0.10);
             let empty_message = spec.empty_message.clone();
 
-            let mut list = div()
-                .id("poodle-select-list")
-                .rounded(control_radius);
+            let mut list = div().id("poodle-select-list").rounded(control_radius);
 
             // menu_min_width: parse CSS length string to pixels (supports rem and px)
             if let Some(ref min_width_str) = spec.menu_min_width {
@@ -311,7 +409,8 @@ impl IntoElement for Select {
                 list = list.bg(elevated_bg);
             }
 
-            list = list.border_1()
+            list = list
+                .border_1()
                 .border_color(overlay_border)
                 // Contract: elevation-popover shadow
                 .shadow(vec![
@@ -356,14 +455,10 @@ impl IntoElement for Select {
             let mut has_visible_options = false;
             for option in spec.options.iter() {
                 has_visible_options = true;
-                let is_selected =
-                    spec.current_value() == Some(option.value.as_str());
+                let is_selected = spec.current_value() == Some(option.value.as_str());
                 let is_opt_disabled = option.is_disabled;
 
-                let item_id = SharedString::from(format!(
-                    "poodle-select-opt-{}",
-                    option.value
-                ));
+                let item_id = SharedString::from(format!("poodle-select-opt-{}", option.value));
 
                 let mut item = div()
                     .id(item_id)
@@ -373,9 +468,7 @@ impl IntoElement for Select {
                     .text_color(text_primary);
 
                 if is_selected {
-                    item = item
-                        .bg(option_selected)
-                        .text_color(accent);
+                    item = item.bg(option_selected).text_color(accent);
                 }
 
                 if is_opt_disabled {
@@ -383,9 +476,7 @@ impl IntoElement for Select {
                         .opacity(disabled_opacity)
                         .cursor(CursorStyle::OperationNotAllowed);
                 } else {
-                    item = item
-                        .cursor_pointer()
-                        .hover(move |s| s.bg(option_hover));
+                    item = item.cursor_pointer().hover(move |s| s.bg(option_hover));
 
                     // Click handler: select option and close dropdown
                     if let Some(ref change_handler) = on_change_rc {

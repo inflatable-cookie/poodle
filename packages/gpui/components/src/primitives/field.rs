@@ -19,12 +19,18 @@ pub struct Field {
 
 impl std::ops::Deref for Field {
     type Target = FieldSpec;
-    fn deref(&self) -> &FieldSpec { &self.spec }
+    fn deref(&self) -> &FieldSpec {
+        &self.spec
+    }
 }
 
 impl Field {
     pub fn new(id: impl Into<String>, label: impl Into<String>, theme: &GpuiThemeProvider) -> Self {
-        Self { spec: FieldSpec::new(id, label), theme: theme.clone(), control: None }
+        Self {
+            spec: FieldSpec::new(id, label),
+            theme: theme.clone(),
+            control: None,
+        }
     }
 
     pub fn from_spec(spec: FieldSpec, theme: &GpuiThemeProvider) -> Self {
@@ -36,15 +42,38 @@ impl Field {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn id(mut self, v: impl Into<String>) -> Self { self.spec.id = v.into(); self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = v.into(); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn error(mut self, v: impl Into<String>) -> Self { self.spec.error = Some(v.into()); self }
-    pub fn pending_message(mut self, v: impl Into<String>) -> Self { self.spec.pending_message = Some(v.into()); self }
-    pub fn validation_state(mut self, v: ValidationState) -> Self { self.spec.validation_state = v; self }
-    pub fn required(mut self, v: bool) -> Self { self.spec.is_required = v; self }
-    pub fn optional_label(mut self, v: impl Into<String>) -> Self { self.spec.optional_label = Some(v.into()); self }
-
+    pub fn id(mut self, v: impl Into<String>) -> Self {
+        self.spec.id = v.into();
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = v.into();
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn error(mut self, v: impl Into<String>) -> Self {
+        self.spec.error = Some(v.into());
+        self
+    }
+    pub fn pending_message(mut self, v: impl Into<String>) -> Self {
+        self.spec.pending_message = Some(v.into());
+        self
+    }
+    pub fn validation_state(mut self, v: ValidationState) -> Self {
+        self.spec.validation_state = v;
+        self
+    }
+    pub fn required(mut self, v: bool) -> Self {
+        self.spec.is_required = v;
+        self
+    }
+    pub fn optional_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.optional_label = Some(v.into());
+        self
+    }
 
     /// Set the form control element that this field wraps.
     pub fn with_control(mut self, control: impl IntoElement) -> Self {
@@ -84,11 +113,7 @@ impl IntoElement for Field {
             );
         }
 
-        let mut label_row = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .gap(px(8.0)); // space-inline-md
+        let mut label_row = div().flex().items_center().justify_between().gap(px(8.0)); // space-inline-md
 
         label_row = label_row.child(label_el);
 

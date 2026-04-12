@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{CheckState, ControlSize, TriStateSwitchSpec};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, control_height_rem, size_font_rem};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, parse_hex_color, resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI tri-state switch component backed by `TriStateSwitchSpec`.
@@ -22,12 +22,19 @@ pub struct TriStateSwitch {
 
 impl std::ops::Deref for TriStateSwitch {
     type Target = TriStateSwitchSpec;
-    fn deref(&self) -> &TriStateSwitchSpec { &self.spec }
+    fn deref(&self) -> &TriStateSwitchSpec {
+        &self.spec
+    }
 }
 
 impl TriStateSwitch {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: TriStateSwitchSpec::new(), theme: theme.clone(), on_change: None, on_click: None }
+        Self {
+            spec: TriStateSwitchSpec::new(),
+            theme: theme.clone(),
+            on_change: None,
+            on_click: None,
+        }
     }
 
     pub fn from_spec(spec: TriStateSwitchSpec, theme: &GpuiThemeProvider) -> Self {
@@ -40,12 +47,30 @@ impl TriStateSwitch {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn state(mut self, v: CheckState) -> Self { self.spec.state = v; self }
-    pub fn label(mut self, v: impl Into<String>) -> Self { self.spec.label = Some(v.into()); self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn state(mut self, v: CheckState) -> Self {
+        self.spec.state = v;
+        self
+    }
+    pub fn label(mut self, v: impl Into<String>) -> Self {
+        self.spec.label = Some(v.into());
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn size_role(mut self, v: poodle_specs::SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn density(mut self, v: poodle_specs::ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn on_change(
         mut self,
@@ -123,9 +148,17 @@ impl IntoElement for TriStateSwitch {
         let included_bg = color_mix(included_color, surface_bg, 0.18);
 
         let (selected_index, selection_bg, selection_border) = match spec.state {
-            CheckState::Unchecked => (0.0, excluded_bg, color_mix(excluded_color, border_color, 0.58)),
+            CheckState::Unchecked => (
+                0.0,
+                excluded_bg,
+                color_mix(excluded_color, border_color, 0.58),
+            ),
             CheckState::Mixed => (1.0, default_bg, border_color),
-            CheckState::Checked => (2.0, included_bg, color_mix(included_color, border_color, 0.58)),
+            CheckState::Checked => (
+                2.0,
+                included_bg,
+                color_mix(included_color, border_color, 0.58),
+            ),
         };
 
         let selection_x = track_padding + segment_min_w * selected_index;
@@ -177,9 +210,21 @@ impl IntoElement for TriStateSwitch {
             self.on_click.map(|handler| std::rc::Rc::from(handler));
 
         let states = [
-            (spec.excluded_label().to_string(), CheckState::Unchecked, excluded_color),
-            (spec.default_label().to_string(), CheckState::Mixed, text_primary),
-            (spec.included_label().to_string(), CheckState::Checked, included_color),
+            (
+                spec.excluded_label().to_string(),
+                CheckState::Unchecked,
+                excluded_color,
+            ),
+            (
+                spec.default_label().to_string(),
+                CheckState::Mixed,
+                text_primary,
+            ),
+            (
+                spec.included_label().to_string(),
+                CheckState::Checked,
+                included_color,
+            ),
         ];
 
         let switch_id = SharedString::from("poodle-tri-state-switch");
@@ -196,23 +241,32 @@ impl IntoElement for TriStateSwitch {
             .border_color(border_color)
             .bg(track_bg)
             .overflow_hidden()
-            .child(selection)
-            ;
+            .child(selection);
 
         if !spec.is_disabled {
             for (idx, (label, state_value, selected_color)) in states.iter().cloned().enumerate() {
                 let is_selected = spec.state == state_value;
                 let mut segment = segment_base(
                     label,
-                    if is_selected { selected_color } else { text_secondary },
+                    if is_selected {
+                        selected_color
+                    } else {
+                        text_secondary
+                    },
                 )
-                .id(SharedString::from(format!("poodle-tri-state-switch-{}", idx)))
+                .id(SharedString::from(format!(
+                    "poodle-tri-state-switch-{}",
+                    idx
+                )))
                 .focusable()
                 .relative()
                 .border_1()
                 .border_color(gpui::transparent_black())
                 .cursor_pointer()
-                .focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+                .focus(move |s| {
+                    s.border_color(focus_ring)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+                });
 
                 if let Some(ref change_handler) = on_change {
                     let click_handler = change_handler.clone();
@@ -235,7 +289,9 @@ impl IntoElement for TriStateSwitch {
                         .on_key_down(move |event: &KeyDownEvent, window, cx| {
                             if event.keystroke.key == "space" || event.keystroke.key == "enter" {
                                 key_handler(&current_state, window, cx);
-                            } else if event.keystroke.key == "right" || event.keystroke.key == "down" {
+                            } else if event.keystroke.key == "right"
+                                || event.keystroke.key == "down"
+                            {
                                 key_handler(&next_state, window, cx);
                             } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
                                 key_handler(&prev_state, window, cx);
@@ -266,19 +322,22 @@ impl IntoElement for TriStateSwitch {
                 let is_selected = spec.state == state_value;
                 let segment = segment_base(
                     label,
-                    if is_selected { selected_color } else { text_secondary },
+                    if is_selected {
+                        selected_color
+                    } else {
+                        text_secondary
+                    },
                 )
-                .id(SharedString::from(format!("poodle-tri-state-switch-{}", idx)))
+                .id(SharedString::from(format!(
+                    "poodle-tri-state-switch-{}",
+                    idx
+                )))
                 .relative();
                 container = container.child(segment);
             }
         }
 
-        let mut el = div()
-            .flex()
-            .items_center()
-            .gap(inline_gap)
-            .child(container);
+        let mut el = div().flex().items_center().gap(inline_gap).child(container);
 
         if let Some(ref label) = spec.label {
             el = el.child(

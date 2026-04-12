@@ -2,9 +2,9 @@
 //! callout-style error/success banners.
 //! Uses semantic spacing tokens for consistent layout.
 
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 pub struct FormLayout {
     theme: GpuiThemeProvider,
@@ -31,25 +31,38 @@ impl FormLayout {
             columns: 1,
         }
     }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.title = Some(v.into()); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.description = Some(v.into()); self }
-    pub fn error(mut self, v: impl Into<String>) -> Self { self.error = Some(v.into()); self }
-    pub fn success(mut self, v: impl Into<String>) -> Self { self.success = Some(v.into()); self }
-    pub fn columns(mut self, n: usize) -> Self { self.columns = n.max(1); self }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.title = Some(v.into());
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.description = Some(v.into());
+        self
+    }
+    pub fn error(mut self, v: impl Into<String>) -> Self {
+        self.error = Some(v.into());
+        self
+    }
+    pub fn success(mut self, v: impl Into<String>) -> Self {
+        self.success = Some(v.into());
+        self
+    }
+    pub fn columns(mut self, n: usize) -> Self {
+        self.columns = n.max(1);
+        self
+    }
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
-        self.children.push(child.into_any_element()); self
+        self.children.push(child.into_any_element());
+        self
     }
     pub fn with_actions(mut self, actions: impl IntoElement) -> Self {
-        self.actions = Some(actions.into_any_element()); self
+        self.actions = Some(actions.into_any_element());
+        self
     }
 }
 
 /// Builds a callout banner with a toned background for error/success messages.
-fn callout_banner(
-    theme: &GpuiThemeProvider,
-    message: &str,
-    tone_color: Hsla,
-) -> impl IntoElement {
+fn callout_banner(theme: &GpuiThemeProvider, message: &str, tone_color: Hsla) -> impl IntoElement {
     let panel_bg = resolve_color(theme, "color.background.panel");
     let radius = resolve_radius(theme, "radius.control");
     let inline_pad = resolve_px(theme, "space.inline.md");

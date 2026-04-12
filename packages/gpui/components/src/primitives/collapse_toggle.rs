@@ -6,7 +6,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, IconSize, IconSpec,
+    SemanticControlSizeRole,
+};
 
 use super::icon::Icon;
 use crate::presentation::resolve_semantic_size;
@@ -22,12 +25,19 @@ pub struct CollapseToggle {
 
 impl std::ops::Deref for CollapseToggle {
     type Target = CollapseToggleSpec;
-    fn deref(&self) -> &CollapseToggleSpec { &self.spec }
+    fn deref(&self) -> &CollapseToggleSpec {
+        &self.spec
+    }
 }
 
 impl CollapseToggle {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: CollapseToggleSpec::new(), theme: theme.clone(), id_suffix: None, on_toggle: None }
+        Self {
+            spec: CollapseToggleSpec::new(),
+            theme: theme.clone(),
+            id_suffix: None,
+            on_toggle: None,
+        }
     }
 
     pub fn from_spec(spec: CollapseToggleSpec, theme: &GpuiThemeProvider) -> Self {
@@ -40,13 +50,34 @@ impl CollapseToggle {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn collapsed(mut self, v: bool) -> Self { self.spec.is_collapsed = v; self }
-    pub fn direction(mut self, v: CollapseDirection) -> Self { self.spec.direction = v; self }
-    pub fn disabled(mut self, v: bool) -> Self { self.spec.is_disabled = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn collapsed(mut self, v: bool) -> Self {
+        self.spec.is_collapsed = v;
+        self
+    }
+    pub fn direction(mut self, v: CollapseDirection) -> Self {
+        self.spec.direction = v;
+        self
+    }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.is_disabled = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
         self.id_suffix = Some(suffix.into());
@@ -112,7 +143,10 @@ impl IntoElement for CollapseToggle {
 
         // Focus ring
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
-        el = el.focus(move |s| s.border_color(focus_ring).shadow(crate::theme_ext::focus_ring_shadow(focus_ring)));
+        el = el.focus(move |s| {
+            s.border_color(focus_ring)
+                .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
+        });
 
         // ── Interactive states ───────────────────────────────────
         if is_disabled {
@@ -123,19 +157,14 @@ impl IntoElement for CollapseToggle {
         } else {
             el = el
                 .cursor_pointer()
-                .hover(move |s| {
-                    s.bg(hover_fill).text_color(hover_text)
-                })
+                .hover(move |s| s.bg(hover_fill).text_color(hover_text))
                 .active(move |s| s.bg(hover_fill));
         }
 
         // ── Direction Icon (chevron) ─────────────────────────────
         el = el.child(
-            Icon::from_spec(
-                IconSpec::new(icon_name).with_size(IconSize::Sm),
-                theme,
-            )
-            .with_color(text_color),
+            Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
+                .with_color(text_color),
         );
 
         // ── Click + keyboard handler ────────────────────────────

@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, panel_space_x_rem};
+use crate::presentation::{panel_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.
@@ -23,12 +23,20 @@ pub struct Drawer {
 
 impl std::ops::Deref for Drawer {
     type Target = DrawerSpec;
-    fn deref(&self) -> &DrawerSpec { &self.spec }
+    fn deref(&self) -> &DrawerSpec {
+        &self.spec
+    }
 }
 
 impl Drawer {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: DrawerSpec::new(), theme: theme.clone(), content: None, main_content: None, on_close: None }
+        Self {
+            spec: DrawerSpec::new(),
+            theme: theme.clone(),
+            content: None,
+            main_content: None,
+            on_close: None,
+        }
     }
 
     pub fn from_spec(spec: DrawerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,18 +50,54 @@ impl Drawer {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn open(mut self, v: bool) -> Self { self.spec.open = Some(v); self }
-    pub fn default_open(mut self, v: bool) -> Self { self.spec.default_open = v; self }
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn description(mut self, v: impl Into<String>) -> Self { self.spec.description = Some(v.into()); self }
-    pub fn edge(mut self, v: DrawerEdge) -> Self { self.spec.edge = v; self }
-    pub fn modal(mut self, v: bool) -> Self { self.spec.is_modal = v; self }
-    pub fn dismiss_on_escape(mut self, v: bool) -> Self { self.spec.dismiss_on_escape = v; self }
-    pub fn dismiss_on_backdrop(mut self, v: bool) -> Self { self.spec.dismiss_on_backdrop = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
-    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self { self.spec.size_role = v; self }
-    pub fn with_density(mut self, v: ControlDensity) -> Self { self.spec.density = v; self }
+    pub fn open(mut self, v: bool) -> Self {
+        self.spec.open = Some(v);
+        self
+    }
+    pub fn default_open(mut self, v: bool) -> Self {
+        self.spec.default_open = v;
+        self
+    }
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn description(mut self, v: impl Into<String>) -> Self {
+        self.spec.description = Some(v.into());
+        self
+    }
+    pub fn edge(mut self, v: DrawerEdge) -> Self {
+        self.spec.edge = v;
+        self
+    }
+    pub fn modal(mut self, v: bool) -> Self {
+        self.spec.is_modal = v;
+        self
+    }
+    pub fn dismiss_on_escape(mut self, v: bool) -> Self {
+        self.spec.dismiss_on_escape = v;
+        self
+    }
+    pub fn dismiss_on_backdrop(mut self, v: bool) -> Self {
+        self.spec.dismiss_on_backdrop = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_content(mut self, content: impl IntoElement) -> Self {
         self.content = Some(content.into_any_element());
@@ -95,8 +139,14 @@ impl IntoElement for Drawer {
         // Matches Svelte treatment-surface-elevated values:
         //   fill: color-mix(elevated 94%, transparent)
         //   border: color-mix(border-default 22%, transparent)
-        let surface_bg = Hsla { a: elevated_bg.a * 0.94, ..elevated_bg };
-        let border = Hsla { a: border_default.a * 0.22, ..border_default };
+        let surface_bg = Hsla {
+            a: elevated_bg.a * 0.94,
+            ..elevated_bg
+        };
+        let border = Hsla {
+            a: border_default.a * 0.22,
+            ..border_default
+        };
 
         let is_left = spec.edge == DrawerEdge::Left || spec.edge == DrawerEdge::Top;
 
@@ -115,7 +165,8 @@ impl IntoElement for Drawer {
             drawer_panel = drawer_panel.bg(surface_bg);
         }
 
-        drawer_panel = drawer_panel.p(panel_padding)
+        drawer_panel = drawer_panel
+            .p(panel_padding)
             .flex()
             .flex_col()
             .gap(stack_gap)
@@ -178,19 +229,19 @@ impl IntoElement for Drawer {
 
         // Main area
         let main = if let Some(main_content) = self.main_content {
-            div().flex_1().flex().items_center().justify_center().child(main_content)
-        } else {
             div()
                 .flex_1()
                 .flex()
                 .items_center()
                 .justify_center()
-                .child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(text_secondary)
-                        .child("Main area"),
-                )
+                .child(main_content)
+        } else {
+            div().flex_1().flex().items_center().justify_center().child(
+                div()
+                    .text_size(px(12.0))
+                    .text_color(text_secondary)
+                    .child("Main area"),
+            )
         };
 
         if spec.is_modal {

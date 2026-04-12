@@ -23,12 +23,20 @@ pub struct AppHeader {
 
 impl std::ops::Deref for AppHeader {
     type Target = AppHeaderSpec;
-    fn deref(&self) -> &AppHeaderSpec { &self.spec }
+    fn deref(&self) -> &AppHeaderSpec {
+        &self.spec
+    }
 }
 
 impl AppHeader {
     pub fn new(theme: &GpuiThemeProvider) -> Self {
-        Self { spec: AppHeaderSpec::new(), theme: theme.clone(), primary_actions: None, utility_items: None, leading: None }
+        Self {
+            spec: AppHeaderSpec::new(),
+            theme: theme.clone(),
+            primary_actions: None,
+            utility_items: None,
+            leading: None,
+        }
     }
 
     pub fn from_spec(spec: AppHeaderSpec, theme: &GpuiThemeProvider) -> Self {
@@ -42,13 +50,30 @@ impl AppHeader {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn title(mut self, v: impl Into<String>) -> Self { self.spec.title = Some(v.into()); self }
-    pub fn subtitle(mut self, v: impl Into<String>) -> Self { self.spec.subtitle = Some(v.into()); self }
-    pub fn drag_region(mut self, v: bool) -> Self { self.spec.is_drag_region = v; self }
-    pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
-    pub fn primary_action_count(mut self, v: usize) -> Self { self.spec.primary_action_count = v; self }
-    pub fn utility_item_count(mut self, v: usize) -> Self { self.spec.utility_item_count = v; self }
-
+    pub fn title(mut self, v: impl Into<String>) -> Self {
+        self.spec.title = Some(v.into());
+        self
+    }
+    pub fn subtitle(mut self, v: impl Into<String>) -> Self {
+        self.spec.subtitle = Some(v.into());
+        self
+    }
+    pub fn drag_region(mut self, v: bool) -> Self {
+        self.spec.is_drag_region = v;
+        self
+    }
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+    pub fn primary_action_count(mut self, v: usize) -> Self {
+        self.spec.primary_action_count = v;
+        self
+    }
+    pub fn utility_item_count(mut self, v: usize) -> Self {
+        self.spec.utility_item_count = v;
+        self
+    }
 
     pub fn with_primary_actions(mut self, actions: impl IntoElement) -> Self {
         self.primary_actions = Some(actions.into_any_element());

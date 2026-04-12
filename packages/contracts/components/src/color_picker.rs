@@ -1,5 +1,5 @@
-use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_tokens::semantic;
 
 /// Color input mode for the picker.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

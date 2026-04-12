@@ -8,16 +8,17 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{
-    AppHeader, Button, Callout, Checkbox, DataTable, DetailShell,
-    Field, PaginationSummary, Pill, Progress, Separator,
-    StatusBar, Surface, TextInput,
-};
-use poodle_specs::{DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec};
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, CallOutSpec, CheckboxSpec, FieldSpec,
-    PillSpec, ProgressSpec, SeparatorSpec, StatusTone, SurfaceSpec, SurfaceTone, TextInputSpec,
+    AppHeader, Button, Callout, Checkbox, DataTable, DetailShell, Field, PaginationSummary, Pill,
+    Progress, Separator, StatusBar, Surface, TextInput,
 };
 use poodle_specs::{AppHeaderSpec, ShellStatusBarSpec};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, CallOutSpec, CheckboxSpec, FieldSpec, PillSpec, ProgressSpec,
+    SeparatorSpec, StatusTone, SurfaceSpec, SurfaceTone, TextInputSpec,
+};
+use poodle_specs::{
+    DataTableSpec, DetailShellSpec, PaginationSummarySpec, TableColumnSpec, TableRowSpec,
+};
 
 use crate::app_state::DemoScreen;
 use crate::style_bridge::color_to_hsla;
@@ -78,9 +79,9 @@ fn render_overview_shell(theme: &GpuiThemeProvider) -> Div {
                     .child(value.to_string()),
             );
         tile_row = tile_row.child(
-            div().flex_1().child(
-                Surface::from_spec(surface_spec, theme).with_content(tile_content),
-            ),
+            div()
+                .flex_1()
+                .child(Surface::from_spec(surface_spec, theme).with_content(tile_content)),
         );
     }
     content = content.child(tile_row);
@@ -207,8 +208,7 @@ fn render_browse_screen(theme: &GpuiThemeProvider) -> Div {
         ),
     ];
 
-    let table_spec = DataTableSpec::new(columns, rows)
-        .with_aria_label("Asset browser");
+    let table_spec = DataTableSpec::new(columns, rows).with_aria_label("Asset browser");
     content = content.child(DataTable::from_spec(table_spec, theme));
 
     // Pagination — real PaginationSummary
@@ -247,48 +247,49 @@ fn render_detail_screen(theme: &GpuiThemeProvider) -> Div {
     let detail_spec = DetailShellSpec::new().with_title("hero-banner.png");
 
     // Build content for the detail shell: overview section + separator + media section
-    let overview_section = Surface::from_spec(
-        SurfaceSpec::new().with_tone(SurfaceTone::Elevated),
-        theme,
-    )
-    .with_content(
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(6.0))
-            .child(div().text_sm().child("Overview"))
-            .child(
-                div()
-                    .text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Image file uploaded 2 hours ago. 1920\u{00d7}1080 pixels, 2.4 MB."),
-            )
-            .child(
+    let overview_section =
+        Surface::from_spec(SurfaceSpec::new().with_tone(SurfaceTone::Elevated), theme)
+            .with_content(
                 div()
                     .flex()
+                    .flex_col()
                     .gap(px(6.0))
-                    .child(Pill::from_spec(PillSpec::new().with_label("Published"), theme))
-                    .child(Pill::from_spec(PillSpec::new().with_label("Image"), theme)),
-            ),
-    );
+                    .child(div().text_sm().child("Overview"))
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(
+                                "Image file uploaded 2 hours ago. 1920\u{00d7}1080 pixels, 2.4 MB.",
+                            ),
+                    )
+                    .child(
+                        div()
+                            .flex()
+                            .gap(px(6.0))
+                            .child(Pill::from_spec(
+                                PillSpec::new().with_label("Published"),
+                                theme,
+                            ))
+                            .child(Pill::from_spec(PillSpec::new().with_label("Image"), theme)),
+                    ),
+            );
 
-    let media_section = Surface::from_spec(
-        SurfaceSpec::new().with_tone(SurfaceTone::Elevated),
-        theme,
-    )
-    .with_content(
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(6.0))
-            .child(div().text_sm().child("Media"))
-            .child(
+    let media_section =
+        Surface::from_spec(SurfaceSpec::new().with_tone(SurfaceTone::Elevated), theme)
+            .with_content(
                 div()
-                    .text_xs()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Preview area for the selected asset."),
-            ),
-    );
+                    .flex()
+                    .flex_col()
+                    .gap(px(6.0))
+                    .child(div().text_sm().child("Media"))
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child("Preview area for the selected asset."),
+                    ),
+            );
 
     let detail_content = div()
         .flex()
@@ -298,9 +299,8 @@ fn render_detail_screen(theme: &GpuiThemeProvider) -> Div {
         .child(Separator::from_spec(SeparatorSpec::new(), theme))
         .child(media_section);
 
-    content = content.child(
-        DetailShell::from_spec(detail_spec, theme).with_content(detail_content),
-    );
+    content =
+        content.child(DetailShell::from_spec(detail_spec, theme).with_content(detail_content));
 
     content
 }
@@ -362,9 +362,8 @@ fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
         .text_xs()
         .text_color(color_to_hsla(text_secondary))
         .child("main branch");
-    content = content.child(
-        AppHeader::from_spec(app_header_spec, theme).with_utility_items(branch_label),
-    );
+    content = content
+        .child(AppHeader::from_spec(app_header_spec, theme).with_utility_items(branch_label));
 
     // Split view: left dock panel + main panel (using raw divs since PanelSurface was removed)
     let left_dock_content = div()
@@ -430,9 +429,7 @@ fn render_workspace_screen(theme: &GpuiThemeProvider) -> Div {
         .text_xs()
         .text_color(color_to_hsla(text_secondary))
         .child("Ln 42, Col 18");
-    content = content.child(
-        StatusBar::from_spec(status_spec, theme).with_trailing_items(trailing),
-    );
+    content = content.child(StatusBar::from_spec(status_spec, theme).with_trailing_items(trailing));
 
     content
 }

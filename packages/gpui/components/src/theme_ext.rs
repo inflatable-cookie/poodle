@@ -66,7 +66,10 @@ pub fn color_mix_black(color: Hsla, ratio: f32) -> Hsla {
 /// Use with `.focus(move |s| s.border_color(fr).shadow(focus_ring_shadow(fr)))`.
 pub fn focus_ring_shadow(focus_ring_color: Hsla) -> Vec<gpui::BoxShadow> {
     vec![gpui::BoxShadow {
-        color: Hsla { a: focus_ring_color.a * 0.28, ..focus_ring_color },
+        color: Hsla {
+            a: focus_ring_color.a * 0.28,
+            ..focus_ring_color
+        },
         offset: gpui::point(gpui::px(0.0), gpui::px(0.0)),
         blur_radius: gpui::px(0.0),
         spread_radius: gpui::px(2.0),
@@ -120,7 +123,11 @@ fn blend_white(color: Hsla, white_ratio: f32) -> Hsla {
 pub fn brand_raised_primary_fill(accent: Hsla) -> gpui::Background {
     let top = blend_white(accent, 0.24);
     let bottom = accent;
-    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
+    gpui::linear_gradient(
+        180.0,
+        gpui::linear_color_stop(top, 0.0),
+        gpui::linear_color_stop(bottom, 1.0),
+    )
 }
 
 /// Brand-raised hover gradient for primary buttons.
@@ -128,35 +135,55 @@ pub fn brand_raised_primary_fill_hover(accent: Hsla) -> gpui::Background {
     let base = blend_white(accent, 0.06);
     let top = blend_white(base, 0.30);
     let bottom = blend_white(base, 0.06);
-    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
+    gpui::linear_gradient(
+        180.0,
+        gpui::linear_color_stop(top, 0.0),
+        gpui::linear_color_stop(bottom, 1.0),
+    )
 }
 
 /// Brand-raised gradient for secondary/ghost buttons and surfaces.
 pub fn brand_raised_interactive_fill(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.18);
     let bottom = blend_white(base_color, 0.02);
-    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
+    gpui::linear_gradient(
+        180.0,
+        gpui::linear_color_stop(top, 0.0),
+        gpui::linear_color_stop(bottom, 1.0),
+    )
 }
 
 /// Brand-raised gradient for subtle input controls.
 pub fn brand_raised_subtle_fill(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.10);
     let bottom = base_color;
-    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
+    gpui::linear_gradient(
+        180.0,
+        gpui::linear_color_stop(top, 0.0),
+        gpui::linear_color_stop(bottom, 1.0),
+    )
 }
 
 /// Brand-raised hover gradient for subtle input controls.
 pub fn brand_raised_subtle_fill_hover(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.16);
     let bottom = blend_white(base_color, 0.02);
-    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
+    gpui::linear_gradient(
+        180.0,
+        gpui::linear_color_stop(top, 0.0),
+        gpui::linear_color_stop(bottom, 1.0),
+    )
 }
 
 /// Brand-raised gradient for surface/card/panel containers.
 pub fn brand_raised_surface_fill(base_color: Hsla) -> gpui::Background {
     let top = blend_white(base_color, 0.14);
     let bottom = blend_white(base_color, 0.02);
-    gpui::linear_gradient(180.0, gpui::linear_color_stop(top, 0.0), gpui::linear_color_stop(bottom, 1.0))
+    gpui::linear_gradient(
+        180.0,
+        gpui::linear_color_stop(top, 0.0),
+        gpui::linear_color_stop(bottom, 1.0),
+    )
 }
 
 /// Brand-raised shadow for interactive elements.
