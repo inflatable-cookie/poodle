@@ -12,6 +12,8 @@ mod style_bridge;
 mod token_view;
 
 use std::borrow::Cow;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
 
 use gpui::prelude::FluentBuilder;
@@ -644,9 +646,12 @@ impl PreviewRoot {
         let mut layout = div().w_full().h(available_h).flex().child(sidebar);
 
         if let Some(component) = active_component {
+            let mut hasher = DefaultHasher::new();
+            component.slug.hash(&mut hasher);
+            let content_id = hasher.finish();
             layout = layout.child(
                 div()
-                    .id("specimen-content")
+                    .id(("specimen-content", content_id))
                     .flex_1()
                     .h(available_h)
                     .flex()
