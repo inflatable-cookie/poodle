@@ -34,26 +34,25 @@ surface that needs to be made explicit again.
   classified, next milestone compiled
 - `g10.003` complete — Svelte Component Overhaul Closeout
 - `g10.004` complete — Unified Component Package
-- `g10.005` ready — GPUI preview shell, navigation, and native state parity
-- `g10.006` planned — GPUI component page usage docs and shape parity
-- `g10.007` planned — GPUI long-tail component parity sweep and closeout
+- `g10.005` complete — GPUI preview shell, navigation, and native state parity
+- `g10.006` complete — GPUI component page usage docs and shape parity
+- `g10.007` complete — GPUI long-tail component parity sweep and closeout
   checkpoint
 
 Three active seams identified:
 - Seam A (Svelte Component Overhaul): complete via `g10.003`
-- Seam B (Jetstream Implementation): planned, not started — own milestone after A
-- Seam C (Parity/Verification): now compiled into `g10.005` to `g10.007`
+- Seam B (Jetstream Implementation): active next lane
+- Seam C (Parity/Verification): closeout checkpoint reached via `g10.005` to
+  `g10.007`
 
 ## Active Runway
 
-- immediate ready card: `g10.005`
-- next planned card: `g10.006`
-- next checkpoint card: `g10.007`
-- planning checkpoint after `g10.007`: decide whether the next active lane is
-  more GPUI parity or Seam B Jetstream implementation
+- current active lane: Seam B Jetstream implementation
+- parity checkpoint reached: `g10.005` to `g10.007` complete
+- only reopen GPUI parity for fresh evidence or a new bounded milestone
 
 ## Next Task
 
-`g10.005` is the active ready milestone. Execute Batch 5.1: replace the bespoke
-GPUI component sidebar with the real `SidebarNav` shell while preserving unified
-search and grouping behavior.
+Return to the Jetstream execution seam in `g10`: compile the next Jetstream
+milestone or resume the current implementation card with the GPUI parity lane
+treated as checkpointed.

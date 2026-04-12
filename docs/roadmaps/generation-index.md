@@ -8,9 +8,9 @@
   - Notes: `g10.001` proved Jetstream feasibility. `g10.002` recovered the
     live queue and classified three seams (Svelte overhaul, Jetstream
     implementation, parity). `g10.003` closed the Svelte overhaul.
-    `g10.004` unified the component package. `g10.005` is now the active ready
-    milestone for GPUI preview shell, navigation, and native state parity, with
-    `g10.006` and `g10.007` forming the next bounded parity runway.
+    `g10.004` unified the component package. `g10.005` to `g10.007` closed the
+    current GPUI parity tranche. The next active execution focus inside `g10`
+    is Jetstream implementation unless a new bounded parity card is opened.
 
 ## Completed Foundations
 
@@ -77,5 +77,5 @@ When roadmap files disagree:
 
 ## Next Task
 
-`g10.005` is the active ready milestone. Start GPUI preview shell and
-navigation parity with SidebarNav adoption and native continuity work.
+Use `g10/README.md` to resume the Jetstream lane. Reopen GPUI parity only if a
+new defect is found and compiled into a fresh bounded milestone.

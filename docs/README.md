@@ -53,5 +53,6 @@ effigy health
 
 ## Next Task
 
-Use `g10.005` as the active ready card for the GPUI parity lane, then continue
-through the compiled runway in `g10.006` and `g10.007`.
+Use `roadmaps/g10/README.md` as the current entrypoint. The GPUI parity tranche
+through `g10.007` is checkpointed; the next active work should come from the
+Jetstream lane unless a new parity defect appears.

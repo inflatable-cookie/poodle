@@ -1,6 +1,6 @@
 # g10.006 GPUI Component Page Usage Docs And Shape Parity
 
-Status: planned
+Status: complete
 Owner: Poodle core
 Depends on: g10.005
 Updated: 2026-04-12
@@ -42,27 +42,34 @@ Svelte `ComponentPage` without faking docs data that does not exist.
 
 ### Batch 6.1 - Contract Doc Extraction
 
-- [ ] define one GPUI-side parser or mapper from shared contract docs into a
+- [x] define one GPUI-side parser or mapper from shared contract docs into a
       usage-doc view model
-- [ ] extract the sections that are consistently present enough to review:
+- [x] extract the sections that are consistently present enough to review:
       summary, props, states, events, anatomy, examples, and status metadata
-- [ ] keep unsupported or absent fields explicit in the model rather than
+- [x] keep unsupported or absent fields explicit in the model rather than
       fabricating output
 
 ### Batch 6.2 - Component Page Integration
 
-- [ ] replace the current contract-doc card with a usage-doc surface that sits
+- [x] replace the current contract-doc card with a usage-doc surface that sits
       where Svelte shows usage docs
-- [ ] keep import guidance compact and subordinate to specimen plus docs
-- [ ] ensure pages with no shared docs do not render a misleading full-doc shell
+- [x] keep import guidance compact and subordinate to specimen plus docs
+- [x] ensure pages with no shared docs do not render a misleading full-doc shell
 
 ### Batch 6.3 - Review And Validation
 
-- [ ] run a spot review across representative components from multiple tags
-- [ ] correct any doc-shape mismatch between GPUI rendering and current
+- [x] run a spot review across representative components from multiple tags
+- [x] correct any doc-shape mismatch between GPUI rendering and current
       contract structure
-- [ ] validate with `cargo check --manifest-path packages/gpui/preview/Cargo.toml`
+- [x] validate with `cargo check --manifest-path packages/gpui/preview/Cargo.toml`
       and `git diff --check`
+
+## Outcome
+
+`g10.006` closed the biggest component-page parity hole. GPUI now reads shared
+generated component docs JSON first, falls back to contract markdown only when
+needed, and renders a Svelte-shaped usage-doc surface after the specimen and
+import sections.
 
 ## Exit Criteria
 
@@ -72,5 +79,5 @@ Svelte `ComponentPage` without faking docs data that does not exist.
 
 ## Next Task
 
-After `g10.005` closes, execute Batch 6.1 in `g10.006`: map shared contract
-docs into a GPUI usage-doc view model.
+`g10.007` is next: run the long-tail parity sweep, close the remaining
+misleading specimens, and leave an explicit residual-gap register.

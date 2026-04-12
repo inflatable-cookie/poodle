@@ -19,8 +19,8 @@ Roadmaps hold executable milestone work for Poodle.
 - highest on-disk generation folder: `g10`
 - current executable generation plan: `g10`
 - `g09` is complete
-- `g10` is active, `g10.005` ready, GPUI parity runway compiled through
-  `g10.007`
+- `g10` is active, `g10.005` to `g10.007` are complete, and the GPUI parity
+  runway is now checkpointed rather than the active ready lane
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -45,6 +45,6 @@ Do not assume the highest-numbered generation folder is the active one.
 
 ## Next Task
 
-Open `g10.005` and execute Batch 5.1: replace the bespoke GPUI component
-sidebar with the real `SidebarNav` shell, then continue through the compiled
-parity runway in `g10.006` and `g10.007`.
+Open `g10/README.md`, treat the GPUI parity tranche as checkpointed, and resume
+the Jetstream execution lane unless fresh parity evidence forces a new bounded
+card.

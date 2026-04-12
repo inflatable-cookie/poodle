@@ -1,6 +1,6 @@
 # g10.005 GPUI Preview Shell, Navigation, And Native State Parity
 
-Status: ready
+Status: complete
 Owner: Poodle core
 Depends on: g10.004
 Updated: 2026-04-12
@@ -46,27 +46,34 @@ and specimen work continues.
 
 ### Batch 5.1 - SidebarNav Adoption
 
-- [ ] replace the custom grouped component sidebar with the shared `SidebarNav`
+- [x] replace the custom grouped component sidebar with the shared `SidebarNav`
       component
-- [ ] preserve the current unified registry grouping, filtering, and count
+- [x] preserve the current unified registry grouping, filtering, and count
       behavior inside that shell
-- [ ] confirm keyboard/focus behavior remains coherent after the shell swap
+- [x] confirm keyboard/focus behavior remains coherent after the shell swap
 
 ### Batch 5.2 - Native State Continuity
 
-- [ ] promote the current launch-command/replay affordance into the canonical
+- [x] promote the current launch-command/replay affordance into the canonical
       native continuity mechanism
-- [ ] preserve active section, search query, selected component, token panel,
+- [x] preserve active section, search query, selected component, token panel,
       token query, and demo screen in one reproducible launch state
-- [ ] make the continuity mechanism visible enough for operators without
+- [x] make the continuity mechanism visible enough for operators without
       turning the preview into an internal tooling dashboard
 
 ### Batch 5.3 - Shell Trim And Validation
 
-- [ ] remove or demote remaining GPUI-only shell framing that overstates parity
-- [ ] keep the hidden demo surface clearly marked as a separate contract target
-- [ ] validate with `cargo check --manifest-path packages/gpui/preview/Cargo.toml`
+- [x] remove or demote remaining GPUI-only shell framing that overstates parity
+- [x] keep the hidden demo surface clearly marked as a separate contract target
+- [x] validate with `cargo check --manifest-path packages/gpui/preview/Cargo.toml`
       and `git diff --check`
+
+## Outcome
+
+`g10.005` closed the shell-level GPUI drift against the live Svelte preview.
+The GPUI preview now uses the real `SidebarNav`, preserves review-critical
+state natively, and no longer carries the earlier fake browser-route or
+dashboard-style review chrome.
 
 ## Exit Criteria
 
@@ -77,5 +84,5 @@ and specimen work continues.
 
 ## Next Task
 
-Execute Batch 5.1 in `g10.005`: replace the bespoke GPUI component sidebar with
-the real `SidebarNav` shell and keep unified search/group behavior intact.
+`g10.006` is next: keep the cleaner shell intact and finish GPUI component-page
+usage-doc and page-shape parity.
