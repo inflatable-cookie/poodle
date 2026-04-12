@@ -1,12 +1,43 @@
 use poodle_tokens::semantic;
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
+/// How the user enters edit mode. Matches `activationMode` prop.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum EditableLabelActivation {
+    #[default]
+    DoubleClick,
+    EnterOrSpace,
+    Programmatic,
+}
+
+/// Visual treatment for the label container.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum EditableLabelVariant {
+    /// Default: has padding and border in edit mode.
+    #[default]
+    Default,
+    /// Flush: no padding or border, text renders inline.
+    Flush,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EditableLabelSpec {
     pub value: String,
     pub placeholder: Option<String>,
     pub is_editing: bool,
     pub is_disabled: bool,
+    /// How the user enters edit mode.
+    pub activation_mode: EditableLabelActivation,
+    /// Select all text when editing begins.
+    pub select_on_focus: bool,
+    /// Visual variant — default has border/padding, flush is inline.
+    pub variant: EditableLabelVariant,
+    /// Italic text shown when value is empty (display mode only).
+    pub empty_text: Option<String>,
+    /// Maximum character count for the input.
+    pub max_length: Option<usize>,
+    /// Show pencil icon on hover/focus to signal editability.
+    pub show_edit_icon: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -19,6 +50,12 @@ impl Default for EditableLabelSpec {
             placeholder: None,
             is_editing: false,
             is_disabled: false,
+            activation_mode: EditableLabelActivation::DoubleClick,
+            select_on_focus: true,
+            variant: EditableLabelVariant::Default,
+            empty_text: None,
+            max_length: None,
+            show_edit_icon: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -48,6 +85,36 @@ impl EditableLabelSpec {
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_activation_mode(mut self, mode: EditableLabelActivation) -> Self {
+        self.activation_mode = mode;
+        self
+    }
+
+    pub fn with_select_on_focus(mut self, v: bool) -> Self {
+        self.select_on_focus = v;
+        self
+    }
+
+    pub fn with_variant(mut self, variant: EditableLabelVariant) -> Self {
+        self.variant = variant;
+        self
+    }
+
+    pub fn with_empty_text(mut self, text: impl Into<String>) -> Self {
+        self.empty_text = Some(text.into());
+        self
+    }
+
+    pub fn with_max_length(mut self, max: usize) -> Self {
+        self.max_length = Some(max);
+        self
+    }
+
+    pub fn with_show_edit_icon(mut self, v: bool) -> Self {
+        self.show_edit_icon = v;
         self
     }
 

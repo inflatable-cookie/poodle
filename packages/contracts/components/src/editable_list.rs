@@ -8,6 +8,11 @@ pub struct EditableListSpec {
     pub add_label: String,
     pub placeholder: String,
     pub max_items: Option<usize>,
+    /// When true, show add-item input and remove buttons.
+    pub is_editable: bool,
+    /// Show remove buttons without enabling add input. Finer-grained
+    /// than `is_editable` — allows deletion without insertion.
+    pub is_removable: bool,
     pub is_disabled: bool,
     pub aria_label: String,
     pub is_reorderable: bool,
@@ -25,6 +30,17 @@ pub struct EditableListSpec {
     /// Informational banner rendered below the list (success /
     /// guidance copy).
     pub info_message: Option<String>,
+    /// Show large-list guidance when item count exceeds threshold.
+    pub long_list_threshold: Option<usize>,
+    /// Custom large-list guidance copy; defaults to generated text
+    /// when None.
+    pub long_list_warning_text: Option<String>,
+    /// Optional page window size for very large reorder sessions.
+    pub window_size: Option<usize>,
+    /// Submit button label when workflow chrome is shown.
+    pub submit_label: String,
+    /// Cancel button label when workflow chrome is shown.
+    pub cancel_label: String,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -37,6 +53,8 @@ impl EditableListSpec {
             add_label: String::from("Add item"),
             placeholder: String::from("New item"),
             max_items: None,
+            is_editable: false,
+            is_removable: false,
             is_disabled: false,
             aria_label: String::from("List"),
             is_reorderable: true,
@@ -44,6 +62,11 @@ impl EditableListSpec {
             is_submitting: false,
             error_message: None,
             info_message: None,
+            long_list_threshold: Some(50),
+            long_list_warning_text: None,
+            window_size: None,
+            submit_label: String::from("Save Order"),
+            cancel_label: String::from("Cancel"),
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -67,6 +90,16 @@ impl EditableListSpec {
 
     pub fn with_max_items(mut self, max: usize) -> Self {
         self.max_items = Some(max);
+        self
+    }
+
+    pub fn with_editable(mut self, is_editable: bool) -> Self {
+        self.is_editable = is_editable;
+        self
+    }
+
+    pub fn with_removable(mut self, is_removable: bool) -> Self {
+        self.is_removable = is_removable;
         self
     }
 
@@ -102,6 +135,31 @@ impl EditableListSpec {
 
     pub fn with_info_message(mut self, message: impl Into<String>) -> Self {
         self.info_message = Some(message.into());
+        self
+    }
+
+    pub fn with_long_list_threshold(mut self, threshold: usize) -> Self {
+        self.long_list_threshold = Some(threshold);
+        self
+    }
+
+    pub fn with_long_list_warning_text(mut self, text: impl Into<String>) -> Self {
+        self.long_list_warning_text = Some(text.into());
+        self
+    }
+
+    pub fn with_window_size(mut self, size: usize) -> Self {
+        self.window_size = Some(size);
+        self
+    }
+
+    pub fn with_submit_label(mut self, label: impl Into<String>) -> Self {
+        self.submit_label = label.into();
+        self
+    }
+
+    pub fn with_cancel_label(mut self, label: impl Into<String>) -> Self {
+        self.cancel_label = label.into();
         self
     }
 

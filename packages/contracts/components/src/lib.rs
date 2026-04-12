@@ -147,7 +147,7 @@ pub use detail_item::{DetailItemLayout, DetailItemPresentation, DetailItemSpan, 
 pub use dialog::DialogSpec;
 pub use drawer::DrawerSpec;
 pub use duration_input::DurationInputSpec;
-pub use editable_label::EditableLabelSpec;
+pub use editable_label::{EditableLabelActivation, EditableLabelSpec, EditableLabelVariant};
 pub use eyebrow::EyebrowSpec;
 pub use field::{FieldRelationships, FieldSpec};
 pub use field_set::{FieldSetSpec, SpaceScale};
@@ -187,7 +187,7 @@ pub type SearchFieldSpec = TextInputSpec;
 pub use segmented_control::SegmentedControlSpec;
 pub use select::{SelectMode, SelectSpec, SelectVariant};
 pub use separator::SeparatorSpec;
-pub use skeleton::SkeletonSpec;
+pub use skeleton::{SkeletonPreset, SkeletonSpec};
 pub use slider::SliderSpec;
 pub use spinner::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 pub use split_button::{SplitButtonSpec, SplitMenuItem};
