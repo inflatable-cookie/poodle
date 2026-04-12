@@ -179,15 +179,17 @@ impl IntoElement for DurationInput {
             if let Some(handler) = self.on_change {
                 let current_display = display.to_string();
                 let show_seconds = spec.show_seconds;
+                let max_hours = spec.max_hours as i64;
+                let min_total = spec.min_total_seconds as i64;
+                let max_total = spec.max_total_seconds.map(|v| v as i64);
                 wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
                     let delta: i64 = if event.keystroke.key == "up" {
-                        60 // increment by 1 minute
+                        60
                     } else if event.keystroke.key == "down" {
-                        -60 // decrement by 1 minute
+                        -60
                     } else {
                         return;
                     };
-                    // Parse current value as total seconds
                     let parts: Vec<&str> = current_display.split(':').collect();
                     let mut total_secs: i64 = 0;
                     if let Some(h) = parts.first().and_then(|s| s.parse::<i64>().ok()) {
@@ -199,8 +201,11 @@ impl IntoElement for DurationInput {
                     if let Some(s) = parts.get(2).and_then(|s| s.parse::<i64>().ok()) {
                         total_secs += s;
                     }
-                    total_secs = (total_secs + delta).max(0);
-                    let h = total_secs / 3600;
+                    total_secs = (total_secs + delta).max(min_total);
+                    if let Some(cap) = max_total {
+                        total_secs = total_secs.min(cap);
+                    }
+                    let h = (total_secs / 3600).min(max_hours);
                     let m = (total_secs % 3600) / 60;
                     let s = total_secs % 60;
                     let new_val = if show_seconds {
