@@ -194,15 +194,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-shortcuts-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-shortcuts-open", open, cx);
                 }
             })
             .with_content(
@@ -258,15 +251,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-form-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-form-open", open, cx);
                 }
             })
             .with_content(
@@ -312,11 +298,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("dialog-form-cancel")
                         .on_click(cx.listener(
                             |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("dialog-form-open".to_string(), false);
-                                cx.notify();
+                                overlay_state::set_toggle(this, "dialog-form-open", false, cx);
                             },
                         )),
                     )
@@ -324,11 +306,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Button::from_spec(ButtonSpec::new().with_label("Create project"), theme)
                             .with_id("dialog-form-create")
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("dialog-form-open".to_string(), false);
-                                cx.notify();
+                                overlay_state::set_toggle(this, "dialog-form-open", false, cx);
                             })),
                     ),
             ),
@@ -364,15 +342,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-changelog-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-changelog-open", open, cx);
                 }
             })
             .with_header(
@@ -421,15 +392,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-terms-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-terms-open", open, cx);
                 }
             })
             .with_content(
@@ -463,11 +427,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_id("dialog-terms-decline")
                                 .on_click(cx.listener(
                                     |this, _e: &ClickEvent, _w, cx| {
-                                        this.state
-                                            .specimens
-                                            .toggles
-                                            .insert("dialog-terms-open".to_string(), false);
-                                        cx.notify();
+                                        overlay_state::set_toggle(
+                                            this,
+                                            "dialog-terms-open",
+                                            false,
+                                            cx,
+                                        );
                                     },
                                 )),
                             )
@@ -475,11 +440,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 Button::from_spec(ButtonSpec::new().with_label("Accept"), theme)
                                     .with_id("dialog-terms-accept")
                                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                        this.state
-                                            .specimens
-                                            .toggles
-                                            .insert("dialog-terms-open".to_string(), false);
-                                        cx.notify();
+                                        overlay_state::set_toggle(
+                                            this,
+                                            "dialog-terms-open",
+                                            false,
+                                            cx,
+                                        );
                                     })),
                             ),
                     ),
@@ -498,15 +464,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-bare-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-bare-open", open, cx);
                 }
             })
             .with_content(
@@ -570,11 +529,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                         .with_id("dialog-bare-close")
                                         .on_click(
                                             cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                                this.state
-                                                    .specimens
-                                                    .toggles
-                                                    .insert("dialog-bare-open".to_string(), false);
-                                                cx.notify();
+                                                overlay_state::set_toggle(
+                                                    this,
+                                                    "dialog-bare-open",
+                                                    false,
+                                                    cx,
+                                                );
                                             }),
                                         ),
                                     )
@@ -586,11 +546,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                         .with_id("dialog-bare-download")
                                         .on_click(
                                             cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                                this.state
-                                                    .specimens
-                                                    .toggles
-                                                    .insert("dialog-bare-open".to_string(), false);
-                                                cx.notify();
+                                                overlay_state::set_toggle(
+                                                    this,
+                                                    "dialog-bare-open",
+                                                    false,
+                                                    cx,
+                                                );
                                             }),
                                         ),
                                     ),
@@ -652,15 +613,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-scroll-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-scroll-open", open, cx);
                 }
             })
             .with_content(log_list)
