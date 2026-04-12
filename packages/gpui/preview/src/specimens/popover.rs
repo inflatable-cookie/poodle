@@ -1,4 +1,5 @@
 use crate::app_state::AppState;
+use crate::specimens::overlay_state;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -30,14 +31,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .on_open_change({
                         let root = root.clone();
                         move |open, _window, cx| {
-                            root.update(cx, |this, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("popover-default".to_string(), open);
-                                cx.notify();
-                            })
-                            .ok();
+                            overlay_state::set_toggle_via_entity(
+                                &root,
+                                "popover-default",
+                                open,
+                                cx,
+                            );
                         }
                     })
                     .with_trigger(
@@ -82,14 +81,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .on_open_change({
                         let root = root.clone();
                         move |open, _window, cx| {
-                            root.update(cx, |this, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("popover-top".to_string(), open);
-                                cx.notify();
-                            })
-                            .ok();
+                            overlay_state::set_toggle_via_entity(&root, "popover-top", open, cx);
                         }
                     })
                     .with_trigger(

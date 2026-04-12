@@ -1,4 +1,5 @@
 use crate::app_state::AppState;
+use crate::specimens::overlay_state;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -43,8 +44,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         .with_id(id)
         .on_click(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-            this.state.specimens.toggles.insert(key.to_string(), true);
-            cx.notify();
+            overlay_state::set_toggle(this, key, true, cx);
         }))
         .into_any_element()
     };
@@ -678,11 +678,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("dialog-scroll-close")
                         .on_click(cx.listener(
                             |this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("dialog-scroll-open".to_string(), false);
-                                cx.notify();
+                                overlay_state::set_toggle(this, "dialog-scroll-open", false, cx);
                             },
                         )),
                     )
@@ -690,11 +686,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Button::from_spec(ButtonSpec::new().with_label("Export log"), theme)
                             .with_id("dialog-scroll-export")
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("dialog-scroll-open".to_string(), false);
-                                cx.notify();
+                                overlay_state::set_toggle(this, "dialog-scroll-open", false, cx);
                             })),
                     ),
             ),
@@ -718,12 +710,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )
                 .on_open_change({
                     let root = root_handle.clone();
-                    move |_open, _window, cx| {
-                        root.update(cx, |this, cx| {
-                            this.state.specimens.toggles.insert(key.to_string(), false);
-                            cx.notify();
-                        })
-                        .ok();
+                    move |open, _window, cx| {
+                        overlay_state::set_toggle_via_entity(&root, key, open, cx);
                     }
                 })
                 .with_content(
@@ -736,8 +724,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Button::from_spec(ButtonSpec::new().with_label("Close"), theme)
                         .with_id(format!("dialog-width-{label}-close"))
                         .on_click(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-                            this.state.specimens.toggles.insert(key.to_string(), false);
-                            cx.notify();
+                            overlay_state::set_toggle(this, key, false, cx);
                         })),
                 ),
             );
@@ -755,15 +742,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-persistent-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-persistent-open", open, cx);
                 }
             })
             .with_content(
@@ -778,11 +758,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 Button::from_spec(ButtonSpec::new().with_label("Done"), theme)
                     .with_id("dialog-persistent-done")
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("dialog-persistent-open".to_string(), false);
-                        cx.notify();
+                        overlay_state::set_toggle(this, "dialog-persistent-open", false, cx);
                     })),
             ),
         );

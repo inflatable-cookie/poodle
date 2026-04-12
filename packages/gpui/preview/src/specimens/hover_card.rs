@@ -1,58 +1,11 @@
 use crate::app_state::AppState;
+use crate::specimens::overlay_state;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{Eyebrow, HoverCard};
 use poodle_specs::{EyebrowSpec, HoverCardSpec, OverlayPlacement};
-use std::time::Duration;
-
-fn update_hover_intent(
-    root: &WeakEntity<PreviewRoot>,
-    intent_key: &'static str,
-    hovered: bool,
-    cx: &mut App,
-) {
-    root.update(cx, |this, cx| {
-        this.state
-            .specimens
-            .toggles
-            .insert(intent_key.to_string(), hovered);
-        cx.notify();
-    })
-    .ok();
-}
-
-fn schedule_hover_card_state(
-    window: &mut Window,
-    cx: &mut App,
-    root: WeakEntity<PreviewRoot>,
-    open_key: &'static str,
-    intent_key: &'static str,
-    hovered: bool,
-    delay_ms: u32,
-) {
-    window
-        .spawn(cx, async move |cx| {
-            cx.background_executor()
-                .timer(Duration::from_millis(u64::from(delay_ms)))
-                .await;
-            cx.update(|_window, cx| {
-                root.update(cx, |this, cx| {
-                    if this.state.specimens.is_on(intent_key) == hovered {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert(open_key.to_string(), hovered);
-                        cx.notify();
-                    }
-                })
-                .ok();
-            })
-            .ok();
-        })
-        .detach();
-}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -73,13 +26,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .on_open_change({
                             let root = root.clone();
                             move |open, window, cx| {
-                                update_hover_intent(&root, "hover-card-default-hovered", open, cx);
-                                schedule_hover_card_state(
+                                overlay_state::sync_hover_intent(
+                                    &root,
+                                    "hover-card-default-open",
+                                    "hover-card-default-hovered",
+                                    open,
+                                    cx,
+                                );
+                                overlay_state::schedule_toggle_if(
                                     window,
                                     cx,
                                     root.clone(),
-                                    "hover-card-default-open",
                                     "hover-card-default-hovered",
+                                    open,
+                                    "hover-card-default-open",
                                     open,
                                     if open {
                                         default_spec.open_delay_ms
@@ -123,13 +83,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .on_open_change({
                         let root = root.clone();
                         move |open, window, cx| {
-                            update_hover_intent(&root, "hover-card-bottom-hovered", open, cx);
-                            schedule_hover_card_state(
+                            overlay_state::sync_hover_intent(
+                                &root,
+                                "hover-card-bottom-open",
+                                "hover-card-bottom-hovered",
+                                open,
+                                cx,
+                            );
+                            overlay_state::schedule_toggle_if(
                                 window,
                                 cx,
                                 root.clone(),
-                                "hover-card-bottom-open",
                                 "hover-card-bottom-hovered",
+                                open,
+                                "hover-card-bottom-open",
                                 open,
                                 if open {
                                     bottom_spec.open_delay_ms

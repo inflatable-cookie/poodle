@@ -1,4 +1,5 @@
 use crate::app_state::AppState;
+use crate::specimens::overlay_state;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -23,8 +24,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         )
         .with_id(id)
         .on_click(cx.listener(move |this, _e: &ClickEvent, _w, cx| {
-            this.state.specimens.toggles.insert(key.to_string(), true);
-            cx.notify();
+            overlay_state::set_toggle(this, key, true, cx);
         }))
         .into_any_element()
     };
@@ -78,15 +78,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("drawer-right-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "drawer-right-open", open, cx);
                 }
             })
             .with_content(
@@ -111,22 +104,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                         .with_id("drawer-cancel")
                         .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                            this.state
-                                .specimens
-                                .toggles
-                                .insert("drawer-right-open".to_string(), false);
-                            cx.notify();
+                            overlay_state::set_toggle(this, "drawer-right-open", false, cx);
                         })),
                     )
                     .child(
                         Button::from_spec(ButtonSpec::new().with_label("Save"), theme)
                             .with_id("drawer-save")
                             .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
-                                this.state
-                                    .specimens
-                                    .toggles
-                                    .insert("drawer-right-open".to_string(), false);
-                                cx.notify();
+                                overlay_state::set_toggle(this, "drawer-right-open", false, cx);
                             })),
                     ),
             ),
@@ -143,15 +128,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .on_open_change({
                 let root = root_handle.clone();
-                move |_open, _window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state
-                            .specimens
-                            .toggles
-                            .insert("drawer-left-open".to_string(), false);
-                        cx.notify();
-                    })
-                    .ok();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "drawer-left-open", open, cx);
                 }
             })
             .with_content(

@@ -1,3 +1,7 @@
+use crate::app_state::AppState;
+use crate::specimens::overlay_state;
+use crate::specimens::specimen_layout::specimen_layout;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, Tooltip};
@@ -5,58 +9,6 @@ use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, OverlayPlacement,
     TooltipSpec,
 };
-use std::time::Duration;
-
-use crate::app_state::AppState;
-use crate::specimens::specimen_layout::specimen_layout;
-use crate::PreviewRoot;
-
-fn update_tooltip_hover(
-    root: &WeakEntity<PreviewRoot>,
-    key: &str,
-    hovered_key: &str,
-    open: bool,
-    cx: &mut App,
-) {
-    root.update(cx, |this, cx| {
-        this.state
-            .specimens
-            .toggles
-            .insert(hovered_key.to_string(), open);
-        if !open {
-            this.state.specimens.toggles.insert(key.to_string(), false);
-        }
-        cx.notify();
-    })
-    .ok();
-}
-
-fn schedule_tooltip_open(
-    window: &mut Window,
-    cx: &mut App,
-    root: WeakEntity<PreviewRoot>,
-    key: String,
-    hovered_key: String,
-    delay_ms: u16,
-) {
-    window
-        .spawn(cx, async move |cx| {
-            cx.background_executor()
-                .timer(Duration::from_millis(u64::from(delay_ms)))
-                .await;
-            cx.update(|_window, cx| {
-                root.update(cx, |this, cx| {
-                    if this.state.specimens.is_on(&hovered_key) {
-                        this.state.specimens.toggles.insert(key.clone(), true);
-                        cx.notify();
-                    }
-                })
-                .ok();
-            })
-            .ok();
-        })
-        .detach();
-}
 
 fn render_tooltip_case(
     state: &AppState,
@@ -70,7 +22,7 @@ fn render_tooltip_case(
     let open_key = open_key.into();
     let hovered_key = hovered_key.into();
     let is_open = state.specimens.is_on(&open_key);
-    let delay_ms = tooltip_spec.delay_ms;
+    let delay_ms = u32::from(tooltip_spec.delay_ms);
 
     Tooltip::from_spec(tooltip_spec.with_open(is_open), theme)
         .on_open_change({
@@ -78,14 +30,22 @@ fn render_tooltip_case(
             let open_key = open_key.clone();
             let hovered_key = hovered_key.clone();
             move |open, window, cx| {
-                update_tooltip_hover(&root, &open_key, &hovered_key, open, cx);
+                overlay_state::sync_hover_intent(
+                    &root,
+                    open_key.clone(),
+                    hovered_key.clone(),
+                    open,
+                    cx,
+                );
                 if open {
-                    schedule_tooltip_open(
+                    overlay_state::schedule_toggle_if(
                         window,
                         cx,
                         root.clone(),
-                        open_key.clone(),
                         hovered_key.clone(),
+                        true,
+                        open_key.clone(),
+                        true,
                         delay_ms,
                     );
                 }

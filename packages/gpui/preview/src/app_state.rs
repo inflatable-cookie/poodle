@@ -216,6 +216,10 @@ impl SpecimenState {
         *val
     }
 
+    pub fn set_toggle(&mut self, key: &str, value: bool) {
+        self.toggles.insert(key.to_string(), value);
+    }
+
     pub fn is_on(&self, key: &str) -> bool {
         self.toggles.get(key).copied().unwrap_or(false)
     }

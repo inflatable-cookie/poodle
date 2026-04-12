@@ -76,6 +76,7 @@ mod hover_card;
 mod menu;
 mod menubar;
 mod navigation_menu;
+mod overlay_state;
 mod popover;
 mod tabs;
 mod tooltip;
