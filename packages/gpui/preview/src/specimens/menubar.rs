@@ -2,6 +2,7 @@ use crate::app_state::AppState;
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -95,15 +96,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         })),
                 )
-                .child(
-                    div()
-                        .text_size(px(12.0))
-                        .text_color(color_to_hsla(text_primary))
-                        .child(format!(
-                            "Last action: {}",
-                            last_action.as_deref().unwrap_or("(none)")
-                        )),
-                ),
+                .when(last_action.is_some(), |d| {
+                    d.child(
+                        div()
+                            .text_size(px(12.0))
+                            .text_color(color_to_hsla(text_primary))
+                            .child(format!(
+                                "Last action: {}",
+                                last_action.as_deref().unwrap_or("")
+                            )),
+                    )
+                }),
         )
         .into_any_element();
 

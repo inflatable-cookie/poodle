@@ -67,8 +67,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let make_items = || {
         vec![
             NavigationMenuEntry::new("home", "Home"),
-            NavigationMenuEntry::new("docs", "Docs"),
-            NavigationMenuEntry::new("about", "About"),
+            NavigationMenuEntry::new("components", "Components"),
+            NavigationMenuEntry::new("tokens", "Tokens"),
+            NavigationMenuEntry::new("guides", "Guides"),
+            NavigationMenuEntry::new("changelog", "Changelog").with_disabled(true),
         ]
     };
 
@@ -80,7 +82,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         move |size, theme: &GpuiThemeProvider| {
             NavigationMenu::from_spec(
                 NavigationMenuSpec::new(make_items())
-                    .with_value("docs")
+                    .with_value("components")
                     .with_aria_label("Navigation"),
                 theme,
             )
@@ -91,7 +93,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         move |density, theme: &GpuiThemeProvider| {
             NavigationMenu::from_spec(
                 NavigationMenuSpec::new(make_items())
-                    .with_value("docs")
+                    .with_value("components")
                     .with_aria_label("Navigation"),
                 theme,
             )

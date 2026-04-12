@@ -42,7 +42,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div()
                 .text_sm()
                 .text_color(color_to_hsla(text_secondary))
-                .child("Right-click this area".to_string()),
+                .child("Right-click here to open context menu".to_string()),
         );
 
     let examples = div()
@@ -111,7 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .text_xs()
                         .text_color(color_to_hsla(text_secondary))
-                        .child(format!("{:?}", size)),
+                        .child(format!("{:?}", size).to_uppercase()),
                 );
             ContextMenu::from_spec(ContextMenuSpec::new(make_menu_items()), theme)
                 .with_id(format!("specimen-size-{:?}", size))
@@ -133,7 +133,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .text_xs()
                         .text_color(color_to_hsla(text_secondary))
-                        .child(format!("{:?}", density)),
+                        .child(format!("{:?}", density).to_lowercase()),
                 );
             ContextMenu::from_spec(ContextMenuSpec::new(make_menu_items()), theme)
                 .with_id(format!("specimen-density-{:?}", density))

@@ -72,10 +72,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Menu::from_spec(file_spec, theme)
                         .with_id("specimen-menu-shortcuts")
                         .on_select(cx.listener(|this, val: &str, _w, cx| {
-                            this.state.specimens.text.insert(
-                                "menu-last-action".to_string(),
-                                format!("Selected: {}", val),
-                            );
+                            this.state
+                                .specimens
+                                .text
+                                .insert("menu-last-action".to_string(), val.to_string());
                             cx.notify();
                         })),
                 ),
@@ -103,10 +103,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 }
                                 _ => {}
                             }
-                            this.state.specimens.text.insert(
-                                "menu-last-action".to_string(),
-                                format!("Selected: {}", val),
-                            );
+                            this.state
+                                .specimens
+                                .text
+                                .insert("menu-last-action".to_string(), val.to_string());
                             cx.notify();
                         })),
                 ),
@@ -125,12 +125,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Menu::from_spec(
                         MenuSpec::new(vec![
                             MenuEntry::new("rename", "Rename"),
-                            MenuEntry::new("duplicate", "Duplicate"),
-                            MenuEntry::new("export", "Export\u{2026}"),
-                            MenuEntry::new("sep", "").with_kind(MenuItemKind::Separator),
-                            MenuEntry::new("delete", "Delete")
-                                .with_destructive(true)
-                                .with_shortcut_label("\u{2318} \u{232B}"),
+                            MenuEntry::new("archive", "Archive"),
+                            MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
+                            MenuEntry::new("delete", "Delete").with_destructive(true),
                         ])
                         .with_default_open(true)
                         .with_aria_label("Item actions"),
@@ -145,7 +142,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 div()
                     .text_sm()
                     .text_color(color_to_hsla(text_secondary))
-                    .child(last_action),
+                    .child(format!("Last: {}", last_action)),
             )
         })
         .into_any_element();

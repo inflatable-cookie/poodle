@@ -24,15 +24,6 @@ impl Section {
             Section::Treatments => "Treatments",
         }
     }
-
-    pub fn cli_value(self) -> &'static str {
-        match self {
-            Section::Components => "components",
-            Section::Demo => "demo",
-            Section::Tokens => "tokens",
-            Section::Treatments => "treatments",
-        }
-    }
 }
 
 /// Available theme presets.
@@ -199,13 +190,6 @@ impl TokenPanel {
             TokenPanel::Inspector => "token-inspector",
         }
     }
-
-    pub fn cli_value(self) -> &'static str {
-        match self {
-            TokenPanel::Summary => "summary",
-            TokenPanel::Inspector => "inspector",
-        }
-    }
 }
 
 impl DemoScreen {
@@ -237,17 +221,6 @@ impl DemoScreen {
             DemoScreen::DetailAndRelatedData => "Detail and related data",
             DemoScreen::PickerAndMedia => "Picker and media",
             DemoScreen::CommandAndWorkspace => "Command and workspace",
-        }
-    }
-
-    pub fn cli_value(self) -> &'static str {
-        match self {
-            DemoScreen::OverviewShell => "overview",
-            DemoScreen::FormAndValidation => "form",
-            DemoScreen::BrowseAndTable => "browse",
-            DemoScreen::DetailAndRelatedData => "detail",
-            DemoScreen::PickerAndMedia => "picker",
-            DemoScreen::CommandAndWorkspace => "workspace",
         }
     }
 
@@ -497,101 +470,4 @@ impl AppState {
         theme.brand_raised = self.appearance_treatment == AppearanceTreatment::BrandRaised;
         self.theme = theme;
     }
-
-    pub fn native_launch_args(&self) -> Vec<String> {
-        let defaults = AppState::new();
-        let mut args = Vec::new();
-
-        if self.section != defaults.section {
-            args.push("--section".to_string());
-            args.push(self.section.cli_value().to_string());
-        }
-
-        if self.theme_preset != defaults.theme_preset {
-            args.push("--theme".to_string());
-            args.push(self.theme_preset.label().to_string());
-        }
-
-        if self.density != defaults.density {
-            args.push("--density".to_string());
-            args.push(self.density.label().to_string());
-        }
-
-        if self.control_size != defaults.control_size {
-            args.push("--size".to_string());
-            args.push(self.control_size.label().to_string());
-        }
-
-        if self.appearance_treatment != defaults.appearance_treatment {
-            args.push("--treatment".to_string());
-            args.push(self.appearance_treatment.label().to_string());
-        }
-
-        if !self.component_search.trim().is_empty() {
-            args.push("--search".to_string());
-            args.push(self.component_search.clone());
-        }
-
-        if let Some(slug) = self.active_component_slug.as_ref() {
-            args.push("--component".to_string());
-            args.push(slug.clone());
-        }
-
-        if self.active_token_panel != defaults.active_token_panel {
-            args.push("--token-panel".to_string());
-            args.push(self.active_token_panel.cli_value().to_string());
-        }
-
-        if !self.token_inspector_query.trim().is_empty() {
-            args.push("--token-query".to_string());
-            args.push(self.token_inspector_query.clone());
-        }
-
-        if self.active_demo_screen != defaults.active_demo_screen {
-            args.push("--demo-screen".to_string());
-            args.push(self.active_demo_screen.cli_value().to_string());
-        }
-
-        args
-    }
-
-    pub fn has_native_review_state(&self) -> bool {
-        !self.native_launch_args().is_empty()
-    }
-
-    pub fn native_launch_command(&self) -> String {
-        let args = self.native_launch_args();
-        let mut parts = vec![
-            "cargo".to_string(),
-            "run".to_string(),
-            "--manifest-path".to_string(),
-            "packages/gpui/preview/Cargo.toml".to_string(),
-        ];
-
-        if !args.is_empty() {
-            parts.push("--".to_string());
-            parts.extend(args);
-        }
-
-        parts
-            .into_iter()
-            .map(|part| shell_quote(&part))
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
-}
-
-fn shell_quote(value: &str) -> String {
-    if value.is_empty() {
-        return "''".to_string();
-    }
-
-    if value
-        .chars()
-        .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_' | '/' | '.' | ':'))
-    {
-        return value.to_string();
-    }
-
-    format!("'{}'", value.replace('\'', "'\"'\"'"))
 }

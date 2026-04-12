@@ -4,7 +4,6 @@ use crate::component_registry::contract_doc_path;
 
 #[derive(Clone, Debug, Default)]
 pub struct ContractUsageDocs {
-    pub path: String,
     pub exists: bool,
     pub status: Option<String>,
     pub updated: Option<String>,
@@ -45,7 +44,6 @@ pub fn load_contract_usage_docs(slug: &str) -> ContractUsageDocs {
         .join(&path);
 
     let mut docs = ContractUsageDocs {
-        path,
         exists: full_path.exists(),
         ..Default::default()
     };

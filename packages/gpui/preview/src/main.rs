@@ -439,15 +439,11 @@ impl PreviewRoot {
     /// Section content router.
     /// `available_h` is the pixel height remaining after top bar + controls.
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
-        let show_native_state = self.state.has_native_review_state();
-        let native_state_h = if show_native_state { px(52.0) } else { px(0.0) };
-        let section_h = available_h - native_state_h;
-
         let section_content = match self.state.section {
-            Section::Components => self.render_components_section(section_h, cx),
-            Section::Demo => self.render_demo_section(section_h, cx),
-            Section::Tokens => self.render_tokens_section(section_h, cx),
-            Section::Treatments => self.render_treatments_section(section_h),
+            Section::Components => self.render_components_section(available_h, cx),
+            Section::Demo => self.render_demo_section(available_h, cx),
+            Section::Tokens => self.render_tokens_section(available_h, cx),
+            Section::Treatments => self.render_treatments_section(available_h),
         };
 
         div()
@@ -455,51 +451,7 @@ impl PreviewRoot {
             .h(available_h)
             .flex()
             .flex_col()
-            .when(show_native_state, |el| {
-                el.child(self.render_native_state_strip(native_state_h))
-            })
             .child(section_content)
-    }
-
-    fn render_native_state_strip(&self, h: Pixels) -> Div {
-        let theme = &self.state.theme;
-        let border_subtle = theme.resolve_color("color.border.subtle");
-        let panel_bg = theme.resolve_color("color.background.panel");
-        let text_secondary = theme.resolve_color("color.text.secondary");
-        let text_primary = theme.resolve_color("color.text.primary");
-        let command = self.state.native_launch_command();
-
-        div()
-            .w_full()
-            .h(h)
-            .flex()
-            .items_center()
-            .justify_between()
-            .gap(px(12.0))
-            .px(px(16.0))
-            .py(px(8.0))
-            .bg(color_to_hsla(panel_bg))
-            .border_b_1()
-            .border_color(color_to_hsla(border_subtle))
-            .child(
-                div()
-                    .flex_shrink_0()
-                    .text_size(px(11.0))
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Launch with current state"),
-            )
-            .child(
-                div()
-                    .flex_1()
-                    .min_w(px(0.0))
-                    .overflow_x_hidden()
-                    .text_ellipsis()
-                    .font_family("SF Mono")
-                    .text_size(px(12.0))
-                    .text_color(color_to_hsla(text_primary))
-                    .child(command),
-            )
     }
 
     fn render_tokens_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
@@ -803,47 +755,44 @@ impl PreviewRoot {
                     )),
             )
             .when(contract_doc.exists, |container| {
-                container.child(self.render_contract_doc_summary(&contract_doc))
+                container
+                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+                    .child(self.render_contract_doc_summary(&contract_doc))
             })
     }
 
     fn render_contract_doc_summary(&self, contract_doc: &ContractUsageDocs) -> Div {
         let theme = &self.state.theme;
-        let text_secondary = theme.resolve_color("color.text.secondary");
         let border_subtle = theme.resolve_color("color.border.subtle");
-
-        let mut meta_parts = vec![contract_doc.path.clone()];
-        if let Some(status) = contract_doc.status.as_ref() {
-            meta_parts.push(status.clone());
-        }
-        if let Some(updated) = contract_doc.updated.as_ref() {
-            meta_parts.push(format!("updated {}", updated));
-        }
-
-        let mut docs = div().flex().flex_col().gap(px(24.0)).child(
-            div()
-                .text_xs()
-                .text_color(color_to_hsla(text_secondary))
-                .child(meta_parts.join(" • ")),
-        );
+        let mut sections: Vec<AnyElement> = Vec::new();
 
         if let Some(usage) = contract_doc.usage.as_ref() {
-            docs = docs.child(self.render_doc_code_section("Usage", "md", usage));
+            sections.push(
+                self.render_doc_code_section("Usage", "md", usage)
+                    .into_any_element(),
+            );
         }
 
         if !contract_doc.props.is_empty() {
-            docs = docs.child(self.render_props_table(contract_doc));
+            sections.push(self.render_props_table(contract_doc).into_any_element());
         }
 
         if !contract_doc.slots.is_empty() {
-            docs = docs.child(self.render_slots_table(contract_doc));
+            sections.push(self.render_slots_table(contract_doc).into_any_element());
         }
 
         if !contract_doc.events.is_empty() {
-            docs = docs.child(self.render_events_table(contract_doc));
+            sections.push(self.render_events_table(contract_doc).into_any_element());
         }
 
-        docs.child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
+        let mut docs = div().flex().flex_col();
+        for (index, section) in sections.into_iter().enumerate() {
+            if index > 0 {
+                docs = docs.child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)));
+            }
+            docs = docs.child(section);
+        }
+        docs
     }
 
     fn render_doc_code_section(
