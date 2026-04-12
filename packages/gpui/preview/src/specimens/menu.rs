@@ -6,8 +6,8 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Eyebrow, Menu};
-use poodle_specs::{EyebrowSpec, MenuEntry, MenuItemKind, MenuSpec};
+use poodle_gpui_components::{Button, Eyebrow, Menu};
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, MenuEntry, MenuItemKind, MenuSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -31,8 +31,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_disabled(true),
     ];
 
+    let file_open = state.specimens.is_on("menu-file-open");
     let file_spec = MenuSpec::new(file_items)
-        .with_default_open(true)
+        .with_open(file_open)
         .with_aria_label("File menu");
 
     // --- With checkboxes ---
@@ -50,20 +51,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         MenuEntry::new("settings", "Settings\u{2026}"),
     ];
 
+    let settings_open = state.specimens.is_on("menu-settings-open");
     let settings_spec = MenuSpec::new(settings_items)
-        .with_default_open(true)
+        .with_open(settings_open)
         .with_aria_label("Settings menu");
+
+    let destructive_open = state.specimens.is_on("menu-destructive-open");
 
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // With shortcuts
         .child(
             div()
                 .flex()
-                .flex_col()
-                .gap(px(8.0))
+                .flex_wrap()
+                .items_center()
+                .gap(px(12.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("With shortcuts"),
                     theme,
@@ -71,21 +75,48 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     Menu::from_spec(file_spec, theme)
                         .with_id("specimen-menu-shortcuts")
+                        .with_trigger(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("File"),
+                                theme,
+                            )
+                            .with_id("menu-file-trigger")
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("menu-file-open");
+                                    this.state
+                                        .specimens
+                                        .toggles
+                                        .insert("menu-settings-open".to_string(), false);
+                                    this.state
+                                        .specimens
+                                        .toggles
+                                        .insert("menu-destructive-open".to_string(), false);
+                                    cx.notify();
+                                },
+                            )),
+                        )
                         .on_select(cx.listener(|this, val: &str, _w, cx| {
                             this.state
                                 .specimens
                                 .text
                                 .insert("menu-last-action".to_string(), val.to_string());
+                            this.state
+                                .specimens
+                                .toggles
+                                .insert("menu-file-open".to_string(), false);
                             cx.notify();
                         })),
                 ),
         )
-        // With checkboxes
         .child(
             div()
                 .flex()
-                .flex_col()
-                .gap(px(8.0))
+                .flex_wrap()
+                .items_center()
+                .gap(px(12.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("With checkboxes"),
                     theme,
@@ -93,6 +124,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     Menu::from_spec(settings_spec, theme)
                         .with_id("specimen-menu-checkboxes")
+                        .with_trigger(
+                            Button::from_spec(
+                                ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("Settings"),
+                                theme,
+                            )
+                            .with_id("menu-settings-trigger")
+                            .on_click(cx.listener(
+                                |this, _e: &ClickEvent, _w, cx| {
+                                    this.state.specimens.toggle("menu-settings-open");
+                                    this.state
+                                        .specimens
+                                        .toggles
+                                        .insert("menu-file-open".to_string(), false);
+                                    this.state
+                                        .specimens
+                                        .toggles
+                                        .insert("menu-destructive-open".to_string(), false);
+                                    cx.notify();
+                                },
+                            )),
+                        )
                         .on_select(cx.listener(|this, val: &str, _w, cx| {
                             match val {
                                 "theme" => {
@@ -111,14 +165,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         })),
                 ),
         )
-        // With destructive item
         .child(
             div()
                 .flex()
-                .flex_col()
-                .gap(px(8.0))
+                .flex_wrap()
+                .items_center()
+                .gap(px(12.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With destructive item"),
+                    EyebrowSpec::new().with_content("Destructive action"),
                     theme,
                 ))
                 .child(
@@ -129,11 +183,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
                             MenuEntry::new("delete", "Delete").with_destructive(true),
                         ])
-                        .with_default_open(true)
+                        .with_open(destructive_open)
                         .with_aria_label("Item actions"),
                         theme,
                     )
-                    .with_id("specimen-menu-destructive"),
+                    .with_id("specimen-menu-destructive")
+                    .with_trigger(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Actions"),
+                            theme,
+                        )
+                        .with_id("menu-actions-trigger")
+                        .on_click(cx.listener(
+                            |this, _e: &ClickEvent, _w, cx| {
+                                this.state.specimens.toggle("menu-destructive-open");
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("menu-file-open".to_string(), false);
+                                this.state
+                                    .specimens
+                                    .toggles
+                                    .insert("menu-settings-open".to_string(), false);
+                                cx.notify();
+                            },
+                        )),
+                    )
+                    .on_select(cx.listener(|this, val: &str, _w, cx| {
+                        this.state
+                            .specimens
+                            .text
+                            .insert("menu-last-action".to_string(), val.to_string());
+                        this.state
+                            .specimens
+                            .toggles
+                            .insert("menu-destructive-open".to_string(), false);
+                        cx.notify();
+                    })),
                 ),
         )
         // --- Last action feedback ---
@@ -158,9 +246,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 MenuEntry::new("copy", "Copy"),
                 MenuEntry::new("paste", "Paste"),
             ];
-            let spec = MenuSpec::new(items)
-                .with_default_open(true)
-                .with_aria_label("Menu");
+            let spec = MenuSpec::new(items).with_open(true).with_aria_label("Menu");
             Menu::from_spec(spec, theme)
                 .with_id(format!("specimen-size-{:?}", size))
                 .size(size)
@@ -172,9 +258,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 MenuEntry::new("copy", "Copy"),
                 MenuEntry::new("paste", "Paste"),
             ];
-            let spec = MenuSpec::new(items)
-                .with_default_open(true)
-                .with_aria_label("Menu");
+            let spec = MenuSpec::new(items).with_open(true).with_aria_label("Menu");
             Menu::from_spec(spec, theme)
                 .with_id(format!("specimen-density-{:?}", density))
                 .with_density(density)

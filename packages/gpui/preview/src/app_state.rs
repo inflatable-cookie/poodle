@@ -10,7 +10,6 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Section {
     Components,
-    Demo,
     Tokens,
     Treatments,
 }
@@ -19,7 +18,6 @@ impl Section {
     pub fn label(self) -> &'static str {
         match self {
             Section::Components => "Components",
-            Section::Demo => "Demo",
             Section::Tokens => "Tokens",
             Section::Treatments => "Treatments",
         }
@@ -159,17 +157,6 @@ impl AppearanceTreatment {
     }
 }
 
-/// Demo screen identifiers.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DemoScreen {
-    OverviewShell,
-    FormAndValidation,
-    BrowseAndTable,
-    DetailAndRelatedData,
-    PickerAndMedia,
-    CommandAndWorkspace,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenPanel {
     Summary,
@@ -189,159 +176,6 @@ impl TokenPanel {
             TokenPanel::Summary => "token-summary-section",
             TokenPanel::Inspector => "token-inspector",
         }
-    }
-}
-
-impl DemoScreen {
-    pub const ALL: &[DemoScreen] = &[
-        DemoScreen::OverviewShell,
-        DemoScreen::FormAndValidation,
-        DemoScreen::BrowseAndTable,
-        DemoScreen::DetailAndRelatedData,
-        DemoScreen::PickerAndMedia,
-        DemoScreen::CommandAndWorkspace,
-    ];
-
-    pub fn label(self) -> &'static str {
-        match self {
-            DemoScreen::OverviewShell => "Overview",
-            DemoScreen::FormAndValidation => "Form",
-            DemoScreen::BrowseAndTable => "Browse",
-            DemoScreen::DetailAndRelatedData => "Detail",
-            DemoScreen::PickerAndMedia => "Picker",
-            DemoScreen::CommandAndWorkspace => "Workspace",
-        }
-    }
-
-    pub fn title(self) -> &'static str {
-        match self {
-            DemoScreen::OverviewShell => "Overview shell",
-            DemoScreen::FormAndValidation => "Form and validation",
-            DemoScreen::BrowseAndTable => "Browse and table",
-            DemoScreen::DetailAndRelatedData => "Detail and related data",
-            DemoScreen::PickerAndMedia => "Picker and media",
-            DemoScreen::CommandAndWorkspace => "Command and workspace",
-        }
-    }
-
-    pub fn comparison_mode(self) -> &'static str {
-        match self {
-            DemoScreen::OverviewShell => "direct-parity",
-            DemoScreen::FormAndValidation => "direct-parity",
-            DemoScreen::BrowseAndTable => "native-adaptation",
-            DemoScreen::DetailAndRelatedData => "direct-parity",
-            DemoScreen::PickerAndMedia => "native-adaptation",
-            DemoScreen::CommandAndWorkspace => "direct-parity",
-        }
-    }
-
-    pub fn summary(self) -> &'static str {
-        match self {
-            DemoScreen::OverviewShell => {
-                "Establish shell hierarchy, identity, and status posture without docs-shell noise."
-            }
-            DemoScreen::FormAndValidation => {
-                "Keep fields, validation, remediation, and actions inside one realistic workflow."
-            }
-            DemoScreen::BrowseAndTable => {
-                "Show filters, table posture, selection, and pagination as one browse story."
-            }
-            DemoScreen::DetailAndRelatedData => {
-                "Keep headers, metadata, and related summaries inside one coherent detail workflow."
-            }
-            DemoScreen::PickerAndMedia => {
-                "Pair selection flow, preview framing, and media fallback in one workflow."
-            }
-            DemoScreen::CommandAndWorkspace => {
-                "Keep command discovery, shell navigation, split regions, and status inside one workstation target."
-            }
-        }
-    }
-
-    pub fn source_sections(self) -> &'static [&'static str] {
-        match self {
-            DemoScreen::OverviewShell => &["notification-suite", "workspace-suite"],
-            DemoScreen::FormAndValidation => &["form-suite", "notification-suite"],
-            DemoScreen::BrowseAndTable => &["browse-suite", "table-suite"],
-            DemoScreen::DetailAndRelatedData => &["detail-suite"],
-            DemoScreen::PickerAndMedia => &["picker-suite", "media-suite"],
-            DemoScreen::CommandAndWorkspace => &["command-suite", "workspace-suite"],
-        }
-    }
-
-    pub fn state_matrix(self) -> &'static [&'static str] {
-        match self {
-            DemoScreen::OverviewShell => &["default", "status-active", "review-blocked"],
-            DemoScreen::FormAndValidation => &["default", "invalid", "pending", "disabled"],
-            DemoScreen::BrowseAndTable => &[
-                "ready",
-                "selection-active",
-                "empty",
-                "no-results",
-                "loading",
-            ],
-            DemoScreen::DetailAndRelatedData => &["default", "metadata-dense", "action-emphasis"],
-            DemoScreen::PickerAndMedia => &[
-                "inline-ready",
-                "modal-open",
-                "media-ready",
-                "media-empty",
-                "media-error",
-            ],
-            DemoScreen::CommandAndWorkspace => &[
-                "shell-ready",
-                "command-open",
-                "docking-visible",
-                "persistence-visible",
-            ],
-        }
-    }
-
-    pub fn region_ids(self) -> &'static [&'static str] {
-        match self {
-            DemoScreen::OverviewShell => &[
-                "app-header",
-                "screen-tabs",
-                "primary-content",
-                "companion-panel",
-                "status-bar",
-            ],
-            DemoScreen::FormAndValidation => &[
-                "context-toolbar",
-                "primary-content",
-                "companion-panel",
-                "modal-layer",
-            ],
-            DemoScreen::BrowseAndTable => {
-                &["context-toolbar", "primary-content", "companion-panel"]
-            }
-            DemoScreen::DetailAndRelatedData => {
-                &["primary-content", "companion-panel", "context-toolbar"]
-            }
-            DemoScreen::PickerAndMedia => &[
-                "context-toolbar",
-                "primary-content",
-                "companion-panel",
-                "modal-layer",
-            ],
-            DemoScreen::CommandAndWorkspace => &[
-                "app-header",
-                "screen-tabs",
-                "primary-content",
-                "companion-panel",
-                "status-bar",
-                "modal-layer",
-            ],
-        }
-    }
-
-    pub fn has_modal_layer(self) -> bool {
-        matches!(
-            self,
-            DemoScreen::FormAndValidation
-                | DemoScreen::PickerAndMedia
-                | DemoScreen::CommandAndWorkspace
-        )
     }
 }
 
@@ -418,7 +252,6 @@ pub struct AppState {
     pub active_component_slug: Option<String>,
     pub active_token_panel: TokenPanel,
     pub token_inspector_query: String,
-    pub active_demo_screen: DemoScreen,
     #[allow(dead_code)]
     pub debug_clicks: u32,
     pub specimens: SpecimenState,
@@ -448,7 +281,6 @@ impl AppState {
             active_component_slug: None,
             active_token_panel: TokenPanel::Summary,
             token_inspector_query: String::new(),
-            active_demo_screen: DemoScreen::OverviewShell,
             debug_clicks: 0,
             specimens: SpecimenState::new(),
         }

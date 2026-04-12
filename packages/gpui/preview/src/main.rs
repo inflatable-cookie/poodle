@@ -6,7 +6,6 @@
 mod app_state;
 mod component_registry;
 mod contract_usage_docs;
-mod demo_view;
 mod specimens;
 #[allow(dead_code)]
 mod style_bridge;
@@ -56,8 +55,7 @@ impl AssetSource for PreviewAssets {
 }
 
 use app_state::{
-    AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
-    TokenPanel,
+    AppState, AppearanceTreatment, ControlSize, Density, Section, ThemePreset, TokenPanel,
 };
 use component_registry::{find_component, grouped_components, package_name};
 use contract_usage_docs::{load_contract_usage_docs, ContractUsageDocs};
@@ -441,7 +439,6 @@ impl PreviewRoot {
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let section_content = match self.state.section {
             Section::Components => self.render_components_section(available_h, cx),
-            Section::Demo => self.render_demo_section(available_h, cx),
             Section::Tokens => self.render_tokens_section(available_h, cx),
             Section::Treatments => self.render_treatments_section(available_h),
         };
@@ -1537,264 +1534,6 @@ impl PreviewRoot {
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
         specimens::render_single_specimen(slug, &self.state, cx)
     }
-
-    /// Shared demo-contract target.
-    ///
-    /// This is intentionally separate from the current docs-shell parity surface.
-    fn render_demo_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
-        let theme = &self.state.theme;
-        let text_secondary = theme.resolve_color("color.text.secondary");
-        let text_primary = theme.resolve_color("color.text.primary");
-        let accent = theme.resolve_color("color.accent.base");
-        let border = theme.resolve_color("color.border.default");
-        let border_subtle = theme.resolve_color("color.border.subtle");
-        let elevated_bg = theme.resolve_color("color.background.elevated");
-        let panel_bg = theme.resolve_color("color.background.panel");
-        let active_screen = self.state.active_demo_screen;
-
-        // Segmented control for demo screens
-        let mut seg = div()
-            .flex()
-            .border_1()
-            .border_color(color_to_hsla(border))
-            .rounded(px(8.0))
-            .overflow_hidden();
-
-        for &screen in DemoScreen::ALL {
-            let is_active = self.state.active_demo_screen == screen;
-            let label = screen.label();
-
-            let mut btn = div()
-                .id(SharedString::from(format!("demo-{}", label)))
-                .px(px(14.0))
-                .py(px(6.0))
-                .text_sm()
-                .cursor_pointer()
-                .child(label);
-
-            btn = if is_active {
-                btn.bg(color_to_hsla(accent).opacity(0.15))
-                    .text_color(color_to_hsla(accent))
-            } else {
-                btn.text_color(color_to_hsla(text_secondary))
-            };
-
-            btn = btn.on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                this.state.active_demo_screen = screen;
-                cx.notify();
-            }));
-
-            seg = seg.child(btn);
-        }
-
-        let screen_content = demo_view::render_single_screen(theme, active_screen);
-
-        let chip = |label: String| {
-            div()
-                .px(px(8.0))
-                .py(px(3.0))
-                .rounded(px(999.0))
-                .border_1()
-                .border_color(color_to_hsla(border))
-                .bg(color_to_hsla(elevated_bg).opacity(0.9))
-                .text_size(px(11.0))
-                .text_color(color_to_hsla(text_secondary))
-                .child(label)
-        };
-
-        let mut region_row = div().flex().flex_wrap().gap(px(6.0));
-        for region in active_screen.region_ids() {
-            region_row = region_row.child(chip((*region).to_string()));
-        }
-
-        let mut section_row = div().flex().flex_wrap().gap(px(6.0));
-        for section in active_screen.source_sections() {
-            section_row = section_row.child(chip((*section).to_string()));
-        }
-
-        let mut state_row = div().flex().flex_wrap().gap(px(6.0));
-        for state in active_screen.state_matrix() {
-            state_row = state_row.child(chip((*state).to_string()));
-        }
-
-        let contract_notice = div()
-            .flex()
-            .flex_col()
-            .gap(px(8.0))
-            .p(px(14.0))
-            .rounded(px(8.0))
-            .border_1()
-            .border_color(color_to_hsla(accent).opacity(0.42))
-            .bg(color_to_hsla(accent).opacity(0.08))
-            .child(
-                div()
-                    .text_size(px(11.0))
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Internal demo target"),
-            )
-            .child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_primary))
-                    .child("This surface tracks the contract-owned shared demo app target. It is separate from the current docs shell and should not be read as current cross-runtime docs-shell parity."),
-            )
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(px(6.0))
-                    .flex_wrap()
-                    .child(chip("docs shell stays separate".to_string()))
-                    .child(chip("contract-owned target".to_string()))
-                    .child(chip("internal review surface".to_string())),
-            );
-
-        let context_toolbar = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .gap(px(12.0))
-            .p(px(12.0))
-            .rounded(px(8.0))
-            .border_1()
-            .border_color(color_to_hsla(border_subtle))
-            .bg(color_to_hsla(panel_bg))
-            .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(4.0))
-                    .child(
-                        div()
-                            .text_size(px(11.0))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(color_to_hsla(text_secondary))
-                            .child("Contract notes"),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            .text_color(color_to_hsla(text_primary))
-                            .child(active_screen.summary()),
-                    ),
-            )
-            .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(px(6.0))
-                    .child(chip(format!("mode: {}", active_screen.comparison_mode())))
-                    .child(chip(format!(
-                        "sections: {}",
-                        active_screen.source_sections().len()
-                    )))
-                    .child(chip(format!(
-                        "states: {}",
-                        active_screen.state_matrix().len()
-                    ))),
-            );
-
-        let companion_panel = div()
-            .flex()
-            .flex_col()
-            .gap(px(12.0))
-            .p(px(16.0))
-            .rounded(px(8.0))
-            .border_1()
-            .border_color(color_to_hsla(border_subtle))
-            .bg(color_to_hsla(elevated_bg).opacity(0.88))
-            .child(
-                div()
-                    .text_size(px(11.0))
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Contract notes"),
-            )
-            .child(
-                div()
-                    .text_lg()
-                    .text_color(color_to_hsla(text_primary))
-                    .child(active_screen.title()),
-            )
-            .child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Shell regions"),
-            )
-            .child(region_row)
-            .child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("Source sections from current docs shell"),
-            )
-            .child(section_row)
-            .child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child("State matrix"),
-            )
-            .child(state_row)
-            .child(
-                div()
-                    .text_sm()
-                    .text_color(color_to_hsla(text_secondary))
-                    .child(if active_screen.has_modal_layer() {
-                        "Modal layer is part of the contract scope for this screen and should stay visible during target-app review."
-                    } else {
-                        "This screen should read clearly as a contract target without relying on modal-layer posture."
-                    }),
-            );
-
-        div().w_full().h(available_h).child(
-            div()
-                .id("demo-section")
-                .size_full()
-                .overflow_y_scroll()
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(16.0))
-                        .p(px(24.0))
-                        .child(contract_notice)
-                        .child(
-                            div()
-                                .flex()
-                                .flex_col()
-                                .gap(px(4.0))
-                                .child(
-                                    div()
-                                        .text_size(px(11.0))
-                                        .font_weight(FontWeight::SEMIBOLD)
-                                        .text_color(color_to_hsla(text_secondary))
-                                        .child("Screens"),
-                                )
-                                .child(seg),
-                        )
-                        .child(context_toolbar)
-                        .child(
-                            div()
-                                .flex()
-                                .items_start()
-                                .gap(px(16.0))
-                                .child(
-                                    div()
-                                        .flex_1()
-                                        .min_w(px(0.0))
-                                        .flex()
-                                        .flex_col()
-                                        .gap(px(12.0))
-                                        .child(screen_content),
-                                )
-                                .child(div().w(px(320.0)).flex_shrink_0().child(companion_panel)),
-                        ),
-                ),
-        )
-    }
 }
 
 /// Parsed CLI arguments.
@@ -1802,7 +1541,6 @@ struct CliArgs {
     section: Option<Section>,
     component: Option<String>,
     component_search: Option<String>,
-    demo_screen: Option<DemoScreen>,
     token_panel: Option<TokenPanel>,
     token_query: Option<String>,
     theme: Option<ThemePreset>,
@@ -1817,7 +1555,6 @@ fn parse_cli_args() -> CliArgs {
     let mut section = None;
     let mut component = None;
     let mut component_search = None;
-    let mut demo_screen = None;
     let mut token_panel = None;
     let mut token_query = None;
     let mut theme = None;
@@ -1835,7 +1572,6 @@ fn parse_cli_args() -> CliArgs {
                         "components" | "primitives" | "composites" | "shells" => {
                             Some(Section::Components)
                         }
-                        "demo" => Some(Section::Demo),
                         "tokens" => Some(Section::Tokens),
                         "treatments" => Some(Section::Treatments),
                         _ => None,
@@ -1852,20 +1588,6 @@ fn parse_cli_args() -> CliArgs {
             "--search" => {
                 if let Some(val) = args.get(i + 1) {
                     component_search = Some(val.clone());
-                    i += 1;
-                }
-            }
-            "--demo-screen" => {
-                if let Some(val) = args.get(i + 1) {
-                    demo_screen = match val.as_str() {
-                        "overview" => Some(DemoScreen::OverviewShell),
-                        "form" => Some(DemoScreen::FormAndValidation),
-                        "browse" => Some(DemoScreen::BrowseAndTable),
-                        "detail" => Some(DemoScreen::DetailAndRelatedData),
-                        "picker" => Some(DemoScreen::PickerAndMedia),
-                        "workspace" => Some(DemoScreen::CommandAndWorkspace),
-                        _ => None,
-                    };
                     i += 1;
                 }
             }
@@ -1946,7 +1668,6 @@ fn parse_cli_args() -> CliArgs {
         section,
         component,
         component_search,
-        demo_screen,
         token_panel,
         token_query,
         theme,
@@ -2031,10 +1752,6 @@ fn main() {
 
                     if let Some(ref search) = cli.component_search {
                         root.state.component_search = search.clone();
-                    }
-
-                    if let Some(screen) = cli.demo_screen {
-                        root.state.active_demo_screen = screen;
                     }
 
                     if let Some(panel) = cli.token_panel {

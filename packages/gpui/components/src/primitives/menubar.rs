@@ -203,6 +203,7 @@ impl IntoElement for Menubar {
             if !entry.items.is_empty() {
                 let menu_spec = MenuSpec::new(entry.items.clone());
                 let mut menu = Menu::from_spec(menu_spec, &self.theme)
+                    .open(true)
                     .with_id(format!("{}-dropdown", self.id_prefix));
 
                 // Wire on_select through to the menu

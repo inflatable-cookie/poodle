@@ -28,13 +28,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let spec = ContextMenuSpec::new(items).with_default_open(true);
 
-    // Build a right-click target area matching Svelte's dashed bordered zone
+    // GPUI has no dashed border. Keep the Svelte shell shape with a 2px solid approximation.
     let target_area = div()
         .h(px(128.0))
         .w_full()
-        .border_1()
+        .border_2()
         .border_color(color_to_hsla(border))
-        .rounded(px(6.0))
+        .rounded(px(4.0))
         .flex()
         .items_center()
         .justify_center()
@@ -101,9 +101,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             let trigger = div()
                 .h(px(64.0))
                 .w_full()
-                .border_1()
+                .border_2()
                 .border_color(color_to_hsla(border))
-                .rounded(px(6.0))
+                .rounded(px(4.0))
                 .flex()
                 .items_center()
                 .justify_center()
@@ -123,9 +123,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             let trigger = div()
                 .h(px(64.0))
                 .w_full()
-                .border_1()
+                .border_2()
                 .border_color(color_to_hsla(border))
-                .rounded(px(6.0))
+                .rounded(px(4.0))
                 .flex()
                 .items_center()
                 .justify_center()

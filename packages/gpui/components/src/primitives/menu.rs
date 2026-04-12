@@ -24,6 +24,7 @@ pub struct Menu {
     spec: MenuSpec,
     theme: GpuiThemeProvider,
     id_prefix: String,
+    trigger: Option<AnyElement>,
     selected_value: Option<String>,
     on_select: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     on_close: Option<std::rc::Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
@@ -42,6 +43,7 @@ impl Menu {
             spec: MenuSpec::default(),
             theme: theme.clone(),
             id_prefix: String::new(),
+            trigger: None,
             selected_value: None,
             on_select: None,
             on_close: None,
@@ -53,6 +55,7 @@ impl Menu {
             spec,
             theme: theme.clone(),
             id_prefix: "poodle-menu".to_string(),
+            trigger: None,
             selected_value: None,
             on_select: None,
             on_close: None,
@@ -108,6 +111,11 @@ impl Menu {
         self
     }
 
+    pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
+        self.trigger = Some(trigger.into_any_element());
+        self
+    }
+
     /// Highlight a specific item as selected/active.
     pub fn with_selected(mut self, value: impl Into<String>) -> Self {
         self.selected_value = Some(value.into());
@@ -120,6 +128,7 @@ impl IntoElement for Menu {
 
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
+        let is_open = self.spec.current_open();
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let item_font_size = px(rem_to_px(size_font_rem(effective_size)));
         let base_height = resolve_px(theme, "size.control.height");
@@ -162,18 +171,18 @@ impl IntoElement for Menu {
         let caption_size = resolve_px(theme, "typography.caption.size");
 
         // Contract: min-width 14rem, padding 0.25rem
-        let mut menu = div()
+        let mut surface = div()
             .min_w(px(224.0)) // 14rem
             .rounded(overlay_radius);
 
         // Brand-raised treatment: gradient fill for elevated surface
         if theme.brand_raised {
-            menu = menu.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
+            surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
         } else {
-            menu = menu.bg(surface_bg);
+            surface = surface.bg(surface_bg);
         }
 
-        menu = menu
+        surface = surface
             .border_1()
             .border_color(border)
             // Contract: elevation-popover shadow
@@ -206,7 +215,7 @@ impl IntoElement for Menu {
             // Separator
             if item.kind == MenuItemKind::Separator {
                 // Contract: height 0.0625rem, margin 0.25rem 0
-                menu = menu.child(
+                surface = surface.child(
                     div()
                         .w_full()
                         .h(px(1.0))
@@ -344,9 +353,19 @@ impl IntoElement for Menu {
                 );
             }
 
-            menu = menu.child(row);
+            surface = surface.child(row);
         }
 
-        menu.into_any_element()
+        let mut wrapper = div().flex().flex_col().gap(px(4.0));
+
+        if let Some(trigger) = self.trigger {
+            wrapper = wrapper.child(trigger);
+        }
+
+        if is_open {
+            wrapper = wrapper.child(surface);
+        }
+
+        wrapper.into_any_element()
     }
 }
