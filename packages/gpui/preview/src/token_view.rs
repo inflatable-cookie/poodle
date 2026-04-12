@@ -2,6 +2,8 @@ use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_components::Table;
+use poodle_specs::{TableColumn, TableRow, TableSpec};
 
 #[derive(Clone, Copy)]
 enum TokenKind {
@@ -239,6 +241,7 @@ pub fn render_runtime_token_summary(theme: &GpuiThemeProvider) -> Div {
                 div()
                     .text_xs()
                     .text_color(color_to_hsla(text_secondary))
+                    .font_family("SF Mono")
                     .child(token.path),
             );
 
@@ -259,6 +262,7 @@ pub fn render_runtime_token_summary(theme: &GpuiThemeProvider) -> Div {
                 .text_sm()
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(color_to_hsla(text_primary))
+                .font_family("SF Mono")
                 .child(value),
         );
 
@@ -268,76 +272,35 @@ pub fn render_runtime_token_summary(theme: &GpuiThemeProvider) -> Div {
     grid
 }
 
-pub fn render_token_inspector(theme: &GpuiThemeProvider, query: &str) -> Div {
-    let border = theme.resolve_color("color.border.subtle");
-    let panel_bg = theme.resolve_color("color.background.panel");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
+pub fn render_token_inspector(theme: &GpuiThemeProvider, query: &str) -> AnyElement {
+    let columns = vec![
+        TableColumn::new("path", "Path").with_row_header(true),
+        TableColumn::new("value", "Value"),
+    ];
 
-    let mut rows = div().flex().flex_col().gap(px(8.0));
+    let rows = filtered_tokens(query)
+        .into_iter()
+        .enumerate()
+        .map(|(index, token)| {
+            TableRow::new(
+                format!("token-{}", index),
+                vec![
+                    ("path".to_string(), token.path.to_string()),
+                    ("value".to_string(), resolve_token_value(theme, token)),
+                ],
+            )
+        })
+        .collect();
 
-    for token in filtered_tokens(query) {
-        let value = resolve_token_value(theme, token);
-        let mut row = div()
-            .p(px(12.0))
-            .rounded(px(8.0))
-            .bg(color_to_hsla(panel_bg))
-            .border_1()
-            .border_color(color_to_hsla(border))
-            .flex()
-            .items_center()
-            .gap(px(12.0))
-            .child(
-                div()
-                    .flex_1()
-                    .min_w(px(0.0))
-                    .flex()
-                    .flex_col()
-                    .gap(px(4.0))
-                    .child(
-                        div()
-                            .text_sm()
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(color_to_hsla(text_primary))
-                            .child(token.path),
-                    )
-                    .child(
-                        div()
-                            .text_xs()
-                            .text_color(color_to_hsla(text_secondary))
-                            .child(value),
-                    ),
-            );
-
-        if let Some(swatch) = resolve_swatch(theme, token) {
-            row = row.child(
-                div()
-                    .w(px(20.0))
-                    .h(px(20.0))
-                    .rounded(px(5.0))
-                    .bg(swatch)
-                    .border_1()
-                    .border_color(color_to_hsla(border)),
-            );
-        }
-
-        rows = rows.child(row);
-    }
-
-    if filtered_tokens(query).is_empty() {
-        rows = rows.child(
-            div()
-                .p(px(16.0))
-                .rounded(px(8.0))
-                .border_1()
-                .border_color(color_to_hsla(border))
-                .text_sm()
-                .text_color(color_to_hsla(text_secondary))
-                .child("No tokens match the current filter."),
-        );
-    }
-
-    rows
+    Table::from_spec(
+        TableSpec::new()
+            .with_columns(columns)
+            .with_rows(rows)
+            .with_aria_label("Semantic token inspector")
+            .with_empty_message("No tokens match the current filter."),
+        theme,
+    )
+    .into_any_element()
 }
 
 fn filtered_tokens(query: &str) -> Vec<TokenEntry> {

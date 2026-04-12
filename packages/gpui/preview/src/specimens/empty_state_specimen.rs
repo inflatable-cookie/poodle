@@ -6,7 +6,6 @@ use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div().flex().flex_col().gap(px(24.0))
-        // --- Neutral ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Neutral"), theme))
@@ -17,12 +16,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .with_actions(vec![
                                 RemediationAction::new("create", "Create project")
                                     .with_variant(ButtonVariant::Primary),
+                                RemediationAction::new("import", "Import existing"),
                             ]),
                         theme,
                     )
                 )
         )
-        // --- Search ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Search"), theme))
@@ -30,15 +29,16 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EmptyState::from_spec(
                         EmptyStateSpec::new("No results found")
                             .with_variant(EmptyStateVariant::Search)
+                            .with_aria_label("Search results empty state")
                             .with_message("Try adjusting your search terms or clearing filters.")
                             .with_actions(vec![
                                 RemediationAction::new("clear", "Clear filters"),
+                                RemediationAction::new("browse", "Browse all"),
                             ]),
                         theme,
                     )
                 )
         )
-        // --- First run ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("First run"), theme))
@@ -46,22 +46,28 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EmptyState::from_spec(
                         EmptyStateSpec::new("Welcome to your workspace")
                             .with_variant(EmptyStateVariant::FirstRun)
-                            .with_message("This is where your team's components will appear once you start building."),
+                            .with_message("This is where your team's components will appear once you start building.")
+                            .with_actions(vec![
+                                RemediationAction::new("tour", "Take the tour")
+                                    .with_variant(ButtonVariant::Primary),
+                                RemediationAction::new("sample", "Load sample data"),
+                            ]),
                         theme,
                     )
                 )
         )
-        // --- Compact (embedded in a list) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Compact"), theme))
                 .child(
-                    EmptyState::from_spec(
-                        EmptyStateSpec::new("No comments yet")
-                            .with_variant(EmptyStateVariant::Neutral)
-                            .with_message("Be the first to add one.")
-                            .with_compact(true),
-                        theme,
+                    div().max_w(px(420.0)).child(
+                        EmptyState::from_spec(
+                            EmptyStateSpec::new("No comments yet")
+                                .with_variant(EmptyStateVariant::Neutral)
+                                .with_message("Be the first to add one.")
+                                .with_compact(true),
+                            theme,
+                        )
                     )
                 )
         )

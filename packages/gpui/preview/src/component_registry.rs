@@ -65,77 +65,77 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry {
         slug: "accordion",
         display_name: "Accordion",
-        description: "Expandable disclosure panels.",
+        description: "Expandable disclosure panels with single or multiple selection.",
     },
     ComponentEntry {
         slug: "alert-dialog",
         display_name: "AlertDialog",
-        description: "Focused confirmation modal.",
+        description: "Focused confirmation modal for destructive actions.",
     },
     ComponentEntry {
         slug: "box",
         display_name: "Box",
-        description: "Generic layout container.",
+        description: "Generic layout container with configurable padding and alignment.",
     },
     ComponentEntry {
         slug: "bulk-action-bar",
         display_name: "BulkActionBar",
-        description: "Batch action bar.",
+        description: "Action bar for batch operations on selected items.",
     },
     ComponentEntry {
         slug: "button",
         display_name: "Button",
-        description: "Primary interactive control.",
+        description: "Primary interactive control for triggering actions.",
     },
     ComponentEntry {
         slug: "calendar",
         display_name: "Calendar",
-        description: "Date grid for picking a single date.",
+        description: "Date grid for picking a single date or a date range.",
     },
     ComponentEntry {
         slug: "callout",
         display_name: "Callout",
-        description: "Highlighted informational block.",
+        description: "Informational block with tone and optional actions.",
     },
     ComponentEntry {
         slug: "card",
         display_name: "Card",
-        description: "Contained surface for content.",
+        description: "Contained surface for grouped content.",
     },
     ComponentEntry {
         slug: "checkbox",
         display_name: "Checkbox",
-        description: "Boolean toggle with label.",
+        description: "Boolean toggle with label, supporting indeterminate state.",
     },
     ComponentEntry {
         slug: "code",
         display_name: "Code",
-        description: "Syntax-highlighted code display.",
+        description: "Syntax-highlighted code display with copy button.",
     },
     ComponentEntry {
         slug: "collapsible",
         display_name: "Collapsible",
-        description: "Show/hide content toggle.",
+        description: "Show/hide content toggle without accordion grouping.",
     },
     ComponentEntry {
         slug: "color-picker",
         display_name: "ColorPicker",
-        description: "Color selection with swatches.",
+        description: "Color selection with native picker, hex input, and swatches.",
     },
     ComponentEntry {
         slug: "context-menu",
         display_name: "ContextMenu",
-        description: "Right-click triggered menu.",
+        description: "Right-click triggered menu overlay.",
     },
     ComponentEntry {
         slug: "date-picker",
         display_name: "DatePicker",
-        description: "Date selection with calendar.",
+        description: "Date selection with calendar popup.",
     },
     ComponentEntry {
         slug: "date-range-picker",
         display_name: "DateRangePicker",
-        description: "Dual calendar date range.",
+        description: "Start and end date selection with dual calendar.",
     },
     ComponentEntry {
         slug: "date-time-picker",
@@ -145,57 +145,57 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry {
         slug: "date-time-range-picker",
         display_name: "DateTimeRangePicker",
-        description: "Date-time range selection.",
+        description: "Start/end date-time range selection.",
     },
     ComponentEntry {
         slug: "detail-item",
         display_name: "DetailItem",
-        description: "Label-value metadata pair.",
+        description: "Label-value pair for metadata display.",
     },
     ComponentEntry {
         slug: "dialog",
         display_name: "Dialog",
-        description: "Modal overlay.",
+        description: "Modal overlay for confirmations, forms, or alerts.",
     },
     ComponentEntry {
         slug: "drawer",
         display_name: "Drawer",
-        description: "Slide-out panel from edge.",
+        description: "Slide-out panel from a screen edge.",
     },
     ComponentEntry {
         slug: "duration-input",
         display_name: "DurationInput",
-        description: "Segmented duration entry.",
+        description: "Segmented hours/minutes/seconds duration entry.",
     },
     ComponentEntry {
         slug: "editable-label",
         display_name: "EditableLabel",
-        description: "Inline editable text.",
+        description: "Inline text that becomes editable on interaction.",
     },
     ComponentEntry {
         slug: "eyebrow",
         display_name: "Eyebrow",
-        description: "Small uppercase label.",
+        description: "Small uppercase label used for section categorization.",
     },
     ComponentEntry {
         slug: "field",
         display_name: "Field",
-        description: "Form field wrapper.",
+        description: "Form field wrapper with label, help text, and validation.",
     },
     ComponentEntry {
         slug: "field-set",
         display_name: "FieldSet",
-        description: "Groups related form controls with optional legend and multi-column layout.",
+        description: "Semantic fieldset with legend and grid layout.",
     },
     ComponentEntry {
         slug: "file-upload",
         display_name: "FileUpload",
-        description: "File input with drag-and-drop.",
+        description: "File input with drag-and-drop, type filtering, and upload progress.",
     },
     ComponentEntry {
         slug: "form-actions",
         display_name: "FormActions",
-        description: "Action row for forms.",
+        description: "Action row for form submit, cancel, and secondary actions.",
     },
     ComponentEntry {
         slug: "grid",
@@ -205,242 +205,247 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry {
         slug: "hover-card",
         display_name: "HoverCard",
-        description: "Rich preview on hover.",
+        description: "Rich preview card triggered by hover or focus.",
     },
     ComponentEntry {
         slug: "icon",
         display_name: "Icon",
-        description: "SVG icon from registry.",
+        description: "SVG icon accepting direct node data or string names.",
     },
     ComponentEntry {
         slug: "icon-button",
         display_name: "IconButton",
-        description: "Icon-only button.",
+        description: "Button variant displaying only an icon.",
     },
     ComponentEntry {
         slug: "icon-provider",
         display_name: "IconProvider",
-        description: "Context boundary for descendant icons.",
+        description: "Context provider for bulk icon set lookups.",
     },
     ComponentEntry {
         slug: "list-card",
         display_name: "ListCard",
-        description: "Structured list item card.",
+        description: "Structured list item card with leading/trailing slots.",
     },
     ComponentEntry {
         slug: "menu",
         display_name: "Menu",
-        description: "Dropdown menu.",
+        description: "Dropdown menu with items, separators, and keyboard navigation.",
     },
     ComponentEntry {
         slug: "menubar",
         display_name: "Menubar",
-        description: "Horizontal menu bar.",
+        description: "Horizontal menu bar with dropdown sub-menus.",
     },
     ComponentEntry {
         slug: "meter",
         display_name: "Meter",
-        description: "Visual gauge for values.",
+        description: "Visual gauge for scalar values within a known range.",
     },
     ComponentEntry {
         slug: "meta-bar",
         display_name: "MetaBar",
-        description: "Wrapping ribbon for inline metadata.",
+        description: "Inline metadata ribbon for compact header facts.",
     },
     ComponentEntry {
         slug: "meta-item",
         display_name: "MetaItem",
-        description: "Compact labeled metadata value.",
+        description: "Compact labeled metadata item for inline ribbons.",
     },
     ComponentEntry {
         slug: "nav-card",
         display_name: "NavCard",
-        description: "Navigation-oriented card.",
+        description: "Navigation-oriented card link with icon, badge, and arrow.",
     },
     ComponentEntry {
         slug: "navigation-menu",
         display_name: "NavigationMenu",
-        description: "Navigation with dropdowns.",
+        description: "Horizontal navigation with dropdown sub-menus.",
     },
     ComponentEntry {
         slug: "number-input",
         display_name: "NumberInput",
-        description: "Numeric input with controls.",
+        description: "Numeric input with optional steppers.",
     },
     ComponentEntry {
         slug: "order-by",
         display_name: "OrderBy",
-        description: "Sort-control toolbar.",
+        description: "Sort-control toolbar for data views.",
     },
     ComponentEntry {
         slug: "pagination",
         display_name: "Pagination",
-        description: "Page navigation controls.",
+        description: "Page navigation controls for paged data sets.",
     },
     ComponentEntry {
         slug: "pagination-summary",
         display_name: "PaginationSummary",
-        description: "Pagination state summary.",
+        description: "Textual summary of pagination state.",
     },
     ComponentEntry {
         slug: "pill",
         display_name: "Pill",
-        description: "Small inline label chip.",
+        description: "Small inline label chip with tone and size variants.",
     },
     ComponentEntry {
         slug: "password-requirements",
         display_name: "PasswordRequirements",
-        description: "Live password policy checklist.",
+        description: "Password-policy checklist driven by caller rules.",
     },
     ComponentEntry {
         slug: "code-input",
         display_name: "CodeInput",
-        description: "Segmented code entry with optional masking.",
+        description: "Code entry with visual digit slots and mask mode.",
     },
     ComponentEntry {
         slug: "popover",
         display_name: "Popover",
-        description: "Anchored overlay.",
+        description: "Anchored overlay for contextual content.",
     },
     ComponentEntry {
         slug: "progress",
         display_name: "Progress",
-        description: "Progress indicator.",
+        description: "Determinate or indeterminate progress indicator.",
     },
     ComponentEntry {
         slug: "radio-group",
         display_name: "RadioGroup",
-        description: "Single-selection group.",
+        description: "Single-selection option group.",
     },
     ComponentEntry {
         slug: "range-slider",
         display_name: "RangeSlider",
-        description: "Dual-thumb slider.",
+        description: "Dual-thumb slider for selecting a numeric range.",
     },
     ComponentEntry {
         slug: "rating",
         display_name: "Rating",
-        description: "Star-based rating.",
+        description: "Star-based rating input or display.",
     },
     ComponentEntry {
         slug: "scroll-shell",
         display_name: "ScrollShell",
-        description: "Scrollable container.",
+        description: "Scrollable container with overflow management.",
+    },
+    ComponentEntry {
+        slug: "region",
+        display_name: "Region",
+        description: "Dashed placeholder block for designating layout areas.",
     },
     ComponentEntry {
         slug: "segmented-control",
         display_name: "SegmentedControl",
-        description: "Inline toggle options.",
+        description: "Inline toggle between mutually exclusive options.",
     },
     ComponentEntry {
         slug: "select",
         display_name: "Select",
-        description: "Dropdown selection.",
+        description: "Dropdown selection from a list of options.",
     },
     ComponentEntry {
         slug: "separator",
         display_name: "Separator",
-        description: "Visual divider.",
+        description: "Visual divider between content sections.",
     },
     ComponentEntry {
         slug: "skeleton",
         display_name: "Skeleton",
-        description: "Placeholder loading shape.",
+        description: "Placeholder loading shape for content.",
     },
     ComponentEntry {
         slug: "slider",
         display_name: "Slider",
-        description: "Single-thumb slider.",
+        description: "Single-thumb slider for selecting a numeric value.",
     },
     ComponentEntry {
         slug: "spinner",
         display_name: "Spinner",
-        description: "Animated loading indicator.",
+        description: "Animated loading indicator with ring and grid variants.",
     },
     ComponentEntry {
         slug: "spacer",
         display_name: "Spacer",
-        description: "Flexible space.",
+        description: "Flexible space for pushing layout elements apart.",
     },
     ComponentEntry {
         slug: "split-button",
         display_name: "SplitButton",
-        description: "Button with dropdown.",
+        description: "Button with primary action and dropdown menu.",
     },
     ComponentEntry {
         slug: "stack",
         display_name: "Stack",
-        description: "Vertical flex layout.",
+        description: "Vertical flex layout container.",
     },
     ComponentEntry {
         slug: "status-indicator",
         display_name: "StatusIndicator",
-        description: "Colored status dot.",
+        description: "Colored dot or icon indicating status.",
     },
     ComponentEntry {
         slug: "surface",
         display_name: "Surface",
-        description: "Themed container.",
+        description: "Themed container with background, border, and padding variants.",
     },
     ComponentEntry {
         slug: "switch",
         display_name: "Switch",
-        description: "Toggle switch.",
+        description: "Toggle switch for on/off states.",
     },
     ComponentEntry {
         slug: "table",
         display_name: "Table",
-        description: "Static data table.",
+        description: "Static data table with headers, rows, and alignment.",
     },
     ComponentEntry {
         slug: "tabs",
         display_name: "Tabs",
-        description: "Tabbed interface.",
+        description: "Tabbed interface with underline, card, pill, and strip variants.",
     },
     ComponentEntry {
         slug: "text-input",
         display_name: "TextInput",
-        description: "Single or multi-line text input.",
+        description: "Single or multi-line text input with search, slug, and multiline modes.",
     },
     ComponentEntry {
         slug: "time-ago",
         display_name: "TimeAgo",
-        description: "Relative timestamp.",
+        description: "Live-updating relative timestamp display.",
     },
     ComponentEntry {
         slug: "time-input",
         display_name: "TimeInput",
-        description: "Time-of-day input.",
+        description: "Time-of-day input with hour/minute selection.",
     },
     ComponentEntry {
         slug: "time-zone-select",
         display_name: "TimeZoneSelect",
-        description: "Timezone selection.",
+        description: "Timezone selection dropdown.",
     },
     ComponentEntry {
         slug: "toggle-group",
         display_name: "ToggleGroup",
-        description: "Mutually exclusive toggles.",
+        description: "Group of mutually exclusive toggle buttons.",
     },
     ComponentEntry {
         slug: "toolbar",
         display_name: "Toolbar",
-        description: "Horizontal action bar.",
+        description: "Horizontal action bar with grouped controls.",
     },
     ComponentEntry {
         slug: "tooltip",
         display_name: "Tooltip",
-        description: "Informational overlay.",
+        description: "Hover/focus-triggered informational overlay.",
     },
     ComponentEntry {
         slug: "tri-state-switch",
         display_name: "TriStateSwitch",
-        description: "Three-position switch.",
+        description: "Three-position switch for on/off/indeterminate.",
     },
     ComponentEntry {
         slug: "date-time-zone-picker",
         display_name: "DateTimeZonePicker",
-        description: "Date-time with timezone.",
+        description: "Date-time picker with timezone awareness.",
     },
 ];
 
@@ -448,152 +453,152 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry {
         slug: "audio-player",
         display_name: "AudioPlayer",
-        description: "Audio playback controls.",
+        description: "Audio playback with transport controls, volume, and speed.",
     },
     ComponentEntry {
         slug: "editable-list",
         display_name: "EditableList",
-        description: "Self-managing editable list.",
+        description: "Editable/reorderable list with add, remove, and drag-and-drop.",
     },
     ComponentEntry {
         slug: "block-editor",
         display_name: "BlockEditor",
-        description: "Block-based content editor.",
+        description: "Block-based content editor shell with pluggable types.",
     },
     ComponentEntry {
         slug: "breadcrumbs",
         display_name: "Breadcrumbs",
-        description: "Navigation trail.",
+        description: "Hierarchical navigation trail showing current location.",
     },
     ComponentEntry {
         slug: "card-radio-group",
         display_name: "CardRadioGroup",
-        description: "Radio selection across cards.",
+        description: "Radio selection across rich card options.",
     },
     ComponentEntry {
         slug: "confirm-action",
         display_name: "ConfirmAction",
-        description: "Confirmation before action.",
+        description: "Trigger with confirmation prompt before executing.",
     },
     ComponentEntry {
         slug: "data-table",
         display_name: "DataTable",
-        description: "Feature-rich table.",
+        description: "Feature-rich table with sorting, selection, and pagination.",
     },
     ComponentEntry {
         slug: "embed-input",
         display_name: "EmbedInput",
-        description: "URL or embed code input.",
+        description: "URL or embed code input with provider detection and parsing.",
     },
     ComponentEntry {
         slug: "embed-preview",
         display_name: "EmbedPreview",
-        description: "Rich preview for embeds.",
+        description: "Rich preview card for embedded content.",
     },
     ComponentEntry {
         slug: "empty-state",
         display_name: "EmptyState",
-        description: "Placeholder for empty views.",
+        description: "Placeholder for empty data views with messaging.",
     },
     ComponentEntry {
         slug: "filter-toolbar",
         display_name: "FilterToolbar",
-        description: "Filter controls toolbar.",
+        description: "Toolbar with filter controls for data views.",
     },
     ComponentEntry {
         slug: "form-dialog",
         display_name: "FormDialog",
-        description: "Modal dialog with form.",
+        description: "Modal dialog with embedded form and submit/cancel.",
     },
     ComponentEntry {
         slug: "form-layout",
         display_name: "FormLayout",
-        description: "Structured layout for forms and validation messaging.",
+        description: "Responsive form grid with error messaging.",
     },
     ComponentEntry {
         slug: "list-container",
         display_name: "ListContainer",
-        description: "Paginated list view with header and state handling.",
+        description: "List-page shell with header, filters, and pagination.",
     },
     ComponentEntry {
         slug: "log-list",
         display_name: "LogList",
-        description: "Timestamped log viewer.",
+        description: "Operational log viewer and audit activity list.",
     },
     ComponentEntry {
         slug: "markdown-editor",
         display_name: "MarkdownEditor",
-        description: "Markdown authoring with preview.",
+        description: "Markdown authoring with formatting toolbar and preview.",
     },
     ComponentEntry {
         slug: "media-browse-panel",
         display_name: "MediaBrowsePanel",
-        description: "Grid of selectable media items.",
+        description: "Browsable media grid with search and pagination.",
     },
     ComponentEntry {
         slug: "media-picker",
         display_name: "MediaPicker",
-        description: "Media asset selection dialog.",
+        description: "Dialog for browsing and selecting media assets.",
     },
     ComponentEntry {
         slug: "media-preview",
         display_name: "MediaPreview",
-        description: "Media asset preview.",
+        description: "Media asset preview with metadata and fallback.",
     },
     ComponentEntry {
         slug: "media-thumbnail",
         display_name: "MediaThumbnail",
-        description: "Compact media thumbnail.",
+        description: "Compact media thumbnail with overlay metadata.",
     },
     ComponentEntry {
         slug: "media-upload-status-panel",
         display_name: "MediaUploadStatusPanel",
-        description: "Upload workflow status panel.",
+        description: "Upload progress panel with file status.",
     },
     ComponentEntry {
         slug: "page-header",
         display_name: "PageHeader",
-        description: "Page-level header.",
+        description: "Page-level header with title, actions, and breadcrumbs.",
     },
     ComponentEntry {
         slug: "page-loading",
         display_name: "PageLoading",
-        description: "Full-viewport loading overlay.",
+        description: "Full-viewport loading overlay with spinner.",
     },
     ComponentEntry {
         slug: "relation-picker",
         display_name: "RelationPicker",
-        description: "Searchable related items picker.",
+        description: "Searchable picker for selecting related items.",
     },
     ComponentEntry {
         slug: "selection-summary",
         display_name: "SelectionSummary",
-        description: "Current selection state.",
+        description: "Summary display of current selection state.",
     },
     ComponentEntry {
         slug: "sidebar-nav",
         display_name: "SidebarNav",
-        description: "Grouped vertical navigation for shells and catalogues.",
+        description: "Grouped sidebar navigation list with active item state.",
     },
     ComponentEntry {
         slug: "metric-tile",
         display_name: "MetricTile",
-        description: "Compact label-value tile.",
+        description: "Compact label-value tile for metrics and KPIs.",
     },
     ComponentEntry {
         slug: "toast-host",
         display_name: "ToastHost",
-        description: "Host-owned notification surface with fixed placement.",
+        description: "Store-aware toast host with timer policy.",
     },
     ComponentEntry {
         slug: "toast-stack",
         display_name: "ToastStack",
-        description: "Stacked notification manager.",
+        description: "Stacked transient notification manager.",
     },
     ComponentEntry {
         slug: "video-player",
         display_name: "VideoPlayer",
-        description: "Video playback controls.",
+        description: "Video playback with overlay controls and fullscreen.",
     },
 ];
 
@@ -601,57 +606,57 @@ pub static SHELLS: &[ComponentEntry] = &[
     ComponentEntry {
         slug: "action-discovery-panel",
         display_name: "ActionDiscoveryPanel",
-        description: "Command-oriented discovery surface.",
+        description: "Grouped action list with keyboard navigation.",
     },
     ComponentEntry {
         slug: "app-header",
         display_name: "AppHeader",
-        description: "Application header for workstation shells.",
+        description: "Top-level application header with branding and actions.",
     },
     ComponentEntry {
         slug: "collapse-toggle",
         display_name: "CollapseToggle",
-        description: "Chevron toggle for collapsing adjacent regions.",
+        description: "Directional chevron toggle for collapsing/expanding regions.",
     },
     ComponentEntry {
         slug: "command-palette",
         display_name: "CommandPalette",
-        description: "Modal command discovery surface.",
+        description: "Keyboard-driven command search and execution overlay.",
     },
     ComponentEntry {
         slug: "detail-section",
         display_name: "DetailSection",
-        description: "Titled detail section.",
+        description: "Titled section for grouping detail content.",
     },
     ComponentEntry {
         slug: "detail-shell",
         display_name: "DetailShell",
-        description: "Full detail page layout.",
+        description: "Full detail page layout with header and sections.",
     },
     ComponentEntry {
         slug: "dock-region",
         display_name: "DockRegion",
-        description: "Dockable workstation region scaffold.",
+        description: "Collapsible dock container with tabs and drag-and-drop.",
     },
     ComponentEntry {
         slug: "picker-shell",
         display_name: "PickerShell",
-        description: "Search-and-select picker.",
+        description: "Container for search-and-select picker workflows.",
     },
     ComponentEntry {
         slug: "resize-handle",
         display_name: "ResizeHandle",
-        description: "Grab handle for adjacent resizable panels.",
+        description: "Drag and keyboard resize handle for split layouts.",
     },
     ComponentEntry {
         slug: "split-view",
         display_name: "SplitView",
-        description: "Two-pane layout with companion region.",
+        description: "Resizable split pane layout with collapse toggles.",
     },
     ComponentEntry {
         slug: "status-bar",
         display_name: "StatusBar",
-        description: "Workstation footer status surface.",
+        description: "Bottom status bar with leading and trailing slots.",
     },
 ];
 
@@ -680,7 +685,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "file-upload"
         | "embed-input" => ComponentTag::Input,
         "box" | "grid" | "stack" | "spacer" | "separator" | "surface" | "scroll-shell"
-        | "split-view" | "resize-handle" => ComponentTag::Layout,
+        | "region" | "split-view" | "resize-handle" => ComponentTag::Layout,
         "eyebrow" | "pill" | "status-indicator" | "icon" | "icon-provider" | "skeleton"
         | "spinner" | "code" | "time-ago" | "metric-tile" | "detail-item" | "meta-bar"
         | "meta-item" | "embed-preview" => ComponentTag::Display,
@@ -733,128 +738,6 @@ pub fn contract_root() -> &'static str {
 
 pub fn contract_doc_path(slug: &str) -> String {
     format!("{}{}.md", contract_root(), slug)
-}
-
-pub fn implementation_root(slug: &str) -> &'static str {
-    match slug {
-        "accordion"
-        | "alert-dialog"
-        | "box"
-        | "bulk-action-bar"
-        | "button"
-        | "calendar"
-        | "callout"
-        | "card"
-        | "checkbox"
-        | "code"
-        | "collapsible"
-        | "color-picker"
-        | "context-menu"
-        | "date-picker"
-        | "date-range-picker"
-        | "date-time-picker"
-        | "date-time-range-picker"
-        | "detail-item"
-        | "dialog"
-        | "drawer"
-        | "duration-input"
-        | "editable-label"
-        | "eyebrow"
-        | "field"
-        | "field-set"
-        | "file-upload"
-        | "form-actions"
-        | "grid"
-        | "hover-card"
-        | "icon"
-        | "icon-button"
-        | "icon-provider"
-        | "list-card"
-        | "menu"
-        | "menubar"
-        | "meter"
-        | "meta-bar"
-        | "meta-item"
-        | "nav-card"
-        | "navigation-menu"
-        | "number-input"
-        | "order-by"
-        | "pagination"
-        | "pagination-summary"
-        | "pill"
-        | "password-requirements"
-        | "code-input"
-        | "popover"
-        | "progress"
-        | "radio-group"
-        | "range-slider"
-        | "rating"
-        | "scroll-shell"
-        | "segmented-control"
-        | "select"
-        | "separator"
-        | "skeleton"
-        | "slider"
-        | "spinner"
-        | "spacer"
-        | "split-button"
-        | "stack"
-        | "status-indicator"
-        | "surface"
-        | "switch"
-        | "table"
-        | "tabs"
-        | "text-input"
-        | "time-ago"
-        | "time-input"
-        | "time-zone-select"
-        | "toggle-group"
-        | "toolbar"
-        | "tooltip"
-        | "tri-state-switch"
-        | "date-time-zone-picker" => "packages/gpui/components/src/primitives/",
-        "audio-player"
-        | "editable-list"
-        | "block-editor"
-        | "breadcrumbs"
-        | "card-radio-group"
-        | "confirm-action"
-        | "data-table"
-        | "embed-input"
-        | "embed-preview"
-        | "empty-state"
-        | "filter-toolbar"
-        | "form-dialog"
-        | "form-layout"
-        | "list-container"
-        | "log-list"
-        | "markdown-editor"
-        | "media-browse-panel"
-        | "media-picker"
-        | "media-preview"
-        | "media-thumbnail"
-        | "media-upload-status-panel"
-        | "page-header"
-        | "page-loading"
-        | "relation-picker"
-        | "selection-summary"
-        | "sidebar-nav"
-        | "metric-tile"
-        | "toast-host"
-        | "toast-stack"
-        | "video-player"
-        | "action-discovery-panel"
-        | "app-header"
-        | "command-palette"
-        | "detail-section"
-        | "detail-shell"
-        | "dock-region"
-        | "picker-shell"
-        | "resize-handle"
-        | "split-view"
-        | "status-bar" => "packages/gpui/components/src/composites/",
-        _ => "packages/gpui/components/src/",
-    }
 }
 
 pub fn all_components() -> Vec<&'static ComponentEntry> {

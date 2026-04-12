@@ -13,7 +13,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- Full app header ---
         .child(
             div()
                 .flex()
@@ -113,46 +112,52 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     ),
                 ),
         )
-        // --- Simple with actions ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With title, actions, and utility"),
+                    EyebrowSpec::new().with_content("Project shell header"),
                     theme,
                 ))
                 .child(
-                    AppHeader::from_spec(AppHeaderSpec::new().with_title("Dashboard"), theme)
-                        .with_primary_actions(
-                            div()
-                                .flex()
-                                .items_center()
-                                .gap(px(6.0))
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Secondary)
-                                            .with_label("Export")
-                                            .with_size(ControlSize::Sm),
-                                        theme,
-                                    )
-                                    .with_id("ah-export"),
+                    AppHeader::from_spec(
+                        AppHeaderSpec::new().with_title("Signals workspace"),
+                        theme,
+                    )
+                    .with_primary_actions(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(px(6.0))
+                            .child(
+                                Button::from_spec(
+                                    ButtonSpec::new()
+                                        .with_variant(ButtonVariant::Secondary)
+                                        .with_label("Export")
+                                        .with_size(ControlSize::Sm),
+                                    theme,
                                 )
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Primary)
-                                            .with_label("New Project")
-                                            .with_size(ControlSize::Sm),
-                                        theme,
-                                    )
-                                    .with_id("ah-new"),
-                                ),
-                        )
-                        .with_utility_items(
-                            div().flex().items_center().child(
+                                .with_id("ah-export"),
+                            )
+                            .child(
+                                Button::from_spec(
+                                    ButtonSpec::new()
+                                        .with_variant(ButtonVariant::Primary)
+                                        .with_label("New Project")
+                                        .with_size(ControlSize::Sm),
+                                    theme,
+                                )
+                                .with_id("ah-new"),
+                            ),
+                    )
+                    .with_utility_items(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(px(4.0))
+                            .child(
                                 IconButton::from_spec(
                                     IconButtonSpec::new()
                                         .with_icon("settings")
@@ -160,26 +165,19 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     theme,
                                 )
                                 .with_id("ah-settings2"),
+                            )
+                            .child(
+                                IconButton::from_spec(
+                                    IconButtonSpec::new()
+                                        .with_icon("user")
+                                        .with_size(ControlSize::Sm),
+                                    theme,
+                                )
+                                .with_id("ah-user"),
                             ),
-                        ),
+                    ),
                 ),
         )
-        // --- Title only ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Title only"),
-                    theme,
-                ))
-                .child(AppHeader::from_spec(
-                    AppHeaderSpec::new().with_title("Settings"),
-                    theme,
-                )),
-        )
-        // --- Custom identity (leading slot) ---
         .child(
             div()
                 .flex()
@@ -235,7 +233,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_size(ControlSize::Sm),
                                     theme,
                                 )
-                                .with_id("ah-user"),
+                                .with_id("ah-user2"),
                             ),
                     ),
                 ),

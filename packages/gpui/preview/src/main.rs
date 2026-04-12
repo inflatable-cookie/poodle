@@ -6,7 +6,6 @@
 mod app_state;
 mod component_registry;
 mod demo_view;
-mod parity_evidence;
 mod specimens;
 #[allow(dead_code)]
 mod style_bridge;
@@ -55,11 +54,7 @@ use app_state::{
     AppState, AppearanceTreatment, ControlSize, DemoScreen, Density, Section, ThemePreset,
     TokenPanel,
 };
-use component_registry::{
-    component_tag, contract_doc_path, contract_root, find_component, grouped_components,
-    implementation_root, package_name,
-};
-use parity_evidence::component_evidence;
+use component_registry::{contract_doc_path, find_component, grouped_components, package_name};
 use poodle_gpui_components::{Code, Tabs, TextInput};
 use style_bridge::color_to_hsla;
 
@@ -247,49 +242,6 @@ impl PreviewRoot {
             .child(pill(self.state.theme_preset.label()))
             .child(pill(self.state.density.label()))
             .child(pill(self.state.control_size.label()))
-    }
-
-    fn review_command(&self) -> String {
-        let mut args = vec![
-            "cargo run --manifest-path packages/gpui/preview/Cargo.toml --".to_string(),
-            format!("--section {}", self.state.section.slug()),
-            format!("--theme {}", self.state.theme_preset.label()),
-            format!("--density {}", self.state.density.label()),
-            format!("--size {}", self.state.control_size.label()),
-            format!("--treatment {}", self.state.appearance_treatment.label()),
-        ];
-
-        if let Some(component_slug) = self.state.active_component_slug.as_deref() {
-            if self.state.section == Section::Components {
-                args.push(format!("--component {}", component_slug));
-            }
-        }
-
-        if self.state.section == Section::Components && !self.state.component_search.is_empty() {
-            args.push(format!("--search {:?}", self.state.component_search));
-        }
-
-        if self.state.section == Section::Demo {
-            args.push(format!(
-                "--demo-screen {}",
-                self.state.active_demo_screen.slug()
-            ));
-        }
-
-        if self.state.section == Section::Tokens {
-            args.push(format!(
-                "--token-panel {}",
-                self.state.active_token_panel.value()
-            ));
-            if !self.state.token_inspector_query.is_empty() {
-                args.push(format!(
-                    "--token-query {:?}",
-                    self.state.token_inspector_query
-                ));
-            }
-        }
-
-        args.join(" ")
     }
 
     /// Display controls bar — theme, density, size, treatment toggle groups + catalogue search.
@@ -496,65 +448,31 @@ impl PreviewRoot {
     /// Section content router.
     /// `available_h` is the pixel height remaining after top bar + controls.
     fn render_section_content(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
-        let theme = &self.state.theme;
-        let border_subtle = theme.resolve_color("color.border.subtle");
-        let text_secondary = theme.resolve_color("color.text.secondary");
-        let content_h = available_h - px(112.0);
-        let review_state = div().w_full().px(px(24.0)).pt(px(16.0)).child(
-            div()
-                .p(px(14.0))
-                .rounded(px(8.0))
-                .border_1()
-                .border_color(color_to_hsla(border_subtle))
-                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(
-                    div()
-                        .text_size(px(11.0))
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("REVIEW STATE"),
-                )
-                .child(Code::from_spec(
-                    CodeSpec::new()
-                        .with_language("bash")
-                        .with_content(self.review_command())
-                        .with_copyable(false),
-                    theme,
-                )),
-        );
-
         match self.state.section {
             Section::Components => div()
                 .w_full()
                 .h(available_h)
                 .flex()
                 .flex_col()
-                .child(review_state)
-                .child(self.render_components_section(content_h, cx)),
+                .child(self.render_components_section(available_h, cx)),
             Section::Demo => div()
                 .w_full()
                 .h(available_h)
                 .flex()
                 .flex_col()
-                .child(review_state)
-                .child(self.render_demo_section(content_h, cx)),
+                .child(self.render_demo_section(available_h, cx)),
             Section::Tokens => div()
                 .w_full()
                 .h(available_h)
                 .flex()
                 .flex_col()
-                .child(review_state)
-                .child(self.render_tokens_section(content_h, cx)),
+                .child(self.render_tokens_section(available_h, cx)),
             Section::Treatments => div()
                 .w_full()
                 .h(available_h)
                 .flex()
                 .flex_col()
-                .child(review_state)
-                .child(self.render_treatments_section(content_h)),
+                .child(self.render_treatments_section(available_h)),
         }
     }
 
@@ -778,12 +696,12 @@ impl PreviewRoot {
                     .h(available_h)
                     .flex()
                     .flex_col()
-                    .gap(px(16.0))
+                    .gap(px(0.0))
                     .p(px(24.0))
                     .overflow_y_scroll()
                     .child(self.render_component_page_header(component))
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(self.render_component_specimen(component.slug, cx)),
+                    .child(self.render_component_specimen(component.slug, cx))
+                    .child(self.render_component_page_support(component)),
             );
         } else {
             layout = layout.child(self.render_catalogue_landing(
@@ -806,97 +724,60 @@ impl PreviewRoot {
         let text_secondary = theme.resolve_color("color.text.secondary");
         let border_subtle = theme.resolve_color("color.border.subtle");
         let elevated_bg = theme.resolve_color("color.background.elevated");
-        let panel_bg = theme.resolve_color("color.background.panel");
-
-        let meta_pill = |label: String| {
-            div()
-                .px(px(8.0))
-                .py(px(3.0))
-                .rounded(px(999.0))
-                .border_1()
-                .border_color(color_to_hsla(border_subtle))
-                .bg(color_to_hsla(elevated_bg).opacity(0.92))
-                .text_size(px(11.0))
-                .text_color(color_to_hsla(text_secondary))
-                .child(label)
-        };
-
-        let provenance_card = |eyebrow: &'static str, title: String, body: String| {
-            div()
-                .flex_1()
-                .min_w(px(220.0))
-                .p(px(14.0))
-                .rounded(px(8.0))
-                .bg(color_to_hsla(elevated_bg))
-                .border_1()
-                .border_color(color_to_hsla(border_subtle))
-                .flex()
-                .flex_col()
-                .gap(px(6.0))
-                .child(
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .pb(px(24.0))
+            .child(
+                div().flex().items_center().gap(px(8.0)).child(
                     div()
+                        .px(px(8.0))
+                        .py(px(3.0))
+                        .rounded(px(999.0))
+                        .border_1()
+                        .border_color(color_to_hsla(border_subtle))
+                        .bg(color_to_hsla(elevated_bg).opacity(0.92))
                         .text_size(px(11.0))
-                        .font_weight(FontWeight::SEMIBOLD)
                         .text_color(color_to_hsla(text_secondary))
-                        .child(eyebrow),
-                )
-                .child(
-                    div()
-                        .text_sm()
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(color_to_hsla(text_primary))
-                        .child(title),
-                )
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(body),
-                )
-        };
+                        .child(package_name().to_string()),
+                ),
+            )
+            .child(
+                div()
+                    .text_3xl()
+                    .font_weight(FontWeight::BOLD)
+                    .text_color(color_to_hsla(text_primary))
+                    .child(component.display_name),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .max_w(px(720.0))
+                    .child(component.description),
+            )
+    }
 
+    fn render_component_page_support(&self, component: &component_registry::ComponentEntry) -> Div {
+        let theme = &self.state.theme;
+        let text_primary = theme.resolve_color("color.text.primary");
+        let text_secondary = theme.resolve_color("color.text.secondary");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let panel_bg = theme.resolve_color("color.background.panel");
+        let contract_doc = load_contract_doc_status(component.slug);
         let import_snippet = format!(
             "use {}::{};",
             package_name().replace('-', "_"),
             component.display_name
         );
-        let contract_doc = load_contract_doc_status(component.slug);
-        let evidence = component_evidence(component.display_name);
 
         div()
             .flex()
             .flex_col()
-            .gap(px(16.0))
-            .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(8.0))
-                    .child(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(8.0))
-                            .flex_wrap()
-                            .child(meta_pill(package_name().to_string()))
-                            .child(meta_pill(component_tag(component.slug).label().to_string()))
-                            .child(meta_pill("contract-backed".to_string())),
-                    )
-                    .child(
-                        div()
-                            .text_3xl()
-                            .font_weight(FontWeight::BOLD)
-                            .text_color(color_to_hsla(text_primary))
-                            .child(component.display_name),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            .text_color(color_to_hsla(text_secondary))
-                            .max_w(px(720.0))
-                            .child(component.description),
-                    ),
-            )
+            .gap(px(24.0))
+            .pt(px(24.0))
+            .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
             .child(
                 div()
                     .flex()
@@ -904,7 +785,7 @@ impl PreviewRoot {
                     .gap(px(10.0))
                     .child(
                         div()
-                            .text_sm()
+                            .text_lg()
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_primary))
                             .child("Import"),
@@ -917,134 +798,59 @@ impl PreviewRoot {
                         theme,
                     )),
             )
-            .child(
-                div()
-                    .flex()
-                    .gap(px(12.0))
-                    .flex_wrap()
-                    .child(provenance_card(
-                        "PACKAGE",
-                        package_name().to_string(),
-                        "Public GPUI component surface under review in the native preview."
-                            .to_string(),
-                    ))
-                    .child(provenance_card(
-                        "CONTRACT ROOT",
-                        contract_root().to_string(),
-                        "Semantic ownership lives in the shared component contracts, not in the preview shell."
-                            .to_string(),
-                    ))
-                    .child(provenance_card(
-                        "CONTRACT DOC",
-                        contract_doc.path.clone(),
-                        if contract_doc.exists {
-                            match (&contract_doc.status, &contract_doc.updated) {
-                                (Some(status), Some(updated)) => {
-                                    format!("Present. Status: {}. Updated: {}.", status, updated)
-                                }
-                                (Some(status), None) => {
-                                    format!("Present. Status: {}.", status)
-                                }
-                                _ => "Present in shared contracts.".to_string(),
-                            }
-                        } else {
-                            "Missing. GPUI preview should show that gap, not fake a docs surface."
-                                .to_string()
-                        },
-                    ))
-                    .child(provenance_card(
-                        "IMPLEMENTATION ROOT",
-                        implementation_root(component.slug).to_string(),
-                        "This tells you where the renderable GPUI implementation currently lives."
-                            .to_string(),
-                    )),
-            )
-            .child(
-                div()
-                    .p(px(14.0))
-                    .rounded(px(8.0))
-                    .bg(color_to_hsla(panel_bg))
-                    .border_1()
-                    .border_color(color_to_hsla(border_subtle))
-                    .flex()
-                    .flex_col()
-                    .gap(px(6.0))
-                    .child(
-                        div()
-                            .text_size(px(11.0))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(color_to_hsla(text_secondary))
-                            .child("DOCS + PARITY"),
-                    )
-                    .child(
-                        div()
-                            .flex()
-                            .items_center()
-                            .gap(px(8.0))
-                            .flex_wrap()
-                            .child(meta_pill(format!(
-                                "contract doc: {}",
-                                if contract_doc.exists { "present" } else { "missing" }
-                            )))
-                            .when_some(contract_doc.status.clone(), |row, status| {
-                                row.child(meta_pill(format!("status: {}", status)))
-                            })
-                            .when_some(contract_doc.updated.clone(), |row, updated| {
-                                row.child(meta_pill(format!("updated: {}", updated)))
-                            }),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            .text_color(color_to_hsla(text_secondary))
-                            .child(if contract_doc.exists {
-                                format!(
-                                    "Shared contract doc found at {}. GPUI still does not mirror Svelte-generated usage docs here.",
-                                    contract_doc.path
-                                )
-                            } else {
-                                format!(
-                                    "No shared contract doc found at {}. Keep the docs gap explicit until the contract exists.",
-                                    contract_doc.path
-                                )
-                            }),
-                    )
-                    .when_some(evidence, |container, evidence| {
-                        let mut section_row = div().flex().flex_wrap().gap(px(6.0));
-                        for title in &evidence.section_titles {
-                            section_row = section_row.child(meta_pill(title.clone()));
-                        }
-
-                        container
-                            .child(
-                                div()
-                                    .flex()
-                                    .items_center()
-                                    .gap(px(8.0))
-                                    .flex_wrap()
-                                    .child(meta_pill(format!("status: {}", evidence.status)))
-                                    .child(meta_pill(format!(
-                                        "sections: {}",
-                                        evidence.section_ids.len()
-                                    ))),
-                            )
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Parity note: {}", evidence.note)),
-                            )
-                            .child(section_row)
-                    })
-                    .when(evidence.is_none(), |container| {
-                        container.child(
+            .when(contract_doc.exists, |container| {
+                container.child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(10.0))
+                        .child(
                             div()
-                                .text_sm()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child("No matching Svelte parity artifact entry was found for this export yet. The GPUI page still exposes package, contract, specimen, and implementation provenance so the gap stays explicit."),
+                                .text_lg()
+                                .font_weight(FontWeight::SEMIBOLD)
+                                .text_color(color_to_hsla(text_primary))
+                                .child("Docs"),
                         )
-                    }),
-            )
+                        .child(
+                            div()
+                                .p(px(14.0))
+                                .rounded(px(8.0))
+                                .bg(color_to_hsla(panel_bg))
+                                .border_1()
+                                .border_color(color_to_hsla(border_subtle))
+                                .flex()
+                                .flex_col()
+                                .gap(px(8.0))
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child(
+                                            match (&contract_doc.status, &contract_doc.updated) {
+                                                (Some(status), Some(updated)) => format!(
+                                                "Shared contract doc: {}. Status: {}. Updated: {}.",
+                                                contract_doc.path, status, updated
+                                            ),
+                                                (Some(status), None) => format!(
+                                                    "Shared contract doc: {}. Status: {}.",
+                                                    contract_doc.path, status
+                                                ),
+                                                _ => format!(
+                                                    "Shared contract doc: {}.",
+                                                    contract_doc.path
+                                                ),
+                                            },
+                                        ),
+                                )
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Usage docs are not surfaced here yet."),
+                                ),
+                        ),
+                )
+            })
     }
 
     /// Landing page grid showing all components as cards.
@@ -1129,7 +935,7 @@ impl PreviewRoot {
                             div()
                                 .text_sm()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child("Browse the full Poodle component library. Each component keeps its contract, specimen, and implementation reviewable from one place."),
+                                .child("Browse the full Poodle component library. Each component handles accessibility, keyboard support, and theming."),
                         )
                         .child(
                             div()

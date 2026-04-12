@@ -3,7 +3,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, ToastHost};
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, EyebrowSpec, Toast, ToastHostPlacement, ToastHostSpec, ToastTone,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole,
+    Toast, ToastHostPlacement, ToastHostSpec, ToastTone,
 };
 
 use crate::style_bridge::color_to_hsla;
@@ -24,7 +25,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
         .flex()
         .flex_col()
-        .gap(px(16.0))
+        .gap(px(24.0))
         .child(
             div()
                 .flex()
@@ -46,18 +47,60 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         .child(
             div()
-                .relative()
-                .min_h(px(256.0))
-                .border_1()
-                .border_color(color_to_hsla(theme.resolve_color("color.border.default")))
-                .rounded(px(8.0))
-                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Host policies"),
+                    theme,
+                ))
                 .child(
-                    ToastHost::from_spec(
-                        ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
-                        theme,
-                    )
-                    .toasts(toasts),
+                    div()
+                        .grid()
+                        .grid_cols(2)
+                        .gap(px(12.0))
+                        .child(
+                            div()
+                                .relative()
+                                .min_h(px(220.0))
+                                .border_1()
+                                .border_color(color_to_hsla(theme.resolve_color("color.border.default")))
+                                .rounded(px(8.0))
+                                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
+                                .child(
+                                    ToastHost::from_spec(
+                                        ToastHostSpec::new()
+                                            .with_placement(ToastHostPlacement::BottomEnd),
+                                        theme,
+                                    )
+                                    .toasts(toasts.clone()),
+                                ),
+                        )
+                        .child(
+                            div()
+                                .relative()
+                                .min_h(px(220.0))
+                                .border_1()
+                                .border_color(color_to_hsla(theme.resolve_color("color.border.default")))
+                                .rounded(px(8.0))
+                                .bg(color_to_hsla(theme.resolve_color("color.background.panel")))
+                                .child(
+                                    ToastHost::from_spec(
+                                        ToastHostSpec::new()
+                                            .with_placement(ToastHostPlacement::TopStart)
+                                            .with_auto_dismiss_ms(0)
+                                            .with_sticky_tones(vec![
+                                                ToastTone::Warning,
+                                                ToastTone::Danger,
+                                            ])
+                                            .with_size(ControlSize::Sm)
+                                            .with_density(ControlDensity::Compact)
+                                            .with_size_role(SemanticControlSizeRole::Chrome),
+                                        theme,
+                                    )
+                                    .toasts(toasts),
+                                ),
+                        ),
                 ),
         )
 }

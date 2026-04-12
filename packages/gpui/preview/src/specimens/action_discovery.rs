@@ -10,8 +10,7 @@ use poodle_specs::{
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
-    // --- Grouped actions ---
-    let grouped_sections = vec![
+    let grouped_spec = ActionDiscoveryPanelSpec::new(vec![
         ActionDiscoverySection::new(
             "file",
             "File",
@@ -41,34 +40,32 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_shortcut("\u{2318}B"),
             ],
         ),
-    ];
+    ]);
 
-    let grouped_spec = ActionDiscoveryPanelSpec::new(grouped_sections);
-
-    // --- With descriptions and badges ---
-    let desc_sections = vec![
+    let workflow_spec = ActionDiscoveryPanelSpec::new(vec![
         ActionDiscoverySection::new(
-            "cicd",
-            "CI/CD",
+            "publishing",
+            "Publishing",
             vec![
-                CommandActionItem::new("deploy", "Deploy to Production")
-                    .with_description("Push current build to production environment")
+                CommandActionItem::new("publish", "Publish release")
+                    .with_description("Ship the approved release to production.")
                     .with_badge("Dangerous"),
-                CommandActionItem::new("open-preview", "Open Preview")
+                CommandActionItem::new("open-preview", "Open preview")
                     .with_description("Launch preview environment for current branch")
                     .with_shortcut("\u{2318}P"),
             ],
         ),
         ActionDiscoverySection::new(
-            "tools",
-            "Tools",
-            vec![CommandActionItem::new("run-linter", "Run Linter").with_shortcut("\u{2318}L")],
+            "maintenance",
+            "Maintenance",
+            vec![
+                CommandActionItem::new("run-linter", "Run linter").with_shortcut("\u{2318}L"),
+                CommandActionItem::new("reindex-search", "Reindex search")
+                    .with_description("Refresh the workspace search index."),
+            ],
         ),
-    ];
+    ]);
 
-    let desc_spec = ActionDiscoveryPanelSpec::new(desc_sections);
-
-    // --- Empty state ---
     let empty_spec = ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Empty);
 
     div()
@@ -95,11 +92,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With descriptions and badges"),
+                    EyebrowSpec::new().with_content("Workflow actions"),
                     theme,
                 ))
                 .child(
-                    ActionDiscoveryPanel::from_spec(desc_spec, theme).with_id("action-disc-desc"),
+                    ActionDiscoveryPanel::from_spec(workflow_spec, theme)
+                        .with_id("action-disc-workflow"),
                 ),
         )
         .child(

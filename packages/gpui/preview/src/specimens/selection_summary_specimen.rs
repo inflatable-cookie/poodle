@@ -5,7 +5,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, SelectionSummary};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{SelectionSummaryItem, SelectionSummarySpec};
+use poodle_specs::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -50,6 +50,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         "1",
                         "Primary button",
                     )]),
+                    theme,
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Clear action"),
+                    theme,
+                ))
+                .child(SelectionSummary::from_spec(
+                    SelectionSummarySpec::new(vec![
+                        SelectionSummaryItem::new("1", "Button"),
+                        SelectionSummaryItem::new("2", "Card"),
+                        SelectionSummaryItem::new("3", "Dialog"),
+                    ])
+                    .with_clear_action(RemediationAction::new("clear", "Clear selection")),
                     theme,
                 )),
         )

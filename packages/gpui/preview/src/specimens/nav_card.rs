@@ -46,7 +46,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             NavCard::from_spec(
                                 NavCardSpec::new()
                                     .with_title("Tokens")
-                                    .with_description("Design tokens and theming system."),
+                                    .with_description("Design tokens and theming system.")
+                                    .with_badge("Core"),
                                 theme,
                             )
                             .with_icon(Icon::from_spec(IconSpec::new("settings"), theme)),
@@ -69,15 +70,37 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Single card"),
+                    EyebrowSpec::new().with_content("Shell destination cards"),
                     theme,
                 ))
-                .child(NavCard::from_spec(
-                    NavCardSpec::new()
-                        .with_title("View Documentation")
-                        .with_description("Open the full documentation site.")
-                        .with_href("#"),
-                    theme,
-                )),
+                .child(
+                    div()
+                        .grid()
+                        .grid_cols(2)
+                        .gap(px(12.0))
+                        .child(
+                            NavCard::from_spec(
+                                NavCardSpec::new()
+                                    .with_title("Command Center")
+                                    .with_description(
+                                        "Open shared command search and recent actions.",
+                                    )
+                                    .with_badge("⌘K")
+                                    .with_href("#commands"),
+                                theme,
+                            )
+                            .with_icon(Icon::from_spec(IconSpec::new("terminal"), theme)),
+                        )
+                        .child(
+                            NavCard::from_spec(
+                                NavCardSpec::new()
+                                    .with_title("Workspace Layout")
+                                    .with_description("Inspect sidebars, docks, and shell regions.")
+                                    .with_href("#workspace"),
+                                theme,
+                            )
+                            .with_icon(Icon::from_spec(IconSpec::new("panel-left"), theme)),
+                        ),
+                ),
         )
 }

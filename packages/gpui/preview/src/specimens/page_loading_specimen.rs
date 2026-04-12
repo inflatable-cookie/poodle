@@ -2,14 +2,15 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, PageLoading};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{PageLoadingPresentation, PageLoadingSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, PageLoadingPresentation, PageLoadingSpec, SemanticControlSizeRole,
+};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- Indeterminate (spinner only) ---
         .child(
             div()
                 .flex()
@@ -24,7 +25,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Determinate (with progress bar) ---
         .child(
             div()
                 .flex()
@@ -42,7 +42,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- With cancel button ---
         .child(
             div()
                 .flex()
@@ -59,7 +58,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Determinate with cancel ---
         .child(
             div()
                 .flex()
@@ -78,7 +76,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Inline presentation (in-flow, no backdrop) ---
         .child(
             div()
                 .flex()
@@ -94,5 +91,38 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_presentation(PageLoadingPresentation::Inline),
                     theme,
                 )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Semantic presentation"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(12.0))
+                        .child(PageLoading::from_spec(
+                            PageLoadingSpec::new()
+                                .with_message("Preparing region…")
+                                .with_presentation(PageLoadingPresentation::Inline)
+                                .with_size(ControlSize::Sm)
+                                .with_density(ControlDensity::Compact),
+                            theme,
+                        ))
+                        .child(PageLoading::from_spec(
+                            PageLoadingSpec::new()
+                                .with_value(82.0)
+                                .with_max(100.0)
+                                .with_message("Publishing release… 82%")
+                                .with_can_cancel(true)
+                                .with_size_role(SemanticControlSizeRole::Prominent),
+                            theme,
+                        )),
+                ),
         )
 }

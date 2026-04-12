@@ -124,10 +124,10 @@ mod relation_picker_specimen;
 mod selection_summary_specimen;
 mod sidebar_nav;
 mod split_view_specimen;
-mod state_display;
 mod table;
 mod time_ago_specimen;
 mod toast_host;
+mod toast_stack_specimen;
 mod video_player_specimen;
 
 // ── Layout Helpers ───────────────────────────────────────
@@ -202,24 +202,32 @@ pub fn specimen_card(title: &str, theme: &GpuiThemeProvider, content: impl IntoE
         .child(content)
 }
 
-/// Render a simple specimen showing a styled box with a label.
-pub fn simple_specimen(label: &str, theme: &GpuiThemeProvider) -> Div {
-    let accent = theme.resolve_color("color.accent.base");
-    let border = theme.resolve_color("color.border.default");
+/// Render an honest placeholder when a registry entry has no specimen yet.
+pub fn missing_specimen(display_name: &str, theme: &GpuiThemeProvider) -> Div {
+    let border = theme.resolve_color("color.border.subtle");
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     div()
-        .h(px(32.0))
-        .px(px(10.0))
-        .rounded(px(4.0))
+        .p(px(32.0))
+        .rounded(px(8.0))
         .border_1()
-        .border_color(color_to_hsla(border))
+        .border_color(color_to_hsla(border).opacity(0.6))
         .flex()
+        .flex_col()
         .items_center()
+        .justify_center()
+        .gap(px(6.0))
         .child(
             div()
-                .text_xs()
-                .text_color(color_to_hsla(accent))
-                .child(label.to_string()),
+                .text_sm()
+                .text_color(color_to_hsla(text_secondary))
+                .child(format!("Specimen not yet available for {}.", display_name)),
+        )
+        .child(
+            div()
+                .text_sm()
+                .text_color(color_to_hsla(text_secondary))
+                .child("Check back as we build out interactive demos for each component."),
         )
 }
 
@@ -257,9 +265,8 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "number-input" => specimen_card("NumberInput", theme, number_input::render(state, cx)),
         "code-input" => specimen_card("CodeInput", theme, code_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
-        "time-field" | "time-input" => {
-            specimen_card("TimeInput", theme, time_field::render(state, cx))
-        }
+        "time-input" => specimen_card("TimeInput", theme, time_field::render(state, cx)),
+        "time-field" => specimen_card("TimeInput", theme, time_field::render(state, cx)),
         "editable-label" => {
             specimen_card("EditableLabel", theme, editable_label::render(state, cx))
         }
@@ -391,11 +398,10 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             pagination_summary_specimen::render(theme),
         ),
-        "metric-tile" | "state-tile" => {
-            specimen_card("MetricTile", theme, metric_tile_specimen::render(theme))
-        }
+        "metric-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
+        "state-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
         "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
-        "toast-stack" => specimen_card("ToastStack", theme, state_display::render(state, cx)),
+        "toast-stack" => specimen_card("ToastStack", theme, toast_stack_specimen::render(theme)),
         "toast-host" => specimen_card("ToastHost", theme, toast_host::render(theme)),
         "confirm-action" => specimen_card(
             "ConfirmAction",
@@ -472,12 +478,12 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "split-view" => specimen_card("SplitView", theme, split_view_specimen::render(theme)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card(
-            "ActionDiscovery",
+            "ActionDiscoveryPanel",
             theme,
             action_discovery::render(state, cx),
         ),
 
         // Fallback
-        _ => simple_specimen(slug, theme),
+        _ => missing_specimen(slug, theme),
     }
 }

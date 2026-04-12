@@ -24,15 +24,6 @@ impl Section {
             Section::Treatments => "Treatments",
         }
     }
-
-    pub fn slug(self) -> &'static str {
-        match self {
-            Section::Components => "components",
-            Section::Demo => "demo",
-            Section::Tokens => "tokens",
-            Section::Treatments => "treatments",
-        }
-    }
 }
 
 /// Available theme presets.
@@ -219,17 +210,6 @@ impl DemoScreen {
             DemoScreen::DetailAndRelatedData => "Detail",
             DemoScreen::PickerAndMedia => "Picker",
             DemoScreen::CommandAndWorkspace => "Workspace",
-        }
-    }
-
-    pub fn slug(self) -> &'static str {
-        match self {
-            DemoScreen::OverviewShell => "overview",
-            DemoScreen::FormAndValidation => "form",
-            DemoScreen::BrowseAndTable => "browse",
-            DemoScreen::DetailAndRelatedData => "detail",
-            DemoScreen::PickerAndMedia => "picker",
-            DemoScreen::CommandAndWorkspace => "workspace",
         }
     }
 
