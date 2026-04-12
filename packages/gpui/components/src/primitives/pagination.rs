@@ -329,19 +329,31 @@ impl IntoElement for Pagination {
             .items_center()
             .gap(gap_md); // 0.375rem
 
+        // Compact mode tightens padding and gap.
+        if self.spec.is_compact {
+            root = root.gap(gap_sm);
+        }
+
+        // Loading state — dim + no interaction.
+        if self.spec.is_loading {
+            root = root.opacity(self.disabled_opacity);
+        }
+
         // Standalone mode strips the panel chrome.
         if !self.spec.standalone {
+            let pad_x = if self.spec.is_compact { px(8.0) } else { px(12.0) };
+            let pad_y = if self.spec.is_compact { px(4.0) } else { px(8.0) };
             root = root
                 .bg(surface_bg)
                 .border_1()
                 .border_color(border_color)
                 .rounded(radius_control)
-                .px(px(12.0))
-                .py(px(8.0));
+                .px(pad_x)
+                .py(pad_y);
         }
 
-        // Info text block (shown on simple/full variants).
-        if self.spec.info_text.is_some() || self.spec.page_size.is_some() {
+        // Info text block — gated on show_info.
+        if self.spec.show_info && (self.spec.info_text.is_some() || self.spec.page_size.is_some()) {
             let mut info = div().flex().items_center().gap(gap_md);
 
             if let Some(ref text) = self.spec.info_text {
@@ -445,6 +457,21 @@ impl IntoElement for Pagination {
                             .child(format!("{current_page}")),
                     ),
             );
+        }
+
+        // Limit selector — rendered when show_limit_selector is true.
+        // Full interactive dropdown requires Select wiring; for now
+        // render a static label showing the current page size and the
+        // available options as a visual stub.
+        if self.spec.show_limit_selector {
+            if let Some(ps) = self.spec.page_size {
+                root = root.child(
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(format!("{ps} / page")),
+                );
+            }
         }
 
         root.into_any_element()

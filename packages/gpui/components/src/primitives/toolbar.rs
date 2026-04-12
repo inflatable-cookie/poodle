@@ -1,8 +1,8 @@
 //! Toolbar — real GPUI component backed by ToolbarSpec.
 
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{Alignment, ControlDensity, ControlSize, SemanticControlSizeRole, ToolbarSpec};
+use poodle_specs::{Alignment, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole, ToolbarSpec};
 
 use crate::presentation::{rem_to_px, control_space_x_rem, panel_space_y_rem};
 use crate::theme_ext::{color_mix, resolve_color};
@@ -34,6 +34,7 @@ impl Toolbar {
 
     // ── Forwarded spec builders ───────────────────────────────
     pub fn alignment(mut self, v: Alignment) -> Self { self.spec.alignment = v; self }
+    pub fn orientation(mut self, v: Orientation) -> Self { self.spec.orientation = v; self }
     pub fn has_separator(mut self, v: bool) -> Self { self.spec.has_separator = v; self }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self { self.spec.aria_label = Some(v.into()); self }
     pub fn size(mut self, v: ControlSize) -> Self { self.spec.size = v; self }
@@ -62,9 +63,12 @@ impl IntoElement for Toolbar {
         // Contract: border color-mix 78% border-default over panel
         let border = color_mix(border_raw, panel, 0.78);
 
+        let is_vertical = spec.orientation == Orientation::Vertical;
+
         let mut el = div()
             .flex()
-            .items_center()
+            .when(is_vertical, |el| el.flex_col())
+            .when(!is_vertical, |el| el.items_center())
             .gap(gap)
             // Contract: padding 0.25rem (4px)
             .p(padding)

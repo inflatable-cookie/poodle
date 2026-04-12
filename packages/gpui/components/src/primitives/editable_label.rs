@@ -4,10 +4,9 @@
 //! transparent border in display mode, accent border in editing mode.
 //! Hover hint in display mode. Focus ring via border.
 
-use gpui::prelude::FluentBuilder;
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, EditableLabelSpec};
+use poodle_specs::{ControlSize, EditableLabelSpec, EditableLabelVariant, IconSize, IconSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
@@ -99,8 +98,16 @@ impl IntoElement for EditableLabel {
         let hover_border = color_mix(default_border, surface_bg, 0.72);
         let hover_bg = color_mix(surface_bg, gpui::transparent_black(), 0.52);
 
+        let is_flush = spec.variant == EditableLabelVariant::Flush;
+
         let is_empty = spec.value.is_empty();
-        let display_text = if is_empty {
+        // empty_text takes precedence in display mode; placeholder is
+        // for the editing input
+        let display_text = if is_empty && !spec.is_editing {
+            spec.empty_text.clone()
+                .or_else(|| spec.placeholder.clone())
+                .unwrap_or_default()
+        } else if is_empty {
             spec.placeholder.clone().unwrap_or_default()
         } else {
             spec.value.clone()
@@ -114,18 +121,40 @@ impl IntoElement for EditableLabel {
             "poodle-editable-label".to_string()
         };
 
-        // Contract: padding scales with effective size
+        // Contract: padding scales with effective size. Flush variant
+        // strips padding, border, and background for inline rendering.
+        let mut content_row = div()
+            .flex()
+            .flex_row()
+            .items_center()
+            .gap(px(4.0))
+            .child(display_text);
+
+        // Show pencil edit icon on hover/focus when spec says so
+        if spec.show_edit_icon && !spec.is_editing && !spec.is_disabled {
+            let icon_color = resolve_color(theme, "color.text.muted");
+            content_row = content_row.child(
+                super::icon::Icon::from_spec(
+                    IconSpec::new("pencil").with_size(IconSize::Sm),
+                    theme,
+                ).with_color(icon_color),
+            );
+        }
+
         let mut el = div()
             .id(SharedString::from(id_str))
             .focusable()
             .w_full()
-            .px(pad_x)
-            .py(pad_y)
-            .rounded(control_radius)
             .text_size(body_size)
             .text_color(text_col)
-            .border_1()
-            .child(display_text);
+            .when(!is_flush, |el| {
+                el.px(pad_x)
+                    .py(pad_y)
+                    .rounded(control_radius)
+                    .border_1()
+            })
+            .when(is_flush, |el| el.border_0())
+            .child(content_row);
 
         if spec.is_editing {
             // Contract: editing mode — accent border + surface bg

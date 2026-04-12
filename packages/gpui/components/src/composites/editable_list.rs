@@ -4,7 +4,7 @@
 //! and add button, and an optional counter showing "N/max" or "N items".
 //! Supports disabled state, reorderable mode, and size/density responsiveness.
 
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EditableListSpec;
 use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
@@ -179,26 +179,28 @@ impl IntoElement for EditableList {
                     .child(content),
             );
 
-            // Remove button
-            let remove_icon = Icon::from_spec(
-                IconSpec::new("x").with_size(IconSize::Sm),
-                theme,
-            ).with_color(remove_color);
+            // Remove button — only when is_editable or is_removable
+            if spec.is_editable || spec.is_removable {
+                let remove_icon = Icon::from_spec(
+                    IconSpec::new("x").with_size(IconSize::Sm),
+                    theme,
+                ).with_color(remove_color);
 
-            let rh = remove_hover_color;
-            let remove_btn = div()
-                .flex()
-                .items_center()
-                .justify_center()
-                .flex_shrink_0()
-                .size(px(remove_size))
-                .rounded(control_radius)
-                .cursor_pointer()
-                .text_color(remove_color)
-                .hover(move |s| s.text_color(rh).bg(hover_bg))
-                .child(remove_icon);
+                let rh = remove_hover_color;
+                let remove_btn = div()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .flex_shrink_0()
+                    .size(px(remove_size))
+                    .rounded(control_radius)
+                    .cursor_pointer()
+                    .text_color(remove_color)
+                    .hover(move |s| s.text_color(rh).bg(hover_bg))
+                    .child(remove_icon);
 
-            row = row.child(remove_btn);
+                row = row.child(remove_btn);
+            }
             row
         };
 
@@ -225,8 +227,9 @@ impl IntoElement for EditableList {
             root = root.child(items_container);
         }
 
-        // ── Add-item input row ────────────────────────────────────
-        let can_add = !spec.is_disabled
+        // ── Add-item input row (only when editable) ─────────────
+        let can_add = spec.is_editable
+            && !spec.is_disabled
             && spec.max_items.map_or(true, |max| total < max);
 
         if can_add {
@@ -365,6 +368,45 @@ impl IntoElement for EditableList {
                     .text_color(info_color)
                     .child(info.clone()),
             );
+        }
+
+        // ── Workflow action buttons (submit / cancel) ────────────
+        // Rendered when the list has pending changes (dirty) or is
+        // in a submitting state. Labels come from spec.submit_label
+        // and spec.cancel_label.
+        if spec.is_dirty || spec.is_submitting {
+            let accent = resolve_color(theme, "color.accent.base");
+            let actions_row = div()
+                .flex()
+                .flex_row()
+                .justify_end()
+                .gap(gap_sm)
+                .w_full()
+                .child(
+                    div()
+                        .px(gap_md)
+                        .py(gap_sm)
+                        .rounded(control_radius)
+                        .text_size(label_size)
+                        .text_color(text_color)
+                        .cursor_pointer()
+                        .hover(|s| s.bg(hover_bg))
+                        .child(spec.cancel_label.clone()),
+                )
+                .child(
+                    div()
+                        .px(gap_md)
+                        .py(gap_sm)
+                        .rounded(control_radius)
+                        .bg(accent)
+                        .text_size(label_size)
+                        .text_color(gpui::white())
+                        .font_weight(FontWeight::MEDIUM)
+                        .cursor_pointer()
+                        .when(spec.is_submitting, |el| el.opacity(disabled_opacity))
+                        .child(spec.submit_label.clone()),
+                );
+            root = root.child(actions_row);
         }
 
         // ── Disabled state ────────────────────────────────────────
