@@ -660,8 +660,13 @@ impl PreviewRoot {
     fn render_demo_section(&self, available_h: Pixels, cx: &mut Context<Self>) -> Div {
         let theme = &self.state.theme;
         let text_secondary = theme.resolve_color("color.text.secondary");
+        let text_primary = theme.resolve_color("color.text.primary");
         let accent = theme.resolve_color("color.accent.base");
         let border = theme.resolve_color("color.border.default");
+        let border_subtle = theme.resolve_color("color.border.subtle");
+        let elevated_bg = theme.resolve_color("color.background.elevated");
+        let panel_bg = theme.resolve_color("color.background.panel");
+        let active_screen = self.state.active_demo_screen;
 
         // Segmented control for demo screens
         let mut seg = div()
@@ -698,7 +703,138 @@ impl PreviewRoot {
             seg = seg.child(btn);
         }
 
-        let screen_content = demo_view::render_single_screen(theme, self.state.active_demo_screen);
+        let screen_content = demo_view::render_single_screen(theme, active_screen);
+
+        let chip = |label: String| {
+            div()
+                .px(px(8.0))
+                .py(px(3.0))
+                .rounded(px(999.0))
+                .border_1()
+                .border_color(color_to_hsla(border))
+                .bg(color_to_hsla(elevated_bg).opacity(0.9))
+                .text_size(px(11.0))
+                .text_color(color_to_hsla(text_secondary))
+                .child(label)
+        };
+
+        let mut region_row = div().flex().flex_wrap().gap(px(6.0));
+        for region in active_screen.region_ids() {
+            region_row = region_row.child(chip((*region).to_string()));
+        }
+
+        let mut section_row = div().flex().flex_wrap().gap(px(6.0));
+        for section in active_screen.source_sections() {
+            section_row = section_row.child(chip((*section).to_string()));
+        }
+
+        let mut state_row = div().flex().flex_wrap().gap(px(6.0));
+        for state in active_screen.state_matrix() {
+            state_row = state_row.child(chip((*state).to_string()));
+        }
+
+        let context_toolbar = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .gap(px(12.0))
+            .p(px(12.0))
+            .rounded(px(8.0))
+            .border_1()
+            .border_color(color_to_hsla(border_subtle))
+            .bg(color_to_hsla(panel_bg))
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(4.0))
+                    .child(
+                        div()
+                            .text_size(px(11.0))
+                            .font_weight(FontWeight::SEMIBOLD)
+                            .text_color(color_to_hsla(text_secondary))
+                            .child("CONTEXT TOOLBAR"),
+                    )
+                    .child(
+                        div()
+                            .text_sm()
+                            .text_color(color_to_hsla(text_primary))
+                            .child(active_screen.summary()),
+                    ),
+            )
+            .child(
+                div()
+                    .flex()
+                    .items_center()
+                    .gap(px(6.0))
+                    .child(chip(format!("mode: {}", active_screen.comparison_mode())))
+                    .child(chip(format!(
+                        "disabled: {}",
+                        if self.state.disabled { "on" } else { "off" }
+                    )))
+                    .child(chip(format!(
+                        "invalid: {}",
+                        if self.state.invalid { "on" } else { "off" }
+                    )))
+                    .child(chip(format!(
+                        "busy: {}",
+                        if self.state.busy { "on" } else { "off" }
+                    ))),
+            );
+
+        let companion_panel = div()
+            .flex()
+            .flex_col()
+            .gap(px(12.0))
+            .p(px(16.0))
+            .rounded(px(8.0))
+            .border_1()
+            .border_color(color_to_hsla(border_subtle))
+            .bg(color_to_hsla(elevated_bg).opacity(0.88))
+            .child(
+                div()
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("COMPANION PANEL"),
+            )
+            .child(
+                div()
+                    .text_lg()
+                    .text_color(color_to_hsla(text_primary))
+                    .child(active_screen.title()),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("Shell regions"),
+            )
+            .child(region_row)
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("Source sections"),
+            )
+            .child(section_row)
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("State matrix"),
+            )
+            .child(state_row)
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(if active_screen.has_modal_layer() {
+                        "Modal layer is in scope for this screen and should stay visible in parity review."
+                    } else {
+                        "This screen should read clearly without relying on modal-layer posture."
+                    }),
+            );
 
         div().w_full().h(available_h).child(
             div()
@@ -711,8 +847,44 @@ impl PreviewRoot {
                         .flex_col()
                         .gap(px(16.0))
                         .p(px(24.0))
-                        .child(seg)
-                        .child(screen_content),
+                        .child(
+                            div()
+                                .flex()
+                                .flex_col()
+                                .gap(px(4.0))
+                                .child(
+                                    div()
+                                        .text_size(px(11.0))
+                                        .font_weight(FontWeight::SEMIBOLD)
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("SCREEN TABS"),
+                                )
+                                .child(seg),
+                        )
+                        .child(context_toolbar)
+                        .child(
+                            div()
+                                .flex()
+                                .items_start()
+                                .gap(px(16.0))
+                                .child(
+                                    div()
+                                        .flex_1()
+                                        .min_w(px(0.0))
+                                        .flex()
+                                        .flex_col()
+                                        .gap(px(12.0))
+                                        .child(
+                                            div()
+                                                .text_size(px(11.0))
+                                                .font_weight(FontWeight::SEMIBOLD)
+                                                .text_color(color_to_hsla(text_secondary))
+                                                .child("PRIMARY CONTENT"),
+                                        )
+                                        .child(screen_content),
+                                )
+                                .child(div().w(px(320.0)).flex_shrink_0().child(companion_panel)),
+                        ),
                 ),
         )
     }

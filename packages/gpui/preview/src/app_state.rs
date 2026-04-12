@@ -200,6 +200,137 @@ impl DemoScreen {
             DemoScreen::CommandAndWorkspace => "Workspace",
         }
     }
+
+    pub fn title(self) -> &'static str {
+        match self {
+            DemoScreen::OverviewShell => "Overview shell",
+            DemoScreen::FormAndValidation => "Form and validation",
+            DemoScreen::BrowseAndTable => "Browse and table",
+            DemoScreen::DetailAndRelatedData => "Detail and related data",
+            DemoScreen::PickerAndMedia => "Picker and media",
+            DemoScreen::CommandAndWorkspace => "Command and workspace",
+        }
+    }
+
+    pub fn comparison_mode(self) -> &'static str {
+        match self {
+            DemoScreen::OverviewShell => "direct-parity",
+            DemoScreen::FormAndValidation => "direct-parity",
+            DemoScreen::BrowseAndTable => "native-adaptation",
+            DemoScreen::DetailAndRelatedData => "direct-parity",
+            DemoScreen::PickerAndMedia => "native-adaptation",
+            DemoScreen::CommandAndWorkspace => "direct-parity",
+        }
+    }
+
+    pub fn summary(self) -> &'static str {
+        match self {
+            DemoScreen::OverviewShell => {
+                "Establish shell hierarchy, identity, and status posture without docs-shell noise."
+            }
+            DemoScreen::FormAndValidation => {
+                "Keep fields, validation, remediation, and actions inside one realistic workflow."
+            }
+            DemoScreen::BrowseAndTable => {
+                "Show filters, table posture, selection, and pagination as one browse story."
+            }
+            DemoScreen::DetailAndRelatedData => {
+                "Keep headers, metadata, and related summaries inside one coherent detail workflow."
+            }
+            DemoScreen::PickerAndMedia => {
+                "Pair selection flow, preview framing, and media fallback in one workflow."
+            }
+            DemoScreen::CommandAndWorkspace => {
+                "Keep command discovery, shell navigation, split regions, and status inside one workstation target."
+            }
+        }
+    }
+
+    pub fn source_sections(self) -> &'static [&'static str] {
+        match self {
+            DemoScreen::OverviewShell => &["notification-suite", "workspace-suite"],
+            DemoScreen::FormAndValidation => &["form-suite", "notification-suite"],
+            DemoScreen::BrowseAndTable => &["browse-suite", "table-suite"],
+            DemoScreen::DetailAndRelatedData => &["detail-suite"],
+            DemoScreen::PickerAndMedia => &["picker-suite", "media-suite"],
+            DemoScreen::CommandAndWorkspace => &["command-suite", "workspace-suite"],
+        }
+    }
+
+    pub fn state_matrix(self) -> &'static [&'static str] {
+        match self {
+            DemoScreen::OverviewShell => &["default", "status-active", "review-blocked"],
+            DemoScreen::FormAndValidation => &["default", "invalid", "pending", "disabled"],
+            DemoScreen::BrowseAndTable => &[
+                "ready",
+                "selection-active",
+                "empty",
+                "no-results",
+                "loading",
+            ],
+            DemoScreen::DetailAndRelatedData => &["default", "metadata-dense", "action-emphasis"],
+            DemoScreen::PickerAndMedia => &[
+                "inline-ready",
+                "modal-open",
+                "media-ready",
+                "media-empty",
+                "media-error",
+            ],
+            DemoScreen::CommandAndWorkspace => &[
+                "shell-ready",
+                "command-open",
+                "docking-visible",
+                "persistence-visible",
+            ],
+        }
+    }
+
+    pub fn region_ids(self) -> &'static [&'static str] {
+        match self {
+            DemoScreen::OverviewShell => &[
+                "app-header",
+                "screen-tabs",
+                "primary-content",
+                "companion-panel",
+                "status-bar",
+            ],
+            DemoScreen::FormAndValidation => &[
+                "context-toolbar",
+                "primary-content",
+                "companion-panel",
+                "modal-layer",
+            ],
+            DemoScreen::BrowseAndTable => {
+                &["context-toolbar", "primary-content", "companion-panel"]
+            }
+            DemoScreen::DetailAndRelatedData => {
+                &["primary-content", "companion-panel", "context-toolbar"]
+            }
+            DemoScreen::PickerAndMedia => &[
+                "context-toolbar",
+                "primary-content",
+                "companion-panel",
+                "modal-layer",
+            ],
+            DemoScreen::CommandAndWorkspace => &[
+                "app-header",
+                "screen-tabs",
+                "primary-content",
+                "companion-panel",
+                "status-bar",
+                "modal-layer",
+            ],
+        }
+    }
+
+    pub fn has_modal_layer(self) -> bool {
+        matches!(
+            self,
+            DemoScreen::FormAndValidation
+                | DemoScreen::PickerAndMedia
+                | DemoScreen::CommandAndWorkspace
+        )
+    }
 }
 
 /// Generic specimen interaction state.
