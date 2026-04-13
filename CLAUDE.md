@@ -109,3 +109,9 @@ Key rules:
 - `LayoutSizing::Grow` on one axis only → `flex_grow: 0`, relies on `align_self: Stretch`
 - `LayoutSizing::Fixed(n)` → explicit size, no grow, no shrink
 - `min_size` defaults to `0` (not `auto`) so containers can be constrained by parents
+
+## Internal Writing Style
+
+Use the repo-local style reference for internal work and normal replies:
+
+- `docs/policy/internal-writing-style.md`

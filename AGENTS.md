@@ -37,3 +37,9 @@ Common commands:
 - `effigy scan attention-markers` — scan for TODO/FIXME markers
 
 Legacy npm scripts in `package.json` are deprecated; use `effigy <task>` instead.
+
+## Internal Writing Style
+
+Use the repo-local style reference for internal work and normal replies:
+
+- `docs/policy/internal-writing-style.md`
