@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-04-13
 
 ## 1. Purpose
 
@@ -65,6 +65,13 @@ Updated: 2026-04-09
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `className` | `string` | `""` | no | additional CSS classes |
 | `style` | `string \| null` | `null` | no | inline style passthrough for dynamic sizing and CSS-variable overrides |
+
+### Portable spec (`ButtonSpec`) vs web-only props
+
+| Contract / web prop | In `ButtonSpec` | Notes |
+|---------------------|-----------------|-------|
+| `ariaExpanded` | yes — `aria_expanded: Option<bool>` | `None` means do not set `aria-expanded`; `Some(true \| false)` mirrors disclosure state. |
+| `type`, `form`, `formaction`, `formenctype`, `formmethod`, `formnovalidate`, `formtarget` | no | HTML form submission only; native/desktop renderers use different models. |
 
 ### Slots
 

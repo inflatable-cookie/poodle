@@ -3,16 +3,17 @@ use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{ContextMenu, Eyebrow, Icon, ListCard, Pill, StatusIndicator};
+use poodle_gpui_components::{ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill, StatusIndicator};
 use poodle_specs::{
-    ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, LeadingFill, LeadingShape, ListCardSpec,
-    MenuEntry, MenuItemKind, PillSpec, PillTone, StatusIndicatorSpec, StatusTone,
+    ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, LeadingFill, LeadingShape, ListCardCounterSpec,
+    ListCardSpec, MenuEntry, MenuItemKind, PillSpec, PillTone, StatusIndicatorSpec, StatusTone,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_muted = theme.resolve_color("color.text.muted");
+    let footer_counter_gap = px(theme.resolve_space("space.inline.md"));
 
     let last_clicked = state.specimens.text.get("list-card-clicked").cloned();
 
@@ -272,9 +273,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_footer(
                                 div()
                                     .flex()
-                                    .gap(px(12.0))
-                                    .child(counter_item("12 views", "eye", text_muted, theme))
-                                    .child(counter_item("3 shares", "share", text_muted, theme)),
+                                    .flex_row()
+                                    .items_center()
+                                    .gap(footer_counter_gap)
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("eye", 12)
+                                            .with_tooltip("12 views"),
+                                        theme,
+                                    ))
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("share", 3)
+                                            .with_tooltip("3 shares"),
+                                        theme,
+                                    )),
                             ),
                         )
                         .child(
@@ -294,15 +305,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_footer(
                                 div()
                                     .flex()
-                                    .gap(px(12.0))
-                                    .child(counter_item("156 reads", "eye", text_muted, theme))
-                                    .child(counter_item("24 edits", "pencil", text_muted, theme))
-                                    .child(counter_item(
-                                        "8 comments",
-                                        "message-circle",
-                                        text_muted,
+                                    .flex_row()
+                                    .items_center()
+                                    .gap(footer_counter_gap)
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("eye", 156)
+                                            .with_tooltip("156 reads"),
                                         theme,
-                                    )),
+                                    ))
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("pencil", 24)
+                                            .with_tooltip("24 edits"),
+                                        theme,
+                                    ))
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("message-circle", 8)
+                                            .with_tooltip("8 comments")
+                                            .with_href("#comments"),
+                                        theme,
+                                    )
+                                    .on_link_click(|_ev, _w, _a| {})),
                             ),
                         ),
                 ),
@@ -749,27 +771,5 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             }),
                     ),
                 ),
-        )
-}
-
-fn counter_item(
-    label: &str,
-    icon_name: &str,
-    color: poodle_tokens::typed::ColorValue,
-    theme: &poodle_gpui::GpuiThemeProvider,
-) -> Div {
-    div()
-        .flex()
-        .items_center()
-        .gap(px(4.0))
-        .child(
-            Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Sm), theme)
-                .with_color(color_to_hsla(color)),
-        )
-        .child(
-            div()
-                .text_size(px(11.0))
-                .text_color(color_to_hsla(color))
-                .child(label.to_string()),
         )
 }

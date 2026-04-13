@@ -5,7 +5,6 @@ use gpui::StatefulInteractiveElement;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
 
-use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI popover component backed by `PopoverSpec`.
@@ -122,6 +121,8 @@ impl IntoElement for Popover {
         let border_default = resolve_color(theme, "color.border.default");
         let panel_x = resolve_px(theme, "space.panel.x");
         let panel_y = resolve_px(theme, "space.panel.y");
+        let menu_min_w = resolve_px(theme, "size.menu.minWidth");
+        let popover_max_w = resolve_px(theme, "size.popover.maxWidth");
         let radius = resolve_radius(theme, "radius.surface");
 
         // Matches Svelte treatment-surface-elevated values
@@ -189,8 +190,8 @@ impl IntoElement for Popover {
                     .px(panel_x)
                     .py(panel_y)
                     // Contract: min-width 14rem, max-width min(24rem, 90vw)
-                    .min_w(px(rem_to_px(14.0)))
-                    .max_w(px(rem_to_px(24.0)))
+                    .min_w(menu_min_w)
+                    .max_w(popover_max_w)
                     .child(content);
 
                 // Escape key to close

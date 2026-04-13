@@ -135,6 +135,8 @@ impl IntoElement for DateTimeRangePicker {
         let inline_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let control_radius = resolve_radius(theme, "radius.control");
+        let trigger_min_w = resolve_px(theme, "size.dateTimeRangePicker.minWidth");
+        let gap_inline_xs = resolve_px(theme, "space.inline.xs");
 
         let surface_bg = resolve_color(theme, "color.background.surface");
         let elevated_bg = resolve_color(theme, "color.background.elevated");
@@ -185,7 +187,7 @@ impl IntoElement for DateTimeRangePicker {
             .justify_between()
             .gap(inline_gap)
             .text_size(body_size)
-            .min_w(px(288.0)); // Contract: min-width 18rem
+            .min_w(trigger_min_w);
 
         // Focus ring
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
@@ -234,7 +236,11 @@ impl IntoElement for DateTimeRangePicker {
             }
         }
 
-        let mut container = div().flex().flex_col().gap(px(4.0)).child(trigger);
+        let mut container = div()
+            .flex()
+            .flex_col()
+            .gap(gap_inline_xs)
+            .child(trigger);
 
         if is_open {
             let section_padding = resolve_px(theme, "space.stack.md");
@@ -305,7 +311,7 @@ impl IntoElement for DateTimeRangePicker {
                     .flex_1()
                     .flex()
                     .flex_col()
-                    .gap(px(4.0))
+                    .gap(gap_inline_xs)
                     .child(
                         div()
                             .text_size(label_size)

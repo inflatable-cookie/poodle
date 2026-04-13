@@ -41,6 +41,10 @@ const KEY_TOKENS: &[TokenEntry] = &[
         kind: TokenKind::Color,
     },
     TokenEntry {
+        path: "color.text.tertiary",
+        kind: TokenKind::Color,
+    },
+    TokenEntry {
         path: "color.border.default",
         kind: TokenKind::Color,
     },
@@ -62,6 +66,14 @@ const KEY_TOKENS: &[TokenEntry] = &[
     },
     TokenEntry {
         path: "space.control.y",
+        kind: TokenKind::Space,
+    },
+    TokenEntry {
+        path: "space.button.gap",
+        kind: TokenKind::Space,
+    },
+    TokenEntry {
+        path: "space.button.iconInset",
         kind: TokenKind::Space,
     },
 ];
@@ -89,6 +101,10 @@ const ALL_TOKENS: &[TokenEntry] = &[
     },
     TokenEntry {
         path: "color.text.secondary",
+        kind: TokenKind::Color,
+    },
+    TokenEntry {
+        path: "color.text.tertiary",
         kind: TokenKind::Color,
     },
     TokenEntry {
@@ -169,6 +185,14 @@ const ALL_TOKENS: &[TokenEntry] = &[
     },
     TokenEntry {
         path: "space.control.y",
+        kind: TokenKind::Space,
+    },
+    TokenEntry {
+        path: "space.button.gap",
+        kind: TokenKind::Space,
+    },
+    TokenEntry {
+        path: "space.button.iconInset",
         kind: TokenKind::Space,
     },
     TokenEntry {

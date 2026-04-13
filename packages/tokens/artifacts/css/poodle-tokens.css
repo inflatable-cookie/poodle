@@ -91,6 +91,7 @@
   --poodle-color-background-overlay: rgba(11, 15, 20, 0.64);
   --poodle-color-text-primary: #131a22;
   --poodle-color-text-secondary: #314255;
+  --poodle-color-text-tertiary: #75869b;
   --poodle-color-text-inverse: #fcfdff;
   --poodle-color-border-subtle: #c9d4e0;
   --poodle-color-border-default: #75869b;
@@ -127,9 +128,18 @@
   --poodle-size-icon-lg: 1.25rem;
   --poodle-size-icon-xl: 1.5rem;
   --poodle-size-panel-header: 2.5rem;
+  --poodle-size-list-grid-minItemWidth: 22.5rem;
+  --poodle-size-menu-maxHeight: 15rem;
+  --poodle-size-menu-minWidth: 14rem;
+  --poodle-size-popover-maxWidth: 24rem;
+  --poodle-size-hoverCard-maxWidth: 22rem;
+  --poodle-size-select-minWidth: 8rem;
+  --poodle-size-dateTimeRangePicker-minWidth: 18rem;
+  --poodle-size-fileUpload-dropZoneMinHeight: 8rem;
   --poodle-space-stack-sm: 0.5rem;
   --poodle-space-stack-md: 0.75rem;
   --poodle-space-stack-lg: 1.25rem;
+  --poodle-space-inline-xs: 0.25rem;
   --poodle-space-inline-sm: 0.5rem;
   --poodle-space-inline-md: 0.75rem;
   --poodle-space-inline-lg: 1rem;
@@ -137,6 +147,8 @@
   --poodle-space-panel-y: 0.75rem;
   --poodle-space-control-x: 0.75rem;
   --poodle-space-control-y: 0.5rem;
+  --poodle-space-button-gap: 0.375rem;
+  --poodle-space-button-iconInset: 0.125rem;
   --poodle-state-opacity-disabled: 0.48;
   --poodle-state-opacity-muted: 0.72;
   --poodle-typography-body-family: "Inter", "SF Pro Display", system-ui, sans-serif;
@@ -147,6 +159,7 @@
   --poodle-typography-label-size: 0.8125rem;
   --poodle-typography-label-lineHeight: 1rem;
   --poodle-typography-label-weight: 500;
+  --poodle-typography-counter-size: 0.75rem;
   --poodle-typography-caption-family: "Inter", "SF Pro Display", system-ui, sans-serif;
   --poodle-typography-caption-size: 0.6875rem;
   --poodle-typography-caption-lineHeight: 1rem;

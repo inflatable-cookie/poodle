@@ -36,6 +36,10 @@
         "$type": "color",
         "$value": "{primitives.color.neutral.700}"
       },
+      "tertiary": {
+        "$type": "color",
+        "$value": "{primitives.color.neutral.400}"
+      },
       "inverse": {
         "$type": "color",
         "$value": "{primitives.color.neutral.0}"

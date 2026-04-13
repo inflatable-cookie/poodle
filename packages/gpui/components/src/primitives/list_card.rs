@@ -263,7 +263,7 @@ impl IntoElement for ListCard {
         // When disabled: aria-disabled="true"
         // When href present: rendered as anchor (link semantics)
         // Non-interactive: no role (generic container)
-        let mut root = div()
+        let root = div()
             .id(SharedString::from(format!(
                 "poodle-list-card-{}",
                 spec.title
@@ -279,6 +279,12 @@ impl IntoElement for ListCard {
             .bg(fill)
             .border_1()
             .border_color(border);
+
+        let mut root = if is_not_live {
+            root.border_dashed()
+        } else {
+            root
+        };
 
         // Optional selection checkbox as the first child.
         if spec.is_selectable {
@@ -363,7 +369,7 @@ impl IntoElement for ListCard {
                 .hover(|style| style.bg(hover_fill).border_color(hover_border));
         }
 
-        // ── Not-live state: dashed border, reduced opacity ──────────
+        // ── Not-live state: dashed root border (above) + reduced opacity ──
         if is_not_live {
             root = root.opacity(0.6);
         }

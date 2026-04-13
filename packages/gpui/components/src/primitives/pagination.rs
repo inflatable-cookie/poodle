@@ -3,16 +3,24 @@
 //! Contract: button height control-height - 0.125rem, font 0.75rem/600,
 //! root gap 0.375rem, page gap 0.25rem, min-width 2.25rem.
 //! Focus ring on buttons. Disabled cursor on boundary buttons.
+//!
+//! Full variant “go to page” and the page-size limit row become interactive when
+//! the parent wires the corresponding callbacks (same controlled pattern as
+//! `Select`: open state and values come from the spec + handlers).
+//! `on_page_change` / `on_page_size_change` pass the page or size by `&usize` so
+//! they compose with `cx.listener` in the preview app.
 
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec,
-    SemanticControlSizeRole,
+    ChoiceOption, ControlDensity, ControlSize, IconSize, IconSpec, PageItem, PaginationSpec,
+    SelectSpec, SemanticControlSizeRole, TextInputSpec,
 };
 
 use super::icon::Icon;
+use super::select::Select;
+use super::text_input::TextInput;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
@@ -37,7 +45,14 @@ pub struct Pagination {
     font_size: Pixels,
     button_padding: Pixels,
     // Callback
-    on_page_change: Option<std::rc::Rc<dyn Fn(usize, &mut Window, &mut App) + 'static>>,
+    on_page_change: Option<std::rc::Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
+    /// Displayed value for the Full variant "go to page" field. When empty, shows `current_page`.
+    goto_page_input: String,
+    on_goto_input_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    limit_selector_open: bool,
+    on_limit_open_change:
+        Option<std::rc::Rc<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
+    on_page_size_change: Option<std::rc::Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Pagination {
@@ -93,6 +108,11 @@ impl Pagination {
             button_padding,
             spec,
             on_page_change: None,
+            goto_page_input: String::new(),
+            on_goto_input_change: None,
+            limit_selector_open: false,
+            on_limit_open_change: None,
+            on_page_size_change: None,
         }
     }
 
@@ -144,9 +164,44 @@ impl Pagination {
 
     pub fn on_page_change(
         mut self,
-        handler: impl Fn(usize, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_page_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    /// Controlled value for the Full variant page jump field (digits only in normal use).
+    pub fn with_goto_page_input(mut self, v: impl Into<String>) -> Self {
+        self.goto_page_input = v.into();
+        self
+    }
+
+    pub fn on_goto_input_change(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_goto_input_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    pub fn limit_selector_open(mut self, open: bool) -> Self {
+        self.limit_selector_open = open;
+        self
+    }
+
+    pub fn on_limit_open_change(
+        mut self,
+        handler: impl Fn(&bool, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_limit_open_change = Some(std::rc::Rc::new(handler));
+        self
+    }
+
+    pub fn on_page_size_change(
+        mut self,
+        handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_page_size_change = Some(std::rc::Rc::new(handler));
         self
     }
 
@@ -200,7 +255,7 @@ impl Pagination {
             if let Some(ref handler) = self.on_page_change {
                 let handler = handler.clone();
                 btn = btn.on_click(move |_event, window, cx| {
-                    handler(target_page, window, cx);
+                    handler(&target_page, window, cx);
                 });
             }
         }
@@ -257,7 +312,7 @@ impl Pagination {
             if let Some(ref handler) = self.on_page_change {
                 let handler = handler.clone();
                 btn = btn.on_click(move |_event, window, cx| {
-                    handler(target_page, window, cx);
+                    handler(&target_page, window, cx);
                 });
             }
         }
@@ -314,7 +369,7 @@ impl Pagination {
             if let Some(ref handler) = self.on_page_change {
                 let handler = handler.clone();
                 btn = btn.on_click(move |_event, window, cx| {
-                    handler(page, window, cx);
+                    handler(&page, window, cx);
                 });
             }
         }
@@ -345,10 +400,17 @@ impl IntoElement for Pagination {
     fn into_element(self) -> Self::Element {
         use poodle_specs::PaginationVariant;
 
+        let goto_page_input = self.goto_page_input.clone();
+        let on_goto_input_change = self.on_goto_input_change.clone();
+        let limit_selector_open = self.limit_selector_open;
+        let on_limit_open_change = self.on_limit_open_change.clone();
+        let on_page_size_change = self.on_page_size_change.clone();
+
         let visible = self.spec.visible_pages();
         let is_first = self.spec.is_first_page();
         let is_last = self.spec.is_last_page();
         let current_page = self.spec.current_page;
+        let total_pages = self.spec.total_pages;
         let theme = &self.theme;
 
         let text_secondary = crate::theme_ext::resolve_color(theme, "color.text.secondary");
@@ -423,6 +485,81 @@ impl IntoElement for Pagination {
             root = root.child(info);
         }
 
+        // Limit selector — contract order: before primary controls. Interactive when
+        // parent wires open + page-size callbacks (matches Select state pattern).
+        if self.spec.show_limit_selector {
+            if let Some(ps) = self.spec.page_size {
+                let interactive_limit =
+                    on_page_size_change.is_some() && on_limit_open_change.is_some();
+                if interactive_limit {
+                    let raw = &self.spec.limit_options;
+                    let options: Vec<ChoiceOption> = if raw.is_empty() {
+                        vec![ChoiceOption::new(ps.to_string(), format!("{ps}"))]
+                    } else {
+                        raw.iter()
+                            .copied()
+                            .map(|n| ChoiceOption::new(n.to_string(), format!("{n}")))
+                            .collect()
+                    };
+                    let select_spec = SelectSpec::new(options)
+                        .with_value(ps.to_string())
+                        .with_placeholder("—")
+                        .with_open(limit_selector_open)
+                        .with_size(self.spec.size)
+                        .with_size_role(self.spec.size_role)
+                        .with_density(self.spec.density);
+
+                    let on_toggle_limit = on_limit_open_change.clone();
+                    let on_ps = on_page_size_change.clone();
+                    let mut limit_select = Select::from_spec(select_spec, theme)
+                        .with_id("pagination-limit")
+                        .aria_label("Items per page")
+                        .on_toggle(move |open, window, cx| {
+                            if let Some(ref h) = on_toggle_limit {
+                                h(open, window, cx);
+                            }
+                        })
+                        .on_change(move |val, window, cx| {
+                            if let Ok(n) = val.parse::<usize>() {
+                                if let Some(ref h) = on_ps {
+                                    h(&n, window, cx);
+                                }
+                            }
+                        });
+                    if self.spec.is_loading {
+                        limit_select = limit_select.disabled(true);
+                    }
+
+                    root = root.child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .gap(gap_md)
+                            .child(
+                                div()
+                                    .text_size(label_size)
+                                    .text_color(text_secondary)
+                                    .child("Show"),
+                            )
+                            .child(limit_select)
+                            .child(
+                                div()
+                                    .text_size(label_size)
+                                    .text_color(text_secondary)
+                                    .child("per page"),
+                            ),
+                    );
+                } else {
+                    root = root.child(
+                        div()
+                            .text_size(label_size)
+                            .text_color(text_secondary)
+                            .child(format!("{ps} / page")),
+                    );
+                }
+            }
+        }
+
         // Prev button — label differs between simple and numbered variants.
         let prev_page = if current_page > 1 {
             current_page - 1
@@ -478,47 +615,86 @@ impl IntoElement for Pagination {
             root = root.child(self.render_nav_button("chevron-right", is_last, next_page, next_id));
         }
 
-        // Full variant: "Go to page" input text (non-interactive stub for now —
-        // matches the visual affordance from Svelte without wiring a handler).
+        // Full variant: "Go to page" — interactive when parent wires draft + handlers.
         if matches!(self.spec.variant, PaginationVariant::Full) {
-            root = root.child(
-                div()
-                    .flex()
-                    .items_center()
-                    .gap(gap_md)
-                    .child(
-                        div()
-                            .text_size(label_size)
-                            .text_color(text_secondary)
-                            .child("Go to"),
-                    )
-                    .child(
-                        div()
-                            .w(px(48.0))
-                            .h(px(24.0))
-                            .px(gap_md)
-                            .border_1()
-                            .border_color(border_color)
-                            .rounded(radius_control)
-                            .flex()
-                            .items_center()
-                            .text_size(label_size)
-                            .child(format!("{current_page}")),
-                    ),
-            );
-        }
+            let goto_display = if goto_page_input.is_empty() {
+                current_page.to_string()
+            } else {
+                goto_page_input.clone()
+            };
+            let interactive_goto = on_goto_input_change.is_some()
+                && self.on_page_change.is_some()
+                && !self.spec.is_loading;
 
-        // Limit selector — rendered when show_limit_selector is true.
-        // Full interactive dropdown requires Select wiring; for now
-        // render a static label showing the current page size and the
-        // available options as a visual stub.
-        if self.spec.show_limit_selector {
-            if let Some(ps) = self.spec.page_size {
+            if interactive_goto {
+                let input_spec = TextInputSpec::new()
+                    .with_value(goto_display)
+                    .with_aria_label("Go to page")
+                    .with_id("poodle-pg-goto")
+                    .with_size(self.spec.size)
+                    .with_size_role(self.spec.size_role)
+                    .with_density(self.spec.density);
+
+                let on_draft = on_goto_input_change.clone();
+                let on_jump = self.on_page_change.clone();
+                let min_w_field = crate::theme_ext::resolve_px(theme, "size.control.minWidth")
+                    .max(px(48.0));
+
+                let mut goto_input = TextInput::from_spec(input_spec, theme)
+                    .with_id("pg-goto")
+                    .on_change(move |s, window, cx| {
+                        if let Some(ref h) = on_draft {
+                            h(s, window, cx);
+                        }
+                    });
+
+                if let Some(ref jump) = on_jump {
+                    let jump = jump.clone();
+                    goto_input = goto_input.on_submit(move |s, window, cx| {
+                        let page: usize = s.trim().parse().unwrap_or(current_page);
+                        let clamped = page.max(1).min(total_pages);
+                        jump(&clamped, window, cx);
+                    });
+                }
+
                 root = root.child(
                     div()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child(format!("{ps} / page")),
+                        .flex()
+                        .items_center()
+                        .gap(gap_md)
+                        .child(
+                            div()
+                                .text_size(label_size)
+                                .text_color(text_secondary)
+                                .child("Go to"),
+                        )
+                        .child(div().w(min_w_field).child(goto_input)),
+                );
+            } else {
+                root = root.child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(gap_md)
+                        .child(
+                            div()
+                                .text_size(label_size)
+                                .text_color(text_secondary)
+                                .child("Go to"),
+                        )
+                        .child(
+                            div()
+                                .min_w(px(48.0))
+                                .h(self.button_height)
+                                .px(gap_md)
+                                .border_1()
+                                .border_color(border_color)
+                                .rounded(radius_control)
+                                .flex()
+                                .items_center()
+                                .text_size(label_size)
+                                .child(format!("{current_page}")),
+                        ),
                 );
             }
         }

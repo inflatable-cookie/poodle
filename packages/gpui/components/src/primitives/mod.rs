@@ -36,6 +36,8 @@ mod icon_button;
 mod icon_provider;
 pub mod icon_registry;
 mod list_card;
+mod list_card_counter;
+mod list_grid;
 mod menu;
 mod menubar;
 mod meta_bar;
@@ -118,6 +120,8 @@ pub use icon::Icon;
 pub use icon_button::IconButton;
 pub use icon_provider::IconProvider;
 pub use list_card::ListCard;
+pub use list_card_counter::ListCardCounter;
+pub use list_grid::ListGrid;
 pub use menu::Menu;
 pub use menubar::Menubar;
 pub use meta_bar::MetaBar;
@@ -161,6 +165,8 @@ pub use tabs::Tabs;
 /// Deprecated: use `TextInput` with multiline mode instead.
 pub type TextArea = TextInput;
 pub use date_time_zone_picker::DateTimeZonePicker;
+/// Contract name for [`TimeField`](time_field::TimeField) (`time-input.md`).
+pub type TimeInput = time_field::TimeField;
 pub use password_requirements::PasswordRequirements;
 pub use text_input::TextInput;
 pub use time_ago::TimeAgo;

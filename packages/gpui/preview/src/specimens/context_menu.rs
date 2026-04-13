@@ -28,11 +28,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let spec = ContextMenuSpec::new(items).with_default_open(true);
 
-    // GPUI has no dashed border. Keep the Svelte shell shape with a 2px solid approximation.
+    // Dashed target shell (matches Svelte specimen cue).
     let target_area = div()
         .h(px(128.0))
         .w_full()
         .border_2()
+        .border_dashed()
         .border_color(color_to_hsla(border))
         .rounded(px(4.0))
         .flex()

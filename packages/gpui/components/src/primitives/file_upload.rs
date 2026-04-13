@@ -2,7 +2,7 @@
 //!
 //! Contract: dropzone with dashed border, min-height 8rem,
 //! radius-surface, panel padding. No hover on root.
-//! Note: GPUI has no dashed border — we approximate with solid.
+//! Dropzone border uses GPUI `.border_dashed()` per contract.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -113,6 +113,10 @@ impl IntoElement for FileUpload {
         let panel_padding_x = px(rem_to_px(panel_space_x_rem(spec.density)));
         let panel_padding_y = px(rem_to_px(panel_space_y_rem(spec.density)));
         let stack_gap = resolve_px(theme, "space.stack.sm");
+        let helper_gap = resolve_px(theme, "space.inline.xs");
+        let caption_size = resolve_px(theme, "typography.caption.size");
+        let control_pad_y = resolve_px(theme, "space.control.y");
+        let dropzone_min_h = resolve_px(theme, "size.fileUpload.dropZoneMinHeight");
         let dropzone_radius = resolve_radius(theme, spec.radius_token());
         let control_radius = resolve_radius(theme, "radius.control");
 
@@ -140,7 +144,7 @@ impl IntoElement for FileUpload {
         // Contract: browse button with accent border
         let browse_btn = div()
             .px(resolve_px(theme, "space.inline.md"))
-            .py(px(6.0))
+            .py(control_pad_y)
             .rounded(control_radius)
             .border_1()
             .border_color(accent)
@@ -156,8 +160,8 @@ impl IntoElement for FileUpload {
             .flex()
             .flex_col()
             .items_center()
-            .gap(px(2.0))
-            .text_size(px(12.0))
+            .gap(helper_gap)
+            .text_size(caption_size)
             .text_color(text_secondary);
 
         if let Some(ref accept) = spec.accept {
@@ -186,15 +190,16 @@ impl IntoElement for FileUpload {
         let upload_icon = Icon::from_spec(IconSpec::new("upload").with_size(IconSize::Md), theme)
             .with_color(text_secondary);
 
-        // Contract: min-height 8rem, dashed border (solid here — GPUI has no dashed)
+        // Contract: min-height 8rem, dashed border
         let mut zone = div()
             .id(SharedString::from(id_str))
             .focusable()
             .w_full()
-            .min_h(px(128.0)) // 8rem
+            .min_h(dropzone_min_h)
             .rounded(dropzone_radius)
             .bg(bg)
             .border_2() // 0.125rem = 2px (contract: 0.125rem dashed)
+            .border_dashed()
             .border_color(border)
             .flex()
             .flex_col()

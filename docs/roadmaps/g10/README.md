@@ -1,7 +1,7 @@
 # g10 Jetstream Focus
 
 Status: active
-Updated: 2026-04-12
+Updated: 2026-04-13
 
 ## Context
 
@@ -38,6 +38,18 @@ surface that needs to be made explicit again.
 - `g10.006` complete — GPUI component page usage docs and shape parity
 - `g10.007` complete — GPUI long-tail component parity sweep and closeout
   checkpoint
+- `g10.008` complete — GPUI contract coverage gaps and list composition
+  (`docs/roadmaps/g10/008-gpui-contract-coverage-gaps-and-list-composition.md`)
+- `g10.009` complete — GPUI token resolution and visual fidelity
+  (`docs/roadmaps/g10/009-gpui-token-resolution-and-visual-fidelity.md`)
+- `g10.010` complete — GPUI behavior, adapter realization, and form remediation
+  parity
+  (`docs/roadmaps/g10/010-gpui-behavior-adapter-and-form-remediation-parity.md`)
+- `g10.011` complete — shared spec and cross-platform button semantics
+  (`docs/roadmaps/g10/011-shared-spec-and-cross-platform-button-semantics.md`)
+- `g10.012` active — GPUI runtime truth, retire `g08` delta register, close false
+  “blockers”, dashed borders, backlog for real input/select/slider work
+  (`docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`)
 
 Three active seams identified:
 - Seam A (Svelte Component Overhaul): complete via `g10.003`
@@ -47,12 +59,15 @@ Three active seams identified:
 
 ## Active Runway
 
-- current active lane: Seam B Jetstream implementation
-- parity checkpoint reached: `g10.005` to `g10.007` complete
-- only reopen GPUI parity for fresh evidence or a new bounded milestone
+- default lane: Seam B Jetstream implementation **or** GPUI production hardening
+  via `g10.012` (user priority)
+- parity checkpoint: `g10.005` to `g10.007` complete
+- GPUI / spec queue: `g10.009` to `g10.011` complete; **`g10.012` open** for
+  deferred functional work (text input, select overlay, sliders, token sweep,
+  adapter mount strategy)
 
 ## Next Task
 
-Return to the Jetstream execution seam in `g10`: compile the next Jetstream
-milestone or resume the current implementation card with the GPUI parity lane
-treated as checkpointed.
+Drive **`g10.012`** checklist, or resume Jetstream / rollover planning. Living GPUI
+vs Svelte truth: `012-gpui-runtime-truth-and-deferred-work-closure.md` (not
+`g08/delta-register.md`).

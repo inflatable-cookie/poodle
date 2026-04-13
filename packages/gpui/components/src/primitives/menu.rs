@@ -169,10 +169,12 @@ impl IntoElement for Menu {
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let gap_sm = resolve_px(theme, "space.inline.sm");
         let caption_size = resolve_px(theme, "typography.caption.size");
+        let menu_min_w = resolve_px(theme, "size.menu.minWidth");
+        let sep_vert_margin = resolve_px(theme, "space.inline.xs");
 
         // Contract: min-width 14rem, padding 0.25rem
         let mut surface = div()
-            .min_w(px(224.0)) // 14rem
+            .min_w(menu_min_w)
             .rounded(overlay_radius);
 
         // Brand-raised treatment: gradient fill for elevated surface
@@ -219,7 +221,7 @@ impl IntoElement for Menu {
                     div()
                         .w_full()
                         .h(px(1.0))
-                        .my(px(4.0)) // 0.25rem
+                        .my(sep_vert_margin)
                         .bg(separator_color),
                 );
                 continue;
@@ -356,7 +358,10 @@ impl IntoElement for Menu {
             surface = surface.child(row);
         }
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0));
+        let mut wrapper = div()
+            .flex()
+            .flex_col()
+            .gap(resolve_px(theme, "space.inline.xs"));
 
         if let Some(trigger) = self.trigger {
             wrapper = wrapper.child(trigger);

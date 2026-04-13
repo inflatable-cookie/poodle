@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-04-12
+Updated: 2026-04-13
 
 Roadmaps hold executable milestone work for Poodle.
 
@@ -19,8 +19,9 @@ Roadmaps hold executable milestone work for Poodle.
 - highest on-disk generation folder: `g10`
 - current executable generation plan: `g10`
 - `g09` is complete
-- `g10` is active, `g10.005` to `g10.007` are complete, and the GPUI parity
-  runway is now checkpointed rather than the active ready lane
+- `g10` is active; on-disk milestones `g10.005` through `g10.011` are **complete**
+  (GPUI preview/parity tranche and shared button spec work); **`g10.012` is the
+  open GPUI production-hardening / delta-closure track**
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -45,6 +46,5 @@ Do not assume the highest-numbered generation folder is the active one.
 
 ## Next Task
 
-Open `g10/README.md`, treat the GPUI parity tranche as checkpointed, and resume
-the Jetstream execution lane unless fresh parity evidence forces a new bounded
-card.
+Open `g10/README.md`. Living GPUI deferred work: `g10/012-gpui-runtime-truth-and-deferred-work-closure.md`.
+Do not extend `g08/delta-register.md` (deprecated stub).

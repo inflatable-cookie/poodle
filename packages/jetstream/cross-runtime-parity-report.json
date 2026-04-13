@@ -47,14 +47,14 @@
   "parityWithSvelte": {
     "componentCoverage": "100% — all 117 renderable components supported",
     "tokenResolution": "full — all semantic tokens resolved via JetstreamThemeProvider",
-    "visualFidelity": "retained-mode rendering; see delta-register.md for adaptations"
+    "visualFidelity": "retained-mode rendering; see docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md"
   },
-  "deltaRegister": "docs/roadmaps/g10/delta-register.md",
+  "deltaRegister": "docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md",
   "comparisonArtifacts": [
     "packages/svelte/preview/artifacts/parity-report.json",
     "packages/gpui/cross-runtime-parity-report.json",
     "packages/jetstream/cross-runtime-parity-report.json",
-    "docs/roadmaps/g10/delta-register.md"
+    "docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md"
   ],
   "verification": {
     "cargoCheck": "pass (7 pre-existing warnings)",

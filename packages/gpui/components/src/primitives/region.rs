@@ -8,8 +8,7 @@ use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A presentational placeholder with a dashed border and centered label.
 ///
-/// GPUI does not support native dashed borders, so a solid border is used
-/// as the closest approximation (known delta from contract).
+/// Uses GPUI `.border_dashed()` (`BorderStyle::Dashed`) per contract.
 pub struct Region {
     spec: RegionSpec,
     theme: GpuiThemeProvider,
@@ -82,14 +81,15 @@ impl IntoElement for Region {
             .p(padding)
             .rounded(radius)
             .border_2()
+            .border_dashed()
             .border_color(border_color);
 
         if !spec.label.is_empty() {
+            let label_size = resolve_px(theme, spec.label_text_size_token());
             el = el.child(
                 div()
                     .text_color(label_color)
-                    // Contract: label font 0.6875rem (11px), semibold, uppercase, line-height 1.5
-                    .text_size(px(11.0))
+                    .text_size(label_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .line_height(relative(1.5))
                     .child(spec.label.to_uppercase()),

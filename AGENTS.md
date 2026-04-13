@@ -21,7 +21,11 @@ Scope: whole `poodle/` repository.
 - `docs/README.md`
 - `docs/vision/001-poodle-vision.md`
 - `docs/architecture/001-poodle-system-shape.md`
+- `docs/architecture/product-guardrails.md`
+- `docs/contracts/001-working-rules.md`
 - `docs/roadmaps/README.md`
+- `docs/specs/062-g10-strict-posture-and-next-boundary-gate.md`
+- `docs/specs/batch-cards/README.md`
 
 ## Task Runner
 

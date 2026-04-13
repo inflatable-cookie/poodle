@@ -173,6 +173,7 @@ export const tokens = {
       "text": {
         "primary": "#131a22",
         "secondary": "#314255",
+        "tertiary": "#75869b",
         "inverse": "#fcfdff"
       },
       "border": {
@@ -245,6 +246,30 @@ export const tokens = {
       },
       "panel": {
         "header": "2.5rem"
+      },
+      "list": {
+        "grid": {
+          "minItemWidth": "22.5rem"
+        }
+      },
+      "menu": {
+        "maxHeight": "15rem",
+        "minWidth": "14rem"
+      },
+      "popover": {
+        "maxWidth": "24rem"
+      },
+      "hoverCard": {
+        "maxWidth": "22rem"
+      },
+      "select": {
+        "minWidth": "8rem"
+      },
+      "dateTimeRangePicker": {
+        "minWidth": "18rem"
+      },
+      "fileUpload": {
+        "dropZoneMinHeight": "8rem"
       }
     },
     "space": {
@@ -254,6 +279,7 @@ export const tokens = {
         "lg": "1.25rem"
       },
       "inline": {
+        "xs": "0.25rem",
         "sm": "0.5rem",
         "md": "0.75rem",
         "lg": "1rem"
@@ -265,6 +291,10 @@ export const tokens = {
       "control": {
         "x": "0.75rem",
         "y": "0.5rem"
+      },
+      "button": {
+        "gap": "0.375rem",
+        "iconInset": "0.125rem"
       }
     },
     "state": {
@@ -285,6 +315,9 @@ export const tokens = {
         "size": "0.8125rem",
         "lineHeight": "1rem",
         "weight": "500"
+      },
+      "counter": {
+        "size": "0.75rem"
       },
       "caption": {
         "family": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
@@ -401,6 +434,7 @@ export const tokenPaths = [
   "color.background.overlay",
   "color.text.primary",
   "color.text.secondary",
+  "color.text.tertiary",
   "color.text.inverse",
   "color.border.subtle",
   "color.border.default",
@@ -437,9 +471,18 @@ export const tokenPaths = [
   "size.icon.lg",
   "size.icon.xl",
   "size.panel.header",
+  "size.list.grid.minItemWidth",
+  "size.menu.maxHeight",
+  "size.menu.minWidth",
+  "size.popover.maxWidth",
+  "size.hoverCard.maxWidth",
+  "size.select.minWidth",
+  "size.dateTimeRangePicker.minWidth",
+  "size.fileUpload.dropZoneMinHeight",
   "space.stack.sm",
   "space.stack.md",
   "space.stack.lg",
+  "space.inline.xs",
   "space.inline.sm",
   "space.inline.md",
   "space.inline.lg",
@@ -447,6 +490,8 @@ export const tokenPaths = [
   "space.panel.y",
   "space.control.x",
   "space.control.y",
+  "space.button.gap",
+  "space.button.iconInset",
   "state.opacity.disabled",
   "state.opacity.muted",
   "typography.body.family",
@@ -457,6 +502,7 @@ export const tokenPaths = [
   "typography.label.size",
   "typography.label.lineHeight",
   "typography.label.weight",
+  "typography.counter.size",
   "typography.caption.family",
   "typography.caption.size",
   "typography.caption.lineHeight",
@@ -482,6 +528,7 @@ export const cssVars = {
   "color.background.overlay": "--poodle-color-background-overlay",
   "color.text.primary": "--poodle-color-text-primary",
   "color.text.secondary": "--poodle-color-text-secondary",
+  "color.text.tertiary": "--poodle-color-text-tertiary",
   "color.text.inverse": "--poodle-color-text-inverse",
   "color.border.subtle": "--poodle-color-border-subtle",
   "color.border.default": "--poodle-color-border-default",
@@ -518,9 +565,18 @@ export const cssVars = {
   "size.icon.lg": "--poodle-size-icon-lg",
   "size.icon.xl": "--poodle-size-icon-xl",
   "size.panel.header": "--poodle-size-panel-header",
+  "size.list.grid.minItemWidth": "--poodle-size-list-grid-minItemWidth",
+  "size.menu.maxHeight": "--poodle-size-menu-maxHeight",
+  "size.menu.minWidth": "--poodle-size-menu-minWidth",
+  "size.popover.maxWidth": "--poodle-size-popover-maxWidth",
+  "size.hoverCard.maxWidth": "--poodle-size-hoverCard-maxWidth",
+  "size.select.minWidth": "--poodle-size-select-minWidth",
+  "size.dateTimeRangePicker.minWidth": "--poodle-size-dateTimeRangePicker-minWidth",
+  "size.fileUpload.dropZoneMinHeight": "--poodle-size-fileUpload-dropZoneMinHeight",
   "space.stack.sm": "--poodle-space-stack-sm",
   "space.stack.md": "--poodle-space-stack-md",
   "space.stack.lg": "--poodle-space-stack-lg",
+  "space.inline.xs": "--poodle-space-inline-xs",
   "space.inline.sm": "--poodle-space-inline-sm",
   "space.inline.md": "--poodle-space-inline-md",
   "space.inline.lg": "--poodle-space-inline-lg",
@@ -528,6 +584,8 @@ export const cssVars = {
   "space.panel.y": "--poodle-space-panel-y",
   "space.control.x": "--poodle-space-control-x",
   "space.control.y": "--poodle-space-control-y",
+  "space.button.gap": "--poodle-space-button-gap",
+  "space.button.iconInset": "--poodle-space-button-iconInset",
   "state.opacity.disabled": "--poodle-state-opacity-disabled",
   "state.opacity.muted": "--poodle-state-opacity-muted",
   "typography.body.family": "--poodle-typography-body-family",
@@ -538,6 +596,7 @@ export const cssVars = {
   "typography.label.size": "--poodle-typography-label-size",
   "typography.label.lineHeight": "--poodle-typography-label-lineHeight",
   "typography.label.weight": "--poodle-typography-label-weight",
+  "typography.counter.size": "--poodle-typography-counter-size",
   "typography.caption.family": "--poodle-typography-caption-family",
   "typography.caption.size": "--poodle-typography-caption-size",
   "typography.caption.lineHeight": "--poodle-typography-caption-lineHeight",

@@ -80,6 +80,12 @@ export const allComponents: ComponentEntry[] = [
   // Layout
   entry("Box", "layout", "Generic layout container with configurable padding and alignment.", true),
   entry("Grid", "layout", "CSS Grid layout container.", true),
+  entry(
+    "ListGrid",
+    "layout",
+    "Responsive auto-fill grid for card or tile collections with optional header actions.",
+    true,
+  ),
   entry("Stack", "layout", "Vertical flex layout container.", true),
   entry("Spacer", "layout", "Flexible space for pushing layout elements apart.", true),
   entry("Separator", "layout", "Visual divider between content sections.", true),

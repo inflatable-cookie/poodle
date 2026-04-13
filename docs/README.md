@@ -53,6 +53,6 @@ effigy health
 
 ## Next Task
 
-Use `roadmaps/g10/README.md` as the current entrypoint. The GPUI parity tranche
-through `g10.007` is checkpointed; the next active work should come from the
-Jetstream lane unless a new parity defect appears.
+Use `roadmaps/g10/README.md` as the current entrypoint. Living GPUI vs Svelte
+runtime truth and deferred functional work: `roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`.
+The historical `g08/delta-register.md` is deprecated (pointer stub only).

@@ -118,6 +118,7 @@ impl IntoElement for PickerShell {
         let label_size = resolve_px(theme, "typography.label.size");
         let control_radius = resolve_radius(theme, "radius.control");
         let footer_gap = resolve_px(theme, spec.footer_gap_token());
+        let menu_max_h = resolve_px(theme, "size.menu.maxHeight");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let border = resolve_color(theme, "color.border.subtle");
@@ -242,7 +243,7 @@ impl IntoElement for PickerShell {
                         .child("No results found."),
                 ),
             BrowseState::Ready => {
-                let mut area = div().w_full().max_h(px(240.0)).overflow_hidden();
+                let mut area = div().w_full().max_h(menu_max_h).overflow_hidden();
                 if let Some(results) = self.results_slot {
                     area = area.child(results);
                 }

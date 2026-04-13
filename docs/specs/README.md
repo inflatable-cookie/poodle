@@ -25,6 +25,11 @@ The active spec set currently runs from `001` through `061`, including:
 
 The complete file list in this folder is the source of truth.
 
+The active strict-planning layer is:
+
+- `062-g10-strict-posture-and-next-boundary-gate.md`
+- `batch-cards/README.md`
+
 ## Working Rule
 
 When a roadmap task touches emitted artifacts, runtime parity, packaging, or cross-component behavior, read the relevant spec first and treat it as normative.

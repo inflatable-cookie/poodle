@@ -49,10 +49,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .relative()
                 .min_h(px(256.0))
                 .border_1()
+                .border_dashed()
                 .border_color(color_to_hsla(theme.resolve_color("color.border.default")).opacity(0.82))
                 .rounded(px(8.0))
                 .bg(color_to_hsla(theme.resolve_color("color.background.panel")).opacity(0.96))
-                // GPUI has no dashed border. Keep the Svelte host surface shape anyway.
                 .child(ToastHost::from_spec(ToastHostSpec::new(), theme).toasts(toasts)),
         )
 }

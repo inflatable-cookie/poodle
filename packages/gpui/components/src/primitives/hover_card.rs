@@ -136,6 +136,8 @@ impl IntoElement for HoverCard {
         // Escape key clears timers and closes the surface
         if spec.current_open() {
             let panel_y = resolve_px(theme, "space.panel.y");
+            let menu_min_w = resolve_px(theme, "size.menu.minWidth");
+            let hover_card_max_w = resolve_px(theme, "size.hoverCard.maxWidth");
             let mut surface = div()
                 .id(("poodle-hover-card-surface", placement_id))
                 .focusable()
@@ -169,8 +171,8 @@ impl IntoElement for HoverCard {
                     },
                 ])
                 // Contract: min-width 14rem, max-width min(22rem, 90vw)
-                .min_w(px(rem_to_px(14.0)))
-                .max_w(px(rem_to_px(22.0)));
+                .min_w(menu_min_w)
+                .max_w(hover_card_max_w);
 
             if let Some(content) = self.content {
                 surface = surface.child(content);

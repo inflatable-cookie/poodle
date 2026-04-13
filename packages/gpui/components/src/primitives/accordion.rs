@@ -138,6 +138,8 @@ impl IntoElement for Accordion {
         let stack_md = density_gap;
         let heading_size = title_font;
         let label_size = resolve_px(theme, "typography.label.size");
+        let gap_inline_sm = resolve_px(theme, "space.inline.sm");
+        let gap_inline_xs = resolve_px(theme, "space.inline.xs");
 
         // Item background: color-mix(surface 93%, text-primary)
         let item_bg = color_mix(surface_bg, text_primary, 0.93);
@@ -177,7 +179,7 @@ impl IntoElement for Accordion {
                 .flex()
                 .items_center()
                 .justify_between()
-                .gap(px(8.0))
+                .gap(gap_inline_sm)
                 .cursor_pointer();
 
             trigger = trigger.focus(move |s| {
@@ -192,7 +194,12 @@ impl IntoElement for Accordion {
             }
 
             // Left side: title + optional description stacked vertically
-            let mut summary = div().flex().flex_col().gap(px(4.0)).min_w(px(0.0)).flex_1();
+            let mut summary = div()
+                .flex()
+                .flex_col()
+                .gap(gap_inline_xs)
+                .min_w(px(0.0))
+                .flex_1();
 
             // Title: bold, 16px, 1.2 line-height
             summary = summary.child(

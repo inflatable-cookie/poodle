@@ -169,6 +169,7 @@ impl IntoElement for RelationPicker {
         let control_radius = resolve_radius(theme, "radius.control");
         let label_size = resolve_px(theme, "typography.label.size");
         let gap_sm = resolve_px(theme, "space.inline.sm");
+        let menu_max_h = resolve_px(theme, "size.menu.maxHeight");
 
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -353,7 +354,7 @@ impl IntoElement for RelationPicker {
                             .w_full()
                             .flex()
                             .flex_col()
-                            .max_h(px(240.0))
+                            .max_h(menu_max_h)
                             .overflow_y_scroll();
 
                         for item in level_items {
@@ -469,7 +470,7 @@ impl IntoElement for RelationPicker {
                     .w_full()
                     .flex()
                     .flex_col()
-                    .max_h(px(240.0))
+                    .max_h(menu_max_h)
                     .overflow_y_scroll();
 
                 for item in source_items {

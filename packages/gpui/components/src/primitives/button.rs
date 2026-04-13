@@ -3,6 +3,12 @@
 //! Implements the button contract (`docs/contracts/components/button.md`) exactly,
 //! resolving all tokens through ButtonSpec + GpuiThemeProvider, and matching the
 //! Svelte implementation's visual output.
+//!
+//! `ButtonSpec::aria_expanded` is stored for cross-runtime parity with the
+//! contract’s `ariaExpanded` prop. GPUI’s fluent element API does not yet expose
+//! ARIA attributes on nodes (see `docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`), so
+//! the value is not emitted to the platform accessibility tree until that gap
+//! closes.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -108,6 +114,10 @@ impl Button {
         self.spec.described_by = Some(v.into());
         self
     }
+    pub fn aria_expanded(mut self, expanded: Option<bool>) -> Self {
+        self.spec.aria_expanded = expanded;
+        self
+    }
 
     // ── GPUI-specific builders ────────────────────────────────
     pub fn with_id(mut self, suffix: impl Into<String>) -> Self {
@@ -149,12 +159,12 @@ impl IntoElement for Button {
         let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
         let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
-        let gap = px(6.0); // contract: 0.375rem = 6px
+        let gap = resolve_px(theme, ButtonSpec::content_gap_token());
 
-        // Icon padding adjustment (contract §8): reduce padding on icon side by 2px
+        // Icon padding adjustment (contract §8): reduce padding on icon side by 0.125rem
         let has_leading = spec.leading_icon.is_some() || spec.is_loading;
         let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
-        let icon_inset = px(2.0);
+        let icon_inset = resolve_px(theme, ButtonSpec::icon_side_inset_token());
         let pad_left = if has_leading {
             pad_x - icon_inset
         } else {

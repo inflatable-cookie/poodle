@@ -69,12 +69,20 @@ impl RenderComponent<ConfirmActionSpec> for GpuiAdapter {
     type Target = GpuiTarget;
     fn render(
         &self,
-        _spec: &ConfirmActionSpec,
+        spec: &ConfirmActionSpec,
         style: &StyleDescriptor,
         _theme: &dyn ThemeProvider,
     ) -> GpuiElementHandle {
         let _s = map_style(style);
-        GpuiElementHandle::new("confirm-action", "ConfirmActionSpec")
+        // `poodle_gpui_components::ConfirmAction` cannot be mounted here without a
+        // circular crate dependency (adapter → components → adapter). Encode a
+        // stable, spec-derived handle so demo manifests and tests observe real input.
+        let element_id = format!(
+            "confirm-action|open={}|title={}",
+            spec.is_open,
+            spec.title
+        );
+        GpuiElementHandle::new(element_id, "ConfirmActionSpec")
     }
 }
 
@@ -128,14 +136,13 @@ mod tests {
     }
     #[test]
     fn confirm_action() {
-        assert_eq!(
-            a().render(
-                &ConfirmActionSpec::new("title", "msg", "OK", "Cancel"),
-                &s(),
-                &t()
-            )
-            .spec_type,
-            "ConfirmActionSpec"
+        let handle = a().render(
+            &ConfirmActionSpec::new("title", "msg", "OK", "Cancel"),
+            &s(),
+            &t(),
         );
+        assert_eq!(handle.spec_type, "ConfirmActionSpec");
+        assert!(handle.element_id.starts_with("confirm-action|open="));
+        assert!(handle.element_id.contains("title=title"));
     }
 }

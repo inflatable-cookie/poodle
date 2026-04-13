@@ -34,7 +34,8 @@ hover workarounds remain.
 
 ### Delta Register
 
-Created `docs/roadmaps/g08/delta-register.md` documenting:
+Created `docs/roadmaps/g08/delta-register.md` documenting (historical; **superseded by**
+`docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`):
 - 8 cross-cutting platform deltas (focus rings, ARIA, fonts, shadows, etc.)
 - 6 component-specific deltas (slider interaction, text editing, etc.)
 

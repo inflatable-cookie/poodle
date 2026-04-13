@@ -2,6 +2,10 @@
 ///
 /// Matches docs/contracts/components/list-card-counter.md.
 
+use poodle_tokens::semantic;
+
+use crate::IconSize;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ListCardCounterSpec {
     /// Icon name passed to the Icon primitive.
@@ -39,5 +43,25 @@ impl ListCardCounterSpec {
 
     pub fn is_linked(&self) -> bool {
         self.href.is_some()
+    }
+
+    pub fn text_secondary_token() -> &'static str {
+        "color.text.secondary"
+    }
+
+    pub fn text_primary_token() -> &'static str {
+        "color.text.primary"
+    }
+
+    pub fn gap_token() -> &'static str {
+        semantic::SPACE_INLINE_XS
+    }
+
+    pub fn font_size_token() -> &'static str {
+        semantic::TYPOGRAPHY_COUNTER_SIZE
+    }
+
+    pub fn icon_size() -> IconSize {
+        IconSize::Sm
     }
 }

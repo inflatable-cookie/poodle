@@ -4,13 +4,22 @@
 
 - `g10`
   - Status: active
-  - Range: `001` to `007`
+  - Range: `001` to `011` on disk (all complete)
   - Notes: `g10.001` proved Jetstream feasibility. `g10.002` recovered the
     live queue and classified three seams (Svelte overhaul, Jetstream
     implementation, parity). `g10.003` closed the Svelte overhaul.
     `g10.004` unified the component package. `g10.005` to `g10.007` closed the
-    current GPUI parity tranche. The next active execution focus inside `g10`
-    is Jetstream implementation unless a new bounded parity card is opened.
+    checkpointed GPUI parity tranche. `g10.008` delivered list grid and list
+    card counter GPUI coverage plus token additions.     `g10.009` tightened GPUI
+    token resolution for button, region, and field plus schema additions
+    (`color.text.tertiary`, button gap/inset).     `g10.010` delivered interactive
+    pagination (full variant + limit selector) and spec-derived adapter handles
+    for `ConfirmActionSpec` under the components↔adapter cycle constraint.
+    `g10.011` added `ButtonSpec::aria_expanded` with contract scoping for web-only
+    form props and documented GPUI/Jetstream ARIA emission gaps (D-002). **`g10.012`**
+    retires the historical `g08/delta-register.md`, records **real** GPUI 0.2.2
+    limits vs Poodle debt, and tracks execution for text input, select overlay,
+    sliders, token literals, and adapter mounting. Choose next work via `g10/README.md`.
 
 ## Completed Foundations
 
@@ -77,5 +86,6 @@ When roadmap files disagree:
 
 ## Next Task
 
-Use `g10/README.md` to resume the Jetstream lane. Reopen GPUI parity only if a
-new defect is found and compiled into a fresh bounded milestone.
+Open `g10/README.md` and pick the active seam: Jetstream implementation,
+generation rollover, or backlog; the on-disk `g10.009`–`g10.011` tranche is
+complete.

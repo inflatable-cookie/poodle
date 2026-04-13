@@ -4,6 +4,10 @@
 //! Reference: `packages/svelte/primitives/src/Button.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
+//!
+//! `ButtonSpec::aria_expanded` is defined for parity with web `ariaExpanded`.
+//! This runtime’s `JsEl` builder does not yet map it onto an accessibility
+//! metadata channel; hosts should read the spec when they need disclosure state.
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
@@ -11,7 +15,6 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::ButtonSpec;
 use poodle_specs::ButtonTone;
 use poodle_specs::ButtonVariant;
-use poodle_specs::ControlSize;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -175,6 +178,7 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_specs::ControlSize;
 
     fn test_theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)

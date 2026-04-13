@@ -49,6 +49,7 @@ import IconButtonSpecimen from "./IconButtonSpecimen.svelte";
 import IconProviderSpecimen from "./IconProviderSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
 import ListContainerSpecimen from "./ListContainerSpecimen.svelte";
+import ListGridSpecimen from "./ListGridSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
@@ -174,6 +175,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "icon-provider": IconProviderSpecimen,
   "list-card": ListCardSpecimen,
   "list-container": ListContainerSpecimen,
+  "list-grid": ListGridSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

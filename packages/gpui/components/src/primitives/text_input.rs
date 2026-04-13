@@ -1,8 +1,9 @@
 //! TextInput — real GPUI component backed by TextInputSpec.
 //!
-//! Note: gpui doesn't provide a native text input widget, so this renders
-//! a styled container displaying the current value. Real text editing would
-//! require gpui's internal input handling.
+//! Current implementation uses a styled `div` plus basic `on_key_down` editing.
+//! Full IME, selection, and clipboard require GPUI’s `EntityInputHandler` path
+//! (see `gpui/examples/input.rs`); track progress in
+//! `docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

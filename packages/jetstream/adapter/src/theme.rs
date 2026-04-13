@@ -246,6 +246,7 @@ fn match_semantic_color(token: &str) -> Option<ColorValue> {
         t if t.contains("background.overlay") => Some(typed::semantic::COLOR_BACKGROUND_OVERLAY),
         t if t.contains("background.elevated") => Some(typed::semantic::COLOR_BACKGROUND_ELEVATED),
         t if t.contains("text.primary") => Some(typed::semantic::COLOR_TEXT_PRIMARY),
+        t if t.contains("text.tertiary") => Some(typed::semantic::COLOR_TEXT_TERTIARY),
         t if t.contains("text.secondary") => Some(typed::semantic::COLOR_TEXT_SECONDARY),
         t if t.contains("text.inverse") => Some(typed::semantic::COLOR_TEXT_INVERSE),
         t if t.contains("border.subtle") => Some(typed::semantic::COLOR_BORDER_SUBTLE),
@@ -271,10 +272,14 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("size.icon.md") => Some(typed::semantic::SIZE_ICON_MD.0),
         t if t.contains("size.icon.lg") => Some(typed::semantic::SIZE_ICON_LG.0),
         t if t.contains("size.panel.header") => Some(typed::semantic::SIZE_PANEL_HEADER.0),
+        t if t.contains("size.list.grid.minItemWidth") => {
+            Some(typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.0)
+        },
         // Space tokens
         t if t.contains("space.stack.sm") => Some(typed::semantic::SPACE_STACK_SM.0),
         t if t.contains("space.stack.md") => Some(typed::semantic::SPACE_STACK_MD.0),
         t if t.contains("space.stack.lg") => Some(typed::semantic::SPACE_STACK_LG.0),
+        t if t.contains("space.inline.xs") => Some(typed::semantic::SPACE_INLINE_XS.0),
         t if t.contains("space.inline.sm") => Some(typed::semantic::SPACE_INLINE_SM.0),
         t if t.contains("space.inline.md") => Some(typed::semantic::SPACE_INLINE_MD.0),
         t if t.contains("space.inline.lg") => Some(typed::semantic::SPACE_INLINE_LG.0),
@@ -282,6 +287,8 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("space.panel.y") => Some(typed::semantic::SPACE_PANEL_Y.0),
         t if t.contains("space.control.x") => Some(typed::semantic::SPACE_CONTROL_X.0),
         t if t.contains("space.control.y") => Some(typed::semantic::SPACE_CONTROL_Y.0),
+        t if t.contains("space.button.gap") => Some(typed::semantic::SPACE_BUTTON_GAP.0),
+        t if t.contains("space.button.iconInset") => Some(typed::semantic::SPACE_BUTTON_ICON_INSET.0),
         // Radius tokens
         t if t.contains("radius.control") => Some(typed::semantic::RADIUS_CONTROL.0),
         t if t.contains("radius.surface") => Some(typed::semantic::RADIUS_SURFACE.0),
@@ -291,6 +298,7 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         t if t.contains("border.width.focus") || t.contains("borderWidth.focus") => Some(typed::semantic::BORDER_WIDTH_FOCUS.0),
         // Typography size (common token used by components)
         t if t.contains("typography.label.size") => Some(13.0), // from typed typography
+        t if t.contains("typography.counter.size") => Some(typed::semantic::TYPOGRAPHY_COUNTER_SIZE.0),
         t if t.contains("typography.body.size") => Some(14.0),
         t if t.contains("typography.heading") => Some(20.0),
         // Opacity tokens

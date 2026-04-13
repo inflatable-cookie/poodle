@@ -16,6 +16,9 @@ pub struct ButtonSpec {
     pub chevron: bool,
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
+    /// Disclosure state for menu / accordion triggers. Mirrors web `ariaExpanded`.
+    /// `None` omits the attribute (non-disclosure buttons).
+    pub aria_expanded: Option<bool>,
     pub label: Option<String>,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -39,6 +42,7 @@ impl Default for ButtonSpec {
             chevron: false,
             aria_label: None,
             described_by: None,
+            aria_expanded: None,
             label: None,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -108,6 +112,17 @@ impl ButtonSpec {
         self
     }
 
+    pub fn with_aria_expanded(mut self, expanded: bool) -> Self {
+        self.aria_expanded = Some(expanded);
+        self
+    }
+
+    /// Clear disclosure state so `aria-expanded` is not surfaced.
+    pub fn without_aria_expanded(mut self) -> Self {
+        self.aria_expanded = None;
+        self
+    }
+
     pub fn with_label(mut self, label: impl Into<String>) -> Self {
         self.label = Some(label.into());
         self
@@ -156,6 +171,16 @@ impl ButtonSpec {
     /// Icon size token — always sm in buttons per contract.
     pub fn icon_size_token(&self) -> &'static str {
         semantic::SIZE_ICON_SM
+    }
+
+    /// Gap between label and icons (contract §8: `0.375rem`).
+    pub fn content_gap_token() -> &'static str {
+        semantic::SPACE_BUTTON_GAP
+    }
+
+    /// Padding reduction on the icon side (contract §8: `0.125rem`).
+    pub fn icon_side_inset_token() -> &'static str {
+        semantic::SPACE_BUTTON_ICON_INSET
     }
 
     pub fn horizontal_padding_token(&self) -> &'static str {

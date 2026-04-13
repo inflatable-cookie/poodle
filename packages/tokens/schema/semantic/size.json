@@ -37,6 +37,54 @@
         "$type": "dimension",
         "$value": "{primitives.size.panel.header}"
       }
+    },
+    "list": {
+      "grid": {
+        "minItemWidth": {
+          "$type": "dimension",
+          "$value": "22.5rem"
+        }
+      }
+    },
+    "menu": {
+      "maxHeight": {
+        "$type": "dimension",
+        "$value": "15rem"
+      },
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "14rem"
+      }
+    },
+    "popover": {
+      "maxWidth": {
+        "$type": "dimension",
+        "$value": "24rem"
+      }
+    },
+    "hoverCard": {
+      "maxWidth": {
+        "$type": "dimension",
+        "$value": "22rem"
+      }
+    },
+    "select": {
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "8rem"
+      }
+    },
+    "dateTimeRangePicker": {
+      "minWidth": {
+        "$type": "dimension",
+        "$value": "18rem"
+      }
+    },
+    "fileUpload": {
+      "dropZoneMinHeight": {
+        "$type": "dimension",
+        "$value": "8rem"
+      }
     }
   }
 }

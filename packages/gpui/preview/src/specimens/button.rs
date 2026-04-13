@@ -19,6 +19,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("btn-last-clicked")
         .cloned()
         .unwrap_or_default();
+    let disclosure_open = state.specimens.is_on("btn-disclosure-open");
 
     let examples = div()
         .flex()
@@ -359,6 +360,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 )
         })
+        // --- Disclosure: aria_expanded on ButtonSpec (native ARIA pending D-002) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disclosure trigger (aria_expanded on spec)"),
+                    theme,
+                ))
+                .child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_label("Sections")
+                            .with_chevron(true)
+                            .with_aria_expanded(disclosure_open),
+                        theme,
+                    )
+                    .with_id("btn-disclosure")
+                    .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                        this.state.specimens.toggle("btn-disclosure-open");
+                        cx.notify();
+                    })),
+                )
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!(
+                            "ButtonSpec.aria_expanded = {:?}",
+                            Some(disclosure_open)
+                        )),
+                ),
+        )
         // --- Form overrides ---
         .child(
             div()

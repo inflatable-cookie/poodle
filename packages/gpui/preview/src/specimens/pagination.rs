@@ -11,6 +11,34 @@ use poodle_specs::{EyebrowSpec, PaginationSpec, PaginationVariant};
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_primary = theme.resolve_color("color.text.primary");
+
+    let full_page = state
+        .specimens
+        .selections
+        .get("pagination-full-page")
+        .copied()
+        .unwrap_or(6);
+    let full_ps = state
+        .specimens
+        .selections
+        .get("pagination-full-ps")
+        .copied()
+        .unwrap_or(10);
+    let full_goto = state
+        .specimens
+        .text
+        .get("pagination-full-goto")
+        .cloned()
+        .unwrap_or_else(|| full_page.to_string());
+    let full_limit_open = state.specimens.is_on("pagination-full-limit-open");
+    let total_items = 248usize;
+    let showing_from = (full_page.saturating_sub(1)).saturating_mul(full_ps) + 1;
+    let showing_to = (full_page * full_ps).min(total_items);
+    let full_info = format!(
+        "Showing {}–{} of {}",
+        showing_from, showing_to, total_items
+    );
 
     let examples = div()
         .flex()
@@ -116,27 +144,73 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
-        // --- Full variant ---
+        // --- Full variant + limit (interactive) ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Full variant"),
+                    EyebrowSpec::new().with_content("Full variant + page-size limit (interactive)"),
                     theme,
                 ))
-                .child(Pagination::from_spec(
-                    PaginationSpec::new()
-                        .with_current_page(6)
-                        .with_total_pages(25)
-                        .with_sibling_count(1)
-                        .with_variant(PaginationVariant::Full)
-                        .with_info_text("Showing 51–60 of 248")
-                        .with_page_size(10)
-                        .with_aria_label("Full pagination"),
-                    theme,
-                )),
+                .child(
+                    Pagination::from_spec(
+                        PaginationSpec::new()
+                            .with_current_page(full_page)
+                            .with_total_pages(25)
+                            .with_sibling_count(1)
+                            .with_variant(PaginationVariant::Full)
+                            .with_info_text(full_info.clone())
+                            .with_page_size(full_ps)
+                            .with_show_limit_selector(true)
+                            .with_limit_options(vec![10, 25, 50])
+                            .with_aria_label("Full pagination"),
+                        theme,
+                    )
+                    .on_page_change(cx.listener(|this, page: &usize, _w, cx| {
+                        this.state
+                            .specimens
+                            .selections
+                            .insert("pagination-full-page".to_string(), *page);
+                        this.state
+                            .specimens
+                            .text
+                            .insert("pagination-full-goto".to_string(), page.to_string());
+                        cx.notify();
+                    }))
+                    .with_goto_page_input(full_goto.clone())
+                    .on_goto_input_change(cx.listener(|this, s: &str, _w, cx| {
+                        this.state
+                            .specimens
+                            .text
+                            .insert("pagination-full-goto".to_string(), s.to_string());
+                        cx.notify();
+                    }))
+                    .limit_selector_open(full_limit_open)
+                    .on_limit_open_change(cx.listener(|this, open: &bool, _w, cx| {
+                        this.state
+                            .specimens
+                            .set_toggle("pagination-full-limit-open", *open);
+                        cx.notify();
+                    }))
+                    .on_page_size_change(cx.listener(|this, n: &usize, _w, cx| {
+                        this.state
+                            .specimens
+                            .selections
+                            .insert("pagination-full-ps".to_string(), *n);
+                        cx.notify();
+                    })),
+                )
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(color_to_hsla(text_primary))
+                        .child(format!(
+                            "Live: page {full_page}, {full_ps} / page, limit menu {}, goto draft “{full_goto}”",
+                            if full_limit_open { "open" } else { "closed" }
+                        )),
+                ),
         )
         // --- Standalone (no container chrome) ---
         .child(

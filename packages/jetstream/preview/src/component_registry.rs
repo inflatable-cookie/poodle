@@ -64,6 +64,8 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "icon-button", display_name: "IconButton", description: "Icon-only button.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "inline", display_name: "Inline", description: "Horizontal flex layout.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "list-card", display_name: "ListCard", description: "Structured list item card.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "list-card-counter", display_name: "ListCardCounter", description: "Icon + count for list card footers.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "list-grid", display_name: "ListGrid", description: "Responsive list/tile grid layout.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "menu", display_name: "Menu", description: "Dropdown menu.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "menubar", display_name: "Menubar", description: "Horizontal menu bar.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "meter", display_name: "Meter", description: "Visual gauge for values.", tier: Tier::Primitive, has_specimen: true },

@@ -127,8 +127,9 @@ impl FieldSpec {
         semantic::TYPOGRAPHY_LABEL_SIZE
     }
 
+    /// Helper/optional/error/pending copy at the `md` size stop (contract §7: `0.75rem`).
     pub fn supporting_text_typography_token(&self) -> &'static str {
-        semantic::TYPOGRAPHY_BODY_SIZE
+        semantic::TYPOGRAPHY_COUNTER_SIZE
     }
 
     pub fn error_color_token(&self) -> &'static str {
@@ -145,5 +146,10 @@ impl FieldSpec {
 
     pub fn header_gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_MD
+    }
+
+    /// Inline gap inside the label row (contract §7: `0.375rem`).
+    pub fn label_row_gap_token(&self) -> &'static str {
+        semantic::SPACE_BUTTON_GAP
     }
 }

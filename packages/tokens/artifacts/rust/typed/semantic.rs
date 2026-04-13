@@ -4,137 +4,29 @@ use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 
 pub const BORDER_WIDTH_DEFAULT: SpaceValue = SpaceValue(1.0);
 pub const BORDER_WIDTH_FOCUS: SpaceValue = SpaceValue(2.0);
-pub const COLOR_BACKGROUND_CANVAS: ColorValue = ColorValue(
-    0.9058823529411765,
-    0.9333333333333333,
-    0.9607843137254902,
-    1.0,
-);
-pub const COLOR_BACKGROUND_SURFACE: ColorValue = ColorValue(
-    0.8588235294117647,
-    0.8980392156862745,
-    0.9372549019607843,
-    1.0,
-);
-pub const COLOR_BACKGROUND_PANEL: ColorValue = ColorValue(
-    0.9686274509803922,
-    0.9803921568627451,
-    0.9921568627450981,
-    1.0,
-);
-pub const COLOR_BACKGROUND_ELEVATED: ColorValue =
-    ColorValue(0.9882352941176471, 0.9921568627450981, 1.0, 1.0);
-pub const COLOR_BACKGROUND_OVERLAY: ColorValue = ColorValue(
-    0.043137254901960784,
-    0.058823529411764705,
-    0.0784313725490196,
-    0.64,
-);
-pub const COLOR_TEXT_PRIMARY: ColorValue = ColorValue(
-    0.07450980392156863,
-    0.10196078431372549,
-    0.13333333333333333,
-    1.0,
-);
-pub const COLOR_TEXT_SECONDARY: ColorValue = ColorValue(
-    0.19215686274509805,
-    0.25882352941176473,
-    0.3333333333333333,
-    1.0,
-);
-pub const COLOR_TEXT_INVERSE: ColorValue =
-    ColorValue(0.9882352941176471, 0.9921568627450981, 1.0, 1.0);
-pub const COLOR_BORDER_SUBTLE: ColorValue = ColorValue(
-    0.788235294117647,
-    0.8313725490196079,
-    0.8784313725490196,
-    1.0,
-);
-pub const COLOR_BORDER_DEFAULT: ColorValue = ColorValue(
-    0.4588235294117647,
-    0.5254901960784314,
-    0.6078431372549019,
-    1.0,
-);
-pub const COLOR_BORDER_STRONG: ColorValue = ColorValue(
-    0.19215686274509805,
-    0.25882352941176473,
-    0.3333333333333333,
-    1.0,
-);
-pub const COLOR_ACCENT_BASE: ColorValue = ColorValue(
-    0.17647058823529413,
-    0.5254901960784314,
-    0.9529411764705882,
-    1.0,
-);
-pub const COLOR_ACCENT_HOVER: ColorValue =
-    ColorValue(0.3411764705882353, 0.6549019607843137, 1.0, 1.0);
-pub const COLOR_ACCENT_FOCUS_RING: ColorValue =
-    ColorValue(0.3411764705882353, 0.6549019607843137, 1.0, 1.0);
-pub const COLOR_STATUS_SUCCESS: ColorValue = ColorValue(
-    0.4980392156862745,
-    0.8235294117647058,
-    0.30196078431372547,
-    1.0,
-);
-pub const COLOR_STATUS_WARNING: ColorValue = ColorValue(
-    0.9411764705882353,
-    0.6980392156862745,
-    0.30196078431372547,
-    1.0,
-);
-pub const COLOR_STATUS_DANGER: ColorValue = ColorValue(
-    0.8784313725490196,
-    0.41568627450980394,
-    0.37254901960784315,
-    1.0,
-);
-pub const COLOR_ICON_PRIMARY: ColorValue = ColorValue(
-    0.07450980392156863,
-    0.10196078431372549,
-    0.13333333333333333,
-    1.0,
-);
-pub const COLOR_ICON_MUTED: ColorValue = ColorValue(
-    0.19215686274509805,
-    0.25882352941176473,
-    0.3333333333333333,
-    1.0,
-);
-pub const ELEVATION_SURFACE: ShadowValue = ShadowValue {
-    offset_x: 0.0,
-    offset_y: 4.0,
-    blur: 12.0,
-    color: ColorValue(
-        0.06666666666666667,
-        0.08627450980392157,
-        0.11372549019607843,
-        0.08,
-    ),
-};
-pub const ELEVATION_OVERLAY: ShadowValue = ShadowValue {
-    offset_x: 0.0,
-    offset_y: 12.0,
-    blur: 32.0,
-    color: ColorValue(
-        0.06666666666666667,
-        0.08627450980392157,
-        0.11372549019607843,
-        0.16,
-    ),
-};
-pub const ELEVATION_DIALOG: ShadowValue = ShadowValue {
-    offset_x: 0.0,
-    offset_y: 24.0,
-    blur: 60.0,
-    color: ColorValue(
-        0.043137254901960784,
-        0.058823529411764705,
-        0.0784313725490196,
-        0.32,
-    ),
-};
+pub const COLOR_BACKGROUND_CANVAS: ColorValue = ColorValue(0.9058823529411765, 0.9333333333333333, 0.9607843137254902, 1.0);
+pub const COLOR_BACKGROUND_SURFACE: ColorValue = ColorValue(0.8588235294117647, 0.8980392156862745, 0.9372549019607843, 1.0);
+pub const COLOR_BACKGROUND_PANEL: ColorValue = ColorValue(0.9686274509803922, 0.9803921568627451, 0.9921568627450981, 1.0);
+pub const COLOR_BACKGROUND_ELEVATED: ColorValue = ColorValue(0.9882352941176471, 0.9921568627450981, 1.0, 1.0);
+pub const COLOR_BACKGROUND_OVERLAY: ColorValue = ColorValue(0.043137254901960784, 0.058823529411764705, 0.0784313725490196, 0.64);
+pub const COLOR_TEXT_PRIMARY: ColorValue = ColorValue(0.07450980392156863, 0.10196078431372549, 0.13333333333333333, 1.0);
+pub const COLOR_TEXT_SECONDARY: ColorValue = ColorValue(0.19215686274509805, 0.25882352941176473, 0.3333333333333333, 1.0);
+pub const COLOR_TEXT_TERTIARY: ColorValue = ColorValue(0.4588235294117647, 0.5254901960784314, 0.6078431372549019, 1.0);
+pub const COLOR_TEXT_INVERSE: ColorValue = ColorValue(0.9882352941176471, 0.9921568627450981, 1.0, 1.0);
+pub const COLOR_BORDER_SUBTLE: ColorValue = ColorValue(0.788235294117647, 0.8313725490196079, 0.8784313725490196, 1.0);
+pub const COLOR_BORDER_DEFAULT: ColorValue = ColorValue(0.4588235294117647, 0.5254901960784314, 0.6078431372549019, 1.0);
+pub const COLOR_BORDER_STRONG: ColorValue = ColorValue(0.19215686274509805, 0.25882352941176473, 0.3333333333333333, 1.0);
+pub const COLOR_ACCENT_BASE: ColorValue = ColorValue(0.17647058823529413, 0.5254901960784314, 0.9529411764705882, 1.0);
+pub const COLOR_ACCENT_HOVER: ColorValue = ColorValue(0.3411764705882353, 0.6549019607843137, 1.0, 1.0);
+pub const COLOR_ACCENT_FOCUS_RING: ColorValue = ColorValue(0.3411764705882353, 0.6549019607843137, 1.0, 1.0);
+pub const COLOR_STATUS_SUCCESS: ColorValue = ColorValue(0.4980392156862745, 0.8235294117647058, 0.30196078431372547, 1.0);
+pub const COLOR_STATUS_WARNING: ColorValue = ColorValue(0.9411764705882353, 0.6980392156862745, 0.30196078431372547, 1.0);
+pub const COLOR_STATUS_DANGER: ColorValue = ColorValue(0.8784313725490196, 0.41568627450980394, 0.37254901960784315, 1.0);
+pub const COLOR_ICON_PRIMARY: ColorValue = ColorValue(0.07450980392156863, 0.10196078431372549, 0.13333333333333333, 1.0);
+pub const COLOR_ICON_MUTED: ColorValue = ColorValue(0.19215686274509805, 0.25882352941176473, 0.3333333333333333, 1.0);
+pub const ELEVATION_SURFACE: ShadowValue = ShadowValue { offset_x: 0.0, offset_y: 4.0, blur: 12.0, color: ColorValue(0.06666666666666667, 0.08627450980392157, 0.11372549019607843, 0.08) };
+pub const ELEVATION_OVERLAY: ShadowValue = ShadowValue { offset_x: 0.0, offset_y: 12.0, blur: 32.0, color: ColorValue(0.06666666666666667, 0.08627450980392157, 0.11372549019607843, 0.16) };
+pub const ELEVATION_DIALOG: ShadowValue = ShadowValue { offset_x: 0.0, offset_y: 24.0, blur: 60.0, color: ColorValue(0.043137254901960784, 0.058823529411764705, 0.0784313725490196, 0.32) };
 pub const ICON_SIZE_DEFAULT: SpaceValue = SpaceValue(16.0);
 pub const ICON_STROKE_DEFAULT: SpaceValue = SpaceValue(1.5008);
 pub const MOTION_DURATION_INTERACTION: DurationValue = DurationValue(180.0);
@@ -156,9 +48,18 @@ pub const SIZE_ICON_MD: SpaceValue = SpaceValue(16.0);
 pub const SIZE_ICON_LG: SpaceValue = SpaceValue(20.0);
 pub const SIZE_ICON_XL: SpaceValue = SpaceValue(24.0);
 pub const SIZE_PANEL_HEADER: SpaceValue = SpaceValue(40.0);
+pub const SIZE_LIST_GRID_MIN_ITEM_WIDTH: SpaceValue = SpaceValue(360.0);
+pub const SIZE_MENU_MAX_HEIGHT: SpaceValue = SpaceValue(240.0);
+pub const SIZE_MENU_MIN_WIDTH: SpaceValue = SpaceValue(224.0);
+pub const SIZE_POPOVER_MAX_WIDTH: SpaceValue = SpaceValue(384.0);
+pub const SIZE_HOVER_CARD_MAX_WIDTH: SpaceValue = SpaceValue(352.0);
+pub const SIZE_SELECT_MIN_WIDTH: SpaceValue = SpaceValue(128.0);
+pub const SIZE_DATE_TIME_RANGE_PICKER_MIN_WIDTH: SpaceValue = SpaceValue(288.0);
+pub const SIZE_FILE_UPLOAD_DROP_ZONE_MIN_HEIGHT: SpaceValue = SpaceValue(128.0);
 pub const SPACE_STACK_SM: SpaceValue = SpaceValue(8.0);
 pub const SPACE_STACK_MD: SpaceValue = SpaceValue(12.0);
 pub const SPACE_STACK_LG: SpaceValue = SpaceValue(20.0);
+pub const SPACE_INLINE_XS: SpaceValue = SpaceValue(4.0);
 pub const SPACE_INLINE_SM: SpaceValue = SpaceValue(8.0);
 pub const SPACE_INLINE_MD: SpaceValue = SpaceValue(12.0);
 pub const SPACE_INLINE_LG: SpaceValue = SpaceValue(16.0);
@@ -166,6 +67,8 @@ pub const SPACE_PANEL_X: SpaceValue = SpaceValue(16.0);
 pub const SPACE_PANEL_Y: SpaceValue = SpaceValue(12.0);
 pub const SPACE_CONTROL_X: SpaceValue = SpaceValue(12.0);
 pub const SPACE_CONTROL_Y: SpaceValue = SpaceValue(8.0);
+pub const SPACE_BUTTON_GAP: SpaceValue = SpaceValue(6.0);
+pub const SPACE_BUTTON_ICON_INSET: SpaceValue = SpaceValue(2.0);
 pub const STATE_OPACITY_DISABLED: f32 = 0.48;
 pub const STATE_OPACITY_MUTED: f32 = 0.72;
 pub const TYPOGRAPHY_BODY_FAMILY: &str = "\"Inter\", \"SF Pro Display\", system-ui, sans-serif";
@@ -176,6 +79,7 @@ pub const TYPOGRAPHY_LABEL_FAMILY: &str = "\"Inter\", \"SF Pro Display\", system
 pub const TYPOGRAPHY_LABEL_SIZE: SpaceValue = SpaceValue(13.0);
 pub const TYPOGRAPHY_LABEL_LINE_HEIGHT: SpaceValue = SpaceValue(16.0);
 pub const TYPOGRAPHY_LABEL_WEIGHT: f32 = 500.0;
+pub const TYPOGRAPHY_COUNTER_SIZE: SpaceValue = SpaceValue(12.0);
 pub const TYPOGRAPHY_CAPTION_FAMILY: &str = "\"Inter\", \"SF Pro Display\", system-ui, sans-serif";
 pub const TYPOGRAPHY_CAPTION_SIZE: SpaceValue = SpaceValue(11.0);
 pub const TYPOGRAPHY_CAPTION_LINE_HEIGHT: SpaceValue = SpaceValue(16.0);

@@ -150,6 +150,8 @@ impl IntoElement for Select {
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let control_radius = resolve_radius(theme, "radius.control");
         let stack_gap = resolve_px(theme, "space.stack.sm");
+        let menu_max_h = resolve_px(theme, "size.menu.maxHeight");
+        let select_min_w = resolve_px(theme, "size.select.minWidth");
 
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let border_default = resolve_color(theme, "color.border.default");
@@ -380,12 +382,9 @@ impl IntoElement for Select {
             });
         }
 
-        let mut wrapper = div()
-            .flex()
-            .flex_col()
-            .gap(stack_gap)
-            .min_w(px(128.0))
-            .child(trigger);
+        // Root is `relative` so the open listbox can sit in an absolutely positioned layer
+        // below the trigger (popover-style) instead of pushing following layout down.
+        let mut wrapper = div().relative().min_w(select_min_w).child(trigger);
 
         // Dropdown list (when open)
         // Note: GPUI always renders a custom dropdown (no native mode).
@@ -428,7 +427,7 @@ impl IntoElement for Select {
                     },
                 ])
                 .py(stack_gap)
-                .max_h(px(240.0))
+                .max_h(menu_max_h)
                 .overflow_y_scroll();
 
             // Searchable: show a filter input placeholder at the top of the dropdown
@@ -508,7 +507,20 @@ impl IntoElement for Select {
                 );
             }
 
-            wrapper = wrapper.child(list);
+            // Position below the trigger; ghost rows are content-sized (no fixed control height).
+            let list_top = if is_ghost {
+                body_size + inline_gap + stack_gap
+            } else {
+                control_height + stack_gap
+            };
+            let list_overlay = div()
+                .absolute()
+                .left(px(0.0))
+                .w_full()
+                .top(list_top)
+                .child(list);
+
+            wrapper = wrapper.child(list_overlay);
         }
 
         wrapper.into_any_element()

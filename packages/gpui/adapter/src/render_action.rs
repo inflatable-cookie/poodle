@@ -44,10 +44,17 @@ impl RenderComponent<ButtonSpec> for GpuiAdapter {
             gpui_style.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
-        GpuiElementHandle::new(
-            format!("button-{}", spec.label.as_deref().unwrap_or("anonymous")),
-            "ButtonSpec",
-        )
+        let mut element_id =
+            format!("button-{}", spec.label.as_deref().unwrap_or("anonymous"));
+        if let Some(expanded) = spec.aria_expanded {
+            element_id.push_str(if expanded {
+                "|aria_expanded=true"
+            } else {
+                "|aria_expanded=false"
+            });
+        }
+
+        GpuiElementHandle::new(element_id, "ButtonSpec")
     }
 }
 
@@ -325,6 +332,16 @@ mod tests {
         let handle = a.render(&spec, &style(), &theme());
         assert_eq!(handle.element_id, "button-Save");
         assert_eq!(handle.spec_type, "ButtonSpec");
+    }
+
+    #[test]
+    fn render_button_aria_expanded_in_element_id() {
+        let a = adapter();
+        let spec = ButtonSpec::new()
+            .with_label("Menu")
+            .with_aria_expanded(true);
+        let handle = a.render(&spec, &style(), &theme());
+        assert!(handle.element_id.contains("aria_expanded=true"));
     }
 
     #[test]

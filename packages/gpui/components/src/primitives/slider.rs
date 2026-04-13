@@ -1,4 +1,9 @@
 //! Slider — real GPUI component backed by SliderSpec.
+//!
+//! Drag and click use the track element’s layout bounds (via `on_children_prepainted`),
+//! not the window bounds.
+
+use std::sync::{Arc, Mutex};
 
 use gpui::*;
 use poodle_adapter::ThemeProvider;
@@ -136,6 +141,10 @@ impl IntoElement for Slider {
 
         let progress = spec.normalized_progress().clamp(0.0, 1.0) as f32;
 
+        // Track layout bounds (window coordinates) — updated each frame for hit math.
+        let track_bounds_store: Arc<Mutex<Option<Bounds<Pixels>>>> = Arc::new(Mutex::new(None));
+        let track_bounds_for_prepaint = track_bounds_store.clone();
+
         // Track with filled portion and thumb
         let track = div()
             .w_full()
@@ -174,6 +183,17 @@ impl IntoElement for Slider {
                         spread_radius: px(0.0),
                     }]),
             );
+
+        let track = div()
+            .w_full()
+            .on_children_prepainted(move |children_bounds, _window, _cx| {
+                if let Some(b) = children_bounds.first() {
+                    if let Ok(mut g) = track_bounds_for_prepaint.lock() {
+                        *g = Some(*b);
+                    }
+                }
+            })
+            .child(track);
 
         // Value labels
         let labels = div()
@@ -224,13 +244,10 @@ impl IntoElement for Slider {
         if is_disabled {
             wrapper = wrapper.opacity(disabled_opacity);
         } else if let Some(on_change) = on_change {
-            // Compute value from click position using Pixels arithmetic
             let compute_value =
-                move |pos_x: Pixels, origin_x: Pixels, width: Pixels| -> Option<f64> {
-                    let local = pos_x - origin_x;
-                    // Use px division: local / width gives a ratio
-                    // Pixels supports Div<Pixels> -> f32 via: local / width
-                    let ratio_f32 = local / width;
+                move |pos_x: Pixels, track: &Bounds<Pixels>| -> Option<f64> {
+                    let local = pos_x - track.origin.x;
+                    let ratio_f32 = local / track.size.width;
                     let ratio = (ratio_f32 as f64).clamp(0.0, 1.0);
                     let raw = min + ratio * (max - min);
                     let stepped = if step > 0.0 {
@@ -244,23 +261,25 @@ impl IntoElement for Slider {
             let on_change = std::rc::Rc::new(on_change);
             let on_change_drag = on_change.clone();
             let compute_drag = compute_value;
+            let tbs_down = track_bounds_store.clone();
+            let tbs_move = track_bounds_store;
 
             wrapper = wrapper
                 .on_mouse_down(MouseButton::Left, move |event, window, cx| {
-                    let bounds = window.bounds();
-                    if let Some(val) =
-                        compute_value(event.position.x, bounds.origin.x, bounds.size.width)
-                    {
-                        on_change(&val, window, cx);
+                    let tb = tbs_down.lock().ok().and_then(|g| *g);
+                    if let Some(track) = tb {
+                        if let Some(val) = compute_value(event.position.x, &track) {
+                            on_change(&val, window, cx);
+                        }
                     }
                 })
                 .on_mouse_move(move |event, window, cx| {
                     if event.pressed_button == Some(MouseButton::Left) {
-                        let bounds = window.bounds();
-                        if let Some(val) =
-                            compute_drag(event.position.x, bounds.origin.x, bounds.size.width)
-                        {
-                            on_change_drag(&val, window, cx);
+                        let tb = tbs_move.lock().ok().and_then(|g| *g);
+                        if let Some(track) = tb {
+                            if let Some(val) = compute_drag(event.position.x, &track) {
+                                on_change_drag(&val, window, cx);
+                            }
                         }
                     }
                 });

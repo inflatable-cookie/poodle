@@ -92,36 +92,45 @@ impl IntoElement for Field {
         let text_primary = resolve_color(theme, "color.text.primary");
         let description_color = resolve_color(theme, spec.description_color_token());
         let error_color = resolve_color(theme, spec.error_color_token());
-        let body_size = resolve_px(theme, "typography.body.size");
+        let label_size = resolve_px(theme, spec.label_typography_token());
+        let supporting_size = resolve_px(theme, spec.supporting_text_typography_token());
+        let root_gap = resolve_px(theme, spec.row_gap_token());
+        let header_gap = resolve_px(theme, spec.header_gap_token());
+        let label_row_gap = resolve_px(theme, spec.label_row_gap_token());
 
-        let mut col = div().flex().flex_col().gap(px(4.0));
+        let mut col = div().flex().flex_col().gap(root_gap);
 
-        // Label row — Svelte: flex, align-items: baseline, justify-content: space-between
-        let mut label_el = div()
-            .text_size(body_size)
-            .font_weight(FontWeight::MEDIUM) // label weight = 500
-            .text_color(text_primary)
-            .child(spec.label.clone());
-
+        // Label group — contract §7: `0.375rem` gap between label and required `*`
+        let mut label_group = div().flex().items_center().gap(label_row_gap);
+        label_group = label_group.child(
+            div()
+                .text_size(label_size)
+                .font_weight(FontWeight::MEDIUM)
+                .text_color(text_primary)
+                .child(spec.label.clone()),
+        );
         if spec.is_required {
-            label_el = label_el.child(
+            label_group = label_group.child(
                 div()
-                    .ml(px(2.0))
-                    .text_size(body_size)
+                    .text_size(label_size)
                     .text_color(error_color)
                     .child("*"),
             );
         }
 
-        let mut label_row = div().flex().items_center().justify_between().gap(px(8.0)); // space-inline-md
+        let mut label_row = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .gap(header_gap);
 
-        label_row = label_row.child(label_el);
+        label_row = label_row.child(label_group);
 
         if !spec.is_required && spec.shows_optional_label() {
             if let Some(ref opt_label) = spec.optional_label {
                 label_row = label_row.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(supporting_size)
                         .text_color(description_color)
                         .flex_shrink_0()
                         .child(opt_label.clone()),
@@ -135,7 +144,7 @@ impl IntoElement for Field {
         if let Some(ref description) = spec.description {
             col = col.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(supporting_size)
                     .text_color(description_color)
                     .child(description.clone()),
             );
@@ -151,7 +160,7 @@ impl IntoElement for Field {
             if let Some(ref error) = spec.error {
                 col = col.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(supporting_size)
                         .text_color(error_color)
                         .child(error.clone()),
                 );
@@ -163,7 +172,7 @@ impl IntoElement for Field {
             if let Some(ref pending) = spec.pending_message {
                 col = col.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(supporting_size)
                         .text_color(description_color)
                         .child(pending.clone()),
                 );

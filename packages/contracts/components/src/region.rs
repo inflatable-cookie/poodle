@@ -42,7 +42,12 @@ impl RegionSpec {
     }
 
     pub fn label_color_token(&self) -> &str {
-        semantic::COLOR_TEXT_SECONDARY
+        semantic::COLOR_TEXT_TERTIARY
+    }
+
+    /// Contract: `--poodle-typography-label-size` for the centered label.
+    pub fn label_text_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
     }
 
     pub fn radius_token(&self) -> &'static str {

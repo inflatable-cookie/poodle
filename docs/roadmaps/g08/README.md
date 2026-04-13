@@ -3,6 +3,9 @@
 Status: complete
 Updated: 2026-03-19
 
+> **Delta register:** `delta-register.md` in this folder is **deprecated**. Living
+> GPUI vs Svelte truth and backlog: `docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`.
+
 ## Context
 
 Prior generations built GPUI component files with a working preview app and

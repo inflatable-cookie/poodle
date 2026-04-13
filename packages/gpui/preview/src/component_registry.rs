@@ -228,6 +228,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Structured list item card with leading/trailing slots.",
     },
     ComponentEntry {
+        slug: "list-grid",
+        display_name: "ListGrid",
+        description: "Responsive auto-fill grid for card or tile collections with optional header actions.",
+    },
+    ComponentEntry {
         slug: "menu",
         display_name: "Menu",
         description: "Dropdown menu with items, separators, and keyboard navigation.",
@@ -684,8 +689,8 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "rating"
         | "file-upload"
         | "embed-input" => ComponentTag::Input,
-        "box" | "grid" | "stack" | "spacer" | "separator" | "surface" | "scroll-shell"
-        | "region" | "split-view" | "resize-handle" => ComponentTag::Layout,
+        "box" | "grid" | "list-grid" | "stack" | "spacer" | "separator" | "surface"
+        | "scroll-shell" | "region" | "split-view" | "resize-handle" => ComponentTag::Layout,
         "eyebrow" | "pill" | "status-indicator" | "icon" | "icon-provider" | "skeleton"
         | "spinner" | "code" | "time-ago" | "metric-tile" | "detail-item" | "meta-bar"
         | "meta-item" | "embed-preview" => ComponentTag::Display,

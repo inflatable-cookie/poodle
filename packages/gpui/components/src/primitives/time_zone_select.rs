@@ -94,6 +94,9 @@ impl IntoElement for TimeZoneSelect {
         let inline_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let control_radius = resolve_radius(theme, "radius.control");
+        let gap_inline_xs = resolve_px(theme, "space.inline.xs");
+        let row_pad_x = resolve_px(theme, "space.inline.sm");
+        let row_pad_y = resolve_px(theme, "space.control.y");
 
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, "color.background.surface");
@@ -180,7 +183,11 @@ impl IntoElement for TimeZoneSelect {
             }
         }
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
+        let mut wrapper = div()
+            .flex()
+            .flex_col()
+            .gap(gap_inline_xs)
+            .child(trigger);
 
         if spec.is_open {
             let timezones = [
@@ -216,15 +223,15 @@ impl IntoElement for TimeZoneSelect {
                         spread_radius: px(0.0),
                     },
                 ])
-                .py(px(4.0))
+                .py(gap_inline_xs)
                 .text_size(body_size)
                 .text_color(text_primary);
 
             for tz in timezones {
                 dropdown = dropdown.child(
                     div()
-                        .px(px(10.0))
-                        .py(px(6.0))
+                        .px(row_pad_x)
+                        .py(row_pad_y)
                         .cursor_pointer()
                         .hover(move |s| s.bg(hover_bg))
                         .child(tz),

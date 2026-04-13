@@ -57,7 +57,9 @@ pub mod icon;
 pub mod icon_button;
 pub mod inline_remediation;
 pub mod list_card;
+pub mod list_card_counter;
 pub mod list_container;
+pub mod list_grid;
 pub mod log_list;
 pub mod markdown_editor;
 pub mod media_browse_panel;
@@ -280,7 +282,9 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "icon-button" => Some(icon_button::render(theme)),
         "inline-remediation" => Some(inline_remediation::render(theme)),
         "list-card" => Some(list_card::render(theme)),
+        "list-card-counter" => Some(list_card_counter::render(theme)),
         "list-container" => Some(list_container::render(theme)),
+        "list-grid" => Some(list_grid::render(theme)),
         "log-list" => Some(log_list::render(theme)),
         "markdown-editor" => Some(markdown_editor::render(theme)),
         "media-browse-panel" => Some(media_browse_panel::render(theme)),

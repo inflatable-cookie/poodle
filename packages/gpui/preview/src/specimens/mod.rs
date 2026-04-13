@@ -103,6 +103,7 @@ mod filter_toolbar_specimen;
 mod form_dialog_specimen;
 mod form_layout;
 mod list_card;
+mod list_grid;
 mod list_container_specimen;
 mod log_list_specimen;
 mod markdown_editor_specimen;
@@ -357,6 +358,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "table" => specimen_card("Table", theme, table::render(theme)),
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),
         "list-card" => specimen_card("ListCard", theme, list_card::render(state, cx)),
+        "list-grid" => specimen_card("ListGrid", theme, list_grid::render(state, cx)),
         "nav-card" => specimen_card("NavCard", theme, nav_card::render(theme)),
         "pagination" => specimen_card("Pagination", theme, pagination::render(state, cx)),
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
