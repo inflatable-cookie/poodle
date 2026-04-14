@@ -1,90 +1,12 @@
 [catalog]
 alias = "poodle"
 
+[manifest]
+include = [
+  "tasks/effigy.tasks.toml",
+  "quality/effigy.scan.toml",
+]
+
 [bootstrap]
 setup = ["bootstrap:deps"]
 start = "preview:dev"
-
-[tasks]
-"bootstrap:deps" = [
-  "bun install",
-  "cargo fetch",
-]
-
-# Token system
-"tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
-
-# Preview (documentation site)
-"svelte:build" = "bun run --cwd packages/svelte/preview build"
-"svelte:run" = "bun run --cwd packages/svelte/preview dev"
-"svelte:preview" = [{ task = "svelte:run"}]
-
-# GPUI native preview (macOS)
-"gpui:build" = "cargo build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:run" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
-"gpui:test" = "cargo test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
-"gpui:preview" = [{ task = "gpui:run" }]
-
-# Jetstream native preview (game engine)
-"jetstream:build" = "cargo build -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
-"jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
-"jetstream:test" = "cd packages/jetstream/adapter && cargo test"
-"jetstream:preview" = [{ task = "jetstream:run" }]
-
-# Reports
-"report:parity" = [
-  { task = "tokens:build" },
-  { run = "bun run --cwd packages/svelte/preview parity:report" },
-]
-"report:accessibility" = "bun run --cwd packages/svelte/preview accessibility:report"
-
-# Documentation
-"docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
-"docs:dev" = [{ task = "svelte:run" }]
-"docs:build" = [{ task = "svelte:build" }]
-"docs:check" = [
-  { task = "docs:lint" },
-  { task = "report:parity" },
-  { task = "report:accessibility" },
-  { task = "docs:build" },
-]
-
-# Legacy aliases for compatibility
-"parity:check" = [{ task = "docs:check" }]
-"parity:report" = [{ task = "report:parity" }]
-
-# Health check aggregator
-health = [{ task = "docs:check" }]
-
-[scan.god_files]
-# Thresholds raised for Svelte primitives (complex interactive components with
-# substantial accessibility markup). Composites and contracts remain strict.
-warn = 250
-high = 500
-critical = 900
-doctor = true
-fail_on_findings = false
-respect_gitignore = true
-include = ["packages/**"]
-exclude = [
-  "docs/**", "dist/**", "node_modules/**", "**/assets/**", "**/artifacts/**",
-  "**/*.json", "**/preview/**", "**/scripts/**",
-  # Intentionally large complex components with substantial markup and accessibility requirements
-  "**/ColorPicker.svelte", "**/Tabs.svelte", "**/RelationPicker.svelte", "**/BlockEditor.svelte", "**/DockRegion.svelte",
-  # Contract files that define comprehensive type systems
-  "**/contracts/**/types.rs", "**/contracts/**/lib.rs",
-]
-format = "markdown"
-out = ".effigy/reports/god-files.md"
-
-[scan.attention_markers]
-warning = ["TODO", "REVIEW", "NOTE", "placeholder"]
-high = ["FIXME", "HACK", "workaround"]
-critical = ["BUG", "SECURITY", "remove before release"]
-doctor = true
-fail_on_findings = false
-respect_gitignore = true
-include = ["packages/**"]
-exclude = ["node_modules/**", "**/assets/**"]
-format = "markdown"
-out = ".effigy/reports/attention-markers.md"

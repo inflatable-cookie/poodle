@@ -1,0 +1,50 @@
+[tasks]
+"bootstrap:deps" = [
+  "bun install",
+  "cargo fetch",
+]
+
+# Token system
+"tokens:build" = "bun packages/tokens/scripts/build-tokens.ts"
+
+# Preview (documentation site)
+"svelte:build" = "bun run --cwd packages/svelte/preview build"
+"svelte:run" = "bun run --cwd packages/svelte/preview dev"
+"svelte:preview" = [{ task = "svelte:run"}]
+
+# GPUI native preview (macOS)
+"gpui:build" = "cargo build -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:run" = "cargo run -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml"
+"gpui:test" = "cargo test -p poodle-gpui --manifest-path packages/gpui/adapter/Cargo.toml"
+"gpui:preview" = [{ task = "gpui:run" }]
+
+# Jetstream native preview (game engine)
+"jetstream:build" = "cargo build -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:run" = "cargo run -p poodle-jetstream-preview --manifest-path packages/jetstream/preview/Cargo.toml"
+"jetstream:test" = "cd packages/jetstream/adapter && cargo test"
+"jetstream:preview" = [{ task = "jetstream:run" }]
+
+# Reports
+"report:parity" = [
+  { task = "tokens:build" },
+  { run = "bun run --cwd packages/svelte/preview parity:report" },
+]
+"report:accessibility" = "bun run --cwd packages/svelte/preview accessibility:report"
+
+# Documentation
+"docs:lint" = "bun run --cwd packages/svelte/preview docs:lint"
+"docs:dev" = [{ task = "svelte:run" }]
+"docs:build" = [{ task = "svelte:build" }]
+"docs:check" = [
+  { task = "docs:lint" },
+  { task = "report:parity" },
+  { task = "report:accessibility" },
+  { task = "docs:build" },
+]
+
+# Legacy aliases for compatibility
+"parity:check" = [{ task = "docs:check" }]
+"parity:report" = [{ task = "report:parity" }]
+
+# Health check aggregator
+health = [{ task = "docs:check" }]
