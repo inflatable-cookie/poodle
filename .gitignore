@@ -71,3 +71,4 @@ Cargo.lock
 
 # Screenshots (Jetstream preview debug captures)
 docs/screenshots/
+.claude/settings.local.json
