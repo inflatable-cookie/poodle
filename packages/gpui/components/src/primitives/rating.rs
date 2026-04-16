@@ -89,7 +89,9 @@ impl IntoElement for Rating {
         let star_touch_size = px(rem_to_px(control_height_rem(effective_size)));
 
         let active_color = resolve_color(theme, spec.active_color_token());
-        let inactive_color = resolve_color(theme, spec.inactive_color_token());
+        // Svelte: color-mix(text-secondary 48%, transparent) for inactive stars
+        let text_secondary_raw = resolve_color(theme, "color.text.secondary");
+        let inactive_color = Hsla { a: text_secondary_raw.a * 0.48, ..text_secondary_raw };
         let filled = spec.filled_count();
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
 
@@ -99,8 +101,8 @@ impl IntoElement for Rating {
         let handler: Option<Rc<dyn Fn(&usize, &mut Window, &mut App)>> =
             self.on_change.map(|h| Rc::from(h));
 
-        // Contract: gap 0.125rem (2px)
-        let mut el = div().flex().items_center().gap(px(2.0));
+        // Contract: gap 0.125rem
+        let mut el = div().flex().items_center().gap(px(rem_to_px(0.125)));
 
         for i in 0..spec.max {
             let color = if i < filled {

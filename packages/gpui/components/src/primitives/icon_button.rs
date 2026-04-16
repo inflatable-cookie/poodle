@@ -151,10 +151,11 @@ impl IntoElement for IconButton {
         let is_pressed = spec.is_pressed.unwrap_or(false);
 
         // ── Hover/active/pressed fills ────────────────────────────
-        let hover_fill = color_mix(fill, elevated, 0.84);
+        // Svelte: hover = color-mix(fill 76%, elevated), active = color-mix(fill 64%, elevated)
+        let hover_fill = color_mix(fill, elevated, 0.76);
         // Contract: hover border = 74% text-primary mix (darkening)
         let hover_border = color_mix(border_color, text_primary, 0.74);
-        let active_fill = color_mix(fill, elevated, 0.72);
+        let active_fill = color_mix(fill, elevated, 0.64);
         // Pressed: accent-tinted background (contract: 20% accent mix)
         let pressed_fill = color_mix(accent, fill, 0.20);
 
