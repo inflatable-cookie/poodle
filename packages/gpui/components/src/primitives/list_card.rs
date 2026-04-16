@@ -130,9 +130,10 @@ impl IntoElement for ListCard {
 
         // ── Resolve tokens ──────────────────────────────────────────
         let surface = resolve_color(theme, spec.fill_token());
-        let panel = resolve_color(theme, "color.background.panel");
-        let fill = color_mix(surface, panel, 0.88);
-        let hover_fill = color_mix(surface, panel, 0.82);
+        let text_primary = resolve_color(theme, "color.text.primary");
+        // Svelte: fill = color-mix(surface 88%, text-primary); hover = 82%
+        let fill = color_mix(surface, text_primary, 0.88);
+        let hover_fill = color_mix(surface, text_primary, 0.82);
         let border_subtle = resolve_color(theme, spec.border_token());
         let border_default = resolve_color(theme, spec.hover_border_token());
         // Svelte: border = color-mix(border-subtle 18%, transparent)
