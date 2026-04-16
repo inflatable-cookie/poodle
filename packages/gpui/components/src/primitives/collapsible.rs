@@ -121,7 +121,8 @@ impl IntoElement for Collapsible {
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let border_color = resolve_color(theme, "color.border.subtle");
-        let _panel_bg = resolve_color(theme, "color.background.panel");
+        let panel_bg = resolve_color(theme, "color.background.panel");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
         let radius = resolve_radius(theme, "radius.surface");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let panel_pad = density_pad_x;
@@ -131,9 +132,8 @@ impl IntoElement for Collapsible {
             a: border_color.a * 0.42,
             ..border_color
         };
-        // Svelte: bg = color-mix(surface 88%, text-primary)
-        let surface_bg = resolve_color(theme, "color.background.surface");
-        let root_bg = color_mix(surface_bg, text_primary, 0.88);
+        // Svelte: bg = color-mix(surface/panel 82%, background-elevated)
+        let root_bg = color_mix(panel_bg, elevated_bg, 0.82);
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-collapsible-{}", suffix)
