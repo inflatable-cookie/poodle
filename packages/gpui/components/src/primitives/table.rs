@@ -44,10 +44,10 @@ impl Table {
             l: shell_fill_raw.l,
             a: 0.0,
         };
-        let shell_fill = color_mix(shell_fill_raw, transparent, 0.04);
+        let shell_fill = color_mix(shell_fill_raw, transparent, 0.96);
 
         // Contract: 78% shell border
-        let shell_border = color_mix(shell_border_raw, transparent, 0.22);
+        let shell_border = color_mix(shell_border_raw, transparent, 0.78);
 
         // Svelte: header bg = color-mix(surface 91%, text-primary)
         let surface = resolve_color(theme, "color.background.surface");
@@ -55,10 +55,10 @@ impl Table {
         let header_fill = color_mix(surface, text_primary, 0.91);
 
         // Contract: 72% header border
-        let header_border = color_mix(header_border_raw, transparent, 0.28);
+        let header_border = color_mix(header_border_raw, transparent, 0.72);
 
         // Contract: 72% cell border
-        let cell_border = color_mix(cell_border_raw, transparent, 0.28);
+        let cell_border = color_mix(cell_border_raw, transparent, 0.72);
 
         Self {
             shell_border,
@@ -90,10 +90,10 @@ impl Table {
             l: shell_fill_raw.l,
             a: 0.0,
         };
-        let shell_fill = color_mix(shell_fill_raw, transparent, 0.04);
+        let shell_fill = color_mix(shell_fill_raw, transparent, 0.96);
 
         // Contract: 78% shell border
-        let shell_border = color_mix(shell_border_raw, transparent, 0.22);
+        let shell_border = color_mix(shell_border_raw, transparent, 0.78);
 
         // Svelte: header bg = color-mix(surface 91%, text-primary)
         let surface = resolve_color(theme, "color.background.surface");
@@ -101,10 +101,10 @@ impl Table {
         let header_fill = color_mix(surface, text_primary, 0.91);
 
         // Contract: 72% header border
-        let header_border = color_mix(header_border_raw, transparent, 0.28);
+        let header_border = color_mix(header_border_raw, transparent, 0.72);
 
         // Contract: 72% cell border
-        let cell_border = color_mix(cell_border_raw, transparent, 0.28);
+        let cell_border = color_mix(cell_border_raw, transparent, 0.72);
 
         Self {
             shell_border,
@@ -149,8 +149,8 @@ impl IntoElement for Table {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let cell_pad_v = px(rem_to_px(0.6875)); // Svelte: 0.6875rem
-        let cell_pad_h = px(rem_to_px(0.875));  // Svelte: 0.875rem
+        let cell_pad_v = px(rem_to_px(0.5));    // Svelte: 0.5rem (Md default)
+        let cell_pad_h = px(rem_to_px(0.75));   // Svelte: 0.75rem (default density)
         let _column_count = self.spec.columns.len();
 
         let mut root = div()
@@ -168,9 +168,9 @@ impl IntoElement for Table {
             root = root.child(
                 div()
                     .px(cell_pad_h)
-                    .py(px(rem_to_px(0.5)))
+                    .py(px(rem_to_px(0.625))) // Svelte: 0.625rem
                     .text_color(self.caption_text)
-                    .text_size(px(rem_to_px(0.75)))
+                    .text_size(px(rem_to_px(0.8125))) // Svelte: 0.8125rem
                     .line_height(relative(1.4))
                     .child(caption.clone()),
             );
