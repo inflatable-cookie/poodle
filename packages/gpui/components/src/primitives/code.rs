@@ -10,7 +10,7 @@ use poodle_specs::{
 use crate::presentation::{
     panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI code display component backed by `CodeSpec`.
 pub struct Code {
@@ -97,15 +97,19 @@ impl IntoElement for Code {
         let label_size = code_font;
         let fill = resolve_color(theme, spec.fill_token());
         let text_color = resolve_color(theme, spec.text_color_token());
+        let panel = resolve_color(theme, "color.background.panel");
+        let elevated = resolve_color(theme, "color.background.elevated");
 
         // ── Inline mode: minimal span-like rendering ──────────
         // Svelte: px=0.375rem, py=0.125rem, radius=0.25rem
+        // Svelte: bg = color-mix(panel 72%, elevated)
         if spec.is_inline {
+            let inline_bg = color_mix(panel, elevated, 0.72);
             return div()
                 .px(px(rem_to_px(0.375)))
                 .py(px(rem_to_px(0.125)))
                 .rounded(px(rem_to_px(0.25)))
-                .bg(fill.opacity(0.6))
+                .bg(inline_bg)
                 .text_size(label_size)
                 .text_color(text_color)
                 .child(spec.content.clone())
@@ -134,6 +138,8 @@ impl IntoElement for Code {
 
         // Contract: toolbar with language label and copy button
         let has_toolbar = spec.language.is_some() || spec.is_copyable;
+        // Svelte: toolbar bg = color-mix(elevated 60%, panel)
+        let toolbar_bg = color_mix(elevated, panel, 0.60);
         if has_toolbar {
             // Toolbar: py = 0.375rem (Svelte reference)
             let mut toolbar = div()
@@ -142,6 +148,7 @@ impl IntoElement for Code {
                 .justify_between()
                 .px(panel_x)
                 .py(px(rem_to_px(0.375)))
+                .bg(toolbar_bg)
                 .border_b_1()
                 .border_color(border);
 
@@ -194,8 +201,8 @@ impl IntoElement for Code {
             code_area = code_area.max_h(px(rem_to_px(20.0))).overflow_y_scroll(); // Svelte: 20rem
         }
 
-        // Highlight line background color
-        let highlight_bg = resolve_color(theme, "color.accent.base").opacity(0.1);
+        // Svelte: highlighted line bg = color-mix(accent 12%, transparent)
+        let highlight_bg = resolve_color(theme, "color.accent.base").opacity(0.12);
 
         // Content with optional line numbers and highlight
         if spec.show_line_numbers || !spec.highlight_lines.is_empty() {

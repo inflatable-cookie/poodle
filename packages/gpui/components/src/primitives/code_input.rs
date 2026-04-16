@@ -148,14 +148,17 @@ impl IntoElement for CodeInput {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         // ── Slot dimensions based on size (from Svelte CSS) ───────
-        // Base slot: width = control-height + 0.25rem, height = control-height + 0.5rem
-        let base_height = rem_to_px(control_height_rem(effective_size));
-        let (slot_width, slot_height, font_size) = match effective_size {
-            ControlSize::Xs => (base_height - 8.0, base_height - 2.0, rem_to_px(0.8125)),
-            ControlSize::Sm => (base_height - 2.0, base_height + 2.0, rem_to_px(0.875)),
-            ControlSize::Md => (base_height + 4.0, base_height + 8.0, rem_to_px(1.0)),
-            ControlSize::Lg => (base_height + 8.0, base_height + 12.0, rem_to_px(1.125)),
-            ControlSize::Xl => (base_height + 12.0, base_height + 16.0, rem_to_px(1.25)),
+        // Svelte: slots are square, each size = control-height for that size
+        // xs=1.5rem, sm=1.75rem, md=2.25rem, lg=2.75rem, xl=3.25rem
+        let slot_size = rem_to_px(control_height_rem(effective_size));
+        let slot_width = slot_size;
+        let slot_height = slot_size;
+        let font_size = match effective_size {
+            ControlSize::Xs => rem_to_px(0.8125),
+            ControlSize::Sm => rem_to_px(0.875),
+            ControlSize::Md => rem_to_px(1.0),
+            ControlSize::Lg => rem_to_px(1.125),
+            ControlSize::Xl => rem_to_px(1.25),
         };
 
         // ── Gap between slots (density-aware) ─────────────────────

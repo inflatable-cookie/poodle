@@ -121,17 +121,20 @@ impl IntoElement for NavigationMenu {
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let gap_sm = resolve_px(theme, "space.inline.sm");
 
-        // Contract: trigger bg 88% surface, border 72% border-subtle
-        let trigger_bg = color_mix(surface, gpui::transparent_black(), 0.88);
-        let trigger_border = color_mix(border_subtle, panel, 0.72);
-        // Contract: active 16% accent, active border 42% accent/border-default
-        let active_bg = color_mix(accent, panel, 0.16);
-        let active_border = color_mix(accent, border_default, 0.58);
-        // Contract: hover 12% accent
-        let hover_bg = color_mix(accent, panel, 0.12);
-        // Contract: viewport border 74% border-subtle, bg 96% panel
-        let viewport_border = color_mix(border_subtle, panel, 0.74);
-        let viewport_bg = color_mix(panel, gpui::transparent_black(), 0.96);
+        // Svelte: trigger bg = color-mix(surface 88%, transparent)
+        let trigger_bg = Hsla { a: surface.a * 0.88, ..surface };
+        // Svelte: trigger border = color-mix(border-subtle 72%, transparent)
+        let trigger_border = Hsla { a: border_subtle.a * 0.72, ..border_subtle };
+        // Svelte: active bg = color-mix(accent 16%, transparent)
+        let active_bg = Hsla { a: accent.a * 0.16, ..accent };
+        // Svelte: active border = color-mix(accent 42%, border-default)
+        let active_border = color_mix(accent, border_default, 0.42);
+        // Svelte: hover bg = color-mix(accent 12%, transparent)
+        let hover_bg = Hsla { a: accent.a * 0.12, ..accent };
+        // Svelte: viewport border = color-mix(border-subtle 74%, transparent)
+        let viewport_border = Hsla { a: border_subtle.a * 0.74, ..border_subtle };
+        // Svelte: viewport bg = color-mix(panel 96%, transparent)
+        let viewport_bg = Hsla { a: panel.a * 0.96, ..panel };
 
         // Contract: trigger min-height = control-height + offset - 0.125rem
         let trigger_height = control_height + trigger_height_offset - px(2.0);

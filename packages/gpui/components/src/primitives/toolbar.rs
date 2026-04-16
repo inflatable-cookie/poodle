@@ -6,8 +6,8 @@ use poodle_specs::{
     Alignment, ControlDensity, ControlSize, Orientation, SemanticControlSizeRole, ToolbarSpec,
 };
 
-use crate::presentation::{control_space_x_rem, panel_space_y_rem, rem_to_px};
-use crate::theme_ext::{color_mix, resolve_color};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::theme_ext::{resolve_color, resolve_radius};
 
 /// A real GPUI horizontal toolbar component backed by `ToolbarSpec`.
 pub struct Toolbar {
@@ -83,14 +83,30 @@ impl IntoElement for Toolbar {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let bg = resolve_color(theme, "color.background.surface");
-        let border_raw = resolve_color(theme, "color.border.default");
         let panel = resolve_color(theme, "color.background.panel");
-        let gap = px(rem_to_px(control_space_x_rem(spec.density)));
-        let padding = px(rem_to_px(panel_space_y_rem(spec.density) * 0.5));
+        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let radius = resolve_radius(theme, "radius.surface");
 
-        // Contract: border color-mix 78% border-default over panel
-        let border = color_mix(border_raw, panel, 0.78);
+        // Svelte: background = color-mix(panel 94%, transparent)
+        let bg = Hsla { a: panel.a * 0.94, ..panel };
+        // Svelte: border = color-mix(border-subtle 78%, transparent)
+        let border = Hsla { a: border_subtle.a * 0.78, ..border_subtle };
+
+        // Svelte: padding and gap vary by size, density overrides inline padding + gap
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        use poodle_specs::ControlSize;
+        let (pad_v, pad_h_base, gap_base) = match effective_size {
+            ControlSize::Xs => (0.125_f32, 0.25_f32, 0.25_f32),
+            ControlSize::Sm => (0.1875, 0.3125, 0.3125),
+            ControlSize::Md => (0.25, 0.375, 0.375),
+            ControlSize::Lg => (0.3125, 0.5, 0.5),
+            ControlSize::Xl => (0.375, 0.625, 0.625),
+        };
+        let (pad_h, gap_val) = match spec.density {
+            ControlDensity::Compact => (0.25_f32, 0.25_f32),
+            ControlDensity::Default => (pad_h_base, gap_base),
+            ControlDensity::Comfortable => (0.5, 0.5),
+        };
 
         let is_vertical = spec.orientation == Orientation::Vertical;
 
@@ -98,12 +114,11 @@ impl IntoElement for Toolbar {
             .flex()
             .when(is_vertical, |el| el.flex_col())
             .when(!is_vertical, |el| el.items_center())
-            .gap(gap)
-            // Contract: padding 0.25rem (4px)
-            .p(padding)
-            // Contract: background surface
+            .gap(px(rem_to_px(gap_val)))
+            .py(px(rem_to_px(pad_v)))
+            .px(px(rem_to_px(pad_h)))
             .bg(bg)
-            // Contract: border color-mix 78% of border-default applied always
+            .rounded(radius)
             .border_1()
             .border_color(border);
 

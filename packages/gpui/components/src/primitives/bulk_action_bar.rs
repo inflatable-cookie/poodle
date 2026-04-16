@@ -121,9 +121,10 @@ impl IntoElement for BulkActionBar {
         let btn_pad_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         // ── Resolve tokens ──────────────────────────────────────────
-        let accent = resolve_color(theme, spec.fill_token());
         let panel_bg = resolve_color(theme, "color.background.panel");
-        let fill = color_mix(accent, panel_bg, 0.10);
+        let text_primary = resolve_color(theme, "color.text.primary");
+        // Svelte: background = color-mix(panel 93%, text-primary)
+        let fill = color_mix(panel_bg, text_primary, 0.93);
         let border = resolve_color(theme, spec.border_token());
         let radius = resolve_radius(theme, spec.radius_token());
         let text_color = resolve_color(theme, spec.text_token());
