@@ -239,8 +239,8 @@ impl IntoElement for Calendar {
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = cal_font;
 
-        // Contract: hover = color-mix(accent 8%, surface)
-        let hover_bg = color_mix(accent, surface_bg, 0.08);
+        // Svelte: day hover = color-mix(accent 14%, transparent)
+        let hover_bg = Hsla { a: accent.a * 0.14, ..accent };
         // Contract: today cell border = border-default
         let today_border = border;
 
@@ -369,7 +369,8 @@ impl IntoElement for Calendar {
         };
 
         // Contract: nav header with prev/next month buttons and centered month label
-        let nav_btn_hover = color_mix(elevated_bg, surface_bg, 0.84);
+        // Svelte: nav hover = color-mix(surface 82%, elevated)
+        let nav_btn_hover = color_mix(surface_bg, elevated_bg, 0.82);
 
         let mut prev_btn = div()
             .id("poodle-cal-prev")
