@@ -220,7 +220,7 @@ impl IntoElement for DateRangePicker {
             }
         }
 
-        let mut wrapper = div().flex().flex_col().gap(px(4.0)).child(trigger);
+        let mut wrapper = div().flex().flex_col().gap(resolve_px(theme, "space.inline.xs")).child(trigger);
 
         // Range calendar dropdown when open
         if is_open {

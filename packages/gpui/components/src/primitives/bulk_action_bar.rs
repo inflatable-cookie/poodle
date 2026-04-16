@@ -154,7 +154,7 @@ impl IntoElement for BulkActionBar {
             let mut row = div().flex().flex_row().items_center().gap(gap);
 
             // Count + label block
-            let mut count_block = div().flex().flex_row().items_center().gap(px(4.0));
+            let mut count_block = div().flex().flex_row().items_center().gap(resolve_px(theme, "space.inline.xs"));
             let count_text = format!("{}", spec.selection_count);
             count_block = count_block.child(
                 div()

@@ -11,7 +11,7 @@ use poodle_specs::{ControlSize, EditableLabelSpec, EditableLabelVariant, IconSiz
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
 pub struct EditableLabel {
@@ -167,7 +167,7 @@ impl IntoElement for EditableLabel {
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(4.0))
+            .gap(resolve_px(theme, "space.inline.xs"))
             .child(display_text);
 
         // Show pencil edit icon on hover/focus when spec says so

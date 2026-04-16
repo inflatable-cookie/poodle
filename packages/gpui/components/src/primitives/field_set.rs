@@ -5,6 +5,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::FieldSetSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI FieldSet component backed by `FieldSetSpec`.
@@ -66,11 +67,11 @@ impl IntoElement for FieldSet {
 
         let mut root = div().flex().flex_col();
 
-        // Legend (styled like Eyebrow: uppercase, small, semibold)
+        // Legend (styled like Eyebrow: uppercase, small, semibold; 0.6875rem)
         if let Some(ref legend) = spec.legend {
             root = root.child(
                 div()
-                    .text_size(px(11.0))
+                    .text_size(px(rem_to_px(0.6875)))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(legend_color)
                     .mb(stack_sm)

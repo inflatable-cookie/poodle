@@ -233,11 +233,11 @@ impl IntoElement for FileUpload {
             return div()
                 .flex()
                 .flex_col()
-                .gap(px(6.0))
+                .gap(px(rem_to_px(0.375)))
                 .child(zone)
                 .child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(px(rem_to_px(0.75)))
                         .text_color(danger)
                         .child(err.clone()),
                 )
