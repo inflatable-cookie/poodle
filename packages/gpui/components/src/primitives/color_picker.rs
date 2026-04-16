@@ -129,6 +129,9 @@ impl IntoElement for ColorPicker {
         let label_size = resolve_px(theme, "typography.label.size");
 
         let border = resolve_color(theme, spec.border_token());
+        // Svelte: trigger border = color-mix(border-default 62%, transparent)
+        let trigger_border = Hsla { a: border.a * 0.62, ..border };
+        let border_subtle = resolve_color(theme, "color.border.subtle");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -156,7 +159,7 @@ impl IntoElement for ColorPicker {
             .rounded(trigger_radius)
             .bg(current_color)
             .border_1()
-            .border_color(border)
+            .border_color(trigger_border)
             .cursor_pointer()
             // Contract: focus ring on trigger
             .focus(move |s| {
@@ -205,12 +208,13 @@ impl IntoElement for ColorPicker {
             let swatch_radius = px(rem_to_px(0.1875));
 
             // Contract: surface width 24rem, padding 0.75rem
+            // Svelte: overlay border = border-subtle (not border-default)
             let mut overlay = div()
                 .w(px(rem_to_px(24.0)))
                 .rounded(surface_radius)
                 .bg(elevated_bg)
                 .border_1()
-                .border_color(border)
+                .border_color(border_subtle)
                 .shadow(vec![
                     gpui::BoxShadow {
                         color: hsla(0.0, 0.0, 0.0, 0.10),

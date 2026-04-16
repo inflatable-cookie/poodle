@@ -72,14 +72,14 @@ impl Pagination {
         let accent_base = resolve_color(theme, spec.current_fill_token());
         let border_default = resolve_color(theme, spec.button_border_token());
 
-        // Contract: 78% border-default mix
-        let button_border = color_mix(border_default, surface_fill, 0.22);
-        // Contract: 18% accent mix with surface for current fill
-        let current_fill = color_mix(accent_base, surface_fill, 0.82);
-        // Contract: 42% accent with border-default for current border
-        let current_border = color_mix(accent_base, border_default, 0.58);
-        // Contract: 12% accent mix for hover
-        let hover_fill = color_mix(accent_base, surface_fill, 0.88);
+        // Svelte: button border = color-mix(border-default 78%, transparent)
+        let button_border = Hsla { a: border_default.a * 0.78, ..border_default };
+        // Svelte: current fill = color-mix(accent 18%, transparent)
+        let current_fill = Hsla { a: accent_base.a * 0.18, ..accent_base };
+        // Svelte: current border = color-mix(accent 42%, border-default)
+        let current_border = color_mix(accent_base, border_default, 0.42);
+        // Svelte: hover fill = color-mix(accent 12%, transparent)
+        let hover_fill = Hsla { a: accent_base.a * 0.12, ..accent_base };
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
