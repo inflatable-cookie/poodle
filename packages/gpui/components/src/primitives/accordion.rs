@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use super::icon::Icon;
 use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -122,7 +122,8 @@ impl IntoElement for Accordion {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
         let title_font = px(rem_to_px(size_font_rem(effective_size)));
         let density_pad_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));
-        let density_pad_y = px(rem_to_px(panel_space_y_rem(self.spec.density)));
+        // Svelte: accordion item vertical padding is fixed 0.625rem (not panel-y token)
+        let density_pad_y = px(rem_to_px(0.625));
         let density_gap = px(rem_to_px(control_space_x_rem(self.spec.density)));
 
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
@@ -148,8 +149,8 @@ impl IntoElement for Accordion {
             a: border_subtle.a * 0.36,
             ..border_subtle
         };
-        // Inset shadow highlight: text-inverse at 8% opacity
-        let _inset_highlight = Hsla {
+        // Svelte: inset 0 0.0625rem 0 text-inverse 8% — top highlight
+        let inset_highlight = Hsla {
             a: text_inverse.a * 0.08,
             ..text_inverse
         };
@@ -267,7 +268,14 @@ impl IntoElement for Accordion {
                 .py(panel_pad_y)
                 .border_1()
                 .border_color(item_border)
-                .rounded(surface_radius);
+                .rounded(surface_radius)
+                // Svelte: inset 0 0.0625rem 0 text-inverse 8%
+                .shadow(vec![gpui::BoxShadow {
+                    color: inset_highlight,
+                    offset: point(px(0.0), px(rem_to_px(0.0625))),
+                    blur_radius: px(0.0),
+                    spread_radius: px(0.0),
+                }]);
 
             // Brand-raised treatment: gradient fill for accordion item card
             if theme.brand_raised {

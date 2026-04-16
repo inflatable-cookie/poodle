@@ -158,13 +158,13 @@ impl IntoElement for Slider {
         let track_bounds_for_prepaint = track_bounds_store.clone();
 
         // Track with filled portion and thumb
+        // Svelte: background = color-mix(surface 88%, transparent); no border
+        let track_bg = Hsla { a: surface_bg.a * 0.88, ..surface_bg };
         let track = div()
             .w_full()
             .h(track_height)
             .rounded(track_radius)
-            .bg(surface_bg)
-            .border_1()
-            .border_color(border.opacity(0.3))
+            .bg(track_bg)
             .relative()
             .child(
                 div()

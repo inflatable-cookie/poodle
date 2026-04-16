@@ -207,13 +207,13 @@ impl IntoElement for RangeSlider {
         }];
 
         // Track with filled range between low and high thumbs
+        // Svelte: track bg = color-mix(surface 88%, transparent); no border
+        let track_bg = Hsla { a: surface_bg.a * 0.88, ..surface_bg };
         let track_inner = div()
             .w_full()
             .h(track_height)
             .rounded(track_radius)
-            .bg(surface_bg)
-            .border_1()
-            .border_color(border.opacity(0.3))
+            .bg(track_bg)
             .relative()
             // Filled range segment
             .child(
