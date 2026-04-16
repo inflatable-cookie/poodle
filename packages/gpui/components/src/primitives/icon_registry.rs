@@ -169,6 +169,12 @@ pub static ICON_REGISTRY: LazyLock<HashMap<&'static str, IconDefinition>> = Lazy
 
     // --- Status / feedback ---
     icon!(
+        "triangle-alert",
+        path!("m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"),
+        path!("M12 9v4"),
+        path!("M12 17h.01")
+    );
+    icon!(
         "alert-circle",
         circle!(12.0, 12.0, 10.0),
         path!("M12 8v4"),

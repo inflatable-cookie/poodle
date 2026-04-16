@@ -259,7 +259,7 @@ impl IntoElement for NumberInput {
             .px(control_padding_x)
             .flex()
             .items_center()
-            .gap(px(6.0))
+            .gap(px(rem_to_px(0.5))) // Svelte: gap 0.5rem
             .text_size(body_size)
             .line_height(body_line_height);
 

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CheckState, CheckboxSpec, ControlSize, IconSize, IconSpec};
+use poodle_specs::{CheckState, CheckboxSpec, ControlDensity, ControlSize, IconSize, IconSpec};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
@@ -110,8 +110,12 @@ impl IntoElement for Checkbox {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        // Contract: gap = space-inline-sm
-        let inline_gap = resolve_px(theme, "space.inline.sm");
+        // Svelte: compact=0.25rem, default=space-inline-sm, comfortable=space-inline-md
+        let inline_gap = match spec.density {
+            ControlDensity::Compact    => resolve_px(theme, "space.inline.xs"),
+            ControlDensity::Default    => resolve_px(theme, "space.inline.sm"),
+            ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
+        };
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
         // Per-size indicator dimensions from the contract size table (icon tokens)
         // Radius: 0.0625rem × {3,4,5,6,7} — Svelte: 0.1875/0.25/0.3125/0.375/0.4375rem

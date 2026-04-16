@@ -181,7 +181,7 @@ impl IntoElement for DurationInput {
             .id(SharedString::from(id_str))
             .focusable()
             .w_full()
-            .py(px(4.0)) // 0.25rem
+            .py(px(rem_to_px(0.25))) // 0.25rem
             .px(control_padding_x)
             .rounded(control_radius)
             .bg(surface_bg)

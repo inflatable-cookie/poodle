@@ -257,8 +257,8 @@ impl IntoElement for Dialog {
             .flex()
             .flex_col()
             .max_w_full()
-            // Svelte: gap 0.375rem (6px)
-            .gap(px(6.0))
+            // Svelte dialog__header: gap 0.5rem; but GPUI uses flat col gap for all sections
+            .gap(px(rem_to_px(0.375)))
             .overflow_hidden()
             .occlude();
 

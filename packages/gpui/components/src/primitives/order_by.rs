@@ -141,8 +141,8 @@ impl IntoElement for OrderBy {
                 };
                 Some(
                     div()
-                        .text_size(px(9.0))
-                        .ml(px(4.0))
+                        .text_size(px(rem_to_px(0.5625))) // sort arrow glyph
+                        .ml(px(rem_to_px(0.25)))
                         .child(arrow.to_string()),
                 )
             } else {
@@ -267,7 +267,7 @@ impl IntoElement for OrderBy {
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(8.0))
+            .gap(px(rem_to_px(0.375))) // Svelte: .order-by gap 0.375rem
             .child(label)
             .child(fields_row);
 

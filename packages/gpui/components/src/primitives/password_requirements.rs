@@ -120,12 +120,12 @@ impl IntoElement for PasswordRequirements {
                     .text_size(title_font)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(title_color)
-                    .mb(px(8.0))
+                    .mb(px(rem_to_px(0.5))) // Svelte: margin-bottom 0.5rem
                     .child(format!("{}:", spec.title)),
             );
 
             // Build requirement rules list
-            let mut list = div().flex().flex_col().gap(px(2.0));
+            let mut list = div().flex().flex_col().gap(px(rem_to_px(0.125)));
 
             // Min length requirement (always present)
             let length_met = spec.length_met();

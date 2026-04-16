@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, SwitchSpec, SwitchTone};
+use poodle_specs::{ControlDensity, ControlSize, SwitchSpec, SwitchTone};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
@@ -120,8 +120,12 @@ impl IntoElement for Switch {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        // Contract: gap = space-inline-sm
-        let inline_gap = resolve_px(theme, "space.inline.sm");
+        // Svelte: compact=0.25rem, default=space-inline-sm, comfortable=space-inline-md
+        let inline_gap = match spec.density {
+            ControlDensity::Compact     => resolve_px(theme, "space.inline.xs"),
+            ControlDensity::Default     => resolve_px(theme, "space.inline.sm"),
+            ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
+        };
 
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let accent = resolve_color(theme, "color.accent.base");

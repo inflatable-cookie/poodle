@@ -124,7 +124,7 @@ impl IntoElement for Callout {
         let icon_name = match spec.tone {
             StatusTone::Info => "info",
             StatusTone::Success => "check-circle",
-            StatusTone::Warning => "alert-triangle",
+            StatusTone::Warning => "triangle-alert", // Svelte: "triangle-alert" (lucide)
             StatusTone::Danger => "alert-circle",
             _ => "info",
         };
@@ -227,13 +227,13 @@ impl IntoElement for Callout {
                 .flex_shrink_0()
                 .w(dismiss_size)
                 .h(dismiss_size)
-                .rounded(control_radius)
+                // Svelte: border-radius = control - 0.0625rem; margin-right = -0.5 * panel-x
+                .rounded(control_radius - px(rem_to_px(0.0625)))
                 .flex()
                 .items_center()
                 .justify_center()
                 .cursor_pointer()
-                .mt(px(-4.0))
-                .mr(px(-4.0))
+                .mr(panel_x * -0.5)
                 .hover(move |s| s.bg(Hsla { a: 0.08, ..text_secondary }))
                 .child(
                     Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)

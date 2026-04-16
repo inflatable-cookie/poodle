@@ -357,7 +357,7 @@ impl IntoElement for SplitButton {
                     } => {
                         let mut item_el = div()
                             .px(gap_md)
-                            .py(px(6.0))
+                            .py(resolve_px(theme, "space.control.y"))
                             .text_size(body_size)
                             .text_color(item_text)
                             .rounded(radius_control);

@@ -140,8 +140,8 @@ impl IntoElement for Menubar {
         let mut trigger_row = div()
             .flex()
             .items_center()
-            .gap(px(2.0)) // Contract: gap 0.125rem
-            .p(px(3.0)) // Contract: padding 0.1875rem
+            .gap(px(rem_to_px(0.125))) // Contract: gap 0.125rem
+            .p(px(rem_to_px(0.1875))) // Contract: padding 0.1875rem
             .border_1()
             .border_color(list_border)
             .rounded(list_radius)

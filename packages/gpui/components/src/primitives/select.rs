@@ -407,8 +407,8 @@ impl IntoElement for Select {
         // Dropdown list (when open)
         // Note: GPUI always renders a custom dropdown (no native mode).
         if is_open {
-            let option_hover = color_mix(accent, elevated_bg, 0.08);
-            let option_selected = color_mix(accent, elevated_bg, 0.10);
+            // Svelte: color-mix(accent 14%, transparent) — matches visually on opaque bg
+            let option_hover = color_mix(accent, elevated_bg, 0.14);
             let empty_message = spec.empty_message.clone();
 
             let mut list = div().id("poodle-select-list").rounded(control_radius);
@@ -520,7 +520,7 @@ impl IntoElement for Select {
                             div()
                                 .px(inline_padding)
                                 .pt(stack_gap)
-                                .pb(px(rem_to_px(0.125)))
+                                .pb(px(rem_to_px(0.1875))) // Svelte: 0.1875rem
                                 .text_size(caption_size)
                                 .font_weight(FontWeight::SEMIBOLD)
                                 .text_color(text_secondary)
@@ -542,8 +542,15 @@ impl IntoElement for Select {
                     .text_size(body_size)
                     .text_color(text_primary);
 
+                // Svelte: selected = font-weight 500 only (no bg, no text-color change)
                 if is_selected {
-                    item = item.bg(option_selected).text_color(accent);
+                    item = item.font_weight(FontWeight::MEDIUM);
+                }
+
+                // Named-group options get extra left indent (Svelte: padding-left: 1rem)
+                let in_named_group = last_group.as_ref().map_or(false, |g| g.is_some());
+                if in_named_group {
+                    item = item.pl(px(rem_to_px(1.0)));
                 }
 
                 if is_opt_disabled {
