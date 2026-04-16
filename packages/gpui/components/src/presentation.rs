@@ -147,6 +147,46 @@ pub fn panel_space_y_rem(density: ControlDensity) -> f32 {
     }
 }
 
+/// Callout outer gap in rem for a given size.
+///
+/// Matches Svelte `.callout { gap: space.inline.md }` base, overridden per-size:
+/// xs→0.375 sm→0.5 md→0.75 lg→0.875 xl→1.0.
+pub fn callout_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        ControlSize::Sm => 0.5,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 1.0,
+    }
+}
+
+/// Callout icon container size in rem for a given size.
+///
+/// Matches Svelte per-size `.callout__icon { width/height }` values.
+pub fn callout_icon_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.875,
+        ControlSize::Sm => 1.125,
+        ControlSize::Md => 1.375,
+        ControlSize::Lg => 1.75,
+        ControlSize::Xl => 2.0,
+    }
+}
+
+/// Callout dismiss button size in rem for a given size.
+///
+/// Matches Svelte per-size `.callout__dismiss { width/height }` values.
+pub fn callout_dismiss_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.25,
+        ControlSize::Sm => 1.5,
+        ControlSize::Md => 1.75,
+        ControlSize::Lg => 2.0,
+        ControlSize::Xl => 2.25,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0

@@ -1,7 +1,7 @@
 # g10 GPUI Production Hardening
 
 Status: active
-Updated: 2026-04-16
+Updated: 2026-04-17
 
 ## Context
 
@@ -50,13 +50,16 @@ did not progress beyond the feasibility proof.
   floating overlay utility (Tooltip/Popover), TabStrip tokens + keyboard, Slider/
   RangeSlider behavioral gaps, Tabs close icon + gap token, Select option groups
   (`docs/roadmaps/g10/014-gpui-overlay-navigation-and-slider-fidelity.md`)
+- `g10.015` active — GPUI Svelte parity second pass: Callout per-size geometry,
+  Button chevron formula, TextInput char-count font, Menu item radius
+  (`docs/roadmaps/g10/015-gpui-svelte-parity-second-pass.md`)
 
 ## Active Runway
 
 - GPUI audit queue: `g10.009` to `g10.014` complete
+- `g10.015` active — ongoing Svelte delta reduction
 - `g10.012` remains active as a living delta register
 
 ## Next Task
 
-GPUI audit tranche closed. Next work determined by product priority — likely a new
-audit pass or `g10.012` closeout.
+Continue `g10.015` — next audit sweep to surface further Svelte divergences.

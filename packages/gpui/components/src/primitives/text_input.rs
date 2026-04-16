@@ -322,10 +322,11 @@ impl IntoElement for TextInput {
             } else {
                 format!("{}", char_len)
             };
+            // Svelte: font-size: 0.6875rem (same as xs body size)
             inner = inner.child(
                 div()
                     .text_color(count_color)
-                    .text_size(px(11.0))
+                    .text_size(px(rem_to_px(0.6875)))
                     .whitespace_nowrap()
                     .child(count_text),
             );

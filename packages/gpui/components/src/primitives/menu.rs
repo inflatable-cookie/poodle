@@ -140,7 +140,7 @@ impl IntoElement for Menu {
         let overlay_radius = resolve_radius(theme, self.spec.overlay_radius_token());
         let control_radius = resolve_radius(theme, "radius.control");
         // Contract: item radius = control - 0.125rem
-        let item_radius = control_radius - px(2.0);
+        let item_radius = control_radius - px(rem_to_px(0.125));
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let border_default = resolve_color(theme, "color.border.default");

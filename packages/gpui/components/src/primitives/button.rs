@@ -11,6 +11,7 @@
 //! closes.
 
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize, IconSize, IconSpec,
@@ -406,10 +407,11 @@ impl IntoElement for Button {
         }
 
         // ── Chevron (contract §8 Chevron) ────────────────────────
-        // opacity: 0.5, margin-left: -2px to tighten from gap
+        // opacity: 0.5; margin-left: calc(space.inline.sm * -0.25) to tighten from gap
         if spec.chevron {
+            let chevron_ml = px(-theme.resolve_space("space.inline.sm") * 0.25);
             el = el.child(
-                div().flex().items_center().opacity(0.5).ml(px(-2.0)).child(
+                div().flex().items_center().opacity(0.5).ml(chevron_ml).child(
                     Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
                         .with_color(icon_color),
                 ),

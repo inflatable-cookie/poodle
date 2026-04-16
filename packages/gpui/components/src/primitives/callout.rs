@@ -9,7 +9,8 @@ use poodle_specs::{
 
 use super::icon::Icon;
 use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    callout_dismiss_size_rem, callout_gap_rem, callout_icon_size_rem, panel_space_x_rem,
+    panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -113,7 +114,9 @@ impl IntoElement for Callout {
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let radius = resolve_radius(theme, "radius.surface");
         let control_radius = resolve_radius(theme, "radius.control");
-        let inline_md = resolve_px(theme, "space.inline.md");
+        let outer_gap = px(rem_to_px(callout_gap_rem(effective_size)));
+        let icon_size = px(rem_to_px(callout_icon_size_rem(effective_size)));
+        let dismiss_size = px(rem_to_px(callout_dismiss_size_rem(effective_size)));
         let body_size = body_font;
         let label_size = resolve_px(theme, "typography.label.size");
 
@@ -162,10 +165,9 @@ impl IntoElement for Callout {
             .border_1()
             .border_color(border)
             .flex()
-            .gap(inline_md);
+            .gap(outer_gap);
 
-        // Icon column — Svelte: circular bg container 1.375rem (22px), surface at 78% opacity
-        let icon_container_size = px(22.0);
+        // Icon column — circular bg container, size per effective_size, surface at 78% opacity
         let icon_bg = Hsla {
             a: surface_bg.a * 0.78,
             ..surface_bg
@@ -173,8 +175,8 @@ impl IntoElement for Callout {
         el = el.child(
             div()
                 .flex_shrink_0()
-                .w(icon_container_size)
-                .h(icon_container_size)
+                .w(icon_size)
+                .h(icon_size)
                 .rounded(px(999.0))
                 .bg(icon_bg)
                 .flex()
@@ -186,8 +188,13 @@ impl IntoElement for Callout {
                 ),
         );
 
-        // Content column
-        let mut content_col = div().flex().flex_col().gap(px(4.0)).flex_1().min_w(px(0.0));
+        // Content column — gap: space.inline.sm (matches Svelte .callout__content { gap })
+        let mut content_col = div()
+            .flex()
+            .flex_col()
+            .gap(resolve_px(theme, "space.inline.sm"))
+            .flex_1()
+            .min_w(px(0.0));
 
         // Title: label family/size/weight
         if let Some(ref title) = spec.title {
@@ -212,14 +219,14 @@ impl IntoElement for Callout {
 
         el = el.child(content_col);
 
-        // Dismiss button — Svelte: 1.75rem (28px) square, rounded control radius
+        // Dismiss button — size per effective_size, rounded control radius
         if self.is_dismissible {
             let dismiss_id = SharedString::from("poodle-callout-dismiss");
             let mut dismiss_btn = div()
                 .id(dismiss_id)
                 .flex_shrink_0()
-                .w(px(28.0))
-                .h(px(28.0))
+                .w(dismiss_size)
+                .h(dismiss_size)
                 .rounded(control_radius)
                 .flex()
                 .items_center()
@@ -227,7 +234,7 @@ impl IntoElement for Callout {
                 .cursor_pointer()
                 .mt(px(-4.0))
                 .mr(px(-4.0))
-                .hover(|s| s.bg(hsla(0.0, 0.0, 0.5, 0.08)))
+                .hover(move |s| s.bg(Hsla { a: 0.08, ..text_secondary }))
                 .child(
                     Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
                         .with_color(text_secondary),
