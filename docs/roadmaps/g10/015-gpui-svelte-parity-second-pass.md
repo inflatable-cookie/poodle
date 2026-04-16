@@ -1,6 +1,6 @@
 # g10.015 GPUI Svelte Parity Second Pass
 
-Status: active
+Status: complete
 Owner: Poodle core
 Depends on: g10.014
 Updated: 2026-04-17
@@ -79,6 +79,7 @@ magic literal.
 
 ## Execution checklist
 
+**Batch 1 — Callout, Button, TextInput, Menu:**
 - [x] Add `callout_gap_rem`, `callout_icon_size_rem`, `callout_dismiss_size_rem`
       to `presentation.rs`
 - [x] Callout outer gap per-size
@@ -90,7 +91,33 @@ magic literal.
 - [x] TextInput: char count font size expressed as `rem_to_px(0.6875)`
 - [x] Menu: item radius expressed as `control_radius - rem_to_px(0.125)`
 
+**Batch 2 — RadioGroup, Pill, Code, Collapsible, CodeInput, Tabs:**
+- [x] RadioGroup: replace scale-based indicator/dot with per-size Svelte formulas
+      (size.icon.{xs-xl} + offset; dot per-size rem values)
+- [x] Pill: convert hardcoded px table to `rem_to_px` formulas (values correct)
+- [x] Checkbox indicator radius: `px(3-7)` → `rem_to_px(0.1875-0.4375)` formulas
+- [x] Code inline: fix px=4→6, py=1→2, radius=3→4 (all wrong vs Svelte)
+- [x] Code toolbar py and language font → `rem_to_px` formulas
+- [x] Code copy button: 24px/4px → `rem_to_px(1.5)`/`rem_to_px(0.25)` formulas
+- [x] Collapsible trigger gap: `px(12.0)` → `resolve_px("space.inline.md")` token
+- [x] CodeInput slot/split gaps: formula-based with confirmed token mappings
+- [x] Tabs + TabStrip icon-label gap: `space.inline.xs`(4px) → `space.inline.sm`(8px)
+      (root cause: `space.inline.xs` = 0.25rem = 4px, not 0.375rem as assumed in g10.014)
+
+**Batch 3 — token sweep across multiple components:**
+- [x] FieldSet legend font: `px(11.0)` → `rem_to_px(0.6875)` formula
+- [x] FileUpload validation gap/font: `px(6.0)`/`px(12.0)` → rem formulas
+- [x] BulkActionBar count-block gap: `px(4.0)` → `space.inline.xs` token
+- [x] EditableLabel content-row gap: `px(4.0)` → `space.inline.xs` token
+- [x] DatePicker/DateRangePicker wrapper gap: `px(4.0)` → `space.inline.xs` token
+
+## Notes
+
+Key discovery: `space.inline.xs` = 0.25rem = 4px (not 0.375rem as previously assumed).
+Token map: xs=4px, sm=8px, md=12px, lg=16px. No xl variant exists.
+This affected the g10.014 Tabs/TabStrip icon-label gap fix (corrected in batch 2).
+
 ## Next task
 
-Continue audit sweep — likely Pill hardcoded size table, RadioGroup geometry
-vs Svelte, or further inspection of component vertical padding consistency.
+Continue audit sweep — calendar cell geometry, dialog close button, list_card
+component values, or a new category of component gaps.

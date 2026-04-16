@@ -50,16 +50,18 @@ did not progress beyond the feasibility proof.
   floating overlay utility (Tooltip/Popover), TabStrip tokens + keyboard, Slider/
   RangeSlider behavioral gaps, Tabs close icon + gap token, Select option groups
   (`docs/roadmaps/g10/014-gpui-overlay-navigation-and-slider-fidelity.md`)
-- `g10.015` active — GPUI Svelte parity second pass: Callout per-size geometry,
-  Button chevron formula, TextInput char-count font, Menu item radius
+- `g10.015` complete — GPUI Svelte parity second pass: Callout geometry,
+  RadioGroup/Pill/Code/Tabs/CodeInput fixes, inline token gap sweep
   (`docs/roadmaps/g10/015-gpui-svelte-parity-second-pass.md`)
 
 ## Active Runway
 
 - GPUI audit queue: `g10.009` to `g10.014` complete
-- `g10.015` active — ongoing Svelte delta reduction
+- `g10.015` complete
 - `g10.012` remains active as a living delta register
 
 ## Next Task
 
-Continue `g10.015` — next audit sweep to surface further Svelte divergences.
+`g10.015` complete. Next: `g10.016` — further audit pass (calendar geometry,
+dialog/list_card values, remaining formula-hardcoded values across complex
+components).
