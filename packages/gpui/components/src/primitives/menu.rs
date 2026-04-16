@@ -160,9 +160,9 @@ impl IntoElement for Menu {
         let accent = resolve_color(theme, self.spec.item_highlight_token());
         // Item hover: accent at 16% mixed into elevated
         let item_hover = color_mix(accent, elevated_bg, 0.16);
-        // Separator: border-subtle at 48% (treatment-surface-divider)
+        // Svelte: color-mix(border-subtle 72%, transparent)
         let separator_color = Hsla {
-            a: border_subtle.a * 0.48,
+            a: border_subtle.a * 0.72,
             ..border_subtle
         };
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());

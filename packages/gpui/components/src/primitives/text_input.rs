@@ -8,8 +8,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
-    TextInputSpec, ValidationState,
+    ControlDensity, ControlSize, IconSize, IconSpec, SpinnerSize, SpinnerSpec, SpinnerTone,
+    SpinnerVariant, TextInputSpec, ValidationState,
 };
 
 use super::icon::Icon;
@@ -204,8 +204,14 @@ impl IntoElement for TextInput {
         let base_height = resolve_px(theme, spec.control_height_token());
         let control_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let base_padding = resolve_px(theme, spec.horizontal_padding_token());
+        // Svelte density: compact -0.125rem, comfortable +0.125rem on padding-inline
+        let density_offset = match spec.density {
+            ControlDensity::Compact     => px(rem_to_px(-0.125)),
+            ControlDensity::Default     => px(0.0),
+            ControlDensity::Comfortable => px(rem_to_px(0.125)),
+        };
         let inline_padding =
-            base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+            base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size))) + density_offset;
         let inline_gap = resolve_px(theme, spec.inline_gap_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
         let body_size = px(rem_to_px(size_font_rem(effective_size)));

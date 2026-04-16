@@ -117,15 +117,12 @@ impl IntoElement for Card {
         let panel = resolve_color(theme, "color.background.panel");
         let elevated = resolve_color(theme, "color.background.elevated");
 
-        // Match Svelte Card.svelte + app.css treatment values:
-        // Default/Outlined: treatment-surface-fill = color-mix(panel 96%, elevated)
-        // Elevated: treatment-surface-elevated-fill = color-mix(elevated 94%, transparent)
+        // Match Svelte Card.svelte:
+        // Default/Outlined: --poodle-recipe-card-fill = color-mix(panel 98%, elevated)
+        // Elevated: --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
         let fill = match spec.variant {
-            CardVariant::Elevated => Hsla {
-                a: elevated.a * 0.94,
-                ..elevated
-            },
-            _ => color_mix(panel, elevated, 0.96),
+            CardVariant::Elevated => color_mix(elevated, panel, 0.98),
+            _ => color_mix(panel, elevated, 0.98),
         };
 
         // Border: Default subtle at 18%, Outlined at 76% border-default,

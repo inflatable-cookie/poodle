@@ -8,7 +8,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 use crate::presentation::{control_height_rem, rem_to_px};
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
 use super::floating_overlay::floating_overlay;
 
 /// A real GPUI tooltip component backed by `TooltipSpec`.
@@ -124,11 +124,9 @@ impl IntoElement for Tooltip {
         let tooltip_radius =
             resolve_radius(theme, "radius.control") - px(rem_to_px(spec.radius_inset_rem()));
 
-        // Svelte treatment-surface-elevated: fill at 94% alpha, border at 22% alpha
-        let fill = Hsla {
-            a: elevated_bg.a * 0.94,
-            ..elevated_bg
-        };
+        // Svelte --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        let panel_bg = resolve_color(theme, "color.background.panel");
+        let fill = color_mix(elevated_bg, panel_bg, 0.98);
         let tooltip_border = Hsla {
             a: border_default.a * 0.22,
             ..border_default
@@ -163,13 +161,21 @@ impl IntoElement for Tooltip {
                     .rounded(tooltip_radius)
                     .border_1()
                     .border_color(tooltip_border)
-                    // Contract: elevation-tooltip shadow
-                    .shadow(vec![gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.12),
-                        offset: point(px(0.0), px(2.0)),
-                        blur_radius: px(8.0),
-                        spread_radius: px(0.0),
-                    }])
+                    // Svelte: 0 0.5rem 1.25rem rgba(0,0,0,0.3), 0 0.125rem 0.375rem rgba(0,0,0,0.2)
+                    .shadow(vec![
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.30),
+                            offset: point(px(0.0), px(rem_to_px(0.5))),
+                            blur_radius: px(rem_to_px(1.25)),
+                            spread_radius: px(0.0),
+                        },
+                        gpui::BoxShadow {
+                            color: hsla(0.0, 0.0, 0.0, 0.20),
+                            offset: point(px(0.0), px(rem_to_px(0.125))),
+                            blur_radius: px(rem_to_px(0.375)),
+                            spread_radius: px(0.0),
+                        },
+                    ])
                     .text_size(tooltip_font_size)
                     .text_color(text_primary)
                     .max_w(tooltip_max_w)
