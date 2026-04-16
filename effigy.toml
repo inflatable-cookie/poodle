@@ -5,6 +5,7 @@ alias = "poodle"
 include = [
   "tasks/effigy.tasks.toml",
   "quality/effigy.scan.toml",
+  "demos/effigy.demos.toml",
 ]
 
 [bootstrap]

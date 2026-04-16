@@ -1,0 +1,32 @@
+[demos.svelte]
+title = "Poodle — Svelte Documentation Site"
+summary = "Starts the SvelteKit-based design system documentation and component preview site."
+proof = "Confirms the Svelte docs site starts and serves design system components — the documentation is browsable locally, validating the Svelte target and component documentation surface."
+owner = "poodle"
+mode = "interactive"
+status = "ready"
+covers = ["poodle.design-system", "poodle.svelte-target"]
+tags = ["design-system", "svelte", "docs"]
+task = "svelte:preview"
+
+[demos.gpui]
+title = "Poodle — GPUI Native Preview"
+summary = "Launches the native macOS GPUI preview application for the design system."
+proof = "Confirms the GPUI native build runs and renders Poodle design tokens on macOS — a live native window validates the macOS component surface and GPUI integration."
+owner = "poodle"
+mode = "interactive"
+status = "ready"
+covers = ["poodle.design-system", "poodle.gpui-target"]
+tags = ["design-system", "gpui", "native", "macos"]
+task = "gpui:preview"
+
+[demos.jetstream]
+title = "Poodle — Jetstream Game Engine Preview"
+summary = "Launches the Jetstream game engine preview application for the design system."
+proof = "Confirms the Jetstream native build runs and renders Poodle design tokens inside the game engine — a live engine window validates the game engine component surface and Jetstream integration."
+owner = "poodle"
+mode = "interactive"
+status = "ready"
+covers = ["poodle.design-system", "poodle.jetstream-target"]
+tags = ["design-system", "jetstream", "native", "game-engine"]
+task = "jetstream:preview"
