@@ -90,16 +90,14 @@ impl IntoElement for Surface {
         let border_subtle = resolve_color(theme, "color.border.subtle");
 
         // ── Background ──────────────────────────────────────────
-        // Matches Svelte app.css treatment values:
-        //   non-elevated: color-mix(panel 96%, elevated)
-        //   elevated: color-mix(elevated 94%, transparent)
+        // Svelte Surface.svelte:
+        //   non-elevated: color-mix(surface 96%, transparent) (alpha only)
+        //   elevated: color-mix(elevated 96%, panel)
+        let surface_bg = resolve_color(theme, "color.background.surface");
         let bg = if is_elevated {
-            Hsla {
-                a: elevated_bg.a * 0.94,
-                ..elevated_bg
-            }
+            color_mix(elevated_bg, panel, 0.96)
         } else {
-            color_mix(panel, elevated_bg, 0.96)
+            Hsla { a: surface_bg.a * 0.96, ..surface_bg }
         };
 
         // Brand-raised treatment: gradient fill over the base color

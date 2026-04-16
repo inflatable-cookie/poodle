@@ -11,7 +11,7 @@ use poodle_specs::{ControlSize, EditableLabelSpec, EditableLabelVariant, IconSiz
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI editable label component backed by `EditableLabelSpec`.
 pub struct EditableLabel {
@@ -127,11 +127,12 @@ impl IntoElement for EditableLabel {
         let pad_x = px(rem_to_px(0.5 + size_padding_x_offset_rem(effective_size)));
         let pad_y = px(rem_to_px(0.375));
 
-        // Contract: hover hint border in display mode
+        // Svelte: hover = color-mix(border-default 72%, transparent) border
+        //               + color-mix(surface 52%, transparent) bg
         let surface_bg = resolve_color(theme, "color.background.surface");
         let default_border = resolve_color(theme, "color.border.default");
-        let hover_border = color_mix(default_border, surface_bg, 0.72);
-        let hover_bg = color_mix(surface_bg, gpui::transparent_black(), 0.52);
+        let hover_border = Hsla { a: default_border.a * 0.72, ..default_border };
+        let hover_bg = Hsla { a: surface_bg.a * 0.52, ..surface_bg };
 
         let is_flush = spec.variant == EditableLabelVariant::Flush;
 

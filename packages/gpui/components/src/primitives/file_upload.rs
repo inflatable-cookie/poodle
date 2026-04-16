@@ -121,6 +121,7 @@ impl IntoElement for FileUpload {
         let control_radius = resolve_radius(theme, "radius.control");
 
         let fill = resolve_color(theme, spec.fill_token());
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let border = resolve_color(theme, spec.border_token());
         let text_color = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -208,7 +209,8 @@ impl IntoElement for FileUpload {
             .gap(stack_gap)
             .px(panel_padding_x)
             .py(panel_padding_y)
-            // Contract: focus = border-color change
+            // Svelte: hover/focus = border-focus + bg color-mix(panel 50%, transparent)
+            .hover(move |s| s.bg(Hsla { a: panel_bg.a * 0.50, ..panel_bg }))
             .focus(move |s| s.border_color(focus_border))
             .child(upload_icon)
             .child(
