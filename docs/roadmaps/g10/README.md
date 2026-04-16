@@ -50,6 +50,14 @@ surface that needs to be made explicit again.
 - `g10.012` active — GPUI runtime truth, retire `g08` delta register, close false
   “blockers”, dashed borders, backlog for real input/select/slider work
   (`docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`)
+- `g10.013` pending — GPUI component correctness and token fidelity: Select fake
+  search, Button danger tone formulas, Checkbox/Switch per-size geometry, Pill
+  token resolution
+  (`docs/roadmaps/g10/013-gpui-component-correctness-and-token-fidelity.md`)
+- `g10.014` pending — GPUI overlay architecture, navigation, and slider fidelity:
+  Tooltip/Popover floating overlay utility, TabStrip ARIA + keyboard, Slider/
+  RangeSlider behavioral gaps, Tabs polish
+  (`docs/roadmaps/g10/014-gpui-overlay-navigation-and-slider-fidelity.md`)
 
 Three active seams identified:
 - Seam A (Svelte Component Overhaul): complete via `g10.003`
