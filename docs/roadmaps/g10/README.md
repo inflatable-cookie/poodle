@@ -69,7 +69,14 @@ did not progress beyond the feasibility proof.
   time_ago/status_bar/nav_card/table/detail_item
   (`docs/roadmaps/g10/017-gpui-formula-sweep-second-pass.md`)
 
+- `g10.018` complete — GPUI formula sweep third pass: skeleton, resize_handle,
+  datetime pickers, drawer, duration_input, field_set, number_input, pagination,
+  password_requirements, split_button, switch, tabs, tab_strip, tri_state_switch
+  (`docs/roadmaps/g10/018-gpui-formula-sweep-third-pass.md`)
+
 ## Next Task
 
-`g10.017` complete. Next: `g10.018` — continue audit sweep (skeleton preset
-dimensions, resize_handle geometry, remaining components).
+`g10.018` complete. Broad px-literal audit is substantially done. Next pass
+should verify correctness vs Svelte for the most visually impactful components
+(calendar, dialog, table, list_card) or continue with any remaining
+categories.
