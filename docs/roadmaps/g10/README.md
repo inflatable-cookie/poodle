@@ -1,31 +1,23 @@
-# g10 Jetstream Focus
+# g10 GPUI Production Hardening
 
 Status: active
-Updated: 2026-04-13
+Updated: 2026-04-16
 
 ## Context
 
-`g10` is now the active generation after `g09`.
-Its original Jetstream feasibility framing is still useful, but the live queue
-has clearly broadened into a component-overhaul and renderer-parity recovery
-surface that needs to be made explicit again.
+`g10` opened with a Jetstream feasibility framing (`g10.001`) but the live queue
+expanded into a full GPUI production-hardening tranche. From `g10.003` onward the
+work has been Svelte overhaul closeout, component package consolidation, GPUI
+parity recovery, spec correctness, and component audit remediation. Jetstream
+did not progress beyond the feasibility proof.
 
 ## Scope
 
-- Jetstream renderer feasibility and constraints
-- Jetstream component implementation depth
-- Jetstream specimen and preview coverage
-- Jetstream parity evidence and documented deltas
-- Jetstream-specific closeout work
-- any component-overhaul recovery work that is materially part of the current
-  Poodle execution queue rather than historical side work
-
-## Working Rule
-
-- do not use `g10` to absorb unfinished `g09` work by pretending `g09` is still
-  active
-- keep the live queue explicit instead of relying on handoff-only momentum
-- use `g10` for the active Jetstream and component-overhaul tranche
+- GPUI component correctness and token fidelity
+- GPUI parity evidence and documented deltas vs Svelte reference
+- Shared spec alignment across platforms
+- GPUI runtime truth and debt classification
+- Component audit remediation
 
 ## Current State
 
@@ -48,7 +40,7 @@ surface that needs to be made explicit again.
 - `g10.011` complete — shared spec and cross-platform button semantics
   (`docs/roadmaps/g10/011-shared-spec-and-cross-platform-button-semantics.md`)
 - `g10.012` active — GPUI runtime truth, retire `g08` delta register, close false
-  “blockers”, dashed borders, backlog for real input/select/slider work
+  "blockers", dashed borders, backlog for real input/select/slider work
   (`docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`)
 - `g10.013` complete — GPUI component correctness and token fidelity: Select fake
   search, Button danger tone formulas, Checkbox/Switch per-size geometry, Pill
@@ -59,23 +51,12 @@ surface that needs to be made explicit again.
   RangeSlider behavioral gaps, Tabs close icon + gap token, Select option groups
   (`docs/roadmaps/g10/014-gpui-overlay-navigation-and-slider-fidelity.md`)
 
-Three active seams identified:
-- Seam A (Svelte Component Overhaul): complete via `g10.003`
-- Seam B (Jetstream Implementation): active next lane
-- Seam C (Parity/Verification): closeout checkpoint reached via `g10.005` to
-  `g10.007`
-
 ## Active Runway
 
-- default lane: Seam B Jetstream implementation **or** GPUI production hardening
-  via `g10.012` (user priority)
-- parity checkpoint: `g10.005` to `g10.007` complete
-- GPUI / spec queue: `g10.009` to `g10.014` complete
+- GPUI audit queue: `g10.009` to `g10.014` complete
+- `g10.012` remains active as a living delta register
 
 ## Next Task
 
-`g10.014` closed with all items complete. GPUI audit tranche (g10.009–g10.014) done.
-
-Next:
-- Seam B Jetstream implementation
-- Any new GPUI audit items from next preview run
+GPUI audit tranche closed. Next work determined by product priority — likely a new
+audit pass or `g10.012` closeout.
