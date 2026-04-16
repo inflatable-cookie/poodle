@@ -261,7 +261,7 @@ impl IntoElement for DatePicker {
                         spread_radius: px(0.0),
                     },
                 ])
-                .p(px(12.0))
+                .p(resolve_px(theme, "space.inline.md"))
                 .child(Calendar::from_spec(cal_spec, theme));
             wrapper = wrapper.child(cal_surface);
         }

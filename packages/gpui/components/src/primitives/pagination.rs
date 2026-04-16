@@ -638,7 +638,7 @@ impl IntoElement for Pagination {
                 let on_draft = on_goto_input_change.clone();
                 let on_jump = self.on_page_change.clone();
                 let min_w_field = crate::theme_ext::resolve_px(theme, "size.control.minWidth")
-                    .max(px(48.0));
+                    .max(px(rem_to_px(3.0)));
 
                 let mut goto_input = TextInput::from_spec(input_spec, theme)
                     .with_id("pg-goto")
@@ -684,7 +684,7 @@ impl IntoElement for Pagination {
                         )
                         .child(
                             div()
-                                .min_w(px(48.0))
+                                .min_w(px(rem_to_px(3.0)))
                                 .h(self.button_height)
                                 .px(gap_md)
                                 .border_1()

@@ -165,7 +165,7 @@ impl IntoElement for Drawer {
         let mut drawer_panel = div()
             .id("poodle-drawer-panel")
             .focusable()
-            .min_w(px(448.0))
+            .min_w(px(rem_to_px(28.0))) // Contract: min(28rem, 100vw)
             .h_full()
             .rounded(px(0.0)); // Contract: drawer radius = 0
 
@@ -249,7 +249,7 @@ impl IntoElement for Drawer {
         } else {
             div().flex_1().flex().items_center().justify_center().child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(px(rem_to_px(0.75)))
                     .text_color(text_secondary)
                     .child("Main area"),
             )

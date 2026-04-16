@@ -222,7 +222,7 @@ impl IntoElement for DateTimeZonePicker {
                         .child("Select date"),
                 )
                 .child(weekday_row)
-                .child(div().min_h(px(180.0)));
+                .child(div().min_h(px(rem_to_px(11.25)))); // 11.25rem placeholder height
 
             // Time section
             let time_section = div()
@@ -285,7 +285,7 @@ impl IntoElement for DateTimeZonePicker {
                         spread_radius: px(0.0),
                     },
                 ])
-                .p(px(16.0))
+                .p(resolve_px(theme, "space.inline.lg"))
                 .flex()
                 .flex_col()
                 .child(calendar_section)

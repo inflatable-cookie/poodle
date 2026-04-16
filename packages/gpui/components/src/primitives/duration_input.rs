@@ -132,7 +132,7 @@ impl IntoElement for DurationInput {
                 segments = segments.child(
                     div()
                         .text_size(body_size)
-                        .line_height(px(14.0))
+                        .line_height(px(rem_to_px(0.875)))
                         .text_color(text_secondary)
                         .font_weight(FontWeight::SEMIBOLD)
                         .child(":"),
@@ -145,8 +145,8 @@ impl IntoElement for DurationInput {
                 .flex()
                 .flex_col()
                 .items_center()
-                .gap(px(2.0)) // 0.125rem
-                .p(px(2.0))
+                .gap(px(rem_to_px(0.125)))
+                .p(px(rem_to_px(0.125)))
                 .rounded(radius_sm)
                 .child(
                     // Label: caption-size (≈11px), uppercase, secondary, line-height 1
@@ -159,10 +159,10 @@ impl IntoElement for DurationInput {
                 .child(
                     // Field: 1.75rem wide, body size, centered, line-height 1
                     div()
-                        .w(px(28.0)) // 1.75rem
+                        .w(px(rem_to_px(1.75)))
                         .text_center()
                         .text_size(body_size)
-                        .line_height(px(14.0))
+                        .line_height(px(rem_to_px(0.875)))
                         .text_color(text_primary)
                         .child(part.to_string()),
                 );

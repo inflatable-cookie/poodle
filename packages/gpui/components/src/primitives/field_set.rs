@@ -91,9 +91,9 @@ impl IntoElement for FieldSet {
             if spec.columns > 1 {
                 // Each child takes up 1/columns of the width minus gap
                 let col_width = match spec.columns {
-                    2 => px(240.0), // approximate half-width
-                    3 => px(160.0),
-                    _ => px(120.0),
+                    2 => px(rem_to_px(15.0)),  // ~half-width at default container
+                    3 => px(rem_to_px(10.0)),
+                    _ => px(rem_to_px(7.5)),
                 };
                 grid = grid.child(div().min_w(col_width).flex_1().child(child));
             } else {

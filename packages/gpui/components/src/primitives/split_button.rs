@@ -247,7 +247,7 @@ impl IntoElement for SplitButton {
             .id("poodle-split-toggle")
             .focusable()
             .h(height)
-            .w(px(32.0));
+            .w(px(rem_to_px(2.0))); // Svelte: 2rem toggle width
 
         // Brand-raised treatment for toggle half
         if theme.brand_raised && !is_ghost && !is_unavailable {
@@ -344,7 +344,7 @@ impl IntoElement for SplitButton {
                         spread_radius: px(0.0),
                     },
                 ])
-                .min_w(px(192.0)) // 12rem
+                .min_w(px(rem_to_px(12.0)))
                 .py(gap_sm)
                 .mt(gap_sm)
                 .flex()

@@ -6,6 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{SkeletonPreset, SkeletonSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI skeleton placeholder component backed by `SkeletonSpec`.
@@ -123,7 +124,7 @@ impl IntoElement for Skeleton {
                         .flex_col()
                         .gap(gap_sm)
                         .w_full()
-                        .child(bone(px(9999.0), px(120.0), radius)) // image area
+                        .child(bone(px(9999.0), px(rem_to_px(7.5)), radius)) // image area: 7.5rem
                         .child(bone(px(180.0), default_height, radius)) // title
                         .child(bone(px(240.0), default_height, radius)); // description
                     wrap(card)
@@ -135,7 +136,7 @@ impl IntoElement for Skeleton {
                         .gap(gap_md)
                         .w_full()
                         .items_center()
-                        .child(bone(px(32.0), px(32.0), pill_radius)) // avatar
+                        .child(bone(px(rem_to_px(2.0)), px(rem_to_px(2.0)), pill_radius)) // avatar
                         .child(
                             div()
                                 .flex()
@@ -164,7 +165,7 @@ impl IntoElement for Skeleton {
                         .flex_row()
                         .gap(gap_md)
                         .items_center()
-                        .child(bone(px(40.0), px(40.0), pill_radius)) // avatar circle
+                        .child(bone(px(rem_to_px(2.5)), px(rem_to_px(2.5)), pill_radius)) // avatar circle
                         .child(
                             div()
                                 .flex()

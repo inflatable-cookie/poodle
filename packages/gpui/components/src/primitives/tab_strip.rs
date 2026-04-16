@@ -281,11 +281,11 @@ impl IntoElement for TabStrip {
                         "{}-close-{}",
                         self.id_prefix, item.value
                     )))
-                    .ml(px(4.0))
+                    .ml(resolve_px(theme, "space.inline.xs"))
                     .cursor_pointer()
-                    .w(px(20.0))
-                    .h(px(20.0))
-                    .rounded(px(4.0))
+                    .w(px(rem_to_px(1.25)))
+                    .h(px(rem_to_px(1.25)))
+                    .rounded(px(rem_to_px(0.25)))
                     .flex()
                     .items_center()
                     .justify_center()

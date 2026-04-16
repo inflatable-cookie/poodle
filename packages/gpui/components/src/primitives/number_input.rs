@@ -159,9 +159,9 @@ impl IntoElement for NumberInput {
         };
         let text_secondary = resolve_color(theme, "color.text.secondary");
 
-        // Contract: stepper width 1.25rem (20px), radius = control - 0.125rem (2px)
-        let stepper_width = px(20.0);
-        let stepper_inner_radius = control_radius - px(2.0);
+        // Contract: stepper width 1.25rem, radius = control - 0.125rem
+        let stepper_width = px(rem_to_px(1.25));
+        let stepper_inner_radius = control_radius - px(rem_to_px(0.125));
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-number-input-{}", suffix)

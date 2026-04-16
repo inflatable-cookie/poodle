@@ -231,7 +231,7 @@ impl IntoElement for DateTimePicker {
             let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
             // Weekday header row
-            let mut weekday_row = div().flex().items_center().gap(px(2.0));
+            let mut weekday_row = div().flex().items_center().gap(px(rem_to_px(0.125)));
             for day in &weekdays {
                 weekday_row = weekday_row.child(
                     div()
@@ -245,14 +245,14 @@ impl IntoElement for DateTimePicker {
             }
 
             // Placeholder grid rows (6 rows x 7 cols)
-            let mut grid = div().flex().flex_col().gap(px(2.0));
+            let mut grid = div().flex().flex_col().gap(px(rem_to_px(0.125)));
             for _row in 0..6 {
-                let mut row = div().flex().items_center().gap(px(2.0));
+                let mut row = div().flex().items_center().gap(px(rem_to_px(0.125)));
                 for _col in 0..7 {
                     row = row.child(
                         div()
                             .flex_1()
-                            .h(px(28.0))
+                            .h(px(rem_to_px(1.75)))
                             .flex()
                             .items_center()
                             .justify_center()
@@ -300,7 +300,7 @@ impl IntoElement for DateTimePicker {
                 .child(
                     div()
                         .px(inline_padding)
-                        .h(px(28.0))
+                        .h(px(rem_to_px(1.75)))
                         .rounded(control_radius)
                         .bg(surface_bg)
                         .border_1()
@@ -330,7 +330,7 @@ impl IntoElement for DateTimePicker {
                 .child(
                     div()
                         .px(inline_padding)
-                        .h(px(28.0))
+                        .h(px(rem_to_px(1.75)))
                         .rounded(control_radius)
                         .bg(accent)
                         .flex()

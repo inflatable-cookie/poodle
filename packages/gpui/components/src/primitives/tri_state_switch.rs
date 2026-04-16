@@ -111,16 +111,16 @@ impl IntoElement for TriStateSwitch {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
-        let track_padding = px(2.0);
+        let track_padding = px(rem_to_px(0.125));
         // Segment width scales with effective size
         let segment_min_w: Pixels = match effective_size {
-            ControlSize::Xs => px(56.0),
-            ControlSize::Sm => px(64.0),
-            ControlSize::Md => px(72.0),
-            ControlSize::Lg => px(80.0),
-            ControlSize::Xl => px(88.0),
+            ControlSize::Xs => px(rem_to_px(3.5)),
+            ControlSize::Sm => px(rem_to_px(4.0)),
+            ControlSize::Md => px(rem_to_px(4.5)),
+            ControlSize::Lg => px(rem_to_px(5.0)),
+            ControlSize::Xl => px(rem_to_px(5.5)),
         };
-        let segment_h = control_height - px(4.0);
+        let segment_h = control_height - px(rem_to_px(0.25));
         let segment_radius = segment_h / 2.0;
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
         let track_w = segment_min_w * 3.0 + track_padding * 2.0;
@@ -195,7 +195,7 @@ impl IntoElement for TriStateSwitch {
                 .flex()
                 .items_center()
                 .justify_center()
-                .px(px(14.0))
+                .px(px(rem_to_px(0.875)))
                 .rounded(segment_radius)
                 .text_size(label_size)
                 .font_weight(FontWeight::MEDIUM)

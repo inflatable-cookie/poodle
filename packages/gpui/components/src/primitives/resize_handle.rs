@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{Orientation, ResizeHandleSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity};
 
 /// A real GPUI resize handle component backed by `ResizeHandleSpec`.
@@ -107,25 +108,25 @@ impl IntoElement for ResizeHandle {
                     .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
             });
 
-        // Visual affordance: 2px line centered in hit target
+        // Visual affordance: 0.125rem line centered in hit target
         let line = if is_horizontal {
             div()
-                .w(px(2.0))
+                .w(px(rem_to_px(0.125)))
                 .h_full()
                 .rounded(px(999.0))
                 .bg(idle_line_color)
         } else {
             div()
                 .w_full()
-                .h(px(2.0))
+                .h(px(rem_to_px(0.125)))
                 .rounded(px(999.0))
                 .bg(idle_line_color)
         };
 
         if is_horizontal {
-            container = container.w(px(8.0)).h_full().cursor_col_resize();
+            container = container.w(px(rem_to_px(0.5))).h_full().cursor_col_resize();
         } else {
-            container = container.w_full().h(px(8.0)).cursor_row_resize();
+            container = container.w_full().h(px(rem_to_px(0.5))).cursor_row_resize();
         }
 
         // Disabled state: reduced opacity, default cursor, no hover

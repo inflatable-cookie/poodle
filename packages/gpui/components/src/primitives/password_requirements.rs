@@ -8,7 +8,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI password requirements checklist backed by `PasswordRequirementsSpec`.
 pub struct PasswordRequirements {
@@ -183,7 +183,7 @@ impl IntoElement for PasswordRequirements {
             if let Some(ref description) = policy.description {
                 container = container.child(
                     div()
-                        .mt(px(12.0))
+                        .mt(resolve_px(theme, "space.inline.md"))
                         .text_size(body_font)
                         .line_height(line_height)
                         .text_color(text_color)
@@ -195,7 +195,7 @@ impl IntoElement for PasswordRequirements {
             if let Some(ref hint) = spec.hint {
                 container = container.child(
                     div()
-                        .mt(px(8.0))
+                        .mt(resolve_px(theme, "space.inline.sm"))
                         .text_size(body_font)
                         .line_height(line_height)
                         .text_color(text_color)
@@ -233,14 +233,14 @@ fn build_rule_row(
         .flex()
         .flex_row()
         .items_baseline()
-        .gap(px(6.0))
+        .gap(px(rem_to_px(0.375)))
         .text_color(color)
         .text_size(font_size)
         .line_height(line_height)
         .child(
             div()
-                .w(px(14.0))
-                .text_size(px(12.0))
+                .w(px(rem_to_px(0.875)))
+                .text_size(px(rem_to_px(0.75)))
                 .flex_shrink_0()
                 .child(indicator),
         )

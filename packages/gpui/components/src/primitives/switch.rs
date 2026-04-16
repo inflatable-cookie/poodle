@@ -147,11 +147,11 @@ impl IntoElement for Switch {
         let icon_lg = resolve_px(theme, "size.icon.lg");
         let icon_xl = resolve_px(theme, "size.icon.xl");
         let (track_w, track_h, track_padding, thumb_size) = match effective_size {
-            ControlSize::Xs => (icon_xs * 1.75, icon_xs * 0.875, px(1.0), icon_xs * 0.75 - px(2.0)),
-            ControlSize::Sm => (icon_sm * 1.875, icon_sm + px(2.0), px(1.5), icon_sm - px(3.0)),
-            ControlSize::Md => (px(34.0), px(20.0), px(2.0), px(14.0)),
-            ControlSize::Lg => (icon_lg * 2.25 + px(4.0), icon_lg + px(8.0), px(3.0), icon_lg),
-            ControlSize::Xl => (icon_xl * 2.5 + px(6.0), icon_xl + px(12.0), px(4.0), icon_xl + px(2.0)),
+            ControlSize::Xs => (icon_xs * 1.75, icon_xs * 0.875, px(rem_to_px(0.0625)),  icon_xs * 0.75 - px(rem_to_px(0.125))),
+            ControlSize::Sm => (icon_sm * 1.875, icon_sm + px(rem_to_px(0.125)),          px(rem_to_px(0.09375)), icon_sm - px(rem_to_px(0.1875))),
+            ControlSize::Md => (px(rem_to_px(2.125)), px(rem_to_px(1.25)),                px(rem_to_px(0.125)), px(rem_to_px(0.875))),
+            ControlSize::Lg => (icon_lg * 2.25 + px(rem_to_px(0.25)), icon_lg + px(rem_to_px(0.5)), px(rem_to_px(0.1875)), icon_lg),
+            ControlSize::Xl => (icon_xl * 2.5 + px(rem_to_px(0.375)), icon_xl + px(rem_to_px(0.75)), px(rem_to_px(0.25)), icon_xl + px(rem_to_px(0.125))),
         };
         let track_radius = track_h / 2.0;
         let thumb_radius = thumb_size / 2.0;
