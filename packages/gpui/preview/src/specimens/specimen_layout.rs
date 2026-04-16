@@ -151,7 +151,7 @@ where
                 .rounded(px(6.0))
                 .bg(color_to_hsla(panel_bg).alpha(0.4));
             for (size, label) in ALL_SIZES {
-                col = col.child(variant_row(*label, sizes_row(*size, theme), text_secondary));
+                col = col.child(variant_row(label, sizes_row(*size, theme), text_secondary));
             }
             col
         }
@@ -167,7 +167,7 @@ where
                 .bg(color_to_hsla(panel_bg).alpha(0.4));
             for (density, label) in ALL_DENSITIES {
                 col = col.child(variant_row(
-                    *label,
+                    label,
                     densities_row(*density, theme),
                     text_secondary,
                 ));

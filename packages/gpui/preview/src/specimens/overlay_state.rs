@@ -47,6 +47,7 @@ pub(crate) fn sync_hover_intent(
     .ok();
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn schedule_toggle_if(
     window: &mut Window,
     cx: &mut App,

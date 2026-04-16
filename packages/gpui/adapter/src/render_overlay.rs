@@ -2,6 +2,10 @@
 //!
 //! g07.005: Accordion, Collapsible, Dialog, Drawer, Popover, Tooltip, HoverCard,
 //! Menu, ContextMenu, Tabs, TabStrip, NavigationMenu, Menubar
+//!
+//! NOTE: style objects are built and mutated as proof of token resolution but are
+//! not yet wired into the returned `GpuiElementHandle`. Suppressed until wired up.
+#![allow(unused_variables, unused_assignments)]
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{

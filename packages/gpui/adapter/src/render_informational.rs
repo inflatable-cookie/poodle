@@ -3,6 +3,10 @@
 //! g07.006: Code, ColorPicker, FileUpload, Eyebrow, Pill, TimeAgo, DurationInput,
 //! TimeZoneSelect, DateTimeZonePicker, SplitButton, DatePicker, Calendar,
 //! DateRangePicker, DateTimePicker, DateTimeRangePicker
+//!
+//! NOTE: `gpui_style` is built and mutated as proof of token resolution but is
+//! not yet wired into the returned `GpuiElementHandle`. Suppressed until wired up.
+#![allow(unused_variables, unused_assignments)]
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{

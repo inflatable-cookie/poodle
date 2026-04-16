@@ -227,7 +227,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(NumberInput::from_spec(
-                    NumberInputSpec::new(3.14159)
+                    NumberInputSpec::new(std::f64::consts::PI)
                         .with_step(0.001)
                         .with_precision(3),
                     theme,

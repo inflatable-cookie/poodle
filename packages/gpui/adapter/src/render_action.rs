@@ -5,6 +5,12 @@
 //! - FieldSpec, TextInputSpec
 //! - FormActionsSpec, TimeFieldSpec
 //! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
+//!
+//! NOTE: `gpui_style` is built and mutated in every render fn as proof of token
+//! resolution, but is not yet wired into the returned `GpuiElementHandle` (the
+//! GPUI integration is incomplete). The unused-variable / unused-assignment lints
+//! are suppressed at the module level until the wiring is in place.
+#![allow(unused_variables, unused_assignments)]
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{

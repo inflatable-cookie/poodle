@@ -238,6 +238,7 @@ impl PreviewRoot {
 
     /// Display controls bar — theme, density, size, treatment toggle groups + catalogue search.
     /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
+    #[allow(clippy::too_many_arguments)]
     fn render_display_controls(
         &self,
         text_secondary: poodle_tokens::typed::ColorValue,
@@ -357,6 +358,7 @@ impl PreviewRoot {
 
     /// A labelled toggle group (uppercase eyebrow + row of individual toggle buttons).
     /// Matches Svelte: each button is a separate pill with its own border.
+    #[allow(clippy::too_many_arguments)]
     fn render_toggle_group(
         &self,
         label: &'static str,
@@ -765,6 +767,7 @@ impl PreviewRoot {
     }
 
     /// Landing page grid showing all components as cards.
+    #[allow(clippy::too_many_arguments)]
     fn render_catalogue_landing(
         &self,
         groups: &[component_registry::ComponentGroup],
@@ -1433,7 +1436,7 @@ fn main() {
         .filter_map(|name| {
             std::fs::read(font_dir.join(name))
                 .ok()
-                .map(|data| std::borrow::Cow::Owned(data))
+                .map(std::borrow::Cow::Owned)
         })
         .collect();
 

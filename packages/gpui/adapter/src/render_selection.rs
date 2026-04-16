@@ -3,6 +3,11 @@
 //! g07.004: Checkbox, RadioGroup, Switch, Select, SegmentedControl, Slider,
 //! RangeSlider, Progress, Badge, StatusIndicator, Meter, Rating, Skeleton,
 //! TriStateSwitch
+//!
+//! NOTE: style objects (`s`) are built and mutated as proof of token resolution
+//! but are not yet wired into the returned `GpuiElementHandle`. Suppressed until
+//! the GPUI integration is wired up.
+#![allow(unused_variables, unused_assignments)]
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{

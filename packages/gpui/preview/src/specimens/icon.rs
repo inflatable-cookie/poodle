@@ -167,7 +167,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new()
-                        .with_content(&format!("All icons ({})", SPECIMEN_ICONS.len())),
+                        .with_content(format!("All icons ({})", SPECIMEN_ICONS.len())),
                     theme,
                 ))
                 .child(render_icon_gallery(theme)),
