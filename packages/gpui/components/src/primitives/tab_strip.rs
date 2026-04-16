@@ -1,16 +1,24 @@
 //! TabStrip — real GPUI component backed by TabStripSpec.
 //!
 //! Closable file/document tabs distinct from content-switching Tabs.
-//! Contract: focus ring, disabled cursor, spec token usage.
+//! Contract: focus ring, disabled cursor, size/density tokens, keyboard nav.
+//!
+//! # Known GPUI deltas
+//! - `role="tablist"`, `role="tab"`, `aria-selected`, `aria-disabled`: GPUI native
+//!   rendering does not carry HTML ARIA attributes. These are documented-only deltas.
 
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
+use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, Orientation, TabStripItem, TabStripSpec};
 
 use super::icon::Icon;
 
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::presentation::{
+    control_space_x_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem, size_padding_x_offset_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI tab strip component backed by `TabStripSpec`.
 pub struct TabStrip {
@@ -74,6 +82,14 @@ impl TabStrip {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_id(mut self, prefix: impl Into<String>) -> Self {
         self.id_prefix = prefix.into();
@@ -97,6 +113,19 @@ impl IntoElement for TabStrip {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
 
+        // ── Size/density token resolution ─────────────────────────────────────
+        // TabStrip uses Control size role (same as other interactive controls).
+        use poodle_specs::SemanticControlSizeRole;
+        let effective_size = resolve_semantic_size(self.spec.size, SemanticControlSizeRole::Control);
+
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
+        let inline_padding = px(rem_to_px(
+            control_space_x_rem(self.spec.density)
+                + size_padding_x_offset_rem(effective_size),
+        ));
+        let control_y = resolve_px(theme, "space.control.y");
+        let inline_gap = resolve_px(theme, "space.inline.xs");
+
         let accent = resolve_color(theme, "color.accent.base");
         let border = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
@@ -104,12 +133,13 @@ impl IntoElement for TabStrip {
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let hover_bg = resolve_color(theme, "color.background.elevated");
-        let gap = theme.resolve_space(self.spec.item_gap_token());
+        let strip_gap = theme.resolve_space(self.spec.item_gap_token());
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
         let is_vertical = self.spec.orientation == Orientation::Vertical;
 
-        let mut strip = div().gap(px(gap));
+        // ARIA delta: role="tablist" not expressible on GPUI native elements.
+        let mut strip = div().gap(px(strip_gap));
 
         if is_vertical {
             strip = strip.flex().flex_col();
@@ -122,25 +152,25 @@ impl IntoElement for TabStrip {
         }
 
         let tab_values: Vec<String> = self.spec.items.iter().map(|i| i.value.clone()).collect();
+        let tab_disabled: Vec<bool> = self.spec.items.iter().map(|i| i.is_disabled).collect();
 
         for (idx, item) in self.spec.items.iter().enumerate() {
             let is_active = current_value.as_deref() == Some(item.value.as_str());
             let is_disabled = item.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
 
+            // ARIA delta: role="tab", aria-selected, aria-disabled not expressible.
             let mut tab = div()
                 .id(item_id)
                 .focusable()
                 .flex()
                 .items_center()
-                .gap(px(6.0))
-                .px(px(10.0))
-                .py(px(6.0))
-                // Contract: label font
-                .text_size(px(12.0))
+                .gap(inline_gap)
+                .px(inline_padding)
+                .py(control_y)
+                .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
-                // Focus ring
                 .focus(move |s| {
                     s.border_color(focus_ring)
                         .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
@@ -170,25 +200,69 @@ impl IntoElement for TabStrip {
                         handler(&val, window, cx);
                     });
 
-                    // Arrow key navigation
-                    let handler = self.on_change.as_ref().unwrap().clone();
+                    // ── Keyboard navigation ───────────────────────────────────
+                    // Arrow keys navigate between tabs, skipping disabled ones.
+                    // Home/End jump to first/last enabled tab.
+                    // Delete closes a closable tab (fires on_close).
+                    let nav_handler = self.on_change.as_ref().unwrap().clone();
+                    let close_handler = self.on_close.clone();
                     let tvs = tab_values.clone();
+                    let td = tab_disabled.clone();
                     let current_idx = idx;
+                    let item_closable = item.is_closable;
+                    let item_val = item.value.clone();
+
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
-                        let next_idx =
-                            if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                                Some((current_idx + 1) % tvs.len())
-                            } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                                Some(if current_idx == 0 {
-                                    tvs.len() - 1
-                                } else {
-                                    current_idx - 1
-                                })
-                            } else {
-                                None
-                            };
-                        if let Some(i) = next_idx {
-                            handler(&tvs[i], window, cx);
+                        let n = tvs.len();
+                        match event.keystroke.key.as_str() {
+                            "right" | "down" => {
+                                // Advance to next enabled tab, wrapping
+                                let mut i = (current_idx + 1) % n;
+                                for _ in 0..n {
+                                    if !td[i] {
+                                        nav_handler(&tvs[i], window, cx);
+                                        return;
+                                    }
+                                    i = (i + 1) % n;
+                                }
+                            }
+                            "left" | "up" => {
+                                // Move to previous enabled tab, wrapping
+                                let mut i = if current_idx == 0 { n - 1 } else { current_idx - 1 };
+                                for _ in 0..n {
+                                    if !td[i] {
+                                        nav_handler(&tvs[i], window, cx);
+                                        return;
+                                    }
+                                    i = if i == 0 { n - 1 } else { i - 1 };
+                                }
+                            }
+                            "home" => {
+                                // First enabled tab
+                                for (i, disabled) in td.iter().enumerate() {
+                                    if !disabled {
+                                        nav_handler(&tvs[i], window, cx);
+                                        return;
+                                    }
+                                }
+                            }
+                            "end" => {
+                                // Last enabled tab
+                                for (i, disabled) in td.iter().enumerate().rev() {
+                                    if !disabled {
+                                        nav_handler(&tvs[i], window, cx);
+                                        return;
+                                    }
+                                }
+                            }
+                            "delete" | "backspace" => {
+                                if item_closable {
+                                    if let Some(ref handler) = close_handler {
+                                        handler(&item_val, window, cx);
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
                     });
                 }

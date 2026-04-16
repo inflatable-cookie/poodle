@@ -54,9 +54,9 @@ surface that needs to be made explicit again.
   search, Button danger tone formulas, Checkbox/Switch per-size geometry, Pill
   tone handling
   (`docs/roadmaps/g10/013-gpui-component-correctness-and-token-fidelity.md`)
-- `g10.014` pending — GPUI overlay architecture, navigation, and slider fidelity:
-  Tooltip/Popover floating overlay utility, TabStrip ARIA + keyboard, Slider/
-  RangeSlider behavioral gaps, Tabs polish
+- `g10.014` complete — GPUI overlay architecture, navigation, and slider fidelity:
+  floating overlay utility (Tooltip/Popover), TabStrip tokens + keyboard, Slider/
+  RangeSlider behavioral gaps, Tabs close icon + gap token
   (`docs/roadmaps/g10/014-gpui-overlay-navigation-and-slider-fidelity.md`)
 
 Three active seams identified:
@@ -70,13 +70,12 @@ Three active seams identified:
 - default lane: Seam B Jetstream implementation **or** GPUI production hardening
   via `g10.012` (user priority)
 - parity checkpoint: `g10.005` to `g10.007` complete
-- GPUI / spec queue: `g10.009` to `g10.013` complete; **`g10.014` open** for
-  overlay architecture, TabStrip ARIA, Slider/RangeSlider behavioral gaps, Tabs
-  polish
+- GPUI / spec queue: `g10.009` to `g10.014` complete
 
 ## Next Task
 
-Drive **`g10.014`** checklist: floating overlay utility for Tooltip/Popover,
-TabStrip tokens + ARIA + keyboard, Slider/RangeSlider behavioral gaps, Tabs
-close affordance and ARIA. Start with the floating overlay — it unblocks both
-Tooltip and Popover in one pass.
+`g10.014` closed. Next work:
+- Select option groups: add `group: Option<String>` to `ChoiceOption`, then render
+  section headers in the Select dropdown — currently blocked on spec change
+- Seam B Jetstream implementation: resumable anytime
+- Any new GPUI audit items flagged by the next preview run

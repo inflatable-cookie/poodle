@@ -1,17 +1,24 @@
 //! Slider — real GPUI component backed by SliderSpec.
 //!
-//! Drag and click use the track element’s layout bounds (via `on_children_prepainted`),
+//! Drag and click use the track element's layout bounds (via `on_children_prepainted`),
 //! not the window bounds.
+//!
+//! # Known GPUI deltas
+//! - `aria-valuemin/max/now/text`, `aria-disabled`: not expressible on GPUI native
+//!   elements via the fluent Div builder.
+//! - `on_value_commit` fires on click-release (`on_click`). GPUI 0.2.2 does not expose
+//!   `on_mouse_up` through the fluent builder, so drag-release commits are not captured.
 
 use std::sync::{Arc, Mutex};
 
 use gpui::*;
-use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, Orientation, SliderSpec};
+use poodle_specs::SliderSpec;
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+use poodle_adapter::ThemeProvider;
+
+use crate::presentation::rem_to_px;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 static SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
 
@@ -21,6 +28,8 @@ pub struct Slider {
     theme: GpuiThemeProvider,
     id: Option<SharedString>,
     on_change: Option<Box<dyn Fn(&f64, &mut Window, &mut App) + 'static>>,
+    /// Fires on click-release. See module-level GPUI delta note.
+    on_value_commit: Option<Box<dyn Fn(&f64, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Slider {
@@ -37,6 +46,7 @@ impl Slider {
             theme: theme.clone(),
             id: None,
             on_change: None,
+            on_value_commit: None,
         }
     }
 
@@ -46,6 +56,7 @@ impl Slider {
             theme: theme.clone(),
             id: None,
             on_change: None,
+            on_value_commit: None,
         }
     }
 
@@ -56,6 +67,16 @@ impl Slider {
 
     pub fn on_change(mut self, handler: impl Fn(&f64, &mut Window, &mut App) + 'static) -> Self {
         self.on_change = Some(Box::new(handler));
+        self
+    }
+
+    /// Register a callback fired when the user completes an interaction.
+    /// See module-level GPUI delta note for limitations.
+    pub fn on_value_commit(
+        mut self,
+        handler: impl Fn(&f64, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_value_commit = Some(Box::new(handler));
         self
     }
 
@@ -76,7 +97,7 @@ impl Slider {
         self.spec.step = v;
         self
     }
-    pub fn orientation(mut self, v: Orientation) -> Self {
+    pub fn orientation(mut self, v: poodle_specs::Orientation) -> Self {
         self.spec.orientation = v;
         self
     }
@@ -92,7 +113,7 @@ impl Slider {
         self.spec.value_text = Some(v.into());
         self
     }
-    pub fn size(mut self, v: ControlSize) -> Self {
+    pub fn size(mut self, v: poodle_specs::ControlSize) -> Self {
         self.spec.size = v;
         self
     }
@@ -117,27 +138,18 @@ impl IntoElement for Slider {
         let accent = resolve_color(theme, spec.range_fill_token());
         let border = resolve_color(theme, "color.border.default");
         let surface_bg = resolve_color(theme, "color.background.surface");
-        let text_secondary = resolve_color(theme, "color.text.secondary");
-        let stack_gap = resolve_px(theme, "space.stack.sm");
-
-        // ── Resolve effective size from size + size_role ────────
-        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-
         let elevated_bg = resolve_color(theme, "color.background.elevated");
-        // Track/thumb scale with effective size
-        let track_f: f32 = match effective_size {
-            ControlSize::Xs => 4.0,
-            ControlSize::Sm => 5.0,
-            ControlSize::Md => 6.0,
-            ControlSize::Lg => 7.0,
-            ControlSize::Xl => 8.0,
-        };
+
+        // Track height: Svelte uses a fixed 0.375rem (6 px) regardless of size.
+        // No dedicated slider-track-height token exists in the design system yet;
+        // the fixed value is retained to match the Svelte reference exactly.
+        let track_f: f32 = rem_to_px(0.375); // 6 px
         let track_height = px(track_f);
         let track_radius = px(track_f / 2.0);
+
         let thumb_f = theme.resolve_space("size.icon.md");
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
-        let label_font_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let progress = spec.normalized_progress().clamp(0.0, 1.0) as f32;
 
@@ -195,17 +207,6 @@ impl IntoElement for Slider {
             })
             .child(track);
 
-        // Value labels
-        let labels = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .text_size(label_font_size)
-            .text_color(text_secondary)
-            .child(format!("{:.0}", spec.min))
-            .child(format!("{:.0}", spec.clamped_value()))
-            .child(format!("{:.0}", spec.max));
-
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
         let slider_id: SharedString = self.id.unwrap_or_else(|| {
@@ -216,6 +217,7 @@ impl IntoElement for Slider {
         });
 
         let on_change = self.on_change;
+        let on_value_commit = self.on_value_commit;
         let min = spec.min;
         let max = spec.max;
         let step = spec.step;
@@ -227,14 +229,12 @@ impl IntoElement for Slider {
             .w_full()
             .flex()
             .flex_col()
-            .gap(stack_gap)
             .cursor(if is_disabled {
                 CursorStyle::OperationNotAllowed
             } else {
                 CursorStyle::PointingHand
             })
-            .child(track)
-            .child(labels);
+            .child(track);
 
         wrapper = wrapper.focus(move |s| {
             s.border_color(focus_ring)
@@ -243,46 +243,62 @@ impl IntoElement for Slider {
 
         if is_disabled {
             wrapper = wrapper.opacity(disabled_opacity);
-        } else if let Some(on_change) = on_change {
-            let compute_value =
-                move |pos_x: Pixels, track: &Bounds<Pixels>| -> Option<f64> {
-                    let local = pos_x - track.origin.x;
-                    let ratio_f32 = local / track.size.width;
-                    let ratio = (ratio_f32 as f64).clamp(0.0, 1.0);
-                    let raw = min + ratio * (max - min);
-                    let stepped = if step > 0.0 {
-                        (raw / step).round() * step
-                    } else {
-                        raw
-                    };
-                    Some(stepped.clamp(min, max))
+        } else {
+            let compute_value = move |pos_x: Pixels, track: &Bounds<Pixels>| -> Option<f64> {
+                let local = pos_x - track.origin.x;
+                let ratio_f32 = local / track.size.width;
+                let ratio = (ratio_f32 as f64).clamp(0.0, 1.0);
+                let raw = min + ratio * (max - min);
+                let stepped = if step > 0.0 {
+                    (raw / step).round() * step
+                } else {
+                    raw
                 };
+                Some(stepped.clamp(min, max))
+            };
 
-            let on_change = std::rc::Rc::new(on_change);
-            let on_change_drag = on_change.clone();
-            let compute_drag = compute_value;
-            let tbs_down = track_bounds_store.clone();
-            let tbs_move = track_bounds_store;
+            if let Some(on_change) = on_change {
+                let on_change = std::rc::Rc::new(on_change);
+                let on_change_drag = on_change.clone();
+                let compute_drag = compute_value;
+                let tbs_down = track_bounds_store.clone();
+                let tbs_move = track_bounds_store.clone();
 
-            wrapper = wrapper
-                .on_mouse_down(MouseButton::Left, move |event, window, cx| {
-                    let tb = tbs_down.lock().ok().and_then(|g| *g);
-                    if let Some(track) = tb {
-                        if let Some(val) = compute_value(event.position.x, &track) {
-                            on_change(&val, window, cx);
-                        }
-                    }
-                })
-                .on_mouse_move(move |event, window, cx| {
-                    if event.pressed_button == Some(MouseButton::Left) {
-                        let tb = tbs_move.lock().ok().and_then(|g| *g);
+                wrapper = wrapper
+                    .on_mouse_down(MouseButton::Left, move |event, window, cx| {
+                        let tb = tbs_down.lock().ok().and_then(|g| *g);
                         if let Some(track) = tb {
-                            if let Some(val) = compute_drag(event.position.x, &track) {
-                                on_change_drag(&val, window, cx);
+                            if let Some(val) = compute_value(event.position.x, &track) {
+                                on_change(&val, window, cx);
                             }
                         }
-                    }
+                    })
+                    .on_mouse_move(move |event, window, cx| {
+                        if event.pressed_button == Some(MouseButton::Left) {
+                            let tb = tbs_move.lock().ok().and_then(|g| *g);
+                            if let Some(track) = tb {
+                                if let Some(val) = compute_drag(event.position.x, &track) {
+                                    on_change_drag(&val, window, cx);
+                                }
+                            }
+                        }
+                    });
+            }
+
+            // on_value_commit: fires on click-release via on_click.
+            // Full drag-release support requires on_mouse_up (GPUI 0.2.2 delta).
+            if let Some(commit_handler) = on_value_commit {
+                let current_val = spec.clamped_value();
+                let tbs_click = track_bounds_store;
+                let compute_commit = compute_value;
+                wrapper = wrapper.on_click(move |event, window, cx| {
+                    let tb = tbs_click.lock().ok().and_then(|g| *g);
+                    let val = tb
+                        .and_then(|track| compute_commit(event.position().x, &track))
+                        .unwrap_or(current_val);
+                    commit_handler(&val, window, cx);
                 });
+            }
         }
 
         wrapper.into_any_element()

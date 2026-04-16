@@ -28,6 +28,7 @@ mod eyebrow;
 mod field;
 mod field_set;
 mod file_upload;
+mod floating_overlay;
 mod form_actions;
 mod grid;
 mod hover_card;

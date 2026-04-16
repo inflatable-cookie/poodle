@@ -3,17 +3,19 @@
 use gpui::*;
 use gpui::StatefulInteractiveElement;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{OverlayPlacement, TooltipSpec};
+use poodle_specs::{ControlSize, OverlayPlacement, TooltipSpec};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
-use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::presentation::{control_height_rem, rem_to_px};
+use crate::theme_ext::{resolve_color, resolve_radius};
+use super::floating_overlay::floating_overlay;
 
 /// A real GPUI tooltip component backed by `TooltipSpec`.
 ///
-/// Renders the tooltip bubble when open. The parent provides the trigger element
-/// and controls the `open` state.
+/// Renders the tooltip bubble in a floating overlay when open. The bubble is
+/// positioned absolutely so it does not push surrounding layout. The parent
+/// controls `open` state and wires `on_open_change` to a hover handler or timer.
 pub struct Tooltip {
     spec: TooltipSpec,
     theme: GpuiThemeProvider,
@@ -92,6 +94,9 @@ impl IntoElement for Tooltip {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+
+        // Stable element ID derived from content + placement so the trigger
+        // div keeps the same ID across frames when state changes.
         let placement_id = match spec.placement {
             OverlayPlacement::Top => 0_u64,
             OverlayPlacement::TopStart => 1_u64,
@@ -115,12 +120,11 @@ impl IntoElement for Tooltip {
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let border_default = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
-        let stack_gap = resolve_px(theme, "space.stack.sm");
         // Contract: border-radius = calc(control-radius - 0.125rem)
         let tooltip_radius =
             resolve_radius(theme, "radius.control") - px(rem_to_px(spec.radius_inset_rem()));
 
-        // Matches Svelte treatment-surface-elevated values
+        // Svelte treatment-surface-elevated: fill at 94% alpha, border at 22% alpha
         let fill = Hsla {
             a: elevated_bg.a * 0.94,
             ..elevated_bg
@@ -130,61 +134,65 @@ impl IntoElement for Tooltip {
             ..border_default
         };
 
-        let mut wrapper = div().flex().flex_col().gap(stack_gap);
-
-        // Trigger
-        if let Some(trigger) = self.trigger {
-            let mut trigger_wrapper = div().id(("poodle-tooltip-trigger", trigger_id));
-            trigger_wrapper = trigger_wrapper.child(trigger);
+        // ── Build trigger element ─────────────────────────────────────────────
+        let trigger_el: AnyElement = if let Some(trigger) = self.trigger {
+            let mut trigger_wrapper =
+                div().id(("poodle-tooltip-trigger", trigger_id)).child(trigger);
             if let Some(ref handler) = self.on_open_change {
                 let hover_handler = handler.clone();
                 trigger_wrapper = trigger_wrapper.on_hover(move |hovered, window, cx| {
                     hover_handler(*hovered, window, cx);
                 });
             }
-            wrapper = wrapper.child(trigger_wrapper);
-        }
+            trigger_wrapper.into_any_element()
+        } else {
+            div().into_any_element()
+        };
 
-        // Tooltip bubble (shown when open)
-        if spec.current_open() && spec.has_content() {
-            if let Some(ref content) = spec.content {
-                // Contract: padding 0.375rem 0.5rem — resolved from spec
+        // ── Build bubble element (None when closed / no content) ──────────────
+        let bubble_el: Option<AnyElement> = if spec.current_open() && spec.has_content() {
+            spec.content.as_ref().map(|content| {
                 let tooltip_px = px(rem_to_px(spec.padding_x_rem()));
                 let tooltip_py = px(rem_to_px(spec.padding_y_rem()));
                 let tooltip_font_size = px(rem_to_px(spec.font_size_rem()));
                 let tooltip_max_w = px(rem_to_px(spec.max_width_rem()));
 
-                let mut tooltip_bubble =
-                    div().px(tooltip_px).py(tooltip_py).rounded(tooltip_radius);
+                let mut bubble = div()
+                    .px(tooltip_px)
+                    .py(tooltip_py)
+                    .rounded(tooltip_radius)
+                    .border_1()
+                    .border_color(tooltip_border)
+                    // Contract: elevation-tooltip shadow
+                    .shadow(vec![gpui::BoxShadow {
+                        color: hsla(0.0, 0.0, 0.0, 0.12),
+                        offset: point(px(0.0), px(2.0)),
+                        blur_radius: px(8.0),
+                        spread_radius: px(0.0),
+                    }])
+                    .text_size(tooltip_font_size)
+                    .text_color(text_primary)
+                    .max_w(tooltip_max_w)
+                    .child(content.clone());
 
                 // Brand-raised treatment: gradient fill for elevated surface
                 if theme.brand_raised {
-                    tooltip_bubble =
-                        tooltip_bubble.bg(crate::theme_ext::brand_raised_surface_fill(fill));
+                    bubble = bubble.bg(crate::theme_ext::brand_raised_surface_fill(fill));
                 } else {
-                    tooltip_bubble = tooltip_bubble.bg(fill);
+                    bubble = bubble.bg(fill);
                 }
 
-                wrapper = wrapper.child(
-                    tooltip_bubble
-                        .border_1()
-                        .border_color(tooltip_border)
-                        // Contract: elevation-tooltip shadow
-                        .shadow(vec![gpui::BoxShadow {
-                            color: hsla(0.0, 0.0, 0.0, 0.12),
-                            offset: point(px(0.0), px(2.0)),
-                            blur_radius: px(8.0),
-                            spread_radius: px(0.0),
-                        }])
-                        // Contract: font 0.6875rem, max-width 16rem
-                        .text_size(tooltip_font_size)
-                        .text_color(text_primary)
-                        .max_w(tooltip_max_w)
-                        .child(content.clone()),
-                );
-            }
-        }
+                bubble.into_any_element()
+            })
+        } else {
+            None
+        };
 
-        wrapper.into_any_element()
+        // ── Floating overlay — positions bubble above the document flow ────────
+        // anchor_h: Md control height is the most common trigger size. TooltipSpec
+        // has no explicit size prop, so we use the Md baseline (2.25rem).
+        let anchor_h = px(rem_to_px(control_height_rem(ControlSize::Md)));
+
+        floating_overlay(trigger_el, bubble_el, spec.placement, anchor_h, anchor_h)
     }
 }

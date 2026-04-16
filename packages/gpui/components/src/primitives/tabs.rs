@@ -35,7 +35,7 @@ fn build_tab_label(
         return div().child(tab_def.label.clone()).into_any_element();
     }
 
-    let mut inner = div().flex().items_center().gap(px(6.0));
+    let mut inner = div().flex().items_center().gap(resolve_px(theme, "space.inline.xs"));
 
     if let Some(ref icon_name) = tab_def.icon {
         inner = inner.child(
@@ -431,17 +431,14 @@ impl Tabs {
             if tab_def.is_closable {
                 let icon_muted = resolve_color(&self.theme, "color.icon.muted");
                 let gap_sm = resolve_px(theme, "space.inline.sm");
-                let caption_size = resolve_px(theme, "typography.caption.size");
                 tab = tab
                     .flex()
                     .items_center()
                     .gap(gap_sm)
                     .child(build_tab_label(tab_def, theme, label_color))
                     .child(
-                        div()
-                            .text_size(caption_size)
-                            .text_color(icon_muted)
-                            .child("×"),
+                        Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), &self.theme)
+                            .with_color(icon_muted),
                     );
             } else {
                 tab = tab.child(build_tab_label(tab_def, theme, label_color));

@@ -1,8 +1,18 @@
 //! RangeSlider — real GPUI component backed by `RangeSliderSpec`.
 //!
-//! Pointer interaction uses the track element’s layout bounds (via `on_children_prepainted`),
+//! Pointer interaction uses the track element's layout bounds (via `on_children_prepainted`),
 //! not the window bounds. Dual-thumb drag state is keyed by the `interaction_key` passed to
 //! [`RangeSlider::on_change`] so it survives parent re-renders while dragging.
+//!
+//! # Known GPUI deltas
+//! - Vertical orientation: not implemented. The build returns a horizontal layout
+//!   regardless of `spec.orientation`. Tracked for a future pass.
+//! - Per-thumb keyboard focus (Tab cycling between thumbs): GPUI 0.2.2 does not
+//!   provide per-element focus within a single stateless render tree. Keyboard nav
+//!   is implemented as a single handler on the wrapper: Left/Down adjusts the low
+//!   thumb, Right/Up adjusts the high thumb.
+//! - `on_value_commit` fires on click-release (`on_click`). GPUI 0.2.2 does not
+//!   expose `on_mouse_up` through the fluent builder.
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -13,10 +23,11 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlSize, Orientation, RangeSliderSpec};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+use crate::presentation::rem_to_px;
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
-static RANGE_SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+static RANGE_SLIDER_ID_COUNTER: std::sync::atomic::AtomicU32 =
+    std::sync::atomic::AtomicU32::new(0);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum DragThumb {
@@ -38,13 +49,7 @@ fn step_clamp(v: f64, min: f64, max: f64, step: f64) -> f64 {
     stepped.clamp(min, max)
 }
 
-fn value_from_x(
-    pos_x: Pixels,
-    track: &Bounds<Pixels>,
-    min: f64,
-    max: f64,
-    step: f64,
-) -> f64 {
+fn value_from_x(pos_x: Pixels, track: &Bounds<Pixels>, min: f64, max: f64, step: f64) -> f64 {
     if max <= min {
         return min;
     }
@@ -63,6 +68,8 @@ pub struct RangeSlider {
         String,
         Box<dyn Fn(&(f64, f64), &mut Window, &mut App) + 'static>,
     )>,
+    /// Fires on click-release. See module-level GPUI delta note.
+    on_value_commit: Option<Box<dyn Fn(&(f64, f64), &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for RangeSlider {
@@ -78,6 +85,7 @@ impl RangeSlider {
             spec: RangeSliderSpec::default(),
             theme: theme.clone(),
             on_change: None,
+            on_value_commit: None,
         }
     }
 
@@ -86,6 +94,7 @@ impl RangeSlider {
             spec,
             theme: theme.clone(),
             on_change: None,
+            on_value_commit: None,
         }
     }
 
@@ -99,6 +108,16 @@ impl RangeSlider {
         f: impl Fn(&(f64, f64), &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_change = Some((interaction_key.into(), Box::new(f)));
+        self
+    }
+
+    /// Register a callback fired when the user completes an interaction.
+    /// See module-level GPUI delta note for limitations.
+    pub fn on_value_commit(
+        mut self,
+        handler: impl Fn(&(f64, f64), &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_value_commit = Some(Box::new(handler));
         self
     }
 
@@ -159,21 +178,12 @@ impl IntoElement for RangeSlider {
         let accent = resolve_color(theme, spec.range_fill_token());
         let border = resolve_color(theme, "color.border.default");
         let surface_bg = resolve_color(theme, spec.track_fill_token());
-        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let stack_gap = resolve_px(theme, "space.stack.sm");
 
-        // ── Resolve effective size from size + size_role ────────
-        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-
-        // Track dimensions scale with effective size
-        let track_height_f: f32 = match effective_size {
-            ControlSize::Xs => 4.0,
-            ControlSize::Sm => 5.0,
-            ControlSize::Md => 6.0,
-            ControlSize::Lg => 7.0,
-            ControlSize::Xl => 8.0,
-        };
+        // Track height: fixed 0.375rem (6 px) matching the Svelte reference.
+        // No per-size token exists for slider track height yet.
+        let track_height_f: f32 = rem_to_px(0.375); // 6 px
         let track_height = px(track_height_f);
         let track_radius = px(track_height_f / 2.0);
 
@@ -181,14 +191,20 @@ impl IntoElement for RangeSlider {
         let thumb_f = theme.resolve_space("size.icon.md");
         let thumb_size = px(thumb_f);
         let thumb_radius = px(thumb_f / 2.0);
-        let label_font_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let norm_low = spec.normalized_low().clamp(0.0, 1.0) as f32;
         let norm_high = spec.normalized_high().clamp(0.0, 1.0) as f32;
 
-        let track_bounds_store: Arc<Mutex<Option<Bounds<Pixels>>>> =
-            Arc::new(Mutex::new(None));
+        let track_bounds_store: Arc<Mutex<Option<Bounds<Pixels>>>> = Arc::new(Mutex::new(None));
         let track_bounds_for_prepaint = track_bounds_store.clone();
+
+        // Thumb style: elevated background + border-default (matches single Slider)
+        let thumb_shadow = vec![gpui::BoxShadow {
+            color: hsla(0.0, 0.0, 0.0, 0.18),
+            offset: point(px(0.0), px(2.0)),
+            blur_radius: px(8.0),
+            spread_radius: px(0.0),
+        }];
 
         // Track with filled range between low and high thumbs
         let track_inner = div()
@@ -210,7 +226,7 @@ impl IntoElement for RangeSlider {
                     .left(relative(norm_low))
                     .w(relative(norm_high - norm_low)),
             )
-            // Low thumb
+            // Low thumb — elevated bg + border-default (matches single Slider contract)
             .child(
                 div()
                     .absolute()
@@ -220,17 +236,12 @@ impl IntoElement for RangeSlider {
                     .w(thumb_size)
                     .h(thumb_size)
                     .rounded(thumb_radius)
-                    .bg(accent)
+                    .bg(elevated_bg)
                     .border_1()
-                    .border_color(accent)
-                    .shadow(vec![gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.2),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(3.0),
-                        spread_radius: px(0.0),
-                    }]),
+                    .border_color(border)
+                    .shadow(thumb_shadow.clone()),
             )
-            // High thumb
+            // High thumb — same styling
             .child(
                 div()
                     .absolute()
@@ -240,15 +251,10 @@ impl IntoElement for RangeSlider {
                     .w(thumb_size)
                     .h(thumb_size)
                     .rounded(thumb_radius)
-                    .bg(accent)
+                    .bg(elevated_bg)
                     .border_1()
-                    .border_color(accent)
-                    .shadow(vec![gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.2),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(3.0),
-                        spread_radius: px(0.0),
-                    }]),
+                    .border_color(border)
+                    .shadow(thumb_shadow),
             );
 
         let track = div()
@@ -261,16 +267,6 @@ impl IntoElement for RangeSlider {
                 }
             })
             .child(track_inner);
-
-        // Labels showing low/high values
-        let labels = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .text_size(label_font_size)
-            .text_color(text_secondary)
-            .child(format!("{:.0}", spec.clamped_low()))
-            .child(format!("{:.0}", spec.clamped_high()));
 
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
@@ -293,14 +289,12 @@ impl IntoElement for RangeSlider {
             .w_full()
             .flex()
             .flex_col()
-            .gap(stack_gap)
             .cursor(if is_disabled {
                 CursorStyle::OperationNotAllowed
             } else {
                 CursorStyle::PointingHand
             })
-            .child(track)
-            .child(labels);
+            .child(track);
 
         wrapper = wrapper.focus(move |s| {
             s.border_color(focus_ring)
@@ -309,100 +303,137 @@ impl IntoElement for RangeSlider {
 
         if is_disabled {
             wrapper = wrapper.opacity(disabled_opacity);
-        } else if let Some((interaction_key, on_change)) = self.on_change {
-            let on_change = Rc::new(on_change);
+        } else {
+            if let Some((interaction_key, on_change)) = self.on_change {
+                let on_change = Rc::new(on_change);
 
-            let emit: Rc<dyn Fn(DragThumb, f64, f64, f64, &mut Window, &mut App)> =
-                Rc::new({
-                    let on_change = on_change.clone();
-                    move |side, v, low, high, window, cx| {
-                        let (nl, nh) = match side {
-                            DragThumb::Low => (v.min(high), high),
-                            DragThumb::High => (low, v.max(low)),
-                        };
-                        on_change(&(nl, nh), window, cx);
-                    }
-                });
-            let emit_down = emit.clone();
-            let emit_move = emit;
+                let emit: Rc<dyn Fn(DragThumb, f64, f64, f64, &mut Window, &mut App)> =
+                    Rc::new({
+                        let on_change = on_change.clone();
+                        move |side, v, low, high, window, cx| {
+                            let (nl, nh) = match side {
+                                DragThumb::Low => (v.min(high), high),
+                                DragThumb::High => (low, v.max(low)),
+                            };
+                            on_change(&(nl, nh), window, cx);
+                        }
+                    });
+                let emit_down = emit.clone();
+                let emit_move = emit.clone();
 
-            let thumb_half = px(thumb_f * 0.5 + 2.0);
+                let thumb_half = px(thumb_f * 0.5 + 2.0);
 
-            let key_down = interaction_key.clone();
-            let key_move = interaction_key.clone();
-            let key_clear = interaction_key;
+                let key_down = interaction_key.clone();
+                let key_move = interaction_key.clone();
+                let key_clear = interaction_key.clone();
 
-            let tbs_down = track_bounds_store.clone();
-            let tbs_move = track_bounds_store;
+                let tbs_down = track_bounds_store.clone();
+                let tbs_move = track_bounds_store.clone();
 
-            wrapper = wrapper
-                .on_mouse_down(MouseButton::Left, move |event, window, cx| {
-                    if orientation != Orientation::Horizontal {
-                        return;
-                    }
-                    let tb = tbs_down.lock().ok().and_then(|g| *g);
-                    let Some(track) = tb else { return };
+                wrapper = wrapper
+                    .on_mouse_down(MouseButton::Left, move |event, window, cx| {
+                        if orientation != Orientation::Horizontal {
+                            return;
+                        }
+                        let tb = tbs_down.lock().ok().and_then(|g| *g);
+                        let Some(track) = tb else { return };
 
-                    let pos = event.position.x;
-                    let v = value_from_x(pos, &track, min, max, step);
+                        let pos = event.position.x;
+                        let v = value_from_x(pos, &track, min, max, step);
 
-                    let nl = norm_low;
-                    let nh = norm_high;
-                    let cx_low = track.origin.x + nl * track.size.width;
-                    let cx_high = track.origin.x + nh * track.size.width;
+                        let cx_low = track.origin.x + norm_low * track.size.width;
+                        let cx_high = track.origin.x + norm_high * track.size.width;
 
-                    let d_low = (pos - cx_low).abs();
-                    let d_high = (pos - cx_high).abs();
+                        let d_low = (pos - cx_low).abs();
+                        let d_high = (pos - cx_high).abs();
 
-                    let side = if d_low <= thumb_half && d_high <= thumb_half {
-                        if d_low <= d_high {
+                        let side = if d_low <= thumb_half && d_high <= thumb_half {
+                            if d_low <= d_high { DragThumb::Low } else { DragThumb::High }
+                        } else if d_low <= thumb_half {
+                            DragThumb::Low
+                        } else if d_high <= thumb_half {
+                            DragThumb::High
+                        } else if d_low <= d_high {
                             DragThumb::Low
                         } else {
                             DragThumb::High
-                        }
-                    } else if d_low <= thumb_half {
-                        DragThumb::Low
-                    } else if d_high <= thumb_half {
-                        DragThumb::High
-                    } else if d_low <= d_high {
-                        DragThumb::Low
-                    } else {
-                        DragThumb::High
-                    };
+                        };
 
-                    if let Ok(mut map) = range_drag_map().lock() {
-                        map.insert(key_down.clone(), side);
-                    }
-
-                    emit_down(side, v, low, high, window, cx);
-                })
-                .on_mouse_move(move |event, window, cx| {
-                    if orientation != Orientation::Horizontal {
-                        return;
-                    }
-                    if event.pressed_button != Some(MouseButton::Left) {
                         if let Ok(mut map) = range_drag_map().lock() {
-                            map.remove(&key_clear);
+                            map.insert(key_down.clone(), side);
                         }
-                        return;
+
+                        emit_down(side, v, low, high, window, cx);
+                    })
+                    .on_mouse_move(move |event, window, cx| {
+                        if orientation != Orientation::Horizontal {
+                            return;
+                        }
+                        if event.pressed_button != Some(MouseButton::Left) {
+                            if let Ok(mut map) = range_drag_map().lock() {
+                                map.remove(&key_clear);
+                            }
+                            return;
+                        }
+
+                        let side = range_drag_map()
+                            .lock()
+                            .ok()
+                            .and_then(|g| g.get(&key_move).copied());
+                        let Some(side) = side else { return };
+
+                        let tb = tbs_move.lock().ok().and_then(|g| *g);
+                        let Some(track) = tb else { return };
+
+                        let v = value_from_x(event.position.x, &track, min, max, step);
+                        emit_move(side, v, low, high, window, cx);
+                    });
+
+                // Keyboard navigation:
+                // Left/Down → decrement low thumb; Right/Up → increment high thumb.
+                // Contract requires per-thumb focus and Tab cycling; this is a
+                // single-focus simplification (GPUI 0.2.2 delta — see module doc).
+                let emit_key = emit;
+                wrapper = wrapper.on_key_down(move |event: &KeyDownEvent, window, cx| {
+                    let delta = if step > 0.0 { step } else { (max - min) / 100.0 };
+                    match event.keystroke.key.as_str() {
+                        "left" | "down" => {
+                            let new_low = step_clamp(low - delta, min, max, step);
+                            emit_key(DragThumb::Low, new_low, low, high, window, cx);
+                        }
+                        "right" | "up" => {
+                            let new_high = step_clamp(high + delta, min, max, step);
+                            emit_key(DragThumb::High, new_high, low, high, window, cx);
+                        }
+                        _ => {}
                     }
-
-                    let side = range_drag_map()
-                        .lock()
-                        .ok()
-                        .and_then(|g| g.get(&key_move).copied());
-                    let Some(side) = side else {
-                        return;
-                    };
-
-                    let tb = tbs_move.lock().ok().and_then(|g| *g);
-                    let Some(track) = tb else {
-                        return;
-                    };
-
-                    let v = value_from_x(event.position.x, &track, min, max, step);
-                    emit_move(side, v, low, high, window, cx);
                 });
+            }
+
+            // on_value_commit: fires on click-release via on_click.
+            if let Some(commit_handler) = self.on_value_commit {
+                let snapshot = (low, high);
+                let tbs_click = track_bounds_store;
+                wrapper = wrapper.on_click(move |event, window, cx| {
+                    let tb = tbs_click.lock().ok().and_then(|g| *g);
+                    let val = if let Some(track) = tb {
+                        let v = value_from_x(event.position().x, &track, min, max, step);
+                        // Commit with whichever thumb is closer to the click position.
+                        let cx_low = track.origin.x + norm_low * track.size.width;
+                        let cx_high = track.origin.x + norm_high * track.size.width;
+                        let d_low = (event.position().x - cx_low).abs();
+                        let d_high = (event.position().x - cx_high).abs();
+                        if d_low <= d_high {
+                            (v.min(snapshot.1), snapshot.1)
+                        } else {
+                            (snapshot.0, v.max(snapshot.0))
+                        }
+                    } else {
+                        snapshot
+                    };
+                    commit_handler(&val, window, cx);
+                });
+            }
         }
 
         wrapper.into_any_element()

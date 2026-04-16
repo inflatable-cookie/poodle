@@ -3,14 +3,25 @@
 use gpui::*;
 use gpui::StatefulInteractiveElement;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{OverlayPlacement, PopoverInitialFocus, PopoverSpec};
+use poodle_specs::{ControlSize, OverlayPlacement, PopoverInitialFocus, PopoverSpec};
 
+use crate::presentation::{control_height_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use super::floating_overlay::floating_overlay;
 
 /// A real GPUI popover component backed by `PopoverSpec`.
 ///
 /// Renders a trigger element with an optional floating content panel.
-/// The parent controls the `open` state.
+/// The panel is positioned absolutely so it does not push surrounding layout.
+/// The parent controls `open` state.
+///
+/// # Known GPUI deltas
+/// - `role="dialog"` / `aria-expanded` on trigger: GPUI native rendering does
+///   not carry HTML ARIA attributes. These are documented-only deltas.
+/// - `dismiss_on_outside_interact`: GPUI has no window-level outside-click
+///   interceptor for arbitrary elements. Escape-to-close is wired instead.
+/// - `initialFocus`: GPUI focus management (cx.focus) is entity-scoped. The
+///   parent is responsible for focusing a child element after opening.
 pub struct Popover {
     spec: PopoverSpec,
     theme: GpuiThemeProvider,
@@ -18,7 +29,7 @@ pub struct Popover {
     trigger: Option<AnyElement>,
     /// The floating content shown when open.
     content: Option<AnyElement>,
-    /// Called when the popover open state should change (Escape to close).
+    /// Called when the popover open state should change (click to toggle, Escape to close).
     on_open_change: Option<std::rc::Rc<dyn Fn(bool, &mut Window, &mut App) + 'static>>,
 }
 
@@ -86,7 +97,7 @@ impl Popover {
         self
     }
 
-    /// Called when the popover open state should change (e.g., Escape to close).
+    /// Called when the popover open state should change (click to toggle, Escape to close).
     pub fn on_open_change(
         mut self,
         handler: impl Fn(bool, &mut Window, &mut App) + 'static,
@@ -125,7 +136,7 @@ impl IntoElement for Popover {
         let popover_max_w = resolve_px(theme, "size.popover.maxWidth");
         let radius = resolve_radius(theme, "radius.surface");
 
-        // Matches Svelte treatment-surface-elevated values
+        // Svelte treatment-surface-elevated: fill at 94% alpha, border at 22% alpha
         let surface_bg = Hsla {
             a: elevated_bg.a * 0.94,
             ..elevated_bg
@@ -135,41 +146,35 @@ impl IntoElement for Popover {
             ..border_default
         };
 
-        let mut wrapper = div().flex().flex_col().gap(px(spec.offset as f32));
-
-        // Trigger
-        if let Some(trigger) = self.trigger {
-            let mut trigger_wrapper = div().id(("poodle-popover-trigger", placement_id));
+        // ── Build trigger element ─────────────────────────────────────────────
+        // Contract §6: trigger carries role="button", aria-expanded, aria-controls.
+        // GPUI note: aria-* attributes are not expressible on native GPU elements;
+        // documented delta — the trigger is a focusable click target only.
+        let trigger_el: AnyElement = if let Some(trigger) = self.trigger {
+            let mut trigger_wrapper =
+                div().id(("poodle-popover-trigger", placement_id)).child(trigger);
             if let Some(ref handler) = self.on_open_change {
                 let click_handler = handler.clone();
                 let next_open = !spec.current_open();
-                trigger_wrapper = trigger_wrapper.on_click(move |_event, window, cx| {
-                    click_handler(next_open, window, cx);
-                });
+                trigger_wrapper =
+                    trigger_wrapper.on_click(move |_event, window, cx| {
+                        click_handler(next_open, window, cx);
+                    });
             }
-            wrapper = wrapper.child(trigger_wrapper.child(trigger));
-        }
+            trigger_wrapper.into_any_element()
+        } else {
+            div().into_any_element()
+        };
 
-        // Floating content (shown when open)
-        // Accessibility semantics (contract section 6):
-        // Trigger: role="button", tabindex="0", aria-expanded={open}, aria-controls={surface id}
-        // Surface: role="dialog", tabindex per initialFocus strategy
-        // aria-label on surface from spec.aria_label when provided
-        if spec.current_open() {
-            if let Some(content) = self.content {
+        // ── Build surface element (None when closed) ──────────────────────────
+        // Contract §6: surface carries role="dialog", tabindex, aria-label.
+        // GPUI note: same delta as trigger — ARIA not expressible.
+        let surface_el: Option<AnyElement> = if spec.current_open() {
+            self.content.map(|content| {
                 let mut surface = div()
                     .id("poodle-popover-surface")
                     .focusable()
-                    .rounded(radius);
-
-                // Brand-raised treatment: gradient fill for elevated surface
-                if theme.brand_raised {
-                    surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
-                } else {
-                    surface = surface.bg(surface_bg);
-                }
-
-                surface = surface
+                    .rounded(radius)
                     .border_1()
                     .border_color(border)
                     // Contract: elevation-popover shadow
@@ -194,6 +199,13 @@ impl IntoElement for Popover {
                     .max_w(popover_max_w)
                     .child(content);
 
+                // Brand-raised treatment: gradient fill for elevated surface
+                if theme.brand_raised {
+                    surface = surface.bg(crate::theme_ext::brand_raised_surface_fill(surface_bg));
+                } else {
+                    surface = surface.bg(surface_bg);
+                }
+
                 // Escape key to close
                 if let Some(ref handler) = self.on_open_change {
                     let esc_handler = handler.clone();
@@ -204,10 +216,17 @@ impl IntoElement for Popover {
                     });
                 }
 
-                wrapper = wrapper.child(surface);
-            }
-        }
+                surface.into_any_element()
+            })
+        } else {
+            None
+        };
 
-        wrapper.into_any_element()
+        // ── Floating overlay — positions surface above the document flow ───────
+        // anchor_h: Md control height is the most common trigger size.
+        // dismiss_on_outside_interact: see struct-level doc comment for delta note.
+        let anchor_h = px(rem_to_px(control_height_rem(ControlSize::Md)));
+
+        floating_overlay(trigger_el, surface_el, spec.placement, anchor_h, anchor_h)
     }
 }

@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{Orientation, TabStripItem};
+use crate::types::{ControlDensity, ControlSize, Orientation, TabStripItem};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TabStripSpec {
@@ -10,6 +10,10 @@ pub struct TabStripSpec {
     pub orientation: Orientation,
     pub is_reorderable: bool,
     pub aria_label: Option<String>,
+    /// Physical size of each tab item (height, font-size, padding). Defaults to Md.
+    pub size: ControlSize,
+    /// Horizontal density — controls padding-x and inline gap. Defaults to Default.
+    pub density: ControlDensity,
 }
 
 impl Default for TabStripSpec {
@@ -21,6 +25,8 @@ impl Default for TabStripSpec {
             orientation: Orientation::Horizontal,
             is_reorderable: false,
             aria_label: None,
+            size: ControlSize::Md,
+            density: ControlDensity::Default,
         }
     }
 }
@@ -55,6 +61,16 @@ impl TabStripSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
         self
     }
 
