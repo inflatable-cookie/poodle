@@ -78,6 +78,11 @@ pub struct SelectSpec {
     /// Invalidates cached lazy options when it changes. Callers bump
     /// this to force a re-fetch from loadOptions. Matches `loadKey`.
     pub load_key: Option<String>,
+    /// Current search/filter query string for the inline search input.
+    /// When `searchable` is true and this is set, only options whose
+    /// labels contain the query (case-insensitive) are shown.
+    /// The host controls this via the `on_search_change` callback.
+    pub search_query: Option<String>,
 }
 
 impl Default for SelectSpec {
@@ -106,6 +111,7 @@ impl Default for SelectSpec {
             validation_state: crate::types::ValidationState::None,
             value_label: None,
             load_key: None,
+            search_query: None,
         }
     }
 }
@@ -252,6 +258,11 @@ impl SelectSpec {
 
     pub fn with_load_key(mut self, key: impl Into<String>) -> Self {
         self.load_key = Some(key.into());
+        self
+    }
+
+    pub fn with_search_query(mut self, query: impl Into<String>) -> Self {
+        self.search_query = Some(query.into());
         self
     }
 }

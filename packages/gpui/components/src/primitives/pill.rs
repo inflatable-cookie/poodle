@@ -129,11 +129,11 @@ impl IntoElement for Pill {
             }
             _ => {
                 match spec.tone {
-                    // Success/Danger: 14% tone tint into surface
-                    PillTone::Success | PillTone::Danger => {
+                    // Toned fills: 14% tone tint blended into surface
+                    PillTone::Success | PillTone::Danger | PillTone::Info | PillTone::Warning => {
                         surface_bg.blend(tone_color.opacity(0.14))
                     }
-                    // Neutral/Info/Warning: 90% surface (Svelte has no overrides for info/warning)
+                    // Neutral: 90% surface
                     _ => surface_bg.opacity(0.9),
                 }
             }
@@ -154,10 +154,11 @@ impl IntoElement for Pill {
             PillAppearance::Badge => gpui::transparent_black(),
             _ => {
                 match spec.tone {
-                    PillTone::Success | PillTone::Danger => {
+                    // Toned borders: 38% tone tint blended into border-subtle
+                    PillTone::Success | PillTone::Danger | PillTone::Info | PillTone::Warning => {
                         border_subtle.blend(tone_color.opacity(0.38))
                     }
-                    // Neutral/Info/Warning: plain border-subtle at 82%
+                    // Neutral: plain border-subtle at 82%
                     _ => border_subtle.opacity(0.82),
                 }
             }

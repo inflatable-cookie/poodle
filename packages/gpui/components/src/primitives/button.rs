@@ -13,8 +13,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ButtonSpec, ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SpinnerSize,
-    SpinnerSpec, SpinnerTone, SpinnerVariant,
+    ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize, IconSize, IconSpec,
+    SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
 
 use super::icon::Icon;
@@ -159,7 +159,11 @@ impl IntoElement for Button {
         let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
         let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
-        let gap = resolve_px(theme, ButtonSpec::content_gap_token());
+        let gap = match spec.density {
+            ControlDensity::Compact => resolve_px(theme, "space.inline.xs"),
+            ControlDensity::Default => resolve_px(theme, ButtonSpec::content_gap_token()),
+            ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
+        };
 
         // Icon padding adjustment (contract §8): reduce padding on icon side by 0.125rem
         let has_leading = spec.leading_icon.is_some() || spec.is_loading;
@@ -189,14 +193,18 @@ impl IntoElement for Button {
                 let surface = resolve_color(theme, "color.background.surface");
                 let border_default = resolve_color(theme, "color.border.default");
                 let fill = color_mix(danger, surface, 0.16);
-                // border: color-mix(status-danger 46%, border-default)
-                let border = color_mix(danger, border_default, 0.46);
-                (fill, border, base_text)
+                // idle border: plain border-default (contract §8 Tone: danger)
+                (fill, border_default, base_text)
             }
             (ButtonVariant::Primary, _) => {
                 // Svelte treatment-interactive-primary-border: accent-base 86% + black
                 let darkened_border = color_mix_black(base_fill, 0.86);
                 (base_fill, darkened_border, base_text)
+            }
+            (ButtonVariant::Ghost, ButtonTone::Danger) => {
+                // Ghost×danger: text uses status-danger instead of text-primary
+                let danger_text = resolve_color(theme, "color.status.danger");
+                (base_fill, base_border, danger_text)
             }
             _ => (base_fill, base_border, base_text),
         };
@@ -222,19 +230,45 @@ impl IntoElement for Button {
             };
 
         // ── Hover/active colors (contract §8 Hover/Active) ──────
-        // hover fill: color-mix(fill 84%, elevated)
-        // active fill: color-mix(fill 72%, elevated)
-        let hover_fill = color_mix(fill, elevated, 0.84);
-        let active_fill = color_mix(fill, elevated, 0.72);
-        // hover border: color-mix(border 78%, text-primary)
-        // For ghost, base border is transparent — CSS color-mix(transparent 78%, text-primary)
-        // produces ~22% text-primary. We replicate by mixing the resolved border-default
-        // token with text-primary so the ghost gets a visible border on hover.
-        let hover_border = if is_ghost {
-            let border_default = resolve_color(theme, "color.border.default");
-            color_mix(border_default, text_primary, 0.78)
-        } else {
-            color_mix(border_color, text_primary, 0.78)
+        // Danger tones use within-family color-mix formulas; all others mix toward
+        // elevated / text-primary (contract §8 Tone: danger, Hover/Active).
+        let (hover_fill, active_fill, hover_border) = match (spec.variant, spec.tone) {
+            (ButtonVariant::Ghost, ButtonTone::Danger) => {
+                let danger = resolve_color(theme, "color.status.danger");
+                (
+                    Hsla { a: 0.10, ..danger },
+                    Hsla { a: 0.16, ..danger },
+                    Hsla { a: 0.28, ..danger },
+                )
+            }
+            (ButtonVariant::Secondary, ButtonTone::Danger) => {
+                let danger = resolve_color(theme, "color.status.danger");
+                let surface = resolve_color(theme, "color.background.surface");
+                let border_default = resolve_color(theme, "color.border.default");
+                (
+                    color_mix(danger, surface, 0.24),
+                    color_mix(danger, surface, 0.32),
+                    color_mix(danger, border_default, 0.62),
+                )
+            }
+            (ButtonVariant::Primary, ButtonTone::Danger) => {
+                let danger = resolve_color(theme, "color.status.danger");
+                let white = Hsla { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };
+                let black = Hsla { h: 0.0, s: 0.0, l: 0.0, a: 1.0 };
+                let hf = color_mix(danger, white, 0.88);
+                (hf, color_mix(danger, black, 0.88), color_mix_black(hf, 0.86))
+            }
+            _ => {
+                let hf = color_mix(fill, elevated, 0.84);
+                let af = color_mix(fill, elevated, 0.72);
+                let hb = if is_ghost {
+                    let border_default = resolve_color(theme, "color.border.default");
+                    color_mix(border_default, text_primary, 0.78)
+                } else {
+                    color_mix(border_color, text_primary, 0.78)
+                };
+                (hf, af, hb)
+            }
         };
 
         // ── Build element ID ─────────────────────────────────────

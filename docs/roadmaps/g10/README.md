@@ -50,9 +50,9 @@ surface that needs to be made explicit again.
 - `g10.012` active — GPUI runtime truth, retire `g08` delta register, close false
   “blockers”, dashed borders, backlog for real input/select/slider work
   (`docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`)
-- `g10.013` pending — GPUI component correctness and token fidelity: Select fake
+- `g10.013` complete — GPUI component correctness and token fidelity: Select fake
   search, Button danger tone formulas, Checkbox/Switch per-size geometry, Pill
-  token resolution
+  tone handling
   (`docs/roadmaps/g10/013-gpui-component-correctness-and-token-fidelity.md`)
 - `g10.014` pending — GPUI overlay architecture, navigation, and slider fidelity:
   Tooltip/Popover floating overlay utility, TabStrip ARIA + keyboard, Slider/
@@ -70,12 +70,13 @@ Three active seams identified:
 - default lane: Seam B Jetstream implementation **or** GPUI production hardening
   via `g10.012` (user priority)
 - parity checkpoint: `g10.005` to `g10.007` complete
-- GPUI / spec queue: `g10.009` to `g10.011` complete; **`g10.012` open** for
-  deferred functional work (text input, select overlay, sliders, token sweep,
-  adapter mount strategy)
+- GPUI / spec queue: `g10.009` to `g10.013` complete; **`g10.014` open** for
+  overlay architecture, TabStrip ARIA, Slider/RangeSlider behavioral gaps, Tabs
+  polish
 
 ## Next Task
 
-Drive **`g10.012`** checklist, or resume Jetstream / rollover planning. Living GPUI
-vs Svelte truth: `012-gpui-runtime-truth-and-deferred-work-closure.md` (not
-`g08/delta-register.md`).
+Drive **`g10.014`** checklist: floating overlay utility for Tooltip/Popover,
+TabStrip tokens + ARIA + keyboard, Slider/RangeSlider behavioral gaps, Tabs
+close affordance and ARIA. Start with the floating overlay — it unblocks both
+Tooltip and Popover in one pass.

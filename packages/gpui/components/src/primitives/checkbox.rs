@@ -2,9 +2,10 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CheckState, CheckboxSpec, ControlSize};
+use poodle_specs::{CheckState, CheckboxSpec, ControlSize, IconSize, IconSpec};
 
-use crate::presentation::{control_height_rem, resolve_semantic_size};
+use super::icon::Icon;
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
@@ -111,13 +112,20 @@ impl IntoElement for Checkbox {
 
         // Contract: gap = space-inline-sm
         let inline_gap = resolve_px(theme, "space.inline.sm");
-        let body_size = resolve_px(theme, "typography.body.size");
-        // Contract: indicator scales with effective size — base 1.125rem at Md,
-        // proportional to control height ratio
-        let indicator_base = 18.0_f32; // 1.125rem at Md
-        let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
-        let indicator_size = px(indicator_base * scale);
-        let indicator_radius = px(5.0 * scale); // 0.3125rem scaled
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
+        // Per-size indicator dimensions from the contract size table (icon tokens)
+        let (indicator_size, indicator_radius) = match effective_size {
+            ControlSize::Xs => (resolve_px(theme, "size.icon.xs"), px(3.0)),
+            ControlSize::Sm => (resolve_px(theme, "size.icon.sm"), px(4.0)),
+            ControlSize::Md => (px(rem_to_px(1.125)), px(5.0)),
+            ControlSize::Lg => (resolve_px(theme, "size.icon.lg"), px(6.0)),
+            ControlSize::Xl => (resolve_px(theme, "size.icon.xl"), px(7.0)),
+        };
+        // Mark icon: one step smaller than the indicator (IconSize only has Sm/Md/Lg)
+        let mark_icon_size = match effective_size {
+            ControlSize::Xs | ControlSize::Sm | ControlSize::Md | ControlSize::Lg => IconSize::Sm,
+            ControlSize::Xl => IconSize::Md,
+        };
         let focus_ring_color = resolve_color(theme, "color.accent.focusRing");
 
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
@@ -157,28 +165,25 @@ impl IntoElement for Checkbox {
                 .justify_center()
                 .flex_shrink_0();
 
-            // Contract: check mark inside indicator = 0.875rem at Md, scaled
-            let mark_size = px(14.0 * scale);
-
             if is_checked {
                 ind = ind.bg(accent).border_1().border_color(accent);
                 match state {
                     CheckState::Checked => {
                         ind = ind.child(
-                            svg()
-                                .path(SharedString::from("assets/icons/check.svg"))
-                                .size(mark_size)
-                                .flex_shrink_0()
-                                .text_color(text_inverse),
+                            Icon::from_spec(
+                                IconSpec::new("check").with_size(mark_icon_size),
+                                theme,
+                            )
+                            .with_color(text_inverse),
                         );
                     }
                     CheckState::Mixed => {
                         ind = ind.child(
-                            svg()
-                                .path(SharedString::from("assets/icons/minus.svg"))
-                                .size(mark_size)
-                                .flex_shrink_0()
-                                .text_color(text_inverse),
+                            Icon::from_spec(
+                                IconSpec::new("minus").with_size(mark_icon_size),
+                                theme,
+                            )
+                            .with_color(text_inverse),
                         );
                     }
                     _ => {}
@@ -211,14 +216,14 @@ impl IntoElement for Checkbox {
                     }])
             });
 
-        if is_interactive {
-            row = row.cursor_pointer();
-        }
-
         if spec.is_disabled {
             row = row
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
+        } else if spec.is_read_only {
+            row = row.cursor_default();
+        } else {
+            row = row.cursor_pointer();
         }
 
         row = row.child(indicator);
@@ -226,7 +231,8 @@ impl IntoElement for Checkbox {
         if let Some(ref label) = spec.label {
             row = row.child(
                 div()
-                    .text_size(body_size)
+                    .text_size(label_size)
+                    .font_weight(FontWeight::MEDIUM)
                     .text_color(text_primary)
                     .child(label.clone()),
             );

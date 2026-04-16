@@ -34,6 +34,10 @@ pub struct SwitchSpec {
     pub default_checked: bool,
     pub is_disabled: bool,
     pub is_read_only: bool,
+    /// HTML `name` attribute for form submission. Required when the switch
+    /// participates in a form (the Svelte implementation passes this to the
+    /// underlying hidden input).
+    pub name: Option<String>,
     pub label: Option<String>,
     /// Left-side label for dual-label mode. When either `left_label` or
     /// `right_label` is set the Switch renders in dual-label layout
@@ -64,6 +68,7 @@ impl Default for SwitchSpec {
             default_checked: false,
             is_disabled: false,
             is_read_only: false,
+            name: None,
             label: None,
             left_label: None,
             right_label: None,
@@ -102,6 +107,11 @@ impl SwitchSpec {
 
     pub fn with_off_color(mut self, color: impl Into<String>) -> Self {
         self.off_color = Some(color.into());
+        self
+    }
+
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
         self
     }
 

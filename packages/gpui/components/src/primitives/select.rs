@@ -4,9 +4,11 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ChoiceOption, ControlSize, IconSize, IconSpec, SelectMode, SelectSpec, SelectVariant,
+    TextInputSpec,
 };
 
 use super::icon::Icon;
+use super::text_input::TextInput;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
@@ -20,6 +22,7 @@ pub struct Select {
     id_suffix: Option<String>,
     on_toggle: Option<Box<dyn Fn(&bool, &mut Window, &mut App) + 'static>>,
     on_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    on_search_change: Option<Box<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for Select {
@@ -37,6 +40,7 @@ impl Select {
             id_suffix: None,
             on_toggle: None,
             on_change: None,
+            on_search_change: None,
         }
     }
 
@@ -47,6 +51,7 @@ impl Select {
             id_suffix: None,
             on_toggle: None,
             on_change: None,
+            on_search_change: None,
         }
     }
 
@@ -130,6 +135,19 @@ impl Select {
         self.on_change = Some(Box::new(handler));
         self
     }
+
+    pub fn search_query(mut self, q: impl Into<String>) -> Self {
+        self.spec.search_query = Some(q.into());
+        self
+    }
+
+    pub fn on_search_change(
+        mut self,
+        handler: impl Fn(&str, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_search_change = Some(Box::new(handler));
+        self
+    }
 }
 
 impl IntoElement for Select {
@@ -202,10 +220,8 @@ impl IntoElement for Select {
             ..border_default
         };
 
-        let trigger_text = spec
-            .trigger_text()
-            .unwrap_or(spec.placeholder.as_deref().unwrap_or("Select..."));
-        let is_placeholder = spec.trigger_text().is_none();
+        let trigger_text = spec.trigger_text().unwrap_or("");
+        let is_placeholder = spec.current_value().is_none();
         let is_open = spec.current_open();
         let is_disabled = spec.is_disabled;
 
@@ -244,7 +260,7 @@ impl IntoElement for Select {
 
             trigger = trigger
                 .border_1()
-                .border_color(if is_open { accent } else { border })
+                .border_color(if is_open { focus_ring } else { border })
                 .flex()
                 .items_center()
                 .justify_between()
@@ -310,6 +326,8 @@ impl IntoElement for Select {
             self.on_toggle.map(|h| std::rc::Rc::from(h));
         let on_change_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_change.map(|h| std::rc::Rc::from(h));
+        let on_search_rc: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
+            self.on_search_change.map(|h| std::rc::Rc::from(h));
 
         // Collect selectable option values for keyboard navigation
         let selectable_values: Vec<String> = spec
@@ -430,29 +448,41 @@ impl IntoElement for Select {
                 .max_h(menu_max_h)
                 .overflow_y_scroll();
 
-            // Searchable: show a filter input placeholder at the top of the dropdown
+            // Searchable: real TextInput wired to on_search_change callback.
+            // The host holds the query in its own state and passes it back
+            // through spec.search_query so the options list is filtered here.
+            let search_query_lc: Option<String> = spec
+                .search_query
+                .as_deref()
+                .filter(|q| !q.is_empty())
+                .map(|q| q.to_lowercase());
+
             if spec.shows_search_input() {
-                let search_placeholder = div()
-                    .id("poodle-select-search")
-                    .focusable()
-                    .mx(inline_padding)
-                    .mb(stack_gap)
-                    .px(inline_padding)
-                    .h(control_height)
-                    .flex()
-                    .items_center()
-                    .rounded(control_radius)
-                    .bg(surface_bg)
-                    .border_1()
-                    .border_color(border)
-                    .text_size(body_size)
-                    .text_color(text_secondary)
-                    .child("Search...");
-                list = list.child(search_placeholder);
+                let search_rc = on_search_rc.clone();
+                let current_query = spec.search_query.clone().unwrap_or_default();
+                let mut search_input = TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_value(current_query)
+                        .with_placeholder("Search..."),
+                    theme,
+                )
+                .with_id("select-search");
+                if let Some(handler) = search_rc {
+                    search_input = search_input.on_change(move |q, window, cx| {
+                        handler(q, window, cx);
+                    });
+                }
+                list = list.child(div().mx(inline_padding).mb(stack_gap).child(search_input));
             }
 
             let mut has_visible_options = false;
             for option in spec.options.iter() {
+                // Filter by search query when searchable and query is non-empty
+                if let Some(ref q) = search_query_lc {
+                    if !option.label.to_lowercase().contains(q.as_str()) {
+                        continue;
+                    }
+                }
                 has_visible_options = true;
                 let is_selected = spec.current_value() == Some(option.value.as_str());
                 let is_opt_disabled = option.is_disabled;
@@ -495,8 +525,8 @@ impl IntoElement for Select {
                 list = list.child(item);
             }
 
-            // Empty state message (shown when searchable and no options match)
-            if !has_visible_options && spec.shows_search_input() {
+            // Empty state message (shown when no options are visible)
+            if !has_visible_options {
                 list = list.child(
                     div()
                         .px(inline_padding)

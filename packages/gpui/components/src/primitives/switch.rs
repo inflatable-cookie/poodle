@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlSize, SwitchSpec, SwitchTone};
 
-use crate::presentation::{control_height_rem, resolve_semantic_size};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI switch/toggle component backed by `SwitchSpec`.
@@ -48,6 +48,10 @@ impl Switch {
     }
     pub fn default_checked(mut self, v: bool) -> Self {
         self.spec.default_checked = v;
+        self
+    }
+    pub fn name(mut self, v: impl Into<String>) -> Self {
+        self.spec.name = Some(v.into());
         self
     }
     pub fn disabled(mut self, v: bool) -> Self {
@@ -115,7 +119,6 @@ impl IntoElement for Switch {
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
 
         // Contract: gap = space-inline-sm
         let inline_gap = resolve_px(theme, "space.inline.sm");
@@ -125,7 +128,7 @@ impl IntoElement for Switch {
         let border = resolve_color(theme, "color.border.default");
         let surface_bg = resolve_color(theme, "color.background.surface");
         let text_primary = resolve_color(theme, "color.text.primary");
-        let body_size = resolve_px(theme, "typography.body.size");
+        let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let is_checked = spec.current_checked();
         let is_interactive = !spec.is_disabled && !spec.is_read_only;
@@ -136,21 +139,24 @@ impl IntoElement for Switch {
             format!("poodle-switch-{}", spec.label.as_deref().unwrap_or("anon"))
         };
 
-        // Svelte: track = calc(icon-default * 2 + 0.125rem) wide × calc(icon-default + 0.25rem) tall
-        // Base values at Md (icon-default = 16px): track = 34px × 20px, thumb = 14px
-        // Scale proportionally with effective_size
-        let icon_default = resolve_px(theme, "size.icon.md");
-        let track_w = (icon_default * 2.0 + px(2.0)) * scale;
-        let track_h = (icon_default + px(4.0)) * scale;
-        let track_radius = track_h / 2.0; // pill
-        let track_padding = px(2.0 * scale);
-
-        let thumb_size = (icon_default - px(2.0)) * scale;
-        let thumb_radius = thumb_size / 2.0; // circle
-
-        // Thumb travel = thumb_size distance
+        // Per-size track geometry from the contract size table.
+        // Md baseline: 34×20px track, 2px padding, 14px thumb (matches Svelte).
+        // Other sizes scale from the icon-size tokens with non-linear per-size geometry.
+        let icon_xs = resolve_px(theme, "size.icon.xs");
+        let icon_sm = resolve_px(theme, "size.icon.sm");
+        let icon_lg = resolve_px(theme, "size.icon.lg");
+        let icon_xl = resolve_px(theme, "size.icon.xl");
+        let (track_w, track_h, track_padding, thumb_size) = match effective_size {
+            ControlSize::Xs => (icon_xs * 1.75, icon_xs * 0.875, px(1.0), icon_xs * 0.75 - px(2.0)),
+            ControlSize::Sm => (icon_sm * 1.875, icon_sm + px(2.0), px(1.5), icon_sm - px(3.0)),
+            ControlSize::Md => (px(34.0), px(20.0), px(2.0), px(14.0)),
+            ControlSize::Lg => (icon_lg * 2.25 + px(4.0), icon_lg + px(8.0), px(3.0), icon_lg),
+            ControlSize::Xl => (icon_xl * 2.5 + px(6.0), icon_xl + px(12.0), px(4.0), icon_xl + px(2.0)),
+        };
+        let track_radius = track_h / 2.0;
+        let thumb_radius = thumb_size / 2.0;
         let knob_offset = if is_checked {
-            thumb_size + track_padding
+            track_w - thumb_size - track_padding
         } else {
             track_padding
         };
@@ -285,7 +291,7 @@ impl IntoElement for Switch {
                 let color = label_color(off_tone_color, !is_checked);
                 row = row.child(
                     div()
-                        .text_size(body_size)
+                        .text_size(label_size)
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(color)
                         .child(left.clone()),
@@ -298,7 +304,7 @@ impl IntoElement for Switch {
                 let color = label_color(on_tone_color, is_checked);
                 row = row.child(
                     div()
-                        .text_size(body_size)
+                        .text_size(label_size)
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(color)
                         .child(right.clone()),
@@ -310,7 +316,8 @@ impl IntoElement for Switch {
             if let Some(ref label) = spec.label {
                 row = row.child(
                     div()
-                        .text_size(body_size)
+                        .text_size(label_size)
+                        .font_weight(FontWeight::MEDIUM)
                         .text_color(text_primary)
                         .child(label.clone()),
                 );

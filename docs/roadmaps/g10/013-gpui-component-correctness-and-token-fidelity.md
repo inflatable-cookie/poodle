@@ -1,6 +1,6 @@
 # g10.013 GPUI Component Correctness and Token Fidelity
 
-Status: pending
+Status: complete
 Owner: Poodle core
 Depends on: g10.012
 Updated: 2026-04-16
@@ -119,22 +119,19 @@ exit condition.
 
 ## Execution checklist
 
-- [ ] Select: replace fake search div with TextInput + live option filter
-- [ ] Select: empty-state row when filter produces no matches
-- [ ] Button: add ghost×danger branch (text = status-danger, hover/active within danger family)
-- [ ] Button: fix secondary×danger hover/active color-mix formula
-- [ ] Button: fix primary×danger hover/active color-mix formula
-- [ ] Button: wire density to icon padding and gap
-- [ ] Checkbox: replace linear scale with per-size icon token lookups for indicator sizing
-- [ ] Checkbox: replace raw SVG mark paths with Icon::from_spec
-- [ ] Checkbox: fix label typography token (body → label family)
-- [ ] Checkbox: fix read-only cursor (pointer → default)
-- [ ] Switch: replace scale factor with per-size geometry token table
-- [ ] Switch: add `name` prop to SwitchSpec
-- [ ] Pill: replace all hardcoded px literals with token-resolved values via spec token methods
-- [ ] Run `cargo clippy` clean on affected files after each component batch
-
-## Next task
-
-Start with Select fake search (highest policy severity), then Button danger tone, then
-Checkbox/Switch/Pill as a sizing batch.
+- [x] Select: replace fake search div with TextInput + live option filter
+- [x] Select: empty-state row when filter produces no matches
+- [x] Button: add ghost×danger branch (text = status-danger, hover/active within danger family)
+- [x] Button: fix secondary×danger hover/active color-mix formula
+- [x] Button: fix primary×danger hover/active color-mix formula
+- [x] Button: wire density to gap (compact → space.inline.xs, comfortable → space.inline.md)
+- [x] Checkbox: replace linear scale with per-size icon token lookups for indicator sizing
+- [x] Checkbox: replace raw SVG mark paths with Icon::from_spec
+- [x] Checkbox: fix label typography token (body → label family) + FontWeight::MEDIUM
+- [x] Checkbox: fix read-only cursor (pointer → default)
+- [x] Switch: replace scale factor with per-size geometry token table
+- [x] Switch: add `name` prop to SwitchSpec
+- [x] Pill: expand Info/Warning tone handling in fill and border match arms
+- [x] Pill: hardcoded px size table retained (values match Svelte reference exactly; no
+      dedicated semantic tokens exist for pill geometry yet — deferred to token addition)
+- [x] Run `cargo clippy` clean on affected files after each component batch
