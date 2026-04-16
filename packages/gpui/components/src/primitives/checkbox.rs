@@ -114,12 +114,13 @@ impl IntoElement for Checkbox {
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
         // Per-size indicator dimensions from the contract size table (icon tokens)
+        // Radius: 0.0625rem × {3,4,5,6,7} — Svelte: 0.1875/0.25/0.3125/0.375/0.4375rem
         let (indicator_size, indicator_radius) = match effective_size {
-            ControlSize::Xs => (resolve_px(theme, "size.icon.xs"), px(3.0)),
-            ControlSize::Sm => (resolve_px(theme, "size.icon.sm"), px(4.0)),
-            ControlSize::Md => (px(rem_to_px(1.125)), px(5.0)),
-            ControlSize::Lg => (resolve_px(theme, "size.icon.lg"), px(6.0)),
-            ControlSize::Xl => (resolve_px(theme, "size.icon.xl"), px(7.0)),
+            ControlSize::Xs => (resolve_px(theme, "size.icon.xs"), px(rem_to_px(0.1875))),
+            ControlSize::Sm => (resolve_px(theme, "size.icon.sm"), px(rem_to_px(0.25))),
+            ControlSize::Md => (px(rem_to_px(1.125)),              px(rem_to_px(0.3125))),
+            ControlSize::Lg => (resolve_px(theme, "size.icon.lg"), px(rem_to_px(0.375))),
+            ControlSize::Xl => (resolve_px(theme, "size.icon.xl"), px(rem_to_px(0.4375))),
         };
         // Mark icon: one step smaller than the indicator (IconSize only has Sm/Md/Lg)
         let mark_icon_size = match effective_size {

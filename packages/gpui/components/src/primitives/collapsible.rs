@@ -161,7 +161,7 @@ impl IntoElement for Collapsible {
             .focusable()
             .flex()
             .items_center()
-            .gap(px(12.0)) // 0.75rem
+            .gap(resolve_px(theme, "space.inline.md"))
             .w_full()
             .focus(move |s| {
                 s.border_color(focus_ring)

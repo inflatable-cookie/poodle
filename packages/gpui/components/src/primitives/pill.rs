@@ -5,6 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{IconSize, IconSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
 use super::icon::Icon;
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI pill component backed by `PillSpec`.
@@ -92,13 +93,17 @@ impl IntoElement for Pill {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // ── Size-dependent values ────────────────────────────────
+        // ── Size-dependent values (Svelte reference: Pill.svelte per-size overrides) ─
+        // min-h: xs→0.875 sm→1.0 md→1.25 lg→1.375 xl→1.5 rem
+        // pad-x: xs→0.3125 sm→0.375 md→0.5 lg→0.625 xl→0.75 rem
+        // pad-y: xs→0.0625 sm→0.125 md→0.1875 lg→0.25 xl→0.3125 rem
+        // font:  xs→0.5625 sm→0.625 md→0.6875 lg→0.75 xl→0.8125 rem
         let (min_h, pad_x, pad_y, font_size) = match spec.size {
-            PillSize::Xs => (px(14.0), px(5.0), px(1.0), px(9.0)),
-            PillSize::Sm => (px(16.0), px(6.0), px(2.0), px(10.0)),
-            PillSize::Md => (px(20.0), px(8.0), px(3.0), px(11.0)),
-            PillSize::Lg => (px(22.0), px(10.0), px(4.0), px(12.0)),
-            PillSize::Xl => (px(24.0), px(12.0), px(5.0), px(13.0)),
+            PillSize::Xs => (px(rem_to_px(0.875)),  px(rem_to_px(0.3125)), px(rem_to_px(0.0625)),  px(rem_to_px(0.5625))),
+            PillSize::Sm => (px(rem_to_px(1.0)),    px(rem_to_px(0.375)),  px(rem_to_px(0.125)),   px(rem_to_px(0.625))),
+            PillSize::Md => (px(rem_to_px(1.25)),   px(rem_to_px(0.5)),    px(rem_to_px(0.1875)),  px(rem_to_px(0.6875))),
+            PillSize::Lg => (px(rem_to_px(1.375)),  px(rem_to_px(0.625)),  px(rem_to_px(0.25)),    px(rem_to_px(0.75))),
+            PillSize::Xl => (px(rem_to_px(1.5)),    px(rem_to_px(0.75)),   px(rem_to_px(0.3125)),  px(rem_to_px(0.8125))),
         };
 
         // ── Colors ───────────────────────────────────────────────

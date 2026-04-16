@@ -124,7 +124,8 @@ impl IntoElement for TabStrip {
                 + size_padding_x_offset_rem(effective_size),
         ));
         let control_y = resolve_px(theme, "space.control.y");
-        let inline_gap = resolve_px(theme, "space.inline.xs");
+        // Icon-to-label gap within each tab; matches Svelte Tabs space.inline.sm
+        let inline_gap = resolve_px(theme, "space.inline.sm");
 
         let accent = resolve_color(theme, "color.accent.base");
         let border = resolve_color(theme, "color.border.default");

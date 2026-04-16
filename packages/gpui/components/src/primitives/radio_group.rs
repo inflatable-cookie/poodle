@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ChoiceOption, ControlSize, Orientation, RadioGroupSpec};
 
-use crate::presentation::{control_height_rem, resolve_semantic_size};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
 
 /// A real GPUI radio group component backed by `RadioGroupSpec`.
@@ -103,13 +103,32 @@ impl IntoElement for RadioGroup {
 
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let scale = control_height_rem(effective_size) / control_height_rem(ControlSize::Md);
 
-        // Svelte: indicator = calc(icon-default + 0.125rem) ≈ 18px, dot = calc(icon-default * 0.5) = 8px
-        // Scale proportionally with effective_size
-        let icon_default = resolve_px(theme, "size.icon.md");
-        let indicator_size = (icon_default + px(2.0)) * scale;
-        let dot_size = icon_default * 0.5 * scale;
+        // Indicator: size.icon.{size} + offset
+        // Svelte: xs/sm use +0.25rem offset, md/lg/xl use +0.125rem offset
+        let icon_size_token = match effective_size {
+            ControlSize::Xs => "size.icon.xs",
+            ControlSize::Sm => "size.icon.sm",
+            ControlSize::Md => "size.icon.md",
+            ControlSize::Lg => "size.icon.lg",
+            ControlSize::Xl => "size.icon.xl",
+        };
+        let indicator_offset = match effective_size {
+            ControlSize::Xs | ControlSize::Sm => rem_to_px(0.25),
+            _ => rem_to_px(0.125),
+        };
+        let indicator_size = resolve_px(theme, icon_size_token) + px(indicator_offset);
+
+        // Dot: per-size rem values; md uses token formula (size.icon.md × 0.5)
+        // Svelte: xs→0.4rem, sm→0.45rem, md→icon-md×0.5, lg→0.55rem, xl→0.6rem
+        let icon_md = resolve_px(theme, "size.icon.md");
+        let dot_size = match effective_size {
+            ControlSize::Xs => px(rem_to_px(0.4)),
+            ControlSize::Sm => px(rem_to_px(0.45)),
+            ControlSize::Md => icon_md * 0.5,
+            ControlSize::Lg => px(rem_to_px(0.55)),
+            ControlSize::Xl => px(rem_to_px(0.6)),
+        };
 
         // Contract: gap per orientation
         let group_gap = resolve_px(theme, spec.option_gap_token());

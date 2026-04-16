@@ -159,17 +159,19 @@ impl IntoElement for CodeInput {
         };
 
         // ── Gap between slots (density-aware) ─────────────────────
+        // Svelte: compact→0.25rem, comfortable→space.inline.md; default interpolated at 0.375rem
         let slot_gap = match spec.density {
-            ControlDensity::Compact => px(4.0),      // 0.25rem
-            ControlDensity::Default => px(6.0),      // ~space-inline-sm
-            ControlDensity::Comfortable => px(10.0), // space-inline-md
+            ControlDensity::Compact => px(rem_to_px(0.25)),
+            ControlDensity::Default => px(rem_to_px(0.375)),
+            ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
         };
 
         // ── Split gap: extra margin after middle digit for 6-digit codes ─
+        // compact→space.inline.sm(8px), default→space.inline.md(12px), comfortable→space.inline.lg(16px)
         let split_extra_margin = match spec.density {
-            ControlDensity::Compact => px(8.0),
-            ControlDensity::Default => px(12.0), // space-inline-md = 0.75rem
-            ControlDensity::Comfortable => px(16.0),
+            ControlDensity::Compact => resolve_px(theme, "space.inline.sm"),
+            ControlDensity::Default => resolve_px(theme, "space.inline.md"),
+            ControlDensity::Comfortable => resolve_px(theme, "space.inline.lg"),
         };
 
         // ── Token resolution ──────────────────────────────────────

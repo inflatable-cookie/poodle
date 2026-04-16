@@ -35,7 +35,8 @@ fn build_tab_label(
         return div().child(tab_def.label.clone()).into_any_element();
     }
 
-    let mut inner = div().flex().items_center().gap(resolve_px(theme, "space.inline.xs"));
+    // Svelte Tabs: gap between icon and label = space.inline.sm
+    let mut inner = div().flex().items_center().gap(resolve_px(theme, "space.inline.sm"));
 
     if let Some(ref icon_name) = tab_def.icon {
         inner = inner.child(

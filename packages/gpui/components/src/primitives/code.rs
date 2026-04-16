@@ -99,11 +99,12 @@ impl IntoElement for Code {
         let text_color = resolve_color(theme, spec.text_color_token());
 
         // ── Inline mode: minimal span-like rendering ──────────
+        // Svelte: px=0.375rem, py=0.125rem, radius=0.25rem
         if spec.is_inline {
             return div()
-                .px(px(4.0))
-                .py(px(1.0))
-                .rounded(px(3.0))
+                .px(px(rem_to_px(0.375)))
+                .py(px(rem_to_px(0.125)))
+                .rounded(px(rem_to_px(0.25)))
                 .bg(fill.opacity(0.6))
                 .text_size(label_size)
                 .text_color(text_color)
@@ -134,20 +135,22 @@ impl IntoElement for Code {
         // Contract: toolbar with language label and copy button
         let has_toolbar = spec.language.is_some() || spec.is_copyable;
         if has_toolbar {
+            // Toolbar: py = 0.375rem (Svelte reference)
             let mut toolbar = div()
                 .flex()
                 .items_center()
                 .justify_between()
                 .px(panel_x)
-                .py(px(6.0))
+                .py(px(rem_to_px(0.375)))
                 .border_b_1()
                 .border_color(border);
 
             // Language label
             if let Some(ref lang) = spec.language {
+                // Language label: 0.6875rem (Svelte reference)
                 toolbar = toolbar.child(
                     div()
-                        .text_size(px(11.0))
+                        .text_size(px(rem_to_px(0.6875)))
                         .text_color(text_secondary)
                         .font_weight(FontWeight::SEMIBOLD)
                         .child(lang.to_uppercase()),
@@ -156,14 +159,14 @@ impl IntoElement for Code {
                 toolbar = toolbar.child(div()); // spacer
             }
 
-            // Copy button
+            // Copy button: 1.5rem × 1.5rem, radius 0.25rem (Svelte reference)
             if spec.is_copyable {
                 toolbar = toolbar.child(
                     div()
                         .cursor_pointer()
-                        .w(px(24.0))
-                        .h(px(24.0))
-                        .rounded(px(4.0))
+                        .w(px(rem_to_px(1.5)))
+                        .h(px(rem_to_px(1.5)))
+                        .rounded(px(rem_to_px(0.25)))
                         .flex()
                         .items_center()
                         .justify_center()
