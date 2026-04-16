@@ -433,6 +433,12 @@ pub struct ChoiceOption {
     pub description: Option<String>,
     pub aria_label: Option<String>,
     pub is_disabled: bool,
+    /// Optional group/section key. Options sharing the same `group` string are
+    /// rendered under a shared section header in the dropdown. `None` means the
+    /// option belongs to no explicit group (rendered at the top level).
+    /// Group headers appear in the order the first option of each group is
+    /// encountered in the `options` slice.
+    pub group: Option<String>,
 }
 
 impl ChoiceOption {
@@ -443,6 +449,7 @@ impl ChoiceOption {
             description: None,
             aria_label: None,
             is_disabled: false,
+            group: None,
         }
     }
 
@@ -458,6 +465,12 @@ impl ChoiceOption {
 
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
+        self
+    }
+
+    /// Assign this option to a named group/section.
+    pub fn with_group(mut self, group: impl Into<String>) -> Self {
+        self.group = Some(group.into());
         self
     }
 }

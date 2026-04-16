@@ -56,7 +56,7 @@ surface that needs to be made explicit again.
   (`docs/roadmaps/g10/013-gpui-component-correctness-and-token-fidelity.md`)
 - `g10.014` complete — GPUI overlay architecture, navigation, and slider fidelity:
   floating overlay utility (Tooltip/Popover), TabStrip tokens + keyboard, Slider/
-  RangeSlider behavioral gaps, Tabs close icon + gap token
+  RangeSlider behavioral gaps, Tabs close icon + gap token, Select option groups
   (`docs/roadmaps/g10/014-gpui-overlay-navigation-and-slider-fidelity.md`)
 
 Three active seams identified:
@@ -74,8 +74,8 @@ Three active seams identified:
 
 ## Next Task
 
-`g10.014` closed. Next work:
-- Select option groups: add `group: Option<String>` to `ChoiceOption`, then render
-  section headers in the Select dropdown — currently blocked on spec change
-- Seam B Jetstream implementation: resumable anytime
-- Any new GPUI audit items flagged by the next preview run
+`g10.014` closed with all items complete. GPUI audit tranche (g10.009–g10.014) done.
+
+Next:
+- Seam B Jetstream implementation
+- Any new GPUI audit items from next preview run

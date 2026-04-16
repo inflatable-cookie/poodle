@@ -193,8 +193,10 @@ component; do it in the same pass if scope allows.
 - [x] Replace `gap(px(6.0))` in `build_tab_label` with `space.inline.xs` token
 
 **Select:**
-- [ ] Option groups deferred — `ChoiceOption` has no `group` field; requires spec change
-      before rendering can be implemented
+- [x] Add `group: Option<String>` to `ChoiceOption` with `with_group` builder
+- [x] Select renders group headers (SEMIBOLD, text-secondary, caption size) and
+      separators between groups; ungrouped options render flat; search filter
+      correctly suppresses headers for fully-filtered groups
 
 ## Next task
 

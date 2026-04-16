@@ -475,7 +475,17 @@ impl IntoElement for Select {
                 list = list.child(div().mx(inline_padding).mb(stack_gap).child(search_input));
             }
 
+            // Group-header styling tokens
+            let caption_size = resolve_px(theme, "typography.caption.size");
+            let separator_color = Hsla {
+                a: border_default.a * 0.30,
+                ..border_default
+            };
+
             let mut has_visible_options = false;
+            // `last_group`: None = no option rendered yet; Some(g) = last visible group.
+            let mut last_group: Option<Option<String>> = None;
+
             for option in spec.options.iter() {
                 // Filter by search query when searchable and query is non-empty
                 if let Some(ref q) = search_query_lc {
@@ -484,6 +494,42 @@ impl IntoElement for Select {
                     }
                 }
                 has_visible_options = true;
+
+                // ── Group header ──────────────────────────────────────────────
+                // Emit a separator + label when the group changes.  Options with
+                // group = None are considered their own "unnamed" section.
+                let this_group = option.group.clone();
+                let group_changed = match &last_group {
+                    None => true,
+                    Some(prev) => prev != &this_group,
+                };
+                if group_changed {
+                    // Thin separator between successive groups (not before the first)
+                    if last_group.is_some() {
+                        list = list.child(
+                            div()
+                                .mx(inline_padding)
+                                .my(px(4.0))
+                                .border_b_1()
+                                .border_color(separator_color),
+                        );
+                    }
+                    // Named group label
+                    if let Some(ref group_name) = this_group {
+                        list = list.child(
+                            div()
+                                .px(inline_padding)
+                                .pt(stack_gap)
+                                .pb(px(2.0))
+                                .text_size(caption_size)
+                                .font_weight(FontWeight::SEMIBOLD)
+                                .text_color(text_secondary)
+                                .child(group_name.clone()),
+                        );
+                    }
+                    last_group = Some(this_group);
+                }
+
                 let is_selected = spec.current_value() == Some(option.value.as_str());
                 let is_opt_disabled = option.is_disabled;
 
