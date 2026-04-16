@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
 use crate::presentation::{panel_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.
 ///
@@ -141,19 +141,16 @@ impl IntoElement for Drawer {
         let panel_padding = density_pad;
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let border_default = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let body_size = resolve_px(theme, "typography.body.size");
         let heading_size = resolve_px(theme, "typography.heading.size");
 
-        // Matches Svelte treatment-surface-elevated values:
-        //   fill: color-mix(elevated 94%, transparent)
-        //   border: color-mix(border-default 22%, transparent)
-        let surface_bg = Hsla {
-            a: elevated_bg.a * 0.94,
-            ..elevated_bg
-        };
+        // Svelte: treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        //         treatment-surface-elevated-border = color-mix(border-default 22%, transparent)
+        let surface_bg = color_mix(elevated_bg, panel_bg, 0.98);
         let border = Hsla {
             a: border_default.a * 0.22,
             ..border_default

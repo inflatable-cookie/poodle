@@ -132,7 +132,7 @@ impl IntoElement for SegmentedControl {
 
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         // Contract: segment min-height = calc(control-height - 0.25rem)
-        let segment_height = control_height - px(4.0);
+        let segment_height = control_height - px(rem_to_px(0.25));
         let segment_font_size = px(rem_to_px(size_font_rem(effective_size)));
         let segment_pad_x = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
 
