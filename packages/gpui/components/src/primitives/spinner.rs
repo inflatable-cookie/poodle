@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 pub struct Spinner {
@@ -94,12 +95,13 @@ impl IntoElement for Spinner {
                     .into_any_element()
             }
             SpinnerVariant::Grid => {
+                // Cell and gap sizes from Svelte per-size values (rem origins)
                 let (cell_size, gap) = match spec.size {
-                    SpinnerSize::Xs => (px(2.0), px(1.0)),
-                    SpinnerSize::Sm => (px(2.5), px(1.25)),
-                    SpinnerSize::Md => (px(3.25), px(1.5)),
-                    SpinnerSize::Lg => (px(4.5), px(2.0)),
-                    SpinnerSize::Xl => (px(6.0), px(2.5)),
+                    SpinnerSize::Xs => (px(rem_to_px(0.125)),    px(rem_to_px(0.0625))),
+                    SpinnerSize::Sm => (px(rem_to_px(0.15625)),  px(rem_to_px(0.078125))),
+                    SpinnerSize::Md => (px(rem_to_px(0.203125)), px(rem_to_px(0.09375))),
+                    SpinnerSize::Lg => (px(rem_to_px(0.28125)),  px(rem_to_px(0.125))),
+                    SpinnerSize::Xl => (px(rem_to_px(0.375)),    px(rem_to_px(0.15625))),
                 };
 
                 let mut col = div().flex().flex_col().gap(gap);
@@ -121,7 +123,7 @@ impl IntoElement for Spinner {
                             div()
                                 .w(cell_size)
                                 .h(cell_size)
-                                .rounded(px(2.0))
+                                .rounded(px(rem_to_px(0.125)))
                                 .bg(color)
                                 .with_animation(
                                     SharedString::from(format!(

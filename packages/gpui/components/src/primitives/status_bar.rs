@@ -4,7 +4,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::ShellStatusBarSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::presentation::rem_to_px;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI status bar backed by `ShellStatusBarSpec`.
 ///
@@ -86,14 +87,14 @@ impl IntoElement for StatusBar {
             .items_center()
             .justify_between()
             .w_full()
-            .h(px(24.0))
-            .px(px(8.0))
+            .h(px(rem_to_px(1.5))) // Svelte: 1.5rem
+            .px(resolve_px(theme, "space.inline.sm"))
             .bg(bg)
             .border_t_1()
             .border_color(border);
 
         // Left section: leading items + summary
-        let mut left = div().flex().items_center().gap(px(6.0)).flex_1().min_w_0();
+        let mut left = div().flex().items_center().gap(px(rem_to_px(0.375))).flex_1().min_w_0();
 
         if let Some(leading_items) = self.leading_items {
             left = left.child(leading_items);
@@ -102,7 +103,7 @@ impl IntoElement for StatusBar {
         if let Some(ref summary) = spec.summary {
             left = left.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(px(rem_to_px(0.75)))
                     .text_color(text_secondary)
                     .overflow_x_hidden()
                     .whitespace_nowrap()
@@ -118,7 +119,7 @@ impl IntoElement for StatusBar {
                 div()
                     .flex()
                     .items_center()
-                    .gap(px(6.0))
+                    .gap(px(rem_to_px(0.375)))
                     .flex_shrink_0()
                     .child(trailing_items),
             );

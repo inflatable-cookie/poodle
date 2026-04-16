@@ -3,6 +3,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{DetailItemLayout, DetailItemPresentation, DetailItemSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct DetailItem {
@@ -117,7 +118,7 @@ impl IntoElement for DetailItem {
 
         // Inline layout: fixed label width; stacked: full width
         if !is_stacked {
-            label_el = label_el.w(px(180.0)).flex_shrink_0();
+            label_el = label_el.w(px(rem_to_px(11.25))).flex_shrink_0(); // Svelte: 11.25rem
         }
 
         let value_block = if let Some(content) = self.value_content {

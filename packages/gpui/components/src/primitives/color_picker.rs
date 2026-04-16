@@ -201,12 +201,12 @@ impl IntoElement for ColorPicker {
 
         if spec.is_open && !spec.is_disabled {
             // Contract: swatch size 1.25rem, border-radius 0.1875rem
-            let swatch_size = px(20.0); // 1.25rem
-            let swatch_radius = px(3.0); // 0.1875rem
+            let swatch_size = px(rem_to_px(1.25));
+            let swatch_radius = px(rem_to_px(0.1875));
 
             // Contract: surface width 24rem, padding 0.75rem
             let mut overlay = div()
-                .w(px(384.0)) // 24rem
+                .w(px(rem_to_px(24.0)))
                 .rounded(surface_radius)
                 .bg(elevated_bg)
                 .border_1()
@@ -299,7 +299,7 @@ impl IntoElement for ColorPicker {
                     .id(hex_id)
                     .focusable()
                     .w_full()
-                    .h(px(28.0))
+                    .h(px(rem_to_px(1.75))) // Svelte: 1.75rem
                     .px(gap_sm)
                     .rounded(radius_control)
                     .bg(resolve_color(theme, "color.background.surface"))

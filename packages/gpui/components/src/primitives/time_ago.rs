@@ -6,6 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::TimeAgoSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI relative time display component backed by `TimeAgoSpec`.
@@ -71,7 +72,7 @@ impl IntoElement for TimeAgo {
         };
 
         div()
-            .text_size(px(12.0))
+            .text_size(px(rem_to_px(0.75)))
             .text_color(text_color)
             .child(display)
             .into_any_element()

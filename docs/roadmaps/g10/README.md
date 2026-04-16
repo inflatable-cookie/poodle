@@ -64,7 +64,12 @@ did not progress beyond the feasibility proof.
 - `g10.015` complete
 - `g10.012` remains active as a living delta register
 
+- `g10.017` complete — GPUI formula sweep second pass: alert_dialog/calendar/
+  code/collapse_toggle/collapsible/color_picker/spinner + meta_bar/meta_item/
+  time_ago/status_bar/nav_card/table/detail_item
+  (`docs/roadmaps/g10/017-gpui-formula-sweep-second-pass.md`)
+
 ## Next Task
 
-`g10.016` complete. Next: `g10.017` — continue audit sweep (badge, avatar,
-notification, data_table geometry, or next category of hardcoded values).
+`g10.017` complete. Next: `g10.018` — continue audit sweep (skeleton preset
+dimensions, resize_handle geometry, remaining components).

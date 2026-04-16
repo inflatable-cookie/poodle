@@ -142,7 +142,7 @@ impl IntoElement for Collapsible {
         };
 
         // ── Root (contract: grid, gap 0.5rem when open, 0 when closed) ──
-        let gap = if is_open { px(8.0) } else { px(0.0) }; // 0.5rem = 8px
+        let gap = if is_open { resolve_px(theme, "space.inline.sm") } else { px(0.0) };
         let mut root = div()
             .flex()
             .flex_col()

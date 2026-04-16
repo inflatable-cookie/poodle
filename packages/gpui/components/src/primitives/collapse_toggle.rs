@@ -12,7 +12,7 @@ use poodle_specs::{
 };
 
 use super::icon::Icon;
-use crate::presentation::resolve_semantic_size;
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI collapse toggle component backed by `CollapseToggleSpec`.
@@ -124,7 +124,7 @@ impl IntoElement for CollapseToggle {
 
         // ── Compact square button sized to icon + small padding ──
         // Contract: "compact button sized to icon", Svelte uses padding: 0.125rem (2px)
-        let padding = px(2.0);
+        let padding = px(rem_to_px(0.125));
         let button_size = icon_size + padding * 2.0;
 
         // ── Build root element ───────────────────────────────────

@@ -2,6 +2,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::MetaItemSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
 
 pub struct MetaItem {
@@ -58,13 +59,13 @@ impl IntoElement for MetaItem {
             .flex_row()
             .flex_wrap()
             .items_center()
-            .gap(px(6.0))
+            .gap(px(rem_to_px(0.375)))
             .min_w(px(0.0));
 
         if let Some(label) = self.spec.label {
             item = item.child(
                 div()
-                    .text_size(px(11.0))
+                    .text_size(px(rem_to_px(0.6875)))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(label_color)
                     .child(label.to_uppercase()),
@@ -73,7 +74,7 @@ impl IntoElement for MetaItem {
 
         let value = self.value.unwrap_or_else(|| {
             div()
-                .text_size(px(14.0))
+                .text_size(px(rem_to_px(0.875)))
                 .text_color(value_color)
                 .child("Value")
                 .into_any_element()
@@ -85,9 +86,9 @@ impl IntoElement for MetaItem {
                 .flex_row()
                 .flex_wrap()
                 .items_center()
-                .gap(px(6.0))
+                .gap(px(rem_to_px(0.375)))
                 .min_w(px(0.0))
-                .text_size(px(14.0))
+                .text_size(px(rem_to_px(0.875)))
                 .text_color(value_color)
                 .child(value),
         )

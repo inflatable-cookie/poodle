@@ -191,7 +191,7 @@ impl IntoElement for Code {
         if let Some(mh) = spec.max_height {
             code_area = code_area.max_h(px(mh as f32)).overflow_y_scroll();
         } else {
-            code_area = code_area.max_h(px(320.0)).overflow_y_scroll();
+            code_area = code_area.max_h(px(rem_to_px(20.0))).overflow_y_scroll(); // Svelte: 20rem
         }
 
         // Highlight line background color

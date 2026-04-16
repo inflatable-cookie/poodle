@@ -1,3 +1,4 @@
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -122,9 +123,9 @@ impl IntoElement for NavCard {
 
         // Icon slot: 2rem square, rounded, accent-tinted background
         let icon_slot = div()
-            .w(px(32.0))
-            .h(px(32.0))
-            .rounded(px(8.0))
+            .w(px(rem_to_px(2.0)))
+            .h(px(rem_to_px(2.0)))
+            .rounded(px(rem_to_px(0.5)))
             .bg(icon_bg.opacity(0.12))
             .flex()
             .items_center()
@@ -133,7 +134,7 @@ impl IntoElement for NavCard {
             .children(self.icon);
 
         // Title row with optional badge
-        let mut title_row = div().flex().flex_row().items_center().gap(px(8.0)).child(
+        let mut title_row = div().flex().flex_row().items_center().gap(px(rem_to_px(0.5))).child(
             div()
                 .text_size(self.body_size)
                 .font_weight(FontWeight::BOLD)
@@ -144,11 +145,11 @@ impl IntoElement for NavCard {
         if let Some(badge) = &self.spec.badge {
             title_row = title_row.child(
                 div()
-                    .px(px(8.0))
-                    .py(px(2.0))
+                    .px(px(rem_to_px(0.5)))
+                    .py(px(rem_to_px(0.125)))
                     .rounded(px(9999.0))
                     .bg(badge_bg.opacity(0.16))
-                    .text_size(px(11.0))
+                    .text_size(px(rem_to_px(0.6875)))
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(badge_color)
                     .child(badge.clone()),
@@ -159,7 +160,7 @@ impl IntoElement for NavCard {
         let mut content = div()
             .flex()
             .flex_col()
-            .gap(px(4.0))
+            .gap(px(rem_to_px(0.25)))
             .flex_grow()
             .child(title_row);
 
@@ -188,9 +189,9 @@ impl IntoElement for NavCard {
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(12.0))
-            .px(px(16.0))
-            .py(px(14.0))
+            .gap(px(rem_to_px(0.75)))
+            .px(px(rem_to_px(1.0)))
+            .py(px(rem_to_px(0.875)))
             .bg(fill)
             .border_1()
             .border_color(border_color.opacity(0.32))

@@ -215,7 +215,7 @@ impl IntoElement for AlertDialog {
             .focusable()
             .flex()
             .flex_col()
-            .w(px(420.0));
+            .w(px(rem_to_px(26.25))); // Svelte: 26.25rem = 420px
 
         // Brand-raised treatment: gradient fill for dialog surface
         if self.brand_raised {

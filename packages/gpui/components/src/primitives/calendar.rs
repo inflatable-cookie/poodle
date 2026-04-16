@@ -320,8 +320,8 @@ impl IntoElement for Calendar {
         let surface_radius = resolve_radius(theme, "radius.surface");
 
         // Build the calendar container
-        // Layout: 7 cells × 2.25rem + 6 gaps × 0.125rem + 2 × 0.75rem padding = 288px
-        let calendar_width = px(288.0);
+        // Layout: 7 cells × 2.25rem + 6 gaps × 0.125rem + 2 × 0.75rem padding = 18rem
+        let calendar_width = px(rem_to_px(18.0));
         let cell_size = px(rem_to_px(2.25)); // Svelte default: 2.25rem
         let nav_btn_size = px(rem_to_px(2.0)); // Svelte default: 2rem
 
@@ -514,7 +514,7 @@ impl IntoElement for Calendar {
 
         // Weekday headers row
         // Contract: weekday font 0.6875rem (11px), weight 600, uppercase
-        let mut header_row = div().flex().gap(px(2.0));
+        let mut header_row = div().flex().gap(px(rem_to_px(0.125)));
         for i in 0..7u32 {
             let idx = ((i + week_start_offset) % 7) as usize;
             header_row = header_row.child(
@@ -546,7 +546,7 @@ impl IntoElement for Calendar {
         let prev_month_days = Self::days_in_month(prev_year, prev_month);
 
         for row in 0..rows {
-            let mut day_row = div().flex().gap(px(2.0));
+            let mut day_row = div().flex().gap(px(rem_to_px(0.125)));
             for col in 0..7u32 {
                 let cell_idx = row * 7 + col;
                 if cell_idx < start_offset {

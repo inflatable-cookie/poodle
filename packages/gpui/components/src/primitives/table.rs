@@ -2,6 +2,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ColumnAlign, TableColumn, TableRow, TableSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 pub struct Table {
@@ -148,8 +149,8 @@ impl IntoElement for Table {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let cell_pad_v = px(11.0);
-        let cell_pad_h = px(14.0);
+        let cell_pad_v = px(rem_to_px(0.6875)); // Svelte: 0.6875rem
+        let cell_pad_h = px(rem_to_px(0.875));  // Svelte: 0.875rem
         let _column_count = self.spec.columns.len();
 
         let mut root = div()
@@ -167,9 +168,9 @@ impl IntoElement for Table {
             root = root.child(
                 div()
                     .px(cell_pad_h)
-                    .py(px(8.0))
+                    .py(px(rem_to_px(0.5)))
                     .text_color(self.caption_text)
-                    .text_size(px(12.0))
+                    .text_size(px(rem_to_px(0.75)))
                     .line_height(relative(1.4))
                     .child(caption.clone()),
             );
@@ -191,7 +192,7 @@ impl IntoElement for Table {
                     .px(cell_pad_h)
                     .py(cell_pad_v)
                     .text_color(self.header_text)
-                    .text_size(px(11.0))
+                    .text_size(px(rem_to_px(0.6875)))
                     .line_height(relative(1.4))
                     .font_weight(FontWeight::SEMIBOLD);
 
@@ -213,7 +214,7 @@ impl IntoElement for Table {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .py(px(32.0))
+                    .py(px(rem_to_px(2.0)))
                     .px(cell_pad_h)
                     .text_color(self.empty_text)
                     .text_size(self.label_size)

@@ -2,7 +2,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::MetaBarSpec;
 
-use crate::theme_ext::resolve_color;
+use crate::presentation::rem_to_px;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 pub struct MetaBar {
     spec: MetaBarSpec,
@@ -55,19 +56,20 @@ impl IntoElement for MetaBar {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let separator_color = resolve_color(&self.theme, "color.text.secondary");
+        let theme = &self.theme;
+        let separator_color = resolve_color(theme, "color.text.secondary");
 
         let mut row = div()
             .flex()
             .flex_row()
             .flex_wrap()
             .items_center()
-            .gap(px(8.0))
+            .gap(resolve_px(theme, "space.inline.sm"))
             .min_w(px(0.0));
 
         for (idx, child) in self.children.into_iter().enumerate() {
             if idx > 0 && self.spec.show_separators {
-                row = row.child(div().w(px(4.0)).h(px(4.0)).rounded(px(999.0)).bg(Hsla {
+                row = row.child(div().w(px(rem_to_px(0.25))).h(px(rem_to_px(0.25))).rounded(px(999.0)).bg(Hsla {
                     a: separator_color.a * 0.72,
                     ..separator_color
                 }));
