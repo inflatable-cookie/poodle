@@ -12,7 +12,7 @@ use crate::presentation::{
     control_height_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI dialog component backed by `DialogSpec`.
 ///
@@ -190,6 +190,7 @@ impl IntoElement for Dialog {
         let panel_y = density_pad_y;
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let border_default = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -201,13 +202,9 @@ impl IntoElement for Dialog {
         let close_btn_dim = px(rem_to_px(control_height_rem(chrome_size)));
         let heading_size = resolve_px(theme, "typography.heading.size");
 
-        // Matches Svelte treatment-surface-elevated values:
-        //   fill: color-mix(elevated 94%, transparent)
-        //   border: color-mix(border-default 22%, transparent)
-        let bg = Hsla {
-            a: elevated_bg.a * 0.94,
-            ..elevated_bg
-        };
+        // Svelte: treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        //         treatment-surface-elevated-border = color-mix(border-default 22%, transparent)
+        let bg = color_mix(elevated_bg, panel_bg, 0.98);
         let border = Hsla {
             a: border_default.a * 0.22,
             ..border_default

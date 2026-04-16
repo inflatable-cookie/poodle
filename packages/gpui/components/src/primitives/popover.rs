@@ -136,11 +136,8 @@ impl IntoElement for Popover {
         let popover_max_w = resolve_px(theme, "size.popover.maxWidth");
         let radius = resolve_radius(theme, "radius.surface");
 
-        // Svelte treatment-surface-elevated: fill at 94% alpha, border at 22% alpha
-        let surface_bg = Hsla {
-            a: elevated_bg.a * 0.94,
-            ..elevated_bg
-        };
+        // Svelte Popover.svelte: background = background-elevated (no mix)
+        let surface_bg = elevated_bg;
         let border = Hsla {
             a: border_default.a * 0.22,
             ..border_default

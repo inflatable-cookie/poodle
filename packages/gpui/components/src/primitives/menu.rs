@@ -143,14 +143,12 @@ impl IntoElement for Menu {
         let item_radius = control_radius - px(rem_to_px(0.125));
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let border_default = resolve_color(theme, "color.border.default");
         let border_subtle = resolve_color(theme, "color.border.subtle");
 
-        // Matches Svelte treatment-surface-elevated values
-        let surface_bg = Hsla {
-            a: elevated_bg.a * 0.94,
-            ..elevated_bg
-        };
+        // Svelte: treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        let surface_bg = color_mix(elevated_bg, panel_bg, 0.98);
         let border = Hsla {
             a: border_default.a * 0.22,
             ..border_default

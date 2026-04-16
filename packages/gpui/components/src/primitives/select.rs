@@ -210,11 +210,9 @@ impl IntoElement for Select {
             a: border_default.a * 0.92,
             ..border_default
         });
-        // Elevated treatment for dropdown overlay
-        let elevated_bg = Hsla {
-            a: elevated_raw.a * 0.94,
-            ..elevated_raw
-        };
+        // Svelte: dropdown overlay bg = color-mix(elevated 98%, panel)
+        let panel_bg = resolve_color(theme, "color.background.panel");
+        let elevated_bg = color_mix(elevated_raw, panel_bg, 0.98);
         let overlay_border = Hsla {
             a: border_default.a * 0.22,
             ..border_default
