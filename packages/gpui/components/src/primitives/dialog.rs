@@ -3,11 +3,14 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, DialogKind, DialogSpec, DialogWidth, SemanticControlSizeRole,
+    ControlDensity, ControlSize, DialogKind, DialogSpec, DialogWidth, IconSize, IconSpec,
+    SemanticControlSizeRole,
 };
 
+use super::icon::Icon;
 use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    control_height_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
@@ -191,7 +194,11 @@ impl IntoElement for Dialog {
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let radius = resolve_radius(theme, "radius.surface");
+        let control_radius = resolve_radius(theme, "radius.control");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
+        // Close button: chrome-sized (one step smaller than dialog size)
+        let chrome_size = resolve_semantic_size(effective_size, SemanticControlSizeRole::Chrome);
+        let close_btn_dim = px(rem_to_px(control_height_rem(chrome_size)));
         let heading_size = resolve_px(theme, "typography.heading.size");
 
         // Matches Svelte treatment-surface-elevated values:
@@ -299,18 +306,25 @@ impl IntoElement for Dialog {
 
                 if spec.show_close_button {
                     let close_id = SharedString::from("poodle-dialog-close");
+                    let close_hover_bg = Hsla { a: 0.08, ..text_secondary };
                     let mut close_button = div()
                         .id(close_id)
                         .flex()
                         .items_center()
                         .justify_center()
-                        .w(px(24.0))
-                        .h(px(24.0))
-                        .rounded(radius)
-                        .text_size(body_size)
-                        .text_color(text_secondary)
+                        .w(close_btn_dim)
+                        .h(close_btn_dim)
+                        .rounded(control_radius)
                         .cursor_pointer()
-                        .child("×");
+                        .flex_shrink_0()
+                        .hover(move |s| s.bg(close_hover_bg))
+                        .child(
+                            Icon::from_spec(
+                                IconSpec::new("x").with_size(IconSize::Sm),
+                                theme,
+                            )
+                            .with_color(text_secondary),
+                        );
                     if let Some(ref handler) = self.on_open_change {
                         let handler = handler.clone();
                         close_button = close_button.on_click(move |_event, window, cx| {

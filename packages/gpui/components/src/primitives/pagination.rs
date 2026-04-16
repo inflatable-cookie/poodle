@@ -86,7 +86,7 @@ impl Pagination {
         let base_height = resolve_px(theme, "size.control.height");
         // Contract: height = control-height + size offset - 0.125rem
         let button_height =
-            base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(2.0);
+            base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(rem_to_px(0.125));
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
         let base_pad = resolve_px(theme, "space.control.x");
         let button_padding = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
@@ -229,7 +229,7 @@ impl Pagination {
             .items_center()
             .justify_center()
             // Contract: min-width 2.25rem
-            .min_w(px(36.0))
+            .min_w(px(rem_to_px(2.25)))
             .h(button_height)
             .px(self.button_padding)
             .bg(fill)
@@ -345,7 +345,7 @@ impl Pagination {
             .flex()
             .items_center()
             .justify_center()
-            .min_w(px(36.0)) // 2.25rem
+            .min_w(px(rem_to_px(2.25))) // 2.25rem
             .h(button_height)
             .px(self.button_padding)
             .bg(fill)
@@ -383,7 +383,7 @@ impl Pagination {
             .items_center()
             .justify_center()
             // Contract: ellipsis min-width 1.5rem
-            .min_w(px(24.0))
+            .min_w(px(rem_to_px(1.5)))
             .h(self.button_height)
             .text_color(self.ellipsis_color)
             // Contract: same font as buttons
@@ -442,14 +442,14 @@ impl IntoElement for Pagination {
         // Standalone mode strips the panel chrome.
         if !self.spec.standalone {
             let pad_x = if self.spec.is_compact {
-                px(8.0)
+                resolve_px(theme, "space.inline.sm")
             } else {
-                px(12.0)
+                resolve_px(theme, "space.inline.md")
             };
             let pad_y = if self.spec.is_compact {
-                px(4.0)
+                resolve_px(theme, "space.inline.xs")
             } else {
-                px(8.0)
+                resolve_px(theme, "space.inline.sm")
             };
             root = root
                 .bg(surface_bg)

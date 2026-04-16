@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{LeadingFill, LeadingShape, ListCardSpec};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 fn parse_hex_to_hsla(hex: &str) -> Option<Hsla> {
@@ -216,7 +217,7 @@ impl IntoElement for ListCard {
             }
 
             if let Some(footer) = self.footer {
-                col = col.child(div().mt(px(4.0)).child(footer));
+                col = col.child(div().mt(resolve_px(theme, "space.inline.xs")).child(footer));
             }
 
             col
@@ -243,14 +244,13 @@ impl IntoElement for ListCard {
                 .absolute()
                 .top(px(0.0))
                 .right(px(0.0))
-                .px(px(6.0))
-                .py(px(2.0))
-                .rounded_bl(px(4.0))
+                .w(px(rem_to_px(6.0)))
+                .py(px(rem_to_px(0.125)))
                 .bg(sash_bg)
                 .text_color(gpui::white())
-                .text_size(px(9.0))
+                .text_size(px(rem_to_px(0.5625)))
                 .font_weight(FontWeight::BOLD)
-                .line_height(px(12.0))
+                .line_height(px(rem_to_px(0.75)))
                 .child(sash_text.to_uppercase())
         });
 
@@ -269,12 +269,12 @@ impl IntoElement for ListCard {
                 spec.title
             )))
             .w_full()
-            .px(px(12.0))
-            .py(px(10.0))
+            .px(resolve_px(theme, "space.inline.md"))
+            .py(px(rem_to_px(0.625)))
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(12.0))
+            .gap(resolve_px(theme, "space.inline.md"))
             .rounded(radius)
             .bg(fill)
             .border_1()

@@ -53,6 +53,10 @@ did not progress beyond the feasibility proof.
 - `g10.015` complete — GPUI Svelte parity second pass: Callout geometry,
   RadioGroup/Pill/Code/Tabs/CodeInput fixes, inline token gap sweep
   (`docs/roadmaps/g10/015-gpui-svelte-parity-second-pass.md`)
+- `g10.016` complete — GPUI Calendar/Dialog/ListCard geometry and formula sweep:
+  calendar cell geometry, dialog close-button chrome, ListCard sash anatomy,
+  Select/Pagination residual magic literals
+  (`docs/roadmaps/g10/016-gpui-calendar-dialog-listcard-formula-sweep.md`)
 
 ## Active Runway
 
@@ -62,6 +66,5 @@ did not progress beyond the feasibility proof.
 
 ## Next Task
 
-`g10.015` complete. Next: `g10.016` — further audit pass (calendar geometry,
-dialog/list_card values, remaining formula-hardcoded values across complex
-components).
+`g10.016` complete. Next: `g10.017` — continue audit sweep (badge, avatar,
+notification, data_table geometry, or next category of hardcoded values).

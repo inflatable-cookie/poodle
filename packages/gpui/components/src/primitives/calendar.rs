@@ -320,10 +320,10 @@ impl IntoElement for Calendar {
         let surface_radius = resolve_radius(theme, "radius.surface");
 
         // Build the calendar container
-        // Contract: padding 0.75rem (12px), radius-surface, gap 0.25rem (4px)
-        // Contract: calendar is a compact inline widget, not full-width
-        // 7 cells * 36px + 6 gaps * 2px + 24px padding = 288px
+        // Layout: 7 cells × 2.25rem + 6 gaps × 0.125rem + 2 × 0.75rem padding = 288px
         let calendar_width = px(288.0);
+        let cell_size = px(rem_to_px(2.25)); // Svelte default: 2.25rem
+        let nav_btn_size = px(rem_to_px(2.0)); // Svelte default: 2rem
 
         let mut cal = div()
             .id(SharedString::from(id_str))
@@ -331,7 +331,7 @@ impl IntoElement for Calendar {
             .flex()
             .flex_col()
             .gap(gap_sm)
-            .p(px(12.0))
+            .p(px(rem_to_px(0.75)))
             .w(calendar_width)
             .rounded(surface_radius)
             .bg(surface_bg)
@@ -373,8 +373,8 @@ impl IntoElement for Calendar {
 
         let mut prev_btn = div()
             .id("poodle-cal-prev")
-            .w(px(28.0))
-            .h(px(28.0))
+            .w(nav_btn_size)
+            .h(nav_btn_size)
             .flex()
             .items_center()
             .justify_center()
@@ -396,8 +396,8 @@ impl IntoElement for Calendar {
 
         let mut next_btn = div()
             .id("poodle-cal-next")
-            .w(px(28.0))
-            .h(px(28.0))
+            .w(nav_btn_size)
+            .h(nav_btn_size)
             .flex()
             .items_center()
             .justify_center()
@@ -519,8 +519,8 @@ impl IntoElement for Calendar {
             let idx = ((i + week_start_offset) % 7) as usize;
             header_row = header_row.child(
                 div()
-                    .w(px(32.0))
-                    .h(px(24.0))
+                    .w(cell_size)
+                    .h(px(rem_to_px(1.5)))
                     .flex()
                     .items_center()
                     .justify_center()
@@ -554,8 +554,8 @@ impl IntoElement for Calendar {
                     let outside_day = prev_month_days - (start_offset - cell_idx - 1);
                     day_row = day_row.child(
                         div()
-                            .w(px(32.0))
-                            .h(px(32.0))
+                            .w(cell_size)
+                            .h(cell_size)
                             .flex()
                             .items_center()
                             .justify_center()
@@ -569,8 +569,8 @@ impl IntoElement for Calendar {
                     let outside_day = cell_idx - start_offset - days_count + 1;
                     day_row = day_row.child(
                         div()
-                            .w(px(32.0))
-                            .h(px(32.0))
+                            .w(cell_size)
+                            .h(cell_size)
                             .flex()
                             .items_center()
                             .justify_center()
@@ -600,8 +600,8 @@ impl IntoElement for Calendar {
                     let mut cell = div()
                         .id(cell_id)
                         .focusable()
-                        .w(px(32.0))
-                        .h(px(32.0))
+                        .w(cell_size)
+                        .h(cell_size)
                         .flex()
                         .items_center()
                         .justify_center()

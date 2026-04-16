@@ -509,7 +509,7 @@ impl IntoElement for Select {
                         list = list.child(
                             div()
                                 .mx(inline_padding)
-                                .my(px(4.0))
+                                .my(resolve_px(theme, "space.inline.xs"))
                                 .border_b_1()
                                 .border_color(separator_color),
                         );
@@ -520,7 +520,7 @@ impl IntoElement for Select {
                             div()
                                 .px(inline_padding)
                                 .pt(stack_gap)
-                                .pb(px(2.0))
+                                .pb(px(rem_to_px(0.125)))
                                 .text_size(caption_size)
                                 .font_weight(FontWeight::SEMIBOLD)
                                 .text_color(text_secondary)
