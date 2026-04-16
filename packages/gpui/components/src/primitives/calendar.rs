@@ -615,8 +615,8 @@ impl IntoElement for Calendar {
                             .text_color(text_inverse)
                             .font_weight(FontWeight::SEMIBOLD);
                     } else if is_in_range {
-                        // Interior range days: accent 20% mix with surface.
-                        let in_range_bg = color_mix(accent, surface_bg, 0.20);
+                        // Svelte: in-range bg = color-mix(accent 16%, transparent)
+                        let in_range_bg = Hsla { a: accent.a * 0.16, ..accent };
                         cell = cell.bg(in_range_bg).text_color(text_primary);
                         if is_today {
                             cell = cell

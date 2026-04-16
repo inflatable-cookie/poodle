@@ -135,8 +135,10 @@ impl IntoElement for ListCard {
         let hover_fill = color_mix(surface, panel, 0.82);
         let border_subtle = resolve_color(theme, spec.border_token());
         let border_default = resolve_color(theme, spec.hover_border_token());
-        let border = color_mix(border_subtle, panel, 0.18);
-        let hover_border = color_mix(border_default, panel, 0.52);
+        // Svelte: border = color-mix(border-subtle 18%, transparent)
+        let border = Hsla { a: border_subtle.a * 0.18, ..border_subtle };
+        // Svelte: hover border = color-mix(border-default 52%, transparent)
+        let hover_border = Hsla { a: border_default.a * 0.52, ..border_default };
         let radius = resolve_radius(theme, spec.radius_token());
         let title_color = resolve_color(theme, spec.title_color_token());
         let subtitle_color = resolve_color(theme, spec.subtitle_color_token());
@@ -149,7 +151,8 @@ impl IntoElement for ListCard {
         let icon_md = resolve_px(theme, "size.icon.md");
         let radius_control = resolve_radius(theme, "radius.control");
         let accent = resolve_color(theme, spec.leading_tint_bg_token());
-        let leading_tint_bg = color_mix(accent, panel, 0.12);
+        // Svelte: leading tint = color-mix(accent 12%, transparent)
+        let leading_tint_bg = Hsla { a: accent.a * 0.12, ..accent };
         let leading_solid_bg = resolve_color(theme, spec.leading_solid_bg_token());
 
         let leading_size = px(match spec.leading_shape {

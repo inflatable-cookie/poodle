@@ -14,7 +14,7 @@ use super::menu::Menu;
 use crate::presentation::{
     control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menubar component backed by `MenubarSpec`.
 pub struct Menubar {
@@ -122,11 +122,12 @@ impl IntoElement for Menubar {
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let _gap = theme.resolve_space(self.spec.trigger_gap_token());
 
-        // Contract: list border 72% border-subtle, bg 96% panel
-        let list_border = color_mix(border_subtle, panel, 0.72);
-        let list_bg = color_mix(panel, gpui::transparent_black(), 0.96);
-        // Contract: trigger hover 14% accent
-        let trigger_hover = color_mix(accent, panel, 0.14);
+        // Svelte: list border = color-mix(border-subtle 72%, transparent)
+        let list_border = Hsla { a: border_subtle.a * 0.72, ..border_subtle };
+        // Svelte: list bg = color-mix(panel 96%, transparent)
+        let list_bg = Hsla { a: panel.a * 0.96, ..panel };
+        // Svelte: trigger hover = color-mix(accent 14%, transparent)
+        let trigger_hover = Hsla { a: accent.a * 0.14, ..accent };
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 

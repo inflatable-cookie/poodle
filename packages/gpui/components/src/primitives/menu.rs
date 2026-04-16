@@ -157,7 +157,8 @@ impl IntoElement for Menu {
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, self.spec.item_highlight_token());
         // Item hover: accent at 16% mixed into elevated
-        let item_hover = color_mix(accent, elevated_bg, 0.16);
+        // Svelte: item hover = color-mix(accent 16%, transparent)
+        let item_hover = Hsla { a: accent.a * 0.16, ..accent };
         // Svelte: color-mix(border-subtle 72%, transparent)
         let separator_color = Hsla {
             a: border_subtle.a * 0.72,

@@ -406,7 +406,8 @@ impl IntoElement for Select {
         // Note: GPUI always renders a custom dropdown (no native mode).
         if is_open {
             // Svelte: color-mix(accent 14%, transparent) — matches visually on opaque bg
-            let option_hover = color_mix(accent, elevated_bg, 0.14);
+            // Svelte: option hover = color-mix(accent 14%, transparent)
+            let option_hover = Hsla { a: accent.a * 0.14, ..accent };
             let empty_message = spec.empty_message.clone();
 
             let mut list = div().id("poodle-select-list").rounded(control_radius);
