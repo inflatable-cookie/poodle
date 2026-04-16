@@ -6,7 +6,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{HoverCardSpec, OverlayPlacement};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI hover card component backed by `HoverCardSpec`.
 pub struct HoverCard {
@@ -102,11 +102,9 @@ impl IntoElement for HoverCard {
         let border_default = resolve_color(theme, "color.border.default");
         let radius = resolve_radius(theme, "radius.surface");
 
-        // Matches Svelte treatment-surface-elevated values
-        let fill = Hsla {
-            a: elevated_bg.a * 0.94,
-            ..elevated_bg
-        };
+        // Svelte: --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
+        let panel_bg = resolve_color(theme, "color.background.panel");
+        let fill = color_mix(elevated_bg, panel_bg, 0.98);
         let border = Hsla {
             a: border_default.a * 0.22,
             ..border_default

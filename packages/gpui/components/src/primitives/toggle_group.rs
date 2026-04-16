@@ -99,6 +99,7 @@ impl IntoElement for ToggleGroup {
         let surface = resolve_color(theme, "color.background.surface");
         let elevated = resolve_color(theme, "color.background.elevated");
         let border_default = resolve_color(theme, "color.border.default");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
@@ -109,8 +110,12 @@ impl IntoElement for ToggleGroup {
         let base_pad_x = resolve_px(theme, "space.control.x");
         let item_pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
-        // Contract: selected = accent 22% tinted bg, accent 42% border
-        let selected_fill = color_mix(accent, surface, 0.22);
+        // Svelte unselected: treatment-interactive-fill = color-mix(surface 93%, text-primary)
+        let item_fill = color_mix(surface, text_primary, 0.93);
+        // Svelte unselected border: treatment-interactive-border = border-subtle 82%
+        let item_border = Hsla { a: border_subtle.a * 0.82, ..border_subtle };
+        // Svelte selected: gradient(accent 22%, transparent) over item_fill
+        let selected_fill = color_mix(accent, item_fill, 0.22);
         let selected_border = color_mix(accent, border_default, 0.42);
 
         let mut el = div().flex().flex_row().flex_wrap().gap(gap);
@@ -124,7 +129,7 @@ impl IntoElement for ToggleGroup {
             let (fill, border_color, text_color) = if is_selected {
                 (selected_fill, selected_border, text_primary)
             } else {
-                (surface, border_default, text_primary)
+                (item_fill, item_border, text_primary)
             };
 
             let hover_fill = color_mix(fill, elevated, 0.84);
