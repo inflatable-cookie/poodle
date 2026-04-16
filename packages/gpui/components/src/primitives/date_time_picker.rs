@@ -138,7 +138,7 @@ impl IntoElement for DateTimePicker {
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = resolve_px(theme, "typography.label.size");
         let caption_size = resolve_px(theme, "typography.caption.size");
-        let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
+        let hover_bg = color_mix(surface_bg, elevated_bg, 0.86);
 
         let value = spec.current_value();
         let has_value = value.date.is_some() || value.time.is_some();

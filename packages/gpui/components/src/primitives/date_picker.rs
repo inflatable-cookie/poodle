@@ -146,7 +146,7 @@ impl IntoElement for DatePicker {
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         // Contract: hover = color-mix(surface 84%, elevated)
-        let hover_bg = color_mix(surface_bg, elevated_bg, 0.84);
+        let hover_bg = color_mix(surface_bg, elevated_bg, 0.86);
 
         let display_text = spec
             .current_value()
