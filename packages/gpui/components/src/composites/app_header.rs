@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::AppHeaderSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI app header bar backed by `AppHeaderSpec`.
@@ -98,7 +99,8 @@ impl IntoElement for AppHeader {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let inline_padding = resolve_px(theme, "space.inline.md");
+        // Svelte: header px = --poodle-space-panel-x = 1rem (16px at default density)
+        let inline_padding = px(rem_to_px(1.0));
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let body_size = resolve_px(theme, "typography.body.size");
         let header_height = resolve_px(theme, "size.panel.header");

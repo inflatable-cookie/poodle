@@ -188,8 +188,9 @@ impl IntoElement for PageLoading {
                         .text_size(label_size)
                         .text_color(muted)
                         .cursor_pointer()
-                        .px(px(12.0))
-                        .py(px(6.0))
+                        // Svelte: cancel button padding = 0.375rem 0.875rem
+                        .px(px(rem_to_px(0.875)))
+                        .py(px(rem_to_px(0.375)))
                         .rounded(control_radius)
                         .hover(move |s| s.bg(hover_bg))
                         .child("Cancel")
@@ -209,7 +210,9 @@ impl IntoElement for PageLoading {
                 .flex()
                 .items_center()
                 .justify_center()
-                .py(px(24.0))
+                // Svelte: padding = 3rem 1rem
+                .py(px(rem_to_px(3.0)))
+                .px(px(rem_to_px(1.0)))
                 .child(card)
                 .into_any_element(),
             PageLoadingPresentation::Overlay => div()
