@@ -364,9 +364,12 @@ impl Tabs {
                         ))
                         .border_color(card_selected_border);
                 } else {
+                    // Svelte: selected bg = color-mix(accent 14%, surface)
+                    use crate::theme_ext::color_mix;
+                    let card_selected_bg = color_mix(accent, surface_bg, 0.14);
                     tab = tab
                         .text_color(text_primary)
-                        .bg(card_default_bg)
+                        .bg(card_selected_bg)
                         .border_color(card_selected_border);
                 }
             } else {

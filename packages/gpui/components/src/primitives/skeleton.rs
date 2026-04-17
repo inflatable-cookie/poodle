@@ -124,7 +124,7 @@ impl IntoElement for Skeleton {
                         .flex_col()
                         .gap(gap_sm)
                         .w_full()
-                        .child(bone(px(9999.0), px(rem_to_px(7.5)), radius)) // image area: 7.5rem
+                        .child(bone(px(9999.0), px(rem_to_px(6.0)), radius)) // image area: Svelte 6rem
                         .child(bone(px(180.0), default_height, radius)) // title
                         .child(bone(px(240.0), default_height, radius)); // description
                     wrap(card)
@@ -136,7 +136,7 @@ impl IntoElement for Skeleton {
                         .gap(gap_md)
                         .w_full()
                         .items_center()
-                        .child(bone(px(rem_to_px(2.0)), px(rem_to_px(2.0)), pill_radius)) // avatar
+                        .child(bone(px(rem_to_px(2.25)), px(rem_to_px(2.25)), pill_radius)) // avatar: Svelte 2.25rem
                         .child(
                             div()
                                 .flex()
@@ -165,7 +165,7 @@ impl IntoElement for Skeleton {
                         .flex_row()
                         .gap(gap_md)
                         .items_center()
-                        .child(bone(px(rem_to_px(2.5)), px(rem_to_px(2.5)), pill_radius)) // avatar circle
+                        .child(bone(px(rem_to_px(2.25)), px(rem_to_px(2.25)), pill_radius)) // avatar: Svelte 2.25rem
                         .child(
                             div()
                                 .flex()

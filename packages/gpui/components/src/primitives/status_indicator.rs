@@ -75,15 +75,15 @@ impl IntoElement for StatusIndicator {
                 .rounded(px(999.0))
                 .bg(status_color)
                 .flex_shrink_0()
-                // Contract: box-shadow 0 0 0 0.125rem at 18% opacity
+                // Svelte: box-shadow 0 0 0 0.125rem at 18% opacity (no blur)
                 .shadow(vec![gpui::BoxShadow {
                     color: Hsla {
                         a: status_color.a * 0.18,
                         ..status_color
                     },
                     offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(4.0),
-                    spread_radius: px(1.0),
+                    blur_radius: px(0.0),
+                    spread_radius: px(rem_to_px(0.125)),
                 }]),
         );
 

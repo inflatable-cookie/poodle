@@ -237,8 +237,8 @@ impl IntoElement for Button {
             (ButtonVariant::Ghost, ButtonTone::Danger) => {
                 let danger = resolve_color(theme, "color.status.danger");
                 (
-                    Hsla { a: 0.10, ..danger },
-                    Hsla { a: 0.16, ..danger },
+                    Hsla { a: 0.12, ..danger }, // Svelte: 12%
+                    Hsla { a: 0.18, ..danger }, // Svelte: 18%
                     Hsla { a: 0.28, ..danger },
                 )
             }

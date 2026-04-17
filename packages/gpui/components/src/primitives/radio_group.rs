@@ -145,7 +145,8 @@ impl IntoElement for RadioGroup {
         let text_primary = resolve_color(theme, "color.text.primary");
         let surface_bg = resolve_color(theme, "color.background.surface");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        let body_size = resolve_px(theme, "typography.body.size");
+        // Svelte: label uses typography.label.size (not body)
+        let body_size = resolve_px(theme, "typography.label.size");
 
         let current_value = spec.current_value().map(|s| s.to_string());
 
