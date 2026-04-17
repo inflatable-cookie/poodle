@@ -1,5 +1,7 @@
 # ValidationSummary
 
+> **Implementation note**: Svelte component not yet built. Contract is complete — implementation is pending.
+
 Status: detailed contract
 Updated: 2026-04-11
 

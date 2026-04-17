@@ -25,6 +25,13 @@ pub struct TextInputSpec {
     pub trailing_icon: Option<String>,
     pub rows: u16,
     pub resize: String,
+    /// Source string for slug mode auto-generation. When `input_type` is
+    /// `"slug"`, the slug value is auto-derived from this string.
+    /// Matches Svelte `source`.
+    pub source: Option<String>,
+    /// When true, a clear (×) button appears in search mode when the
+    /// input has a value. Matches Svelte `showClearButton`.
+    pub show_clear_button: bool,
     pub submit_enabled: bool,
     pub cancel_enabled: bool,
     /// When true, the input is required for form submission. Renders
@@ -72,6 +79,8 @@ impl Default for TextInputSpec {
             trailing_icon: None,
             rows: 1,
             resize: String::from("vertical"),
+            source: None,
+            show_clear_button: true,
             submit_enabled: false,
             cancel_enabled: false,
             is_required: false,
@@ -198,6 +207,16 @@ impl TextInputSpec {
     /// Whether this spec operates in multiline mode (rows > 1 or input_type is "multiline").
     pub fn is_multiline(&self) -> bool {
         self.input_type == "multiline" || self.rows > 1
+    }
+
+    pub fn with_source(mut self, source: impl Into<String>) -> Self {
+        self.source = Some(source.into());
+        self
+    }
+
+    pub fn with_show_clear_button(mut self, show: bool) -> Self {
+        self.show_clear_button = show;
+        self
     }
 
     pub fn with_submit_enabled(mut self, submit_enabled: bool) -> Self {

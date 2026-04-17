@@ -1,5 +1,7 @@
 # FormShell
 
+> **Implementation note**: no standalone Svelte component. This contract exists as a shared spec for GPUI/Jetstream composite renderers so they don't reinvent field grouping, validation exposure, or submission-blocking logic. In Svelte, form orchestration is handled compositionally by the caller.
+
 Status: detailed contract
 Updated: 2026-04-11
 

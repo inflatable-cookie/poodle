@@ -8,7 +8,10 @@ pub struct DialogSpec {
     pub default_open: bool,
     pub title: Option<String>,
     pub description: Option<String>,
-    pub kind: DialogKind,
+    /// ARIA role for the dialog element. Use `DialogKind::AlertDialog`
+    /// for alert dialogs that require an immediate response.
+    /// Matches Svelte `role` prop. The legacy field name `kind` is deprecated.
+    pub role: DialogKind,
     pub dismiss_on_escape: bool,
     pub dismiss_on_backdrop: bool,
     pub aria_label: Option<String>,
@@ -33,7 +36,7 @@ impl Default for DialogSpec {
             default_open: false,
             title: None,
             description: None,
-            kind: DialogKind::Dialog,
+            role: DialogKind::Dialog,
             dismiss_on_escape: true,
             dismiss_on_backdrop: true,
             aria_label: None,
@@ -73,8 +76,15 @@ impl DialogSpec {
         self
     }
 
+    pub fn with_role(mut self, role: DialogKind) -> Self {
+        self.role = role;
+        self
+    }
+
+    /// Deprecated — use `with_role` instead.
+    #[deprecated(note = "Use with_role instead")]
     pub fn with_kind(mut self, kind: DialogKind) -> Self {
-        self.kind = kind;
+        self.role = kind;
         self
     }
 
@@ -135,7 +145,7 @@ impl DialogSpec {
     }
 
     pub fn is_alert_dialog(&self) -> bool {
-        self.kind == DialogKind::AlertDialog
+        self.role == DialogKind::AlertDialog
     }
 
     pub fn effective_dismiss_on_backdrop(&self) -> bool {

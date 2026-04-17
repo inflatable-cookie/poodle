@@ -3,7 +3,7 @@
 //! Implements the adapter trait for:
 //! - BoxSpec, StackSpec, GridSpec, SurfaceSpec
 //! - SeparatorSpec, ScrollShellSpec
-//! - BannerSpec, CallOutSpec
+//! - CallOutSpec
 //!
 //! NOTE: `gpui_style` is built and mutated as proof of token resolution but is
 //! not yet wired into the returned `GpuiElementHandle`. Suppressed until wired up.
@@ -11,8 +11,7 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
-    SurfaceSpec,
+    BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec, SurfaceSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -181,28 +180,6 @@ impl RenderComponent<ScrollShellSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<BannerSpec> for GpuiAdapter {
-    type Target = GpuiTarget;
-
-    fn render(
-        &self,
-        spec: &BannerSpec,
-        style: &StyleDescriptor,
-        theme: &dyn ThemeProvider,
-    ) -> GpuiElementHandle {
-        let mut gpui_style = map_style(style);
-
-        let fill = theme.resolve_color(spec.fill_token());
-        let border = theme.resolve_color(spec.border_token());
-        gpui_style.background = Some(fill.into());
-        gpui_style.border_color = Some(border.into());
-
-        GpuiElementHandle::new(
-            format!("banner-{}", spec.title.as_deref().unwrap_or("anonymous")),
-            "BannerSpec",
-        )
-    }
-}
 
 impl RenderComponent<CallOutSpec> for GpuiAdapter {
     type Target = GpuiTarget;
@@ -231,8 +208,7 @@ impl RenderComponent<CallOutSpec> for GpuiAdapter {
 mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_specs::{
-        BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
-        SurfaceSpec,
+        BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec, SurfaceSpec,
     };
     use poodle_style::StyleDescriptor;
 
@@ -321,14 +297,6 @@ mod tests {
             .with_label("sidebar");
         let handle = a.render(&spec, &style(), &theme());
         assert_eq!(handle.element_id, "scroll-shell-sidebar");
-    }
-
-    #[test]
-    fn render_banner_resolves_tone_tokens() {
-        let a = adapter();
-        let spec = BannerSpec::new().with_title("Warning");
-        let handle = a.render(&spec, &style(), &theme());
-        assert_eq!(handle.element_id, "banner-Warning");
     }
 
     #[test]

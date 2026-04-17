@@ -74,23 +74,22 @@ did not progress beyond the feasibility proof.
   password_requirements, split_button, switch, tabs, tab_strip, tri_state_switch
   (`docs/roadmaps/g10/018-gpui-formula-sweep-third-pass.md`)
 
-- `g10.019` queued — contract sync priority sweep: TextInput multiline props,
-  density/size batch across ~35 components, CodeInput/NumberInput/DataTable/
-  LogList deep audits, PageHeader reversal investigation, orphan cleanup
+- `g10.019` **complete** — contract sync priority sweep: all Tier 1–4 items
+  done; 5 genuine prop gaps patched; full density/size scan clean; 8 orphan
+  contracts annotated; PageHeader Svelte 5 false-alarm documented
   (`docs/roadmaps/g10/019-contract-sync-priority-sweep.md`)
 
-- `g10.020` queued — spec struct coverage gaps: TextInput source/showClearButton,
-  Select id/name, RadioGroup name, Dialog role vs kind reconciliation, orphan
-  spec review
+- `g10.020` **complete** — spec struct coverage gaps: RadioGroup name, Select
+  id/name, TextInput source/showClearButton, Dialog kind→role rename; 6 orphan
+  spec files annotated with doc comments; both crates compile clean
   (`docs/roadmaps/g10/020-spec-struct-coverage-gaps.md`)
 
-- `g10.021` queued — GPUI accessibility baseline: scope what is achievable in
-  gpui 0.2.2 without upstream changes; investigate custom Element bridge;
-  update g10.012 true-limits register
+- `g10.021` **complete** — GPUI accessibility baseline: full source audit
+  confirms zero accessibility API in gpui 0.2.2; no platform bridge on any OS;
+  no local workaround viable; g10.012 §2 confirmed accurate; recheck when GPUI
+  publishes an accessibility API
   (`docs/roadmaps/g10/021-gpui-accessibility-baseline.md`)
 
-## Next Task
+## Status
 
-`g10.019` is the active queue entry. Start with TextInput contract (Tier 1,
-highest cross-platform impact), then batch the density/size additions across
-Tier 2.
+g10.019, g10.020, and g10.021 are all complete. g10 is fully closed.

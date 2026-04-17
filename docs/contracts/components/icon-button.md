@@ -50,6 +50,7 @@ Updated: 2026-03-26
 | `disabled` | `boolean` | `false` | no | suppresses activation |
 | `loading` | `boolean` | `false` | no | shows spinner and suppresses activation |
 | `pressed` | `boolean \| null` | `null` | no | optional pressed/toggled state; null omits aria-pressed |
+| `defaultPressed` | `boolean` | `false` | no | uncontrolled initial pressed state; enables toggle mode when true even if `pressed` is null |
 | `tooltip` | `string \| null` | `null` | no | override text for the built-in tooltip; defaults to `ariaLabel` when null |
 | `tooltipPlacement` | `OverlayPlacement` | `"top"` | no | positioning of the tooltip relative to the button |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby reference |

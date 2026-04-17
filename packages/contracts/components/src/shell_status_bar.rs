@@ -1,3 +1,8 @@
+//! `ShellStatusBarSpec` — Jetstream workstation-specific status bar rendered
+//! by `render_workstation.rs`. Distinct from the Poodle `StatusBar` primitive
+//! (`docs/contracts/components/status-bar.md`): this variant owns leading/
+//! trailing item counts rather than generic slot content.
+
 use poodle_tokens::semantic;
 
 #[derive(Clone, Debug, Eq, PartialEq)]

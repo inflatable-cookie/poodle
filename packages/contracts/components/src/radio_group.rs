@@ -11,6 +11,7 @@ pub struct RadioGroupSpec {
     pub options: Vec<ChoiceOption>,
     pub orientation: Orientation,
     pub is_disabled: bool,
+    pub name: Option<String>,
     pub aria_label: Option<String>,
     pub description_id: Option<String>,
     /// Custom color override for the selected radio indicator (CSS hex string).
@@ -28,6 +29,7 @@ impl Default for RadioGroupSpec {
             options: Vec::new(),
             orientation: Orientation::Vertical,
             is_disabled: false,
+            name: None,
             aria_label: None,
             description_id: None,
             selected_color: None,
@@ -58,6 +60,11 @@ impl RadioGroupSpec {
 
     pub fn with_orientation(mut self, orientation: Orientation) -> Self {
         self.orientation = orientation;
+        self
+    }
+
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
         self
     }
 

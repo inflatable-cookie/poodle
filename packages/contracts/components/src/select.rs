@@ -37,6 +37,8 @@ impl Default for SelectVariant {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SelectSpec {
+    pub id: Option<String>,
+    pub name: Option<String>,
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub placeholder: Option<String>,
@@ -88,6 +90,8 @@ pub struct SelectSpec {
 impl Default for SelectSpec {
     fn default() -> Self {
         Self {
+            id: None,
+            name: None,
             value: None,
             default_value: None,
             placeholder: None,
@@ -122,6 +126,16 @@ impl SelectSpec {
             options,
             ..Self::default()
         }
+    }
+
+    pub fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id = Some(id.into());
+        self
+    }
+
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
     }
 
     pub fn with_value(mut self, value: impl Into<String>) -> Self {

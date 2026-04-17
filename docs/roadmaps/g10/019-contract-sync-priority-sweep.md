@@ -88,19 +88,15 @@ remediation-banner, and others). Confirm each is either:
 
 ## Execution checklist
 
-- [ ] TextInput: add rows, resize, list to contract
-- [ ] CodeInput: full contract audit and update
-- [ ] NumberInput: full contract audit and update
-- [ ] DataTable: full contract audit and update
-- [ ] LogList: full contract audit and update
-- [ ] CommandPalette: contract audit and update
-- [ ] MarkdownEditor: contract audit and update
-- [ ] RelationPicker: contract audit and update
-- [ ] Tier 2 density/size batch (35 components)
-- [ ] PageHeader: investigate and resolve reversal
-- [ ] Orphan contract cleanup (11 contracts)
+- [x] TextInput: add rows, resize, list to contract
+- [x] Tier 2 density batch — menu, context-menu, menubar, navigation-menu (density added); list-card, table (size + sizeRole + density added)
+- [x] Accurate gap scan — replaced rough backtick-grep with structured prop-row extraction; confirmed CodeInput/NumberInput/DataTable/LogList/CommandPalette/MarkdownEditor/RelationPicker/PageHeader are all fully documented (earlier "43/124" count was inflated by CSS property names and Svelte 5 interface Props pattern)
+- [x] Confirmed 5 real gaps and patched all: icon-button (defaultPressed), media-thumbnail (frameWidth), pagination (chrome + deprecated standalone note), status-bar (chrome/size/sizeRole/density + removed incorrect out-of-scope note), icon-provider (registry → icons rename)
+- [x] Tier 2 density/size sweep — full scan run; all remaining components are covered (table-format contracts have explicit rows; "active"-status contracts list them as standard control props bullet)
+- [x] PageHeader: audit note added — Svelte 5 interface Props, contract is accurate
+- [x] Orphan contract cleanup (8 confirmed orphans): format-display-date and format-file-size noted as utility function contracts; form-shell and tab-strip noted as cross-platform specs without Svelte components; inline-remediation, remediation-banner, state-tile, and validation-summary noted as pending Svelte implementations
 
-## Next task
+## Outcome
 
-Start with Tier 1: TextInput contract (smallest, highest cross-platform impact),
-then CodeInput/NumberInput in a batch.
+All items complete. No undocumented drift remains. Next regular sync can be
+re-run with the structured Python scan in this roadmap's notes.

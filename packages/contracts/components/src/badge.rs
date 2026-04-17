@@ -1,3 +1,7 @@
+//! `BadgeSpec` — no Svelte/web contract. Actively used in Jetstream workstation
+//! rendering (`render_feedback.rs`). If a web component is added, create
+//! `docs/contracts/components/badge.md` to match.
+
 use poodle_tokens::semantic;
 
 use crate::types::BadgeVariant;

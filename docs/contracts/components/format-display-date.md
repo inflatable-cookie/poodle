@@ -1,5 +1,7 @@
 # formatDisplayDate
 
+> **Implementation note**: utility function contract — no Svelte component expected. These are pure JS/TS formatting helpers imported directly.
+
 Status: contract
 Updated: 2026-04-08
 

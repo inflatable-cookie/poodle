@@ -1,3 +1,6 @@
+//! Shared composite types used across multiple component specs — not a
+//! component spec itself. No corresponding contract file or Svelte component.
+
 use crate::{ButtonVariant, FormActionAlign, StatusTone, ValidationState};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

@@ -1,3 +1,8 @@
+//! `CallOutSpec` — spec for the `Callout` component. File is named `call_out.rs`
+//! for Rust naming consistency; the contract lives at
+//! `docs/contracts/components/callout.md` and the Svelte component is
+//! `Callout.svelte`. Not an orphan — just a naming discrepancy.
+
 use poodle_tokens::semantic;
 
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone};

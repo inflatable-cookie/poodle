@@ -1,14 +1,13 @@
 //! RenderComponent implementations for structural and layout primitives.
 //!
 //! g08.003: BoxSpec, StackSpec, GridSpec, SurfaceSpec, SeparatorSpec,
-//! ScrollShellSpec, BannerSpec, CallOutSpec
+//! ScrollShellSpec, CallOutSpec
 //!
 //! All structural primitives map to Widget::Panel in Jetstream.
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    BannerSpec, BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec,
-    SurfaceSpec,
+    BoxSpec, CallOutSpec, GridSpec, ScrollShellSpec, SeparatorSpec, StackSpec, SurfaceSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -175,30 +174,6 @@ impl RenderComponent<ScrollShellSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<BannerSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, spec: &BannerSpec, style: &StyleDescriptor, theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mut mapped = map_style(style);
-
-        // Resolve fill (background) color
-        let fill_token = spec.fill_token();
-        let fill_color = theme.resolve_color(fill_token);
-        mapped.visuals.background = Some(JetstreamColor::from(fill_color));
-
-        // Resolve border color
-        let border_token = spec.border_token();
-        let border_color = theme.resolve_color(border_token);
-        mapped.visuals.border_color = Some(JetstreamColor::from(border_color));
-
-        // Resolve icon color
-        let icon_token = spec.icon_color_token();
-        let icon_color = theme.resolve_color(icon_token);
-        mapped.visuals.icon_color = Some(JetstreamColor::from(icon_color));
-
-        let node_id = spec.title.as_deref().unwrap_or("banner");
-        JetstreamNodeHandle::new(node_id, "BannerSpec", WidgetKind::Panel, mapped)
-    }
-}
 
 impl RenderComponent<CallOutSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
@@ -307,20 +282,6 @@ mod tests {
     fn scroll_shell_defaults_id_without_label() {
         let h = a().render(&ScrollShellSpec::new(), &s(), &t());
         assert_eq!(h.node_id, "scroll-shell");
-    }
-
-    #[test]
-    fn banner_spec_uses_title_as_id() {
-        let spec = BannerSpec::new().with_title("System Alert");
-        let h = a().render(&spec, &s(), &t());
-        assert_eq!(h.node_id, "System Alert");
-        assert_eq!(h.spec_type, "BannerSpec");
-    }
-
-    #[test]
-    fn banner_spec_defaults_id_without_title() {
-        let h = a().render(&BannerSpec::new(), &s(), &t());
-        assert_eq!(h.node_id, "banner");
     }
 
     #[test]

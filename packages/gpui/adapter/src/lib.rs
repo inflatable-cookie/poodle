@@ -107,7 +107,6 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "SurfaceSpec",
     "SeparatorSpec",
     "ScrollShellSpec",
-    "BannerSpec",
     "CallOutSpec",
     // g07.003 — action, text-entry, and field
     "ButtonSpec",

@@ -1,5 +1,7 @@
 # PageHeader
 
+> **Audit note**: the Svelte component uses Svelte 5 `interface Props {}` syntax rather than `export let` declarations. All props listed in this contract are present and accurate — `grep "export let"` scans will find nothing and should not be treated as evidence of drift.
+
 Status: detailed contract
 Updated: 2026-03-30
 

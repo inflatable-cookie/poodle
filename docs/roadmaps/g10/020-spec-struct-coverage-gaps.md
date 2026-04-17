@@ -49,13 +49,15 @@ intentional:
 
 ## Execution checklist
 
-- [ ] TextInput spec: add `source` and `show_clear_button` fields + builder methods
-- [ ] Select spec: add `id` and `name` fields + builder methods
-- [ ] RadioGroup spec: add `name` field + builder method
-- [ ] Dialog spec: reconcile `kind` vs `role`; add `role` field
-- [ ] Orphan spec file review
+- [x] RadioGroup spec: added `name: Option<String>` + `with_name()` builder
+- [x] Select spec: added `id: Option<String>`, `name: Option<String>` + builders
+- [x] TextInput spec: added `source: Option<String>` (slug mode) + `show_clear_button: bool` (default true) + builders
+- [x] Dialog spec: renamed `kind` → `role`; `with_kind()` kept as `#[deprecated]` alias; `is_alert_dialog()` updated; GPUI dialog component updated to match
+- [x] Orphan spec file review: badge (Jetstream-only, no web contract), banner (unconnected early spec — candidate for deletion), call_out (maps to callout.md — naming mismatch only), composite_types (shared types, not a component), shell_status_bar (Jetstream workstation variant, distinct from StatusBar), time_field (maps to time-input.md — naming mismatch only); all annotated with module-level doc comments
 
-## Next task
+## Outcome
 
-Start with RadioGroup (smallest change), then Select, TextInput, Dialog in that
-order.
+All items complete. Both crates compile clean.
+One follow-up candidate: `banner.rs` / `BannerSpec` has no contract and no
+known renderer usage — likely superseded by `RemediationBannerSpec` or
+`CallOutSpec`. Confirm and delete in a future cleanup pass.

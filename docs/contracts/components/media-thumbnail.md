@@ -76,6 +76,7 @@ type AspectRatio = "square" | "landscape" | "portrait" | "video";
 | `stateTitle` | `string \| null` | `null` | no | heading for non-ready states; auto-defaults per state |
 | `stateMessage` | `string \| null` | `null` | no | body text for non-ready states; hidden in compact mode |
 | `presentation` | `"default" \| "compact"` | `"default"` | no | compact hides caption and state message |
+| `frameWidth` | `"fill" \| "xl" \| number \| string \| null` | `"fill"` | no | explicit frame width; `"fill"` stretches to parent width, `"xl"` applies a preset wide size, number sets px width, string sets arbitrary CSS value, null removes inline width |
 
 ## 5. Slots
 

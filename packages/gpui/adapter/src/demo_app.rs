@@ -14,7 +14,7 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    AccordionSpec, BadgeSpec, BannerSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
+    AccordionSpec, BadgeSpec, BoxSpec, BreadcrumbsSpec, ButtonSpec, CheckboxSpec,
     FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SelectSpec, SeparatorSpec,
     SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextInputSpec,
     ToolbarSpec,
@@ -86,7 +86,6 @@ fn render_overview_shell(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoScreen {
     screen.push(a.render(&SurfaceSpec::new(), &s, t));
     screen.push(a.render(&StackSpec::new(), &s, t));
     screen.push(a.render(&PageHeaderSpec::new("Workspace Overview"), &s, t));
-    screen.push(a.render(&BannerSpec::new(), &s, t));
     screen.push(a.render(&GridSpec::new(), &s, t));
     screen.push(a.render(&StateTileSpec::new("Active projects", "12"), &s, t));
     screen.push(a.render(&StateTileSpec::new("Pending reviews", "3"), &s, t));
@@ -242,7 +241,6 @@ mod tests {
         let screen = render_overview_shell(&adapter(), adapter().theme());
         let types = screen.spec_types();
         assert!(types.contains(&"StateTileSpec"));
-        assert!(types.contains(&"BannerSpec"));
         assert!(types.contains(&"ProgressSpec"));
         assert!(screen.component_count() >= 10);
     }

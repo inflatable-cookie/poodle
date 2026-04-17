@@ -128,7 +128,7 @@ impl JetstreamAdapter {
 const SUPPORTED_PRIMITIVES: &[&str] = &[
     // Structural
     "BoxSpec", "StackSpec", "GridSpec", "SurfaceSpec", "SeparatorSpec", "ScrollShellSpec",
-    "BannerSpec", "CallOutSpec",
+    "CallOutSpec",
     // Action
     "ButtonSpec", "IconButtonSpec", "FormActionsSpec", "ToolbarSpec",
     // Input

@@ -1,5 +1,7 @@
 # formatFileSize
 
+> **Implementation note**: utility function contract — no Svelte component expected. Pure JS/TS formatting helper imported directly.
+
 Status: contract
 Updated: 2026-04-08
 

@@ -30,7 +30,7 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `registry` | `IconRegistry` | — | yes | icon registry instance providing name-to-SVG mappings |
+| `icons` | `IconSet` | — | yes | icon set instance providing name-to-SVG mappings |
 
 ### Slots
 

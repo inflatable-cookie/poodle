@@ -1,3 +1,8 @@
+//! `TimeFieldSpec` — spec for the `TimeInput` component. File is named
+//! `time_field.rs` (legacy name); the contract lives at
+//! `docs/contracts/components/time-input.md` and the Svelte component is
+//! `TimeInput.svelte`. Not an orphan — just a naming discrepancy.
+
 use poodle_tokens::semantic;
 
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};

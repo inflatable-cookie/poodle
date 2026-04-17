@@ -12,7 +12,7 @@ Updated: 2026-03-30
 - In scope: leading and trailing status regions via slots, summary text fallback
   in the leading region, shell-level status packing with space-between layout
 - Out of scope: transient notifications, remediation banners, app-specific
-  transport/status widgets, global command registries, size/density scaling
+  transport/status widgets, global command registries
 
 ## 2. Anatomy
 
@@ -39,6 +39,10 @@ Updated: 2026-03-30
 |------|------|---------|----------|-------|
 | `summary` | `string \| null` | `null` | no | summary text; displayed in the leading region when no `leading` slot content is provided; also used as fallback `aria-label` |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the `<footer>`; falls back to `summary`, then to `"Status"` |
+| `chrome` | `boolean` | `false` | no | when true, renders with an explicit border-top and panel background; when false, the bar blends into its container |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit size override; scales font-size and padding-block |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override; scales padding-inline and gap |
 
 ### Slots
 

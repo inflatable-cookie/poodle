@@ -9,7 +9,6 @@ pub mod alert_dialog;
 pub mod app_header;
 pub mod audio_player;
 pub mod badge;
-pub mod banner;
 pub mod block_editor;
 pub mod breadcrumbs;
 pub mod bulk_action_bar;
@@ -234,7 +233,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "app-header" => Some(app_header::render(theme)),
         "audio-player" => Some(audio_player::render(theme)),
         "badge" => Some(badge::render(theme)),
-        "banner" => Some(banner::render(theme)),
         "block-editor" => Some(block_editor::render(theme)),
         "box" => Some(bx::render(theme)),
         "breadcrumbs" => Some(breadcrumbs::render(theme)),

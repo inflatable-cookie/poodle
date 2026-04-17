@@ -84,8 +84,14 @@ impl Dialog {
         self.spec.description = Some(v.into());
         self
     }
+    pub fn role(mut self, v: DialogKind) -> Self {
+        self.spec.role = v;
+        self
+    }
+    /// Deprecated — use `role` instead.
+    #[deprecated(note = "Use role instead")]
     pub fn kind(mut self, v: DialogKind) -> Self {
-        self.spec.kind = v;
+        self.spec.role = v;
         self
     }
     pub fn dismiss_on_escape(mut self, v: bool) -> Self {
