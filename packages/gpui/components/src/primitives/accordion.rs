@@ -15,10 +15,7 @@ use poodle_specs::{
 use std::rc::Rc;
 
 use super::icon::Icon;
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI accordion component backed by `AccordionSpec`.
@@ -120,11 +117,26 @@ impl IntoElement for Accordion {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let title_font = px(rem_to_px(size_font_rem(effective_size)));
-        let density_pad_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));
+        // Accordion titles use heading-scale sizes, not control-scale (Svelte: accordion__title)
+        let title_font = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.8125,
+            ControlSize::Sm => 0.875,
+            ControlSize::Md => 1.0,
+            ControlSize::Lg => 1.0625,
+            ControlSize::Xl => 1.125,
+        }));
+        // Description scales with size like control fonts (Svelte: accordion__description)
+        let description_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: compact=0.5rem, default=panel-x token (1rem), comfortable=1rem (hardcoded)
+        let density_pad_x = px(rem_to_px(match self.spec.density {
+            ControlDensity::Compact     => 0.5,
+            ControlDensity::Default     => 1.0,
+            ControlDensity::Comfortable => 1.0,
+        }));
         // Svelte: accordion item vertical padding is fixed 0.625rem (not panel-y token)
         let density_pad_y = px(rem_to_px(0.625));
-        let density_gap = px(rem_to_px(control_space_x_rem(self.spec.density)));
+        // Svelte: both outer gap and item internal gap = space.stack.md (density-aware)
+        let density_gap = resolve_px(theme, "space.stack.md");
 
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let border_subtle = resolve_color(theme, "color.border.subtle");
@@ -138,9 +150,8 @@ impl IntoElement for Accordion {
         let panel_pad_y = density_pad_y;
         let stack_md = density_gap;
         let heading_size = title_font;
-        let label_size = resolve_px(theme, "typography.label.size");
         let gap_inline_sm = resolve_px(theme, "space.inline.sm");
-        let gap_inline_xs = resolve_px(theme, "space.inline.xs");
+        let gap_inline_md = resolve_px(theme, "space.inline.md");
 
         // Item background: color-mix(surface 93%, text-primary)
         let item_bg = color_mix(surface_bg, text_primary, 0.93);
@@ -180,7 +191,7 @@ impl IntoElement for Accordion {
                 .flex()
                 .items_center()
                 .justify_between()
-                .gap(gap_inline_sm)
+                .gap(gap_inline_md) // Svelte: space-inline-md
                 .cursor_pointer();
 
             trigger = trigger.focus(move |s| {
@@ -198,7 +209,7 @@ impl IntoElement for Accordion {
             let mut summary = div()
                 .flex()
                 .flex_col()
-                .gap(gap_inline_xs)
+                .gap(gap_inline_sm) // Svelte: space-inline-sm
                 .min_w(px(0.0))
                 .flex_1();
 
@@ -216,7 +227,7 @@ impl IntoElement for Accordion {
             if let Some(ref desc) = item.description {
                 summary = summary.child(
                     div()
-                        .text_size(label_size)
+                        .text_size(description_font) // Svelte: size-responsive, matches control font scale
                         .line_height(relative(1.45))
                         .text_color(text_secondary)
                         .child(desc.clone()),

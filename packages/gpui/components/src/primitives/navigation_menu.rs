@@ -12,8 +12,7 @@ use poodle_specs::{
 };
 
 use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem, size_height_offset_rem,
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_height_offset_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -98,10 +97,21 @@ impl IntoElement for NavigationMenu {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let trigger_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: nav trigger font is compact-scale (0.75rem default, not control size_font_rem)
+        let trigger_font = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.75,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }));
         let _base_height = resolve_px(theme, "size.control.height");
         let trigger_height_offset = px(rem_to_px(size_height_offset_rem(effective_size)));
-        let trigger_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
+        // Svelte: compact=0.5rem, default=space-control-x (0.75rem), comfortable=0.75rem (same as default)
+        let trigger_pad_x = px(rem_to_px(match self.spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default | ControlDensity::Comfortable => 0.75,
+        }));
         let density_panel_x = px(rem_to_px(panel_space_x_rem(self.spec.density)));
         let density_panel_y = px(rem_to_px(panel_space_y_rem(self.spec.density)));
 
