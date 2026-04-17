@@ -203,10 +203,10 @@ impl IntoElement for Dialog {
         let heading_size = resolve_px(theme, "typography.heading.size");
 
         // Svelte: treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
-        //         treatment-surface-elevated-border = color-mix(border-default 22%, transparent)
+        //         treatment-surface-elevated-border = color-mix(border-default 78%, transparent)
         let bg = color_mix(elevated_bg, panel_bg, 0.98);
         let border = Hsla {
-            a: border_default.a * 0.22,
+            a: border_default.a * 0.78,
             ..border_default
         };
 

@@ -149,8 +149,9 @@ impl IntoElement for Menu {
 
         // Svelte: treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
         let surface_bg = color_mix(elevated_bg, panel_bg, 0.98);
+        // Svelte: color-mix(border-default 72%, transparent)
         let border = Hsla {
-            a: border_default.a * 0.22,
+            a: border_default.a * 0.72,
             ..border_default
         };
         let text_primary = resolve_color(theme, self.spec.item_text_token());

@@ -129,7 +129,7 @@ impl IntoElement for Popover {
         };
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
-        let border_default = resolve_color(theme, "color.border.default");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
         let panel_x = resolve_px(theme, "space.panel.x");
         let panel_y = resolve_px(theme, "space.panel.y");
         let menu_min_w = resolve_px(theme, "size.menu.minWidth");
@@ -137,10 +137,11 @@ impl IntoElement for Popover {
         let radius = resolve_radius(theme, "radius.surface");
 
         // Svelte Popover.svelte: background = background-elevated (no mix)
+        //         border = color-mix(border-subtle 74%, transparent)
         let surface_bg = elevated_bg;
         let border = Hsla {
-            a: border_default.a * 0.22,
-            ..border_default
+            a: border_subtle.a * 0.74,
+            ..border_subtle
         };
 
         // ── Build trigger element ─────────────────────────────────────────────
