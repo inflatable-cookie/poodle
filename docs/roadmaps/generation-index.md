@@ -84,8 +84,15 @@ When roadmap files disagree:
 2. treat `docs/roadmaps/README.md` as the entrypoint
 3. treat `g10` as the active generation until it is explicitly closed
 
+    `g10.013`–`g10.017` delivered a systematic GPUI component correctness and
+    token-fidelity sweep (formula literals, composite/primitive parity vs Svelte).
+    `g10.018` completed the formula sweep third pass (skeleton, datetime pickers,
+    switch, tabs, and others). `g10.019`–`g10.021` are queued: contract sync
+    priority sweep, spec struct coverage gaps, and GPUI accessibility baseline.
+
 ## Next Task
 
-Open `g10/README.md` and pick the active seam: Jetstream implementation,
+Open `g10/README.md`. Active seam: `g10.019` contract sync — start with TextInput
+multiline props. Or open `g10/021` to begin the accessibility investigation.
 generation rollover, or backlog; the on-disk `g10.009`–`g10.011` tranche is
 complete.

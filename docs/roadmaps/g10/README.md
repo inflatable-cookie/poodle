@@ -74,9 +74,23 @@ did not progress beyond the feasibility proof.
   password_requirements, split_button, switch, tabs, tab_strip, tri_state_switch
   (`docs/roadmaps/g10/018-gpui-formula-sweep-third-pass.md`)
 
+- `g10.019` queued — contract sync priority sweep: TextInput multiline props,
+  density/size batch across ~35 components, CodeInput/NumberInput/DataTable/
+  LogList deep audits, PageHeader reversal investigation, orphan cleanup
+  (`docs/roadmaps/g10/019-contract-sync-priority-sweep.md`)
+
+- `g10.020` queued — spec struct coverage gaps: TextInput source/showClearButton,
+  Select id/name, RadioGroup name, Dialog role vs kind reconciliation, orphan
+  spec review
+  (`docs/roadmaps/g10/020-spec-struct-coverage-gaps.md`)
+
+- `g10.021` queued — GPUI accessibility baseline: scope what is achievable in
+  gpui 0.2.2 without upstream changes; investigate custom Element bridge;
+  update g10.012 true-limits register
+  (`docs/roadmaps/g10/021-gpui-accessibility-baseline.md`)
+
 ## Next Task
 
-`g10.018` complete. Broad px-literal audit is substantially done. Next pass
-should verify correctness vs Svelte for the most visually impactful components
-(calendar, dialog, table, list_card) or continue with any remaining
-categories.
+`g10.019` is the active queue entry. Start with TextInput contract (Tier 1,
+highest cross-platform impact), then batch the density/size additions across
+Tier 2.
