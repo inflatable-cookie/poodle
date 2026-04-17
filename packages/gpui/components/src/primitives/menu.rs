@@ -13,10 +13,7 @@ use poodle_specs::{
 
 use super::icon::Icon;
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-    size_height_offset_rem,
-};
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI menu component backed by `MenuSpec`.
@@ -130,12 +127,23 @@ impl IntoElement for Menu {
         let theme = &self.theme;
         let is_open = self.spec.current_open();
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let item_font_size = px(rem_to_px(size_font_rem(effective_size)));
-        let base_height = resolve_px(theme, "size.control.height");
-        let item_min_height =
-            base_height + px(rem_to_px(size_height_offset_rem(effective_size))) - px(4.0);
-        let item_pad_x = px(rem_to_px(control_space_x_rem(self.spec.density)));
-        let menu_pad = px(rem_to_px(panel_space_y_rem(self.spec.density) * 0.5));
+        // Svelte: body-scale fonts (xs=0.6875, sm=0.75, md=0.875, lg=0.9375, xl=1.0rem)
+        let item_font_size = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.75,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 0.9375,
+            ControlSize::Xl => 1.0,
+        }));
+        // Svelte: min-height = full size-control-height (no reduction)
+        let item_min_height = px(rem_to_px(control_height_rem(effective_size)));
+        // Svelte: compact=0.375rem, default=0.75rem, comfortable=0.75rem (hardcoded)
+        let item_pad_x = px(rem_to_px(match self.spec.density {
+            ControlDensity::Compact => 0.375,
+            ControlDensity::Default | ControlDensity::Comfortable => 0.75,
+        }));
+        // Svelte: item vertical padding = space.control.y (density-aware token)
+        let item_pad_y = resolve_px(theme, "space.control.y");
 
         let overlay_radius = resolve_radius(theme, self.spec.overlay_radius_token());
         let control_radius = resolve_radius(theme, "radius.control");
@@ -202,7 +210,7 @@ impl IntoElement for Menu {
                     spread_radius: px(0.0),
                 },
             ])
-            .p(menu_pad);
+            .p(px(rem_to_px(0.25))); // Svelte: padding: 0.25rem (fixed, all densities)
 
         // Collect focusable (non-separator, non-disabled) item values for arrow key navigation
         let focusable_values: Vec<String> = self
@@ -243,7 +251,7 @@ impl IntoElement for Menu {
                 .w_full()
                 .min_h(item_min_height)
                 .px(item_pad_x)
-                .py(menu_pad)
+                .py(item_pad_y)
                 .rounded(item_radius)
                 // Contract: font per effective size
                 .text_size(item_font_size)
