@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, ProgressSpec, SemanticControlSizeRole};
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color};
 
 /// A real GPUI progress bar component backed by `ProgressSpec`.
@@ -81,8 +81,12 @@ impl IntoElement for Progress {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        // Bar height scales with size: base 0.5rem (8px) + height offset
-        let bar_height = px(8.0 + rem_to_px(size_height_offset_rem(effective_size)) * 0.5);
+        // Svelte: three-tier height — xs/sm=0.375rem (6px), md=0.5rem (8px), lg/xl=0.75rem (12px)
+        let bar_height = px(rem_to_px(match effective_size {
+            ControlSize::Xs | ControlSize::Sm => 0.375,
+            ControlSize::Md => 0.5,
+            ControlSize::Lg | ControlSize::Xl => 0.75,
+        }));
 
         let accent = resolve_color(theme, spec.indicator_fill_token());
         let surface = resolve_color(theme, "color.background.surface");

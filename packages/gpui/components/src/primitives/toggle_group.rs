@@ -4,12 +4,11 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
-
-use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem,
+use poodle_specs::{
+    ControlDensity, ControlSize, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec,
 };
+
+use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct ToggleGroup {
@@ -93,7 +92,12 @@ impl IntoElement for ToggleGroup {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let gap = resolve_px(theme, spec.item_gap_token());
+        // Svelte: gap varies by density (compact=0.1875rem, default=0.25rem, comfortable=0.375rem)
+        let gap = px(rem_to_px(match spec.density {
+            ControlDensity::Compact     => 0.1875,
+            ControlDensity::Default     => 0.25,
+            ControlDensity::Comfortable => 0.375,
+        }));
         let radius = resolve_radius(theme, "radius.control");
         let accent = resolve_color(theme, "color.accent.base");
         let surface = resolve_color(theme, "color.background.surface");
@@ -104,11 +108,10 @@ impl IntoElement for ToggleGroup {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
-        // Size-aware item height and padding
-        let base_height = resolve_px(theme, "size.control.height");
-        let item_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_pad_x = resolve_px(theme, "space.control.x");
-        let item_pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        // Svelte: item min-height = control-height - 0.25rem (uniform reduction across sizes)
+        let item_height = px(rem_to_px(control_height_rem(effective_size) - 0.25));
+        // Svelte: horizontal padding is density-only (space.control.x, no size offset)
+        let item_pad_x = resolve_px(theme, "space.control.x");
 
         // Svelte unselected: treatment-interactive-fill = color-mix(surface 93%, text-primary)
         let item_fill = color_mix(surface, text_primary, 0.93);
