@@ -136,10 +136,9 @@ impl IntoElement for Card {
                 a: border_default.a * 0.76,
                 ..border_default
             }),
-            CardVariant::Elevated => Some(Hsla {
-                a: border_default.a * 0.22,
-                ..border_default
-            }),
+            // Svelte: color-mix(treatment-border-or-border-default 82%, border-default)
+            // In default theme (no treatment override) = plain border-default
+            CardVariant::Elevated => Some(border_default),
         };
 
         // Hover fill: treatment-surface-hover-fill

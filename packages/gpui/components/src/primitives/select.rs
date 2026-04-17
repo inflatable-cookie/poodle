@@ -13,7 +13,7 @@ use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI select/dropdown component backed by `SelectSpec`.
 pub struct Select {

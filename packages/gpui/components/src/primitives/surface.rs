@@ -109,29 +109,23 @@ impl IntoElement for Surface {
         }
 
         // ── Border ──────────────────────────────────────────────
-        // Matches Svelte app.css treatment values:
-        //   non-elevated subtle: color-mix(border-subtle 30%, transparent)
-        //   elevated subtle: color-mix(border-default 22%, transparent)
+        // Svelte Surface.svelte: both non-elevated and elevated use
+        //   --poodle-surface-border = color-mix(border-subtle 74%, transparent)
         //   default: border-default full
         //   none: transparent
-        if let Some(border_token) = spec.resolved_border_color() {
-            let border_color = resolve_color(theme, border_token);
+        if let Some(_border_token) = spec.resolved_border_color() {
             let final_border = match spec.border {
                 SurfaceBorder::Subtle => {
-                    if is_elevated {
-                        let border_default = resolve_color(theme, "color.border.default");
-                        Hsla {
-                            a: border_default.a * 0.22,
-                            ..border_default
-                        }
-                    } else {
-                        Hsla {
-                            a: border_color.a * 0.30,
-                            ..border_color
-                        }
+                    // Svelte: color-mix(border-subtle 74%, transparent)
+                    Hsla {
+                        a: border_subtle.a * 0.74,
+                        ..border_subtle
                     }
                 }
-                _ => border_color,
+                _ => {
+                    let border_default = resolve_color(theme, "color.border.default");
+                    border_default
+                }
             };
             el = el.border_1().border_color(final_border);
         }

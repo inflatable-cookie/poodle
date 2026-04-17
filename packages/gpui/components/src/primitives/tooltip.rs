@@ -127,8 +127,9 @@ impl IntoElement for Tooltip {
         // Svelte --poodle-treatment-surface-elevated-fill = color-mix(elevated 98%, panel)
         let panel_bg = resolve_color(theme, "color.background.panel");
         let fill = color_mix(elevated_bg, panel_bg, 0.98);
+        // Svelte: color-mix(border-default 72%, transparent)
         let tooltip_border = Hsla {
-            a: border_default.a * 0.22,
+            a: border_default.a * 0.72,
             ..border_default
         };
 
