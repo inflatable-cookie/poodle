@@ -120,6 +120,7 @@ impl IntoElement for ActionDiscoveryPanel {
         let gap_sm = resolve_px(theme, "space.inline.sm");
         let gap_md = resolve_px(theme, "space.inline.md");
         let label_size = resolve_px(theme, "typography.label.size");
+        let caption_size = resolve_px(theme, "typography.caption.size");
         let radius_control = resolve_radius(theme, "radius.control");
 
         let mut panel = div().flex().flex_col().gap(px(gap)).size_full();
@@ -185,7 +186,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 div()
                     .px(px(row_x))
                     .py(px(row_y))
-                    .text_size(px(font_size * 0.85))
+                    .text_size(caption_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_muted)
                     .child(section.title.clone()),
@@ -196,7 +197,7 @@ impl IntoElement for ActionDiscoveryPanel {
                 section_el = section_el.child(
                     div()
                         .px(px(panel_px * 0.5))
-                        .text_size(px(font_size * 0.85))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(desc.clone()),
                 );

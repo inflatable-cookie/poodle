@@ -8,7 +8,7 @@ use poodle_specs::{MediaUploadStatusPanelSpec, MediaUploadStep};
 use crate::presentation::{
     control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 pub struct MediaUploadStatusPanel {
     spec: MediaUploadStatusPanelSpec,
@@ -48,7 +48,7 @@ impl IntoElement for MediaUploadStatusPanel {
         let item_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let body_size = px(font_size);
-        let label_size = px(font_size * 0.85);
+        let label_size = resolve_px(theme, "typography.label.size");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, "color.accent.base");

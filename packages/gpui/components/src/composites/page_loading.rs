@@ -85,7 +85,7 @@ impl IntoElement for PageLoading {
         let accent = resolve_color(theme, self.spec.progress_fill_token());
         let text_color = resolve_color(theme, "color.text.primary");
         let body_size = px(font_size);
-        let label_size = px(font_size * 0.85);
+        let label_size = resolve_px(theme, "typography.label.size");
         let surface_bg = resolve_color(theme, "color.background.surface");
         let border = resolve_color(theme, "color.border.default");
         let radius = resolve_radius(theme, "radius.surface");

@@ -187,6 +187,7 @@ impl IntoElement for CodeInput {
         let danger_color = resolve_color(theme, "color.status.danger");
         let control_radius = resolve_radius(theme, "radius.control");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
+        let label_size = resolve_px(theme, "typography.label.size");
 
         let effective_validation = spec.effective_validation_state();
         let is_invalid = effective_validation == ValidationState::Invalid;
@@ -348,7 +349,7 @@ impl IntoElement for CodeInput {
             if spec.error.is_none() {
                 wrapper = wrapper.child(
                     div()
-                        .text_size(px(rem_to_px(size_font_rem(effective_size) * 0.85)))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(hint.clone()),
                 );
@@ -359,7 +360,7 @@ impl IntoElement for CodeInput {
         if let Some(ref error) = spec.error {
             wrapper = wrapper.child(
                 div()
-                    .text_size(px(rem_to_px(size_font_rem(effective_size) * 0.85)))
+                    .text_size(label_size)
                     .text_color(danger_color)
                     .child(error.clone()),
             );

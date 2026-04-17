@@ -192,7 +192,7 @@ impl IntoElement for Table {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .py(px(rem_to_px(2.0)))
+                    .py(cell_pad_v)
                     .px(cell_pad_h)
                     .text_color(self.empty_text)
                     .text_size(self.label_size)
