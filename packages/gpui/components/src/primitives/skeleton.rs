@@ -144,7 +144,8 @@ impl IntoElement for Skeleton {
                                 .gap(gap_sm)
                                 .flex_grow()
                                 .child(bone(px(160.0), default_height, radius))
-                                .child(bone(px(100.0), default_height * 0.85, radius)),
+                                // Svelte: skeleton--line-sm height = 0.6875rem
+                                .child(bone(px(100.0), px(rem_to_px(0.6875)), radius)),
                         );
                     wrap(item)
                 }
