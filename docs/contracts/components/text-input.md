@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-04-17
 
 ## 1. Purpose
 
@@ -44,7 +44,7 @@ Updated: 2026-04-09
 | Prefix | no | non-editable text prefix with separator | text color, border, spacing |
 | Field | yes | relative positioning layer for editable surface and overlaid chrome | internal spacing, overlay offsets |
 | Leading Affordance | no | icon or adornment inside editable field leading edge | icon color, icon size |
-| Input Control | yes | native single-line or multiline input element that owns its own padding | typography, text color, caret |
+| Input Control | yes | native input element (`<input>` single-line, `<textarea>` multiline) that owns its own padding | typography, text color, caret, resize |
 | Trailing Affordance | no | icon or action inside editable field trailing edge | icon color, icon size |
 | Clear Button | no | search clear action inside editable field trailing edge | icon color, hover state, focus ring |
 | Validation Indicator | no | pending shared spinner or valid/invalid status icon overlaid inside field | status colors, icon size, motion |
@@ -81,7 +81,10 @@ Updated: 2026-04-09
 | `ariaLabel` | `string \| null` | `null` | no | required when no external label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `inputMode` | `"none" \| "search" \| "text" \| "tel" \| "url" \| "email" \| "numeric" \| "decimal" \| null` | `null` | no | virtual keyboard hint |
-| `type` | `string` | `"text"` | no | HTML input type attribute. When `"search"`, automatically renders a leading search icon (if no `leading` slot is provided), supports `showClearButton`, and emits `clear` event. When `"slug"`, behaves as semantic slug entry but renders a native text input for HTML compatibility |
+| `list` | `string \| null` | `null` | no | id of a `<datalist>` element to associate for native suggestion lists; passed directly to the native input as the `list` attribute |
+| `type` | `string` | `"text"` | no | HTML input type attribute. When `"multiline"`, renders a `<textarea>`. When `"search"`, automatically renders a leading search icon (if no `leading` slot is provided), supports `showClearButton`, and emits `clear` event. When `"slug"`, behaves as semantic slug entry but renders a native text input for HTML compatibility |
+| `rows` | `number \| null` | `null` | no | number of visible text rows; when greater than 1 and `type` is not explicitly set, auto-switches to multiline mode (equivalent to `type="multiline"`); textarea defaults to 4 rows when multiline and rows is null |
+| `resize` | `"vertical" \| "horizontal" \| "both" \| "none"` | `"vertical"` | no | resize handle direction in multiline mode; only applies when the control renders as a `<textarea>` |
 | `source` | `string \| null` | `null` | no | when `type="slug"`, source text used to auto-generate the slug until the user meaningfully edits the field |
 | `showClearButton` | `boolean` | `true` | no | when `type="search"`, whether to show the clear button when the input has a value and is not disabled/readonly |
 | `prefix` | `string \| null` | `null` | no | static text before input (e.g. "$") |
@@ -146,6 +149,24 @@ Updated: 2026-04-09
 - custom `validate` still runs after built-in slug checks and receives the
   combined slug candidate plus merged validation context
 
+### Multiline Mode
+
+- multiline mode is entered when `type="multiline"` or when `rows` is set to a
+  value greater than 1 with the default `type="text"`
+- the rendered control switches from `<input>` to `<textarea>`
+- multiline root loses the fixed `min-height` from the single-line control; the
+  textarea's natural height (driven by `rows`) replaces it
+- `rows` defaults to `4` when multiline and no rows value is provided
+- `resize` controls the native resize handle: `"vertical"` (default), `"horizontal"`,
+  `"both"`, or `"none"`
+- character count, when shown, is overlaid in the bottom-right of the textarea
+  at `0.375rem` from the bottom and `0.5rem` from the right edge
+- char-count overlay adds extra bottom padding to the control equal to the
+  character count element height so typed text never runs under the counter
+- all other behaviour (validation, affixes, affordances, focus ring, disabled
+  state, slug and search modes) is incompatible with multiline and should not
+  be combined with it
+
 ## 4. States
 
 ### Visual States
@@ -193,6 +214,7 @@ Updated: 2026-04-09
 - `autocomplete`: native autocomplete attribute when provided
 - `maxlength`: from maxLength prop
 - `inputmode`: from inputMode prop
+- `list`: from list prop; associates a native datalist for browser-provided suggestions
 - Prefix/suffix: decorative, not announced; `user-select: none`
 - Labeling rules: placeholder text never counts as the accessible name
 
@@ -226,9 +248,13 @@ Updated: 2026-04-09
 
 ### Sizing
 
-- minimum height: `size-control-height` (from token)
+- minimum height: `size-control-height` (from token) — single-line only
+- multiline mode: `min-height: auto`; natural height is driven by `rows` (default 4);
+  minimum textarea height is `calc(1lh * 4)` (four line-heights at the current
+  font size)
 - width: stretches with parent; `min-width: 0` on the input allows flex shrink
-- content remains single-line and horizontally scrolls internally if necessary
+- single-line content scrolls horizontally if it exceeds the available width
+- multiline content wraps and scrolls vertically
 
 ### Composition
 

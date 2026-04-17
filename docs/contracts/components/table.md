@@ -53,6 +53,9 @@ Updated: 2026-04-01
 | `caption` | `string \| null` | `null` | no | visible caption text |
 | `emptyMessage` | `string` | `"No rows available."` | no | shown when rows is empty |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when no caption |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
+| `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for cell spacing; when null, resolves from inherited presentation |
 
 ### Type Definitions
 

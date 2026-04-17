@@ -46,6 +46,7 @@ Updated: 2026-03-15
 | `anchorPoint` | `{ x: number; y: number } \| null` | `null` | no | pointer-based anchor position (clientX/clientY) |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | optional menu label |
 
 ### Type Definitions
