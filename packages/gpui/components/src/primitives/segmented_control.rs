@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ChoiceOption, ControlSize, SegmentedControlSpec};
 
 use crate::presentation::{
-    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
+    control_height_rem, rem_to_px, resolve_semantic_size, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_radius};
 
@@ -131,18 +131,22 @@ impl IntoElement for SegmentedControl {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
-        // Contract: segment min-height = calc(control-height - 0.25rem)
+        // Container has 0.125rem padding on all sides (Svelte: padding: 0.125rem)
+        // Segment height = control height minus top+bottom container padding (2 × 0.125rem)
         let segment_height = control_height - px(rem_to_px(0.25));
-        let segment_font_size = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: font-size is fixed at 0.75rem for all sizes (not size-responsive)
+        let segment_font_size = px(rem_to_px(0.75));
         let segment_pad_x = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
 
         let mut row = div()
             .flex()
+            .items_center()
             .rounded(control_radius)
             .border_1()
             .border_color(root_border)
             .bg(root_bg)
-            .h(control_height);
+            .h(control_height)
+            .p(px(rem_to_px(0.125))); // Svelte: padding: 0.125rem
 
         if is_disabled {
             row = row

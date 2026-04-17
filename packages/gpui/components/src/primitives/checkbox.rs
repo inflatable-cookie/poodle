@@ -122,7 +122,7 @@ impl IntoElement for Checkbox {
         let (indicator_size, indicator_radius) = match effective_size {
             ControlSize::Xs => (resolve_px(theme, "size.icon.xs"), px(rem_to_px(0.1875))),
             ControlSize::Sm => (resolve_px(theme, "size.icon.sm"), px(rem_to_px(0.25))),
-            ControlSize::Md => (px(rem_to_px(1.125)),              px(rem_to_px(0.3125))),
+            ControlSize::Md => (resolve_px(theme, "size.icon.md"), px(rem_to_px(0.3125))),
             ControlSize::Lg => (resolve_px(theme, "size.icon.lg"), px(rem_to_px(0.375))),
             ControlSize::Xl => (resolve_px(theme, "size.icon.xl"), px(rem_to_px(0.4375))),
         };

@@ -145,7 +145,7 @@ impl IntoElement for Slider {
         // the fixed value is retained to match the Svelte reference exactly.
         let track_f: f32 = rem_to_px(0.375); // 6 px
         let track_height = px(track_f);
-        let track_radius = px(track_f / 2.0);
+        let track_radius = px(999.0); // Svelte: border-radius: 999px (full pill)
 
         let thumb_f = theme.resolve_space("size.icon.md");
         let thumb_size = px(thumb_f);
