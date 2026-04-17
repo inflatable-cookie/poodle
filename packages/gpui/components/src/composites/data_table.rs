@@ -329,7 +329,7 @@ impl IntoElement for DataTable {
         if spec.has_filters() {
             let mut filter_row = div().flex().flex_wrap().gap(gap_sm);
             for filter in &spec.filters {
-                let chip_bg = accent.opacity(accent.a * 0.12);
+                let chip_bg = Hsla { a: accent.a * 0.12, ..accent };
                 filter_row = filter_row.child(
                     div()
                         .flex()
