@@ -2,6 +2,7 @@
 //! callout-style error/success banners.
 //! Uses semantic spacing tokens for consistent layout.
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -64,9 +65,10 @@ impl FormLayout {
 /// Builds a callout banner with a toned background for error/success messages.
 fn callout_banner(theme: &GpuiThemeProvider, message: &str, tone_color: Hsla) -> impl IntoElement {
     let panel_bg = resolve_color(theme, "color.background.panel");
-    let radius = resolve_radius(theme, "radius.control");
-    let inline_pad = resolve_px(theme, "space.inline.md");
-    let stack_pad = resolve_px(theme, "space.stack.sm");
+    // Svelte: callout uses radius.surface, panel_x (16px), stack.md (12px) padding
+    let radius = resolve_radius(theme, "radius.surface");
+    let inline_pad = px(rem_to_px(1.0)); // panel_x at default density
+    let stack_pad = resolve_px(theme, "space.stack.md");
     let body_size = resolve_px(theme, "typography.body.size");
 
     // Tone-colored background: 12% tone over panel

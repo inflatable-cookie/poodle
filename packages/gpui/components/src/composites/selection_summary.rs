@@ -105,6 +105,25 @@ impl IntoElement for SelectionSummary {
         let accent = resolve_color(theme, "color.accent.base");
         let bg = resolve_color(theme, "color.background.surface");
 
+        // Svelte: chip font = label-size scale; chip pad-x = size-based; internal gap = space.inline.md
+        let chip_font = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.71875,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }));
+        let chip_pad_x = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.5,
+            ControlSize::Sm => 0.625,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.875,
+            ControlSize::Xl => 1.0,
+        }));
+        let chip_internal_gap = resolve_px(theme, "space.inline.md");
+        // Svelte: overflow chip px = 0.625rem (10px)
+        let overflow_pad_x = px(rem_to_px(0.625));
+
         let mut container = div().w_full().flex().flex_wrap().items_center().gap(gap);
 
         // Selected item pills — clamped by max_visible_items if set.
@@ -116,8 +135,8 @@ impl IntoElement for SelectionSummary {
                 .id(item_id)
                 .flex()
                 .items_center()
-                .gap(px(4.0))
-                .px(px(8.0))
+                .gap(chip_internal_gap)
+                .px(chip_pad_x)
                 .py(px(3.0))
                 .rounded(px(12.0))
                 .bg(bg)
@@ -126,7 +145,7 @@ impl IntoElement for SelectionSummary {
 
             pill = pill.child(
                 div()
-                    .text_size(px(12.0))
+                    .text_size(chip_font)
                     .text_color(text_primary)
                     .child(item.label.clone()),
             );
@@ -134,7 +153,7 @@ impl IntoElement for SelectionSummary {
             if let Some(ref meta) = item.meta {
                 pill = pill.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(chip_font)
                         .text_color(text_secondary.opacity(0.7))
                         .child(meta.clone()),
                 );
@@ -144,7 +163,7 @@ impl IntoElement for SelectionSummary {
             pill = pill.child(
                 div()
                     .cursor_pointer()
-                    .text_size(px(12.0))
+                    .text_size(chip_font)
                     .text_color(text_secondary)
                     .child("\u{2715}"),
             );
@@ -159,13 +178,13 @@ impl IntoElement for SelectionSummary {
                 div()
                     .flex()
                     .items_center()
-                    .px(px(8.0))
+                    .px(overflow_pad_x)
                     .py(px(3.0))
                     .rounded(px(12.0))
                     .bg(bg)
                     .border_1()
                     .border_color(border)
-                    .text_size(px(12.0))
+                    .text_size(chip_font)
                     .text_color(text_secondary)
                     .child(format!("+{overflow} more")),
             );
@@ -178,7 +197,7 @@ impl IntoElement for SelectionSummary {
                 let mut clear_btn = div()
                     .id(clear_id)
                     .cursor_pointer()
-                    .text_size(px(12.0))
+                    .text_size(chip_font)
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(accent)
                     .child(clear_action.label.clone());

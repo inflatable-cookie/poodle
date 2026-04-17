@@ -5,6 +5,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI empty state component backed by `EmptyStateSpec`.
@@ -92,21 +93,22 @@ impl IntoElement for EmptyState {
 
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let body_size = resolve_px(theme, "typography.body.size");
-        let heading_size = resolve_px(theme, "typography.heading.size");
         let control_radius = resolve_radius(theme, "radius.control");
         let gap = resolve_px(theme, spec.layout_gap_token());
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let accent = resolve_color(theme, "color.accent.base");
 
-        // Compact mode halves the vertical padding and reduces the
-        // title size, suitable for embedding in tight containers.
-        let vertical_padding = if spec.compact { px(24.0) } else { px(48.0) };
-        let title_size = if spec.compact {
-            body_size
+        // Svelte: title = 1.125rem default, 0.9375rem compact.
+        // Svelte: padding = panel_y*1.5 vertical (default) / space.stack.lg (compact), panel_x horizontal.
+        let title_size = px(rem_to_px(if spec.compact { 0.9375 } else { 1.125 }));
+        let vertical_padding = if spec.compact {
+            resolve_px(theme, "space.stack.lg")
         } else {
-            heading_size
+            // panel_y (default) * 1.5 = 0.75rem * 1.5 = 1.125rem
+            px(rem_to_px(1.125))
         };
+        let horiz_padding = px(rem_to_px(1.0)); // panel_x at default density
 
         let mut container = div()
             .w_full()
@@ -115,7 +117,7 @@ impl IntoElement for EmptyState {
             .items_center()
             .justify_center()
             .py(vertical_padding)
-            .px(px(24.0))
+            .px(horiz_padding)
             .gap(gap);
 
         // Illustration slot

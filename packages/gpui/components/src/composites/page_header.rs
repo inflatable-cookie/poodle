@@ -195,14 +195,15 @@ impl IntoElement for PageHeader {
             } else {
                 body_size
             };
-            let inline_xs = resolve_px(theme, "space.inline.sm");
+            // Svelte: back link gap = 0.35rem (hardcoded, not a token)
+            let back_gap = px(rem_to_px(0.35));
             let mut back_row = div()
                 .id("poodle-page-header-back")
                 .w_full()
                 .mb(gap)
                 .flex()
                 .items_center()
-                .gap(inline_xs)
+                .gap(back_gap)
                 .text_size(back_text_size)
                 .text_color(back_color)
                 .cursor_pointer()
@@ -229,7 +230,8 @@ impl IntoElement for PageHeader {
                 div()
                     .w_full()
                     .mb(gap)
-                    .text_size(px(11.0))
+                    // Svelte: section label = 0.75rem
+                    .text_size(px(rem_to_px(0.75)))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(eyebrow_color)
                     .child(section.to_uppercase()),
@@ -249,12 +251,15 @@ impl IntoElement for PageHeader {
         }
 
         // Title block: eyebrow, title row (+count), subtitle stacked
-        let mut title_block = div().flex().flex_col().gap(gap);
+        // Svelte: title-block gap = space.inline.sm (8px)
+        let title_block_gap = resolve_px(theme, "space.inline.sm");
+        let mut title_block = div().flex().flex_col().gap(title_block_gap);
 
         if let Some(ref eyebrow) = spec.eyebrow {
             title_block = title_block.child(
                 div()
-                    .text_size(px(12.0))
+                    // Svelte: eyebrow = 0.6875rem (11px)
+                    .text_size(px(rem_to_px(0.6875)))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(eyebrow_color)
                     .child(eyebrow.clone()),

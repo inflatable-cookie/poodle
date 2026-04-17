@@ -123,7 +123,8 @@ impl IntoElement for ToastStack {
             let dismiss_element_id = SharedString::from(format!("toast-dismiss-{}", toast.id));
 
             // Build the content column: title + optional message
-            let mut content_col = div().flex().flex_col().gap(px(2.0)).flex_grow().child(
+            // Svelte: content col gap = 0.25rem (4px)
+            let mut content_col = div().flex().flex_col().gap(px(rem_to_px(0.25))).flex_grow().child(
                 div()
                     .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
@@ -134,7 +135,8 @@ impl IntoElement for ToastStack {
             if let Some(ref message) = toast.message {
                 content_col = content_col.child(
                     div()
-                        .text_size(px(12.0))
+                        // Svelte: message font = body scale (md=0.8125rem)
+                        .text_size(body_size)
                         .text_color(message_color)
                         .child(message.clone()),
                 );
@@ -192,8 +194,8 @@ impl IntoElement for ToastStack {
                 .rounded(radius)
                 .overflow_hidden()
                 .child(
-                    // Left accent bar
-                    div().w(px(4.0)).h_full().bg(tone_color).flex_shrink_0(),
+                    // Left accent bar — Svelte: 0.1875rem (3px)
+                    div().w(px(rem_to_px(0.1875))).h_full().bg(tone_color).flex_shrink_0(),
                 )
                 .child(
                     // Content area with padding

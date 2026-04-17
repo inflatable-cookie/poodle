@@ -214,12 +214,13 @@ impl IntoElement for LogList {
         let search_icon = Icon::from_spec(IconSpec::new("search").with_size(IconSize::Sm), theme)
             .with_color(text_secondary);
 
+        // Svelte: toolbar padding = 0.75rem vertical (hardcoded), pad_x horizontal
         let mut toolbar = div()
             .flex()
             .items_center()
             .gap(px(item_gap))
             .px(px(pad_x))
-            .py(px(pad_y * 0.5))
+            .py(px(rem_to_px(0.75)))
             .border_b_1()
             .border_color(border_color);
 
@@ -333,10 +334,11 @@ impl IntoElement for LogList {
                 .text_color(text_primary)
                 .child(entry.message.clone());
 
+            // Svelte: top-row items gap = 0.375rem (6px)
             let top_row = div()
                 .flex()
                 .items_center()
-                .gap(px(item_gap))
+                .gap(px(rem_to_px(0.375)))
                 .child(timestamp)
                 .child(badge)
                 .child(message);
@@ -398,7 +400,13 @@ impl IntoElement for LogList {
                 None
             };
 
-            let mut entry_block = div().flex().flex_col().py(px(2.0)).child(top_row);
+            // Svelte: entry block padding = 0.875rem vertical; body gap = 0.3rem between rows
+            let mut entry_block = div()
+                .flex()
+                .flex_col()
+                .py(px(rem_to_px(0.875)))
+                .gap(px(rem_to_px(0.3)))
+                .child(top_row);
             if let Some(audit) = audit_row {
                 entry_block = entry_block.child(audit);
             }
