@@ -84,6 +84,26 @@ When roadmap files disagree:
 2. treat `docs/roadmaps/README.md` as the entrypoint
 3. treat `g10` as the active generation until it is explicitly closed
 
+## Rollover policy
+
+Create a new generation only when maintainers explicitly decide the sequencing
+baseline needs a real reset.
+
+Generations should be substantial. As a healthy default, expect something
+closer to 20 to 40 roadmap files before rollover is worth discussing. Treat
+that as a judgment guardrail, not an automatic counter.
+
+Rollover is a closeout event, not a convenience move. Before opening the next
+generation:
+
+- close, pause, supersede, or rehome every roadmap in the current generation
+- refresh the roadmap front doors so the old generation is visibly closed
+- purge stale generation-specific strict-planning artifacts from the active
+  `docs/specs/` tree
+
+If that cleanup has not happened, stay in the current generation and finish the
+closeout there first.
+
     `g10.013`–`g10.017` delivered a systematic GPUI component correctness and
     token-fidelity sweep (formula literals, composite/primitive parity vs Svelte).
     `g10.018` completed the formula sweep third pass (skeleton, datetime pickers,

@@ -11,6 +11,12 @@ Roadmaps hold executable milestone work for Poodle.
 - file names use `NNN-slug.md` with numbering local to the generation
 - references use roadmap IDs such as `g09.001`
 - generation rollover is manual only
+- treat generations as substantial sequencing eras, not one-or-two-file
+  buckets; as a healthy default, expect roughly 20 to 40 roadmap files in one
+  generation before rollover is even worth discussing
+- treat rollover as full generation closeout, not a convenience reset: close,
+  supersede, or rehome every roadmap in the current generation first, then
+  purge stale strict-planning artifacts from the active `docs/specs/` tree
 - backlog items belong in `backlog/`
 - architecture belongs in `../architecture/`, not here
 
@@ -43,6 +49,20 @@ If a generation README conflicts with that file, treat the index as the source o
 
 Use the top-level generation index to determine what is current, then open the relevant generation folder.
 Do not assume the highest-numbered generation folder is the active one.
+
+## Rollover guardrail
+
+Do not open `gNN+1` while the current generation still has live roadmap files
+or stale strict-planning debris in the active specs tree.
+
+Before rollover:
+
+- every roadmap in the closing generation must be explicitly closed, paused,
+  superseded, or moved to backlog
+- the roadmap front doors must agree that the old generation is no longer the
+  live queue
+- stale strict-planning artifacts for that generation must be purged from the
+  active `docs/specs/` tree
 
 ## Next Task
 

@@ -33,6 +33,10 @@ The active strict-planning layer is:
 ## Working Rule
 
 When a roadmap task touches emitted artifacts, runtime parity, packaging, or cross-component behavior, read the relevant spec first and treat it as normative.
+Before roadmap generation rollover, purge stale generation-specific
+strict-planning artifacts from the active tree so the next generation does not
+inherit dead planning debris. Repo-wide normative specs are not part of that
+purge unless they are actually superseded.
 
 ## Next Task
 

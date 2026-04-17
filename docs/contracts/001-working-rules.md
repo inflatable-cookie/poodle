@@ -20,6 +20,24 @@ Depends on: `docs/architecture/product-guardrails.md`
 - Keep currentness surfaces aligned so completed cards do not remain advertised
   as ready.
 
+## Generation Rollover Rule
+
+Treat roadmap generations as substantial sequencing eras, not tiny buckets. In
+a long-running repo, expect roughly 20 to 40 roadmap files in one generation
+before rollover is even worth discussing.
+
+Treat rollover as full closeout:
+
+- every roadmap in the old generation must be explicitly closed, paused,
+  superseded, or moved to backlog
+- the roadmap front doors must reflect that closed state before the next
+  generation opens
+- stale strict-planning artifacts from the closing generation must be archived
+  or removed from the active `docs/specs/` tree
+
+If those closeout conditions are not satisfied, repair the current generation
+instead of opening a new one.
+
 ## Current Posture
 
 Poodle is in a strict-paused `g10` posture until the next active owner is
