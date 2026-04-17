@@ -129,6 +129,7 @@ impl IntoElement for DateTimePicker {
 
         let surface_bg = resolve_color(theme, "color.background.surface");
         let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let border = resolve_color(theme, "color.border.default");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -344,9 +345,11 @@ impl IntoElement for DateTimePicker {
 
             let overlay = div()
                 .rounded(control_radius)
-                .bg(elevated_bg)
+                // Svelte: color-mix(elevated 98%, panel)
+                .bg(color_mix(elevated_bg, panel_bg, 0.98))
                 .border_1()
-                .border_color(border)
+                // Svelte: color-mix(border-default 72%, transparent)
+                .border_color(Hsla { a: border.a * 0.72, ..border })
                 .shadow(vec![
                     gpui::BoxShadow {
                         color: hsla(0.0, 0.0, 0.0, 0.10),

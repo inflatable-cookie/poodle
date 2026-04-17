@@ -12,7 +12,7 @@ use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI date-time-zone picker component backed by `DateTimeZonePickerSpec`.
 pub struct DateTimeZonePicker {
@@ -101,6 +101,7 @@ impl IntoElement for DateTimeZonePicker {
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
+        let panel_bg = resolve_color(theme, "color.background.panel");
         let icon_muted = resolve_color(theme, "color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
@@ -268,9 +269,11 @@ impl IntoElement for DateTimeZonePicker {
 
             let overlay = div()
                 .rounded(control_radius)
-                .bg(elevated_bg)
+                // Svelte: color-mix(elevated 98%, panel)
+                .bg(color_mix(elevated_bg, panel_bg, 0.98))
                 .border_1()
-                .border_color(border)
+                // Svelte: color-mix(border-default 72%, transparent)
+                .border_color(Hsla { a: border.a * 0.72, ..border })
                 .shadow(vec![
                     gpui::BoxShadow {
                         color: hsla(0.0, 0.0, 0.0, 0.10),

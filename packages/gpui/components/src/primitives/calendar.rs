@@ -239,10 +239,12 @@ impl IntoElement for Calendar {
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = cal_font;
 
-        // Svelte: day hover = color-mix(accent 14%, transparent)
+        // Svelte: day hover bg = color-mix(accent 14%, transparent)
         let hover_bg = Hsla { a: accent.a * 0.14, ..accent };
-        // Contract: today cell border = border-default
-        let today_border = border;
+        // Svelte: day hover border = color-mix(accent 46%, border-default)
+        let hover_border = color_mix(accent, border, 0.46);
+        // Svelte: today cell border = color-mix(accent 44%, border-default)
+        let today_border = color_mix(accent, border, 0.44);
 
         let selected_date = spec.current_value().map(|s| s.to_string());
         let selected_day = selected_date.as_deref().and_then(Self::parse_day);
@@ -380,6 +382,10 @@ impl IntoElement for Calendar {
             .items_center()
             .justify_center()
             .rounded(control_radius)
+            // Svelte: border 1px border-default, bg surface
+            .border_1()
+            .border_color(border)
+            .bg(surface_bg)
             .cursor_pointer()
             .hover(move |s| s.bg(nav_btn_hover))
             .child(
@@ -403,7 +409,12 @@ impl IntoElement for Calendar {
             .items_center()
             .justify_center()
             .rounded(control_radius)
+            // Svelte: border 1px border-default, bg surface
+            .border_1()
+            .border_color(border)
+            .bg(surface_bg)
             .cursor_pointer()
+            .hover(move |s| s.bg(nav_btn_hover))
             .child(
                 Icon::from_spec(
                     IconSpec::new("chevron-right").with_size(IconSize::Sm),
@@ -562,7 +573,9 @@ impl IntoElement for Calendar {
                             .justify_center()
                             .rounded(control_radius)
                             .text_size(body_size)
-                            .text_color(text_secondary.opacity(0.4))
+                            // Svelte: color text-secondary with element opacity 0.72
+                            .text_color(text_secondary)
+                            .opacity(0.72)
                             .child(format!("{}", outside_day)),
                     );
                 } else if cell_idx >= start_offset + days_count {
@@ -577,7 +590,9 @@ impl IntoElement for Calendar {
                             .justify_center()
                             .rounded(control_radius)
                             .text_size(body_size)
-                            .text_color(text_secondary.opacity(0.4))
+                            // Svelte: color text-secondary with element opacity 0.72
+                            .text_color(text_secondary)
+                            .opacity(0.72)
                             .child(format!("{}", outside_day)),
                     );
                 } else {
@@ -634,8 +649,9 @@ impl IntoElement for Calendar {
                                 .border_color(today_border)
                                 .font_weight(FontWeight::SEMIBOLD);
                         }
-                        // Contract: hover = color-mix(accent 8%, surface)
-                        cell = cell.hover(move |s| s.bg(hover_bg));
+                        // Svelte: hover border = color-mix(accent 46%, border-default)
+                        //         hover bg    = color-mix(accent 14%, transparent)
+                        cell = cell.hover(move |s| s.border_color(hover_border).bg(hover_bg));
                     }
 
                     if spec.is_disabled {
