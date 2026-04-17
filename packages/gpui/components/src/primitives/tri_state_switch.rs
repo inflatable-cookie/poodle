@@ -143,9 +143,10 @@ impl IntoElement for TriStateSwitch {
             .unwrap_or(success);
 
         let track_bg = color_mix(text_primary, surface_bg, 0.18);
-        let excluded_bg = color_mix(excluded_color, surface_bg, 0.18);
-        let default_bg = color_mix(default_color, surface_bg, 0.10);
-        let included_bg = color_mix(included_color, surface_bg, 0.18);
+        // Svelte: color-mix(X 14%, canvas-70%-black) — ratios 14/8/14
+        let excluded_bg = color_mix(excluded_color, surface_bg, 0.14);
+        let default_bg = color_mix(default_color, surface_bg, 0.08);
+        let included_bg = color_mix(included_color, surface_bg, 0.14);
 
         let (selected_index, selection_bg, selection_border) = match spec.state {
             CheckState::Unchecked => (
