@@ -185,7 +185,8 @@ impl IntoElement for Dialog {
         let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
         let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
 
-        let actions_gap = resolve_px(theme, "space.inline.sm");
+        // Svelte: header row gap = space.inline.md (12px), not inline.sm
+        let actions_gap = resolve_px(theme, "space.inline.md");
         let panel_x = density_pad_x;
         let panel_y = density_pad_y;
 

@@ -9,9 +9,7 @@ use poodle_specs::{
 };
 
 use super::icon::Icon;
-use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct Collapsible {
@@ -112,9 +110,23 @@ impl IntoElement for Collapsible {
         let spec = &self.spec;
         let is_open = spec.current_open();
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
-        let _density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
-        let title_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: collapsible density X = compact=0.5, default=1.0, comfortable=1.0rem
+        // (not the standard panel_space_x_rem which gives compact=0.75, comfortable=1.25)
+        let density_pad_x = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 1.0,
+            ControlDensity::Comfortable => 1.0,
+        }));
+        // Svelte: collapsible Y is hardcoded 0.625rem (not density-based)
+        let density_pad_y = px(rem_to_px(0.625));
+        // Svelte: title is heading-scale (xs=0.8125, sm=0.875, md=1.0, lg=1.0625, xl=1.125rem)
+        let title_font = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.8125,
+            ControlSize::Sm => 0.875,
+            ControlSize::Md => 1.0,
+            ControlSize::Lg => 1.0625,
+            ControlSize::Xl => 1.125,
+        }));
 
         let heading_size = title_font;
         let label_size = resolve_px(theme, "typography.label.size");
@@ -125,7 +137,6 @@ impl IntoElement for Collapsible {
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let radius = resolve_radius(theme, "radius.surface");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        let panel_pad = density_pad_x;
 
         // Svelte: border = color-mix(border-subtle 42%, transparent)
         let root_border = Hsla {
@@ -141,15 +152,17 @@ impl IntoElement for Collapsible {
             "poodle-collapsible".to_string()
         };
 
-        // ── Root (contract: grid, gap 0.5rem when open, 0 when closed) ──
-        let gap = if is_open { resolve_px(theme, "space.inline.sm") } else { px(0.0) };
+        // ── Root (contract: grid, gap space.stack.md when open, 0 when closed) ──
+        // Svelte: open gap = space.stack.md (12px), not inline.sm (8px)
+        let gap = if is_open { resolve_px(theme, "space.stack.md") } else { px(0.0) };
         let mut root = div()
             .flex()
             .flex_col()
             .gap(gap)
             .min_w(px(0.0))
-            // Contract: padding from panel spacing token
-            .p(panel_pad)
+            // Svelte: padding X is density-based, Y is hardcoded 0.625rem
+            .px(density_pad_x)
+            .py(density_pad_y)
             .border_1()
             .border_color(root_border)
             .rounded(radius)

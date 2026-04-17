@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ControlDensity, ControlSize, DrawerEdge, DrawerSpec, SemanticControlSizeRole};
 
-use crate::presentation::{panel_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{color_mix, resolve_color, resolve_px};
 
 /// A real GPUI drawer component backed by `DrawerSpec`.
@@ -134,11 +134,12 @@ impl IntoElement for Drawer {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let density_pad = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        // Svelte: drawer uses panel-y for vertical, panel-x for horizontal (not both from panel-x)
+        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
         let _body_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let stack_gap = resolve_px(theme, "space.stack.sm");
-        let panel_padding = density_pad;
 
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let panel_bg = resolve_color(theme, "color.background.panel");
@@ -174,7 +175,8 @@ impl IntoElement for Drawer {
         }
 
         drawer_panel = drawer_panel
-            .p(panel_padding)
+            .px(density_pad_x)
+            .py(density_pad_y)
             .flex()
             .flex_col()
             .gap(stack_gap)
