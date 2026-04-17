@@ -15,7 +15,7 @@ use poodle_specs::{
 use super::icon::Icon;
 use super::spinner::Spinner;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    rem_to_px, resolve_semantic_size, size_height_offset_rem,
     size_padding_x_offset_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
@@ -214,7 +214,15 @@ impl IntoElement for TextInput {
             base_padding + px(rem_to_px(size_padding_x_offset_rem(effective_size))) + density_offset;
         let inline_gap = resolve_px(theme, spec.inline_gap_token());
         let control_radius = resolve_radius(theme, spec.radius_token());
-        let body_size = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: TextInput uses body-scale fonts (one step above control fonts)
+        // xs=0.75, sm=0.8125, md=0.875, lg=0.9375, xl=1.0rem
+        let body_size = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.75,
+            ControlSize::Sm => 0.8125,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 0.9375,
+            ControlSize::Xl => 1.0,
+        }));
         let body_line_height = resolve_px(theme, spec.body_line_height_token());
 
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());

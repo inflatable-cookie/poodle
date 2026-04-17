@@ -439,7 +439,9 @@ impl IntoElement for Select {
                         spread_radius: px(0.0),
                     },
                 ])
-                .py(stack_gap)
+                // Svelte: padding: 0.25rem (4px all sides); items use grid gap: 0.0625rem
+                .p(px(rem_to_px(0.25)))
+                .gap(px(rem_to_px(0.0625)))
                 .max_h(menu_max_h)
                 .overflow_y_scroll();
 
@@ -510,12 +512,13 @@ impl IntoElement for Select {
                         );
                     }
                     // Named group label
+                    // Svelte: padding: 0.375rem 0.5rem 0.1875rem (hardcoded, not size/density)
                     if let Some(ref group_name) = this_group {
                         list = list.child(
                             div()
-                                .px(inline_padding)
-                                .pt(stack_gap)
-                                .pb(px(rem_to_px(0.1875))) // Svelte: 0.1875rem
+                                .px(px(rem_to_px(0.5)))
+                                .pt(px(rem_to_px(0.375)))
+                                .pb(px(rem_to_px(0.1875)))
                                 .text_size(caption_size)
                                 .font_weight(FontWeight::SEMIBOLD)
                                 .text_color(text_secondary)
@@ -530,10 +533,11 @@ impl IntoElement for Select {
 
                 let item_id = SharedString::from(format!("poodle-select-opt-{}", option.value));
 
+                // Svelte: option padding: 0.375rem 0.5rem (hardcoded, not size/density responsive)
                 let mut item = div()
                     .id(item_id)
-                    .px(inline_padding)
-                    .py(stack_gap)
+                    .px(px(rem_to_px(0.5)))
+                    .py(px(rem_to_px(0.375)))
                     .text_size(body_size)
                     .text_color(text_primary);
 
@@ -577,8 +581,8 @@ impl IntoElement for Select {
             if !has_visible_options {
                 list = list.child(
                     div()
-                        .px(inline_padding)
-                        .py(stack_gap)
+                        .px(px(rem_to_px(0.5)))
+                        .py(px(rem_to_px(0.375)))
                         .text_size(body_size)
                         .text_color(text_secondary)
                         .child(empty_message),
