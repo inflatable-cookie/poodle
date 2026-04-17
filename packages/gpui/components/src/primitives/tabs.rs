@@ -9,14 +9,14 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlSize, IconSize, IconSpec, Orientation, TabActivationMode, TabDefinition, TabVariant,
-    TabsSpec,
+    ControlDensity, ControlSize, IconSize, IconSpec, Orientation, TabActivationMode,
+    TabDefinition, TabVariant, TabsSpec,
 };
 
 use super::icon::Icon;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem, size_padding_x_offset_rem,
+    control_height_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -465,9 +465,12 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        let inline_padding = px(rem_to_px(
-            control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size),
-        ));
+        // Svelte: --poodle-tabs-control-x is density-only (0.5/0.75/1.0rem)
+        let inline_padding = px(rem_to_px(match self.spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.75,
+            ControlDensity::Comfortable => 1.0,
+        }));
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -612,9 +615,12 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        let control_x = px(rem_to_px(
-            control_space_x_rem(self.spec.density) + size_padding_x_offset_rem(effective_size),
-        ));
+        // Svelte: --poodle-tabs-control-x is density-only (0.5/0.75/1.0rem)
+        let control_x = px(rem_to_px(match self.spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.75,
+            ControlDensity::Comfortable => 1.0,
+        }));
         let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
