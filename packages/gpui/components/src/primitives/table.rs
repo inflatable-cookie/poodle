@@ -37,28 +37,17 @@ impl Table {
         let header_border_raw = resolve_color(theme, spec.header_border_token());
         let cell_border_raw = resolve_color(theme, spec.cell_border_token());
 
-        // Contract: 96% panel fill
-        let transparent = Hsla {
-            h: shell_fill_raw.h,
-            s: shell_fill_raw.s,
-            l: shell_fill_raw.l,
-            a: 0.0,
-        };
-        let shell_fill = color_mix(shell_fill_raw, transparent, 0.96);
-
-        // Contract: 78% shell border
-        let shell_border = color_mix(shell_border_raw, transparent, 0.78);
+        // Svelte: color-mix(X N%, transparent) = alpha reduction
+        let shell_fill = Hsla { a: shell_fill_raw.a * 0.96, ..shell_fill_raw };
+        let shell_border = Hsla { a: shell_border_raw.a * 0.78, ..shell_border_raw };
 
         // Svelte: header bg = color-mix(surface 91%, text-primary)
         let surface = resolve_color(theme, "color.background.surface");
         let text_primary = resolve_color(theme, "color.text.primary");
         let header_fill = color_mix(surface, text_primary, 0.91);
 
-        // Contract: 72% header border
-        let header_border = color_mix(header_border_raw, transparent, 0.72);
-
-        // Contract: 72% cell border
-        let cell_border = color_mix(cell_border_raw, transparent, 0.72);
+        let header_border = Hsla { a: header_border_raw.a * 0.72, ..header_border_raw };
+        let cell_border = Hsla { a: cell_border_raw.a * 0.72, ..cell_border_raw };
 
         Self {
             shell_border,
@@ -83,28 +72,17 @@ impl Table {
         let header_border_raw = resolve_color(theme, spec.header_border_token());
         let cell_border_raw = resolve_color(theme, spec.cell_border_token());
 
-        // Contract: 96% panel fill
-        let transparent = Hsla {
-            h: shell_fill_raw.h,
-            s: shell_fill_raw.s,
-            l: shell_fill_raw.l,
-            a: 0.0,
-        };
-        let shell_fill = color_mix(shell_fill_raw, transparent, 0.96);
-
-        // Contract: 78% shell border
-        let shell_border = color_mix(shell_border_raw, transparent, 0.78);
+        // Svelte: color-mix(X N%, transparent) = alpha reduction
+        let shell_fill = Hsla { a: shell_fill_raw.a * 0.96, ..shell_fill_raw };
+        let shell_border = Hsla { a: shell_border_raw.a * 0.78, ..shell_border_raw };
 
         // Svelte: header bg = color-mix(surface 91%, text-primary)
         let surface = resolve_color(theme, "color.background.surface");
         let text_primary = resolve_color(theme, "color.text.primary");
         let header_fill = color_mix(surface, text_primary, 0.91);
 
-        // Contract: 72% header border
-        let header_border = color_mix(header_border_raw, transparent, 0.72);
-
-        // Contract: 72% cell border
-        let cell_border = color_mix(cell_border_raw, transparent, 0.72);
+        let header_border = Hsla { a: header_border_raw.a * 0.72, ..header_border_raw };
+        let cell_border = Hsla { a: cell_border_raw.a * 0.72, ..cell_border_raw };
 
         Self {
             shell_border,

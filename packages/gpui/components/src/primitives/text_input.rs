@@ -18,7 +18,7 @@ use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI text input component backed by `TextInputSpec`.
 pub struct TextInput {
@@ -280,7 +280,8 @@ impl IntoElement for TextInput {
         if let Some(ref prefix_text) = spec.prefix {
             let affix_color = resolve_color(theme, spec.affix_color_token());
             let separator_base = resolve_color(theme, spec.affix_separator_color_token());
-            let separator_color = color_mix(separator_base, gpui::Hsla::transparent_black(), 0.52);
+            // Svelte: color-mix(border-subtle 52%, transparent)
+            let separator_color = Hsla { a: separator_base.a * 0.52, ..separator_base };
             inner = inner.child(
                 div()
                     .flex()
@@ -382,7 +383,8 @@ impl IntoElement for TextInput {
         if let Some(ref suffix_text) = spec.suffix {
             let affix_color = resolve_color(theme, spec.affix_color_token());
             let separator_base = resolve_color(theme, spec.affix_separator_color_token());
-            let separator_color = color_mix(separator_base, gpui::Hsla::transparent_black(), 0.52);
+            // Svelte: color-mix(border-subtle 52%, transparent)
+            let separator_color = Hsla { a: separator_base.a * 0.52, ..separator_base };
             inner = inner.child(
                 div()
                     .flex()

@@ -5,7 +5,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{Orientation, ResizeHandleSpec};
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity};
+use crate::theme_ext::{resolve_color, resolve_opacity};
 
 /// A real GPUI resize handle component backed by `ResizeHandleSpec`.
 ///
@@ -87,8 +87,8 @@ impl IntoElement for ResizeHandle {
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
 
-        // Idle line color: 82% border-default mixed with transparent (Svelte: color-mix 82%)
-        let idle_line_color = color_mix(border_color, hsla(0.0, 0.0, 0.0, 0.0), 0.82);
+        // Idle line color: 82% border-default (Svelte: color-mix(border-default 82%, transparent))
+        let idle_line_color = Hsla { a: border_color.a * 0.82, ..border_color };
 
         let is_horizontal = spec.orientation == Orientation::Horizontal;
         let handle_id = SharedString::from(format!("{}-handle", self.id_prefix));
