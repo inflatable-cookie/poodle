@@ -192,4 +192,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .disabled(true),
                 ),
         )
+        // --- Disabled item ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled item"),
+                    theme,
+                ))
+                .child(
+                    ToggleGroup::new(
+                        vec![
+                            ToggleGroupOption::new("grid", "Grid"),
+                            ToggleGroupOption::new("list", "List").with_disabled(true),
+                            ToggleGroupOption::new("board", "Board"),
+                        ],
+                        theme,
+                    )
+                    .default_value(vec!["grid".to_string()]),
+                ),
+        )
 }

@@ -124,6 +124,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     RadioGroup::from_spec(spec, theme).with_id("radio-disabled")
                 }),
         )
+        // --- Disabled option ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled option"),
+                    theme,
+                ))
+                .child(
+                    RadioGroup::from_spec(
+                        RadioGroupSpec::new(vec![
+                            ChoiceOption::new("free", "Free"),
+                            ChoiceOption::new("pro", "Pro"),
+                            ChoiceOption::new("enterprise", "Enterprise")
+                                .with_disabled(true),
+                        ])
+                        .with_value("pro"),
+                        theme,
+                    )
+                    .with_id("radio-disabled-option"),
+                ),
+        )
         // --- Custom selected color ---
         .child(
             div()
