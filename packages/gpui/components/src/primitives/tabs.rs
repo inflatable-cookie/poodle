@@ -621,9 +621,9 @@ impl Tabs {
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        // Container border: border-subtle with 68% opacity
+        // Container border: border-subtle with 68% opacity (alpha reduction only)
         let container_border =
-            border_subtle.opacity(border_subtle.a * self.spec.pill_border_opacity());
+            Hsla { a: border_subtle.a * self.spec.pill_border_opacity(), ..border_subtle };
 
         // Svelte: padding 0.1875rem, gap 0.125rem, border 2px
         let mut tabs = div()
