@@ -9,8 +9,8 @@ use poodle_specs::{
 use std::rc::Rc;
 
 use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
+    panel_space_x_rem, rem_to_px, resolve_semantic_size,
+    size_height_offset_rem, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -111,10 +111,25 @@ impl IntoElement for BulkActionBar {
 
         // ── Resolve effective size / density ──────────────────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let body_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: body-scale font (one step up from size_font_rem)
+        let body_font = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.75,
+            ControlSize::Sm => 0.8125,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 0.9375,
+            ControlSize::Xl => 1.0,
+        }));
         let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
-        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
-        let density_gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        // Svelte: Y padding hardcoded 0.5rem (not density-based)
+        let density_pad_y = px(rem_to_px(0.5));
+        // Svelte: summary/actions rows use space.inline.sm (8px) for default/compact
+        // Actions density: compact=0.125rem, default=space.inline.sm, comfortable=0.5rem
+        let summary_gap = resolve_px(theme, "space.inline.sm");
+        let actions_gap = match spec.density {
+            ControlDensity::Compact => px(rem_to_px(0.125)),
+            ControlDensity::Default => resolve_px(theme, "space.inline.sm"),
+            ControlDensity::Comfortable => px(rem_to_px(0.5)),
+        };
         let base_height = resolve_px(theme, "size.control.height");
         let btn_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let base_pad = resolve_px(theme, "space.control.x");
@@ -137,7 +152,6 @@ impl IntoElement for BulkActionBar {
         let warning_border_raw = resolve_color(theme, spec.warning_border_token());
         let warning_text = resolve_color(theme, spec.warning_text_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let gap = density_gap;
         let pad_x = density_pad_x;
         let pad_y = density_pad_y;
         let control_height = btn_height;
@@ -152,10 +166,10 @@ impl IntoElement for BulkActionBar {
 
         // ── Summary section (left) ──────────────────────────────────
         let summary = {
-            let mut row = div().flex().flex_row().items_center().gap(gap);
+            let mut row = div().flex().flex_row().items_center().gap(summary_gap);
 
-            // Count + label block
-            let mut count_block = div().flex().flex_row().items_center().gap(resolve_px(theme, "space.inline.xs"));
+            // Count + label block — Svelte: gap = space.inline.sm (8px)
+            let mut count_block = div().flex().flex_row().items_center().gap(resolve_px(theme, "space.inline.sm"));
             let count_text = format!("{}", spec.selection_count);
             count_block = count_block.child(
                 div()
@@ -212,7 +226,7 @@ impl IntoElement for BulkActionBar {
 
         // ── Actions section (right) ─────────────────────────────────
         let actions = {
-            let mut row = div().flex().flex_row().items_center().gap(gap);
+            let mut row = div().flex().flex_row().items_center().gap(actions_gap);
             for action in &spec.actions {
                 let (btn_border, btn_text) = match action.tone {
                     BulkActionTone::Danger => (danger_border, danger_text),
