@@ -10,10 +10,7 @@ use poodle_specs::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
 };
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::primitives::Icon;
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -217,13 +214,29 @@ impl IntoElement for DataTable {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
-        let panel_py = rem_to_px(panel_space_y_rem(spec.density));
-        let _item_gap = rem_to_px(control_space_x_rem(spec.density));
-
-        let inline_padding = px(panel_px);
-        let body_size = px(font_size);
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
+        // Svelte: cell horizontal padding is density-based (compact=0.5, default=0.75, comfortable=1.125rem)
+        let inline_padding = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.75,
+            ControlDensity::Comfortable => 1.125,
+        }));
+        // Svelte: cell vertical padding is size-based (not compact bool)
+        let cell_py = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.3125,
+            ControlSize::Sm => 0.375,
+            ControlSize::Md => 0.5,
+            ControlSize::Lg => 0.625,
+            ControlSize::Xl => 0.75,
+        }));
+        // Svelte: header label font is smaller than body (xs=0.5625→0.8125rem)
+        let header_font = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.5625,
+            ControlSize::Sm => 0.625,
+            ControlSize::Md => 0.6875,
+            ControlSize::Lg => 0.75,
+            ControlSize::Xl => 0.8125,
+        }));
 
         let radius_control = resolve_radius(theme, "radius.control");
         let radius_pill = resolve_radius(theme, "radius.pill");
@@ -232,8 +245,6 @@ impl IntoElement for DataTable {
         let gap_md = resolve_px(theme, "space.inline.md");
         let gap_lg = resolve_px(theme, "space.inline.lg");
         let icon_sm = resolve_px(theme, "size.icon.sm");
-        // Compact mode uses tighter cell vertical padding.
-        let cell_py = if spec.compact { gap_sm } else { gap_md };
 
         let header_bg = resolve_color(theme, spec.header_fill_token());
         let border_color = resolve_color(theme, "color.border.subtle");
@@ -440,8 +451,8 @@ impl IntoElement for DataTable {
 
             let mut header_cell = div()
                 .px(inline_padding)
-                .py(px(panel_py))
-                .text_size(label_size)
+                .py(cell_py)
+                .text_size(header_font)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_secondary)
                 .when(col.align_end, |el| el.text_right());
@@ -500,8 +511,8 @@ impl IntoElement for DataTable {
                 div()
                     .w(px(120.0))
                     .px(inline_padding)
-                    .py(gap_md)
-                    .text_size(label_size)
+                    .py(cell_py)
+                    .text_size(header_font)
                     .text_color(text_secondary),
             );
         }
