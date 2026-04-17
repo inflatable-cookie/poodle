@@ -149,15 +149,18 @@ impl IntoElement for SidebarNav {
             ControlDensity::Comfortable => 1.0,
         });
 
+        // Svelte: nav has 0.375rem (6px) horizontal padding
         let mut nav = div()
             .flex()
             .flex_col()
             .gap(px(group_gap))
             .min_w(px(0.0))
-            .py(px(panel_y));
+            .py(px(panel_y))
+            .px(px(rem_to_px(0.375)));
 
         for (group_idx, group) in visible_groups.iter().enumerate() {
-            let mut section = div().flex().flex_col().gap(px(5.0)).min_w(px(0.0));
+            // Svelte: group section internal gap = 2px (title → list)
+            let mut section = div().flex().flex_col().gap(px(2.0)).min_w(px(0.0));
 
             // Separator between groups
             if multi_group && group_idx > 0 {
@@ -246,7 +249,8 @@ impl IntoElement for SidebarNav {
                             .left(px(2.0))
                             .top(px(4.0))
                             .bottom(px(4.0))
-                            .w(px(2.0))
+                            // Svelte: left border = 3px (0.1875rem)
+                            .w(px(3.0))
                             .rounded(px(999.0))
                             .bg(indicator),
                     );

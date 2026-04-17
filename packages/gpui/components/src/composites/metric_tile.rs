@@ -79,7 +79,8 @@ impl IntoElement for MetricTile {
         let label_color = resolve_color(theme, spec.label_color_token());
         let value_color = resolve_color(theme, spec.value_color_token());
         let padding = resolve_px(theme, spec.padding_token());
-        let gap = resolve_px(theme, spec.gap_token());
+        // Svelte: sections gap = space.inline.md (12px), not stack.sm (8px)
+        let gap = resolve_px(theme, "space.inline.md");
         let heading_size = resolve_px(theme, "typography.heading.size");
 
         let mut tile = div()
@@ -123,7 +124,8 @@ impl IntoElement for MetricTile {
                 .py(px(2.0))
                 .rounded(px(10.0))
                 .bg(trend_bg)
-                .text_size(px(11.0))
+                // Svelte: trend chip font = 0.75rem (12px)
+                .text_size(px(12.0))
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(trend_color);
 

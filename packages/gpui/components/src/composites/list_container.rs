@@ -37,7 +37,8 @@ impl IntoElement for ListContainer {
         let heading_size = resolve_px(theme, "typography.heading.size");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let stack_gap = resolve_px(theme, "space.stack.md");
+        // Svelte: top-level container gap = space.stack.lg (20px), not stack.md (12px)
+        let stack_gap = resolve_px(theme, "space.stack.lg");
 
         let label_size = resolve_px(theme, "typography.label.size");
         let caption_size = resolve_px(theme, "typography.caption.size");

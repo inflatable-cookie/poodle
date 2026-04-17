@@ -148,7 +148,9 @@ impl IntoElement for FilterToolbar {
         let panel_py = px(rem_to_px(panel_space_y_rem(spec.density)));
 
         let stack_sm = resolve_px(theme, spec.gap_token());
-        let inline_md = resolve_px(theme, spec.controls_gap_token());
+        // Svelte: header row and filter grid use space.inline.sm (8px) not inline.md (12px)
+        let inline_sm = resolve_px(theme, "space.inline.sm");
+        let _inline_md = resolve_px(theme, spec.controls_gap_token());
         let body_size = resolve_px(theme, "typography.body.size");
 
         let elevated_bg = resolve_color(theme, spec.background_token());
@@ -191,7 +193,7 @@ impl IntoElement for FilterToolbar {
             spec.collapsible || spec.summary_text.is_some() || self.actions.is_some();
 
         if needs_header {
-            let mut header_row = div().flex().items_center().gap(inline_md);
+            let mut header_row = div().flex().items_center().gap(inline_sm);
 
             // Collapse toggle (chevron)
             if spec.collapsible {
@@ -245,7 +247,8 @@ impl IntoElement for FilterToolbar {
                     div()
                         .flex()
                         .items_center()
-                        .gap(px(6.0))
+                        // Svelte: actions gap = 0.25rem (4px)
+                        .gap(px(4.0))
                         .flex_shrink_0()
                         .child(actions),
                 );
@@ -265,7 +268,7 @@ impl IntoElement for FilterToolbar {
             // doesn't have CSS grid so flex-wrap with min-width on each
             // child is the closest equivalent to the Svelte implementation.
             let min_item_width = px(rem_to_px(spec.min_item_width_rem));
-            let mut grid = div().flex().flex_wrap().gap(inline_md).w_full();
+            let mut grid = div().flex().flex_wrap().gap(inline_sm).w_full();
 
             for child in self.children {
                 grid = grid.child(

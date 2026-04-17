@@ -4,6 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::DetailSectionSpec;
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI detail section component backed by `DetailSectionSpec`.
@@ -115,12 +116,13 @@ impl IntoElement for DetailSection {
                 .mb(title_body_gap);
 
             // Title block: title + description stacked
-            let mut title_block = div().flex().flex_col();
+            // Svelte: title=1.125rem (18px) heading, description=body_size (14px), gap=0.375rem
+            let mut title_block = div().flex().flex_col().gap(px(rem_to_px(0.375)));
 
             if let Some(ref title) = spec.title {
                 title_block = title_block.child(
                     div()
-                        .text_size(body_size)
+                        .text_size(px(rem_to_px(1.125)))
                         .font_weight(FontWeight::BOLD)
                         .text_color(title_color)
                         .child(title.clone()),
@@ -130,7 +132,7 @@ impl IntoElement for DetailSection {
             if let Some(ref description) = spec.description {
                 title_block = title_block.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(body_size)
                         .text_color(description_color)
                         .child(description.clone()),
                 );
