@@ -56,7 +56,7 @@ impl BlockEditor {
     }
 }
 
-/// Build a small toolbar icon button (20x20, rounded, hover-bg).
+/// Build a small toolbar icon button (24x24, rounded, hover-bg).
 fn toolbar_icon(
     theme: &GpuiThemeProvider,
     icon_name: &str,
@@ -69,8 +69,8 @@ fn toolbar_icon(
         .flex()
         .items_center()
         .justify_center()
-        .w(px(20.0))
-        .h(px(20.0))
+        .w(px(24.0))
+        .h(px(24.0))
         .rounded(radius)
         .hover(move |s| s.bg(hover_bg))
         .child(

@@ -188,8 +188,8 @@ impl IntoElement for MediaThumbnail {
             frame = frame.child(
                 div()
                     .absolute()
-                    .top(px(6.0))
-                    .right(px(6.0))
+                    .top(px(10.0))
+                    .right(px(10.0))
                     .px(gap_md)
                     .py(px(2.0))
                     .rounded(radius_control)

@@ -48,6 +48,7 @@ impl IntoElement for EmbedInput {
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let status_color = resolve_color(theme, spec.status_text_color_token());
         let body_size = resolve_px(theme, "typography.body.size");
+        let label_size = resolve_px(theme, "typography.label.size");
 
         let display = if spec.value.is_empty() {
             spec.placeholder
@@ -94,7 +95,7 @@ impl IntoElement for EmbedInput {
         let mut wrapper = div()
             .flex()
             .flex_col()
-            .gap(px(4.0))
+            .gap(px(6.0))
             .w_full()
             .child(textarea);
 
@@ -104,8 +105,8 @@ impl IntoElement for EmbedInput {
                 .px(px(4.0))
                 .flex()
                 .items_center()
-                .gap(px(4.0))
-                .text_size(px(12.0))
+                .gap(px(6.0))
+                .text_size(label_size)
                 .text_color(status_color)
                 .when(parsed.is_some(), |el| {
                     el.child(Pill::from_spec(

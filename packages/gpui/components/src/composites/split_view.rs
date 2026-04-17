@@ -388,7 +388,7 @@ impl IntoElement for SplitView {
 
             if is_horizontal {
                 divider = divider
-                    .w(px(4.0))
+                    .w(px(8.0))
                     .h_full()
                     .flex()
                     .items_center()
@@ -400,7 +400,7 @@ impl IntoElement for SplitView {
                 }
             } else {
                 divider = divider
-                    .h(px(4.0))
+                    .h(px(8.0))
                     .w_full()
                     .flex()
                     .items_center()

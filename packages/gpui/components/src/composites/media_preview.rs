@@ -118,6 +118,7 @@ impl IntoElement for MediaPreview {
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let body_size = resolve_px(theme, "typography.body.size");
         let heading_size = resolve_px(theme, "typography.heading.size");
+        let label_size = resolve_px(theme, "typography.label.size");
         let control_radius = resolve_radius(theme, "radius.control");
 
         let text_primary = resolve_color(theme, "color.text.primary");
@@ -169,7 +170,7 @@ impl IntoElement for MediaPreview {
             .flex_col()
             .gap(px(6.0))
             .px(inline_padding)
-            .py(px(10.0));
+            .py(inline_padding);
 
         // Title
         info = info.child(
@@ -206,14 +207,14 @@ impl IntoElement for MediaPreview {
                 if i > 0 {
                     meta_row = meta_row.child(
                         div()
-                            .text_size(px(12.0))
+                            .text_size(label_size)
                             .text_color(text_secondary.opacity(0.5))
                             .child("\u{00B7}"),
                     );
                 }
                 meta_row = meta_row.child(
                     div()
-                        .text_size(px(12.0))
+                        .text_size(label_size)
                         .text_color(text_secondary)
                         .child(meta.clone()),
                 );
@@ -241,7 +242,7 @@ impl IntoElement for MediaPreview {
                 let btn = div()
                     .id(action_id)
                     .cursor_pointer()
-                    .text_size(px(12.0))
+                    .text_size(label_size)
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(accent)
                     .when(action.is_disabled, |el| el.opacity(0.5))

@@ -89,8 +89,8 @@ impl IntoElement for VideoPlayer {
             .flex()
             .items_center()
             .justify_center()
-            .size(px(56.0))
-            .rounded(px(28.0))
+            .size(px(64.0))
+            .rounded_full()
             .bg(overlay)
             .cursor_pointer()
             .child(big_play_icon);
@@ -124,12 +124,12 @@ impl IntoElement for VideoPlayer {
         let track_bar = div()
             .h(px(4.0))
             .flex_grow()
-            .rounded(px(2.0))
+            .rounded_full()
             .bg(text_color.opacity(0.3))
             .child(
                 div()
                     .h_full()
-                    .rounded(px(2.0))
+                    .rounded_full()
                     .bg(text_color)
                     .w(relative(progress_pct as f32 / 100.0)),
             );
@@ -200,7 +200,7 @@ impl IntoElement for VideoPlayer {
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(8.0))
+            .gap(px(6.0))
             .flex_grow()
             .child(ctrl_btn(play_icon.into_any_element()))
             .child(track_bar)
@@ -216,7 +216,7 @@ impl IntoElement for VideoPlayer {
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(4.0))
+            .gap(px(6.0))
             .child(ctrl_btn(mute_icon.into_any_element()))
             .child(ctrl_btn(fullscreen_icon.into_any_element()));
 

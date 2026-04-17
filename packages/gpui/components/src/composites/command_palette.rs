@@ -160,7 +160,7 @@ impl IntoElement for CommandPalette {
         let mut palette = div()
             .flex()
             .flex_col()
-            .w(px(480.0))
+            .w(px(720.0))
             .max_h(px(400.0))
             .rounded(radius_surface)
             .bg(results_bg)

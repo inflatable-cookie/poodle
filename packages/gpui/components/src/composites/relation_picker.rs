@@ -369,7 +369,7 @@ impl IntoElement for RelationPicker {
                                 .items_center()
                                 .gap(inline_gap)
                                 .px(inline_padding)
-                                .py(px(8.0))
+                                .py(px(6.0))
                                 .cursor_pointer()
                                 .border_b_1()
                                 .border_color(border.opacity(0.3));
@@ -485,7 +485,7 @@ impl IntoElement for RelationPicker {
                         .items_center()
                         .gap(inline_gap)
                         .px(inline_padding)
-                        .py(px(8.0))
+                        .py(px(6.0))
                         .cursor_pointer()
                         .border_b_1()
                         .border_color(border.opacity(0.3))

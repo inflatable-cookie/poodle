@@ -2,11 +2,10 @@
 //! GPUI cannot play audio — this renders the UI chrome only.
 
 use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
+    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
 use crate::primitives::Icon;
-use crate::theme_ext::{color_mix, resolve_color, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::AudioPlayerSpec;
@@ -55,10 +54,16 @@ impl IntoElement for AudioPlayer {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
-        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
-        let gap = rem_to_px(control_space_x_rem(self.spec.density));
+        let _font_size = rem_to_px(size_font_rem(effective_size));
+        // AudioPlayer uses its own tighter spacing scale (matches Svelte CSS variables):
+        // compact → 0.375rem, default → 0.5rem, comfortable → 0.625rem
+        let pad_x = rem_to_px(control_space_x_rem(self.spec.density));
+        let pad_y = match self.spec.density {
+            poodle_specs::ControlDensity::Compact => rem_to_px(0.375),
+            poodle_specs::ControlDensity::Default => rem_to_px(0.5),
+            poodle_specs::ControlDensity::Comfortable => rem_to_px(0.625),
+        };
+        let gap = pad_y; // gap == pad_y on all density tiers
 
         let fill = resolve_color(&self.theme, self.spec.fill_token());
         let control_color = resolve_color(&self.theme, self.spec.control_color_token());
@@ -67,6 +72,7 @@ impl IntoElement for AudioPlayer {
         let accent = resolve_color(&self.theme, "color.accent.base");
         let focus_ring = resolve_color(&self.theme, "color.accent.focusRing");
         let hover_bg = color_mix(accent, fill, 0.12);
+        let label_size = resolve_px(&self.theme, "typography.label.size");
 
         // Play / Pause icon
         let play_icon_name = if self.spec.is_playing {
@@ -129,7 +135,7 @@ impl IntoElement for AudioPlayer {
                     .cursor_pointer()
                     .w(px(32.0))
                     .h(px(32.0))
-                    .rounded(px(4.0))
+                    .rounded_full()
                     .flex()
                     .items_center()
                     .justify_center()
@@ -139,7 +145,7 @@ impl IntoElement for AudioPlayer {
             )
             .child(
                 div()
-                    .text_size(px(font_size * 0.85))
+                    .text_size(label_size)
                     .text_color(muted_color)
                     .child(time),
             )
@@ -151,7 +157,7 @@ impl IntoElement for AudioPlayer {
                     .cursor_pointer()
                     .w(px(32.0))
                     .h(px(32.0))
-                    .rounded(px(4.0))
+                    .rounded_full()
                     .flex()
                     .items_center()
                     .justify_center()

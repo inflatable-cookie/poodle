@@ -125,12 +125,14 @@ impl IntoElement for EditableList {
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
         // ── Size-dependent layout (from Svelte CSS) ───────────────
+        // Handle size scale matches Svelte --poodle-editable-list-handle-size:
+        // xs→0.875rem, sm→0.875rem, md→1rem, lg→1.125rem, xl→1.25rem
         let (remove_size, item_pad_x, add_pad_x) = match effective_size {
-            ControlSize::Xs => (rem_to_px(1.0), rem_to_px(0.5), rem_to_px(0.625)),
-            ControlSize::Sm => (rem_to_px(1.125), rem_to_px(0.625), rem_to_px(0.75)),
-            ControlSize::Md => (rem_to_px(1.25), rem_to_px(0.625), rem_to_px(0.75)),
-            ControlSize::Lg => (rem_to_px(1.375), rem_to_px(0.75), rem_to_px(0.875)),
-            ControlSize::Xl => (rem_to_px(1.5), rem_to_px(0.875), rem_to_px(1.0)),
+            ControlSize::Xs => (rem_to_px(0.875), rem_to_px(0.5), rem_to_px(0.625)),
+            ControlSize::Sm => (rem_to_px(0.875), rem_to_px(0.625), rem_to_px(0.75)),
+            ControlSize::Md => (rem_to_px(1.0), rem_to_px(0.625), rem_to_px(0.75)),
+            ControlSize::Lg => (rem_to_px(1.125), rem_to_px(0.75), rem_to_px(0.875)),
+            ControlSize::Xl => (rem_to_px(1.25), rem_to_px(0.875), rem_to_px(1.0)),
         };
 
         // ── Density-dependent spacing (from Svelte CSS) ───────────

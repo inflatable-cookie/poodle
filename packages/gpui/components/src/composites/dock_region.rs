@@ -6,7 +6,7 @@ use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_specs::{DockEdge, DockRegionSpec, DockTabsPlacement, PanelTabItem};
 
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI dock region backed by `DockRegionSpec`.
 ///
@@ -124,8 +124,10 @@ impl IntoElement for DockRegion {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
+        let _font_size = rem_to_px(size_font_rem(effective_size));
         let tab_gap = rem_to_px(control_space_x_rem(spec.density));
+        let label_size = resolve_px(theme, "typography.label.size");
+        let radius_control = resolve_radius(theme, "radius.control");
 
         let strip_fill = resolve_color(theme, spec.strip_fill_token());
         let border = resolve_color(theme, "color.border.default");
@@ -193,18 +195,18 @@ impl IntoElement for DockRegion {
                 .items_center()
                 .justify_center()
                 .cursor_pointer()
-                .rounded(px(3.0));
+                .rounded(radius_control);
 
             if is_tabs_on_edge {
                 tab = tab
                     .w_full()
                     .py(px(tab_gap * 0.75))
-                    .text_size(px(font_size * 0.85));
+                    .text_size(label_size);
             } else {
                 tab = tab
                     .px(px(tab_gap))
                     .py(px(tab_gap * 0.5))
-                    .text_size(px(font_size * 0.85));
+                    .text_size(label_size);
             }
 
             if is_active {

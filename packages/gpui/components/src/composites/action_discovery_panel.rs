@@ -99,6 +99,14 @@ impl IntoElement for ActionDiscoveryPanel {
         let panel_px = rem_to_px(panel_space_x_rem(spec.density));
         let panel_py = rem_to_px(panel_space_y_rem(spec.density));
         let item_gap = rem_to_px(control_space_x_rem(spec.density));
+        // Per-size row x/y padding matches Svelte --poodle-action-discovery-row-x/y
+        let (row_x, row_y) = match effective_size {
+            poodle_specs::ControlSize::Xs => (rem_to_px(0.5), rem_to_px(0.25)),
+            poodle_specs::ControlSize::Sm => (rem_to_px(0.5), rem_to_px(0.3125)),
+            poodle_specs::ControlSize::Md => (rem_to_px(0.625), rem_to_px(0.375)),
+            poodle_specs::ControlSize::Lg => (rem_to_px(0.75), rem_to_px(0.5)),
+            poodle_specs::ControlSize::Xl => (rem_to_px(0.875), rem_to_px(0.625)),
+        };
 
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -175,8 +183,8 @@ impl IntoElement for ActionDiscoveryPanel {
             // Section heading
             section_el = section_el.child(
                 div()
-                    .px(px(panel_px * 0.5))
-                    .py(px(panel_py * 0.5))
+                    .px(px(row_x))
+                    .py(px(row_y))
                     .text_size(px(font_size * 0.85))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_muted)
@@ -203,8 +211,8 @@ impl IntoElement for ActionDiscoveryPanel {
                     .flex()
                     .items_center()
                     .justify_between()
-                    .px(px(panel_px * 0.5))
-                    .py(px(panel_py * 0.5))
+                    .px(px(row_x))
+                    .py(px(row_y))
                     .rounded(radius_control)
                     .text_size(body_size)
                     .text_color(text_primary);

@@ -116,6 +116,8 @@ impl IntoElement for PickerShell {
         let gap_lg = resolve_px(theme, "space.inline.lg");
         let body_size = resolve_px(theme, "typography.body.size");
         let label_size = resolve_px(theme, "typography.label.size");
+        // PickerShell title uses 1.25rem regardless of body_size (matches Svelte .picker-shell__title)
+        let title_size = px(crate::presentation::rem_to_px(1.25));
         let control_radius = resolve_radius(theme, "radius.control");
         let footer_gap = resolve_px(theme, spec.footer_gap_token());
         let menu_max_h = resolve_px(theme, "size.menu.maxHeight");
@@ -159,13 +161,13 @@ impl IntoElement for PickerShell {
             .py(gap_md)
             .flex()
             .flex_col()
-            .gap(px(2.0))
+            .gap(gap_sm)
             .border_b_1()
             .border_color(border);
 
         header = header.child(
             div()
-                .text_size(body_size)
+                .text_size(title_size)
                 .font_weight(FontWeight::SEMIBOLD)
                 .text_color(text_primary)
                 .child(spec.title.clone()),

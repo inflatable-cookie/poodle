@@ -6,7 +6,7 @@ use poodle_specs::MediaBrowsePanelSpec;
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 pub struct MediaBrowsePanel {
     spec: MediaBrowsePanelSpec,
@@ -45,7 +45,7 @@ impl IntoElement for MediaBrowsePanel {
         let item_gap = rem_to_px(control_space_x_rem(spec.density));
 
         let body_size = px(font_size);
-        let label_size = px(font_size);
+        let label_size = resolve_px(theme, "typography.label.size");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let surface_bg = resolve_color(theme, "color.background.surface");
@@ -104,7 +104,7 @@ impl IntoElement for MediaBrowsePanel {
                         )
                         .child(
                             div()
-                                .text_size(px(10.0))
+                                .text_size(label_size)
                                 .text_color(text_secondary)
                                 .child(item.kind.clone()),
                         ),

@@ -97,16 +97,16 @@ impl IntoElement for MediaUploadStatusPanel {
             panel = panel.child(
                 div()
                     .w_full()
-                    .h(px(4.0))
-                    .rounded(px(2.0))
+                    .h(px(6.0))
+                    .rounded_full()
                     .bg(Hsla {
                         a: text_secondary.a * 0.2,
                         ..text_secondary
                     })
                     .child(
                         div()
-                            .h(px(4.0))
-                            .rounded(px(2.0))
+                            .h(px(6.0))
+                            .rounded_full()
                             .bg(accent)
                             .w(px(progress_pct / 100.0 * 200.0)), // approximate width
                     ),

@@ -358,8 +358,8 @@ impl IntoElement for MediaPicker {
 
             let mut item = div()
                 .id(item_id)
-                .w(px(96.0))
-                .h(px(96.0))
+                .w(px(72.0))
+                .h(px(72.0))
                 .rounded(radius_control)
                 .border(border_w)
                 .border_color(selected_border)
