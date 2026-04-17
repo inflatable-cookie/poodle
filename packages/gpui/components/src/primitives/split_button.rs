@@ -132,6 +132,7 @@ impl IntoElement for SplitButton {
         let separator_color = resolve_color(theme, spec.separator_token());
         let elevated = resolve_color(theme, "color.background.elevated");
         let text_primary = resolve_color(theme, "color.text.primary");
+        let border_subtle = resolve_color(theme, "color.border.subtle");
         let radius = resolve_radius(theme, spec.radius_token());
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
         let body_size = resolve_px(theme, "typography.body.size");
@@ -156,7 +157,11 @@ impl IntoElement for SplitButton {
                         a: surface.a * 0.42,
                         ..surface
                     },
-                    gpui::transparent_black(),
+                    // Svelte: color-mix(border-subtle 72%, transparent)
+                    Hsla {
+                        a: border_subtle.a * 0.72,
+                        ..border_subtle
+                    },
                 )
             }
             _ => (base_fill, base_border),

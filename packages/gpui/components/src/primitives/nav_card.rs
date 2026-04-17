@@ -1,5 +1,5 @@
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::NavCardSpec;
@@ -145,7 +145,7 @@ impl IntoElement for NavCard {
         if let Some(badge) = &self.spec.badge {
             title_row = title_row.child(
                 div()
-                    .px(px(rem_to_px(0.5)))
+                    .px(px(rem_to_px(0.375)))
                     .py(px(rem_to_px(0.125)))
                     .rounded(px(9999.0))
                     .bg(badge_bg.opacity(0.16))
@@ -210,10 +210,12 @@ impl IntoElement for NavCard {
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
-            root = root.cursor_pointer().hover(|style| {
+            root = root.cursor_pointer().hover(move |style| {
+                // Svelte: bg = color-mix(elevated 52%, surface)
+                // Svelte: border = color-mix(accent 28%, border-subtle)
                 style
-                    .bg(hover_fill.opacity(0.52))
-                    .border_color(hover_border_color.opacity(0.28))
+                    .bg(color_mix(hover_fill, fill, 0.52))
+                    .border_color(color_mix(hover_border_color, border_color, 0.28))
             });
 
             // Show arrow on hover via group

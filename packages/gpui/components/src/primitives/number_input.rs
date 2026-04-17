@@ -11,7 +11,7 @@ use super::icon::Icon;
 use crate::presentation::{
     control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
 };
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI numeric input component with +/- stepper buttons backed by `NumberInputSpec`.
 pub struct NumberInput {
@@ -149,7 +149,8 @@ impl IntoElement for NumberInput {
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
 
-        let stepper_bg = color_mix(elevated, surface_bg, 0.88);
+        // Svelte: color-mix(elevated 88%, transparent)
+        let stepper_bg = Hsla { a: elevated.a * 0.88, ..elevated };
         // Precision-aware display: when `precision` is set, format
         // with the requested decimal places (e.g. 2 → "3.20").
         // Otherwise fall back to the clamped value's natural form.

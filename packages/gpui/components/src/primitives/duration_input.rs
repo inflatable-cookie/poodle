@@ -123,7 +123,7 @@ impl IntoElement for DurationInput {
         };
 
         // Contract: gap 0.125rem between segments
-        let mut segments = div().flex().items_end().gap(px(2.0));
+        let mut segments = div().flex().items_end().gap(px(rem_to_px(0.125)));
 
         let parts: Vec<&str> = display.split(':').collect();
         for (i, part) in parts.iter().enumerate() {
