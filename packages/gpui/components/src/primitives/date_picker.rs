@@ -246,7 +246,8 @@ impl IntoElement for DatePicker {
                 .rounded(resolve_radius(theme, "radius.surface"))
                 .bg(color_mix(surface_raw, panel_bg, 0.98))
                 .border_1()
-                .border_color(color_mix(panel_border, panel_bg, 0.72))
+                // Svelte: color-mix(border-default 72%, transparent)
+                .border_color(Hsla { a: panel_border.a * 0.72, ..panel_border })
                 .shadow(vec![
                     gpui::BoxShadow {
                         color: hsla(0.0, 0.0, 0.0, 0.10),
