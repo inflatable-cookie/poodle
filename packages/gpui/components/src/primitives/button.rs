@@ -158,7 +158,13 @@ impl IntoElement for Button {
         let height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
         let min_width = px(rem_to_px(size_min_width_rem(effective_size)));
         let base_pad_x = resolve_px(theme, spec.horizontal_padding_token());
-        let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
+        // Svelte: compact -0.125rem, comfortable +0.125rem density offset on padding
+        let density_pad_offset = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => -0.125,
+            ControlDensity::Default => 0.0,
+            ControlDensity::Comfortable => 0.125,
+        }));
+        let pad_x = base_pad_x + px(rem_to_px(size_padding_x_offset_rem(effective_size))) + density_pad_offset;
         let font_size = px(rem_to_px(size_font_rem(effective_size)));
         let gap = match spec.density {
             ControlDensity::Compact => resolve_px(theme, "space.inline.xs"),

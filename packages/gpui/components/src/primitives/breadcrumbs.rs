@@ -6,14 +6,18 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, SemanticControlSizeRole,
+    BreadcrumbItem, BreadcrumbsSpec, ControlDensity, ControlSize, IconSize, IconSpec,
+    SemanticControlSizeRole,
 };
 
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::resolve_color;
+
+use super::icon::Icon;
 
 pub struct Breadcrumbs {
     spec: BreadcrumbsSpec,
+    theme: poodle_gpui::GpuiThemeProvider,
     text_color: Hsla,
     current_text_color: Hsla,
     separator_color: Hsla,
@@ -42,11 +46,18 @@ impl Breadcrumbs {
         let current_text_color = resolve_color(theme, spec.current_text_color_token());
         let separator_color = resolve_color(theme, spec.separator_color_token());
         let hover_color = resolve_color(theme, spec.hover_color_token());
-        let gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        // Svelte: gap is size-based (xs=0.25, sm/md=0.375, lg=0.625, xl=0.75rem)
+        let gap = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.25,
+            ControlSize::Sm | ControlSize::Md => 0.375,
+            ControlSize::Lg => 0.625,
+            ControlSize::Xl => 0.75,
+        }));
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
 
         Self {
             spec,
+            theme: theme.clone(),
             text_color,
             current_text_color,
             separator_color,
@@ -85,6 +96,7 @@ impl IntoElement for Breadcrumbs {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        let theme = self.theme.clone();
         let items = &self.spec.items;
         let visible_items = if let Some(max) = self.spec.max_visible_items {
             if items.len() > max && max >= 2 {
@@ -121,9 +133,16 @@ impl IntoElement for Breadcrumbs {
 
         for (i, item) in visible_items.iter().enumerate() {
             if i > 0 {
-                // Contract: separator opacity 0.4
-                container =
-                    container.child(div().text_color(separator_color).opacity(0.4).child("/"));
+                // Svelte: separator is chevron-right icon at 0.4 opacity
+                container = container.child(
+                    div().opacity(0.4).child(
+                        Icon::from_spec(
+                            IconSpec::new("chevron-right").with_size(IconSize::Sm),
+                            &theme,
+                        )
+                        .with_color(separator_color),
+                    ),
+                );
             }
 
             let is_current = item.is_current || i == last_index;

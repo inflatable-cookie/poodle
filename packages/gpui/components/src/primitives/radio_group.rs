@@ -155,8 +155,10 @@ impl IntoElement for RadioGroup {
             self.on_change.map(|h| std::rc::Rc::from(h));
 
         // Contract: grid layout, orientation drives flow
+        // Svelte: horizontal gap = space.inline.md (larger than vertical space.stack.sm)
+        let horizontal_gap = resolve_px(theme, "space.inline.md");
         let mut group = match spec.orientation {
-            Orientation::Horizontal => div().flex().flex_row().items_center().gap(group_gap),
+            Orientation::Horizontal => div().flex().flex_row().items_center().gap(horizontal_gap),
             Orientation::Vertical => div().flex().flex_col().gap(group_gap),
         };
 

@@ -534,7 +534,8 @@ impl IntoElement for Pagination {
                         div()
                             .flex()
                             .items_center()
-                            .gap(gap_md)
+                            // Svelte: limit row gap = 0.375rem (space.inline.sm)
+                            .gap(gap_sm)
                             .child(
                                 div()
                                     .text_size(label_size)

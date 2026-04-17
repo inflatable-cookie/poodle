@@ -15,8 +15,8 @@ use poodle_specs::{
 
 use super::icon::Icon;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-    size_padding_x_offset_rem,
+    control_height_rem, control_space_x_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
+    size_font_rem, size_padding_x_offset_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
@@ -177,7 +177,12 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        let inline_padding = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
+        // Svelte: tabs-control-x is density-based (compact=0.5, default=0.75, comfortable=1.0rem)
+        let inline_padding = px(rem_to_px(match self.spec.density {
+            poodle_specs::ControlDensity::Compact => 0.5,
+            poodle_specs::ControlDensity::Default => 0.75,
+            poodle_specs::ControlDensity::Comfortable => 1.0,
+        }));
         let control_y = resolve_px(theme, "space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());
@@ -306,7 +311,8 @@ impl Tabs {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
 
-        let inline_padding = px(rem_to_px(0.75 + size_padding_x_offset_rem(effective_size)));
+        // Svelte: card tabs use panel-x padding (density-based, space.panel.x)
+        let inline_padding = px(rem_to_px(panel_space_x_rem(self.spec.density)));
         let control_y = resolve_px(theme, "space.control.y");
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let accent = resolve_color(theme, self.spec.indicator_token());

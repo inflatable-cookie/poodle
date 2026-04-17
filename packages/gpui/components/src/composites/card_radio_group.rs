@@ -96,7 +96,8 @@ impl IntoElement for CardRadioGroup {
             let border_c = if is_selected { accent } else { border };
             let bw = if is_selected { 2.0 } else { 1.0 };
 
-            // Radio indicator: 18px outer circle with border, 8px inner dot when selected
+            // Radio indicator: 18px outer circle with border, 6px inner dot when selected
+            // Svelte: outer=1.125rem(18px), inner dot=0.375rem(6px)
             let indicator = div()
                 .w(px(18.0))
                 .h(px(18.0))
@@ -110,8 +111,8 @@ impl IntoElement for CardRadioGroup {
                 .flex_shrink_0()
                 .child(
                     div()
-                        .w(px(8.0))
-                        .h(px(8.0))
+                        .w(px(rem_to_px(0.375)))
+                        .h(px(rem_to_px(0.375)))
                         .rounded(px(999.0))
                         .bg(if is_selected {
                             accent
@@ -121,7 +122,8 @@ impl IntoElement for CardRadioGroup {
                 );
 
             // Content: label + optional description
-            let mut content = div().flex().flex_col().gap(px(2.0)).child(
+            // Svelte: content gap = 0.5rem (8px)
+            let mut content = div().flex().flex_col().gap(px(rem_to_px(0.5))).child(
                 div()
                     .text_size(body_size)
                     .text_color(text_color)
@@ -153,7 +155,8 @@ impl IntoElement for CardRadioGroup {
                 .py(px(pad_y))
                 .flex()
                 .items_center()
-                .gap(px(gap))
+                // Svelte: header gap = 0.5rem (8px), hardcoded regardless of density
+                .gap(px(rem_to_px(0.5)))
                 // Focus ring
                 .focus(move |s| s.border_color(focus_ring))
                 .child(indicator)
