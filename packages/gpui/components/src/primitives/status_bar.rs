@@ -103,7 +103,8 @@ impl IntoElement for StatusBar {
         if let Some(ref summary) = spec.summary {
             left = left.child(
                 div()
-                    .text_size(px(rem_to_px(0.75)))
+                    // Svelte: status bar default font = 0.8125rem (13px)
+                    .text_size(px(rem_to_px(0.8125)))
                     .text_color(text_secondary)
                     .overflow_x_hidden()
                     .whitespace_nowrap()
