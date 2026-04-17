@@ -476,10 +476,10 @@ impl Tabs {
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
 
-        // List background: panel tinted at 90% opacity, bordered at the bottom.
-        let list_bg = panel_bg.opacity(panel_bg.a * self.spec.block_list_bg_opacity());
-        let separator_color = border.opacity(border.a * self.spec.block_separator_opacity());
-        let hover_bg = elevated.opacity(elevated.a * self.spec.block_hover_bg_opacity());
+        // Svelte: color-mix(X N%, transparent) = alpha reduction
+        let list_bg = Hsla { a: panel_bg.a * self.spec.block_list_bg_opacity(), ..panel_bg };
+        let separator_color = Hsla { a: border.a * self.spec.block_separator_opacity(), ..border };
+        let hover_bg = Hsla { a: elevated.a * self.spec.block_hover_bg_opacity(), ..elevated };
 
         // Selected item background: accent mixed into surface.
         let selected_bg =
