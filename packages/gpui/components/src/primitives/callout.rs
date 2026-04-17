@@ -10,7 +10,7 @@ use poodle_specs::{
 use super::icon::Icon;
 use crate::presentation::{
     callout_dismiss_size_rem, callout_gap_rem, callout_icon_size_rem, panel_space_x_rem,
-    panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    rem_to_px, resolve_semantic_size, size_font_rem,
 };
 use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
@@ -102,11 +102,15 @@ impl IntoElement for Callout {
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
         let body_font = px(rem_to_px(size_font_rem(effective_size)));
-        let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
-        let density_pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
-
-        let panel_x = density_pad_x;
-        let panel_y = density_pad_y;
+        // Svelte: X = compact=0.5, default=panel_space_x=1.0, comfortable=1.25rem
+        // compact is 0.5rem (not panel_space_x_rem which gives 0.75rem)
+        let panel_x = px(rem_to_px(match spec.density {
+            poodle_specs::ControlDensity::Compact => 0.5,
+            poodle_specs::ControlDensity::Default => panel_space_x_rem(spec.density),
+            poodle_specs::ControlDensity::Comfortable => panel_space_x_rem(spec.density),
+        }));
+        // Svelte: Y is hardcoded 0.625rem (all densities)
+        let panel_y = px(rem_to_px(0.625));
 
         let tone_color = resolve_color(theme, spec.fill_token());
         let surface_bg = resolve_color(theme, "color.background.surface");
