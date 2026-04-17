@@ -12,7 +12,7 @@ use poodle_specs::{SidebarNavGroup, SidebarNavSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{
-    color_mix, focus_ring_shadow, resolve_color, resolve_opacity, resolve_radius,
+    focus_ring_shadow, resolve_color, resolve_opacity, resolve_radius,
 };
 
 /// A real GPUI sidebar navigation component backed by `SidebarNavSpec`.
@@ -134,10 +134,10 @@ impl IntoElement for SidebarNav {
         let control_radius = resolve_radius(theme, "radius.control");
         let item_radius = control_radius - px(2.0); // contract: calc(radius-control - 0.125rem)
 
-        // Active item background: accent at 10% opacity
-        let active_bg = color_mix(active_indicator_color, gpui::transparent_black(), 0.10);
-        // Hover background: elevated at 60%
-        let hover_bg = color_mix(elevated_bg, gpui::transparent_black(), 0.60);
+        // Active item background: accent at 10% (alpha reduction only)
+        let active_bg = Hsla { a: active_indicator_color.a * 0.10, ..active_indicator_color };
+        // Hover background: elevated at 60% (alpha reduction only)
+        let hover_bg = Hsla { a: elevated_bg.a * 0.60, ..elevated_bg };
 
         let visible_groups = spec.visible_groups();
         let multi_group = visible_groups.len() > 1;
@@ -165,7 +165,7 @@ impl IntoElement for SidebarNav {
                     .mt(px(2.0))
                     .pt(px(group_gap - 2.0))
                     .border_t_1()
-                    .border_color(color_mix(separator_color, gpui::transparent_black(), 0.54));
+                    .border_color(Hsla { a: separator_color.a * 0.54, ..separator_color });
             }
 
             // Group title
