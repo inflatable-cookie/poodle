@@ -14,9 +14,9 @@ The repo currently ships and validates:
 Key package groups:
 
 - `packages/contracts/*`
-  shared renderer-agnostic crates such as `poodle-primitives`, `poodle-composites`, and `poodle-tokens`
+  shared renderer-agnostic crates such as `poodle-specs`, `poodle-workstation`, and `poodle-tokens`
 - `packages/svelte/*`
-  published web packages such as `@poodle/svelte-primitives`, `@poodle/svelte-composites`, `@poodle/svelte-tokens`, and the docs or preview app
+  published web packages such as `@poodle/svelte`, `@poodle/svelte-tokens`, `@poodle/icons-lucide`, and the docs or preview app
 - `packages/gpui/*`
   native GPUI adapter, renderable components, and preview app
 - `packages/jetstream/*`
@@ -26,9 +26,20 @@ Key package groups:
 - `packages/tokens`
   canonical token schema and artifact generation pipeline
 
+## Consuming Poodle
+
+Start with the developer guide for your target runtime:
+
+- **Svelte** — [docs/guides/svelte-developer-guide.md](docs/guides/svelte-developer-guide.md)
+- **GPUI** — [docs/guides/gpui-developer-guide.md](docs/guides/gpui-developer-guide.md)
+- **Jetstream** — [docs/guides/jetstream-developer-guide.md](docs/guides/jetstream-developer-guide.md)
+
+All components are defined by contracts in [docs/contracts/components/](docs/contracts/components/).
+The contract is the source of truth for every implementation.
+
 ## Canonical Docs
 
-Start with these:
+Internal planning and architecture hierarchy:
 
 1. [docs/vision/001-poodle-vision.md](docs/vision/001-poodle-vision.md)
 2. [docs/architecture/001-poodle-system-shape.md](docs/architecture/001-poodle-system-shape.md)
