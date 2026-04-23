@@ -1,7 +1,7 @@
 //! Size-role and density resolution infrastructure for GPUI components.
 //!
 //! These helpers mirror the Svelte reference implementation in
-//! `packages/svelte/primitives/src/presentation.ts` and ensure all GPUI
+//! `packages/svelte/components/src/presentation.ts` and ensure all GPUI
 //! components resolve size, density, and layout offsets identically.
 
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};

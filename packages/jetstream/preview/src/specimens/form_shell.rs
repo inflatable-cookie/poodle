@@ -3,12 +3,13 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::form_shell::js_form_shell;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::FormShellSpec;
-use poodle_specs::FormSectionSpec;
+use poodle_specs::{ControlSize, FormSectionSpec, FormShellSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     let sections = vec![
@@ -24,11 +25,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let actions_slot = div().flex_row().gap(8.0).justify_end()
         .child(
             button("Cancel")
-                .text_color(text_primary).text_size(13.0)
+                .text_color(text_primary).text_size(body_font)
         )
         .child(
             button("Save")
-                .text_color(text_primary).text_size(13.0)
+                .text_color(text_primary).text_size(body_font)
         );
 
     div().flex_col().gap(24.0)

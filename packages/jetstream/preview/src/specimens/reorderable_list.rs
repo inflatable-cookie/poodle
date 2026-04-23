@@ -3,24 +3,26 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::reorderable_list::js_reorderable_list;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::ReorderableListSpec;
+use poodle_specs::{ControlSize, ReorderableListSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     let items: Vec<JsEl> = vec![
-        label("Introduction").text_color(text_primary).text_size(13.0),
-        label("Background").text_color(text_primary).text_size(13.0),
-        label("Methods").text_color(text_primary).text_size(13.0),
-        label("Results").text_color(text_primary).text_size(13.0),
+        label("Introduction").text_color(text_primary).text_size(body_font),
+        label("Background").text_color(text_primary).text_size(body_font),
+        label("Methods").text_color(text_primary).text_size(body_font),
+        label("Results").text_color(text_primary).text_size(body_font),
     ];
 
     let drag_items: Vec<JsEl> = vec![
-        label("Track A").text_color(text_primary).text_size(13.0),
-        label("Track B (dragging)").text_color(text_primary).text_size(13.0),
-        label("Track C").text_color(text_primary).text_size(13.0),
+        label("Track A").text_color(text_primary).text_size(body_font),
+        label("Track B (dragging)").text_color(text_primary).text_size(body_font),
+        label("Track C").text_color(text_primary).text_size(body_font),
     ];
 
     div().flex_col().gap(24.0)

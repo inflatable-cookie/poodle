@@ -1,7 +1,7 @@
 //! DateTimeRangePicker — Jetstream date+time range picker trigger backed by DateTimeRangePickerSpec.
 //!
 //! Contract: `docs/contracts/components/date-time-range-picker.md`
-//! Reference: `packages/svelte/primitives/src/DateTimeRangePicker.svelte`
+//! Reference: `packages/svelte/components/src/DateTimeRangePicker.svelte`
 //!
 //! Renders the trigger button with value/placeholder display and disclosure
 //! indicator.  The range-calendar+paired-time-fields surface is overlay-managed

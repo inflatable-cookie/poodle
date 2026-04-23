@@ -1,7 +1,7 @@
 //! JsBadge — small status label backed by BadgeSpec.
 //!
 //! Contract: `docs/contracts/components/badge.md`
-//! Reference: `packages/svelte/primitives/src/Badge.svelte`
+//! Reference: `packages/svelte/components/src/Badge.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 

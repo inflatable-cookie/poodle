@@ -10,11 +10,37 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
-        .child(group("Default range", secondary,
+        // Default range: 20–80
+        .child(group("Default range (20–80)", secondary,
             div().w(300.0).child(
                 js_range_slider(&RangeSliderSpec::new(20.0, 80.0), theme)
             )
         ))
+        // Narrow range near centre
+        .child(group("Narrow range (45–55)", secondary,
+            div().w(300.0).child(
+                js_range_slider(&RangeSliderSpec::new(45.0, 55.0), theme)
+            )
+        ))
+        // Full range
+        .child(group("Full range (0–100)", secondary,
+            div().w(300.0).child(
+                js_range_slider(&RangeSliderSpec::new(0.0, 100.0), theme)
+            )
+        ))
+        // Low end only
+        .child(group("Low end (0–25)", secondary,
+            div().w(300.0).child(
+                js_range_slider(&RangeSliderSpec::new(0.0, 25.0), theme)
+            )
+        ))
+        // High end only
+        .child(group("High end (75–100)", secondary,
+            div().w(300.0).child(
+                js_range_slider(&RangeSliderSpec::new(75.0, 100.0), theme)
+            )
+        ))
+        // Disabled
         .child(group("Disabled", secondary,
             div().w(300.0).child(
                 js_range_slider(

@@ -1,7 +1,7 @@
 //! ColorPicker — Jetstream color picker trigger backed by ColorPickerSpec.
 //!
 //! Contract: `docs/contracts/components/color-picker.md`
-//! Reference: `packages/svelte/primitives/src/ColorPicker.svelte`
+//! Reference: `packages/svelte/components/src/ColorPicker.svelte`
 //!
 //! Renders the trigger button with color preview swatch and optional
 //! inline hex text input.  The popover surface (gradient pad, hue/alpha

@@ -1,7 +1,7 @@
 //! Size-role and density resolution infrastructure for Jetstream components.
 //!
 //! These helpers mirror the Svelte reference implementation in
-//! `packages/svelte/primitives/src/presentation.ts` and ensure all Jetstream
+//! `packages/svelte/components/src/presentation.ts` and ensure all Jetstream
 //! components resolve size, density, and layout offsets identically.
 //!
 //! Identical to the GPUI presentation module — both runtimes must produce

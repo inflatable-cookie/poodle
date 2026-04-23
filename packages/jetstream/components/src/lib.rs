@@ -25,7 +25,7 @@
 //!    a root, indicator, label, and panel — all four must exist in the output.
 //!
 //! 4. **Svelte is the visual reference.** When the contract is ambiguous,
-//!    check `packages/svelte/primitives/src/` for the correct behavior.
+//!    check `packages/svelte/components/src/` for the correct behavior.
 //!
 //! ```rust,ignore
 //! use poodle_jetstream_components::button::js_button;
@@ -56,11 +56,15 @@ pub mod card;
 pub mod detail_item;
 pub mod eyebrow;
 pub mod field;
+pub mod floating_overlay;
 pub mod form_actions;
 pub mod grid;
+pub mod meta_bar;
+pub mod meta_item;
 pub mod pill;
 pub mod region;
 pub mod skeleton;
+pub mod spacer;
 pub mod stack;
 pub mod surface;
 pub mod toolbar;
@@ -137,6 +141,8 @@ pub mod embed_input;
 pub mod embed_preview;
 pub mod empty_state;
 pub mod filter_toolbar;
+pub mod form_dialog;
+pub mod form_layout;
 pub mod form_shell;
 pub mod inline_remediation;
 pub mod list_card;

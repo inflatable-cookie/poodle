@@ -3,11 +3,13 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::picker_shell::js_picker_shell;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::PickerShellSpec;
+use poodle_specs::{ControlSize, PickerShellSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
@@ -17,9 +19,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
                 Some(
                     div().flex_col().gap(4.0)
-                        .child(label("Option A").text_color(text_primary).text_size(13.0))
-                        .child(label("Option B").text_color(text_primary).text_size(13.0))
-                        .child(label("Option C").text_color(text_primary).text_size(13.0))
+                        .child(label("Option A").text_color(text_primary).text_size(body_font))
+                        .child(label("Option B").text_color(text_primary).text_size(body_font))
+                        .child(label("Option C").text_color(text_primary).text_size(body_font))
                 ),
             )
         ))

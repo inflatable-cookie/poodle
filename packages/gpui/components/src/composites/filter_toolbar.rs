@@ -5,7 +5,7 @@
 //!   2. Grid of filter controls (children) when expanded
 //!   3. Optional secondary row below the grid
 //!
-//! Matches the Svelte FilterToolbar composite (packages/svelte/composites/src/FilterToolbar.svelte).
+//! Matches the Svelte FilterToolbar composite (packages/svelte/components/src/FilterToolbar.svelte).
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;

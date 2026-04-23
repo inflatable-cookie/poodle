@@ -33,7 +33,7 @@ pub use types::{
 };
 pub use workspace_shell::WorkspaceShellSpec;
 
-pub const CURRENT_GENERATION: &str = "g06.002";
+pub const CURRENT_GENERATION: &str = "g10.004";
 pub const WORKSTATION_EXPORTS: &[&str] = &[
     "ActionDiscoveryPanelSpec",
     "AppHeaderSpec",

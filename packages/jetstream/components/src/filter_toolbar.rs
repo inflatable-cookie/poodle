@@ -8,7 +8,7 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::FilterToolbarSpec;
 
-use crate::presentation::resolve_semantic_size;
+use crate::presentation::{panel_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// Render a filter toolbar.
@@ -23,7 +23,9 @@ pub fn js_filter_toolbar(
     actions: Option<JsEl>,
     secondary: Option<JsEl>,
 ) -> JsEl {
-    let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let font_size = rem_to_px(size_font_rem(effective_size));
+    let pad = rem_to_px(panel_space_x_rem(spec.density));
 
     let bg = resolve_color(theme, spec.background_token());
     let border = resolve_color(theme, spec.border_token());
@@ -38,7 +40,7 @@ pub fn js_filter_toolbar(
     let mut toolbar = ui_element::div()
         .flex_col()
         .gap(stack_sm)
-        .p(12.0)
+        .p(pad)
         .bg(bg)
         .border(1.0)
         .border_color(border)
@@ -53,7 +55,7 @@ pub fn js_filter_toolbar(
             header = header.child(
                 ui_element::label(summary)
                     .text_color(summary_color)
-                    .text_size(13.0),
+                    .text_size(font_size),
             );
         }
 

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::select::js_select;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ChoiceOption, SelectSpec};
+use poodle_specs::{ChoiceOption, SelectSpec, SelectVariant, ValidationState};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -32,6 +32,26 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             spec.is_disabled = true;
             div().w(240.0).child(js_select(&spec, theme))
         }))
+        // Open state
+        .child(group("Open state", secondary,
+            div().w(240.0)
+                .child(js_select(&SelectSpec::new(options.clone()).with_placeholder("Choose fruit...").with_open(true), theme))
+        ))
+        // Searchable
+        .child(group("Searchable", secondary,
+            div().w(240.0)
+                .child(js_select(&SelectSpec::new(options.clone()).with_placeholder("Search...").with_searchable(true), theme))
+        ))
+        // Invalid validation
+        .child(group("Invalid validation", secondary,
+            div().w(240.0)
+                .child(js_select(&SelectSpec::new(options.clone()).with_validation_state(ValidationState::Invalid).with_placeholder("Choose..."), theme))
+        ))
+        // Ghost variant
+        .child(group("Ghost variant", secondary,
+            div().w(240.0)
+                .child(js_select(&SelectSpec::new(options.clone()).with_variant(SelectVariant::Ghost).with_value("cherry"), theme))
+        ))
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

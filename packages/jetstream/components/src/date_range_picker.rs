@@ -1,7 +1,7 @@
 //! DateRangePicker — Jetstream date-range picker trigger backed by DateRangePickerSpec.
 //!
 //! Contract: `docs/contracts/components/date-range-picker.md`
-//! Reference: `packages/svelte/primitives/src/DateRangePicker.svelte`
+//! Reference: `packages/svelte/components/src/DateRangePicker.svelte`
 //!
 //! Renders the trigger button with value/placeholder display and disclosure
 //! indicator.  The range-calendar surface is overlay-managed at runtime.

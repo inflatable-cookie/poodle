@@ -2,7 +2,7 @@
 //! backed by CodeInputSpec.
 //!
 //! Contract: `docs/contracts/components/code-input.md`
-//! Reference: `packages/svelte/primitives/src/CodeInput.svelte`
+//! Reference: `packages/svelte/components/src/CodeInput.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 

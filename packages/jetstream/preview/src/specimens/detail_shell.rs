@@ -3,11 +3,13 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::detail_shell::js_detail_shell;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::DetailShellSpec;
+use poodle_specs::{ControlSize, DetailShellSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
@@ -16,8 +18,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 js_detail_shell(
                     &DetailShellSpec::new().with_title("Item Detail"),
                     theme,
-                    Some(label("Header area").text_color(text_primary).text_size(14.0).text_weight(600).p(12.0)),
-                    Some(label("Content area").text_color(secondary).text_size(13.0).p(12.0)),
+                    Some(label("Header area").text_color(text_primary).text_size(body_font).text_weight(600).p(rem_to_px(0.75))),
+                    Some(label("Content area").text_color(secondary).text_size(body_font).p(rem_to_px(0.75))),
                 )
             )
         ))

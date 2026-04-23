@@ -46,6 +46,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 )
             )
         ))
+        // Valid state
+        .child(group("Valid state", secondary,
+            div().w(300.0).child(
+                js_field(
+                    &FieldSpec::new("score", "Score")
+                        .with_validation_state(ValidationState::Valid),
+                    theme,
+                    Some(js_text_input(&TextInputSpec::new().with_value("95"), theme)),
+                )
+            )
+        ))
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

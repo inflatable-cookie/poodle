@@ -3,11 +3,13 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::filter_toolbar::js_filter_toolbar;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::FilterToolbarSpec;
+use poodle_specs::{ControlSize, FilterToolbarSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     // Stand-in "control" chips so the specimen has something visible in
@@ -15,8 +17,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let chip = |label_text: &str| {
         label(label_text)
             .text_color(text_primary)
-            .text_size(13.0)
-            .p(8.0)
+            .text_size(body_font)
+            .p(rem_to_px(0.5))
     };
 
     div().flex_col().gap(24.0)
@@ -52,7 +54,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
                 vec![chip("Filter"), chip("Status"), chip("Type")],
                 None,
-                Some(label("Reset all").text_color(secondary).text_size(13.0)),
+                Some(label("Reset all").text_color(secondary).text_size(body_font)),
             )
         ))
         .child(group("Empty", secondary,

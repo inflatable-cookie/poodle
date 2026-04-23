@@ -19,6 +19,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
             )
         ))
+        // Disabled
+        .child(group("Disabled", secondary, {
+            let mut spec = DatePickerSpec::new().with_default_value("2026-03-21");
+            spec.is_disabled = true;
+            js_date_picker(&spec, theme)
+        }))
+        // Open
+        .child(group("Open", secondary,
+            js_date_picker(&DatePickerSpec::new().with_default_open(true), theme)
+        ))
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

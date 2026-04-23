@@ -3,11 +3,13 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::collapsible::js_collapsible;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::CollapsibleSpec;
+use poodle_specs::{CollapsibleSpec, ControlSize};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_muted = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
@@ -17,7 +19,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 js_collapsible(
                     &CollapsibleSpec::new().with_title("Section Title").with_default_open(true),
                     theme,
-                    Some(label("This is the collapsible content that is visible when open.").text_color(text_muted).text_size(13.0)),
+                    Some(label("This is the collapsible content that is visible when open.").text_color(text_muted).text_size(body_font)),
                 )
             )
         ))
@@ -27,7 +29,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 js_collapsible(
                     &CollapsibleSpec::new().with_title("Collapsed Section").with_default_open(false),
                     theme,
-                    Some(label("Hidden content").text_color(text_muted).text_size(13.0)),
+                    Some(label("Hidden content").text_color(text_muted).text_size(body_font)),
                 )
             )
         ))
@@ -37,7 +39,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 js_collapsible(
                     &CollapsibleSpec::new().with_title("Disabled Section").with_default_open(false).with_disabled(true),
                     theme,
-                    Some(label("Cannot toggle").text_color(text_muted).text_size(13.0)),
+                    Some(label("Cannot toggle").text_color(text_muted).text_size(body_font)),
                 )
             )
         ))

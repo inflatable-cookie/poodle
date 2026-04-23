@@ -1,21 +1,18 @@
 {
   "version": 1,
-  "generation": "g06.014",
-  "updated": "2026-03-14",
-  "description": "Multi-renderer parity validation report — maps Svelte components to Rust specs and adapter readiness",
+  "generation": "g10.021",
+  "updated": "2026-04-22",
+  "description": "Multi-renderer parity validation report — maps the unified Svelte component surface to the merged Rust spec crates and adapter readiness",
   "contract_crates": {
     "poodle-tokens": {
       "path": "packages/contracts/tokens",
       "modules": ["semantic", "primitives", "themes", "density", "metadata", "typed"],
       "typed_module": true
     },
-    "poodle-primitives": {
-      "path": "packages/contracts/primitives",
-      "spec_count": 64
-    },
-    "poodle-composites": {
-      "path": "packages/contracts/composites",
-      "spec_count": 41
+    "poodle-specs": {
+      "path": "packages/contracts/components",
+      "spec_count": 126,
+      "notes": "Merged contract crate. Replaced legacy poodle-primitives and poodle-composites in g10.004."
     },
     "poodle-workstation": {
       "path": "packages/contracts/workstation",
@@ -40,23 +37,22 @@
   },
   "adapter_targets": {
     "gpui": {
-      "generation": "g07",
-      "status": "planned",
+      "generation": "g10",
+      "status": "implemented",
       "crate_name": "poodle-gpui"
     },
     "jetstream": {
-      "generation": "g08",
-      "status": "planned",
+      "generation": "g10",
+      "status": "implemented",
       "crate_name": "poodle-jetstream",
       "constraint_document": "docs/roadmaps/g06/013-jetstream-rendering-constraint-document.md"
     }
   },
   "spec_coverage": {
     "total_svelte_components": 124,
-    "total_rust_specs": 118,
-    "coverage_notes": "6 Svelte components map to existing specs via configuration (AlertDialog → DialogSpec with DialogKind::AlertDialog, FormDialog → FormShellSpec + DialogSpec, etc.)",
-    "primitive_specs": 64,
-    "composite_specs": 41,
+    "total_rust_specs": 139,
+    "coverage_notes": "The merged poodle-specs crate exports 126 component specs. The remaining 13 specs live in poodle-workstation for shell and workstation-only surfaces.",
+    "component_specs": 126,
     "workstation_specs": 13
   },
   "validation_checks": {

@@ -1,7 +1,7 @@
 //! IconButton — Jetstream icon-only button backed by IconButtonSpec.
 //!
 //! Contract: `docs/contracts/components/icon-button.md`
-//! Reference: `packages/svelte/primitives/src/IconButton.svelte`
+//! Reference: `packages/svelte/components/src/IconButton.svelte`
 //!
 //! Uses SVG icon() for the icon glyph and Color::mix for hover/active.
 

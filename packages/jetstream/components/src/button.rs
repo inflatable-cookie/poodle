@@ -1,7 +1,7 @@
 //! JsButton — Jetstream button component backed by ButtonSpec.
 //!
 //! Contract: `docs/contracts/components/button.md`
-//! Reference: `packages/svelte/primitives/src/Button.svelte`
+//! Reference: `packages/svelte/components/src/Button.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 //!

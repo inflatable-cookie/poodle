@@ -3,16 +3,18 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::grid::js_grid;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::GridSpec;
+use poodle_specs::{ControlSize, GridSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let caption_font = rem_to_px(size_font_rem(ControlSize::Sm));
     let text_primary = resolve_color(theme, "color.text.primary");
     let accent = resolve_color(theme, "color.accent.base");
 
-    let cell = |text: &str| label(text).text_color(text_primary).text_size(12.0)
-        .px(12.0).py(8.0).bg(tint(accent, 0.10)).rounded(4.0);
+    let cell = |text: &str| label(text).text_color(text_primary).text_size(caption_font)
+        .px(rem_to_px(0.75)).py(rem_to_px(0.5)).bg(tint(accent, 0.10)).rounded(rem_to_px(0.25));
 
     div().flex_col().gap(24.0)
         .child(group("Default grid", secondary,

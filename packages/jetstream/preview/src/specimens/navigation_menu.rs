@@ -1,4 +1,4 @@
-//! NavigationMenu specimen — horizontal nav menu with entries.
+//! NavigationMenu specimen — horizontal nav menus with active and disabled states.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
@@ -13,11 +13,31 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         NavigationMenuEntry::new("docs", "Docs"),
         NavigationMenuEntry::new("contracts", "Contracts"),
         NavigationMenuEntry::new("tokens", "Tokens"),
+        NavigationMenuEntry::new("changelog", "Changelog"),
+    ];
+
+    let items_with_disabled = vec![
+        NavigationMenuEntry::new("docs", "Docs"),
+        NavigationMenuEntry::new("contracts", "Contracts"),
+        NavigationMenuEntry::new("tokens", "Tokens"),
+        NavigationMenuEntry::new("disabled", "Coming Soon").with_disabled(true),
     ];
 
     div().flex_col().gap(24.0)
-        .child(group("Default", secondary,
-            js_navigation_menu(&NavigationMenuSpec::new(items), theme)
+        // Default (first item auto-selected)
+        .child(group("Default (first active)", secondary,
+            js_navigation_menu(&NavigationMenuSpec::new(items.clone()), theme)
+        ))
+        // Explicit active item
+        .child(group("Active: Contracts", secondary,
+            js_navigation_menu(
+                &NavigationMenuSpec::new(items.clone()).with_default_value("contracts"),
+                theme,
+            )
+        ))
+        // With disabled entry
+        .child(group("With disabled entry", secondary,
+            js_navigation_menu(&NavigationMenuSpec::new(items_with_disabled), theme)
         ))
 }
 

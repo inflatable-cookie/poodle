@@ -1,6 +1,7 @@
 mod accordion;
 mod alert_dialog;
 mod badge;
+mod banner;
 mod r#box;
 mod breadcrumbs;
 mod bulk_action_bar;
@@ -132,6 +133,7 @@ mod video_player;
 pub use accordion::AccordionSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
 pub use badge::BadgeSpec;
+pub use banner::BannerSpec;
 pub use breadcrumbs::{BreadcrumbItem, BreadcrumbsSpec};
 pub use bulk_action_bar::{BulkAction, BulkActionBarSpec, BulkActionTone};
 pub use button::ButtonSpec;
@@ -289,7 +291,7 @@ pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
 pub use validation_summary::ValidationSummarySpec;
 pub use video_player::VideoPlayerSpec;
 
-pub const CURRENT_GENERATION: &str = "g06.002";
+pub const CURRENT_GENERATION: &str = "g10.004";
 pub const STRUCTURAL_EXPORTS: &[&str] = &[
     "BoxSpec",
     "StackSpec",

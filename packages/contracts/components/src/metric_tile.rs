@@ -123,11 +123,30 @@ impl MetricTileSpec {
         semantic::COLOR_TEXT_PRIMARY
     }
 
+    pub fn padding_x_token(&self) -> &'static str {
+        semantic::SPACE_PANEL_X
+    }
+
+    pub fn padding_y_token(&self) -> &'static str {
+        semantic::SPACE_PANEL_Y
+    }
+
+    /// Back-compat alias — historically returned SPACE_PANEL_X.
     pub fn padding_token(&self) -> &'static str {
         semantic::SPACE_PANEL_X
     }
 
     pub fn gap_token(&self) -> &'static str {
         semantic::SPACE_STACK_SM
+    }
+
+    /// Label font: code-family, 0.75rem. Contract §8: `0.75rem`.
+    pub fn label_font_size_rem(&self) -> f32 {
+        0.75
+    }
+
+    /// Value font: body size. Contract §8: `1rem`.
+    pub fn value_font_size_rem(&self) -> f32 {
+        1.0
     }
 }

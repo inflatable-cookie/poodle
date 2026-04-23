@@ -3,22 +3,24 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::region::js_region;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::RegionSpec;
+use poodle_specs::{ControlSize, RegionSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     div().flex_col().gap(24.0)
         .child(group("Labeled region", secondary,
             js_region(&RegionSpec::new().with_label("Section Title"), theme, vec![
-                label("Region content goes here.").text_color(text_primary).text_size(13.0),
+                label("Region content goes here.").text_color(text_primary).text_size(body_font),
             ])
         ))
         .child(group("Unlabeled region", secondary,
             js_region(&RegionSpec::new(), theme, vec![
-                label("Unlabeled region content.").text_color(text_primary).text_size(13.0),
+                label("Unlabeled region content.").text_color(text_primary).text_size(body_font),
             ])
         ))
 }

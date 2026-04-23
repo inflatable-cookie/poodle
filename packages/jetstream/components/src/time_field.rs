@@ -1,7 +1,7 @@
 //! JsTimeField — time input backed by TimeFieldSpec.
 //!
 //! Contract: `docs/contracts/components/time-field.md`
-//! Reference: `packages/svelte/primitives/src/TimeField.svelte`
+//! Reference: `packages/svelte/components/src/TimeField.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 

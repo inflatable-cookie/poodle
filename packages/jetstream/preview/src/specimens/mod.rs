@@ -9,6 +9,7 @@ pub mod alert_dialog;
 pub mod app_header;
 pub mod audio_player;
 pub mod badge;
+pub mod banner;
 pub mod block_editor;
 pub mod breadcrumbs;
 pub mod bulk_action_bar;
@@ -48,7 +49,10 @@ pub mod field;
 pub mod field_set;
 pub mod file_upload;
 pub mod filter_toolbar;
+pub mod floating_overlay;
 pub mod form_actions;
+pub mod form_dialog;
+pub mod form_layout;
 pub mod form_shell;
 pub mod grid;
 pub mod hover_card;
@@ -61,6 +65,8 @@ pub mod list_container;
 pub mod list_grid;
 pub mod log_list;
 pub mod markdown_editor;
+pub mod meta_bar;
+pub mod meta_item;
 pub mod media_browse_panel;
 pub mod media_picker;
 pub mod media_preview;
@@ -102,6 +108,7 @@ pub mod shell_status_bar;
 pub mod sidebar_nav;
 pub mod skeleton;
 pub mod slider;
+pub mod spacer;
 pub mod spinner;
 pub mod split_button;
 pub mod split_view;
@@ -233,6 +240,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "app-header" => Some(app_header::render(theme)),
         "audio-player" => Some(audio_player::render(theme)),
         "badge" => Some(badge::render(theme)),
+        "banner" => Some(banner::render(theme)),
         "block-editor" => Some(block_editor::render(theme)),
         "box" => Some(bx::render(theme)),
         "breadcrumbs" => Some(breadcrumbs::render(theme)),
@@ -272,7 +280,10 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "field-set" => Some(field_set::render(theme)),
         "file-upload" => Some(file_upload::render(theme)),
         "filter-toolbar" => Some(filter_toolbar::render(theme)),
+        "floating-overlay" => Some(floating_overlay::render(theme)),
         "form-actions" => Some(form_actions::render(theme)),
+        "form-dialog" => Some(form_dialog::render(theme)),
+        "form-layout" => Some(form_layout::render(theme)),
         "form-shell" => Some(form_shell::render(theme)),
         "grid" => Some(grid::render(theme)),
         "hover-card" => Some(hover_card::render(theme)),
@@ -285,6 +296,8 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "list-grid" => Some(list_grid::render(theme)),
         "log-list" => Some(log_list::render(theme)),
         "markdown-editor" => Some(markdown_editor::render(theme)),
+        "meta-bar" => Some(meta_bar::render(theme)),
+        "meta-item" => Some(meta_item::render(theme)),
         "media-browse-panel" => Some(media_browse_panel::render(theme)),
         "media-picker" => Some(media_picker::render(theme)),
         "media-preview" => Some(media_preview::render(theme)),
@@ -325,6 +338,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "sidebar-nav" => Some(sidebar_nav::render(theme)),
         "skeleton" => Some(skeleton::render(theme)),
         "slider" => Some(slider::render(theme)),
+        "spacer" => Some(spacer::render(theme)),
         "spinner" => Some(spinner::render(theme)),
         "split-button" => Some(split_button::render(theme)),
         "split-view" => Some(split_view::render(theme)),

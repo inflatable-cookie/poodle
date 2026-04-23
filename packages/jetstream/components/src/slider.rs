@@ -1,9 +1,11 @@
 //! Slider — Jetstream slider backed by SliderSpec.
 //!
 //! Contract: `docs/contracts/components/slider.md`
-//! Reference: `packages/svelte/primitives/src/Slider.svelte`
+//! Reference: `packages/svelte/components/src/Slider.svelte`
 //!
-//! Uses on_drag for thumb interaction and Color::mix for track background.
+//! Track layout: fixed-width flex-row with two segments (fill + remainder)
+//! so the filled portion reflects the actual fraction. Thumb is absolutely
+//! positioned at the junction of fill and remainder.
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
@@ -14,6 +16,11 @@ use crate::presentation::{
     control_height_rem, rem_to_px, resolve_semantic_size,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity};
+
+/// Fixed track width — 10 rem, matching the GPUI reference basis.
+fn track_w() -> f32 {
+    rem_to_px(10.0)
+}
 
 pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -32,33 +39,60 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let range = (spec.max - spec.min).max(0.001);
     let fraction = ((spec.value - spec.min) / range).clamp(0.0, 1.0) as f32;
 
-    // Track
-    let track = ui_element::div()
-        .h(track_h).grow().rounded(track_h * 0.5).bg(track_bg)
-        .relative()
-        .flex_row();
+    let tw = track_w();
+    let fill_w = fraction * tw;
+    // Remaining track width — never negative.
+    let rem_w = (tw - fill_w).max(0.0);
 
-    // Fill: accent-colored portion from left
+    let thumb_r = thumb_size * 0.5;
+
+    // Fill segment: left portion in accent color.
     let fill = ui_element::div()
+        .w(fill_w)
         .h(track_h)
         .bg(accent)
-        .rounded(track_h * 0.5);
+        .rounded_l(track_h * 0.5);
 
-    // Thumb
+    // Remainder segment: takes the rest of the track.
+    let remainder = ui_element::div()
+        .w(rem_w)
+        .h(track_h)
+        .bg(track_bg)
+        .rounded_r(track_h * 0.5);
+
+    // Thumb: absolutely positioned at the fill/remainder junction.
+    // top offsets the thumb vertically to center on the track.
+    let thumb_top = -(thumb_r - track_h * 0.5);
+    let thumb_left = fill_w - thumb_r;
     let thumb = ui_element::div()
-        .w(thumb_size).h(thumb_size)
-        .rounded(thumb_size * 0.5)
+        .absolute()
+        .top(thumb_top)
+        .left(thumb_left)
+        .w(thumb_size)
+        .h(thumb_size)
+        .rounded(thumb_r)
         .bg(elevated)
-        .border(1.0).border_color(border_default)
+        .border(1.0)
+        .border_color(border_default)
         .cursor_pointer();
 
-    let mut el = ui_element::div()
-        .h(container_h).grow()
-        .flex_row().items_center()
+    // Track row: relative container holding fill, remainder, and thumb.
+    let track = ui_element::div()
+        .w(tw)
+        .h(thumb_size)
         .relative()
-        .child(
-            track.child(fill).child(thumb)
-        );
+        .flex_row()
+        .items_center()
+        .child(fill)
+        .child(remainder)
+        .child(thumb);
+
+    let mut el = ui_element::div()
+        .h(container_h)
+        .grow()
+        .flex_row()
+        .items_center()
+        .child(track);
 
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, "state.opacity.disabled");

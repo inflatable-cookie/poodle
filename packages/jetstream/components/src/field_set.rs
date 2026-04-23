@@ -1,7 +1,7 @@
 //! FieldSet — Jetstream fieldset grouping wrapper backed by FieldSetSpec.
 //!
 //! Contract: `docs/contracts/components/field-set.md`
-//! Reference: `packages/svelte/primitives/src/FieldSet.svelte` (if present)
+//! Reference: `packages/svelte/components/src/FieldSet.svelte` (if present)
 //!
 //! Renders a fieldset wrapper with optional legend and a multi-column grid
 //! for slotted field content.  Children are passed in as a Vec of JsEl.

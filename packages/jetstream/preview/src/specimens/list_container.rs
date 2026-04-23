@@ -3,17 +3,19 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::list_container::js_list_container;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ListContainerSpec, ListContainerState};
+use poodle_specs::{ControlSize, ListContainerSpec, ListContainerState};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     let list_content = div().flex_col().gap(4.0)
-        .child(label("Item 1").text_color(text_primary).text_size(13.0))
-        .child(label("Item 2").text_color(text_primary).text_size(13.0))
-        .child(label("Item 3").text_color(text_primary).text_size(13.0));
+        .child(label("Item 1").text_color(text_primary).text_size(body_font))
+        .child(label("Item 2").text_color(text_primary).text_size(body_font))
+        .child(label("Item 3").text_color(text_primary).text_size(body_font));
 
     div().flex_col().gap(24.0)
         .child(group("With items", secondary,

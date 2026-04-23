@@ -1,7 +1,7 @@
 //! DateTimeZonePicker — Jetstream date+time+zone picker trigger backed by DateTimeZonePickerSpec.
 //!
 //! Contract: `docs/contracts/components/date-time-zone-picker.md`
-//! Reference: `packages/svelte/primitives/src/DateTimeZonePicker.svelte`
+//! Reference: `packages/svelte/components/src/DateTimeZonePicker.svelte`
 //!
 //! Renders the trigger button with value/placeholder display and disclosure
 //! indicator.  The calendar+time-field+timezone-select surface is overlay-managed

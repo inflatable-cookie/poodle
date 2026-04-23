@@ -111,4 +111,29 @@ impl NavCardSpec {
     pub fn focus_ring_color_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
+
+    /// Title typography: label-size token. Contract §8: `typography.label.size`.
+    pub fn title_typography_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    /// Root padding-x. Contract §8: `1rem`.
+    pub fn padding_x_rem(&self) -> f32 {
+        1.0
+    }
+
+    /// Root padding-y. Contract §8: `0.875rem`.
+    pub fn padding_y_rem(&self) -> f32 {
+        0.875
+    }
+
+    /// Gap between title and description. Contract §8: `0.25rem`.
+    pub fn content_gap_rem(&self) -> f32 {
+        0.25
+    }
+
+    /// Description font-size. Contract §8: `0.8125rem`.
+    pub fn description_font_size_rem(&self) -> f32 {
+        0.8125
+    }
 }

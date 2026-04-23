@@ -1,7 +1,7 @@
 //! Card — Jetstream card component backed by CardSpec.
 //!
 //! Contract: `docs/contracts/components/card.md`
-//! Reference: `packages/svelte/primitives/src/Card.svelte`
+//! Reference: `packages/svelte/components/src/Card.svelte`
 //!
 //! Uses Color::mix for hover/active states on interactive cards.
 
@@ -43,7 +43,8 @@ pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<Js
 
     if let Some(selected_token) = spec.selected_border_token() {
         let selected_color = resolve_color(theme, selected_token);
-        el = el.border(2.0).border_color(selected_color);
+        let sel_border_w = resolve_px(theme, "border.width.focus");
+        el = el.border(sel_border_w).border_color(selected_color);
     }
 
     // Interactive cards get hover state

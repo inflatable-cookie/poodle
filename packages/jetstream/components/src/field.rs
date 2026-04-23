@@ -47,12 +47,14 @@ pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Optio
         el = el.child(control_el);
     }
 
+    let supporting_size = resolve_px(theme, spec.supporting_text_typography_token());
+
     // Description
     if let Some(ref desc) = spec.description {
         el = el.child(
             ui_element::label(desc)
                 .text_color(desc_color)
-                .text_size(12.0)
+                .text_size(supporting_size)
         );
     }
 
@@ -62,7 +64,7 @@ pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Optio
             el = el.child(
                 ui_element::label(error)
                     .text_color(error_color)
-                    .text_size(12.0)
+                    .text_size(supporting_size)
             );
         }
     }
@@ -73,7 +75,7 @@ pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Optio
             el = el.child(
                 ui_element::label(pending)
                     .text_color(desc_color)
-                    .text_size(12.0)
+                    .text_size(supporting_size)
             );
         }
     }

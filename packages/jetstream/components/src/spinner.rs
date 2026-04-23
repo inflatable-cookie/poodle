@@ -1,7 +1,7 @@
 //! JsSpinner — animated loading indicator backed by SpinnerSpec.
 //!
 //! Contract: `docs/contracts/components/spinner.md`
-//! Reference: `packages/svelte/primitives/src/Spinner.svelte`
+//! Reference: `packages/svelte/components/src/Spinner.svelte`
 //!
 //! ALL dimensions resolve from tokens or spec methods. ZERO hardcoded pixel values.
 

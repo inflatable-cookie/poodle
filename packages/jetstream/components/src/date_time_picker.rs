@@ -1,7 +1,7 @@
 //! DateTimePicker — Jetstream date+time picker trigger backed by DateTimePickerSpec.
 //!
 //! Contract: `docs/contracts/components/date-time-picker.md`
-//! Reference: `packages/svelte/primitives/src/DateTimePicker.svelte`
+//! Reference: `packages/svelte/components/src/DateTimePicker.svelte`
 //!
 //! Renders the trigger button with value/placeholder display and disclosure
 //! indicator.  The calendar+time-field surface is overlay-managed at runtime.

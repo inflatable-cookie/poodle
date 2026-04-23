@@ -1,7 +1,7 @@
 //! JsFileUpload — drag-and-drop file upload zone backed by FileUploadSpec.
 //!
 //! Contract: `docs/contracts/components/file-upload.md`
-//! Reference: `packages/svelte/primitives/src/FileUpload.svelte`
+//! Reference: `packages/svelte/components/src/FileUpload.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 

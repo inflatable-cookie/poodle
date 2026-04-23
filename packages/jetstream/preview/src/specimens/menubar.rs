@@ -1,4 +1,4 @@
-//! Menubar specimen — horizontal menu bars with dropdown entries.
+//! Menubar specimen — horizontal menu bars with open and disabled states.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
@@ -29,10 +29,34 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         ]),
     ];
 
+    let items_with_disabled = vec![
+        MenubarEntry::new("file", "File", vec![
+            MenuEntry::new("new", "New"),
+        ]),
+        MenubarEntry::new("edit", "Edit", vec![
+            MenuEntry::new("undo", "Undo"),
+        ]),
+        MenubarEntry::new("tools", "Tools", vec![]).with_disabled(true),
+        MenubarEntry::new("help", "Help", vec![
+            MenuEntry::new("about", "About"),
+        ]),
+    ];
+
     div().flex_col().gap(24.0)
-        // Default
-        .child(group("Default", secondary,
-            js_menubar(&MenubarSpec::new(items), theme)
+        // Default (first item treated as open/active)
+        .child(group("Default (File open)", secondary,
+            js_menubar(&MenubarSpec::new(items.clone()), theme)
+        ))
+        // Edit open
+        .child(group("Edit open", secondary,
+            js_menubar(
+                &MenubarSpec::new(items.clone()).with_default_value("edit"),
+                theme,
+            )
+        ))
+        // With disabled entry
+        .child(group("With disabled entry (Tools)", secondary,
+            js_menubar(&MenubarSpec::new(items_with_disabled), theme)
         ))
 }
 

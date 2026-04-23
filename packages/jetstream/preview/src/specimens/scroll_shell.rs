@@ -3,17 +3,19 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::scroll_shell::js_scroll_shell;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::ScrollShellSpec;
+use poodle_specs::{ControlSize, ScrollShellSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
     let children = vec![
-        label("Scrollable content line 1").text_color(text_primary).text_size(13.0),
-        label("Scrollable content line 2").text_color(text_primary).text_size(13.0),
-        label("Scrollable content line 3").text_color(text_primary).text_size(13.0),
+        label("Scrollable content line 1").text_color(text_primary).text_size(body_font),
+        label("Scrollable content line 2").text_color(text_primary).text_size(body_font),
+        label("Scrollable content line 3").text_color(text_primary).text_size(body_font),
     ];
 
     div().flex_col().gap(24.0)

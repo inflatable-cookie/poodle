@@ -3,15 +3,17 @@
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::stack::js_stack;
+use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{Alignment, PaddingScale, StackSpec};
+use poodle_specs::{Alignment, ControlSize, PaddingScale, StackSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
+    let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
     let accent = resolve_color(theme, "color.accent.base");
 
-    let item = |text: &str| label(text).text_color(text_primary).text_size(13.0)
+    let item = |text: &str| label(text).text_color(text_primary).text_size(body_font)
         .px(8.0).py(4.0).bg(tint(accent, 0.12)).rounded(4.0);
 
     div().flex_col().gap(24.0)

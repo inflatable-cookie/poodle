@@ -1,7 +1,7 @@
 //! JsToggleGroup — grouped toggle selection backed by ToggleGroupSpec.
 //!
 //! Contract: `docs/contracts/components/toggle-group.md`
-//! Reference: `packages/svelte/primitives/src/ToggleGroup.svelte`
+//! Reference: `packages/svelte/components/src/ToggleGroup.svelte`
 //!
 //! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
 
