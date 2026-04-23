@@ -179,8 +179,8 @@ type EmptyStateVariant = "neutral" | "search" | "firstRun";
 ### Composition
 
 - Composes: `Callout`, `Pagination`, `PaginationSummary` from
-  `@poodle/svelte-primitives`; `EmptyState` and `PageHeader` from
-  `@poodle/svelte-composites`
+  `@poodle/svelte`; `EmptyState` and `PageHeader` from
+  `@poodle/svelte`
 - Parent expectations: list pages, admin browse views, content libraries
 - Child expectations: host provides filters, batch strip, and content
 - Resizing rules: caller content is fully responsible for row/card/grid
@@ -241,7 +241,7 @@ None.
 
 - Uses `createEventDispatcher` for `pageChange` event
 - Composes `Callout`, `Pagination`, `PaginationSummary` from
-  `@poodle/svelte-primitives` and `EmptyState`, `PageHeader` from
+  `@poodle/svelte` and `EmptyState`, `PageHeader` from
   local composites
 - PageHeader rendering branches on `$$slots.breadcrumbs` and `$$slots.actions`
   to avoid empty slot wrappers — four branches handle all combinations

@@ -20,7 +20,7 @@ rules.
 
 ```svelte
 <script lang="ts">
-  import { Field, TextInput, type InputValidationStatus, type ValidationResult } from "@poodle/svelte-primitives";
+  import { Field, TextInput, type InputValidationStatus, type ValidationResult } from "@poodle/svelte";
   import { slugify, isReservedSlug, isValidSlugFormat } from "@decodelabs/underlay/patterns";
 
   let title = "";

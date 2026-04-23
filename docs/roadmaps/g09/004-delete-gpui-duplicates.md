@@ -4,6 +4,10 @@ Status: complete
 Owner: Poodle Core
 Depends on: g09.003
 
+> Historical note: this milestone records the pre-`g10.004` dependency layout.
+> `poodle-primitives` and `poodle-composites` were later merged into
+> `poodle-specs`.
+
 ## Context
 
 With specs unified into `poodle-primitives` and `poodle-composites`, the

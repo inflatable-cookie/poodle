@@ -7,7 +7,7 @@ Owner: Poodle Core
 ## Summary
 
 - completed `g02.005`
-- added reusable picker workflow composites at `packages/svelte/composites/src/PickerShell.svelte`, `packages/svelte/composites/src/RelationPicker.svelte`, and `packages/svelte/composites/src/SelectionSummary.svelte`
+- added reusable picker workflow composites at `packages/svelte/components/src/PickerShell.svelte`, `packages/svelte/components/src/RelationPicker.svelte`, and `packages/svelte/components/src/SelectionSummary.svelte`
 - extended the preview with host-controlled inline, popover-style, and modal-style relation selection flows, including query, selection mode, state posture, and confirm/cancel behavior
 - added workflow contracts at `docs/contracts/composites/picker-shell.md`, `docs/contracts/composites/relation-picker.md`, and `docs/contracts/composites/selection-summary.md`
 - added the normative picker baseline at `docs/specs/013-picker-relation-and-selection-workflow-rules.md`

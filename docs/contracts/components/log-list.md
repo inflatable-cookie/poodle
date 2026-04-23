@@ -160,7 +160,7 @@ type LogEntry = StreamLogEntry | AuditLogEntry;
 
 ```svelte
 <script lang="ts">
-  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte-composites";
+  import { LogList, type LogEntry, type LogFilter } from "@poodle/svelte";
 
   const filters: LogFilter[] = [
     {
@@ -205,7 +205,7 @@ type LogEntry = StreamLogEntry | AuditLogEntry;
 
 ```svelte
 <script lang="ts">
-  import { LogList } from "@poodle/svelte-composites";
+  import { LogList } from "@poodle/svelte";
 
   const entries = [
     { id: "1", level: "info", message: "Server started", timestamp: Date.now() },

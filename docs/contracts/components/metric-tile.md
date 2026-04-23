@@ -116,7 +116,7 @@ None. MetricTile is a non-interactive display component.
 
 ### Composition
 
-- Composes: `Icon` from `@poodle/svelte-primitives`
+- Composes: `Icon` from `@poodle/svelte`
 - Parent expectations: grids, stacks, signal panels, workspace surfaces
 - Child expectations: none (self-contained)
 - Resizing rules: tile stretches horizontally; value text wraps if needed

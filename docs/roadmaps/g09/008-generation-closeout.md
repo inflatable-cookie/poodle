@@ -4,6 +4,10 @@ Status: complete
 Owner: Poodle Core
 Depends on: g09.007
 
+> Historical note: this closeout reflects the pre-`g10.004` dependency graph.
+> `poodle-primitives` and `poodle-composites` were later merged into
+> `poodle-specs`.
+
 ## Completed Actions
 
 - [x] All g09 milestones verified complete

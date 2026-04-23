@@ -21,8 +21,8 @@ availability, uniqueness checks, or remote validation against app-owned rules.
 
 ```svelte
 <script lang="ts">
-  import { Field, TextInput } from "@poodle/svelte-primitives";
-  import type { InputValidationStatus } from "@poodle/svelte-primitives";
+  import { Field, TextInput } from "@poodle/svelte";
+  import type { InputValidationStatus } from "@poodle/svelte";
 
   let slug = "";
   let slugStatus: InputValidationStatus = "idle";

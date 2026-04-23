@@ -3,6 +3,9 @@
 Status: completed
 Updated: 2026-03-14
 
+> Historical note: `g06` describes the split-crate era. The live component spec
+> surface now ships from `poodle-specs` after `g10.004`.
+
 ## Context
 
 `g05` established the GPUI foundation: spec crates with renderer-agnostic types
@@ -40,6 +43,9 @@ Svelte surface established in `g04`.
 
 - shared contract crates are renamed and restructured as `poodle-contracts-*`
   (no renderer name in the crate path)
+- current equivalent after `g10.004`: the live component spec surface ships
+  from `poodle-specs` rather than split `poodle-primitives` /
+  `poodle-composites` crates
 - token system supports typed output (parsed `Vec4`-compatible colors, `f32`
   pixel values) alongside existing string constants
 - layout intent types are renderer-agnostic and map cleanly to both GPUI's

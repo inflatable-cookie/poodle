@@ -47,8 +47,7 @@ Primary repos: `poodle`
     `token-inspector` remain useful preview infrastructure but are not the main
     shared demo target GPUI should reproduce
 - made the current coverage debt explicit using the generated parity report:
-  - `@poodle/svelte-primitives`: `14/63` previewed
-  - `@poodle/svelte-composites`: `18/20` previewed
+  - `@poodle/svelte`: `32/83` previewed
   - `@poodle/svelte-workstation`: `12/14` previewed
 - froze the main audit findings: docs-shell leakage, monolithic entry shape,
   broad but shallow coverage, missing coherent app story, and excessive

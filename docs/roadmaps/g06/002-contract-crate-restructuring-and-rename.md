@@ -3,6 +3,9 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: this milestone predates the `g10.004` crate merge. The live
+> component-spec crate is now `poodle-specs` at `packages/contracts/components/`.
+
 ## Objective
 
 Rename and restructure the shared Rust crates from GPUI-specific naming to
@@ -36,7 +39,9 @@ Updated across 77 source files spanning all four crates.
 
 ### Generation Constants
 
-`CURRENT_GENERATION` updated to `"g06.002"` in all three spec crates.
+At this milestone, `CURRENT_GENERATION` was updated to `"g06.002"` in the
+then-live spec crates. The live `poodle-specs` and `poodle-workstation` crates
+now report `g10.004` after the later merge cleanup.
 
 ### Token Path
 

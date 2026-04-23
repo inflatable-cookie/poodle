@@ -3,6 +3,10 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: references here to `poodle-composites` describe the crate
+> layout at the time. The live component spec surface now ships from
+> `poodle-specs`.
+
 ## Objective
 
 Implement `RenderComponent` for the 24 editing, navigation, list interaction,

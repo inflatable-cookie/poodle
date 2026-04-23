@@ -62,11 +62,11 @@ Hardcoded pixel values like `.h(16.0)` or `.text_size(13.0)` in component code a
 
 ### Reference Implementation
 
-The **Svelte implementation** (`packages/svelte/primitives/src/`) is the proof reference for visual correctness. When the contract is ambiguous, refer to the Svelte implementation for clarification. The GPUI implementation may have deviations and should not be used as a reference.
+The **Svelte implementation** (`packages/svelte/components/src/`) is the proof reference for visual correctness. When the contract is ambiguous, refer to the Svelte implementation for clarification. The GPUI implementation may have deviations and should not be used as a reference.
 
 ## Development Workflow Rules
 
-- Any changes to Svelte components in `packages/svelte/primitives/src/` must be reflected in the corresponding contract file in `docs/contracts/components/`. For example, changes to `Button.svelte` should be mirrored in `docs/contracts/components/button.md`. Always keep component implementations and their contracts in sync.
+- Any changes to Svelte components in `packages/svelte/components/src/` must be reflected in the corresponding contract file in `docs/contracts/components/`. For example, changes to `Button.svelte` should be mirrored in `docs/contracts/components/button.md`. Always keep component implementations and their contracts in sync.
 
 - When implementing a Jetstream component:
   1. **Read the full contract** (`docs/contracts/components/<component>.md`) — every section

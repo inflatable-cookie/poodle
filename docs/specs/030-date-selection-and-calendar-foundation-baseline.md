@@ -85,7 +85,7 @@ need deliberate follow-up rather than incidental growth.
 - `docs/contracts/components/range-calendar.md`
 - `docs/contracts/components/date-picker.md`
 - `docs/contracts/components/date-range-picker.md`
-- `packages/svelte/primitives/README.md`
+- `packages/svelte/components/README.md`
 
 ## Next Task
 

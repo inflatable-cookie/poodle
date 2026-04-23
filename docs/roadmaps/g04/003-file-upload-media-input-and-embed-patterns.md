@@ -19,16 +19,16 @@ Primary repos: `poodle`
 
 - [ ] write contract for FileUpload: drop zone, file type accept list, size
   limits, multiple files, progress callback, preview thumbnails
-- [ ] implement FileUpload primitive in `@poodle/svelte-primitives`
+- [ ] implement FileUpload primitive in `@poodle/svelte`
 - [ ] write contract for MediaPicker: gallery view, search, filtering, selection
   mode, upload integration
-- [ ] implement MediaPicker composite in `@poodle/svelte-composites`
+- [ ] implement MediaPicker composite in `@poodle/svelte`
 - [ ] write contract for EmbedInput: URL input, paste detection, provider
   resolution, preview generation
-- [ ] implement EmbedInput composite in `@poodle/svelte-composites`
+- [ ] implement EmbedInput composite in `@poodle/svelte`
 - [ ] write contract for EmbedPreview: provider icon, title, description,
   thumbnail, link
-- [ ] implement EmbedPreview composite in `@poodle/svelte-composites`
+- [ ] implement EmbedPreview composite in `@poodle/svelte`
 - [ ] create specimens for all four components
 - [ ] register in component-registry.ts and specimen registry
 

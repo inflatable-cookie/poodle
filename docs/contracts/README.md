@@ -85,6 +85,7 @@ above it in downstream repos such as Loophole.
 - `components/form-actions.md`
 - `components/form-dialog.md`
 - `components/form-layout.md`
+- `components/form-shell.md`
 - `components/format-display-date.md`
 - `components/format-file-size.md`
 - `components/grid.md`
@@ -93,6 +94,7 @@ above it in downstream repos such as Loophole.
 - `components/icon-provider.md`
 - `components/icon.md`
 - `components/inline-list-section.md`
+- `components/inline-remediation.md`
 - `components/list-card-counter.md`
 - `components/list-card.md`
 - `components/list-container.md`
@@ -128,6 +130,7 @@ above it in downstream repos such as Loophole.
 - `components/rating.md`
 - `components/region.md`
 - `components/relation-picker.md`
+- `components/remediation-banner.md`
 - `components/resize-handle.md`
 - `components/scroll-shell.md`
 - `components/segmented-control.md`
@@ -143,11 +146,13 @@ above it in downstream repos such as Loophole.
 - `components/split-button.md`
 - `components/split-view.md`
 - `components/stack.md`
+- `components/state-tile.md`
 - `components/status-bar.md`
 - `components/status-indicator.md`
 - `components/surface-elevation.md`
 - `components/surface.md`
 - `components/switch.md`
+- `components/tab-strip.md`
 - `components/table.md`
 - `components/tabs.md`
 - `components/text-input.md`
@@ -162,6 +167,7 @@ above it in downstream repos such as Loophole.
 - `components/treatment-tokens.md`
 - `components/tri-state-switch.md`
 - `components/ui-presentation-provider.md`
+- `components/validation-summary.md`
 - `components/video-player.md`
 
 ## Next Task

@@ -59,6 +59,7 @@ primitives and layout surfaces through higher-order application components.
 - `form-actions.md`
 - `form-dialog.md`
 - `form-layout.md`
+- `form-shell.md`
 - `format-display-date.md`
 - `format-file-size.md`
 - `grid.md`
@@ -67,6 +68,7 @@ primitives and layout surfaces through higher-order application components.
 - `icon-provider.md`
 - `icon.md`
 - `inline-list-section.md`
+- `inline-remediation.md`
 - `list-card-counter.md`
 - `list-card.md`
 - `list-container.md`
@@ -102,6 +104,7 @@ primitives and layout surfaces through higher-order application components.
 - `rating.md`
 - `region.md`
 - `relation-picker.md`
+- `remediation-banner.md`
 - `resize-handle.md`
 - `scroll-shell.md`
 - `segmented-control.md`
@@ -117,11 +120,13 @@ primitives and layout surfaces through higher-order application components.
 - `split-button.md`
 - `split-view.md`
 - `stack.md`
+- `state-tile.md`
 - `status-bar.md`
 - `status-indicator.md`
 - `surface-elevation.md`
 - `surface.md`
 - `switch.md`
+- `tab-strip.md`
 - `table.md`
 - `tabs.md`
 - `text-input.md`
@@ -136,6 +141,7 @@ primitives and layout surfaces through higher-order application components.
 - `treatment-tokens.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`
+- `validation-summary.md`
 - `video-player.md`
 
 ## Accessibility Rule

@@ -274,7 +274,7 @@ None.
 - Grid uses `grid-template-rows: auto` instead of explicit row template
 - State fallback shows `stateTitle` (or "Picker state") and optional `stateMessage` when no `state` slot provided
 - Loading state prepends shared `Spinner` primitive (`variant="grid"`, `tone="accent"`) before state title
-- Imports `Spinner` from `@poodle/svelte-primitives`
+- Imports `Spinner` from `@poodle/svelte`
 
 ## 10. GPUI Notes
 

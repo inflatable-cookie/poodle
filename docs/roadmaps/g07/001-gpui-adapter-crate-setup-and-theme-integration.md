@@ -3,6 +3,10 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: references here to `poodle-primitives` and
+> `poodle-composites` describe the crate layout at the time. The live component
+> spec surface now ships from `poodle-specs`.
+
 ## Objective
 
 Create the `poodle-gpui` adapter crate that implements the renderer adapter traits
@@ -19,6 +23,9 @@ g06.006.
 | Path | `packages/gpui/adapter/` |
 | Crate name | `poodle-gpui` |
 | Dependencies | `poodle-adapter`, `poodle-events`, `poodle-layout`, `poodle-primitives`, `poodle-composites`, `poodle-workstation`, `poodle-style`, `poodle-tokens` |
+
+Current equivalent after `g10.004`: the live component spec dependency is
+`poodle-specs` plus `poodle-workstation`, not the older split pair.
 
 ### Modules
 

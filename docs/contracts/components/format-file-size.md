@@ -32,7 +32,7 @@ formatFileSize(bytes: number | null | undefined): string
 ## 4. Example
 
 ```ts
-import { formatFileSize } from "@poodle/svelte-primitives";
+import { formatFileSize } from "@poodle/svelte";
 
 formatFileSize(500); // "500 B"
 formatFileSize(1024); // "1 KB"

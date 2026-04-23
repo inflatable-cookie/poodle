@@ -23,8 +23,8 @@ becomes genuinely custom.
 
 ```svelte
 <script lang="ts">
-  import { FormLayout } from "@poodle/svelte-composites";
-  import { Field, TextInput } from "@poodle/svelte-primitives";
+  import { FormLayout } from "@poodle/svelte";
+  import { Field, TextInput } from "@poodle/svelte";
 </script>
 
 <FormLayout>
@@ -46,8 +46,8 @@ becomes genuinely custom.
 
 ```svelte
 <script lang="ts">
-  import { FormLayout } from "@poodle/svelte-composites";
-  import { FieldSet, Field, TextInput } from "@poodle/svelte-primitives";
+  import { FormLayout } from "@poodle/svelte";
+  import { FieldSet, Field, TextInput } from "@poodle/svelte";
 </script>
 
 <FieldSet legend="Publishing">
@@ -82,7 +82,7 @@ becomes genuinely custom.
 
 ```svelte
 <script lang="ts">
-  import { Field, TextInput } from "@poodle/svelte-primitives";
+  import { Field, TextInput } from "@poodle/svelte";
 </script>
 
 <Field
@@ -118,7 +118,7 @@ owns the field and text-input capabilities needed to express that workflow.
 
 ```svelte
 <script lang="ts">
-  import { Field, TextInput } from "@poodle/svelte-primitives";
+  import { Field, TextInput } from "@poodle/svelte";
 
   let title = "";
   let slug = "";

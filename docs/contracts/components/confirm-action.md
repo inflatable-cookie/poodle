@@ -133,7 +133,7 @@ type AlertDialogTone = "danger" | "warning";
 
 ### Composition
 
-- composes: `AlertDialog` and `Button` from `@poodle/svelte-primitives`
+- composes: `AlertDialog` and `Button` from `@poodle/svelte`
 - parent expectations: toolbars, list item actions, settings forms
 - child expectations: AlertDialog primitive, Button primitive, optional body
   content via default slot
@@ -182,7 +182,7 @@ None.
 ## 9. Svelte Notes
 
 - uses `createEventDispatcher` for `confirm` and `cancel` events
-- composes `AlertDialog` and `Button` from `@poodle/svelte-primitives`
+- composes `AlertDialog` and `Button` from `@poodle/svelte`
 - `open` is passed to AlertDialog as `open || null` (falsy to null for
   uncontrolled initial state)
 - handles `openChange` from AlertDialog to sync internal open state
@@ -191,7 +191,7 @@ None.
   resolved from `resolveSemanticControlSize` and `getUiPresentation`
 - `$$slots.trigger` check determines custom vs default trigger rendering
 - `AlertDialogTone`, `ControlSize`, `SemanticControlSizeRole`, `ControlDensity`
-  types imported from `@poodle/svelte-primitives`
+  types imported from `@poodle/svelte`
 - size resolves via `resolveSemanticControlSize` with `sizeRole="control"`
 
 ## 10. GPUI Notes

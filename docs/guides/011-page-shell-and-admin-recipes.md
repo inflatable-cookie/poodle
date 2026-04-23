@@ -28,8 +28,8 @@ projects, categories, and scheduled-task list/detail/edit pages.
 
 ```svelte
 <script lang="ts">
-  import { PageHeader } from "@poodle/svelte-composites";
-  import { Breadcrumbs, Code, MetaBar, MetaItem, Pill } from "@poodle/svelte-primitives";
+  import { PageHeader } from "@poodle/svelte";
+  import { Breadcrumbs, Code, MetaBar, MetaItem, Pill } from "@poodle/svelte";
 </script>
 
 <div class="detail-page__header">
@@ -63,8 +63,8 @@ projects, categories, and scheduled-task list/detail/edit pages.
 
 ```svelte
 <script lang="ts">
-  import { FilterToolbar, ListContainer } from "@poodle/svelte-composites";
-  import { Button, Field, TextInput, Select } from "@poodle/svelte-primitives";
+  import { FilterToolbar, ListContainer } from "@poodle/svelte";
+  import { Button, Field, TextInput, Select } from "@poodle/svelte";
 </script>
 
 <ListContainer
@@ -103,8 +103,8 @@ surface rather than a CRUD browse page.
 
 ```svelte
 <script lang="ts">
-  import { MetricTile, NavCard, PageHeader } from "@poodle/svelte-composites";
-  import { Callout, Grid } from "@poodle/svelte-primitives";
+  import { MetricTile, NavCard, PageHeader } from "@poodle/svelte";
+  import { Callout, Grid } from "@poodle/svelte";
 </script>
 
 <PageHeader
@@ -163,7 +163,7 @@ Use `Tabs` directly. Keep mount policy app-owned.
 
 ```svelte
 <script lang="ts">
-  import { Tabs } from "@poodle/svelte-primitives";
+  import { Tabs } from "@poodle/svelte";
 
   let activeTab = "details";
 </script>

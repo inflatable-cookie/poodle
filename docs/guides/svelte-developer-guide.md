@@ -19,10 +19,10 @@ also use [Guides Index](./README.md), especially
 ### 1. Install packages
 
 ```bash
-bun add @poodle/svelte-tokens @poodle/svelte-primitives @poodle/svelte-composites @poodle/icons-lucide
+bun add @poodle/svelte-tokens @poodle/svelte @poodle/icons-lucide
 ```
 
-`@poodle/svelte-tokens` provides the CSS custom properties and theme helpers, `@poodle/svelte-primitives` provides the foundational UI components, `@poodle/svelte-composites` provides higher-level compositions, and `@poodle/icons-lucide` provides tree-shakeable icon imports.
+`@poodle/svelte-tokens` provides the CSS custom properties and theme helpers, `@poodle/svelte` provides the full Svelte component surface, and `@poodle/icons-lucide` provides tree-shakeable icon imports.
 
 ### 2. Import the token stylesheet
 
@@ -79,7 +79,7 @@ Or simply apply the data attributes in your HTML:
 
 ```svelte
 <script>
-  import { Button, TextInput, Field, Select } from "@poodle/svelte-primitives";
+  import { Button, TextInput, Field, Select } from "@poodle/svelte";
   import { search } from "@poodle/icons-lucide";
 </script>
 
@@ -98,8 +98,7 @@ Or simply apply the data attributes in your HTML:
 
 ```
 @poodle/svelte-tokens       — CSS custom properties, theme/density/size helpers
-@poodle/svelte-primitives    — 83 foundational UI components
-@poodle/svelte-composites    — 34 higher-level compositions built on primitives
+@poodle/svelte              — unified Svelte component package
 @poodle/icons-lucide         — 1700+ tree-shakeable Lucide icon exports
 ```
 
@@ -108,9 +107,7 @@ Or simply apply the data attributes in your HTML:
 ```
 @poodle/svelte-tokens
     ↑
-@poodle/svelte-primitives (depends on tokens)
-    ↑
-@poodle/svelte-composites (depends on primitives, tokens)
+@poodle/svelte (depends on tokens)
 
 @poodle/icons-lucide (standalone — no dependency on other Poodle packages)
 ```
@@ -119,10 +116,8 @@ Or simply apply the data attributes in your HTML:
 
 | Package | Import | Purpose |
 |---------|--------|---------|
-| `@poodle/svelte-primitives` | Default | All components |
-| `@poodle/svelte-primitives/types` | Type-only | TypeScript types |
-| `@poodle/svelte-composites` | Default | All composites |
-| `@poodle/svelte-composites/types` | Type-only | TypeScript types |
+| `@poodle/svelte` | Default | All components |
+| `@poodle/svelte/types` | Type-only | TypeScript types |
 | `@poodle/svelte-tokens` | Default | Token values and metadata |
 | `@poodle/svelte-tokens/runtime` | `applyThemeAttributes()` | Theme attribute helper |
 | `@poodle/svelte-tokens/themes` | `themes`, `densityModes`, `controlSizes` | Theme definitions |
@@ -260,7 +255,7 @@ baseline without hard-coding every child:
 
 ```svelte
 <script>
-  import { UiPresentationProvider, Toolbar, Button } from "@poodle/svelte-primitives";
+  import { UiPresentationProvider, Toolbar, Button } from "@poodle/svelte";
 </script>
 
 <UiPresentationProvider density="compact" sizeScale="sm">
@@ -411,7 +406,7 @@ Import individual icons from `@poodle/icons-lucide`. Only icons you use end up i
 
 ```svelte
 <script>
-  import { Icon } from "@poodle/svelte-primitives";
+  import { Icon } from "@poodle/svelte";
   import { search, heart, settings, trash2 } from "@poodle/icons-lucide";
 </script>
 
@@ -448,7 +443,7 @@ For scenarios where you need the full icon catalogue available by name (e.g., CM
 
 ```svelte
 <script>
-  import { Icon, IconProvider } from "@poodle/svelte-primitives";
+  import { Icon, IconProvider } from "@poodle/svelte";
   import iconNodes from "lucide-static/icon-nodes.json";
 </script>
 
@@ -470,7 +465,7 @@ Components that accept icons use the `IconProp` type (`IconNodes | string`):
 
 ```svelte
 <script>
-  import { Button, IconButton } from "@poodle/svelte-primitives";
+  import { Button, IconButton } from "@poodle/svelte";
   import { save, trash2, plus } from "@poodle/icons-lucide";
 </script>
 
@@ -507,7 +502,7 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
 
 ```svelte
 <script>
-  import { Field, TextInput, Select, Checkbox } from "@poodle/svelte-primitives";
+  import { Field, TextInput, Select, Checkbox } from "@poodle/svelte";
 
   let name = "";
   let role = "";
@@ -601,8 +596,8 @@ For multi-field forms, use `FormLayout` from composites:
 
 ```svelte
 <script>
-  import { FormLayout } from "@poodle/svelte-composites";
-  import { Field, TextInput, Select, Button } from "@poodle/svelte-primitives";
+  import { FormLayout } from "@poodle/svelte";
+  import { Field, TextInput, Select, Button } from "@poodle/svelte";
 </script>
 
 <FormLayout columns={2}>
@@ -638,7 +633,7 @@ Use `FieldSet` to group related fields with a semantic `<fieldset>` and `<legend
 
 ```svelte
 <script>
-  import { FieldSet, Field, TextInput, Select } from "@poodle/svelte-primitives";
+  import { FieldSet, Field, TextInput, Select } from "@poodle/svelte";
 </script>
 
 <FieldSet legend="Contact Information">
@@ -679,7 +674,7 @@ Flex container with direction and gap control:
 
 ```svelte
 <script>
-  import { Stack, Button } from "@poodle/svelte-primitives";
+  import { Stack, Button } from "@poodle/svelte";
 </script>
 
 <Stack direction="vertical" gap="md">
@@ -700,7 +695,7 @@ CSS Grid layout container:
 
 ```svelte
 <script>
-  import { Grid, Surface } from "@poodle/svelte-primitives";
+  import { Grid, Surface } from "@poodle/svelte";
 </script>
 
 <Grid columns={3} gap="md">
@@ -736,7 +731,7 @@ Flex-aware spacer element that pushes siblings apart.
 
 ```svelte
 <script>
-  import { Dialog, Button } from "@poodle/svelte-primitives";
+  import { Dialog, Button } from "@poodle/svelte";
   let open = false;
 </script>
 
@@ -792,8 +787,8 @@ Positioned floating content anchored to a trigger:
 
 ```svelte
 <script>
-  import { Table } from "@poodle/svelte-primitives";
-  import type { TableColumn, TableRow } from "@poodle/svelte-primitives";
+  import { Table } from "@poodle/svelte";
+  import type { TableColumn, TableRow } from "@poodle/svelte";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", isRowHeader: true },
@@ -816,8 +811,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 
 ```svelte
 <script>
-  import { DataTable } from "@poodle/svelte-composites";
-  import type { TableColumn, TableRow } from "@poodle/svelte-composites";
+  import { DataTable } from "@poodle/svelte";
+  import type { TableColumn, TableRow } from "@poodle/svelte";
 </script>
 
 <DataTable
@@ -834,8 +829,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
 
 ```svelte
 <script>
-  import { Tabs } from "@poodle/svelte-primitives";
-  import type { TabItem } from "@poodle/svelte-primitives";
+  import { Tabs } from "@poodle/svelte";
+  import type { TabItem } from "@poodle/svelte";
 
   const tabs: TabItem[] = [
     { value: "general", label: "General" },
@@ -864,8 +859,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Breadcrumbs } from "@poodle/svelte-primitives";
-  import type { BreadcrumbItem } from "@poodle/svelte-primitives";
+  import { Breadcrumbs } from "@poodle/svelte";
+  import type { BreadcrumbItem } from "@poodle/svelte";
 
   const items: BreadcrumbItem[] = [
     { value: "home", label: "Home", href: "/" },
@@ -881,7 +876,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Pagination } from "@poodle/svelte-primitives";
+  import { Pagination } from "@poodle/svelte";
   let page = 1;
 </script>
 
@@ -896,8 +891,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Menu, Button } from "@poodle/svelte-primitives";
-  import type { MenuItem } from "@poodle/svelte-primitives";
+  import { Menu, Button } from "@poodle/svelte";
+  import type { MenuItem } from "@poodle/svelte";
 
   const items: MenuItem[] = [
     { value: "edit", label: "Edit", shortcutLabel: "⌘E" },
@@ -920,7 +915,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { Callout } from "@poodle/svelte-primitives";
+  import { Callout } from "@poodle/svelte";
 </script>
 
 <Callout tone="info">This is an informational message.</Callout>
@@ -947,8 +942,8 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
 
 ```svelte
 <script>
-  import { ToastStack } from "@poodle/svelte-composites";
-  import type { ToastItem } from "@poodle/svelte-composites";
+  import { ToastStack } from "@poodle/svelte";
+  import type { ToastItem } from "@poodle/svelte";
 
   let toasts: ToastItem[] = [];
 
@@ -1068,8 +1063,8 @@ Grouped options:
 
 ```svelte
 <script>
-  import { PageHeader, DetailShell, DetailSection, DetailItem } from "@poodle/svelte-composites";
-  import { Breadcrumbs } from "@poodle/svelte-primitives";
+  import { PageHeader, DetailShell, DetailSection, DetailItem } from "@poodle/svelte";
+  import { Breadcrumbs } from "@poodle/svelte";
 </script>
 
 <PageHeader title="User Details">
@@ -1102,8 +1097,8 @@ Grouped options:
 
 ```svelte
 <script>
-  import { CommandPalette } from "@poodle/svelte-composites";
-  import type { CommandActionItem } from "@poodle/svelte-composites";
+  import { CommandPalette } from "@poodle/svelte";
+  import type { CommandActionItem } from "@poodle/svelte";
 
   let open = false;
   const actions: CommandActionItem[] = [
@@ -1137,7 +1132,7 @@ import type {
   DateRangeValue,
   DateTimeValue,
   OverlayPlacement,
-} from "@poodle/svelte-primitives";
+} from "@poodle/svelte";
 
 // Composite types
 import type {
@@ -1148,10 +1143,10 @@ import type {
   WorkspaceLayoutSnapshot,
   DockEdge,
   PanelTabItem,
-} from "@poodle/svelte-composites";
+} from "@poodle/svelte";
 
 // Icon types
-import type { IconNodes, IconNodeElement, IconSet } from "@poodle/svelte-primitives";
+import type { IconNodes, IconNodeElement, IconSet } from "@poodle/svelte";
 ```
 
 ### Key type definitions
@@ -1201,7 +1196,7 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Surface, Stack } from "@poodle/svelte-primitives";
+  import { Surface, Stack } from "@poodle/svelte";
 </script>
 
 <div data-theme="dark" data-density="compact">
@@ -1217,8 +1212,8 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Field, TextInput, Select, Button, Stack } from "@poodle/svelte-primitives";
-  import { FormLayout } from "@poodle/svelte-composites";
+  import { Field, TextInput, Select, Button, Stack } from "@poodle/svelte";
+  import { FormLayout } from "@poodle/svelte";
 
   let name = "";
   let email = "";
@@ -1270,7 +1265,7 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { Toolbar, IconButton, Separator } from "@poodle/svelte-primitives";
+  import { Toolbar, IconButton, Separator } from "@poodle/svelte";
   import { bold, italic, underline, link, image } from "@poodle/icons-lucide";
 </script>
 
@@ -1288,7 +1283,7 @@ interface MenuItem {
 
 ```svelte
 <script>
-  import { AlertDialog, Button } from "@poodle/svelte-primitives";
+  import { AlertDialog, Button } from "@poodle/svelte";
   let showConfirm = false;
 </script>
 

@@ -109,10 +109,10 @@ tree and event system.
 - `docs/contracts/components/data-table.md`
 - `docs/contracts/components/bulk-action-bar.md`
 - `docs/contracts/components/pagination-summary.md`
-- `packages/svelte/primitives/src/Checkbox.svelte`
-- `packages/svelte/composites/src/DataTable.svelte`
-- `packages/svelte/composites/src/BulkActionBar.svelte`
-- `packages/svelte/composites/src/PaginationSummary.svelte`
+- `packages/svelte/components/src/Checkbox.svelte`
+- `packages/svelte/components/src/DataTable.svelte`
+- `packages/svelte/components/src/BulkActionBar.svelte`
+- `packages/svelte/components/src/PaginationSummary.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

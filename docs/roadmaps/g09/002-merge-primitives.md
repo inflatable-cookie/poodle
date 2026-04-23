@@ -4,6 +4,9 @@ Status: complete
 Owner: Poodle Core
 Depends on: g09.001
 
+> Historical note: this milestone records the pre-`g10.004` split-crate state.
+> The live merged crate is now `poodle-specs`.
+
 ## Context
 
 `poodle-gpui-primitives` has 77 modules; `poodle-primitives` has 65. The 12 extra

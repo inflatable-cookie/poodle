@@ -7,7 +7,7 @@ Owner: Poodle Core
 ## Summary
 
 - completed `g02.007`
-- added reusable hardening surfaces at `packages/svelte/primitives/src/Banner.svelte`, `packages/svelte/primitives/src/Skeleton.svelte`, `packages/svelte/composites/src/EmptyState.svelte`, and `packages/svelte/composites/src/ToastStack.svelte`
+- added reusable hardening surfaces at `packages/svelte/components/src/Banner.svelte`, `packages/svelte/components/src/Skeleton.svelte`, `packages/svelte/components/src/EmptyState.svelte`, and `packages/svelte/components/src/ToastStack.svelte`
 - extended the preview to use those components across browse, detail, picker, and embed states instead of relying on ad hoc `stateTitle` and `stateMessage` copy alone
 - added the transient notification contract at `docs/contracts/composites/toast-stack.md`
 - added the normative hardening baseline at `docs/specs/015-loading-empty-error-notification-and-remediation-rules.md`

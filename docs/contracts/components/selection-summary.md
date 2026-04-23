@@ -232,7 +232,7 @@ No density variants or light theme overrides in the current implementation.
 - Uses `createEventDispatcher` for `remove` and `clear` events
 - `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
 - Uses `Icon` primitive with `name="x"` for the remove icon
-- Imports `getUiPresentation` and `resolveSemanticControlSize` from `@poodle/svelte-primitives`
+- Imports `getUiPresentation` and `resolveSemanticControlSize` from `@poodle/svelte`
 
 ## 10. GPUI Notes
 

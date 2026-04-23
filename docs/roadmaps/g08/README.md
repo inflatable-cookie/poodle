@@ -178,7 +178,7 @@ Assumptions from previous sessions may be stale. Specifically:
 - Verify the component still exists in the contract (not renamed/removed)
 - Verify prop names and types match current contract
 - Verify token target names match current contract
-- Verify the spec struct in `poodle-primitives`/`poodle-composites` matches
+- Verify the spec struct in `poodle-specs` matches
 - If a contract has changed, update the GPUI implementation to match before
   proceeding with quality fixes
 

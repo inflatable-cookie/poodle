@@ -4,6 +4,9 @@ Status: complete
 Owner: Poodle Core
 Depends on: g09.004
 
+> Historical note: this milestone sits in the pre-`g10.004` split-crate era.
+> The live merged component spec crate is now `poodle-specs`.
+
 ## Context
 
 GPUI components previously used a `Poodle` prefix (`PoodleButton`, `PoodleCheckbox`)

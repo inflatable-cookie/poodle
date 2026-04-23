@@ -21,7 +21,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 ## Public Contract
 
 - Component name: `NumberInput`
-- Import: `@poodle/svelte-primitives`
+- Import: `@poodle/svelte`
 
 ## Core Props
 
@@ -55,7 +55,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 
 ```svelte
 <script lang="ts">
-  import { NumberInput } from "@poodle/svelte-primitives";
+  import { NumberInput } from "@poodle/svelte";
 
   let quantity: number | null = 1;
   let formYear = "2026";

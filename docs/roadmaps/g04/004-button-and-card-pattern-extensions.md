@@ -19,10 +19,10 @@ Primary repos: `poodle`
 
 - [ ] write contract for SplitButton: primary action, dropdown items, disabled
   state, loading state, size variants
-- [ ] implement SplitButton primitive in `@poodle/svelte-primitives`
+- [ ] implement SplitButton primitive in `@poodle/svelte`
 - [ ] write contract for CardRadioGroup: card items with title/description/icon,
   single selection, disabled items, controlled value
-- [ ] implement CardRadioGroup composite in `@poodle/svelte-composites`
+- [ ] implement CardRadioGroup composite in `@poodle/svelte`
 - [ ] extend Button contract with split variant support
 - [ ] extend Card contract with radio-selection mode and visual-selection state
 - [ ] create specimens for SplitButton and CardRadioGroup

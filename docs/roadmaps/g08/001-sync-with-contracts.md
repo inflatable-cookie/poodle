@@ -60,7 +60,8 @@ callout, pill, progress, separator, dialog, tooltip, surface
   for neutral/pending tones questionable.
 
 ### Missing Spec
-- **accordion** — no spec file found in `packages/contracts/primitives/src/`
+- **accordion** — audit note from the pre-merge crate split. The live spec now
+  lives in `poodle-specs` (`packages/contracts/components/src/accordion.rs`).
 
 ### Not Verified
 - **surface** — no contract file found (may be internal/structural only)

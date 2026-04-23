@@ -7,7 +7,7 @@ Owner: Poodle Core
 ## Summary
 
 - completed `g02.006`
-- added reusable media composites at `packages/svelte/composites/src/MediaThumbnail.svelte`, `packages/svelte/composites/src/MediaPreview.svelte`, and `packages/svelte/composites/src/EmbedShell.svelte`
+- added reusable media composites at `packages/svelte/components/src/MediaThumbnail.svelte`, `packages/svelte/components/src/MediaPreview.svelte`, and `packages/svelte/components/src/EmbedShell.svelte`
 - extended the preview with a media and asset suite that exercises framed preview state, asset switching, document/image/audio/video-style surfaces, and embed fallback posture
 - added media contracts at `docs/contracts/composites/media-thumbnail.md`, `docs/contracts/composites/media-preview.md`, and `docs/contracts/composites/embed-shell.md`
 - added the normative media baseline at `docs/specs/014-media-preview-embed-and-asset-surface-rules.md`

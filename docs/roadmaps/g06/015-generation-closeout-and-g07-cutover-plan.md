@@ -3,6 +3,9 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: the split `poodle-primitives` / `poodle-composites` layout
+> described here was later merged into `poodle-specs` in `g10.004`.
+
 ## Objective
 
 Verify all g06 milestones are complete, document deferred items, and confirm

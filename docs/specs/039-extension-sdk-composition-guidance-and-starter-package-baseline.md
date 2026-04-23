@@ -34,8 +34,7 @@ to sound more “SDK-like”.
 The current extension-facing surface is:
 
 - `@poodle/svelte-tokens`
-- `@poodle/svelte-primitives`
-- `@poodle/svelte-composites`
+- `@poodle/svelte`
 - `@poodle/svelte-workstation`
 - bridge-owned adapter packages such as `packages/bridges/underlay`
 - contract docs under `docs/contracts/`

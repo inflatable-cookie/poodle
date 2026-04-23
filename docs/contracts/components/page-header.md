@@ -383,7 +383,7 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 ## 9. Svelte Notes
 
 - Uses Svelte 5 `$props()` syntax with `Props` interface
-- Composes `Callout` and `Icon` primitives from `@poodle/svelte-primitives` for banner shortcut and back link arrow
+- Composes `Callout` and `Icon` primitives from `@poodle/svelte` for banner shortcut and back link arrow
 - `primaryTitle` derived as `title ?? section ?? ""`
 - `hasSectionTitleSplit` derived as `Boolean(section && title)`
 - Heading tag is dynamic via `<svelte:element this={headingTag}>`

@@ -82,7 +82,7 @@ feature, not a hole: it keeps the primitive layer honest.
 - `docs/contracts/components/pagination.md`
 - `docs/contracts/components/data-table.md`
 - `docs/contracts/workstation/command-palette.md`
-- `packages/svelte/primitives/README.md`
+- `packages/svelte/components/README.md`
 
 ## Next Task
 

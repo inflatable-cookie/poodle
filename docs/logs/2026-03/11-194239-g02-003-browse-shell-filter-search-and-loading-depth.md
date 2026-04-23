@@ -8,9 +8,9 @@ Owner: Poodle Core
 
 - completed `g02.003`
 - added Svelte browse composites at
-  `packages/svelte/composites/src/FilterToolbar.svelte`,
-  `packages/svelte/composites/src/ListShell.svelte`, and
-  `packages/svelte/composites/src/GridShell.svelte`
+  `packages/svelte/components/src/FilterToolbar.svelte`,
+  `packages/svelte/components/src/ListShell.svelte`, and
+  `packages/svelte/components/src/GridShell.svelte`
 - extended the preview with a shared filter/search toolbar, explicit shell
   state toggles, progressive-loading list behavior, and paginated grid behavior
 - added the search-and-results composition contract at

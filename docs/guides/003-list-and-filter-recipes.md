@@ -23,14 +23,14 @@ pagination placement. Render the actual list or grid in the default slot.
 
 ```svelte
 <script lang="ts">
-  import { ListContainer, FilterToolbar } from "@poodle/svelte-composites";
+  import { ListContainer, FilterToolbar } from "@poodle/svelte";
   import {
     Button,
     Field,
     IconButton,
     TextInput,
     Select
-  } from "@poodle/svelte-primitives";
+  } from "@poodle/svelte";
 
   let collapsed = false;
 </script>

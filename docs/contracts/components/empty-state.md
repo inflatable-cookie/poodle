@@ -254,7 +254,7 @@ None.
 - visual slot uses `$$slots.visual` check to detect custom content
 - actions slot rendered conditionally via `$$slots.actions` check
 - `ariaLabel` on `<section>` falls back to `title` when null
-- `Icon` imported from `@poodle/svelte-primitives`
+- `Icon` imported from `@poodle/svelte`
 - `EmptyStateVariant` and `EmptyStateSize` types imported from shared `types.ts`
 
 ## 10. GPUI Notes

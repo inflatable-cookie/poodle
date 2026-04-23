@@ -24,7 +24,7 @@ local layout over `Card`.
 
 ```svelte
 <script lang="ts">
-  import { Card } from "@poodle/svelte-primitives";
+  import { Card } from "@poodle/svelte";
 </script>
 
 <div class="auth-shell">
@@ -41,7 +41,7 @@ Compose the visible screen in Poodle even when the flow logic lives elsewhere.
 
 ```svelte
 <script lang="ts">
-  import { Button, Callout, Field, TextInput } from "@poodle/svelte-primitives";
+  import { Button, Callout, Field, TextInput } from "@poodle/svelte";
 
   let email = "";
   let password = "";
@@ -72,7 +72,7 @@ wrapper unless the flow owns non-generic orchestration around it.
 
 ```svelte
 <script lang="ts">
-  import { Field, CodeInput } from "@poodle/svelte-primitives";
+  import { Field, CodeInput } from "@poodle/svelte";
 
   let code = "";
 </script>
@@ -89,7 +89,7 @@ contract.
 
 ```svelte
 <script lang="ts">
-  import { PasswordRequirements } from "@poodle/svelte-primitives";
+  import { PasswordRequirements } from "@poodle/svelte";
 
   let password = "";
 

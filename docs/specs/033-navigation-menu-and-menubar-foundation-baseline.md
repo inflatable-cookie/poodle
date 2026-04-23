@@ -69,7 +69,7 @@ still need higher-layer or future specialized contracts.
 
 - `docs/contracts/components/navigation-menu.md`
 - `docs/contracts/components/menubar.md`
-- `packages/svelte/primitives/README.md`
+- `packages/svelte/components/README.md`
 - `docs/specs/029-advanced-primitive-promotion-and-substrate-mapping.md`
 
 ## Next Task

@@ -95,7 +95,7 @@ the native accessibility tree.
 
 - `docs/contracts/components/filter-toolbar.md`
 - `docs/contracts/components/browse-search-shell.md`
-- `packages/svelte/composites/src/FilterToolbar.svelte`
+- `packages/svelte/components/src/FilterToolbar.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

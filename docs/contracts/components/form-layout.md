@@ -148,7 +148,7 @@ None. FormLayout is a structural composite with no component-owned events.
 
 ### Composition
 
-- Composes: `Callout` and `FormActions` from `@poodle/svelte-primitives`
+- Composes: `Callout` and `FormActions` from `@poodle/svelte`
 - Parent expectations: page sections, Dialog body, card content
 - Child expectations: Field-wrapped form controls, standalone controls
 - Used by: FormDialog to provide consistent field layout inside dialogs

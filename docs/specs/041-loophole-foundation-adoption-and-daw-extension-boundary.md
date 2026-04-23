@@ -23,8 +23,7 @@ of Poodle foundations.
 The current allowed Loophole adoption layers are:
 
 - `@poodle/svelte-tokens`
-- `@poodle/svelte-primitives`
-- `@poodle/svelte-composites`
+- `@poodle/svelte`
 - `@poodle/svelte-workstation`
 
 These packages are sufficient for a first foundation adoption proof when the

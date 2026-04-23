@@ -124,7 +124,7 @@ not as an implicit decision.
 
 ## Current Svelte Packaging Baseline
 
-After the current tranche, `@poodle/svelte-primitives` covers the full documented
+After the current tranche, `@poodle/svelte` covers the full documented
 foundation contract set:
 
 - structural primitives: `Box`, `Stack`, `Inline`, `Grid`, `Spacer`,
@@ -187,8 +187,8 @@ Not:
 - `docs/contracts/components/README.md`
 - `docs/research/source-hubs/hub-bits.md`
 - `docs/research/translation-memos/tm-svelte-substrate.md`
-- `packages/svelte/primitives/README.md`
-- `packages/svelte/primitives/src/index.ts`
+- `packages/svelte/components/README.md`
+- `packages/svelte/components/src/index.ts`
 
 ## Next Task
 

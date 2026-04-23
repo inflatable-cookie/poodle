@@ -123,10 +123,10 @@ Examples of unacceptable delta:
 - `docs/contracts/components/toast-stack.md`
 - `packages/svelte/workstation/src/CommandPalette.svelte`
 - `packages/svelte/workstation/src/ActionDiscoveryPanel.svelte`
-- `packages/svelte/composites/src/DataTable.svelte`
-- `packages/svelte/composites/src/PickerShell.svelte`
-- `packages/svelte/composites/src/RelationPicker.svelte`
-- `packages/svelte/composites/src/ToastStack.svelte`
+- `packages/svelte/components/src/DataTable.svelte`
+- `packages/svelte/components/src/PickerShell.svelte`
+- `packages/svelte/components/src/RelationPicker.svelte`
+- `packages/svelte/components/src/ToastStack.svelte`
 
 ## Next Task
 

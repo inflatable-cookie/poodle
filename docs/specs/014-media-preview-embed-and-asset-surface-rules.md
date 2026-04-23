@@ -67,9 +67,9 @@ GPUI must recreate equivalent meaning in the native accessibility tree even wher
 - `docs/contracts/components/media-thumbnail.md`
 - `docs/contracts/components/media-preview.md`
 - `docs/contracts/components/embed-shell.md`
-- `packages/svelte/composites/src/MediaThumbnail.svelte`
-- `packages/svelte/composites/src/MediaPreview.svelte`
-- `packages/svelte/composites/src/EmbedShell.svelte`
+- `packages/svelte/components/src/MediaThumbnail.svelte`
+- `packages/svelte/components/src/MediaPreview.svelte`
+- `packages/svelte/components/src/EmbedShell.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

@@ -21,7 +21,7 @@ resolution, focus rings, and ARIA from the start.
 ### alert-dialog
 
 - [ ] Read contract: `docs/contracts/components/alert-dialog.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/AlertDialog.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/AlertDialog.svelte`
 - [ ] Create spec struct in `poodle-gpui-primitives`
 - [ ] Implement component in `poodle-gpui-components`
 - [ ] Write specimen in `poodle-gpui-preview`
@@ -30,84 +30,84 @@ resolution, focus rings, and ARIA from the start.
 ### breadcrumbs
 
 - [ ] Read contract: `docs/contracts/components/breadcrumbs.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/Breadcrumbs.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/Breadcrumbs.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### bulk-action-bar
 
 - [ ] Read contract: `docs/contracts/components/bulk-action-bar.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/BulkActionBar.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/BulkActionBar.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### card
 
 - [ ] Read contract: `docs/contracts/components/card.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/Card.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/Card.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### collapse-toggle
 
 - [ ] Read contract: `docs/contracts/components/collapse-toggle.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/CollapseToggle.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/CollapseToggle.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### combobox
 
 - [ ] Read contract: `docs/contracts/components/combobox.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/Combobox.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/Combobox.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### detail-item
 
 - [ ] Read contract: `docs/contracts/components/detail-item.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/DetailItem.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/DetailItem.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### list-card
 
 - [ ] Read contract: `docs/contracts/components/list-card.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/ListCard.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/ListCard.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### nav-card
 
 - [ ] Read contract: `docs/contracts/components/nav-card.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/NavCard.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/NavCard.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### nav-card-grid
 
 - [ ] Read contract: `docs/contracts/components/nav-card-grid.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/NavCardGrid.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/NavCardGrid.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### order-by
 
 - [ ] Read contract: `docs/contracts/components/order-by.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/OrderBy.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/OrderBy.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### pagination
 
 - [ ] Read contract: `docs/contracts/components/pagination.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/Pagination.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/Pagination.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
 ### region
 
 - [ ] Read contract: `docs/contracts/components/region.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/Region.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/Region.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 
@@ -128,7 +128,7 @@ resolution, focus rings, and ARIA from the start.
 ### table
 
 - [ ] Read contract: `docs/contracts/components/table.md`
-- [ ] Read Svelte: `packages/svelte/primitives/src/Table.svelte`
+- [ ] Read Svelte: `packages/svelte/components/src/Table.svelte`
 - [ ] Create spec struct, implement component, write specimen
 - [ ] Pass 10-point quality checklist
 

@@ -17,10 +17,10 @@ Primary repos: `poodle`
 - [ ] write contract for TimeAgo: datetime prop, live-update interval, tooltip
   with absolute time, locale support, thresholds for switching from "seconds
   ago" to "minutes ago" etc.
-- [ ] implement TimeAgo primitive in `@poodle/svelte-primitives`
+- [ ] implement TimeAgo primitive in `@poodle/svelte`
 - [ ] write contract for DurationInput: hours/minutes/seconds segments,
   min/max constraints, step increments, format display
-- [ ] implement DurationInput primitive in `@poodle/svelte-primitives`
+- [ ] implement DurationInput primitive in `@poodle/svelte`
 - [ ] create specimens for TimeAgo and DurationInput
 - [ ] register in component-registry.ts and specimen registry
 

@@ -70,8 +70,8 @@ or utility control surfaces so they do not remain contract-only exports.
 
 - `docs/contracts/components/collapsible.md`
 - `docs/contracts/components/accordion.md`
-- `packages/svelte/primitives/src/Collapsible.svelte`
-- `packages/svelte/primitives/src/Accordion.svelte`
+- `packages/svelte/components/src/Collapsible.svelte`
+- `packages/svelte/components/src/Accordion.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

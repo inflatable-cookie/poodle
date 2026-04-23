@@ -3,6 +3,9 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: this milestone records the pre-`g10.004` split component
+> spec crates. The live merged crate is now `poodle-specs`.
+
 ## Objective
 
 Add 10 new primitive spec structs for structural and input components that exist

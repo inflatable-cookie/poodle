@@ -3,6 +3,10 @@
 Status: completed
 Updated: 2026-03-14
 
+> Historical note: references here to `poodle-primitives` and
+> `poodle-composites` describe the crate layout at the time. The live component
+> spec surface now ships from `poodle-specs` after `g10.004`.
+
 ## Context
 
 `g06` restructured the shared Rust contract layer to be explicitly

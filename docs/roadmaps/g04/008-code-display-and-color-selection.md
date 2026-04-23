@@ -18,10 +18,10 @@ Primary repos: `poodle`
   highlighting, copy button, max-height with scroll, inline vs block mode
 - [ ] evaluate syntax highlighting approach (static CSS classes vs runtime
   highlighter)
-- [ ] implement Code primitive in `@poodle/svelte-primitives`
+- [ ] implement Code primitive in `@poodle/svelte`
 - [ ] write contract for ColorPicker: hex/rgb/hsl input, swatch palette,
   eyedropper (where supported), alpha channel, format toggle
-- [ ] implement ColorPicker primitive in `@poodle/svelte-primitives`
+- [ ] implement ColorPicker primitive in `@poodle/svelte`
 - [ ] create specimens for Code and ColorPicker
 - [ ] register in component-registry.ts and specimen registry
 

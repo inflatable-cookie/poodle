@@ -3,6 +3,10 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: references here to `poodle-primitives` and
+> `poodle-composites` describe the crate layout at the time. The live component
+> spec surface now ships from `poodle-specs`.
+
 ## Objective
 
 Demonstrate downstream consumption of the `poodle-gpui` crate by creating a
@@ -20,6 +24,9 @@ Executable example that demonstrates:
 4. **Rendering** — calling `adapter.render(&spec, &style, theme)` to get element handles
 5. **Screen composition** — assembling multiple rendered components into screens
 6. **Demo app integration** — calling `demo_app::render_all_screens()` for full coverage
+
+Current equivalent after `g10.004`: spec construction now uses
+`poodle-specs` plus `poodle-workstation`.
 
 ### Integration patterns documented
 

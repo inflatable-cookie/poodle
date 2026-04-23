@@ -171,7 +171,7 @@ None.
 
 ### Composition
 
-- Composes: `TextInput` and `Pill` from `@poodle/svelte-primitives`
+- Composes: `TextInput` and `Pill` from `@poodle/svelte`
 - Parent expectations: form fields (often wrapped in Field), embed editing UIs
 - Child expectations: none (self-contained inputs)
 - Resizing rules: fills parent width; TextInput height determined by rows prop
@@ -222,7 +222,7 @@ None.
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `parse` and `change` events
-- Composes `TextInput` and `Pill` from `@poodle/svelte-primitives`
+- Composes `TextInput` and `Pill` from `@poodle/svelte`
 - Debounce uses `setTimeout`/`clearTimeout` with configurable delay
 - Parsing is routed through the exported `resolveEmbedParseState` helper in
   `embed-input.ts` rather than being inline; the helper calls

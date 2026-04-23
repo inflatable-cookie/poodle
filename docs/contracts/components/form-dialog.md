@@ -154,7 +154,7 @@ No additional internal state. All state is externally controlled via props.
 
 ### Composition
 
-- composes: `Dialog` and `Button` from `@poodle/svelte-primitives`,
+- composes: `Dialog` and `Button` from `@poodle/svelte`,
   `FormLayout` from composites
 - parent expectations: any view needing a modal form (user creation, settings
   edit, etc.)
@@ -203,8 +203,8 @@ None.
 ## 9. Svelte Notes
 
 - uses `createEventDispatcher` for `submit`, `cancel`, and `openChange` events
-- composes `Dialog`, `Button` from `@poodle/svelte-primitives` and `FormLayout`
-  from `@poodle/svelte-composites`
+- composes `Dialog`, `Button` from `@poodle/svelte` and `FormLayout`
+  from `@poodle/svelte`
 - submit button text switches between `submitLabel` and `"Submitting..."`
 - cancel handler calls internal `setOpen(false)` which emits `openChange`
   when `open !== null`

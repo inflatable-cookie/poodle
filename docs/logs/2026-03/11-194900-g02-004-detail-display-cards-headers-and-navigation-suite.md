@@ -8,12 +8,12 @@ Owner: Poodle Core
 
 - completed `g02.004`
 - added Svelte detail/display composites at
-  `packages/svelte/composites/src/Card.svelte`,
-  `packages/svelte/composites/src/PageHeader.svelte`,
-  `packages/svelte/composites/src/Breadcrumbs.svelte`,
-  `packages/svelte/composites/src/DetailShell.svelte`,
-  `packages/svelte/composites/src/DetailSection.svelte`, and
-  `packages/svelte/composites/src/DetailItem.svelte`
+  `packages/svelte/components/src/Card.svelte`,
+  `packages/svelte/components/src/PageHeader.svelte`,
+  `packages/svelte/components/src/Breadcrumbs.svelte`,
+  `packages/svelte/components/src/DetailShell.svelte`,
+  `packages/svelte/components/src/DetailSection.svelte`, and
+  `packages/svelte/components/src/DetailItem.svelte`
 - extended the preview with a real detail surface that composes breadcrumbs,
   local page identity, summary cards, readonly detail rows, and section
   hierarchy together

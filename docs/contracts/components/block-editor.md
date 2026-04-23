@@ -153,7 +153,7 @@ When the `block` slot is not provided, the only fallback is a minimal `<textarea
 
 ### Composition
 
-- Composes: `Icon`, `Select`, `UiPresentationProvider` from `@poodle/svelte-primitives`
+- Composes: `Icon`, `Select`, `UiPresentationProvider` from `@poodle/svelte`
 - Both the type-switch and add-block controls use Select with `variant="ghost"` and `native={false}`
 - The add-block Select uses a custom trigger slot containing a plus icon styled as a tool button
 - Parent expectations: content editing surfaces, form sections
@@ -392,7 +392,7 @@ When the `block` slot is not provided, the only fallback is a minimal `<textarea
 
 - Uses `createEventDispatcher` for `change` event
 - Wraps in `UiPresentationProvider` to propagate resolved size and density to child controls
-- Composes `Icon`, `Select`, and `UiPresentationProvider` from `@poodle/svelte-primitives`
+- Composes `Icon`, `Select`, and `UiPresentationProvider` from `@poodle/svelte`
 - Block type options are derived from `blockTypes` prop, mapped to `SelectOption[]` with `value`, `label`, and `icon`
 - Type-switch per block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, bound to `block.type`
 - Add-block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, `value={null}`, and a trigger slot containing a plus icon styled as a tool button; selecting a value calls `addBlock(value, index)`

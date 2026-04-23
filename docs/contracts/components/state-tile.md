@@ -80,7 +80,21 @@ Updated: 2026-04-11
 - Rust type: `poodle_specs::StateTileSpec`
 - File: `packages/contracts/components/src/state_tile.rs`
 
-## 7. Known Deltas
+## 7. Accessibility
+
+- Root stays accessibility-neutral by default. Do not imply button, link, or
+  status semantics unless a host wrapper owns that behavior.
+- Label and value must remain plain text content so assistive technology reads
+  them in source order without extra role noise.
+- Trend text must be expressed in readable text, not icon-only direction
+  markers. If an icon is present, treat it as decorative and keep the trend
+  meaning in text.
+- Sparkline content is host-owned. When a host renders one, it must decide
+  whether the chart is decorative or needs its own accessible summary.
+- If a host promotes StateTile into a live status region or interactive card,
+  that wrapper owns the additional semantics and keyboard behavior.
+
+## 8. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|

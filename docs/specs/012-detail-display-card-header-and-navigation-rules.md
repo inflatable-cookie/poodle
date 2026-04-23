@@ -99,12 +99,12 @@ tree.
 - `docs/contracts/components/detail-shell.md`
 - `docs/contracts/components/detail-section.md`
 - `docs/contracts/components/detail-item.md`
-- `packages/svelte/composites/src/Card.svelte`
-- `packages/svelte/composites/src/PageHeader.svelte`
-- `packages/svelte/composites/src/Breadcrumbs.svelte`
-- `packages/svelte/composites/src/DetailShell.svelte`
-- `packages/svelte/composites/src/DetailSection.svelte`
-- `packages/svelte/composites/src/DetailItem.svelte`
+- `packages/svelte/components/src/Card.svelte`
+- `packages/svelte/components/src/PageHeader.svelte`
+- `packages/svelte/components/src/Breadcrumbs.svelte`
+- `packages/svelte/components/src/DetailShell.svelte`
+- `packages/svelte/components/src/DetailSection.svelte`
+- `packages/svelte/components/src/DetailItem.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

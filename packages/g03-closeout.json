@@ -30,10 +30,9 @@
     },
     {
       "id": "contract-backed-svelte-surface",
-      "label": "Contract-backed Svelte package family",
+      "label": "Contract-backed Svelte package surface",
       "evidencePaths": [
-        "packages/svelte/primitives/",
-        "packages/svelte/composites/",
+        "packages/svelte/components/",
         "docs/contracts/"
       ]
     },
@@ -53,8 +52,7 @@
       "label": "Underlay, Loophole, and extension-boundary proofs",
       "evidencePaths": [
         "packages/bridges/underlay/ts/zero-leak-proof.ts",
-        "packages/svelte/primitives/README.md",
-        "packages/svelte/composites/README.md",
+        "packages/svelte/components/README.md",
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"

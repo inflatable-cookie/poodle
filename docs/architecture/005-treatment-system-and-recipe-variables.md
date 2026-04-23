@@ -270,21 +270,21 @@ redefine canonical token meaning.
 
 ## Evidence
 
-- `packages/svelte/primitives/src/Button.svelte` — interactive and interactive-primary
-- `packages/svelte/primitives/src/IconButton.svelte` — interactive (secondary) and interactive-primary
-- `packages/svelte/primitives/src/SplitButton.svelte` — interactive, interactive-primary, surface-elevated (menu)
-- `packages/svelte/primitives/src/ToggleGroup.svelte` — interactive
-- `packages/svelte/primitives/src/SegmentedControl.svelte` — interactive (track)
-- `packages/svelte/primitives/src/Tabs.svelte` — interactive (card variant items)
-- `packages/svelte/primitives/src/TextInput.svelte` — interactive-subtle (reference pattern)
-- `packages/svelte/primitives/src/TextArea.svelte` — interactive-subtle
-- `packages/svelte/primitives/src/Select.svelte` — interactive-subtle
-- `packages/svelte/primitives/src/Card.svelte` — surface and surface-elevated
-- `packages/svelte/primitives/src/Surface.svelte` — surface and surface-elevated
-- `packages/svelte/primitives/src/Dialog.svelte` — surface-elevated
-- `packages/svelte/primitives/src/Popover.svelte` — surface-elevated
-- `packages/svelte/primitives/src/Drawer.svelte` — surface-elevated
-- `packages/svelte/primitives/src/Menu.svelte` — surface-elevated (overlay)
-- `packages/svelte/primitives/src/HoverCard.svelte` — surface-elevated
-- `packages/svelte/primitives/src/Tooltip.svelte` — surface-elevated
+- `packages/svelte/components/src/Button.svelte` — interactive and interactive-primary
+- `packages/svelte/components/src/IconButton.svelte` — interactive (secondary) and interactive-primary
+- `packages/svelte/components/src/SplitButton.svelte` — interactive, interactive-primary, surface-elevated (menu)
+- `packages/svelte/components/src/ToggleGroup.svelte` — interactive
+- `packages/svelte/components/src/SegmentedControl.svelte` — interactive (track)
+- `packages/svelte/components/src/Tabs.svelte` — interactive (card variant items)
+- `packages/svelte/components/src/TextInput.svelte` — interactive-subtle (reference pattern)
+- `packages/svelte/components/src/TextArea.svelte` — interactive-subtle
+- `packages/svelte/components/src/Select.svelte` — interactive-subtle
+- `packages/svelte/components/src/Card.svelte` — surface and surface-elevated
+- `packages/svelte/components/src/Surface.svelte` — surface and surface-elevated
+- `packages/svelte/components/src/Dialog.svelte` — surface-elevated
+- `packages/svelte/components/src/Popover.svelte` — surface-elevated
+- `packages/svelte/components/src/Drawer.svelte` — surface-elevated
+- `packages/svelte/components/src/Menu.svelte` — surface-elevated (overlay)
+- `packages/svelte/components/src/HoverCard.svelte` — surface-elevated
+- `packages/svelte/components/src/Tooltip.svelte` — surface-elevated
 - `packages/svelte/preview/src/app.css` — treatment variable definitions and brand-raised

@@ -4,6 +4,10 @@ Status: complete
 Owner: Poodle Core
 Depends on: g09.005, g09.006
 
+> Historical note: the test targets listed below reflect the pre-`g10.004`
+> split-crate layout. The live merged component spec crate is now
+> `poodle-specs`.
+
 ## Completed Actions
 
 - [x] `cargo check` for all GPUI crates (adapter, components, preview) — clean

@@ -3,6 +3,9 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: this plan predates the `g10.004` crate merge. References to
+> `poodle-primitives` and `poodle-composites` reflect the layout at the time.
+
 ## Objective
 
 Audit the existing `poodle-gpui-*` crates, classify every module and type as
@@ -45,7 +48,8 @@ that the shared contracts can serve both targets.
 - Crate names: `poodle-gpui-tokens`, `poodle-gpui-primitives`, `poodle-gpui-composites`,
   `poodle-gpui-workstation`
 - Import paths: `poodle_gpui_tokens::semantic`, `poodle_gpui_primitives::ButtonSpec`, etc.
-- `CURRENT_GENERATION` constants reference GPUI-specific milestone IDs
+- `CURRENT_GENERATION` constants reference the then-current GPUI extraction
+  milestone IDs
 - Cargo.toml `name` and `description` fields mention GPUI
 
 **GPUI-biased by token format (typed alternatives needed):**

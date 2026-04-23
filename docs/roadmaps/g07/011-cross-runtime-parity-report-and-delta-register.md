@@ -3,6 +3,10 @@
 Status: Completed
 Updated: 2026-03-14
 
+> Historical note: the parity matrix below reflects the pre-`g10.004`
+> split-crate layout. The live component spec surface now ships from
+> `poodle-specs`.
+
 ## Objective
 
 Document parity between Svelte and GPUI implementations across the full
@@ -23,6 +27,9 @@ renderers consume the same shared contract layer.
 ### Shared Infrastructure
 
 Both renderers consume the same contract crates from g06:
+
+Current equivalent after `g10.004`: `poodle-primitives` and
+`poodle-composites` were merged into `poodle-specs`.
 
 | Crate | Purpose | Svelte | GPUI |
 |-------|---------|--------|------|

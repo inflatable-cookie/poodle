@@ -111,10 +111,10 @@ The first concrete evidence for this spec is:
 - `docs/contracts/components/form-actions.md`
 - `docs/contracts/components/text-input.md`
 - `docs/contracts/components/search-field.md`
-- `packages/svelte/primitives/src/Field.svelte`
-- `packages/svelte/primitives/src/TextInput.svelte`
-- `packages/svelte/primitives/src/SearchField.svelte`
-- `packages/svelte/primitives/src/FormActions.svelte`
+- `packages/svelte/components/src/Field.svelte`
+- `packages/svelte/components/src/TextInput.svelte`
+- `packages/svelte/components/src/SearchField.svelte`
+- `packages/svelte/components/src/FormActions.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

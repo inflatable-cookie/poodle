@@ -305,12 +305,12 @@ None.
 - uses `createEventDispatcher` for all events
 - `bind:this={container}` on root for computing raw ratio from mouse position
 - `rawRatio()` converts mouse position to ratio using container bounding rect
-- primary/secondary collapse toggles use `CollapseToggle` from `@poodle/svelte-primitives`
+- primary/secondary collapse toggles use `CollapseToggle` from `@poodle/svelte`
 - resize events handled via `ResizeHandle` `resizeStart`/`resizeMove`/`resizeStep` events
 - pane content conditionally rendered: `{#if !primaryCollapsed}` / `{#if !secondaryCollapsed}`
 - `SplitOrientation`, `CollapseDirection`, `ControlSize`, `SemanticControlSizeRole`,
-  `ControlDensity` types imported from `@poodle/svelte-primitives`
-- `ResizeHandle` and `CollapseToggle` imported from `@poodle/svelte-primitives`
+  `ControlDensity` types imported from `@poodle/svelte`
+- `ResizeHandle` and `CollapseToggle` imported from `@poodle/svelte`
 - `data-primary-collapsed` and `data-secondary-collapsed` use `|| undefined` to
   omit the attribute when false
 

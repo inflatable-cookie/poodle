@@ -78,9 +78,9 @@ GPUI must recreate equivalent workflow structure and state in the native accessi
 - `docs/contracts/components/picker-shell.md`
 - `docs/contracts/components/relation-picker.md`
 - `docs/contracts/components/selection-summary.md`
-- `packages/svelte/composites/src/PickerShell.svelte`
-- `packages/svelte/composites/src/RelationPicker.svelte`
-- `packages/svelte/composites/src/SelectionSummary.svelte`
+- `packages/svelte/components/src/PickerShell.svelte`
+- `packages/svelte/components/src/RelationPicker.svelte`
+- `packages/svelte/components/src/SelectionSummary.svelte`
 - `packages/svelte/preview/src/App.svelte`
 
 ## Next Task

@@ -21,7 +21,7 @@ vocabulary, such as “Save” and “Save and close”, belongs in app code.
 
 ```svelte
 <script lang="ts">
-  import { SplitButton } from "@poodle/svelte-primitives";
+  import { SplitButton } from "@poodle/svelte";
 
   let intent = "save";
 
@@ -66,7 +66,7 @@ Those wrappers mostly encode app vocabulary, not reusable UI semantics.
 
 ```svelte
 <script lang="ts">
-  import { Menu, Button } from "@poodle/svelte-primitives";
+  import { Menu, Button } from "@poodle/svelte";
 
   const items = [
     { value: "duplicate", label: "Duplicate" },

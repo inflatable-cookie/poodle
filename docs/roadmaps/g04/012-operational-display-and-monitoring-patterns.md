@@ -15,7 +15,7 @@ Primary repos: `poodle`
 
 - [ ] write contract for LogList: entries with timestamp/level/message, level
   filtering, auto-scroll, search, max entries with virtualization
-- [ ] implement LogList composite in `@poodle/svelte-composites`
+- [ ] implement LogList composite in `@poodle/svelte`
 - [ ] amend StateTile contract: add `trend` prop (up/down/flat), `trendLabel`,
   optional sparkline data array
 - [ ] implement StateTile trend indicator (directional arrow + percentage)

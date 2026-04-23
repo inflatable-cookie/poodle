@@ -22,7 +22,7 @@ Use `MediaPicker` when the host already owns the local items and upload queue.
 
 ```svelte
 <script lang="ts">
-  import { MediaPicker, type MediaPickerItem } from "@poodle/svelte-composites";
+  import { MediaPicker, type MediaPickerItem } from "@poodle/svelte";
 
   let open = false;
   let items: MediaPickerItem[] = [];
@@ -54,7 +54,7 @@ wrapper.
     MediaBrowsePanel,
     MediaUploadStatusPanel,
     type MediaBrowseItem
-  } from "@poodle/svelte-composites";
+  } from "@poodle/svelte";
 
   let items: MediaBrowseItem[] = [];
   let uploads = [];
@@ -92,7 +92,7 @@ Use `MediaThumbnail` and `MediaPreview` directly for read-only media framing.
 
 ```svelte
 <script lang="ts">
-  import { MediaPreview, MediaThumbnail } from "@poodle/svelte-composites";
+  import { MediaPreview, MediaThumbnail } from "@poodle/svelte";
 </script>
 
 <MediaThumbnail src={media.thumbnailUrl} alt={media.title} aspectRatio="landscape" />

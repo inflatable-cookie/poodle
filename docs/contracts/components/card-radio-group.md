@@ -139,7 +139,7 @@ type CardRadioItem = {
 
 ### Composition
 
-- Composes: `Card` primitive from `@poodle/svelte-primitives`
+- Composes: `Card` primitive from `@poodle/svelte`
 - Parent expectations: form sections, settings pages, plan selection flows
 - Resizing rules: grid columns distribute evenly; cards stretch to fill column width
 
@@ -264,7 +264,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 ## 9. Svelte Notes
 
 - Uses `createEventDispatcher` for `change` event
-- Composes `Card` primitive from `@poodle/svelte-primitives` with `interactive` and `selected` props
+- Composes `Card` primitive from `@poodle/svelte` with `interactive` and `selected` props
 - Arrow key navigation uses `data-card-radio-index` attributes and `document.querySelector` for DOM focus management
 - Disabled items are filtered out of the enabled navigation list
 - Resolves size via `resolveSemanticControlSize` from `getUiPresentation()`

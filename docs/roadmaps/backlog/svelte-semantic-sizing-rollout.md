@@ -2,7 +2,7 @@
 
 Status: complete
 Updated: 2026-03-26
-Depends on: landed presentation model in `packages/svelte/primitives/src/presentation.ts`
+Depends on: landed presentation model in `packages/svelte/components/src/presentation.ts`
 
 ## Purpose
 

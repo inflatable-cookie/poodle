@@ -172,9 +172,9 @@ The current seed implementation proves this strategy on the Svelte side by:
 
 ## Evidence
 
-- `packages/svelte/primitives/src/TextInput.svelte`
-- `packages/svelte/composites/src/Card.svelte`
-- `packages/svelte/composites/src/PageHeader.svelte`
+- `packages/svelte/components/src/TextInput.svelte`
+- `packages/svelte/components/src/Card.svelte`
+- `packages/svelte/components/src/PageHeader.svelte`
 - `packages/svelte/workstation/src/PanelTabs.svelte`
 - `packages/svelte/workstation/src/PanelSurface.svelte`
 - `packages/svelte/workstation/src/SurfaceTabs.svelte`

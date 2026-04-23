@@ -148,10 +148,10 @@ The current baseline is implemented through:
 - `packages/svelte/preview/scripts/build-parity-report.ts`
 - `packages/svelte/preview/scripts/lint-docs.ts`
 - `docs/contracts/README.md`
-- `packages/svelte/primitives/src/index.ts`
-- `packages/svelte/primitives/README.md`
-- `packages/svelte/composites/src/index.ts`
-- `packages/svelte/composites/README.md`
+- `packages/svelte/components/src/index.ts`
+- `packages/svelte/components/README.md`
+- `packages/svelte/components/src/index.ts`
+- `packages/svelte/components/README.md`
 - `packages/svelte/workstation/src/index.ts`
 - `packages/svelte/workstation/README.md`
 - `packages/svelte/preview/README.md`

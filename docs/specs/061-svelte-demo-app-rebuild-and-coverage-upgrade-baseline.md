@@ -45,8 +45,7 @@ of merely improving the old preview counts.
 
 As of this baseline, the parity artifact should reflect:
 
-- `@poodle/svelte-primitives`: `63/63` directly previewed exports
-- `@poodle/svelte-composites`: `20/20` directly previewed exports
+- `@poodle/svelte`: `83/83` directly previewed exports
 - `@poodle/svelte-workstation`: `14/14` directly previewed exports
 
 These counts are evidence that the rebuilt demo is now a full public-surface

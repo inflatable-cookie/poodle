@@ -48,8 +48,7 @@ This writes:
 - `packages/svelte/preview/artifacts/parity-report.json`
 
 The parity artifact now also records which public exports from
-`@poodle/svelte-primitives`, `@poodle/svelte-composites`, and
-`@poodle/svelte-workstation` are directly covered by preview sections versus still
+`@poodle/svelte` and `@poodle/svelte-workstation` are directly covered by preview sections versus still
 being contract-only, and it now includes a cross-runtime summary sourced from:
 
 - `packages/gpui/cross-runtime-parity-report.json`

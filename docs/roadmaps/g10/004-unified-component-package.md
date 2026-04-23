@@ -14,8 +14,8 @@ consumers, making this a safe restructuring.
 
 ## Goals
 
-- merge @poodle/svelte-primitives and @poodle/svelte-composites into @poodle/svelte
-- merge docs/contracts/components/ and docs/contracts/components/ into docs/contracts/components/
+- merge the legacy split Svelte packages into `@poodle/svelte`
+- consolidate contracts under `docs/contracts/components/`
 - unify preview app into a single Components section with tag-based filtering
 - merge Rust contract crates (packages/contracts/primitives and composites)
 - update all imports, registry, parity, lint expectations

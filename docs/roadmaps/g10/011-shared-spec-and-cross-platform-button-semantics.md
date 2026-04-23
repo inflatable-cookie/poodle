@@ -22,7 +22,7 @@ elements (D-002).
 
 - `docs/contracts/components/button.md`
 - `packages/contracts/components/src/button.rs`
-- `packages/svelte/primitives/src/Button.svelte`
+- `packages/svelte/components/src/Button.svelte`
 - `packages/gpui/components/src/primitives/button.rs`
 - `docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md` (assistive / ARIA limits)
 

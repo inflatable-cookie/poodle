@@ -66,8 +66,7 @@ The current release posture is:
 ### Preview Channel Public-Intent Packages
 
 - `@poodle/svelte-tokens`
-- `@poodle/svelte-primitives`
-- `@poodle/svelte-composites`
+- `@poodle/svelte`
 - `@poodle/svelte-workstation`
 - `poodle-gpui-tokens`
 - `poodle-gpui-primitives`
@@ -104,8 +103,8 @@ Each release-capable tranche should document:
 - `packages/release-manifest.json`
 - `packages/release-operations.json`
 - `packages/svelte/tokens/package.json`
-- `packages/svelte/primitives/package.json`
-- `packages/svelte/composites/package.json`
+- `packages/svelte/components/package.json`
+- `packages/svelte/components/package.json`
 - `packages/svelte/workstation/package.json`
 - `packages/svelte/preview/package.json`
 - `packages/bridges/underlay/package.json`

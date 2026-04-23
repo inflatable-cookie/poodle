@@ -155,13 +155,13 @@ surface without becoming visually noisy.
 
 ## Seed Evidence
 
-- `packages/svelte/composites/src/Card.svelte`
+- `packages/svelte/components/src/Card.svelte`
 - `packages/svelte/workstation/src/CommandPalette.svelte`
 - `packages/svelte/workstation/src/ActionDiscoveryPanel.svelte`
 - `packages/svelte/workstation/src/ProjectHeader.svelte`
 - `packages/svelte/workstation/src/DockRegion.svelte`
-- `packages/svelte/composites/src/SelectionSummary.svelte`
-- `packages/svelte/composites/src/MediaPreview.svelte`
+- `packages/svelte/components/src/SelectionSummary.svelte`
+- `packages/svelte/components/src/MediaPreview.svelte`
 - `packages/svelte/preview/src/app.css`
 
 ## Next Task

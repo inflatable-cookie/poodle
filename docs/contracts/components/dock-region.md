@@ -492,7 +492,7 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 ## 10. Svelte Notes
 
-- Composes Tabs (`variant="strip"`) and CollapseToggle from `@poodle/svelte-primitives`
+- Composes Tabs (`variant="strip"`) and CollapseToggle from `@poodle/svelte`
 - Does NOT use PanelTabs, PanelHeader, or PanelSurface
 - CollapseToggle is only rendered when `collapsible=true`; in all four flexible
   postures (expanded, collapsed icon-strip left/right, collapsed icon-strip

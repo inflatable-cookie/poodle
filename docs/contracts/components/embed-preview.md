@@ -160,7 +160,7 @@ None. EmbedPreview is a pure display component.
 
 ### Composition
 
-- Composes: `Skeleton` from `@poodle/svelte-primitives`
+- Composes: `Skeleton` from `@poodle/svelte`
 - Parent expectations: media embed forms, content editors, paired with
   EmbedInput
 - Child expectations: none (self-contained display)
@@ -283,7 +283,7 @@ None.
 
 ## 9. Svelte Notes
 
-- Uses `Skeleton` from `@poodle/svelte-primitives` for the loading state
+- Uses `Skeleton` from `@poodle/svelte` for the loading state
 - Raw embed code rendered via `{@html parsed.originalEmbed}` — consumers must
   ensure embed code is trusted
 - Aspect ratio applied via inline `style` attribute on the container

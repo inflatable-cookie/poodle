@@ -21,10 +21,8 @@ baseline:
 - `@poodle/svelte-tokens/css`
 - `@poodle/svelte-tokens/themes`
 - `@poodle/svelte-tokens/metadata`
-- `@poodle/svelte-primitives`
-- `@poodle/svelte-primitives/types`
-- `@poodle/svelte-composites`
-- `@poodle/svelte-composites/types`
+- `@poodle/svelte`
+- `@poodle/svelte/types`
 - `@poodle/svelte-workstation`
 - `@poodle/svelte-workstation/types`
 - `poodle-gpui-tokens`
@@ -131,16 +129,16 @@ Downstream adoption should remain blocked until all of the following are true:
 ## Seed Evidence
 
 - `packages/svelte/tokens/package.json`
-- `packages/svelte/primitives/package.json`
-- `packages/svelte/composites/package.json`
+- `packages/svelte/components/package.json`
+- `packages/svelte/components/package.json`
 - `packages/svelte/workstation/package.json`
 - `packages/gpui/tokens/Cargo.toml`
 - `packages/gpui/primitives/Cargo.toml`
 - `packages/gpui/composites/Cargo.toml`
 - `packages/gpui/workstation/Cargo.toml`
 - `packages/svelte/tokens/README.md`
-- `packages/svelte/primitives/README.md`
-- `packages/svelte/composites/README.md`
+- `packages/svelte/components/README.md`
+- `packages/svelte/components/README.md`
 - `packages/svelte/workstation/README.md`
 - `packages/gpui/tokens/README.md`
 - `packages/gpui/primitives/README.md`
