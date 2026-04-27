@@ -8,6 +8,15 @@ include = [
   "demos/effigy.demos.toml",
 ]
 
+[isolation]
+paths = [
+  "node_modules",
+  "packages/svelte/components/node_modules",
+  "packages/svelte/icons-lucide/node_modules",
+  "packages/svelte/preview/node_modules",
+  "packages/svelte/preview/.svelte-kit",
+]
+
 [bootstrap]
 setup = ["bootstrap:deps"]
 start = "preview:dev"
