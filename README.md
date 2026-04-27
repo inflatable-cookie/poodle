@@ -55,6 +55,11 @@ bun install
 bun packages/tokens/scripts/build-tokens.ts
 ```
 
+`bun install` at the repo root is the canonical JS hydration step. Mounted
+consumer repos should hydrate the root workspace, not run separate
+package-local installs under `packages/svelte/*` unless a package explicitly
+documents that requirement.
+
 Common repo tasks:
 
 ```sh

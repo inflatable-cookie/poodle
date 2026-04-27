@@ -45,6 +45,11 @@ bun packages/tokens/scripts/build-tokens.ts
 bun run --cwd packages/svelte/preview dev
 ```
 
+The repo-root `bun install` is the intended install root for normal
+development and mounted-consumer hydration. Package-local `node_modules` under
+`packages/svelte/*` are preview or direct-package execution details, not the
+default repo contract.
+
 For the default repo validation pass:
 
 ```sh

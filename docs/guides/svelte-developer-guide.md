@@ -1344,6 +1344,10 @@ cd packages/svelte/preview
 bun run dev
 ```
 
+Use the repo-root `bun install` as the normal workspace hydration step. Do not
+treat package-local installs under `packages/svelte/*` as part of the default
+consumer contract unless a package explicitly says otherwise.
+
 Open `http://localhost:4173`. The preview app shows every component specimen with theme/density/size controls.
 
 ---
