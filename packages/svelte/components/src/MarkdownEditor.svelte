@@ -89,17 +89,17 @@
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
   <div
-    class="md-editor"
-    class:md-editor--disabled={disabled}
+    class="poodle-md-editor"
+    class:poodle-md-editor--disabled={disabled}
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
-    <div class="md-editor__toolbar">
-      <div class="md-editor__tools">
+    <div class="poodle-md-editor__toolbar">
+      <div class="poodle-md-editor__tools">
         {#each toolbarActions as tool}
           <button
             type="button"
-            class="md-editor__tool-btn"
+            class="poodle-md-editor__tool-btn"
             title={tool.label}
             aria-label={tool.label}
             disabled={disabled || mode === "preview"}
@@ -110,33 +110,33 @@
         {/each}
       </div>
 
-      <div class="md-editor__modes">
+      <div class="poodle-md-editor__modes">
         <button
           type="button"
-          class="md-editor__mode-btn"
-          class:active={mode === "edit"}
+          class="poodle-md-editor__mode-btn"
+          class:poodle-active={mode === "edit"}
           on:click={() => (mode = "edit")}
         >Edit</button>
         <button
           type="button"
-          class="md-editor__mode-btn"
-          class:active={mode === "split"}
+          class="poodle-md-editor__mode-btn"
+          class:poodle-active={mode === "split"}
           on:click={() => (mode = "split")}
         >Split</button>
         <button
           type="button"
-          class="md-editor__mode-btn"
-          class:active={mode === "preview"}
+          class="poodle-md-editor__mode-btn"
+          class:poodle-active={mode === "preview"}
           on:click={() => (mode = "preview")}
         >Preview</button>
       </div>
     </div>
 
-    <div class="md-editor__body" data-mode={mode}>
+    <div class="poodle-md-editor__body" data-mode={mode}>
       {#if mode !== "preview"}
         <textarea
           bind:this={textareaEl}
-          class="md-editor__textarea"
+          class="poodle-md-editor__textarea"
           name={name ?? undefined}
           {placeholder}
           disabled={disabled}
@@ -149,11 +149,11 @@
       {/if}
 
       {#if mode !== "edit"}
-        <div class="md-editor__preview" aria-label="Preview">
+        <div class="poodle-md-editor__preview" aria-label="Preview">
           {#if value.trim()}
             {@html previewHtml}
           {:else}
-            <p class="md-editor__preview-empty">Nothing to preview</p>
+            <p class="poodle-md-editor__preview-empty">Nothing to preview</p>
           {/if}
         </div>
       {/if}
@@ -162,7 +162,7 @@
 </UiPresentationProvider>
 
 <style>
-  .md-editor {
+  .poodle-md-editor {
     --poodle-md-editor-toolbar-y: 0.375rem;
     --poodle-md-editor-toolbar-x: 0.5rem;
     --poodle-md-editor-tool-gap: 0.125rem;
@@ -177,30 +177,30 @@
     overflow: hidden;
   }
 
-  .md-editor[data-size="xs"] {
+  .poodle-md-editor[data-size="xs"] {
     --poodle-md-editor-tool-size: 1.5rem;
     --poodle-md-editor-mode-x: 0.375rem;
   }
 
-  .md-editor[data-size="sm"] {
+  .poodle-md-editor[data-size="sm"] {
     --poodle-md-editor-tool-size: 1.75rem;
   }
 
-  .md-editor[data-size="md"] {
+  .poodle-md-editor[data-size="md"] {
     --poodle-md-editor-tool-size: 2rem;
   }
 
-  .md-editor[data-size="lg"] {
+  .poodle-md-editor[data-size="lg"] {
     --poodle-md-editor-tool-size: 2.25rem;
     --poodle-md-editor-mode-x: 0.625rem;
   }
 
-  .md-editor[data-size="xl"] {
+  .poodle-md-editor[data-size="xl"] {
     --poodle-md-editor-tool-size: 2.5rem;
     --poodle-md-editor-mode-x: 0.75rem;
   }
 
-  .md-editor[data-density="compact"] {
+  .poodle-md-editor[data-density="compact"] {
     --poodle-md-editor-toolbar-y: 0.25rem;
     --poodle-md-editor-toolbar-x: 0.375rem;
     --poodle-md-editor-tool-gap: 0.0625rem;
@@ -209,7 +209,7 @@
     --poodle-md-editor-pane-y: 0.625rem;
   }
 
-  .md-editor[data-density="comfortable"] {
+  .poodle-md-editor[data-density="comfortable"] {
     --poodle-md-editor-toolbar-y: 0.5rem;
     --poodle-md-editor-toolbar-x: 0.625rem;
     --poodle-md-editor-tool-gap: 0.1875rem;
@@ -218,12 +218,12 @@
     --poodle-md-editor-pane-y: 0.875rem;
   }
 
-  .md-editor--disabled {
+  .poodle-md-editor--disabled {
     opacity: var(--poodle-state-opacity-disabled);
     pointer-events: none;
   }
 
-  .md-editor__toolbar {
+  .poodle-md-editor__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -234,12 +234,12 @@
     flex-wrap: wrap;
   }
 
-  .md-editor__tools {
+  .poodle-md-editor__tools {
     display: flex;
     gap: var(--poodle-md-editor-tool-gap);
   }
 
-  .md-editor__tool-btn {
+  .poodle-md-editor__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -258,22 +258,22 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .md-editor__tool-btn:hover:not(:disabled) {
+  .poodle-md-editor__tool-btn:hover:not(:disabled) {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .md-editor__tool-btn:focus-visible {
+  .poodle-md-editor__tool-btn:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .md-editor__tool-btn:disabled {
+  .poodle-md-editor__tool-btn:disabled {
     opacity: 0.4;
     cursor: default;
   }
 
-  .md-editor__modes {
+  .poodle-md-editor__modes {
     display: flex;
     gap: var(--poodle-md-editor-tool-gap);
     border: 0.0625rem solid var(--poodle-color-border-default);
@@ -281,7 +281,7 @@
     overflow: hidden;
   }
 
-  .md-editor__mode-btn {
+  .poodle-md-editor__mode-btn {
     min-height: calc(var(--poodle-md-editor-tool-size) - (var(--poodle-md-editor-toolbar-y) * 0.5));
     padding: var(--poodle-md-editor-mode-y) var(--poodle-md-editor-mode-x);
     border: 0;
@@ -294,33 +294,33 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .md-editor__mode-btn:hover {
+  .poodle-md-editor__mode-btn:hover {
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
   }
 
-  .md-editor__mode-btn.active {
+  .poodle-md-editor__mode-btn.poodle-active {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .md-editor__body {
+  .poodle-md-editor__body {
     display: flex;
   }
 
-  .md-editor__body[data-mode="split"] {
+  .poodle-md-editor__body[data-mode="split"] {
     gap: 0;
   }
 
-  .md-editor__body[data-mode="split"] .md-editor__textarea {
+  .poodle-md-editor__body[data-mode="split"] .poodle-md-editor__textarea {
     flex: 1;
     border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .md-editor__body[data-mode="split"] .md-editor__preview {
+  .poodle-md-editor__body[data-mode="split"] .poodle-md-editor__preview {
     flex: 1;
   }
 
-  .md-editor__textarea {
+  .poodle-md-editor__textarea {
     flex: 1;
     width: 100%;
     padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
@@ -334,11 +334,11 @@
     outline: none;
   }
 
-  .md-editor__textarea::placeholder {
+  .poodle-md-editor__textarea::placeholder {
     color: var(--poodle-color-text-tertiary);
   }
 
-  .md-editor__preview {
+  .poodle-md-editor__preview {
     flex: 1;
     padding: var(--poodle-md-editor-pane-y) var(--poodle-md-editor-pane-x);
     font-family: var(--poodle-typography-body-family);
@@ -348,33 +348,33 @@
     overflow-y: auto;
   }
 
-  .md-editor__preview :global(h1) {
+  .poodle-md-editor__preview :global(h1) {
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0 0 0.5rem;
   }
 
-  .md-editor__preview :global(h2) {
+  .poodle-md-editor__preview :global(h2) {
     font-size: 1.0625rem;
     font-weight: 600;
     margin: 0 0 0.375rem;
   }
 
-  .md-editor__preview :global(h3) {
+  .poodle-md-editor__preview :global(h3) {
     font-size: 0.9375rem;
     font-weight: 600;
     margin: 0 0 0.25rem;
   }
 
-  .md-editor__preview :global(p) {
+  .poodle-md-editor__preview :global(p) {
     margin: 0 0 0.5rem;
   }
 
-  .md-editor__preview :global(strong) {
+  .poodle-md-editor__preview :global(strong) {
     font-weight: 700;
   }
 
-  .md-editor__preview :global(code) {
+  .poodle-md-editor__preview :global(code) {
     padding: 0.125rem 0.25rem;
     border-radius: var(--poodle-radius-control);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
@@ -382,35 +382,35 @@
     font-size: 0.8125rem;
   }
 
-  .md-editor__preview :global(blockquote) {
+  .poodle-md-editor__preview :global(blockquote) {
     margin: 0 0 0.5rem;
     padding: 0.375rem 0.75rem;
     border-left: 0.1875rem solid var(--poodle-color-border-default);
     color: var(--poodle-color-text-secondary);
   }
 
-  .md-editor__preview :global(ul),
-  .md-editor__preview :global(ol) {
+  .poodle-md-editor__preview :global(ul),
+  .poodle-md-editor__preview :global(ol) {
     margin: 0 0 0.5rem;
     padding-left: 1.25rem;
   }
 
-  .md-editor__preview :global(li) {
+  .poodle-md-editor__preview :global(li) {
     margin: 0 0 0.125rem;
   }
 
-  .md-editor__preview :global(hr) {
+  .poodle-md-editor__preview :global(hr) {
     border: 0;
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     margin: 0.75rem 0;
   }
 
-  .md-editor__preview :global(a) {
+  .poodle-md-editor__preview :global(a) {
     color: var(--poodle-color-accent-default, #6366f1);
     text-decoration: underline;
   }
 
-  .md-editor__preview-empty {
+  .poodle-md-editor__preview-empty {
     color: var(--poodle-color-text-tertiary);
     font-style: italic;
     margin: 0;

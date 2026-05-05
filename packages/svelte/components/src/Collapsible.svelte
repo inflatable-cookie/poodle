@@ -43,10 +43,10 @@
   }
 </script>
 
-<section class="collapsible" data-open={isOpen} data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
+<section class="poodle-collapsible" data-open={isOpen} data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
   <button
     type="button"
-    class="collapsible__trigger"
+    class="poodle-collapsible__trigger"
     id={`poodle-collapsible-trigger-${collapsibleId}`}
     disabled={disabled}
     aria-expanded={isOpen ? "true" : "false"}
@@ -54,25 +54,25 @@
     aria-label={title ? undefined : ariaLabel ?? undefined}
     on:click={() => setOpen(!isOpen)}
   >
-    <span class="collapsible__heading">
+    <span class="poodle-collapsible__heading">
       {#if $$slots.trigger}
         <slot name="trigger" {isOpen} />
       {:else}
         {#if title}
-          <span class="collapsible__title">{title}</span>
+          <span class="poodle-collapsible__title">{title}</span>
         {/if}
 
         {#if description}
-          <span class="collapsible__description">{description}</span>
+          <span class="poodle-collapsible__description">{description}</span>
         {/if}
       {/if}
     </span>
-    <span class="collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
+    <span class="poodle-collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
   </button>
 
   {#if isOpen}
     <div
-      class="collapsible__content"
+      class="poodle-collapsible__content"
       id={`poodle-collapsible-content-${collapsibleId}`}
       role="region"
       aria-labelledby={`poodle-collapsible-trigger-${collapsibleId}`}
@@ -84,7 +84,7 @@
 </section>
 
 <style>
-  .collapsible {
+  .poodle-collapsible {
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
@@ -94,15 +94,15 @@
     background: color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-panel)) 82%, var(--poodle-color-background-elevated));
   }
 
-  .collapsible[data-open="false"] {
+  .poodle-collapsible[data-open="false"] {
     gap: 0;
   }
 
-  .collapsible[data-disabled="true"] {
+  .poodle-collapsible[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .collapsible__trigger {
+  .poodle-collapsible__trigger {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -117,36 +117,36 @@
     font: inherit;
   }
 
-  .collapsible__trigger:disabled {
+  .poodle-collapsible__trigger:disabled {
     cursor: not-allowed;
   }
 
-  .collapsible__trigger:focus-visible {
+  .poodle-collapsible__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
   }
 
-  .collapsible__heading {
+  .poodle-collapsible__heading {
     display: grid;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
-  .collapsible__title {
+  .poodle-collapsible__title {
     font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.2;
   }
 
-  .collapsible__description {
+  .poodle-collapsible__description {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.45;
   }
 
-  .collapsible__indicator {
+  .poodle-collapsible__indicator {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
@@ -154,49 +154,49 @@
     transition: transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .collapsible[data-open="true"] .collapsible__indicator {
+  .poodle-collapsible[data-open="true"] .poodle-collapsible__indicator {
     transform: rotate(180deg);
   }
 
-  .collapsible__content {
+  .poodle-collapsible__content {
     min-width: 0;
     padding-top: 0.125rem;
   }
 
   /* Size variants */
-  .collapsible[data-size="xs"] .collapsible__title {
+  .poodle-collapsible[data-size="xs"] .poodle-collapsible__title {
     font-size: 0.8125rem;
   }
 
-  .collapsible[data-size="xs"] .collapsible__description {
+  .poodle-collapsible[data-size="xs"] .poodle-collapsible__description {
     font-size: 0.6875rem;
   }
 
-  .collapsible[data-size="sm"] .collapsible__title {
+  .poodle-collapsible[data-size="sm"] .poodle-collapsible__title {
     font-size: 0.875rem;
   }
 
-  .collapsible[data-size="sm"] .collapsible__description {
+  .poodle-collapsible[data-size="sm"] .poodle-collapsible__description {
     font-size: 0.75rem;
   }
 
-  .collapsible[data-size="lg"] .collapsible__title {
+  .poodle-collapsible[data-size="lg"] .poodle-collapsible__title {
     font-size: 1.0625rem;
   }
 
-  .collapsible[data-size="lg"] .collapsible__description {
+  .poodle-collapsible[data-size="lg"] .poodle-collapsible__description {
     font-size: 0.875rem;
   }
 
-  .collapsible[data-size="xl"] .collapsible__title {
+  .poodle-collapsible[data-size="xl"] .poodle-collapsible__title {
     font-size: 1.125rem;
   }
 
-  .collapsible[data-size="xl"] .collapsible__description {
+  .poodle-collapsible[data-size="xl"] .poodle-collapsible__description {
     font-size: 0.9375rem;
   }
 
   /* Density variants */
-  .collapsible[data-density="compact"] { padding-inline: 0.5rem; }
-  .collapsible[data-density="comfortable"] { padding-inline: 1rem; }
+  .poodle-collapsible[data-density="compact"] { padding-inline: 0.5rem; }
+  .poodle-collapsible[data-density="comfortable"] { padding-inline: 1rem; }
 </style>

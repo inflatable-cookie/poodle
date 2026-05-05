@@ -6,7 +6,7 @@
   let lastAction = "";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Default trigger (danger)">
     <ConfirmAction
       title="Delete this record?"
@@ -49,7 +49,7 @@
       confirmLabel="Revoke"
       on:confirm={() => (lastAction = "Key revoked")}
     >
-      <div class="key-display">
+      <div class="poodle-key-display">
         <code>pk_live_abc123...xyz789</code>
       </div>
     </ConfirmAction>
@@ -63,19 +63,19 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .key-display {
+  .poodle-key-display {
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;
     background: var(--poodle-color-background-panel, #1a1a1a);
   }
 
-  .key-display code {
+  .poodle-key-display code {
     font-family: var(--poodle-typography-mono-family, monospace);
     font-size: 0.8125rem;
   }

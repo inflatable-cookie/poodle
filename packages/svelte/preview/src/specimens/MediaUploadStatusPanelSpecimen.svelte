@@ -9,9 +9,9 @@
   let lastAction = "None";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Upload status panel">
-    <div class="specimen__actions">
+    <div class="poodle-specimen__actions">
       <button type="button" on:click={() => (uploadStep = "checking")}>Checking</button>
       <button type="button" on:click={() => (uploadStep = "duplicate")}>Duplicate</button>
       <button type="button" on:click={() => (uploadStep = "uploading")}>Uploading</button>
@@ -33,7 +33,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       {#each controlSizes as size}
         <MediaUploadStatusPanel
           uploadStep="uploading"
@@ -46,20 +46,20 @@
 </div>
 
 <style>
-  .specimen,
-  .specimen__stack {
+  .poodle-specimen,
+  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__actions {
+  .poodle-specimen__actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .specimen__actions button {
+  .poodle-specimen__actions button {
     padding: 0.375rem 0.625rem;
   }
 

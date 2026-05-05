@@ -204,17 +204,17 @@
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
   {#if resolvedVariant === "audit"}
     <section
-      class="log-list log-list--audit"
+      class="poodle-log-list poodle-log-list--audit"
       data-size={resolvedSize}
       data-density={resolvedDensity}
       aria-label={ariaLabel}
     >
       {#if hasAuditToolbar}
-        <div class="log-list__toolbar">
+        <div class="poodle-log-list__toolbar">
           {#if filters.length > 0}
-            <div class="log-list__filters">
+            <div class="poodle-log-list__filters">
               {#each filters as filter}
-                <div class="log-list__filter">
+                <div class="poodle-log-list__filter">
                   {#if filter.type === "select" && filter.options}
                     <Field id={`log-filter-${filter.field}`} label={filter.label} let:describedBy>
                       <Select
@@ -248,7 +248,7 @@
             </div>
           {/if}
 
-          <div class="log-list__toolbar-actions">
+          <div class="poodle-log-list__toolbar-actions">
             {#if onRefresh}
               <IconButton
                 icon="refresh-cw"
@@ -268,27 +268,27 @@
         </div>
       {/if}
 
-      <div class="log-list__content">
+      <div class="poodle-log-list__content">
         {#if loading && auditEntries.length === 0}
-          <div class="log-list__status">
+          <div class="poodle-log-list__status">
             <p>Loading log entries...</p>
           </div>
         {:else if error}
-          <div class="log-list__status log-list__status--error" role="alert">
+          <div class="poodle-log-list__status poodle-log-list__status--error" role="alert">
             <p>{error}</p>
           </div>
         {:else if auditEntries.length === 0}
-          <div class="log-list__status">
+          <div class="poodle-log-list__status">
             <p>{emptyMessage}</p>
           </div>
         {:else}
-          <ul class="log-list__audit-entries">
+          <ul class="poodle-log-list__audit-entries">
             {#each auditEntries as entry (entry.id)}
               {@const actionType = resolveActionType(entry.action)}
               {@const actorName = resolveActorName(entry)}
               {@const resourceHref = getResourceHref?.(entry.resourceType, entry.resourceId, entry.action) ?? null}
-              <li class="log-list__audit-entry">
-                <div class="log-list__audit-icon" data-action-type={actionType}>
+              <li class="poodle-log-list__audit-entry">
+                <div class="poodle-log-list__audit-icon" data-action-type={actionType}>
                   {#if actionIcon}
                     {@render actionIcon(actionType)}
                   {:else}
@@ -296,11 +296,11 @@
                   {/if}
                 </div>
 
-                <div class="log-list__audit-body">
-                  <div class="log-list__audit-main">
-                    <span class="log-list__audit-actor">
+                <div class="poodle-log-list__audit-body">
+                  <div class="poodle-log-list__audit-main">
+                    <span class="poodle-log-list__audit-actor">
                       {#if entry.actor && getActorHref}
-                        <a href={getActorHref(entry.actor)} class="log-list__audit-link">{actorName}</a>
+                        <a href={getActorHref(entry.actor)} class="poodle-log-list__audit-link">{actorName}</a>
                       {:else}
                         {actorName}
                       {/if}
@@ -311,29 +311,29 @@
                     </Pill>
 
                     {#if resourceHref}
-                      <a href={resourceHref} class="log-list__audit-link log-list__audit-resource">
+                      <a href={resourceHref} class="poodle-log-list__audit-link poodle-log-list__audit-resource">
                         {resolveResourceLabel(entry.resourceType)}
                         {#if entry.resourceLabel}
-                          <span class="log-list__audit-resource-label">"{entry.resourceLabel}"</span>
+                          <span class="poodle-log-list__audit-resource-label">"{entry.resourceLabel}"</span>
                         {/if}
                       </a>
                     {:else}
-                      <span class="log-list__audit-resource">
+                      <span class="poodle-log-list__audit-resource">
                         {resolveResourceLabel(entry.resourceType)}
                         {#if entry.resourceLabel}
-                          <span class="log-list__audit-resource-label">"{entry.resourceLabel}"</span>
+                          <span class="poodle-log-list__audit-resource-label">"{entry.resourceLabel}"</span>
                         {/if}
                       </span>
                     {/if}
                   </div>
 
                   {#if entryDetails}
-                    <div class="log-list__audit-details">
+                    <div class="poodle-log-list__audit-details">
                       {@render entryDetails(entry)}
                     </div>
                   {/if}
 
-                  <time class="log-list__audit-time" datetime={entry.occurredAt}>
+                  <time class="poodle-log-list__audit-time" datetime={entry.occurredAt}>
                     {formatRelativeTime(entry.occurredAt)}
                   </time>
                 </div>
@@ -344,12 +344,12 @@
       </div>
 
       {#if showPagination}
-        <div class="log-list__pagination">
-          <span class="log-list__pagination-info">
+        <div class="poodle-log-list__pagination">
+          <span class="poodle-log-list__pagination-info">
             Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, total ?? 0)} of {total}
           </span>
 
-          <div class="log-list__pagination-controls">
+          <div class="poodle-log-list__pagination-controls">
             <IconButton
               icon="chevron-left"
               variant="ghost"
@@ -358,7 +358,7 @@
               disabled={page <= 1 || loading}
               on:click={() => requestPage(page - 1)}
             />
-            <span class="log-list__pagination-page">Page {page} of {totalPages}</span>
+            <span class="poodle-log-list__pagination-page">Page {page} of {totalPages}</span>
             <IconButton
               icon="chevron-right"
               variant="ghost"
@@ -373,66 +373,66 @@
     </section>
   {:else}
     <div
-      class="log-list log-list--stream"
+      class="poodle-log-list poodle-log-list--stream"
       data-size={resolvedSize}
       data-density={resolvedDensity}
       role="log"
       aria-label={ariaLabel}
     >
-      <div class="log-list__toolbar">
-        <div class="log-list__stream-filters">
+      <div class="poodle-log-list__toolbar">
+        <div class="poodle-log-list__stream-filters">
           <button
             type="button"
-            class="log-list__filter-btn"
-            class:active={filterLevel === null}
+            class="poodle-log-list__filter-btn"
+            class:poodle-active={filterLevel === null}
             on:click={() => (filterLevel = null)}
           >
-            All <span class="log-list__count">{entries.length}</span>
+            All <span class="poodle-log-list__count">{entries.length}</span>
           </button>
           <button
             type="button"
-            class="log-list__filter-btn log-list__filter-btn--info"
-            class:active={filterLevel === "info"}
+            class="poodle-log-list__filter-btn poodle-log-list__filter-btn--info"
+            class:poodle-active={filterLevel === "info"}
             on:click={() => (filterLevel = filterLevel === "info" ? null : "info")}
           >
-            Info <span class="log-list__count">{levelCounts.info}</span>
+            Info <span class="poodle-log-list__count">{levelCounts.info}</span>
           </button>
           <button
             type="button"
-            class="log-list__filter-btn log-list__filter-btn--warn"
-            class:active={filterLevel === "warn"}
+            class="poodle-log-list__filter-btn poodle-log-list__filter-btn--warn"
+            class:poodle-active={filterLevel === "warn"}
             on:click={() => (filterLevel = filterLevel === "warn" ? null : "warn")}
           >
-            Warn <span class="log-list__count">{levelCounts.warn}</span>
+            Warn <span class="poodle-log-list__count">{levelCounts.warn}</span>
           </button>
           <button
             type="button"
-            class="log-list__filter-btn log-list__filter-btn--error"
-            class:active={filterLevel === "error"}
+            class="poodle-log-list__filter-btn poodle-log-list__filter-btn--error"
+            class:poodle-active={filterLevel === "error"}
             on:click={() => (filterLevel = filterLevel === "error" ? null : "error")}
           >
-            Error <span class="log-list__count">{levelCounts.error}</span>
+            Error <span class="poodle-log-list__count">{levelCounts.error}</span>
           </button>
         </div>
 
         <input
           type="text"
-          class="log-list__search"
+          class="poodle-log-list__search"
           placeholder="Filter logs..."
           bind:value={filterText}
           aria-label="Filter log messages"
         />
       </div>
 
-      <div class="log-list__scroll" bind:this={scrollContainer} on:scroll={handleScroll}>
+      <div class="poodle-log-list__scroll" bind:this={scrollContainer} on:scroll={handleScroll}>
         {#if displayEntries.length === 0}
-          <div class="log-list__empty">No log entries{filterLevel || filterText ? " match filters" : ""}</div>
+          <div class="poodle-log-list__empty">No log entries{filterLevel || filterText ? " match filters" : ""}</div>
         {:else}
           {#each displayEntries as entry (entry.id ?? `${entry.timestamp}-${entry.message}`)}
-            <div class="log-list__entry" data-level={entry.level}>
-              <time class="log-list__ts">{formatStreamTimestamp(entry.timestamp)}</time>
-              <span class="log-list__level">{entry.level.toUpperCase()}</span>
-              <span class="log-list__msg">{entry.message}</span>
+            <div class="poodle-log-list__entry" data-level={entry.level}>
+              <time class="poodle-log-list__ts">{formatStreamTimestamp(entry.timestamp)}</time>
+              <span class="poodle-log-list__level">{entry.level.toUpperCase()}</span>
+              <span class="poodle-log-list__msg">{entry.message}</span>
             </div>
           {/each}
         {/if}
@@ -441,7 +441,7 @@
       {#if isUserScrolled && autoScroll}
         <button
           type="button"
-          class="log-list__scroll-btn"
+          class="poodle-log-list__scroll-btn"
           on:click={scrollToBottom}
           aria-label="Scroll to latest"
         >
@@ -453,7 +453,7 @@
 </UiPresentationProvider>
 
 <style>
-  .log-list {
+  .poodle-log-list {
     display: flex;
     flex-direction: column;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
@@ -463,7 +463,7 @@
     position: relative;
   }
 
-  .log-list__toolbar {
+  .poodle-log-list__toolbar {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -474,30 +474,30 @@
     flex-wrap: wrap;
   }
 
-  .log-list--stream .log-list__toolbar {
+  .poodle-log-list--stream .poodle-log-list__toolbar {
     align-items: center;
   }
 
-  .log-list__stream-filters,
-  .log-list__filters {
+  .poodle-log-list__stream-filters,
+  .poodle-log-list__filters {
     display: flex;
     align-items: flex-end;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .log-list__filter {
+  .poodle-log-list__filter {
     min-width: 10rem;
   }
 
-  .log-list__toolbar-actions {
+  .poodle-log-list__toolbar-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-left: auto;
   }
 
-  .log-list__filter-btn {
+  .poodle-log-list__filter-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -513,13 +513,13 @@
     line-height: 1;
   }
 
-  .log-list__filter-btn.active {
+  .poodle-log-list__filter-btn.poodle-active {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 42%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .log-list__search {
+  .poodle-log-list__search {
     flex: 1;
     min-width: 10rem;
     padding: 0.1875rem 0.5rem;
@@ -532,15 +532,15 @@
     outline: none;
   }
 
-  .log-list__search:focus {
+  .poodle-log-list__search:focus {
     border-color: var(--poodle-color-accent-focusRing);
   }
 
-  .log-list__content {
+  .poodle-log-list__content {
     min-height: 12rem;
   }
 
-  .log-list__status {
+  .poodle-log-list__status {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -550,28 +550,28 @@
     text-align: center;
   }
 
-  .log-list__status--error {
+  .poodle-log-list__status--error {
     color: var(--poodle-color-status-danger, #ef4444);
   }
 
-  .log-list__audit-entries {
+  .poodle-log-list__audit-entries {
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .log-list__audit-entry {
+  .poodle-log-list__audit-entry {
     display: flex;
     gap: 0.75rem;
     padding: 0.875rem 1rem;
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
   }
 
-  .log-list__audit-entry:last-child {
+  .poodle-log-list__audit-entry:last-child {
     border-bottom: none;
   }
 
-  .log-list__audit-icon {
+  .poodle-log-list__audit-icon {
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 999px;
@@ -585,29 +585,29 @@
     font-weight: 700;
   }
 
-  .log-list__audit-icon[data-action-type="create"],
-  .log-list__audit-icon[data-action-type="restore"] {
+  .poodle-log-list__audit-icon[data-action-type="create"],
+  .poodle-log-list__audit-icon[data-action-type="restore"] {
     background: color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 16%, transparent);
     color: var(--poodle-color-status-success, #22c55e);
   }
 
-  .log-list__audit-icon[data-action-type="delete"] {
+  .poodle-log-list__audit-icon[data-action-type="delete"] {
     background: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 16%, transparent);
     color: var(--poodle-color-status-danger, #ef4444);
   }
 
-  .log-list__audit-icon[data-action-type="update"],
-  .log-list__audit-icon[data-action-type="upload"] {
+  .poodle-log-list__audit-icon[data-action-type="update"],
+  .poodle-log-list__audit-icon[data-action-type="upload"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     color: var(--poodle-color-accent-base);
   }
 
-  .log-list__audit-icon[data-action-type="security"] {
+  .poodle-log-list__audit-icon[data-action-type="security"] {
     background: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 16%, transparent);
     color: var(--poodle-color-status-warning, #f59e0b);
   }
 
-  .log-list__audit-body {
+  .poodle-log-list__audit-body {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -615,7 +615,7 @@
     gap: 0.3rem;
   }
 
-  .log-list__audit-main {
+  .poodle-log-list__audit-main {
     display: flex;
     align-items: center;
     gap: 0.375rem;
@@ -624,40 +624,40 @@
     line-height: 1.4;
   }
 
-  .log-list__audit-actor {
+  .poodle-log-list__audit-actor {
     font-weight: 600;
     color: var(--poodle-color-text-primary);
   }
 
-  .log-list__audit-link {
+  .poodle-log-list__audit-link {
     color: inherit;
     text-decoration: none;
   }
 
-  .log-list__audit-link:hover {
+  .poodle-log-list__audit-link:hover {
     text-decoration: underline;
   }
 
-  .log-list__audit-resource {
+  .poodle-log-list__audit-resource {
     color: var(--poodle-color-text-secondary);
   }
 
-  .log-list__audit-resource-label {
+  .poodle-log-list__audit-resource-label {
     font-style: italic;
     color: var(--poodle-color-text-primary);
   }
 
-  .log-list__audit-details {
+  .poodle-log-list__audit-details {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }
 
-  .log-list__audit-time {
+  .poodle-log-list__audit-time {
     color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
   }
 
-  .log-list__pagination {
+  .poodle-log-list__pagination {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -667,19 +667,19 @@
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
-  .log-list__pagination-info,
-  .log-list__pagination-page {
+  .poodle-log-list__pagination-info,
+  .poodle-log-list__pagination-page {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }
 
-  .log-list__pagination-controls {
+  .poodle-log-list__pagination-controls {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .log-list__scroll {
+  .poodle-log-list__scroll {
     max-height: 20rem;
     overflow-y: auto;
     font-family: var(--poodle-typography-code-family);
@@ -687,45 +687,45 @@
     line-height: 1.6;
   }
 
-  .log-list__entry {
+  .poodle-log-list__entry {
     display: flex;
     gap: 0.625rem;
     padding: 0.125rem 0.5rem;
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
   }
 
-  .log-list__entry[data-level="warn"] {
+  .poodle-log-list__entry[data-level="warn"] {
     background: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 8%, transparent);
   }
 
-  .log-list__entry[data-level="error"] {
+  .poodle-log-list__entry[data-level="error"] {
     background: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 8%, transparent);
   }
 
-  .log-list__ts,
-  .log-list__level {
+  .poodle-log-list__ts,
+  .poodle-log-list__level {
     flex-shrink: 0;
   }
 
-  .log-list__level {
+  .poodle-log-list__level {
     width: 3rem;
     text-align: right;
     font-weight: 600;
   }
 
-  .log-list__msg {
+  .poodle-log-list__msg {
     flex: 1;
     min-width: 0;
     word-break: break-word;
   }
 
-  .log-list__empty {
+  .poodle-log-list__empty {
     padding: 1rem;
     color: var(--poodle-color-text-secondary);
     text-align: center;
   }
 
-  .log-list__scroll-btn {
+  .poodle-log-list__scroll-btn {
     position: absolute;
     bottom: 0.5rem;
     left: 50%;

@@ -90,10 +90,10 @@
   });
 </script>
 
-<div class="popover" bind:this={rootElement}>
+<div class="poodle-popover" bind:this={rootElement}>
   <div
     bind:this={triggerElement}
-    class="popover__trigger"
+    class="poodle-popover__trigger"
     role="button"
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
@@ -113,7 +113,7 @@
     <div
       bind:this={surfaceElement}
       id={popoverId}
-      class="popover__surface"
+      class="poodle-popover__surface"
       data-placement={placement}
       style={`--poodle-popover-offset: ${offset}px;`}
       tabindex={initialFocus === "content" ? 0 : -1}
@@ -126,21 +126,21 @@
 </div>
 
 <style>
-  .popover {
+  .poodle-popover {
     position: relative;
     display: inline-flex;
   }
 
-  .popover__trigger {
+  .poodle-popover__trigger {
     display: inline-flex;
   }
 
-  .popover__trigger:focus-visible {
+  .poodle-popover__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .popover__surface {
+  .poodle-popover__surface {
     position: absolute;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
@@ -159,27 +159,27 @@
       0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
   }
 
-  .popover__surface[data-placement^="bottom"] {
+  .poodle-popover__surface[data-placement^="bottom"] {
     top: calc(100% + var(--poodle-popover-offset));
     left: 0;
   }
 
-  .popover__surface[data-placement^="top"] {
+  .poodle-popover__surface[data-placement^="top"] {
     bottom: calc(100% + var(--poodle-popover-offset));
     left: 0;
   }
 
-  .popover__surface[data-placement^="right"] {
+  .poodle-popover__surface[data-placement^="right"] {
     top: 0;
     left: calc(100% + var(--poodle-popover-offset));
   }
 
-  .popover__surface[data-placement^="left"] {
+  .poodle-popover__surface[data-placement^="left"] {
     top: 0;
     right: calc(100% + var(--poodle-popover-offset));
   }
 
-  .popover__surface[data-placement$="end"] {
+  .poodle-popover__surface[data-placement$="end"] {
     left: auto;
     right: 0;
   }

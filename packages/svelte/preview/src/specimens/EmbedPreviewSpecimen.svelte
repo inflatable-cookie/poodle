@@ -16,7 +16,7 @@
   };
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="YouTube embed">
     <EmbedPreview parsed={youtubeParsed} />
   </SpecimenGroup>
@@ -39,7 +39,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

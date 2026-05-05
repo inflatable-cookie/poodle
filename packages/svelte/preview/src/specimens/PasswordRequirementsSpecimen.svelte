@@ -14,9 +14,9 @@
   };
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Default">
-    <label class="specimen__field">
+    <label class="poodle-specimen__field">
       <span>Password</span>
       <input bind:value={password} type="password" />
     </label>
@@ -37,14 +37,14 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     max-width: 28rem;
   }
 
-  .specimen__field {
+  .poodle-specimen__field {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
@@ -52,7 +52,7 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  .specimen__field input {
+  .poodle-specimen__field input {
     padding: 0.625rem 0.75rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);

@@ -34,9 +34,9 @@
   }));
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Supported providers">
-    <table class="providers">
+    <table class="poodle-providers">
       <thead>
         <tr><th>Provider</th><th>Detected patterns</th></tr>
       </thead>
@@ -49,7 +49,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Detection matrix">
-    <table class="providers">
+    <table class="poodle-providers">
       <thead>
         <tr><th>Input</th><th>Resolved state</th></tr>
       </thead>
@@ -58,11 +58,11 @@
           <tr>
             <td>
               <strong>{sample.label}</strong>
-              <div class="providers__detail"><code>{sample.input}</code></div>
+              <div class="poodle-providers__detail"><code>{sample.input}</code></div>
             </td>
             <td>
               {#if sample.result.error}
-                <span class="providers__error">{sample.result.error}</span>
+                <span class="poodle-providers__error">{sample.result.error}</span>
               {:else if sample.result.parsed}
                 <code>{JSON.stringify(sample.result.parsed)}</code>
               {:else}
@@ -100,37 +100,37 @@
 
   {#if parsed}
     <SpecimenGroup label="Parsed result">
-      <pre class="parsed">{JSON.stringify(parsed, null, 2)}</pre>
+      <pre class="poodle-parsed">{JSON.stringify(parsed, null, 2)}</pre>
     </SpecimenGroup>
   {/if}
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .providers {
+  .poodle-providers {
     width: 100%;
     border-collapse: collapse;
     font-size: var(--poodle-typography-label-size, 0.75rem);
   }
 
-  .providers th,
-  .providers td {
+  .poodle-providers th,
+  .poodle-providers td {
     padding: 0.375rem 0.625rem;
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     text-align: left;
   }
 
-  .providers th {
+  .poodle-providers th {
     color: var(--poodle-color-text-secondary);
     font-weight: 600;
   }
 
-  .providers code {
+  .poodle-providers code {
     padding: 0.0625rem 0.25rem;
     border-radius: 0.1875rem;
     background: var(--poodle-color-background-panel, #1a1a1a);
@@ -138,15 +138,15 @@
     font-size: 0.6875rem;
   }
 
-  .providers__detail {
+  .poodle-providers__detail {
     margin-top: 0.25rem;
   }
 
-  .providers__error {
+  .poodle-providers__error {
     color: var(--poodle-color-text-danger, #ef4444);
   }
 
-  .parsed {
+  .poodle-parsed {
     margin: 0;
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;

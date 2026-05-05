@@ -21,32 +21,32 @@
 
 {#if visible}
   <div
-    class="page-loading"
+    class="poodle-page-loading"
     data-presentation={presentation}
     role="status"
     aria-label={ariaLabel ?? "Loading"}
     aria-live="polite"
   >
     {#if isOverlay}
-      <div class="page-loading__backdrop" aria-hidden="true"></div>
+      <div class="poodle-page-loading__backdrop" aria-hidden="true"></div>
     {/if}
-    <div class="page-loading__card">
-      <Spinner className="page-loading__spinner" variant="ring" sizeRole="prominent" tone="accent" />
+    <div class="poodle-page-loading__card">
+      <Spinner className="poodle-page-loading__spinner" variant="ring" sizeRole="prominent" tone="accent" />
 
       {#if !isIndeterminate}
-        <div class="page-loading__progress">
+        <div class="poodle-page-loading__progress">
           <Progress {value} {max} ariaLabel={message ?? "Loading progress"} />
         </div>
       {/if}
 
       {#if message}
-        <p class="page-loading__message">{message}</p>
+        <p class="poodle-page-loading__message">{message}</p>
       {/if}
 
       {#if canCancel}
         <button
           type="button"
-          class="page-loading__cancel"
+          class="poodle-page-loading__cancel"
           on:click={() => dispatch("cancel")}
         >
           Cancel
@@ -57,32 +57,32 @@
 {/if}
 
 <style>
-  .page-loading {
+  .poodle-page-loading {
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .page-loading[data-presentation="overlay"] {
+  .poodle-page-loading[data-presentation="overlay"] {
     position: fixed;
     inset: 0;
     z-index: var(--poodle-overlay-z-modal, 1000);
   }
 
-  .page-loading[data-presentation="inline"] {
+  .poodle-page-loading[data-presentation="inline"] {
     position: relative;
     min-height: 12rem;
     padding: 3rem 1rem;
   }
 
-  .page-loading__backdrop {
+  .poodle-page-loading__backdrop {
     position: absolute;
     inset: 0;
     background: color-mix(in srgb, var(--poodle-color-background-base, #000) 62%, transparent);
     backdrop-filter: blur(2px);
   }
 
-  .page-loading__card {
+  .poodle-page-loading__card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -97,7 +97,7 @@
     box-shadow: var(--poodle-elevation-overlay);
   }
 
-  .page-loading[data-presentation="inline"] .page-loading__card {
+  .poodle-page-loading[data-presentation="inline"] .poodle-page-loading__card {
     min-width: auto;
     max-width: 24rem;
     padding: 0;
@@ -106,11 +106,11 @@
     box-shadow: none;
   }
 
-  .page-loading__progress {
+  .poodle-page-loading__progress {
     width: 100%;
   }
 
-  .page-loading__message {
+  .poodle-page-loading__message {
     margin: 0;
     font-size: var(--poodle-typography-label-size, 0.8125rem);
     color: var(--poodle-color-text-secondary);
@@ -118,7 +118,7 @@
     line-height: 1.4;
   }
 
-  .page-loading__cancel {
+  .poodle-page-loading__cancel {
     padding: 0.375rem 0.875rem;
     border: 1px solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
@@ -130,11 +130,11 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .page-loading__cancel:hover {
+  .poodle-page-loading__cancel:hover {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent);
   }
 
-  .page-loading__cancel:focus-visible {
+  .poodle-page-loading__cancel:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }

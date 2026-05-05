@@ -22,7 +22,7 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Plan selection (2 columns)">
     <CardRadioGroup
       items={planItems}
@@ -48,7 +48,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       {#each controlSizes as size}
         <CardRadioGroup
           items={sizeItems}
@@ -73,13 +73,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;

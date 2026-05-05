@@ -15,7 +15,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Variants">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Button variant="primary" on:click={() => log("Primary")}>Primary</Button>
       <Button variant="secondary" on:click={() => log("Secondary")}>Secondary</Button>
       <Button variant="ghost" on:click={() => log("Ghost")}>Ghost</Button>
@@ -23,7 +23,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Danger tone">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Button variant="primary" tone="danger" on:click={() => log("Danger primary")}>Danger primary</Button>
       <Button variant="secondary" tone="danger" on:click={() => log("Danger secondary")}>Danger secondary</Button>
       <Button variant="ghost" tone="danger" on:click={() => log("Danger ghost")}>Danger ghost</Button>
@@ -31,7 +31,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With icons">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Button leadingIcon="plus" on:click={() => log("Leading icon")}>Create</Button>
       <Button trailingIcon="external-link" on:click={() => log("Trailing icon")}>Open</Button>
       <Button leadingIcon="save" trailingIcon="check" on:click={() => log("Both icons")}>Save</Button>
@@ -39,7 +39,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With chevron">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Button chevron on:click={() => log("Chevron")}>Options</Button>
       <Button variant="primary" chevron on:click={() => log("Primary chevron")}>Actions</Button>
       <Button leadingIcon="filter" chevron on:click={() => log("Icon + chevron")}>Filter</Button>
@@ -47,7 +47,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="States">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Button variant="primary" disabled>Disabled</Button>
       <Button variant="primary" loading>Loading</Button>
       <Button variant="secondary" disabled>Disabled secondary</Button>
@@ -55,7 +55,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Toggle (pressed state)">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Button
         variant="secondary"
         leadingIcon="star"
@@ -68,9 +68,9 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Form overrides">
-    <form class="specimen__form" on:submit|preventDefault={() => log(`Submitted via ${intent}`)}>
+    <form class="poodle-specimen__form" on:submit|preventDefault={() => log(`Submitted via ${intent}`)}>
       <input type="hidden" name="intent" value={intent} />
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Button
           type="submit"
           variant="secondary"
@@ -95,7 +95,7 @@
     </form>
   </SpecimenGroup>
 
-  <p class="specimen__log">{clickLog}</p>
+  <p class="poodle-specimen__log">{clickLog}</p>
 
   <svelte:fragment slot="sizes" let:size>
     <Button variant="primary" {size} leadingIcon="plus" on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
@@ -107,14 +107,14 @@
 </SpecimenLayout>
 
 <style>
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .specimen__log {
+  .poodle-specimen__log {
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     margin: 0;

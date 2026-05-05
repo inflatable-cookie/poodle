@@ -134,11 +134,11 @@
 </script>
 
 {#if isOpen}
-  <div class="drawer" data-edge={edge} data-modal={modal} data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="poodle-drawer" data-edge={edge} data-modal={modal} data-size={resolvedSize} data-density={resolvedDensity}>
     {#if modal}
       <button
         type="button"
-        class="drawer__backdrop"
+        class="poodle-drawer__backdrop"
         aria-label="Dismiss drawer backdrop"
         transition:fade={{ duration }}
         on:click={() => {
@@ -151,7 +151,7 @@
 
     <div
       bind:this={surfaceElement}
-      class="drawer__surface"
+      class="poodle-drawer__surface"
       role="dialog"
       tabindex="-1"
       aria-modal={modal ? "true" : undefined}
@@ -160,7 +160,7 @@
       on:keydown={trapFocus}
     >
       {#if title || description}
-        <div class="drawer__header">
+        <div class="poodle-drawer__header">
           {#if title}
             <strong>{title}</strong>
           {/if}
@@ -171,12 +171,12 @@
         </div>
       {/if}
 
-      <div class="drawer__body">
+      <div class="poodle-drawer__body">
         <slot />
       </div>
 
       {#if $$slots.actions}
-        <div class="drawer__actions">
+        <div class="poodle-drawer__actions">
           <slot name="actions" />
         </div>
       {/if}
@@ -185,7 +185,7 @@
 {/if}
 
 <style>
-  .drawer {
+  .poodle-drawer {
     position: fixed;
     inset: 0;
     z-index: var(--poodle-overlay-z-dialog);
@@ -193,12 +193,12 @@
     pointer-events: none;
   }
 
-  .drawer[data-edge="left"] { justify-content: flex-start; }
-  .drawer[data-edge="right"] { justify-content: flex-end; }
-  .drawer[data-edge="top"] { align-items: flex-start; }
-  .drawer[data-edge="bottom"] { align-items: flex-end; }
+  .poodle-drawer[data-edge="left"] { justify-content: flex-start; }
+  .poodle-drawer[data-edge="right"] { justify-content: flex-end; }
+  .poodle-drawer[data-edge="top"] { align-items: flex-start; }
+  .poodle-drawer[data-edge="bottom"] { align-items: flex-end; }
 
-  .drawer__backdrop {
+  .poodle-drawer__backdrop {
     position: absolute;
     inset: 0;
     padding: 0;
@@ -208,7 +208,7 @@
     cursor: default;
   }
 
-  .drawer__surface {
+  .poodle-drawer__surface {
     position: relative;
     z-index: 1;
     pointer-events: auto;
@@ -232,30 +232,30 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
   }
 
-  .drawer[data-edge="top"] .drawer__surface,
-  .drawer[data-edge="bottom"] .drawer__surface {
+  .poodle-drawer[data-edge="top"] .poodle-drawer__surface,
+  .poodle-drawer[data-edge="bottom"] .poodle-drawer__surface {
     width: 100vw;
     height: min(24rem, 100vh);
   }
 
-  .drawer__header {
+  .poodle-drawer__header {
     display: grid;
     gap: 0.375rem;
     margin-bottom: var(--poodle-space-stack-md);
   }
 
-  .drawer__header strong {
+  .poodle-drawer__header strong {
     font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     line-height: 1.2;
   }
 
-  .drawer__header p {
+  .poodle-drawer__header p {
     margin: 0;
     color: var(--poodle-color-text-secondary);
   }
 
-  .drawer__actions {
+  .poodle-drawer__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
@@ -264,13 +264,13 @@
   }
 
   /* Size variants */
-  .drawer[data-size="xs"] .drawer__header strong { font-size: 0.8125rem; }
-  .drawer[data-size="xs"] .drawer__header p { font-size: 0.75rem; }
-  .drawer[data-size="sm"] .drawer__header strong { font-size: 0.875rem; }
-  .drawer[data-size="lg"] .drawer__header strong { font-size: 1.0625rem; }
-  .drawer[data-size="xl"] .drawer__header strong { font-size: 1.125rem; }
+  .poodle-drawer[data-size="xs"] .poodle-drawer__header strong { font-size: 0.8125rem; }
+  .poodle-drawer[data-size="xs"] .poodle-drawer__header p { font-size: 0.75rem; }
+  .poodle-drawer[data-size="sm"] .poodle-drawer__header strong { font-size: 0.875rem; }
+  .poodle-drawer[data-size="lg"] .poodle-drawer__header strong { font-size: 1.0625rem; }
+  .poodle-drawer[data-size="xl"] .poodle-drawer__header strong { font-size: 1.125rem; }
 
   /* Density variants */
-  .drawer[data-density="compact"] .drawer__surface { padding: 0.5rem 0.75rem; }
-  .drawer[data-density="comfortable"] .drawer__surface { padding: 1rem 1.25rem; }
+  .poodle-drawer[data-density="compact"] .poodle-drawer__surface { padding: 0.5rem 0.75rem; }
+  .poodle-drawer[data-density="comfortable"] .poodle-drawer__surface { padding: 1rem 1.25rem; }
 </style>

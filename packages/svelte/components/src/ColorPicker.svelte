@@ -341,7 +341,7 @@
 </script>
 
 <div
-  class="color-picker"
+  class="poodle-color-picker"
   aria-label={ariaLabel}
   data-disabled={disabled || undefined}
   data-size={resolvedSize}
@@ -349,10 +349,10 @@
   bind:this={rootElement}
 >
   <!-- Trigger row -->
-  <div class="color-picker__controls">
+  <div class="poodle-color-picker__controls">
     <button
       type="button"
-      class="color-picker__trigger"
+      class="poodle-color-picker__trigger"
       aria-label="Open color picker"
       aria-haspopup="dialog"
       aria-expanded={isOpen}
@@ -361,7 +361,7 @@
       on:click={toggleOpen}
     >
       <span
-        class="color-picker__preview"
+        class="poodle-color-picker__preview"
         style="background: {previewColor}"
         aria-hidden="true"
       ></span>
@@ -370,7 +370,7 @@
     {#if showInput}
       <input
         type="text"
-        class="color-picker__input"
+        class="poodle-color-picker__input"
         value={triggerHexInput}
         disabled={disabled}
         maxlength="9"
@@ -385,15 +385,15 @@
   {#if isOpen}
     <div
       id={surfaceId}
-      class="color-picker__surface"
-      class:color-picker__surface--above={placement === "above"}
+      class="poodle-color-picker__surface"
+      class:poodle-color-picker__surface--above={placement === "above"}
       role="dialog"
       aria-label="Color picker"
     >
-      <div class="color-picker__picker-area">
+      <div class="poodle-color-picker__picker-area">
         <!-- Gradient pad (saturation × value) -->
         <div
-          class="color-picker__gradient"
+          class="poodle-color-picker__gradient"
           style="background-color: hsl({h}, 100%, 50%)"
           role="slider"
           tabindex="0"
@@ -409,16 +409,16 @@
           on:keydown={onGradientKeydown}
         >
           <div
-            class="color-picker__gradient-thumb"
+            class="poodle-color-picker__gradient-thumb"
             style="left: {s}%; top: {100 - v}%; background: {currentHex}"
             aria-hidden="true"
           ></div>
         </div>
 
         <!-- Controls panel (right of gradient) -->
-        <div class="color-picker__controls-panel">
+        <div class="poodle-color-picker__controls-panel">
           <!-- Hue slider -->
-          <div class="color-picker__hue-wrap">
+          <div class="poodle-color-picker__hue-wrap">
             <Slider
               value={h}
               min={0}
@@ -434,7 +434,7 @@
           <!-- Alpha slider -->
           {#if showAlpha}
             <div
-              class="color-picker__alpha-wrap"
+              class="poodle-color-picker__alpha-wrap"
               style="--poodle-cp-alpha-color: {currentHex}"
             >
               <Slider
@@ -451,8 +451,8 @@
           {/if}
 
           <!-- Mode toggle + inputs -->
-          <div class="color-picker__mode-section">
-        <div class="color-picker__mode-toggle">
+          <div class="poodle-color-picker__mode-section">
+        <div class="poodle-color-picker__mode-toggle">
           <SegmentedControl
             value={inputMode}
             options={modeOptions}
@@ -463,22 +463,22 @@
           />
         </div>
 
-        <div class="color-picker__inputs">
+        <div class="poodle-color-picker__inputs">
           {#if inputMode === "hex"}
-            <div class="color-picker__hex-field">
+            <div class="poodle-color-picker__hex-field">
               <input
                 type="text"
-                class="color-picker__text-input"
+                class="poodle-color-picker__text-input"
                 value={hexInput}
                 maxlength="9"
                 aria-label="Hex color"
                 on:input={onHexInput}
                 on:blur={onHexBlur}
               />
-              <span class="color-picker__input-label" aria-hidden="true">Hex</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">Hex</span>
             </div>
             {#if showAlpha}
-              <div class="color-picker__channel-field">
+              <div class="poodle-color-picker__channel-field">
                 <NumberInput
                   id="cp-{pickerId}-a-hex"
                   value={Math.round(alpha * 100)}
@@ -490,11 +490,11 @@
                   density={resolvedDensity}
                   on:valueChange={onAlphaInputChange}
                 />
-                <span class="color-picker__input-label" aria-hidden="true">A</span>
+                <span class="poodle-color-picker__input-label" aria-hidden="true">A</span>
               </div>
             {/if}
           {:else if inputMode === "rgb"}
-            <div class="color-picker__channel-field">
+            <div class="poodle-color-picker__channel-field">
               <NumberInput
                 id="cp-{pickerId}-r"
                 value={currentRgb.r}
@@ -506,9 +506,9 @@
                 density={resolvedDensity}
                 on:valueChange={(e) => onRgbChange("r", e)}
               />
-              <span class="color-picker__input-label" aria-hidden="true">R</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">R</span>
             </div>
-            <div class="color-picker__channel-field">
+            <div class="poodle-color-picker__channel-field">
               <NumberInput
                 id="cp-{pickerId}-g"
                 value={currentRgb.g}
@@ -520,9 +520,9 @@
                 density={resolvedDensity}
                 on:valueChange={(e) => onRgbChange("g", e)}
               />
-              <span class="color-picker__input-label" aria-hidden="true">G</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">G</span>
             </div>
-            <div class="color-picker__channel-field">
+            <div class="poodle-color-picker__channel-field">
               <NumberInput
                 id="cp-{pickerId}-b"
                 value={currentRgb.b}
@@ -534,10 +534,10 @@
                 density={resolvedDensity}
                 on:valueChange={(e) => onRgbChange("b", e)}
               />
-              <span class="color-picker__input-label" aria-hidden="true">B</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">B</span>
             </div>
             {#if showAlpha}
-              <div class="color-picker__channel-field">
+              <div class="poodle-color-picker__channel-field">
                 <NumberInput
                   id="cp-{pickerId}-a-rgb"
                   value={Math.round(alpha * 100)}
@@ -549,11 +549,11 @@
                   density={resolvedDensity}
                   on:valueChange={onAlphaInputChange}
                 />
-                <span class="color-picker__input-label" aria-hidden="true">A</span>
+                <span class="poodle-color-picker__input-label" aria-hidden="true">A</span>
               </div>
             {/if}
           {:else}
-            <div class="color-picker__channel-field">
+            <div class="poodle-color-picker__channel-field">
               <NumberInput
                 id="cp-{pickerId}-hsl-h"
                 value={currentHsl.h}
@@ -565,9 +565,9 @@
                 density={resolvedDensity}
                 on:valueChange={(e) => onHslChange("h", e)}
               />
-              <span class="color-picker__input-label" aria-hidden="true">H</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">H</span>
             </div>
-            <div class="color-picker__channel-field">
+            <div class="poodle-color-picker__channel-field">
               <NumberInput
                 id="cp-{pickerId}-hsl-s"
                 value={currentHsl.s}
@@ -579,9 +579,9 @@
                 density={resolvedDensity}
                 on:valueChange={(e) => onHslChange("s", e)}
               />
-              <span class="color-picker__input-label" aria-hidden="true">S</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">S</span>
             </div>
-            <div class="color-picker__channel-field">
+            <div class="poodle-color-picker__channel-field">
               <NumberInput
                 id="cp-{pickerId}-hsl-l"
                 value={currentHsl.l}
@@ -593,10 +593,10 @@
                 density={resolvedDensity}
                 on:valueChange={(e) => onHslChange("l", e)}
               />
-              <span class="color-picker__input-label" aria-hidden="true">L</span>
+              <span class="poodle-color-picker__input-label" aria-hidden="true">L</span>
             </div>
             {#if showAlpha}
-              <div class="color-picker__channel-field">
+              <div class="poodle-color-picker__channel-field">
                 <NumberInput
                   id="cp-{pickerId}-a-hsl"
                   value={Math.round(alpha * 100)}
@@ -608,7 +608,7 @@
                   density={resolvedDensity}
                   on:valueChange={onAlphaInputChange}
                 />
-                <span class="color-picker__input-label" aria-hidden="true">A</span>
+                <span class="poodle-color-picker__input-label" aria-hidden="true">A</span>
               </div>
             {/if}
           {/if}
@@ -619,12 +619,12 @@
 
       <!-- Swatches -->
       {#if swatches.length > 0}
-        <div class="color-picker__swatches" role="listbox" aria-label="Color swatches">
+        <div class="poodle-color-picker__swatches" role="listbox" aria-label="Color swatches">
           {#each swatches as hex (hex)}
             <button
               type="button"
-              class="color-picker__swatch"
-              class:color-picker__swatch--active={currentHex === hex}
+              class="poodle-color-picker__swatch"
+              class:poodle-color-picker__swatch--active={currentHex === hex}
               style="background: {hex}"
               role="option"
               aria-selected={currentHex === hex ? "true" : "false"}
@@ -639,18 +639,18 @@
 </div>
 
 <style>
-  .color-picker {
+  .poodle-color-picker {
     position: relative;
     display: inline-flex;
     flex-direction: column;
   }
 
-  .color-picker[data-disabled] {
+  .poodle-color-picker[data-disabled] {
     opacity: var(--poodle-state-opacity-disabled);
     pointer-events: none;
   }
 
-  .color-picker__controls {
+  .poodle-color-picker__controls {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -658,7 +658,7 @@
 
   /* ── Trigger button ──────────────────────────────────────── */
 
-  .color-picker__trigger {
+  .poodle-color-picker__trigger {
     position: relative;
     width: 2.25rem;
     height: 2.25rem;
@@ -675,12 +675,12 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .color-picker__trigger:focus-visible {
+  .poodle-color-picker__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .color-picker__preview {
+  .poodle-color-picker__preview {
     position: absolute;
     inset: 0;
     border-radius: inherit;
@@ -688,7 +688,7 @@
 
   /* ── Inline hex input ────────────────────────────────────── */
 
-  .color-picker__input {
+  .poodle-color-picker__input {
     width: 6.5rem;
     height: 2.25rem;
     min-height: 0;
@@ -705,7 +705,7 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .color-picker__input:focus {
+  .poodle-color-picker__input:focus {
     border-color: var(--poodle-color-accent-focusRing);
     box-shadow: 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
@@ -713,7 +713,7 @@
 
   /* ── Surface (popover) ───────────────────────────────────── */
 
-  .color-picker__surface {
+  .poodle-color-picker__surface {
     position: absolute;
     top: 100%;
     left: 0;
@@ -730,7 +730,7 @@
     box-shadow: var(--poodle-shadow-lg);
   }
 
-  .color-picker__surface--above {
+  .poodle-color-picker__surface--above {
     top: auto;
     bottom: 100%;
     margin-top: 0;
@@ -739,13 +739,13 @@
 
   /* ── Picker area (gradient + controls side by side) ────── */
 
-  .color-picker__picker-area {
+  .poodle-color-picker__picker-area {
     display: flex;
     gap: 0.625rem;
     align-items: stretch;
   }
 
-  .color-picker__controls-panel {
+  .poodle-color-picker__controls-panel {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -755,7 +755,7 @@
 
   /* ── Gradient pad ────────────────────────────────────────── */
 
-  .color-picker__gradient {
+  .poodle-color-picker__gradient {
     position: relative;
     width: 10rem;
     flex-shrink: 0;
@@ -766,26 +766,26 @@
     overflow: hidden;
   }
 
-  .color-picker__gradient::before {
+  .poodle-color-picker__gradient::before {
     content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(to right, #fff, transparent);
   }
 
-  .color-picker__gradient::after {
+  .poodle-color-picker__gradient::after {
     content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, transparent, #000);
   }
 
-  .color-picker__gradient:focus-visible {
+  .poodle-color-picker__gradient:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .color-picker__gradient-thumb {
+  .poodle-color-picker__gradient-thumb {
     position: absolute;
     z-index: 1;
     width: 0.875rem;
@@ -801,11 +801,11 @@
 
   /* ── Hue slider ──────────────────────────────────────────── */
 
-  .color-picker__hue-wrap {
+  .poodle-color-picker__hue-wrap {
     min-height: 0;
   }
 
-  .color-picker__hue-wrap :global(.slider__track) {
+  .poodle-color-picker__hue-wrap :global(.poodle-slider__track) {
     background: linear-gradient(
       to right,
       #f00 0%,
@@ -818,18 +818,18 @@
     ) !important;
   }
 
-  .color-picker__hue-wrap :global(.slider__fill) {
+  .poodle-color-picker__hue-wrap :global(.poodle-slider__fill) {
     display: none;
   }
 
   /* ── Alpha slider ────────────────────────────────────────── */
 
-  .color-picker__alpha-wrap {
+  .poodle-color-picker__alpha-wrap {
     position: relative;
     min-height: 0;
   }
 
-  .color-picker__alpha-wrap :global(.slider__track) {
+  .poodle-color-picker__alpha-wrap :global(.poodle-slider__track) {
     background:
       linear-gradient(
         to right,
@@ -842,29 +842,29 @@
       ) 0 0 / 0.5rem 0.5rem !important;
   }
 
-  .color-picker__alpha-wrap :global(.slider__fill) {
+  .poodle-color-picker__alpha-wrap :global(.poodle-slider__fill) {
     display: none;
   }
 
   /* ── Mode section ────────────────────────────────────────── */
 
-  .color-picker__mode-section {
+  .poodle-color-picker__mode-section {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .color-picker__mode-toggle {
+  .poodle-color-picker__mode-toggle {
     min-height: 0;
   }
 
-  .color-picker__inputs {
+  .poodle-color-picker__inputs {
     display: flex;
     gap: 0.375rem;
     align-items: flex-start;
   }
 
-  .color-picker__hex-field {
+  .poodle-color-picker__hex-field {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -872,7 +872,7 @@
     min-width: 0;
   }
 
-  .color-picker__channel-field {
+  .poodle-color-picker__channel-field {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -880,11 +880,11 @@
     min-width: 0;
   }
 
-  .color-picker__channel-field :global(input) {
+  .poodle-color-picker__channel-field :global(input) {
     min-height: 0;
   }
 
-  .color-picker__text-input {
+  .poodle-color-picker__text-input {
     width: 100%;
     height: 2rem;
     min-height: 0;
@@ -901,13 +901,13 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .color-picker__text-input:focus {
+  .poodle-color-picker__text-input:focus {
     border-color: var(--poodle-color-accent-focusRing);
     box-shadow: 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
-  .color-picker__input-label {
+  .poodle-color-picker__input-label {
     display: block;
     font-family: var(--poodle-typography-label-family);
     font-size: 0.625rem;
@@ -921,7 +921,7 @@
 
   /* ── Swatches ────────────────────────────────────────────── */
 
-  .color-picker__swatches {
+  .poodle-color-picker__swatches {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
@@ -929,7 +929,7 @@
     border-top: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
   }
 
-  .color-picker__swatch {
+  .poodle-color-picker__swatch {
     width: 1.25rem;
     height: 1.25rem;
     min-height: 0;
@@ -942,62 +942,62 @@
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .color-picker__swatch:hover {
+  .poodle-color-picker__swatch:hover {
     transform: scale(1.15);
   }
 
-  .color-picker__swatch:focus-visible {
+  .poodle-color-picker__swatch:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .color-picker__swatch--active {
+  .poodle-color-picker__swatch--active {
     border-color: var(--poodle-color-text-primary);
     box-shadow: 0 0 0 0.0625rem var(--poodle-color-background-surface);
   }
 
   /* Size variants */
-  .color-picker[data-size="xs"] .color-picker__trigger {
+  .poodle-color-picker[data-size="xs"] .poodle-color-picker__trigger {
     width: 1.75rem;
     height: 1.75rem;
   }
 
-  .color-picker[data-size="xs"] .color-picker__input {
+  .poodle-color-picker[data-size="xs"] .poodle-color-picker__input {
     height: 1.75rem;
     font-size: 0.6875rem;
   }
 
-  .color-picker[data-size="sm"] .color-picker__trigger {
+  .poodle-color-picker[data-size="sm"] .poodle-color-picker__trigger {
     width: 2rem;
     height: 2rem;
   }
 
-  .color-picker[data-size="sm"] .color-picker__input {
+  .poodle-color-picker[data-size="sm"] .poodle-color-picker__input {
     height: 2rem;
     font-size: 0.75rem;
   }
 
-  .color-picker[data-size="lg"] .color-picker__trigger {
+  .poodle-color-picker[data-size="lg"] .poodle-color-picker__trigger {
     width: 2.5rem;
     height: 2.5rem;
   }
 
-  .color-picker[data-size="lg"] .color-picker__input {
+  .poodle-color-picker[data-size="lg"] .poodle-color-picker__input {
     height: 2.5rem;
     font-size: 0.875rem;
   }
 
-  .color-picker[data-size="xl"] .color-picker__trigger {
+  .poodle-color-picker[data-size="xl"] .poodle-color-picker__trigger {
     width: 2.75rem;
     height: 2.75rem;
   }
 
-  .color-picker[data-size="xl"] .color-picker__input {
+  .poodle-color-picker[data-size="xl"] .poodle-color-picker__input {
     height: 2.75rem;
     font-size: 0.9375rem;
   }
 
   /* Density variants */
-  .color-picker[data-density="compact"] .color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .color-picker[data-density="comfortable"] .color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-color-picker[data-density="compact"] .poodle-color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-color-picker[data-density="comfortable"] .poodle-color-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

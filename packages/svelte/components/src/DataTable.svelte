@@ -128,8 +128,8 @@
 
   function getActionButtonClass(action: TableRowAction): string {
     return action.tone === "danger"
-      ? "data-table__row-action-btn data-table__row-action-btn--danger"
-      : "data-table__row-action-btn";
+      ? "poodle-data-table__row-action-btn poodle-data-table__row-action-btn--danger"
+      : "poodle-data-table__row-action-btn";
   }
 
   function requestRowAction(row: TableRow, action: TableRowAction): void {
@@ -239,19 +239,19 @@
 </script>
 
 <div
-  class="data-table"
-  class:data-table--compact={compact}
-  class:data-table--striped={striped}
-  class:data-table--sticky-header={stickyHeader}
+  class="poodle-data-table"
+  class:poodle-data-table--compact={compact}
+  class:poodle-data-table--striped={striped}
+  class:poodle-data-table--sticky-header={stickyHeader}
   data-size={resolvedSize}
   data-density={resolvedDensity}
 >
   {#if showColumnVisibility || showExport}
-    <div class="data-table__toolbar">
+    <div class="poodle-data-table__toolbar">
       {#if showExport}
         <button
           type="button"
-          class="data-table__toolbar-btn"
+          class="poodle-data-table__toolbar-btn"
           on:click={handleExport}
           aria-label="Export as CSV"
         >
@@ -262,13 +262,13 @@
 
       {#if showColumnVisibility && hideableColumns.length > 0}
         <Popover placement="bottom-end" ariaLabel="Column visibility">
-          <span slot="trigger" class="data-table__toolbar-btn">
+          <span slot="trigger" class="poodle-data-table__toolbar-btn">
             <Icon name="columns-3" />
             Columns
           </span>
-          <div class="data-table__col-menu" role="menu">
+          <div class="poodle-data-table__col-menu" role="menu">
             {#each hideableColumns as column}
-              <label class="data-table__col-menu-item">
+              <label class="poodle-data-table__col-menu-item">
                 <Checkbox
                   ariaLabel={column.label}
                   checked={!hiddenColumnIds.includes(column.id)}
@@ -284,7 +284,7 @@
   {/if}
 
   <table aria-label={ariaLabel}>
-    <caption class="data-table__caption">
+    <caption class="poodle-data-table__caption">
       {#if selectable}
         {ariaLabel}. {selectionCount} selected row{selectionCount === 1 ? "" : "s"} out of {selectableRowCount}.
       {:else}
@@ -294,7 +294,7 @@
     <thead>
       <tr>
         {#if selectable}
-          <th class="data-table__selection">
+          <th class="poodle-data-table__selection">
             <Checkbox
               ariaLabel="Select all visible rows"
               checked={allRowsSelected}
@@ -306,15 +306,15 @@
         {#each visibleColumns as column}
           <th
             style={getColumnStyle(column)}
-            class:center-align={column.align === "center"}
-            class:end-align={column.align === "end"}
-            class:data-table__hide-mobile={column.hideOnMobile === true}
+            class:poodle-center-align={column.align === "center"}
+            class:poodle-end-align={column.align === "end"}
+            class:poodle-data-table__hide-mobile={column.hideOnMobile === true}
             aria-sort={column.sortable && sortColumnId === column.id ? (sortDirection === "asc" ? "ascending" : "descending") : column.sortable ? "none" : undefined}
           >
             {#if column.sortable}
               <button
                 type="button"
-                class="data-table__sort"
+                class="poodle-data-table__sort"
                 on:click={() => requestSort(column)}
                 aria-label={`Sort by ${column.label}${sortColumnId === column.id ? `, currently ${sortDirection}` : ""}`}
               >
@@ -329,20 +329,20 @@
           </th>
         {/each}
         {#if showActionsColumn}
-          <th scope="col" class="data-table__actions-header">Actions</th>
+          <th scope="col" class="poodle-data-table__actions-header">Actions</th>
         {/if}
       </tr>
       {#if hasFilters}
-        <tr class="data-table__filters-row">
+        <tr class="poodle-data-table__filters-row">
           {#if selectable}
-            <td class="data-table__selection" aria-hidden="true"></td>
+            <td class="poodle-data-table__selection" aria-hidden="true"></td>
           {/if}
           {#each visibleColumns as column}
             <td
               style={getColumnStyle(column)}
-              class:center-align={column.align === "center"}
-              class:end-align={column.align === "end"}
-              class:data-table__hide-mobile={column.hideOnMobile === true}
+              class:poodle-center-align={column.align === "center"}
+              class:poodle-end-align={column.align === "end"}
+              class:poodle-data-table__hide-mobile={column.hideOnMobile === true}
             >
               {#if column.filterable}
                 {#if column.filterType === "select" && column.filterOptions}
@@ -391,32 +391,32 @@
     <tbody>
       {#if loading && rows.length === 0}
         {#each Array(loadingRows) as _, index (index)}
-          <tr class="data-table__loading-row">
+          <tr class="poodle-data-table__loading-row">
             {#if selectable}
-              <td class="data-table__selection">
-                <span class="data-table__loading-block data-table__loading-block--checkbox"></span>
+              <td class="poodle-data-table__selection">
+                <span class="poodle-data-table__loading-block poodle-data-table__loading-block--checkbox"></span>
               </td>
             {/if}
             {#each visibleColumns as column}
               <td
                 style={getColumnStyle(column)}
-                class:center-align={column.align === "center"}
-                class:end-align={column.align === "end"}
-                class:data-table__hide-mobile={column.hideOnMobile === true}
+                class:poodle-center-align={column.align === "center"}
+                class:poodle-end-align={column.align === "end"}
+                class:poodle-data-table__hide-mobile={column.hideOnMobile === true}
               >
-                <span class="data-table__loading-block"></span>
+                <span class="poodle-data-table__loading-block"></span>
               </td>
             {/each}
             {#if showActionsColumn}
-              <td class="data-table__actions">
-                <span class="data-table__loading-block data-table__loading-block--action"></span>
+              <td class="poodle-data-table__actions">
+                <span class="poodle-data-table__loading-block poodle-data-table__loading-block--action"></span>
               </td>
             {/if}
           </tr>
         {/each}
       {:else if rows.length === 0}
         <tr>
-          <td colspan={columnCount} class="data-table__empty">
+          <td colspan={columnCount} class="poodle-data-table__empty">
             {#if hasEmptySlot}
               <slot name="empty" />
             {:else}
@@ -427,12 +427,12 @@
       {:else}
         {#each rows as row (row.id)}
           <tr
-            class:selected={selectable && selectedRowIds.includes(row.id)}
+            class:poodle-selected={selectable && selectedRowIds.includes(row.id)}
             aria-selected={selectable ? selectedRowIds.includes(row.id) : undefined}
             on:click={(event) => handleRowClick(event, row)}
           >
             {#if selectable}
-              <td class="data-table__selection">
+              <td class="poodle-data-table__selection">
                 <Checkbox
                   ariaLabel={`Select row ${getRowPrimaryLabel(row)}`}
                   checked={selectedRowIds.includes(row.id)}
@@ -445,14 +445,14 @@
                 this={index === 0 && column.isRowHeader !== false ? "th" : "td"}
                 scope={index === 0 && column.isRowHeader !== false ? "row" : undefined}
                 style={getColumnStyle(column)}
-                class:center-align={column.align === "center"}
-                class:end-align={column.align === "end"}
-                class:data-table__hide-mobile={column.hideOnMobile === true}
+                class:poodle-center-align={column.align === "center"}
+                class:poodle-end-align={column.align === "end"}
+                class:poodle-data-table__hide-mobile={column.hideOnMobile === true}
               >
                 {#if hasCustomCellSlot}
                   <slot name="cell" column={column} row={row} value={row.cells[column.id] ?? null} />
                 {:else}
-                  <div class="data-table__cell">
+                  <div class="poodle-data-table__cell">
                     <span>{stringifyCellValue(row.cells[column.id] ?? null) || "—"}</span>
                     {#if column.id === visibleColumns[0]?.id && row.summary}
                       <small>{row.summary}</small>
@@ -462,7 +462,7 @@
               </svelte:element>
             {/each}
             {#if showActionsColumn}
-              <td class="data-table__actions">
+              <td class="poodle-data-table__actions">
                 {#if hasRichRowActions}
                   {@const actions = resolveRowActions(row)}
                   {@const actionableActions = actions.filter((action) => action.kind !== "separator")}
@@ -493,7 +493,7 @@
                       placement="bottom-end"
                       on:action={(event) => handleMenuAction(row, actions, event.detail.value)}
                     >
-                      <span slot="trigger" class="data-table__actions-trigger" data-row-action-trigger="true">
+                      <span slot="trigger" class="poodle-data-table__actions-trigger" data-row-action-trigger="true">
                         <Icon name="ellipsis" />
                         Actions
                       </span>
@@ -502,7 +502,7 @@
                 {:else if showLegacyRowAction}
                   <button
                     type="button"
-                    class="data-table__row-action-btn"
+                    class="poodle-data-table__row-action-btn"
                     aria-label={`${rowActionLabel} ${getRowPrimaryLabel(row)}`}
                     on:click|stopPropagation={() => dispatch("rowAction", { rowId: row.id })}
                   >
@@ -513,9 +513,9 @@
             {/if}
           </tr>
           {#if hasExpandedRowSlot && expandedIdSet.has(row.id)}
-            <tr class="data-table__expanded-row">
+            <tr class="poodle-data-table__expanded-row">
               <td colspan={columnCount}>
-                <div class="data-table__expanded-panel">
+                <div class="poodle-data-table__expanded-panel">
                   <slot name="expandedRow" row={row} />
                 </div>
               </td>
@@ -527,11 +527,11 @@
   </table>
 
   {#if showPaginationFooter && pagination}
-    <div class="data-table__footer">
-      <p class="data-table__pagination-summary">{getPaginationSummary()}</p>
-      <div class="data-table__pagination-actions">
+    <div class="poodle-data-table__footer">
+      <p class="poodle-data-table__pagination-summary">{getPaginationSummary()}</p>
+      <div class="poodle-data-table__pagination-actions">
         {#if showLimitSelector && limitOptions.length > 0}
-          <label class="data-table__limit">
+          <label class="poodle-data-table__limit">
             <span>Show</span>
             <Select
               id={`${ariaLabel.replace(/\s+/g, "-").toLowerCase()}-limit`}
@@ -544,14 +544,14 @@
           </label>
         {/if}
         {#if totalPages > 1}
-          <div class="data-table__pagination-controls">
+          <div class="poodle-data-table__pagination-controls">
             <Button type="button" variant="ghost" size="sm" disabled={pagination.page <= 1} on:click={() => requestPageChange(1)}>
               First
             </Button>
             <Button type="button" variant="ghost" size="sm" disabled={pagination.page <= 1} on:click={() => requestPageChange(pagination.page - 1)}>
               Previous
             </Button>
-            <span class="data-table__pagination-page">Page {pagination.page} of {totalPages}</span>
+            <span class="poodle-data-table__pagination-page">Page {pagination.page} of {totalPages}</span>
             <Button type="button" variant="ghost" size="sm" disabled={pagination.page >= totalPages} on:click={() => requestPageChange(pagination.page + 1)}>
               Next
             </Button>
@@ -566,14 +566,14 @@
 </div>
 
 <style>
-  .data-table {
+  .poodle-data-table {
     overflow: auto;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-panel);
   }
 
-  .data-table__toolbar {
+  .poodle-data-table__toolbar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -583,7 +583,7 @@
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
-  .data-table__toolbar-btn {
+  .poodle-data-table__toolbar-btn {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -599,26 +599,26 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .data-table__toolbar-btn:hover {
+  .poodle-data-table__toolbar-btn:hover {
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
   }
 
-  .data-table__toolbar-btn:focus-visible {
+  .poodle-data-table__toolbar-btn:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .data-table__toolbar-btn :global(.poodle-icon) {
+  .poodle-data-table__toolbar-btn :global(.poodle-icon) {
     width: 0.875rem;
     height: 0.875rem;
   }
 
-  .data-table__col-menu {
+  .poodle-data-table__col-menu {
     display: flex;
     flex-direction: column;
   }
 
-  .data-table__col-menu-item {
+  .poodle-data-table__col-menu-item {
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-md);
@@ -629,7 +629,7 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .data-table__col-menu-item:hover {
+  .poodle-data-table__col-menu-item:hover {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
@@ -638,7 +638,7 @@
     border-collapse: collapse;
   }
 
-  .data-table__caption {
+  .poodle-data-table__caption {
     position: absolute;
     width: 0.0625rem;
     height: 0.0625rem;
@@ -668,25 +668,25 @@
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
-  .data-table--sticky-header thead th {
+  .poodle-data-table--sticky-header thead th {
     position: sticky;
     top: 0;
     z-index: 1;
   }
 
-  .data-table__filters-row td {
+  .poodle-data-table__filters-row td {
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
-  .data-table__filters-row :global(.select),
-  .data-table__filters-row :global(.text-input),
-  .data-table__filters-row :global(.text-input__field) {
+  .poodle-data-table__filters-row :global(.poodle-select),
+  .poodle-data-table__filters-row :global(.poodle-text-input),
+  .poodle-data-table__filters-row :global(.poodle-text-input__field) {
     width: 100%;
   }
 
-  tbody tr.selected {
+  tbody tr.poodle-selected {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
   }
 
@@ -694,14 +694,14 @@
     background: color-mix(in srgb, var(--poodle-color-accent-base) 5%, transparent);
   }
 
-  .data-table__selection {
+  .poodle-data-table__selection {
     width: 3.25rem;
   }
 
-  .data-table__sort,
-  .data-table__row-action-btn,
-  .data-table__action-link,
-  .data-table__actions-trigger {
+  .poodle-data-table__sort,
+  .poodle-data-table__row-action-btn,
+  .poodle-data-table__action-link,
+  .poodle-data-table__actions-trigger {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -715,73 +715,73 @@
     text-decoration: none;
   }
 
-  .data-table__sort:focus-visible,
-  .data-table__row-action-btn:focus-visible,
-  .data-table__action-link:focus-visible,
-  .data-table__actions-trigger:focus-visible {
+  .poodle-data-table__sort:focus-visible,
+  .poodle-data-table__row-action-btn:focus-visible,
+  .poodle-data-table__action-link:focus-visible,
+  .poodle-data-table__actions-trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     border-radius: var(--poodle-radius-control);
   }
 
-  .data-table__cell {
+  .poodle-data-table__cell {
     display: grid;
     gap: 0.25rem;
   }
 
-  .data-table__cell small {
+  .poodle-data-table__cell small {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .center-align {
+  .poodle-center-align {
     text-align: center;
   }
 
-  .end-align {
+  .poodle-end-align {
     text-align: right;
   }
 
-  .data-table__actions-header,
-  .data-table__actions {
+  .poodle-data-table__actions-header,
+  .poodle-data-table__actions {
     width: 7.5rem;
     text-align: right;
     white-space: nowrap;
   }
 
-  .data-table__actions-trigger {
+  .poodle-data-table__actions-trigger {
     justify-content: flex-end;
   }
 
-  .data-table__actions-trigger :global(.poodle-icon) {
+  .poodle-data-table__actions-trigger :global(.poodle-icon) {
     width: 0.875rem;
     height: 0.875rem;
   }
 
-  .data-table__row-action-btn--danger,
-  .data-table__action-link.data-table__row-action-btn--danger {
+  .poodle-data-table__row-action-btn--danger,
+  .poodle-data-table__action-link.poodle-data-table__row-action-btn--danger {
     color: var(--poodle-color-feedback-danger-text);
   }
 
-  .data-table__expanded-row td {
+  .poodle-data-table__expanded-row td {
     padding: 0;
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
   }
 
-  .data-table__expanded-panel {
+  .poodle-data-table__expanded-panel {
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
   }
 
-  .data-table__empty {
+  .poodle-data-table__empty {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .data-table__footer {
+  .poodle-data-table__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -791,13 +791,13 @@
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
-  .data-table__pagination-summary {
+  .poodle-data-table__pagination-summary {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-label-size);
   }
 
-  .data-table__pagination-actions {
+  .poodle-data-table__pagination-actions {
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-lg);
@@ -805,7 +805,7 @@
     flex-wrap: wrap;
   }
 
-  .data-table__limit {
+  .poodle-data-table__limit {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -813,11 +813,11 @@
     font-size: var(--poodle-typography-label-size);
   }
 
-  .data-table__limit :global(.select) {
+  .poodle-data-table__limit :global(.poodle-select) {
     min-width: 5rem;
   }
 
-  .data-table__pagination-controls {
+  .poodle-data-table__pagination-controls {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -825,13 +825,13 @@
     justify-content: flex-end;
   }
 
-  .data-table__pagination-page {
+  .poodle-data-table__pagination-page {
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-label-size);
     white-space: nowrap;
   }
 
-  .data-table__loading-block {
+  .poodle-data-table__loading-block {
     display: inline-flex;
     width: 100%;
     height: 0.875rem;
@@ -844,214 +844,214 @@
     );
   }
 
-  .data-table__loading-block--checkbox {
+  .poodle-data-table__loading-block--checkbox {
     width: 1.125rem;
     height: 1.125rem;
   }
 
-  .data-table__loading-block--action {
+  .poodle-data-table__loading-block--action {
     width: 4rem;
     margin-left: auto;
   }
 
-  .data-table__hide-mobile {
+  .poodle-data-table__hide-mobile {
     display: table-cell;
   }
 
-  .data-table--compact th,
-  .data-table--compact td,
-  .data-table--compact .data-table__filters-row td,
-  .data-table--compact .data-table__expanded-panel,
-  .data-table--compact .data-table__footer {
+  .poodle-data-table--compact th,
+  .poodle-data-table--compact td,
+  .poodle-data-table--compact .poodle-data-table__filters-row td,
+  .poodle-data-table--compact .poodle-data-table__expanded-panel,
+  .poodle-data-table--compact .poodle-data-table__footer {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
   }
 
-  .data-table--striped tbody tr:nth-child(even) {
+  .poodle-data-table--striped tbody tr:nth-child(even) {
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent);
   }
 
-  .data-table--striped tbody tr.selected:nth-child(even) {
+  .poodle-data-table--striped tbody tr.poodle-selected:nth-child(even) {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
   }
 
-  .data-table[data-size="xs"] .data-table__toolbar-btn {
+  .poodle-data-table[data-size="xs"] .poodle-data-table__toolbar-btn {
     font-size: 0.6875rem;
     padding: 0.1875rem 0.375rem;
   }
 
-  .data-table[data-size="xs"] .data-table__toolbar-btn :global(.poodle-icon) {
+  .poodle-data-table[data-size="xs"] .poodle-data-table__toolbar-btn :global(.poodle-icon) {
     width: 0.75rem;
     height: 0.75rem;
   }
 
-  .data-table[data-size="xs"] th,
-  .data-table[data-size="xs"] td,
-  .data-table[data-size="xs"] .data-table__filters-row td,
-  .data-table[data-size="xs"] .data-table__footer {
+  .poodle-data-table[data-size="xs"] th,
+  .poodle-data-table[data-size="xs"] td,
+  .poodle-data-table[data-size="xs"] .poodle-data-table__filters-row td,
+  .poodle-data-table[data-size="xs"] .poodle-data-table__footer {
     font-size: 0.6875rem;
   }
 
-  .data-table[data-size="xs"] th,
-  .data-table[data-size="xs"] td,
-  .data-table[data-size="xs"] .data-table__filters-row td {
+  .poodle-data-table[data-size="xs"] th,
+  .poodle-data-table[data-size="xs"] td,
+  .poodle-data-table[data-size="xs"] .poodle-data-table__filters-row td {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
 
-  .data-table[data-size="xs"] .data-table__sort,
-  .data-table[data-size="xs"] .data-table__row-action-btn,
-  .data-table[data-size="xs"] .data-table__action-link,
-  .data-table[data-size="xs"] .data-table__actions-trigger {
+  .poodle-data-table[data-size="xs"] .poodle-data-table__sort,
+  .poodle-data-table[data-size="xs"] .poodle-data-table__row-action-btn,
+  .poodle-data-table[data-size="xs"] .poodle-data-table__action-link,
+  .poodle-data-table[data-size="xs"] .poodle-data-table__actions-trigger {
     min-height: 1.25rem;
   }
 
-  .data-table[data-size="xs"] .data-table__selection {
+  .poodle-data-table[data-size="xs"] .poodle-data-table__selection {
     width: 2.5rem;
   }
 
-  .data-table[data-size="sm"] .data-table__toolbar-btn {
+  .poodle-data-table[data-size="sm"] .poodle-data-table__toolbar-btn {
     font-size: 0.71875rem;
     padding: 0.25rem 0.4375rem;
   }
 
-  .data-table[data-size="sm"] th,
-  .data-table[data-size="sm"] td,
-  .data-table[data-size="sm"] .data-table__filters-row td,
-  .data-table[data-size="sm"] .data-table__footer {
+  .poodle-data-table[data-size="sm"] th,
+  .poodle-data-table[data-size="sm"] td,
+  .poodle-data-table[data-size="sm"] .poodle-data-table__filters-row td,
+  .poodle-data-table[data-size="sm"] .poodle-data-table__footer {
     font-size: 0.71875rem;
   }
 
-  .data-table[data-size="sm"] th,
-  .data-table[data-size="sm"] td,
-  .data-table[data-size="sm"] .data-table__filters-row td {
+  .poodle-data-table[data-size="sm"] th,
+  .poodle-data-table[data-size="sm"] td,
+  .poodle-data-table[data-size="sm"] .poodle-data-table__filters-row td {
     padding-left: 0.625rem;
     padding-right: 0.625rem;
   }
 
-  .data-table[data-size="sm"] .data-table__sort,
-  .data-table[data-size="sm"] .data-table__row-action-btn,
-  .data-table[data-size="sm"] .data-table__action-link,
-  .data-table[data-size="sm"] .data-table__actions-trigger {
+  .poodle-data-table[data-size="sm"] .poodle-data-table__sort,
+  .poodle-data-table[data-size="sm"] .poodle-data-table__row-action-btn,
+  .poodle-data-table[data-size="sm"] .poodle-data-table__action-link,
+  .poodle-data-table[data-size="sm"] .poodle-data-table__actions-trigger {
     min-height: 1.375rem;
   }
 
-  .data-table[data-size="sm"] .data-table__selection {
+  .poodle-data-table[data-size="sm"] .poodle-data-table__selection {
     width: 2.75rem;
   }
 
-  .data-table[data-size="lg"] .data-table__toolbar-btn {
+  .poodle-data-table[data-size="lg"] .poodle-data-table__toolbar-btn {
     font-size: 0.8125rem;
     padding: 0.375rem 0.625rem;
   }
 
-  .data-table[data-size="lg"] .data-table__toolbar-btn :global(.poodle-icon) {
+  .poodle-data-table[data-size="lg"] .poodle-data-table__toolbar-btn :global(.poodle-icon) {
     width: 1rem;
     height: 1rem;
   }
 
-  .data-table[data-size="lg"] th,
-  .data-table[data-size="lg"] td,
-  .data-table[data-size="lg"] .data-table__filters-row td,
-  .data-table[data-size="lg"] .data-table__footer {
+  .poodle-data-table[data-size="lg"] th,
+  .poodle-data-table[data-size="lg"] td,
+  .poodle-data-table[data-size="lg"] .poodle-data-table__filters-row td,
+  .poodle-data-table[data-size="lg"] .poodle-data-table__footer {
     font-size: 0.8125rem;
   }
 
-  .data-table[data-size="lg"] th,
-  .data-table[data-size="lg"] td,
-  .data-table[data-size="lg"] .data-table__filters-row td {
+  .poodle-data-table[data-size="lg"] th,
+  .poodle-data-table[data-size="lg"] td,
+  .poodle-data-table[data-size="lg"] .poodle-data-table__filters-row td {
     padding-left: 0.875rem;
     padding-right: 0.875rem;
   }
 
-  .data-table[data-size="lg"] .data-table__sort,
-  .data-table[data-size="lg"] .data-table__row-action-btn,
-  .data-table[data-size="lg"] .data-table__action-link,
-  .data-table[data-size="lg"] .data-table__actions-trigger {
+  .poodle-data-table[data-size="lg"] .poodle-data-table__sort,
+  .poodle-data-table[data-size="lg"] .poodle-data-table__row-action-btn,
+  .poodle-data-table[data-size="lg"] .poodle-data-table__action-link,
+  .poodle-data-table[data-size="lg"] .poodle-data-table__actions-trigger {
     min-height: 2.125rem;
   }
 
-  .data-table[data-size="lg"] .data-table__selection {
+  .poodle-data-table[data-size="lg"] .poodle-data-table__selection {
     width: 3.625rem;
   }
 
-  .data-table[data-size="xl"] .data-table__toolbar-btn {
+  .poodle-data-table[data-size="xl"] .poodle-data-table__toolbar-btn {
     font-size: 0.875rem;
     padding: 0.4375rem 0.75rem;
   }
 
-  .data-table[data-size="xl"] .data-table__toolbar-btn :global(.poodle-icon) {
+  .poodle-data-table[data-size="xl"] .poodle-data-table__toolbar-btn :global(.poodle-icon) {
     width: 1.125rem;
     height: 1.125rem;
   }
 
-  .data-table[data-size="xl"] th,
-  .data-table[data-size="xl"] td,
-  .data-table[data-size="xl"] .data-table__filters-row td,
-  .data-table[data-size="xl"] .data-table__footer {
+  .poodle-data-table[data-size="xl"] th,
+  .poodle-data-table[data-size="xl"] td,
+  .poodle-data-table[data-size="xl"] .poodle-data-table__filters-row td,
+  .poodle-data-table[data-size="xl"] .poodle-data-table__footer {
     font-size: 0.875rem;
   }
 
-  .data-table[data-size="xl"] th,
-  .data-table[data-size="xl"] td,
-  .data-table[data-size="xl"] .data-table__filters-row td {
+  .poodle-data-table[data-size="xl"] th,
+  .poodle-data-table[data-size="xl"] td,
+  .poodle-data-table[data-size="xl"] .poodle-data-table__filters-row td {
     padding-left: 1rem;
     padding-right: 1rem;
   }
 
-  .data-table[data-size="xl"] .data-table__sort,
-  .data-table[data-size="xl"] .data-table__row-action-btn,
-  .data-table[data-size="xl"] .data-table__action-link,
-  .data-table[data-size="xl"] .data-table__actions-trigger {
+  .poodle-data-table[data-size="xl"] .poodle-data-table__sort,
+  .poodle-data-table[data-size="xl"] .poodle-data-table__row-action-btn,
+  .poodle-data-table[data-size="xl"] .poodle-data-table__action-link,
+  .poodle-data-table[data-size="xl"] .poodle-data-table__actions-trigger {
     min-height: 2.25rem;
   }
 
-  .data-table[data-size="xl"] .data-table__selection {
+  .poodle-data-table[data-size="xl"] .poodle-data-table__selection {
     width: 4rem;
   }
 
   /* ── Density variants ─────────────────────────────────────── */
 
-  .data-table[data-density="compact"] th,
-  .data-table[data-density="compact"] td {
+  .poodle-data-table[data-density="compact"] th,
+  .poodle-data-table[data-density="compact"] td {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
   }
 
-  .data-table[data-density="compact"] .data-table__footer {
+  .poodle-data-table[data-density="compact"] .poodle-data-table__footer {
     padding-left: var(--poodle-space-control-x);
     padding-right: var(--poodle-space-control-x);
   }
 
-  .data-table[data-density="comfortable"] th,
-  .data-table[data-density="comfortable"] td {
+  .poodle-data-table[data-density="comfortable"] th,
+  .poodle-data-table[data-density="comfortable"] td {
     padding-top: calc(var(--poodle-space-panel-y) * 1.25);
     padding-bottom: calc(var(--poodle-space-panel-y) * 1.25);
   }
 
-  .data-table[data-density="comfortable"] .data-table__footer {
+  .poodle-data-table[data-density="comfortable"] .poodle-data-table__footer {
     padding-left: calc(var(--poodle-space-panel-x) * 1.25);
     padding-right: calc(var(--poodle-space-panel-x) * 1.25);
   }
 
   @media (max-width: 48rem) {
-    .data-table__hide-mobile {
+    .poodle-data-table__hide-mobile {
       display: none;
     }
 
-    .data-table__footer {
+    .poodle-data-table__footer {
       flex-direction: column;
       align-items: stretch;
     }
 
-    .data-table__pagination-actions {
+    .poodle-data-table__pagination-actions {
       justify-content: stretch;
       flex-direction: column;
       align-items: stretch;
     }
 
-    .data-table__limit,
-    .data-table__pagination-controls {
+    .poodle-data-table__limit,
+    .poodle-data-table__pagination-controls {
       justify-content: center;
     }
   }

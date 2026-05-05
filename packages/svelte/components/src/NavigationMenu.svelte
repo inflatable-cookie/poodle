@@ -122,16 +122,16 @@
   });
 </script>
 
-<div class="navigation-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
+<div class="poodle-navigation-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
   <nav
-    class="navigation-menu__list"
+    class="poodle-navigation-menu__list"
     aria-label={ariaLabel ?? undefined}
   >
     {#each items as item, index (item.value)}
       <button
         bind:this={triggerElements[index]}
         type="button"
-        class="navigation-menu__trigger"
+        class="poodle-navigation-menu__trigger"
         data-open={currentValue === item.value}
         disabled={item.disabled === true}
         tabindex={index === focusIndex ? 0 : -1}
@@ -142,14 +142,14 @@
         on:click={() => toggleValue(item.value)}
         on:keydown={(event) => handleKeydown(event, index)}
       >
-        <span class="navigation-menu__label">{item.label}</span>
+        <span class="poodle-navigation-menu__label">{item.label}</span>
       </button>
     {/each}
   </nav>
 
   {#if currentItem}
     <div
-      class="navigation-menu__viewport"
+      class="poodle-navigation-menu__viewport"
       id={`poodle-navigation-menu-panel-${menuId}-${currentItem.value}`}
       aria-labelledby={`poodle-navigation-menu-trigger-${menuId}-${currentItem.value}`}
     >
@@ -159,20 +159,20 @@
 </div>
 
 <style>
-  .navigation-menu {
+  .poodle-navigation-menu {
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
   }
 
-  .navigation-menu__list {
+  .poodle-navigation-menu__list {
     display: inline-flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
     align-items: center;
   }
 
-  .navigation-menu__trigger {
+  .poodle-navigation-menu__trigger {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -189,23 +189,23 @@
     line-height: 1;
   }
 
-  .navigation-menu__trigger[data-open="true"] {
+  .poodle-navigation-menu__trigger[data-open="true"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
   }
 
-  .navigation-menu__trigger:hover:not(:disabled),
-  .navigation-menu__trigger:focus-visible {
+  .poodle-navigation-menu__trigger:hover:not(:disabled),
+  .poodle-navigation-menu__trigger:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     outline: none;
   }
 
-  .navigation-menu__trigger:disabled {
+  .poodle-navigation-menu__trigger:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .navigation-menu__viewport {
+  .poodle-navigation-menu__viewport {
     min-width: 0;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent);
@@ -215,30 +215,30 @@
   }
 
   /* Size variants */
-  .navigation-menu[data-size="xs"] .navigation-menu__trigger {
+  .poodle-navigation-menu[data-size="xs"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.6875rem;
   }
 
-  .navigation-menu[data-size="sm"] .navigation-menu__trigger {
+  .poodle-navigation-menu[data-size="sm"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
   }
 
-  .navigation-menu[data-size="lg"] .navigation-menu__trigger {
+  .poodle-navigation-menu[data-size="lg"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.8125rem;
   }
 
-  .navigation-menu[data-size="xl"] .navigation-menu__trigger {
+  .poodle-navigation-menu[data-size="xl"] .poodle-navigation-menu__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.875rem;
   }
 
   /* Density variants */
-  .navigation-menu[data-density="compact"] .navigation-menu__trigger { padding-inline: 0.5rem; }
-  .navigation-menu[data-density="comfortable"] .navigation-menu__trigger { padding-inline: 0.75rem; }
+  .poodle-navigation-menu[data-density="compact"] .poodle-navigation-menu__trigger { padding-inline: 0.5rem; }
+  .poodle-navigation-menu[data-density="comfortable"] .poodle-navigation-menu__trigger { padding-inline: 0.75rem; }
 </style>

@@ -35,13 +35,13 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Inline">
     <Button variant="secondary" on:click={() => (showInline = !showInline)}>
       Toggle inline loading
     </Button>
     {#if showInline}
-      <div class="specimen__inline-shell">
+      <div class="poodle-specimen__inline-shell">
         <PageLoading
           visible
           presentation="inline"
@@ -85,27 +85,27 @@
   </SpecimenGroup>
 
   {#if showIndeterminate || showDeterminate || showWithCancel}
-    <button class="specimen__dismiss" on:click={closeAll}>
+    <button class="poodle-specimen__dismiss" on:click={closeAll}>
       Dismiss overlay (click here if stuck)
     </button>
   {/if}
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__inline-shell {
+  .poodle-specimen__inline-shell {
     min-height: 18rem;
     border: 1px dashed var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 94%, transparent);
   }
 
-  .specimen__dismiss {
+  .poodle-specimen__dismiss {
     position: fixed;
     bottom: 1rem;
     right: 1rem;

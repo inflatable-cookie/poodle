@@ -2,12 +2,12 @@
   export let ariaLabel: string | null = null;
 </script>
 
-<span class="eyebrow" aria-label={ariaLabel ?? undefined}>
+<span class="poodle-eyebrow" aria-label={ariaLabel ?? undefined}>
   <slot />
 </span>
 
 <style>
-  .eyebrow {
+  .poodle-eyebrow {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);

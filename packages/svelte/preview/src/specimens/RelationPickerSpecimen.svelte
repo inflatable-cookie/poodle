@@ -89,7 +89,7 @@
   let compactSelected: string[] = ["btn"];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Multiple selection">
     <RelationPicker
       title="Select components"
@@ -127,7 +127,7 @@
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
+      <div class="poodle-specimen__stack">
         <RelationPicker
           title="Compact picker"
           description="Inherited density and size should tighten breadcrumb and drill-list geometry."
@@ -150,13 +150,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }

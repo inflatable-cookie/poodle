@@ -112,17 +112,17 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <!-- 1a. Static dock — horizontal (top edge, panels stack vertically) -->
   <SpecimenGroup label="Static dock — horizontal (top edge)">
-    <div class="specimen__frame specimen__frame--short">
+    <div class="poodle-specimen__frame poodle-specimen__frame--short">
       <DockRegion
         edge="top"
         sizing="static"
         items={staticItems}
         on:reorder={handleStaticReorder}
       >
-        <div slot="panel" let:item class="specimen__static-panel">
+        <div slot="panel" let:item class="poodle-specimen__static-panel">
           {item.label}
         </div>
       </DockRegion>
@@ -131,14 +131,14 @@
 
   <!-- 1b. Static dock — vertical (left edge, panels stack horizontally) -->
   <SpecimenGroup label="Static dock — vertical (left edge)">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <DockRegion
         edge="left"
         sizing="static"
         items={staticVerticalItems}
         on:reorder={handleStaticVerticalReorder}
       >
-        <div slot="panel" let:item class="specimen__static-panel">
+        <div slot="panel" let:item class="poodle-specimen__static-panel">
           {item.label}
         </div>
       </DockRegion>
@@ -147,7 +147,7 @@
 
   <!-- 2. Flexible dock (expanded) -->
   <SpecimenGroup label="Flexible dock — expanded (left edge)">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <DockRegion
         edge="left"
         sizing="flexible"
@@ -156,7 +156,7 @@
         collapsed={false}
         on:valueChange={(e) => (flexActivePanel = e.detail.value)}
       >
-        <div class="specimen__panel-content">
+        <div class="poodle-specimen__panel-content">
           <strong>{flexActivePanel}</strong>
           <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
         </div>
@@ -166,7 +166,7 @@
 
   <!-- 3. Flexible dock (collapsed icon-strip) -->
   <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)">
-    <div class="specimen__frame specimen__frame--narrow">
+    <div class="poodle-specimen__frame poodle-specimen__frame--narrow">
       <DockRegion
         edge="left"
         sizing="flexible"
@@ -181,7 +181,7 @@
 
   <!-- 4. Interactive collapse toggle -->
   <SpecimenGroup label="Interactive collapse toggle (click to toggle)">
-    <div class="specimen__frame specimen__frame--flex">
+    <div class="poodle-specimen__frame poodle-specimen__frame--flex">
       <DockRegion
         edge="left"
         sizing="flexible"
@@ -193,12 +193,12 @@
         on:valueChange={(e) => (interactiveActive = e.detail.value)}
         on:collapsedChange={(e) => (interactiveCollapsed = e.detail.isCollapsed)}
       >
-        <div class="specimen__panel-content">
+        <div class="poodle-specimen__panel-content">
           <strong>{interactiveActive}</strong>
           <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
         </div>
       </DockRegion>
-      <div class="specimen__flex-main">
+      <div class="poodle-specimen__flex-main">
         Main content area
       </div>
     </div>
@@ -206,8 +206,8 @@
 
   <!-- 5. Bottom edge collapsible dock -->
   <SpecimenGroup label="Bottom edge dock (click to toggle)">
-    <div class="specimen__frame specimen__frame--bottom-layout">
-      <div class="specimen__flex-main">
+    <div class="poodle-specimen__frame poodle-specimen__frame--bottom-layout">
+      <div class="poodle-specimen__flex-main">
         Editor area
       </div>
       <DockRegion
@@ -221,7 +221,7 @@
         on:valueChange={(e) => (bottomActive = e.detail.value)}
         on:collapsedChange={(e) => (bottomCollapsed = e.detail.isCollapsed)}
       >
-        <div class="specimen__panel-content">
+        <div class="poodle-specimen__panel-content">
           <strong>{bottomActive}</strong>
           <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
         </div>
@@ -231,8 +231,8 @@
 
   <!-- 6. Cross-region drag-and-drop -->
   <SpecimenGroup label="Cross-region drag-and-drop (drag tabs between docks)">
-    <div class="specimen__dnd-layout">
-      <div class="specimen__frame specimen__dnd-region">
+    <div class="poodle-specimen__dnd-layout">
+      <div class="poodle-specimen__frame poodle-specimen__dnd-region">
         <DockRegion
           edge="left"
           sizing="flexible"
@@ -244,13 +244,13 @@
           on:reorder={handleLeftReorder}
           on:panelDrop={handleLeftDrop}
         >
-          <div class="specimen__panel-content">
+          <div class="poodle-specimen__panel-content">
             <strong>{leftActive}</strong>
             <p>Left dock — {leftItems.length} panels</p>
           </div>
         </DockRegion>
       </div>
-      <div class="specimen__frame specimen__dnd-region">
+      <div class="poodle-specimen__frame poodle-specimen__dnd-region">
         <DockRegion
           edge="right"
           sizing="flexible"
@@ -262,7 +262,7 @@
           on:reorder={handleRightReorder}
           on:panelDrop={handleRightDrop}
         >
-          <div class="specimen__panel-content">
+          <div class="poodle-specimen__panel-content">
             <strong>{rightActive}</strong>
             <p>Right dock — {rightItems.length} panels</p>
           </div>
@@ -273,59 +273,59 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__frame {
+  .poodle-specimen__frame {
     height: 16rem;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     overflow: hidden;
   }
 
-  .specimen__frame--short {
+  .poodle-specimen__frame--short {
     height: 6rem;
   }
 
-  .specimen__frame--narrow {
+  .poodle-specimen__frame--narrow {
     width: 3.5rem;
     height: 16rem;
   }
 
-  .specimen__frame--flex {
+  .poodle-specimen__frame--flex {
     display: flex;
     align-items: stretch;
   }
 
-  .specimen__frame--bottom-layout {
+  .poodle-specimen__frame--bottom-layout {
     display: flex;
     flex-direction: column;
     height: 22rem;
   }
 
-  .specimen__frame--bottom-layout .specimen__flex-main {
+  .poodle-specimen__frame--bottom-layout .poodle-specimen__flex-main {
     flex: 1 1 0;
     min-height: 0;
   }
 
-  .specimen__frame--bottom-layout :global(.dock-region) {
+  .poodle-specimen__frame--bottom-layout :global(.poodle-dock-region) {
     height: auto;
     flex: 0 0 auto;
     max-height: 10rem;
   }
 
-  .specimen__frame--flex :global(.dock-region:not([data-collapsed])) {
+  .poodle-specimen__frame--flex :global(.poodle-dock-region:not([data-collapsed])) {
     flex: 0 0 16rem;
   }
 
-  .specimen__frame--flex :global(.dock-region[data-collapsed]) {
+  .poodle-specimen__frame--flex :global(.poodle-dock-region[data-collapsed]) {
     flex: 0 0 auto;
   }
 
-  .specimen__flex-main {
+  .poodle-specimen__flex-main {
     flex: 1 1 0;
     min-width: 0;
     display: flex;
@@ -335,25 +335,25 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  .specimen__panel-content {
+  .poodle-specimen__panel-content {
     padding: 0.75rem;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
-  .specimen__panel-content strong {
+  .poodle-specimen__panel-content strong {
     display: block;
     margin-bottom: 0.25rem;
     color: var(--poodle-color-text-primary);
     text-transform: capitalize;
   }
 
-  .specimen__panel-content p {
+  .poodle-specimen__panel-content p {
     margin: 0;
   }
 
-  .specimen__static-panel {
+  .poodle-specimen__static-panel {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -364,18 +364,18 @@
     border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .specimen__static-panel:last-child {
+  .poodle-specimen__static-panel:last-child {
     border-right: 0;
   }
 
 
-  .specimen__dnd-layout {
+  .poodle-specimen__dnd-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
 
-  .specimen__dnd-region {
+  .poodle-specimen__dnd-region {
     height: 18rem;
   }
 </style>

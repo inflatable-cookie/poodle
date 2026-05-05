@@ -30,25 +30,25 @@
 
 <SpecimenLayout>
   <Surface tone="panel" border="subtle" padding="md">
-    <div class="specimen">
-      <div class="specimen__row">
+    <div class="poodle-specimen">
+      <div class="poodle-specimen__row">
         <Eyebrow>With shortcuts</Eyebrow>
         <Menu items={fileItems} ariaLabel="File menu" on:action={(e) => (lastAction = e.detail.value)}>
           <Button variant="secondary" slot="trigger">File</Button>
         </Menu>
         {#if lastAction}
-          <span class="specimen__hint">Last: {lastAction}</span>
+          <span class="poodle-specimen__hint">Last: {lastAction}</span>
         {/if}
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>With checkboxes</Eyebrow>
         <Menu items={settingsItems} ariaLabel="Settings menu">
           <Button variant="secondary" slot="trigger">Settings</Button>
         </Menu>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Destructive action</Eyebrow>
         <Menu items={destructiveItems} ariaLabel="Item actions">
           <Button variant="secondary" slot="trigger">Actions</Button>
@@ -71,20 +71,20 @@
 </SpecimenLayout>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
   }
 
-  .specimen__hint {
+  .poodle-specimen__hint {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
   }

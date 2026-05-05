@@ -140,7 +140,7 @@
 </script>
 
 <div
-  class="video-player"
+  class="poodle-video-player"
   bind:this={wrapperEl}
   style="aspect-ratio: {aspectRatio}"
   role="button"
@@ -169,7 +169,7 @@
   {#if !isPlaying && currentTime === 0}
     <button
       type="button"
-      class="video-player__big-play"
+      class="poodle-video-player__big-play"
       on:click|stopPropagation={togglePlay}
       aria-label="Play video"
     >
@@ -181,12 +181,12 @@
   {/if}
 
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-  <div class="video-player__controls" class:visible={showControls} on:click|stopPropagation>
-    <div class="video-player__progress-bar">
-      <div class="video-player__progress-fill" style="width: {progress}%"></div>
+  <div class="poodle-video-player__controls" class:poodle-visible={showControls} on:click|stopPropagation>
+    <div class="poodle-video-player__progress-bar">
+      <div class="poodle-video-player__progress-fill" style="width: {progress}%"></div>
       <input
         type="range"
-        class="video-player__seek"
+        class="poodle-video-player__seek"
         min="0"
         max={duration || 0}
         step="0.1"
@@ -196,11 +196,11 @@
       />
     </div>
 
-    <div class="video-player__bar">
-      <div class="video-player__bar-left">
+    <div class="poodle-video-player__bar">
+      <div class="poodle-video-player__bar-left">
         <button
           type="button"
-          class="video-player__btn"
+          class="poodle-video-player__btn"
           on:click|stopPropagation={togglePlay}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
@@ -218,7 +218,7 @@
 
         <button
           type="button"
-          class="video-player__btn"
+          class="poodle-video-player__btn"
           on:click|stopPropagation={toggleMute}
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
@@ -236,7 +236,7 @@
 
         <input
           type="range"
-          class="video-player__volume"
+          class="poodle-video-player__volume"
           min="0"
           max="1"
           step="0.01"
@@ -245,13 +245,13 @@
           aria-label="Volume"
         />
 
-        <span class="video-player__time">{formattedCurrent} / {formattedDuration}</span>
+        <span class="poodle-video-player__time">{formattedCurrent} / {formattedDuration}</span>
       </div>
 
-      <div class="video-player__bar-right">
+      <div class="poodle-video-player__bar-right">
         <button
           type="button"
-          class="video-player__btn"
+          class="poodle-video-player__btn"
           on:click|stopPropagation={toggleFullscreen}
           aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
         >
@@ -269,7 +269,7 @@
 </div>
 
 <style>
-  .video-player {
+  .poodle-video-player {
     position: relative;
     overflow: hidden;
     border-radius: var(--poodle-radius-surface);
@@ -277,14 +277,14 @@
     cursor: pointer;
   }
 
-  .video-player video {
+  .poodle-video-player video {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
   }
 
-  .video-player__big-play {
+  .poodle-video-player__big-play {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -299,16 +299,16 @@
     transition: transform 0.2s ease;
   }
 
-  .video-player__big-play:hover {
+  .poodle-video-player__big-play:hover {
     transform: translate(-50%, -50%) scale(1.1);
   }
 
-  .video-player__big-play svg {
+  .poodle-video-player__big-play svg {
     width: 100%;
     height: 100%;
   }
 
-  .video-player__controls {
+  .poodle-video-player__controls {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -320,11 +320,11 @@
     cursor: default;
   }
 
-  .video-player__controls.visible {
+  .poodle-video-player__controls.poodle-visible {
     opacity: 1;
   }
 
-  .video-player__progress-bar {
+  .poodle-video-player__progress-bar {
     position: relative;
     height: 0.25rem;
     margin-bottom: 0.375rem;
@@ -333,14 +333,14 @@
     overflow: hidden;
   }
 
-  .video-player__progress-fill {
+  .poodle-video-player__progress-fill {
     height: 100%;
     background: var(--poodle-color-accent-base, #6366f1);
     border-radius: 999rem;
     transition: width 0.1s linear;
   }
 
-  .video-player__seek {
+  .poodle-video-player__seek {
     position: absolute;
     top: -0.375rem;
     left: 0;
@@ -351,20 +351,20 @@
     margin: 0;
   }
 
-  .video-player__bar {
+  .poodle-video-player__bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
-  .video-player__bar-left,
-  .video-player__bar-right {
+  .poodle-video-player__bar-left,
+  .poodle-video-player__bar-right {
     display: flex;
     align-items: center;
     gap: 0.375rem;
   }
 
-  .video-player__btn {
+  .poodle-video-player__btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -379,16 +379,16 @@
     transition: background 0.15s ease;
   }
 
-  .video-player__btn:hover {
+  .poodle-video-player__btn:hover {
     background: rgba(255, 255, 255, 0.15);
   }
 
-  .video-player__btn svg {
+  .poodle-video-player__btn svg {
     width: 0.875rem;
     height: 0.875rem;
   }
 
-  .video-player__volume {
+  .poodle-video-player__volume {
     -webkit-appearance: none;
     appearance: none;
     width: 3.5rem;
@@ -398,19 +398,19 @@
     flex-shrink: 0;
   }
 
-  .video-player__volume::-webkit-slider-runnable-track {
+  .poodle-video-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
     background: rgba(255, 255, 255, 0.5);
   }
 
-  .video-player__volume::-moz-range-track {
+  .poodle-video-player__volume::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
     background: rgba(255, 255, 255, 0.5);
   }
 
-  .video-player__volume::-webkit-slider-thumb {
+  .poodle-video-player__volume::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 0.625rem;
     height: 0.625rem;
@@ -420,7 +420,7 @@
     margin-top: -0.1875rem;
   }
 
-  .video-player__volume::-moz-range-thumb {
+  .poodle-video-player__volume::-moz-range-thumb {
     width: 0.625rem;
     height: 0.625rem;
     border-radius: 50%;
@@ -428,7 +428,7 @@
     background: white;
   }
 
-  .video-player__time {
+  .poodle-video-player__time {
     font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
     color: rgba(255, 255, 255, 0.8);
@@ -437,104 +437,104 @@
 
   /* ── Size variants ──────────────────────────────────────────── */
 
-  .video-player[data-size="xs"] .video-player__btn {
+  .poodle-video-player[data-size="xs"] .poodle-video-player__btn {
     width: 1.25rem;
     height: 1.25rem;
   }
 
-  .video-player[data-size="xs"] .video-player__btn svg {
+  .poodle-video-player[data-size="xs"] .poodle-video-player__btn svg {
     width: 0.75rem;
     height: 0.75rem;
   }
 
-  .video-player[data-size="xs"] .video-player__volume {
+  .poodle-video-player[data-size="xs"] .poodle-video-player__volume {
     width: 2.5rem;
   }
 
-  .video-player[data-size="xs"] .video-player__time {
+  .poodle-video-player[data-size="xs"] .poodle-video-player__time {
     font-size: 0.5625rem;
   }
 
-  .video-player[data-size="xs"] .video-player__big-play {
+  .poodle-video-player[data-size="xs"] .poodle-video-player__big-play {
     width: 3rem;
     height: 3rem;
   }
 
-  .video-player[data-size="sm"] .video-player__btn {
+  .poodle-video-player[data-size="sm"] .poodle-video-player__btn {
     width: 1.5rem;
     height: 1.5rem;
   }
 
-  .video-player[data-size="sm"] .video-player__volume {
+  .poodle-video-player[data-size="sm"] .poodle-video-player__volume {
     width: 3rem;
   }
 
-  .video-player[data-size="sm"] .video-player__time {
+  .poodle-video-player[data-size="sm"] .poodle-video-player__time {
     font-size: 0.625rem;
   }
 
-  .video-player[data-size="sm"] .video-player__big-play {
+  .poodle-video-player[data-size="sm"] .poodle-video-player__big-play {
     width: 3.5rem;
     height: 3.5rem;
   }
 
-  .video-player[data-size="lg"] .video-player__btn {
+  .poodle-video-player[data-size="lg"] .poodle-video-player__btn {
     width: 2.125rem;
     height: 2.125rem;
   }
 
-  .video-player[data-size="lg"] .video-player__btn svg {
+  .poodle-video-player[data-size="lg"] .poodle-video-player__btn svg {
     width: 1rem;
     height: 1rem;
   }
 
-  .video-player[data-size="lg"] .video-player__volume {
+  .poodle-video-player[data-size="lg"] .poodle-video-player__volume {
     width: 4rem;
   }
 
-  .video-player[data-size="lg"] .video-player__time {
+  .poodle-video-player[data-size="lg"] .poodle-video-player__time {
     font-size: 0.75rem;
   }
 
-  .video-player[data-size="lg"] .video-player__big-play {
+  .poodle-video-player[data-size="lg"] .poodle-video-player__big-play {
     width: 4.5rem;
     height: 4.5rem;
   }
 
-  .video-player[data-size="xl"] .video-player__btn {
+  .poodle-video-player[data-size="xl"] .poodle-video-player__btn {
     width: 2.25rem;
     height: 2.25rem;
   }
 
-  .video-player[data-size="xl"] .video-player__btn svg {
+  .poodle-video-player[data-size="xl"] .poodle-video-player__btn svg {
     width: 1.125rem;
     height: 1.125rem;
   }
 
-  .video-player[data-size="xl"] .video-player__volume {
+  .poodle-video-player[data-size="xl"] .poodle-video-player__volume {
     width: 4.5rem;
   }
 
-  .video-player[data-size="xl"] .video-player__time {
+  .poodle-video-player[data-size="xl"] .poodle-video-player__time {
     font-size: 0.8125rem;
   }
 
-  .video-player[data-size="xl"] .video-player__big-play {
+  .poodle-video-player[data-size="xl"] .poodle-video-player__big-play {
     width: 5rem;
     height: 5rem;
   }
 
   /* Density variants */
-  .video-player[data-density="compact"] .video-player__controls { padding-inline: 0.375rem; gap: 0.25rem; }
-  .video-player[data-density="comfortable"] .video-player__controls { padding-inline: 0.75rem; gap: 0.5rem; }
+  .poodle-video-player[data-density="compact"] .poodle-video-player__controls { padding-inline: 0.375rem; gap: 0.25rem; }
+  .poodle-video-player[data-density="comfortable"] .poodle-video-player__controls { padding-inline: 0.75rem; gap: 0.5rem; }
 
-  .video-player[data-density="compact"] .video-player__bar-left,
-  .video-player[data-density="compact"] .video-player__bar-right {
+  .poodle-video-player[data-density="compact"] .poodle-video-player__bar-left,
+  .poodle-video-player[data-density="compact"] .poodle-video-player__bar-right {
     gap: 0.25rem;
   }
 
-  .video-player[data-density="comfortable"] .video-player__bar-left,
-  .video-player[data-density="comfortable"] .video-player__bar-right {
+  .poodle-video-player[data-density="comfortable"] .poodle-video-player__bar-left,
+  .poodle-video-player[data-density="comfortable"] .poodle-video-player__bar-right {
     gap: 0.5rem;
   }
 </style>

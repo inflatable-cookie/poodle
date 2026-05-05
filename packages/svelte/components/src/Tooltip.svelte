@@ -98,7 +98,7 @@
 </script>
 
 <span
-  class="tooltip"
+  class="poodle-tooltip"
   role="presentation"
   on:mouseenter={scheduleOpen}
   on:mouseleave={dismiss}
@@ -112,7 +112,7 @@
 >
   <span
     bind:this={triggerElement}
-    class="tooltip__trigger"
+    class="poodle-tooltip__trigger"
     role="button"
     tabindex="0"
     aria-describedby={isOpen ? tooltipId : undefined}
@@ -124,7 +124,7 @@
     <span
       id={tooltipId}
       bind:this={bubbleElement}
-      class="tooltip__bubble"
+      class="poodle-tooltip__bubble"
       data-placement={resolvedPlacement}
       style={bubbleStyle}
       role="tooltip"
@@ -135,21 +135,21 @@
 </span>
 
 <style>
-  .tooltip {
+  .poodle-tooltip {
     position: relative;
     display: inline-flex;
   }
 
-  .tooltip__trigger {
+  .poodle-tooltip__trigger {
     display: inline-flex;
   }
 
-  .tooltip__trigger:focus-visible {
+  .poodle-tooltip__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .tooltip__bubble {
+  .poodle-tooltip__bubble {
     position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     max-width: 16rem;

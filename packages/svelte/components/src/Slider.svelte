@@ -49,12 +49,12 @@
   }
 </script>
 
-<div class="slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity}>
-  <span class="slider__track" aria-hidden="true">
-    <span class="slider__fill"></span>
+<div class="poodle-slider" data-orientation={orientation} data-disabled={disabled} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity}>
+  <span class="poodle-slider__track" aria-hidden="true">
+    <span class="poodle-slider__fill"></span>
   </span>
   <input
-    class="slider__control"
+    class="poodle-slider__control"
     type="range"
     min={min}
     max={safeMax}
@@ -69,7 +69,7 @@
 </div>
 
 <style>
-  .slider {
+  .poodle-slider {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -77,7 +77,7 @@
     min-height: 1.5rem;
   }
 
-  .slider[data-orientation="vertical"] {
+  .poodle-slider[data-orientation="vertical"] {
     width: 1.5rem;
     min-width: 1.5rem;
     min-height: 10rem;
@@ -85,11 +85,11 @@
     justify-content: center;
   }
 
-  .slider[data-disabled="true"] {
+  .poodle-slider[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .slider__track {
+  .poodle-slider__track {
     position: absolute;
     inset: 50% 0 0;
     height: 0.375rem;
@@ -98,14 +98,14 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent);
   }
 
-  .slider[data-orientation="vertical"] .slider__track {
+  .poodle-slider[data-orientation="vertical"] .poodle-slider__track {
     inset: 0 auto 0 50%;
     width: 0.375rem;
     height: 100%;
     transform: translateX(-50%);
   }
 
-  .slider__fill {
+  .poodle-slider__fill {
     display: block;
     width: var(--poodle-slider-percent);
     height: 100%;
@@ -113,14 +113,14 @@
     background: var(--poodle-color-accent-base);
   }
 
-  .slider[data-orientation="vertical"] .slider__fill {
+  .poodle-slider[data-orientation="vertical"] .poodle-slider__fill {
     position: absolute;
     bottom: 0;
     width: 100%;
     height: var(--poodle-slider-percent);
   }
 
-  .slider__control {
+  .poodle-slider__control {
     position: relative;
     z-index: 1;
     width: 100%;
@@ -129,22 +129,22 @@
     appearance: none;
   }
 
-  .slider[data-orientation="vertical"] .slider__control {
+  .poodle-slider[data-orientation="vertical"] .poodle-slider__control {
     width: 10rem;
     transform: rotate(-90deg);
   }
 
-  .slider__control::-webkit-slider-runnable-track {
+  .poodle-slider__control::-webkit-slider-runnable-track {
     height: 0.375rem;
     background: transparent;
   }
 
-  .slider__control::-moz-range-track {
+  .poodle-slider__control::-moz-range-track {
     height: 0.375rem;
     background: transparent;
   }
 
-  .slider__control::-webkit-slider-thumb {
+  .poodle-slider__control::-webkit-slider-thumb {
     width: 1rem;
     height: 1rem;
     margin-top: -0.3125rem;
@@ -155,7 +155,7 @@
     appearance: none;
   }
 
-  .slider__control::-moz-range-thumb {
+  .poodle-slider__control::-moz-range-thumb {
     width: 1rem;
     height: 1rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
@@ -164,35 +164,35 @@
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 
-  .slider__control:focus-visible {
+  .poodle-slider__control:focus-visible {
     outline: none;
   }
 
-  .slider__control:focus-visible::-webkit-slider-thumb {
+  .poodle-slider__control:focus-visible::-webkit-slider-thumb {
     box-shadow:
       0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
       0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 
-  .slider__control:focus-visible::-moz-range-thumb {
+  .poodle-slider__control:focus-visible::-moz-range-thumb {
     box-shadow:
       0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 32%, transparent),
       0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
   }
 
   /* Size variants */
-  .slider[data-size="xs"] { min-height: 1.25rem; }
-  .slider[data-size="xs"] .slider__control::-webkit-slider-thumb { width: 0.75rem; height: 0.75rem; margin-top: -0.1875rem; }
-  .slider[data-size="xs"] .slider__control::-moz-range-thumb { width: 0.75rem; height: 0.75rem; }
-  .slider[data-size="sm"] { min-height: 1.375rem; }
-  .slider[data-size="sm"] .slider__control::-webkit-slider-thumb { width: 0.875rem; height: 0.875rem; margin-top: -0.25rem; }
-  .slider[data-size="sm"] .slider__control::-moz-range-thumb { width: 0.875rem; height: 0.875rem; }
-  .slider[data-size="lg"] .slider__control::-webkit-slider-thumb { width: 1.125rem; height: 1.125rem; margin-top: -0.375rem; }
-  .slider[data-size="lg"] .slider__control::-moz-range-thumb { width: 1.125rem; height: 1.125rem; }
-  .slider[data-size="xl"] .slider__control::-webkit-slider-thumb { width: 1.25rem; height: 1.25rem; margin-top: -0.4375rem; }
-  .slider[data-size="xl"] .slider__control::-moz-range-thumb { width: 1.25rem; height: 1.25rem; }
+  .poodle-slider[data-size="xs"] { min-height: 1.25rem; }
+  .poodle-slider[data-size="xs"] .poodle-slider__control::-webkit-slider-thumb { width: 0.75rem; height: 0.75rem; margin-top: -0.1875rem; }
+  .poodle-slider[data-size="xs"] .poodle-slider__control::-moz-range-thumb { width: 0.75rem; height: 0.75rem; }
+  .poodle-slider[data-size="sm"] { min-height: 1.375rem; }
+  .poodle-slider[data-size="sm"] .poodle-slider__control::-webkit-slider-thumb { width: 0.875rem; height: 0.875rem; margin-top: -0.25rem; }
+  .poodle-slider[data-size="sm"] .poodle-slider__control::-moz-range-thumb { width: 0.875rem; height: 0.875rem; }
+  .poodle-slider[data-size="lg"] .poodle-slider__control::-webkit-slider-thumb { width: 1.125rem; height: 1.125rem; margin-top: -0.375rem; }
+  .poodle-slider[data-size="lg"] .poodle-slider__control::-moz-range-thumb { width: 1.125rem; height: 1.125rem; }
+  .poodle-slider[data-size="xl"] .poodle-slider__control::-webkit-slider-thumb { width: 1.25rem; height: 1.25rem; margin-top: -0.4375rem; }
+  .poodle-slider[data-size="xl"] .poodle-slider__control::-moz-range-thumb { width: 1.25rem; height: 1.25rem; }
 
   /* Density variants */
-  .slider[data-density="compact"] { padding: 0.25rem 0; }
-  .slider[data-density="comfortable"] { padding: 0.75rem 0; }
+  .poodle-slider[data-density="compact"] { padding: 0.25rem 0; }
+  .poodle-slider[data-density="comfortable"] { padding: 0.75rem 0; }
 </style>

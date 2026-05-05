@@ -3,41 +3,41 @@
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">
-  <div class="specimen">
-    <div class="specimen__example">
+  <div class="poodle-specimen">
+    <div class="poodle-specimen__example">
       <Eyebrow>Section label</Eyebrow>
-      <h3 class="demo-heading">Page Title</h3>
+      <h3 class="poodle-demo-heading">Page Title</h3>
       <p>Eyebrow renders small uppercase text used for categorizing content above headings.</p>
     </div>
 
-    <div class="specimen__example">
+    <div class="poodle-specimen__example">
       <Eyebrow>Primitive</Eyebrow>
-      <h3 class="demo-heading">Button</h3>
+      <h3 class="poodle-demo-heading">Button</h3>
       <p>Primary interactive control for triggering actions.</p>
     </div>
 
-    <div class="specimen__example">
+    <div class="poodle-specimen__example">
       <Eyebrow>Status</Eyebrow>
-      <h3 class="demo-heading">Active deployment</h3>
+      <h3 class="poodle-demo-heading">Active deployment</h3>
       <p>Last deployed 3 minutes ago.</p>
     </div>
   </div>
 </Surface>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
 
-  .specimen__example {
+  .poodle-specimen__example {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .demo-heading {
+  .poodle-demo-heading {
     margin: 0;
     font-size: 1.25rem;
     color: var(--poodle-color-text-primary);

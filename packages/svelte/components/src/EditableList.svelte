@@ -222,11 +222,11 @@
 </script>
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
-  <div class="editable-list-session" data-disabled={isUnavailable} data-size={resolvedSize} data-density={resolvedDensity}>
-    <div class="editable-list-session__sr" aria-live="polite" aria-atomic="true">{liveMessage}</div>
+  <div class="poodle-editable-list-session" data-disabled={isUnavailable} data-size={resolvedSize} data-density={resolvedDensity}>
+    <div class="poodle-editable-list-session__sr" aria-live="polite" aria-atomic="true">{liveMessage}</div>
 
     {#if showWorkflowChrome}
-      <div class="editable-list-session__header">
+      <div class="poodle-editable-list-session__header">
         <Button variant="secondary" on:click={handleCancel} disabled={isUnavailable}>
           {cancelLabel}
         </Button>
@@ -241,29 +241,29 @@
     {/if}
 
     {#if errorMessage}
-      <div class="editable-list-session__error" role="alert">
+      <div class="poodle-editable-list-session__error" role="alert">
         {errorMessage}
       </div>
     {/if}
 
     {#if infoMessage}
-      <div class="editable-list-session__info" role="status">
+      <div class="poodle-editable-list-session__info" role="status">
         {infoMessage}
       </div>
     {/if}
 
     {#if isLongList}
-      <div class="editable-list-session__info" role="status">
+      <div class="poodle-editable-list-session__info" role="status">
         {effectiveLongListWarning}
       </div>
     {/if}
 
     {#if isWindowed}
-      <div class="editable-list-session__window-nav">
+      <div class="poodle-editable-list-session__window-nav">
         <Button variant="secondary" on:click={previousWindowPage} disabled={isUnavailable || windowPageIndex === 0}>
           Previous
         </Button>
-        <span class="editable-list-session__window-label">
+        <span class="poodle-editable-list-session__window-label">
           Page {windowPageIndex + 1} of {windowPageCount} · Items {windowStart + 1}-{windowEnd} of {items.length}
         </span>
         <Button variant="secondary" on:click={nextWindowPage} disabled={isUnavailable || windowPageIndex >= windowPageCount - 1}>
@@ -273,7 +273,7 @@
     {/if}
 
     <ul
-      class="editable-list"
+      class="poodle-editable-list"
       role="listbox"
       aria-label={ariaLabel}
       data-disabled={isUnavailable}
@@ -283,10 +283,10 @@
       {#each visibleItems as reorderItem, localIndex (reorderItem.id)}
         {@const index = windowStart + localIndex}
         <li
-          class="editable-list__item"
-          class:editable-list__item--dragging={draggingIndex === index}
-          class:editable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
-          class:editable-list__item--grabbed={grabbedIndex === index}
+          class="poodle-editable-list__item"
+          class:poodle-editable-list__item--dragging={draggingIndex === index}
+          class:poodle-editable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
+          class:poodle-editable-list__item--grabbed={grabbedIndex === index}
           role="option"
           tabindex={isUnavailable ? -1 : 0}
           aria-selected="false"
@@ -300,7 +300,7 @@
           on:keydown={(e) => handleKeydown(e, index)}
         >
           {#if reorderable}
-            <span class="editable-list__handle" aria-hidden="true">
+            <span class="poodle-editable-list__handle" aria-hidden="true">
               <svg viewBox="0 0 16 16" fill="currentColor">
                 <circle cx="5" cy="4" r="1.25" />
                 <circle cx="11" cy="4" r="1.25" />
@@ -311,7 +311,7 @@
               </svg>
             </span>
           {/if}
-          <span class="editable-list__content">
+          <span class="poodle-editable-list__content">
             {#if item}
               {@render item(reorderItem)}
             {:else}
@@ -321,7 +321,7 @@
           {#if showRemove}
             <button
               type="button"
-              class="editable-list__remove"
+              class="poodle-editable-list__remove"
               disabled={isUnavailable}
               aria-label={`Remove ${reorderItem.label ?? reorderItem.id}`}
               on:click|stopPropagation={() => removeItem(reorderItem.id)}
@@ -336,10 +336,10 @@
     </ul>
 
     {#if canAdd}
-      <div class="editable-list__add">
+      <div class="poodle-editable-list__add">
         <input
           type="text"
-          class="editable-list__add-input"
+          class="poodle-editable-list__add-input"
           bind:value={newItemText}
           placeholder={addPlaceholder}
           disabled={isUnavailable}
@@ -347,7 +347,7 @@
         />
         <button
           type="button"
-          class="editable-list__add-btn"
+          class="poodle-editable-list__add-btn"
           disabled={!newItemText.trim() || !canAdd}
           on:click={addItem}
         >
@@ -357,7 +357,7 @@
     {/if}
 
     {#if editable && maxItems !== null}
-      <span class="editable-list__count">
+      <span class="poodle-editable-list__count">
         {items.length}/{maxItems}
       </span>
     {/if}
@@ -365,13 +365,13 @@
 </UiPresentationProvider>
 
 <style>
-  .editable-list-session {
+  .poodle-editable-list-session {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .editable-list-session__sr {
+  .poodle-editable-list-session__sr {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -383,7 +383,7 @@
     border: 0;
   }
 
-  .editable-list-session__header {
+  .poodle-editable-list-session__header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -392,40 +392,40 @@
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 76%, transparent);
   }
 
-  .editable-list-session__error,
-  .editable-list-session__info {
+  .poodle-editable-list-session__error,
+  .poodle-editable-list-session__info {
     padding: 0.75rem;
     border-radius: var(--poodle-radius-surface);
     font-size: 0.875rem;
   }
 
-  .editable-list-session__error {
+  .poodle-editable-list-session__error {
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent);
     background: color-mix(in srgb, var(--poodle-color-status-danger) 8%, var(--poodle-color-background-surface));
     color: var(--poodle-color-status-danger);
   }
 
-  .editable-list-session__info {
+  .poodle-editable-list-session__info {
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
     background: color-mix(in srgb, var(--poodle-color-accent-base) 6%, var(--poodle-color-background-surface));
     color: var(--poodle-color-text-primary);
   }
 
-  .editable-list-session__window-nav {
+  .poodle-editable-list-session__window-nav {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 0.5rem;
   }
 
-  .editable-list-session__window-label {
+  .poodle-editable-list-session__window-label {
     min-width: 13rem;
     text-align: center;
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
   }
 
-  .editable-list {
+  .poodle-editable-list {
     --poodle-editable-list-gap: 0.125rem;
     --poodle-editable-list-item-gap: 0.5rem;
     --poodle-editable-list-item-x: 0.625rem;
@@ -440,48 +440,48 @@
     gap: var(--poodle-editable-list-gap);
   }
 
-  .editable-list[data-size="xs"] {
+  .poodle-editable-list[data-size="xs"] {
     --poodle-editable-list-handle-size: 0.875rem;
     --poodle-editable-list-item-x: 0.5rem;
     --poodle-editable-list-item-y: 0.375rem;
     --poodle-editable-list-font-size: 0.6875rem;
   }
 
-  .editable-list[data-size="sm"] {
+  .poodle-editable-list[data-size="sm"] {
     --poodle-editable-list-handle-size: 1rem;
     --poodle-editable-list-item-y: 0.4375rem;
     --poodle-editable-list-font-size: 0.75rem;
   }
 
-  .editable-list[data-size="lg"] {
+  .poodle-editable-list[data-size="lg"] {
     --poodle-editable-list-handle-size: 1.125rem;
     --poodle-editable-list-item-x: 0.75rem;
     --poodle-editable-list-item-y: 0.5625rem;
     --poodle-editable-list-font-size: 0.875rem;
   }
 
-  .editable-list[data-size="xl"] {
+  .poodle-editable-list[data-size="xl"] {
     --poodle-editable-list-handle-size: 1.25rem;
     --poodle-editable-list-item-x: 0.875rem;
     --poodle-editable-list-item-y: 0.625rem;
     --poodle-editable-list-font-size: 0.9375rem;
   }
 
-  .editable-list[data-density="compact"] {
+  .poodle-editable-list[data-density="compact"] {
     --poodle-editable-list-gap: 0.0625rem;
     --poodle-editable-list-item-gap: 0.375rem;
   }
 
-  .editable-list[data-density="comfortable"] {
+  .poodle-editable-list[data-density="comfortable"] {
     --poodle-editable-list-gap: 0.1875rem;
     --poodle-editable-list-item-gap: 0.625rem;
   }
 
-  .editable-list[data-disabled="true"] {
+  .poodle-editable-list[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .editable-list__item {
+  .poodle-editable-list__item {
     display: flex;
     align-items: center;
     gap: var(--poodle-editable-list-item-gap);
@@ -495,26 +495,26 @@
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .editable-list__item:hover {
+  .poodle-editable-list__item:hover {
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface));
   }
 
-  .editable-list__item:focus-visible {
+  .poodle-editable-list__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: -0.0625rem;
   }
 
-  .editable-list__item--dragging {
+  .poodle-editable-list__item--dragging {
     opacity: 0.4;
   }
 
-  .editable-list__item--drop-target,
-  .editable-list__item--grabbed {
+  .poodle-editable-list__item--drop-target,
+  .poodle-editable-list__item--grabbed {
     border-color: var(--poodle-color-accent-base);
     background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-surface));
   }
 
-  .editable-list__handle {
+  .poodle-editable-list__handle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -525,12 +525,12 @@
     cursor: grab;
   }
 
-  .editable-list__handle svg {
+  .poodle-editable-list__handle svg {
     width: 100%;
     height: 100%;
   }
 
-  .editable-list__content {
+  .poodle-editable-list__content {
     flex: 1;
     min-width: 0;
     font-family: var(--poodle-typography-body-family);
@@ -538,7 +538,7 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .editable-list__remove {
+  .poodle-editable-list__remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -553,21 +553,21 @@
     cursor: pointer;
   }
 
-  .editable-list__remove:hover:not(:disabled) {
+  .poodle-editable-list__remove:hover:not(:disabled) {
     color: var(--poodle-color-status-danger);
   }
 
-  .editable-list__remove svg {
+  .poodle-editable-list__remove svg {
     width: 0.75rem;
     height: 0.75rem;
   }
 
-  .editable-list__add {
+  .poodle-editable-list__add {
     display: flex;
     gap: 0.375rem;
   }
 
-  .editable-list__add-input {
+  .poodle-editable-list__add-input {
     flex: 1;
     min-width: 0;
     height: var(--poodle-size-control-height);
@@ -581,17 +581,17 @@
     outline: none;
   }
 
-  .editable-list__add-input:focus {
+  .poodle-editable-list__add-input:focus {
     border-color: var(--poodle-color-accent-focusRing);
     box-shadow: 0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
-  .editable-list__add-input::placeholder {
+  .poodle-editable-list__add-input::placeholder {
     color: var(--poodle-color-text-secondary);
   }
 
-  .editable-list__add-btn {
+  .poodle-editable-list__add-btn {
     display: inline-flex;
     align-items: center;
     height: var(--poodle-size-control-height);
@@ -606,16 +606,16 @@
     font-weight: var(--poodle-typography-label-weight);
   }
 
-  .editable-list__add-btn:hover:not(:disabled) {
+  .poodle-editable-list__add-btn:hover:not(:disabled) {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
   }
 
-  .editable-list__add-btn:disabled {
+  .poodle-editable-list__add-btn:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .editable-list__count {
+  .poodle-editable-list__count {
     font-size: var(--poodle-typography-label-size);
     color: var(--poodle-color-text-secondary);
     font-variant-numeric: tabular-nums;

@@ -219,11 +219,11 @@
   }
 </script>
 
-<div class="calendar" data-size={resolvedSize} data-density={resolvedDensity} data-mode={mode} aria-label={ariaLabel ?? undefined}>
-  <div class="calendar__header">
+<div class="poodle-calendar" data-size={resolvedSize} data-density={resolvedDensity} data-mode={mode} aria-label={ariaLabel ?? undefined}>
+  <div class="poodle-calendar__header">
     <button
       type="button"
-      class="calendar__nav"
+      class="poodle-calendar__nav"
       disabled={disabled}
       aria-label="Previous month"
       on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))))}
@@ -231,13 +231,13 @@
       <span aria-hidden="true">&#x2039;</span>
     </button>
 
-    <div class="calendar__month" aria-live="polite">
+    <div class="poodle-calendar__month" aria-live="polite">
       {monthLabel}
     </div>
 
     <button
       type="button"
-      class="calendar__nav"
+      class="poodle-calendar__nav"
       disabled={disabled}
       aria-label="Next month"
       on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))))}
@@ -246,25 +246,25 @@
     </button>
   </div>
 
-  <div class="calendar__weekdays" aria-hidden="true">
+  <div class="poodle-calendar__weekdays" aria-hidden="true">
     {#each weekdayLabels as label}
-      <span class="calendar__weekday">{label}</span>
+      <span class="poodle-calendar__weekday">{label}</span>
     {/each}
   </div>
 
-  <div id={gridId} class="calendar__grid" role="grid" aria-label={ariaLabel ?? monthLabel}>
+  <div id={gridId} class="poodle-calendar__grid" role="grid" aria-label={ariaLabel ?? monthLabel}>
     {#each weeks as week}
-      <div class="calendar__week" role="row">
+      <div class="poodle-calendar__week" role="row">
         {#each week as day}
           <div
-            class="calendar__cell"
+            class="poodle-calendar__cell"
             role="gridcell"
             aria-selected={isSelected(day.iso) ? "true" : "false"}
           >
             <button
               bind:this={dayElements[day.iso]}
               type="button"
-              class="calendar__day"
+              class="poodle-calendar__day"
               data-current-month={day.inMonth}
               data-selected={mode === "single" && currentSingleValue === day.iso}
               data-today={day.isToday}
@@ -288,26 +288,26 @@
 </div>
 
 <style>
-  .calendar {
+  .poodle-calendar {
     display: grid;
     gap: 0.75rem;
     width: fit-content;
   }
 
-  .calendar__header,
-  .calendar__weekdays,
-  .calendar__week {
+  .poodle-calendar__header,
+  .poodle-calendar__weekdays,
+  .poodle-calendar__week {
     display: grid;
     grid-template-columns: repeat(7, var(--calendar-cell-size, 2.25rem));
     align-items: center;
   }
 
-  .calendar__header {
+  .poodle-calendar__header {
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 0.5rem;
   }
 
-  .calendar__month {
+  .poodle-calendar__month {
     font-family: var(--poodle-typography-label-family);
     font-size: 0.8125rem;
     font-weight: 600;
@@ -315,7 +315,7 @@
     text-align: center;
   }
 
-  .calendar__nav {
+  .poodle-calendar__nav {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -329,15 +329,15 @@
     font: inherit;
   }
 
-  .calendar__nav:hover:not(:disabled) {
+  .poodle-calendar__nav:hover:not(:disabled) {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 82%, var(--poodle-color-background-elevated));
   }
 
-  .calendar__weekdays {
+  .poodle-calendar__weekdays {
     gap: 0.125rem;
   }
 
-  .calendar__weekday {
+  .poodle-calendar__weekday {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
@@ -347,20 +347,20 @@
     text-transform: uppercase;
   }
 
-  .calendar__grid {
+  .poodle-calendar__grid {
     display: grid;
     gap: 0.125rem;
   }
 
-  .calendar__week {
+  .poodle-calendar__week {
     gap: 0.125rem;
   }
 
-  .calendar__cell {
+  .poodle-calendar__cell {
     display: grid;
   }
 
-  .calendar__day {
+  .poodle-calendar__day {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -376,125 +376,125 @@
     font-weight: 500;
   }
 
-  .calendar__day[data-current-month="false"] {
+  .poodle-calendar__day[data-current-month="false"] {
     color: var(--poodle-color-text-secondary);
     opacity: 0.72;
   }
 
-  .calendar__day[data-today="true"] {
+  .poodle-calendar__day[data-today="true"] {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default));
   }
 
   /* Single mode: selected day */
-  .calendar__day[data-selected="true"] {
+  .poodle-calendar__day[data-selected="true"] {
     background: var(--poodle-color-accent-base);
     color: var(--poodle-color-text-inverse);
   }
 
   /* Range mode: in-range days */
-  .calendar__day[data-in-range="true"] {
+  .poodle-calendar__day[data-in-range="true"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
   }
 
   /* Range mode: range endpoints */
-  .calendar__day[data-range-start="true"],
-  .calendar__day[data-range-end="true"] {
+  .poodle-calendar__day[data-range-start="true"],
+  .poodle-calendar__day[data-range-end="true"] {
     background: var(--poodle-color-accent-base);
     color: var(--poodle-color-text-inverse);
   }
 
-  .calendar__day:hover:not(:disabled),
-  .calendar__day:focus-visible {
+  .poodle-calendar__day:hover:not(:disabled),
+  .poodle-calendar__day:focus-visible {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 46%, var(--poodle-color-border-default));
     background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
     outline: none;
   }
 
-  .calendar__day[data-selected="true"]:hover:not(:disabled),
-  .calendar__day[data-selected="true"]:focus-visible {
+  .poodle-calendar__day[data-selected="true"]:hover:not(:disabled),
+  .poodle-calendar__day[data-selected="true"]:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
   }
 
-  .calendar__day[data-range-start="true"]:hover:not(:disabled),
-  .calendar__day[data-range-start="true"]:focus-visible,
-  .calendar__day[data-range-end="true"]:hover:not(:disabled),
-  .calendar__day[data-range-end="true"]:focus-visible {
+  .poodle-calendar__day[data-range-start="true"]:hover:not(:disabled),
+  .poodle-calendar__day[data-range-start="true"]:focus-visible,
+  .poodle-calendar__day[data-range-end="true"]:hover:not(:disabled),
+  .poodle-calendar__day[data-range-end="true"]:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 88%, white 8%);
   }
 
-  .calendar__nav:focus-visible {
+  .poodle-calendar__nav:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .calendar__nav:disabled,
-  .calendar__day:disabled {
+  .poodle-calendar__nav:disabled,
+  .poodle-calendar__day:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .calendar[data-size="xs"] { --calendar-cell-size: 1.75rem; }
-  .calendar[data-size="sm"] { --calendar-cell-size: 2rem; }
-  .calendar[data-size="lg"] { --calendar-cell-size: 2.5rem; }
-  .calendar[data-size="xl"] { --calendar-cell-size: 2.75rem; }
+  .poodle-calendar[data-size="xs"] { --calendar-cell-size: 1.75rem; }
+  .poodle-calendar[data-size="sm"] { --calendar-cell-size: 2rem; }
+  .poodle-calendar[data-size="lg"] { --calendar-cell-size: 2.5rem; }
+  .poodle-calendar[data-size="xl"] { --calendar-cell-size: 2.75rem; }
 
-  .calendar[data-size="xs"] .calendar__nav {
+  .poodle-calendar[data-size="xs"] .poodle-calendar__nav {
     width: 1.5rem;
     height: 1.5rem;
   }
 
-  .calendar[data-size="xs"] .calendar__day {
+  .poodle-calendar[data-size="xs"] .poodle-calendar__day {
     min-height: 1.75rem;
     font-size: 0.6875rem;
   }
 
-  .calendar[data-size="xs"] .calendar__month {
+  .poodle-calendar[data-size="xs"] .poodle-calendar__month {
     font-size: 0.6875rem;
   }
 
-  .calendar[data-size="sm"] .calendar__nav {
+  .poodle-calendar[data-size="sm"] .poodle-calendar__nav {
     width: 1.75rem;
     height: 1.75rem;
   }
 
-  .calendar[data-size="sm"] .calendar__day {
+  .poodle-calendar[data-size="sm"] .poodle-calendar__day {
     min-height: 2rem;
   }
 
-  .calendar[data-size="lg"] .calendar__nav {
+  .poodle-calendar[data-size="lg"] .poodle-calendar__nav {
     width: 2.25rem;
     height: 2.25rem;
   }
 
-  .calendar[data-size="lg"] .calendar__day {
+  .poodle-calendar[data-size="lg"] .poodle-calendar__day {
     min-height: 2.5rem;
     font-size: 0.8125rem;
   }
 
-  .calendar[data-size="lg"] .calendar__month {
+  .poodle-calendar[data-size="lg"] .poodle-calendar__month {
     font-size: 0.875rem;
   }
 
-  .calendar[data-size="xl"] .calendar__nav {
+  .poodle-calendar[data-size="xl"] .poodle-calendar__nav {
     width: 2.5rem;
     height: 2.5rem;
   }
 
-  .calendar[data-size="xl"] .calendar__day {
+  .poodle-calendar[data-size="xl"] .poodle-calendar__day {
     min-height: 2.75rem;
     font-size: 0.875rem;
   }
 
-  .calendar[data-size="xl"] .calendar__month {
+  .poodle-calendar[data-size="xl"] .poodle-calendar__month {
     font-size: 0.9375rem;
   }
 
   /* Density variants */
-  .calendar[data-density="compact"] .calendar__grid { gap: 0; }
-  .calendar[data-density="compact"] .calendar__week,
-  .calendar[data-density="compact"] .calendar__weekdays { gap: 0; }
-  .calendar[data-density="comfortable"] .calendar__grid { gap: 0.25rem; }
-  .calendar[data-density="comfortable"] .calendar__week,
-  .calendar[data-density="comfortable"] .calendar__weekdays { gap: 0.25rem; }
+  .poodle-calendar[data-density="compact"] .poodle-calendar__grid { gap: 0; }
+  .poodle-calendar[data-density="compact"] .poodle-calendar__week,
+  .poodle-calendar[data-density="compact"] .poodle-calendar__weekdays { gap: 0; }
+  .poodle-calendar[data-density="comfortable"] .poodle-calendar__grid { gap: 0.25rem; }
+  .poodle-calendar[data-density="comfortable"] .poodle-calendar__week,
+  .poodle-calendar[data-density="comfortable"] .poodle-calendar__weekdays { gap: 0.25rem; }
 </style>

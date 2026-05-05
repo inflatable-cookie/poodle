@@ -126,9 +126,9 @@
     <input type="hidden" {name} value={currentValue} />
 
     <div
-      class="code-input"
-      class:code-input--disabled={disabled}
-      class:code-input--focused={hasFocus}
+      class="poodle-code-input"
+      class:poodle-code-input--disabled={disabled}
+      class:poodle-code-input--focused={hasFocus}
       data-size={resolvedSize}
       data-density={resolvedDensity}
       style={`--code-slot-border:${slotBorderColor}; --code-slot-focus:${slotFocusColor}; --code-slot-focus-ring:${slotFocusRing};`}
@@ -138,7 +138,7 @@
       <input
         bind:this={inputRef}
         id={effectiveId}
-        class="code-input__control"
+        class="poodle-code-input__control"
         type="text"
         inputmode="numeric"
         pattern="[0-9]*"
@@ -159,10 +159,10 @@
       {#each digits as digit, index}
         <button
           type="button"
-          class="code-input__slot"
-          class:code-input__slot--active={hasFocus && index === activeCaretIndex}
-          class:code-input__slot--filled={digit.length > 0}
-          class:code-input__slot--split-after={length === 6 && index === 2}
+          class="poodle-code-input__slot"
+          class:poodle-code-input__slot--active={hasFocus && index === activeCaretIndex}
+          class:poodle-code-input__slot--filled={digit.length > 0}
+          class:poodle-code-input__slot--split-after={length === 6 && index === 2}
           tabindex={-1}
           onclick={() => handleSlotClick(index)}
           aria-hidden="true"
@@ -175,14 +175,14 @@
 </Field>
 
 <style>
-  .code-input {
+  .poodle-code-input {
     position: relative;
     display: inline-flex;
     gap: var(--poodle-space-inline-sm);
     width: max-content;
   }
 
-  .code-input__control {
+  .poodle-code-input__control {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -192,7 +192,7 @@
     z-index: 1;
   }
 
-  .code-input__slot {
+  .poodle-code-input__slot {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,60 +213,60 @@
     z-index: 0;
   }
 
-  .code-input__slot--active {
+  .poodle-code-input__slot--active {
     border-color: var(--code-slot-focus, var(--poodle-color-accent-border));
     box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--code-slot-focus-ring, color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent));
   }
 
-  .code-input__slot--split-after {
+  .poodle-code-input__slot--split-after {
     margin-right: var(--poodle-space-inline-md);
   }
 
-  .code-input--disabled .code-input__slot {
+  .poodle-code-input--disabled .poodle-code-input__slot {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
-  .code-input[data-size="xs"] .code-input__slot {
+  .poodle-code-input[data-size="xs"] .poodle-code-input__slot {
     width: 1.5rem;
     height: 1.5rem;
     font-size: 0.8125rem;
   }
 
-  .code-input[data-size="sm"] .code-input__slot {
+  .poodle-code-input[data-size="sm"] .poodle-code-input__slot {
     width: 1.75rem;
     height: 1.75rem;
     font-size: 0.875rem;
   }
 
-  .code-input[data-size="lg"] .code-input__slot {
+  .poodle-code-input[data-size="lg"] .poodle-code-input__slot {
     width: 2.75rem;
     height: 2.75rem;
     font-size: 1.125rem;
   }
 
-  .code-input[data-size="xl"] .code-input__slot {
+  .poodle-code-input[data-size="xl"] .poodle-code-input__slot {
     width: 3.25rem;
     height: 3.25rem;
     font-size: 1.25rem;
   }
 
-  .code-input[data-density="compact"] {
+  .poodle-code-input[data-density="compact"] {
     gap: 0.25rem;
   }
 
-  .code-input[data-density="comfortable"] {
+  .poodle-code-input[data-density="comfortable"] {
     gap: var(--poodle-space-inline-md);
   }
 
   @media (max-width: 30rem) {
-    .code-input__slot {
+    .poodle-code-input__slot {
       width: 2rem;
       height: 2rem;
       font-size: 0.9375rem;
     }
 
-    .code-input__slot--split-after {
+    .poodle-code-input__slot--split-after {
       margin-right: var(--poodle-space-inline-sm);
     }
   }

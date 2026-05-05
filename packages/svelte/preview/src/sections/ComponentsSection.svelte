@@ -36,8 +36,8 @@
     .filter((group) => group.items.length > 0);
 </script>
 
-<div class="catalogue-layout">
-  <div class="catalogue-sidebar">
+<div class="poodle-catalogue-layout">
+  <div class="poodle-catalogue-sidebar">
     <SidebarNav
       ariaLabel="Components"
       groups={navGroups}
@@ -45,7 +45,7 @@
     />
   </div>
 
-  <div class="catalogue-content" bind:this={contentElement}>
+  <div class="poodle-catalogue-content" bind:this={contentElement}>
     {#if entry}
       <ComponentPage {entry} specimenComponent={specimen} />
     {:else}
@@ -55,20 +55,20 @@
 </div>
 
 <style>
-  .catalogue-layout {
+  .poodle-catalogue-layout {
     display: flex;
     min-height: 0;
     height: 100%;
   }
 
-  .catalogue-sidebar {
+  .poodle-catalogue-sidebar {
     width: 14rem;
     flex-shrink: 0;
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);
     overflow-y: auto;
   }
 
-  .catalogue-content {
+  .poodle-catalogue-content {
     flex: 1;
     min-width: 0;
     overflow-y: auto;

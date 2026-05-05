@@ -10,10 +10,10 @@
   ]);
 </script>
 
-<div class="spacer" aria-hidden="true" style={style}></div>
+<div class="poodle-spacer" aria-hidden="true" style={style}></div>
 
 <style>
-  .spacer {
+  .poodle-spacer {
     min-width: 0;
     min-height: 0;
   }

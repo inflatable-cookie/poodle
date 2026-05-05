@@ -15,19 +15,19 @@
   const sampleNames = ["rocket", "flame", "shield-check", "globe", "compass", "anchor", "cpu", "database"];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Full Lucide set via IconProvider">
-    <p class="hint">
+    <p class="poodle-hint">
       Wrap a subtree in <code>&lt;IconProvider icons={"{iconNodes}"}&gt;</code> to
       make all {Object.keys(iconNodes).length} Lucide icons available by name.
       Icons resolve from this set first, then fall back to the 35 built-in internals.
     </p>
     <IconProvider icons={iconNodes as unknown as IconSet}>
-      <div class="icon-row">
+      <div class="poodle-icon-row">
         {#each sampleNames as name}
-          <div class="labeled-icon">
+          <div class="poodle-labeled-icon">
             <Icon icon={name} />
-            <span class="label">{name}</span>
+            <span class="poodle-label">{name}</span>
           </div>
         {/each}
       </div>
@@ -35,16 +35,16 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Custom icon set">
-    <p class="hint">
+    <p class="poodle-hint">
       Any <code>Record&lt;string, IconNodes&gt;</code> works as an icon set.
       You can supply a Phosphor equivalent, a subset, or your own custom icons.
     </p>
     <IconProvider icons={customIcons}>
-      <div class="icon-row">
+      <div class="poodle-icon-row">
         {#each Object.keys(customIcons) as name}
-          <div class="labeled-icon">
+          <div class="poodle-labeled-icon">
             <Icon icon={name} />
-            <span class="label">{name}</span>
+            <span class="poodle-label">{name}</span>
           </div>
         {/each}
       </div>
@@ -52,50 +52,50 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Without IconProvider — built-in internals">
-    <p class="hint">
+    <p class="poodle-hint">
       Without any <code>IconProvider</code>, string names resolve to the 35
       built-in icons used for component chrome (chevrons, check, x, etc.).
     </p>
-    <div class="icon-row">
-      <div class="labeled-icon">
+    <div class="poodle-icon-row">
+      <div class="poodle-labeled-icon">
         <Icon icon="check" />
-        <span class="label">check</span>
+        <span class="poodle-label">check</span>
       </div>
-      <div class="labeled-icon">
+      <div class="poodle-labeled-icon">
         <Icon icon="chevron-down" />
-        <span class="label">chevron-down</span>
+        <span class="poodle-label">chevron-down</span>
       </div>
-      <div class="labeled-icon">
+      <div class="poodle-labeled-icon">
         <Icon icon="x" />
-        <span class="label">x</span>
+        <span class="poodle-label">x</span>
       </div>
-      <div class="labeled-icon">
+      <div class="poodle-labeled-icon">
         <Icon icon="search" />
-        <span class="label">search</span>
+        <span class="poodle-label">search</span>
       </div>
-      <div class="labeled-icon">
+      <div class="poodle-labeled-icon">
         <Icon icon="plus" />
-        <span class="label">plus</span>
+        <span class="poodle-label">plus</span>
       </div>
     </div>
   </SpecimenGroup>
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .hint {
+  .poodle-hint {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
     margin: 0;
   }
 
-  .hint code {
+  .poodle-hint code {
     font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
     padding: 0.0625rem 0.25rem;
@@ -103,14 +103,14 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 64%, transparent);
   }
 
-  .icon-row {
+  .poodle-icon-row {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
-  .labeled-icon {
+  .poodle-labeled-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -118,7 +118,7 @@
     min-width: 4rem;
   }
 
-  .label {
+  .poodle-label {
     font-size: 0.5625rem;
     font-family: var(--poodle-typography-code-family);
     color: var(--poodle-color-text-muted);

@@ -33,7 +33,7 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Two-column layout (span 3 = half)">
     <FormLayout description="Fill in the details below to create a new user account.">
       <Field label="First name" id="fl-first" span={3}>
@@ -145,7 +145,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

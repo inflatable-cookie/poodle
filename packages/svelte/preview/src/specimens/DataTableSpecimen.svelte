@@ -98,7 +98,7 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="With sorting, column visibility, and export">
     <DataTable
       {columns}
@@ -118,9 +118,9 @@
       on:columnVisibilityChange={handleColumnVisibility}
     />
     {#if lastAction}
-      <p class="last-action">Last action: <strong>{lastAction}</strong></p>
+      <p class="poodle-last-action">Last action: <strong>{lastAction}</strong></p>
     {/if}
-    <p class="selection-count">{selectedRowIds.length} of {rows.length} selected</p>
+    <p class="poodle-selection-count">{selectedRowIds.length} of {rows.length} selected</p>
   </SpecimenGroup>
 
   <SpecimenGroup label="With filters and pagination">
@@ -140,7 +140,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       {#each controlSizes as size}
         <DataTable
           {columns}
@@ -163,7 +163,7 @@
       <svelte:fragment slot="cell" let:column let:row>
         {@const incident = row.data as Incident | undefined}
         {#if column.id === "expand"}
-          <button type="button" class="expand-button" on:click={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
+          <button type="button" class="poodle-expand-button" on:click={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
             {expandedIncidentId === row.id ? "Hide" : "Show"}
           </button>
         {:else if column.id === "status"}
@@ -177,7 +177,7 @@
       <svelte:fragment slot="expandedRow" let:row>
         {@const incident = row.data as Incident | undefined}
         {#if incident}
-          <div class="incident-detail">
+          <div class="poodle-incident-detail">
             <strong>{incident.endpoint}</strong>
             <span>Owned by {incident.owner}</span>
             <span>Updated {new Date(incident.updatedAt).toLocaleString()}</span>
@@ -198,26 +198,26 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .last-action,
-  .selection-count {
+  .poodle-last-action,
+  .poodle-selection-count {
     margin: 0;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
   }
 
-  .expand-button {
+  .poodle-expand-button {
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-secondary);
@@ -225,7 +225,7 @@
     cursor: pointer;
   }
 
-  .incident-detail {
+  .poodle-incident-detail {
     display: grid;
     gap: 0.25rem;
     font-size: 0.8125rem;

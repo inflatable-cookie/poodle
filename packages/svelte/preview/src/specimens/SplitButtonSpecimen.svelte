@@ -21,34 +21,34 @@
 
 <SpecimenLayout>
   <Surface tone="panel" border="subtle" padding="md">
-    <div class="specimen">
-      <div class="specimen__row">
+    <div class="poodle-specimen">
+      <div class="poodle-specimen__row">
         <Eyebrow>Primary</Eyebrow>
         <SplitButton variant="primary" items={saveItems} on:click={() => (lastAction = "Save")} on:action={(e) => (lastAction = e.detail.value)}>Save</SplitButton>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Secondary</Eyebrow>
         <SplitButton variant="secondary" items={exportItems} on:click={() => (lastAction = "Export")} on:action={(e) => (lastAction = e.detail.value)}>Export</SplitButton>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Danger</Eyebrow>
         <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} on:click={() => (lastAction = "Delete")} on:action={(e) => (lastAction = e.detail.value)}>Delete</SplitButton>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Loading</Eyebrow>
         <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Disabled</Eyebrow>
         <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
       </div>
 
       {#if lastAction}
-        <p class="specimen__hint">Last action: <strong>{lastAction}</strong></p>
+        <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
       {/if}
     </div>
   </Surface>
@@ -63,20 +63,20 @@
 </SpecimenLayout>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
   }
 
-  .specimen__hint {
+  .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);

@@ -47,7 +47,7 @@
   }
 </script>
 
-<div class="embed-input">
+<div class="poodle-embed-input">
   <TextInput
     {id}
     {value}
@@ -57,24 +57,24 @@
     on:valueChange={handleValueChange}
   />
 
-  <div class="embed-input__status">
+  <div class="poodle-embed-input__status">
     {#if error}
-      <span class="embed-input__error">{error}</span>
+      <span class="poodle-embed-input__error">{error}</span>
     {:else if parsed}
       <Pill tone="success" sizeRole="chrome">{parsed.provider}</Pill>
-      <span class="embed-input__success">Embed detected</span>
+      <span class="poodle-embed-input__success">Embed detected</span>
     {/if}
   </div>
 </div>
 
 <style>
-  .embed-input {
+  .poodle-embed-input {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .embed-input__status {
+  .poodle-embed-input__status {
     display: flex;
     align-items: center;
     gap: 0.375rem;
@@ -82,11 +82,11 @@
     font-size: 0.75rem;
   }
 
-  .embed-input__error {
+  .poodle-embed-input__error {
     color: var(--poodle-color-text-danger, #ef4444);
   }
 
-  .embed-input__success {
+  .poodle-embed-input__success {
     color: var(--poodle-color-text-success, #22c55e);
   }
 </style>

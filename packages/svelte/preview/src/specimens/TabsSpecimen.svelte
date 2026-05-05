@@ -47,7 +47,7 @@
   let panelCollapsed = false;
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Text variant (default, with indicator line)">
     <Tabs
       items={basicTabs}
@@ -87,7 +87,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <Tabs
         items={stripTabs}
         variant="block"
@@ -95,7 +95,7 @@
         reorderable
         ariaLabel="Workspace surfaces"
       />
-      <div class="specimen__surface-body">
+      <div class="poodle-specimen__surface-body">
         <p>Surface content area</p>
       </div>
     </div>
@@ -119,7 +119,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Strip variant (full-width bar with icons, closable, reorderable)">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <Tabs
         items={stripTabs}
         variant="strip"
@@ -129,14 +129,14 @@
         on:close={(e) => (lastClosed = e.detail.value)}
         on:reorder={(e) => (lastReorder = e.detail.items.join(", "))}
       />
-      <div class="specimen__surface-body">
+      <div class="poodle-specimen__surface-body">
         <p>Surface content area</p>
       </div>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Strip variant — vertical (icon-only, collapsed panel)">
-    <div class="specimen__frame specimen__frame--row">
+    <div class="poodle-specimen__frame poodle-specimen__frame--row">
       <Tabs
         items={panelTabs}
         variant="strip"
@@ -144,16 +144,16 @@
         defaultValue="explorer"
         ariaLabel="Side panel tabs"
       />
-      <div class="specimen__surface-body specimen__surface-body--fill">
+      <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
         <p>Panel content</p>
       </div>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Strip variant — collapse toggle (click to toggle orientation)">
-    <div class="specimen__frame specimen__frame--row">
+    <div class="poodle-specimen__frame poodle-specimen__frame--row">
       {#if !panelCollapsed}
-        <div class="specimen__panel-expanded">
+        <div class="poodle-specimen__panel-expanded">
           <Tabs
             items={panelTabs}
             variant="strip"
@@ -163,7 +163,7 @@
             ariaLabel="Side panel tabs"
             on:close={(e) => (lastClosed = e.detail.value)}
           />
-          <div class="specimen__surface-body specimen__surface-body--fill">
+          <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
             <p>Panel body — expanded</p>
           </div>
         </div>
@@ -177,7 +177,7 @@
         />
       {/if}
       <button
-        class="specimen__collapse-btn"
+        class="poodle-specimen__collapse-btn"
         on:click={() => (panelCollapsed = !panelCollapsed)}
       >
         {panelCollapsed ? "→" : "←"}
@@ -200,19 +200,19 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__frame {
+  .poodle-specimen__frame {
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     overflow: hidden;
   }
 
-  .specimen__surface-body {
+  .poodle-specimen__surface-body {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -222,25 +222,25 @@
     background: var(--poodle-color-background-panel);
   }
 
-  .specimen__surface-body--fill {
+  .poodle-specimen__surface-body--fill {
     flex: 1;
     height: auto;
     min-height: 8rem;
   }
 
-  .specimen__frame--row {
+  .poodle-specimen__frame--row {
     display: flex;
     flex-direction: row;
   }
 
-  .specimen__panel-expanded {
+  .poodle-specimen__panel-expanded {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-width: 0;
   }
 
-  .specimen__collapse-btn {
+  .poodle-specimen__collapse-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -255,7 +255,7 @@
     font-size: 0.75rem;
   }
 
-  .specimen__collapse-btn:hover {
+  .poodle-specimen__collapse-btn:hover {
     background: var(--poodle-color-surface-hover);
     color: var(--poodle-color-text-primary);
   }

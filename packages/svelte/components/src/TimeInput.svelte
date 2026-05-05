@@ -41,7 +41,7 @@
 
 <input
   id={id ?? undefined}
-  class="time-input"
+  class="poodle-time-input"
   data-size={resolvedSize}
   data-density={resolvedDensity}
   type="time"
@@ -56,7 +56,7 @@
 />
 
 <style>
-  .time-input {
+  .poodle-time-input {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     border: 0.0625rem solid var(--poodle-color-border-default);
@@ -68,23 +68,23 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .time-input:focus-visible {
+  .poodle-time-input:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .time-input:disabled {
+  .poodle-time-input:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .time-input[data-size="xs"] { min-height: 1.5rem; font-size: 0.75rem; }
-  .time-input[data-size="sm"] { min-height: 1.75rem; font-size: 0.8125rem; }
-  .time-input[data-size="lg"] { min-height: 2.75rem; font-size: 0.9375rem; }
-  .time-input[data-size="xl"] { min-height: 3.25rem; font-size: 1rem; }
+  .poodle-time-input[data-size="xs"] { min-height: 1.5rem; font-size: 0.75rem; }
+  .poodle-time-input[data-size="sm"] { min-height: 1.75rem; font-size: 0.8125rem; }
+  .poodle-time-input[data-size="lg"] { min-height: 2.75rem; font-size: 0.9375rem; }
+  .poodle-time-input[data-size="xl"] { min-height: 3.25rem; font-size: 1rem; }
 
   /* Density variants */
-  .time-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .time-input[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-time-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-time-input[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

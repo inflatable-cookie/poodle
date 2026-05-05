@@ -29,12 +29,12 @@
   ]);
 </script>
 
-<div class={`stack ${className}`.trim()} role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
+<div class={`poodle-stack ${className}`.trim()} role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
   <slot />
 </div>
 
 <style>
-  .stack {
+  .poodle-stack {
     display: flex;
     min-width: 0;
     min-height: 0;

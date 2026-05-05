@@ -100,7 +100,7 @@
   on:openChange={handleOpenChange}
 >
   {#if itemLabel && itemValue}
-    <p class="alert-dialog__item-detail">
+    <p class="poodle-alert-dialog__item-detail">
       <strong>{itemLabel}:</strong> {itemValue}
     </p>
   {/if}
@@ -130,13 +130,13 @@
 </div>
 
 <style>
-  .alert-dialog__item-detail {
+  .poodle-alert-dialog__item-detail {
     margin: 0 0 0.75rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
-  .alert-dialog__item-detail strong {
+  .poodle-alert-dialog__item-detail strong {
     color: var(--poodle-color-text-primary);
   }
 </style>

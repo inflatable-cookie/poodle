@@ -23,65 +23,65 @@
 
 {#if href && !disabled}
   <a
-    class="nav-card"
+    class="poodle-nav-card"
     {href}
     aria-label={ariaLabel ?? title}
     data-disabled={disabled}
     on:click={handleClick}
   >
     {#if $$slots.icon}
-      <span class="nav-card__icon" aria-hidden="true">
+      <span class="poodle-nav-card__icon" aria-hidden="true">
         <slot name="icon" />
       </span>
     {/if}
-    <div class="nav-card__content">
-      <span class="nav-card__title">
+    <div class="poodle-nav-card__content">
+      <span class="poodle-nav-card__title">
         {title}
         {#if badge}
-          <span class="nav-card__badge">{badge}</span>
+          <span class="poodle-nav-card__badge">{badge}</span>
         {/if}
       </span>
       {#if description}
-        <span class="nav-card__description">{description}</span>
+        <span class="poodle-nav-card__description">{description}</span>
       {/if}
     </div>
-    <svg class="nav-card__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg class="poodle-nav-card__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </a>
 {:else}
   <button
     type="button"
-    class="nav-card"
+    class="poodle-nav-card"
     aria-label={ariaLabel ?? title}
     disabled={disabled}
     data-disabled={disabled}
     on:click={handleClick}
   >
     {#if $$slots.icon}
-      <span class="nav-card__icon" aria-hidden="true">
+      <span class="poodle-nav-card__icon" aria-hidden="true">
         <slot name="icon" />
       </span>
     {/if}
-    <div class="nav-card__content">
-      <span class="nav-card__title">
+    <div class="poodle-nav-card__content">
+      <span class="poodle-nav-card__title">
         {title}
         {#if badge}
-          <span class="nav-card__badge">{badge}</span>
+          <span class="poodle-nav-card__badge">{badge}</span>
         {/if}
       </span>
       {#if description}
-        <span class="nav-card__description">{description}</span>
+        <span class="poodle-nav-card__description">{description}</span>
       {/if}
     </div>
-    <svg class="nav-card__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg class="poodle-nav-card__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
 {/if}
 
 <style>
-  .nav-card {
+  .poodle-nav-card {
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-md);
@@ -101,22 +101,22 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .nav-card:hover:not(:disabled):not([data-disabled="true"]) {
+  .poodle-nav-card:hover:not(:disabled):not([data-disabled="true"]) {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle));
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface));
   }
 
-  .nav-card:focus-visible {
+  .poodle-nav-card:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .nav-card[data-disabled="true"] {
+  .poodle-nav-card[data-disabled="true"] {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .nav-card__icon {
+  .poodle-nav-card__icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -129,7 +129,7 @@
     font-size: 1rem;
   }
 
-  .nav-card__content {
+  .poodle-nav-card__content {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -137,7 +137,7 @@
     gap: 0.125rem;
   }
 
-  .nav-card__title {
+  .poodle-nav-card__title {
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -147,7 +147,7 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .nav-card__badge {
+  .poodle-nav-card__badge {
     display: inline-flex;
     align-items: center;
     padding: 0.0625rem 0.375rem;
@@ -160,13 +160,13 @@
     letter-spacing: 0.05em;
   }
 
-  .nav-card__description {
+  .poodle-nav-card__description {
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.4;
   }
 
-  .nav-card__arrow {
+  .poodle-nav-card__arrow {
     flex-shrink: 0;
     width: 1rem;
     height: 1rem;
@@ -175,7 +175,7 @@
     transition: opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .nav-card:hover .nav-card__arrow {
+  .poodle-nav-card:hover .poodle-nav-card__arrow {
     opacity: 1;
   }
 </style>

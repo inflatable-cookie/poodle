@@ -4,7 +4,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="With title and rows">
     <DetailSection title="Project details" description="Core metadata for this project.">
       <DetailItem label="Name" value="Poodle Design System" />
@@ -47,7 +47,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

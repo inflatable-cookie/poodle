@@ -107,10 +107,10 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-time-zone-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
+<div bind:this={rootElement} class="poodle-date-time-zone-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
   <button
     type="button"
-    class="date-time-zone-picker__trigger"
+    class="poodle-date-time-zone-picker__trigger"
     disabled={disabled}
     aria-haspopup="dialog"
     aria-expanded={isOpen ? "true" : "false"}
@@ -119,22 +119,22 @@
     on:click={() => setOpen(!isOpen)}
   >
     <span
-      class="date-time-zone-picker__value"
+      class="poodle-date-time-zone-picker__value"
       data-placeholder={!currentValue.date || !currentValue.time || !currentValue.timeZone}
     >
       {valueLabel}
     </span>
-    <span class="date-time-zone-picker__indicator" aria-hidden="true">▾</span>
+    <span class="poodle-date-time-zone-picker__indicator" aria-hidden="true">▾</span>
   </button>
 
   {#if isOpen}
     <div
       id={surfaceId}
-      class="date-time-zone-picker__surface"
+      class="poodle-date-time-zone-picker__surface"
       role="dialog"
       aria-label={ariaLabel ?? placeholder}
     >
-      <div class="date-time-zone-picker__body">
+      <div class="poodle-date-time-zone-picker__body">
         <Calendar
           value={currentValue.date}
           visibleMonth={visibleMonth}
@@ -148,9 +148,9 @@
           on:monthChange={(event) => (visibleMonth = event.detail.month)}
         />
 
-        <div class="date-time-zone-picker__fields">
-          <div class="date-time-zone-picker__field">
-            <label class="date-time-zone-picker__label" for={`${surfaceId}-time`}>
+        <div class="poodle-date-time-zone-picker__fields">
+          <div class="poodle-date-time-zone-picker__field">
+            <label class="poodle-date-time-zone-picker__label" for={`${surfaceId}-time`}>
               Time
             </label>
             <TimeInput
@@ -164,8 +164,8 @@
             />
           </div>
 
-          <div class="date-time-zone-picker__field">
-            <label class="date-time-zone-picker__label" for={`${surfaceId}-timezone`}>
+          <div class="poodle-date-time-zone-picker__field">
+            <label class="poodle-date-time-zone-picker__label" for={`${surfaceId}-timezone`}>
               Time zone
             </label>
             <TimeZoneSelect
@@ -186,13 +186,13 @@
 </div>
 
 <style>
-  .date-time-zone-picker {
+  .poodle-date-time-zone-picker {
     position: relative;
     display: inline-grid;
     min-width: 18rem;
   }
 
-  .date-time-zone-picker__trigger {
+  .poodle-date-time-zone-picker__trigger {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
@@ -210,20 +210,20 @@
     text-align: left;
   }
 
-  .date-time-zone-picker__value {
+  .poodle-date-time-zone-picker__value {
     min-width: 0;
   }
 
-  .date-time-zone-picker__value[data-placeholder="true"] {
+  .poodle-date-time-zone-picker__value[data-placeholder="true"] {
     color: var(--poodle-color-text-secondary);
   }
 
-  .date-time-zone-picker__indicator {
+  .poodle-date-time-zone-picker__indicator {
     color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
   }
 
-  .date-time-zone-picker__surface {
+  .poodle-date-time-zone-picker__surface {
     position: absolute;
     top: calc(100% + 0.375rem);
     left: 0;
@@ -239,22 +239,22 @@
     box-shadow: var(--poodle-elevation-overlay);
   }
 
-  .date-time-zone-picker__body {
+  .poodle-date-time-zone-picker__body {
     display: grid;
     gap: 0.875rem;
   }
 
-  .date-time-zone-picker__fields {
+  .poodle-date-time-zone-picker__fields {
     display: grid;
     gap: 0.75rem;
   }
 
-  .date-time-zone-picker__field {
+  .poodle-date-time-zone-picker__field {
     display: grid;
     gap: 0.375rem;
   }
 
-  .date-time-zone-picker__label {
+  .poodle-date-time-zone-picker__label {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
@@ -263,7 +263,7 @@
     text-transform: uppercase;
   }
 
-  .date-time-zone-picker__trigger:hover:not(:disabled) {
+  .poodle-date-time-zone-picker__trigger:hover:not(:disabled) {
     background: color-mix(
       in srgb,
       var(--poodle-color-background-surface) 86%,
@@ -271,41 +271,41 @@
     );
   }
 
-  .date-time-zone-picker__trigger:focus-visible {
+  .poodle-date-time-zone-picker__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .date-time-zone-picker__trigger:disabled {
+  .poodle-date-time-zone-picker__trigger:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .date-time-zone-picker[data-size="xs"] .date-time-zone-picker__trigger {
+  .poodle-date-time-zone-picker[data-size="xs"] .poodle-date-time-zone-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
-  .date-time-zone-picker[data-size="sm"] .date-time-zone-picker__trigger {
+  .poodle-date-time-zone-picker[data-size="sm"] .poodle-date-time-zone-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
   }
 
-  .date-time-zone-picker[data-size="lg"] .date-time-zone-picker__trigger {
+  .poodle-date-time-zone-picker[data-size="lg"] .poodle-date-time-zone-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
 
-  .date-time-zone-picker[data-size="xl"] .date-time-zone-picker__trigger {
+  .poodle-date-time-zone-picker[data-size="xl"] .poodle-date-time-zone-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 1rem;
   }
 
   /* Density variants */
-  .date-time-zone-picker[data-density="compact"] .date-time-zone-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .date-time-zone-picker[data-density="comfortable"] .date-time-zone-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-date-time-zone-picker[data-density="compact"] .poodle-date-time-zone-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-date-time-zone-picker[data-density="comfortable"] .poodle-date-time-zone-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

@@ -132,7 +132,7 @@
 </script>
 
 <span
-  class="hover-card"
+  class="poodle-hover-card"
   role="presentation"
   on:mouseenter={scheduleOpen}
   on:mouseleave={scheduleClose}
@@ -147,7 +147,7 @@
 >
   <span
     bind:this={triggerElement}
-    class="hover-card__trigger"
+    class="poodle-hover-card__trigger"
     role="button"
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
@@ -160,7 +160,7 @@
     <span
       bind:this={surfaceElement}
       id={hoverCardId}
-      class="hover-card__surface"
+      class="poodle-hover-card__surface"
       role="dialog"
       tabindex="-1"
       aria-label={ariaLabel ?? undefined}
@@ -174,21 +174,21 @@
 </span>
 
 <style>
-  .hover-card {
+  .poodle-hover-card {
     position: relative;
     display: inline-flex;
   }
 
-  .hover-card__trigger {
+  .poodle-hover-card__trigger {
     display: inline-flex;
   }
 
-  .hover-card__trigger:focus-visible {
+  .poodle-hover-card__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .hover-card__surface {
+  .poodle-hover-card__surface {
     position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;

@@ -135,14 +135,14 @@
   });
 </script>
 
-<div bind:this={rootElement} class="menubar" data-size={resolvedSize} data-density={resolvedDensity}>
-  <div class="menubar__list" role="menubar" aria-label={ariaLabel ?? undefined}>
+<div bind:this={rootElement} class="poodle-menubar" data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="poodle-menubar__list" role="menubar" aria-label={ariaLabel ?? undefined}>
     {#each items as item, index (item.value)}
-      <div class="menubar__group">
+      <div class="poodle-menubar__group">
         <button
           bind:this={triggerElements[index]}
           type="button"
-          class="menubar__trigger"
+          class="poodle-menubar__trigger"
           data-open={currentValue === item.value}
           disabled={item.disabled === true}
           role="menuitem"
@@ -194,18 +194,18 @@
         {#if currentValue === item.value}
           <div
             id={`poodle-menubar-menu-${menubarId}-${item.value}`}
-            class="menubar__overlay"
+            class="poodle-menubar__overlay"
             role="menu"
             aria-label={item.label}
           >
             {#each item.items as menuItem (menuItem.value)}
               {#if menuItem.kind === "separator"}
-                <div class="menubar__separator" role="separator"></div>
+                <div class="poodle-menubar__separator" role="separator"></div>
               {:else}
                 <button
                   bind:this={menuItemElements[actionableItems.findIndex((candidate) => candidate.value === menuItem.value)]}
                   type="button"
-                  class="menubar__item"
+                  class="poodle-menubar__item"
                   disabled={menuItem.disabled === true}
                   role={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? `menuitem${menuItem.kind}` : "menuitem"}
                   aria-checked={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? (menuItem.checked ? "true" : "false") : undefined}
@@ -257,12 +257,12 @@
                     }
                   }}
                 >
-                  <span class="menubar__label">{menuItem.label}</span>
+                  <span class="poodle-menubar__label">{menuItem.label}</span>
 
                   {#if menuItem.checked}
-                    <span class="menubar__meta" aria-hidden="true">✓</span>
+                    <span class="poodle-menubar__meta" aria-hidden="true">✓</span>
                   {:else if menuItem.shortcutLabel}
-                    <span class="menubar__meta" aria-hidden="true">{menuItem.shortcutLabel}</span>
+                    <span class="poodle-menubar__meta" aria-hidden="true">{menuItem.shortcutLabel}</span>
                   {/if}
                 </button>
               {/if}
@@ -275,12 +275,12 @@
 </div>
 
 <style>
-  .menubar {
+  .poodle-menubar {
     display: inline-flex;
     min-width: 0;
   }
 
-  .menubar__list {
+  .poodle-menubar__list {
     display: inline-flex;
     gap: 0.125rem;
     padding: 0.1875rem;
@@ -289,12 +289,12 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent);
   }
 
-  .menubar__group {
+  .poodle-menubar__group {
     position: relative;
     display: inline-flex;
   }
 
-  .menubar__trigger {
+  .poodle-menubar__trigger {
     display: inline-flex;
     align-items: center;
     min-height: var(--poodle-size-control-height);
@@ -310,14 +310,14 @@
     line-height: 1;
   }
 
-  .menubar__trigger[data-open="true"],
-  .menubar__trigger:hover:not(:disabled),
-  .menubar__trigger:focus-visible {
+  .poodle-menubar__trigger[data-open="true"],
+  .poodle-menubar__trigger:hover:not(:disabled),
+  .poodle-menubar__trigger:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
     outline: none;
   }
 
-  .menubar__overlay {
+  .poodle-menubar__overlay {
     position: absolute;
     top: calc(100% + 0.25rem);
     left: 0;
@@ -336,7 +336,7 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 
-  .menubar__item {
+  .poodle-menubar__item {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -353,75 +353,75 @@
     text-align: left;
   }
 
-  .menubar__item:hover:not(:disabled),
-  .menubar__item:focus-visible {
+  .poodle-menubar__item:hover:not(:disabled),
+  .poodle-menubar__item:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     outline: none;
   }
 
-  .menubar__meta {
+  .poodle-menubar__meta {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
   }
 
-  .menubar__separator {
+  .poodle-menubar__separator {
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
-  .menubar__trigger:disabled,
-  .menubar__item:disabled {
+  .poodle-menubar__trigger:disabled,
+  .poodle-menubar__item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .menubar[data-size="xs"] .menubar__trigger {
+  .poodle-menubar[data-size="xs"] .poodle-menubar__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.6875rem;
   }
 
-  .menubar[data-size="xs"] .menubar__item {
+  .poodle-menubar[data-size="xs"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
     font-size: 0.75rem;
   }
 
-  .menubar[data-size="sm"] .menubar__trigger {
+  .poodle-menubar[data-size="sm"] .poodle-menubar__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
   }
 
-  .menubar[data-size="sm"] .menubar__item {
+  .poodle-menubar[data-size="sm"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
   }
 
-  .menubar[data-size="lg"] .menubar__trigger {
+  .poodle-menubar[data-size="lg"] .poodle-menubar__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.875rem;
   }
 
-  .menubar[data-size="lg"] .menubar__item {
+  .poodle-menubar[data-size="lg"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
     font-size: 0.9375rem;
   }
 
-  .menubar[data-size="xl"] .menubar__trigger {
+  .poodle-menubar[data-size="xl"] .poodle-menubar__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
 
-  .menubar[data-size="xl"] .menubar__item {
+  .poodle-menubar[data-size="xl"] .poodle-menubar__item {
     min-height: var(--poodle-size-control-height);
     font-size: 1rem;
   }
 
   /* Density variants */
-  .menubar[data-density="compact"] .menubar__item { padding-inline: 0.5rem; }
-  .menubar[data-density="comfortable"] .menubar__item { padding-inline: 0.75rem; }
+  .poodle-menubar[data-density="compact"] .poodle-menubar__item { padding-inline: 0.5rem; }
+  .poodle-menubar[data-density="comfortable"] .poodle-menubar__item { padding-inline: 0.75rem; }
 </style>

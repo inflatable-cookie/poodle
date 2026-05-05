@@ -18,31 +18,31 @@
 {#if tooltip}
   <Tooltip content={tooltip}>
     {#if href}
-      <a class="list-card-counter" {href} onclick={handleClick}>
+      <a class="poodle-list-card-counter" {href} onclick={handleClick}>
         <Icon icon={icon} />
         <span>{count}</span>
       </a>
     {:else}
-      <span class="list-card-counter">
+      <span class="poodle-list-card-counter">
         <Icon icon={icon} />
         <span>{count}</span>
       </span>
     {/if}
   </Tooltip>
 {:else if href}
-  <a class="list-card-counter" {href} onclick={handleClick}>
+  <a class="poodle-list-card-counter" {href} onclick={handleClick}>
     <Icon icon={icon} />
     <span>{count}</span>
   </a>
 {:else}
-  <span class="list-card-counter">
+  <span class="poodle-list-card-counter">
     <Icon icon={icon} />
     <span>{count}</span>
   </span>
 {/if}
 
 <style>
-  .list-card-counter {
+  .poodle-list-card-counter {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -52,7 +52,7 @@
     text-decoration: none;
   }
 
-  a.list-card-counter:hover {
+  a.poodle-list-card-counter:hover {
     color: var(--poodle-color-text-primary);
   }
 </style>

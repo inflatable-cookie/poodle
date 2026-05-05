@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Default">
     <PaginationSummary currentPage={1} totalPages={8} totalItems={156} pageSize={20} />
   </SpecimenGroup>
@@ -18,7 +18,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

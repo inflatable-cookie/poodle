@@ -165,30 +165,30 @@
   });
 </script>
 
-<div class="split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={resolvedSize} data-density={resolvedDensity} bind:this={rootElement}>
+<div class="poodle-split-button" data-variant={variant} data-tone={tone !== "default" ? tone : undefined} data-size={resolvedSize} data-density={resolvedDensity} bind:this={rootElement}>
   <button
     {type}
-    class="split-button__primary"
+    class="poodle-split-button__primary"
     disabled={isUnavailable}
     aria-label={ariaLabel ?? undefined}
     aria-busy={loading ? "true" : undefined}
     on:click={(event) => dispatch("click", event)}
   >
     {#if loading}
-      <span class="split-button__spinner" aria-hidden="true">
+      <span class="poodle-split-button__spinner" aria-hidden="true">
         <Spinner variant="ring" size={resolvedVisualSize} tone="current" />
       </span>
     {/if}
-    <span class="split-button__label">
+    <span class="poodle-split-button__label">
       <slot />
     </span>
   </button>
 
-  <div class="split-button__divider" aria-hidden="true"></div>
+  <div class="poodle-split-button__divider" aria-hidden="true"></div>
 
   <button
     type="button"
-    class="split-button__toggle"
+    class="poodle-split-button__toggle"
     bind:this={toggleElement}
     disabled={isUnavailable}
     aria-haspopup="true"
@@ -210,7 +210,7 @@
       }
     }}
   >
-    <svg class="split-button__chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg class="poodle-split-button__chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
@@ -218,7 +218,7 @@
   {#if menuOpen}
     <div
       bind:this={menuElement}
-      class="split-button__menu"
+      class="poodle-split-button__menu"
       data-placement={menuPlacement}
       role="menu"
       aria-label={menuAriaLabel}
@@ -226,12 +226,12 @@
     >
       {#each items as item (item.value)}
         {#if item.kind === "separator"}
-          <div class="split-button__separator" role="separator"></div>
+          <div class="poodle-split-button__separator" role="separator"></div>
         {:else}
           <button
             bind:this={itemElements[actionableItems.findIndex((c) => c.value === item.value)]}
             type="button"
-            class="split-button__item"
+            class="poodle-split-button__item"
             disabled={item.disabled === true}
             role="menuitem"
             on:click={() => activateItem(item)}
@@ -260,7 +260,7 @@
               }
             }}
           >
-            <span class="split-button__item-label">{item.label}</span>
+            <span class="poodle-split-button__item-label">{item.label}</span>
           </button>
         {/if}
       {/each}
@@ -269,7 +269,7 @@
 </div>
 
 <style>
-  .split-button {
+  .poodle-split-button {
     --poodle-split-fill: var(
       --poodle-treatment-interactive-fill,
       var(--poodle-color-background-surface)
@@ -295,7 +295,7 @@
     border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
   }
 
-  .split-button[data-variant="primary"] {
+  .poodle-split-button[data-variant="primary"] {
     --poodle-split-fill: var(
       --poodle-treatment-interactive-primary-fill,
       var(--poodle-color-accent-base)
@@ -314,31 +314,31 @@
     );
   }
 
-  .split-button[data-variant="ghost"] {
+  .poodle-split-button[data-variant="ghost"] {
     --poodle-split-fill: color-mix(in srgb, var(--poodle-color-background-surface) 42%, transparent);
     --poodle-split-border: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
-  .split-button[data-tone="danger"] {
+  .poodle-split-button[data-tone="danger"] {
     --poodle-split-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
     --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
     --poodle-split-text: var(--poodle-color-text-primary);
   }
 
-  .split-button[data-variant="primary"][data-tone="danger"] {
+  .poodle-split-button[data-variant="primary"][data-tone="danger"] {
     --poodle-split-fill: var(--poodle-color-status-danger);
     --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
     --poodle-split-text: var(--poodle-color-text-inverse);
   }
 
-  .split-button[data-variant="ghost"][data-tone="danger"] {
+  .poodle-split-button[data-variant="ghost"][data-tone="danger"] {
     --poodle-split-fill: transparent;
     --poodle-split-border: transparent;
     --poodle-split-text: var(--poodle-color-status-danger);
   }
 
-  .split-button__primary,
-  .split-button__toggle {
+  .poodle-split-button__primary,
+  .poodle-split-button__toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -359,31 +359,31 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .split-button[data-size="sm"] .split-button__primary,
-  .split-button[data-size="sm"] .split-button__toggle {
+  .poodle-split-button[data-size="sm"] .poodle-split-button__primary,
+  .poodle-split-button[data-size="sm"] .poodle-split-button__toggle {
     height: var(--poodle-size-control-height);
     font-size: 0.75rem;
   }
 
-  .split-button[data-size="xs"] .split-button__primary,
-  .split-button[data-size="xs"] .split-button__toggle {
+  .poodle-split-button[data-size="xs"] .poodle-split-button__primary,
+  .poodle-split-button[data-size="xs"] .poodle-split-button__toggle {
     height: var(--poodle-size-control-height);
     font-size: 0.6875rem;
   }
 
-  .split-button[data-size="lg"] .split-button__primary,
-  .split-button[data-size="lg"] .split-button__toggle {
+  .poodle-split-button[data-size="lg"] .poodle-split-button__primary,
+  .poodle-split-button[data-size="lg"] .poodle-split-button__toggle {
     height: var(--poodle-size-control-height);
     font-size: 0.875rem;
   }
 
-  .split-button[data-size="xl"] .split-button__primary,
-  .split-button[data-size="xl"] .split-button__toggle {
+  .poodle-split-button[data-size="xl"] .poodle-split-button__primary,
+  .poodle-split-button[data-size="xl"] .poodle-split-button__toggle {
     height: var(--poodle-size-control-height);
     font-size: 0.9375rem;
   }
 
-  .split-button__primary {
+  .poodle-split-button__primary {
     gap: var(--poodle-space-inline-sm);
     min-width: 4rem;
     padding: 0 var(--poodle-space-control-x);
@@ -391,67 +391,67 @@
     border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
   }
 
-  .split-button__primary:hover:not(:disabled) {
+  .poodle-split-button__primary:hover:not(:disabled) {
     background: var(--poodle-split-fill-hover);
   }
 
-  .split-button__primary:focus-visible {
+  .poodle-split-button__primary:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     z-index: 1;
   }
 
-  .split-button__primary:disabled {
+  .poodle-split-button__primary:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .split-button__toggle {
+  .poodle-split-button__toggle {
     width: 2rem;
     padding: 0;
     border-left: 0;
     border-radius: 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0;
   }
 
-  .split-button__toggle:hover:not(:disabled) {
+  .poodle-split-button__toggle:hover:not(:disabled) {
     background: var(--poodle-split-fill-hover);
   }
 
-  .split-button__toggle:focus-visible {
+  .poodle-split-button__toggle:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     z-index: 1;
   }
 
-  .split-button__toggle:disabled {
+  .poodle-split-button__toggle:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .split-button__divider {
+  .poodle-split-button__divider {
     width: 0.0625rem;
     background: color-mix(in srgb, var(--poodle-split-text) 22%, transparent);
     align-self: center;
     height: 60%;
   }
 
-  .split-button__chevron {
+  .poodle-split-button__chevron {
     width: 0.75rem;
     height: 0.75rem;
   }
 
-  .split-button__label {
+  .poodle-split-button__label {
     min-width: 0;
     white-space: nowrap;
   }
 
-  .split-button__spinner {
+  .poodle-split-button__spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .split-button__menu {
+  .poodle-split-button__menu {
     position: absolute;
     top: calc(100% + 0.375rem);
     left: 0;
@@ -471,12 +471,12 @@
     overflow-y: auto;
   }
 
-  .split-button__menu[data-placement="top-start"] {
+  .poodle-split-button__menu[data-placement="top-start"] {
     top: auto;
     bottom: calc(100% + 0.375rem);
   }
 
-  .split-button__item {
+  .poodle-split-button__item {
     display: flex;
     align-items: center;
     width: 100%;
@@ -492,18 +492,18 @@
     text-align: left;
   }
 
-  .split-button__item:hover:not(:disabled),
-  .split-button__item:focus-visible {
+  .poodle-split-button__item:hover:not(:disabled),
+  .poodle-split-button__item:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     outline: none;
   }
 
-  .split-button__item:disabled {
+  .poodle-split-button__item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .split-button__separator {
+  .poodle-split-button__separator {
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
@@ -511,6 +511,6 @@
   }
 
   /* Density variants — horizontal padding */
-  .split-button[data-density="compact"] .split-button__primary { padding-inline: 0.5rem; }
-  .split-button[data-density="comfortable"] .split-button__primary { padding-inline: 1.125rem; }
+  .poodle-split-button[data-density="compact"] .poodle-split-button__primary { padding-inline: 0.5rem; }
+  .poodle-split-button[data-density="comfortable"] .poodle-split-button__primary { padding-inline: 1.125rem; }
 </style>

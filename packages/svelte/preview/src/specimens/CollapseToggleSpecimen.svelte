@@ -11,8 +11,8 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Directions">
-    <div class="specimen__row">
-      <div class="specimen__labeled">
+    <div class="poodle-specimen__row">
+      <div class="poodle-specimen__labeled">
         <CollapseToggle
           direction="left"
           collapsed={collapsedLeft}
@@ -20,7 +20,7 @@
         />
         <span>Left {collapsedLeft ? "(collapsed)" : "(expanded)"}</span>
       </div>
-      <div class="specimen__labeled">
+      <div class="poodle-specimen__labeled">
         <CollapseToggle
           direction="right"
           collapsed={collapsedRight}
@@ -28,7 +28,7 @@
         />
         <span>Right {collapsedRight ? "(collapsed)" : "(expanded)"}</span>
       </div>
-      <div class="specimen__labeled">
+      <div class="poodle-specimen__labeled">
         <CollapseToggle
           direction="up"
           collapsed={collapsedUp}
@@ -36,7 +36,7 @@
         />
         <span>Up {collapsedUp ? "(collapsed)" : "(expanded)"}</span>
       </div>
-      <div class="specimen__labeled">
+      <div class="poodle-specimen__labeled">
         <CollapseToggle
           direction="down"
           collapsed={collapsedDown}
@@ -48,7 +48,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <CollapseToggle direction="left" disabled />
       <CollapseToggle direction="right" disabled />
     </div>
@@ -64,20 +64,20 @@
 </SpecimenLayout>
 
 <style>
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     gap: 1.5rem;
     align-items: center;
     flex-wrap: wrap;
   }
 
-  .specimen__labeled {
+  .poodle-specimen__labeled {
     display: flex;
     align-items: center;
     gap: 0.375rem;
   }
 
-  .specimen__labeled span {
+  .poodle-specimen__labeled span {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
   }

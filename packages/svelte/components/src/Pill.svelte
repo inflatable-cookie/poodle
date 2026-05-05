@@ -20,7 +20,7 @@
 </script>
 
 <span
-  class="pill"
+  class="poodle-pill"
   data-tone={tone}
   data-appearance={appearance}
   data-size={resolvedSize}
@@ -35,7 +35,7 @@
 </span>
 
 <style>
-  .pill {
+  .poodle-pill {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent);
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
     --poodle-pill-text: var(--poodle-color-text-secondary);
@@ -55,70 +55,70 @@
     white-space: nowrap;
   }
 
-  .pill[data-tone="success"] {
+  .poodle-pill[data-tone="success"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface));
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
-  .pill[data-tone="info"] {
+  .poodle-pill[data-tone="info"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface));
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
-  .pill[data-tone="warning"] {
+  .poodle-pill[data-tone="warning"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface));
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
-  .pill[data-tone="danger"] {
+  .poodle-pill[data-tone="danger"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface));
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
-  .pill[data-accent="custom"] {
+  .poodle-pill[data-accent="custom"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-pill-accent) 18%, rgba(148, 163, 184, 0.08));
     --poodle-pill-border: color-mix(in srgb, var(--poodle-pill-accent) 30%, rgba(148, 163, 184, 0.12));
     --poodle-pill-text: color-mix(in srgb, var(--poodle-pill-accent) 88%, white);
   }
 
-  .pill[data-appearance="subtle"] {
+  .poodle-pill[data-appearance="subtle"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent);
   }
 
-  .pill[data-size="sm"] {
+  .poodle-pill[data-size="sm"] {
     min-height: 1rem;
     padding: 0.125rem 0.375rem;
     font-size: 0.625rem;
   }
 
-  .pill[data-size="xs"] {
+  .poodle-pill[data-size="xs"] {
     min-height: 0.875rem;
     padding: 0.0625rem 0.3125rem;
     font-size: 0.5625rem;
   }
 
-  .pill[data-size="lg"] {
+  .poodle-pill[data-size="lg"] {
     min-height: 1.375rem;
     padding: 0.25rem 0.625rem;
     font-size: 0.75rem;
   }
 
-  .pill[data-size="xl"] {
+  .poodle-pill[data-size="xl"] {
     min-height: 1.5rem;
     padding: 0.3125rem 0.75rem;
     font-size: 0.8125rem;
   }
 
-  .pill[data-font="mono"] {
+  .poodle-pill[data-font="mono"] {
     font-family: var(--poodle-typography-code-family);
     letter-spacing: 0.02em;
   }
 
-  .pill[data-appearance="badge"] {
+  .poodle-pill[data-appearance="badge"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
     --poodle-pill-border: transparent;
     --poodle-pill-text: var(--poodle-color-text-primary);
@@ -127,16 +127,16 @@
     text-transform: uppercase;
   }
 
-  .pill[data-appearance="badge"][data-tone="neutral"] {
+  .poodle-pill[data-appearance="badge"][data-tone="neutral"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
     --poodle-pill-text: var(--poodle-color-text-secondary);
   }
 
-  .pill[data-muted="true"] {
+  .poodle-pill[data-muted="true"] {
     opacity: 0.72;
   }
 
   /* Density variants */
-  .pill[data-density="compact"] { padding: 0 0.375rem; gap: 0.125rem; }
-  .pill[data-density="comfortable"] { padding: 0 0.625rem; gap: 0.25rem; }
+  .poodle-pill[data-density="compact"] { padding: 0 0.375rem; gap: 0.125rem; }
+  .poodle-pill[data-density="comfortable"] { padding: 0 0.625rem; gap: 0.25rem; }
 </style>

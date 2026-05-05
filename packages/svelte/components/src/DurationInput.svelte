@@ -113,7 +113,7 @@
 </script>
 
 <div
-  class="duration-input"
+  class="poodle-duration-input"
   role="group"
   aria-label={ariaLabel}
   data-disabled={disabled}
@@ -121,13 +121,13 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
 >
-  <div class="duration-input__segment">
-    <label class="duration-input__label" for="dur-hours">h</label>
+  <div class="poodle-duration-input__segment">
+    <label class="poodle-duration-input__label" for="dur-hours">h</label>
     <input
       id="dur-hours"
       type="text"
       inputmode="numeric"
-      class="duration-input__field"
+      class="poodle-duration-input__field"
       value={pad(hours)}
       disabled={disabled}
       aria-label="Hours"
@@ -137,15 +137,15 @@
     />
   </div>
 
-  <span class="duration-input__separator" aria-hidden="true">:</span>
+  <span class="poodle-duration-input__separator" aria-hidden="true">:</span>
 
-  <div class="duration-input__segment">
-    <label class="duration-input__label" for="dur-minutes">m</label>
+  <div class="poodle-duration-input__segment">
+    <label class="poodle-duration-input__label" for="dur-minutes">m</label>
     <input
       id="dur-minutes"
       type="text"
       inputmode="numeric"
-      class="duration-input__field"
+      class="poodle-duration-input__field"
       value={pad(minutes)}
       disabled={disabled}
       aria-label="Minutes"
@@ -156,15 +156,15 @@
   </div>
 
   {#if showSeconds}
-    <span class="duration-input__separator" aria-hidden="true">:</span>
+    <span class="poodle-duration-input__separator" aria-hidden="true">:</span>
 
-    <div class="duration-input__segment">
-      <label class="duration-input__label" for="dur-seconds">s</label>
+    <div class="poodle-duration-input__segment">
+      <label class="poodle-duration-input__label" for="dur-seconds">s</label>
       <input
         id="dur-seconds"
         type="text"
         inputmode="numeric"
-        class="duration-input__field"
+        class="poodle-duration-input__field"
         value={pad(seconds)}
         disabled={disabled}
         aria-label="Seconds"
@@ -177,7 +177,7 @@
 </div>
 
 <style>
-  .duration-input {
+  .poodle-duration-input {
     display: inline-flex;
     align-items: flex-end;
     gap: 0.125rem;
@@ -192,20 +192,20 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .duration-input:focus-within {
+  .poodle-duration-input:focus-within {
     border-color: var(--poodle-color-accent-focusRing);
     box-shadow: 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
-  .duration-input[data-disabled="true"] {
+  .poodle-duration-input[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .duration-input[data-invalid="true"] {
+  .poodle-duration-input[data-invalid="true"] {
     border-color: var(--poodle-color-status-danger);
   }
 
-  .duration-input__segment {
+  .poodle-duration-input__segment {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -214,11 +214,11 @@
     border-radius: 0.1875rem;
   }
 
-  .duration-input__segment:has(.duration-input__field:focus) {
+  .poodle-duration-input__segment:has(.poodle-duration-input__field:focus) {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
-  .duration-input__label {
+  .poodle-duration-input__label {
     font-size: 0.5625rem;
     color: var(--poodle-color-text-secondary);
     text-transform: uppercase;
@@ -227,7 +227,7 @@
     user-select: none;
   }
 
-  .duration-input__field {
+  .poodle-duration-input__field {
     width: 1.75rem;
     min-height: 0;
     padding: 0;
@@ -242,7 +242,7 @@
     outline: none;
   }
 
-  .duration-input__separator {
+  .poodle-duration-input__separator {
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-body-size);
     font-weight: 600;
@@ -251,42 +251,42 @@
   }
 
   /* Size variants */
-  .duration-input[data-size="xs"] {
+  .poodle-duration-input[data-size="xs"] {
     padding: 0.125rem calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
-  .duration-input[data-size="xs"] .duration-input__field {
+  .poodle-duration-input[data-size="xs"] .poodle-duration-input__field {
     width: 1.5rem;
     font-size: 0.75rem;
   }
 
-  .duration-input[data-size="xs"] .duration-input__label {
+  .poodle-duration-input[data-size="xs"] .poodle-duration-input__label {
     font-size: 0.5rem;
   }
 
-  .duration-input[data-size="sm"] {
+  .poodle-duration-input[data-size="sm"] {
     padding: 0.1875rem calc(var(--poodle-space-control-x) - 0.0625rem);
   }
 
-  .duration-input[data-size="lg"] {
+  .poodle-duration-input[data-size="lg"] {
     padding: 0.3125rem calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
-  .duration-input[data-size="lg"] .duration-input__field {
+  .poodle-duration-input[data-size="lg"] .poodle-duration-input__field {
     width: 2rem;
     font-size: 0.9375rem;
   }
 
-  .duration-input[data-size="xl"] {
+  .poodle-duration-input[data-size="xl"] {
     padding: 0.375rem calc(var(--poodle-space-control-x) + 0.1875rem);
   }
 
-  .duration-input[data-size="xl"] .duration-input__field {
+  .poodle-duration-input[data-size="xl"] .poodle-duration-input__field {
     width: 2.25rem;
     font-size: 1rem;
   }
 
   /* Density variants */
-  .duration-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); gap: 0.125rem; }
-  .duration-input[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); gap: 0.375rem; }
+  .poodle-duration-input[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); gap: 0.125rem; }
+  .poodle-duration-input[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); gap: 0.375rem; }
 </style>

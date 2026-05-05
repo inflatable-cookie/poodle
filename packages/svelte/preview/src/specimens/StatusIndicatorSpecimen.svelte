@@ -6,7 +6,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="All statuses">
-    <div class="status-list">
+    <div class="poodle-status-list">
       <StatusIndicator status="neutral" label="Neutral" />
       <StatusIndicator status="info" label="Info" />
       <StatusIndicator status="success" label="Success" />
@@ -17,7 +17,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Without labels (dot only)">
-    <div class="status-row">
+    <div class="poodle-status-row">
       <StatusIndicator status="success" ariaLabel="Online" />
       <StatusIndicator status="info" ariaLabel="Active" />
       <StatusIndicator status="warning" ariaLabel="Away" />
@@ -40,13 +40,13 @@
 </SpecimenLayout>
 
 <style>
-  .status-list {
+  .poodle-status-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .status-row {
+  .poodle-status-row {
     display: flex;
     gap: 1rem;
     align-items: center;

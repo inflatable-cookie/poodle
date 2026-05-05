@@ -50,7 +50,7 @@
 </script>
 
 <section
-  class="callout"
+  class="poodle-callout"
   data-tone={tone}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -58,8 +58,8 @@
   role={role}
   aria-live={ariaLive}
 >
-  <div class="callout__body">
-    <span class="callout__icon" aria-hidden="true">
+  <div class="poodle-callout__body">
+    <span class="poodle-callout__icon" aria-hidden="true">
       {#if $$slots.icon}
         <slot name="icon" />
       {:else if tone === "pending"}
@@ -69,7 +69,7 @@
       {/if}
     </span>
 
-    <div class="callout__content">
+    <div class="poodle-callout__content">
       {#if title}
         <strong>{title}</strong>
       {/if}
@@ -81,7 +81,7 @@
   </div>
 
   {#if $$slots.actions}
-    <div class="callout__actions">
+    <div class="poodle-callout__actions">
       <slot name="actions" />
     </div>
   {/if}
@@ -89,7 +89,7 @@
   {#if dismissible}
     <button
       type="button"
-      class="callout__dismiss"
+      class="poodle-callout__dismiss"
       aria-label={dismissLabel}
       on:click={() => dispatch("dismiss")}
     >
@@ -99,7 +99,7 @@
 </section>
 
 <style>
-  .callout {
+  .poodle-callout {
     --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
     --poodle-callout-border: color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent);
     display: grid;
@@ -114,32 +114,32 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .callout[data-tone="info"] {
+  .poodle-callout[data-tone="info"] {
     --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel));
     --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default));
   }
 
-  .callout[data-tone="success"] {
+  .poodle-callout[data-tone="success"] {
     --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel));
     --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default));
   }
 
-  .callout[data-tone="warning"] {
+  .poodle-callout[data-tone="warning"] {
     --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel));
     --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default));
   }
 
-  .callout[data-tone="danger"] {
+  .poodle-callout[data-tone="danger"] {
     --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel));
     --poodle-callout-border: color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default));
   }
 
-  .callout[data-tone="pending"] {
+  .poodle-callout[data-tone="pending"] {
     --poodle-callout-fill: color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel));
     --poodle-callout-border: color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default));
   }
 
-  .callout__body {
+  .poodle-callout__body {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-self: start;
@@ -147,7 +147,7 @@
     min-width: 0;
   }
 
-  .callout__icon {
+  .poodle-callout__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -161,7 +161,7 @@
     line-height: 1;
   }
 
-  .callout__content {
+  .poodle-callout__content {
     display: grid;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
@@ -170,24 +170,24 @@
     line-height: 1.5;
   }
 
-  .callout__content strong {
+  .poodle-callout__content strong {
     color: var(--poodle-color-text-primary);
   }
 
-  .callout__content :global(p) {
+  .poodle-callout__content :global(p) {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .callout__content strong {
+  .poodle-callout__content strong {
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     line-height: var(--poodle-typography-label-lineHeight);
   }
 
-  .callout__actions {
+  .poodle-callout__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
@@ -195,7 +195,7 @@
     justify-content: flex-end;
   }
 
-  .callout__dismiss {
+  .poodle-callout__dismiss {
     width: 1.75rem;
     height: 1.75rem;
     min-height: 0;
@@ -209,63 +209,63 @@
     font: inherit;
   }
 
-  .callout__dismiss:focus-visible {
+  .poodle-callout__dismiss:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
   @media (max-width: 45rem) {
-    .callout {
+    .poodle-callout {
       grid-template-columns: 1fr;
     }
 
-    .callout__actions {
+    .poodle-callout__actions {
       justify-content: flex-start;
     }
   }
 
   /* Size variants */
-  .callout[data-size="xs"] .callout__icon {
+  .poodle-callout[data-size="xs"] .poodle-callout__icon {
     width: 0.875rem;
     height: 0.875rem;
     font-size: 0.5rem;
   }
-  .callout[data-size="xs"] .callout__content { font-size: 0.625rem; }
-  .callout[data-size="xs"] .callout__content strong { font-size: 0.6875rem; }
-  .callout[data-size="xs"] .callout__dismiss { width: 1.25rem; height: 1.25rem; }
-  .callout[data-size="xs"] { gap: 0.375rem; }
+  .poodle-callout[data-size="xs"] .poodle-callout__content { font-size: 0.625rem; }
+  .poodle-callout[data-size="xs"] .poodle-callout__content strong { font-size: 0.6875rem; }
+  .poodle-callout[data-size="xs"] .poodle-callout__dismiss { width: 1.25rem; height: 1.25rem; }
+  .poodle-callout[data-size="xs"] { gap: 0.375rem; }
 
-  .callout[data-size="sm"] .callout__icon {
+  .poodle-callout[data-size="sm"] .poodle-callout__icon {
     width: 1.125rem;
     height: 1.125rem;
     font-size: 0.5625rem;
   }
-  .callout[data-size="sm"] .callout__content { font-size: 0.6875rem; }
-  .callout[data-size="sm"] .callout__content strong { font-size: 0.75rem; }
-  .callout[data-size="sm"] .callout__dismiss { width: 1.5rem; height: 1.5rem; }
-  .callout[data-size="sm"] { gap: 0.5rem; }
+  .poodle-callout[data-size="sm"] .poodle-callout__content { font-size: 0.6875rem; }
+  .poodle-callout[data-size="sm"] .poodle-callout__content strong { font-size: 0.75rem; }
+  .poodle-callout[data-size="sm"] .poodle-callout__dismiss { width: 1.5rem; height: 1.5rem; }
+  .poodle-callout[data-size="sm"] { gap: 0.5rem; }
 
-  .callout[data-size="lg"] .callout__icon {
+  .poodle-callout[data-size="lg"] .poodle-callout__icon {
     width: 1.75rem;
     height: 1.75rem;
     font-size: 0.9375rem;
   }
-  .callout[data-size="lg"] .callout__content { font-size: 0.9375rem; }
-  .callout[data-size="lg"] .callout__content strong { font-size: 1rem; }
-  .callout[data-size="lg"] .callout__dismiss { width: 2rem; height: 2rem; }
-  .callout[data-size="lg"] { gap: 0.875rem; }
+  .poodle-callout[data-size="lg"] .poodle-callout__content { font-size: 0.9375rem; }
+  .poodle-callout[data-size="lg"] .poodle-callout__content strong { font-size: 1rem; }
+  .poodle-callout[data-size="lg"] .poodle-callout__dismiss { width: 2rem; height: 2rem; }
+  .poodle-callout[data-size="lg"] { gap: 0.875rem; }
 
-  .callout[data-size="xl"] .callout__icon {
+  .poodle-callout[data-size="xl"] .poodle-callout__icon {
     width: 2rem;
     height: 2rem;
     font-size: 1.0625rem;
   }
-  .callout[data-size="xl"] .callout__content { font-size: 1.0625rem; }
-  .callout[data-size="xl"] .callout__content strong { font-size: 1.125rem; }
-  .callout[data-size="xl"] .callout__dismiss { width: 2.25rem; height: 2.25rem; }
-  .callout[data-size="xl"] { gap: 1rem; }
+  .poodle-callout[data-size="xl"] .poodle-callout__content { font-size: 1.0625rem; }
+  .poodle-callout[data-size="xl"] .poodle-callout__content strong { font-size: 1.125rem; }
+  .poodle-callout[data-size="xl"] .poodle-callout__dismiss { width: 2.25rem; height: 2.25rem; }
+  .poodle-callout[data-size="xl"] { gap: 1rem; }
 
   /* Density variants */
-  .callout[data-density="compact"] { padding-inline: 0.5rem; }
-  .callout[data-density="comfortable"] { padding-inline: 1.25rem; }
+  .poodle-callout[data-density="compact"] { padding-inline: 0.5rem; }
+  .poodle-callout[data-density="comfortable"] { padding-inline: 1.25rem; }
 </style>

@@ -3,9 +3,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Basic tiles">
-    <div class="specimen__grid">
+    <div class="poodle-specimen__grid">
       <MetricTile label="Components" value="85" />
       <MetricTile label="Coverage" value="94%" />
       <MetricTile label="Open issues" value="12" />
@@ -14,7 +14,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With trend indicators">
-    <div class="specimen__grid">
+    <div class="poodle-specimen__grid">
       <MetricTile label="Active users" value="2,847" trend="up" trendLabel="+12.3%" />
       <MetricTile label="Error rate" value="0.04%" trend="down" trendLabel="-8%" />
       <MetricTile label="Latency" value="42ms" trend="flat" trendLabel="No change" />
@@ -23,7 +23,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With sparklines">
-    <div class="specimen__grid">
+    <div class="poodle-specimen__grid">
       <MetricTile
         label="Requests/min"
         value="1,204"
@@ -48,13 +48,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__grid {
+  .poodle-specimen__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
     gap: 0.75rem;

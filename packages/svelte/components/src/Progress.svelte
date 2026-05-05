@@ -21,7 +21,7 @@
 </script>
 
 <div
-  class="progress"
+  class="poodle-progress"
   data-size={resolvedSize}
   data-indeterminate={indeterminate}
   role="progressbar"
@@ -32,13 +32,13 @@
   aria-valuetext={valueText ?? computedValueText ?? undefined}
 >
   <span
-    class="progress__indicator"
+    class="poodle-progress__indicator"
     style={indeterminate ? undefined : `transform: scaleX(${percentage});`}
   ></span>
 </div>
 
 <style>
-  .progress {
+  .poodle-progress {
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -47,17 +47,17 @@
     background: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
   }
 
-  .progress[data-size="xs"],
-  .progress[data-size="sm"] {
+  .poodle-progress[data-size="xs"],
+  .poodle-progress[data-size="sm"] {
     min-height: 0.375rem;
   }
 
-  .progress[data-size="lg"],
-  .progress[data-size="xl"] {
+  .poodle-progress[data-size="lg"],
+  .poodle-progress[data-size="xl"] {
     min-height: 0.75rem;
   }
 
-  .progress__indicator {
+  .poodle-progress__indicator {
     position: absolute;
     inset: 0;
     transform-origin: left center;
@@ -70,7 +70,7 @@
     transition: transform var(--poodle-motion-duration-standard) var(--poodle-motion-easing-standard);
   }
 
-  .progress[data-indeterminate="true"] .progress__indicator {
+  .poodle-progress[data-indeterminate="true"] .poodle-progress__indicator {
     width: 40%;
     transform: translateX(-100%);
     animation: progress-indeterminate 1.2s ease-in-out infinite;

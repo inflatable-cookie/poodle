@@ -29,12 +29,12 @@
   ].join("; ");
 </script>
 
-<div class="ui-presentation-provider" style={providerStyle}>
+<div class="poodle-ui-presentation-provider" style={providerStyle}>
   <slot />
 </div>
 
 <style>
-  .ui-presentation-provider {
+  .poodle-ui-presentation-provider {
     display: contents;
   }
 </style>

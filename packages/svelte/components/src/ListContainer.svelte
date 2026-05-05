@@ -47,7 +47,7 @@
   }
 </script>
 
-<section class="list-container" aria-label={ariaLabel ?? title} data-state={state}>
+<section class="poodle-list-container" aria-label={ariaLabel ?? title} data-state={state}>
   {#if $$slots.breadcrumbs && $$slots.actions}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet breadcrumbs()}
@@ -75,23 +75,23 @@
 
   {#if state === "ready"}
     {#if $$slots.filters}
-      <div class="list-container__filters">
+      <div class="poodle-list-container__filters">
         <slot name="filters" />
       </div>
     {/if}
 
     {#if $$slots.batch}
-      <div class="list-container__batch">
+      <div class="poodle-list-container__batch">
         <slot name="batch" />
       </div>
     {/if}
 
-    <div class="list-container__content">
+    <div class="poodle-list-container__content">
       <slot />
     </div>
 
     {#if shouldShowPagination || $$slots.pagination}
-      <div class="list-container__pagination">
+      <div class="poodle-list-container__pagination">
         {#if $$slots.pagination}
           <slot name="pagination" />
         {:else}
@@ -115,7 +115,7 @@
       </div>
     {/if}
   {:else if state === "loading"}
-    <div class="list-container__state">
+    <div class="poodle-list-container__state">
       {#if $$slots.loading}
         <slot name="loading" />
       {:else}
@@ -123,7 +123,7 @@
       {/if}
     </div>
   {:else if state === "error"}
-    <div class="list-container__state">
+    <div class="poodle-list-container__state">
       {#if $$slots.error}
         <slot name="error" />
       {:else}
@@ -131,7 +131,7 @@
       {/if}
     </div>
   {:else}
-    <div class="list-container__state">
+    <div class="poodle-list-container__state">
       {#if $$slots.empty}
         <slot name="empty" />
       {:else}
@@ -142,29 +142,29 @@
 </section>
 
 <style>
-  .list-container {
+  .poodle-list-container {
     display: grid;
     gap: var(--poodle-space-stack-lg);
   }
 
-  .list-container__filters,
-  .list-container__batch,
-  .list-container__content,
-  .list-container__state {
+  .poodle-list-container__filters,
+  .poodle-list-container__batch,
+  .poodle-list-container__content,
+  .poodle-list-container__state {
     display: grid;
     gap: var(--poodle-space-stack-md);
   }
 
-  .list-container__pagination {
+  .poodle-list-container__pagination {
     display: grid;
     gap: var(--poodle-space-stack-md);
   }
 
-  .list-container__pagination :global(.pagination-summary) {
+  .poodle-list-container__pagination :global(.poodle-pagination-summary) {
     width: 100%;
   }
 
-  .list-container__pagination :global(.pagination) {
+  .poodle-list-container__pagination :global(.poodle-pagination) {
     justify-self: start;
   }
 </style>

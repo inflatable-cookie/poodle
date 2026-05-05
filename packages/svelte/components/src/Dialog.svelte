@@ -149,10 +149,10 @@
 </script>
 
 {#if isOpen}
-  <div use:portal class="dialog" data-size={resolvedSize} data-density={resolvedDensity} data-width={width}>
+  <div use:portal class="poodle-dialog" data-size={resolvedSize} data-density={resolvedDensity} data-width={width}>
     <button
       type="button"
-      class={`dialog__backdrop ${overlayClassName}`}
+      class={`poodle-dialog__backdrop ${overlayClassName}`}
       aria-label="Dismiss dialog backdrop"
       on:click={() => {
         if (dismissOnBackdrop) {
@@ -162,8 +162,8 @@
     ></button>
     <div
       bind:this={surfaceElement}
-      class={`dialog__surface ${contentClassName}`}
-      class:dialog__surface--bare={bare}
+      class={`poodle-dialog__surface ${contentClassName}`}
+      class:poodle-dialog__surface--bare={bare}
       style={contentStyle}
       role={effectiveRole}
       tabindex="-1"
@@ -173,7 +173,7 @@
     >
       {#if bare}
         {#if showCloseButton}
-          <div class="dialog__close dialog__close--overlay">
+          <div class="poodle-dialog__close poodle-dialog__close--overlay">
             <IconButton
               type="button"
               icon="x"
@@ -188,13 +188,13 @@
         <slot />
       {:else}
         {#if $$slots.header || title || description || showCloseButton}
-          <div class="dialog__header-row">
+          <div class="poodle-dialog__header-row">
             {#if $$slots.header}
-              <div class="dialog__header">
+              <div class="poodle-dialog__header">
                 <slot name="header" />
               </div>
             {:else if title || description}
-              <div class="dialog__header">
+              <div class="poodle-dialog__header">
                 {#if title}
                   <strong>{title}</strong>
                 {/if}
@@ -206,7 +206,7 @@
             {/if}
 
             {#if showCloseButton}
-              <div class="dialog__close">
+              <div class="poodle-dialog__close">
                 <IconButton
                   type="button"
                   icon="x"
@@ -221,16 +221,16 @@
           </div>
         {/if}
 
-        <div class="dialog__body">
+        <div class="poodle-dialog__body">
           <slot />
         </div>
 
         {#if $$slots.footer}
-          <div class="dialog__footer">
+          <div class="poodle-dialog__footer">
             <slot name="footer" />
           </div>
         {:else if $$slots.actions}
-          <div class="dialog__actions">
+          <div class="poodle-dialog__actions">
             <slot name="actions" />
           </div>
         {/if}
@@ -240,7 +240,7 @@
 {/if}
 
 <style>
-  .dialog {
+  .poodle-dialog {
     position: fixed;
     inset: 0;
     z-index: var(--poodle-overlay-z-dialog);
@@ -249,7 +249,7 @@
     padding: 2rem;
   }
 
-  .dialog__backdrop {
+  .poodle-dialog__backdrop {
     position: absolute;
     inset: 0;
     padding: 0;
@@ -258,7 +258,7 @@
     cursor: default;
   }
 
-  .dialog__surface {
+  .poodle-dialog__surface {
     position: relative;
     z-index: 1;
     width: min(34rem, 100%);
@@ -281,17 +281,17 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
   }
 
-  .dialog__surface--bare {
+  .poodle-dialog__surface--bare {
     padding: 0;
   }
 
   /* Width presets */
-  .dialog[data-width="sm"] .dialog__surface { width: min(24rem, 100%); }
-  .dialog[data-width="lg"] .dialog__surface { width: min(48rem, 100%); }
-  .dialog[data-width="xl"] .dialog__surface { width: min(64rem, 100%); }
-  .dialog[data-width="full"] .dialog__surface { width: 100%; }
+  .poodle-dialog[data-width="sm"] .poodle-dialog__surface { width: min(24rem, 100%); }
+  .poodle-dialog[data-width="lg"] .poodle-dialog__surface { width: min(48rem, 100%); }
+  .poodle-dialog[data-width="xl"] .poodle-dialog__surface { width: min(64rem, 100%); }
+  .poodle-dialog[data-width="full"] .poodle-dialog__surface { width: 100%; }
 
-  .dialog__header-row {
+  .poodle-dialog__header-row {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -299,34 +299,34 @@
     margin-bottom: 1.25rem;
   }
 
-  .dialog__close {
+  .poodle-dialog__close {
     position: static;
     flex-shrink: 0;
     margin-top: -0.5rem;
     margin-right: -0.375rem;
   }
 
-  .dialog__close--overlay {
+  .poodle-dialog__close--overlay {
     position: absolute;
     top: var(--poodle-space-panel-y);
     right: var(--poodle-space-panel-x);
     z-index: 1;
   }
 
-  .dialog__header {
+  .poodle-dialog__header {
     display: grid;
     gap: 0.5rem;
     flex: 1 1 auto;
     min-width: 0;
   }
 
-  .dialog__header strong {
+  .poodle-dialog__header strong {
     font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     line-height: 1.2;
   }
 
-  .dialog__header p {
+  .poodle-dialog__header p {
     margin: 0;
     padding-top: 0.375rem;
     color: var(--poodle-color-text-secondary);
@@ -334,11 +334,11 @@
     line-height: 1.5;
   }
 
-  .dialog__body {
+  .poodle-dialog__body {
     min-width: 0;
   }
 
-  .dialog__actions {
+  .poodle-dialog__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
@@ -346,53 +346,53 @@
     margin-top: var(--poodle-space-stack-lg);
   }
 
-  .dialog__footer {
+  .poodle-dialog__footer {
     margin-top: var(--poodle-space-stack-lg);
   }
 
   /* Size variants */
-  .dialog[data-size="xs"] .dialog__header strong {
+  .poodle-dialog[data-size="xs"] .poodle-dialog__header strong {
     font-size: 0.8125rem;
   }
 
-  .dialog[data-size="xs"] .dialog__header p {
+  .poodle-dialog[data-size="xs"] .poodle-dialog__header p {
     font-size: 0.6875rem;
   }
 
-  .dialog[data-size="sm"] .dialog__header strong {
+  .poodle-dialog[data-size="sm"] .poodle-dialog__header strong {
     font-size: 0.875rem;
   }
 
-  .dialog[data-size="sm"] .dialog__header p {
+  .poodle-dialog[data-size="sm"] .poodle-dialog__header p {
     font-size: 0.75rem;
   }
 
-  .dialog[data-size="lg"] .dialog__header strong {
+  .poodle-dialog[data-size="lg"] .poodle-dialog__header strong {
     font-size: 1.0625rem;
   }
 
-  .dialog[data-size="lg"] .dialog__header p {
+  .poodle-dialog[data-size="lg"] .poodle-dialog__header p {
     font-size: 0.875rem;
   }
 
-  .dialog[data-size="xl"] .dialog__header strong {
+  .poodle-dialog[data-size="xl"] .poodle-dialog__header strong {
     font-size: 1.125rem;
   }
 
-  .dialog[data-size="xl"] .dialog__header p {
+  .poodle-dialog[data-size="xl"] .poodle-dialog__header p {
     font-size: 0.9375rem;
   }
 
   /* Density variants */
-  .dialog[data-density="compact"] .dialog__surface { padding: 0.5rem 0.75rem; }
-  .dialog[data-density="compact"] .dialog__surface--bare { padding: 0; }
-  .dialog[data-density="compact"] .dialog__close--overlay {
+  .poodle-dialog[data-density="compact"] .poodle-dialog__surface { padding: 0.5rem 0.75rem; }
+  .poodle-dialog[data-density="compact"] .poodle-dialog__surface--bare { padding: 0; }
+  .poodle-dialog[data-density="compact"] .poodle-dialog__close--overlay {
     top: 0.5rem;
     right: 0.75rem;
   }
-  .dialog[data-density="comfortable"] .dialog__surface { padding: 1rem 1.25rem; }
-  .dialog[data-density="comfortable"] .dialog__surface--bare { padding: 0; }
-  .dialog[data-density="comfortable"] .dialog__close--overlay {
+  .poodle-dialog[data-density="comfortable"] .poodle-dialog__surface { padding: 1rem 1.25rem; }
+  .poodle-dialog[data-density="comfortable"] .poodle-dialog__surface--bare { padding: 0; }
+  .poodle-dialog[data-density="comfortable"] .poodle-dialog__close--overlay {
     top: 1rem;
     right: 1.25rem;
   }

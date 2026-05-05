@@ -9,7 +9,7 @@
   let errorMsg = "";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Image upload with preview">
     <FileUpload
       accept="image/*"
@@ -48,19 +48,19 @@
 
   {#if errorMsg}
     <SpecimenGroup label="Last error">
-      <p class="error">{errorMsg}</p>
+      <p class="poodle-error">{errorMsg}</p>
     </SpecimenGroup>
   {/if}
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .error {
+  .poodle-error {
     margin: 0;
     color: var(--poodle-color-text-danger, #ef4444);
     font-size: 0.8125rem;

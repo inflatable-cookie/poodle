@@ -160,7 +160,7 @@
 </script>
 
 <div
-  class="split-view"
+  class="poodle-split-view"
   data-orientation={orientation}
   data-primary-collapsed={primaryCollapsed || undefined}
   data-secondary-collapsed={secondaryCollapsed || undefined}
@@ -170,7 +170,7 @@
   bind:this={container}
 >
   <div
-    class="split-view__pane split-view__pane--primary"
+    class="poodle-split-view__pane poodle-split-view__pane--primary"
     style="flex: {primaryFlex}; overflow: hidden; {primaryMinStyle}"
   >
     {#if !primaryCollapsed}
@@ -179,7 +179,7 @@
   </div>
 
   <div
-    class="split-view__divider"
+    class="poodle-split-view__divider"
     data-orientation={orientation}
     data-disabled={disabled || undefined}
     data-has-toggles={hasToggles || undefined}
@@ -194,7 +194,7 @@
     />
 
     {#if hasToggles}
-      <div class="split-view__toggles">
+      <div class="poodle-split-view__toggles">
         {#if showCollapsePrimary && !secondaryCollapsed}
           <CollapseToggle
             direction={beforeDirection}
@@ -218,7 +218,7 @@
   </div>
 
   <div
-    class="split-view__pane split-view__pane--secondary"
+    class="poodle-split-view__pane poodle-split-view__pane--secondary"
     style="flex: {secondaryFlex}; overflow: hidden; {secondaryMinStyle}"
   >
     {#if !secondaryCollapsed}
@@ -228,7 +228,7 @@
 </div>
 
 <style>
-  .split-view {
+  .poodle-split-view {
     display: flex;
     min-height: 0;
     min-width: 0;
@@ -236,18 +236,18 @@
     width: 100%;
   }
 
-  .split-view[data-orientation="vertical"] {
+  .poodle-split-view[data-orientation="vertical"] {
     flex-direction: column;
   }
 
-  .split-view__pane {
+  .poodle-split-view__pane {
     min-width: 0;
     min-height: 0;
   }
 
   /* ── Divider ─────────────────────────────────────────────────── */
 
-  .split-view__divider {
+  .poodle-split-view__divider {
     position: relative;
     display: flex;
     align-items: center;
@@ -255,19 +255,19 @@
     flex-shrink: 0;
   }
 
-  .split-view__divider[data-orientation="horizontal"] {
+  .poodle-split-view__divider[data-orientation="horizontal"] {
     width: 0.5rem;
     height: 100%;
   }
 
-  .split-view__divider[data-orientation="vertical"] {
+  .poodle-split-view__divider[data-orientation="vertical"] {
     height: 0.5rem;
     width: 100%;
   }
 
   /* ── Collapse toggles overlay ────────────────────────────────── */
 
-  .split-view__toggles {
+  .poodle-split-view__toggles {
     position: absolute;
     z-index: 1;
     display: flex;
@@ -276,18 +276,18 @@
     pointer-events: none;
   }
 
-  .split-view__toggles :global(*) {
+  .poodle-split-view__toggles :global(*) {
     pointer-events: auto;
   }
 
-  .split-view__divider[data-orientation="horizontal"] .split-view__toggles {
+  .poodle-split-view__divider[data-orientation="horizontal"] .poodle-split-view__toggles {
     flex-direction: column;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
   }
 
-  .split-view__divider[data-orientation="vertical"] .split-view__toggles {
+  .poodle-split-view__divider[data-orientation="vertical"] .poodle-split-view__toggles {
     flex-direction: row;
     top: 50%;
     left: 50%;

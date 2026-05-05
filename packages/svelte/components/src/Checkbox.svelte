@@ -48,11 +48,11 @@
   }
 </script>
 
-<label class="checkbox" data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity} style={checkboxStyles}>
+<label class="poodle-checkbox" data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity} style={checkboxStyles}>
   <input
     bind:this={input}
     {id}
-    class="checkbox__control"
+    class="poodle-checkbox__control"
     type="checkbox"
     checked={currentChecked}
     disabled={disabled}
@@ -61,20 +61,20 @@
     aria-readonly={readOnly ? "true" : undefined}
     on:change={handleChange}
   />
-  <span class="checkbox__indicator" aria-hidden="true">
+  <span class="poodle-checkbox__indicator" aria-hidden="true">
     {#if mixed}
-      <span class="checkbox__mark"><Icon name="minus" /></span>
+      <span class="poodle-checkbox__mark"><Icon name="minus" /></span>
     {:else if currentChecked}
-      <span class="checkbox__mark"><Icon name="check" /></span>
+      <span class="poodle-checkbox__mark"><Icon name="check" /></span>
     {/if}
   </span>
   {#if label}
-    <span class="checkbox__label">{label}</span>
+    <span class="poodle-checkbox__label">{label}</span>
   {/if}
 </label>
 
 <style>
-  .checkbox {
+  .poodle-checkbox {
     --poodle-checkbox-selected-color: var(--poodle-color-accent-base);
     position: relative;
     display: inline-flex;
@@ -84,12 +84,12 @@
     cursor: pointer;
   }
 
-  .checkbox[data-disabled="true"] {
+  .poodle-checkbox[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
-  .checkbox__control {
+  .poodle-checkbox__control {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -101,7 +101,7 @@
     border: 0;
   }
 
-  .checkbox__indicator {
+  .poodle-checkbox__indicator {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -113,18 +113,18 @@
     color: var(--poodle-color-text-inverse);
   }
 
-  .checkbox__control:checked + .checkbox__indicator,
-  .checkbox__control:indeterminate + .checkbox__indicator {
+  .poodle-checkbox__control:checked + .poodle-checkbox__indicator,
+  .poodle-checkbox__control:indeterminate + .poodle-checkbox__indicator {
     border-color: var(--poodle-checkbox-selected-color);
     background: var(--poodle-checkbox-selected-color);
   }
 
-  .checkbox__control:focus-visible + .checkbox__indicator {
+  .poodle-checkbox__control:focus-visible + .poodle-checkbox__indicator {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .checkbox__mark {
+  .poodle-checkbox__mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -133,7 +133,7 @@
     line-height: 1;
   }
 
-  .checkbox__label {
+  .poodle-checkbox__label {
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
@@ -141,61 +141,61 @@
   }
 
   /* Density variants */
-  .checkbox[data-density="compact"] {
+  .poodle-checkbox[data-density="compact"] {
     gap: 0.25rem;
   }
 
-  .checkbox[data-density="comfortable"] {
+  .poodle-checkbox[data-density="comfortable"] {
     gap: var(--poodle-space-inline-md);
   }
 
   /* Size variants — label */
-  .checkbox[data-size="xs"] .checkbox__label { font-size: 0.6875rem; }
-  .checkbox[data-size="sm"] .checkbox__label { font-size: 0.75rem; }
-  .checkbox[data-size="lg"] .checkbox__label { font-size: 0.875rem; }
-  .checkbox[data-size="xl"] .checkbox__label { font-size: 0.9375rem; }
+  .poodle-checkbox[data-size="xs"] .poodle-checkbox__label { font-size: 0.6875rem; }
+  .poodle-checkbox[data-size="sm"] .poodle-checkbox__label { font-size: 0.75rem; }
+  .poodle-checkbox[data-size="lg"] .poodle-checkbox__label { font-size: 0.875rem; }
+  .poodle-checkbox[data-size="xl"] .poodle-checkbox__label { font-size: 0.9375rem; }
 
   /* Size variants — indicator */
-  .checkbox[data-size="xs"] .checkbox__indicator {
+  .poodle-checkbox[data-size="xs"] .poodle-checkbox__indicator {
     width: var(--poodle-size-icon-xs);
     height: var(--poodle-size-icon-xs);
     border-radius: 0.1875rem;
   }
 
-  .checkbox[data-size="xs"] .checkbox__mark {
+  .poodle-checkbox[data-size="xs"] .poodle-checkbox__mark {
     width: calc(var(--poodle-size-icon-xs) - 0.25rem);
     height: calc(var(--poodle-size-icon-xs) - 0.25rem);
   }
 
-  .checkbox[data-size="sm"] .checkbox__indicator {
+  .poodle-checkbox[data-size="sm"] .poodle-checkbox__indicator {
     width: var(--poodle-size-icon-sm);
     height: var(--poodle-size-icon-sm);
     border-radius: 0.25rem;
   }
 
-  .checkbox[data-size="sm"] .checkbox__mark {
+  .poodle-checkbox[data-size="sm"] .poodle-checkbox__mark {
     width: calc(var(--poodle-size-icon-sm) - 0.25rem);
     height: calc(var(--poodle-size-icon-sm) - 0.25rem);
   }
 
-  .checkbox[data-size="lg"] .checkbox__indicator {
+  .poodle-checkbox[data-size="lg"] .poodle-checkbox__indicator {
     width: var(--poodle-size-icon-lg);
     height: var(--poodle-size-icon-lg);
     border-radius: 0.375rem;
   }
 
-  .checkbox[data-size="lg"] .checkbox__mark {
+  .poodle-checkbox[data-size="lg"] .poodle-checkbox__mark {
     width: calc(var(--poodle-size-icon-lg) - 0.375rem);
     height: calc(var(--poodle-size-icon-lg) - 0.375rem);
   }
 
-  .checkbox[data-size="xl"] .checkbox__indicator {
+  .poodle-checkbox[data-size="xl"] .poodle-checkbox__indicator {
     width: var(--poodle-size-icon-xl);
     height: var(--poodle-size-icon-xl);
     border-radius: 0.4375rem;
   }
 
-  .checkbox[data-size="xl"] .checkbox__mark {
+  .poodle-checkbox[data-size="xl"] .poodle-checkbox__mark {
     width: calc(var(--poodle-size-icon-xl) - 0.375rem);
     height: calc(var(--poodle-size-icon-xl) - 0.375rem);
   }

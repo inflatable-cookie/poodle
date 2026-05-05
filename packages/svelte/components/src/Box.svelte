@@ -22,12 +22,12 @@
   ]);
 </script>
 
-<div class="box" role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
+<div class="poodle-box" role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
   <slot />
 </div>
 
 <style>
-  .box {
+  .poodle-box {
     min-width: 0;
     min-height: 0;
   }

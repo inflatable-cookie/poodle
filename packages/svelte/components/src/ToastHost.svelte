@@ -113,7 +113,7 @@
 </script>
 
 {#if items.length > 0}
-  <div class="toast-host" data-placement={placement}>
+  <div class="poodle-toast-host" data-placement={placement}>
     <ToastStack
       {items}
       {ariaLabel}
@@ -127,47 +127,47 @@
 {/if}
 
 <style>
-  .toast-host {
+  .poodle-toast-host {
     position: fixed;
     z-index: 80;
     width: min(28rem, calc(100vw - 2rem));
   }
 
-  .toast-host[data-placement="bottom-end"] {
+  .poodle-toast-host[data-placement="bottom-end"] {
     right: 1rem;
     bottom: 1rem;
   }
 
-  .toast-host[data-placement="bottom-start"] {
+  .poodle-toast-host[data-placement="bottom-start"] {
     left: 1rem;
     bottom: 1rem;
   }
 
-  .toast-host[data-placement="top-end"] {
+  .poodle-toast-host[data-placement="top-end"] {
     right: 1rem;
     top: 1rem;
   }
 
-  .toast-host[data-placement="top-start"] {
+  .poodle-toast-host[data-placement="top-start"] {
     left: 1rem;
     top: 1rem;
   }
 
   @media (max-width: 40rem) {
-    .toast-host {
+    .poodle-toast-host {
       width: calc(100vw - 1rem);
     }
 
-    .toast-host[data-placement="bottom-end"],
-    .toast-host[data-placement="bottom-start"] {
+    .poodle-toast-host[data-placement="bottom-end"],
+    .poodle-toast-host[data-placement="bottom-start"] {
       left: 0.5rem;
       right: 0.5rem;
       bottom: 0.5rem;
       width: auto;
     }
 
-    .toast-host[data-placement="top-end"],
-    .toast-host[data-placement="top-start"] {
+    .poodle-toast-host[data-placement="top-end"],
+    .poodle-toast-host[data-placement="top-start"] {
       left: 0.5rem;
       right: 0.5rem;
       top: 0.5rem;

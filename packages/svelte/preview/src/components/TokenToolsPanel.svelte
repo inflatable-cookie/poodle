@@ -33,13 +33,13 @@
 <Stack gap="lg" asRole="region" ariaLabel="Token tools">
   <Stack gap="sm">
     <Eyebrow>Token tools</Eyebrow>
-    <h2 class="heading">Runtime values and emitted-token inspection</h2>
+    <h2 class="poodle-heading">Runtime values and emitted-token inspection</h2>
   </Stack>
 
   <Stack gap="md">
-    <span class="hint">@poodle/svelte-tokens</span>
-    <span class="path">packages/tokens/artifacts/css/</span>
-    <span class="path">packages/tokens/artifacts/ts/</span>
+    <span class="poodle-hint">@poodle/svelte-tokens</span>
+    <span class="poodle-path">packages/tokens/artifacts/css/</span>
+    <span class="poodle-path">packages/tokens/artifacts/ts/</span>
   </Stack>
 
   <Tabs
@@ -55,12 +55,12 @@
         {#each keySemanticTokens as token}
           <Surface tone="panel" border="subtle" padding="md">
             <Stack gap="md">
-              <span class="path">{token.path}</span>
-              <span class="value-row">
+              <span class="poodle-path">{token.path}</span>
+              <span class="poodle-value-row">
                 {#if isColorToken(token.path)}
-                  <span class="swatch" style="background: {token.value};"></span>
+                  <span class="poodle-swatch" style="background: {token.value};"></span>
                 {/if}
-                <strong class="value">{token.value}</strong>
+                <strong class="poodle-value">{token.value}</strong>
               </span>
             </Stack>
           </Surface>
@@ -68,7 +68,7 @@
       </Grid>
     {:else}
       <Stack gap="md">
-        <div class="search-input">
+        <div class="poodle-search-input">
           <TextInput
             id="token-inspector-query"
             type="search"
@@ -79,7 +79,7 @@
             on:clear={onQueryClear}
           />
         </div>
-        <p class="inspector-count">{matchingTokenCount} semantic tokens shown</p>
+        <p class="poodle-inspector-count">{matchingTokenCount} semantic tokens shown</p>
         <Table
           columns={inspectorColumns}
           rows={inspectorRows}
@@ -92,13 +92,13 @@
 </Stack>
 
 <style>
-  .heading {
+  .poodle-heading {
     margin: 0;
     font-size: 1.75rem;
     line-height: 1.1;
   }
 
-  .hint {
+  .poodle-hint {
     padding: 0.25rem 0.625rem;
     border-radius: 999rem;
     background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
@@ -107,7 +107,7 @@
     font-weight: 700;
   }
 
-  .path {
+  .poodle-path {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
@@ -117,13 +117,13 @@
     white-space: nowrap;
   }
 
-  .value-row {
+  .poodle-value-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .swatch {
+  .poodle-swatch {
     flex-shrink: 0;
     width: 1.25rem;
     height: 1.25rem;
@@ -131,17 +131,17 @@
     border-radius: var(--poodle-radius-control);
   }
 
-  .value {
+  .poodle-value {
     font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
   }
 
-  .search-input {
+  .poodle-search-input {
     min-width: min(17.5rem, 100%);
     max-width: 26rem;
   }
 
-  .inspector-count {
+  .poodle-inspector-count {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;

@@ -33,7 +33,7 @@
   };
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup bare label="Single selection">
     <Accordion
       items={singleItems}
@@ -60,7 +60,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

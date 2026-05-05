@@ -4,7 +4,7 @@
 </script>
 
 <div
-  class="meta-bar"
+  class="poodle-meta-bar"
   data-separators={showSeparators}
   aria-label={ariaLabel ?? undefined}
 >
@@ -12,7 +12,7 @@
 </div>
 
 <style>
-  .meta-bar {
+  .poodle-meta-bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -20,16 +20,16 @@
     min-width: 0;
   }
 
-  .meta-bar > :global(*) {
+  .poodle-meta-bar > :global(*) {
     min-width: 0;
   }
 
-  .meta-bar[data-separators="true"] > :global(* + *) {
+  .poodle-meta-bar[data-separators="true"] > :global(* + *) {
     position: relative;
     padding-inline-start: 1rem;
   }
 
-  .meta-bar[data-separators="true"] > :global(* + *)::before {
+  .poodle-meta-bar[data-separators="true"] > :global(* + *)::before {
     content: "";
     position: absolute;
     inset-inline-start: 0.375rem;
@@ -41,11 +41,11 @@
     transform: translateY(-50%);
   }
   @media (max-width: 40rem) {
-    .meta-bar[data-separators="true"] > :global(* + *) {
+    .poodle-meta-bar[data-separators="true"] > :global(* + *) {
       padding-inline-start: 0.75rem;
     }
 
-    .meta-bar[data-separators="true"] > :global(* + *)::before {
+    .poodle-meta-bar[data-separators="true"] > :global(* + *)::before {
       inset-inline-start: 0.25rem;
     }
   }

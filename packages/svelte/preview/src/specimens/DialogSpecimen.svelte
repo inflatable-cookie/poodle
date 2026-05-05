@@ -12,45 +12,45 @@
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">
-  <div class="specimen">
-    <div class="specimen__row">
+  <div class="poodle-specimen">
+    <div class="poodle-specimen__row">
       <Eyebrow>Informational</Eyebrow>
       <Button variant="secondary" on:click={() => (basicOpen = true)}>View details</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Form</Eyebrow>
       <Button variant="secondary" on:click={() => (formOpen = true)}>Create project</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Custom header</Eyebrow>
       <Button variant="secondary" on:click={() => (contentOnlyOpen = true)}>View changelog</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Custom footer</Eyebrow>
       <Button variant="secondary" on:click={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Bare mode</Eyebrow>
       <Button variant="secondary" on:click={() => (bareOpen = true)}>Preview image</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Scrollable</Eyebrow>
       <Button variant="secondary" on:click={() => (scrollableOpen = true)}>View log</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Width presets</Eyebrow>
       {#each ["sm", "md", "lg", "xl"] as w}
         <Button variant="secondary" on:click={() => (widthOpenMap[w] = true)}>{w}</Button>
       {/each}
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Non-dismissible</Eyebrow>
       <Button variant="secondary" on:click={() => (wideOpen = true)}>Open persistent</Button>
     </div>
@@ -65,12 +65,12 @@
   showCloseButton
   on:openChange={(e) => (basicOpen = e.detail.open)}
 >
-  <div class="shortcuts-list">
-    <div class="shortcut"><kbd>⌘ K</kbd> <span>Command palette</span></div>
-    <div class="shortcut"><kbd>⌘ S</kbd> <span>Save</span></div>
-    <div class="shortcut"><kbd>⌘ /</kbd> <span>Toggle comment</span></div>
-    <div class="shortcut"><kbd>⌘ ⇧ P</kbd> <span>Quick actions</span></div>
-    <div class="shortcut"><kbd>Esc</kbd> <span>Close dialog</span></div>
+  <div class="poodle-shortcuts-list">
+    <div class="poodle-shortcut"><kbd>⌘ K</kbd> <span>Command palette</span></div>
+    <div class="poodle-shortcut"><kbd>⌘ S</kbd> <span>Save</span></div>
+    <div class="poodle-shortcut"><kbd>⌘ /</kbd> <span>Toggle comment</span></div>
+    <div class="poodle-shortcut"><kbd>⌘ ⇧ P</kbd> <span>Quick actions</span></div>
+    <div class="poodle-shortcut"><kbd>Esc</kbd> <span>Close dialog</span></div>
   </div>
 </Dialog>
 
@@ -82,7 +82,7 @@
   showCloseButton
   on:openChange={(e) => (formOpen = e.detail.open)}
 >
-  <div class="form-grid">
+  <div class="poodle-form-grid">
     <Field label="Project name" id="dialog-project-name">
       <TextInput id="dialog-proj-name" placeholder="My project" />
     </Field>
@@ -93,12 +93,12 @@
         { value: "advanced", label: "Advanced" },
       ]} />
     </Field>
-    <div class="form-full-width">
+    <div class="poodle-form-full-width">
       <Field label="Description" id="dialog-description">
         <TextInput id="dialog-desc" placeholder="What is this project for?" rows={3} />
       </Field>
     </div>
-    <div class="form-full-width">
+    <div class="poodle-form-full-width">
       <Checkbox id="dialog-private" label="Make this project private" />
     </div>
   </div>
@@ -114,17 +114,17 @@
   on:openChange={(e) => (contentOnlyOpen = e.detail.open)}
 >
   <svelte:fragment slot="header">
-    <div class="changelog-header">
-      <h2 class="changelog-header__title">What's new</h2>
+    <div class="poodle-changelog-header">
+      <h2 class="poodle-changelog-header__title">What's new</h2>
       <Pill tone="info" appearance="badge">v2.4.0</Pill>
     </div>
   </svelte:fragment>
-  <div class="changelog">
-    <div class="changelog__entry">
+  <div class="poodle-changelog">
+    <div class="poodle-changelog__entry">
       <strong>Dialog flexibility improvements</strong>
       <p>Dialogs now support custom headers, footers, width presets, and bare mode.</p>
     </div>
-    <div class="changelog__entry">
+    <div class="poodle-changelog__entry">
       <strong>Size propagation fixes</strong>
       <p>All parent components now correctly forward size and density to embedded children.</p>
     </div>
@@ -137,13 +137,13 @@
   showCloseButton
   on:openChange={(e) => (customFooterOpen = e.detail.open)}
 >
-  <div class="terms-body">
+  <div class="poodle-terms-body">
     <p>By using this service, you agree to our terms and conditions.</p>
   </div>
   <svelte:fragment slot="footer">
-    <div class="split-footer">
-      <a href="#terms" class="split-footer__link">Read full terms</a>
-      <div class="split-footer__actions">
+    <div class="poodle-split-footer">
+      <a href="#terms" class="poodle-split-footer__link">Read full terms</a>
+      <div class="poodle-split-footer__actions">
         <Button variant="ghost" on:click={() => (customFooterOpen = false)}>Decline</Button>
         <Button on:click={() => (customFooterOpen = false)}>Accept</Button>
       </div>
@@ -158,16 +158,16 @@
   ariaLabel="Image preview"
   on:openChange={(e) => (bareOpen = e.detail.open)}
 >
-  <div class="image-preview">
-    <div class="image-preview__canvas">
-      <span class="image-preview__placeholder">2400 × 1600</span>
+  <div class="poodle-image-preview">
+    <div class="poodle-image-preview__canvas">
+      <span class="poodle-image-preview__placeholder">2400 × 1600</span>
     </div>
-    <div class="image-preview__bar">
-      <div class="image-preview__meta">
+    <div class="poodle-image-preview__bar">
+      <div class="poodle-image-preview__meta">
         <strong>landscape-hero.png</strong>
         <span>2.4 MB · Uploaded today</span>
       </div>
-      <div class="image-preview__actions">
+      <div class="poodle-image-preview__actions">
         <Button variant="ghost" on:click={() => (bareOpen = false)}>Close</Button>
         <Button leadingIcon="download" on:click={() => (bareOpen = false)}>Download</Button>
       </div>
@@ -182,11 +182,11 @@
   showCloseButton
   on:openChange={(e) => (scrollableOpen = e.detail.open)}
 >
-  <div class="log-list">
+  <div class="poodle-log-list">
     {#each Array(20) as _, i}
-      <div class="log-entry">
-        <span class="log-entry__time">{String(9 + Math.floor(i / 3)).padStart(2, "0")}:{String((i * 17) % 60).padStart(2, "0")}</span>
-        <span class="log-entry__message">
+      <div class="poodle-log-entry">
+        <span class="poodle-log-entry__time">{String(9 + Math.floor(i / 3)).padStart(2, "0")}:{String((i * 17) % 60).padStart(2, "0")}</span>
+        <span class="poodle-log-entry__message">
           {["User signed in", "Project created", "File uploaded", "Settings updated", "Comment added", "Build completed", "Deploy started", "Review requested"][i % 8]}
         </span>
       </div>
@@ -227,22 +227,22 @@
 </Dialog>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
   }
 
-  .shortcuts-list { display: flex; flex-direction: column; gap: 0.5rem; }
-  .shortcut { display: flex; align-items: center; gap: 0.75rem; }
-  .shortcut kbd {
+  .poodle-shortcuts-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .poodle-shortcut { display: flex; align-items: center; gap: 0.75rem; }
+  .poodle-shortcut kbd {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 4.5rem; padding: 0.25rem 0.5rem;
     border: 0.0625rem solid var(--poodle-color-border-default);
@@ -250,35 +250,35 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 80%, var(--poodle-color-background-elevated));
     font-family: var(--poodle-typography-code-family); font-size: 0.75rem; font-weight: 500;
   }
-  .shortcut span { color: var(--poodle-color-text-secondary); font-size: 0.8125rem; }
+  .poodle-shortcut span { color: var(--poodle-color-text-secondary); font-size: 0.8125rem; }
 
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .form-full-width { grid-column: 1 / -1; }
+  .poodle-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .poodle-form-full-width { grid-column: 1 / -1; }
 
-  .changelog-header { display: flex; align-items: center; gap: 0.625rem; }
-  .changelog-header__title { margin: 0; font-family: var(--poodle-typography-heading-family); font-size: 1rem; font-weight: 600; line-height: 1.2; }
-  .changelog { display: flex; flex-direction: column; gap: 0.875rem; }
-  .changelog__entry { display: flex; flex-direction: column; gap: 0.25rem; }
-  .changelog__entry strong { font-size: 0.875rem; }
-  .changelog__entry p { margin: 0; color: var(--poodle-color-text-secondary); font-size: 0.8125rem; line-height: 1.5; }
+  .poodle-changelog-header { display: flex; align-items: center; gap: 0.625rem; }
+  .poodle-changelog-header__title { margin: 0; font-family: var(--poodle-typography-heading-family); font-size: 1rem; font-weight: 600; line-height: 1.2; }
+  .poodle-changelog { display: flex; flex-direction: column; gap: 0.875rem; }
+  .poodle-changelog__entry { display: flex; flex-direction: column; gap: 0.25rem; }
+  .poodle-changelog__entry strong { font-size: 0.875rem; }
+  .poodle-changelog__entry p { margin: 0; color: var(--poodle-color-text-secondary); font-size: 0.8125rem; line-height: 1.5; }
 
-  .terms-body p { margin: 0 0 0.5rem; color: var(--poodle-color-text-secondary); font-size: 0.8125rem; line-height: 1.6; }
-  .split-footer { display: flex; align-items: center; justify-content: space-between; }
-  .split-footer__link { color: var(--poodle-color-accent-base); font-size: 0.8125rem; text-decoration: none; }
-  .split-footer__link:hover { text-decoration: underline; }
-  .split-footer__actions { display: flex; gap: 0.5rem; }
+  .poodle-terms-body p { margin: 0 0 0.5rem; color: var(--poodle-color-text-secondary); font-size: 0.8125rem; line-height: 1.6; }
+  .poodle-split-footer { display: flex; align-items: center; justify-content: space-between; }
+  .poodle-split-footer__link { color: var(--poodle-color-accent-base); font-size: 0.8125rem; text-decoration: none; }
+  .poodle-split-footer__link:hover { text-decoration: underline; }
+  .poodle-split-footer__actions { display: flex; gap: 0.5rem; }
 
-  .image-preview { display: flex; flex-direction: column; }
-  .image-preview__canvas { display: grid; place-items: center; min-height: 20rem; background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, black); border-radius: var(--poodle-radius-surface) var(--poodle-radius-surface) 0 0; }
-  .image-preview__placeholder { color: var(--poodle-color-text-secondary); font-family: var(--poodle-typography-code-family); font-size: 0.875rem; opacity: 0.5; }
-  .image-preview__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; border-top: 0.0625rem solid var(--poodle-color-border-subtle); }
-  .image-preview__meta { display: flex; flex-direction: column; gap: 0.125rem; }
-  .image-preview__meta strong { font-size: 0.8125rem; }
-  .image-preview__meta span { color: var(--poodle-color-text-secondary); font-size: 0.75rem; }
-  .image-preview__actions { display: flex; gap: 0.5rem; }
+  .poodle-image-preview { display: flex; flex-direction: column; }
+  .poodle-image-preview__canvas { display: grid; place-items: center; min-height: 20rem; background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, black); border-radius: var(--poodle-radius-surface) var(--poodle-radius-surface) 0 0; }
+  .poodle-image-preview__placeholder { color: var(--poodle-color-text-secondary); font-family: var(--poodle-typography-code-family); font-size: 0.875rem; opacity: 0.5; }
+  .poodle-image-preview__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 1rem; border-top: 0.0625rem solid var(--poodle-color-border-subtle); }
+  .poodle-image-preview__meta { display: flex; flex-direction: column; gap: 0.125rem; }
+  .poodle-image-preview__meta strong { font-size: 0.8125rem; }
+  .poodle-image-preview__meta span { color: var(--poodle-color-text-secondary); font-size: 0.75rem; }
+  .poodle-image-preview__actions { display: flex; gap: 0.5rem; }
 
-  .log-list { display: flex; flex-direction: column; gap: 0.25rem; max-height: 18rem; overflow-y: auto; }
-  .log-entry { display: flex; gap: 0.75rem; padding: 0.375rem 0; border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 50%, transparent); }
-  .log-entry__time { color: var(--poodle-color-text-secondary); font-family: var(--poodle-typography-code-family); font-size: 0.75rem; min-width: 3rem; }
-  .log-entry__message { font-size: 0.8125rem; }
+  .poodle-log-list { display: flex; flex-direction: column; gap: 0.25rem; max-height: 18rem; overflow-y: auto; }
+  .poodle-log-entry { display: flex; gap: 0.75rem; padding: 0.375rem 0; border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 50%, transparent); }
+  .poodle-log-entry__time { color: var(--poodle-color-text-secondary); font-family: var(--poodle-typography-code-family); font-size: 0.75rem; min-width: 3rem; }
+  .poodle-log-entry__message { font-size: 0.8125rem; }
 </style>

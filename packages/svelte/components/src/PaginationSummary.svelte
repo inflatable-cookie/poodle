@@ -9,17 +9,17 @@
 </script>
 
 <div
-  class="pagination-summary"
+  class="poodle-pagination-summary"
   aria-live="polite"
   aria-label={`Showing ${fromItem}-${toItem} of ${totalItems} across ${totalPages} pages`}
 >
-  <p class="pagination-summary__copy">
+  <p class="poodle-pagination-summary__copy">
     Showing {fromItem}-{toItem} of {totalItems}
   </p>
 </div>
 
 <style>
-  .pagination-summary {
+  .poodle-pagination-summary {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -27,7 +27,7 @@
     gap: var(--poodle-space-inline-md);
   }
 
-  .pagination-summary__copy {
+  .poodle-pagination-summary__copy {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-body-family);

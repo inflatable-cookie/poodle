@@ -132,9 +132,9 @@
 />
 
 <UiPresentationProvider density={density} sizeScale={controlSize}>
-  <div class="app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
-    <header class="app-top-bar">
-      <div class="app-top-bar__title">
+  <div class="poodle-app-shell" data-appearance-treatment={appearanceTreatment} bind:this={appShell}>
+    <header class="poodle-app-top-bar">
+      <div class="poodle-app-top-bar__title">
         <strong>Poodle</strong>
       </div>
       <Tabs
@@ -144,7 +144,7 @@
         ariaLabel="Main navigation"
         on:valueChange={(event) => navigateToSection(event.detail.value as SectionId)}
       />
-      <div class="app-top-bar__pills">
+      <div class="poodle-app-top-bar__pills">
         <Pill>{theme}</Pill>
         <Pill>{density}</Pill>
         <Pill>{controlSize}</Pill>
@@ -169,7 +169,7 @@
       }}
     />
 
-    <main class="app-main">
+    <main class="poodle-app-main">
       {#key `${theme}:${activeSection}`}
         <IconProvider icons={iconNodes as unknown as IconSet}>
           {#if activeSection === "components"}
@@ -186,13 +186,13 @@
 </UiPresentationProvider>
 
 <style>
-  :global(.app-shell) {
+  .poodle-app-shell {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
   }
 
-  .app-top-bar {
+  .poodle-app-top-bar {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -202,20 +202,20 @@
     flex-shrink: 0;
   }
 
-  .app-top-bar__title strong {
+  .poodle-app-top-bar__title strong {
     font-size: 1rem;
     font-weight: 700;
     color: var(--poodle-color-text-primary);
     white-space: nowrap;
   }
 
-  .app-top-bar__pills {
+  .poodle-app-top-bar__pills {
     display: flex;
     gap: 0.375rem;
     margin-left: auto;
   }
 
-  .app-main {
+  .poodle-app-main {
     flex: 1 1 0;
     min-height: 0;
     overflow-y: auto;

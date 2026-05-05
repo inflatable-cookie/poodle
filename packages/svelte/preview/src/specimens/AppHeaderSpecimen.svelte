@@ -49,12 +49,12 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Full app window header (title + menubar + utility)">
-    <div class="specimen__frame specimen__frame--app">
+    <div class="poodle-specimen__frame poodle-specimen__frame--app">
       <AppHeader title="Poodle Studio">
         <svelte:fragment slot="actions">
-          <div class="specimen__menubar-inline">
+          <div class="poodle-specimen__menubar-inline">
             <Menubar items={menuItems} ariaLabel="Application menu" />
           </div>
         </svelte:fragment>
@@ -64,14 +64,14 @@
           <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
         </svelte:fragment>
       </AppHeader>
-      <div class="specimen__app-body">
+      <div class="poodle-specimen__app-body">
         <p>Application content area</p>
       </div>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="With title, actions, and utility">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <AppHeader title="My Application">
         <svelte:fragment slot="actions">
           <Button sizeRole="chrome" variant="ghost">New</Button>
@@ -85,16 +85,16 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Title only">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <AppHeader title="Poodle Workstation" />
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Custom identity slot">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <AppHeader>
         <svelte:fragment slot="identity">
-          <span class="specimen__logo">P</span>
+          <span class="poodle-specimen__logo">P</span>
           <strong>Poodle Studio</strong>
         </svelte:fragment>
         <svelte:fragment slot="utility">
@@ -107,31 +107,31 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__frame {
+  .poodle-specimen__frame {
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     overflow: visible;
   }
 
-  .specimen__frame--app {
+  .poodle-specimen__frame--app {
     overflow: hidden;
   }
 
   /* Strip the menubar's container chrome when inline in AppHeader */
-  .specimen__menubar-inline :global(.menubar__list) {
+  .poodle-specimen__menubar-inline :global(.poodle-menubar__list) {
     border: 0;
     background: transparent;
     padding: 0;
     gap: 0;
   }
 
-  .specimen__app-body {
+  .poodle-specimen__app-body {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -141,11 +141,11 @@
     background: var(--poodle-color-background-panel);
   }
 
-  .specimen__app-body p {
+  .poodle-specimen__app-body p {
     margin: 0;
   }
 
-  .specimen__logo {
+  .poodle-specimen__logo {
     display: inline-flex;
     align-items: center;
     justify-content: center;

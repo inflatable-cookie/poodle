@@ -97,10 +97,10 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Log output with filtering">
     <LogList {entries} ariaLabel="Application logs" />
-    <div class="specimen__actions">
+    <div class="poodle-specimen__actions">
       <Button variant="secondary" on:click={addEntry}>Add log entry</Button>
     </div>
   </SpecimenGroup>
@@ -122,13 +122,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__actions {
+  .poodle-specimen__actions {
     display: flex;
     gap: 0.5rem;
   }

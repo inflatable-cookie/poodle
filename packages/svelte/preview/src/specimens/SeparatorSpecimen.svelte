@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Horizontal (default)">
     <p>Content above</p>
     <Separator />
@@ -11,7 +11,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Vertical">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <span>Left</span>
       <Separator orientation="vertical" />
       <span>Center</span>
@@ -26,13 +26,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     gap: 0.75rem;
     align-items: center;

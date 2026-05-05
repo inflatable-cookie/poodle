@@ -25,16 +25,16 @@
 </script>
 
 <div
-  class={`poodle-list-grid list-grid ${className}`.trim()}
+  class={`poodle-list-grid ${className}`.trim()}
   style={`--poodle-list-grid-gap: ${gridGap};`}
 >
   {#if actions}
-    <div class="list-grid__header">
+    <div class="poodle-list-grid__header">
       {@render actions()}
     </div>
   {/if}
 
-  <div class="list-grid__content" style={`grid-template-columns: ${columns}; gap: ${gridGap};`}>
+  <div class="poodle-list-grid__content" style={`grid-template-columns: ${columns}; gap: ${gridGap};`}>
     {#if children}
       {@render children()}
     {/if}
@@ -42,11 +42,7 @@
 </div>
 
 <style>
-  .list-grid {
-    margin-block: var(--poodle-list-grid-gap);
-  }
-
-  .list-grid__header {
+  .poodle-list-grid__header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -54,7 +50,7 @@
     margin-bottom: var(--poodle-list-grid-gap);
   }
 
-  .list-grid__content {
+  .poodle-list-grid__content {
     display: grid;
     align-items: stretch;
   }

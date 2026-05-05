@@ -26,9 +26,9 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Browse panel">
-    <div class="specimen__actions">
+    <div class="poodle-specimen__actions">
       <button type="button" on:click={() => { loading = true; error = null; lastAction = "Loading"; }}>Loading</button>
       <button type="button" on:click={() => { loading = false; error = "Failed to load media"; lastAction = "Error"; }}>Error</button>
       <button type="button" on:click={() => { loading = false; error = null; items = []; lastAction = "Empty"; }}>Empty</button>
@@ -47,7 +47,7 @@
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
+      <div class="poodle-specimen__stack">
         <MediaBrowsePanel {items} hasMore />
         <MediaBrowsePanel {items} hasMore sizeRole="prominent" />
       </div>
@@ -56,19 +56,19 @@
 </div>
 
 <style>
-  .specimen,
-  .specimen__actions {
+  .poodle-specimen,
+  .poodle-specimen__actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }
 
-  .specimen__actions button {
+  .poodle-specimen__actions button {
     padding: 0.375rem 0.625rem;
   }
 

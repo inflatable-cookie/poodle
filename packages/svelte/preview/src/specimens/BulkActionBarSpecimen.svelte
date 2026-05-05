@@ -27,7 +27,7 @@
       on:clear={() => (allSelected = false)}
     />
     {#if lastAction}
-      <p class="specimen__hint">Last action: <strong>{lastAction}</strong></p>
+      <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
     {/if}
   </SpecimenGroup>
 
@@ -59,7 +59,7 @@
 </SpecimenLayout>
 
 <style>
-  .specimen__hint {
+  .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);

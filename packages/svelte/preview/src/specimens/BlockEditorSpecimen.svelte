@@ -25,16 +25,16 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Consumer-driven block types">
     <BlockEditor {blocks} {blockTypes} on:change={handleChange}>
       <svelte:fragment slot="block" let:block let:disabled let:update>
         {#if block.type === "divider"}
-          <hr class="block-divider" />
+          <hr class="poodle-block-divider" />
         {:else if block.type === "heading"}
           <input
             type="text"
-            class="block-input block-input--heading"
+            class="poodle-block-input poodle-block-input--heading"
             placeholder="Heading..."
             disabled={disabled}
             value={block.content}
@@ -42,7 +42,7 @@
           />
         {:else if block.type === "code"}
           <textarea
-            class="block-input block-input--code"
+            class="poodle-block-input poodle-block-input--code"
             placeholder="Code..."
             disabled={disabled}
             value={block.content}
@@ -51,7 +51,7 @@
           ></textarea>
         {:else if block.type === "quote"}
           <textarea
-            class="block-input block-input--quote"
+            class="poodle-block-input poodle-block-input--quote"
             placeholder="Quote..."
             disabled={disabled}
             value={block.content}
@@ -60,7 +60,7 @@
           ></textarea>
         {:else}
           <textarea
-            class="block-input"
+            class="poodle-block-input"
             placeholder="Type something..."
             disabled={disabled}
             value={block.content}
@@ -70,25 +70,25 @@
         {/if}
       </svelte:fragment>
     </BlockEditor>
-    <p class="specimen__count">{blocks.length} blocks</p>
+    <p class="poodle-specimen__count">{blocks.length} blocks</p>
   </SpecimenGroup>
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__count {
+  .poodle-specimen__count {
     margin: 0;
     font-size: 0.75rem;
     color: var(--poodle-color-text-tertiary);
   }
 
   /* Block rendering styles — owned by the consumer, not the shell */
-  .block-input {
+  .poodle-block-input {
     width: 100%;
     padding: 0.25rem 0.375rem;
     border: 0;
@@ -101,25 +101,25 @@
     resize: vertical;
   }
 
-  .block-input--heading {
+  .poodle-block-input--heading {
     font-size: 1.125rem;
     font-weight: 700;
   }
 
-  .block-input--code {
+  .poodle-block-input--code {
     font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
   }
 
-  .block-input--quote {
+  .poodle-block-input--quote {
     border-left: 0.1875rem solid var(--poodle-color-border-default);
     padding-left: 0.625rem;
     color: var(--poodle-color-text-secondary);
     font-style: italic;
   }
 
-  .block-divider {
+  .poodle-block-divider {
     border: 0;
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     margin: 0.5rem 0;

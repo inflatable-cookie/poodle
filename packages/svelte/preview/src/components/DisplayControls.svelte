@@ -46,8 +46,8 @@
   ];
 </script>
 
-<div class="display-controls">
-  <div class="display-controls__group">
+<div class="poodle-display-controls">
+  <div class="poodle-display-controls__group">
     <Eyebrow>Theme</Eyebrow>
     <ToggleGroup
       value={theme}
@@ -57,7 +57,7 @@
     />
   </div>
 
-  <div class="display-controls__group">
+  <div class="poodle-display-controls__group">
     <Eyebrow>Density</Eyebrow>
     <ToggleGroup
       value={density}
@@ -67,7 +67,7 @@
     />
   </div>
 
-  <div class="display-controls__group">
+  <div class="poodle-display-controls__group">
     <Eyebrow>Size</Eyebrow>
     <ToggleGroup
       value={controlSize}
@@ -77,7 +77,7 @@
     />
   </div>
 
-  <div class="display-controls__group">
+  <div class="poodle-display-controls__group">
     <Eyebrow>Treatment</Eyebrow>
     <ToggleGroup
       value={appearanceTreatment}
@@ -87,7 +87,7 @@
     />
   </div>
 
-  <div class="display-controls__group display-controls__group--search">
+  <div class="poodle-display-controls__group poodle-display-controls__group--search">
     <Eyebrow>Search</Eyebrow>
     <TextInput
       type="search"
@@ -101,7 +101,7 @@
 </div>
 
 <style>
-  .display-controls {
+  .poodle-display-controls {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
@@ -111,13 +111,13 @@
     background: var(--poodle-color-background-panel);
   }
 
-  .display-controls__group {
+  .poodle-display-controls__group {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
   }
 
-  .display-controls__group--search {
+  .poodle-display-controls__group--search {
     flex: 1;
     min-width: 10rem;
   }

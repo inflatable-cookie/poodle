@@ -7,9 +7,9 @@
   let compactOpen = false;
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Command Palette">
-    <p class="specimen__hint">Click below to open the palette. Close with Escape, click outside, or the X button.</p>
+    <p class="poodle-specimen__hint">Click below to open the palette. Close with Escape, click outside, or the X button.</p>
     <div>
       <Button on:click={() => (open = true)}>Open Command Palette</Button>
     </div>
@@ -29,7 +29,7 @@
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
+      <div class="poodle-specimen__stack">
         <Button on:click={() => (compactOpen = true)}>Open compact palette</Button>
         <CommandPalette
           open={compactOpen}
@@ -53,19 +53,19 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__hint {
+  .poodle-specimen__hint {
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }

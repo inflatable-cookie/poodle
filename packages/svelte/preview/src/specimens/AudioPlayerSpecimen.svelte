@@ -4,7 +4,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Basic audio player">
     <AudioPlayer
       src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3"
@@ -22,7 +22,7 @@
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
+      <div class="poodle-specimen__stack">
         <AudioPlayer
           src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3"
           ariaLabel="Compact audio player"
@@ -39,13 +39,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }

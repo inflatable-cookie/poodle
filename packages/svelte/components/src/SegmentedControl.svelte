@@ -47,7 +47,7 @@
 </script>
 
 <div
-  class="segmented-control"
+  class="poodle-segmented-control"
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-equal-width={equalWidth}
@@ -55,9 +55,9 @@
   aria-label={ariaLabel ?? undefined}
 >
   {#each options as option (option.value)}
-    <label class="segmented-control__segment" data-selected={currentValue === option.value} title={option.title ?? undefined}>
+    <label class="poodle-segmented-control__segment" data-selected={currentValue === option.value} title={option.title ?? undefined}>
       <input
-        class="segmented-control__control"
+        class="poodle-segmented-control__control"
         type="radio"
         name={name ?? generatedName}
         value={option.value}
@@ -66,13 +66,13 @@
         aria-label={option.ariaLabel ?? undefined}
         on:change={() => handleChange(option.value)}
       />
-      <span class="segmented-control__label">{option.label}</span>
+      <span class="poodle-segmented-control__label">{option.label}</span>
     </label>
   {/each}
 </div>
 
 <style>
-  .segmented-control {
+  .poodle-segmented-control {
     --poodle-segmented-control-height: var(--poodle-size-control-height);
     --poodle-segmented-control-x: var(--poodle-space-control-x);
     display: grid;
@@ -92,52 +92,52 @@
     box-shadow: var(--poodle-treatment-interactive-shadow, none);
   }
 
-  .segmented-control[data-equal-width="false"] {
+  .poodle-segmented-control[data-equal-width="false"] {
     width: fit-content;
     grid-auto-columns: max-content;
     justify-content: start;
   }
 
-  .segmented-control[data-size="xs"] {
+  .poodle-segmented-control[data-size="xs"] {
     --poodle-segmented-control-height: 1.5rem;
   }
 
-  .segmented-control[data-size="sm"] {
+  .poodle-segmented-control[data-size="sm"] {
     --poodle-segmented-control-height: 1.75rem;
   }
 
-  .segmented-control[data-size="md"] {
+  .poodle-segmented-control[data-size="md"] {
     --poodle-segmented-control-height: 2.25rem;
   }
 
-  .segmented-control[data-size="lg"] {
+  .poodle-segmented-control[data-size="lg"] {
     --poodle-segmented-control-height: 2.75rem;
   }
 
-  .segmented-control[data-size="xl"] {
+  .poodle-segmented-control[data-size="xl"] {
     --poodle-segmented-control-height: 3.25rem;
   }
 
-  .segmented-control[data-density="compact"] {
+  .poodle-segmented-control[data-density="compact"] {
     --poodle-segmented-control-x: 0.5rem;
   }
 
-  .segmented-control[data-density="default"] {
+  .poodle-segmented-control[data-density="default"] {
     --poodle-segmented-control-x: 0.75rem;
   }
 
-  .segmented-control[data-density="comfortable"] {
+  .poodle-segmented-control[data-density="comfortable"] {
     --poodle-segmented-control-x: 1rem;
   }
 
-  .segmented-control__segment {
+  .poodle-segmented-control__segment {
     position: relative;
     display: grid;
     min-width: 0;
     cursor: pointer;
   }
 
-  .segmented-control__control {
+  .poodle-segmented-control__control {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -149,7 +149,7 @@
     border: 0;
   }
 
-  .segmented-control__label {
+  .poodle-segmented-control__label {
     display: block;
     min-width: 0;
     min-height: calc(var(--poodle-segmented-control-height) - 0.25rem);
@@ -170,18 +170,18 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .segmented-control__segment[data-selected="true"] .segmented-control__label {
+  .poodle-segmented-control__segment[data-selected="true"] .poodle-segmented-control__label {
     background: var(--poodle-color-accent-base);
     color: var(--poodle-color-text-inverse);
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent);
   }
 
-  .segmented-control__control:focus-visible + .segmented-control__label {
+  .poodle-segmented-control__control:focus-visible + .poodle-segmented-control__label {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .segmented-control__control:disabled + .segmented-control__label {
+  .poodle-segmented-control__control:disabled + .poodle-segmented-control__label {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }

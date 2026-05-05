@@ -109,12 +109,12 @@
   });
 </script>
 
-<div class="audio-player" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
+<div class="poodle-audio-player" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
   <audio bind:this={audioEl} {src} preload="metadata"></audio>
 
   <button
     type="button"
-    class="audio-player__play"
+    class="poodle-audio-player__play"
     on:click={togglePlay}
     aria-label={isPlaying ? "Pause" : "Play"}
   >
@@ -130,11 +130,11 @@
     {/if}
   </button>
 
-  <span class="audio-player__time">{formattedCurrent}</span>
+  <span class="poodle-audio-player__time">{formattedCurrent}</span>
 
   <input
     type="range"
-    class="audio-player__seek"
+    class="poodle-audio-player__seek"
     min="0"
     max={duration || 0}
     step="0.1"
@@ -143,11 +143,11 @@
     aria-label="Seek"
   />
 
-  <span class="audio-player__time">{formattedDuration}</span>
+  <span class="poodle-audio-player__time">{formattedDuration}</span>
 
   <button
     type="button"
-    class="audio-player__mute"
+    class="poodle-audio-player__mute"
     on:click={toggleMute}
     aria-label={isMuted ? "Unmute" : "Mute"}
   >
@@ -166,7 +166,7 @@
 
   <input
     type="range"
-    class="audio-player__volume"
+    class="poodle-audio-player__volume"
     min="0"
     max="1"
     step="0.01"
@@ -177,7 +177,7 @@
 
   {#if showSpeedControl}
     <select
-      class="audio-player__speed"
+      class="poodle-audio-player__speed"
       value={playbackRate}
       on:change={(e) => setSpeed(Number((e.currentTarget as HTMLSelectElement).value))}
       aria-label="Playback speed"
@@ -190,7 +190,7 @@
 </div>
 
 <style>
-  .audio-player {
+  .poodle-audio-player {
     --poodle-audio-player-gap: 0.5rem;
     --poodle-audio-player-pad-y: 0.5rem;
     --poodle-audio-player-pad-x: 0.75rem;
@@ -209,18 +209,18 @@
     background: var(--poodle-color-background-surface);
   }
 
-  .audio-player[data-size="xs"] {
+  .poodle-audio-player[data-size="xs"] {
     --poodle-audio-player-button-size: 1.5rem;
     --poodle-audio-player-icon-size: 0.875rem;
     --poodle-audio-player-time-width: 2rem;
     --poodle-audio-player-volume-width: 3rem;
   }
 
-  .audio-player[data-size="sm"] {
+  .poodle-audio-player[data-size="sm"] {
     --poodle-audio-player-button-size: 1.75rem;
   }
 
-  .audio-player[data-size="lg"] {
+  .poodle-audio-player[data-size="lg"] {
     --poodle-audio-player-button-size: 2.25rem;
     --poodle-audio-player-icon-size: 1.125rem;
     --poodle-audio-player-time-width: 2.75rem;
@@ -228,7 +228,7 @@
     --poodle-audio-player-speed-x: 0.375rem;
   }
 
-  .audio-player[data-size="xl"] {
+  .poodle-audio-player[data-size="xl"] {
     --poodle-audio-player-button-size: 2.5rem;
     --poodle-audio-player-icon-size: 1.25rem;
     --poodle-audio-player-time-width: 3rem;
@@ -236,22 +236,22 @@
     --poodle-audio-player-speed-x: 0.5rem;
   }
 
-  .audio-player[data-density="compact"] {
+  .poodle-audio-player[data-density="compact"] {
     --poodle-audio-player-gap: 0.375rem;
     --poodle-audio-player-pad-y: 0.375rem;
     --poodle-audio-player-pad-x: 0.5rem;
     --poodle-audio-player-speed-y: 0.0625rem;
   }
 
-  .audio-player[data-density="comfortable"] {
+  .poodle-audio-player[data-density="comfortable"] {
     --poodle-audio-player-gap: 0.625rem;
     --poodle-audio-player-pad-y: 0.625rem;
     --poodle-audio-player-pad-x: 0.875rem;
     --poodle-audio-player-speed-y: 0.1875rem;
   }
 
-  .audio-player__play,
-  .audio-player__mute {
+  .poodle-audio-player__play,
+  .poodle-audio-player__mute {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -267,24 +267,24 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .audio-player__play:hover,
-  .audio-player__mute:hover {
+  .poodle-audio-player__play:hover,
+  .poodle-audio-player__mute:hover {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
-  .audio-player__play:focus-visible,
-  .audio-player__mute:focus-visible {
+  .poodle-audio-player__play:focus-visible,
+  .poodle-audio-player__mute:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .audio-player__play svg,
-  .audio-player__mute svg {
+  .poodle-audio-player__play svg,
+  .poodle-audio-player__mute svg {
     width: var(--poodle-audio-player-icon-size);
     height: var(--poodle-audio-player-icon-size);
   }
 
-  .audio-player__time {
+  .poodle-audio-player__time {
     font-family: var(--poodle-typography-code-family);
     font-size: var(--poodle-typography-label-size);
     color: var(--poodle-color-text-secondary);
@@ -293,8 +293,8 @@
     text-align: center;
   }
 
-  .audio-player__seek,
-  .audio-player__volume {
+  .poodle-audio-player__seek,
+  .poodle-audio-player__volume {
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
@@ -302,45 +302,45 @@
     height: 1rem;
   }
 
-  .audio-player__seek {
+  .poodle-audio-player__seek {
     flex: 1;
     min-width: 4rem;
   }
 
-  .audio-player__volume {
+  .poodle-audio-player__volume {
     width: var(--poodle-audio-player-volume-width);
     flex-shrink: 0;
   }
 
   /* Seek track */
-  .audio-player__seek::-webkit-slider-runnable-track {
+  .poodle-audio-player__seek::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
     background: var(--poodle-color-text-primary);
   }
 
-  .audio-player__seek::-moz-range-track {
+  .poodle-audio-player__seek::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
     background: var(--poodle-color-text-primary);
   }
 
   /* Volume track */
-  .audio-player__volume::-webkit-slider-runnable-track {
+  .poodle-audio-player__volume::-webkit-slider-runnable-track {
     height: 0.25rem;
     border-radius: 0.125rem;
     background: var(--poodle-color-accent-base);
   }
 
-  .audio-player__volume::-moz-range-track {
+  .poodle-audio-player__volume::-moz-range-track {
     height: 0.25rem;
     border-radius: 0.125rem;
     background: var(--poodle-color-accent-base);
   }
 
   /* Thumb */
-  .audio-player__seek::-webkit-slider-thumb,
-  .audio-player__volume::-webkit-slider-thumb {
+  .poodle-audio-player__seek::-webkit-slider-thumb,
+  .poodle-audio-player__volume::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 0.625rem;
     height: 0.625rem;
@@ -350,8 +350,8 @@
     margin-top: -0.1875rem;
   }
 
-  .audio-player__seek::-moz-range-thumb,
-  .audio-player__volume::-moz-range-thumb {
+  .poodle-audio-player__seek::-moz-range-thumb,
+  .poodle-audio-player__volume::-moz-range-thumb {
     width: 0.625rem;
     height: 0.625rem;
     border-radius: 50%;
@@ -359,7 +359,7 @@
     background: var(--poodle-color-text-primary);
   }
 
-  .audio-player__speed {
+  .poodle-audio-player__speed {
     min-height: var(--poodle-size-control-height);
     padding: var(--poodle-audio-player-speed-y) var(--poodle-audio-player-speed-x);
     border: 0.0625rem solid var(--poodle-color-border-default);

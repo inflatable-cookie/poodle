@@ -45,7 +45,7 @@
 </script>
 
 <div
-  class="radio-group"
+  class="poodle-radio-group"
   data-orientation={orientation}
   data-disabled={disabled}
   data-size={resolvedSize}
@@ -56,9 +56,9 @@
   style={radioGroupStyles}
 >
   {#each options as option (option.value)}
-    <label class="radio-group__option" data-disabled={disabled || option.disabled === true}>
+    <label class="poodle-radio-group__option" data-disabled={disabled || option.disabled === true}>
       <input
-        class="radio-group__control"
+        class="poodle-radio-group__control"
         type="radio"
         name={name ?? generatedName}
         value={option.value}
@@ -66,29 +66,29 @@
         disabled={disabled || option.disabled === true}
         on:change={() => handleChange(option.value)}
       />
-      <span class="radio-group__indicator" aria-hidden="true">
-        <span class="radio-group__dot"></span>
+      <span class="poodle-radio-group__indicator" aria-hidden="true">
+        <span class="poodle-radio-group__dot"></span>
       </span>
-      <span class="radio-group__label">{option.label}</span>
+      <span class="poodle-radio-group__label">{option.label}</span>
     </label>
   {/each}
 </div>
 
 <style>
-  .radio-group {
+  .poodle-radio-group {
     --poodle-radio-selected-color: var(--poodle-color-accent-base);
     display: grid;
     gap: var(--poodle-space-stack-sm);
   }
 
-  .radio-group[data-orientation="horizontal"] {
+  .poodle-radio-group[data-orientation="horizontal"] {
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, max-content);
     gap: var(--poodle-space-inline-md);
     align-items: center;
   }
 
-  .radio-group__option {
+  .poodle-radio-group__option {
     position: relative;
     display: inline-grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -99,12 +99,12 @@
     cursor: pointer;
   }
 
-  .radio-group__option[data-disabled="true"] {
+  .poodle-radio-group__option[data-disabled="true"] {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .radio-group__control {
+  .poodle-radio-group__control {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -116,7 +116,7 @@
     border: 0;
   }
 
-  .radio-group__indicator {
+  .poodle-radio-group__indicator {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -130,7 +130,7 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .radio-group__dot {
+  .poodle-radio-group__dot {
     width: calc(var(--poodle-size-icon-md) * 0.5);
     height: calc(var(--poodle-size-icon-md) * 0.5);
     border-radius: 999px;
@@ -138,20 +138,20 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .radio-group__control:checked + .radio-group__indicator {
+  .poodle-radio-group__control:checked + .poodle-radio-group__indicator {
     border-color: var(--poodle-radio-selected-color);
   }
 
-  .radio-group__control:checked + .radio-group__indicator .radio-group__dot {
+  .poodle-radio-group__control:checked + .poodle-radio-group__indicator .poodle-radio-group__dot {
     background: var(--poodle-radio-selected-color);
   }
 
-  .radio-group__control:focus-visible + .radio-group__indicator {
+  .poodle-radio-group__control:focus-visible + .poodle-radio-group__indicator {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .radio-group__label {
+  .poodle-radio-group__label {
     min-width: 0;
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
@@ -160,51 +160,51 @@
   }
 
   /* Density variants */
-  .radio-group[data-density="compact"] {
+  .poodle-radio-group[data-density="compact"] {
     gap: var(--poodle-space-stack-sm);
   }
 
-  .radio-group[data-density="comfortable"] {
+  .poodle-radio-group[data-density="comfortable"] {
     gap: var(--poodle-space-stack-lg);
   }
 
   /* Size variants */
-  .radio-group[data-size="xs"] .radio-group__indicator {
+  .poodle-radio-group[data-size="xs"] .poodle-radio-group__indicator {
     width: calc(var(--poodle-size-icon-xs) + 0.25rem);
     height: calc(var(--poodle-size-icon-xs) + 0.25rem);
   }
 
-  .radio-group[data-size="xs"] .radio-group__dot {
+  .poodle-radio-group[data-size="xs"] .poodle-radio-group__dot {
     width: 0.4rem;
     height: 0.4rem;
   }
 
-  .radio-group[data-size="sm"] .radio-group__indicator {
+  .poodle-radio-group[data-size="sm"] .poodle-radio-group__indicator {
     width: calc(var(--poodle-size-icon-sm) + 0.25rem);
     height: calc(var(--poodle-size-icon-sm) + 0.25rem);
   }
 
-  .radio-group[data-size="sm"] .radio-group__dot {
+  .poodle-radio-group[data-size="sm"] .poodle-radio-group__dot {
     width: 0.45rem;
     height: 0.45rem;
   }
 
-  .radio-group[data-size="lg"] .radio-group__indicator {
+  .poodle-radio-group[data-size="lg"] .poodle-radio-group__indicator {
     width: calc(var(--poodle-size-icon-lg) + 0.125rem);
     height: calc(var(--poodle-size-icon-lg) + 0.125rem);
   }
 
-  .radio-group[data-size="lg"] .radio-group__dot {
+  .poodle-radio-group[data-size="lg"] .poodle-radio-group__dot {
     width: 0.55rem;
     height: 0.55rem;
   }
 
-  .radio-group[data-size="xl"] .radio-group__indicator {
+  .poodle-radio-group[data-size="xl"] .poodle-radio-group__indicator {
     width: calc(var(--poodle-size-icon-xl) + 0.125rem);
     height: calc(var(--poodle-size-icon-xl) + 0.125rem);
   }
 
-  .radio-group[data-size="xl"] .radio-group__dot {
+  .poodle-radio-group[data-size="xl"] .poodle-radio-group__dot {
     width: 0.6rem;
     height: 0.6rem;
   }

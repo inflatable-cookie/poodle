@@ -10,31 +10,31 @@
   $: docs = componentDocsMap[entry.slug] ?? null;
 </script>
 
-<article class="component-page">
-  <header class="component-page__hero">
-    <div class="component-page__hero-top">
+<article class="poodle-component-page">
+  <header class="poodle-component-page__hero">
+    <div class="poodle-component-page__hero-top">
       <Pill size="lg">{entry.packageName}</Pill>
     </div>
-    <h1 class="component-page__title">{entry.displayName}</h1>
-    <p class="component-page__description">{entry.description}</p>
+    <h1 class="poodle-component-page__title">{entry.displayName}</h1>
+    <p class="poodle-component-page__description">{entry.description}</p>
   </header>
 
   {#if specimenComponent}
-    <section class="component-page__section">
+    <section class="poodle-component-page__section">
       <svelte:component this={specimenComponent} />
     </section>
   {:else}
-    <section class="component-page__section">
-      <div class="component-page__placeholder">
+    <section class="poodle-component-page__section">
+      <div class="poodle-component-page__placeholder">
         <p>Specimen not yet available for <strong>{entry.displayName}</strong>.</p>
         <p>Check back as we build out interactive demos for each component.</p>
       </div>
     </section>
   {/if}
 
-  <section class="component-page__section">
-    <h2 class="component-page__section-title">Import</h2>
-    <pre class="component-page__code"><code>import {"{"} {entry.displayName} {"}"} from "{entry.packageName}";</code></pre>
+  <section class="poodle-component-page__section">
+    <h2 class="poodle-component-page__section-title">Import</h2>
+    <pre class="poodle-component-page__code"><code>import {"{"} {entry.displayName} {"}"} from "{entry.packageName}";</code></pre>
   </section>
 
   {#if docs}
@@ -44,47 +44,47 @@
 </article>
 
 <style>
-  .component-page {
+  .poodle-component-page {
     padding: 1.5rem 2rem;
   }
 
-  .component-page__hero {
+  .poodle-component-page__hero {
     margin-bottom: 1.5rem;
   }
 
-  .component-page__hero-top {
+  .poodle-component-page__hero-top {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
   }
 
-  .component-page__title {
+  .poodle-component-page__title {
     font-size: 2rem;
     font-weight: 700;
     color: var(--poodle-color-text-primary);
     margin: 0.25rem 0 0.75rem;
   }
 
-  .component-page__description {
+  .poodle-component-page__description {
     font-size: 1rem;
     line-height: 1.6;
     color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 
-  .component-page__section {
+  .poodle-component-page__section {
     padding: 1.5rem 0;
   }
 
-  .component-page__section-title {
+  .poodle-component-page__section-title {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--poodle-color-text-primary);
     margin: 0 0 1rem;
   }
 
-  .component-page__placeholder {
+  .poodle-component-page__placeholder {
     padding: 2rem;
     text-align: center;
     color: var(--poodle-color-text-secondary);
@@ -92,12 +92,12 @@
     border-radius: var(--poodle-radius-surface);
   }
 
-  .component-page__placeholder p {
+  .poodle-component-page__placeholder p {
     margin: 0.25rem 0;
     font-size: 0.875rem;
   }
 
-  .component-page__code {
+  .poodle-component-page__code {
     padding: 0.75rem 1rem;
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, transparent);

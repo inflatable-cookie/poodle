@@ -3,17 +3,17 @@
   export let ariaLabel: string | null = null;
 </script>
 
-<span class="meta-item" aria-label={ariaLabel ?? undefined}>
+<span class="poodle-meta-item" aria-label={ariaLabel ?? undefined}>
   {#if label}
-    <span class="meta-item__label">{label}</span>
+    <span class="poodle-meta-item__label">{label}</span>
   {/if}
-  <span class="meta-item__value">
+  <span class="poodle-meta-item__value">
     <slot />
   </span>
 </span>
 
 <style>
-  .meta-item {
+  .poodle-meta-item {
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
@@ -21,7 +21,7 @@
     min-width: 0;
   }
 
-  .meta-item__label {
+  .poodle-meta-item__label {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
@@ -32,7 +32,7 @@
     white-space: nowrap;
   }
 
-  .meta-item__value {
+  .poodle-meta-item__value {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -43,7 +43,7 @@
     line-height: 1.4;
   }
 
-  .meta-item__value :global(*) {
+  .poodle-meta-item__value :global(*) {
     min-width: 0;
   }
 </style>

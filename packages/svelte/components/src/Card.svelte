@@ -12,7 +12,7 @@
 </script>
 
 <article
-  class={`card ${className}`.trim()}
+  class={`poodle-card ${className}`.trim()}
   data-variant={variant}
   data-layout={layout}
   data-interactive={interactive}
@@ -20,30 +20,30 @@
   aria-label={ariaLabel ?? undefined}
 >
   {#if $$slots.media}
-    <div class="card__media" data-has-media={media}>
+    <div class="poodle-card__media" data-has-media={media}>
       <slot name="media" />
     </div>
   {/if}
 
   {#if $$slots.header}
-    <div class="card__header">
+    <div class="poodle-card__header">
       <slot name="header" />
     </div>
   {/if}
 
-  <div class="card__body">
+  <div class="poodle-card__body">
     <slot />
   </div>
 
   {#if $$slots.footer}
-    <div class="card__footer">
+    <div class="poodle-card__footer">
       <slot name="footer" />
     </div>
   {/if}
 </article>
 
 <style>
-  .card {
+  .poodle-card {
     --poodle-recipe-card-radius: var(--poodle-treatment-surface-radius, var(--poodle-radius-surface));
     --poodle-recipe-card-fill: color-mix(
       in srgb,
@@ -85,11 +85,11 @@
     box-shadow: var(--poodle-treatment-surface-shadow, var(--poodle-recipe-card-shadow));
   }
 
-  .card[data-variant="outlined"] {
+  .poodle-card[data-variant="outlined"] {
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 76%, transparent);
   }
 
-  .card[data-variant="elevated"] {
+  .poodle-card[data-variant="elevated"] {
     border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-recipe-card-radius));
     border-color: color-mix(
       in srgb,
@@ -107,7 +107,7 @@
       0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 12%, transparent);
   }
 
-  :global([data-theme="light"]) .card[data-variant="elevated"] {
+  :global([data-theme="light"]) .poodle-card[data-variant="elevated"] {
     box-shadow:
       0 0.875rem 1.75rem rgba(49, 66, 85, 0.1),
       0 0.25rem 0.625rem rgba(49, 66, 85, 0.06),
@@ -115,51 +115,51 @@
       0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 10%, transparent);
   }
 
-  .card[data-selected="true"] {
+  .poodle-card[data-selected="true"] {
     border-color: var(--poodle-color-accent-base);
     box-shadow:
       0 0 0 0.0625rem var(--poodle-color-accent-base),
       inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
-  .card[data-interactive="true"] {
+  .poodle-card[data-interactive="true"] {
     cursor: pointer;
   }
 
-  .card[data-interactive="true"]:hover {
+  .poodle-card[data-interactive="true"]:hover {
     border-color: var(--poodle-recipe-card-hover-border);
     background: var(--poodle-recipe-card-hover-fill);
     box-shadow: var(--poodle-recipe-card-hover-shadow);
   }
 
-  .card[data-interactive="true"][data-selected="true"]:hover {
+  .poodle-card[data-interactive="true"][data-selected="true"]:hover {
     border-color: var(--poodle-color-accent-base);
     box-shadow:
       0 0 0 0.0625rem var(--poodle-color-accent-base),
       inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
-  .card[data-layout="horizontal"] {
+  .poodle-card[data-layout="horizontal"] {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto;
   }
 
-  .card[data-layout="horizontal"] .card__media {
+  .poodle-card[data-layout="horizontal"] .poodle-card__media {
     grid-row: 1 / -1;
     width: 8rem;
   }
 
-  .card[data-layout="compact"] {
+  .poodle-card[data-layout="compact"] {
     padding: var(--poodle-space-panel-y-sm, 0.5rem) var(--poodle-space-panel-x-sm, 0.625rem);
     gap: var(--poodle-space-stack-sm);
   }
 
-  .card__media {
+  .poodle-card__media {
     overflow: hidden;
     border-radius: calc(var(--poodle-recipe-card-radius) - 0.1875rem);
   }
 
-  .card__footer {
+  .poodle-card__footer {
     padding-top: var(--poodle-space-stack-sm);
     border-top: 0.0625rem solid var(--poodle-treatment-surface-divider, var(--poodle-recipe-card-divider));
   }

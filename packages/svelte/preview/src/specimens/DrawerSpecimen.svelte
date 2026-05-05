@@ -6,13 +6,13 @@
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">
-  <div class="specimen">
-    <div class="specimen__row">
+  <div class="poodle-specimen">
+    <div class="poodle-specimen__row">
       <Eyebrow>Right edge (default)</Eyebrow>
       <Button variant="secondary" on:click={() => (rightOpen = true)}>Open right drawer</Button>
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Left edge</Eyebrow>
       <Button variant="secondary" on:click={() => (leftOpen = true)}>Open left drawer</Button>
     </div>
@@ -42,13 +42,13 @@
 </Drawer>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;

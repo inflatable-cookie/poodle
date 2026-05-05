@@ -129,8 +129,8 @@
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
   <div
-    class="block-editor"
-    class:block-editor--disabled={disabled}
+    class="poodle-block-editor"
+    class:poodle-block-editor--disabled={disabled}
     data-size={resolvedSize}
     data-density={resolvedDensity}
     aria-label={ariaLabel}
@@ -138,10 +138,10 @@
     {#each blocks as block, index (block.id)}
       <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
       <div
-        class="block-editor__block"
-        class:active={activeBlockId === block.id}
-        class:drag-over={dragOverIndex === index}
-        class:dragging={dragSourceIndex === index}
+        class="poodle-block-editor__block"
+        class:poodle-active={activeBlockId === block.id}
+        class:poodle-drag-over={dragOverIndex === index}
+        class:poodle-dragging={dragSourceIndex === index}
         data-type={block.type}
         on:focusin={() => (activeBlockId = block.id)}
         on:dragover={(e) => handleDragOver(e, index)}
@@ -150,11 +150,11 @@
         role="group"
         aria-label={`${block.type} block`}
       >
-        <div class="block-editor__toolbar">
-          <div class="block-editor__toolbar-left">
+        <div class="poodle-block-editor__toolbar">
+          <div class="poodle-block-editor__toolbar-left">
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <span
-              class="block-editor__drag-grip"
+              class="poodle-block-editor__drag-grip"
               draggable="true"
               on:dragstart={(e) => handleDragStart(e, index)}
               on:dragend={handleDragEnd}
@@ -162,7 +162,7 @@
               aria-hidden="true"
             ><Icon name="grip-vertical" /></span>
 
-            <div class="block-editor__type-select">
+            <div class="poodle-block-editor__type-select">
               <Select
                 value={block.type}
                 options={selectOptions}
@@ -176,22 +176,22 @@
             </div>
           </div>
 
-          <div class="block-editor__toolbar-right">
+          <div class="poodle-block-editor__toolbar-right">
             <button
               type="button"
-              class="block-editor__tool-btn"
+              class="poodle-block-editor__tool-btn"
               disabled={disabled || index === 0}
               on:click|stopPropagation={() => moveBlock(index, -1)}
               aria-label="Move up"
             ><Icon name="arrow-up" /></button>
             <button
               type="button"
-              class="block-editor__tool-btn"
+              class="poodle-block-editor__tool-btn"
               disabled={disabled || index === blocks.length - 1}
               on:click|stopPropagation={() => moveBlock(index, 1)}
               aria-label="Move down"
             ><Icon name="arrow-down" /></button>
-            <div class="block-editor__add-select">
+            <div class="poodle-block-editor__add-select">
               <Select
                 value={null}
                 options={selectOptions}
@@ -203,7 +203,7 @@
                 on:valueChange={(e) => addBlock(e.detail.value, index)}
               >
                 <svelte:fragment slot="trigger">
-                  <span class="block-editor__tool-btn" aria-hidden="true">
+                  <span class="poodle-block-editor__tool-btn" aria-hidden="true">
                     <Icon name="plus" />
                   </span>
                 </svelte:fragment>
@@ -212,7 +212,7 @@
             {#if blocks.length > 1}
               <button
                 type="button"
-                class="block-editor__tool-btn block-editor__remove-btn"
+                class="poodle-block-editor__tool-btn poodle-block-editor__remove-btn"
                 disabled={disabled}
                 on:click|stopPropagation={() => removeBlock(index)}
                 aria-label="Remove block"
@@ -221,7 +221,7 @@
           </div>
         </div>
 
-        <div class="block-editor__content">
+        <div class="poodle-block-editor__content">
           <slot
             name="block"
             {block}
@@ -230,7 +230,7 @@
             update={(updates: Partial<EditorBlock>) => updateBlock(index, updates)}
           >
             <textarea
-              class="block-editor__input"
+              class="poodle-block-editor__input"
               placeholder="Type something..."
               disabled={disabled}
               value={block.content}
@@ -245,7 +245,7 @@
 </UiPresentationProvider>
 
 <style>
-  .block-editor {
+  .poodle-block-editor {
     --poodle-block-editor-shell-x: 0.75rem;
     --poodle-block-editor-shell-y: 0.75rem;
     --poodle-block-editor-stack-gap: 0.5rem;
@@ -266,27 +266,27 @@
     gap: var(--poodle-block-editor-stack-gap);
   }
 
-  .block-editor[data-size="xs"] {
+  .poodle-block-editor[data-size="xs"] {
     --poodle-block-editor-control-size: 1.25rem;
   }
 
-  .block-editor[data-size="sm"] {
+  .poodle-block-editor[data-size="sm"] {
     --poodle-block-editor-control-size: 1.5rem;
   }
 
-  .block-editor[data-size="md"] {
+  .poodle-block-editor[data-size="md"] {
     --poodle-block-editor-control-size: 1.75rem;
   }
 
-  .block-editor[data-size="lg"] {
+  .poodle-block-editor[data-size="lg"] {
     --poodle-block-editor-control-size: 2rem;
   }
 
-  .block-editor[data-size="xl"] {
+  .poodle-block-editor[data-size="xl"] {
     --poodle-block-editor-control-size: 2.25rem;
   }
 
-  .block-editor[data-density="compact"] {
+  .poodle-block-editor[data-density="compact"] {
     --poodle-block-editor-shell-x: 0.625rem;
     --poodle-block-editor-shell-y: 0.625rem;
     --poodle-block-editor-stack-gap: 0.375rem;
@@ -298,7 +298,7 @@
     --poodle-block-editor-input-y: 0.1875rem;
   }
 
-  .block-editor[data-density="comfortable"] {
+  .poodle-block-editor[data-density="comfortable"] {
     --poodle-block-editor-shell-x: 1rem;
     --poodle-block-editor-shell-y: 1rem;
     --poodle-block-editor-stack-gap: 0.625rem;
@@ -310,12 +310,12 @@
     --poodle-block-editor-input-y: 0.3125rem;
   }
 
-  .block-editor--disabled {
+  .poodle-block-editor--disabled {
     opacity: var(--poodle-state-opacity-disabled);
     pointer-events: none;
   }
 
-  .block-editor__block {
+  .poodle-block-editor__block {
     display: flex;
     flex-direction: column;
     border: none;
@@ -326,19 +326,19 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .block-editor__block.active {
+  .poodle-block-editor__block.poodle-active {
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
   }
 
-  .block-editor__block.drag-over {
+  .poodle-block-editor__block.poodle-drag-over {
     box-shadow: 0 0 0 0.125rem var(--poodle-color-accent-base);
   }
 
-  .block-editor__block.dragging {
+  .poodle-block-editor__block.poodle-dragging {
     opacity: 0.4;
   }
 
-  .block-editor__toolbar {
+  .poodle-block-editor__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -347,14 +347,14 @@
     border-radius: var(--poodle-radius-control) var(--poodle-radius-control) 0 0;
   }
 
-  .block-editor__toolbar-left,
-  .block-editor__toolbar-right {
+  .poodle-block-editor__toolbar-left,
+  .poodle-block-editor__toolbar-right {
     display: flex;
     align-items: center;
     gap: var(--poodle-block-editor-toolbar-gap);
   }
 
-  .block-editor__drag-grip {
+  .poodle-block-editor__drag-grip {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -366,24 +366,24 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .block-editor__drag-grip:hover {
+  .poodle-block-editor__drag-grip:hover {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     color: var(--poodle-color-text-secondary);
   }
 
-  .block-editor__drag-grip:active {
+  .poodle-block-editor__drag-grip:active {
     cursor: grabbing;
   }
 
-  .block-editor__type-select {
+  .poodle-block-editor__type-select {
     flex-shrink: 0;
   }
 
-  .block-editor__add-select {
+  .poodle-block-editor__add-select {
     flex-shrink: 0;
   }
 
-  .block-editor__tool-btn {
+  .poodle-block-editor__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -400,33 +400,33 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .block-editor__tool-btn:hover {
+  .poodle-block-editor__tool-btn:hover {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .block-editor__tool-btn:disabled {
+  .poodle-block-editor__tool-btn:disabled {
     opacity: 0.3;
     cursor: default;
   }
 
-  .block-editor__tool-btn:disabled:hover {
+  .poodle-block-editor__tool-btn:disabled:hover {
     background: transparent;
     color: var(--poodle-color-text-tertiary);
   }
 
-  .block-editor__remove-btn:hover:not(:disabled) {
+  .poodle-block-editor__remove-btn:hover:not(:disabled) {
     background: color-mix(in srgb, var(--poodle-color-status-danger) 16%, transparent);
     color: var(--poodle-color-status-danger);
   }
 
-  .block-editor__content {
+  .poodle-block-editor__content {
     padding: var(--poodle-block-editor-content-y) var(--poodle-block-editor-content-x);
     min-height: 1.5rem;
   }
 
   /* Minimal fallback input (used when no block slot is provided) */
-  .block-editor__input {
+  .poodle-block-editor__input {
     width: 100%;
     padding: var(--poodle-block-editor-input-y) var(--poodle-block-editor-input-x);
     border: 0;

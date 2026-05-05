@@ -12,9 +12,9 @@
   $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
 </script>
 
-<div class="meter" aria-label={ariaLabel ?? undefined}>
+<div class="poodle-meter" aria-label={ariaLabel ?? undefined}>
   <meter
-    class="meter__native"
+    class="poodle-meter__native"
     min={min}
     max={safeMax}
     {low}
@@ -22,25 +22,25 @@
     {optimum}
     value={safeValue}
   ></meter>
-  <span class="meter__track" aria-hidden="true">
-    <span class="meter__fill" style={`width: ${percentage}%;`}></span>
+  <span class="poodle-meter__track" aria-hidden="true">
+    <span class="poodle-meter__fill" style={`width: ${percentage}%;`}></span>
   </span>
 </div>
 
 <style>
-  .meter {
+  .poodle-meter {
     display: grid;
     gap: 0;
     width: 100%;
   }
 
-  .meter__native {
+  .poodle-meter__native {
     position: absolute;
     opacity: 0;
     pointer-events: none;
   }
 
-  .meter__track {
+  .poodle-meter__track {
     position: relative;
     display: block;
     overflow: hidden;
@@ -49,7 +49,7 @@
     background: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
   }
 
-  .meter__fill {
+  .poodle-meter__fill {
     display: block;
     height: 100%;
     border-radius: inherit;

@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Default (50%)">
     <Meter value={50} ariaLabel="Storage usage" />
   </SpecimenGroup>
@@ -25,7 +25,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

@@ -64,7 +64,7 @@
 </script>
 
 <div
-  class="rating"
+  class="poodle-rating"
   role="radiogroup"
   tabindex="-1"
   aria-label={ariaLabel ?? undefined}
@@ -76,7 +76,7 @@
     <button
       bind:this={itemElements[index]}
       type="button"
-      class="rating__item"
+      class="poodle-rating__item"
       data-filled={displayValue >= index + 1}
       data-hovered={hoverIndex === index}
       disabled={disabled}
@@ -114,19 +114,19 @@
         }
       }}
     >
-      <span class="rating__glyph" aria-hidden="true"><Icon name="star" size={resolvedSize} /></span>
+      <span class="poodle-rating__glyph" aria-hidden="true"><Icon name="star" size={resolvedSize} /></span>
     </button>
   {/each}
 </div>
 
 <style>
-  .rating {
+  .poodle-rating {
     display: inline-flex;
     align-items: center;
     gap: 0.125rem;
   }
 
-  .rating__item {
+  .poodle-rating__item {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -142,52 +142,52 @@
     transition: color 120ms ease, filter 120ms ease;
   }
 
-  .rating__item[data-filled="true"] {
+  .poodle-rating__item[data-filled="true"] {
     color: var(--poodle-color-accent-base);
   }
 
-  .rating__item[data-hovered="true"] {
+  .poodle-rating__item[data-hovered="true"] {
     filter: drop-shadow(0 0 0.375rem color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent));
   }
 
-  .rating__item:focus-visible {
+  .poodle-rating__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .rating__glyph {
+  .poodle-rating__glyph {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .rating__glyph :global(svg) {
+  .poodle-rating__glyph :global(svg) {
     width: 1.125em;
     height: 1.125em;
     stroke-width: 2;
   }
 
-  .rating__item[data-filled="true"] .rating__glyph :global(svg) {
+  .poodle-rating__item[data-filled="true"] .poodle-rating__glyph :global(svg) {
     fill: currentColor;
     stroke-width: 1.5;
   }
 
-  .rating__item:disabled {
+  .poodle-rating__item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .rating[data-size="xs"] .rating__item { width: calc(var(--poodle-size-icon-xs) + 0.75rem); height: calc(var(--poodle-size-icon-xs) + 0.75rem); }
-  .rating[data-size="xs"] .rating__glyph { font-size: 0.75rem; }
-  .rating[data-size="sm"] .rating__item { width: calc(var(--poodle-size-icon-sm) + 0.75rem); height: calc(var(--poodle-size-icon-sm) + 0.75rem); }
-  .rating[data-size="sm"] .rating__glyph { font-size: 0.875rem; }
-  .rating[data-size="lg"] .rating__item { width: calc(var(--poodle-size-icon-lg) + 0.75rem); height: calc(var(--poodle-size-icon-lg) + 0.75rem); }
-  .rating[data-size="lg"] .rating__glyph { font-size: 1.125rem; }
-  .rating[data-size="xl"] .rating__item { width: calc(var(--poodle-size-icon-xl) + 0.75rem); height: calc(var(--poodle-size-icon-xl) + 0.75rem); }
-  .rating[data-size="xl"] .rating__glyph { font-size: 1.25rem; }
+  .poodle-rating[data-size="xs"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xs) + 0.75rem); height: calc(var(--poodle-size-icon-xs) + 0.75rem); }
+  .poodle-rating[data-size="xs"] .poodle-rating__glyph { font-size: 0.75rem; }
+  .poodle-rating[data-size="sm"] .poodle-rating__item { width: calc(var(--poodle-size-icon-sm) + 0.75rem); height: calc(var(--poodle-size-icon-sm) + 0.75rem); }
+  .poodle-rating[data-size="sm"] .poodle-rating__glyph { font-size: 0.875rem; }
+  .poodle-rating[data-size="lg"] .poodle-rating__item { width: calc(var(--poodle-size-icon-lg) + 0.75rem); height: calc(var(--poodle-size-icon-lg) + 0.75rem); }
+  .poodle-rating[data-size="lg"] .poodle-rating__glyph { font-size: 1.125rem; }
+  .poodle-rating[data-size="xl"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xl) + 0.75rem); height: calc(var(--poodle-size-icon-xl) + 0.75rem); }
+  .poodle-rating[data-size="xl"] .poodle-rating__glyph { font-size: 1.25rem; }
 
   /* Density variants */
-  .rating[data-density="compact"] { gap: 0.0625rem; }
-  .rating[data-density="comfortable"] { gap: 0.25rem; }
+  .poodle-rating[data-density="compact"] { gap: 0.0625rem; }
+  .poodle-rating[data-density="comfortable"] { gap: 0.25rem; }
 </style>

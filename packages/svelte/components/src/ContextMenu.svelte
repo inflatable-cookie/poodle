@@ -133,7 +133,7 @@
 </script>
 
 <div
-  class="context-menu"
+  class="poodle-context-menu"
   bind:this={rootElement}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -160,7 +160,7 @@
   {#if isOpen && currentAnchorPoint}
     <div
       bind:this={overlayElement}
-      class="context-menu__overlay"
+      class="poodle-context-menu__overlay"
       role="menu"
       aria-label={ariaLabel ?? undefined}
       style={adjustedPosition
@@ -169,12 +169,12 @@
     >
       {#each items as item (item.value)}
         {#if item.kind === "separator"}
-          <div class="context-menu__separator" role="separator"></div>
+          <div class="poodle-context-menu__separator" role="separator"></div>
         {:else}
           <button
             bind:this={itemElements[actionableItems.findIndex((candidate) => candidate.value === item.value)]}
             type="button"
-            class="context-menu__item"
+            class="poodle-context-menu__item"
             disabled={item.disabled === true}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
             aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
@@ -211,9 +211,9 @@
             <span>{item.label}</span>
 
             {#if item.checked}
-              <span class="context-menu__meta" aria-hidden="true">✓</span>
+              <span class="poodle-context-menu__meta" aria-hidden="true">✓</span>
             {:else if item.shortcutLabel}
-              <span class="context-menu__meta" aria-hidden="true">{item.shortcutLabel}</span>
+              <span class="poodle-context-menu__meta" aria-hidden="true">{item.shortcutLabel}</span>
             {/if}
           </button>
         {/if}
@@ -223,12 +223,7 @@
 </div>
 
 <style>
-  .context-menu {
-    position: relative;
-    min-width: 0;
-  }
-
-  .context-menu__overlay {
+  .poodle-context-menu__overlay {
     position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
@@ -245,7 +240,7 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 
-  .context-menu__item {
+  .poodle-context-menu__item {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -262,24 +257,24 @@
     text-align: left;
   }
 
-  .context-menu__item:hover:not(:disabled),
-  .context-menu__item:focus-visible {
+  .poodle-context-menu__item:hover:not(:disabled),
+  .poodle-context-menu__item:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     outline: none;
   }
 
-  .context-menu__item:disabled {
+  .poodle-context-menu__item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .context-menu__meta {
+  .poodle-context-menu__meta {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
   }
 
-  .context-menu__separator {
+  .poodle-context-menu__separator {
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
@@ -287,27 +282,27 @@
   }
 
   /* Size variants */
-  .context-menu[data-size="xs"] .context-menu__item {
+  .poodle-context-menu[data-size="xs"] .poodle-context-menu__item {
     min-height: var(--poodle-size-control-height);
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
-  .context-menu[data-size="sm"] .context-menu__item {
+  .poodle-context-menu[data-size="sm"] .poodle-context-menu__item {
     min-height: var(--poodle-size-control-height);
   }
 
-  .context-menu[data-size="lg"] .context-menu__item {
+  .poodle-context-menu[data-size="lg"] .poodle-context-menu__item {
     min-height: var(--poodle-size-control-height);
     font-size: 0.9375rem;
   }
 
-  .context-menu[data-size="xl"] .context-menu__item {
+  .poodle-context-menu[data-size="xl"] .poodle-context-menu__item {
     min-height: var(--poodle-size-control-height);
     font-size: 1rem;
   }
 
   /* Density variants */
-  .context-menu[data-density="compact"] .context-menu__item { padding-inline: 0.375rem; }
-  .context-menu[data-density="comfortable"] .context-menu__item { padding-inline: 0.75rem; }
+  .poodle-context-menu[data-density="compact"] .poodle-context-menu__item { padding-inline: 0.375rem; }
+  .poodle-context-menu[data-density="comfortable"] .poodle-context-menu__item { padding-inline: 0.75rem; }
 </style>

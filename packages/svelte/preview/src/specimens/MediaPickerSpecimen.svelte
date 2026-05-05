@@ -19,7 +19,7 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Media picker dialog">
     <Button variant="secondary" on:click={() => (open = true)}>Select media</Button>
     <MediaPicker
@@ -36,7 +36,7 @@
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
+      <div class="poodle-specimen__stack">
         <Button variant="secondary" on:click={() => (compactOpen = true)}>Open compact picker</Button>
         <MediaPicker
           open={compactOpen}
@@ -60,13 +60,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }

@@ -41,9 +41,9 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Single-group catalogue">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <SidebarNav
         ariaLabel="Catalogue navigation"
         groups={catalogueGroups}
@@ -54,7 +54,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Grouped verification nav">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <SidebarNav
         ariaLabel="Verification navigation"
         groups={harnessGroups}
@@ -66,12 +66,12 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: grid;
     gap: 1rem;
   }
 
-  .specimen__frame {
+  .poodle-specimen__frame {
     width: 16rem;
     min-height: 20rem;
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent);

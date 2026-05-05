@@ -21,7 +21,7 @@ Check out [Poodle](https://example.com) for more.`;
   let compactContent = "## Compact workspace\n\nToolbar and pane spacing should tighten with density while controls still scale semantically.";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Split view">
     <MarkdownEditor bind:value={content} mode="split" />
   </SpecimenGroup>
@@ -36,7 +36,7 @@ Check out [Poodle](https://example.com) for more.`;
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
+      <div class="poodle-specimen__stack">
         <MarkdownEditor bind:value={compactContent} mode="split" />
         <MarkdownEditor value={compactContent} mode="preview" sizeRole="prominent" />
       </div>
@@ -45,13 +45,13 @@ Check out [Poodle](https://example.com) for more.`;
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }

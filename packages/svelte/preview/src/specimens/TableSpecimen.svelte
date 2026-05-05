@@ -47,20 +47,20 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <div class="variant-block">
+    <div class="poodle-variant-block">
       <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Table at {size}" {size} />
     </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <div class="variant-block">
+    <div class="poodle-variant-block">
       <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Table at {density}" {density} />
     </div>
   </svelte:fragment>
 </SpecimenLayout>
 
 <style>
-  .variant-block {
+  .poodle-variant-block {
     width: 100%;
   }
 </style>

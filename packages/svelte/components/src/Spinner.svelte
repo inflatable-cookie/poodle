@@ -28,7 +28,7 @@
 
 <span
   {...$$restProps}
-  class={`spinner ${className}`.trim()}
+  class={`poodle-spinner ${className}`.trim()}
   data-variant={variant}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -40,12 +40,12 @@
   aria-hidden={ariaLabel ? undefined : "true"}
 >
   {#if variant === "ring"}
-    <span class="spinner__ring" aria-hidden="true"></span>
+    <span class="poodle-spinner__ring" aria-hidden="true"></span>
   {:else}
-    <span class="spinner__grid" aria-hidden="true">
+    <span class="poodle-spinner__grid" aria-hidden="true">
       {#each gridCells as cell}
         <span
-          class="spinner__cell"
+          class="poodle-spinner__cell"
           data-phase={cell.phase}
         ></span>
       {/each}
@@ -54,7 +54,7 @@
 </span>
 
 <style>
-  .spinner {
+  .poodle-spinner {
     --poodle-spinner-color: currentColor;
     display: inline-flex;
     align-items: center;
@@ -62,50 +62,50 @@
     color: var(--poodle-spinner-color);
   }
 
-  .spinner[data-tone="accent"] {
+  .poodle-spinner[data-tone="accent"] {
     --poodle-spinner-color: var(--poodle-color-accent-base);
   }
 
-  .spinner[data-tone="muted"] {
+  .poodle-spinner[data-tone="muted"] {
     --poodle-spinner-color: var(--poodle-color-text-secondary);
   }
 
-  .spinner[data-size="sm"] {
+  .poodle-spinner[data-size="sm"] {
     --poodle-spinner-ring-size: 0.75rem;
     --poodle-spinner-grid-width: 0.4375rem;
     --poodle-spinner-grid-height: 0.6875rem;
     --poodle-spinner-grid-gap: 0.078125rem;
   }
 
-  .spinner[data-size="xs"] {
+  .poodle-spinner[data-size="xs"] {
     --poodle-spinner-ring-size: 0.625rem;
     --poodle-spinner-grid-width: 0.375rem;
     --poodle-spinner-grid-height: 0.5625rem;
     --poodle-spinner-grid-gap: 0.0625rem;
   }
 
-  .spinner[data-size="md"] {
+  .poodle-spinner[data-size="md"] {
     --poodle-spinner-ring-size: 1rem;
     --poodle-spinner-grid-width: 0.5625rem;
     --poodle-spinner-grid-height: 0.9375rem;
     --poodle-spinner-grid-gap: 0.09375rem;
   }
 
-  .spinner[data-size="lg"] {
+  .poodle-spinner[data-size="lg"] {
     --poodle-spinner-ring-size: 1.5rem;
     --poodle-spinner-grid-width: 0.75rem;
     --poodle-spinner-grid-height: 1.25rem;
     --poodle-spinner-grid-gap: 0.125rem;
   }
 
-  .spinner[data-size="xl"] {
+  .poodle-spinner[data-size="xl"] {
     --poodle-spinner-ring-size: 1.875rem;
     --poodle-spinner-grid-width: 0.9375rem;
     --poodle-spinner-grid-height: 1.5625rem;
     --poodle-spinner-grid-gap: 0.15625rem;
   }
 
-  .spinner__ring {
+  .poodle-spinner__ring {
     width: var(--poodle-spinner-ring-size);
     height: var(--poodle-spinner-ring-size);
     border: 0.125rem solid color-mix(in srgb, currentColor 24%, transparent);
@@ -115,7 +115,7 @@
     animation: poodle-spinner-ring 0.8s linear infinite;
   }
 
-  .spinner__grid {
+  .poodle-spinner__grid {
     display: inline-grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 1fr);
@@ -124,7 +124,7 @@
     height: var(--poodle-spinner-grid-height);
   }
 
-  .spinner__cell {
+  .poodle-spinner__cell {
     width: 100%;
     height: 100%;
     border-radius: 0.125rem;
@@ -133,27 +133,27 @@
     animation: poodle-spinner-grid-idle 1.24s linear infinite;
   }
 
-  .spinner__cell[data-phase="tl"] {
+  .poodle-spinner__cell[data-phase="tl"] {
     animation-name: poodle-spinner-grid-tl;
   }
 
-  .spinner__cell[data-phase="tr"] {
+  .poodle-spinner__cell[data-phase="tr"] {
     animation-name: poodle-spinner-grid-tr;
   }
 
-  .spinner__cell[data-phase="mr"] {
+  .poodle-spinner__cell[data-phase="mr"] {
     animation-name: poodle-spinner-grid-mr;
   }
 
-  .spinner__cell[data-phase="ml"] {
+  .poodle-spinner__cell[data-phase="ml"] {
     animation-name: poodle-spinner-grid-ml;
   }
 
-  .spinner__cell[data-phase="bl"] {
+  .poodle-spinner__cell[data-phase="bl"] {
     animation-name: poodle-spinner-grid-bl;
   }
 
-  .spinner__cell[data-phase="br"] {
+  .poodle-spinner__cell[data-phase="br"] {
     animation-name: poodle-spinner-grid-br;
   }
 

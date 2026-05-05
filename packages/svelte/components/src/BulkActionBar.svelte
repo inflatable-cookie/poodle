@@ -47,8 +47,8 @@
 
 </script>
 
-<div class="bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize} data-density={resolvedDensity}>
-  <div class="bulk-action-bar__summary">
+<div class="poodle-bulk-action-bar" role="region" aria-label="Bulk actions" data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="poodle-bulk-action-bar__summary">
     <strong>{selectionCount} selected</strong>
     {#if totalCount !== null}
       <span>of {totalCount}</span>
@@ -66,11 +66,11 @@
     {/if}
   </div>
 
-  <div class="bulk-action-bar__actions">
+  <div class="poodle-bulk-action-bar__actions">
     {#each actions as action}
       {@const actionTone = action.tone ?? "default"}
       <span
-        class="bulk-action-bar__icon-action"
+        class="poodle-bulk-action-bar__icon-action"
         data-tone={actionTone !== "default" ? actionTone : undefined}
       >
         {#if action.icon && isIconComponent(action.icon)}
@@ -112,7 +112,7 @@
 </div>
 
 <style>
-  .bulk-action-bar {
+  .poodle-bulk-action-bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -126,7 +126,7 @@
     --poodle-surface: var(--poodle-recipe-bulk-fill);
   }
 
-  .bulk-action-bar__summary {
+  .poodle-bulk-action-bar__summary {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
@@ -137,42 +137,42 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .bulk-action-bar__summary span {
+  .poodle-bulk-action-bar__summary span {
     color: var(--poodle-color-text-secondary);
   }
 
-  .bulk-action-bar__actions {
+  .poodle-bulk-action-bar__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
   }
 
 
-  .bulk-action-bar__icon-action {
+  .poodle-bulk-action-bar__icon-action {
     display: inline-flex;
   }
 
-  .bulk-action-bar__icon-action[data-tone="warning"] :global(.icon-button) {
+  .poodle-bulk-action-bar__icon-action[data-tone="warning"] :global(.poodle-icon-button) {
     color: var(--poodle-color-status-warning);
   }
 
-  .bulk-action-bar__icon-action[data-tone="warning"] :global(.icon-button:hover),
-  .bulk-action-bar__icon-action[data-tone="warning"] :global(.icon-button:focus-visible) {
+  .poodle-bulk-action-bar__icon-action[data-tone="warning"] :global(.poodle-icon-button:hover),
+  .poodle-bulk-action-bar__icon-action[data-tone="warning"] :global(.poodle-icon-button:focus-visible) {
     color: color-mix(in srgb, var(--poodle-color-status-warning) 82%, var(--poodle-color-text-primary));
   }
 
   /* Size variants — controls and text only, not container padding */
-  .bulk-action-bar[data-size="xs"] .bulk-action-bar__summary { font-size: 0.75rem; }
+  .poodle-bulk-action-bar[data-size="xs"] .poodle-bulk-action-bar__summary { font-size: 0.75rem; }
 
-  .bulk-action-bar[data-size="sm"] .bulk-action-bar__summary { font-size: 0.8125rem; }
+  .poodle-bulk-action-bar[data-size="sm"] .poodle-bulk-action-bar__summary { font-size: 0.8125rem; }
 
-  .bulk-action-bar[data-size="lg"] .bulk-action-bar__summary { font-size: 0.9375rem; }
+  .poodle-bulk-action-bar[data-size="lg"] .poodle-bulk-action-bar__summary { font-size: 0.9375rem; }
 
-  .bulk-action-bar[data-size="xl"] .bulk-action-bar__summary { font-size: 1rem; }
+  .poodle-bulk-action-bar[data-size="xl"] .poodle-bulk-action-bar__summary { font-size: 1rem; }
 
   /* Density variants — horizontal padding and gap only, not vertical padding */
-  .bulk-action-bar[data-density="compact"] { padding-inline: 0.75rem; gap: 0.375rem; }
-  .bulk-action-bar[data-density="compact"] .bulk-action-bar__actions { gap: 0.125rem; }
-  .bulk-action-bar[data-density="comfortable"] { padding-inline: 1.25rem; gap: 1rem; }
-  .bulk-action-bar[data-density="comfortable"] .bulk-action-bar__actions { gap: 0.5rem; }
+  .poodle-bulk-action-bar[data-density="compact"] { padding-inline: 0.75rem; gap: 0.375rem; }
+  .poodle-bulk-action-bar[data-density="compact"] .poodle-bulk-action-bar__actions { gap: 0.125rem; }
+  .poodle-bulk-action-bar[data-density="comfortable"] { padding-inline: 1.25rem; gap: 1rem; }
+  .poodle-bulk-action-bar[data-density="comfortable"] .poodle-bulk-action-bar__actions { gap: 0.5rem; }
 </style>

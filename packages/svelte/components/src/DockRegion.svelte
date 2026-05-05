@@ -268,7 +268,7 @@
 </script>
 
 <section
-  class="dock-region"
+  class="poodle-dock-region"
   data-edge={edge}
   data-sizing={sizing}
   data-emphasis={emphasis}
@@ -280,16 +280,16 @@
   on:drop={handleRegionDrop}
 >
   {#if isDragOver}
-    <div class="dock-region__drop-zone"></div>
+    <div class="poodle-dock-region__drop-zone"></div>
   {/if}
 
   {#if sizing === "static"}
     <!-- Static: stacked panels, no tabs, no collapse -->
-    <div class="dock-region__stack" data-direction={stackDirection}>
+    <div class="poodle-dock-region__stack" data-direction={stackDirection}>
       {#each items as item, index (item.value)}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
-          class="dock-region__stack-item"
+          class="poodle-dock-region__stack-item"
           data-drop-target={dropInsertIndex === index || undefined}
           data-drag-source={dragSourceIndex === index || undefined}
           draggable="true"
@@ -309,7 +309,7 @@
   {:else if showHidden}
     <!-- Flexible collapsed (hidden): just the collapse toggle -->
     {#if collapsible}
-      <div class="dock-region__edge-toggle">
+      <div class="poodle-dock-region__edge-toggle">
         <CollapseToggle
           collapsed={collapsed}
           direction={collapseDirection}
@@ -321,7 +321,7 @@
 
   {:else if showIconStrip && isVerticalEdge}
     <!-- Flexible collapsed (icon-strip) for left/right: collapse toggle + vertical tabs -->
-    <div class="dock-region__strip" data-orientation="vertical">
+    <div class="poodle-dock-region__strip" data-orientation="vertical">
       {#if collapsible}
         <CollapseToggle
           collapsed={collapsed}
@@ -350,12 +350,12 @@
     <!-- Flexible collapsed (icon-strip) for top/bottom: horizontal tabs, no body -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
-      class="dock-region__strip"
+      class="poodle-dock-region__strip"
       data-orientation="horizontal"
       data-compact={isCompact || undefined}
       on:dragstart={handleStripDragStart}
     >
-      <div class="dock-region__tabs" use:observeStrip>
+      <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
           variant="strip"
           orientation="horizontal"
@@ -386,12 +386,12 @@
     <!-- Flexible expanded: horizontal tabs + body -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
-      class="dock-region__strip"
+      class="poodle-dock-region__strip"
       data-orientation="horizontal"
       data-compact={isCompact || undefined}
       on:dragstart={handleStripDragStart}
     >
-      <div class="dock-region__tabs" use:observeStrip>
+      <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
           variant="strip"
           orientation="horizontal"
@@ -418,14 +418,14 @@
       {/if}
     </div>
 
-    <div class="dock-region__body">
+    <div class="poodle-dock-region__body">
       <slot activeItem={activeItem} />
     </div>
   {/if}
 </section>
 
 <style>
-  .dock-region {
+  .poodle-dock-region {
     position: relative;
     display: grid;
     min-width: 0;
@@ -436,74 +436,74 @@
   }
 
   /* Emphasis variants */
-  .dock-region[data-emphasis="quiet"] {
+  .poodle-dock-region[data-emphasis="quiet"] {
     border-color: transparent;
     background: transparent;
   }
 
-  .dock-region[data-emphasis="strong"] {
+  .poodle-dock-region[data-emphasis="strong"] {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
   }
 
   /* ── Static mode ── */
 
-  .dock-region[data-sizing="static"] {
+  .poodle-dock-region[data-sizing="static"] {
     grid-template-rows: 1fr;
   }
 
-  .dock-region__stack {
+  .poodle-dock-region__stack {
     display: flex;
     min-width: 0;
     min-height: 0;
   }
 
-  .dock-region__stack[data-direction="column"] {
+  .poodle-dock-region__stack[data-direction="column"] {
     flex-direction: column;
   }
 
-  .dock-region__stack[data-direction="row"] {
+  .poodle-dock-region__stack[data-direction="row"] {
     flex-direction: row;
   }
 
-  .dock-region__stack-item {
+  .poodle-dock-region__stack-item {
     flex: 1 1 0;
     min-width: 0;
     min-height: 0;
     cursor: grab;
   }
 
-  .dock-region__stack-item[data-drag-source] {
+  .poodle-dock-region__stack-item[data-drag-source] {
     opacity: 0.4;
   }
 
-  .dock-region__stack-item[data-drop-target] {
+  .poodle-dock-region__stack-item[data-drop-target] {
     box-shadow: inset 0 0 0 0.125rem var(--poodle-color-accent-base);
     border-radius: var(--poodle-radius-control);
   }
 
   /* ── Flexible expanded ── */
 
-  .dock-region[data-sizing="flexible"]:not([data-collapsed]) {
+  .poodle-dock-region[data-sizing="flexible"]:not([data-collapsed]) {
     grid-template-rows: auto minmax(0, 1fr);
   }
 
-  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="left"] {
+  .poodle-dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="left"] {
     border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="right"] {
+  .poodle-dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="right"] {
     border-left: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="top"] {
+  .poodle-dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="top"] {
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="bottom"] {
+  .poodle-dock-region[data-sizing="flexible"]:not([data-collapsed])[data-edge="bottom"] {
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region__strip[data-orientation="horizontal"] {
+  .poodle-dock-region__strip[data-orientation="horizontal"] {
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
@@ -511,62 +511,62 @@
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region__tabs {
+  .poodle-dock-region__tabs {
     flex: 1 1 0;
     min-width: 0;
   }
 
-  .dock-region__strip[data-orientation="horizontal"] :global(.poodle-tabs[data-variant="strip"] .poodle-tabs__list) {
+  .poodle-dock-region__strip[data-orientation="horizontal"] :global(.poodle-tabs[data-variant="strip"] .poodle-tabs__list) {
     border-bottom: 0;
   }
 
   /* Compact mode: icon-only horizontal tabs when strip is too narrow */
-  .dock-region__strip[data-compact] :global(.poodle-tabs__label),
-  .dock-region__strip[data-compact] :global(.poodle-tabs__close) {
+  .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__label),
+  .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__close) {
     display: none;
   }
 
-  .dock-region__strip[data-compact] :global(.poodle-tabs__tab) {
+  .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__tab) {
     padding: 0 0.5rem;
     justify-content: center;
   }
 
-  .dock-region__strip[data-compact] :global(.poodle-tabs__list) {
+  .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__list) {
     overflow: visible;
   }
 
-  .dock-region__body {
+  .poodle-dock-region__body {
     min-height: 0;
     overflow: auto;
   }
 
   /* ── Flexible collapsed (icon-strip) ── */
 
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"] {
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"] {
     grid-template-rows: 1fr;
   }
 
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"] {
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"] {
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
   /* Side docks collapse to narrow icon strip */
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="left"],
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="right"] {
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="left"],
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="right"] {
     width: fit-content;
   }
 
   /* Top/bottom docks collapse to a thin horizontal strip */
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"],
-  .dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"],
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
     height: fit-content;
   }
 
-  .dock-region__strip[data-orientation="vertical"] {
+  .poodle-dock-region__strip[data-orientation="vertical"] {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -575,12 +575,12 @@
     border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs) {
+  .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs) {
     flex: 1 1 0;
     min-height: 0;
   }
 
-  .dock-region__strip[data-orientation="vertical"] > :global(.collapse-toggle) {
+  .poodle-dock-region__strip[data-orientation="vertical"] > :global(.poodle-collapse-toggle) {
     align-self: center;
     padding: var(--poodle-space-panel-y, 0.5rem) 0;
   }
@@ -589,43 +589,43 @@
      The default vertical Tabs uses `grid-template-columns: auto minmax(0,1fr)`
      which sizes the list to content. We need it to fill so the active item's
      accent border sits flush on the strip's right divider. */
-  .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs) {
+  .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs) {
     grid-template-columns: 1fr !important;
   }
 
-  .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__list) {
+  .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__list) {
     border-right: 0 !important;
   }
 
   /* Ensure items' accent border overlaps the strip's border-right */
-  .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
+  .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
     margin-right: -0.0625rem !important;
   }
 
-  .dock-region[data-edge="right"] .dock-region__strip[data-orientation="vertical"] {
+  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] {
     border-right: 0;
     border-left: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .dock-region[data-edge="right"] .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
+  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
     border-right: 0;
     border-left: 0.125rem solid transparent;
     margin-right: 0 !important;
     margin-left: -0.125rem !important;
   }
 
-  .dock-region[data-edge="right"] .dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item[data-selected="true"]) {
+  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item[data-selected="true"]) {
     border-left-color: var(--poodle-color-accent-base);
   }
 
   /* ── Flexible collapsed (hidden) ── */
 
-  .dock-region[data-collapsed][data-collapsed-posture="hidden"] {
+  .poodle-dock-region[data-collapsed][data-collapsed-posture="hidden"] {
     border-color: transparent;
     background: transparent;
   }
 
-  .dock-region__edge-toggle {
+  .poodle-dock-region__edge-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -634,7 +634,7 @@
 
   /* ── Drop zone overlay ── */
 
-  .dock-region__drop-zone {
+  .poodle-dock-region__drop-zone {
     position: absolute;
     inset: 0;
     z-index: 10;

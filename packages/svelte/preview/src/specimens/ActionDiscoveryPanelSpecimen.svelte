@@ -4,9 +4,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Grouped actions">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <ActionDiscoveryPanel
         items={[
           { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
@@ -23,7 +23,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With descriptions and badges">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <ActionDiscoveryPanel
         items={[
           { id: "deploy", title: "Deploy to Production", description: "Push current branch to production environment", badge: "Dangerous", group: "CI/CD" },
@@ -36,15 +36,15 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Empty state">
-    <div class="specimen__frame">
+    <div class="poodle-specimen__frame">
       <ActionDiscoveryPanel items={[]} state="empty" ariaLabel="Empty actions" />
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="specimen__stack">
-        <div class="specimen__frame">
+      <div class="poodle-specimen__stack">
+        <div class="poodle-specimen__frame">
           <ActionDiscoveryPanel
             items={[
               { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
@@ -52,7 +52,7 @@
             ]}
           />
         </div>
-        <div class="specimen__frame">
+        <div class="poodle-specimen__frame">
           <ActionDiscoveryPanel
             items={[
               { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
@@ -67,13 +67,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__frame {
+  .poodle-specimen__frame {
     max-width: 32rem;
     max-height: 20rem;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
@@ -82,7 +82,7 @@
     overflow: hidden;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: grid;
     gap: 0.75rem;
   }

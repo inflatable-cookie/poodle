@@ -4,7 +4,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Inline variant (ready)">
     <PickerShell title="Select a component" description="Browse and select from available components." resultCount={12} variant="inline">
       <Surface padding="sm" border="subtle"><p>Component A</p></Surface>
@@ -19,7 +19,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

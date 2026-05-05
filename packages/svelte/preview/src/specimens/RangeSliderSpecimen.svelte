@@ -7,7 +7,7 @@
   let ageRange: [number, number] = [23, 43];
 </script>
 
-<div class="range-slider-specimen">
+<div class="poodle-range-slider-specimen">
 <SpecimenLayout>
   <SpecimenGroup label="Default">
     <RangeSlider
@@ -47,7 +47,7 @@
 </div>
 
 <style>
-  .range-slider-specimen {
+  .poodle-range-slider-specimen {
     max-width: 20rem;
   }
 </style>

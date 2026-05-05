@@ -87,7 +87,7 @@
 </script>
 
 <label
-  class="switch"
+  class="poodle-switch"
   data-disabled={disabled}
   data-read-only={readOnly}
   data-size={resolvedSize}
@@ -98,7 +98,7 @@
   <input
     {id}
     {name}
-    class="switch__control"
+    class="poodle-switch__control"
     type="checkbox"
     role="switch"
     checked={currentChecked}
@@ -109,20 +109,20 @@
     on:change={handleChange}
   />
   {#if leftLabel}
-    <span class="switch__label switch__label--left">{leftLabel}</span>
+    <span class="poodle-switch__label poodle-switch__label--left">{leftLabel}</span>
   {/if}
-  <span class="switch__track" aria-hidden="true">
-    <span class="switch__thumb"></span>
+  <span class="poodle-switch__track" aria-hidden="true">
+    <span class="poodle-switch__thumb"></span>
   </span>
   {#if rightLabel}
-    <span class="switch__label switch__label--right">{rightLabel}</span>
+    <span class="poodle-switch__label poodle-switch__label--right">{rightLabel}</span>
   {:else if label}
-    <span class="switch__label">{label}</span>
+    <span class="poodle-switch__label">{label}</span>
   {/if}
 </label>
 
 <style>
-  .switch {
+  .poodle-switch {
     --switch-unit: var(--poodle-size-icon-md);
     --poodle-switch-off-color: var(--poodle-color-text-primary);
     --poodle-switch-on-color: var(--poodle-color-accent-base);
@@ -140,16 +140,16 @@
     cursor: pointer;
   }
 
-  .switch[data-disabled="true"] {
+  .poodle-switch[data-disabled="true"] {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .switch[data-read-only="true"] {
+  .poodle-switch[data-read-only="true"] {
     cursor: default;
   }
 
-  .switch__control {
+  .poodle-switch__control {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -161,7 +161,7 @@
     border: 0;
   }
 
-  .switch__track {
+  .poodle-switch__track {
     display: inline-flex;
     align-items: center;
     width: calc(var(--switch-unit) * 2 + 0.125rem);
@@ -177,7 +177,7 @@
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .switch__thumb {
+  .poodle-switch__thumb {
     width: calc(var(--switch-unit) - 0.125rem);
     height: calc(var(--switch-unit) - 0.125rem);
     border-radius: 999px;
@@ -189,123 +189,123 @@
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .switch__control:checked ~ .switch__track {
+  .poodle-switch__control:checked ~ .poodle-switch__track {
     border-color: var(--poodle-switch-on-border);
     background: var(--poodle-switch-on-track);
   }
 
-  .switch__control:checked ~ .switch__track .switch__thumb {
+  .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
     background: var(--poodle-switch-on-thumb);
     transform: translateX(calc(var(--switch-unit) - 0.125rem));
   }
 
-  .switch__control:focus-visible + .switch__track {
+  .poodle-switch__control:focus-visible + .poodle-switch__track {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .switch__label {
+  .poodle-switch__label {
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
   }
 
-  .switch__label--left,
-  .switch__label--right {
+  .poodle-switch__label--left,
+  .poodle-switch__label--right {
     color: var(--poodle-color-text-muted);
     transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .switch:not([data-dual-label]) .switch__label {
+  .poodle-switch:not([data-dual-label]) .poodle-switch__label {
     color: var(--poodle-color-text-primary);
   }
 
-  .switch__control:not(:checked) ~ .switch__label--left {
+  .poodle-switch__control:not(:checked) ~ .poodle-switch__label--left {
     color: var(--poodle-switch-off-color);
   }
 
-  .switch__control:checked ~ .switch__label--right {
+  .poodle-switch__control:checked ~ .poodle-switch__label--right {
     color: var(--poodle-switch-on-color);
   }
 
   /* Density variants */
-  .switch[data-density="compact"] {
+  .poodle-switch[data-density="compact"] {
     gap: 0.25rem;
   }
 
-  .switch[data-density="comfortable"] {
+  .poodle-switch[data-density="comfortable"] {
     gap: var(--poodle-space-inline-md);
   }
 
   /* Size variants — set --switch-unit per size, geometry calcs use it */
-  .switch[data-size="xs"] { --switch-unit: var(--poodle-size-icon-xs); }
-  .switch[data-size="xs"] .switch__track {
+  .poodle-switch[data-size="xs"] { --switch-unit: var(--poodle-size-icon-xs); }
+  .poodle-switch[data-size="xs"] .poodle-switch__track {
     width: calc(var(--switch-unit) * 1.75);
     height: calc(var(--switch-unit) * 0.875);
     padding: 0.0625rem;
   }
 
-  .switch[data-size="xs"] .switch__thumb {
+  .poodle-switch[data-size="xs"] .poodle-switch__thumb {
     width: calc(var(--switch-unit) * 0.75 - 0.125rem);
     height: calc(var(--switch-unit) * 0.75 - 0.125rem);
   }
 
-  .switch[data-size="xs"] .switch__control:checked ~ .switch__track .switch__thumb {
+  .poodle-switch[data-size="xs"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
     transform: translateX(0.5rem);
   }
 
-  .switch[data-size="sm"] { --switch-unit: var(--poodle-size-icon-sm); }
-  .switch[data-size="sm"] .switch__track {
+  .poodle-switch[data-size="sm"] { --switch-unit: var(--poodle-size-icon-sm); }
+  .poodle-switch[data-size="sm"] .poodle-switch__track {
     width: calc(var(--switch-unit) * 1.875);
     height: calc(var(--switch-unit) + 0.125rem);
     padding: 0.09375rem;
   }
 
-  .switch[data-size="sm"] .switch__thumb {
+  .poodle-switch[data-size="sm"] .poodle-switch__thumb {
     width: calc(var(--switch-unit) - 0.1875rem);
     height: calc(var(--switch-unit) - 0.1875rem);
   }
 
-  .switch[data-size="sm"] .switch__control:checked ~ .switch__track .switch__thumb {
+  .poodle-switch[data-size="sm"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
     transform: translateX(0.53125rem);
   }
 
-  .switch[data-size="lg"] { --switch-unit: var(--poodle-size-icon-lg); }
-  .switch[data-size="lg"] .switch__track {
+  .poodle-switch[data-size="lg"] { --switch-unit: var(--poodle-size-icon-lg); }
+  .poodle-switch[data-size="lg"] .poodle-switch__track {
     width: calc(var(--switch-unit) * 2.25 + 0.25rem);
     height: calc(var(--switch-unit) + 0.5rem);
     padding: 0.1875rem;
   }
 
-  .switch[data-size="lg"] .switch__thumb {
+  .poodle-switch[data-size="lg"] .poodle-switch__thumb {
     width: var(--switch-unit);
     height: var(--switch-unit);
   }
 
-  .switch[data-size="lg"] .switch__control:checked ~ .switch__track .switch__thumb {
+  .poodle-switch[data-size="lg"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
     transform: translateX(calc(var(--switch-unit) + 0.0625rem));
   }
 
-  .switch[data-size="xl"] { --switch-unit: var(--poodle-size-icon-xl); }
-  .switch[data-size="xl"] .switch__track {
+  .poodle-switch[data-size="xl"] { --switch-unit: var(--poodle-size-icon-xl); }
+  .poodle-switch[data-size="xl"] .poodle-switch__track {
     width: calc(var(--switch-unit) * 2.5 + 0.375rem);
     height: calc(var(--switch-unit) + 0.75rem);
     padding: 0.25rem;
   }
 
-  .switch[data-size="xl"] .switch__thumb {
+  .poodle-switch[data-size="xl"] .poodle-switch__thumb {
     width: calc(var(--switch-unit) + 0.125rem);
     height: calc(var(--switch-unit) + 0.125rem);
   }
 
-  .switch[data-size="xl"] .switch__control:checked ~ .switch__track .switch__thumb {
+  .poodle-switch[data-size="xl"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
     transform: translateX(1.875rem);
   }
 
   /* Label size variants */
-  .switch[data-size="xs"] .switch__label { font-size: 0.6875rem; }
-  .switch[data-size="sm"] .switch__label { font-size: 0.75rem; }
-  .switch[data-size="lg"] .switch__label { font-size: 0.875rem; }
-  .switch[data-size="xl"] .switch__label { font-size: 0.9375rem; }
+  .poodle-switch[data-size="xs"] .poodle-switch__label { font-size: 0.6875rem; }
+  .poodle-switch[data-size="sm"] .poodle-switch__label { font-size: 0.75rem; }
+  .poodle-switch[data-size="lg"] .poodle-switch__label { font-size: 0.875rem; }
+  .poodle-switch[data-size="xl"] .poodle-switch__label { font-size: 0.9375rem; }
 </style>

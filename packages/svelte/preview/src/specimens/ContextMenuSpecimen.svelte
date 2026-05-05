@@ -19,7 +19,7 @@
 <SpecimenLayout>
   <SpecimenGroup label="Right-click the area below">
     <ContextMenu {items} on:action={(e) => (lastAction = e.detail.value)}>
-      <div class="target-area">
+      <div class="poodle-target-area">
         <p>Right-click here to open context menu</p>
       </div>
     </ContextMenu>
@@ -30,7 +30,7 @@
 
   <svelte:fragment slot="sizes" let:size>
     <ContextMenu {items} {size}>
-      <div class="target-area target-area--small">
+      <div class="poodle-target-area poodle-target-area--small">
         <p>{size.toUpperCase()}</p>
       </div>
     </ContextMenu>
@@ -38,7 +38,7 @@
 
   <svelte:fragment slot="densities" let:density>
     <ContextMenu {items} {density}>
-      <div class="target-area target-area--small">
+      <div class="poodle-target-area poodle-target-area--small">
         <p>{density}</p>
       </div>
     </ContextMenu>
@@ -46,7 +46,7 @@
 </SpecimenLayout>
 
 <style>
-  .target-area {
+  .poodle-target-area {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -55,7 +55,7 @@
     border-radius: 4px;
   }
 
-  .target-area--small {
+  .poodle-target-area--small {
     display: flex;
     align-items: center;
     justify-content: center;

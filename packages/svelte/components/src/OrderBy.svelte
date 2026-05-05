@@ -163,7 +163,7 @@
 <Popover bind:open placement="bottom-start" ariaLabel={ariaLabel}>
   <div
     slot="trigger"
-    class="order-by"
+    class="poodle-order-by"
     role="group"
     aria-label={ariaLabel}
     data-disabled={disabled}
@@ -172,21 +172,21 @@
   >
     <button
       type="button"
-      class="order-by__trigger"
+      class="poodle-order-by__trigger"
       disabled={disabled}
       aria-label={ariaLabel}
     >
-      <span class="order-by__label">Sort by</span>
-      <span class="order-by__summary" data-placeholder={effectiveValue.length === 0}>
+      <span class="poodle-order-by__label">Sort by</span>
+      <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
         {triggerText}
       </span>
-      <span class="order-by__chevron" aria-hidden="true">▾</span>
+      <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
     </button>
 
     {#if effectiveValue.length > 0}
       <button
         type="button"
-        class="order-by__reset"
+        class="poodle-order-by__reset"
         on:click|stopPropagation|preventDefault={clearAll}
         disabled={disabled}
         aria-label="Clear sort"
@@ -202,20 +202,20 @@
     {/if}
   </div>
 
-  <div class="order-by__panel">
+  <div class="poodle-order-by__panel">
     {#if effectiveValue.length > 0}
-      <div class="order-by__list" role="list">
+      <div class="poodle-order-by__list" role="list">
         {#each effectiveValue as item, index (`${item.key}-${index}`)}
           {@const field = fieldMap.get(item.key)}
           <div
-            class="order-by__item"
-            class:order-by__item--dragging={dragIndex === index}
-            class:order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
+            class="poodle-order-by__item"
+            class:poodle-order-by__item--dragging={dragIndex === index}
+            class:poodle-order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
             role="listitem"
           >
             <button
               type="button"
-              class="order-by__drag-handle"
+              class="poodle-order-by__drag-handle"
               draggable={!disabled}
               disabled={disabled}
               aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
@@ -231,7 +231,7 @@
             >
               ⠿
             </button>
-            <span class="order-by__item-label">{field?.label ?? item.key}</span>
+            <span class="poodle-order-by__item-label">{field?.label ?? item.key}</span>
             <IconButton
               icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
               ariaLabel={`${field?.label ?? item.key}: ${item.direction === "asc" ? "ascending" : "descending"}. Click to toggle.`}
@@ -254,11 +254,11 @@
         {/each}
       </div>
     {:else}
-      <p class="order-by__empty">No sort fields</p>
+      <p class="poodle-order-by__empty">No sort fields</p>
     {/if}
 
     {#if canAddMore && availableFields.length > 0}
-      <div class="order-by__add">
+      <div class="poodle-order-by__add">
         <Select
           items={selectItems}
           bind:value={addFieldValue}
@@ -275,17 +275,17 @@
 </Popover>
 
 <style>
-  .order-by {
+  .poodle-order-by {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
   }
 
-  .order-by[data-disabled="true"] {
+  .poodle-order-by[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .order-by__trigger {
+  .poodle-order-by__trigger {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -304,17 +304,17 @@
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .order-by__trigger:hover:not(:disabled) {
+  .poodle-order-by__trigger:hover:not(:disabled) {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
   }
 
-  .order-by__trigger:focus-visible,
-  .order-by__reset:focus-visible {
+  .poodle-order-by__trigger:focus-visible,
+  .poodle-order-by__reset:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .order-by__label {
+  .poodle-order-by__label {
     font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: var(--poodle-typography-label-weight);
@@ -324,7 +324,7 @@
     white-space: nowrap;
   }
 
-  .order-by__summary {
+  .poodle-order-by__summary {
     flex: 1;
     min-width: 0;
     font-size: 0.875rem;
@@ -333,15 +333,15 @@
     text-overflow: ellipsis;
   }
 
-  .order-by__summary[data-placeholder="true"] {
+  .poodle-order-by__summary[data-placeholder="true"] {
     color: var(--poodle-color-text-muted);
   }
 
-  .order-by__chevron {
+  .poodle-order-by__chevron {
     color: var(--poodle-color-text-secondary);
   }
 
-  .order-by__reset {
+  .poodle-order-by__reset {
     display: inline-flex;
     padding: 0;
     border: 0;
@@ -349,7 +349,7 @@
     cursor: pointer;
   }
 
-  .order-by__panel {
+  .poodle-order-by__panel {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
@@ -358,13 +358,13 @@
     padding: 0.375rem;
   }
 
-  .order-by__list {
+  .poodle-order-by__list {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .order-by__item {
+  .poodle-order-by__item {
     display: flex;
     align-items: center;
     gap: 0.375rem;
@@ -374,25 +374,25 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 90%, var(--poodle-color-background-elevated));
   }
 
-  .order-by__item:hover {
+  .poodle-order-by__item:hover {
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 60%, transparent);
   }
 
-  .order-by__item:focus-visible {
+  .poodle-order-by__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: -0.0625rem;
   }
 
-  .order-by__item--dragging {
+  .poodle-order-by__item--dragging {
     opacity: 0.65;
   }
 
-  .order-by__item--drop-target {
+  .poodle-order-by__item--drop-target {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
     box-shadow: inset 0.125rem 0 0 var(--poodle-color-accent-base);
   }
 
-  .order-by__item-label {
+  .poodle-order-by__item-label {
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -402,7 +402,7 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .order-by__drag-handle {
+  .poodle-order-by__drag-handle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -418,43 +418,43 @@
     flex-shrink: 0;
   }
 
-  .order-by__drag-handle:disabled {
+  .poodle-order-by__drag-handle:disabled {
     cursor: not-allowed;
   }
 
-  .order-by__empty {
+  .poodle-order-by__empty {
     color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
     margin: 0;
     padding: 0.25rem 0;
   }
 
-  .order-by__add {
+  .poodle-order-by__add {
     display: flex;
     align-items: center;
   }
 
-  .order-by[data-size="xs"] .order-by__trigger { min-height: 1.625rem; padding: 0 0.5rem; }
-  .order-by[data-size="xs"] .order-by__label { font-size: 0.5625rem; }
-  .order-by[data-size="xs"] .order-by__summary { font-size: 0.6875rem; }
+  .poodle-order-by[data-size="xs"] .poodle-order-by__trigger { min-height: 1.625rem; padding: 0 0.5rem; }
+  .poodle-order-by[data-size="xs"] .poodle-order-by__label { font-size: 0.5625rem; }
+  .poodle-order-by[data-size="xs"] .poodle-order-by__summary { font-size: 0.6875rem; }
 
-  .order-by[data-size="sm"] .order-by__trigger { min-height: 1.75rem; }
-  .order-by[data-size="sm"] .order-by__label { font-size: 0.625rem; }
-  .order-by[data-size="sm"] .order-by__summary { font-size: 0.75rem; }
+  .poodle-order-by[data-size="sm"] .poodle-order-by__trigger { min-height: 1.75rem; }
+  .poodle-order-by[data-size="sm"] .poodle-order-by__label { font-size: 0.625rem; }
+  .poodle-order-by[data-size="sm"] .poodle-order-by__summary { font-size: 0.75rem; }
 
-  .order-by[data-size="lg"] .order-by__trigger { min-height: 2.25rem; }
-  .order-by[data-size="lg"] .order-by__label { font-size: 0.8125rem; }
-  .order-by[data-size="lg"] .order-by__summary { font-size: 0.9375rem; }
+  .poodle-order-by[data-size="lg"] .poodle-order-by__trigger { min-height: 2.25rem; }
+  .poodle-order-by[data-size="lg"] .poodle-order-by__label { font-size: 0.8125rem; }
+  .poodle-order-by[data-size="lg"] .poodle-order-by__summary { font-size: 0.9375rem; }
 
-  .order-by[data-size="xl"] .order-by__trigger { min-height: 2.5rem; }
-  .order-by[data-size="xl"] .order-by__label { font-size: 0.875rem; }
-  .order-by[data-size="xl"] .order-by__summary { font-size: 1rem; }
+  .poodle-order-by[data-size="xl"] .poodle-order-by__trigger { min-height: 2.5rem; }
+  .poodle-order-by[data-size="xl"] .poodle-order-by__label { font-size: 0.875rem; }
+  .poodle-order-by[data-size="xl"] .poodle-order-by__summary { font-size: 1rem; }
 
-  .order-by[data-density="compact"] .order-by__trigger {
+  .poodle-order-by[data-density="compact"] .poodle-order-by__trigger {
     gap: 0.375rem;
   }
 
-  .order-by[data-density="comfortable"] .order-by__trigger {
+  .poodle-order-by[data-density="comfortable"] .poodle-order-by__trigger {
     gap: 0.625rem;
   }
 </style>

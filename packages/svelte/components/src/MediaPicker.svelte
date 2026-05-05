@@ -74,7 +74,7 @@
   on:openChange={handleOpenChange}
 >
   <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
-    <div class="media-picker" data-size={resolvedSize} data-density={resolvedDensity}>
+    <div class="poodle-media-picker" data-size={resolvedSize} data-density={resolvedDensity}>
       <Tabs
         items={tabItems}
         value={activeTab}
@@ -82,7 +82,7 @@
       />
 
       {#if activeTab === "browse"}
-        <div class="media-picker__search">
+        <div class="poodle-media-picker__search">
           <TextInput
             id="media-picker-search"
             bind:value={searchQuery}
@@ -91,23 +91,23 @@
         </div>
 
         {#if filteredItems.length === 0}
-          <div class="media-picker__empty">
+          <div class="poodle-media-picker__empty">
             <p>{emptyMessage}</p>
           </div>
         {:else}
-          <div class="media-picker__grid" role="listbox" aria-label="Media items">
+          <div class="poodle-media-picker__grid" role="listbox" aria-label="Media items">
             {#each filteredItems as item (item.id)}
               <button
                 type="button"
-                class="media-picker__item"
+                class="poodle-media-picker__item"
                 role="option"
                 aria-selected="false"
                 on:click={() => handleSelect(item)}
               >
                 {#if item.thumbnailUrl}
-                  <img class="media-picker__thumb" src={item.thumbnailUrl} alt="" />
+                  <img class="poodle-media-picker__thumb" src={item.thumbnailUrl} alt="" />
                 {:else}
-                  <div class="media-picker__thumb media-picker__thumb--placeholder">
+                  <div class="poodle-media-picker__thumb poodle-media-picker__thumb--placeholder">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <rect x="3" y="3" width="18" height="18" rx="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
@@ -115,13 +115,13 @@
                     </svg>
                   </div>
                 {/if}
-                <span class="media-picker__label">{item.label}</span>
+                <span class="poodle-media-picker__label">{item.label}</span>
               </button>
             {/each}
           </div>
         {/if}
       {:else}
-        <div class="media-picker__upload">
+        <div class="poodle-media-picker__upload">
           <FileUpload
             {accept}
             maxSize={maxFileSize}
@@ -136,7 +136,7 @@
 </Dialog>
 
 <style>
-  .media-picker {
+  .poodle-media-picker {
     --poodle-media-picker-stack-gap: var(--poodle-space-stack-sm, 0.5rem);
     --poodle-media-picker-search-offset: 0.25rem;
     --poodle-media-picker-grid-gap: 0.375rem;
@@ -149,43 +149,43 @@
     min-height: 20rem;
   }
 
-  .media-picker[data-size="xs"] {
+  .poodle-media-picker[data-size="xs"] {
     --poodle-media-picker-thumb-size: 3.5rem;
     --poodle-media-picker-grid-min: 4.75rem;
   }
 
-  .media-picker[data-size="sm"] {
+  .poodle-media-picker[data-size="sm"] {
     --poodle-media-picker-thumb-size: 4.25rem;
     --poodle-media-picker-grid-min: 5.25rem;
   }
 
-  .media-picker[data-size="lg"] {
+  .poodle-media-picker[data-size="lg"] {
     --poodle-media-picker-thumb-size: 5rem;
     --poodle-media-picker-grid-min: 6rem;
   }
 
-  .media-picker[data-size="xl"] {
+  .poodle-media-picker[data-size="xl"] {
     --poodle-media-picker-thumb-size: 5.5rem;
     --poodle-media-picker-grid-min: 6.5rem;
   }
 
-  .media-picker[data-density="compact"] {
+  .poodle-media-picker[data-density="compact"] {
     --poodle-media-picker-search-offset: 0.125rem;
     --poodle-media-picker-grid-gap: 0.25rem;
     --poodle-media-picker-item-pad: 0.25rem;
   }
 
-  .media-picker[data-density="comfortable"] {
+  .poodle-media-picker[data-density="comfortable"] {
     --poodle-media-picker-search-offset: 0.375rem;
     --poodle-media-picker-grid-gap: 0.5rem;
     --poodle-media-picker-item-pad: 0.5rem;
   }
 
-  .media-picker__search {
+  .poodle-media-picker__search {
     margin-top: var(--poodle-media-picker-search-offset);
   }
 
-  .media-picker__grid {
+  .poodle-media-picker__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(var(--poodle-media-picker-grid-min), 1fr));
     gap: var(--poodle-media-picker-grid-gap);
@@ -193,7 +193,7 @@
     overflow-y: auto;
   }
 
-  .media-picker__item {
+  .poodle-media-picker__item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -207,34 +207,34 @@
     transition: border-color 0.1s, background 0.1s;
   }
 
-  .media-picker__item:hover,
-  .media-picker__item:focus-visible {
+  .poodle-media-picker__item:hover,
+  .poodle-media-picker__item:focus-visible {
     border-color: var(--poodle-color-border-focus, #888);
     background: var(--poodle-color-background-panel, #1a1a1a);
     outline: none;
   }
 
-  .media-picker__thumb {
+  .poodle-media-picker__thumb {
     width: var(--poodle-media-picker-thumb-size);
     height: var(--poodle-media-picker-thumb-size);
     border-radius: 0.25rem;
     object-fit: cover;
   }
 
-  .media-picker__thumb--placeholder {
+  .poodle-media-picker__thumb--placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--poodle-color-background-panel, #1a1a1a);
   }
 
-  .media-picker__thumb--placeholder svg {
+  .poodle-media-picker__thumb--placeholder svg {
     width: 1.5rem;
     height: 1.5rem;
     color: var(--poodle-color-text-tertiary, #666);
   }
 
-  .media-picker__label {
+  .poodle-media-picker__label {
     font-size: var(--poodle-typography-label-size);
     color: var(--poodle-color-text-secondary, #999);
     white-space: nowrap;
@@ -243,20 +243,20 @@
     max-width: 100%;
   }
 
-  .media-picker__empty {
+  .poodle-media-picker__empty {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 10rem;
   }
 
-  .media-picker__empty p {
+  .poodle-media-picker__empty p {
     margin: 0;
     color: var(--poodle-color-text-secondary, #999);
     font-size: 0.875rem;
   }
 
-  .media-picker__upload {
+  .poodle-media-picker__upload {
     margin-top: var(--poodle-media-picker-search-offset);
   }
 </style>

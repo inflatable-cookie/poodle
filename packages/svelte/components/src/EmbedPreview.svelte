@@ -25,14 +25,14 @@
   }
 </script>
 
-<div class="embed-preview">
+<div class="poodle-embed-preview">
   {#if loading}
-    <div class="embed-preview__loading">
+    <div class="poodle-embed-preview__loading">
       <Skeleton shape="block" />
-      <span class="embed-preview__loading-text">Loading preview...</span>
+      <span class="poodle-embed-preview__loading-text">Loading preview...</span>
     </div>
   {:else if error}
-    <div class="embed-preview__error">
+    <div class="poodle-embed-preview__error">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="12" cy="12" r="10" />
         <path d="M12 8v4m0 4h.01" stroke-linecap="round" />
@@ -40,7 +40,7 @@
       <span>{error}</span>
     </div>
   {:else if !parsed}
-    <div class="embed-preview__empty">
+    <div class="poodle-embed-preview__empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="2" y="4" width="20" height="16" rx="2" />
         <path d="M10 9l5 3-5 3V9z" />
@@ -49,7 +49,7 @@
     </div>
   {:else if embedUrl}
     <div
-      class="embed-preview__container"
+      class="poodle-embed-preview__container"
       style={effectiveAspectRatio !== "auto" ? `aspect-ratio: ${effectiveAspectRatio}` : ""}
     >
       <iframe
@@ -59,18 +59,18 @@
         allowfullscreen
         loading="lazy"
         sandbox="allow-scripts allow-same-origin allow-popups"
-        class="embed-preview__iframe"
+        class="poodle-embed-preview__iframe"
       ></iframe>
     </div>
   {:else if parsed.originalEmbed}
     <div
-      class="embed-preview__container"
+      class="poodle-embed-preview__container"
       style={effectiveAspectRatio !== "auto" ? `aspect-ratio: ${effectiveAspectRatio}` : ""}
     >
       {@html parsed.originalEmbed}
     </div>
   {:else}
-    <div class="embed-preview__fallback">
+    <div class="poodle-embed-preview__fallback">
       <a href={parsed.originalUrl} target="_blank" rel="noopener noreferrer">
         {parsed.originalUrl ?? parsed.id}
       </a>
@@ -79,18 +79,18 @@
 </div>
 
 <style>
-  .embed-preview {
+  .poodle-embed-preview {
     border-radius: var(--poodle-radius-surface, 0.5rem);
     overflow: hidden;
   }
 
-  .embed-preview__container {
+  .poodle-embed-preview__container {
     position: relative;
     width: 100%;
     background: var(--poodle-color-background-panel, #1a1a1a);
   }
 
-  .embed-preview__iframe {
+  .poodle-embed-preview__iframe {
     position: absolute;
     top: 0;
     left: 0;
@@ -99,14 +99,14 @@
     border: 0;
   }
 
-  .embed-preview__container:not([style*="aspect-ratio"]) .embed-preview__iframe {
+  .poodle-embed-preview__container:not([style*="aspect-ratio"]) .poodle-embed-preview__iframe {
     position: static;
     height: 10rem;
   }
 
-  .embed-preview__loading,
-  .embed-preview__error,
-  .embed-preview__empty {
+  .poodle-embed-preview__loading,
+  .poodle-embed-preview__error,
+  .poodle-embed-preview__empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -118,35 +118,35 @@
     border-radius: var(--poodle-radius-surface, 0.5rem);
   }
 
-  .embed-preview__error svg,
-  .embed-preview__empty svg {
+  .poodle-embed-preview__error svg,
+  .poodle-embed-preview__empty svg {
     width: 2rem;
     height: 2rem;
     color: var(--poodle-color-text-tertiary, #666);
   }
 
-  .embed-preview__loading-text {
+  .poodle-embed-preview__loading-text {
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary, #999);
   }
 
-  .embed-preview__error span,
-  .embed-preview__empty span {
+  .poodle-embed-preview__error span,
+  .poodle-embed-preview__empty span {
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary, #999);
   }
 
-  .embed-preview__error svg {
+  .poodle-embed-preview__error svg {
     color: var(--poodle-color-text-danger, #ef4444);
   }
 
-  .embed-preview__fallback {
+  .poodle-embed-preview__fallback {
     padding: 0.75rem 1rem;
     background: var(--poodle-color-background-panel, #1a1a1a);
     border-radius: var(--poodle-radius-surface, 0.5rem);
   }
 
-  .embed-preview__fallback a {
+  .poodle-embed-preview__fallback a {
     color: var(--poodle-color-accent-default, #6366f1);
     font-size: 0.8125rem;
     word-break: break-all;

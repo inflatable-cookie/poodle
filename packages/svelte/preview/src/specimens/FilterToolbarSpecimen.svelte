@@ -29,7 +29,7 @@
   let collapsed2 = true;
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Responsive grid layout">
     <FilterToolbar summaryText="Showing 24 of 156 items" ariaLabel="Item filters">
       <TextInput id="filter-search" type="search" placeholder="Search…" ariaLabel="Search items" />
@@ -40,7 +40,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       {#each controlSizes as size}
         <FilterToolbar summaryText="Toolbar at {size}" {size} ariaLabel="Filter toolbar at {size}">
           <TextInput id="size-search-{size}" type="search" placeholder="Search…" ariaLabel="Search" />
@@ -94,13 +94,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;

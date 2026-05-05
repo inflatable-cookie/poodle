@@ -61,37 +61,37 @@
 </script>
 
 <div
-  class="accordion"
+  class="poodle-accordion"
   role={selectionMode === "multiple" ? "group" : undefined}
   aria-label={ariaLabel ?? undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
 >
   {#each items as item (item.value)}
-    <section class="accordion__item" data-open={openValues.includes(item.value)}>
-      <h3 class="accordion__heading">
+    <section class="poodle-accordion__item" data-open={openValues.includes(item.value)}>
+      <h3 class="poodle-accordion__heading">
         <button
           type="button"
-          class="accordion__trigger"
+          class="poodle-accordion__trigger"
           id={`poodle-accordion-trigger-${accordionId}-${item.value}`}
           disabled={item.disabled === true}
           aria-expanded={openValues.includes(item.value) ? "true" : "false"}
           aria-controls={`poodle-accordion-panel-${accordionId}-${item.value}`}
           on:click={() => toggle(item.value)}
         >
-          <span class="accordion__summary">
-            <span class="accordion__title">{item.label}</span>
+          <span class="poodle-accordion__summary">
+            <span class="poodle-accordion__title">{item.label}</span>
             {#if item.description}
-              <span class="accordion__description">{item.description}</span>
+              <span class="poodle-accordion__description">{item.description}</span>
             {/if}
           </span>
-          <span class="accordion__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
+          <span class="poodle-accordion__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
         </button>
       </h3>
 
       {#if openValues.includes(item.value)}
         <div
-          class="accordion__panel"
+          class="poodle-accordion__panel"
           id={`poodle-accordion-panel-${accordionId}-${item.value}`}
           role="region"
           aria-labelledby={`poodle-accordion-trigger-${accordionId}-${item.value}`}
@@ -105,13 +105,13 @@
 </div>
 
 <style>
-  .accordion {
+  .poodle-accordion {
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
   }
 
-  .accordion__item {
+  .poodle-accordion__item {
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
@@ -122,11 +122,11 @@
     box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent);
   }
 
-  .accordion__heading {
+  .poodle-accordion__heading {
     margin: 0;
   }
 
-  .accordion__trigger {
+  .poodle-accordion__trigger {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -141,37 +141,37 @@
     font: inherit;
   }
 
-  .accordion__trigger:disabled {
+  .poodle-accordion__trigger:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .accordion__trigger:focus-visible {
+  .poodle-accordion__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
   }
 
-  .accordion__summary {
+  .poodle-accordion__summary {
     display: grid;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
-  .accordion__title {
+  .poodle-accordion__title {
     font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.2;
   }
 
-  .accordion__description {
+  .poodle-accordion__description {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.45;
   }
 
-  .accordion__indicator {
+  .poodle-accordion__indicator {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
@@ -179,48 +179,48 @@
     transition: transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .accordion__item[data-open="true"] .accordion__indicator {
+  .poodle-accordion__item[data-open="true"] .poodle-accordion__indicator {
     transform: rotate(180deg);
   }
 
-  .accordion__panel {
+  .poodle-accordion__panel {
     min-width: 0;
   }
 
   /* Size variants */
-  .accordion[data-size="xs"] .accordion__title {
+  .poodle-accordion[data-size="xs"] .poodle-accordion__title {
     font-size: 0.8125rem;
   }
 
-  .accordion[data-size="xs"] .accordion__description {
+  .poodle-accordion[data-size="xs"] .poodle-accordion__description {
     font-size: 0.6875rem;
   }
 
-  .accordion[data-size="sm"] .accordion__title {
+  .poodle-accordion[data-size="sm"] .poodle-accordion__title {
     font-size: 0.875rem;
   }
 
-  .accordion[data-size="sm"] .accordion__description {
+  .poodle-accordion[data-size="sm"] .poodle-accordion__description {
     font-size: 0.75rem;
   }
 
-  .accordion[data-size="lg"] .accordion__title {
+  .poodle-accordion[data-size="lg"] .poodle-accordion__title {
     font-size: 1.0625rem;
   }
 
-  .accordion[data-size="lg"] .accordion__description {
+  .poodle-accordion[data-size="lg"] .poodle-accordion__description {
     font-size: 0.875rem;
   }
 
-  .accordion[data-size="xl"] .accordion__title {
+  .poodle-accordion[data-size="xl"] .poodle-accordion__title {
     font-size: 1.125rem;
   }
 
-  .accordion[data-size="xl"] .accordion__description {
+  .poodle-accordion[data-size="xl"] .poodle-accordion__description {
     font-size: 0.9375rem;
   }
 
   /* Density variants */
-  .accordion[data-density="compact"] .accordion__item { padding-inline: 0.5rem; }
-  .accordion[data-density="comfortable"] .accordion__item { padding-inline: 1rem; }
+  .poodle-accordion[data-density="compact"] .poodle-accordion__item { padding-inline: 0.5rem; }
+  .poodle-accordion[data-density="comfortable"] .poodle-accordion__item { padding-inline: 1rem; }
 </style>

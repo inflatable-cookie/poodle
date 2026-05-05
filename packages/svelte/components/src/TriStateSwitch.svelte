@@ -58,7 +58,7 @@
 </script>
 
 <div
-  class="tri-state-switch"
+  class="poodle-tri-state-switch"
   role="radiogroup"
   aria-label={ariaLabel}
   aria-disabled={disabled ? "true" : undefined}
@@ -68,16 +68,16 @@
   data-disabled={disabled}
   style={triStateStyles}
 >
-  <span class="tri-state-switch__selection" aria-hidden="true"></span>
+  <span class="poodle-tri-state-switch__selection" aria-hidden="true"></span>
 
   {#each orderedValues as optionValue}
     <label
-      class="tri-state-switch__option"
+      class="poodle-tri-state-switch__option"
       data-state={optionValue}
       data-selected={value === optionValue}
     >
       <input
-        class="tri-state-switch__control"
+        class="poodle-tri-state-switch__control"
         type="radio"
         name={groupName}
         checked={value === optionValue}
@@ -85,13 +85,13 @@
         aria-label={options[optionValue]}
         on:change={() => handleSelect(optionValue)}
       />
-      <span class="tri-state-switch__segment">{options[optionValue]}</span>
+      <span class="poodle-tri-state-switch__segment">{options[optionValue]}</span>
     </label>
   {/each}
 </div>
 
 <style>
-  .tri-state-switch {
+  .poodle-tri-state-switch {
     --poodle-tri-state-excluded-color: var(--poodle-color-status-danger);
     --poodle-tri-state-default-color: var(--poodle-color-text-primary);
     --poodle-tri-state-included-color: var(--poodle-color-status-success);
@@ -115,51 +115,51 @@
     isolation: isolate;
   }
 
-  .tri-state-switch[data-size="xs"] {
+  .poodle-tri-state-switch[data-size="xs"] {
     --poodle-tri-state-height: 1.5rem;
     --poodle-tri-state-min-width: 3.75rem;
   }
 
-  .tri-state-switch[data-size="sm"] {
+  .poodle-tri-state-switch[data-size="sm"] {
     --poodle-tri-state-height: 1.75rem;
     --poodle-tri-state-min-width: 4rem;
   }
 
-  .tri-state-switch[data-size="md"] {
+  .poodle-tri-state-switch[data-size="md"] {
     --poodle-tri-state-height: 2.25rem;
     --poodle-tri-state-min-width: 4.5rem;
   }
 
-  .tri-state-switch[data-size="lg"] {
+  .poodle-tri-state-switch[data-size="lg"] {
     --poodle-tri-state-height: 2.75rem;
     --poodle-tri-state-min-width: 5.25rem;
   }
 
-  .tri-state-switch[data-size="xl"] {
+  .poodle-tri-state-switch[data-size="xl"] {
     --poodle-tri-state-height: 3.25rem;
     --poodle-tri-state-min-width: 6rem;
   }
 
-  .tri-state-switch[data-density="compact"] {
+  .poodle-tri-state-switch[data-density="compact"] {
     --poodle-tri-state-x: 0.5rem;
     --poodle-tri-state-track-inset: 0.0625rem;
   }
 
-  .tri-state-switch[data-density="default"] {
+  .poodle-tri-state-switch[data-density="default"] {
     --poodle-tri-state-x: 0.75rem;
     --poodle-tri-state-track-inset: 0.125rem;
   }
 
-  .tri-state-switch[data-density="comfortable"] {
+  .poodle-tri-state-switch[data-density="comfortable"] {
     --poodle-tri-state-x: 1rem;
     --poodle-tri-state-track-inset: 0.1875rem;
   }
 
-  .tri-state-switch[data-disabled="true"] {
+  .poodle-tri-state-switch[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .tri-state-switch__selection {
+  .poodle-tri-state-switch__selection {
     position: absolute;
     top: var(--poodle-tri-state-track-inset);
     bottom: var(--poodle-tri-state-track-inset);
@@ -179,32 +179,32 @@
     z-index: 0;
   }
 
-  .tri-state-switch[data-state="excluded"] .tri-state-switch__selection {
+  .poodle-tri-state-switch[data-state="excluded"] .poodle-tri-state-switch__selection {
     background: var(--poodle-tri-state-excluded-track);
     border-color: color-mix(in srgb, var(--poodle-tri-state-excluded-color) 58%, var(--poodle-color-border-default));
   }
 
-  .tri-state-switch[data-state="default"] .tri-state-switch__selection {
+  .poodle-tri-state-switch[data-state="default"] .poodle-tri-state-switch__selection {
     background: var(--poodle-tri-state-default-track);
     border-color: var(--poodle-color-border-default);
   }
 
-  .tri-state-switch[data-state="included"] .tri-state-switch__selection {
+  .poodle-tri-state-switch[data-state="included"] .poodle-tri-state-switch__selection {
     background: var(--poodle-tri-state-included-track);
     border-color: color-mix(in srgb, var(--poodle-tri-state-included-color) 58%, var(--poodle-color-border-default));
   }
 
-  .tri-state-switch__option {
+  .poodle-tri-state-switch__option {
     position: relative;
     z-index: 1;
     cursor: pointer;
   }
 
-  .tri-state-switch[data-disabled="true"] .tri-state-switch__option {
+  .poodle-tri-state-switch[data-disabled="true"] .poodle-tri-state-switch__option {
     cursor: not-allowed;
   }
 
-  .tri-state-switch__control {
+  .poodle-tri-state-switch__control {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -216,7 +216,7 @@
     border: 0;
   }
 
-  .tri-state-switch__segment {
+  .poodle-tri-state-switch__segment {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -234,23 +234,23 @@
       opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .tri-state-switch__option[data-selected="true"] .tri-state-switch__segment {
+  .poodle-tri-state-switch__option[data-selected="true"] .poodle-tri-state-switch__segment {
     color: var(--poodle-color-text-primary);
   }
 
-  .tri-state-switch__option[data-state="excluded"][data-selected="true"] .tri-state-switch__segment {
+  .poodle-tri-state-switch__option[data-state="excluded"][data-selected="true"] .poodle-tri-state-switch__segment {
     color: var(--poodle-tri-state-excluded-color);
   }
 
-  .tri-state-switch__option[data-state="default"][data-selected="true"] .tri-state-switch__segment {
+  .poodle-tri-state-switch__option[data-state="default"][data-selected="true"] .poodle-tri-state-switch__segment {
     color: var(--poodle-color-text-primary);
   }
 
-  .tri-state-switch__option[data-state="included"][data-selected="true"] .tri-state-switch__segment {
+  .poodle-tri-state-switch__option[data-state="included"][data-selected="true"] .poodle-tri-state-switch__segment {
     color: var(--poodle-tri-state-included-color);
   }
 
-  .tri-state-switch__control:focus-visible + .tri-state-switch__segment {
+  .poodle-tri-state-switch__control:focus-visible + .poodle-tri-state-switch__segment {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }

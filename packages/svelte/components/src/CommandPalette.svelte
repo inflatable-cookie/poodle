@@ -102,7 +102,7 @@
 
     const focusableElements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        '.command-palette button:not([disabled]), .command-palette input:not([disabled]), .command-palette [tabindex]:not([tabindex="-1"])',
+        '.poodle-command-palette button:not([disabled]), .poodle-command-palette input:not([disabled]), .poodle-command-palette [tabindex]:not([tabindex="-1"])',
       ),
     ).filter((el) => !el.hasAttribute("disabled"));
 
@@ -169,10 +169,10 @@
 
 {#if open}
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-  <div class="command-palette__overlay" aria-hidden="true" on:click={close}></div>
+  <div class="poodle-command-palette__overlay" aria-hidden="true" on:click={close}></div>
   <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
     <div
-      class="command-palette"
+      class="poodle-command-palette"
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel ?? title}
@@ -180,24 +180,24 @@
       data-size={resolvedSize}
       data-density={resolvedDensity}
     >
-      <div class="command-palette__header">
+      <div class="poodle-command-palette__header">
         <div>
           <h3>{title}</h3>
           {#if description}
             <p id="command-palette-description">{description}</p>
           {/if}
         </div>
-        <div class="command-palette__meta">
+        <div class="poodle-command-palette__meta">
           {#if invocationHint}
-            <span class="command-palette__hint">{invocationHint}</span>
+            <span class="poodle-command-palette__hint">{invocationHint}</span>
           {/if}
-          <button type="button" class="command-palette__close" aria-label="Close command palette" on:click={close}>
+          <button type="button" class="poodle-command-palette__close" aria-label="Close command palette" on:click={close}>
             <Icon name="x" />
           </button>
         </div>
       </div>
 
-      <div class="command-palette__query">
+      <div class="poodle-command-palette__query">
         <TextInput
           id={queryInputId}
           type="search"
@@ -216,7 +216,7 @@
         />
       </div>
 
-      <p id={statusId} class="command-palette__status" role="status" aria-live="polite" aria-atomic="true">
+      <p id={statusId} class="poodle-command-palette__status" role="status" aria-live="polite" aria-atomic="true">
         {paletteStatus}
       </p>
 
@@ -239,7 +239,7 @@
 {/if}
 
 <style>
-  .command-palette__overlay {
+  .poodle-command-palette__overlay {
     position: fixed;
     inset: 0;
     background: color-mix(in srgb, black 44%, transparent);
@@ -247,7 +247,7 @@
     z-index: 40;
   }
 
-  .command-palette {
+  .poodle-command-palette {
     --poodle-command-palette-hint-height: 1.5rem;
     --poodle-command-palette-hint-x: 0.5rem;
     --poodle-command-palette-close-size: 1.75rem;
@@ -271,59 +271,59 @@
     z-index: 41;
   }
 
-  .command-palette[data-size="xs"] {
+  .poodle-command-palette[data-size="xs"] {
     --poodle-command-palette-hint-height: 1.25rem;
     --poodle-command-palette-hint-x: 0.375rem;
     --poodle-command-palette-close-size: 1.5rem;
   }
 
-  .command-palette[data-size="sm"] {
+  .poodle-command-palette[data-size="sm"] {
     --poodle-command-palette-hint-height: 1.5rem;
     --poodle-command-palette-close-size: 1.75rem;
   }
 
-  .command-palette[data-size="lg"] {
+  .poodle-command-palette[data-size="lg"] {
     --poodle-command-palette-hint-height: 1.75rem;
     --poodle-command-palette-hint-x: 0.625rem;
     --poodle-command-palette-close-size: 2rem;
   }
 
-  .command-palette[data-size="xl"] {
+  .poodle-command-palette[data-size="xl"] {
     --poodle-command-palette-hint-height: 2rem;
     --poodle-command-palette-hint-x: 0.75rem;
     --poodle-command-palette-close-size: 2.25rem;
   }
 
-  .command-palette__header {
+  .poodle-command-palette__header {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--poodle-space-inline-md);
     align-items: start;
   }
 
-  .command-palette__header h3,
-  .command-palette__header p {
+  .poodle-command-palette__header h3,
+  .poodle-command-palette__header p {
     margin: 0;
   }
 
-  .command-palette__header h3 {
+  .poodle-command-palette__header h3 {
     font-size: 1.375rem;
     line-height: 1.2;
   }
 
-  .command-palette__header p {
+  .poodle-command-palette__header p {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .command-palette__meta {
+  .poodle-command-palette__meta {
     display: flex;
     gap: var(--poodle-space-inline-sm);
     align-items: center;
   }
 
-  .command-palette__hint {
+  .poodle-command-palette__hint {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -336,7 +336,7 @@
     font-size: var(--poodle-typography-label-size);
   }
 
-  .command-palette__close {
+  .poodle-command-palette__close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -351,24 +351,24 @@
     font: inherit;
   }
 
-  .command-palette__close:hover {
+  .poodle-command-palette__close:hover {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .command-palette__close:focus-visible {
+  .poodle-command-palette__close:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .command-palette__status {
+  .poodle-command-palette__status {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  :global([data-theme="light"]) .command-palette {
+  :global([data-theme="light"]) .poodle-command-palette {
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 24%, transparent);
     box-shadow:
       0 1.125rem 2.75rem rgba(49, 66, 85, 0.1),
@@ -376,17 +376,17 @@
   }
 
   @media (max-width: 45rem) {
-    .command-palette {
+    .poodle-command-palette {
       width: min(100vw - 1.25rem, 45rem);
       max-height: calc(100vh - 1.25rem);
       padding: 1rem;
     }
 
-    .command-palette__header {
+    .poodle-command-palette__header {
       grid-template-columns: 1fr;
     }
 
-    .command-palette__meta {
+    .poodle-command-palette__meta {
       justify-content: flex-start;
     }
   }

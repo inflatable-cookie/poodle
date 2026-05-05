@@ -54,23 +54,23 @@
 
 <SpecimenLayout>
   <Surface tone="panel" border="subtle" padding="md">
-    <div class="specimen">
-      <div class="specimen__row">
+    <div class="poodle-specimen">
+      <div class="poodle-specimen__row">
         <Eyebrow>Native</Eyebrow>
-        <div class="specimen__field">
+        <div class="poodle-specimen__field">
           <Select
             options={fruitOptions}
             placeholder="Choose a fruit"
             ariaLabel="Fruit selection"
             on:valueChange={(e) => (selectedFruit = e.detail.value)}
           />
-          {#if selectedFruit}<span class="specimen__value">{selectedFruit}</span>{/if}
+          {#if selectedFruit}<span class="poodle-specimen__value">{selectedFruit}</span>{/if}
         </div>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Custom dropdown</Eyebrow>
-        <div class="specimen__field">
+        <div class="poodle-specimen__field">
           <Select
             options={richOptions}
             placeholder="Choose a country"
@@ -78,13 +78,13 @@
             ariaLabel="Country selection"
             on:valueChange={(e) => (selectedCountry = e.detail.value)}
           />
-          {#if selectedCountry}<span class="specimen__value">{selectedCountry}</span>{/if}
+          {#if selectedCountry}<span class="poodle-specimen__value">{selectedCountry}</span>{/if}
         </div>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Searchable</Eyebrow>
-        <div class="specimen__field">
+        <div class="poodle-specimen__field">
           <Select
             options={frameworkOptions}
             placeholder="Search frameworks..."
@@ -92,13 +92,13 @@
             ariaLabel="Framework search"
             on:valueChange={(e) => (selectedFramework = e.detail.value)}
           />
-          {#if selectedFramework}<span class="specimen__value">{selectedFramework}</span>{/if}
+          {#if selectedFramework}<span class="poodle-specimen__value">{selectedFramework}</span>{/if}
         </div>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Freeform</Eyebrow>
-        <div class="specimen__field">
+        <div class="poodle-specimen__field">
           <Select
             options={frameworkOptions}
             placeholder="Type or select..."
@@ -107,11 +107,11 @@
             ariaLabel="Freeform"
             on:valueChange={(e) => (freeformValue = e.detail.value)}
           />
-          {#if freeformValue}<span class="specimen__value">{freeformValue}</span>{/if}
+          {#if freeformValue}<span class="poodle-specimen__value">{freeformValue}</span>{/if}
         </div>
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Grouped</Eyebrow>
         <Select
           options={groupedOptions}
@@ -120,7 +120,7 @@
         />
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Clearable</Eyebrow>
         <Select
           options={fruitOptions}
@@ -131,7 +131,7 @@
         />
       </div>
 
-      <div class="specimen__row">
+      <div class="poodle-specimen__row">
         <Eyebrow>Disabled</Eyebrow>
         <Select
           options={fruitOptions}
@@ -153,20 +153,20 @@
 </SpecimenLayout>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
   }
 
-  .specimen__field {
+  .poodle-specimen__field {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -174,7 +174,7 @@
     min-width: 12rem;
   }
 
-  .specimen__value {
+  .poodle-specimen__value {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
   }

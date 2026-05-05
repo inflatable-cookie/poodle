@@ -70,7 +70,7 @@
 </script>
 
 <div
-  class="editable-label"
+  class="poodle-editable-label"
   data-editing={isEditing}
   data-disabled={disabled}
   data-variant={variant}
@@ -80,7 +80,7 @@
   {#if isEditing}
     <input
       bind:this={inputElement}
-      class="editable-label__input"
+      class="poodle-editable-label__input"
       type="text"
       value={draftValue}
       {placeholder}
@@ -95,8 +95,8 @@
   {:else}
     <button
       type="button"
-      class="editable-label__display"
-      class:editable-label__display--empty={isEmpty}
+      class="poodle-editable-label__display"
+      class:poodle-editable-label__display--empty={isEmpty}
       disabled={disabled}
       aria-label={ariaLabel}
       on:dblclick={() => { if (activationMode === "doubleClick") startEditing(); }}
@@ -108,9 +108,9 @@
         }
       }}
     >
-      <span class="editable-label__text">{displayValue}</span>
+      <span class="poodle-editable-label__text">{displayValue}</span>
       {#if showEditIcon}
-        <svg class="editable-label__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <svg class="poodle-editable-label__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M11.5 2.5l2 2-8 8H3.5v-2l8-8z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       {/if}
@@ -119,13 +119,13 @@
 </div>
 
 <style>
-  .editable-label {
+  .poodle-editable-label {
     display: inline-flex;
     min-width: 0;
   }
 
-  .editable-label__display,
-  .editable-label__input {
+  .poodle-editable-label__display,
+  .poodle-editable-label__input {
     width: 100%;
     min-width: 0;
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
@@ -140,26 +140,26 @@
     text-align: left;
   }
 
-  .editable-label__display {
+  .poodle-editable-label__display {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
     cursor: text;
   }
 
-  .editable-label__display:hover:not(:disabled),
-  .editable-label__display:focus-visible {
+  .poodle-editable-label__display:hover:not(:disabled),
+  .poodle-editable-label__display:focus-visible {
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 52%, transparent);
     outline: none;
   }
 
-  .editable-label__display:focus-visible {
+  .poodle-editable-label__display:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
-  .editable-label__input {
+  .poodle-editable-label__input {
     border-color: var(--poodle-color-accent-focusRing);
     background: var(--poodle-color-background-surface);
     outline: none;
@@ -168,17 +168,17 @@
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
-  .editable-label[data-disabled="true"] .editable-label__display {
+  .poodle-editable-label[data-disabled="true"] .poodle-editable-label__display {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .editable-label__display--empty .editable-label__text {
+  .poodle-editable-label__display--empty .poodle-editable-label__text {
     color: var(--poodle-color-text-secondary);
     font-style: italic;
   }
 
-  .editable-label__icon {
+  .poodle-editable-label__icon {
     width: 0.75rem;
     height: 0.75rem;
     color: var(--poodle-color-text-secondary);
@@ -186,56 +186,56 @@
     transition: opacity var(--poodle-motion-duration-interaction, 0.15s) var(--poodle-motion-easing-standard, ease);
   }
 
-  .editable-label__display:hover:not(:disabled) .editable-label__icon,
-  .editable-label__display:focus-visible .editable-label__icon {
+  .poodle-editable-label__display:hover:not(:disabled) .poodle-editable-label__icon,
+  .poodle-editable-label__display:focus-visible .poodle-editable-label__icon {
     opacity: 1;
   }
 
   /* Flush variant */
-  .editable-label[data-variant="flush"] .editable-label__display,
-  .editable-label[data-variant="flush"] .editable-label__input {
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__display,
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__input {
     padding: 0;
     border: none;
     border-radius: 0;
   }
 
-  .editable-label[data-variant="flush"] .editable-label__display:hover:not(:disabled),
-  .editable-label[data-variant="flush"] .editable-label__display:focus-visible {
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__display:hover:not(:disabled),
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__display:focus-visible {
     border: none;
     background: transparent;
   }
 
-  .editable-label[data-variant="flush"] .editable-label__input {
+  .poodle-editable-label[data-variant="flush"] .poodle-editable-label__input {
     border-bottom: 0.0625rem solid var(--poodle-color-accent-focusRing);
     box-shadow: none;
     background: transparent;
   }
 
   /* Size variants */
-  .editable-label[data-size="xs"] .editable-label__display,
-  .editable-label[data-size="xs"] .editable-label__input {
+  .poodle-editable-label[data-size="xs"] .poodle-editable-label__display,
+  .poodle-editable-label[data-size="xs"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
     font-size: 0.75rem;
   }
 
-  .editable-label[data-size="sm"] .editable-label__display,
-  .editable-label[data-size="sm"] .editable-label__input {
+  .poodle-editable-label[data-size="sm"] .poodle-editable-label__display,
+  .poodle-editable-label[data-size="sm"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) - 0.0625rem) calc(var(--poodle-space-control-x) - 0.0625rem);
   }
 
-  .editable-label[data-size="lg"] .editable-label__display,
-  .editable-label[data-size="lg"] .editable-label__input {
+  .poodle-editable-label[data-size="lg"] .poodle-editable-label__display,
+  .poodle-editable-label[data-size="lg"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) + 0.0625rem) calc(var(--poodle-space-control-x) + 0.125rem);
     font-size: 0.9375rem;
   }
 
-  .editable-label[data-size="xl"] .editable-label__display,
-  .editable-label[data-size="xl"] .editable-label__input {
+  .poodle-editable-label[data-size="xl"] .poodle-editable-label__display,
+  .poodle-editable-label[data-size="xl"] .poodle-editable-label__input {
     padding: calc(var(--poodle-space-control-y) + 0.125rem) calc(var(--poodle-space-control-x) + 0.1875rem);
     font-size: 1rem;
   }
 
   /* Density variants */
-  .editable-label[data-density="compact"] .editable-label__input { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .editable-label[data-density="comfortable"] .editable-label__input { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-editable-label[data-density="compact"] .poodle-editable-label__input { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-editable-label[data-density="comfortable"] .poodle-editable-label__input { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

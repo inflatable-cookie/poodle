@@ -87,7 +87,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
 <div
-  class="resize-handle"
+  class="poodle-resize-handle"
   data-orientation={orientation}
   data-disabled={disabled || undefined}
   data-dragging={isDragging || undefined}
@@ -101,11 +101,11 @@
   on:mousedown={handlePointerDown}
   on:keydown={handleKeydown}
 >
-  <span class="resize-handle__line" aria-hidden="true"></span>
+  <span class="poodle-resize-handle__line" aria-hidden="true"></span>
 </div>
 
 <style>
-  .resize-handle {
+  .poodle-resize-handle {
     position: relative;
     display: flex;
     align-items: center;
@@ -113,46 +113,46 @@
     flex-shrink: 0;
   }
 
-  .resize-handle[data-orientation="horizontal"] {
+  .poodle-resize-handle[data-orientation="horizontal"] {
     width: 0.5rem;
     height: 100%;
     cursor: col-resize;
   }
 
-  .resize-handle[data-orientation="vertical"] {
+  .poodle-resize-handle[data-orientation="vertical"] {
     width: 100%;
     height: 0.5rem;
     cursor: row-resize;
   }
 
-  .resize-handle[data-disabled] {
+  .poodle-resize-handle[data-disabled] {
     cursor: default;
     opacity: 0.4;
   }
 
-  .resize-handle__line {
+  .poodle-resize-handle__line {
     position: absolute;
     border-radius: 999rem;
     background: color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent);
     transition: background 120ms ease;
   }
 
-  .resize-handle[data-orientation="horizontal"] .resize-handle__line {
+  .poodle-resize-handle[data-orientation="horizontal"] .poodle-resize-handle__line {
     width: 0.125rem;
     height: 100%;
   }
 
-  .resize-handle[data-orientation="vertical"] .resize-handle__line {
+  .poodle-resize-handle[data-orientation="vertical"] .poodle-resize-handle__line {
     width: 100%;
     height: 0.125rem;
   }
 
-  .resize-handle:not([data-disabled]):hover .resize-handle__line,
-  .resize-handle[data-dragging] .resize-handle__line {
+  .poodle-resize-handle:not([data-disabled]):hover .poodle-resize-handle__line,
+  .poodle-resize-handle[data-dragging] .poodle-resize-handle__line {
     background: var(--poodle-color-accent-base);
   }
 
-  .resize-handle:focus-visible {
+  .poodle-resize-handle:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }

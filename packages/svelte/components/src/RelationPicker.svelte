@@ -255,7 +255,7 @@
 </script>
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
-  <div class="relation-picker" data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="poodle-relation-picker" data-size={resolvedSize} data-density={resolvedDensity}>
     <PickerShell
       {title}
       {description}
@@ -272,10 +272,10 @@
       <div slot="toolbar">
         {#if isDrilling}
           {#if drillBreadcrumbs.length > 0}
-            <div class="drill-breadcrumbs">
+            <div class="poodle-drill-breadcrumbs">
               <button
                 type="button"
-                class="drill-breadcrumbs__back"
+                class="poodle-drill-breadcrumbs__back"
                 on:click={drillBack}
                 aria-label="Go back"
               >
@@ -283,11 +283,11 @@
               </button>
               {#each drillBreadcrumbs as crumb, i}
                 {#if i > 0}
-                  <span class="drill-breadcrumbs__sep">/</span>
+                  <span class="poodle-drill-breadcrumbs__sep">/</span>
                 {/if}
                 <button
                   type="button"
-                  class="drill-breadcrumbs__item"
+                  class="poodle-drill-breadcrumbs__item"
                   on:click={() => drillNavigateTo(crumb.depth)}
                 >
                   {crumb.label}
@@ -295,7 +295,7 @@
               {/each}
             </div>
           {/if}
-          <div class="drill-level-label">{currentLevel?.label}</div>
+          <div class="poodle-drill-level-label">{currentLevel?.label}</div>
           <TextInput
             id="drill-search"
             type="search"
@@ -308,10 +308,10 @@
           />
         {:else}
           {#if drillDown && drillBreadcrumbs.length > 0}
-            <div class="drill-breadcrumbs">
+            <div class="poodle-drill-breadcrumbs">
               <button
                 type="button"
-                class="drill-breadcrumbs__back"
+                class="poodle-drill-breadcrumbs__back"
                 on:click={drillBack}
                 aria-label="Go back"
               >
@@ -319,11 +319,11 @@
               </button>
               {#each drillBreadcrumbs as crumb, i}
                 {#if i > 0}
-                  <span class="drill-breadcrumbs__sep">/</span>
+                  <span class="poodle-drill-breadcrumbs__sep">/</span>
                 {/if}
                 <button
                   type="button"
-                  class="drill-breadcrumbs__item"
+                  class="poodle-drill-breadcrumbs__item"
                   on:click={() => drillNavigateTo(crumb.depth)}
                 >
                   {crumb.label}
@@ -355,23 +355,23 @@
       <slot name="state" slot="state" />
 
       {#if isDrilling}
-        <ul class="drill-list" aria-label={currentLevel?.label ?? "Items"}>
+        <ul class="poodle-drill-list" aria-label={currentLevel?.label ?? "Items"}>
           {#each drillItems as item (item.id)}
-            <li class="drill-list__item">
+            <li class="poodle-drill-list__item">
               <button
                 type="button"
-                class="drill-list__button"
+                class="poodle-drill-list__button"
                 on:click={() => drillSelect(item)}
               >
-                <span class="drill-list__copy">
+                <span class="poodle-drill-list__copy">
                   <strong>{item.label}</strong>
                   {#if item.description}
                     <small>{item.description}</small>
                   {/if}
                 </span>
-                <span class="drill-list__meta">
+                <span class="poodle-drill-list__meta">
                   {#if item.count !== undefined}
-                    <span class="drill-list__count">{item.count}</span>
+                    <span class="poodle-drill-list__count">{item.count}</span>
                   {/if}
                   <Icon name="chevron-right" />
                 </span>
@@ -379,14 +379,14 @@
             </li>
           {/each}
           {#if drillItems.length === 0 && !drillLoading}
-            <li class="drill-list__empty">No items found</li>
+            <li class="poodle-drill-list__empty">No items found</li>
           {/if}
         </ul>
       {:else}
-        <ul class="relation-picker__list" aria-label="Available candidates">
+        <ul class="poodle-relation-picker__list" aria-label="Available candidates">
           {#each filteredItems as item, index}
             <li
-              class="relation-picker__item"
+              class="poodle-relation-picker__item"
               data-selected={selectedIds.includes(item.id)}
             >
               {#if selectionMode === "multiple"}
@@ -398,13 +398,13 @@
                 <button
                   bind:this={candidateButtons[index]}
                   type="button"
-                  class="relation-picker__item-button"
+                  class="poodle-relation-picker__item-button"
                   aria-pressed={selectedIds.includes(item.id)}
                   aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
                   on:click={() => toggleItem(item.id)}
                   on:keydown={(event) => handleCandidateKeydown(event, index)}
                 >
-                  <span class="relation-picker__item-copy">
+                  <span class="poodle-relation-picker__item-copy">
                     <strong>{item.label}</strong>
                     {#if item.description || item.meta}
                       <small id={`relation-picker-item-${item.id}`}>
@@ -421,13 +421,13 @@
                 <button
                   bind:this={candidateButtons[index]}
                   type="button"
-                  class="relation-picker__item-button"
+                  class="poodle-relation-picker__item-button"
                   aria-pressed={selectedIds.includes(item.id)}
                   aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
                   on:click={() => toggleItem(item.id)}
                   on:keydown={(event) => handleCandidateKeydown(event, index)}
                 >
-                  <span class="relation-picker__item-copy">
+                  <span class="poodle-relation-picker__item-copy">
                     <strong>{item.label}</strong>
                     {#if item.description || item.meta}
                       <small id={`relation-picker-item-${item.id}`}>
@@ -448,10 +448,10 @@
 
       <div slot="footer">
         <FormActions align="between">
-          <p class="relation-picker__footer-note">
+          <p class="poodle-relation-picker__footer-note">
             {selectionMode === "single" ? "Single-choice selection keeps the picker confirmable without inline radio-group chrome." : "Multi-selection stays explicit through selection summary and confirm/cancel actions."}
           </p>
-          <div class="relation-picker__footer-actions">
+          <div class="poodle-relation-picker__footer-actions">
             <Button variant="ghost" size={resolvedSize} on:click={() => dispatch("cancel")}>
               {cancelLabel}
             </Button>
@@ -466,7 +466,7 @@
 </UiPresentationProvider>
 
 <style>
-  .relation-picker {
+  .poodle-relation-picker {
     --poodle-relation-picker-breadcrumb-control: 1.5rem;
     --poodle-relation-picker-breadcrumb-x: 0.375rem;
     --poodle-relation-picker-list-x: 0.625rem;
@@ -479,7 +479,7 @@
     --poodle-relation-picker-desc-size: 0.6875rem;
   }
 
-  .relation-picker[data-size="xs"] {
+  .poodle-relation-picker[data-size="xs"] {
     --poodle-relation-picker-breadcrumb-control: 1.25rem;
     --poodle-relation-picker-breadcrumb-x: 0.25rem;
     --poodle-relation-picker-list-x: 0.5rem;
@@ -490,19 +490,19 @@
     --poodle-relation-picker-desc-size: 0.5625rem;
   }
 
-  .relation-picker[data-size="sm"] {
+  .poodle-relation-picker[data-size="sm"] {
     --poodle-relation-picker-breadcrumb-control: 1.5rem;
     --poodle-relation-picker-title-size: 0.75rem;
     --poodle-relation-picker-desc-size: 0.625rem;
   }
 
-  .relation-picker[data-size="md"] {
+  .poodle-relation-picker[data-size="md"] {
     --poodle-relation-picker-breadcrumb-control: 1.75rem;
     --poodle-relation-picker-title-size: 0.8125rem;
     --poodle-relation-picker-desc-size: 0.6875rem;
   }
 
-  .relation-picker[data-size="lg"] {
+  .poodle-relation-picker[data-size="lg"] {
     --poodle-relation-picker-breadcrumb-control: 2rem;
     --poodle-relation-picker-breadcrumb-x: 0.5rem;
     --poodle-relation-picker-list-x: 0.75rem;
@@ -512,7 +512,7 @@
     --poodle-relation-picker-desc-size: 0.75rem;
   }
 
-  .relation-picker[data-size="xl"] {
+  .poodle-relation-picker[data-size="xl"] {
     --poodle-relation-picker-breadcrumb-control: 2.25rem;
     --poodle-relation-picker-breadcrumb-x: 0.625rem;
     --poodle-relation-picker-list-x: 0.875rem;
@@ -522,23 +522,23 @@
     --poodle-relation-picker-desc-size: 0.8125rem;
   }
 
-  .relation-picker[data-density="compact"] {
+  .poodle-relation-picker[data-density="compact"] {
     --poodle-relation-picker-list-gap: 0.0625rem;
   }
 
-  .relation-picker[data-density="comfortable"] {
+  .poodle-relation-picker[data-density="comfortable"] {
     --poodle-relation-picker-list-gap: 0.1875rem;
   }
 
   /* Drill-down breadcrumbs */
-  .drill-breadcrumbs {
+  .poodle-drill-breadcrumbs {
     display: flex;
     align-items: center;
     gap: 0.25rem;
     padding-bottom: var(--poodle-space-stack-sm);
   }
 
-  .drill-breadcrumbs__back {
+  .poodle-drill-breadcrumbs__back {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -552,18 +552,18 @@
     cursor: pointer;
   }
 
-  .drill-breadcrumbs__back:hover {
+  .poodle-drill-breadcrumbs__back:hover {
     background: var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12));
     color: var(--poodle-color-text-primary);
   }
 
-  .drill-breadcrumbs__sep {
+  .poodle-drill-breadcrumbs__sep {
     color: var(--poodle-color-text-secondary);
     font-size: 0.6875rem;
     opacity: 0.6;
   }
 
-  .drill-breadcrumbs__item {
+  .poodle-drill-breadcrumbs__item {
     min-height: calc(var(--poodle-relation-picker-breadcrumb-control) - 0.25rem);
     padding: 0.125rem var(--poodle-relation-picker-breadcrumb-x);
     border: none;
@@ -579,11 +579,11 @@
     max-width: 8rem;
   }
 
-  .drill-breadcrumbs__item:hover {
+  .poodle-drill-breadcrumbs__item:hover {
     background: var(--poodle-color-surface-hover, rgba(148, 163, 184, 0.12));
   }
 
-  .drill-level-label {
+  .poodle-drill-level-label {
     font-size: var(--poodle-typography-label-size);
     font-weight: 600;
     text-transform: uppercase;
@@ -593,7 +593,7 @@
   }
 
   /* Drill-down list */
-  .drill-list {
+  .poodle-drill-list {
     display: grid;
     gap: var(--poodle-relation-picker-list-gap);
     margin: 0;
@@ -601,11 +601,11 @@
     list-style: none;
   }
 
-  .drill-list__item {
+  .poodle-drill-list__item {
     display: flex;
   }
 
-  .drill-list__button {
+  .poodle-drill-list__button {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -622,29 +622,29 @@
     font-size: var(--poodle-typography-body-size);
   }
 
-  .drill-list__button:hover {
+  .poodle-drill-list__button:hover {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
-  .drill-list__button:focus-visible {
+  .poodle-drill-list__button:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: -0.0625rem;
   }
 
-  .drill-list__copy {
+  .poodle-drill-list__copy {
     display: grid;
     gap: 0.125rem;
     min-width: 0;
   }
 
-  .drill-list__copy strong {
+  .poodle-drill-list__copy strong {
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .drill-list__copy small {
+  .poodle-drill-list__copy small {
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-label-size);
     overflow: hidden;
@@ -652,7 +652,7 @@
     white-space: nowrap;
   }
 
-  .drill-list__meta {
+  .poodle-drill-list__meta {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -660,12 +660,12 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  .drill-list__count {
+  .poodle-drill-list__count {
     font-size: var(--poodle-typography-label-size);
     opacity: 0.7;
   }
 
-  .drill-list__empty {
+  .poodle-drill-list__empty {
     padding: calc(var(--poodle-relation-picker-list-y) * 2.5);
     text-align: center;
     color: var(--poodle-color-text-secondary);
@@ -673,7 +673,7 @@
   }
 
   /* Existing flat picker styles */
-  .relation-picker__list {
+  .poodle-relation-picker__list {
     display: grid;
     gap: var(--poodle-relation-picker-list-gap);
     margin: 0;
@@ -681,7 +681,7 @@
     list-style: none;
   }
 
-  .relation-picker__item {
+  .poodle-relation-picker__item {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
@@ -693,12 +693,12 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .relation-picker__item[data-selected="true"] {
+  .poodle-relation-picker__item[data-selected="true"] {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent);
     background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
   }
 
-  .relation-picker__item-button {
+  .poodle-relation-picker__item-button {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.25rem;
@@ -712,38 +712,38 @@
     font: inherit;
   }
 
-  .relation-picker__item-copy {
+  .poodle-relation-picker__item-copy {
     display: grid;
     gap: 0.25rem;
   }
 
-  .relation-picker__item-copy strong {
+  .poodle-relation-picker__item-copy strong {
     margin: 0;
     font-size: var(--poodle-relation-picker-title-size);
     font-weight: 500;
   }
 
-  .relation-picker__item-copy small {
+  .poodle-relation-picker__item-copy small {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-relation-picker-desc-size);
     line-height: 1.4;
   }
 
-  .relation-picker__footer-note {
+  .poodle-relation-picker__footer-note {
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-relation-picker-desc-size);
     line-height: 1.5;
   }
 
-  .relation-picker__item-button:focus-visible {
+  .poodle-relation-picker__item-button:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     border-radius: var(--poodle-radius-control);
   }
 
-  .relation-picker__footer-actions {
+  .poodle-relation-picker__footer-actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);

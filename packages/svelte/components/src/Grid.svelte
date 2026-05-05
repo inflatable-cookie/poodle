@@ -18,12 +18,12 @@
   ]);
 </script>
 
-<div class="grid" role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
+<div class="poodle-grid" role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
   <slot />
 </div>
 
 <style>
-  .grid {
+  .poodle-grid {
     display: grid;
     min-width: 0;
     min-height: 0;

@@ -42,7 +42,7 @@
 </script>
 
 <figure
-  class="media-thumbnail"
+  class="poodle-media-thumbnail"
   data-kind={resolvedKind}
   data-state={state}
   data-aspect-ratio={aspectRatio}
@@ -51,25 +51,25 @@
   aria-busy={state === "loading"}
   style={rootStyle}
 >
-  <div class="media-thumbnail__frame">
+  <div class="poodle-media-thumbnail__frame">
     {#if state === "ready"}
       {#if $$slots.default}
         <slot />
       {:else}
-        <div class="media-thumbnail__placeholder" aria-hidden="true">
+        <div class="poodle-media-thumbnail__placeholder" aria-hidden="true">
           <Icon name={fallbackIcon} size={resolvedVisualSize} />
         </div>
       {/if}
 
       {#if resolvedKind === "audio" || resolvedKind === "video"}
-        <span class="media-thumbnail__play" aria-hidden="true">
+        <span class="poodle-media-thumbnail__play" aria-hidden="true">
           <Icon name={resolvedKind === "audio" ? "music" : "play"} size={resolvedSupportingSize} />
         </span>
       {/if}
     {:else}
-      <div class="media-thumbnail__state">
+      <div class="poodle-media-thumbnail__state">
         {#if state === "loading"}
-          <span class="media-thumbnail__spinner" aria-hidden="true">
+          <span class="poodle-media-thumbnail__spinner" aria-hidden="true">
             <Spinner variant="grid" size={resolvedSpinnerSize} tone="accent" />
           </span>
         {/if}
@@ -81,12 +81,12 @@
     {/if}
 
     {#if badge}
-      <span class="media-thumbnail__badge">{badge}</span>
+      <span class="poodle-media-thumbnail__badge">{badge}</span>
     {/if}
   </div>
 
   {#if presentation !== "compact" && (title || meta)}
-    <figcaption class="media-thumbnail__caption">
+    <figcaption class="poodle-media-thumbnail__caption">
       {#if title}
         <strong>{title}</strong>
       {/if}
@@ -98,17 +98,17 @@
 </figure>
 
 <style>
-  .media-thumbnail {
+  .poodle-media-thumbnail {
     display: grid;
     gap: var(--poodle-space-stack-sm);
     margin: 0;
   }
 
-  .media-thumbnail[data-presentation="compact"] {
+  .poodle-media-thumbnail[data-presentation="compact"] {
     gap: 0;
   }
 
-  .media-thumbnail__frame {
+  .poodle-media-thumbnail__frame {
     position: relative;
     overflow: hidden;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
@@ -118,37 +118,37 @@
       color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
-  .media-thumbnail[data-aspect-ratio="square"] .media-thumbnail__frame {
+  .poodle-media-thumbnail[data-aspect-ratio="square"] .poodle-media-thumbnail__frame {
     aspect-ratio: 1 / 1;
   }
 
-  .media-thumbnail[data-aspect-ratio="landscape"] .media-thumbnail__frame {
+  .poodle-media-thumbnail[data-aspect-ratio="landscape"] .poodle-media-thumbnail__frame {
     aspect-ratio: 16 / 10;
   }
 
-  .media-thumbnail[data-aspect-ratio="portrait"] .media-thumbnail__frame {
+  .poodle-media-thumbnail[data-aspect-ratio="portrait"] .poodle-media-thumbnail__frame {
     aspect-ratio: 3 / 4;
   }
 
-  .media-thumbnail[data-aspect-ratio="video"] .media-thumbnail__frame {
+  .poodle-media-thumbnail[data-aspect-ratio="video"] .poodle-media-thumbnail__frame {
     aspect-ratio: 16 / 9;
   }
 
-  .media-thumbnail__placeholder,
-  .media-thumbnail__state {
+  .poodle-media-thumbnail__placeholder,
+  .poodle-media-thumbnail__state {
     display: grid;
     width: 100%;
     height: 100%;
   }
 
-  .media-thumbnail__placeholder {
+  .poodle-media-thumbnail__placeholder {
     place-items: center;
     width: 100%;
     height: 100%;
     padding: 0.5rem var(--poodle-space-panel-x);
   }
 
-  .media-thumbnail__state {
+  .poodle-media-thumbnail__state {
     gap: var(--poodle-space-stack-sm);
     align-content: end;
     justify-items: start;
@@ -159,48 +159,48 @@
       color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
   }
 
-  .media-thumbnail__spinner {
+  .poodle-media-thumbnail__spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .media-thumbnail__state strong,
-  .media-thumbnail__state p {
+  .poodle-media-thumbnail__state strong,
+  .poodle-media-thumbnail__state p {
     margin: 0;
   }
 
-  .media-thumbnail[data-presentation="compact"] .media-thumbnail__state {
+  .poodle-media-thumbnail[data-presentation="compact"] .poodle-media-thumbnail__state {
     align-content: center;
     justify-items: center;
     padding: 0.875rem;
     text-align: center;
   }
 
-  .media-thumbnail[data-presentation="compact"] .media-thumbnail__state strong {
+  .poodle-media-thumbnail[data-presentation="compact"] .poodle-media-thumbnail__state strong {
     font-size: 0.875rem;
     line-height: 1.35;
   }
 
-  .media-thumbnail__state p,
-  .media-thumbnail__caption span {
+  .poodle-media-thumbnail__state p,
+  .poodle-media-thumbnail__caption span {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .media-thumbnail__caption {
+  .poodle-media-thumbnail__caption {
     display: grid;
     gap: 0.125rem;
   }
 
-  .media-thumbnail__caption strong {
+  .poodle-media-thumbnail__caption strong {
     font-size: 0.875rem;
     line-height: 1.35;
   }
 
-  .media-thumbnail__badge,
-  .media-thumbnail__play {
+  .poodle-media-thumbnail__badge,
+  .poodle-media-thumbnail__play {
     position: absolute;
     display: inline-flex;
     align-items: center;
@@ -209,7 +209,7 @@
     backdrop-filter: blur(1rem);
   }
 
-  .media-thumbnail__badge {
+  .poodle-media-thumbnail__badge {
     top: 0.625rem;
     right: 0.625rem;
     min-height: 1.5rem;
@@ -222,12 +222,12 @@
     text-transform: uppercase;
   }
 
-  .media-thumbnail[data-presentation="compact"] .media-thumbnail__badge {
+  .poodle-media-thumbnail[data-presentation="compact"] .poodle-media-thumbnail__badge {
     top: 0.5rem;
     right: 0.5rem;
   }
 
-  .media-thumbnail__play {
+  .poodle-media-thumbnail__play {
     left: 0.625rem;
     bottom: 0.625rem;
     width: 2rem;

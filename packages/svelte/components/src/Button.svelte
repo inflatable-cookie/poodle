@@ -91,7 +91,7 @@
   formmethod={formmethod ?? undefined}
   formnovalidate={formnovalidate || undefined}
   formtarget={formtarget ?? undefined}
-  class={`button ${className}`.trim()}
+  class={`poodle-button ${className}`.trim()}
   style={style ?? undefined}
   data-variant={variant}
   data-tone={tone !== "default" ? tone : undefined}
@@ -113,13 +113,13 @@
   on:blur={(event) => dispatch("blur", event)}
 >
   {#if loading}
-    <span class="button__spinner" aria-hidden="true">
+    <span class="poodle-button__spinner" aria-hidden="true">
       <Spinner variant="ring" size={resolvedIconSize} tone="current" />
     </span>
   {/if}
 
   {#if $$slots.leading || leadingIcon}
-    <span class="button__icon" aria-hidden="true">
+    <span class="poodle-button__icon" aria-hidden="true">
       {#if $$slots.leading}
         <slot name="leading" />
       {:else if leadingIcon}
@@ -129,13 +129,13 @@
   {/if}
 
   {#if $$slots.default}
-    <span class="button__label">
+    <span class="poodle-button__label">
       <slot />
     </span>
   {/if}
 
   {#if $$slots.trailing || trailingIcon}
-    <span class="button__icon" aria-hidden="true">
+    <span class="poodle-button__icon" aria-hidden="true">
       {#if $$slots.trailing}
         <slot name="trailing" />
       {:else if trailingIcon}
@@ -145,14 +145,14 @@
   {/if}
 
   {#if chevron}
-    <span class="button__chevron" aria-hidden="true">
+    <span class="poodle-button__chevron" aria-hidden="true">
       <Icon name="chevron-down" size={resolvedIconSize} />
     </span>
   {/if}
 </button>
 
 <style>
-  .button {
+  .poodle-button {
     --poodle-button-fill: var(
       --poodle-treatment-interactive-fill,
       color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary))
@@ -206,28 +206,28 @@
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .button[data-size="xs"] {
+  .poodle-button[data-size="xs"] {
     min-width: 3.75rem;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.6875rem;
   }
 
-  .button[data-size="sm"] {
+  .poodle-button[data-size="sm"] {
     min-width: 4.25rem;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
-  .button[data-size="lg"] {
+  .poodle-button[data-size="lg"] {
     min-width: 5.75rem;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.875rem;
   }
 
-  .button[data-size="xl"] {
+  .poodle-button[data-size="xl"] {
     min-width: 6.5rem;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
@@ -235,61 +235,61 @@
   }
 
   /* Icon padding adjustment: reduce padding on icon side by 0.125rem */
-  .button[data-has-leading] {
+  .poodle-button[data-has-leading] {
     padding-left: calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
-  .button[data-has-trailing] {
+  .poodle-button[data-has-trailing] {
     padding-right: calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
-  .button[data-has-leading][data-size="xs"] {
+  .poodle-button[data-has-leading][data-size="xs"] {
     padding-left: calc(var(--poodle-space-control-x) - 0.1875rem);
   }
 
-  .button[data-has-trailing][data-size="xs"] {
+  .poodle-button[data-has-trailing][data-size="xs"] {
     padding-right: calc(var(--poodle-space-control-x) - 0.1875rem);
   }
 
-  .button[data-has-leading][data-size="sm"] {
+  .poodle-button[data-has-leading][data-size="sm"] {
     padding-left: calc(var(--poodle-space-control-x) - 0.25rem);
   }
 
-  .button[data-has-trailing][data-size="sm"] {
+  .poodle-button[data-has-trailing][data-size="sm"] {
     padding-right: calc(var(--poodle-space-control-x) - 0.25rem);
   }
 
-  .button[data-has-leading][data-size="lg"] {
+  .poodle-button[data-has-leading][data-size="lg"] {
     padding-left: var(--poodle-space-control-x);
   }
 
-  .button[data-has-trailing][data-size="lg"] {
+  .poodle-button[data-has-trailing][data-size="lg"] {
     padding-right: var(--poodle-space-control-x);
   }
 
-  .button[data-has-leading][data-size="xl"] {
+  .poodle-button[data-has-leading][data-size="xl"] {
     padding-left: calc(var(--poodle-space-control-x) + 0.0625rem);
   }
 
-  .button[data-has-trailing][data-size="xl"] {
+  .poodle-button[data-has-trailing][data-size="xl"] {
     padding-right: calc(var(--poodle-space-control-x) + 0.0625rem);
   }
 
   /* Icon-only: square, no min-width */
-  .button[data-icon-only] {
+  .poodle-button[data-icon-only] {
     min-width: 0;
     padding: 0;
     width: var(--poodle-size-control-height);
   }
 
-  .button[data-icon-only][data-size="xs"],
-  .button[data-icon-only][data-size="sm"],
-  .button[data-icon-only][data-size="lg"],
-  .button[data-icon-only][data-size="xl"] {
+  .poodle-button[data-icon-only][data-size="xs"],
+  .poodle-button[data-icon-only][data-size="sm"],
+  .poodle-button[data-icon-only][data-size="lg"],
+  .poodle-button[data-icon-only][data-size="xl"] {
     width: var(--poodle-size-control-height);
   }
 
-  .button[data-variant="primary"] {
+  .poodle-button[data-variant="primary"] {
     --poodle-button-fill: var(
       --poodle-treatment-interactive-primary-fill,
       var(--poodle-color-accent-base)
@@ -314,13 +314,13 @@
     );
   }
 
-  .button[data-variant="ghost"] {
+  .poodle-button[data-variant="ghost"] {
     --poodle-button-fill: transparent;
     --poodle-button-border: transparent;
     --poodle-button-shadow: none;
   }
 
-  .button[data-tone="danger"] {
+  .poodle-button[data-tone="danger"] {
     --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-surface, var(--poodle-color-background-surface)));
     --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 24%, var(--poodle-surface, var(--poodle-color-background-surface)));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 32%, var(--poodle-surface, var(--poodle-color-background-surface)));
@@ -329,7 +329,7 @@
     --poodle-button-text: var(--poodle-color-text-primary);
   }
 
-  .button[data-variant="primary"][data-tone="danger"] {
+  .poodle-button[data-variant="primary"][data-tone="danger"] {
     --poodle-button-fill: var(--poodle-color-status-danger);
     --poodle-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-status-danger));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 88%, black);
@@ -341,7 +341,7 @@
       0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent);
   }
 
-  .button[data-variant="ghost"][data-tone="danger"] {
+  .poodle-button[data-variant="ghost"][data-tone="danger"] {
     --poodle-button-fill: transparent;
     --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-danger) 12%, transparent);
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent);
@@ -351,7 +351,7 @@
     --poodle-button-shadow: none;
   }
 
-  .button:hover:not(:disabled) {
+  .poodle-button:hover:not(:disabled) {
     background: var(--poodle-button-fill-hover);
     border-color: var(--poodle-button-border-hover);
     box-shadow: var(
@@ -360,24 +360,24 @@
     );
   }
 
-  .button:active:not(:disabled) {
+  .poodle-button:active:not(:disabled) {
     background: var(--poodle-button-fill-active);
     transform: translateY(0.03125rem);
   }
 
-  .button:focus-visible {
+  .poodle-button:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .button:disabled {
+  .poodle-button:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Pressed/toggle state — only applies accent treatment to non-primary variants.
      Primary is already accent-colored, so pressed is purely semantic (aria-pressed). */
-  .button[data-pressed="true"]:not([data-variant="primary"]) {
+  .poodle-button[data-pressed="true"]:not([data-variant="primary"]) {
     --poodle-button-fill: var(--poodle-color-accent-base);
     --poodle-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-accent-base));
     --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-accent-base) 88%, black);
@@ -386,13 +386,13 @@
     --poodle-button-shadow: none;
   }
 
-  .button__label {
+  .poodle-button__label {
     min-width: 0;
     white-space: nowrap;
   }
 
-  .button__icon,
-  .button__spinner {
+  .poodle-button__icon,
+  .poodle-button__spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -403,7 +403,7 @@
     line-height: 1;
   }
 
-  .button__chevron {
+  .poodle-button__chevron {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -411,18 +411,18 @@
     margin-left: calc(var(--poodle-space-inline-sm) * -0.25);
   }
 
-  .button__spinner :global(.spinner) {
+  .poodle-button__spinner :global(.poodle-spinner) {
     width: 0.75rem;
     height: 0.75rem;
   }
 
   /* Density variants */
-  .button[data-density="compact"] {
+  .poodle-button[data-density="compact"] {
     padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
     gap: 0.25rem;
   }
 
-  .button[data-density="comfortable"] {
+  .poodle-button[data-density="comfortable"] {
     padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
     gap: var(--poodle-space-inline-md);
   }

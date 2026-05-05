@@ -4,9 +4,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Layout structure">
-    <div class="specimen__demo">
+    <div class="poodle-specimen__demo">
       <DetailShell ariaLabel="Layout regions">
         <svelte:fragment slot="header">
           <Region label="Header" color="#5b9bd5" minHeight="3rem" />
@@ -19,7 +19,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Multi-section layout with header">
-    <div class="specimen__demo">
+    <div class="poodle-specimen__demo">
       <DetailShell ariaLabel="Project detail view">
         <svelte:fragment slot="header">
           <PageHeader title="Poodle Design System" eyebrow="Project" subtitle="A comprehensive component library.">
@@ -53,13 +53,13 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Loading state">
-    <div class="specimen__demo">
+    <div class="poodle-specimen__demo">
       <DetailShell title="Loading" state="loading" ariaLabel="Loading view" />
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Error state">
-    <div class="specimen__demo">
+    <div class="poodle-specimen__demo">
       <DetailShell
         title="Error"
         state="error"
@@ -72,13 +72,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__demo {
+  .poodle-specimen__demo {
     margin-top: 0.75rem;
   }
 </style>

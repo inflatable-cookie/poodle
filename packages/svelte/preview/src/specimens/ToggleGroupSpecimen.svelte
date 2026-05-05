@@ -34,7 +34,7 @@
       ariaLabel="View mode"
       on:valueChange={(e) => (view = e.detail.value as string)}
     />
-    <p class="specimen__hint">View: <strong>{view}</strong></p>
+    <p class="poodle-specimen__hint">View: <strong>{view}</strong></p>
   </SpecimenGroup>
 
   <SpecimenGroup label="Four options">
@@ -53,7 +53,7 @@
       ariaLabel="Filter tags"
       on:valueChange={(e) => (tags = e.detail.value as string[])}
     />
-    <p class="specimen__hint">Selected: <strong>{tags.join(", ") || "none"}</strong></p>
+    <p class="poodle-specimen__hint">Selected: <strong>{tags.join(", ") || "none"}</strong></p>
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
@@ -75,7 +75,7 @@
 </SpecimenLayout>
 
 <style>
-  .specimen__hint {
+  .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);

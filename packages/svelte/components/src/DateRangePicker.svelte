@@ -103,10 +103,10 @@
   });
 </script>
 
-<div bind:this={rootElement} class="date-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
+<div bind:this={rootElement} class="poodle-date-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
   <button
     type="button"
-    class="date-range-picker__trigger"
+    class="poodle-date-range-picker__trigger"
     disabled={disabled}
     aria-haspopup="dialog"
     aria-expanded={isOpen ? "true" : "false"}
@@ -114,16 +114,16 @@
     aria-label={ariaLabel ?? undefined}
     on:click={() => setOpen(!isOpen)}
   >
-    <span class="date-range-picker__value" data-placeholder={currentValue.start === null}>
+    <span class="poodle-date-range-picker__value" data-placeholder={currentValue.start === null}>
       {valueLabel}
     </span>
-    <span class="date-range-picker__indicator" aria-hidden="true">▾</span>
+    <span class="poodle-date-range-picker__indicator" aria-hidden="true">▾</span>
   </button>
 
   {#if isOpen}
     <div
       id={surfaceId}
-      class="date-range-picker__surface"
+      class="poodle-date-range-picker__surface"
       role="dialog"
       aria-label={ariaLabel ?? placeholder}
     >
@@ -145,13 +145,13 @@
 </div>
 
 <style>
-  .date-range-picker {
+  .poodle-date-range-picker {
     position: relative;
     display: inline-grid;
     min-width: 16rem;
   }
 
-  .date-range-picker__trigger {
+  .poodle-date-range-picker__trigger {
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
@@ -169,20 +169,20 @@
     text-align: left;
   }
 
-  .date-range-picker__value {
+  .poodle-date-range-picker__value {
     min-width: 0;
   }
 
-  .date-range-picker__value[data-placeholder="true"] {
+  .poodle-date-range-picker__value[data-placeholder="true"] {
     color: var(--poodle-color-text-secondary);
   }
 
-  .date-range-picker__indicator {
+  .poodle-date-range-picker__indicator {
     color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
   }
 
-  .date-range-picker__surface {
+  .poodle-date-range-picker__surface {
     position: absolute;
     top: calc(100% + 0.375rem);
     left: 0;
@@ -198,7 +198,7 @@
     box-shadow: var(--poodle-elevation-overlay);
   }
 
-  .date-range-picker__trigger:hover:not(:disabled) {
+  .poodle-date-range-picker__trigger:hover:not(:disabled) {
     background: color-mix(
       in srgb,
       var(--poodle-color-background-surface) 86%,
@@ -206,41 +206,41 @@
     );
   }
 
-  .date-range-picker__trigger:focus-visible {
+  .poodle-date-range-picker__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .date-range-picker__trigger:disabled {
+  .poodle-date-range-picker__trigger:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .date-range-picker[data-size="xs"] .date-range-picker__trigger {
+  .poodle-date-range-picker[data-size="xs"] .poodle-date-range-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
-  .date-range-picker[data-size="sm"] .date-range-picker__trigger {
+  .poodle-date-range-picker[data-size="sm"] .poodle-date-range-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
   }
 
-  .date-range-picker[data-size="lg"] .date-range-picker__trigger {
+  .poodle-date-range-picker[data-size="lg"] .poodle-date-range-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
 
-  .date-range-picker[data-size="xl"] .date-range-picker__trigger {
+  .poodle-date-range-picker[data-size="xl"] .poodle-date-range-picker__trigger {
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
     font-size: 1rem;
   }
 
   /* Density variants */
-  .date-range-picker[data-density="compact"] .date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .date-range-picker[data-density="comfortable"] .date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-date-range-picker[data-density="compact"] .poodle-date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-date-range-picker[data-density="comfortable"] .poodle-date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

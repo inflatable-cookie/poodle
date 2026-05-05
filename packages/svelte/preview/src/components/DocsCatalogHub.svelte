@@ -19,39 +19,39 @@
   const catalogEntryMap = Object.fromEntries(catalogEntries.map((entry) => [entry.id, entry]));
 </script>
 
-<section id="catalog-hub" class="panel token-summary" aria-labelledby="catalog-heading">
-  <div class="section-header">
+<section id="catalog-hub" class="poodle-panel poodle-token-summary" aria-labelledby="catalog-heading">
+  <div class="poodle-section-header">
     <div>
       <Eyebrow>Catalog hub</Eyebrow>
       <h2 id="catalog-heading">Information architecture, coverage, and adoption bar</h2>
     </div>
   </div>
-  <div class="docs-overview-stack">
-    <div class="docs-overview-top">
-      <article class="demo-card docs-overview-card">
-        <div class="card-header">
+  <div class="poodle-docs-overview-stack">
+    <div class="poodle-docs-overview-top">
+      <article class="poodle-demo-card poodle-docs-overview-card">
+        <div class="poodle-card-header">
           <h3>Family directory</h3>
           <p>
             The docs shell still groups examples by the same package and contract
             layers adopters actually consume.
           </p>
         </div>
-        <div class="docs-family-grid">
+        <div class="poodle-docs-family-grid">
           {#each docsFamilies as family}
-            <article class="docs-family-card">
-              <div class="docs-family-card__header">
+            <article class="poodle-docs-family-card">
+              <div class="poodle-docs-family-card__header">
                 <div>
                   <Eyebrow>{family.eyebrow}</Eyebrow>
                   <h4>{family.title}</h4>
                 </div>
-                <span class="command-shortcut-hint">{family.packageName}</span>
+                <span class="poodle-command-shortcut-hint">{family.packageName}</span>
               </div>
-              <p class="detail-card-meta">{family.summary}</p>
-              <div class="docs-family-meta">
-                <span class="token-path">{family.contractRoot}</span>
+              <p class="poodle-detail-card-meta">{family.summary}</p>
+              <div class="poodle-docs-family-meta">
+                <span class="poodle-token-path">{family.contractRoot}</span>
                 <strong>{family.adoptionBar}</strong>
               </div>
-              <div class="docs-link-row">
+              <div class="poodle-docs-link-row">
                 {#each family.sectionIds as sectionId}
                   {#if catalogEntryMap[sectionId]}
                     <Button
@@ -70,17 +70,17 @@
         </div>
       </article>
 
-      <article class="demo-card docs-overview-card docs-overview-card--narrow">
-        <div class="card-header">
+      <article class="poodle-demo-card poodle-docs-overview-card poodle-docs-overview-card--narrow">
+        <div class="poodle-card-header">
           <h3>Adoption-ready minimum</h3>
           <p>
             The docs shell still freezes what must be visible before wider rollout,
             not just what exists somewhere in the repo.
           </p>
         </div>
-        <div class="behavior-list">
+        <div class="poodle-behavior-list">
           {#each docsAdoptionChecklist as item}
-            <div class="behavior-item">
+            <div class="poodle-behavior-item">
               <strong>Required</strong>
               <p>{item}</p>
             </div>
@@ -88,15 +88,15 @@
         </div>
       </article>
 
-      <article class="demo-card docs-overview-card docs-overview-card--narrow">
-        <div class="card-header">
+      <article class="poodle-demo-card poodle-docs-overview-card poodle-docs-overview-card--narrow">
+        <div class="poodle-card-header">
           <h3>Disclosure primitives</h3>
           <p>
             Catalog chrome now proves grouped and single-block disclosure through
             real foundation primitives.
           </p>
         </div>
-        <div class="demo-stack">
+        <div class="poodle-demo-stack">
           <Accordion
             items={[
               {
@@ -114,7 +114,7 @@
             ariaLabel="Disclosure primitive example"
             let:item
           >
-            <p class="detail-card-meta">
+            <p class="poodle-detail-card-meta">
               {item.value === "accordion-foundation"
                 ? "Foundation-safe grouped disclosure now exists for more web-oriented products and docs surfaces."
                 : "Single-block reveal belongs to Collapsible; grouped disclosure belongs to Accordion."}
@@ -126,7 +126,7 @@
             description="Single revealable content block for compact notes, diagnostics, or settings groups."
             defaultOpen={true}
           >
-            <p class="detail-card-meta">
+            <p class="poodle-detail-card-meta">
               This surface owns one trigger and one revealable region without
               pretending to be grouped navigation.
             </p>
@@ -135,15 +135,15 @@
       </article>
     </div>
 
-    <article class="demo-card docs-overview-card">
-      <div class="card-header">
+    <article class="poodle-demo-card poodle-docs-overview-card">
+      <div class="poodle-card-header">
         <h3>Example directory</h3>
         <p>
           The docs shell can still launch every section directly, but the shared
           demo target now sits behind a cleaner screen model.
         </p>
       </div>
-      <div class="docs-section-list">
+      <div class="poodle-docs-section-list">
         {#each catalogEntries as entry}
           <Button
             className="docs-section-card"
@@ -156,11 +156,11 @@
               <strong>{entry.title}</strong>
             </div>
             <p>{entry.summary}</p>
-            <div class="docs-section-meta">
-              <span class="token-path">{entry.contractRoot}</span>
-              <span class="command-shortcut-hint">{entry.packageName}</span>
+            <div class="poodle-docs-section-meta">
+              <span class="poodle-token-path">{entry.contractRoot}</span>
+              <span class="poodle-command-shortcut-hint">{entry.packageName}</span>
             </div>
-            <div class="docs-tag-row">
+            <div class="poodle-docs-tag-row">
               {#each entry.exampleTypes as exampleType}
                 <Pill appearance="subtle">{exampleType}</Pill>
               {/each}
@@ -170,15 +170,15 @@
       </div>
     </article>
 
-    <article class="demo-card docs-overview-card">
-      <div class="card-header">
+    <article class="poodle-demo-card poodle-docs-overview-card">
+      <div class="poodle-card-header">
         <h3>Scoped brand proof</h3>
         <p>
           Brand expression still belongs to app-owned wrappers and scoped recipes,
           not the default system chrome.
         </p>
       </div>
-      <div class="brand-proof-scope">
+      <div class="poodle-brand-proof-scope">
         <PageHeader
           title="Make room for brand styling without rebuilding the system"
           eyebrow="Website-style wrapper"
@@ -192,14 +192,14 @@
 {/snippet}
         </PageHeader>
 
-        <div class="brand-proof-grid">
+        <div class="poodle-brand-proof-grid">
           {#each brandProofCards as card}
             <Card variant={card.variant}>
               <div slot="header">
                 <Eyebrow>{card.eyebrow}</Eyebrow>
               </div>
-              <strong class="detail-card-value">{card.title}</strong>
-              <p class="detail-card-meta">{card.summary}</p>
+              <strong class="poodle-detail-card-value">{card.title}</strong>
+              <p class="poodle-detail-card-meta">{card.summary}</p>
             </Card>
           {/each}
         </div>

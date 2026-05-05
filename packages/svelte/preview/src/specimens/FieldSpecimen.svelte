@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Default with description">
     <Field label="Display name" description="This is how your name appears to other users." id="field-name">
       <TextInput id="field-name" placeholder="Enter your name" ariaLabel="Display name" />
@@ -48,7 +48,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

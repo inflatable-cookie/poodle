@@ -4,7 +4,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Neutral">
     <EmptyState title="No projects yet" message="Create your first project to get started.">
       <svelte:fragment slot="actions">
@@ -47,7 +47,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

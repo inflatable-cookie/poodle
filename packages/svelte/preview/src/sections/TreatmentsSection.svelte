@@ -82,11 +82,11 @@
   ];
 </script>
 
-<div class="treatments-section">
-  <article class="treatments-page">
-    <header class="treatments-page__hero">
-      <h1 class="treatments-page__title">Treatment System</h1>
-      <p class="treatments-page__description">
+<div class="poodle-treatments-section">
+  <article class="poodle-treatments-page">
+    <header class="poodle-treatments-page__hero">
+      <h1 class="poodle-treatments-page__title">Treatment System</h1>
+      <p class="poodle-treatments-page__description">
         Treatments sit between canonical semantic tokens and app-owned wrappers.
         They let downstream consumers apply cohesive visual branding across component
         families without redefining token meaning.
@@ -95,20 +95,20 @@
 
     <Separator />
 
-    <section class="treatments-page__section">
-      <h2 class="treatments-page__heading">Three-Layer Architecture</h2>
-      <div class="layer-stack">
-        <div class="layer-card">
+    <section class="poodle-treatments-page__section">
+      <h2 class="poodle-treatments-page__heading">Three-Layer Architecture</h2>
+      <div class="poodle-layer-stack">
+        <div class="poodle-layer-card">
           <Eyebrow>Layer 1</Eyebrow>
           <strong>Canonical Semantic Tokens</strong>
           <p>Typed, narrow values: color, spacing, radius. Never broadened to hold gradients or web-only effects.</p>
         </div>
-        <div class="layer-card layer-card--active">
+        <div class="poodle-layer-card poodle-layer-card--active">
           <Eyebrow>Layer 2</Eyebrow>
           <strong>Appearance Recipes &amp; Treatment Roles</strong>
           <p>Grouped visual overrides scoped to component families. May include gradients, layered shadows, and other web-only effects.</p>
         </div>
-        <div class="layer-card">
+        <div class="poodle-layer-card">
           <Eyebrow>Layer 3</Eyebrow>
           <strong>App-Owned Wrappers &amp; Composites</strong>
           <p>Structural brand expression built by composing Poodle primitives.</p>
@@ -118,19 +118,19 @@
 
     <Separator />
 
-    <section class="treatments-page__section">
-      <h2 class="treatments-page__heading">How Components Consume Treatments</h2>
-      <p class="treatments-page__body">
+    <section class="poodle-treatments-page__section">
+      <h2 class="poodle-treatments-page__heading">How Components Consume Treatments</h2>
+      <p class="poodle-treatments-page__body">
         Components reference treatment variables using CSS custom property fallbacks.
         The treatment variable is tried first; if undefined, the semantic token value is used.
       </p>
-      <pre class="treatments-page__code"><code>{`.text-input {
+      <pre class="poodle-treatments-page__code"><code>{`.text-input {
   background: var(
     --poodle-treatment-interactive-subtle-fill,
     var(--poodle-color-background-surface)
   );
 }`}</code></pre>
-      <p class="treatments-page__body">
+      <p class="poodle-treatments-page__body">
         This means components render with standard token values by default, and
         treatment values take precedence only when explicitly set. Components never
         need to know which specific treatment is active.
@@ -139,29 +139,29 @@
 
     <Separator />
 
-    <section class="treatments-page__section">
-      <h2 class="treatments-page__heading">Treatment Roles</h2>
-      <p class="treatments-page__body">
+    <section class="poodle-treatments-page__section">
+      <h2 class="poodle-treatments-page__heading">Treatment Roles</h2>
+      <p class="poodle-treatments-page__body">
         Six family-level roles are defined. Components map these into local CSS aliases
         rather than inventing per-component vocabularies.
       </p>
 
       {#each treatmentRoles as role}
-        <div class="role-card">
-          <div class="role-card__header">
-            <h3 class="role-card__name">{role.name}</h3>
+        <div class="poodle-role-card">
+          <div class="poodle-role-card__header">
+            <h3 class="poodle-role-card__name">{role.name}</h3>
             {#if role.components.length > 0}
-              <div class="role-card__pills">
+              <div class="poodle-role-card__pills">
                 {#each role.components as comp}
                   <Pill size="sm" tone="neutral" appearance="subtle">{comp}</Pill>
                 {/each}
               </div>
             {/if}
           </div>
-          <p class="role-card__description">{role.description}</p>
+          <p class="poodle-role-card__description">{role.description}</p>
           {#if role.variables.length > 0}
-            <div class="role-card__table-wrap">
-              <table class="role-card__table">
+            <div class="poodle-role-card__table-wrap">
+              <table class="poodle-role-card__table">
                 <thead>
                   <tr>
                     <th>Variable</th>
@@ -171,7 +171,7 @@
                 <tbody>
                   {#each role.variables as v}
                     <tr>
-                      <td class="role-card__var"><code>{v.name}</code></td>
+                      <td class="poodle-role-card__var"><code>{v.name}</code></td>
                       <td>{v.purpose}</td>
                     </tr>
                   {/each}
@@ -185,19 +185,19 @@
 
     <Separator />
 
-    <section class="treatments-page__section">
-      <h2 class="treatments-page__heading">Applying a Treatment</h2>
-      <p class="treatments-page__body">
+    <section class="poodle-treatments-page__section">
+      <h2 class="poodle-treatments-page__heading">Applying a Treatment</h2>
+      <p class="poodle-treatments-page__body">
         Set a <code>data-appearance-treatment</code> attribute on a container element.
         All descendants inherit treatment values through the CSS cascade.
       </p>
-      <pre class="treatments-page__code"><code>{`<div data-appearance-treatment="brand-raised">
+      <pre class="poodle-treatments-page__code"><code>{`<div data-appearance-treatment="brand-raised">
   <!-- All Poodle components inside inherit treatment values -->
 </div>`}</code></pre>
-      <p class="treatments-page__body">
+      <p class="poodle-treatments-page__body">
         Then define CSS that overrides treatment variables when that attribute is present:
       </p>
-      <pre class="treatments-page__code"><code>{`[data-appearance-treatment="brand-raised"] {
+      <pre class="poodle-treatments-page__code"><code>{`[data-appearance-treatment="brand-raised"] {
   --poodle-treatment-interactive-fill:
     linear-gradient(180deg, rgba(255,255,255,0.14), transparent),
     var(--poodle-color-background-elevated);
@@ -213,26 +213,26 @@
 
     <Separator />
 
-    <section class="treatments-page__section">
-      <h2 class="treatments-page__heading">Creating a New Treatment</h2>
-      <div class="step-list">
-        <div class="step">
-          <div class="step__number">1</div>
-          <div class="step__content">
+    <section class="poodle-treatments-page__section">
+      <h2 class="poodle-treatments-page__heading">Creating a New Treatment</h2>
+      <div class="poodle-step-list">
+        <div class="poodle-step">
+          <div class="poodle-step__number">1</div>
+          <div class="poodle-step__content">
             <strong>Define treatment variables</strong>
             <p>Create a CSS rule block that sets treatment variables for every role you want to affect. Unset variables fall through to semantic token defaults.</p>
           </div>
         </div>
-        <div class="step">
-          <div class="step__number">2</div>
-          <div class="step__content">
+        <div class="poodle-step">
+          <div class="poodle-step__number">2</div>
+          <div class="poodle-step__content">
             <strong>Add theme-specific adjustments</strong>
             <p>Treatments may need per-theme overrides, especially for shadows which look different on light versus dark backgrounds.</p>
           </div>
         </div>
-        <div class="step">
-          <div class="step__number">3</div>
-          <div class="step__content">
+        <div class="poodle-step">
+          <div class="poodle-step__number">3</div>
+          <div class="poodle-step__content">
             <strong>Register in the preview app</strong>
             <p>Add the treatment name to <code>DisplayControls.svelte</code> and <code>App.svelte</code> to make it selectable during development.</p>
           </div>
@@ -242,26 +242,26 @@
 
     <Separator />
 
-    <section class="treatments-page__section">
-      <h2 class="treatments-page__heading">Rules</h2>
-      <div class="rule-list">
-        <div class="rule">
+    <section class="poodle-treatments-page__section">
+      <h2 class="poodle-treatments-page__heading">Rules</h2>
+      <div class="poodle-rule-list">
+        <div class="poodle-rule">
           <strong>Token purity</strong>
           <p>Semantic tokens must remain typed and narrow. Do not broaden a color token to hold a gradient.</p>
         </div>
-        <div class="rule">
+        <div class="poodle-rule">
           <strong>Family-level roles</strong>
           <p>Prefer shared treatment roles over per-component treatment variables.</p>
         </div>
-        <div class="rule">
+        <div class="poodle-rule">
           <strong>Fallback chain</strong>
           <p>Every treatment variable reference must include a semantic token fallback.</p>
         </div>
-        <div class="rule">
+        <div class="poodle-rule">
           <strong>Gradient rule</strong>
           <p>Gradients are valid appearance treatments, not canonical colors.</p>
         </div>
-        <div class="rule">
+        <div class="poodle-rule">
           <strong>Safe override boundary</strong>
           <p>Downstream apps may scope recipe overrides to subtrees. They must not redefine semantic token meaning.</p>
         </div>
@@ -271,53 +271,53 @@
 </div>
 
 <style>
-  .treatments-section {
+  .poodle-treatments-section {
     flex: 1;
     overflow-y: auto;
   }
 
-  .treatments-page {
+  .poodle-treatments-page {
     padding: 1.5rem 2rem;
     max-width: 52rem;
   }
 
-  .treatments-page__hero {
+  .poodle-treatments-page__hero {
     margin-bottom: 1.5rem;
   }
 
-  .treatments-page__title {
+  .poodle-treatments-page__title {
     font-size: 2rem;
     font-weight: 700;
     color: var(--poodle-color-text-primary);
     margin: 0 0 0.75rem;
   }
 
-  .treatments-page__description {
+  .poodle-treatments-page__description {
     font-size: 1rem;
     line-height: 1.6;
     color: var(--poodle-color-text-secondary);
     margin: 0;
   }
 
-  .treatments-page__section {
+  .poodle-treatments-page__section {
     padding: 1.5rem 0;
   }
 
-  .treatments-page__heading {
+  .poodle-treatments-page__heading {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--poodle-color-text-primary);
     margin: 0 0 1rem;
   }
 
-  .treatments-page__body {
+  .poodle-treatments-page__body {
     font-size: 0.875rem;
     line-height: 1.6;
     color: var(--poodle-color-text-secondary);
     margin: 0 0 1rem;
   }
 
-  .treatments-page__body code {
+  .poodle-treatments-page__body code {
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.8125rem;
     padding: 0.0625rem 0.25rem;
@@ -325,7 +325,7 @@
     background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
   }
 
-  .treatments-page__code {
+  .poodle-treatments-page__code {
     padding: 0.75rem 1rem;
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-canvas) 90%, transparent);
@@ -339,12 +339,12 @@
     white-space: pre;
   }
 
-  .layer-stack {
+  .poodle-layer-stack {
     display: grid;
     gap: 0.75rem;
   }
 
-  .layer-card {
+  .poodle-layer-card {
     display: grid;
     gap: 0.25rem;
     padding: 1rem;
@@ -353,23 +353,23 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
-  .layer-card--active {
+  .poodle-layer-card--active {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-default));
     background: color-mix(in srgb, var(--poodle-color-accent-base) 6%, var(--poodle-color-background-surface));
   }
 
-  .layer-card strong {
+  .poodle-layer-card strong {
     font-size: 0.9375rem;
   }
 
-  .layer-card p {
+  .poodle-layer-card p {
     margin: 0;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
-  .role-card {
+  .poodle-role-card {
     display: grid;
     gap: 0.5rem;
     padding: 1rem;
@@ -378,14 +378,14 @@
     border-radius: var(--poodle-radius-surface);
   }
 
-  .role-card__header {
+  .poodle-role-card__header {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.75rem;
   }
 
-  .role-card__name {
+  .poodle-role-card__name {
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.9375rem;
     font-weight: 600;
@@ -393,31 +393,31 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .role-card__pills {
+  .poodle-role-card__pills {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
   }
 
-  .role-card__description {
+  .poodle-role-card__description {
     margin: 0;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
-  .role-card__table-wrap {
+  .poodle-role-card__table-wrap {
     overflow-x: auto;
   }
 
-  .role-card__table {
+  .poodle-role-card__table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .role-card__table th {
+  .poodle-role-card__table th {
     text-align: left;
     font-weight: 600;
     color: var(--poodle-color-text-secondary);
@@ -428,36 +428,36 @@
     letter-spacing: 0.05em;
   }
 
-  .role-card__table td {
+  .poodle-role-card__table td {
     padding: 0.375rem 0.75rem;
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 40%, transparent);
     color: var(--poodle-color-text-secondary);
   }
 
-  .role-card__table tbody tr:last-child td {
+  .poodle-role-card__table tbody tr:last-child td {
     border-bottom: none;
   }
 
-  .role-card__var code {
+  .poodle-role-card__var code {
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.75rem;
     color: var(--poodle-color-text-primary);
     white-space: nowrap;
   }
 
-  .step-list {
+  .poodle-step-list {
     display: grid;
     gap: 1rem;
   }
 
-  .step {
+  .poodle-step {
     display: grid;
     grid-template-columns: 2rem 1fr;
     gap: 0.75rem;
     align-items: start;
   }
 
-  .step__number {
+  .poodle-step__number {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -470,23 +470,23 @@
     font-weight: 700;
   }
 
-  .step__content {
+  .poodle-step__content {
     display: grid;
     gap: 0.25rem;
   }
 
-  .step__content strong {
+  .poodle-step__content strong {
     font-size: 0.9375rem;
   }
 
-  .step__content p {
+  .poodle-step__content p {
     margin: 0;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     line-height: 1.5;
   }
 
-  .step__content code {
+  .poodle-step__content code {
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.75rem;
     padding: 0.0625rem 0.25rem;
@@ -494,12 +494,12 @@
     background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
   }
 
-  .rule-list {
+  .poodle-rule-list {
     display: grid;
     gap: 0.75rem;
   }
 
-  .rule {
+  .poodle-rule {
     display: grid;
     gap: 0.25rem;
     padding: 0.875rem;
@@ -507,11 +507,11 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
-  .rule strong {
+  .poodle-rule strong {
     font-size: 0.875rem;
   }
 
-  .rule p {
+  .poodle-rule p {
     margin: 0;
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);

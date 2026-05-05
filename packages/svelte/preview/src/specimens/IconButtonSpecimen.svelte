@@ -13,7 +13,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Variants">
-    <div class="button-row">
+    <div class="poodle-button-row">
       <IconButton icon={plus} ariaLabel="Add" variant="primary" />
       <IconButton icon={settings} ariaLabel="Settings" variant="secondary" />
       <IconButton icon={x} ariaLabel="Close" variant="ghost" />
@@ -21,7 +21,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Danger tone">
-    <div class="button-row">
+    <div class="poodle-button-row">
       <IconButton icon={trash2} ariaLabel="Delete" variant="primary" tone="danger" />
       <IconButton icon={trash2} ariaLabel="Delete" variant="secondary" tone="danger" />
       <IconButton icon={trash2} ariaLabel="Delete" variant="ghost" tone="danger" />
@@ -29,7 +29,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Toggle (text editor toolbar)">
-    <div class="button-row">
+    <div class="poodle-button-row">
       <IconButton icon="bold" ariaLabel="Bold" variant="ghost" bind:pressed={bold} />
       <IconButton icon="italic" ariaLabel="Italic" variant="ghost" bind:pressed={italic} />
       <IconButton icon="underline" ariaLabel="Underline" variant="ghost" bind:pressed={underline} />
@@ -37,14 +37,14 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Toggle (secondary variant)">
-    <div class="button-row">
+    <div class="poodle-button-row">
       <IconButton icon={mapPin} ariaLabel="Pin" variant="secondary" bind:pressed={pinned} />
       <IconButton icon={star} ariaLabel="Favorite" variant="secondary" bind:pressed={starred} />
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled and loading">
-    <div class="button-row">
+    <div class="poodle-button-row">
       <IconButton icon={ban} ariaLabel="Disabled" disabled variant="secondary" />
       <IconButton icon={refreshCw} ariaLabel="Loading" loading variant="secondary" />
     </div>
@@ -60,7 +60,7 @@
 </SpecimenLayout>
 
 <style>
-  .button-row {
+  .poodle-button-row {
     display: flex;
     gap: 0.5rem;
     align-items: center;

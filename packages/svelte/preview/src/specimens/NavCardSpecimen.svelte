@@ -6,7 +6,7 @@
   let lastClick = "";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Navigation cards in a grid (2 columns)">
     <Grid columns="1fr 1fr" gap="md" asRole="navigation" ariaLabel="Navigation cards">
       <NavCard
@@ -57,6 +57,6 @@
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1rem; }
+  .poodle-specimen { display: flex; flex-direction: column; gap: 1rem; }
   p { margin: 0; }
 </style>

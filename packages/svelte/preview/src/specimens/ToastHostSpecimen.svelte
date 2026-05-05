@@ -38,32 +38,32 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Runtime host">
-    <p class="specimen__copy">
+    <p class="poodle-specimen__copy">
       The host owns timer policy and fixed positioning while `ToastStack` stays presentational.
     </p>
     <Button variant="secondary" on:click={pushToast}>Add toast</Button>
   </SpecimenGroup>
 
-  <div class="specimen__surface">
+  <div class="poodle-specimen__surface">
     <ToastHost {store} />
   </div>
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__copy {
+  .poodle-specimen__copy {
     margin: 0;
     color: var(--poodle-color-text-secondary);
   }
 
-  .specimen__surface {
+  .poodle-specimen__surface {
     position: relative;
     min-height: 16rem;
     border: 1px dashed color-mix(in srgb, var(--poodle-color-border-default) 82%, transparent);
@@ -71,7 +71,7 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent);
   }
 
-  .specimen__surface :global(.toast-host) {
+  .poodle-specimen__surface :global(.poodle-toast-host) {
     position: absolute;
   }
 </style>

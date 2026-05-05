@@ -7,45 +7,45 @@
 </script>
 
 <section
-  class="detail-section"
+  class="poodle-detail-section"
   data-separated={separated}
   data-columns={columns}
   aria-label={ariaLabel ?? undefined}
 >
   {#if title || description || $$slots.actions}
-    <div class="detail-section__header">
-      <div class="detail-section__title-block">
+    <div class="poodle-detail-section__header">
+      <div class="poodle-detail-section__title-block">
         {#if title}
-          <h3 class="detail-section__title">{title}</h3>
+          <h3 class="poodle-detail-section__title">{title}</h3>
         {/if}
         {#if description}
-          <p class="detail-section__description">{description}</p>
+          <p class="poodle-detail-section__description">{description}</p>
         {/if}
       </div>
       {#if $$slots.actions}
-        <div class="detail-section__actions">
+        <div class="poodle-detail-section__actions">
           <slot name="actions" />
         </div>
       {/if}
     </div>
   {/if}
-  <div class="detail-section__body">
+  <div class="poodle-detail-section__body">
     <slot />
   </div>
 </section>
 
 <style>
-  .detail-section {
+  .poodle-detail-section {
     display: grid;
     gap: calc(var(--poodle-space-stack-md) + 0.125rem);
     padding-top: calc(var(--poodle-space-stack-md) + 0.125rem);
   }
 
-  .detail-section[data-separated="true"] {
+  .poodle-detail-section[data-separated="true"] {
     border-top: 0;
   }
 
-  .detail-section__header {
+  .poodle-detail-section__header {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -53,44 +53,44 @@
     align-items: start;
   }
 
-  .detail-section__title-block {
+  .poodle-detail-section__title-block {
     display: grid;
     gap: 0.375rem;
   }
 
-  .detail-section__title,
-  .detail-section__description {
+  .poodle-detail-section__title,
+  .poodle-detail-section__description {
     margin: 0;
   }
 
-  .detail-section__title {
+  .poodle-detail-section__title {
     font-family: var(--poodle-typography-heading-family);
     font-size: 1.125rem;
     line-height: 1.2;
   }
 
-  .detail-section__description {
+  .poodle-detail-section__description {
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .detail-section__body {
+  .poodle-detail-section__body {
     display: grid;
     gap: var(--poodle-space-stack-sm);
   }
 
-  .detail-section[data-columns="2"] .detail-section__body {
+  .poodle-detail-section[data-columns="2"] .poodle-detail-section__body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .detail-section[data-columns="3"] .detail-section__body {
+  .poodle-detail-section[data-columns="3"] .poodle-detail-section__body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   @media (max-width: 60rem) {
-    .detail-section[data-columns="2"] .detail-section__body,
-    .detail-section[data-columns="3"] .detail-section__body {
+    .poodle-detail-section[data-columns="2"] .poodle-detail-section__body,
+    .poodle-detail-section[data-columns="3"] .poodle-detail-section__body {
       grid-template-columns: 1fr;
     }
   }

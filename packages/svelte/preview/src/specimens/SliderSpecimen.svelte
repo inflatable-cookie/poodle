@@ -7,7 +7,7 @@
   let opacity = 100;
 </script>
 
-<div class="slider-specimen">
+<div class="poodle-slider-specimen">
 <SpecimenLayout>
   <SpecimenGroup label="Default">
     <Slider
@@ -47,7 +47,7 @@
 </div>
 
 <style>
-  .slider-specimen {
+  .poodle-slider-specimen {
     max-width: 20rem;
   }
 </style>

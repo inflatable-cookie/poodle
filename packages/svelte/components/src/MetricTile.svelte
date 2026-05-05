@@ -28,13 +28,13 @@
   }
 </script>
 
-<div class="state-tile" aria-label={ariaLabel ?? `${label}: ${value}`}>
-  <span class="state-tile__label">{label}</span>
-  <div class="state-tile__body">
-    <strong class="state-tile__value">{value}</strong>
+<div class="poodle-state-tile" aria-label={ariaLabel ?? `${label}: ${value}`}>
+  <span class="poodle-state-tile__label">{label}</span>
+  <div class="poodle-state-tile__body">
+    <strong class="poodle-state-tile__value">{value}</strong>
     {#if sparklinePath}
       <svg
-        class="state-tile__sparkline"
+        class="poodle-state-tile__sparkline"
         viewBox="0 0 64 24"
         fill="none"
         aria-hidden="true"
@@ -50,8 +50,8 @@
     {/if}
   </div>
   {#if trend}
-    <span class="state-tile__trend" data-trend={trend}>
-      <span class="state-tile__trend-arrow" aria-hidden="true">
+    <span class="poodle-state-tile__trend" data-trend={trend}>
+      <span class="poodle-state-tile__trend-arrow" aria-hidden="true">
         {#if trend === "up"}<Icon name="trending-up" />{:else if trend === "down"}<Icon name="trending-down" />{:else}<Icon name="arrow-right" />{/if}
       </span>
       {#if trendLabel}
@@ -62,7 +62,7 @@
 </div>
 
 <style>
-  .state-tile {
+  .poodle-state-tile {
     display: grid;
     gap: var(--poodle-space-inline-sm);
     padding: 0.625rem var(--poodle-space-panel-x);
@@ -71,30 +71,30 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
-  .state-tile__label {
+  .poodle-state-tile__label {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;
   }
 
-  .state-tile__body {
+  .poodle-state-tile__body {
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-md);
   }
 
-  .state-tile__value {
+  .poodle-state-tile__value {
     font-size: 1rem;
   }
 
-  .state-tile__sparkline {
+  .poodle-state-tile__sparkline {
     width: 4rem;
     height: 1.5rem;
     color: var(--poodle-color-text-tertiary);
     flex-shrink: 0;
   }
 
-  .state-tile__trend {
+  .poodle-state-tile__trend {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -103,24 +103,24 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  .state-tile__trend[data-trend="up"] {
+  .poodle-state-tile__trend[data-trend="up"] {
     color: var(--poodle-color-status-success, #22c55e);
   }
 
-  .state-tile__trend[data-trend="down"] {
+  .poodle-state-tile__trend[data-trend="down"] {
     color: var(--poodle-color-status-danger, #ef4444);
   }
 
-  .state-tile__trend[data-trend="flat"] {
+  .poodle-state-tile__trend[data-trend="flat"] {
     color: var(--poodle-color-text-tertiary);
   }
 
-  .state-tile__trend-arrow {
+  .poodle-state-tile__trend-arrow {
     font-size: 0.875rem;
     line-height: 1;
   }
 
-  :global([data-theme="light"]) .state-tile {
+  :global([data-theme="light"]) .poodle-state-tile {
     background: var(--poodle-treatment-surface-fill);
   }
 </style>

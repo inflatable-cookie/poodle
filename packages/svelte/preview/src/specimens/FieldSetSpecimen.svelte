@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Contact Information">
     <FieldSet legend="Contact Information">
       <Field id="fs-name" label="Full Name" required>
@@ -66,7 +66,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Multiple sections">
-    <div class="form-sections">
+    <div class="poodle-form-sections">
       <FieldSet legend="Personal" columns={2}>
         <Field id="fs2-first" label="First Name" required>
           <TextInput id="fs2-first" ariaLabel="First Name" />
@@ -104,14 +104,14 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     max-width: 36rem;
   }
 
-  .form-sections {
+  .poodle-form-sections {
     display: flex;
     flex-direction: column;
     gap: var(--poodle-space-stack-lg);

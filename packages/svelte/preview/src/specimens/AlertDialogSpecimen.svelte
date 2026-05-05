@@ -13,8 +13,8 @@
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">
-  <div class="specimen">
-    <div class="specimen__row">
+  <div class="poodle-specimen">
+    <div class="poodle-specimen__row">
       <Eyebrow>Danger tone</Eyebrow>
       <Button tone="danger" on:click={() => (dangerOpen = true)}>Delete item</Button>
       <AlertDialog
@@ -29,7 +29,7 @@
       />
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Warning tone</Eyebrow>
       <Button variant="secondary" on:click={() => (warningOpen = true)}>Reset settings</Button>
       <AlertDialog
@@ -45,7 +45,7 @@
       />
     </div>
 
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Eyebrow>Async confirm</Eyebrow>
       <Button tone="danger" on:click={() => (asyncOpen = true)}>Archive project</Button>
       <AlertDialog
@@ -58,7 +58,7 @@
         on:cancel={() => (asyncOpen = false)}
         on:openChange={(e) => (asyncOpen = e.detail.open ? true : null)}
       >
-        <div class="user-card">
+        <div class="poodle-user-card">
           <strong>Roadmap Cleanup</strong>
           <span>14 linked tasks will move to the archived view.</span>
         </div>
@@ -66,31 +66,31 @@
     </div>
 
     {#if lastAction}
-      <p class="specimen__hint">Last action: <strong>{lastAction}</strong></p>
+      <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
     {/if}
   </div>
 </Surface>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
 
-  .specimen__hint {
+  .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
   }
 
-  .user-card {
+  .poodle-user-card {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
@@ -99,7 +99,7 @@
     background: var(--poodle-color-background-panel);
   }
 
-  .user-card span {
+  .poodle-user-card span {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }

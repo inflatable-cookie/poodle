@@ -3,9 +3,9 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Basic shapes">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Skeleton shape="line" width="12rem" />
       <Skeleton shape="circle" width="2.5rem" height="2.5rem" />
       <Skeleton shape="block" width="8rem" height="3rem" />
@@ -29,7 +29,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Preset: card">
-    <div class="specimen__card-grid">
+    <div class="poodle-specimen__card-grid">
       <Skeleton preset="card" />
       <Skeleton preset="card" />
     </div>
@@ -45,20 +45,20 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
   }
 
-  .specimen__card-grid {
+  .poodle-specimen__card-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;

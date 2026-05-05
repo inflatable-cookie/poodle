@@ -12,7 +12,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Placements">
-    <div class="specimen__row">
+    <div class="poodle-specimen__row">
       <Tooltip content="Top tooltip" placement="top">
         <Button variant="ghost">Top</Button>
       </Tooltip>
@@ -42,7 +42,7 @@
 </SpecimenLayout>
 
 <style>
-  .specimen__row {
+  .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;

@@ -7,9 +7,9 @@
   let selectedCard = false;
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Interactive list cards">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="design-system-v2.figma"
         subtitle="Updated by Clay · 2h ago"
@@ -40,7 +40,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Link roots and explicit actions">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="Billing settings"
         subtitle="Manage invoices and payment methods"
@@ -66,7 +66,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Selectable cards">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="Selected row"
         subtitle="Batch-selection ready"
@@ -107,7 +107,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Rounded-square leading (thumbnails)">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="hero-banner.png"
         subtitle="Uploaded by Jamie · 4h ago"
@@ -132,7 +132,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With badges">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="API integration guide"
         subtitle="Updated yesterday"
@@ -161,7 +161,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With footer counters">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="Design system"
         subtitle="12 contributors"
@@ -196,7 +196,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Solid fill with accent colors">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="Design tokens"
         subtitle="Foundation layer"
@@ -243,8 +243,31 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="With context menu">
-    <div class="specimen__stack">
+  <SpecimenGroup label="With built-in context menu">
+    <div class="poodle-specimen__stack">
+      <ListCard
+        title="Right-click for actions"
+        subtitle="Context menu on the whole card"
+        meta="12 KB"
+        interactive
+        contextMenuItems={[
+          { label: "Open", value: "open" },
+          { label: "Rename", value: "rename" },
+          { label: "Duplicate", value: "duplicate" },
+          { kind: "separator", label: "", value: "sep-1" },
+          { label: "Delete", value: "delete" },
+        ]}
+        contextMenuAriaLabel="File actions"
+        onContextAction={(value) => (lastClick = `Action: ${value}`)}
+        on:click={() => (lastClick = "Card clicked")}
+      >
+        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+      </ListCard>
+    </div>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="With wrapped context menu">
+    <div class="poodle-specimen__stack">
       <ContextMenu
         items={[
           { label: "Open", value: "open" },
@@ -256,8 +279,8 @@
         on:action={(e) => (lastClick = `Action: ${e.detail.value}`)}
       >
         <ListCard
-          title="Right-click for actions"
-          subtitle="Context menu on the whole card"
+          title="Legacy wrapper path"
+          subtitle="Still supported for arbitrary content"
           meta="12 KB"
           interactive
           on:click={() => (lastClick = "Card clicked")}
@@ -269,7 +292,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Not live (dashed border, interactive)">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="Unpublished draft"
         subtitle="Created yesterday · not yet deployed"
@@ -296,7 +319,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Corner sash badges">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       <ListCard
         title="Free tier plan"
         subtitle="No credit card required"
@@ -344,7 +367,7 @@
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1rem; }
-  .specimen__stack { display: flex; flex-direction: column; gap: 0.25rem; }
+  .poodle-specimen { display: flex; flex-direction: column; gap: 1rem; }
+  .poodle-specimen__stack { display: flex; flex-direction: column; gap: 0.25rem; }
   p { margin: 0; }
 </style>

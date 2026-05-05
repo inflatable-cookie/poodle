@@ -35,10 +35,10 @@
   }
 </script>
 
-<nav class="breadcrumbs" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
-  <ol class="breadcrumbs__list">
+<nav class="poodle-breadcrumbs" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
+  <ol class="poodle-breadcrumbs__list">
     {#each visibleItems as item, index}
-      <li class="breadcrumbs__item">
+      <li class="poodle-breadcrumbs__item">
         {#if item.current || index === visibleItems.length - 1}
           <span aria-current="page">{item.label}</span>
         {:else if item.href}
@@ -49,7 +49,7 @@
           <button type="button" on:click={() => handleNavigate(item)}>{item.label}</button>
         {/if}
         {#if index < visibleItems.length - 1}
-          <span class="breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" /></span>
+          <span class="poodle-breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" /></span>
         {/if}
       </li>
     {/each}
@@ -57,7 +57,7 @@
 </nav>
 
 <style>
-  .breadcrumbs__list {
+  .poodle-breadcrumbs__list {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
@@ -69,14 +69,14 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .breadcrumbs__item {
+  .poodle-breadcrumbs__item {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
   }
 
-  .breadcrumbs a,
-  .breadcrumbs button {
+  .poodle-breadcrumbs a,
+  .poodle-breadcrumbs button {
     border: 0;
     padding: 0;
     background: transparent;
@@ -86,43 +86,43 @@
     text-decoration: none;
   }
 
-  .breadcrumbs__separator {
+  .poodle-breadcrumbs__separator {
     display: inline-flex;
     opacity: 0.4;
   }
 
-  .breadcrumbs [aria-current="page"] {
+  .poodle-breadcrumbs [aria-current="page"] {
     color: var(--poodle-color-text-primary);
   }
 
   /* Size variants */
-  .breadcrumbs[data-size="xs"] .breadcrumbs__list {
+  .poodle-breadcrumbs[data-size="xs"] .poodle-breadcrumbs__list {
     gap: 0.25rem;
     font-size: 0.6875rem;
   }
-  .breadcrumbs[data-size="xs"] .breadcrumbs__item { gap: 0.25rem; }
+  .poodle-breadcrumbs[data-size="xs"] .poodle-breadcrumbs__item { gap: 0.25rem; }
 
-  .breadcrumbs[data-size="sm"] .breadcrumbs__list {
+  .poodle-breadcrumbs[data-size="sm"] .poodle-breadcrumbs__list {
     gap: 0.375rem;
     font-size: 0.78125rem;
   }
-  .breadcrumbs[data-size="sm"] .breadcrumbs__item { gap: 0.375rem; }
+  .poodle-breadcrumbs[data-size="sm"] .poodle-breadcrumbs__item { gap: 0.375rem; }
 
-  .breadcrumbs[data-size="lg"] .breadcrumbs__list {
+  .poodle-breadcrumbs[data-size="lg"] .poodle-breadcrumbs__list {
     gap: 0.625rem;
     font-size: 1rem;
   }
-  .breadcrumbs[data-size="lg"] .breadcrumbs__item { gap: 0.625rem; }
+  .poodle-breadcrumbs[data-size="lg"] .poodle-breadcrumbs__item { gap: 0.625rem; }
 
-  .breadcrumbs[data-size="xl"] .breadcrumbs__list {
+  .poodle-breadcrumbs[data-size="xl"] .poodle-breadcrumbs__list {
     gap: 0.75rem;
     font-size: 1.125rem;
   }
-  .breadcrumbs[data-size="xl"] .breadcrumbs__item { gap: 0.75rem; }
+  .poodle-breadcrumbs[data-size="xl"] .poodle-breadcrumbs__item { gap: 0.75rem; }
 
   /* Density variants */
-  .breadcrumbs[data-density="compact"] .breadcrumbs__list { gap: 0.25rem; }
-  .breadcrumbs[data-density="compact"] .breadcrumbs__item { gap: 0.25rem; }
-  .breadcrumbs[data-density="comfortable"] .breadcrumbs__list { gap: 0.75rem; }
-  .breadcrumbs[data-density="comfortable"] .breadcrumbs__item { gap: 0.75rem; }
+  .poodle-breadcrumbs[data-density="compact"] .poodle-breadcrumbs__list { gap: 0.25rem; }
+  .poodle-breadcrumbs[data-density="compact"] .poodle-breadcrumbs__item { gap: 0.25rem; }
+  .poodle-breadcrumbs[data-density="comfortable"] .poodle-breadcrumbs__list { gap: 0.75rem; }
+  .poodle-breadcrumbs[data-density="comfortable"] .poodle-breadcrumbs__item { gap: 0.75rem; }
 </style>

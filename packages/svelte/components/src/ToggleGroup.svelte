@@ -60,7 +60,7 @@
 </script>
 
 <div
-  class="toggle-group"
+  class="poodle-toggle-group"
   data-size={resolvedSize}
   data-density={resolvedDensity}
   role={selectionMode === "multiple" ? "group" : "radiogroup"}
@@ -69,8 +69,8 @@
   {#each options as option (option.value)}
     <button
       type="button"
-      class="toggle-group__item"
-      class:selected={isSelected(option.value)}
+      class="poodle-toggle-group__item"
+      class:poodle-selected={isSelected(option.value)}
       data-selected={isSelected(option.value) ? "true" : "false"}
       disabled={disabled || option.disabled === true}
       role={selectionMode === "multiple" ? "button" : "radio"}
@@ -85,7 +85,7 @@
 </div>
 
 <style>
-  .toggle-group {
+  .poodle-toggle-group {
     --poodle-toggle-group-height: var(--poodle-size-control-height);
     --poodle-toggle-group-x: var(--poodle-space-control-x);
     --poodle-toggle-group-gap: 0.25rem;
@@ -94,42 +94,42 @@
     gap: var(--poodle-toggle-group-gap);
   }
 
-  .toggle-group[data-size="xs"] {
+  .poodle-toggle-group[data-size="xs"] {
     --poodle-toggle-group-height: 1.5rem;
   }
 
-  .toggle-group[data-size="sm"] {
+  .poodle-toggle-group[data-size="sm"] {
     --poodle-toggle-group-height: 1.75rem;
   }
 
-  .toggle-group[data-size="md"] {
+  .poodle-toggle-group[data-size="md"] {
     --poodle-toggle-group-height: 2.25rem;
   }
 
-  .toggle-group[data-size="lg"] {
+  .poodle-toggle-group[data-size="lg"] {
     --poodle-toggle-group-height: 2.75rem;
   }
 
-  .toggle-group[data-size="xl"] {
+  .poodle-toggle-group[data-size="xl"] {
     --poodle-toggle-group-height: 3.25rem;
   }
 
-  .toggle-group[data-density="compact"] {
+  .poodle-toggle-group[data-density="compact"] {
     --poodle-toggle-group-x: 0.5rem;
     --poodle-toggle-group-gap: 0.1875rem;
   }
 
-  .toggle-group[data-density="default"] {
+  .poodle-toggle-group[data-density="default"] {
     --poodle-toggle-group-x: 0.75rem;
     --poodle-toggle-group-gap: 0.25rem;
   }
 
-  .toggle-group[data-density="comfortable"] {
+  .poodle-toggle-group[data-density="comfortable"] {
     --poodle-toggle-group-x: 1rem;
     --poodle-toggle-group-gap: 0.375rem;
   }
 
-  .toggle-group__item {
+  .poodle-toggle-group__item {
     min-height: calc(var(--poodle-toggle-group-height) - 0.25rem);
     padding: 0 var(--poodle-toggle-group-x);
     border: 0.0625rem solid var(
@@ -155,7 +155,7 @@
       color 180ms ease;
   }
 
-  .toggle-group__item.selected {
+  .poodle-toggle-group__item.poodle-selected {
     background:
       linear-gradient(
         color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent),
@@ -171,12 +171,12 @@
     );
   }
 
-  .toggle-group__item:focus-visible {
+  .poodle-toggle-group__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .toggle-group__item:disabled {
+  .poodle-toggle-group__item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }

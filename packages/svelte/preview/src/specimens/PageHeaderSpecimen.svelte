@@ -4,7 +4,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Basic">
     <PageHeader title="Components" subtitle="Browse and manage your component library." />
   </SpecimenGroup>
@@ -58,8 +58,8 @@
       {#snippet meta()}
         <MetaBar>
           <Pill tone="success" appearance="badge">Active</Pill>
-          <span class="meta-text">Every 6 hours</span>
-          <span class="meta-text">Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
+          <span class="poodle-meta-text">Every 6 hours</span>
+          <span class="poodle-meta-text">Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
         </MetaBar>
       {/snippet}
       {#snippet actions()}
@@ -75,13 +75,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .meta-text {
+  .poodle-meta-text {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
   }

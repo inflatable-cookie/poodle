@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Three columns">
     <Grid columns="1fr 1fr 1fr" gap="md">
       <Surface padding="md" border="subtle"><p>Column 1</p></Surface>
@@ -31,7 +31,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

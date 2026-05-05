@@ -17,8 +17,8 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
 </script>
 
-<section class="empty-state" data-variant={variant} data-size={size} data-density={resolvedDensity} aria-label={ariaLabel ?? title}>
-  <div class="empty-state__visual" aria-hidden="true">
+<section class="poodle-empty-state" data-variant={variant} data-size={size} data-density={resolvedDensity} aria-label={ariaLabel ?? title}>
+  <div class="poodle-empty-state__visual" aria-hidden="true">
     {#if $$slots.visual}
       <slot name="visual" />
     {:else}
@@ -32,7 +32,7 @@
     {/if}
   </div>
 
-  <div class="empty-state__copy">
+  <div class="poodle-empty-state__copy">
     <h3>{title}</h3>
     {#if message}
       <p>{message}</p>
@@ -40,14 +40,14 @@
   </div>
 
   {#if $$slots.actions}
-    <div class="empty-state__actions">
+    <div class="poodle-empty-state__actions">
       <slot name="actions" />
     </div>
   {/if}
 </section>
 
 <style>
-  .empty-state {
+  .poodle-empty-state {
     display: grid;
     justify-items: center;
     text-align: center;
@@ -58,15 +58,15 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
   }
 
-  .empty-state[data-variant="search"] {
+  .poodle-empty-state[data-variant="search"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent);
   }
 
-  .empty-state[data-variant="firstRun"] {
+  .poodle-empty-state[data-variant="firstRun"] {
     background: color-mix(in srgb, var(--poodle-color-status-success) 7%, transparent);
   }
 
-  .empty-state__visual {
+  .poodle-empty-state__visual {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -79,43 +79,43 @@
     font-weight: 600;
   }
 
-  .empty-state[data-size="compact"] .empty-state__visual {
+  .poodle-empty-state[data-size="compact"] .poodle-empty-state__visual {
     width: 1.75rem;
     height: 1.75rem;
     font-size: 0.9375rem;
   }
 
-  .empty-state__copy {
+  .poodle-empty-state__copy {
     display: grid;
     gap: var(--poodle-space-inline-sm);
     max-width: 24rem;
   }
 
-  .empty-state__copy h3,
-  .empty-state__copy p {
+  .poodle-empty-state__copy h3,
+  .poodle-empty-state__copy p {
     margin: 0;
   }
 
-  .empty-state__copy h3 {
+  .poodle-empty-state__copy h3 {
     font-size: 1.125rem;
     line-height: 1.2;
   }
 
-  .empty-state[data-size="compact"] .empty-state__copy h3 {
+  .poodle-empty-state[data-size="compact"] .poodle-empty-state__copy h3 {
     font-size: 0.9375rem;
   }
 
-  .empty-state__copy p {
+  .poodle-empty-state__copy p {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .empty-state[data-size="compact"] .empty-state__copy p {
+  .poodle-empty-state[data-size="compact"] .poodle-empty-state__copy p {
     font-size: 0.75rem;
   }
 
-  .empty-state__actions {
+  .poodle-empty-state__actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
@@ -123,12 +123,12 @@
 
   /* ── Density variants ─────────────────────────────────────── */
 
-  .empty-state[data-density="compact"] {
+  .poodle-empty-state[data-density="compact"] {
     gap: var(--poodle-space-stack-sm);
     padding: var(--poodle-space-stack-lg) var(--poodle-space-panel-x);
   }
 
-  .empty-state[data-density="comfortable"] {
+  .poodle-empty-state[data-density="comfortable"] {
     gap: var(--poodle-space-stack-lg);
     padding: calc(var(--poodle-space-panel-y) * 2) var(--poodle-space-panel-x);
   }

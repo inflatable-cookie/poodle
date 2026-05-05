@@ -127,7 +127,7 @@
 </script>
 
 <time
-  class="time-ago"
+  class="poodle-time-ago"
   datetime={new Date(timestamp).toISOString()}
   title={absoluteText}
   aria-label={ariaLabel ?? `${relativeText} (${absoluteText})`}
@@ -136,7 +136,7 @@
 </time>
 
 <style>
-  .time-ago {
+  .poodle-time-ago {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);

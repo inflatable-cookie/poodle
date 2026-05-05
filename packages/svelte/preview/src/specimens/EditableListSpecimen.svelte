@@ -10,7 +10,7 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Editable + reorderable">
     <EditableList
       bind:items={tags}
@@ -51,5 +51,5 @@
 </div>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 1rem; }
+  .poodle-specimen { display: flex; flex-direction: column; gap: 1rem; }
 </style>

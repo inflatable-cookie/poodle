@@ -7,24 +7,24 @@
 
 <SpecimenLayout>
   <Surface tone="panel" border="subtle" padding="md">
-    <div class="specimen">
-      <div class="specimen__item">
+    <div class="poodle-specimen">
+      <div class="poodle-specimen__item">
         <Eyebrow>Default</Eyebrow>
         <TimeInput id="start-time" ariaLabel="Start time" on:valueChange={(e) => { if (e.detail.value) time = e.detail.value; }} />
-        {#if time}<span class="specimen__value">{time}</span>{/if}
+        {#if time}<span class="poodle-specimen__value">{time}</span>{/if}
       </div>
 
-      <div class="specimen__item">
+      <div class="poodle-specimen__item">
         <Eyebrow>With default value</Eyebrow>
         <TimeInput id="meeting-time" defaultValue="14:30" ariaLabel="Meeting time" />
       </div>
 
-      <div class="specimen__item">
+      <div class="poodle-specimen__item">
         <Eyebrow>With min/max</Eyebrow>
         <TimeInput id="office" defaultValue="09:00" min="08:00" max="18:00" ariaLabel="Office hours" />
       </div>
 
-      <div class="specimen__item">
+      <div class="poodle-specimen__item">
         <Eyebrow>Disabled</Eyebrow>
         <TimeInput id="disabled-time" defaultValue="12:00" disabled ariaLabel="Disabled" />
       </div>
@@ -41,7 +41,7 @@
 </SpecimenLayout>
 
 <style>
-  .specimen { display: flex; flex-direction: column; gap: 0.75rem; }
-  .specimen__item { display: flex; align-items: center; gap: 0.75rem; }
-  .specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
+  .poodle-specimen { display: flex; flex-direction: column; gap: 0.75rem; }
+  .poodle-specimen__item { display: flex; align-items: center; gap: 0.75rem; }
+  .poodle-specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
 </style>

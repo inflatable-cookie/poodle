@@ -49,7 +49,7 @@
   }
 </script>
 
-<article class="tokens-page">
+<article class="poodle-tokens-page">
   <Surface tone="panel" border="subtle" padding="lg">
     <TokenToolsPanel
       {activePanelId}
@@ -65,7 +65,7 @@
 </article>
 
 <style>
-  .tokens-page {
+  .poodle-tokens-page {
     padding: 1.5rem 2rem;
     max-width: 64rem;
     overflow-y: auto;

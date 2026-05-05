@@ -213,13 +213,13 @@
   }
 </script>
 
-<div class:with-prefix={Boolean(prefix)} class:with-suffix={Boolean(suffix)} class="number-input">
+<div class:poodle-with-prefix={Boolean(prefix)} class:poodle-with-suffix={Boolean(suffix)} class="poodle-number-input">
   {#if prefix}
-    <span class="number-input__prefix">{prefix}</span>
+    <span class="poodle-number-input__prefix">{prefix}</span>
   {/if}
 
   <div
-    class="number-input__field"
+    class="poodle-number-input__field"
     data-validation-state={effectiveValidationState}
     data-size={resolvedSize}
     data-density={resolvedDensity}
@@ -228,7 +228,7 @@
     <input
       {id}
       {name}
-      class="number-input__control"
+      class="poodle-number-input__control"
       type="text"
       inputmode="decimal"
       value={draftValue}
@@ -264,7 +264,7 @@
     />
 
     {#if showSteppers}
-      <div class="number-input__steppers">
+      <div class="poodle-number-input__steppers">
         <button type="button" disabled={disabled || readOnly} on:click={() => adjust(resolvedStep, "increment")}>
           <Icon name="plus" />
         </button>
@@ -276,19 +276,19 @@
   </div>
 
   {#if suffix}
-    <span class="number-input__suffix">{suffix}</span>
+    <span class="poodle-number-input__suffix">{suffix}</span>
   {/if}
 </div>
 
 <style>
-  .number-input {
+  .poodle-number-input {
     display: flex;
     align-items: stretch;
     gap: 0.5rem;
   }
 
-  .number-input__prefix,
-  .number-input__suffix {
+  .poodle-number-input__prefix,
+  .poodle-number-input__suffix {
     display: inline-flex;
     align-items: center;
     padding: 0 0.75rem;
@@ -299,7 +299,7 @@
     white-space: nowrap;
   }
 
-  .number-input__field {
+  .poodle-number-input__field {
     flex: 1 1 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -311,25 +311,25 @@
     overflow: hidden;
   }
 
-  .number-input__field[data-validation-state="invalid"] {
+  .poodle-number-input__field[data-validation-state="invalid"] {
     border-color: var(--poodle-color-status-danger);
   }
 
-  .number-input__field[data-validation-state="valid"] {
+  .poodle-number-input__field[data-validation-state="valid"] {
     border-color: var(--poodle-color-status-success);
   }
 
-  .number-input__field[data-validation-state="pending"] {
+  .poodle-number-input__field[data-validation-state="pending"] {
     border-color: var(--poodle-color-accent-base);
   }
 
-  .number-input__field:focus-within {
+  .poodle-number-input__field:focus-within {
     box-shadow:
       0 0 0 var(--poodle-border-width-focus)
       color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
   }
 
-  .number-input__control {
+  .poodle-number-input__control {
     min-width: 0;
     padding: 0 var(--poodle-space-control-x);
     border: 0;
@@ -341,14 +341,14 @@
     outline: 0;
   }
 
-  .number-input__steppers {
+  .poodle-number-input__steppers {
     display: grid;
     grid-template-rows: 1fr 1fr;
     gap: 0;
     padding: 0.0625rem;
   }
 
-  .number-input__steppers button {
+  .poodle-number-input__steppers button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -364,36 +364,36 @@
     overflow: hidden;
   }
 
-  .number-input__field[data-disabled="true"] {
+  .poodle-number-input__field[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }
 
-  .number-input__field[data-disabled="true"] .number-input__control {
+  .poodle-number-input__field[data-disabled="true"] .poodle-number-input__control {
     cursor: not-allowed;
   }
 
-  .number-input__steppers button:disabled {
+  .poodle-number-input__steppers button:disabled {
     cursor: not-allowed;
   }
 
-  .number-input__field[data-density="compact"] .number-input__control {
+  .poodle-number-input__field[data-density="compact"] .poodle-number-input__control {
     padding: 0 calc(var(--poodle-space-control-x) - 0.125rem);
   }
 
-  .number-input__field[data-density="comfortable"] .number-input__control {
+  .poodle-number-input__field[data-density="comfortable"] .poodle-number-input__control {
     padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
-  .number-input__field[data-size="xs"] { height: 1.5rem; }
-  .number-input__field[data-size="xs"] .number-input__control { font-size: 0.75rem; }
+  .poodle-number-input__field[data-size="xs"] { height: 1.5rem; }
+  .poodle-number-input__field[data-size="xs"] .poodle-number-input__control { font-size: 0.75rem; }
 
-  .number-input__field[data-size="sm"] { height: 1.75rem; }
-  .number-input__field[data-size="sm"] .number-input__control { font-size: 0.8125rem; }
+  .poodle-number-input__field[data-size="sm"] { height: 1.75rem; }
+  .poodle-number-input__field[data-size="sm"] .poodle-number-input__control { font-size: 0.8125rem; }
 
-  .number-input__field[data-size="lg"] { height: 2.75rem; }
-  .number-input__field[data-size="lg"] .number-input__control { font-size: 0.9375rem; }
+  .poodle-number-input__field[data-size="lg"] { height: 2.75rem; }
+  .poodle-number-input__field[data-size="lg"] .poodle-number-input__control { font-size: 0.9375rem; }
 
-  .number-input__field[data-size="xl"] { height: 3.25rem; }
-  .number-input__field[data-size="xl"] .number-input__control { font-size: 1rem; }
+  .poodle-number-input__field[data-size="xl"] { height: 3.25rem; }
+  .poodle-number-input__field[data-size="xl"] .poodle-number-input__control { font-size: 1rem; }
 </style>

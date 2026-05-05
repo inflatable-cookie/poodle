@@ -19,7 +19,7 @@
   const uiPresentation = getUiPresentation();
 </script>
 
-<div class="specimen-layout">
+<div class="poodle-specimen-layout">
   <Tabs
     value={activeTab}
     items={tabs}
@@ -28,19 +28,19 @@
     on:valueChange={(e) => (activeTab = e.detail.value as typeof activeTab)}
   />
 
-  <div class="specimen-layout__content">
+  <div class="poodle-specimen-layout__content">
     {#if activeTab === "examples"}
       <slot />
     {:else if activeTab === "sizes"}
       {#if bareVariants}
-        <div class="specimen-layout__variants" data-direction={variantDirection}>
+        <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each controlSizes as size}
             <slot name="sizes" {size} />
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
-          <div class="specimen-layout__variants" data-direction={variantDirection}>
+          <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
             {#each controlSizes as size}
               <slot name="sizes" {size} />
             {/each}
@@ -49,14 +49,14 @@
       {/if}
     {:else if activeTab === "densities"}
       {#if bareVariants}
-        <div class="specimen-layout__variants" data-direction={variantDirection}>
+        <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each densities as density}
             <slot name="densities" {density} />
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
-          <div class="specimen-layout__variants" data-direction={variantDirection}>
+          <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
             {#each densities as density}
               <slot name="densities" {density} />
             {/each}
@@ -68,26 +68,26 @@
 </div>
 
 <style>
-  .specimen-layout {
+  .poodle-specimen-layout {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen-layout__content {
+  .poodle-specimen-layout__content {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen-layout__variants {
+  .poodle-specimen-layout__variants {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
 
-  .specimen-layout__variants[data-direction="row"] {
+  .poodle-specimen-layout__variants[data-direction="row"] {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;

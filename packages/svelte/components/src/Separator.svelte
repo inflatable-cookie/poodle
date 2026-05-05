@@ -7,7 +7,7 @@
 </script>
 
 <div
-  class="separator"
+  class="poodle-separator"
   data-orientation={orientation}
   data-tone={tone}
   role={decorative ? undefined : "separator"}
@@ -16,22 +16,22 @@
 ></div>
 
 <style>
-  .separator {
+  .poodle-separator {
     --poodle-separator-color: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
     flex: 0 0 auto;
     background: var(--poodle-separator-color);
   }
 
-  .separator[data-tone="default"] {
+  .poodle-separator[data-tone="default"] {
     --poodle-separator-color: var(--poodle-color-border-default);
   }
 
-  .separator[data-orientation="horizontal"] {
+  .poodle-separator[data-orientation="horizontal"] {
     width: 100%;
     min-height: 0.0625rem;
   }
 
-  .separator[data-orientation="vertical"] {
+  .poodle-separator[data-orientation="vertical"] {
     width: 0.0625rem;
     align-self: stretch;
     min-height: 100%;

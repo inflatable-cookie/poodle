@@ -48,7 +48,7 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Basic form dialog">
     <Button variant="primary" on:click={() => (basicOpen = true)}>Add user</Button>
     <FormDialog
@@ -126,7 +126,7 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;

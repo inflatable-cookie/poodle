@@ -86,8 +86,8 @@
   on:openChange={handleOpenChange}
 >
   {#if $$slots.subtitle}
-    <div class="form-dialog__header">
-      <div class="form-dialog__subtitle">
+    <div class="poodle-form-dialog__header">
+      <div class="poodle-form-dialog__subtitle">
         <slot name="subtitle" {submitting} />
       </div>
     </div>
@@ -128,15 +128,15 @@
 </Dialog>
 
 <style>
-  :global(.form-dialog__surface) {
+  :global(.poodle-form-dialog__surface) {
     width: min(var(--poodle-form-dialog-width, 34rem), 100%);
   }
 
-  .form-dialog__header {
+  .poodle-form-dialog__header {
     margin-bottom: var(--poodle-space-stack-md);
   }
 
-  .form-dialog__subtitle {
+  .poodle-form-dialog__subtitle {
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-body-size, 0.875rem);
     line-height: var(--poodle-typography-body-lineHeight, 1.5);

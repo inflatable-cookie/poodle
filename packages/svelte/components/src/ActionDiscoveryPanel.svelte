@@ -80,17 +80,17 @@
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
   <div
-    class="action-discovery-panel"
+    class="poodle-action-discovery-panel"
     role="listbox"
     aria-label={ariaLabel}
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
     {#if state === "loading"}
-      <div class="action-discovery-panel__state">
-        <div class="action-discovery-panel__skeletons" aria-hidden="true">
+      <div class="poodle-action-discovery-panel__state">
+        <div class="poodle-action-discovery-panel__skeletons" aria-hidden="true">
           {#each Array.from({ length: 5 }) as _}
-            <div class="action-discovery-panel__skeleton-row">
+            <div class="poodle-action-discovery-panel__skeleton-row">
               <Skeleton width="48%" />
               <Skeleton width="20%" />
             </div>
@@ -115,9 +115,9 @@
       />
     {:else}
       {#each groupEntries as [group, groupItems]}
-        <div class="action-discovery-panel__group">
+        <div class="poodle-action-discovery-panel__group">
           <Eyebrow>{group}</Eyebrow>
-          <ul class="action-discovery-panel__list">
+          <ul class="poodle-action-discovery-panel__list">
             {#each groupItems as item (item.id)}
               <li
                 bind:this={itemElements[enabledItems.findIndex((e) => e.id === item.id)]}
@@ -135,12 +135,12 @@
                   on:focus={() => setActive(item.id)}
                 >
                   <svelte:fragment slot="trailing">
-                    <span class="action-discovery-panel__trailing">
+                    <span class="poodle-action-discovery-panel__trailing">
                       {#if item.badge}
-                        <span class="action-discovery-panel__badge">{item.badge}</span>
+                        <span class="poodle-action-discovery-panel__badge">{item.badge}</span>
                       {/if}
                       {#if item.shortcut}
-                        <kbd class="action-discovery-panel__kbd">{item.shortcut}</kbd>
+                        <kbd class="poodle-action-discovery-panel__kbd">{item.shortcut}</kbd>
                       {/if}
                     </span>
                   </svelte:fragment>
@@ -155,7 +155,7 @@
 </UiPresentationProvider>
 
 <style>
-  .action-discovery-panel {
+  .poodle-action-discovery-panel {
     --poodle-action-discovery-stack-gap: 0.75rem;
     --poodle-action-discovery-group-gap: 0.375rem;
     --poodle-action-discovery-list-gap: 0.25rem;
@@ -173,11 +173,11 @@
     overscroll-behavior: contain;
   }
 
-  .action-discovery-panel :global(.list-card) {
+  .poodle-action-discovery-panel :global(.poodle-list-card) {
     padding: var(--poodle-action-discovery-row-y) var(--poodle-action-discovery-row-x);
   }
 
-  .action-discovery-panel[data-size="xs"] {
+  .poodle-action-discovery-panel[data-size="xs"] {
     --poodle-action-discovery-chip-height: 1.125rem;
     --poodle-action-discovery-chip-x: 0.375rem;
     --poodle-action-discovery-chip-font-size: 0.5625rem;
@@ -185,14 +185,14 @@
     --poodle-action-discovery-row-x: 0.5rem;
   }
 
-  .action-discovery-panel[data-size="sm"] {
+  .poodle-action-discovery-panel[data-size="sm"] {
     --poodle-action-discovery-chip-height: 1.25rem;
     --poodle-action-discovery-chip-font-size: 0.625rem;
     --poodle-action-discovery-row-y: 0.3125rem;
     --poodle-action-discovery-row-x: 0.5rem;
   }
 
-  .action-discovery-panel[data-size="lg"] {
+  .poodle-action-discovery-panel[data-size="lg"] {
     --poodle-action-discovery-chip-height: 1.5rem;
     --poodle-action-discovery-chip-x: 0.625rem;
     --poodle-action-discovery-chip-font-size: 0.75rem;
@@ -200,7 +200,7 @@
     --poodle-action-discovery-row-x: 0.75rem;
   }
 
-  .action-discovery-panel[data-size="xl"] {
+  .poodle-action-discovery-panel[data-size="xl"] {
     --poodle-action-discovery-chip-height: 1.75rem;
     --poodle-action-discovery-chip-x: 0.75rem;
     --poodle-action-discovery-chip-font-size: 0.8125rem;
@@ -208,7 +208,7 @@
     --poodle-action-discovery-row-x: 0.875rem;
   }
 
-  .action-discovery-panel[data-density="compact"] {
+  .poodle-action-discovery-panel[data-density="compact"] {
     --poodle-action-discovery-stack-gap: 0.5rem;
     --poodle-action-discovery-group-gap: 0.25rem;
     --poodle-action-discovery-list-gap: 0.1875rem;
@@ -218,7 +218,7 @@
     --poodle-action-discovery-row-x: 0.5rem;
   }
 
-  .action-discovery-panel[data-density="comfortable"] {
+  .poodle-action-discovery-panel[data-density="comfortable"] {
     --poodle-action-discovery-stack-gap: 0.875rem;
     --poodle-action-discovery-group-gap: 0.5rem;
     --poodle-action-discovery-list-gap: 0.375rem;
@@ -228,12 +228,12 @@
     --poodle-action-discovery-row-x: 0.875rem;
   }
 
-  .action-discovery-panel__group {
+  .poodle-action-discovery-panel__group {
     display: grid;
     gap: var(--poodle-action-discovery-group-gap);
   }
 
-  .action-discovery-panel__list {
+  .poodle-action-discovery-panel__list {
     display: grid;
     gap: var(--poodle-action-discovery-list-gap);
     margin: 0;
@@ -241,21 +241,21 @@
     list-style: none;
   }
 
-  .action-discovery-panel__list li[aria-selected="true"] :global(.list-card) {
+  .poodle-action-discovery-panel__list li[aria-selected="true"] :global(.poodle-list-card) {
     border-color: transparent;
     background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-elevated));
     box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent);
   }
 
-  .action-discovery-panel__trailing {
+  .poodle-action-discovery-panel__trailing {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-action-discovery-chip-gap);
     align-items: center;
   }
 
-  .action-discovery-panel__badge,
-  .action-discovery-panel__kbd {
+  .poodle-action-discovery-panel__badge,
+  .poodle-action-discovery-panel__kbd {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -267,21 +267,21 @@
     font-size: var(--poodle-action-discovery-chip-font-size);
   }
 
-  .action-discovery-panel__kbd {
+  .poodle-action-discovery-panel__kbd {
     font-family: var(--poodle-typography-code-family);
   }
 
-  .action-discovery-panel__state {
+  .poodle-action-discovery-panel__state {
     display: grid;
     gap: var(--poodle-space-stack-sm);
   }
 
-  .action-discovery-panel__skeletons {
+  .poodle-action-discovery-panel__skeletons {
     display: grid;
     gap: var(--poodle-space-stack-sm);
   }
 
-  .action-discovery-panel__skeleton-row {
+  .poodle-action-discovery-panel__skeleton-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--poodle-space-inline-md);

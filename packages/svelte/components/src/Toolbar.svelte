@@ -37,7 +37,7 @@
 
 <div
   bind:this={rootElement}
-  class="toolbar"
+  class="poodle-toolbar"
   data-orientation={orientation}
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -67,7 +67,7 @@
 </div>
 
 <style>
-  .toolbar {
+  .poodle-toolbar {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -78,16 +78,16 @@
   }
 
   /* Size variants */
-  .toolbar[data-size="xs"] { padding: 0.125rem 0.25rem; gap: 0.25rem; }
-  .toolbar[data-size="sm"] { padding: 0.1875rem 0.3125rem; gap: 0.3125rem; }
-  .toolbar[data-size="lg"] { padding: 0.3125rem 0.5rem; gap: 0.5rem; }
-  .toolbar[data-size="xl"] { padding: 0.375rem 0.625rem; gap: 0.625rem; }
+  .poodle-toolbar[data-size="xs"] { padding: 0.125rem 0.25rem; gap: 0.25rem; }
+  .poodle-toolbar[data-size="sm"] { padding: 0.1875rem 0.3125rem; gap: 0.3125rem; }
+  .poodle-toolbar[data-size="lg"] { padding: 0.3125rem 0.5rem; gap: 0.5rem; }
+  .poodle-toolbar[data-size="xl"] { padding: 0.375rem 0.625rem; gap: 0.625rem; }
 
   /* Density variants */
-  .toolbar[data-density="compact"] { padding-inline: 0.25rem; gap: 0.25rem; }
-  .toolbar[data-density="comfortable"] { padding-inline: 0.5rem; gap: 0.5rem; }
+  .poodle-toolbar[data-density="compact"] { padding-inline: 0.25rem; gap: 0.25rem; }
+  .poodle-toolbar[data-density="comfortable"] { padding-inline: 0.5rem; gap: 0.5rem; }
 
-  .toolbar[data-orientation="vertical"] {
+  .poodle-toolbar[data-orientation="vertical"] {
     flex-direction: column;
     align-items: stretch;
   }

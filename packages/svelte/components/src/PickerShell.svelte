@@ -17,19 +17,19 @@
 </script>
 
 <section
-  class="picker-shell"
+  class="poodle-picker-shell"
   data-variant={variant}
   data-state={state}
   aria-label={ariaLabel ?? undefined}
 >
-  <div class="picker-shell__header">
+  <div class="poodle-picker-shell__header">
     <div>
-      <h3 class="picker-shell__title">{title}</h3>
+      <h3 class="poodle-picker-shell__title">{title}</h3>
       {#if description}
-        <p class="picker-shell__description">{description}</p>
+        <p class="poodle-picker-shell__description">{description}</p>
       {/if}
     </div>
-    <div class="picker-shell__meta">
+    <div class="poodle-picker-shell__meta">
       {#if resultCount !== null}
         <span>{resultCount} results</span>
       {/if}
@@ -38,35 +38,35 @@
   </div>
 
   {#if $$slots.toolbar}
-    <div class="picker-shell__toolbar">
+    <div class="poodle-picker-shell__toolbar">
       <slot name="toolbar" />
     </div>
   {/if}
 
   {#if $$slots.selection}
-    <div class="picker-shell__selection">
+    <div class="poodle-picker-shell__selection">
       <slot name="selection" />
     </div>
   {/if}
 
   <!-- Screen-reader-only live region for status updates -->
   {#if statusText}
-    <p class="picker-shell__status sr-only" id={statusId ?? undefined} role="status" aria-live="polite" aria-atomic="true">
+    <p class="poodle-picker-shell__status poodle-sr-only" id={statusId ?? undefined} role="status" aria-live="polite" aria-atomic="true">
       {statusText}
     </p>
   {/if}
 
   {#if state === "ready"}
-    <div class="picker-shell__body">
+    <div class="poodle-picker-shell__body">
       <slot />
     </div>
   {:else}
-    <div class="picker-shell__state">
+    <div class="poodle-picker-shell__state">
       {#if $$slots.state}
         <slot name="state" />
       {:else}
         {#if state === "loading"}
-          <span class="picker-shell__spinner" aria-hidden="true">
+          <span class="poodle-picker-shell__spinner" aria-hidden="true">
             <Spinner variant="grid" tone="accent" />
           </span>
         {/if}
@@ -79,14 +79,14 @@
   {/if}
 
   {#if $$slots.footer}
-    <div class="picker-shell__footer">
+    <div class="poodle-picker-shell__footer">
       <slot name="footer" />
     </div>
   {/if}
 </section>
 
 <style>
-  .picker-shell {
+  .poodle-picker-shell {
     display: grid;
     grid-template-rows: auto;
     gap: var(--poodle-space-stack-md);
@@ -96,47 +96,47 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
-  .picker-shell[data-variant="popover"] {
+  .poodle-picker-shell[data-variant="popover"] {
     max-width: 30rem;
     box-shadow: var(--poodle-elevation-overlay);
   }
 
-  .picker-shell[data-variant="modal"] {
+  .poodle-picker-shell[data-variant="modal"] {
     box-shadow: var(--poodle-elevation-dialog);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 96%, transparent);
   }
 
-  .picker-shell__header {
+  .poodle-picker-shell__header {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--poodle-space-inline-md);
   }
 
-  .picker-shell__title,
-  .picker-shell__description {
+  .poodle-picker-shell__title,
+  .poodle-picker-shell__description {
     margin: 0;
   }
 
-  .picker-shell__title {
+  .poodle-picker-shell__title {
     font-size: 1.25rem;
     line-height: 1.2;
   }
 
-  .picker-shell__description,
-  .picker-shell__meta,
-  .picker-shell__state p,
-  .picker-shell__status {
+  .poodle-picker-shell__description,
+  .poodle-picker-shell__meta,
+  .poodle-picker-shell__state p,
+  .poodle-picker-shell__status {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .picker-shell__status {
+  .poodle-picker-shell__status {
     margin: 0;
   }
 
-  .sr-only {
+  .poodle-sr-only {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -148,19 +148,19 @@
     border: 0;
   }
 
-  .picker-shell__meta {
+  .poodle-picker-shell__meta {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
     align-items: baseline;
   }
 
-  .picker-shell__body {
+  .poodle-picker-shell__body {
     min-height: 0;
     overflow-y: auto;
   }
 
-  .picker-shell__state {
+  .poodle-picker-shell__state {
     display: grid;
     gap: var(--poodle-space-stack-sm);
     justify-items: start;
@@ -170,14 +170,14 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent);
   }
 
-  .picker-shell__spinner {
+  .poodle-picker-shell__spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .picker-shell__state strong,
-  .picker-shell__state p {
+  .poodle-picker-shell__state strong,
+  .poodle-picker-shell__state p {
     margin: 0;
   }
 </style>

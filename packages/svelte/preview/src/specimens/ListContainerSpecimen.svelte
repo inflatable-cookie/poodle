@@ -46,7 +46,7 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Ready with slots and built-in pagination">
     <Surface padding="lg" border="subtle">
       <ListContainer
@@ -97,17 +97,17 @@
         </svelte:fragment>
 
         <svelte:fragment slot="batch">
-          <div class="specimen__batch">
+          <div class="poodle-specimen__batch">
             <Pill tone="neutral" appearance="badge">3 selected</Pill>
             <Button variant="ghost" sizeRole="chrome">Archive</Button>
             <Button variant="ghost" sizeRole="chrome">Mute alerts</Button>
           </div>
         </svelte:fragment>
 
-        <div class="specimen__list">
+        <div class="poodle-specimen__list">
           {#each items as item}
-            <article class="specimen__card">
-              <div class="specimen__card-header">
+            <article class="poodle-specimen__card">
+              <div class="poodle-specimen__card-header">
                 <strong>{item.name}</strong>
                 <Pill tone={toneFor(item.status)} appearance="badge">{item.status}</Pill>
               </div>
@@ -121,7 +121,7 @@
 
   <SpecimenGroup label="State handling">
     <Surface padding="lg" border="subtle">
-      <div class="specimen__state-buttons">
+      <div class="poodle-specimen__state-buttons">
         <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "ready")}>Ready</Button>
         <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "loading")}>Loading</Button>
         <Button variant={state === "empty" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "empty")}>Empty</Button>
@@ -137,7 +137,7 @@
         emptyTitle="No incidents found"
         emptyMessage="Try widening the filters or create a new workflow incident."
       >
-        <div class="specimen__card">
+        <div class="poodle-specimen__card">
           This content is only shown in the ready state.
         </div>
       </ListContainer>
@@ -146,26 +146,26 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__batch {
+  .poodle-specimen__batch {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem;
   }
 
-  .specimen__list {
+  .poodle-specimen__list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .specimen__card {
+  .poodle-specimen__card {
     display: grid;
     gap: 0.5rem;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
@@ -174,19 +174,19 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent);
   }
 
-  .specimen__card-header {
+  .poodle-specimen__card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
   }
 
-  .specimen__card p {
+  .poodle-specimen__card p {
     margin: 0;
     color: var(--poodle-color-text-secondary);
   }
 
-  .specimen__state-buttons {
+  .poodle-specimen__state-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;

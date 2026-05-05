@@ -22,11 +22,11 @@
   }
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       {#each controlSizes as size}
-        <div class="toast-container">
+        <div class="poodle-toast-container">
           <ToastStack
             items={[{ id: "s-{size}", title: "Toast at {size}", message: "Chrome scales with size.", tone: "info" }]}
             {size}
@@ -38,7 +38,7 @@
 
   <SpecimenGroup label="Interactive stack">
     <Button variant="secondary" on:click={addToast}>Add toast</Button>
-    <div class="toast-container">
+    <div class="poodle-toast-container">
       <ToastStack
         {items}
         on:dismiss={(e) => (items = items.filter((t) => t.id !== e.detail.id))}
@@ -49,19 +49,19 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .toast-container {
+  .poodle-toast-container {
     position: relative;
     min-height: 12rem;
   }

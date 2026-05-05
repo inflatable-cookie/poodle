@@ -3,7 +3,7 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Image preview">
     <MediaPreview
       title="Hero banner"
@@ -13,7 +13,7 @@
       kind="image"
       aspectRatio="landscape"
     >
-      <div slot="media" class="placeholder-media">Image placeholder</div>
+      <div slot="media" class="poodle-placeholder-media">Image placeholder</div>
     </MediaPreview>
   </SpecimenGroup>
 
@@ -25,7 +25,7 @@
       kind="video"
       aspectRatio="video"
     >
-      <div slot="media" class="placeholder-media">Video placeholder</div>
+      <div slot="media" class="poodle-placeholder-media">Video placeholder</div>
     </MediaPreview>
   </SpecimenGroup>
 
@@ -42,14 +42,14 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     max-width: 24rem;
   }
 
-  .placeholder-media {
+  .poodle-placeholder-media {
     display: flex;
     align-items: center;
     justify-content: center;

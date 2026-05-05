@@ -29,7 +29,7 @@
 </script>
 
 <nav
-  class="sidebar-nav"
+  class="poodle-sidebar-nav"
   data-size={size ?? undefined}
   data-density={density ?? undefined}
   data-size-role={sizeRole}
@@ -37,21 +37,21 @@
 >
   {#each visibleGroups as group (group.id)}
     <section
-      class="sidebar-nav__group"
+      class="poodle-sidebar-nav__group"
       data-separated={visibleGroups.length > 1}
       aria-label={group.label ?? undefined}
     >
       {#if group.label}
-        <h2 class="sidebar-nav__group-title">{group.label}</h2>
+        <h2 class="poodle-sidebar-nav__group-title">{group.label}</h2>
       {/if}
 
-      <ul class="sidebar-nav__list">
+      <ul class="poodle-sidebar-nav__list">
         {#each group.items as item (item.value)}
           <li>
             {#if item.href && !item.disabled}
               <a
-                class="sidebar-nav__item"
-                class:sidebar-nav__item--active={item.value === value}
+                class="poodle-sidebar-nav__item"
+                class:poodle-sidebar-nav__item--active={item.value === value}
                 href={item.href}
                 aria-current={item.value === value ? "page" : undefined}
                 on:click={() => handleItemActivation(item)}
@@ -61,8 +61,8 @@
             {:else}
               <button
                 type="button"
-                class="sidebar-nav__item"
-                class:sidebar-nav__item--active={item.value === value}
+                class="poodle-sidebar-nav__item"
+                class:poodle-sidebar-nav__item--active={item.value === value}
                 aria-current={item.value === value ? "page" : undefined}
                 disabled={item.disabled}
                 on:click={() => handleItemActivation(item)}
@@ -78,7 +78,7 @@
 </nav>
 
 <style>
-  .sidebar-nav {
+  .poodle-sidebar-nav {
     --poodle-sidebar-nav-item-height: 1.875rem;
     --poodle-sidebar-nav-group-gap: var(--poodle-space-panel-y);
     --poodle-sidebar-nav-item-padding-inline: var(--poodle-space-control-x);
@@ -94,37 +94,37 @@
     padding: var(--poodle-space-panel-y) 0.375rem;
   }
 
-  .sidebar-nav[data-size="xs"] {
+  .poodle-sidebar-nav[data-size="xs"] {
     --poodle-sidebar-nav-item-height: 1.375rem;
     --poodle-sidebar-nav-item-font-size: 0.6875rem;
     --poodle-sidebar-nav-title-font-size: 0.46875rem;
   }
 
-  .sidebar-nav[data-size="sm"] {
+  .poodle-sidebar-nav[data-size="sm"] {
     --poodle-sidebar-nav-item-height: 1.625rem;
     --poodle-sidebar-nav-item-font-size: 0.75rem;
     --poodle-sidebar-nav-title-font-size: 0.5rem;
   }
 
-  .sidebar-nav[data-size="md"] {
+  .poodle-sidebar-nav[data-size="md"] {
     --poodle-sidebar-nav-item-height: 1.875rem;
     --poodle-sidebar-nav-item-font-size: 0.8125rem;
     --poodle-sidebar-nav-title-font-size: 0.5625rem;
   }
 
-  .sidebar-nav[data-size="lg"] {
+  .poodle-sidebar-nav[data-size="lg"] {
     --poodle-sidebar-nav-item-height: 2.125rem;
     --poodle-sidebar-nav-item-font-size: 0.875rem;
     --poodle-sidebar-nav-title-font-size: 0.59375rem;
   }
 
-  .sidebar-nav[data-size="xl"] {
+  .poodle-sidebar-nav[data-size="xl"] {
     --poodle-sidebar-nav-item-height: 2.375rem;
     --poodle-sidebar-nav-item-font-size: 0.9375rem;
     --poodle-sidebar-nav-title-font-size: 0.625rem;
   }
 
-  .sidebar-nav[data-density="compact"] {
+  .poodle-sidebar-nav[data-density="compact"] {
     --poodle-sidebar-nav-group-gap: 0.625rem;
     --poodle-sidebar-nav-item-padding-inline: 0.5rem;
     --poodle-sidebar-nav-item-padding-block: 0.3125rem;
@@ -132,7 +132,7 @@
     --poodle-sidebar-nav-title-gap: 0.125rem;
   }
 
-  .sidebar-nav[data-density="default"] {
+  .poodle-sidebar-nav[data-density="default"] {
     --poodle-sidebar-nav-group-gap: 0.75rem;
     --poodle-sidebar-nav-item-padding-inline: 0.75rem;
     --poodle-sidebar-nav-item-padding-block: 0.375rem;
@@ -140,7 +140,7 @@
     --poodle-sidebar-nav-title-gap: 0.1875rem;
   }
 
-  .sidebar-nav[data-density="comfortable"] {
+  .poodle-sidebar-nav[data-density="comfortable"] {
     --poodle-sidebar-nav-group-gap: 0.875rem;
     --poodle-sidebar-nav-item-padding-inline: 0.875rem;
     --poodle-sidebar-nav-item-padding-block: 0.4375rem;
@@ -148,20 +148,20 @@
     --poodle-sidebar-nav-title-gap: 0.25rem;
   }
 
-  .sidebar-nav__group {
+  .poodle-sidebar-nav__group {
     display: grid;
     gap: 0.3125rem;
     min-width: 0;
   }
 
-  .sidebar-nav__group[data-separated="true"] + .sidebar-nav__group {
+  .poodle-sidebar-nav__group[data-separated="true"] + .poodle-sidebar-nav__group {
     margin-top: 0.125rem;
     padding-top: calc(var(--poodle-sidebar-nav-group-gap) - 0.125rem);
     border-top: 0.0625rem solid
       color-mix(in srgb, var(--poodle-color-border-subtle) 54%, transparent);
   }
 
-  .sidebar-nav__group-title {
+  .poodle-sidebar-nav__group-title {
     margin: 0;
     padding: 0 var(--poodle-sidebar-nav-item-padding-inline) var(--poodle-sidebar-nav-title-gap);
     color: var(--poodle-color-accent-base);
@@ -173,7 +173,7 @@
     text-transform: uppercase;
   }
 
-  .sidebar-nav__list {
+  .poodle-sidebar-nav__list {
     display: grid;
     gap: 0.125rem;
     min-width: 0;
@@ -182,7 +182,7 @@
     padding: 0;
   }
 
-  .sidebar-nav__item {
+  .poodle-sidebar-nav__item {
     position: relative;
     display: block;
     width: 100%;
@@ -208,28 +208,28 @@
   }
 
 
-  .sidebar-nav__item:hover:not(:disabled) {
+  .poodle-sidebar-nav__item:hover:not(:disabled) {
     color: var(--poodle-color-text-primary);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent);
   }
 
-  .sidebar-nav__item--active {
+  .poodle-sidebar-nav__item--active {
     color: var(--poodle-color-text-primary);
     font-weight: 600;
     background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
     box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 20%, transparent);
   }
 
-  .sidebar-nav__item--active {
+  .poodle-sidebar-nav__item--active {
     border-left-color: var(--poodle-color-accent-base);
   }
 
-  .sidebar-nav__item:focus-visible {
+  .poodle-sidebar-nav__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .sidebar-nav__item:disabled {
+  .poodle-sidebar-nav__item:disabled {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
   }

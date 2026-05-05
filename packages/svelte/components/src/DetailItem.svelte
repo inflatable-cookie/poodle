@@ -14,29 +14,29 @@
 </script>
 
 <div
-  class="detail-item"
+  class="poodle-detail-item"
   data-layout={layout}
   data-presentation={presentation}
   data-span={span ?? undefined}
   aria-label={ariaLabel ?? undefined}
 >
-  <div class="detail-item__label-block">
-    <dt class="detail-item__label">
+  <div class="poodle-detail-item__label-block">
+    <dt class="poodle-detail-item__label">
       {label}
       {#if description}
         <Popover placement="top" offset={6} ariaLabel="More information">
-          <span slot="trigger" class="detail-item__info-trigger">
-            <span class="detail-item__info-icon" aria-label="More information">
+          <span slot="trigger" class="poodle-detail-item__info-trigger">
+            <span class="poodle-detail-item__info-icon" aria-label="More information">
               <Icon name="info" />
             </span>
           </span>
-          <p class="detail-item__info-content">{description}</p>
+          <p class="poodle-detail-item__info-content">{description}</p>
         </Popover>
       {/if}
     </dt>
   </div>
 
-  <dd class:truncate={truncateValue} class="detail-item__value">
+  <dd class:poodle-truncate={truncateValue} class="poodle-detail-item__value">
     {#if $$slots.value}
       <slot name="value" />
     {:else if $$slots.default}
@@ -47,53 +47,53 @@
   </dd>
 
   {#if $$slots.action}
-    <div class="detail-item__action">
+    <div class="poodle-detail-item__action">
       <slot name="action" />
     </div>
   {/if}
 </div>
 
 <style>
-  .detail-item {
+  .poodle-detail-item {
     display: grid;
     gap: 0.25rem;
   }
 
-  .detail-item[data-layout="inline"] {
+  .poodle-detail-item[data-layout="inline"] {
     grid-template-columns: minmax(8rem, 11.25rem) minmax(0, 1fr) auto;
     gap: 0.25rem var(--poodle-space-inline-md);
     align-items: baseline;
   }
 
-  .detail-item[data-layout="inline"] .detail-item__label-block {
+  .poodle-detail-item[data-layout="inline"] .poodle-detail-item__label-block {
     grid-row: 1;
   }
 
-  .detail-item[data-layout="inline"] .detail-item__value {
+  .poodle-detail-item[data-layout="inline"] .poodle-detail-item__value {
     grid-row: 1;
   }
 
-  .detail-item[data-layout="inline"] .detail-item__action {
+  .poodle-detail-item[data-layout="inline"] .poodle-detail-item__action {
     grid-row: 1;
   }
 
-  .detail-item[data-span="full"] {
+  .poodle-detail-item[data-span="full"] {
     grid-column: 1 / -1;
   }
 
-  .detail-item__label,
-  .detail-item__value {
+  .poodle-detail-item__label,
+  .poodle-detail-item__value {
     margin: 0;
   }
 
-  .detail-item__label-block {
+  .poodle-detail-item__label-block {
     display: flex;
     align-items: baseline;
     gap: var(--poodle-space-inline-sm);
     min-width: 0;
   }
 
-  .detail-item__label {
+  .poodle-detail-item__label {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -103,7 +103,7 @@
     line-height: var(--poodle-typography-label-lineHeight);
   }
 
-  .detail-item__value {
+  .poodle-detail-item__value {
     min-width: 0;
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-body-family);
@@ -112,7 +112,7 @@
     word-break: break-word;
   }
 
-  .detail-item__value.truncate {
+  .poodle-detail-item__value.poodle-truncate {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -120,12 +120,12 @@
 
   /* ── Info icon popover (matches Field pattern) ── */
 
-  .detail-item__info-trigger {
+  .poodle-detail-item__info-trigger {
     display: inline-flex;
     align-items: center;
   }
 
-  .detail-item__info-icon {
+  .poodle-detail-item__info-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -139,17 +139,17 @@
     transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .detail-item__info-icon :global(svg) {
+  .poodle-detail-item__info-icon :global(svg) {
     width: 0.75em !important;
     height: 0.75em !important;
   }
 
-  .detail-item__info-trigger:hover .detail-item__info-icon {
+  .poodle-detail-item__info-trigger:hover .poodle-detail-item__info-icon {
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 26%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
-  .detail-item__info-content {
+  .poodle-detail-item__info-content {
     margin: 0;
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-body-family);
@@ -157,24 +157,24 @@
     line-height: 1.5;
   }
 
-  .detail-item__label :global(.popover__surface) {
+  .poodle-detail-item__label :global(.poodle-popover__surface) {
     min-width: 10rem;
     max-width: 22rem;
     padding: 0.5rem 0.625rem;
   }
 
-  .detail-item__label :global(.popover__trigger:focus-visible) {
+  .poodle-detail-item__label :global(.poodle-popover__trigger:focus-visible) {
     outline: none;
   }
 
-  .detail-item__info-trigger:focus-visible .detail-item__info-icon {
+  .poodle-detail-item__info-trigger:focus-visible .poodle-detail-item__info-icon {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
 
   /* ── Surface presentation ── */
 
-  .detail-item[data-presentation="surface"] {
+  .poodle-detail-item[data-presentation="surface"] {
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
     gap: var(--poodle-space-inline-md);
     align-items: center;
@@ -183,37 +183,37 @@
     background: color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary));
   }
 
-  .detail-item[data-presentation="surface"][data-layout="stacked"] {
+  .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
 
-  .detail-item[data-presentation="surface"][data-layout="stacked"] .detail-item__label-block {
+  .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__label-block {
     grid-column: 1 / -1;
     gap: 0.25rem;
   }
 
-  .detail-item[data-presentation="surface"][data-layout="stacked"] .detail-item__value {
+  .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__value {
     font-size: 1rem;
     font-weight: 600;
   }
 
   @media (max-width: 45rem) {
-    .detail-item[data-layout="inline"] {
+    .poodle-detail-item[data-layout="inline"] {
       grid-template-columns: 1fr;
     }
 
-    .detail-item[data-layout="inline"] .detail-item__label-block,
-    .detail-item[data-layout="inline"] .detail-item__value,
-    .detail-item[data-layout="inline"] .detail-item__action {
+    .poodle-detail-item[data-layout="inline"] .poodle-detail-item__label-block,
+    .poodle-detail-item[data-layout="inline"] .poodle-detail-item__value,
+    .poodle-detail-item[data-layout="inline"] .poodle-detail-item__action {
       grid-row: auto;
     }
 
-    .detail-item[data-presentation="surface"] {
+    .poodle-detail-item[data-presentation="surface"] {
       grid-template-columns: 1fr;
     }
 
-    .detail-item[data-presentation="surface"][data-layout="stacked"] {
+    .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] {
       grid-template-columns: 1fr;
     }
   }

@@ -25,20 +25,20 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
 </script>
 
-<section class="toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize} data-density={resolvedDensity}>
+<section class="poodle-toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize} data-density={resolvedDensity}>
   {#each items as item (item.id)}
     <article
-      class="toast"
+      class="poodle-toast"
       data-tone={item.tone ?? "info"}
       role="listitem"
       aria-live={item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
     >
-      <button type="button" class="toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
+      <button type="button" class="poodle-toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
         <Icon name="x" />
       </button>
 
-      <div class="toast__copy">
+      <div class="poodle-toast__copy">
         <strong>{item.title}</strong>
         {#if item.message}
           <p>{item.message}</p>
@@ -46,7 +46,7 @@
       </div>
 
       {#if item.actionLabel}
-        <div class="toast__actions">
+        <div class="poodle-toast__actions">
           <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("action", { id: item.id })}>
             {item.actionLabel}
           </Button>
@@ -57,12 +57,12 @@
 </section>
 
 <style>
-  .toast-stack {
+  .poodle-toast-stack {
     display: grid;
     gap: var(--poodle-space-stack-sm);
   }
 
-  .toast {
+  .poodle-toast {
     --poodle-toast-tone: var(--poodle-color-status-info, #3b82f6);
     display: grid;
     gap: var(--poodle-space-stack-sm);
@@ -82,7 +82,7 @@
     overflow: hidden;
   }
 
-  .toast::before {
+  .poodle-toast::before {
     content: "";
     position: absolute;
     inset: 0 auto 0 0;
@@ -90,23 +90,23 @@
     background: color-mix(in srgb, var(--poodle-toast-tone) 82%, white 6%);
   }
 
-  .toast[data-tone="info"] {
+  .poodle-toast[data-tone="info"] {
     --poodle-toast-tone: var(--poodle-color-status-info, #3b82f6);
   }
 
-  .toast[data-tone="success"] {
+  .poodle-toast[data-tone="success"] {
     --poodle-toast-tone: var(--poodle-color-status-success);
   }
 
-  .toast[data-tone="warning"] {
+  .poodle-toast[data-tone="warning"] {
     --poodle-toast-tone: var(--poodle-color-status-warning);
   }
 
-  .toast[data-tone="danger"] {
+  .poodle-toast[data-tone="danger"] {
     --poodle-toast-tone: var(--poodle-color-status-danger);
   }
 
-  .toast__dismiss {
+  .poodle-toast__dismiss {
     position: absolute;
     top: 0.375rem;
     right: 0.375rem;
@@ -123,98 +123,98 @@
     cursor: pointer;
   }
 
-  .toast__dismiss:hover {
+  .poodle-toast__dismiss:hover {
     color: var(--poodle-color-text-primary);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
   }
 
-  .toast__copy {
+  .poodle-toast__copy {
     display: grid;
     gap: 0.25rem;
   }
 
-  .toast__copy strong,
-  .toast__copy p {
+  .poodle-toast__copy strong,
+  .poodle-toast__copy p {
     margin: 0;
   }
 
-  .toast__copy p {
+  .poodle-toast__copy p {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.5;
   }
 
-  .toast__actions {
+  .poodle-toast__actions {
     display: flex;
     justify-content: flex-start;
   }
 
   /* ── Size variants ──────────────────────────────────────────── */
 
-  .toast-stack[data-size="xs"] .toast__dismiss {
+  .poodle-toast-stack[data-size="xs"] .poodle-toast__dismiss {
     width: 1rem;
     height: 1rem;
     top: 0.25rem;
     right: 0.25rem;
   }
 
-  .toast-stack[data-size="xs"] .toast__copy p {
+  .poodle-toast-stack[data-size="xs"] .poodle-toast__copy p {
     font-size: 0.6875rem;
   }
 
-  .toast-stack[data-size="xs"] .toast__copy strong {
+  .poodle-toast-stack[data-size="xs"] .poodle-toast__copy strong {
     font-size: 0.71875rem;
   }
 
-  .toast-stack[data-size="sm"] .toast__dismiss {
+  .poodle-toast-stack[data-size="sm"] .poodle-toast__dismiss {
     width: 1.125rem;
     height: 1.125rem;
   }
 
-  .toast-stack[data-size="sm"] .toast__copy p {
+  .poodle-toast-stack[data-size="sm"] .poodle-toast__copy p {
     font-size: 0.75rem;
   }
 
-  .toast-stack[data-size="lg"] .toast__dismiss {
+  .poodle-toast-stack[data-size="lg"] .poodle-toast__dismiss {
     width: 1.5rem;
     height: 1.5rem;
     top: 0.5rem;
     right: 0.5rem;
   }
 
-  .toast-stack[data-size="lg"] .toast__copy p {
+  .poodle-toast-stack[data-size="lg"] .poodle-toast__copy p {
     font-size: 0.875rem;
   }
 
-  .toast-stack[data-size="lg"] .toast__copy strong {
+  .poodle-toast-stack[data-size="lg"] .poodle-toast__copy strong {
     font-size: 0.9375rem;
   }
 
-  .toast-stack[data-size="xl"] .toast__dismiss {
+  .poodle-toast-stack[data-size="xl"] .poodle-toast__dismiss {
     width: 1.75rem;
     height: 1.75rem;
     top: 0.5rem;
     right: 0.5rem;
   }
 
-  .toast-stack[data-size="xl"] .toast__copy p {
+  .poodle-toast-stack[data-size="xl"] .poodle-toast__copy p {
     font-size: 0.9375rem;
   }
 
-  .toast-stack[data-size="xl"] .toast__copy strong {
+  .poodle-toast-stack[data-size="xl"] .poodle-toast__copy strong {
     font-size: 1rem;
   }
 
   /* Density variants */
-  .toast-stack[data-density="compact"] { gap: var(--poodle-space-stack-sm); }
-  .toast-stack[data-density="comfortable"] { gap: var(--poodle-space-stack-lg); }
+  .poodle-toast-stack[data-density="compact"] { gap: var(--poodle-space-stack-sm); }
+  .poodle-toast-stack[data-density="comfortable"] { gap: var(--poodle-space-stack-lg); }
 
-  .toast-stack[data-density="compact"] .toast {
+  .poodle-toast-stack[data-density="compact"] .poodle-toast {
     padding: calc(var(--poodle-space-panel-x) * 0.75);
     padding-right: calc(var(--poodle-space-panel-x) * 0.75 + 1.25rem);
   }
 
-  .toast-stack[data-density="comfortable"] .toast {
+  .poodle-toast-stack[data-density="comfortable"] .poodle-toast {
     padding: calc(var(--poodle-space-panel-x) * 1.25);
     padding-right: calc(var(--poodle-space-panel-x) * 1.25 + 1.75rem);
   }

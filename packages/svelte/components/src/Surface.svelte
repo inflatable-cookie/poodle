@@ -23,7 +23,7 @@
 </script>
 
 <div
-  class="surface"
+  class="poodle-surface"
   data-tone={tone}
   data-border={border}
   data-elevated={elevated}
@@ -35,7 +35,7 @@
 </div>
 
 <style>
-  .surface {
+  .poodle-surface {
     --poodle-surface-fill: var(
       --poodle-treatment-surface-fill,
       color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent)
@@ -54,12 +54,12 @@
     box-shadow: var(--poodle-surface-shadow);
   }
 
-  .surface[data-tone="canvas"] {
+  .poodle-surface[data-tone="canvas"] {
     --poodle-surface-fill: color-mix(in srgb, var(--poodle-color-background-canvas) 98%, transparent);
   }
 
-  .surface[data-tone="elevated"],
-  .surface[data-elevated="true"] {
+  .poodle-surface[data-tone="elevated"],
+  .poodle-surface[data-elevated="true"] {
     --poodle-surface-fill: var(
       --poodle-treatment-surface-elevated-fill,
       color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))
@@ -74,11 +74,11 @@
     );
   }
 
-  .surface[data-border="none"] {
+  .poodle-surface[data-border="none"] {
     border-color: transparent;
   }
 
-  .surface[data-border="default"] {
+  .poodle-surface[data-border="default"] {
     --poodle-surface-border: var(--poodle-color-border-default);
   }
 </style>

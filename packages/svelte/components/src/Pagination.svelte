@@ -201,16 +201,16 @@
 
 {#if safeTotalPages > 1 || showLimitSelector}
   <nav
-    class="pagination {className}"
-    class:pagination--compact={compact}
-    class:pagination--loading={isLoading}
-    class:pagination--chrome={standalone !== undefined ? !standalone : chrome}
+    class="poodle-pagination {className}"
+    class:poodle-pagination--compact={compact}
+    class:poodle-pagination--loading={isLoading}
+    class:poodle-pagination--chrome={standalone !== undefined ? !standalone : chrome}
     aria-label={ariaLabel ?? "Pagination"}
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
     {#if showInfo && (effectiveTotal ?? 0) > 0}
-      <div class="pagination__info">
+      <div class="poodle-pagination__info">
         {#if effectiveTotal !== null}
           Showing {startItem} to {endItem} of {effectiveTotal.toLocaleString()}
         {:else}
@@ -219,9 +219,9 @@
       </div>
     {/if}
 
-    <div class="pagination__controls-wrapper">
+    <div class="poodle-pagination__controls-wrapper">
       {#if showLimitSelector && limitOptions.length > 0}
-        <div class="pagination__limit">
+        <div class="poodle-pagination__limit">
           <label for="pagination-limit">Show</label>
           <select
             id="pagination-limit"
@@ -238,11 +238,11 @@
       {/if}
 
       {#if safeTotalPages > 1 || hasPrevPage || hasNextPage}
-        <div class="pagination__controls">
+        <div class="poodle-pagination__controls">
           {#if variant === "full" && supportsGoToPage}
             <button
               type="button"
-              class="pagination__button"
+              class="poodle-pagination__button"
               disabled={!hasPrevPage || isLoading}
               aria-label="First page"
               on:click={() => handlePageRequest(1)}
@@ -253,7 +253,7 @@
 
           <button
             type="button"
-            class="pagination__button"
+            class="poodle-pagination__button"
             disabled={!hasPrevPage || isLoading}
             aria-label="Previous page"
             on:click={() => handlePageRequest(safeCurrentPage - 1)}
@@ -262,14 +262,14 @@
           </button>
 
           {#if variant === "numbered"}
-            <div class="pagination__pages">
+            <div class="poodle-pagination__pages">
               {#each visiblePages as visiblePage}
                 {#if visiblePage === "ellipsis"}
-                  <span class="pagination__ellipsis" aria-hidden="true">…</span>
+                  <span class="poodle-pagination__ellipsis" aria-hidden="true">…</span>
                 {:else}
                   <button
                     type="button"
-                    class="pagination__button"
+                    class="poodle-pagination__button"
                     data-current={visiblePage === safeCurrentPage}
                     aria-current={visiblePage === safeCurrentPage ? "page" : undefined}
                     aria-label={`Page ${visiblePage}`}
@@ -281,18 +281,18 @@
               {/each}
             </div>
           {:else if variant === "full"}
-            <span class="pagination__summary">
+            <span class="poodle-pagination__summary">
               Page {safeCurrentPage} of {safeTotalPages}
             </span>
           {:else}
-            <span class="pagination__summary">
+            <span class="poodle-pagination__summary">
               {startItem}–{endItem}{#if effectiveTotal !== null}&nbsp;of {effectiveTotal.toLocaleString()}{/if}
             </span>
           {/if}
 
           <button
             type="button"
-            class="pagination__button"
+            class="poodle-pagination__button"
             disabled={!hasNextPage || isLoading}
             aria-label="Next page"
             on:click={() => handlePageRequest(safeCurrentPage + 1)}
@@ -303,7 +303,7 @@
           {#if variant === "full" && supportsGoToPage}
             <button
               type="button"
-              class="pagination__button"
+              class="poodle-pagination__button"
               disabled={!hasNextPage || isLoading}
               aria-label="Last page"
               on:click={() => handlePageRequest(safeTotalPages)}
@@ -318,7 +318,7 @@
 {/if}
 
 <style>
-  .pagination {
+  .poodle-pagination {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -328,38 +328,37 @@
     padding: 0;
   }
 
-  .pagination--chrome {
-    margin-top: var(--poodle-space-panel-y);
+  .poodle-pagination--chrome {
     padding: var(--poodle-space-control-y) var(--poodle-space-panel-x);
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
-  .pagination--compact {
+  .poodle-pagination--compact {
     padding: 0.5rem 0.75rem;
     gap: 0.75rem;
   }
 
-  .pagination--loading {
+  .poodle-pagination--loading {
     opacity: 0.7;
     pointer-events: none;
   }
 
-  .pagination__info {
+  .poodle-pagination__info {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
-  .pagination__controls-wrapper {
+  .poodle-pagination__controls-wrapper {
     display: flex;
     align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
   }
 
-  .pagination__limit {
+  .poodle-pagination__limit {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -368,7 +367,7 @@
     font-size: var(--poodle-typography-body-size);
   }
 
-  .pagination__limit select {
+  .poodle-pagination__limit select {
     padding: 0.25rem 0.5rem;
     font: inherit;
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent);
@@ -377,25 +376,25 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .pagination__limit select:focus-visible {
+  .poodle-pagination__limit select:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .pagination__controls {
+  .poodle-pagination__controls {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
     flex-wrap: wrap;
   }
 
-  .pagination__pages {
+  .poodle-pagination__pages {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-sm);
   }
 
-  .pagination__button {
+  .poodle-pagination__button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -413,18 +412,18 @@
     line-height: 1;
   }
 
-  .pagination__button[data-current="true"] {
+  .poodle-pagination__button[data-current="true"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
   }
 
-  .pagination__button:hover:not(:disabled),
-  .pagination__button:focus-visible {
+  .poodle-pagination__button:hover:not(:disabled),
+  .poodle-pagination__button:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     outline: none;
   }
 
-  .pagination__ellipsis {
+  .poodle-pagination__ellipsis {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -435,7 +434,7 @@
     font-weight: 600;
   }
 
-  .pagination__summary {
+  .poodle-pagination__summary {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
@@ -444,39 +443,39 @@
     padding: 0 0.5rem;
   }
 
-  .pagination__button:disabled {
+  .poodle-pagination__button:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Size variants */
-  .pagination[data-size="xs"] .pagination__button { min-width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
-  .pagination[data-size="sm"] .pagination__button { min-width: 1.75rem; height: 1.75rem; }
-  .pagination[data-size="lg"] .pagination__button { min-width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
-  .pagination[data-size="xl"] .pagination__button { min-width: 3.25rem; height: 3.25rem; font-size: 0.9375rem; }
+  .poodle-pagination[data-size="xs"] .poodle-pagination__button { min-width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
+  .poodle-pagination[data-size="sm"] .poodle-pagination__button { min-width: 1.75rem; height: 1.75rem; }
+  .poodle-pagination[data-size="lg"] .poodle-pagination__button { min-width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
+  .poodle-pagination[data-size="xl"] .poodle-pagination__button { min-width: 3.25rem; height: 3.25rem; font-size: 0.9375rem; }
 
   /* Density variants */
-  .pagination[data-density="compact"] .pagination__controls,
-  .pagination[data-density="compact"] .pagination__pages {
+  .poodle-pagination[data-density="compact"] .poodle-pagination__controls,
+  .poodle-pagination[data-density="compact"] .poodle-pagination__pages {
     gap: 0.0625rem;
   }
 
-  .pagination[data-density="comfortable"] .pagination__controls,
-  .pagination[data-density="comfortable"] .pagination__pages {
+  .poodle-pagination[data-density="comfortable"] .poodle-pagination__controls,
+  .poodle-pagination[data-density="comfortable"] .poodle-pagination__pages {
     gap: 0.25rem;
   }
 
   @media (max-width: 40rem) {
-    .pagination {
+    .poodle-pagination {
       flex-direction: column;
       align-items: stretch;
     }
 
-    .pagination--compact .pagination__info {
+    .poodle-pagination--compact .poodle-pagination__info {
       display: none;
     }
 
-    .pagination__controls-wrapper {
+    .poodle-pagination__controls-wrapper {
       justify-content: center;
     }
   }

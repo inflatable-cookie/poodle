@@ -120,9 +120,9 @@
   });
 </script>
 
-<div class="menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
+<div class="poodle-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
   <div
-    class="menu__trigger"
+    class="poodle-menu__trigger"
     role="button"
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
@@ -134,15 +134,15 @@
   </div>
 
   {#if isOpen}
-    <div class="menu__overlay" data-placement={placement} role="menu" aria-label={ariaLabel ?? undefined}>
+    <div class="poodle-menu__overlay" data-placement={placement} role="menu" aria-label={ariaLabel ?? undefined}>
       {#each items as item, index (item.value)}
         {#if item.kind === "separator"}
-          <div class="menu__separator" role="separator"></div>
+          <div class="poodle-menu__separator" role="separator"></div>
         {:else}
           <button
             bind:this={itemElements[actionableItems.findIndex((candidate) => candidate.value === item.value)]}
             type="button"
-            class="menu__item"
+            class="poodle-menu__item"
             disabled={item.disabled === true}
             data-kind={item.kind ?? "action"}
             data-tone={item.tone ?? "default"}
@@ -178,12 +178,12 @@
               }
             }}
           >
-            <span class="menu__label">{item.label}</span>
+            <span class="poodle-menu__label">{item.label}</span>
 
             {#if item.checked}
-              <span class="menu__meta" aria-hidden="true">✓</span>
+              <span class="poodle-menu__meta" aria-hidden="true">✓</span>
             {:else if item.shortcutLabel}
-              <span class="menu__meta" aria-hidden="true">{item.shortcutLabel}</span>
+              <span class="poodle-menu__meta" aria-hidden="true">{item.shortcutLabel}</span>
             {/if}
           </button>
         {/if}
@@ -193,21 +193,21 @@
 </div>
 
 <style>
-  .menu {
+  .poodle-menu {
     position: relative;
     display: inline-flex;
   }
 
-  .menu__trigger {
+  .poodle-menu__trigger {
     display: inline-flex;
   }
 
-  .menu__trigger:focus-visible {
+  .poodle-menu__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .menu__overlay {
+  .poodle-menu__overlay {
     position: absolute;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
@@ -224,22 +224,22 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 
-  .menu__overlay[data-placement^="bottom"] {
+  .poodle-menu__overlay[data-placement^="bottom"] {
     top: calc(100% + 0.375rem);
     left: 0;
   }
 
-  .menu__overlay[data-placement^="top"] {
+  .poodle-menu__overlay[data-placement^="top"] {
     bottom: calc(100% + 0.375rem);
     left: 0;
   }
 
-  .menu__overlay[data-placement$="end"] {
+  .poodle-menu__overlay[data-placement$="end"] {
     left: auto;
     right: 0;
   }
 
-  .menu__item {
+  .poodle-menu__item {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -256,33 +256,33 @@
     text-align: left;
   }
 
-  .menu__item:hover:not(:disabled),
-  .menu__item:focus-visible {
+  .poodle-menu__item:hover:not(:disabled),
+  .poodle-menu__item:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
     outline: none;
   }
 
-  .menu__item[data-tone="danger"] {
+  .poodle-menu__item[data-tone="danger"] {
     color: var(--poodle-color-danger-base);
   }
 
-  .menu__item[data-tone="danger"]:hover:not(:disabled),
-  .menu__item[data-tone="danger"]:focus-visible {
+  .poodle-menu__item[data-tone="danger"]:hover:not(:disabled),
+  .poodle-menu__item[data-tone="danger"]:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-danger-base) 14%, transparent);
   }
 
-  .menu__item:disabled {
+  .poodle-menu__item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .menu__meta {
+  .poodle-menu__meta {
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-code-family);
     font-size: 0.6875rem;
   }
 
-  .menu__separator {
+  .poodle-menu__separator {
     width: 100%;
     height: 0.0625rem;
     margin: 0.25rem 0;
@@ -290,16 +290,16 @@
   }
 
   /* Size variants */
-  .menu[data-size="xs"] .menu__item { min-height: 1.5rem; font-size: 0.6875rem; }
-  .menu[data-size="xs"] .menu__meta { font-size: 0.5625rem; }
-  .menu[data-size="sm"] .menu__item { min-height: 1.75rem; font-size: 0.75rem; }
-  .menu[data-size="sm"] .menu__meta { font-size: 0.625rem; }
-  .menu[data-size="lg"] .menu__item { min-height: 2.75rem; font-size: 0.9375rem; }
-  .menu[data-size="lg"] .menu__meta { font-size: 0.75rem; }
-  .menu[data-size="xl"] .menu__item { min-height: 3.25rem; font-size: 1rem; }
-  .menu[data-size="xl"] .menu__meta { font-size: 0.8125rem; }
+  .poodle-menu[data-size="xs"] .poodle-menu__item { min-height: 1.5rem; font-size: 0.6875rem; }
+  .poodle-menu[data-size="xs"] .poodle-menu__meta { font-size: 0.5625rem; }
+  .poodle-menu[data-size="sm"] .poodle-menu__item { min-height: 1.75rem; font-size: 0.75rem; }
+  .poodle-menu[data-size="sm"] .poodle-menu__meta { font-size: 0.625rem; }
+  .poodle-menu[data-size="lg"] .poodle-menu__item { min-height: 2.75rem; font-size: 0.9375rem; }
+  .poodle-menu[data-size="lg"] .poodle-menu__meta { font-size: 0.75rem; }
+  .poodle-menu[data-size="xl"] .poodle-menu__item { min-height: 3.25rem; font-size: 1rem; }
+  .poodle-menu[data-size="xl"] .poodle-menu__meta { font-size: 0.8125rem; }
 
   /* Density variants */
-  .menu[data-density="compact"] .menu__item { padding-inline: 0.375rem; }
-  .menu[data-density="comfortable"] .menu__item { padding-inline: 0.75rem; }
+  .poodle-menu[data-density="compact"] .poodle-menu__item { padding-inline: 0.375rem; }
+  .poodle-menu[data-density="comfortable"] .poodle-menu__item { padding-inline: 0.75rem; }
 </style>

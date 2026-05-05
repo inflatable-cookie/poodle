@@ -13,7 +13,7 @@
   ];
 </script>
 
-<div class="specimen">
+<div class="poodle-specimen">
   <SpecimenGroup label="Multiple items selected">
     <SelectionSummary
       {items}
@@ -27,7 +27,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Sizes">
-    <div class="specimen__stack">
+    <div class="poodle-specimen__stack">
       {#each controlSizes as size}
         <SelectionSummary
           items={[{ id: "1", label: "Button" }, { id: "2", label: "Card" }, { id: "3", label: "Dialog" }]}
@@ -53,13 +53,13 @@
 </div>
 
 <style>
-  .specimen {
+  .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .specimen__stack {
+  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;

@@ -129,7 +129,7 @@
 </script>
 
 <span
-  class="icon-button-wrap"
+  class="poodle-icon-button-wrap"
   role="presentation"
   on:mouseenter={scheduleOpen}
   on:mouseleave={dismiss}
@@ -137,7 +137,7 @@
   <button
     {type}
     bind:this={buttonElement}
-    class="icon-button"
+    class="poodle-icon-button"
     data-variant={variant}
     data-tone={tone !== "default" ? tone : undefined}
     data-size={resolvedSize}
@@ -170,11 +170,11 @@
     }}
   >
     {#if loading}
-      <span class="icon-button__spinner" aria-hidden="true">
+      <span class="poodle-icon-button__spinner" aria-hidden="true">
         <Spinner variant="ring" size={resolvedIconSize} tone="current" />
       </span>
     {:else}
-      <span class="icon-button__glyph" aria-hidden="true">
+      <span class="poodle-icon-button__glyph" aria-hidden="true">
         <slot><Icon icon={icon} size={resolvedIconSize} /></slot>
       </span>
     {/if}
@@ -184,7 +184,7 @@
     <span
       id={tooltipId}
       bind:this={tooltipElement}
-      class="icon-button__tooltip"
+      class="poodle-icon-button__tooltip"
       data-placement={resolvedTooltipPlacement}
       style={tooltipStyle}
       role="tooltip"
@@ -195,12 +195,12 @@
 </span>
 
 <style>
-  .icon-button-wrap {
+  .poodle-icon-button-wrap {
     position: relative;
     display: inline-flex;
   }
 
-  .icon-button {
+  .poodle-icon-button {
     --poodle-icon-button-fill: transparent;
     --poodle-icon-button-fill-hover: color-mix(
       in srgb,
@@ -235,7 +235,7 @@
   }
 
 
-  .icon-button[data-variant="primary"] {
+  .poodle-icon-button[data-variant="primary"] {
     --poodle-icon-button-fill: var(
       --poodle-treatment-interactive-primary-fill,
       var(--poodle-color-accent-base)
@@ -254,7 +254,7 @@
     );
   }
 
-  .icon-button[data-variant="secondary"] {
+  .poodle-icon-button[data-variant="secondary"] {
     --poodle-icon-button-fill: var(
       --poodle-treatment-interactive-fill,
       var(--poodle-color-background-surface)
@@ -269,29 +269,29 @@
     );
   }
 
-  .icon-button[data-tone="danger"] {
+  .poodle-icon-button[data-tone="danger"] {
     --poodle-icon-button-fill: color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface));
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
   }
 
-  .icon-button[data-variant="primary"][data-tone="danger"] {
+  .poodle-icon-button[data-variant="primary"][data-tone="danger"] {
     --poodle-icon-button-fill: var(--poodle-color-status-danger);
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
     --poodle-icon-button-text: var(--poodle-color-text-inverse);
   }
 
-  .icon-button[data-variant="ghost"][data-tone="danger"] {
+  .poodle-icon-button[data-variant="ghost"][data-tone="danger"] {
     --poodle-icon-button-fill: transparent;
     --poodle-icon-button-border: transparent;
     --poodle-icon-button-text: var(--poodle-color-status-danger);
   }
 
-  .icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
+  .poodle-icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
     background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
   }
 
-  .icon-button[data-pressed="true"]:not([data-variant="primary"]) {
+  .poodle-icon-button[data-pressed="true"]:not([data-variant="primary"]) {
     --poodle-icon-button-fill: var(--poodle-color-accent-base);
     --poodle-icon-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-accent-base));
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-accent-base) 85%, black);
@@ -299,29 +299,29 @@
     --poodle-icon-button-shadow: none;
   }
 
-  .icon-button:hover:not(:disabled) {
+  .poodle-icon-button:hover:not(:disabled) {
     background: var(--poodle-icon-button-fill-hover);
     border-color: color-mix(in srgb, var(--poodle-icon-button-border) 74%, var(--poodle-color-text-primary));
     box-shadow: var(--poodle-treatment-interactive-shadow-active, var(--poodle-icon-button-shadow));
   }
 
-  .icon-button:active:not(:disabled) {
+  .poodle-icon-button:active:not(:disabled) {
     background: var(--poodle-icon-button-fill-active);
     transform: translateY(0.03125rem);
   }
 
-  .icon-button:focus-visible {
+  .poodle-icon-button:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
   }
 
-  .icon-button:disabled {
+  .poodle-icon-button:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .icon-button__glyph,
-  .icon-button__spinner {
+  .poodle-icon-button__glyph,
+  .poodle-icon-button__spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -332,25 +332,45 @@
     line-height: 1;
   }
 
-  .icon-button__glyph :global(svg) {
+  .poodle-icon-button__glyph :global(svg) {
     width: 100%;
     height: 100%;
   }
 
-  .icon-button__spinner {
+  .poodle-icon-button__spinner {
     width: 45%;
     height: 45%;
   }
 
-  .icon-button__spinner :global(.spinner) {
+  .poodle-icon-button__spinner :global(.poodle-spinner) {
     width: 100%;
     height: 100%;
+  }
+
+  .poodle-icon-button[data-size="xs"] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .poodle-icon-button[data-size="sm"] {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .poodle-icon-button[data-size="lg"] {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .poodle-icon-button[data-size="xl"] {
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   /* ── Tooltip ── */
 
 
-  .icon-button__tooltip {
+  .poodle-icon-button__tooltip {
     position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     max-width: 16rem;

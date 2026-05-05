@@ -26,19 +26,19 @@
   }
 </script>
 
-<div class="form-actions" data-align={align}>
+<div class="poodle-form-actions" data-align={align}>
   {#if children}
     {@render children()}
   {/if}
 
   {#if hasDangerSlot}
-    <div class="form-actions__danger" data-mode={showResponsiveDangerSwap ? "responsive" : "inline"}>
+    <div class="poodle-form-actions__danger" data-mode={showResponsiveDangerSwap ? "responsive" : "inline"}>
       {@render danger?.()}
     </div>
   {/if}
 
   {#if hasDangerMenu}
-    <div class="form-actions__danger-menu" data-visible={showResponsiveDangerSwap ? "responsive" : "always"}>
+    <div class="poodle-form-actions__danger-menu" data-visible={showResponsiveDangerSwap ? "responsive" : "always"}>
       <Menu items={collapsedDangerItems} ariaLabel="More actions" placement="top-end" on:action={(event) => handleDangerAction(event.detail.value)}>
         <span slot="trigger">
           <IconButton icon="ellipsis" ariaLabel="More actions" variant="ghost" sizeRole="chrome" />
@@ -49,7 +49,7 @@
 </div>
 
 <style>
-  .form-actions {
+  .poodle-form-actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-md);
@@ -58,39 +58,39 @@
     container-type: inline-size;
   }
 
-  .form-actions[data-align="start"] {
+  .poodle-form-actions[data-align="start"] {
     justify-content: flex-start;
   }
 
-  .form-actions[data-align="end"] {
+  .poodle-form-actions[data-align="end"] {
     justify-content: flex-end;
   }
 
-  .form-actions[data-align="between"] {
+  .poodle-form-actions[data-align="between"] {
     justify-content: space-between;
   }
 
-  .form-actions__danger {
+  .poodle-form-actions__danger {
     display: inline-flex;
     align-items: center;
     gap: var(--poodle-space-inline-md);
   }
 
-  .form-actions__danger-menu {
+  .poodle-form-actions__danger-menu {
     display: none;
     align-items: center;
   }
 
-  .form-actions__danger-menu[data-visible="always"] {
+  .poodle-form-actions__danger-menu[data-visible="always"] {
     display: inline-flex;
   }
 
   @container (max-width: 31.25rem) {
-    .form-actions__danger[data-mode="responsive"] {
+    .poodle-form-actions__danger[data-mode="responsive"] {
       display: none;
     }
 
-    .form-actions__danger-menu[data-visible="responsive"] {
+    .poodle-form-actions__danger-menu[data-visible="responsive"] {
       display: inline-flex;
     }
   }

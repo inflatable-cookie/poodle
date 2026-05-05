@@ -36,14 +36,14 @@
 </script>
 
 {#if inline}
-  <span class="code code--inline-wrap" data-size={resolvedSize} data-density={resolvedDensity}>
-    <code class="code code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize} data-density={resolvedDensity}>
+  <span class="poodle-code poodle-code--inline-wrap" data-size={resolvedSize} data-density={resolvedDensity}>
+    <code class="poodle-code poodle-code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize} data-density={resolvedDensity}>
       {source}
     </code>
     {#if showCopyButton}
       <button
         type="button"
-        class="code__copy code__copy--inline"
+        class="poodle-code__copy poodle-code__copy--inline"
         aria-label={copied ? "Copied" : "Copy to clipboard"}
         on:click={copyToClipboard}
       >
@@ -62,7 +62,7 @@
   </span>
 {:else}
   <div
-    class="code code--block"
+    class="poodle-code poodle-code--block"
     aria-label={ariaLabel ?? `Code block${language ? ` (${language})` : ""}`}
     data-language={language}
     data-size={resolvedSize}
@@ -70,15 +70,15 @@
     style={maxHeight ? `max-height: ${maxHeight}` : undefined}
   >
     {#if language || showCopyButton}
-      <div class="code__toolbar">
+      <div class="poodle-code__toolbar">
         {#if language}
-          <span class="code__language">{language}</span>
+          <span class="poodle-code__language">{language}</span>
         {/if}
-        <div class="code__toolbar-actions">
+        <div class="poodle-code__toolbar-actions">
           {#if showCopyButton}
             <button
               type="button"
-              class="code__copy"
+              class="poodle-code__copy"
               aria-label={copied ? "Copied" : "Copy to clipboard"}
               on:click={copyToClipboard}
             >
@@ -98,23 +98,23 @@
       </div>
     {/if}
 
-    <div class="code__scroll">
-      <pre class="code__pre"><code class="code__source">{#each lines as line, i}<span
-          class="code__line"
-          class:code__line--highlighted={highlightSet.has(i + 1)}
-        >{#if showLineNumbers}<span class="code__line-number" aria-hidden="true">{i + 1}</span>{/if}<span class="code__line-content">{line}</span></span>{/each}</code></pre>
+    <div class="poodle-code__scroll">
+      <pre class="poodle-code__pre"><code class="poodle-code__source">{#each lines as line, i}<span
+          class="poodle-code__line"
+          class:poodle-code__line--highlighted={highlightSet.has(i + 1)}
+        >{#if showLineNumbers}<span class="poodle-code__line-number" aria-hidden="true">{i + 1}</span>{/if}<span class="poodle-code__line-content">{line}</span></span>{/each}</code></pre>
     </div>
   </div>
 {/if}
 
 <style>
-  .code--inline-wrap {
+  .poodle-code--inline-wrap {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
   }
 
-  .code--inline {
+  .poodle-code--inline {
     display: inline;
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
@@ -125,7 +125,7 @@
     line-height: 1.5;
   }
 
-  .code--block {
+  .poodle-code--block {
     display: flex;
     flex-direction: column;
     border: 0.0625rem solid var(--poodle-color-border-subtle);
@@ -133,7 +133,7 @@
     overflow: hidden;
   }
 
-  .code__toolbar {
+  .poodle-code__toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -142,7 +142,7 @@
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .code__language {
+  .poodle-code__language {
     font-family: var(--poodle-typography-label-family);
     font-size: 0.6875rem;
     font-weight: var(--poodle-typography-label-weight);
@@ -151,12 +151,12 @@
     letter-spacing: 0.05em;
   }
 
-  .code__toolbar-actions {
+  .poodle-code__toolbar-actions {
     display: flex;
     gap: 0.25rem;
   }
 
-  .code__copy {
+  .poodle-code__copy {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -171,40 +171,40 @@
     transition: color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .code__copy:hover {
+  .poodle-code__copy:hover {
     color: var(--poodle-color-text-primary);
   }
 
-  .code__copy:focus-visible {
+  .poodle-code__copy:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   }
 
-  .code__copy svg {
+  .poodle-code__copy svg {
     width: 0.875rem;
     height: 0.875rem;
   }
 
-  .code__copy--inline {
+  .poodle-code__copy--inline {
     width: 1.25rem;
     height: 1.25rem;
   }
 
-  .code__copy--inline svg {
+  .poodle-code__copy--inline svg {
     width: 0.75rem;
     height: 0.75rem;
   }
 
-  .code__scroll {
+  .poodle-code__scroll {
     overflow-x: auto;
   }
 
-  .code__pre {
+  .poodle-code__pre {
     margin: 0;
     padding: 0.75rem 1rem;
     background: color-mix(in srgb, var(--poodle-color-background-canvas) 92%, black);
   }
 
-  .code__source {
+  .poodle-code__source {
     display: block;
     font-family: var(--poodle-typography-code-family);
     font-size: 0.8125rem;
@@ -214,17 +214,17 @@
     white-space: pre;
   }
 
-  .code__line {
+  .poodle-code__line {
     display: block;
   }
 
-  .code__line--highlighted {
+  .poodle-code__line--highlighted {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     margin: 0 -1rem;
     padding: 0 1rem;
   }
 
-  .code__line-number {
+  .poodle-code__line-number {
     display: inline-block;
     width: 2.5rem;
     padding-right: 1rem;
@@ -235,39 +235,39 @@
   }
 
   /* Size variants */
-  .code[data-size="xs"] .code__source {
+  .poodle-code[data-size="xs"] .poodle-code__source {
     font-size: 0.6875rem;
   }
 
-  .code--inline[data-size="xs"] {
+  .poodle-code--inline[data-size="xs"] {
     font-size: calc(0.6875em * var(--poodle-typography-code-adjustmentRatio));
   }
 
-  .code[data-size="sm"] .code__source {
+  .poodle-code[data-size="sm"] .poodle-code__source {
     font-size: 0.75rem;
   }
 
-  .code--inline[data-size="sm"] {
+  .poodle-code--inline[data-size="sm"] {
     font-size: calc(0.75em * var(--poodle-typography-code-adjustmentRatio));
   }
 
-  .code[data-size="lg"] .code__source {
+  .poodle-code[data-size="lg"] .poodle-code__source {
     font-size: 0.875rem;
   }
 
-  .code--inline[data-size="lg"] {
+  .poodle-code--inline[data-size="lg"] {
     font-size: calc(0.875em * var(--poodle-typography-code-adjustmentRatio));
   }
 
-  .code[data-size="xl"] .code__source {
+  .poodle-code[data-size="xl"] .poodle-code__source {
     font-size: 0.9375rem;
   }
 
-  .code--inline[data-size="xl"] {
+  .poodle-code--inline[data-size="xl"] {
     font-size: calc(0.9375em * var(--poodle-typography-code-adjustmentRatio));
   }
 
   /* Density variants */
-  .code[data-density="compact"] .code__pre { padding: 0.5rem 0.75rem; }
-  .code[data-density="comfortable"] .code__pre { padding: 1rem 1.25rem; }
+  .poodle-code[data-density="compact"] .poodle-code__pre { padding: 0.5rem 0.75rem; }
+  .poodle-code[data-density="comfortable"] .poodle-code__pre { padding: 1rem 1.25rem; }
 </style>

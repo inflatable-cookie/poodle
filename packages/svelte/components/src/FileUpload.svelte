@@ -226,10 +226,10 @@
   });
 </script>
 
-<div class="file-upload" class:file-upload--disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
+<div class="poodle-file-upload" class:poodle-file-upload--disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
   <div
-    class="file-upload__dropzone"
-    class:file-upload__dropzone--active={dragActive}
+    class="poodle-file-upload__dropzone"
+    class:poodle-file-upload__dropzone--active={dragActive}
     role="button"
     tabindex={disabled ? -1 : 0}
     aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
@@ -245,24 +245,24 @@
       accept={accept}
       {multiple}
       {disabled}
-      class="file-upload__input"
+      class="poodle-file-upload__input"
       on:change={handleInputChange}
       tabindex="-1"
     />
-    <div class="file-upload__dropzone-content">
-      <svg class="file-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <div class="poodle-file-upload__dropzone-content">
+      <svg class="poodle-file-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M12 16V4m0 0L8 8m4-4l4 4" stroke-linecap="round" stroke-linejoin="round" />
         <path d="M20 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-      <p class="file-upload__label">
+      <p class="poodle-file-upload__label">
         {#if dragActive}
           Drop to upload
         {:else}
-          Drop files here or <span class="file-upload__browse">browse</span>
+          Drop files here or <span class="poodle-file-upload__browse">browse</span>
         {/if}
       </p>
       {#if accept || maxSize}
-        <p class="file-upload__hint">
+        <p class="poodle-file-upload__hint">
           {#if accept}{accept}{/if}
           {#if accept && maxSize} · {/if}
           {#if maxSize}Max {formatFileSize(maxSize)}{/if}
@@ -272,13 +272,13 @@
   </div>
 
   {#if files.length > 0}
-    <ul class="file-upload__list" role="list">
+    <ul class="poodle-file-upload__list" role="list">
       {#each files as item (item.id)}
-        <li class="file-upload__item" class:file-upload__item--error={item.status === "error"}>
+        <li class="poodle-file-upload__item" class:poodle-file-upload__item--error={item.status === "error"}>
           {#if item.previewUrl}
-            <img class="file-upload__preview" src={item.previewUrl} alt="" />
+            <img class="poodle-file-upload__preview" src={item.previewUrl} alt="" />
           {:else}
-            <div class="file-upload__file-icon">
+            <div class="poodle-file-upload__file-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M14 2v6h6" stroke-linecap="round" stroke-linejoin="round" />
@@ -286,12 +286,12 @@
             </div>
           {/if}
 
-          <div class="file-upload__meta">
-            <span class="file-upload__name">{item.file.name}</span>
-            <span class="file-upload__size">
+          <div class="poodle-file-upload__meta">
+            <span class="poodle-file-upload__name">{item.file.name}</span>
+            <span class="poodle-file-upload__size">
               {formatFileSize(item.file.size)}
               {#if item.status === "error" && item.error}
-                · <span class="file-upload__error-text">{item.error}</span>
+                · <span class="poodle-file-upload__error-text">{item.error}</span>
               {:else if item.status === "uploading"}
                 · {item.progress}%
               {:else if item.status === "complete"}
@@ -301,14 +301,14 @@
           </div>
 
           {#if item.status === "uploading"}
-            <div class="file-upload__progress">
-              <div class="file-upload__progress-bar" style="width: {item.progress}%"></div>
+            <div class="poodle-file-upload__progress">
+              <div class="poodle-file-upload__progress-bar" style="width: {item.progress}%"></div>
             </div>
           {/if}
 
           <button
             type="button"
-            class="file-upload__remove"
+            class="poodle-file-upload__remove"
             aria-label="Remove {item.file.name}"
             on:click|stopPropagation={() => removeFile(item.id)}
           >
@@ -323,18 +323,18 @@
 </div>
 
 <style>
-  .file-upload {
+  .poodle-file-upload {
     display: flex;
     flex-direction: column;
     gap: var(--poodle-space-stack-sm, 0.5rem);
   }
 
-  .file-upload--disabled {
+  .poodle-file-upload--disabled {
     opacity: 0.5;
     pointer-events: none;
   }
 
-  .file-upload__dropzone {
+  .poodle-file-upload__dropzone {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -347,19 +347,19 @@
     transition: border-color 0.15s, background 0.15s;
   }
 
-  .file-upload__dropzone:hover,
-  .file-upload__dropzone:focus-visible {
+  .poodle-file-upload__dropzone:hover,
+  .poodle-file-upload__dropzone:focus-visible {
     border-color: var(--poodle-color-border-focus, #888);
     background: color-mix(in srgb, var(--poodle-color-background-panel, #1a1a1a) 50%, transparent);
     outline: none;
   }
 
-  .file-upload__dropzone--active {
+  .poodle-file-upload__dropzone--active {
     border-color: var(--poodle-color-accent-default, #6366f1);
     background: color-mix(in srgb, var(--poodle-color-accent-default, #6366f1) 8%, transparent);
   }
 
-  .file-upload__input {
+  .poodle-file-upload__input {
     position: absolute;
     width: 0;
     height: 0;
@@ -367,7 +367,7 @@
     opacity: 0;
   }
 
-  .file-upload__dropzone-content {
+  .poodle-file-upload__dropzone-content {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -375,36 +375,36 @@
     text-align: center;
   }
 
-  .file-upload__icon {
+  .poodle-file-upload__icon {
     width: 2rem;
     height: 2rem;
     color: var(--poodle-color-text-secondary, #999);
   }
 
-  .file-upload__label,
-  .file-upload__hint,
-  .file-upload__size,
-  .file-upload__error-text {
+  .poodle-file-upload__label,
+  .poodle-file-upload__hint,
+  .poodle-file-upload__size,
+  .poodle-file-upload__error-text {
     margin: 0;
   }
 
-  .file-upload__label {
+  .poodle-file-upload__label {
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary, #999);
   }
 
-  .file-upload__browse {
+  .poodle-file-upload__browse {
     color: var(--poodle-color-accent-default, #6366f1);
     text-decoration: underline;
   }
 
-  .file-upload__hint,
-  .file-upload__size {
+  .poodle-file-upload__hint,
+  .poodle-file-upload__size {
     font-size: 0.8125rem;
     color: var(--poodle-color-text-tertiary, #777);
   }
 
-  .file-upload__list {
+  .poodle-file-upload__list {
     list-style: none;
     display: flex;
     flex-direction: column;
@@ -413,7 +413,7 @@
     padding: 0;
   }
 
-  .file-upload__item {
+  .poodle-file-upload__item {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
@@ -423,22 +423,22 @@
     background: var(--poodle-color-background-panel, #1a1a1a);
   }
 
-  .file-upload__item--error {
+  .poodle-file-upload__item--error {
     background: color-mix(in srgb, var(--poodle-color-danger-base, #ef4444) 10%, var(--poodle-color-background-panel, #1a1a1a));
   }
 
-  .file-upload__preview,
-  .file-upload__file-icon {
+  .poodle-file-upload__preview,
+  .poodle-file-upload__file-icon {
     width: 2rem;
     height: 2rem;
     border-radius: 0.375rem;
   }
 
-  .file-upload__preview {
+  .poodle-file-upload__preview {
     object-fit: cover;
   }
 
-  .file-upload__file-icon {
+  .poodle-file-upload__file-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -446,14 +446,14 @@
     color: var(--poodle-color-text-secondary, #999);
   }
 
-  .file-upload__meta {
+  .poodle-file-upload__meta {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
     min-width: 0;
   }
 
-  .file-upload__name {
+  .poodle-file-upload__name {
     font-size: 0.875rem;
     color: var(--poodle-color-text-primary, #f5f5f5);
     overflow: hidden;
@@ -461,11 +461,11 @@
     white-space: nowrap;
   }
 
-  .file-upload__error-text {
+  .poodle-file-upload__error-text {
     color: var(--poodle-color-danger-base, #ef4444);
   }
 
-  .file-upload__progress {
+  .poodle-file-upload__progress {
     grid-column: 2;
     height: 0.25rem;
     border-radius: 999px;
@@ -473,13 +473,13 @@
     background: color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent);
   }
 
-  .file-upload__progress-bar {
+  .poodle-file-upload__progress-bar {
     height: 100%;
     background: var(--poodle-color-accent-default, #6366f1);
     transition: width 0.15s ease;
   }
 
-  .file-upload__remove {
+  .poodle-file-upload__remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -493,62 +493,62 @@
     cursor: pointer;
   }
 
-  .file-upload__remove:hover,
-  .file-upload__remove:focus-visible {
+  .poodle-file-upload__remove:hover,
+  .poodle-file-upload__remove:focus-visible {
     background: color-mix(in srgb, var(--poodle-color-background-surface, #111) 82%, transparent);
     color: var(--poodle-color-text-primary, #f5f5f5);
     outline: none;
   }
 
-  .file-upload__remove svg {
+  .poodle-file-upload__remove svg {
     width: 0.875rem;
     height: 0.875rem;
   }
 
   /* Size variants */
-  .file-upload[data-size="xs"] .file-upload__dropzone {
+  .poodle-file-upload[data-size="xs"] .poodle-file-upload__dropzone {
     min-height: 5rem;
   }
 
-  .file-upload[data-size="xs"] .file-upload__icon {
+  .poodle-file-upload[data-size="xs"] .poodle-file-upload__icon {
     width: 1.5rem;
     height: 1.5rem;
   }
 
-  .file-upload[data-size="xs"] .file-upload__label {
+  .poodle-file-upload[data-size="xs"] .poodle-file-upload__label {
     font-size: 0.75rem;
   }
 
-  .file-upload[data-size="xs"] .file-upload__hint {
+  .poodle-file-upload[data-size="xs"] .poodle-file-upload__hint {
     font-size: 0.6875rem;
   }
 
-  .file-upload[data-size="sm"] .file-upload__dropzone {
+  .poodle-file-upload[data-size="sm"] .poodle-file-upload__dropzone {
     min-height: 6rem;
   }
 
-  .file-upload[data-size="lg"] .file-upload__dropzone {
+  .poodle-file-upload[data-size="lg"] .poodle-file-upload__dropzone {
     min-height: 10rem;
   }
 
-  .file-upload[data-size="lg"] .file-upload__label {
+  .poodle-file-upload[data-size="lg"] .poodle-file-upload__label {
     font-size: 0.9375rem;
   }
 
-  .file-upload[data-size="xl"] .file-upload__dropzone {
+  .poodle-file-upload[data-size="xl"] .poodle-file-upload__dropzone {
     min-height: 12rem;
   }
 
-  .file-upload[data-size="xl"] .file-upload__icon {
+  .poodle-file-upload[data-size="xl"] .poodle-file-upload__icon {
     width: 2.5rem;
     height: 2.5rem;
   }
 
-  .file-upload[data-size="xl"] .file-upload__label {
+  .poodle-file-upload[data-size="xl"] .poodle-file-upload__label {
     font-size: 1rem;
   }
 
   /* Density variants */
-  .file-upload[data-density="compact"] { padding-inline: 0.75rem; }
-  .file-upload[data-density="comfortable"] { padding-inline: 1.25rem; }
+  .poodle-file-upload[data-density="compact"] { padding-inline: 0.75rem; }
+  .poodle-file-upload[data-density="comfortable"] { padding-inline: 1.25rem; }
 </style>

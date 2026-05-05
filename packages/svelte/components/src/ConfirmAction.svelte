@@ -61,7 +61,7 @@
 
 {#if $$slots.trigger}
   <span
-    class="confirm-action__trigger"
+    class="poodle-confirm-action__trigger"
     data-size={resolvedSize}
     data-density={resolvedDensity}
     role="presentation"

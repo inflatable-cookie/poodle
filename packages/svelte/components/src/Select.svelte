@@ -407,7 +407,7 @@
   <!-- ═══ CUSTOM MODE ═══ -->
   <div
     bind:this={rootElement}
-    class="select select--custom"
+    class="poodle-select poodle-select--custom"
     data-open={open}
     data-placeholder={!hasSelection}
     data-variant={variant}
@@ -419,7 +419,7 @@
     {#if searchable}
       <!-- Searchable: text input trigger -->
       <div
-        class="select__trigger-area"
+        class="poodle-select__trigger-area"
         role="combobox"
         aria-expanded={open ? "true" : "false"}
         aria-haspopup="listbox"
@@ -428,7 +428,7 @@
       >
         <input
           id={selectId}
-          class="select__input"
+          class="poodle-select__input"
           type="text"
           value={query}
           {disabled}
@@ -443,23 +443,23 @@
         {#if clearable && hasSelection && !disabled}
           <button
             type="button"
-            class="select__clear"
+            class="poodle-select__clear"
             aria-label="Clear selection"
             on:click={handleClear}
           >
             <Icon name="x" size="xs" />
           </button>
         {/if}
-        <span class="select__indicator" aria-hidden="true">
+        <span class="poodle-select__indicator" aria-hidden="true">
           <Icon name="chevron-down" />
         </span>
       </div>
     {:else}
       <!-- Non-searchable: button trigger -->
-      <div class="select__trigger-area">
+      <div class="poodle-select__trigger-area">
         <button
           type="button"
-          class="select__trigger"
+          class="poodle-select__trigger"
           id={selectId}
           {disabled}
           aria-expanded={open ? "true" : "false"}
@@ -473,7 +473,7 @@
           {#if $$slots.trigger}
             <slot name="trigger" selectedOption={selectedOption} {open} {placeholder} />
           {:else}
-            <span class="select__value" data-placeholder={!hasSelection}>
+            <span class="poodle-select__value" data-placeholder={!hasSelection}>
               {selectedOption?.label ?? placeholder ?? ""}
             </span>
           {/if}
@@ -481,7 +481,7 @@
         {#if clearable && hasSelection && !disabled}
           <button
             type="button"
-            class="select__clear"
+            class="poodle-select__clear"
             aria-label="Clear selection"
             on:click={handleClear}
           >
@@ -489,7 +489,7 @@
           </button>
         {/if}
         {#if variant !== "ghost"}
-          <span class="select__indicator" aria-hidden="true">
+          <span class="poodle-select__indicator" aria-hidden="true">
             <Icon name="chevron-down" />
           </span>
         {/if}
@@ -505,10 +505,10 @@
     {#if open}
       <div
         id={listboxId}
-        class="select__listbox"
-        class:select__listbox--above={placement === "above"}
-        class:select__listbox--auto-width={!!menuMinWidth}
-        class:select__listbox--align-end={alignEnd}
+        class="poodle-select__listbox"
+        class:poodle-select__listbox--above={placement === "above"}
+        class:poodle-select__listbox--auto-width={!!menuMinWidth}
+        class:poodle-select__listbox--align-end={alignEnd}
         role="listbox"
         aria-label={ariaLabel ?? undefined}
         style={menuMinWidth ? `min-width: ${menuMinWidth}` : undefined}
@@ -517,15 +517,15 @@
           {#each normalizedOptions as group}
             {@const g = group as SelectOptionGroup}
             {#if g.options.length > 0}
-              <div class="select__group" role="group" aria-label={g.label || undefined}>
+              <div class="poodle-select__group" role="group" aria-label={g.label || undefined}>
                 {#if g.label}
-                  <div class="select__group-label">{g.label}</div>
+                  <div class="poodle-select__group-label">{g.label}</div>
                 {/if}
                 {#each g.options as option, idx}
                   {@const flatIdx = flatOptions.indexOf(option)}
                   <button
                     type="button"
-                    class="select__option"
+                    class="poodle-select__option"
                     id={`${listboxId}-option-${flatIdx}`}
                     role="option"
                     aria-selected={currentValue === option.value ? "true" : "false"}
@@ -538,11 +538,11 @@
                       <slot name="option" {option} highlighted={highlightIndex === flatIdx} selected={currentValue === option.value} index={flatIdx} />
                     {:else}
                       {#if option.icon}
-                        <span class="select__option-icon"><Icon icon={option.icon} size="sm" /></span>
+                        <span class="poodle-select__option-icon"><Icon icon={option.icon} size="sm" /></span>
                       {/if}
-                      <span class="select__option-label">{option.label}</span>
+                      <span class="poodle-select__option-label">{option.label}</span>
                       {#if option.description}
-                        <span class="select__option-description">{option.description}</span>
+                        <span class="poodle-select__option-description">{option.description}</span>
                       {/if}
                     {/if}
                   </button>
@@ -554,15 +554,15 @@
           {#each filteredGroups as group}
             {@const g = group as SelectOptionGroup}
             {#if g.options.length > 0}
-              <div class="select__group" role="group" aria-label={g.label || undefined}>
+              <div class="poodle-select__group" role="group" aria-label={g.label || undefined}>
                 {#if g.label}
-                  <div class="select__group-label">{g.label}</div>
+                  <div class="poodle-select__group-label">{g.label}</div>
                 {/if}
                 {#each g.options as option}
                   {@const flatIdx = filteredOptions.indexOf(option)}
                   <button
                     type="button"
-                    class="select__option"
+                    class="poodle-select__option"
                     id={`${listboxId}-option-${flatIdx}`}
                     role="option"
                     aria-selected={currentValue === option.value ? "true" : "false"}
@@ -574,9 +574,9 @@
                     {#if $$slots.option}
                       <slot name="option" {option} highlighted={highlightIndex === flatIdx} selected={currentValue === option.value} index={flatIdx} />
                     {:else}
-                      <span class="select__option-label">{option.label}</span>
+                      <span class="poodle-select__option-label">{option.label}</span>
                       {#if option.description}
-                        <span class="select__option-description">{option.description}</span>
+                        <span class="poodle-select__option-description">{option.description}</span>
                       {/if}
                     {/if}
                   </button>
@@ -588,7 +588,7 @@
           {#each filteredOptions as option, index (option.value)}
             <button
               type="button"
-              class="select__option"
+              class="poodle-select__option"
               id={`${listboxId}-option-${index}`}
               role="option"
               aria-selected={currentValue === option.value ? "true" : "false"}
@@ -601,11 +601,11 @@
                 <slot name="option" {option} highlighted={highlightIndex === index} selected={currentValue === option.value} {index} />
               {:else}
                 {#if option.icon}
-                  <span class="select__option-icon"><Icon icon={option.icon} size="sm" /></span>
+                  <span class="poodle-select__option-icon"><Icon icon={option.icon} size="sm" /></span>
                 {/if}
-                <span class="select__option-label">{option.label}</span>
+                <span class="poodle-select__option-label">{option.label}</span>
                 {#if option.description}
-                  <span class="select__option-description">{option.description}</span>
+                  <span class="poodle-select__option-description">{option.description}</span>
                 {/if}
               {/if}
             </button>
@@ -616,7 +616,7 @@
           {#if $$slots.empty}
             <slot name="empty" {query} />
           {:else}
-            <div class="select__empty">{emptyMessage}</div>
+            <div class="poodle-select__empty">{emptyMessage}</div>
           {/if}
         {/if}
       </div>
@@ -625,11 +625,11 @@
 
 {:else}
   <!-- ═══ NATIVE MODE ═══ -->
-  <div class="select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity} data-validation-state={validationState}>
+  <div class="poodle-select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity} data-validation-state={validationState}>
     <select
       id={selectId}
       {name}
-      class="select__control"
+      class="poodle-select__control"
       value={currentValue}
       {disabled}
       {required}
@@ -679,14 +679,14 @@
       {/if}
     </select>
 
-    <span class="select__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
+    <span class="poodle-select__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
   </div>
 {/if}
 
 <style>
   /* ═══ SHARED STYLES ═══ */
 
-  .select {
+  .poodle-select {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -706,19 +706,19 @@
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .select[data-validation-state="invalid"] {
+  .poodle-select[data-validation-state="invalid"] {
     border-color: var(--poodle-color-status-danger);
   }
 
-  .select[data-validation-state="valid"] {
+  .poodle-select[data-validation-state="valid"] {
     border-color: var(--poodle-color-status-success);
   }
 
-  .select[data-validation-state="pending"] {
+  .poodle-select[data-validation-state="pending"] {
     border-color: var(--poodle-color-accent-base);
   }
 
-  .select:focus-within {
+  .poodle-select:focus-within {
     border-color: var(--poodle-color-accent-focusRing);
     background: var(
       --poodle-treatment-interactive-subtle-fill-focus,
@@ -731,7 +731,7 @@
     );
   }
 
-  .select__indicator {
+  .poodle-select__indicator {
     position: absolute;
     right: var(--poodle-space-control-x);
     top: 50%;
@@ -744,11 +744,11 @@
 
   /* ═══ NATIVE MODE ═══ */
 
-  .select:has(.select__control:disabled) {
+  .poodle-select:has(.poodle-select__control:disabled) {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .select__control {
+  .poodle-select__control {
     min-width: 0;
     width: 100%;
     height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
@@ -765,25 +765,25 @@
     cursor: pointer;
   }
 
-  .select[data-placeholder="true"] .select__control {
+  .poodle-select[data-placeholder="true"] .poodle-select__control {
     color: var(--poodle-color-text-secondary);
   }
 
-  .select__control optgroup { font-weight: 600; color: var(--poodle-color-text-secondary); }
-  .select__control option { font-weight: normal; color: var(--poodle-color-text-primary); }
+  .poodle-select__control optgroup { font-weight: 600; color: var(--poodle-color-text-secondary); }
+  .poodle-select__control option { font-weight: normal; color: var(--poodle-color-text-primary); }
 
   /* ═══ CUSTOM MODE ═══ */
 
-  .select--custom {
+  .poodle-select--custom {
     padding: 0;
   }
 
-  .select--custom:has(:disabled) {
+  .poodle-select--custom:has(:disabled) {
     opacity: var(--poodle-state-opacity-disabled);
   }
 
   /* Trigger area (searchable) */
-  .select__trigger-area {
+  .poodle-select__trigger-area {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -791,7 +791,7 @@
     min-height: var(--poodle-size-control-height);
   }
 
-  .select__input {
+  .poodle-select__input {
     flex: 1;
     min-width: 0;
     height: var(--poodle-size-control-height);
@@ -805,12 +805,12 @@
     outline: 0;
   }
 
-  .select__input::placeholder {
+  .poodle-select__input::placeholder {
     color: var(--poodle-color-text-secondary);
   }
 
   /* Trigger button (non-searchable custom) */
-  .select__trigger {
+  .poodle-select__trigger {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -828,11 +828,11 @@
     cursor: pointer;
   }
 
-  .select__trigger:disabled {
+  .poodle-select__trigger:disabled {
     cursor: not-allowed;
   }
 
-  .select__value {
+  .poodle-select__value {
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -840,12 +840,12 @@
     white-space: nowrap;
   }
 
-  .select__value[data-placeholder="true"] {
+  .poodle-select__value[data-placeholder="true"] {
     color: var(--poodle-color-text-secondary);
   }
 
   /* Clear button */
-  .select__clear {
+  .poodle-select__clear {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -860,13 +860,13 @@
     cursor: pointer;
   }
 
-  .select__clear:hover {
+  .poodle-select__clear:hover {
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 28%, transparent);
     color: var(--poodle-color-text-primary);
   }
 
   /* Listbox dropdown */
-  .select__listbox {
+  .poodle-select__listbox {
     position: absolute;
     top: calc(100% + 0.25rem);
     left: -0.0625rem;
@@ -883,13 +883,13 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
   }
 
-  .select__listbox--above {
+  .poodle-select__listbox--above {
     top: auto;
     bottom: calc(100% + 0.25rem);
   }
 
   /* Group */
-  .select__group-label {
+  .poodle-select__group-label {
     padding: 0.375rem 0.5rem 0.1875rem;
     color: var(--poodle-color-text-secondary);
     font-family: var(--poodle-typography-label-family);
@@ -899,12 +899,12 @@
     text-transform: uppercase;
   }
 
-  .select__group .select__option {
+  .poodle-select__group .poodle-select__option {
     padding-left: 1rem;
   }
 
   /* Option */
-  .select__option {
+  .poodle-select__option {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -920,36 +920,36 @@
     text-align: left;
   }
 
-  .select__option[data-highlighted="true"],
-  .select__option:hover:not(:disabled) {
+  .poodle-select__option[data-highlighted="true"],
+  .poodle-select__option:hover:not(:disabled) {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent);
   }
 
-  .select__option[aria-selected="true"] {
+  .poodle-select__option[aria-selected="true"] {
     font-weight: 500;
   }
 
-  .select__option:disabled {
+  .poodle-select__option:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .select__option-icon {
+  .poodle-select__option-icon {
     display: inline-flex;
     flex-shrink: 0;
   }
 
-  .select__option-label {
+  .poodle-select__option-label {
     flex: 1;
     min-width: 0;
   }
 
-  .select__option-description {
+  .poodle-select__option-description {
     color: var(--poodle-color-text-secondary);
     font-size: 0.6875rem;
   }
 
-  .select__empty {
+  .poodle-select__empty {
     padding: 0.5rem;
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
@@ -957,7 +957,7 @@
 
   /* ═══ GHOST VARIANT ═══ */
 
-  .select[data-variant="ghost"] {
+  .poodle-select[data-variant="ghost"] {
     min-height: 0;
     padding: 0;
     border: 0;
@@ -966,68 +966,68 @@
     box-shadow: none;
   }
 
-  .select[data-variant="ghost"]:focus-within {
+  .poodle-select[data-variant="ghost"]:focus-within {
     border-color: transparent;
     background: transparent;
     box-shadow: none;
   }
 
-  .select[data-variant="ghost"] .select__trigger-area {
+  .poodle-select[data-variant="ghost"] .poodle-select__trigger-area {
     padding: 0;
     min-height: 0;
   }
 
-  .select[data-variant="ghost"] .select__trigger {
+  .poodle-select[data-variant="ghost"] .poodle-select__trigger {
     min-height: 0;
     padding: 0;
     line-height: 1;
   }
 
   /* Auto-width listbox (used with menuMinWidth) */
-  .select__listbox--auto-width {
+  .poodle-select__listbox--auto-width {
     right: auto;
     width: max-content;
   }
 
-  .select__listbox--align-end {
+  .poodle-select__listbox--align-end {
     left: auto;
     right: -0.0625rem;
   }
 
   /* ═══ DENSITY VARIANTS ═══ */
-  .select[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .select[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
-  .select--custom[data-density="compact"] { padding: 0; }
-  .select--custom[data-density="compact"] .select__trigger-area,
-  .select--custom[data-density="compact"] .select__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .select--custom[data-density="compact"] .select__trigger { padding: 0; }
-  .select--custom[data-density="comfortable"] { padding: 0; }
-  .select--custom[data-density="comfortable"] .select__trigger-area,
-  .select--custom[data-density="comfortable"] .select__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
-  .select--custom[data-density="comfortable"] .select__trigger { padding: 0; }
+  .poodle-select[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-select[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-select--custom[data-density="compact"] { padding: 0; }
+  .poodle-select--custom[data-density="compact"] .poodle-select__trigger-area,
+  .poodle-select--custom[data-density="compact"] .poodle-select__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-select--custom[data-density="compact"] .poodle-select__trigger { padding: 0; }
+  .poodle-select--custom[data-density="comfortable"] { padding: 0; }
+  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger-area,
+  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger { padding: 0; }
 
   /* ═══ SIZE VARIANTS ═══ */
-  .select[data-size="xs"] { min-height: 1.5rem; padding: 0 0.5rem; }
-  .select[data-size="xs"] .select__control { height: calc(1.5rem - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
-  .select[data-size="xs"] .select__input,
-  .select[data-size="xs"] .select__trigger { font-size: 0.75rem; min-height: 1.5rem; }
-  .select--custom[data-size="xs"] { padding: 0; }
+  .poodle-select[data-size="xs"] { min-height: 1.5rem; padding: 0 0.5rem; }
+  .poodle-select[data-size="xs"] .poodle-select__control { height: calc(1.5rem - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
+  .poodle-select[data-size="xs"] .poodle-select__input,
+  .poodle-select[data-size="xs"] .poodle-select__trigger { font-size: 0.75rem; min-height: 1.5rem; }
+  .poodle-select--custom[data-size="xs"] { padding: 0; }
 
-  .select[data-size="sm"] { min-height: 1.75rem; padding: 0 0.625rem; }
-  .select[data-size="sm"] .select__control { height: calc(1.75rem - (var(--poodle-border-width-default) * 2)); }
-  .select[data-size="sm"] .select__input,
-  .select[data-size="sm"] .select__trigger { min-height: 1.75rem; }
-  .select--custom[data-size="sm"] { padding: 0; }
+  .poodle-select[data-size="sm"] { min-height: 1.75rem; padding: 0 0.625rem; }
+  .poodle-select[data-size="sm"] .poodle-select__control { height: calc(1.75rem - (var(--poodle-border-width-default) * 2)); }
+  .poodle-select[data-size="sm"] .poodle-select__input,
+  .poodle-select[data-size="sm"] .poodle-select__trigger { min-height: 1.75rem; }
+  .poodle-select--custom[data-size="sm"] { padding: 0; }
 
-  .select[data-size="lg"] { min-height: 2.75rem; padding: 0 1rem; }
-  .select[data-size="lg"] .select__control { height: calc(2.75rem - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
-  .select[data-size="lg"] .select__input,
-  .select[data-size="lg"] .select__trigger { font-size: 0.9375rem; min-height: 2.75rem; }
-  .select--custom[data-size="lg"] { padding: 0; }
+  .poodle-select[data-size="lg"] { min-height: 2.75rem; padding: 0 1rem; }
+  .poodle-select[data-size="lg"] .poodle-select__control { height: calc(2.75rem - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
+  .poodle-select[data-size="lg"] .poodle-select__input,
+  .poodle-select[data-size="lg"] .poodle-select__trigger { font-size: 0.9375rem; min-height: 2.75rem; }
+  .poodle-select--custom[data-size="lg"] { padding: 0; }
 
-  .select[data-size="xl"] { min-height: 3.25rem; padding: 0 1.125rem; }
-  .select[data-size="xl"] .select__control { height: calc(3.25rem - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
-  .select[data-size="xl"] .select__input,
-  .select[data-size="xl"] .select__trigger { font-size: 1rem; min-height: 3.25rem; }
-  .select--custom[data-size="xl"] { padding: 0; }
+  .poodle-select[data-size="xl"] { min-height: 3.25rem; padding: 0 1.125rem; }
+  .poodle-select[data-size="xl"] .poodle-select__control { height: calc(3.25rem - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
+  .poodle-select[data-size="xl"] .poodle-select__input,
+  .poodle-select[data-size="xl"] .poodle-select__trigger { font-size: 1rem; min-height: 3.25rem; }
+  .poodle-select--custom[data-size="xl"] { padding: 0; }
 </style>

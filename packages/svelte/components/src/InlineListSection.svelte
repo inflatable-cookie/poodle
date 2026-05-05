@@ -21,11 +21,11 @@
 </script>
 
 <Card>
-  <section class="inline-list-section" aria-label={title}>
-    <div class="inline-list-section__header">
-      <h4 class="inline-list-section__title">{title}</h4>
+  <section class="poodle-inline-list-section" aria-label={title}>
+    <div class="poodle-inline-list-section__header">
+      <h4 class="poodle-inline-list-section__title">{title}</h4>
       {#if actions}
-        <div class="inline-list-section__header-actions">
+        <div class="poodle-inline-list-section__header-actions">
           {@render actions()}
         </div>
       {/if}
@@ -33,12 +33,12 @@
 
     {#if items.length === 0}
       {#if emptyMessage}
-        <p class="inline-list-section__empty">{emptyMessage}</p>
+        <p class="poodle-inline-list-section__empty">{emptyMessage}</p>
       {/if}
     {:else}
-      <ul class="inline-list-section__items">
+      <ul class="poodle-inline-list-section__items">
         {#each items as entry}
-          <li class="inline-list-section__item">
+          <li class="poodle-inline-list-section__item">
             {@render item(entry)}
           </li>
         {/each}
@@ -48,19 +48,19 @@
 </Card>
 
 <style>
-  .inline-list-section {
+  .poodle-inline-list-section {
     display: grid;
     gap: 0.75rem;
   }
 
-  .inline-list-section__header {
+  .poodle-inline-list-section__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
   }
 
-  .inline-list-section__title {
+  .poodle-inline-list-section__title {
     margin: 0;
     font-size: 0.75rem;
     font-weight: 600;
@@ -69,13 +69,13 @@
     color: var(--underlay-color-text-muted, rgba(148, 163, 184, 0.85));
   }
 
-  .inline-list-section__header-actions {
+  .poodle-inline-list-section__header-actions {
     display: flex;
     align-items: center;
     gap: 0.375rem;
   }
 
-  .inline-list-section__items {
+  .poodle-inline-list-section__items {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -84,7 +84,7 @@
     gap: 0.375rem;
   }
 
-  .inline-list-section__item {
+  .poodle-inline-list-section__item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -94,7 +94,7 @@
     background: var(--underlay-color-surface-muted, rgba(255, 255, 255, 0.02));
   }
 
-  .inline-list-section__empty {
+  .poodle-inline-list-section__empty {
     margin: 0;
     font-size: 0.9rem;
     font-style: italic;
