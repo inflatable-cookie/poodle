@@ -165,6 +165,6 @@
   }
 
   .poodle-list-container__pagination :global(.poodle-pagination) {
-    justify-self: start;
+    justify-self: end;
   }
 </style>

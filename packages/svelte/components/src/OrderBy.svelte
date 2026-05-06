@@ -28,6 +28,7 @@
   export let density: ControlDensity | null = null;
   export let maxFields: number | null = null;
   export let compact = false;
+  export let showClearButton = true;
   export let onChange: ((value: OrderByValue) => void) | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -160,13 +161,14 @@
   }
 </script>
 
-<Popover bind:open placement="bottom-start" ariaLabel={ariaLabel}>
+<Popover bind:open placement="bottom-start" ariaLabel={ariaLabel} block>
   <div
     slot="trigger"
     class="poodle-order-by"
     role="group"
     aria-label={ariaLabel}
     data-disabled={disabled}
+    data-compact={compact}
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
@@ -183,7 +185,7 @@
       <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
     </button>
 
-    {#if effectiveValue.length > 0}
+    {#if showClearButton && effectiveValue.length > 0}
       <button
         type="button"
         class="poodle-order-by__reset"
@@ -276,9 +278,11 @@
 
 <style>
   .poodle-order-by {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 0.375rem;
+    width: 100%;
+    min-width: 0;
   }
 
   .poodle-order-by[data-disabled="true"] {
@@ -289,10 +293,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    min-width: 12rem;
-    max-width: min(28rem, 75vw);
-    min-height: 2rem;
-    padding: 0 0.75rem;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--poodle-size-control-height);
+    padding: 0 var(--poodle-space-control-x);
+    box-sizing: border-box;
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
@@ -343,10 +350,15 @@
 
   .poodle-order-by__reset {
     display: inline-flex;
+    flex-shrink: 0;
     padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
+  }
+
+  .poodle-order-by[data-compact="true"] .poodle-order-by__label {
+    display: none;
   }
 
   .poodle-order-by__panel {
@@ -434,19 +446,19 @@
     align-items: center;
   }
 
-  .poodle-order-by[data-size="xs"] .poodle-order-by__trigger { min-height: 1.625rem; padding: 0 0.5rem; }
+  .poodle-order-by[data-size="xs"] .poodle-order-by__trigger { min-height: 1.5rem; padding: 0 0.5rem; }
   .poodle-order-by[data-size="xs"] .poodle-order-by__label { font-size: 0.5625rem; }
   .poodle-order-by[data-size="xs"] .poodle-order-by__summary { font-size: 0.6875rem; }
 
   .poodle-order-by[data-size="sm"] .poodle-order-by__trigger { min-height: 1.75rem; }
   .poodle-order-by[data-size="sm"] .poodle-order-by__label { font-size: 0.625rem; }
-  .poodle-order-by[data-size="sm"] .poodle-order-by__summary { font-size: 0.75rem; }
+  .poodle-order-by[data-size="sm"] .poodle-order-by__summary { font-size: 0.8125rem; }
 
-  .poodle-order-by[data-size="lg"] .poodle-order-by__trigger { min-height: 2.25rem; }
+  .poodle-order-by[data-size="lg"] .poodle-order-by__trigger { min-height: 2.75rem; padding: 0 1rem; }
   .poodle-order-by[data-size="lg"] .poodle-order-by__label { font-size: 0.8125rem; }
   .poodle-order-by[data-size="lg"] .poodle-order-by__summary { font-size: 0.9375rem; }
 
-  .poodle-order-by[data-size="xl"] .poodle-order-by__trigger { min-height: 2.5rem; }
+  .poodle-order-by[data-size="xl"] .poodle-order-by__trigger { min-height: 3.25rem; padding: 0 1.125rem; }
   .poodle-order-by[data-size="xl"] .poodle-order-by__label { font-size: 0.875rem; }
   .poodle-order-by[data-size="xl"] .poodle-order-by__summary { font-size: 1rem; }
 

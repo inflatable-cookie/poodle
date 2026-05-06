@@ -118,6 +118,13 @@
       color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
+  .poodle-media-thumbnail__frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .poodle-media-thumbnail[data-aspect-ratio="square"] .poodle-media-thumbnail__frame {
     aspect-ratio: 1 / 1;
   }

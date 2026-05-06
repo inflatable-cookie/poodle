@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import Tooltip from "./Tooltip.svelte";
 
   export let datetime: Date | string | number;
   export let live = true;
@@ -126,21 +127,37 @@
   });
 </script>
 
-<time
-  class="poodle-time-ago"
-  datetime={new Date(timestamp).toISOString()}
-  title={absoluteText}
-  aria-label={ariaLabel ?? `${relativeText} (${absoluteText})`}
->
-  {relativeText}
-</time>
+<Tooltip content={absoluteText}>
+  <time
+    class="poodle-time-ago"
+    datetime={new Date(timestamp).toISOString()}
+    aria-label={ariaLabel ?? `${relativeText} (${absoluteText})`}
+  >
+    {relativeText}
+  </time>
+</Tooltip>
 
 <style>
   .poodle-time-ago {
     color: var(--poodle-color-text-secondary);
+    --poodle-time-ago-underline: color-mix(in srgb, currentColor 32%, transparent);
+    --poodle-time-ago-underline-hover: color-mix(in srgb, currentColor 48%, transparent);
     font-family: var(--poodle-typography-body-family);
     font-size: var(--poodle-typography-body-size);
     font-variant-numeric: tabular-nums;
-    cursor: default;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--poodle-time-ago-underline);
+    text-underline-offset: 0.14em;
+    cursor: help;
+    transition:
+      color 120ms ease,
+      text-decoration-color 120ms ease;
+  }
+
+  .poodle-time-ago:hover,
+  .poodle-time-ago:focus-visible {
+    color: var(--poodle-color-text-primary);
+    text-decoration-color: var(--poodle-time-ago-underline-hover);
   }
 </style>

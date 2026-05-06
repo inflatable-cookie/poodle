@@ -51,7 +51,11 @@
         on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
       />
 
-      {#if summaryText}
+      {#if $$slots.summary}
+        <span class="poodle-filter-toolbar__summary">
+          <slot name="summary" />
+        </span>
+      {:else if summaryText}
         <span class="poodle-filter-toolbar__summary">{summaryText}</span>
       {/if}
 
@@ -76,7 +80,11 @@
         />
       {/if}
 
-      {#if summaryText}
+      {#if $$slots.summary}
+        <div class="poodle-filter-toolbar__summary">
+          <slot name="summary" />
+        </div>
+      {:else if summaryText}
         <p class="poodle-filter-toolbar__summary">{summaryText}</p>
       {/if}
 
@@ -162,17 +170,15 @@
   .poodle-filter-toolbar__controls {
     display: grid;
     grid-template-columns: repeat(
-      var(--ft-columns, 4),
-      minmax(var(--ft-min-width, 10rem), 1fr)
+      auto-fit,
+      minmax(min(var(--ft-min-width, 10rem), 100%), 1fr)
     );
     gap: var(--poodle-space-inline-sm);
     align-items: end;
   }
 
-  @media (max-width: 960px) {
-    .poodle-filter-toolbar__controls {
-      grid-template-columns: repeat(2, minmax(var(--ft-min-width, 10rem), 1fr));
-    }
+  :global(.poodle-filter-toolbar__controls > *) {
+    min-width: 0;
   }
 
   @media (max-width: 640px) {

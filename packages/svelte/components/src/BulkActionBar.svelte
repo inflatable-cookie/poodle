@@ -36,6 +36,7 @@
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isUnavailable = disabled || loading;
+  $: actionsDisabled = isUnavailable || selectionCount === 0;
 
   function isIconComponent(icon: BulkAction["icon"]): icon is Component<any> {
     return icon != null && typeof icon !== "string" && !Array.isArray(icon);
@@ -81,7 +82,7 @@
             variant="ghost"
             tone={actionTone === "danger" ? "danger" : "default"}
             size={resolvedSize}
-            disabled={isUnavailable || action.disabled}
+            disabled={actionsDisabled || action.disabled}
             on:click={() => dispatch("action", { id: action.id })}
           >
             <svelte:component this={action.icon} size={16} />
@@ -94,7 +95,7 @@
             variant="ghost"
             tone={actionTone === "danger" ? "danger" : "default"}
             size={resolvedSize}
-            disabled={isUnavailable || action.disabled}
+            disabled={actionsDisabled || action.disabled}
             on:click={() => dispatch("action", { id: action.id })}
           />
         {/if}

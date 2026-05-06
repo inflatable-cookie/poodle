@@ -20,6 +20,7 @@
   export let disabled = false;
   export let selectable = false;
   export let selected = false;
+  export let selectionIndicator: "none" | "checkbox" = "none";
   export let showReorderHandle = false;
   export let notLive = false;
   export let sash: string | null = null;
@@ -40,6 +41,8 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isCompact = layout === "compact";
   $: isInteractive = Boolean(href) || interactive || selectable;
+  $: showSelectionIndicator = selectable && selectionIndicator === "checkbox";
+  $: showSelectionOverlay = showSelectionIndicator && Boolean($$slots.leading);
   $: actionableContextMenuItems = menuNavigableItems(contextMenuItems ?? []);
   $: hasContextMenu = (contextMenuItems?.length ?? 0) > 0;
 
@@ -223,6 +226,27 @@
     {#if $$slots.leading}
       <span class="poodle-list-card__leading">
         <slot name="leading" />
+        {#if showSelectionOverlay}
+          <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
+            <span class="poodle-list-card__selection-box">
+              {#if selected}
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+                </svg>
+              {/if}
+            </span>
+          </span>
+        {/if}
+      </span>
+    {:else if showSelectionIndicator}
+      <span class="poodle-list-card__selection-indicator" aria-hidden="true">
+        <span class="poodle-list-card__selection-box">
+          {#if selected}
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+            </svg>
+          {/if}
+        </span>
       </span>
     {/if}
 
@@ -311,6 +335,27 @@
     {#if $$slots.leading}
       <span class="poodle-list-card__leading">
         <slot name="leading" />
+        {#if showSelectionOverlay}
+          <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
+            <span class="poodle-list-card__selection-box">
+              {#if selected}
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+                </svg>
+              {/if}
+            </span>
+          </span>
+        {/if}
+      </span>
+    {:else if showSelectionIndicator}
+      <span class="poodle-list-card__selection-indicator" aria-hidden="true">
+        <span class="poodle-list-card__selection-box">
+          {#if selected}
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+            </svg>
+          {/if}
+        </span>
       </span>
     {/if}
 
@@ -448,18 +493,19 @@
   }
 
   .poodle-list-card[data-selected="true"] {
-    border-color: var(--list-card-accent, var(--poodle-color-accent-base));
+    border-color: var(--poodle-color-accent-base);
+    background: color-mix(in srgb, var(--poodle-surface) 84%, var(--poodle-color-accent-base) 16%);
     box-shadow:
-      0 0 0 0.0625rem var(--list-card-accent, var(--poodle-color-accent-base)),
+      0 0 0 0.0625rem var(--poodle-color-accent-base),
       inset 0 0 0 0.0625rem color-mix(
         in srgb,
-        var(--list-card-accent, var(--poodle-color-accent-base)) 12%,
+        var(--poodle-color-accent-base) 12%,
         transparent
       );
   }
 
   .poodle-list-card--interactive[data-selected="true"]:hover:not([data-disabled="true"]) {
-    border-color: var(--list-card-accent, var(--poodle-color-accent-base));
+    border-color: var(--poodle-color-accent-base);
   }
 
   .poodle-list-card:focus-visible {
@@ -491,10 +537,33 @@
     min-height: 3rem;
   }
 
+  .poodle-list-card[data-layout="compact"][data-size="xs"] {
+    gap: 0.3125rem;
+    padding: 0.25rem 0.375rem;
+    min-height: 2.25rem;
+  }
+
+  .poodle-list-card[data-layout="compact"][data-size="sm"] {
+    gap: 0.375rem;
+    padding: 0.3125rem 0.5rem;
+    min-height: 2.5rem;
+  }
+
   .poodle-list-card[data-layout="compact"] .poodle-list-card__leading {
     width: 1.5rem;
     height: 1.5rem;
     font-size: 0.75rem;
+  }
+
+  .poodle-list-card[data-layout="compact"][data-size="xs"] .poodle-list-card__leading {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.625rem;
+  }
+
+  .poodle-list-card[data-layout="compact"][data-size="xs"][data-leading-shape="rounded-square"] .poodle-list-card__leading {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .poodle-list-card[data-layout="compact"][data-leading-shape="rounded-square"] .poodle-list-card__leading {
@@ -508,6 +577,10 @@
 
   .poodle-list-card[data-layout="compact"] .poodle-list-card__title {
     font-size: 0.875rem;
+  }
+
+  .poodle-list-card[data-layout="compact"][data-size="xs"] .poodle-list-card__title {
+    font-size: 0.75rem;
   }
 
   .poodle-list-card[data-layout="compact"] .poodle-list-card__subtitle,
@@ -531,7 +604,50 @@
     height: 100%;
   }
 
+  .poodle-list-card__selection-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .poodle-list-card__selection-indicator--overlay {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    z-index: 1;
+  }
+
+  .poodle-list-card__selection-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 88%, transparent);
+    border-radius: 0.25rem;
+    background: var(--poodle-color-background-surface);
+    color: var(--poodle-color-text-inverse);
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-list-card[data-selected="true"] .poodle-list-card__selection-box {
+    border-color: var(--poodle-color-accent-base);
+    background: var(--poodle-color-accent-base);
+  }
+
+  .poodle-list-card__selection-box svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
   .poodle-list-card__leading {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -631,24 +747,34 @@
   .poodle-list-card[data-size="xs"] .poodle-list-card__subtitle { font-size: 0.625rem; }
   .poodle-list-card[data-size="xs"] .poodle-list-card__meta { font-size: 0.625rem; }
   .poodle-list-card[data-size="xs"] .poodle-list-card__leading { width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
+  .poodle-list-card[data-size="xs"] .poodle-list-card__selection-indicator { width: 1.5rem; height: 1.5rem; }
+  .poodle-list-card[data-size="xs"] .poodle-list-card__selection-box { width: 0.875rem; height: 0.875rem; }
+  .poodle-list-card[data-size="xs"] .poodle-list-card__selection-box svg { width: 0.625rem; height: 0.625rem; }
 
   .poodle-list-card[data-size="sm"] { padding: 0.5rem 0.625rem; gap: 0.5rem; }
   .poodle-list-card[data-size="sm"] .poodle-list-card__title { font-size: 0.8125rem; }
   .poodle-list-card[data-size="sm"] .poodle-list-card__subtitle { font-size: 0.6875rem; }
   .poodle-list-card[data-size="sm"] .poodle-list-card__meta { font-size: 0.6875rem; }
   .poodle-list-card[data-size="sm"] .poodle-list-card__leading { width: 1.75rem; height: 1.75rem; font-size: 0.75rem; }
+  .poodle-list-card[data-size="sm"] .poodle-list-card__selection-indicator { width: 1.75rem; height: 1.75rem; }
 
   .poodle-list-card[data-size="lg"] { padding: 0.75rem 1rem; gap: 0.875rem; }
   .poodle-list-card[data-size="lg"] .poodle-list-card__title { font-size: 1rem; }
   .poodle-list-card[data-size="lg"] .poodle-list-card__subtitle { font-size: 0.8125rem; }
   .poodle-list-card[data-size="lg"] .poodle-list-card__meta { font-size: 0.8125rem; }
   .poodle-list-card[data-size="lg"] .poodle-list-card__leading { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+  .poodle-list-card[data-size="lg"] .poodle-list-card__selection-indicator { width: 2.5rem; height: 2.5rem; }
+  .poodle-list-card[data-size="lg"] .poodle-list-card__selection-box { width: 1.125rem; height: 1.125rem; }
+  .poodle-list-card[data-size="lg"] .poodle-list-card__selection-box svg { width: 0.8125rem; height: 0.8125rem; }
 
   .poodle-list-card[data-size="xl"] { padding: 0.875rem 1.125rem; gap: 1rem; }
   .poodle-list-card[data-size="xl"] .poodle-list-card__title { font-size: 1.0625rem; }
   .poodle-list-card[data-size="xl"] .poodle-list-card__subtitle { font-size: 0.875rem; }
   .poodle-list-card[data-size="xl"] .poodle-list-card__meta { font-size: 0.875rem; }
   .poodle-list-card[data-size="xl"] .poodle-list-card__leading { width: 2.75rem; height: 2.75rem; font-size: 1.125rem; }
+  .poodle-list-card[data-size="xl"] .poodle-list-card__selection-indicator { width: 2.75rem; height: 2.75rem; }
+  .poodle-list-card[data-size="xl"] .poodle-list-card__selection-box { width: 1.25rem; height: 1.25rem; }
+  .poodle-list-card[data-size="xl"] .poodle-list-card__selection-box svg { width: 0.875rem; height: 0.875rem; }
 
   /* Density variants */
   .poodle-list-card[data-density="compact"] { padding-inline: 0.5rem; }

@@ -4,6 +4,7 @@
   import Button from "./Button.svelte";
   import Checkbox from "./Checkbox.svelte";
   import Icon from "./Icon.svelte";
+  import IconButton from "./IconButton.svelte";
   import Menu from "./Menu.svelte";
   import Popover from "./Popover.svelte";
   import Select from "./Select.svelte";
@@ -122,6 +123,7 @@
       label: action.label,
       disabled: action.disabled,
       shortcutLabel: action.shortcutLabel,
+      tone: action.tone,
       kind: action.kind === "separator" ? "separator" : "action",
     };
   }
@@ -494,8 +496,13 @@
                       on:action={(event) => handleMenuAction(row, actions, event.detail.value)}
                     >
                       <span slot="trigger" class="poodle-data-table__actions-trigger" data-row-action-trigger="true">
-                        <Icon name="ellipsis" />
-                        Actions
+                        <IconButton
+                          icon="ellipsis"
+                          variant="ghost"
+                          sizeRole="chrome"
+                          ariaLabel={`Actions for ${getRowPrimaryLabel(row)}`}
+                          tooltip="Actions"
+                        />
                       </span>
                     </Menu>
                   {/if}
@@ -746,7 +753,7 @@
 
   .poodle-data-table__actions-header,
   .poodle-data-table__actions {
-    width: 7.5rem;
+    width: 3.5rem;
     text-align: right;
     white-space: nowrap;
   }

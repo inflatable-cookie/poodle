@@ -119,9 +119,6 @@
   }
 
   .poodle-pill[data-appearance="badge"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
-    --poodle-pill-border: transparent;
-    --poodle-pill-text: var(--poodle-color-text-primary);
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -130,6 +127,26 @@
   .poodle-pill[data-appearance="badge"][data-tone="neutral"] {
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
     --poodle-pill-text: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-pill[data-appearance="badge"][data-tone="success"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success) 42%, transparent);
+  }
+
+  .poodle-pill[data-appearance="badge"][data-tone="info"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info) 42%, transparent);
+  }
+
+  .poodle-pill[data-appearance="badge"][data-tone="warning"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning) 42%, transparent);
+  }
+
+  .poodle-pill[data-appearance="badge"][data-tone="danger"] {
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger) 42%, transparent);
   }
 
   .poodle-pill[data-muted="true"] {

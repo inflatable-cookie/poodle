@@ -16,6 +16,7 @@
   export let dismissOnOutsideInteract = true;
   export let initialFocus: PopoverInitialFocus = "first-focusable";
   export let ariaLabel: string | null = null;
+  export let block = false;
 
   const dispatch = createEventDispatcher<{
     openChange: { open: boolean };
@@ -90,10 +91,11 @@
   });
 </script>
 
-<div class="poodle-popover" bind:this={rootElement}>
+<div class="poodle-popover" data-block={block} bind:this={rootElement}>
   <div
     bind:this={triggerElement}
     class="poodle-popover__trigger"
+    data-block={block}
     role="button"
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
@@ -131,8 +133,20 @@
     display: inline-flex;
   }
 
+  .poodle-popover[data-block="true"] {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+
   .poodle-popover__trigger {
     display: inline-flex;
+  }
+
+  .poodle-popover__trigger[data-block="true"] {
+    display: flex;
+    width: 100%;
+    min-width: 0;
   }
 
   .poodle-popover__trigger:focus-visible {

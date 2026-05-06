@@ -1,5 +1,5 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
   import type { Snippet } from "svelte";
   import Button from "./Button.svelte";
   import UiPresentationProvider from "./UiPresentationProvider.svelte";
@@ -21,6 +21,7 @@
   export let addPlaceholder = "New item";
   export let maxItems: number | null = null;
   export let removable = false;
+  export let embeddedHandle = false;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
@@ -50,8 +51,10 @@
   let draggingIndex: number | null = null;
   let dropTargetIndex: number | null = null;
   let grabbedIndex: number | null = null;
+  let lastMovedId: string | null = null;
   let windowPageIndex = 0;
   let liveMessage = "";
+  let clearLastMovedTimeout: ReturnType<typeof setTimeout> | null = null;
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
@@ -85,6 +88,19 @@
     windowPageIndex = Math.floor(index / effectiveWindowSize);
   }
 
+  function markLastMoved(id: string): void {
+    lastMovedId = id;
+    if (clearLastMovedTimeout) {
+      clearTimeout(clearLastMovedTimeout);
+    }
+    clearLastMovedTimeout = setTimeout(() => {
+      if (lastMovedId === id) {
+        lastMovedId = null;
+      }
+      clearLastMovedTimeout = null;
+    }, 1400);
+  }
+
   function moveItem(fromIndex: number, toIndex: number): void {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     if (fromIndex >= items.length || toIndex >= items.length) return;
@@ -95,6 +111,7 @@
     items = updated;
     dispatch("reorder", { items: updated });
     ensureIndexVisible(toIndex);
+    markLastMoved(moved.id);
     announce(`Moved ${moved.label ?? moved.id} to position ${toIndex + 1} of ${updated.length}.`);
   }
 
@@ -219,6 +236,12 @@
   function nextWindowPage(): void {
     windowPageIndex = Math.min(windowPageIndex + 1, windowPageCount - 1);
   }
+
+  onDestroy(() => {
+    if (clearLastMovedTimeout) {
+      clearTimeout(clearLastMovedTimeout);
+    }
+  });
 </script>
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
@@ -274,6 +297,7 @@
 
     <ul
       class="poodle-editable-list"
+      class:poodle-editable-list--embedded-handle={embeddedHandle}
       role="listbox"
       aria-label={ariaLabel}
       data-disabled={isUnavailable}
@@ -287,6 +311,8 @@
           class:poodle-editable-list__item--dragging={draggingIndex === index}
           class:poodle-editable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
           class:poodle-editable-list__item--grabbed={grabbedIndex === index}
+          class:poodle-editable-list__item--last-moved={lastMovedId === reorderItem.id}
+          class:poodle-editable-list__item--embedded-handle={embeddedHandle}
           role="option"
           tabindex={isUnavailable ? -1 : 0}
           aria-selected="false"
@@ -299,7 +325,7 @@
           on:dragend={handleDragEnd}
           on:keydown={(e) => handleKeydown(e, index)}
         >
-          {#if reorderable}
+          {#if reorderable && !embeddedHandle}
             <span class="poodle-editable-list__handle" aria-hidden="true">
               <svg viewBox="0 0 16 16" fill="currentColor">
                 <circle cx="5" cy="4" r="1.25" />
@@ -440,6 +466,10 @@
     gap: var(--poodle-editable-list-gap);
   }
 
+  .poodle-editable-list--embedded-handle {
+    --poodle-editable-list-gap: 0.5rem;
+  }
+
   .poodle-editable-list[data-size="xs"] {
     --poodle-editable-list-handle-size: 0.875rem;
     --poodle-editable-list-item-x: 0.5rem;
@@ -472,9 +502,17 @@
     --poodle-editable-list-item-gap: 0.375rem;
   }
 
+  .poodle-editable-list--embedded-handle[data-density="compact"] {
+    --poodle-editable-list-gap: 0.5rem;
+  }
+
   .poodle-editable-list[data-density="comfortable"] {
     --poodle-editable-list-gap: 0.1875rem;
     --poodle-editable-list-item-gap: 0.625rem;
+  }
+
+  .poodle-editable-list--embedded-handle[data-density="comfortable"] {
+    --poodle-editable-list-gap: 0.625rem;
   }
 
   .poodle-editable-list[data-disabled="true"] {
@@ -499,6 +537,16 @@
     background: color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface));
   }
 
+  .poodle-editable-list__item--embedded-handle {
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .poodle-editable-list__item--embedded-handle:hover {
+    background: transparent;
+  }
+
   .poodle-editable-list__item:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: -0.0625rem;
@@ -512,6 +560,31 @@
   .poodle-editable-list__item--grabbed {
     border-color: var(--poodle-color-accent-base);
     background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-surface));
+  }
+
+  .poodle-editable-list__item--last-moved {
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-surface));
+    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 32%, transparent);
+    animation: poodle-editable-list-last-moved 1.4s ease-out;
+  }
+
+  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--drop-target,
+  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--grabbed {
+    background: transparent;
+  }
+
+  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--last-moved {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--last-moved :global(.poodle-list-card) {
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-surface));
+    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 32%, transparent);
+    animation: poodle-editable-list-last-moved 1.4s ease-out;
   }
 
   .poodle-editable-list__handle {
@@ -538,6 +611,11 @@
     color: var(--poodle-color-text-primary);
   }
 
+  .poodle-editable-list__item--embedded-handle .poodle-editable-list__content {
+    display: block;
+    width: 100%;
+  }
+
   .poodle-editable-list__remove {
     display: inline-flex;
     align-items: center;
@@ -560,6 +638,18 @@
   .poodle-editable-list__remove svg {
     width: 0.75rem;
     height: 0.75rem;
+  }
+
+  @keyframes poodle-editable-list-last-moved {
+    0% {
+      background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
+      box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-base) 38%, transparent);
+    }
+
+    100% {
+      background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-surface));
+      box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 32%, transparent);
+    }
   }
 
   .poodle-editable-list__add {

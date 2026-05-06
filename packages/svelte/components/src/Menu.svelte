@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount, tick } from "svelte";
 
   import { menuNavigableItems } from "./internal";
+  import { resolveOverlayPosition } from "./overlay-position";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement, SemanticControlSizeRole } from "./types";
@@ -24,9 +25,13 @@
   const uiPresentation = getUiPresentation();
 
   let rootElement: HTMLDivElement | null = null;
+  let triggerElement: HTMLDivElement | null = null;
+  let overlayElement: HTMLDivElement | null = null;
   let itemElements: Array<HTMLButtonElement | null> = [];
   let uncontrolledOpen = defaultOpen;
   let highlightIndex = 0;
+  let resolvedPlacement: OverlayPlacement = placement;
+  let overlayStyle = "";
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
@@ -34,7 +39,10 @@
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
   $: actionableItems = menuNavigableItems(items);
   $: if (isOpen) {
-    tick().then(() => itemElements[highlightIndex]?.focus());
+    tick().then(() => {
+      void updateOverlayPosition();
+      itemElements[highlightIndex]?.focus();
+    });
   }
 
   function setOpen(nextOpen: boolean): void {
@@ -92,6 +100,27 @@
     }
   }
 
+  async function updateOverlayPosition(): Promise<void> {
+    if (!isOpen || !triggerElement) {
+      return;
+    }
+
+    await tick();
+
+    if (!overlayElement) {
+      return;
+    }
+
+    const nextPosition = resolveOverlayPosition(
+      triggerElement.getBoundingClientRect(),
+      overlayElement.getBoundingClientRect(),
+      placement,
+    );
+
+    resolvedPlacement = nextPosition.placement;
+    overlayStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
+  }
+
   onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
       if (!isOpen || !rootElement) {
@@ -110,18 +139,29 @@
       }
     }
 
+    function handleViewportChange(): void {
+      if (isOpen) {
+        void updateOverlayPosition();
+      }
+    }
+
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeydown);
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
 
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
     };
   });
 </script>
 
 <div class="poodle-menu" bind:this={rootElement} data-size={resolvedSize} data-density={resolvedDensity}>
   <div
+    bind:this={triggerElement}
     class="poodle-menu__trigger"
     role="button"
     tabindex="0"
@@ -134,7 +174,14 @@
   </div>
 
   {#if isOpen}
-    <div class="poodle-menu__overlay" data-placement={placement} role="menu" aria-label={ariaLabel ?? undefined}>
+    <div
+      bind:this={overlayElement}
+      class="poodle-menu__overlay"
+      data-placement={resolvedPlacement}
+      style={overlayStyle}
+      role="menu"
+      aria-label={ariaLabel ?? undefined}
+    >
       {#each items as item, index (item.value)}
         {#if item.kind === "separator"}
           <div class="poodle-menu__separator" role="separator"></div>
@@ -208,7 +255,7 @@
   }
 
   .poodle-menu__overlay {
-    position: absolute;
+    position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
     padding: 0.25rem;
@@ -222,21 +269,6 @@
       color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))
     );
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-overlay));
-  }
-
-  .poodle-menu__overlay[data-placement^="bottom"] {
-    top: calc(100% + 0.375rem);
-    left: 0;
-  }
-
-  .poodle-menu__overlay[data-placement^="top"] {
-    bottom: calc(100% + 0.375rem);
-    left: 0;
-  }
-
-  .poodle-menu__overlay[data-placement$="end"] {
-    left: auto;
-    right: 0;
   }
 
   .poodle-menu__item {
