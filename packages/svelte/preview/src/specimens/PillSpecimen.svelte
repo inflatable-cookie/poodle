@@ -41,6 +41,14 @@
     </div>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Inherited typography">
+    <p class="poodle-specimen__inline-copy">
+      Status:
+      <Pill appearance="badge" tone="success" typography="inherit">Active</Pill>
+      synced with surrounding text.
+    </p>
+  </SpecimenGroup>
+
   <SpecimenGroup label="Custom accent">
     <div class="poodle-specimen__row">
       <Pill accent="#3b82f6" sizeRole="control">Info-ish</Pill>
@@ -65,5 +73,11 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
+  }
+
+  .poodle-specimen__inline-copy {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--poodle-color-text-primary);
   }
 </style>

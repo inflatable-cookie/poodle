@@ -23,10 +23,13 @@ use crate::theme_ext::resolve_color;
 pub fn js_meta_item(spec: &MetaItemSpec, theme: &JetstreamThemeProvider, value: Option<JsEl>) -> JsEl {
     let label_color = resolve_color(theme, "color.text.secondary");
     let value_color = resolve_color(theme, "color.text.primary");
-    let label_size = rem_to_px(0.6875); // 11px
-    let value_size = rem_to_px(0.875);  // 14px
-    let gap = rem_to_px(0.375);
+    let label_size = rem_to_px(spec.label_font_size_rem());
+    let value_size = rem_to_px(spec.value_font_size_rem());
+    let gap = rem_to_px(spec.gap_rem());
 
+    // Jetstream's current text API does not expose font-family, letter-spacing,
+    // or line-height controls, so those typography details remain documented
+    // runtime deltas for now.
     let mut row = ui_element::div()
         .flex_row()
         .flex_wrap()

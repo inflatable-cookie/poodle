@@ -186,11 +186,17 @@
   .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
+    gap: 0.1875rem;
   }
 
   .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__label-block {
     grid-column: 1 / -1;
-    gap: 0.25rem;
+  }
+
+  .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__label {
+    color: var(--poodle-color-text-tertiary);
+    font-size: 0.75rem;
+    line-height: 1.35;
   }
 
   .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__value {

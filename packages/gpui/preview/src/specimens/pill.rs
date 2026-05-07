@@ -5,7 +5,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, Pill};
 use poodle_specs::{
-    ControlSize, EyebrowSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone,
+    ControlSize, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont, PillSize,
+    PillSpec, PillTone,
 };
 
 fn control_size_to_pill(size: ControlSize) -> PillSize {
@@ -192,6 +193,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_tone(PillTone::Neutral),
                             theme,
                         )),
+                ),
+        )
+        // --- Inherit typography ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Inherit typography"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
+                        .text_size(px(20.0))
+                        .child(div().child("Release"))
+                        .child(Pill::from_spec(
+                            PillSpec::new()
+                                .with_label("Beta")
+                                .with_typography(InlineTypographyMode::Inherit),
+                            theme,
+                        ))
+                        .child(div().child("channel")),
                 ),
         )
         // --- Custom accent ---

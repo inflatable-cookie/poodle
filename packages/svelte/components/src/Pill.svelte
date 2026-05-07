@@ -3,12 +3,15 @@
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
 
+  type PillTypography = "label" | "inherit";
+
   export let tone: PillTone = "neutral";
   export let appearance: PillAppearance = "solid";
   export let size: PillSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
   export let font: PillFont = "normal";
+  export let typography: PillTypography = "label";
   export let accent: string | null = null;
   export let muted = false;
   export let ariaLabel: string | null = null;
@@ -26,6 +29,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-font={font}
+  data-typography={typography}
   data-muted={muted}
   data-accent={accent ? "custom" : undefined}
   aria-label={ariaLabel ?? undefined}
@@ -39,17 +43,21 @@
     --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent);
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
     --poodle-pill-text: var(--poodle-color-text-secondary);
+    --poodle-pill-min-height: 1.25rem;
+    --poodle-pill-padding-y: 0.1875rem;
+    --poodle-pill-padding-x: 0.5rem;
+    --poodle-pill-font-size: 0.6875rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 1.25rem;
-    padding: 0.1875rem 0.5rem;
+    min-height: var(--poodle-pill-min-height);
+    padding: var(--poodle-pill-padding-y) var(--poodle-pill-padding-x);
     border: 0.0625rem solid var(--poodle-pill-border);
     border-radius: 999px;
     background: var(--poodle-pill-fill);
     color: var(--poodle-pill-text);
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.6875rem;
+    font-size: var(--poodle-pill-font-size);
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
@@ -90,27 +98,70 @@
   }
 
   .poodle-pill[data-size="sm"] {
-    min-height: 1rem;
-    padding: 0.125rem 0.375rem;
-    font-size: 0.625rem;
+    --poodle-pill-min-height: 1rem;
+    --poodle-pill-padding-y: 0.125rem;
+    --poodle-pill-padding-x: 0.375rem;
+    --poodle-pill-font-size: 0.625rem;
   }
 
   .poodle-pill[data-size="xs"] {
-    min-height: 0.875rem;
-    padding: 0.0625rem 0.3125rem;
-    font-size: 0.5625rem;
+    --poodle-pill-min-height: 0.875rem;
+    --poodle-pill-padding-y: 0.0625rem;
+    --poodle-pill-padding-x: 0.3125rem;
+    --poodle-pill-font-size: 0.5625rem;
   }
 
   .poodle-pill[data-size="lg"] {
-    min-height: 1.375rem;
-    padding: 0.25rem 0.625rem;
-    font-size: 0.75rem;
+    --poodle-pill-min-height: 1.375rem;
+    --poodle-pill-padding-y: 0.25rem;
+    --poodle-pill-padding-x: 0.625rem;
+    --poodle-pill-font-size: 0.75rem;
   }
 
   .poodle-pill[data-size="xl"] {
-    min-height: 1.5rem;
-    padding: 0.3125rem 0.75rem;
-    font-size: 0.8125rem;
+    --poodle-pill-min-height: 1.5rem;
+    --poodle-pill-padding-y: 0.3125rem;
+    --poodle-pill-padding-x: 0.75rem;
+    --poodle-pill-font-size: 0.8125rem;
+  }
+
+  .poodle-pill[data-typography="inherit"] {
+    --poodle-pill-font-size: 0.7071em;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-size="xs"] {
+    --poodle-pill-font-size: 0.5786em;
+    --poodle-pill-min-height: 1.5556em;
+    --poodle-pill-padding-y: 0.1111em;
+    --poodle-pill-padding-x: 0.5556em;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-size="sm"] {
+    --poodle-pill-font-size: 0.6429em;
+    --poodle-pill-min-height: 1.6em;
+    --poodle-pill-padding-y: 0.2em;
+    --poodle-pill-padding-x: 0.6em;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-size="md"] {
+    --poodle-pill-font-size: 0.7071em;
+    --poodle-pill-min-height: 1.8182em;
+    --poodle-pill-padding-y: 0.2727em;
+    --poodle-pill-padding-x: 0.7273em;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-size="lg"] {
+    --poodle-pill-font-size: 0.7714em;
+    --poodle-pill-min-height: 1.8333em;
+    --poodle-pill-padding-y: 0.3333em;
+    --poodle-pill-padding-x: 0.8333em;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-size="xl"] {
+    --poodle-pill-font-size: 0.8357em;
+    --poodle-pill-min-height: 1.8462em;
+    --poodle-pill-padding-y: 0.3846em;
+    --poodle-pill-padding-x: 0.9231em;
   }
 
   .poodle-pill[data-font="mono"] {
@@ -154,6 +205,25 @@
   }
 
   /* Density variants */
-  .poodle-pill[data-density="compact"] { padding: 0 0.375rem; gap: 0.125rem; }
-  .poodle-pill[data-density="comfortable"] { padding: 0 0.625rem; gap: 0.25rem; }
+  .poodle-pill[data-density="compact"] {
+    --poodle-pill-padding-y: 0;
+    --poodle-pill-padding-x: 0.375rem;
+    gap: 0.125rem;
+  }
+
+  .poodle-pill[data-density="comfortable"] {
+    --poodle-pill-padding-y: 0;
+    --poodle-pill-padding-x: 0.625rem;
+    gap: 0.25rem;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-density="compact"] {
+    --poodle-pill-padding-y: 0;
+    --poodle-pill-padding-x: 0.5455em;
+  }
+
+  .poodle-pill[data-typography="inherit"][data-density="comfortable"] {
+    --poodle-pill-padding-y: 0;
+    --poodle-pill-padding-x: 0.9091em;
+  }
 </style>

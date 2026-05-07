@@ -9,6 +9,7 @@
     item: Snippet<[T]>;
     actions?: Snippet;
     emptyMessage?: string | null;
+    framed?: boolean;
   }
 
   let {
@@ -16,11 +17,39 @@
     items,
     item,
     actions,
-    emptyMessage = "No items yet."
+    emptyMessage = "No items yet.",
+    framed = true
   }: Props = $props();
 </script>
 
-<Card>
+{#if framed}
+  <Card>
+    <section class="poodle-inline-list-section" aria-label={title}>
+      <div class="poodle-inline-list-section__header">
+        <h4 class="poodle-inline-list-section__title">{title}</h4>
+        {#if actions}
+          <div class="poodle-inline-list-section__header-actions">
+            {@render actions()}
+          </div>
+        {/if}
+      </div>
+
+      {#if items.length === 0}
+        {#if emptyMessage}
+          <p class="poodle-inline-list-section__empty">{emptyMessage}</p>
+        {/if}
+      {:else}
+        <ul class="poodle-inline-list-section__items">
+          {#each items as entry}
+            <li class="poodle-inline-list-section__item">
+              {@render item(entry)}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
+  </Card>
+{:else}
   <section class="poodle-inline-list-section" aria-label={title}>
     <div class="poodle-inline-list-section__header">
       <h4 class="poodle-inline-list-section__title">{title}</h4>
@@ -45,12 +74,12 @@
       </ul>
     {/if}
   </section>
-</Card>
+{/if}
 
 <style>
   .poodle-inline-list-section {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--poodle-space-stack-md);
   }
 
   .poodle-inline-list-section__header {
@@ -62,11 +91,11 @@
 
   .poodle-inline-list-section__title {
     margin: 0;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--underlay-color-text-muted, rgba(148, 163, 184, 0.85));
+    color: var(--poodle-color-text-secondary);
   }
 
   .poodle-inline-list-section__header-actions {
@@ -81,7 +110,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: var(--poodle-space-stack-sm);
   }
 
   .poodle-inline-list-section__item {
@@ -90,14 +119,14 @@
     gap: 0.75rem;
     min-width: 0;
     padding: 0.5rem 0.625rem;
-    border-radius: var(--underlay-radius-sm, 0.375rem);
-    background: var(--underlay-color-surface-muted, rgba(255, 255, 255, 0.02));
+    border-radius: calc(var(--poodle-radius-surface) - 0.1875rem);
+    background: color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary));
   }
 
   .poodle-inline-list-section__empty {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: var(--poodle-typography-body-size);
     font-style: italic;
-    color: var(--underlay-color-text-muted, rgba(148, 163, 184, 0.7));
+    color: var(--poodle-color-text-secondary);
   }
 </style>

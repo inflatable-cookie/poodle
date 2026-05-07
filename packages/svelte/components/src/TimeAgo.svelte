@@ -7,6 +7,7 @@
   export let interval = 30_000;
   export let ariaLabel: string | null = null;
   export let short = true;
+  export let typography: "body" | "inherit" = "body";
   export let tooltipFormat: "full" | "date" | "datetime" = "datetime";
   export let timezone: string | null = null;
 
@@ -130,6 +131,7 @@
 <Tooltip content={absoluteText}>
   <time
     class="poodle-time-ago"
+    data-typography={typography}
     datetime={new Date(timestamp).toISOString()}
     aria-label={ariaLabel ?? `${relativeText} (${absoluteText})`}
   >
@@ -153,6 +155,10 @@
     transition:
       color 120ms ease,
       text-decoration-color 120ms ease;
+  }
+
+  .poodle-time-ago[data-typography="inherit"] {
+    font: inherit;
   }
 
   .poodle-time-ago:hover,

@@ -5,8 +5,9 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill, StatusIndicator};
 use poodle_specs::{
-    ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, LeadingFill, LeadingShape, ListCardCounterSpec,
-    ListCardSpec, MenuEntry, MenuItemKind, PillSpec, PillTone, StatusIndicatorSpec, StatusTone,
+    ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, InlineTypographyMode, LeadingFill,
+    LeadingShape, ListCardCounterSpec, ListCardSpec, MenuEntry, MenuItemKind, PillSpec, PillTone,
+    StatusIndicatorSpec, StatusTone,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -239,6 +240,53 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             ))
                         }),
+                ),
+        )
+        // -- Footer counters with inherited typography --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Footer counters with inherited typography"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .text_size(px(20.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Activity Feed")
+                                    .with_subtitle("Inline metadata scales with the parent"),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("activity").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            )
+                            .with_footer(
+                                div()
+                                    .flex()
+                                    .flex_row()
+                                    .items_center()
+                                    .gap(footer_counter_gap)
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("eye", 128)
+                                            .with_typography(InlineTypographyMode::Inherit),
+                                        theme,
+                                    ))
+                                    .child(ListCardCounter::from_spec(
+                                        ListCardCounterSpec::new("message-circle", 14)
+                                            .with_typography(InlineTypographyMode::Inherit),
+                                        theme,
+                                    )),
+                            ),
+                        ),
                 ),
         )
         // -- With footer counters --

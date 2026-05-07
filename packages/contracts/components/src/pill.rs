@@ -1,5 +1,7 @@
 use poodle_tokens::semantic;
 
+use crate::InlineTypographyMode;
+
 /// Tone / semantic color of a pill.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PillTone {
@@ -46,6 +48,7 @@ pub struct PillSpec {
     pub appearance: PillAppearance,
     pub size: PillSize,
     pub font: PillFont,
+    pub typography: InlineTypographyMode,
     pub is_muted: bool,
     pub is_removable: bool,
     pub is_selected: bool,
@@ -63,6 +66,7 @@ impl Default for PillSpec {
             appearance: PillAppearance::default(),
             size: PillSize::default(),
             font: PillFont::default(),
+            typography: InlineTypographyMode::default(),
             is_muted: false,
             is_removable: false,
             is_selected: false,
@@ -100,6 +104,11 @@ impl PillSpec {
 
     pub fn with_font(mut self, font: PillFont) -> Self {
         self.font = font;
+        self
+    }
+
+    pub fn with_typography(mut self, typography: InlineTypographyMode) -> Self {
+        self.typography = typography;
         self
     }
 

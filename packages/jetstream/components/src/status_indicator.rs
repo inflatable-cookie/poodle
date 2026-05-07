@@ -41,7 +41,9 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
         .h(dot_size)
         .rounded(999.0) // circle
         .bg(status_color);
-    // Note: box-shadow (0 0 0 0.125rem with 18% opacity) requires JsEl shadow support
+    // Note: box-shadow (0 0 0 0.125rem with 18% opacity) requires JsEl shadow support.
+    // Label line-height and richer text metrics are also not exposed yet, so
+    // those remain documented runtime deltas for Jetstream.
 
     // Root: inline-flex, gap, min-width 0
     let mut root = ui_element::div()
@@ -56,7 +58,8 @@ pub fn js_status_indicator(spec: &StatusIndicatorSpec, theme: &JetstreamThemePro
             ui_element::label(label_text)
                 .text_color(text_primary)
                 .text_size(label_size)
-            // Note: font-weight 600 and line-height 1.3 require runtime text support
+                .text_weight(600)
+            // Note: line-height 1.3 still requires richer runtime text support.
         );
     }
 

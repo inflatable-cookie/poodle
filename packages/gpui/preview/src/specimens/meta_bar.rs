@@ -1,7 +1,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Code, Eyebrow, MetaBar, MetaItem, Pill};
-use poodle_specs::{CodeSpec, EyebrowSpec, MetaBarSpec, MetaItemSpec, PillSpec, PillTone};
+use poodle_specs::{
+    CodeSpec, EyebrowSpec, InlineTypographyMode, MetaBarSpec, MetaItemSpec, PillSpec, PillTone,
+};
 
 use crate::specimens::specimen_card;
 
@@ -104,5 +106,25 @@ pub(crate) fn render_meta_item(theme: &GpuiThemeProvider) -> Div {
                     ))
                     .child(div().child("Ready for review")),
             ),
+        ))
+        .child(specimen_card(
+            "Inherit typography",
+            theme,
+            div()
+                .flex()
+                .items_center()
+                .gap(px(8.0))
+                .text_size(px(20.0))
+                .child(div().child("Owner"))
+                .child(
+                    MetaItem::from_spec(
+                        MetaItemSpec::new()
+                            .with_label("Team")
+                            .with_typography(InlineTypographyMode::Inherit),
+                        theme,
+                    )
+                    .with_value(div().child("Platform")),
+                )
+                .child(div().child("today")),
         ))
 }

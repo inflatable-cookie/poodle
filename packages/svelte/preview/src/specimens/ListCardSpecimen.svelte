@@ -195,6 +195,16 @@
     </div>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Inherited footer counters">
+    <p class="poodle-specimen__inline-copy">
+      Summary:
+      <ListCardCounter icon="file-text" count={24} tooltip="24 documents" typography="inherit" />
+      and
+      <ListCardCounter icon="image" count={8} tooltip="8 images" typography="inherit" />
+      published this week.
+    </p>
+  </SpecimenGroup>
+
   <SpecimenGroup label="Solid fill with accent colors">
     <div class="poodle-specimen__stack">
       <ListCard
@@ -369,5 +379,6 @@
 <style>
   .poodle-specimen { display: flex; flex-direction: column; gap: 1rem; }
   .poodle-specimen__stack { display: flex; flex-direction: column; gap: 0.25rem; }
+  .poodle-specimen__inline-copy { font-size: 1rem; line-height: 1.6; color: var(--poodle-color-text-primary); }
   p { margin: 0; }
 </style>

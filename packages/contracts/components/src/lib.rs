@@ -233,7 +233,7 @@ pub use types::{
     DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
     FormActionAlign, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
     Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus, RuleTone,
-    SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder, SurfaceRole,
+    InlineTypographyMode, SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder, SurfaceRole,
     SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, TabVariant, ValidationState,
 };
 

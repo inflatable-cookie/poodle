@@ -831,4 +831,11 @@
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent);
   }
+
+  .poodle-tabs[data-variant="text"] .poodle-tabs__panel {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
 </style>

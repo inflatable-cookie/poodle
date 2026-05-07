@@ -47,6 +47,14 @@
     <TimeAgo datetime={twoMinutesAgo} live={false} />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Inherited typography">
+    <p class="poodle-specimen__inline-copy">
+      Activity finished
+      <TimeAgo datetime={twoMinutesAgo} typography="inherit" />
+      in running prose.
+    </p>
+  </SpecimenGroup>
+
   <SpecimenGroup label="From ISO string">
     <TimeAgo datetime="2026-03-14T00:00:00Z" />
   </SpecimenGroup>
@@ -69,5 +77,11 @@
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     min-width: 8rem;
+  }
+
+  .poodle-specimen__inline-copy {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--poodle-color-text-primary);
   }
 </style>

@@ -38,6 +38,30 @@ Treat rollover as full closeout:
 If those closeout conditions are not satisfied, repair the current generation
 instead of opening a new one.
 
+## Typography Inherit Rule
+
+Use `typography="inherit"` for inline text-like primitives when parent copy
+should own the local text scale.
+
+Two modes are allowed:
+
+- text-only inherit: for primitives without shell geometry, inherit font metrics
+  directly from the parent
+- proportional inherit: for primitives with visible shell geometry, convert the
+  component's size preset from token `rem` values into equivalent `em` values
+  so text, padding, gaps, and other shell metrics stay proportional
+
+Runtime note:
+
+- CSS runtimes should implement this literally with inherited font metrics and
+  `em`-relative shell geometry
+- non-CSS runtimes may approximate proportional inherit with equivalent
+  ratio-preserving metrics from a 1rem baseline until parent-relative inline
+  layout exists; that limitation must stay documented on the runtime side
+
+Do not overload `size` with an `"inherit"` option for this behavior. `size`
+continues to mean the component's own semantic size preset.
+
 ## Current Posture
 
 Poodle is in a strict-paused `g10` posture until the next active owner is

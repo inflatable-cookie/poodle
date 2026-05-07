@@ -21,7 +21,8 @@
   const tooltipId = `poodle-tooltip-${++nextTooltipId}`;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let uncontrolledOpen = defaultOpen;
-  let triggerElement: HTMLSpanElement | null = null;
+  let rootElement: HTMLSpanElement | null = null;
+  let triggerElement: HTMLElement | null = null;
   let bubbleElement: HTMLSpanElement | null = null;
   let resolvedPlacement: OverlayPlacement = placement;
   let bubbleStyle = "";
@@ -33,6 +34,10 @@
   }
 
   function setOpen(nextOpen: boolean): void {
+    if (!nextOpen && triggerElement) {
+      triggerElement.removeAttribute("aria-describedby");
+    }
+
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
     }
@@ -57,6 +62,68 @@
     setOpen(false);
   }
 
+  function resolveAnchor(target: EventTarget | null): HTMLElement | null {
+    if (!(target instanceof HTMLElement) || !rootElement) {
+      return null;
+    }
+
+    return rootElement.contains(target) ? target : null;
+  }
+
+  function handlePointerEnter(event: PointerEvent): void {
+    const anchor = resolveAnchor(event.target);
+    if (!anchor) {
+      return;
+    }
+
+    if (triggerElement && triggerElement !== anchor) {
+      triggerElement.removeAttribute("aria-describedby");
+    }
+    triggerElement = anchor;
+    scheduleOpen();
+  }
+
+  function handlePointerLeave(event: PointerEvent): void {
+    if (!rootElement) {
+      dismiss();
+      return;
+    }
+
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Node && rootElement.contains(nextTarget)) {
+      return;
+    }
+
+    dismiss();
+  }
+
+  function handleFocusIn(event: FocusEvent): void {
+    const anchor = resolveAnchor(event.target);
+    if (!anchor) {
+      return;
+    }
+
+    if (triggerElement && triggerElement !== anchor) {
+      triggerElement.removeAttribute("aria-describedby");
+    }
+    triggerElement = anchor;
+    scheduleOpen();
+  }
+
+  function handleFocusOut(event: FocusEvent): void {
+    if (!rootElement) {
+      dismiss();
+      return;
+    }
+
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Node && rootElement.contains(nextTarget)) {
+      return;
+    }
+
+    dismiss();
+  }
+
   async function updateTooltipPosition(): Promise<void> {
     if (!isOpen || !triggerElement) {
       return;
@@ -76,6 +143,7 @@
 
     resolvedPlacement = nextPosition.placement;
     bubbleStyle = `top: ${nextPosition.top}px; left: ${nextPosition.left}px;`;
+    triggerElement.setAttribute("aria-describedby", tooltipId);
   }
 
   function handleViewportChange(): void {
@@ -94,31 +162,27 @@
     };
   });
 
-  onDestroy(() => clearTimer());
+  onDestroy(() => {
+    clearTimer();
+    triggerElement?.removeAttribute("aria-describedby");
+  });
 </script>
 
 <span
+  bind:this={rootElement}
   class="poodle-tooltip"
   role="presentation"
-  on:mouseenter={scheduleOpen}
-  on:mouseleave={dismiss}
-  on:focusin={scheduleOpen}
-  on:focusout={dismiss}
+  on:pointerenter={handlePointerEnter}
+  on:pointerleave={handlePointerLeave}
+  on:focusin={handleFocusIn}
+  on:focusout={handleFocusOut}
   on:keydown={(event) => {
     if (event.key === "Escape") {
       dismiss();
     }
   }}
 >
-  <span
-    bind:this={triggerElement}
-    class="poodle-tooltip__trigger"
-    role="button"
-    tabindex="0"
-    aria-describedby={isOpen ? tooltipId : undefined}
-  >
-    <slot />
-  </span>
+  <slot />
 
   {#if isOpen}
     <span
@@ -136,17 +200,7 @@
 
 <style>
   .poodle-tooltip {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .poodle-tooltip__trigger {
-    display: inline-flex;
-  }
-
-  .poodle-tooltip__trigger:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
+    display: contents;
   }
 
   .poodle-tooltip__bubble {

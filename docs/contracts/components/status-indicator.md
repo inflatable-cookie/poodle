@@ -38,6 +38,7 @@ Updated: 2026-04-01
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `typography` | `"label" \| "inherit"` | `"label"` | no | label typography by default; use `"inherit"` when parent inline text should own the label font metrics |
 
 ### Controlled And Uncontrolled
 
@@ -102,6 +103,8 @@ No internal state. Status is fully parent-controlled.
 - Root has `min-width: 0` to allow truncation in tight containers
 - Dot is fixed at `0.5625rem` x `0.5625rem`
 - Gap between dot and label is `0.4375rem`
+- `typography="inherit"` keeps the selected size preset, but expresses font,
+  dot, and gap metrics in `em` so the whole indicator scales with parent text
 
 ### Composition
 
@@ -173,6 +176,14 @@ When `status="pending"`, the dot receives:
 | `font-weight` | `600` |
 | `line-height` | `1.3` |
 
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font` | `inherit` |
+| `font-weight` | `600` |
+| `font-size` | size-specific `em` value derived from the selected preset |
+
 ### Size adjustments
 
 | Size | Dot size | Label font-size |
@@ -182,6 +193,16 @@ When `status="pending"`, the dot receives:
 | `md` | `0.5625rem` | `0.75rem` |
 | `lg` | `0.6875rem` | `0.8125rem` |
 | `xl` | `0.8125rem` | `0.875rem` |
+
+When `typography="inherit"`:
+
+| Size | Root font-size | Dot size | Gap |
+|------|----------------|----------|-----|
+| `xs` | `0.7143em` | `0.6em` | `0.5em` |
+| `sm` | `0.7857em` | `0.6364em` | `0.5455em` |
+| `md` | `0.8571em` | `0.75em` | `0.5833em` |
+| `lg` | `0.9286em` | `0.8462em` | `0.6154em` |
+| `xl` | `1em` | `0.9286em` | `0.6429em` |
 
 ### Token Reference
 
@@ -204,6 +225,9 @@ When `status="pending"`, the dot receives:
   selectors
 - `data-size` on root reflects the resolved size
 - `data-density` on root reflects the resolved density value (`compact`, `default`, or `comfortable`)
+- `typography="inherit"` uses the proportional-inherit rule from
+  `docs/contracts/001-working-rules.md`: the selected size preset is converted
+  from token `rem` values into equivalent `em` values for label, dot, and gap
 - Label content can come from prop or default slot
 
 ## 10. GPUI Notes
@@ -213,6 +237,9 @@ When `status="pending"`, the dot receives:
   status remains perceivable to assistive technology
 - Pending animation pulse is optional in GPUI if native animation support is
   limited
+- for `typography="inherit"`, non-CSS runtimes may approximate parent-owned
+  `em` behavior with ratio-preserving metrics from a 1rem baseline until
+  parent-relative inline layout exists
 
 ## 11. Parity Checklist
 
@@ -241,6 +268,7 @@ When `status="pending"`, the dot receives:
 |-------|-------------|-----------------|-----------|
 | pending animation details may differ | motion internals are runtime-specific | allowed | keep semantic labeling strict |
 | CSS custom property pattern is Svelte-specific | GPUI uses direct color values | allowed | ensure same final colors |
+| Jetstream dot glow and label metrics | current Jetstream `JsEl` surface does not yet expose box-shadow, line-height, or full text styling parity | allowed | add shadow and richer text metrics support, then apply glow and label metrics literally |
 
 ## 13. Specimen Definitions
 

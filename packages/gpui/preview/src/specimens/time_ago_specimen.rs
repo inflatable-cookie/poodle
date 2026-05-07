@@ -3,7 +3,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, TimeAgo};
-use poodle_specs::{EyebrowSpec, TimeAgoSpec};
+use poodle_specs::{EyebrowSpec, InlineTypographyMode, TimeAgoSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -64,6 +64,32 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                     text_secondary,
                 )),
+        )
+        // --- Inherit typography ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Inherit typography"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
+                        .text_size(px(20.0))
+                        .child(div().child("Updated"))
+                        .child(TimeAgo::from_spec(
+                            TimeAgoSpec::new()
+                                .with_timestamp("2026-03-23T10:58:00Z")
+                                .with_typography(InlineTypographyMode::Inherit),
+                            theme,
+                        ))
+                        .child(div().child("by Clay")),
+                ),
         )
         // --- Long format ---
         .child(

@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{IconSize, IconSpec, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
+use poodle_specs::{IconSize, IconSpec, InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
 use super::icon::Icon;
 use crate::presentation::rem_to_px;
@@ -60,6 +60,10 @@ impl Pill {
         self.spec.font = v;
         self
     }
+    pub fn typography(mut self, v: InlineTypographyMode) -> Self {
+        self.spec.typography = v;
+        self
+    }
     pub fn muted(mut self, v: bool) -> Self {
         self.spec.is_muted = v;
         self
@@ -98,12 +102,17 @@ impl IntoElement for Pill {
         // pad-x: xs→0.3125 sm→0.375 md→0.5 lg→0.625 xl→0.75 rem
         // pad-y: xs→0.0625 sm→0.125 md→0.1875 lg→0.25 xl→0.3125 rem
         // font:  xs→0.5625 sm→0.625 md→0.6875 lg→0.75 xl→0.8125 rem
-        let (min_h, pad_x, pad_y, font_size) = match spec.size {
-            PillSize::Xs => (px(rem_to_px(0.875)),  px(rem_to_px(0.3125)), px(rem_to_px(0.0625)),  px(rem_to_px(0.5625))),
-            PillSize::Sm => (px(rem_to_px(1.0)),    px(rem_to_px(0.375)),  px(rem_to_px(0.125)),   px(rem_to_px(0.625))),
-            PillSize::Md => (px(rem_to_px(1.25)),   px(rem_to_px(0.5)),    px(rem_to_px(0.1875)),  px(rem_to_px(0.6875))),
-            PillSize::Lg => (px(rem_to_px(1.375)),  px(rem_to_px(0.625)),  px(rem_to_px(0.25)),    px(rem_to_px(0.75))),
-            PillSize::Xl => (px(rem_to_px(1.5)),    px(rem_to_px(0.75)),   px(rem_to_px(0.3125)),  px(rem_to_px(0.8125))),
+        let (min_h, pad_x, pad_y, font_size) = match (spec.typography, spec.size) {
+            (InlineTypographyMode::Inherit, PillSize::Xs) => (px(rem_to_px(1.5556)), px(rem_to_px(0.5556)), px(rem_to_px(0.1111)), px(rem_to_px(0.6429))),
+            (InlineTypographyMode::Inherit, PillSize::Sm) => (px(rem_to_px(1.6)), px(rem_to_px(0.6)), px(rem_to_px(0.2)), px(rem_to_px(0.7143))),
+            (InlineTypographyMode::Inherit, PillSize::Md) => (px(rem_to_px(1.8182)), px(rem_to_px(0.7273)), px(rem_to_px(0.2727)), px(rem_to_px(0.7857))),
+            (InlineTypographyMode::Inherit, PillSize::Lg) => (px(rem_to_px(1.8333)), px(rem_to_px(0.8333)), px(rem_to_px(0.3333)), px(rem_to_px(0.8571))),
+            (InlineTypographyMode::Inherit, PillSize::Xl) => (px(rem_to_px(1.8462)), px(rem_to_px(0.9231)), px(rem_to_px(0.3846)), px(rem_to_px(0.9286))),
+            (InlineTypographyMode::Default, PillSize::Xs) => (px(rem_to_px(0.875)),  px(rem_to_px(0.3125)), px(rem_to_px(0.0625)),  px(rem_to_px(0.5625))),
+            (InlineTypographyMode::Default, PillSize::Sm) => (px(rem_to_px(1.0)),    px(rem_to_px(0.375)),  px(rem_to_px(0.125)),   px(rem_to_px(0.625))),
+            (InlineTypographyMode::Default, PillSize::Md) => (px(rem_to_px(1.25)),   px(rem_to_px(0.5)),    px(rem_to_px(0.1875)),  px(rem_to_px(0.6875))),
+            (InlineTypographyMode::Default, PillSize::Lg) => (px(rem_to_px(1.375)),  px(rem_to_px(0.625)),  px(rem_to_px(0.25)),    px(rem_to_px(0.75))),
+            (InlineTypographyMode::Default, PillSize::Xl) => (px(rem_to_px(1.5)),    px(rem_to_px(0.75)),   px(rem_to_px(0.3125)),  px(rem_to_px(0.8125))),
         };
 
         // ── Colors ───────────────────────────────────────────────

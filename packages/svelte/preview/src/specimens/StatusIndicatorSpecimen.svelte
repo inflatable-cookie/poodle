@@ -30,6 +30,14 @@
     <StatusIndicator status="success">Build passing</StatusIndicator>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Inherited typography">
+    <p class="poodle-status-copy">
+      Deploy status:
+      <StatusIndicator status="success" label="Healthy" typography="inherit" />
+      across the last 24 hours.
+    </p>
+  </SpecimenGroup>
+
   <svelte:fragment slot="sizes" let:size>
     <StatusIndicator status="success" {size} label={size.toUpperCase()} />
   </svelte:fragment>
@@ -50,5 +58,11 @@
     display: flex;
     gap: 1rem;
     align-items: center;
+  }
+
+  .poodle-status-copy {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--poodle-color-text-primary);
   }
 </style>

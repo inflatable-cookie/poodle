@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, StatusIndicator};
-use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
+use poodle_specs::{EyebrowSpec, InlineTypographyMode, StatusIndicatorSpec, StatusTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // --- All statuses ---
@@ -86,6 +86,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child(StatusIndicator::from_spec(away, theme))
                         .child(StatusIndicator::from_spec(offline, theme))
                         .child(StatusIndicator::from_spec(unknown, theme)),
+                ),
+        )
+        // --- Inherit typography ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Inherit typography"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
+                        .text_size(px(20.0))
+                        .child(div().child("Deploy"))
+                        .child(StatusIndicator::from_spec(
+                            StatusIndicatorSpec::new()
+                                .with_status(StatusTone::Success)
+                                .with_label("Healthy")
+                                .with_typography(InlineTypographyMode::Inherit),
+                            theme,
+                        ))
+                        .child(div().child("now")),
                 ),
         )
         // --- Slot content ---

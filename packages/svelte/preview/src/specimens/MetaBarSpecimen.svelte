@@ -22,6 +22,14 @@
       <MetaItem>1920 × 1080</MetaItem>
     </MetaBar>
   </SpecimenGroup>
+
+  <SpecimenGroup label="Inherited typography">
+    <p class="poodle-specimen__inline-copy">
+      Release metadata:
+      <MetaItem label="Status" typography="inherit">Stable</MetaItem>
+      <MetaItem label="Version" typography="inherit">2.4.1</MetaItem>
+    </p>
+  </SpecimenGroup>
 </div>
 
 <style>
@@ -29,6 +37,12 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .poodle-specimen__inline-copy {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--poodle-color-text-primary);
   }
 
 </style>

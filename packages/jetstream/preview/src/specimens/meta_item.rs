@@ -5,7 +5,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::meta_item::js_meta_item;
 use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, MetaItemSpec};
+use poodle_specs::{ControlSize, InlineTypographyMode, MetaItemSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -51,6 +51,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     theme,
                     Some(label("128").text_color(primary).text_size(body_font)),
                 ))
+        ))
+        .child(group("Inherit typography", secondary,
+            div().flex_row().gap(8.0).items_center().text_size(20.0)
+                .child(label("Owner"))
+                .child(js_meta_item(
+                    &MetaItemSpec::new()
+                        .with_label("Team")
+                        .with_typography(InlineTypographyMode::Inherit),
+                    theme,
+                    Some(label("Platform").text_color(primary).text_size(20.0)),
+                ))
+                .child(label("today"))
         ))
 }
 

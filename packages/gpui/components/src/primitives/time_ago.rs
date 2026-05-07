@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::TimeAgoSpec;
+use poodle_specs::{InlineTypographyMode, TimeAgoSpec};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
@@ -54,6 +54,10 @@ impl TimeAgo {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn typography(mut self, v: InlineTypographyMode) -> Self {
+        self.spec.typography = v;
+        self
+    }
 }
 
 impl IntoElement for TimeAgo {
@@ -71,11 +75,11 @@ impl IntoElement for TimeAgo {
             relative_time(&spec.timestamp, spec.short).unwrap_or_else(|| spec.timestamp.clone())
         };
 
-        div()
-            .text_size(px(rem_to_px(0.75)))
-            .text_color(text_color)
-            .child(display)
-            .into_any_element()
+        let mut el = div().text_color(text_color).child(display);
+        if !spec.inherits_typography() {
+            el = el.text_size(px(rem_to_px(0.875)));
+        }
+        el.into_any_element()
     }
 }
 

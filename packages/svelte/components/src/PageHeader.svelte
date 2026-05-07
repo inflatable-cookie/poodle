@@ -11,6 +11,7 @@
     count?: number | null;
     subtitle?: string | null;
     eyebrow?: string | null;
+    posture?: "default" | "entity-detail";
     backHref?: string | null;
     backLabel?: string | null;
     backIsContextual?: boolean;
@@ -32,6 +33,7 @@
     count = null,
     subtitle = null,
     eyebrow = null,
+    posture = "default",
     backHref = null,
     backLabel = null,
     backIsContextual = false,
@@ -47,8 +49,14 @@
     banner,
   }: Props = $props();
 
-  const primaryTitle = $derived(title ?? section ?? "");
   const hasSectionTitleSplit = $derived(Boolean(section && title));
+  const isEntityDetailPosture = $derived(posture === "entity-detail" && hasSectionTitleSplit);
+  const primaryTitle = $derived(
+    isEntityDetailPosture ? section ?? title ?? "" : title ?? section ?? ""
+  );
+  const resolvedSubtitle = $derived(
+    isEntityDetailPosture ? title ?? subtitle ?? null : subtitle
+  );
   const headingTag = $derived(`h${level}` as `h${1 | 2 | 3 | 4 | 5 | 6}`);
 </script>
 
@@ -64,7 +72,7 @@
       {#if eyebrow}
         <p class="poodle-page-header__eyebrow">{eyebrow}</p>
       {/if}
-      {#if hasSectionTitleSplit}
+      {#if hasSectionTitleSplit && !isEntityDetailPosture}
         <p class="poodle-page-header__section">{section}</p>
       {/if}
       <svelte:element this={headingTag} class="poodle-page-header__title">
@@ -77,11 +85,11 @@
           </span>
         {/if}
       </svelte:element>
-      {#if hasSectionTitleSplit}
+      {#if hasSectionTitleSplit && !isEntityDetailPosture}
         <p class="poodle-page-header__section-title">{title}</p>
       {/if}
-      {#if subtitle}
-        <p class="poodle-page-header__subtitle">{subtitle}</p>
+      {#if resolvedSubtitle}
+        <p class="poodle-page-header__subtitle">{resolvedSubtitle}</p>
       {/if}
       {#if meta}
         <div class="poodle-page-header__meta">
@@ -137,7 +145,7 @@
     --poodle-recipe-page-header-radius: var(--poodle-radius-surface);
     display: grid;
     gap: var(--poodle-space-stack-md);
-    align-items: end;
+    align-items: start;
     padding:
       var(--poodle-recipe-page-header-padding-block-start)
       var(--poodle-recipe-page-header-padding-inline)

@@ -40,6 +40,7 @@ Updated: 2026-03-30
 | `count` | `number` | -- | yes | Numeric value to display |
 | `tooltip` | `string \| null` | `null` | no | Tooltip text; when provided, Root is wrapped in a Tooltip |
 | `href` | `string \| null` | `null` | no | When provided, Root renders as an `<a>` element with this href |
+| `typography` | `"label" \| "inherit"` | `"label"` | no | label-sized by default; use `"inherit"` to apply proportional-inherit scaling for text, icon, and gap |
 
 ### Slots
 
@@ -79,6 +80,8 @@ No internal component state. All visual states are derived from props.
 - `display: inline-flex` with `align-items: center`
 - `gap: 0.25rem`
 - `font-size: 0.75rem`
+- `typography="inherit"` uses the proportional-inherit rule from
+  `docs/contracts/001-working-rules.md` so text, icon, and gap scale together
 - `font-variant-numeric: tabular-nums` for consistent digit widths
 - Inline element, wraps with its parent container
 - Parent expectations: designed to be placed in the `footer` slot of ListCard
@@ -94,8 +97,17 @@ No internal component state. All visual states are derived from props.
 | `gap` | `0.25rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.75rem` |
+| `icon size` | `1rem` |
 | `font-variant-numeric` | `tabular-nums` |
 | `text-decoration` | `none` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.8571em` |
+| `gap` | `0.3333em` |
+| `icon size` | `1.3333em` |
 
 ### `a.list-card-counter:hover`
 
@@ -114,6 +126,8 @@ None.
 - Click handler calls `e.stopPropagation()` on linked counters to prevent
   bubbling to the parent ListCard
 - Conditional root element: `<a>` when href is set, `<span>` otherwise
+- `typography="inherit"` applies proportional-inherit scaling to the text,
+  icon, and gap metrics as one inline unit
 - Four-branch template handles tooltip x href combinations (tooltip+href,
   tooltip+span, href-only, span-only)
 
@@ -122,6 +136,9 @@ None.
 - Expected crate/module surface: `poodle_gpui::primitives::list_card_counter`
 - Render as inline flex with icon and text child
 - Link behavior may need to be handled via click callback rather than href
+- for `typography="inherit"`, non-CSS runtimes may approximate parent-owned
+  `em` scaling with ratio-preserving metrics from a 1rem baseline until
+  parent-relative inline layout exists
 
 ## 11. Parity Checklist
 
@@ -142,7 +159,15 @@ None.
 
 - [ ] rendering internals stay internal
 
-## 12. Specimen Definitions
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| Jetstream tooltip trigger wrapping | current Jetstream tooltip helper is panel-only and does not yet compose a standard trigger+overlay path | allowed | add trigger-wrapped tooltip composition, then honor `tooltip` literally |
+| Jetstream linked counter semantics | Jetstream has no native anchor widget in this layer, so linked counters only expose linked styling today | allowed | add shell-owned navigation semantics when the runtime surface supports them |
+| tabular numerals | current Jetstream text surface does not expose numeric font-feature controls | allowed | add numeric-feature support, then apply `tabular-nums` literally |
+
+## 13. Specimen Definitions
 
 ListCardCounter does not have a standalone specimen. It is demonstrated within
 the **ListCardSpecimen** in the "With footer counters" group.

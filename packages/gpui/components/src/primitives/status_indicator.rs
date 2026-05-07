@@ -48,6 +48,10 @@ impl StatusIndicator {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn typography(mut self, v: poodle_specs::InlineTypographyMode) -> Self {
+        self.spec.typography = v;
+        self
+    }
 }
 
 impl IntoElement for StatusIndicator {

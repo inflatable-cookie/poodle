@@ -8,9 +8,11 @@ use crate::theme_ext::{resolve_color, resolve_px};
 
 pub fn js_time_ago(spec: &TimeAgoSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let text_color = resolve_color(theme, spec.text_color_token());
-    let font_size = resolve_px(theme, spec.font_size_token());
+    let label = ui_element::label(&spec.timestamp).text_color(text_color);
 
-    ui_element::label(&spec.timestamp)
-        .text_color(text_color)
-        .text_size(font_size)
+    if spec.inherits_typography() {
+        label
+    } else {
+        label.text_size(resolve_px(theme, spec.font_size_token()))
+    }
 }

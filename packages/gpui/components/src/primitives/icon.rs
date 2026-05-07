@@ -19,6 +19,7 @@ pub struct Icon {
     theme: poodle_gpui::GpuiThemeProvider,
     /// Explicit color override. If None, uses theme's icon.primary color.
     color: Option<Hsla>,
+    size_px: Option<Pixels>,
 }
 
 impl std::ops::Deref for Icon {
@@ -34,6 +35,7 @@ impl Icon {
             spec: IconSpec::new(name),
             theme: theme.clone(),
             color: None,
+            size_px: None,
         }
     }
 
@@ -42,6 +44,7 @@ impl Icon {
             spec,
             theme: theme.clone(),
             color: None,
+            size_px: None,
         }
     }
 
@@ -71,13 +74,20 @@ impl Icon {
         self.color = Some(color);
         self
     }
+
+    pub fn with_px_size(mut self, size_px: f32) -> Self {
+        self.size_px = Some(px(size_px));
+        self
+    }
 }
 
 impl IntoElement for Icon {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let size = resolve_px(&self.theme, self.spec.size_token());
+        let size = self
+            .size_px
+            .unwrap_or_else(|| resolve_px(&self.theme, self.spec.size_token()));
         let icon_path = format!("assets/icons/{}.svg", self.spec.name);
         let shared_path = SharedString::from(icon_path);
 

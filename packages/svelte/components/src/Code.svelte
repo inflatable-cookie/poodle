@@ -11,6 +11,8 @@
   export let maxHeight: string | null = null;
   export let inline = false;
   export let ariaLabel: string | null = null;
+  export let inlineVariant: "default" | "plain" = "default";
+  export let typography: "body" | "inline" = "body";
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
@@ -36,8 +38,22 @@
 </script>
 
 {#if inline}
-  <span class="poodle-code poodle-code--inline-wrap" data-size={resolvedSize} data-density={resolvedDensity}>
-    <code class="poodle-code poodle-code--inline" aria-label={ariaLabel ?? undefined} data-language={language} data-size={resolvedSize} data-density={resolvedDensity}>
+  <span
+    class="poodle-code poodle-code--inline-wrap"
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+    data-inline-variant={inlineVariant}
+    data-typography={typography}
+  >
+    <code
+      class="poodle-code poodle-code--inline"
+      aria-label={ariaLabel ?? undefined}
+      data-language={language}
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
+      data-inline-variant={inlineVariant}
+      data-typography={typography}
+    >
       {source}
     </code>
     {#if showCopyButton}
@@ -123,6 +139,17 @@
     font-family: var(--poodle-typography-code-family);
     font-size: calc(0.8125em * var(--poodle-typography-code-adjustmentRatio));
     line-height: 1.5;
+  }
+
+  .poodle-code--inline[data-inline-variant="plain"] {
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .poodle-code--inline[data-typography="inline"] {
+    font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio));
+    line-height: inherit;
   }
 
   .poodle-code--block {

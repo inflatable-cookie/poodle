@@ -4,7 +4,7 @@
 
 use poodle_tokens::semantic;
 
-use crate::IconSize;
+use crate::{IconSize, InlineTypographyMode};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ListCardCounterSpec {
@@ -19,6 +19,7 @@ pub struct ListCardCounterSpec {
     /// stopPropagation to prevent the parent ListCard click from
     /// firing.
     pub href: Option<String>,
+    pub typography: InlineTypographyMode,
 }
 
 impl ListCardCounterSpec {
@@ -28,6 +29,7 @@ impl ListCardCounterSpec {
             count,
             tooltip: None,
             href: None,
+            typography: InlineTypographyMode::default(),
         }
     }
 
@@ -38,6 +40,11 @@ impl ListCardCounterSpec {
 
     pub fn with_href(mut self, href: impl Into<String>) -> Self {
         self.href = Some(href.into());
+        self
+    }
+
+    pub fn with_typography(mut self, typography: InlineTypographyMode) -> Self {
+        self.typography = typography;
         self
     }
 
@@ -63,5 +70,30 @@ impl ListCardCounterSpec {
 
     pub fn icon_size() -> IconSize {
         IconSize::Sm
+    }
+
+    pub fn gap_rem(&self) -> f32 {
+        match self.typography {
+            InlineTypographyMode::Default => 0.25,
+            InlineTypographyMode::Inherit => 0.3333,
+        }
+    }
+
+    pub fn font_size_rem(&self) -> f32 {
+        match self.typography {
+            InlineTypographyMode::Default => 0.75,
+            InlineTypographyMode::Inherit => 0.8571,
+        }
+    }
+
+    pub fn icon_size_rem(&self) -> f32 {
+        match self.typography {
+            InlineTypographyMode::Default => 1.0,
+            InlineTypographyMode::Inherit => 1.3333,
+        }
+    }
+
+    pub fn inherits_typography(&self) -> bool {
+        self.typography == InlineTypographyMode::Inherit
     }
 }

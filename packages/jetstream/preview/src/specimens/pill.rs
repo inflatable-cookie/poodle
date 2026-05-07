@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::pill::js_pill;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::PillSpec;
+use poodle_specs::{InlineTypographyMode, PillSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -23,6 +23,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("Disabled", secondary,
             div().flex_row().gap(8.0).items_center()
                 .child(js_pill(&PillSpec::new().with_label("Disabled").with_disabled(true), theme))
+        ))
+        .child(group("Inherit typography", secondary,
+            div().flex_row().gap(8.0).items_center().text_size(20.0)
+                .child(label("Release"))
+                .child(js_pill(
+                    &PillSpec::new()
+                        .with_label("Beta")
+                        .with_typography(InlineTypographyMode::Inherit),
+                    theme,
+                ))
+                .child(label("channel"))
         ))
 }
 

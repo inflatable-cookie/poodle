@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::time_ago::js_time_ago;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::TimeAgoSpec;
+use poodle_specs::{InlineTypographyMode, TimeAgoSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -24,6 +24,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     &TimeAgoSpec::new().with_timestamp("Yesterday"),
                     theme,
                 ))
+        ))
+        .child(group("Inherit typography", secondary,
+            div().flex_row().gap(8.0).items_center().text_size(20.0)
+                .child(label("Updated"))
+                .child(js_time_ago(
+                    &TimeAgoSpec::new()
+                        .with_timestamp("2 minutes ago")
+                        .with_typography(InlineTypographyMode::Inherit),
+                    theme,
+                ))
+                .child(label("by Clay"))
         ))
 }
 

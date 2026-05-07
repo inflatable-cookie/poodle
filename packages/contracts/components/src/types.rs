@@ -185,6 +185,20 @@ pub enum Orientation {
     Vertical,
 }
 
+/// Typography mode for inline text-like primitives.
+///
+/// `Default` uses the primitive's own token-owned typography metrics.
+/// `Inherit` asks the runtime to scale from the surrounding inline context.
+/// CSS runtimes should implement that literally. Non-CSS runtimes may use a
+/// ratio-preserving approximation when true parent-relative inline layout is
+/// not available yet.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum InlineTypographyMode {
+    #[default]
+    Default,
+    Inherit,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ButtonVariant {
     Primary,

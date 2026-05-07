@@ -325,6 +325,10 @@
                         {/if}
                       </span>
                     {/if}
+
+                    <time class="poodle-log-list__audit-time" datetime={entry.occurredAt}>
+                      {formatRelativeTime(entry.occurredAt)}
+                    </time>
                   </div>
 
                   {#if entryDetails}
@@ -332,10 +336,6 @@
                       {@render entryDetails(entry)}
                     </div>
                   {/if}
-
-                  <time class="poodle-log-list__audit-time" datetime={entry.occurredAt}>
-                    {formatRelativeTime(entry.occurredAt)}
-                  </time>
                 </div>
               </li>
             {/each}
@@ -653,8 +653,11 @@
   }
 
   .poodle-log-list__audit-time {
+    margin-left: auto;
     color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .poodle-log-list__pagination {

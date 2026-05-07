@@ -38,7 +38,6 @@
   .poodle-detail-section {
     display: grid;
     gap: calc(var(--poodle-space-stack-md) + 0.125rem);
-    padding-top: calc(var(--poodle-space-stack-md) + 0.125rem);
   }
 
   .poodle-detail-section[data-separated="true"] {

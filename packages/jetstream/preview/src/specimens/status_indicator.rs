@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::status_indicator::js_status_indicator;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{StatusIndicatorSpec, StatusTone};
+use poodle_specs::{InlineTypographyMode, StatusIndicatorSpec, StatusTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -30,6 +30,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 .child(js_status_indicator(&StatusIndicatorSpec::new().with_status(StatusTone::Success), theme))
                 .child(js_status_indicator(&StatusIndicatorSpec::new().with_status(StatusTone::Warning), theme))
                 .child(js_status_indicator(&StatusIndicatorSpec::new().with_status(StatusTone::Danger), theme))
+        ))
+        .child(group("Inherit typography", secondary,
+            div().flex_row().gap(8.0).items_center().text_size(20.0)
+                .child(label("Deploy"))
+                .child(js_status_indicator(
+                    &StatusIndicatorSpec::new()
+                        .with_status(StatusTone::Success)
+                        .with_label("Healthy")
+                        .with_typography(InlineTypographyMode::Inherit),
+                    theme,
+                ))
+                .child(label("now"))
         ))
 }
 

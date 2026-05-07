@@ -1,5 +1,7 @@
 use poodle_tokens::semantic;
 
+use crate::InlineTypographyMode;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct TimeAgoSpec {
     pub timestamp: String,
@@ -8,6 +10,7 @@ pub struct TimeAgoSpec {
     /// When false, renders long forms like "2 minutes ago".
     pub short: bool,
     pub aria_label: Option<String>,
+    pub typography: InlineTypographyMode,
 }
 
 impl Default for TimeAgoSpec {
@@ -17,6 +20,7 @@ impl Default for TimeAgoSpec {
             live: false,
             short: true,
             aria_label: None,
+            typography: InlineTypographyMode::default(),
         }
     }
 }
@@ -46,11 +50,20 @@ impl TimeAgoSpec {
         self
     }
 
+    pub fn with_typography(mut self, typography: InlineTypographyMode) -> Self {
+        self.typography = typography;
+        self
+    }
+
     pub fn text_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY
     }
 
     pub fn font_size_token(&self) -> &'static str {
-        semantic::TYPOGRAPHY_LABEL_SIZE
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    pub fn inherits_typography(&self) -> bool {
+        self.typography == InlineTypographyMode::Inherit
     }
 }

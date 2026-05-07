@@ -37,6 +37,7 @@ Updated: 2026-03-26
 | `interval` | `number` | `30000` | no | live update interval in milliseconds |
 | `ariaLabel` | `string \| null` | `null` | no | override accessible label |
 | `short` | `boolean` | `true` | no | use compact output like `"5m ago"` instead of long phrases |
+| `typography` | `"body" \| "inherit"` | `"body"` | no | body tokens by default; use `"inherit"` when the parent inline context should own font sizing and related typography |
 | `tooltipFormat` | `"full" \| "date" \| "datetime"` | `"datetime"` | no | absolute-time format used for the native title tooltip |
 | `timezone` | `string \| null` | `null` | no | optional IANA timezone for tooltip formatting |
 
@@ -97,6 +98,7 @@ Updated: 2026-03-26
 ### Sizing
 
 - Inline text element, sizes to content
+- Default typography uses body tokens; `typography="inherit"` lets parent text size and line-height flow through
 - `cursor: default` prevents text cursor on hover
 - `font-variant-numeric: tabular-nums` ensures stable width as numbers change
 
@@ -118,6 +120,14 @@ Updated: 2026-03-26
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `font-variant-numeric` | `tabular-nums` |
 | `cursor` | `default` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font` | `inherit` |
+| `font-variant-numeric` | `tabular-nums` |
+| `color` | `var(--poodle-color-text-secondary)` |
 
 ### HTML attributes
 
@@ -145,6 +155,9 @@ Values are computed using integer division (floor). Thresholds use seconds:
 ## 9. Svelte Notes
 
 - Renders a `<time>` element with class `time-ago`
+- `typography="inherit"` uses the text-only-inherit rule from
+  `docs/contracts/001-working-rules.md`: font metrics inherit directly because
+  the primitive has no shell geometry to scale
 - Live updates via `setInterval` with `interval` prop as delay; cleared on
   component destroy via `onDestroy`
 - `datetime` prop accepts `Date`, ISO string, or Unix timestamp (number);
@@ -156,6 +169,9 @@ Values are computed using integer division (floor). Thresholds use seconds:
 - expected crate/module surface: `poodle_gpui::primitives::time_ago`
 - GPUI must implement periodic re-render when `live=true` using a timer or
   frame-based update mechanism
+- `typography="inherit"` is text-only here, so non-CSS runtimes should
+  implement it literally by omitting explicit font sizing rather than
+  approximating from a baseline
 - `toLocaleString` for title: GPUI should use platform locale formatting or
   `chrono` crate equivalent
 - `font-variant-numeric: tabular-nums`: GPUI must use a font feature setting

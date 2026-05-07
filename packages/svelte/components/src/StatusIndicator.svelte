@@ -2,12 +2,15 @@
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
 
+  type StatusIndicatorTypography = "label" | "inherit";
+
   export let status: StatusTone = "neutral";
   export let label: string | null = null;
   export let ariaLabel: string | null = null;
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
+  export let typography: StatusIndicatorTypography = "label";
 
   const uiPresentation = getUiPresentation();
 
@@ -15,7 +18,14 @@
   $: resolvedDensity = density ?? $uiPresentation.density;
 </script>
 
-<span class="poodle-status-indicator" data-status={status} data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
+<span
+  class="poodle-status-indicator"
+  data-status={status}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  data-typography={typography}
+  aria-label={ariaLabel ?? undefined}
+>
   <span class="poodle-status-indicator__dot" aria-hidden="true"></span>
   {#if label}
     <span class="poodle-status-indicator__label">{label}</span>
@@ -27,9 +37,14 @@
 <style>
   .poodle-status-indicator {
     --poodle-status-color: var(--poodle-color-text-secondary);
+    --poodle-status-gap: 0.4375rem;
+    --poodle-status-dot-size: 0.5625rem;
+    --poodle-status-dot-ring: 0.125rem;
+    --poodle-status-label-font-size: 0.75rem;
+    --poodle-status-label-line-height: 1.3;
     display: inline-flex;
     align-items: center;
-    gap: 0.4375rem;
+    gap: var(--poodle-status-gap);
     color: var(--poodle-color-text-primary);
     min-width: 0;
   }
@@ -56,11 +71,11 @@
 
   .poodle-status-indicator__dot {
     flex: 0 0 auto;
-    width: 0.5625rem;
-    height: 0.5625rem;
+    width: var(--poodle-status-dot-size);
+    height: var(--poodle-status-dot-size);
     border-radius: 999px;
     background: var(--poodle-status-color);
-    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-status-color) 18%, transparent);
+    box-shadow: 0 0 0 var(--poodle-status-dot-ring) color-mix(in srgb, var(--poodle-status-color) 18%, transparent);
   }
 
   .poodle-status-indicator[data-status="pending"] .poodle-status-indicator__dot {
@@ -70,31 +85,101 @@
   .poodle-status-indicator__label {
     min-width: 0;
     font-family: var(--poodle-typography-label-family);
-    font-size: 0.75rem;
+    font-size: var(--poodle-status-label-font-size);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: var(--poodle-status-label-line-height);
   }
 
   /* Size variants */
-  .poodle-status-indicator[data-size="xs"] .poodle-status-indicator__dot { width: 0.375rem; height: 0.375rem; }
-  .poodle-status-indicator[data-size="xs"] .poodle-status-indicator__label { font-size: 0.625rem; }
-  .poodle-status-indicator[data-size="xs"] { gap: 0.3125rem; }
+  .poodle-status-indicator[data-size="xs"] {
+    --poodle-status-gap: 0.3125rem;
+    --poodle-status-dot-size: 0.375rem;
+    --poodle-status-dot-ring: 0.125rem;
+    --poodle-status-label-font-size: 0.625rem;
+  }
 
-  .poodle-status-indicator[data-size="sm"] .poodle-status-indicator__dot { width: 0.4375rem; height: 0.4375rem; }
-  .poodle-status-indicator[data-size="sm"] .poodle-status-indicator__label { font-size: 0.6875rem; }
-  .poodle-status-indicator[data-size="sm"] { gap: 0.375rem; }
+  .poodle-status-indicator[data-size="sm"] {
+    --poodle-status-gap: 0.375rem;
+    --poodle-status-dot-size: 0.4375rem;
+    --poodle-status-dot-ring: 0.125rem;
+    --poodle-status-label-font-size: 0.6875rem;
+  }
 
-  .poodle-status-indicator[data-size="lg"] .poodle-status-indicator__dot { width: 0.6875rem; height: 0.6875rem; }
-  .poodle-status-indicator[data-size="lg"] .poodle-status-indicator__label { font-size: 0.8125rem; }
-  .poodle-status-indicator[data-size="lg"] { gap: 0.5rem; }
+  .poodle-status-indicator[data-size="lg"] {
+    --poodle-status-gap: 0.5rem;
+    --poodle-status-dot-size: 0.6875rem;
+    --poodle-status-dot-ring: 0.125rem;
+    --poodle-status-label-font-size: 0.8125rem;
+  }
 
-  .poodle-status-indicator[data-size="xl"] .poodle-status-indicator__dot { width: 0.8125rem; height: 0.8125rem; }
-  .poodle-status-indicator[data-size="xl"] .poodle-status-indicator__label { font-size: 0.875rem; }
-  .poodle-status-indicator[data-size="xl"] { gap: 0.5625rem; }
+  .poodle-status-indicator[data-size="xl"] {
+    --poodle-status-gap: 0.5625rem;
+    --poodle-status-dot-size: 0.8125rem;
+    --poodle-status-dot-ring: 0.125rem;
+    --poodle-status-label-font-size: 0.875rem;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"] {
+    font-size: 0.8571em;
+    line-height: var(--poodle-status-label-line-height);
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-size="xs"] {
+    --poodle-status-gap: 0.5em;
+    --poodle-status-dot-size: 0.6em;
+    --poodle-status-dot-ring: 0.2em;
+    font-size: 0.7143em;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-size="sm"] {
+    --poodle-status-gap: 0.5455em;
+    --poodle-status-dot-size: 0.6364em;
+    --poodle-status-dot-ring: 0.1818em;
+    font-size: 0.7857em;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-size="md"] {
+    --poodle-status-gap: 0.5833em;
+    --poodle-status-dot-size: 0.75em;
+    --poodle-status-dot-ring: 0.1667em;
+    font-size: 0.8571em;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-size="lg"] {
+    --poodle-status-gap: 0.6154em;
+    --poodle-status-dot-size: 0.8462em;
+    --poodle-status-dot-ring: 0.1538em;
+    font-size: 0.9286em;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-size="xl"] {
+    --poodle-status-gap: 0.6429em;
+    --poodle-status-dot-size: 0.9286em;
+    --poodle-status-dot-ring: 0.1429em;
+    font-size: 1em;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"] .poodle-status-indicator__label {
+    font: inherit;
+    font-weight: 600;
+  }
 
   /* Density variants */
-  .poodle-status-indicator[data-density="compact"] { gap: 0.25rem; }
-  .poodle-status-indicator[data-density="comfortable"] { gap: 0.625rem; }
+  .poodle-status-indicator[data-density="compact"] {
+    --poodle-status-gap: 0.25rem;
+  }
+
+  .poodle-status-indicator[data-density="comfortable"] {
+    --poodle-status-gap: 0.625rem;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-density="compact"] {
+    --poodle-status-gap: 0.4em;
+  }
+
+  .poodle-status-indicator[data-typography="inherit"][data-density="comfortable"] {
+    --poodle-status-gap: 0.8em;
+  }
 
   @keyframes status-pulse {
     from {

@@ -295,12 +295,12 @@
   }
 
   .poodle-menu__item[data-tone="danger"] {
-    color: var(--poodle-color-danger-base);
+    color: var(--poodle-color-status-danger);
   }
 
   .poodle-menu__item[data-tone="danger"]:hover:not(:disabled),
   .poodle-menu__item[data-tone="danger"]:focus-visible {
-    background: color-mix(in srgb, var(--poodle-color-danger-base) 14%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 14%, transparent);
   }
 
   .poodle-menu__item:disabled {

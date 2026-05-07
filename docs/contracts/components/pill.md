@@ -35,6 +35,7 @@ Updated: 2026-03-26
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `font` | `"normal" \| "mono"` | `"normal"` | no | content font variant |
+| `typography` | `"label" \| "inherit"` | `"label"` | no | label typography by default; use `"inherit"` when parent inline text should own font size and line-height |
 | `accent` | `string \| null` | `null` | no | optional custom accent color overriding the semantic tone colors |
 | `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
@@ -101,6 +102,8 @@ No internal state.
 ### Sizing
 
 - Pill sizes to content with compact padding
+- `typography="inherit"` keeps the selected size preset, but expresses pill
+  geometry in `em` so shell height and padding scale with the inherited text
 - Content may truncate according to parent layout rules
 - Uses `white-space: nowrap` to prevent wrapping
 
@@ -129,6 +132,14 @@ No internal state.
 | `font-weight` | `600` |
 | `line-height` | `1` |
 | `white-space` | `nowrap` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | size-specific `em` value derived from the selected preset |
+| `min-height` | size-specific `em` value derived from the selected preset |
+| `padding` | size-specific `em` value derived from the selected preset |
 
 ### Component custom properties (neutral default)
 
@@ -194,6 +205,14 @@ No internal state.
 | `padding` | `0.125rem 0.375rem` |
 | `font-size` | `0.625rem` |
 
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.7143em` |
+| `min-height` | `1.6em` |
+| `padding` | `0.2em 0.6em` |
+
 ### Size: xs `.pill[data-size="xs"]`
 
 | Property | Value |
@@ -201,6 +220,30 @@ No internal state.
 | `min-height` | `0.875rem` |
 | `padding` | `0.0625rem 0.3125rem` |
 | `font-size` | `0.5625rem` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.6429em` |
+| `min-height` | `1.5556em` |
+| `padding` | `0.1111em 0.5556em` |
+
+### Size: md `.pill[data-size="md"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `1.25rem` |
+| `padding` | `0.1875rem 0.5rem` |
+| `font-size` | `0.6875rem` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.7857em` |
+| `min-height` | `1.8182em` |
+| `padding` | `0.2727em 0.7273em` |
 
 ### Size: lg `.pill[data-size="lg"]`
 
@@ -210,6 +253,14 @@ No internal state.
 | `padding` | `0.25rem 0.625rem` |
 | `font-size` | `0.75rem` |
 
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.8571em` |
+| `min-height` | `1.8333em` |
+| `padding` | `0.3333em 0.8333em` |
+
 ### Size: xl `.pill[data-size="xl"]`
 
 | Property | Value |
@@ -217,6 +268,14 @@ No internal state.
 | `min-height` | `1.5rem` |
 | `padding` | `0.3125rem 0.75rem` |
 | `font-size` | `0.8125rem` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.9286em` |
+| `min-height` | `1.8462em` |
+| `padding` | `0.3846em 0.9231em` |
 
 ### Font: mono `.pill[data-font="mono"]`
 
@@ -236,6 +295,9 @@ No internal state.
 - Renders as a styled inline `<span>` with a default slot
 - Tone, appearance, size, font, and muted state are driven via `data-*`
   attributes for CSS selector targeting
+- `typography="inherit"` uses the proportional-inherit rule from
+  `docs/contracts/001-working-rules.md`: the selected size preset is converted
+  from token `rem` values into equivalent `em` values
 - Component custom properties (`--poodle-pill-fill`, `--poodle-pill-border`,
   `--poodle-pill-text`) are set on the root element and consumed by the same
   element's CSS, enabling tone overrides without class proliferation
@@ -247,6 +309,9 @@ No internal state.
 - keep semantics non-interactive unless wrapped by a control-specific contract
 - `color-mix` blending should be replicated using equivalent alpha-blended color
   calculations in GPUI's color system
+- for `typography="inherit"`, non-CSS runtimes may approximate parent-owned
+  `em` behavior with ratio-preserving metrics from a 1rem baseline until
+  parent-relative inline layout exists
 
 ## 11. Parity Checklist
 
@@ -272,6 +337,7 @@ No internal state.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | `color-mix` implementation | GPUI may pre-compute blended colors rather than using CSS `color-mix` | allowed | ensure visual equivalence across themes |
+| Jetstream mono font styling | current Jetstream `JsEl` text surface does not expose font-family or letter-spacing controls | allowed | implement text-family and tracking support in Jetstream, then apply `font="mono"` literally |
 
 ## 13. Specimen Definitions
 

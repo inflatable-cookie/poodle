@@ -6,11 +6,12 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{IconSpec, ListCardCounterSpec, OverlayPlacement, TooltipSpec};
+use poodle_specs::{IconSpec, InlineTypographyMode, ListCardCounterSpec, OverlayPlacement, TooltipSpec};
 
 use std::rc::Rc;
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::presentation::rem_to_px;
+use crate::theme_ext::resolve_color;
 use crate::{Icon, Tooltip};
 
 /// Compact footer counter backed by [`ListCardCounterSpec`].
@@ -72,11 +73,16 @@ impl ListCardCounter {
         self
     }
 
+    pub fn typography(mut self, v: InlineTypographyMode) -> Self {
+        self.spec.typography = v;
+        self
+    }
+
     fn build_row(&self) -> AnyElement {
         let theme = &self.theme;
         let spec = &self.spec;
-        let gap = resolve_px(theme, ListCardCounterSpec::gap_token());
-        let font_size = resolve_px(theme, ListCardCounterSpec::font_size_token());
+        let gap = px(rem_to_px(spec.gap_rem()));
+        let font_size = px(rem_to_px(spec.font_size_rem()));
         let secondary = resolve_color(theme, ListCardCounterSpec::text_secondary_token());
         let primary = resolve_color(theme, ListCardCounterSpec::text_primary_token());
 
@@ -84,7 +90,8 @@ impl ListCardCounter {
             IconSpec::new(spec.icon.clone()).with_size(ListCardCounterSpec::icon_size()),
             theme,
         )
-        .with_color(secondary);
+        .with_color(secondary)
+        .with_px_size(rem_to_px(spec.icon_size_rem()));
 
         let count = div().child(format!("{}", spec.count));
 

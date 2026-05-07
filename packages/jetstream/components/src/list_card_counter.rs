@@ -13,20 +13,26 @@ use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{IconSpec, ListCardCounterSpec};
 
 use crate::icon::js_icon;
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::presentation::rem_to_px;
+use crate::theme_ext::resolve_color;
 
 /// Compact footer counter: decorative icon + numeric label.
 pub fn js_list_card_counter(spec: &ListCardCounterSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let gap = resolve_px(theme, ListCardCounterSpec::gap_token());
-    let font_size = resolve_px(theme, ListCardCounterSpec::font_size_token());
+    let gap = rem_to_px(spec.gap_rem());
+    let font_size = rem_to_px(spec.font_size_rem());
     let secondary = resolve_color(theme, ListCardCounterSpec::text_secondary_token());
     let primary = resolve_color(theme, ListCardCounterSpec::text_primary_token());
 
     let icon_el = js_icon(
         &IconSpec::new(spec.icon.clone()).with_size(ListCardCounterSpec::icon_size()),
         theme,
-    );
+    )
+    .w(rem_to_px(spec.icon_size_rem()))
+    .h(rem_to_px(spec.icon_size_rem()));
 
+    // Jetstream does not yet expose tabular numeral or anchor semantics in this
+    // layer, so numeric-feature parity and literal link behavior remain
+    // documented runtime deltas for now.
     let count = ui_element::label(&format!("{}", spec.count));
 
     let mut row = ui_element::div()

@@ -40,6 +40,10 @@ impl MetaItem {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn typography(mut self, v: poodle_specs::InlineTypographyMode) -> Self {
+        self.spec.typography = v;
+        self
+    }
 
     pub fn with_value(mut self, value: impl IntoElement) -> Self {
         self.value = Some(value.into_any_element());
@@ -59,13 +63,13 @@ impl IntoElement for MetaItem {
             .flex_row()
             .flex_wrap()
             .items_center()
-            .gap(px(rem_to_px(0.375)))
+            .gap(px(rem_to_px(self.spec.gap_rem())))
             .min_w(px(0.0));
 
-        if let Some(label) = self.spec.label {
+        if let Some(ref label) = self.spec.label {
             item = item.child(
                 div()
-                    .text_size(px(rem_to_px(0.6875)))
+                    .text_size(px(rem_to_px(self.spec.label_font_size_rem())))
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(label_color)
                     .child(label.to_uppercase()),
@@ -74,7 +78,7 @@ impl IntoElement for MetaItem {
 
         let value = self.value.unwrap_or_else(|| {
             div()
-                .text_size(px(rem_to_px(0.875)))
+                .text_size(px(rem_to_px(self.spec.value_font_size_rem())))
                 .text_color(value_color)
                 .child("Value")
                 .into_any_element()
@@ -86,9 +90,9 @@ impl IntoElement for MetaItem {
                 .flex_row()
                 .flex_wrap()
                 .items_center()
-                .gap(px(rem_to_px(0.375)))
+                .gap(px(rem_to_px(self.spec.gap_rem())))
                 .min_w(px(0.0))
-                .text_size(px(rem_to_px(0.875)))
+                .text_size(px(rem_to_px(self.spec.value_font_size_rem())))
                 .text_color(value_color)
                 .child(value),
         )
