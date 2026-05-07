@@ -62,12 +62,30 @@
     setOpen(false);
   }
 
-  function resolveAnchor(target: EventTarget | null): HTMLElement | null {
-    if (!(target instanceof HTMLElement) || !rootElement) {
+  function getDefaultAnchor(): HTMLElement | null {
+    if (!rootElement) {
       return null;
     }
 
-    return rootElement.contains(target) ? target : null;
+    return rootElement.firstElementChild instanceof HTMLElement
+      ? rootElement.firstElementChild
+      : null;
+  }
+
+  function resolveAnchor(target: EventTarget | null): HTMLElement | null {
+    if (!rootElement) {
+      return null;
+    }
+
+    if (!(target instanceof HTMLElement)) {
+      return getDefaultAnchor();
+    }
+
+    if (target === rootElement) {
+      return getDefaultAnchor();
+    }
+
+    return rootElement.contains(target) ? target : getDefaultAnchor();
   }
 
   function handlePointerEnter(event: PointerEvent): void {

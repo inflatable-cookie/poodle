@@ -10,6 +10,7 @@
     section?: string | null;
     count?: number | null;
     subtitle?: string | null;
+    showSubtitleWithBreadcrumbs?: boolean;
     eyebrow?: string | null;
     posture?: "default" | "entity-detail";
     backHref?: string | null;
@@ -32,6 +33,7 @@
     section = null,
     count = null,
     subtitle = null,
+    showSubtitleWithBreadcrumbs = false,
     eyebrow = null,
     posture = "default",
     backHref = null,
@@ -57,12 +59,33 @@
   const resolvedSubtitle = $derived(
     isEntityDetailPosture ? title ?? subtitle ?? null : subtitle
   );
+  const hasPrimaryHeading = $derived(Boolean(primaryTitle || count !== null));
+  const showTopBreadcrumbs = $derived(Boolean(breadcrumbs && !isEntityDetailPosture));
+  const showSubtitleText = $derived(
+    Boolean(resolvedSubtitle) &&
+      (!isEntityDetailPosture || !breadcrumbs || showSubtitleWithBreadcrumbs)
+  );
+  const isCompactSubtitleHeader = $derived(
+    !hasPrimaryHeading &&
+      Boolean(resolvedSubtitle) &&
+      !eyebrow &&
+      !showTopBreadcrumbs &&
+      !meta &&
+      !children
+  );
   const headingTag = $derived(`h${level}` as `h${1 | 2 | 3 | 4 | 5 | 6}`);
 </script>
 
-<header class="poodle-page-header" data-align={align} aria-label={ariaLabel ?? undefined}>
+<header
+  class="poodle-page-header"
+  data-align={align}
+  data-level={level}
+  data-has-title={hasPrimaryHeading}
+  data-compact-subtitle-header={isCompactSubtitleHeader}
+  aria-label={ariaLabel ?? undefined}
+>
   <div class="poodle-page-header__content">
-    {#if breadcrumbs}
+    {#if showTopBreadcrumbs && breadcrumbs}
       <div class="poodle-page-header__breadcrumbs">
         {@render breadcrumbs()}
       </div>
@@ -75,21 +98,30 @@
       {#if hasSectionTitleSplit && !isEntityDetailPosture}
         <p class="poodle-page-header__section">{section}</p>
       {/if}
-      <svelte:element this={headingTag} class="poodle-page-header__title">
-        <span>{primaryTitle}</span>
-        {#if count !== null}
-          <span class="poodle-page-header__count">
-            <Pill tone="neutral" appearance="subtle" size="lg" ariaLabel={`${count}`}>
-              {count}
-            </Pill>
-          </span>
-        {/if}
-      </svelte:element>
+      {#if hasPrimaryHeading}
+        <svelte:element this={headingTag} class="poodle-page-header__title">
+          {#if primaryTitle}
+            <span>{primaryTitle}</span>
+          {/if}
+          {#if count !== null}
+            <span class="poodle-page-header__count">
+              <Pill tone="neutral" appearance="subtle" size="lg" ariaLabel={`${count}`}>
+                {count}
+              </Pill>
+            </span>
+          {/if}
+        </svelte:element>
+      {/if}
       {#if hasSectionTitleSplit && !isEntityDetailPosture}
         <p class="poodle-page-header__section-title">{title}</p>
       {/if}
-      {#if resolvedSubtitle}
+      {#if showSubtitleText}
         <p class="poodle-page-header__subtitle">{resolvedSubtitle}</p>
+      {/if}
+      {#if isEntityDetailPosture && breadcrumbs}
+        <div class="poodle-page-header__breadcrumbs poodle-page-header__breadcrumbs--subtitle">
+          {@render breadcrumbs()}
+        </div>
       {/if}
       {#if meta}
         <div class="poodle-page-header__meta">
@@ -160,9 +192,25 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  .poodle-page-header[data-compact-subtitle-header="true"][data-align="between"] {
+    align-items: center;
+  }
+
   .poodle-page-header__content {
     display: grid;
     gap: var(--poodle-space-stack-md);
+  }
+
+  .poodle-page-header__breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__content,
+  .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__title-block {
+    gap: 0;
   }
 
   .poodle-page-header__back {
@@ -247,6 +295,48 @@
     line-height: var(--poodle-typography-body-lineHeight);
   }
 
+  .poodle-page-header[data-has-title="false"] .poodle-page-header__subtitle {
+    color: var(--poodle-color-text-primary);
+    font-family: var(--poodle-typography-heading-family);
+    font-size: 1rem;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .poodle-page-header[data-level="3"] .poodle-page-header__title,
+  .poodle-page-header[data-level="4"] .poodle-page-header__title,
+  .poodle-page-header[data-level="5"] .poodle-page-header__title,
+  .poodle-page-header[data-level="6"] .poodle-page-header__title {
+    font-size: 1.25rem;
+    line-height: 1.15;
+  }
+
+  .poodle-page-header[data-level="3"] .poodle-page-header__section-title,
+  .poodle-page-header[data-level="4"] .poodle-page-header__section-title,
+  .poodle-page-header[data-level="5"] .poodle-page-header__section-title,
+  .poodle-page-header[data-level="6"] .poodle-page-header__section-title {
+    font-size: 0.875rem;
+  }
+
+  .poodle-page-header[data-level="3"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="3"] .poodle-page-header__body,
+  .poodle-page-header[data-level="4"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="4"] .poodle-page-header__body,
+  .poodle-page-header[data-level="5"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="5"] .poodle-page-header__body,
+  .poodle-page-header[data-level="6"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="6"] .poodle-page-header__body {
+    font-size: 0.875rem;
+  }
+
+  .poodle-page-header[data-level="3"][data-has-title="false"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="4"][data-has-title="false"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="5"][data-has-title="false"] .poodle-page-header__subtitle,
+  .poodle-page-header[data-level="6"][data-has-title="false"] .poodle-page-header__subtitle {
+    font-size: 0.9375rem;
+    line-height: 1.15;
+  }
+
   .poodle-page-header__meta {
     margin-top: 0.125rem;
   }
@@ -263,6 +353,10 @@
     gap: var(--poodle-space-inline-md);
   }
 
+  .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__actions-row {
+    align-self: center;
+  }
+
   .poodle-page-header__actions {
     display: flex;
     flex-wrap: wrap;
@@ -273,6 +367,7 @@
 
   .poodle-page-header__banner {
     grid-column: 1 / -1;
+    margin-top: 0.75rem;
   }
 
   @media (max-width: 45rem) {
