@@ -9,6 +9,7 @@
   export let items: BreadcrumbItem[] = [];
   export let ariaLabel = "Breadcrumb";
   export let maxVisibleItems: number | null = null;
+  export let forceLastItemCurrent = true;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
@@ -39,7 +40,7 @@
   <ol class="poodle-breadcrumbs__list">
     {#each visibleItems as item, index}
       <li class="poodle-breadcrumbs__item">
-        {#if item.current || index === visibleItems.length - 1}
+        {#if item.current || (forceLastItemCurrent && index === visibleItems.length - 1)}
           <span aria-current="page">{item.label}</span>
         {:else if item.href}
           <a href={item.href}>{item.label}</a>
