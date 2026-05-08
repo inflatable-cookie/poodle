@@ -93,3 +93,6 @@ did not progress beyond the feasibility proof.
 ## Status
 
 g10.019, g10.020, and g10.021 are all complete. g10 is fully closed.
+
+
+Batch cards live in `g10/batch-cards/` when strict posture uses them.

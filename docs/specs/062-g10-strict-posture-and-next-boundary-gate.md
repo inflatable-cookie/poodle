@@ -26,4 +26,4 @@ That makes the repo active but not honestly ready.
 
 ## Next Task
 
-Execute `docs/specs/batch-cards/001-freeze-g10-strict-posture-and-next-owner.md`.
+Execute `docs/roadmaps/g10/batch-cards/001-freeze-g10-strict-posture-and-next-owner.md`.
