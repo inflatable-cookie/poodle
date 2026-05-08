@@ -122,12 +122,19 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "blockTypes", type: "BlockTypeDefinition[]", default: "[defaults]", description: "Available block type definitions." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the editor is disabled." },
       { name: "ariaLabel", type: "string", default: '"Block editor"', description: "Accessible label for the editor region." },
+      { name: "mode", type: '"single" | "multi"', default: '"multi"', description: "Single posture hides multi-block controls by default; multi posture enables them." },
+      { name: "allowReorder", type: "boolean | null", default: "null", description: "Explicit override for drag and move controls." },
+      { name: "allowAdd", type: "boolean | null", default: "null", description: "Explicit override for add-block controls." },
+      { name: "allowRemove", type: "boolean | null", default: "null", description: "Explicit override for remove controls." },
+      { name: "allowTypeChange", type: "boolean | null", default: "null", description: "Explicit override for the type-change control." },
       { name: "size", type: 'ControlSize | null', default: "null", description: "Explicit semantic control size override for editor chrome and nested controls." },
       { name: "sizeRole", type: 'SemanticControlSizeRole', default: '"control"', description: "Semantic size role used when inheriting from presentation context." },
       { name: "density", type: 'ControlDensity | null', default: "null", description: "Explicit density override for editor shell and toolbar spacing." },
     ],
     slots: [
       { name: "block", description: "Custom block renderer. Receives slot props: block, index, disabled, update." },
+      { name: "type-picker", description: "Optional override for the built-in type-change control." },
+      { name: "add-picker", description: "Optional override for the built-in add-block control." },
     ],
     events: [
       { name: "change", payload: "{ blocks: EditorBlock[] }", description: "Fires when any block content changes." },
@@ -135,10 +142,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     usage: `<script lang="ts">
   import { BlockEditor } from "@poodle/svelte";
 
-  let blocks = [{ type: "paragraph", content: "Start writing..." }];
+  let blocks = [{ id: "intro", type: "paragraph", data: { text: "Start writing..." } }];
 </script>
 
-<BlockEditor {blocks} on:change={(e) => (blocks = e.detail.blocks)} />`,
+<BlockEditor {blocks} mode="single" on:change={(e) => (blocks = e.detail.blocks)} />`,
   },
 
   box: {

@@ -247,7 +247,10 @@ export type {
   // Composite types
   AspectRatio,
   BlockType,
+  BlockEditorMode,
   BlockTypeDefinition,
+  BlockTypeGroup,
+  BlockTypeItems,
   BrowseState,
   CardRadioItem,
   CenterRegionSnapshot,

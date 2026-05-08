@@ -337,6 +337,7 @@ export type AuditLogEntry = {
 export type LogEntry = StreamLogEntry | AuditLogEntry;
 
 export type BlockType = string;
+export type BlockEditorMode = "single" | "multi";
 
 export type BlockTypeDefinition = {
   type: BlockType;
@@ -344,10 +345,20 @@ export type BlockTypeDefinition = {
   icon: IconProp;
 };
 
+export type BlockTypeGroup = {
+  label: string;
+  options: BlockTypeDefinition[];
+};
+
+export type BlockTypeItems = BlockTypeDefinition[] | BlockTypeGroup[];
+
 export type EditorBlock = {
   id: string;
   type: BlockType;
-  content: string;
+  version?: string | number;
+  hash?: string | null;
+  data?: unknown;
+  content?: string;
   [key: string]: unknown;
 };
 

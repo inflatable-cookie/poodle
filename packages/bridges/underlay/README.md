@@ -169,13 +169,14 @@ import { underlayWrapperPolicies, underlayZeroLeakRules } from "@poodle/bridge-u
 
 ### Approved wrapper surfaces
 
-Three surfaces are currently proven and policy-documented:
+Four surfaces are currently proven and policy-documented:
 
 | Underlay export | May use Poodle internal | Notes |
 |---|---|---|
 | `@underlay/ui/Button` | Button family | Variant/size translation, focus-ring parity, event-name compatibility |
 | `@underlay/ui/SearchInput` | TextInput | Query prop naming, submit/cancel behavior, result-shell composition |
 | `@underlay/ui/Panel` | Panel internals | Header slot translation, panel identity naming, workstation-only rollout |
+| `@underlay/ui/NightfireBlockEditor` | BlockEditor shell | Single/multi posture mapping, opaque block envelope pass-through, grouped type picker override when subcategory menus matter |
 
 ### Wrapper implementation pattern
 
@@ -240,6 +241,64 @@ Wrappers must not drop any of these from the underlying Poodle component:
 If your wrapper needs to intercept an event or slot, verify the accessibility
 semantics still flow through. When in doubt, pass remaining attributes with
 `{...$$restProps}` (Svelte) or spread.
+
+---
+
+## Nightfire Block Editor
+
+Nightfire is now an explicit bridge use-case. Poodle owns the shell, but
+Underlay still owns the Nightfire block JSON shape, schema definition, grouped
+type picker semantics, and app-facing wrapper import path.
+
+Use the bridge helper to map Nightfire records onto the Poodle shell without
+teaching app code about Poodle types:
+
+```typescript
+import {
+  buildNightfireBlockEditorBridge,
+  toPoodleEditorBlocks,
+} from "@poodle/bridge-underlay/nightfire-block-editor";
+
+const bridge = buildNightfireBlockEditorBridge({
+  typeOptions: editorTypeOptions,
+  groupedOptions,
+});
+
+const blocks = toPoodleEditorBlocks(value.blocks ?? [], {
+  fallbackType: definition.defaultType,
+});
+```
+
+Then the Underlay-owned wrapper can decide whether the built-in picker is
+enough or whether it should keep rendering `NightfireTypeSelect` through
+Poodle's `type-picker` slot:
+
+```svelte
+<BlockEditor
+  {blocks}
+  blockTypes={bridge.blockTypes}
+  blockTypeItems={bridge.blockTypeItems}
+  mode={definition.mode}
+>
+  {#if bridge.pickerMode === "slot-override"}
+    <svelte:fragment slot="type-picker" let:block let:changeType>
+      <NightfireTypeSelect
+        value={block.type}
+        {groupedOptions}
+        typeOptions={editorTypeOptions}
+        onChange={changeType}
+      />
+    </svelte:fragment>
+  {/if}
+</BlockEditor>
+```
+
+Rule of thumb:
+- use Poodle's built-in picker when flat or one-level grouped menus are enough
+- keep an Underlay-owned slot override when Nightfire needs nested
+  category/subcategory menus
+- keep block payloads opaque; the bridge should only ensure `id` and `type`
+  exist for the shell
 
 ---
 
@@ -308,6 +367,7 @@ before the bridge posture is considered fully hardened:
 | `@poodle/bridge-underlay/token-map` | `underlayTokenMap`, `canonicalTokenFamilies`, `UnderlayBridgeToken` |
 | `@poodle/bridge-underlay/theme-map` | `underlayThemeMap`, `underlayDensityModeMap`, `underlayControlSizeMap`, `canonicalPoodleThemes` |
 | `@poodle/bridge-underlay/component-wrappers` | `underlayWrapperPolicies`, `underlayZeroLeakRules`, `UnderlayWrapperPolicy` |
+| `@poodle/bridge-underlay/nightfire-block-editor` | Nightfire block envelope and type-picker mapping helpers for Poodle `BlockEditor` |
 | `@poodle/bridge-underlay/zero-leak-proof` | `underlayZeroLeakProof`, `validateUnderlayZeroLeakProof`, proof types |
 
 ---

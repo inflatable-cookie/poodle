@@ -7,8 +7,14 @@ Updated: 2026-04-09
 
 - Component name: `BlockEditor`
 - Layer: `composites`
-- Summary: a pure shell for block-based content editing — provides block CRUD, reordering, and type switching infrastructure with zero built-in block types or block renderers; consumers supply all block types and rendering via props and slots
-- In scope: block CRUD, type switching via Select (ghost variant), reordering (drag-and-drop + arrow buttons), consumer-provided block type definitions, slotted block content rendering, size and density variants
+- Summary: a pure shell for block-based content editing — supports both multi-
+  block and single-block posture, provides optional block CRUD/reordering/type
+  switching infrastructure, and leaves block payload shape and rendering fully
+  consumer-owned
+- In scope: single or multi posture, optional block CRUD, optional type
+  switching via Select or slot override, optional reordering (drag-and-drop +
+  arrow buttons), consumer-provided block type definitions, opaque block
+  payloads, slotted block content rendering, size and density variants
 - Out of scope: built-in block types, built-in block rendering, rich text editing within blocks, collaborative editing, undo/redo history, block nesting, server persistence
 
 ## 2. Anatomy
@@ -52,8 +58,14 @@ Updated: 2026-04-09
 |------|------|---------|----------|-------|
 | `blocks` | `EditorBlock[]` | `[]` | no | Array of block data objects; bind for two-way |
 | `blockTypes` | `BlockTypeDefinition[]` | `[]` | no | Consumer provides all available block types; drives both the type-switch Select and the add-block Select |
+| `blockTypeItems` | `BlockTypeDefinition[] \| BlockTypeGroup[] \| null` | `null` | no | Optional richer type input for built-in pickers; supports flat or grouped Nightfire-style menus |
 | `disabled` | `boolean` | `false` | no | Disables all editing controls |
 | `ariaLabel` | `string` | `"Block editor"` | no | Accessible label for the root container |
+| `mode` | `"single" \| "multi"` | `"multi"` | no | Single posture hides multi-block controls by default; multi posture enables them by default |
+| `allowReorder` | `boolean \| null` | `null` | no | Explicit override for drag grip and move controls; defaults from `mode` |
+| `allowAdd` | `boolean \| null` | `null` | no | Explicit override for add-block control; defaults from `mode` |
+| `allowRemove` | `boolean \| null` | `null` | no | Explicit override for remove control; defaults from `mode` |
+| `allowTypeChange` | `boolean \| null` | `null` | no | Explicit override for type-change control; defaults to `true` in both postures |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar chrome and nested controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for shell, toolbar, content, and input spacing |
@@ -69,11 +81,19 @@ type BlockTypeDefinition = {
   icon: IconProp;
 };
 
+type BlockTypeGroup = {
+  label: string;
+  options: BlockTypeDefinition[];
+};
+
 type EditorBlock = {
   id: string;
   type: BlockType;
-  content: string;
-  [key: string]: unknown;  // extensible for custom data
+  version?: string | number;
+  hash?: string | null;
+  data?: unknown;
+  content?: string;  // legacy fallback convenience, not required
+  [key: string]: unknown;  // opaque payload remains consumer-owned
 };
 ```
 
@@ -82,10 +102,12 @@ type EditorBlock = {
 | Slot | Scope | Purpose |
 |------|-------|---------|
 | `block` | `{ block: EditorBlock, index: number, disabled: boolean, update: (updates: Partial<EditorBlock>) => void }` | Custom rendering for block content; when not provided, falls back to a minimal `<textarea>` |
+| `type-picker` | `{ block: EditorBlock, index: number, disabled: boolean, options: SelectOption[], groupedOptions: SelectItems, changeType: (type: BlockType) => void }` | Override the built-in type-change control while keeping the shell |
+| `add-picker` | `{ block: EditorBlock, index: number, disabled: boolean, options: SelectOption[], groupedOptions: SelectItems, addBlock: (type: BlockType) => void }` | Override the built-in add-block control while keeping the shell |
 
 ### Fallback Block Renderer
 
-When the `block` slot is not provided, the only fallback is a minimal `<textarea>` with `placeholder="Type something..."` and `rows="1"`. There are no built-in type-specific renderers (no heading, code, quote, list, image, or divider rendering). Consumers are expected to provide a `block` slot for meaningful rendering.
+When the `block` slot is not provided, the only fallback is a minimal `<textarea>` with `placeholder="Type something..."` and `rows="1"`. That fallback reads and writes `block.content` only for legacy convenience. There are no built-in type-specific renderers (no heading, code, quote, list, image, or divider rendering). Consumers are expected to provide a `block` slot for meaningful rendering and should treat the full block object as opaque, consumer-owned data.
 
 ### Controlled And Uncontrolled
 
@@ -100,6 +122,7 @@ When the `block` slot is not provided, the only fallback is a minimal `<textarea
 |-------|---------|-----------------|
 | default | blocks present, not disabled | Blocks shown with toolbars |
 | disabled | `disabled=true` | Root has `opacity: disabled`, `pointer-events: none` |
+| single-posture | `mode="single"` | Reorder, add, and remove controls hidden unless explicitly re-enabled |
 | active-block | block receives focus | Block background increases to 72% elevated mix |
 | dragging | drag grip held | Source block at 40% opacity |
 | drag-over | dragging over another block | Target block shows accent box-shadow ring |
@@ -155,7 +178,11 @@ When the `block` slot is not provided, the only fallback is a minimal `<textarea
 
 - Composes: `Icon`, `Select`, `UiPresentationProvider` from `@poodle/svelte`
 - Both the type-switch and add-block controls use Select with `variant="ghost"` and `native={false}`
+- `blockTypeItems` can drive those built-in controls with either flat or grouped
+  options; `blockTypes` remains the flat convenience input
 - The add-block Select uses a custom trigger slot containing a plus icon styled as a tool button
+- Consumers may override the built-in type-change and add-block controls via
+  slots while reusing the same shell chrome
 - Parent expectations: content editing surfaces, form sections
 - Resizing rules: blocks fill parent width; content areas are flexible
 

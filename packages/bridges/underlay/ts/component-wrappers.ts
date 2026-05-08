@@ -49,6 +49,19 @@ export const underlayWrapperPolicies: UnderlayWrapperPolicy[] = [
     notes:
       "If Underlay adopts workstation shell surfaces later, public shell exports remain Underlay-owned.",
   },
+  {
+    underlayExport: "NightfireBlockEditor",
+    publicOwner: "underlay",
+    mayUsePoodleInternals: true,
+    appImportsPoodleDirectly: false,
+    migrationPressurePoints: [
+      "single and multi posture mapping",
+      "opaque Nightfire block envelope pass-through",
+      "grouped type picker override when subcategory menus matter",
+    ],
+    notes:
+      "Underlay may wrap Poodle BlockEditor internally for Nightfire, but Nightfire block JSON shape, grouped picker semantics, and wrapper import paths remain Underlay-owned.",
+  },
 ];
 
 export const underlayZeroLeakRules = [

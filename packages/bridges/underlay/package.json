@@ -12,6 +12,7 @@
     "./token-map": "./ts/token-map.ts",
     "./theme-map": "./ts/theme-map.ts",
     "./component-wrappers": "./ts/component-wrappers.ts",
+    "./nightfire-block-editor": "./ts/nightfire-block-editor.ts",
     "./zero-leak-proof": "./ts/zero-leak-proof.ts",
     ".": "./ts/index.ts"
   }

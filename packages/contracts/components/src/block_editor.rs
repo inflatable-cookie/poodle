@@ -1,6 +1,18 @@
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum BlockEditorMode {
+    Single,
+    Multi,
+}
+
+impl Default for BlockEditorMode {
+    fn default() -> Self {
+        Self::Multi
+    }
+}
+
 /// A single block type definition (provided by the consumer).
 ///
 /// Defines the schema for one kind of block: its type identifier, display label,
@@ -37,8 +49,12 @@ pub struct EditorBlock {
     pub id: String,
     /// Block type matching a BlockTypeDefinition.
     pub block_type: String,
-    /// Block text content.
-    pub content: String,
+    /// Optional block schema version.
+    pub version: Option<String>,
+    /// Optional content hash or revision marker.
+    pub hash: Option<String>,
+    /// Optional legacy fallback content string.
+    pub content: Option<String>,
 }
 
 impl EditorBlock {
@@ -46,12 +62,24 @@ impl EditorBlock {
         Self {
             id: id.into(),
             block_type: block_type.into(),
-            content: String::new(),
+            version: None,
+            hash: None,
+            content: None,
         }
     }
 
     pub fn with_content(mut self, content: impl Into<String>) -> Self {
-        self.content = content.into();
+        self.content = Some(content.into());
+        self
+    }
+
+    pub fn with_version(mut self, version: impl Into<String>) -> Self {
+        self.version = Some(version.into());
+        self
+    }
+
+    pub fn with_hash(mut self, hash: impl Into<String>) -> Self {
+        self.hash = Some(hash.into());
         self
     }
 }
@@ -71,6 +99,11 @@ pub struct BlockEditorSpec {
     pub is_disabled: bool,
     /// Accessible label for the root container.
     pub aria_label: String,
+    pub mode: BlockEditorMode,
+    pub allow_reorder: Option<bool>,
+    pub allow_add: Option<bool>,
+    pub allow_remove: Option<bool>,
+    pub allow_type_change: Option<bool>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -89,6 +122,11 @@ impl BlockEditorSpec {
             block_types: Vec::new(),
             is_disabled: false,
             aria_label: String::from("Block editor"),
+            mode: BlockEditorMode::default(),
+            allow_reorder: None,
+            allow_add: None,
+            allow_remove: None,
+            allow_type_change: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -112,6 +150,31 @@ impl BlockEditorSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = aria_label.into();
+        self
+    }
+
+    pub fn with_mode(mut self, mode: BlockEditorMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    pub fn with_allow_reorder(mut self, allow_reorder: bool) -> Self {
+        self.allow_reorder = Some(allow_reorder);
+        self
+    }
+
+    pub fn with_allow_add(mut self, allow_add: bool) -> Self {
+        self.allow_add = Some(allow_add);
+        self
+    }
+
+    pub fn with_allow_remove(mut self, allow_remove: bool) -> Self {
+        self.allow_remove = Some(allow_remove);
+        self
+    }
+
+    pub fn with_allow_type_change(mut self, allow_type_change: bool) -> Self {
+        self.allow_type_change = Some(allow_type_change);
         self
     }
 

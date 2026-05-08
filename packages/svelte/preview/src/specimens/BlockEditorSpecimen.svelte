@@ -1,6 +1,6 @@
 <script lang="ts">
   import { BlockEditor } from "@poodle/svelte";
-  import type { EditorBlock, BlockTypeDefinition } from "@poodle/svelte";
+  import type { BlockTypeDefinition, BlockTypeGroup, EditorBlock } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   const blockTypes: BlockTypeDefinition[] = [
@@ -12,16 +12,49 @@
   ];
 
   let blocks: EditorBlock[] = [
-    { id: "1", type: "heading", content: "Block Editor Shell" },
-    { id: "2", type: "paragraph", content: "Block types and rendering are provided by the consumer. The shell handles ordering, type selection, add/remove, and drag-drop." },
-    { id: "3", type: "quote", content: "The best way to predict the future is to invent it." },
-    { id: "4", type: "code", content: 'console.log("Hello, world!");' },
-    { id: "5", type: "divider", content: "" },
-    { id: "6", type: "paragraph", content: "Use the type dropdown to change a block, or the + dropdown to add a new one after." },
+    { id: "1", type: "heading", version: 3, hash: "a1", data: { text: "Block Editor Shell" }, content: "Block Editor Shell" },
+    { id: "2", type: "paragraph", version: 3, hash: "a2", data: { text: "Block types and rendering are provided by the consumer. The shell handles ordering, type selection, add/remove, and drag-drop." }, content: "Block types and rendering are provided by the consumer. The shell handles ordering, type selection, add/remove, and drag-drop." },
+    { id: "3", type: "quote", version: 3, hash: "a3", data: { text: "The best way to predict the future is to invent it." }, content: "The best way to predict the future is to invent it." },
+    { id: "4", type: "code", version: 3, hash: "a4", data: { text: 'console.log("Hello, world!");' }, content: 'console.log("Hello, world!");' },
+    { id: "5", type: "divider", version: 3, hash: "a5", data: {}, content: "" },
+    { id: "6", type: "paragraph", version: 3, hash: "a6", data: { text: "Use the type dropdown to change a block, or the + dropdown to add a new one after." }, content: "Use the type dropdown to change a block, or the + dropdown to add a new one after." },
+  ];
+
+  let singleBlocks: EditorBlock[] = [
+    {
+      id: "hero-1",
+      type: "heading",
+      version: "initial",
+      hash: "hero-hash",
+      data: { text: "Single-block Nightfire posture" },
+      content: "Single-block Nightfire posture",
+    },
+  ];
+
+  const groupedTypeOptions: BlockTypeGroup[] = [
+    {
+      label: "Text",
+      options: [
+        { type: "paragraph", label: "Paragraph", icon: "file-text" },
+        { type: "heading", label: "Heading", icon: "hash" },
+        { type: "quote", label: "Quote", icon: "bookmark" },
+      ],
+    },
+    {
+      label: "Structure",
+      options: [
+        { type: "code", label: "Code", icon: "code" },
+        { type: "divider", label: "Divider", icon: "minus" },
+      ],
+    },
   ];
 
   function handleChange(event: CustomEvent<{ blocks: EditorBlock[] }>): void {
     blocks = event.detail.blocks;
+  }
+
+  function handleSingleChange(event: CustomEvent<{ blocks: EditorBlock[] }>): void {
+    singleBlocks = event.detail.blocks;
   }
 </script>
 
@@ -37,16 +70,16 @@
             class="poodle-block-input poodle-block-input--heading"
             placeholder="Heading..."
             disabled={disabled}
-            value={block.content}
-            on:input={(e) => update({ content: (e.currentTarget).value })}
+            value={block.content ?? block.data?.text ?? ""}
+            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
           />
         {:else if block.type === "code"}
           <textarea
             class="poodle-block-input poodle-block-input--code"
             placeholder="Code..."
             disabled={disabled}
-            value={block.content}
-            on:input={(e) => update({ content: (e.currentTarget).value })}
+            value={block.content ?? block.data?.text ?? ""}
+            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
             rows="3"
           ></textarea>
         {:else if block.type === "quote"}
@@ -54,8 +87,8 @@
             class="poodle-block-input poodle-block-input--quote"
             placeholder="Quote..."
             disabled={disabled}
-            value={block.content}
-            on:input={(e) => update({ content: (e.currentTarget).value })}
+            value={block.content ?? block.data?.text ?? ""}
+            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
             rows="2"
           ></textarea>
         {:else}
@@ -63,14 +96,36 @@
             class="poodle-block-input"
             placeholder="Type something..."
             disabled={disabled}
-            value={block.content}
-            on:input={(e) => update({ content: (e.currentTarget).value })}
+            value={block.content ?? block.data?.text ?? ""}
+            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
             rows="2"
           ></textarea>
         {/if}
       </svelte:fragment>
     </BlockEditor>
     <p class="poodle-specimen__count">{blocks.length} blocks</p>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Single posture with custom grouped type picker">
+    <BlockEditor
+      blocks={singleBlocks}
+      {blockTypes}
+      blockTypeItems={groupedTypeOptions}
+      mode="single"
+      on:change={handleSingleChange}
+    >
+      <svelte:fragment slot="block" let:block let:disabled let:update>
+        <input
+          type="text"
+          class="poodle-block-input poodle-block-input--heading"
+          placeholder="Heading..."
+          disabled={disabled}
+          value={block.content ?? block.data?.text ?? ""}
+          on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+        />
+      </svelte:fragment>
+    </BlockEditor>
+    <p class="poodle-specimen__count">Single posture hides reorder, add, and remove controls while the built-in picker accepts grouped Nightfire-style options.</p>
   </SpecimenGroup>
 </div>
 
