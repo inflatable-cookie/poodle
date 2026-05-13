@@ -2,6 +2,7 @@
 alias = "poodle"
 
 [manifest]
+minimum_effigy_version = "0.7.0"
 include = [
   "tasks/effigy.tasks.toml",
   "quality/effigy.scan.toml",
