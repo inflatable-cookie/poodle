@@ -27,10 +27,6 @@
 </script>
 
 <div class="poodle-form-actions" data-align={align}>
-  {#if children}
-    {@render children()}
-  {/if}
-
   {#if hasDangerSlot}
     <div class="poodle-form-actions__danger" data-mode={showResponsiveDangerSwap ? "responsive" : "inline"}>
       {@render danger?.()}
@@ -45,6 +41,10 @@
         </span>
       </Menu>
     </div>
+  {/if}
+
+  {#if children}
+    {@render children()}
   {/if}
 </div>
 

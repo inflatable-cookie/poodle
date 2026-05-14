@@ -28,6 +28,7 @@
   export let ariaLabel: string | null = null;
   export let contextMenuItems: MenuItem[] | null = null;
   export let contextMenuAriaLabel: string | null = null;
+  export let contextMenuTrigger: "context" | "leading" = "context";
   export let onContextAction: ((value: string) => void) | null = null;
 
   const dispatch = createEventDispatcher<{
@@ -38,6 +39,7 @@
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedContextMenuSize = resolveSemanticControlSize($uiPresentation.sizeScale, "chrome");
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isCompact = layout === "compact";
   $: isInteractive = Boolean(href) || interactive || selectable;
@@ -45,8 +47,10 @@
   $: showSelectionOverlay = showSelectionIndicator && Boolean($$slots.leading);
   $: actionableContextMenuItems = menuNavigableItems(contextMenuItems ?? []);
   $: hasContextMenu = (contextMenuItems?.length ?? 0) > 0;
+  $: useLeadingContextMenu = contextMenuTrigger === "leading" && hasContextMenu && !selectable;
 
   let rootElement: HTMLElement | null = null;
+  let leadingElement: HTMLSpanElement | null = null;
   let overlayElement: HTMLDivElement | null = null;
   let contextMenuOpen = false;
   let contextMenuAnchorPoint: { x: number; y: number } | null = null;
@@ -115,9 +119,24 @@
 
   function handleContextMenu(event: MouseEvent) {
     if (disabled || !hasContextMenu) return;
+    if (useLeadingContextMenu) return;
     event.preventDefault();
     event.stopPropagation();
     openContextMenuAt(event.clientX, event.clientY);
+  }
+
+  function toggleContextMenuFromLeading(event: MouseEvent | KeyboardEvent) {
+    if (disabled || !useLeadingContextMenu || !leadingElement) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (contextMenuOpen) {
+      closeContextMenu();
+      return;
+    }
+
+    const rect = leadingElement.getBoundingClientRect();
+    openContextMenuAt(rect.left + rect.width / 2, rect.bottom + 4);
   }
 
   function handleContextMenuKeydown(event: KeyboardEvent) {
@@ -125,6 +144,10 @@
     if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
       event.preventDefault();
       event.stopPropagation();
+      if (useLeadingContextMenu) {
+        toggleContextMenuFromLeading(event);
+        return;
+      }
       const rect = rootElement?.getBoundingClientRect();
       if (!rect) return;
       openContextMenuAt(rect.left + 16, rect.top + 16);
@@ -160,6 +183,7 @@
   onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
       if (!contextMenuOpen) return;
+      if (leadingElement?.contains(event.target as Node)) return;
       if (!overlayElement || !overlayElement.contains(event.target as Node)) {
         closeContextMenu();
       }
@@ -188,7 +212,7 @@
     class="poodle-list-card"
     class:poodle-list-card--interactive={isInteractive}
     href={href}
-    data-size={resolvedSize}
+    data-size={resolvedContextMenuSize}
     data-density={resolvedDensity}
     data-disabled={disabled}
     data-not-live={notLive}
@@ -224,8 +248,24 @@
     {/if}
 
     {#if $$slots.leading}
-      <span class="poodle-list-card__leading">
-        <slot name="leading" />
+      <span
+        bind:this={leadingElement}
+        class="poodle-list-card__leading"
+        data-interactive={useLeadingContextMenu}
+        data-selection-overlay={showSelectionOverlay}
+        role={useLeadingContextMenu ? "button" : undefined}
+        tabindex={useLeadingContextMenu && !disabled ? 0 : undefined}
+        aria-label={useLeadingContextMenu ? (contextMenuAriaLabel ?? `${title} actions`) : undefined}
+        on:click={toggleContextMenuFromLeading}
+        on:keydown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            toggleContextMenuFromLeading(event);
+          }
+        }}
+      >
+        <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
+          <slot name="leading" />
+        </span>
         {#if showSelectionOverlay}
           <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
             <span class="poodle-list-card__selection-box">
@@ -262,7 +302,13 @@
         {/if}
       </div>
       {#if subtitle}
-        <span class="poodle-list-card__subtitle">{subtitle}</span>
+        <span class="poodle-list-card__subtitle">
+          <slot name="subtitle">{subtitle}</slot>
+        </span>
+      {:else if $$slots.subtitle}
+        <span class="poodle-list-card__subtitle">
+          <slot name="subtitle" />
+        </span>
       {/if}
       {#if $$slots.footer}
         <div class="poodle-list-card__footer">
@@ -333,8 +379,24 @@
     {/if}
 
     {#if $$slots.leading}
-      <span class="poodle-list-card__leading">
-        <slot name="leading" />
+      <span
+        bind:this={leadingElement}
+        class="poodle-list-card__leading"
+        data-interactive={useLeadingContextMenu}
+        data-selection-overlay={showSelectionOverlay}
+        role={useLeadingContextMenu ? "button" : undefined}
+        tabindex={useLeadingContextMenu && !disabled ? 0 : undefined}
+        aria-label={useLeadingContextMenu ? (contextMenuAriaLabel ?? `${title} actions`) : undefined}
+        on:click={toggleContextMenuFromLeading}
+        on:keydown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            toggleContextMenuFromLeading(event);
+          }
+        }}
+      >
+        <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
+          <slot name="leading" />
+        </span>
         {#if showSelectionOverlay}
           <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
             <span class="poodle-list-card__selection-box">
@@ -371,7 +433,13 @@
         {/if}
       </div>
       {#if subtitle}
-        <span class="poodle-list-card__subtitle">{subtitle}</span>
+        <span class="poodle-list-card__subtitle">
+          <slot name="subtitle">{subtitle}</slot>
+        </span>
+      {:else if $$slots.subtitle}
+        <span class="poodle-list-card__subtitle">
+          <slot name="subtitle" />
+        </span>
       {/if}
       {#if $$slots.footer}
         <div class="poodle-list-card__footer">
@@ -402,6 +470,8 @@
   <div
     bind:this={overlayElement}
     class="poodle-list-card__context-menu"
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
     role="menu"
     aria-label={contextMenuAriaLabel ?? undefined}
     style={contextMenuAdjustedPosition
@@ -417,6 +487,7 @@
           type="button"
           class="poodle-list-card__context-item"
           disabled={item.disabled === true}
+          data-tone={item.tone ?? "default"}
           role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
           aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
           on:click={() => activateContextMenuItem(item)}
@@ -464,13 +535,23 @@
 
 <style>
   .poodle-list-card {
+    --poodle-recipe-list-card-fill: color-mix(
+      in srgb,
+      var(--poodle-color-background-canvas) 88%,
+      var(--poodle-color-text-primary)
+    );
+    --poodle-recipe-list-card-hover-fill: color-mix(
+      in srgb,
+      var(--poodle-color-background-canvas) 82%,
+      var(--poodle-color-text-primary)
+    );
     display: flex;
     align-items: center;
     gap: var(--poodle-space-inline-md);
     padding: 0.625rem var(--poodle-space-panel-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent);
     border-radius: var(--poodle-radius-control);
-    background: color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary));
+    background: var(--poodle-treatment-list-card-fill, var(--poodle-recipe-list-card-fill));
     text-decoration: none;
     width: 100%;
     transition:
@@ -488,13 +569,13 @@
   }
 
   .poodle-list-card--interactive:hover:not([data-disabled="true"]) {
-    background: color-mix(in srgb, var(--poodle-surface) 82%, var(--poodle-color-text-primary));
+    background: var(--poodle-treatment-list-card-hover-fill, var(--poodle-recipe-list-card-hover-fill));
     border-color: color-mix(in srgb, var(--poodle-color-border-default) 52%, transparent);
   }
 
   .poodle-list-card[data-selected="true"] {
     border-color: var(--poodle-color-accent-base);
-    background: color-mix(in srgb, var(--poodle-surface) 84%, var(--poodle-color-accent-base) 16%);
+    background: color-mix(in srgb, var(--poodle-recipe-list-card-fill) 84%, var(--poodle-color-accent-base) 16%);
     box-shadow:
       0 0 0 0.0625rem var(--poodle-color-accent-base),
       inset 0 0 0 0.0625rem color-mix(
@@ -520,7 +601,7 @@
 
   .poodle-list-card[data-not-live="true"] {
     border: 0.1875rem dashed color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent);
-    background: color-mix(in srgb, var(--poodle-surface) 32%, transparent);
+    background: color-mix(in srgb, var(--poodle-recipe-list-card-fill) 32%, transparent);
     filter: grayscale(1);
     opacity: 0.72;
   }
@@ -621,6 +702,17 @@
     z-index: 1;
   }
 
+  .poodle-list-card__leading-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-list-card__leading[data-selection-overlay="true"] .poodle-list-card__leading-content {
+    opacity: 0;
+  }
+
   .poodle-list-card__selection-box {
     display: inline-flex;
     align-items: center;
@@ -660,6 +752,29 @@
     color: var(--list-card-accent, var(--poodle-color-accent-base));
     font-size: 0.875rem;
     font-weight: 600;
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-list-card__leading[data-interactive="true"] {
+    cursor: pointer;
+  }
+
+  .poodle-list-card__leading[data-interactive="true"]:hover {
+    background: color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 22%, transparent);
+    box-shadow:
+      inset 0 0 0 0.0625rem color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 34%, transparent);
+  }
+
+  .poodle-list-card__leading[data-interactive="true"]:active {
+    background: color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 30%, transparent);
+  }
+
+  .poodle-list-card__leading[data-interactive="true"]:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
   }
 
   .poodle-list-card[data-leading-shape="rounded-square"] .poodle-list-card__leading {
@@ -671,6 +786,10 @@
   .poodle-list-card[data-leading-fill="solid"] .poodle-list-card__leading {
     background: var(--list-card-accent, var(--poodle-color-accent-base));
     color: #fff;
+  }
+
+  .poodle-list-card[data-leading-fill="solid"] .poodle-list-card__leading[data-interactive="true"]:hover {
+    background: color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 86%, var(--poodle-color-text-primary));
   }
 
   .poodle-list-card__body {
@@ -718,8 +837,10 @@
   .poodle-list-card__footer {
     display: flex;
     align-items: center;
-    gap: var(--poodle-space-inline-md);
-    margin-top: 0.125rem;
+    gap: var(--poodle-space-inline-sm);
+    margin-top: 0.0625rem;
+    font-size: 0.6875rem;
+    line-height: 1.35;
   }
 
   .poodle-list-card__meta {
@@ -840,6 +961,15 @@
     outline: none;
   }
 
+  .poodle-list-card__context-item[data-tone="danger"] {
+    color: var(--poodle-color-status-danger);
+  }
+
+  .poodle-list-card__context-item[data-tone="danger"]:hover:not(:disabled),
+  .poodle-list-card__context-item[data-tone="danger"]:focus-visible {
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 14%, transparent);
+  }
+
   .poodle-list-card__context-item:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);
@@ -857,4 +987,16 @@
     margin: 0.25rem 0;
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
+
+  .poodle-list-card__context-menu[data-size="xs"] .poodle-list-card__context-item { min-height: 1.5rem; font-size: 0.6875rem; }
+  .poodle-list-card__context-menu[data-size="xs"] .poodle-list-card__context-meta { font-size: 0.5625rem; }
+  .poodle-list-card__context-menu[data-size="sm"] .poodle-list-card__context-item { min-height: 1.75rem; font-size: 0.75rem; }
+  .poodle-list-card__context-menu[data-size="sm"] .poodle-list-card__context-meta { font-size: 0.625rem; }
+  .poodle-list-card__context-menu[data-size="lg"] .poodle-list-card__context-item { min-height: 2.75rem; font-size: 0.9375rem; }
+  .poodle-list-card__context-menu[data-size="lg"] .poodle-list-card__context-meta { font-size: 0.75rem; }
+  .poodle-list-card__context-menu[data-size="xl"] .poodle-list-card__context-item { min-height: 3.25rem; font-size: 1rem; }
+  .poodle-list-card__context-menu[data-size="xl"] .poodle-list-card__context-meta { font-size: 0.8125rem; }
+
+  .poodle-list-card__context-menu[data-density="compact"] .poodle-list-card__context-item { padding-inline: 0.375rem; }
+  .poodle-list-card__context-menu[data-density="comfortable"] .poodle-list-card__context-item { padding-inline: 0.75rem; }
 </style>

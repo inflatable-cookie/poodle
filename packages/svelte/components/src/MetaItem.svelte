@@ -63,4 +63,5 @@
   .poodle-meta-item__value :global(*) {
     min-width: 0;
   }
+
 </style>

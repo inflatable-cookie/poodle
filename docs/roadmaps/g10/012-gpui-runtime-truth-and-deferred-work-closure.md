@@ -1,9 +1,9 @@
 # g10.012 GPUI Runtime Truth And Deferred Work Closure
 
-Status: active (execution)
+Status: completed
 Owner: Poodle core
 Depends on: g10.011
-Updated: 2026-04-13
+Updated: 2026-05-14
 
 ## Purpose
 
@@ -108,7 +108,8 @@ not a visual stub.
 - [ ] Token sweep for remaining literals (prioritize contract-facing surfaces; menu max-height done — see §3 **Residual** row)
 - [ ] Adapter mount strategy for form/validation composites
 
-## Next task
+## Closeout
 
-Execute §3 rows in priority order agreed with stakeholders; after TextInput overhaul,
-re-run GPUI preview specimens for keyboard + IME smoke paths.
+This roadmap is closed as historical GPUI runtime-truth documentation. Follow-on
+execution moved into the later completed `g10.013` to `g10.021` tranche and the
+live queue has rolled to `g11`.

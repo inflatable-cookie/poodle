@@ -320,6 +320,16 @@ Every interactive component requires an `id` prop for form label association or 
 
 ### Event patterns
 
+Compatibility note:
+
+- much of the current public component surface still dispatches typed events via
+  `createEventDispatcher`
+- that is the existing compatibility contract, not the preferred direction for
+  new component APIs
+- for new or substantially reshaped components, prefer callback props first and
+  keep event dispatch only where it is needed for compatibility with existing
+  consumers
+
 Components dispatch typed events via Svelte's `createEventDispatcher`:
 
 ```svelte
@@ -363,6 +373,14 @@ Components dispatch typed events via Svelte's `createEventDispatcher`:
 - `click`, `focus`, `blur` — standard DOM events
 
 ### Slot patterns
+
+Compatibility note:
+
+- many current components still expose named slots because that is how the
+  shipped public surface was built
+- for new composition APIs, prefer Svelte 5 snippets over introducing new
+  legacy slot surfaces unless the component is intentionally staying on a
+  compatibility-first contract during migration
 
 Components use named slots for flexible composition:
 

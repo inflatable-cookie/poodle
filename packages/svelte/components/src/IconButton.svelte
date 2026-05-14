@@ -274,9 +274,20 @@
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
   }
 
+  .poodle-icon-button[data-tone="success"] {
+    --poodle-icon-button-fill: color-mix(in srgb, var(--poodle-color-status-success) 16%, var(--poodle-color-background-surface));
+    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default));
+  }
+
   .poodle-icon-button[data-variant="primary"][data-tone="danger"] {
     --poodle-icon-button-fill: var(--poodle-color-status-danger);
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
+    --poodle-icon-button-text: var(--poodle-color-text-inverse);
+  }
+
+  .poodle-icon-button[data-variant="primary"][data-tone="success"] {
+    --poodle-icon-button-fill: var(--poodle-color-status-success);
+    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-success) 84%, black);
     --poodle-icon-button-text: var(--poodle-color-text-inverse);
   }
 
@@ -286,9 +297,20 @@
     --poodle-icon-button-text: var(--poodle-color-status-danger);
   }
 
+  .poodle-icon-button[data-variant="ghost"][data-tone="success"] {
+    --poodle-icon-button-fill: transparent;
+    --poodle-icon-button-border: transparent;
+    --poodle-icon-button-text: var(--poodle-color-status-success);
+  }
+
   .poodle-icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled) {
     --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
     background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
+  }
+
+  .poodle-icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled) {
+    --poodle-icon-button-border: color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default));
+    background: color-mix(in srgb, var(--poodle-color-status-success) 10%, transparent);
   }
 
   .poodle-icon-button[data-pressed="true"]:not([data-variant="primary"]) {

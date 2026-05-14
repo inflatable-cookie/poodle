@@ -40,6 +40,8 @@
   export let bare = false;
   /** Explicit size override. */
   export let size: ControlSize | null = null;
+  /** Explicit close button size override. Defaults to the dialog size. */
+  export let closeButtonSize: ControlSize | null = null;
   /** Semantic size role. */
   export let sizeRole: SemanticControlSizeRole = "control";
   /** Explicit density override. */
@@ -64,6 +66,7 @@
 
   $: effectiveRole = kind ?? role;
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  $: resolvedCloseButtonSize = closeButtonSize ?? resolveSemanticControlSize($uiPresentation.sizeScale, "chrome");
   $: resolvedDensity = density ?? $uiPresentation.density;
   $: isControlled = open !== null;
   $: isOpen = isControlled ? open === true : uncontrolledOpen;
@@ -89,6 +92,8 @@
   $: previousOpen = isOpen;
 
   function setOpen(nextOpen: boolean): void {
+    open = nextOpen;
+
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
     }
@@ -180,7 +185,7 @@
               ariaLabel={closeLabel}
               variant="ghost"
               sizeRole="chrome"
-              size={resolvedSize}
+              size={resolvedCloseButtonSize}
               on:click={requestClose}
             />
           </div>
@@ -196,7 +201,7 @@
             {:else if title || description}
               <div class="poodle-dialog__header">
                 {#if title}
-                  <strong>{title}</strong>
+                  <strong class="poodle-dialog__title">{title}</strong>
                 {/if}
 
                 {#if description}
@@ -213,7 +218,7 @@
                   ariaLabel={closeLabel}
                   variant="ghost"
                   sizeRole="chrome"
-                  size={resolvedSize}
+                  size={resolvedCloseButtonSize}
                   on:click={requestClose}
                 />
               </div>
@@ -302,7 +307,6 @@
   .poodle-dialog__close {
     position: static;
     flex-shrink: 0;
-    margin-top: -0.5rem;
     margin-right: -0.375rem;
   }
 
@@ -320,7 +324,7 @@
     min-width: 0;
   }
 
-  .poodle-dialog__header strong {
+  .poodle-dialog__title {
     font-family: var(--poodle-typography-heading-family);
     font-size: 1rem;
     line-height: 1.2;

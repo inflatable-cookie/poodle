@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: active
-Updated: 2026-04-13
+Updated: 2026-05-14
 
 Roadmaps hold executable milestone work for Poodle.
 
@@ -22,12 +22,13 @@ Roadmaps hold executable milestone work for Poodle.
 
 ## Current Index State
 
-- highest on-disk generation folder: `g10`
-- current executable generation plan: `g10`
+- highest on-disk generation folder: `g11`
+- current executable generation plan: `g11`
 - `g09` is complete
-- `g10` is active; on-disk milestones `g10.005` through `g10.011` are **complete**
-  (GPUI preview/parity tranche and shared button spec work); **`g10.012` is the
-  open GPUI production-hardening / delta-closure track**
+- `g10` is complete
+- `g11` is active; it owns the systematic Svelte component modernization and
+  downstream consumer rollout program across Underlay, the six Underlay-root
+  app families, and direct desktop consumers
 
 The canonical summary of roadmap status is `generation-index.md`.
 If a generation README conflicts with that file, treat the index as the source of truth until the generation README is reconciled.
@@ -43,7 +44,8 @@ If a generation README conflicts with that file, treat the index as the source o
 - `g07` GPUI rendering build-out, adapter crate, primitive and composite rendering, workstation shell updates, and parity reporting
 - `g08` consolidated GPUI production-quality and compliance program
 - `g09` completed GPUI continuation and semantic sizing/density generation
-- `g10` active Jetstream-focused and component-overhaul generation
+- `g10` completed Jetstream-feasibility / GPUI-production-hardening generation
+- `g11` active Svelte modernization and consumer rollout generation
 
 ## Working Rule
 
@@ -66,5 +68,4 @@ Before rollover:
 
 ## Next Task
 
-Open `g10/README.md`. Living GPUI deferred work: `g10/012-gpui-runtime-truth-and-deferred-work-closure.md`.
-Do not extend `g08/delta-register.md` (deprecated stub).
+Open `g11/README.md`, then `g11/001-svelte-modernization-and-consumer-rollout.md`.

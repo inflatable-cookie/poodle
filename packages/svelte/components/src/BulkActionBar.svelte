@@ -70,13 +70,14 @@
   <div class="poodle-bulk-action-bar__actions">
     {#each actions as action}
       {@const actionTone = action.tone ?? "default"}
+      {@const fallbackIcon = actionTone === "danger" ? "trash-2" : "circle"}
       <span
         class="poodle-bulk-action-bar__icon-action"
         data-tone={actionTone !== "default" ? actionTone : undefined}
       >
         {#if action.icon && isIconComponent(action.icon)}
           <IconButton
-            icon="circle"
+            icon={fallbackIcon}
             ariaLabel={action.label}
             tooltip={action.label}
             variant="ghost"
@@ -89,7 +90,7 @@
           </IconButton>
         {:else}
           <IconButton
-            icon={isNamedIcon(action.icon) ? action.icon : "circle"}
+            icon={isNamedIcon(action.icon) ? action.icon : fallbackIcon}
             ariaLabel={action.label}
             tooltip={action.label}
             variant="ghost"
@@ -114,7 +115,14 @@
 
 <style>
   .poodle-bulk-action-bar {
+    position: fixed;
+    right: var(--poodle-bulk-action-bar-right, max(1rem, env(safe-area-inset-right)));
+    bottom: var(--poodle-bulk-action-bar-bottom, max(1rem, env(safe-area-inset-bottom)));
+    left: var(--poodle-bulk-action-bar-left, max(1rem, env(safe-area-inset-left)));
+    z-index: var(--poodle-z-index-sticky, 40);
     display: flex;
+    box-sizing: border-box;
+    max-width: var(--poodle-bulk-action-bar-max-width, none);
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
@@ -125,6 +133,9 @@
     --poodle-recipe-bulk-fill: color-mix(in srgb, var(--poodle-color-background-panel) 93%, var(--poodle-color-text-primary));
     background: var(--poodle-recipe-bulk-fill);
     --poodle-surface: var(--poodle-recipe-bulk-fill);
+    box-shadow:
+      0 1rem 2.5rem color-mix(in srgb, black 36%, transparent),
+      0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 28%, transparent);
   }
 
   .poodle-bulk-action-bar__summary {

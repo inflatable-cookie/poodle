@@ -232,7 +232,7 @@
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 999px;
-    background: var(--poodle-color-fill-info-strong, var(--poodle-color-border-info));
+    background: var(--poodle-color-status-success, #22c55e);
     flex: none;
   }
 
@@ -363,6 +363,10 @@
     gap: 0.375rem;
     align-items: center;
     margin-left: auto;
+  }
+
+  .poodle-page-header__actions:empty {
+    display: none;
   }
 
   .poodle-page-header__banner {

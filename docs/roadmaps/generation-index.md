@@ -2,24 +2,21 @@
 
 ## Active Execution Track
 
-- `g10`
+- `g11`
   - Status: active
-  - Range: `001` to `011` on disk (all complete)
-  - Notes: `g10.001` proved Jetstream feasibility. `g10.002` recovered the
-    live queue and classified three seams (Svelte overhaul, Jetstream
-    implementation, parity). `g10.003` closed the Svelte overhaul.
-    `g10.004` unified the component package. `g10.005` to `g10.007` closed the
-    checkpointed GPUI parity tranche. `g10.008` delivered list grid and list
-    card counter GPUI coverage plus token additions.     `g10.009` tightened GPUI
-    token resolution for button, region, and field plus schema additions
-    (`color.text.tertiary`, button gap/inset).     `g10.010` delivered interactive
-    pagination (full variant + limit selector) and spec-derived adapter handles
-    for `ConfirmActionSpec` under the components↔adapter cycle constraint.
-    `g10.011` added `ButtonSpec::aria_expanded` with contract scoping for web-only
-    form props and documented GPUI/Jetstream ARIA emission gaps (D-002). **`g10.012`**
-    retires the historical `g08/delta-register.md`, records **real** GPUI 0.2.2
-    limits vs Poodle debt, and tracks execution for text input, select overlay,
-    sliders, token literals, and adapter mounting. Choose next work via `g10/README.md`.
+  - Range: `001` on disk
+  - Notes: systematic Svelte component modernization and downstream consumer
+    rollout. Sequence every public Svelte component through a modern API or
+    internals pass, then update Underlay, the six Underlay-root consumer app
+    families, and direct desktop adopters one component wave at a time.
+
+- `g10`
+  - Status: completed
+  - Range: `001` to `021`
+  - Notes: Jetstream feasibility, Svelte overhaul closeout, unified component
+    packaging, GPUI parity recovery, token fidelity, contract sync, spec struct
+    coverage, and GPUI accessibility baseline are complete. `g10.012` is now
+    closed as historical runtime-truth documentation, not the live queue.
 
 ## Completed Foundations
 
@@ -70,19 +67,13 @@
   - Range: `001` to `011`
   - Notes: consolidated GPUI production-quality, contract-compliance, specimen, accessibility, and visual-parity work
 
-## Removed Generations
-
-- `g11`
-  - Status: removed
-  - Notes: this generation no longer exists as part of the live roadmap structure; its former scope was merged down and should be treated as superseded
-
 ## Working Rule
 
 When roadmap files disagree:
 
 1. treat this index as the top-level source of truth
 2. treat `docs/roadmaps/README.md` as the entrypoint
-3. treat `g10` as the active generation until it is explicitly closed
+3. treat `g11` as the active generation until it is explicitly closed
 
 ## Rollover policy
 
@@ -104,15 +95,7 @@ generation:
 If that cleanup has not happened, stay in the current generation and finish the
 closeout there first.
 
-    `g10.013`–`g10.017` delivered a systematic GPUI component correctness and
-    token-fidelity sweep (formula literals, composite/primitive parity vs Svelte).
-    `g10.018` completed the formula sweep third pass (skeleton, datetime pickers,
-    switch, tabs, and others). `g10.019`–`g10.021` are queued: contract sync
-    priority sweep, spec struct coverage gaps, and GPUI accessibility baseline.
-
 ## Next Task
 
-Open `g10/README.md`. Active seam: `g10.019` contract sync — start with TextInput
-multiline props. Or open `g10/021` to begin the accessibility investigation.
-generation rollover, or backlog; the on-disk `g10.009`–`g10.011` tranche is
-complete.
+Open `g11/README.md`. Active seam: `g11.001` consumer-by-consumer Svelte
+modernization rollout planning and execution.

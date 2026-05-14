@@ -5,12 +5,15 @@ export function portal(node: HTMLElement): { destroy(): void } {
     };
   }
 
-  // Portal into the nearest themed ancestor so overlays inherit
-  // CSS custom properties (colors, typography, etc.) from the
-  // active theme. Falls back to document.body.
-  const target =
-    node.parentElement?.closest("[data-theme]") as HTMLElement | null
-    ?? document.body;
+  const explicitThemeRoot = node.parentElement?.closest("[data-poodle-theme-root]") as HTMLElement | null;
+  const nearestThemeAncestor = node.parentElement?.closest("[data-theme]") as HTMLElement | null;
+
+  // Portal into an explicit theme root when present. Otherwise use the nearest
+  // themed ancestor, but never mount overlays directly under <html>.
+  const target = explicitThemeRoot
+    ?? (nearestThemeAncestor && nearestThemeAncestor !== document.documentElement
+      ? nearestThemeAncestor
+      : document.body);
   target.appendChild(node);
 
   return {

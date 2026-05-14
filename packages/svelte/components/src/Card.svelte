@@ -47,7 +47,7 @@
     --poodle-recipe-card-radius: var(--poodle-treatment-surface-radius, var(--poodle-radius-surface));
     --poodle-recipe-card-fill: color-mix(
       in srgb,
-      var(--poodle-color-background-panel) 98%,
+      var(--poodle-color-background-panel) 10%,
       var(--poodle-color-background-elevated)
     );
     --poodle-recipe-card-border: color-mix(
@@ -79,9 +79,8 @@
     border-radius: var(--poodle-recipe-card-radius);
     background: var(
       --poodle-treatment-surface-fill,
-      color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary))
+      var(--poodle-recipe-card-fill)
     );
-    --poodle-surface: var(--poodle-treatment-surface-fill, var(--poodle-recipe-card-fill));
     box-shadow: var(--poodle-treatment-surface-shadow, var(--poodle-recipe-card-shadow));
   }
 

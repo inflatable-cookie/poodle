@@ -34,6 +34,7 @@
   export let windowSize: number | null = null;
   export let submitLabel = "Save Order";
   export let cancelLabel = "Cancel";
+  export let showWorkflowChrome = true;
   export let onsubmit: (() => void | Promise<void>) | null = null;
   export let oncancel: (() => void) | null = null;
   export let item: Snippet<[T]> | undefined = undefined;
@@ -62,7 +63,7 @@
   $: isUnavailable = disabled || submitting;
   $: canAdd = editable && !isUnavailable && (maxItems === null || items.length < maxItems);
   $: showRemove = editable || removable;
-  $: showWorkflowChrome = onsubmit !== null || oncancel !== null;
+  $: effectiveShowWorkflowChrome = showWorkflowChrome && (onsubmit !== null || oncancel !== null);
   $: isLongList = longListThreshold !== null && longListThreshold > 0 && items.length > longListThreshold;
   $: effectiveLongListWarning =
     longListWarningText ??
@@ -248,7 +249,7 @@
   <div class="poodle-editable-list-session" data-disabled={isUnavailable} data-size={resolvedSize} data-density={resolvedDensity}>
     <div class="poodle-editable-list-session__sr" aria-live="polite" aria-atomic="true">{liveMessage}</div>
 
-    {#if showWorkflowChrome}
+    {#if effectiveShowWorkflowChrome}
       <div class="poodle-editable-list-session__header">
         <Button variant="secondary" on:click={handleCancel} disabled={isUnavailable}>
           {cancelLabel}

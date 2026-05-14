@@ -1,9 +1,8 @@
 <script lang="ts">
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { getPillContext, type PillTypography } from "./pill-context";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
-
-  type PillTypography = "label" | "inherit";
 
   export let tone: PillTone = "neutral";
   export let appearance: PillAppearance = "solid";
@@ -17,9 +16,11 @@
   export let ariaLabel: string | null = null;
 
   const uiPresentation = getUiPresentation();
+  const pillContext = getPillContext();
 
-  $: resolvedSize = (size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as PillSize;
+  $: resolvedSize = (pillContext?.size ?? size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as PillSize;
   $: resolvedDensity = density ?? $uiPresentation.density;
+  $: resolvedTypography = pillContext?.typography ?? typography;
 </script>
 
 <span
@@ -29,7 +30,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-font={font}
-  data-typography={typography}
+  data-typography={resolvedTypography}
   data-muted={muted}
   data-accent={accent ? "custom" : undefined}
   aria-label={ariaLabel ?? undefined}
@@ -47,9 +48,11 @@
     --poodle-pill-padding-y: 0.1875rem;
     --poodle-pill-padding-x: 0.5rem;
     --poodle-pill-font-size: 0.6875rem;
+    --poodle-pill-gap: 0.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--poodle-pill-gap);
     min-height: var(--poodle-pill-min-height);
     padding: var(--poodle-pill-padding-y) var(--poodle-pill-padding-x);
     border: 0.0625rem solid var(--poodle-pill-border);
@@ -102,6 +105,7 @@
     --poodle-pill-padding-y: 0.125rem;
     --poodle-pill-padding-x: 0.375rem;
     --poodle-pill-font-size: 0.625rem;
+    --poodle-pill-gap: 0.1875rem;
   }
 
   .poodle-pill[data-size="xs"] {
@@ -109,6 +113,7 @@
     --poodle-pill-padding-y: 0.0625rem;
     --poodle-pill-padding-x: 0.3125rem;
     --poodle-pill-font-size: 0.5625rem;
+    --poodle-pill-gap: 0.15625rem;
   }
 
   .poodle-pill[data-size="lg"] {
@@ -208,13 +213,13 @@
   .poodle-pill[data-density="compact"] {
     --poodle-pill-padding-y: 0;
     --poodle-pill-padding-x: 0.375rem;
-    gap: 0.125rem;
+    --poodle-pill-gap: 0.125rem;
   }
 
   .poodle-pill[data-density="comfortable"] {
     --poodle-pill-padding-y: 0;
     --poodle-pill-padding-x: 0.625rem;
-    gap: 0.25rem;
+    --poodle-pill-gap: 0.25rem;
   }
 
   .poodle-pill[data-typography="inherit"][data-density="compact"] {
@@ -225,5 +230,12 @@
   .poodle-pill[data-typography="inherit"][data-density="comfortable"] {
     --poodle-pill-padding-y: 0;
     --poodle-pill-padding-x: 0.9091em;
+  }
+
+  .poodle-pill :global(svg),
+  .poodle-pill :global(.poodle-icon) {
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
   }
 </style>

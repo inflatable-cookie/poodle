@@ -1,6 +1,13 @@
 <script lang="ts">
+  import { setPillContext } from "./pill-context";
+
   export let ariaLabel: string | null = null;
   export let showSeparators = true;
+
+  setPillContext({
+    size: "sm",
+    typography: "inherit",
+  });
 </script>
 
 <div
@@ -39,6 +46,22 @@
     border-radius: 999px;
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent);
     transform: translateY(-50%);
+  }
+
+  .poodle-meta-bar[data-separators="true"] > :global(*:has(.poodle-pill)[data-separator="true"]) {
+    padding-inline-start: 0;
+  }
+
+  .poodle-meta-bar[data-separators="true"] > :global(*:has(.poodle-pill)[data-separator="true"])::before {
+    display: none;
+  }
+
+  .poodle-meta-bar > :global(.poodle-meta-item:has(.poodle-pill)) {
+    --poodle-meta-item-gap: 0;
+  }
+
+  .poodle-meta-bar > :global(.poodle-meta-item:has(.poodle-pill) .poodle-meta-item__label) {
+    display: none;
   }
   @media (max-width: 40rem) {
     .poodle-meta-bar[data-separators="true"] > :global(* + [data-separator="true"]) {

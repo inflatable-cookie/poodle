@@ -24,7 +24,8 @@ Scope: whole `poodle/` repository.
 - `docs/architecture/product-guardrails.md`
 - `docs/contracts/001-working-rules.md`
 - `docs/roadmaps/README.md`
-- `docs/specs/062-g10-strict-posture-and-next-boundary-gate.md`
+- `docs/roadmaps/g11/README.md`
+- `docs/roadmaps/g11/001-svelte-modernization-and-consumer-rollout.md`
 - `docs/specs/batch-cards/README.md`
 
 ## Task Runner

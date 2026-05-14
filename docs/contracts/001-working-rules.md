@@ -62,6 +62,30 @@ Runtime note:
 Do not overload `size` with an `"inherit"` option for this behavior. `size`
 continues to mean the component's own semantic size preset.
 
+## Svelte Surface Modernization Rule
+
+Treat the current Svelte component layer as compatibility-first, not as the
+target shape for new work.
+
+Rules:
+
+- new or substantially reshaped Svelte components should prefer Svelte 5
+  runes-based internals over `export let` plus `$:` compatibility mode
+- new public composition surfaces should prefer callback props and snippets over
+  introducing new `createEventDispatcher` and legacy slot APIs
+- do not add new compatibility alias props like parallel `items` / `options`
+  inputs unless there is a specific downstream migration need documented first
+- when a legacy component is touched substantially, remove old compatibility
+  baggage before adding more surface area if that can be done without breaking
+  current consumers
+
+Operational note:
+
+- use `effigy svelte:surface-audit` to keep the legacy surface visible during
+  modernization work
+- the audit is a report, not a gate; the goal is to stop drift first, then
+  reduce the backlog deliberately
+
 ## Current Posture
 
 Poodle is in a strict-paused `g10` posture until the next active owner is

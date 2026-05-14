@@ -1,7 +1,7 @@
 # g10 GPUI Production Hardening
 
-Status: active
-Updated: 2026-04-17
+Status: completed
+Updated: 2026-05-14
 
 ## Context
 
@@ -39,7 +39,7 @@ did not progress beyond the feasibility proof.
   (`docs/roadmaps/g10/010-gpui-behavior-adapter-and-form-remediation-parity.md`)
 - `g10.011` complete — shared spec and cross-platform button semantics
   (`docs/roadmaps/g10/011-shared-spec-and-cross-platform-button-semantics.md`)
-- `g10.012` active — GPUI runtime truth, retire `g08` delta register, close false
+- `g10.012` complete — GPUI runtime truth, retire `g08` delta register, close false
   "blockers", dashed borders, backlog for real input/select/slider work
   (`docs/roadmaps/g10/012-gpui-runtime-truth-and-deferred-work-closure.md`)
 - `g10.013` complete — GPUI component correctness and token fidelity: Select fake
@@ -62,7 +62,7 @@ did not progress beyond the feasibility proof.
 
 - GPUI audit queue: `g10.009` to `g10.014` complete
 - `g10.015` complete
-- `g10.012` remains active as a living delta register
+- `g10.012` complete — historical runtime-truth register, no longer the live queue
 
 - `g10.017` complete — GPUI formula sweep second pass: alert_dialog/calendar/
   code/collapse_toggle/collapsible/color_picker/spinner + meta_bar/meta_item/
@@ -92,7 +92,7 @@ did not progress beyond the feasibility proof.
 
 ## Status
 
-g10.019, g10.020, and g10.021 are all complete. g10 is fully closed.
+g10.012 through g10.021 are all complete. g10 is fully closed.
 
 
 Batch cards live in `g10/batch-cards/` when strict posture uses them.
