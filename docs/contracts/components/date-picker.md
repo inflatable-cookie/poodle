@@ -63,10 +63,10 @@ CalendarWeekStart: "sunday" | "monday"
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` (non-null) plus `onValueChange` callback
+- controlled value: `value` plus `onValueChange` callback
 - uncontrolled value: `defaultValue` sets the initial selection; component owns
   its own state
-- controlled open: `open` (non-null) plus `onOpenChange` callback
+- controlled open: `open` plus `onOpenChange` callback
 - uncontrolled open: `defaultOpen` sets the initial open state; component owns
   its own state
 

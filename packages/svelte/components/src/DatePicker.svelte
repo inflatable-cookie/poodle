@@ -1,68 +1,88 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextDatePickerId = 0;
 </script>
 
 <script lang="ts">
-  import { onMount } from "svelte";
-
   import Calendar from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { CalendarWeekStart, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let placeholder = "Select date";
-  export let weekStartsOn: CalendarWeekStart = "monday";
-  export let locale = "en-US";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onValueChange: ((value: string) => void) | undefined = undefined;
-  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
+  interface Props {
+    value?: string | null | undefined;
+    defaultValue?: string | null;
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    placeholder?: string;
+    weekStartsOn?: CalendarWeekStart;
+    locale?: string;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+  }
+
+  let {
+    value = undefined,
+    defaultValue = null,
+    open = undefined,
+    defaultOpen = false,
+    placeholder = "Select date",
+    weekStartsOn = "monday",
+    locale = "en-US",
+    disabled = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    onOpenChange = undefined,
+  }: Props = $props();
 
   const surfaceId = `poodle-date-picker-surface-${++nextDatePickerId}`;
   const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
-  let uncontrolledValue = defaultValue;
-  let uncontrolledOpen = defaultOpen;
-  let visibleMonth = monthAnchorIso(defaultValue ?? todayIsoDate());
+  let uncontrolledValue = $state<string | null>(null);
+  let uncontrolledOpen = $state(false);
+  let visibleMonth = $state(todayIsoDate());
+  let seededDefaults = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = value ?? uncontrolledValue;
-  $: isOpen = open ?? uncontrolledOpen;
-  $: if (currentValue) {
-    visibleMonth = monthAnchorIso(currentValue);
-  }
-  $: valueLabel = currentValue ? formatDateLabel(currentValue, locale) : placeholder;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledValue = $derived(value !== undefined);
+  const hasControlledOpen = $derived(open !== undefined);
+  const currentValue = $derived(hasControlledValue ? value ?? null : uncontrolledValue);
+  const isOpen = $derived(hasControlledOpen ? open === true : uncontrolledOpen);
+  const valueLabel = $derived(currentValue ? formatDateLabel(currentValue, locale) : placeholder);
 
-  function setOpen(nextOpen: boolean): void {
-    if (open === null) {
-      uncontrolledOpen = nextOpen;
+  $effect.pre(() => {
+    if (seededDefaults) {
+      return;
     }
 
-    onOpenChange?.(nextOpen);
-  }
+    uncontrolledValue = defaultValue;
+    uncontrolledOpen = defaultOpen;
+    visibleMonth = monthAnchorIso(defaultValue ?? todayIsoDate());
+    seededDefaults = true;
+  });
 
-  function commitValue(nextValue: string): void {
-    if (value === null) {
-      uncontrolledValue = nextValue;
+  $effect(() => {
+    if (currentValue) {
+      visibleMonth = monthAnchorIso(currentValue);
+    }
+  });
+
+  $effect(() => {
+    if (!isOpen) {
+      return;
     }
 
-    visibleMonth = monthAnchorIso(nextValue);
-    setOpen(false);
-    onValueChange?.(nextValue);
-  }
-
-  onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
-      if (!isOpen || !rootElement) {
+      if (!rootElement) {
         return;
       }
 
@@ -72,7 +92,7 @@
     }
 
     function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
+      if (event.key === "Escape") {
         event.preventDefault();
         setOpen(false);
       }
@@ -86,6 +106,24 @@
       document.removeEventListener("keydown", handleKeydown);
     };
   });
+
+  function setOpen(nextOpen: boolean): void {
+    if (!hasControlledOpen) {
+      uncontrolledOpen = nextOpen;
+    }
+
+    onOpenChange?.(nextOpen);
+  }
+
+  function commitValue(nextValue: string): void {
+    if (!hasControlledValue) {
+      uncontrolledValue = nextValue;
+    }
+
+    visibleMonth = monthAnchorIso(nextValue);
+    setOpen(false);
+    onValueChange?.(nextValue);
+  }
 </script>
 
 <div bind:this={rootElement} class="poodle-date-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
@@ -116,7 +154,7 @@
         size={resolvedSize}
         density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
-        onValueChange={(value) => commitValue(value as string)}
+        onValueChange={(nextValue) => commitValue(nextValue as string)}
         onMonthChange={(month) => (visibleMonth = month)}
       />
     </div>
@@ -191,7 +229,6 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Size variants */
   .poodle-date-picker[data-size="xs"] .poodle-date-picker__trigger { min-height: 1.5rem; font-size: 0.75rem; }
   .poodle-date-picker[data-size="xs"] .poodle-date-picker__indicator { font-size: 0.625rem; }
   .poodle-date-picker[data-size="sm"] .poodle-date-picker__trigger { min-height: 1.75rem; font-size: 0.8125rem; }
@@ -201,7 +238,6 @@
   .poodle-date-picker[data-size="xl"] .poodle-date-picker__trigger { min-height: 3.25rem; font-size: 1rem; }
   .poodle-date-picker[data-size="xl"] .poodle-date-picker__indicator { font-size: 0.875rem; }
 
-  /* Density variants */
   .poodle-date-picker[data-density="compact"] .poodle-date-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
   .poodle-date-picker[data-density="comfortable"] .poodle-date-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

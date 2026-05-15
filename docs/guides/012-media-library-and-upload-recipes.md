@@ -29,14 +29,13 @@ Use `MediaPicker` when the host already owns the local items and upload queue.
 </script>
 
 <MediaPicker
-  bind:open
+  open={open}
+  onOpenChange={(nextOpen) => (open = nextOpen)}
   {items}
-  on:select={(event) => {
-    const item = event.detail.item;
+  onSelect={(item) => {
     // host-owned selection handling
   }}
-  on:upload={(event) => {
-    const files = event.detail.files;
+  onUpload={(files) => {
     // host-owned queue handling
   }}
 />
@@ -65,12 +64,8 @@ wrapper.
     title="Media"
     items={items}
     state="ready"
-    on:search={(event) => {
-      const query = event.detail.query;
-      // host-owned search/pagination
-    }}
-    on:select={(event) => {
-      const item = event.detail.item;
+    query={query}
+    onSelect={(item) => {
       // host-owned selection
     }}
   />
@@ -78,8 +73,7 @@ wrapper.
   <MediaUploadStatusPanel
     title="Uploads"
     uploads={uploads}
-    on:retry={(event) => {
-      const upload = event.detail.upload;
+    onUploadAnyway={(upload) => {
       // host-owned retry
     }}
   />

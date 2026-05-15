@@ -25,7 +25,7 @@
   <SpecimenGroup label="Basic">
     <Breadcrumbs
       items={basicItems}
-      on:navigate={(e) => (lastNav = e.detail.value)}
+      onNavigate={(value) => (lastNav = value)}
     />
     {#if lastNav}
       <p>Navigated to: <strong>{lastNav}</strong></p>

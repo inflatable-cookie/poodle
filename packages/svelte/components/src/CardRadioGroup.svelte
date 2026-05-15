@@ -1,38 +1,74 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import Card from "./Card.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
   import type { CardRadioItem } from "./types";
 
-  export let items: CardRadioItem[] = [];
-  export let value: string | null = null;
-  export let columns: 1 | 2 | 3 | 4 = 2;
-  export let ariaLabel: string | null = null;
-  export let disabled = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onValueChange: ((value: string) => void) | undefined = undefined;
+  interface CardSnippetProps {
+    item: CardRadioItem;
+    checked: boolean;
+    disabled: boolean;
+  }
+
+  interface Props {
+    items?: CardRadioItem[];
+    value?: string | null | undefined;
+    columns?: 1 | 2 | 3 | 4;
+    ariaLabel?: string | null;
+    disabled?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string) => void) | undefined;
+    card?: Snippet<[CardSnippetProps]>;
+  }
+
+  let {
+    items = [],
+    value = $bindable<string | null | undefined>(undefined),
+    columns = 2,
+    ariaLabel = null,
+    disabled = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    card,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  let uncontrolledValue = $state<string | null>(null);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived(isControlled ? value ?? null : uncontrolledValue);
 
   function select(itemValue: string): void {
-    if (disabled) return;
-    const item = items.find((i) => i.value === itemValue);
-    if (item?.disabled) return;
-    value = itemValue;
+    if (disabled) {
+      return;
+    }
+
+    const item = items.find((candidate) => candidate.value === itemValue);
+    if (item?.disabled) {
+      return;
+    }
+
+    if (isControlled) {
+      value = itemValue;
+    } else {
+      uncontrolledValue = itemValue;
+    }
+
     onValueChange?.(itemValue);
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
-    const enabledItems = items.filter((i) => !i.disabled);
-    const currentEnabledIndex = enabledItems.findIndex(
-      (i) => i.value === items[index].value
-    );
+    const enabledItems = items.filter((item) => !item.disabled);
+    const currentEnabledIndex = enabledItems.findIndex((item) => item.value === items[index].value);
 
     let nextItem: CardRadioItem | undefined;
 
@@ -41,20 +77,17 @@
       nextItem = enabledItems[(currentEnabledIndex + 1) % enabledItems.length];
     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      nextItem =
-        enabledItems[
-          (currentEnabledIndex - 1 + enabledItems.length) % enabledItems.length
-        ];
+      nextItem = enabledItems[(currentEnabledIndex - 1 + enabledItems.length) % enabledItems.length];
     }
 
-    if (nextItem) {
-      select(nextItem.value);
-      const nextIndex = items.findIndex((i) => i.value === nextItem!.value);
-      const el = document.querySelector<HTMLElement>(
-        `[data-card-radio-index="${nextIndex}"]`
-      );
-      el?.focus();
+    if (!nextItem) {
+      return;
     }
+
+    select(nextItem.value);
+    const nextIndex = items.findIndex((item) => item.value === nextItem.value);
+    const element = document.querySelector<HTMLElement>(`[data-card-radio-index="${nextIndex}"]`);
+    element?.focus();
   }
 </script>
 
@@ -62,29 +95,25 @@
   class="poodle-card-radio-group"
   role="radiogroup"
   aria-label={ariaLabel ?? undefined}
-  style="--columns: {columns}"
+  style={`--columns: ${columns}`}
   data-size={resolvedSize}
   data-density={resolvedDensity}
 >
   {#each items as item, index (item.value)}
-    {@const isChecked = value === item.value}
+    {@const isChecked = currentValue === item.value}
     {@const isItemDisabled = disabled || item.disabled === true}
     <div
       class="poodle-card-radio-group__option"
       role="radio"
-      tabindex={isItemDisabled ? -1 : isChecked || (value === null && index === 0) ? 0 : -1}
+      tabindex={isItemDisabled ? -1 : isChecked || (currentValue === null && index === 0) ? 0 : -1}
       aria-checked={isChecked ? "true" : "false"}
       aria-disabled={isItemDisabled ? "true" : undefined}
       data-card-radio-index={index}
       onclick={() => !isItemDisabled && select(item.value)}
-      onkeydown={(e) => !isItemDisabled && handleKeydown(e, index)}
+      onkeydown={(event) => !isItemDisabled && handleKeydown(event, index)}
     >
-      <Card
-        interactive={!isItemDisabled}
-        selected={isChecked}
-        ariaLabel={item.label}
-      >
-        <svelte:fragment slot="header">
+      <Card interactive={!isItemDisabled} selected={isChecked} ariaLabel={item.label}>
+        {#snippet header()}
           <div class="poodle-card-radio-group__header">
             <span
               class="poodle-card-radio-group__indicator"
@@ -100,7 +129,7 @@
               {item.label}
             </span>
           </div>
-        </svelte:fragment>
+        {/snippet}
 
         {#if item.description}
           <p class="poodle-card-radio-group__description" data-disabled={isItemDisabled}>
@@ -108,9 +137,7 @@
           </p>
         {/if}
 
-        {#if $$slots.card}
-          <slot name="card" {item} checked={isChecked} disabled={isItemDisabled} />
-        {/if}
+        {@render card?.({ item, checked: isChecked, disabled: isItemDisabled })}
       </Card>
     </div>
   {/each}
@@ -184,8 +211,6 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  /* ── Size variants ──────────────────────────────────────────── */
-
   .poodle-card-radio-group[data-size="xs"] .poodle-card-radio-group__indicator {
     width: 0.875rem;
     height: 0.875rem;
@@ -253,14 +278,11 @@
     font-size: 0.9375rem;
   }
 
-  /* Density variants */
   .poodle-card-radio-group[data-density="compact"] {
     gap: 0.5rem;
   }
-  .poodle-card-radio-group[data-density="compact"] .poodle-card-radio-group__option :global(.poodle-card) { padding-inline: 0.5rem; }
 
-  .poodle-card-radio-group[data-density="comfortable"] {
-    gap: 1rem;
+  .poodle-card-radio-group[data-density="compact"] .poodle-card-radio-group__option :global(.poodle-card) {
+    padding-inline: 0.5rem;
   }
-  .poodle-card-radio-group[data-density="comfortable"] .poodle-card-radio-group__option :global(.poodle-card) { padding-inline: 1rem; }
 </style>

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { AlertDialog, Button, Eyebrow, Surface } from "@poodle/svelte";
 
-  let dangerOpen: boolean | null = null;
-  let warningOpen: boolean | null = null;
-  let asyncOpen: boolean | null = null;
+  let dangerOpen = false;
+  let warningOpen = false;
+  let asyncOpen = false;
   let lastAction = "";
 
   async function simulateAsync(): Promise<void> {
@@ -16,22 +16,22 @@
   <div class="poodle-specimen">
     <div class="poodle-specimen__row">
       <Eyebrow>Danger tone</Eyebrow>
-      <Button tone="danger" on:click={() => (dangerOpen = true)}>Delete item</Button>
+      <Button tone="danger" onClick={() => (dangerOpen = true)}>Delete item</Button>
       <AlertDialog
         open={dangerOpen}
         title="Delete this item?"
         description="This action cannot be undone. The item and all associated data will be permanently removed."
         confirmLabel="Delete"
         cancelLabel="Keep it"
-        on:confirm={() => { lastAction = "Item deleted"; dangerOpen = false; }}
-        on:cancel={() => (dangerOpen = false)}
-        on:openChange={(e) => (dangerOpen = e.detail.open ? true : null)}
+        onConfirm={() => { lastAction = "Item deleted"; dangerOpen = false; }}
+        onCancel={() => (dangerOpen = false)}
+        onOpenChange={(open) => (dangerOpen = open)}
       />
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Warning tone</Eyebrow>
-      <Button variant="secondary" on:click={() => (warningOpen = true)}>Reset settings</Button>
+      <Button variant="secondary" onClick={() => (warningOpen = true)}>Reset settings</Button>
       <AlertDialog
         open={warningOpen}
         title="Reset all settings?"
@@ -39,15 +39,15 @@
         tone="warning"
         confirmLabel="Reset"
         cancelLabel="Cancel"
-        on:confirm={() => { lastAction = "Settings reset"; warningOpen = false; }}
-        on:cancel={() => (warningOpen = false)}
-        on:openChange={(e) => (warningOpen = e.detail.open ? true : null)}
+        onConfirm={() => { lastAction = "Settings reset"; warningOpen = false; }}
+        onCancel={() => (warningOpen = false)}
+        onOpenChange={(open) => (warningOpen = open)}
       />
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Async confirm</Eyebrow>
-      <Button tone="danger" on:click={() => (asyncOpen = true)}>Archive project</Button>
+      <Button tone="danger" onClick={() => (asyncOpen = true)}>Archive project</Button>
       <AlertDialog
         open={asyncOpen}
         title="Archive this project?"
@@ -55,8 +55,8 @@
         confirmLabel="Archive"
         workingLabel="Archiving…"
         onConfirm={async () => { await simulateAsync(); asyncOpen = false; }}
-        on:cancel={() => (asyncOpen = false)}
-        on:openChange={(e) => (asyncOpen = e.detail.open ? true : null)}
+        onCancel={() => (asyncOpen = false)}
+        onOpenChange={(open) => (asyncOpen = open)}
       >
         <div class="poodle-user-card">
           <strong>Roadmap Cleanup</strong>

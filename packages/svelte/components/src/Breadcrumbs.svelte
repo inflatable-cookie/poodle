@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -13,10 +11,7 @@
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    navigate: { value: string };
-  }>();
+  export let onNavigate: ((value: string) => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
 
@@ -32,7 +27,7 @@
       return;
     }
 
-    dispatch("navigate", { value: item.value });
+    onNavigate?.(item.value);
   }
 </script>
 
@@ -47,7 +42,7 @@
         {:else if item.value === "__ellipsis__"}
           <span aria-hidden="true">{item.label}</span>
         {:else}
-          <button type="button" on:click={() => handleNavigate(item)}>{item.label}</button>
+          <button type="button" onclick={() => handleNavigate(item)}>{item.label}</button>
         {/if}
         {#if index < visibleItems.length - 1}
           <span class="poodle-breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" /></span>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
   import Button from "./Button.svelte";
   import Checkbox from "./Checkbox.svelte";
@@ -22,70 +22,117 @@
     TableSortDirection,
   } from "./types";
 
-  export let ariaLabel = "Data table";
-  export let columns: TableColumn[] = [];
-  export let rows: TableRow[] = [];
-  export let filters: TableFilters = {};
-  export let pagination: TablePagination | null = null;
-  export let loading = false;
-  export let loadingRows = 5;
-  export let selectable = false;
-  export let selectedRowIds: string[] = [];
-  export let sortColumnId: string | null = null;
-  export let sortDirection: TableSortDirection = "asc";
-  export let rowActionLabel = "Open";
-  export let showRowActions = true;
-  export let rowActions: TableRowAction[] | ((row: TableRow) => TableRowAction[]) = [];
-  export let expandedRowIds: string[] = [];
-  export let emptyMessage = "No rows match the current view.";
-  export let hiddenColumnIds: string[] = [];
-  export let showColumnVisibility = false;
-  export let showExport = false;
-  export let exportFilename = "export.csv";
-  export let limitOptions: number[] = [10, 20, 50, 100];
-  export let showLimitSelector = true;
-  export let compact = false;
-  export let striped = false;
-  export let stickyHeader = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    ariaLabel?: string;
+    columns?: TableColumn[];
+    rows?: TableRow[];
+    filters?: TableFilters;
+    pagination?: TablePagination | null;
+    loading?: boolean;
+    loadingRows?: number;
+    selectable?: boolean;
+    selectedRowIds?: string[];
+    sortColumnId?: string | null;
+    sortDirection?: TableSortDirection;
+    rowActionLabel?: string;
+    showRowActions?: boolean;
+    rowActions?: TableRowAction[] | ((row: TableRow) => TableRowAction[]);
+    expandedRowIds?: string[];
+    emptyMessage?: string;
+    hiddenColumnIds?: string[];
+    showColumnVisibility?: boolean;
+    showExport?: boolean;
+    exportFilename?: string;
+    limitOptions?: number[];
+    showLimitSelector?: boolean;
+    compact?: boolean;
+    striped?: boolean;
+    stickyHeader?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onSortChange?: ((payload: { columnId: string; direction: TableSortDirection }) => void) | null;
+    onRowToggle?: ((payload: { rowId: string; selected: boolean }) => void) | null;
+    onToggleAll?: ((payload: { selected: boolean }) => void) | null;
+    onRowAction?: ((payload: { rowId: string }) => void) | null;
+    onRowActionSelect?: ((payload: { rowId: string; row: TableRow; action: TableRowAction }) => void) | null;
+    onColumnVisibilityChange?: ((payload: { columnId: string; visible: boolean }) => void) | null;
+    onExportCsv?: ((payload: { filename: string }) => void) | null;
+    onRowClick?: ((payload: { rowId: string; row: TableRow }) => void) | null;
+    onFilterChange?: ((payload: { filters: TableFilters }) => void) | null;
+    onPageChange?: ((payload: { page: number }) => void) | null;
+    onLimitChange?: ((payload: { limit: number }) => void) | null;
+    cell?: Snippet<[TableColumn, TableRow, TableCellValue]>;
+    expandedRow?: Snippet<[TableRow]>;
+    empty?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    sortChange: { columnId: string; direction: TableSortDirection };
-    rowToggle: { rowId: string; selected: boolean };
-    toggleAll: { selected: boolean };
-    rowAction: { rowId: string };
-    rowActionSelect: { rowId: string; row: TableRow; action: TableRowAction };
-    columnVisibilityChange: { columnId: string; visible: boolean };
-    exportCsv: { filename: string };
-    rowClick: { rowId: string; row: TableRow };
-    filterChange: { filters: TableFilters };
-    pageChange: { page: number };
-    limitChange: { limit: number };
-  }>();
+  let {
+    ariaLabel = "Data table",
+    columns = [],
+    rows = [],
+    filters = {},
+    pagination = null,
+    loading = false,
+    loadingRows = 5,
+    selectable = false,
+    selectedRowIds = [],
+    sortColumnId = null,
+    sortDirection = "asc",
+    rowActionLabel = "Open",
+    showRowActions = true,
+    rowActions = [],
+    expandedRowIds = [],
+    emptyMessage = "No rows match the current view.",
+    hiddenColumnIds = [],
+    showColumnVisibility = false,
+    showExport = false,
+    exportFilename = "export.csv",
+    limitOptions = [10, 20, 50, 100],
+    showLimitSelector = true,
+    compact = false,
+    striped = false,
+    stickyHeader = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onSortChange = null,
+    onRowToggle = null,
+    onToggleAll = null,
+    onRowAction = null,
+    onRowActionSelect = null,
+    onColumnVisibilityChange = null,
+    onExportCsv = null,
+    onRowClick = null,
+    onFilterChange = null,
+    onPageChange = null,
+    onLimitChange = null,
+    cell,
+    expandedRow,
+    empty,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: visibleColumns = columns.filter((column) => !hiddenColumnIds.includes(column.id));
-  $: hideableColumns = columns.filter((column) => column.hideable !== false);
-  $: hasFilters = visibleColumns.some((column) => column.filterable);
-  $: selectableRowCount = selectable ? rows.length : 0;
-  $: selectionCount = selectable ? rows.filter((row) => selectedRowIds.includes(row.id)).length : 0;
-  $: allRowsSelected = selectableRowCount > 0 && selectionCount === selectableRowCount;
-  $: mixedSelection = selectionCount > 0 && !allRowsSelected;
-  $: hasCustomCellSlot = $$slots.cell !== undefined;
-  $: hasExpandedRowSlot = $$slots.expandedRow !== undefined;
-  $: expandedIdSet = new Set(expandedRowIds);
-  $: hasEmptySlot = $$slots.empty !== undefined;
-  $: hasRichRowActions = typeof rowActions === "function" || rowActions.length > 0;
-  $: showLegacyRowAction = showRowActions && !hasRichRowActions;
-  $: showActionsColumn = showRowActions && (showLegacyRowAction || hasRichRowActions);
-  $: totalPages = pagination ? Math.max(1, Math.ceil(pagination.total / pagination.limit)) : 1;
-  $: showPaginationFooter = pagination !== null && (totalPages > 1 || showLimitSelector);
-  $: columnCount = visibleColumns.length + (selectable ? 1 : 0) + (showActionsColumn ? 1 : 0);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const visibleColumns = $derived(columns.filter((column) => !hiddenColumnIds.includes(column.id)));
+  const hideableColumns = $derived(columns.filter((column) => column.hideable !== false));
+  const hasFilters = $derived(visibleColumns.some((column) => column.filterable));
+  const selectableRowCount = $derived(selectable ? rows.length : 0);
+  const selectionCount = $derived(selectable ? rows.filter((row) => selectedRowIds.includes(row.id)).length : 0);
+  const allRowsSelected = $derived(selectableRowCount > 0 && selectionCount === selectableRowCount);
+  const mixedSelection = $derived(selectionCount > 0 && !allRowsSelected);
+  const hasCustomCellSnippet = $derived(Boolean(cell));
+  const hasExpandedRowSnippet = $derived(Boolean(expandedRow));
+  const expandedIdSet = $derived(new Set(expandedRowIds));
+  const hasEmptySnippet = $derived(Boolean(empty));
+  const hasRichRowActions = $derived(typeof rowActions === "function" || rowActions.length > 0);
+  const showLegacyRowAction = $derived(showRowActions && !hasRichRowActions);
+  const showActionsColumn = $derived(showRowActions && (showLegacyRowAction || hasRichRowActions));
+  const totalPages = $derived(pagination ? Math.max(1, Math.ceil(pagination.total / pagination.limit)) : 1);
+  const showPaginationFooter = $derived(pagination !== null && (totalPages > 1 || showLimitSelector));
+  const columnCount = $derived(visibleColumns.length + (selectable ? 1 : 0) + (showActionsColumn ? 1 : 0));
 
   function stringifyCellValue(value: TableCellValue): string {
     if (value === null || value === undefined) {
@@ -139,7 +186,7 @@
       return;
     }
 
-    dispatch("rowActionSelect", { rowId: row.id, row, action });
+    onRowActionSelect?.({ rowId: row.id, row, action });
   }
 
   function handleMenuAction(row: TableRow, actions: TableRowAction[], value: string): void {
@@ -157,11 +204,11 @@
       return;
     }
 
-    dispatch("rowClick", { rowId: row.id, row });
+    onRowClick?.({ rowId: row.id, row });
   }
 
   function requestFilterChange(columnId: string, value: string): void {
-    dispatch("filterChange", {
+    onFilterChange?.({
       filters: {
         ...filters,
         [columnId]: value,
@@ -179,12 +226,12 @@
         ? "desc"
         : "asc";
 
-    dispatch("sortChange", { columnId: column.id, direction });
+    onSortChange?.({ columnId: column.id, direction });
   }
 
   function toggleColumnVisibility(columnId: string): void {
     const isHidden = hiddenColumnIds.includes(columnId);
-    dispatch("columnVisibilityChange", { columnId, visible: isHidden });
+    onColumnVisibilityChange?.({ columnId, visible: isHidden });
   }
 
   function requestPageChange(page: number): void {
@@ -197,11 +244,11 @@
       return;
     }
 
-    dispatch("pageChange", { page: nextPage });
+    onPageChange?.({ page: nextPage });
   }
 
   function requestLimitChange(limit: number): void {
-    dispatch("limitChange", { limit });
+    onLimitChange?.({ limit });
   }
 
   function handleExport(): void {
@@ -226,7 +273,7 @@
     link.download = exportFilename;
     link.click();
     URL.revokeObjectURL(url);
-    dispatch("exportCsv", { filename: exportFilename });
+    onExportCsv?.({ filename: exportFilename });
   }
 
   function getPaginationSummary(): string {
@@ -254,7 +301,7 @@
         <button
           type="button"
           class="poodle-data-table__toolbar-btn"
-          on:click={handleExport}
+          onclick={handleExport}
           aria-label="Export as CSV"
         >
           <Icon name="download" />
@@ -276,7 +323,7 @@
                 <Checkbox
                   ariaLabel={column.label}
                   checked={!hiddenColumnIds.includes(column.id)}
-                  on:checkedChange={() => toggleColumnVisibility(column.id)}
+                  onCheckedChange={() => toggleColumnVisibility(column.id)}
                 />
                 <span>{column.label}</span>
               </label>
@@ -303,7 +350,7 @@
               ariaLabel="Select all visible rows"
               checked={allRowsSelected}
               mixed={mixedSelection}
-              on:checkedChange={(event) => dispatch("toggleAll", { selected: event.detail.checked })}
+              onCheckedChange={(checked) => onToggleAll?.({ selected: checked })}
             />
           </th>
         {/if}
@@ -319,7 +366,7 @@
               <button
                 type="button"
                 class="poodle-data-table__sort"
-                on:click={() => requestSort(column)}
+                onclick={() => requestSort(column)}
                 aria-label={`Sort by ${column.label}${sortColumnId === column.id ? `, currently ${sortDirection}` : ""}`}
               >
                 <span>{column.label}</span>
@@ -421,8 +468,8 @@
       {:else if rows.length === 0}
         <tr>
           <td colspan={columnCount} class="poodle-data-table__empty">
-            {#if hasEmptySlot}
-              <slot name="empty" />
+            {#if hasEmptySnippet}
+              {@render empty?.()}
             {:else}
               {emptyMessage}
             {/if}
@@ -433,14 +480,14 @@
           <tr
             class:poodle-selected={selectable && selectedRowIds.includes(row.id)}
             aria-selected={selectable ? selectedRowIds.includes(row.id) : undefined}
-            on:click={(event) => handleRowClick(event, row)}
+            onclick={(event) => handleRowClick(event, row)}
           >
             {#if selectable}
               <td class="poodle-data-table__selection">
                 <Checkbox
                   ariaLabel={`Select row ${getRowPrimaryLabel(row)}`}
                   checked={selectedRowIds.includes(row.id)}
-                  on:checkedChange={(event) => dispatch("rowToggle", { rowId: row.id, selected: event.detail.checked })}
+                  onCheckedChange={(checked) => onRowToggle?.({ rowId: row.id, selected: checked })}
                 />
               </td>
             {/if}
@@ -453,8 +500,8 @@
                 class:poodle-end-align={column.align === "end"}
                 class:poodle-data-table__hide-mobile={column.hideOnMobile === true}
               >
-                {#if hasCustomCellSlot}
-                  <slot name="cell" column={column} row={row} value={row.cells[column.id] ?? null} />
+                {#if hasCustomCellSnippet}
+                  {@render cell?.(column, row, row.cells[column.id] ?? null)}
                 {:else}
                   <div class="poodle-data-table__cell">
                     <span>{stringifyCellValue(row.cells[column.id] ?? null) || "—"}</span>
@@ -485,7 +532,10 @@
                         type="button"
                         class={getActionButtonClass(action)}
                         aria-label={`${action.label} ${getRowPrimaryLabel(row)}`}
-                        on:click|stopPropagation={() => requestRowAction(row, action)}
+                        onclick={(event) => {
+                          event.stopPropagation();
+                          requestRowAction(row, action);
+                        }}
                       >
                         {action.label}
                       </button>
@@ -515,7 +565,10 @@
                     type="button"
                     class="poodle-data-table__row-action-btn"
                     aria-label={`${rowActionLabel} ${getRowPrimaryLabel(row)}`}
-                    on:click|stopPropagation={() => dispatch("rowAction", { rowId: row.id })}
+                    onclick={(event) => {
+                      event.stopPropagation();
+                      onRowAction?.({ rowId: row.id });
+                    }}
                   >
                     {rowActionLabel}
                   </button>
@@ -523,11 +576,11 @@
               </td>
             {/if}
           </tr>
-          {#if hasExpandedRowSlot && expandedIdSet.has(row.id)}
+          {#if hasExpandedRowSnippet && expandedIdSet.has(row.id)}
             <tr class="poodle-data-table__expanded-row">
               <td colspan={columnCount}>
                 <div class="poodle-data-table__expanded-panel">
-                  <slot name="expandedRow" row={row} />
+                  {@render expandedRow?.(row)}
                 </div>
               </td>
             </tr>
@@ -556,17 +609,17 @@
         {/if}
         {#if totalPages > 1}
           <div class="poodle-data-table__pagination-controls">
-            <Button type="button" variant="ghost" size="sm" disabled={pagination.page <= 1} on:click={() => requestPageChange(1)}>
+            <Button type="button" variant="ghost" size="sm" disabled={pagination.page <= 1} onClick={() => requestPageChange(1)}>
               First
             </Button>
-            <Button type="button" variant="ghost" size="sm" disabled={pagination.page <= 1} on:click={() => requestPageChange(pagination.page - 1)}>
+            <Button type="button" variant="ghost" size="sm" disabled={pagination.page <= 1} onClick={() => requestPageChange(pagination.page - 1)}>
               Previous
             </Button>
             <span class="poodle-data-table__pagination-page">Page {pagination.page} of {totalPages}</span>
-            <Button type="button" variant="ghost" size="sm" disabled={pagination.page >= totalPages} on:click={() => requestPageChange(pagination.page + 1)}>
+            <Button type="button" variant="ghost" size="sm" disabled={pagination.page >= totalPages} onClick={() => requestPageChange(pagination.page + 1)}>
               Next
             </Button>
-            <Button type="button" variant="ghost" size="sm" disabled={pagination.page >= totalPages} on:click={() => requestPageChange(totalPages)}>
+            <Button type="button" variant="ghost" size="sm" disabled={pagination.page >= totalPages} onClick={() => requestPageChange(totalPages)}>
               Last
             </Button>
           </div>

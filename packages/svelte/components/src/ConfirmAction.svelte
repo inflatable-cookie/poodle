@@ -61,8 +61,8 @@
     open = false;
   }
 
-  function handleOpenChange(event: CustomEvent<{ open: boolean }>): void {
-    open = event.detail.open;
+  function handleOpenChange(nextOpen: boolean): void {
+    open = nextOpen;
   }
 </script>
 
@@ -83,13 +83,13 @@
     {@render trigger?.()}
   </span>
 {:else}
-  <Button variant="secondary" tone={triggerTone} size={resolvedSize} density={resolvedDensity} onclick={handleTrigger}>
+  <Button variant="secondary" tone={triggerTone} size={resolvedSize} density={resolvedDensity} onClick={handleTrigger}>
     {triggerLabel}
   </Button>
 {/if}
 
 <AlertDialog
-  open={open || null}
+  {open}
   {title}
   {description}
   {tone}
@@ -97,9 +97,9 @@
   {cancelLabel}
   size={resolvedSize}
   density={resolvedDensity}
-  on:confirm={handleConfirm}
-  on:cancel={handleCancel}
-  on:openChange={handleOpenChange}
+  onConfirm={handleConfirm}
+  onCancel={handleCancel}
+  onOpenChange={handleOpenChange}
 >
   {@render children?.()}
 </AlertDialog>

@@ -43,10 +43,12 @@
   let surfaceElement = $state<HTMLDivElement | null>(null);
   let uncontrolledOpen = $state(false);
   let previousOpen = $state(false);
+  let seededDefaultOpen = $state(false);
 
   $effect.pre(() => {
-    if (!rootElement) {
+    if (!seededDefaultOpen) {
       uncontrolledOpen = defaultOpen;
+      seededDefaultOpen = true;
     }
   });
 

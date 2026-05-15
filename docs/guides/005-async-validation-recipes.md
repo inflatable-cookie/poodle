@@ -58,10 +58,10 @@ availability, uniqueness checks, or remote validation against app-owned rules.
     validate={validateSlug}
     validationContext={{ entryId }}
     validationDebounce={300}
-    on:valueChange={(event) => (slug = event.detail.value)}
-    on:validationChange={(event) => {
-      slugStatus = event.detail.status;
-      slugError = event.detail.message || null;
+    onValueChange={(nextValue) => (slug = nextValue)}
+    onValidationChange={(detail) => {
+      slugStatus = detail.status;
+      slugError = detail.message || null;
     }}
   />
 </Field>

@@ -12,7 +12,7 @@
       <NavCard
         title="Getting Started"
         description="Learn the basics of the component library."
-        on:click={() => (lastClick = "Getting Started")}
+        onClick={() => (lastClick = "Getting Started")}
       >
         <svelte:fragment slot="icon"><Icon icon={house} /></svelte:fragment>
       </NavCard>
@@ -20,14 +20,14 @@
         title="Components"
         description="Browse all available components."
         badge="New"
-        on:click={() => (lastClick = "Components")}
+        onClick={() => (lastClick = "Components")}
       >
         <svelte:fragment slot="icon"><Icon icon={layers} /></svelte:fragment>
       </NavCard>
       <NavCard
         title="Tokens"
         description="Design tokens and theming system."
-        on:click={() => (lastClick = "Tokens")}
+        onClick={() => (lastClick = "Tokens")}
       >
         <svelte:fragment slot="icon"><Icon icon={slidersHorizontal} /></svelte:fragment>
       </NavCard>

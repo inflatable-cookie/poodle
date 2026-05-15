@@ -9,7 +9,7 @@ Updated: 2026-03-30
 - Layer: `foundation`
 - Summary: a lightweight shell utility/status row for workspace summary,
   connection state, and context metadata, rendered as a `<footer>` landmark
-- In scope: leading and trailing status regions via slots, summary text fallback
+- In scope: leading and trailing status regions via snippets, summary text fallback
   in the leading region, shell-level status packing with space-between layout
 - Out of scope: transient notifications, remediation banners, app-specific
   transport/status widgets, global command registries
@@ -19,10 +19,10 @@ Updated: 2026-03-30
 ```text
 [Root .status-bar]  <footer aria-label="...">
   ├── [Leading .status-bar__leading]  <div>
-  │   ├── [Slot: leading] (slot content when provided)
-  │   └── [Summary fallback]  <span> (when no leading slot, and summary is set)
-  └── [Trailing .status-bar__trailing]  <div> (only rendered when trailing slot has content)
-        └── [Slot: trailing]
+  │   ├── [leading()] (snippet content when provided)
+  │   └── [Summary fallback]  <span> (when no leading snippet, and summary is set)
+  └── [Trailing .status-bar__trailing]  <div> (only rendered when trailing snippet has content)
+        └── [trailing()]
 ```
 
 | Part | Required | Description | Token Targets |
@@ -44,17 +44,17 @@ Updated: 2026-03-30
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override; scales padding-inline and gap |
 
-### Slots
+### Snippets
 
-| Slot | Purpose | Notes |
-|------|---------|-------|
-| `leading` | left-aligned status items (branch indicator, error count, etc.) | when provided, overrides `summary` text display |
-| `trailing` | right-aligned context metadata (cursor position, encoding, language, etc.) | trailing container only renders when this slot has content |
+| Snippet | Purpose | Notes |
+|---------|---------|-------|
+| `leading()` | left-aligned status items (branch indicator, error count, and so on) | when provided, overrides `summary` text display |
+| `trailing()` | right-aligned context metadata (cursor position, encoding, language, and so on) | trailing container only renders when this snippet has content |
 
 ### Controlled And Uncontrolled
 
 - Fully declarative; no internal state
-- Content is determined entirely by props and slot content
+- Content is determined entirely by props and snippet content
 
 ## 4. States
 
@@ -63,15 +63,15 @@ Updated: 2026-03-30
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | component rendered | status bar with semi-transparent panel background, border-top, secondary text color |
-| summary only | `summary` provided, no slots | leading region shows summary text |
-| with leading slot | `leading` slot provided | slot content replaces summary text in leading region |
-| with trailing slot | `trailing` slot provided | trailing region appears with right-aligned metadata |
-| full | both slots + summary | leading slot content shown (summary ignored for display), trailing slot shown |
+| summary only | `summary` provided, no snippets | leading region shows summary text |
+| with leading snippet | `leading()` provided | snippet content replaces summary text in leading region |
+| with trailing snippet | `trailing()` provided | trailing region appears with right-aligned metadata |
+| full | both snippets + summary | leading snippet content shown (summary ignored for display), trailing snippet shown |
 
 ## 5. Events
 
 No events are dispatched by this component. Interactive controls placed in
-slots dispatch their own events.
+snippets dispatch their own events.
 
 ## 6. Accessibility
 
@@ -80,18 +80,18 @@ slots dispatch their own events.
 - Root: `<footer>` element providing landmark semantics
 - `aria-label` resolved in order: `ariaLabel` prop > `summary` prop > `"Status"`
 - Status bar content must remain textual and keyboard-reachable where interactive
-  controls are placed in slots
+  controls are placed in snippets
 - Shell utility metadata must not be the only place a critical error is communicated
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | moves focus through any interactive controls placed in slots |
+| `Tab` | moves focus through any interactive controls placed in snippets |
 
 ### Focus And Announcement
 
-- focus entry: no focusable elements by default; interactive slot content
+- focus entry: no focusable elements by default; interactive snippet content
   participates in tab order
 - live-region behavior: none
 
@@ -106,7 +106,7 @@ slots dispatch their own events.
 ### Composition
 
 - parent expectations: bottom of application shell, workspace frame, or panel
-- child expectations: slot content only (status items, metadata labels,
+- child expectations: snippet content only (status items, metadata labels,
   interactive controls)
 - resizing: fills parent width, wraps on narrow viewports
 
@@ -121,9 +121,7 @@ slots dispatch their own events.
 | `align-items` | `center` |
 | `justify-content` | `space-between` |
 | `gap` | `var(--poodle-space-inline-md)` |
-| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border-top` | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+| `padding` | `0.375rem 0.75rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
@@ -153,25 +151,51 @@ The `aria-label` on the `<footer>` is resolved as:
 2. `summary` prop if provided
 3. `"Status"` as final fallback
 
+### Chrome modifier `.status-bar--chrome`
+
+| Property | Value |
+|----------|-------|
+| `border-top` | `0.0625rem solid var(--poodle-color-border-subtle)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+
+### Size modifiers
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.status-bar[data-size="xs"]` | `font-size` | `0.6875rem` |
+| `.status-bar[data-size="xs"]` | `padding-block` | `0.25rem` |
+| `.status-bar[data-size="sm"]` | `font-size` | `0.75rem` |
+| `.status-bar[data-size="sm"]` | `padding-block` | `0.3125rem` |
+| `.status-bar[data-size="lg"]` | `font-size` | `0.875rem` |
+| `.status-bar[data-size="lg"]` | `padding-block` | `0.4375rem` |
+| `.status-bar[data-size="xl"]` | `font-size` | `0.9375rem` |
+| `.status-bar[data-size="xl"]` | `padding-block` | `0.5rem` |
+
+### Density modifiers
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.status-bar[data-density="compact"]` | `padding-inline` | `0.5rem` |
+| `.status-bar[data-density="compact"]` | `gap` | `0.375rem` |
+| `.status-bar[data-density="comfortable"]` | `padding-inline` | `1.125rem` |
+| `.status-bar[data-density="comfortable"]` | `gap` | `1rem` |
+
 ## 9. Svelte Notes
 
 - Root is a native `<footer>` element
-- No `data-size` or `data-density` attributes; this component does not
-  participate in size/density scaling
-- Leading region always renders; when the `leading` slot has content, it is
+- `data-size` and `data-density` attributes are used to apply size and density variants
+- Leading region always renders; when the `leading()` snippet has content, it is
   displayed; otherwise, the `summary` prop text is shown in a `<span>`
-- Trailing region only renders when the `trailing` slot has content
-  (checked via `$$slots.trailing`)
+- Trailing region only renders when the `trailing()` snippet has content
 - The component has no internal state and dispatches no events
-- Background uses `color-mix` for semi-transparent panel appearance
-- Font-size is hardcoded at `0.8125rem` (not token-driven) as the bar is
-  intentionally compact
+- Chrome background uses `color-mix` for semi-transparent panel appearance
+- Size and density defaults resolve through the shared UI presentation layer
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::components::status_bar`
 - Spec struct: `StatusBarSpec` in primitives crate
-- Slot-equivalent: leading and trailing child element lists
+- Snippet-equivalent: leading and trailing child element lists
 - `<footer>` landmark semantics must be mapped to GPUI accessibility API
 - Background uses color-mix equivalent in Rust
 - No size/density scaling needed
@@ -181,24 +205,25 @@ The `aria-label` on the `<footer>` is resolved as:
 ### Tier 1: Strict Parity
 
 - [ ] `<footer>` landmark with `aria-label` resolution (prop > summary > "Status")
-- [ ] leading region shows slot content or summary text fallback
+- [ ] leading region shows snippet content or summary text fallback
 - [ ] trailing region only rendered when content exists
 - [ ] no events dispatched by the component itself
 
 ### Tier 2: Visual Parity
 
-- [ ] background: 94% panel color mixed with transparent
-- [ ] border-top: 0.0625rem solid border-subtle
+- [ ] chrome background: 94% panel color mixed with transparent
+- [ ] chrome border-top: 0.0625rem solid border-subtle
 - [ ] font-size: 0.8125rem, line-height: 1.5
 - [ ] color: text-secondary
-- [ ] padding: panel-y panel-x
+- [ ] default padding: `0.375rem 0.75rem`
 - [ ] gap between leading and trailing: space-inline-md
 - [ ] gap within leading/trailing: space-inline-sm
 - [ ] flex-wrap on root and inner containers
+- [ ] size and density variants match the Svelte table
 
 ### Tier 3: Implementation Freedom
 
-- [ ] slot rendering mechanism is platform-owned
+- [ ] snippet rendering mechanism is platform-owned
 - [ ] color-mix implementation method is platform-owned
 
 ## 12. Specimen Definitions
@@ -207,7 +232,7 @@ The `aria-label` on the `<footer>` is resolved as:
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Default | `summary="Ready"`, leading slot: "main" branch indicator + "0 errors" status, trailing slot: "Ln 42, Col 18" + "UTF-8" + "TypeScript" | Full-width status bar with summary text in leading area, branch and error items on the left, cursor/encoding/language metadata on the right |
+| Default | `summary="Ready"`, leading snippet: "main" branch indicator + "0 errors" status, trailing snippet: "Ln 42, Col 18" + "UTF-8" + "TypeScript" | Full-width status bar with summary text in leading area, branch and error items on the left, cursor/encoding/language metadata on the right |
 
 ### Group: Summary only
 

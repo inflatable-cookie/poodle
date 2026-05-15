@@ -81,9 +81,9 @@ DateTimeRangeValue: {
 ### Controlled And Uncontrolled
 
 - controlled value: `value` plus `onValueChange` callback
-- uncontrolled value: `defaultValue`
+- uncontrolled value: `defaultValue`; omitting `value` leaves state internal
 - controlled open: `open` plus `onOpenChange` callback
-- uncontrolled open: `defaultOpen`
+- uncontrolled open: `defaultOpen`; omitting `open` leaves state internal
 
 ## 4. States
 
@@ -288,9 +288,11 @@ DateTimeRangeValue: {
 
 - Module-level `nextDateTimeRangePickerId` counter generates unique ids for each
   instance to wire ARIA relationships (`aria-controls`, `aria-expanded`)
-- Controlled/uncontrolled pattern: if `value` prop is non-null, component
-  operates in controlled mode; otherwise `defaultValue` seeds internal state
-- Same pattern for `open`/`defaultOpen`
+- Controlled/uncontrolled pattern: supplying `value` makes it host-owned,
+  including `null` for a controlled empty state; otherwise `defaultValue`
+  seeds internal state
+- Same pattern for `open`/`defaultOpen`: supplying `open` makes visibility
+  host-owned
 - Outside click handler closes the overlay; Escape key closes the overlay
 - Composes `Calendar` with `mode="range"` and two `TimeInput` instances internally
 - Public value uses nested local-value objects rather than `Date` instances

@@ -37,7 +37,7 @@
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Inline">
-    <Button variant="secondary" on:click={() => (showInline = !showInline)}>
+    <Button variant="secondary" onClick={() => (showInline = !showInline)}>
       Toggle inline loading
     </Button>
     {#if showInline}
@@ -52,7 +52,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Indeterminate (spinner only)">
-    <Button variant="secondary" on:click={() => (showIndeterminate = true)}>
+    <Button variant="secondary" onClick={() => (showIndeterminate = true)}>
       Show loading overlay
     </Button>
     <PageLoading
@@ -62,7 +62,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Determinate (with progress bar)">
-    <Button variant="secondary" on:click={startDeterminate}>
+    <Button variant="secondary" onClick={startDeterminate}>
       Show progress overlay
     </Button>
     <PageLoading
@@ -73,19 +73,19 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With cancel button">
-    <Button variant="secondary" on:click={() => (showWithCancel = true)}>
+    <Button variant="secondary" onClick={() => (showWithCancel = true)}>
       Show cancellable loading
     </Button>
     <PageLoading
       visible={showWithCancel}
       message="Processing request..."
       canCancel
-      on:cancel={closeAll}
+      onCancel={closeAll}
     />
   </SpecimenGroup>
 
   {#if showIndeterminate || showDeterminate || showWithCancel}
-    <button class="poodle-specimen__dismiss" on:click={closeAll}>
+    <button class="poodle-specimen__dismiss" onclick={closeAll}>
       Dismiss overlay (click here if stuck)
     </button>
   {/if}

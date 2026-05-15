@@ -53,9 +53,9 @@ Updated: 2026-03-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `mode` | `"single" \| "range"` | `"single"` | no | selection mode — single date or date range |
-| `value` | `string \| DateRangeValue \| null` | `null` | no | controlled selected value; string in single mode, DateRangeValue in range mode |
+| `value` | `string \| DateRangeValue \| null` | `null` | no | selected value; string in single mode, DateRangeValue in range mode; when supplied, the host owns updates through `onValueChange` |
 | `defaultValue` | `string \| DateRangeValue \| null` | `null` | no | uncontrolled initial value |
-| `visibleMonth` | `string \| null` | `null` | no | controlled visible month (ISO `YYYY-MM`) |
+| `visibleMonth` | `string \| null` | `null` | no | visible month (ISO `YYYY-MM`); when supplied, the host owns updates through `onMonthChange` |
 | `weekStartsOn` | `CalendarWeekStart` | `"monday"` | no | first day of the week |
 | `locale` | `string` | `"en-US"` | no | locale for month and weekday formatting |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
@@ -73,10 +73,10 @@ DateRangeValue: { start: string | null; end: string | null }
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` (non-null) plus `onValueChange` callback
+- controlled value: supplying `value` makes it host-owned, including `null` for an explicit empty selection
 - uncontrolled value: `defaultValue` sets the initial selection; component owns
   its own state
-- controlled month: `visibleMonth` (non-null) plus `onMonthChange` callback
+- controlled month: supplying `visibleMonth` makes month navigation host-owned through `onMonthChange`
 - uncontrolled month: component manages visible month internally
 
 ## 4. States

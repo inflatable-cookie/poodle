@@ -64,7 +64,7 @@ type BreadcrumbItem = {
 ### Controlled And Uncontrolled
 
 - Declarative path model; parent provides the complete `items` array
-- Navigation may be link-driven (`href`) or callback-driven (via `navigate` event)
+- Navigation may be link-driven (`href`) or callback-driven (via `onNavigate`)
 
 ### Truncation Behavior
 
@@ -85,11 +85,11 @@ When `maxVisibleItems` is set and `items.length > maxVisibleItems`:
 | truncated | `items.length > maxVisibleItems` | first item, ellipsis, then last N-1 items shown |
 | hover (link/button) | pointer over interactive item | browser default link/button hover |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `navigate` | non-current, non-ellipsis item is clicked (button path only) | `{ value: string }` | dispatched via `dispatch("navigate", { value: item.value })`; items with `href` navigate via native anchor behavior instead |
+| Callback | When It Fires | Signature | Notes |
+|----------|---------------|-----------|-------|
+| `onNavigate` | non-current, non-ellipsis item is clicked (button path only) | `(value: string) => void` | items with `href` still navigate via native anchor behavior instead |
 
 ## 6. Accessibility
 
@@ -235,7 +235,7 @@ Density controls list and item gap only. It does NOT affect font-size.
 - [ ] `<nav>` landmark with `aria-label` matches
 - [ ] `aria-current="page"` on current/last item
 - [ ] `aria-hidden="true"` on separators and ellipsis
-- [ ] `navigate` event fires with correct `value`
+- [ ] `onNavigate` callback receives the correct `value`
 - [ ] truncation shows first item + ellipsis + last N-1 items
 - [ ] items with `href` use anchor navigation; items without use callback
 

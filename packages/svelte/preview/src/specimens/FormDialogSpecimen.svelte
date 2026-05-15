@@ -50,16 +50,16 @@
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Basic form dialog">
-    <Button variant="primary" on:click={() => (basicOpen = true)}>Add user</Button>
+    <Button variant="primary" onClick={() => (basicOpen = true)}>Add user</Button>
     <FormDialog
       open={basicOpen}
       title="Add new user"
       description="Invite a user to this workspace."
       submitLabel="Add user"
       {submitting}
-      on:submit={handleBasicSubmit}
-      on:cancel={() => (basicOpen = false)}
-      on:openChange={(e) => (basicOpen = e.detail.open ? true : null)}
+      onSubmit={handleBasicSubmit}
+      onCancel={() => (basicOpen = false)}
+      onOpenChange={(open) => (basicOpen = open ? true : null)}
     >
       <Field label="Full name" id="form-dialog-full-name">
         <TextInput bind:value={name} placeholder="Enter name" />
@@ -71,16 +71,16 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="With error state">
-    <Button variant="secondary" on:click={() => { errorOpen = true; error = null; }}>Try with error</Button>
+    <Button variant="secondary" onClick={() => { errorOpen = true; error = null; }}>Try with error</Button>
     <FormDialog
       open={errorOpen}
       title="Create account"
       submitLabel="Create"
       {submitting}
       {error}
-      on:submit={handleErrorSubmit}
-      on:cancel={() => { errorOpen = false; error = null; }}
-      on:openChange={(e) => { if (!e.detail.open) { errorOpen = null; error = null; } }}
+      onSubmit={handleErrorSubmit}
+      onCancel={() => { errorOpen = false; error = null; }}
+      onOpenChange={(open) => { if (!open) { errorOpen = null; error = null; } }}
     >
       <Field label="Email" id="form-dialog-email">
         <TextInput value="existing@example.com" placeholder="Enter email" />
@@ -89,7 +89,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Shell mode with custom actions">
-    <Button variant="ghost" on:click={() => { shellOpen = true; success = null; }}>Open settings shell</Button>
+    <Button variant="ghost" onClick={() => { shellOpen = true; success = null; }}>Open settings shell</Button>
     <FormDialog
       open={shellOpen}
       title="Edit workspace settings"
@@ -98,23 +98,25 @@
       {submitting}
       success={success}
       showDefaultActions={false}
-      on:cancel={() => { shellOpen = false; success = null; }}
-      on:openChange={(e) => { shellOpen = e.detail.open ? true : null; }}
+      onCancel={() => { shellOpen = false; success = null; }}
+      onOpenChange={(open) => { shellOpen = open ? true : null; }}
     >
-      <Field label="Workspace name" id="form-dialog-workspace-name">
-        <TextInput value="Northstar" disabled={submitting} />
-      </Field>
-      <Field label="Default role" id="form-dialog-default-role">
-        <Select options={roleOptions} value="editor" disabled={submitting} />
-      </Field>
-      <svelte:fragment slot="actions">
+      {#snippet body(submitting)}
+        <Field label="Workspace name" id="form-dialog-workspace-name">
+          <TextInput value="Northstar" disabled={submitting} />
+        </Field>
+        <Field label="Default role" id="form-dialog-default-role">
+          <Select options={roleOptions} value="editor" disabled={submitting} />
+        </Field>
+      {/snippet}
+      {#snippet actions(submitting)}
         <FormActions align="end">
-          <Button variant="ghost" on:click={() => { shellOpen = false; success = null; }} disabled={submitting}>Cancel</Button>
-          <Button variant="primary" on:click={handleShellSubmit} disabled={submitting}>
+          <Button variant="ghost" onClick={() => { shellOpen = false; success = null; }} disabled={submitting}>Cancel</Button>
+          <Button variant="primary" onClick={handleShellSubmit} disabled={submitting}>
             {submitting ? "Saving..." : "Save changes"}
           </Button>
         </FormActions>
-      </svelte:fragment>
+      {/snippet}
     </FormDialog>
   </SpecimenGroup>
 

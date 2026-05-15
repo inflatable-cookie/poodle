@@ -17,13 +17,13 @@ Updated: 2026-03-30
 [Root .filter-toolbar]  <div role="toolbar"> aria-label
   ├── [Header .filter-toolbar__header]  (when collapsed: <button>, otherwise: <div>)
   │     ├── [CollapseToggle]  (optional, when collapsible)
-  │     ├── [Summary .filter-toolbar__summary]  <p>/<span> (optional, when summaryText)
-  │     └── [Actions .filter-toolbar__actions]  <div>/<span> (optional, when actions slot)
-  │           └── [ActionsSlot]  named "actions" slot
+  │     ├── [Summary .filter-toolbar__summary]  <p>/<span> (optional, when summaryText or summary snippet)
+  │     └── [Actions .filter-toolbar__actions]  <div>/<span> (optional, when actions snippet)
+  │           └── [Actions]  `actions` snippet
   ├── [ControlsGrid .filter-toolbar__controls]  <div> (hidden when collapsed)
-  │     └── [DefaultSlot]  filter controls (TextInput type="search", Select, etc.)
-  └── [Secondary .filter-toolbar__secondary]  <div> (optional, when secondary slot)
-        └── [SecondarySlot]  named "secondary" slot
+  │     └── [Children]  filter controls (TextInput type="search", Select, etc.)
+  └── [Secondary .filter-toolbar__secondary]  <div> (optional, when secondary snippet)
+        └── [Secondary]  `secondary` snippet
 ```
 
 ### Parts
@@ -55,11 +55,12 @@ Updated: 2026-03-30
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for spacing |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| default | Filter controls (TextInput type="search", Select, etc.) placed in the grid |
+| `children` | Filter controls (TextInput type="search", Select, etc.) placed in the grid |
+| `summary` | Optional summary content replacing `summaryText` |
 | `actions` | Icon buttons in the header row (refresh, settings, etc.) |
 | `secondary` | Trailing actions below the grid (reset, export, etc.) |
 
@@ -77,16 +78,16 @@ Updated: 2026-03-30
 | expanded | default or `collapsed=false` | Header + controls grid visible |
 | collapsed | `collapsible=true`, `collapsed=true` | Header only (as `<button>`), controls hidden; header click toggles open |
 | summarized | `summaryText` present | Summary text in header row |
-| with-actions | actions slot populated | Icon buttons right-aligned in header |
+| with-actions | actions snippet populated | Icon buttons right-aligned in header |
 | sticky | `sticky=true` | Sticky positioning with elevation shadow |
 
 ### Component States
 
 State table is sufficient.
 
-## 5. Events
+## 5. Callbacks
 
-No component-owned events beyond child control behavior and collapse toggle. The `CollapseToggle` primitive fires `toggle` events internally to update `collapsed`.
+No component-owned callbacks. Child controls keep their own callback contracts, and the toolbar updates `collapsed` through `CollapseToggle`'s `onToggle` callback.
 
 ## 6. Accessibility
 

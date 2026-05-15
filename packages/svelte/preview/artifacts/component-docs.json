@@ -54,22 +54,22 @@
         "type": "ControlDensity | null",
         "default": "null",
         "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string | string[] | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the open panel value changes."
       }
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Custom panel content. Receives slot props: item, isOpen."
+        "name": "children",
+        "description": "Snippet rendered inside each open panel. Receives item and isOpen."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string | string[] | null }",
-        "description": "Fires when the open panel(s) change."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { Accordion } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"one\", title: \"Section One\", content: \"Content for section one.\" },\n    { value: \"two\", title: \"Section Two\", content: \"Content for section two.\" },\n  ];\n</script>\n\n<Accordion {items} selectionMode=\"single\" collapsible />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Accordion } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"one\", title: \"Section One\", content: \"Content for section one.\" },\n    { value: \"two\", title: \"Section Two\", content: \"Content for section two.\" },\n  ];\n</script>\n\n<Accordion {items} selectionMode=\"single\" collapsible onValueChange={(value) => console.log(value)}>\n  {#snippet children(item)}\n    <p>{item.label} content.</p>\n  {/snippet}\n</Accordion>"
   },
   "alert-dialog": {
     "props": [
@@ -93,9 +93,9 @@
       },
       {
         "name": "open",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled open state of the dialog."
+        "type": "boolean | null | undefined",
+        "default": "undefined",
+        "description": "Dialog visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "title",
@@ -162,32 +162,22 @@
         "type": "(() => void) | null",
         "default": "null",
         "description": "Optional built-in cancel callback used for cancel and dismiss paths."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the open state changes."
       }
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Optional body content rendered between description and the built-in action row."
+        "name": "children",
+        "description": "Optional body content snippet rendered between description and the built-in action row."
       }
     ],
-    "events": [
-      {
-        "name": "confirm",
-        "payload": "void",
-        "description": "Fires when the confirm button is clicked and no onConfirm callback is supplied."
-      },
-      {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the dialog is cancelled and no onCancel callback is supplied."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { AlertDialog } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<AlertDialog\n  bind:open\n  title=\"Delete item?\"\n  description=\"This action cannot be undone.\"\n  tone=\"danger\"\n  onConfirm={async () => {\n    await deleteItem();\n  }}\n/>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AlertDialog } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<AlertDialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Delete item?\"\n  description=\"This action cannot be undone.\"\n  tone=\"danger\"\n  onConfirm={async () => {\n    await deleteItem();\n  }}\n/>"
   },
   "audio-player": {
     "props": [
@@ -259,6 +249,36 @@
         "description": "Accessible label for the editor region."
       },
       {
+        "name": "mode",
+        "type": "\"single\" | \"multi\"",
+        "default": "\"multi\"",
+        "description": "Single posture hides multi-block controls by default; multi posture enables them."
+      },
+      {
+        "name": "allowReorder",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Explicit override for drag and move controls."
+      },
+      {
+        "name": "allowAdd",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Explicit override for add-block controls."
+      },
+      {
+        "name": "allowRemove",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Explicit override for remove controls."
+      },
+      {
+        "name": "allowTypeChange",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Explicit override for the type-change control."
+      },
+      {
         "name": "size",
         "type": "ControlSize | null",
         "default": "null",
@@ -280,17 +300,19 @@
     "slots": [
       {
         "name": "block",
-        "description": "Custom block renderer. Receives slot props: block, index, disabled, update."
-      }
-    ],
-    "events": [
+        "description": "Custom block renderer snippet. Receives: block, index, disabled, update."
+      },
       {
-        "name": "change",
-        "payload": "{ blocks: EditorBlock[] }",
-        "description": "Fires when any block content changes."
+        "name": "typePicker",
+        "description": "Optional snippet override for the built-in type-change control."
+      },
+      {
+        "name": "addPicker",
+        "description": "Optional snippet override for the built-in add-block control."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { BlockEditor } from \"@poodle/svelte\";\n\n  let blocks = [{ type: \"paragraph\", content: \"Start writing...\" }];\n</script>\n\n<BlockEditor {blocks} on:change={(e) => (blocks = e.detail.blocks)} />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { BlockEditor } from \"@poodle/svelte\";\n\n  let blocks = [{ id: \"intro\", type: \"paragraph\", data: { text: \"Start writing...\" } }];\n</script>\n\n<BlockEditor {blocks} mode=\"single\" onChange={(nextBlocks) => (blocks = nextBlocks)} />"
   },
   "box": {
     "props": [
@@ -355,24 +377,6 @@
   "breadcrumbs": {
     "props": [
       {
-        "name": "size",
-        "type": "ControlSize | null",
-        "default": "null",
-        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
-      },
-      {
-        "name": "sizeRole",
-        "type": "\"chrome\" | \"control\" | \"prominent\"",
-        "default": "\"chrome\"",
-        "description": "Semantic size offset relative to the inherited presentation scale."
-      },
-      {
-        "name": "density",
-        "type": "ControlDensity | null",
-        "default": "null",
-        "description": "Explicit density override. Supports compact, default, and comfortable."
-      },
-      {
         "name": "items",
         "type": "BreadcrumbItem[]",
         "default": "[]",
@@ -389,17 +393,41 @@
         "type": "number | null",
         "default": "null",
         "description": "Maximum number of visible items before collapsing."
+      },
+      {
+        "name": "forceLastItemCurrent",
+        "type": "boolean",
+        "default": "true",
+        "description": "Treat the last visible item as the current page when it is not explicitly marked current."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"chrome\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override for list spacing."
       }
     ],
     "slots": [],
     "events": [
       {
-        "name": "navigate",
-        "payload": "{ value: string }",
-        "description": "Fires when a breadcrumb item is clicked."
+        "name": "onNavigate",
+        "payload": "(value: string) => void",
+        "description": "Called when a callback-driven breadcrumb item is activated."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Breadcrumbs } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"products\", label: \"Products\" },\n    { value: \"widgets\", label: \"Widgets\" },\n  ];\n</script>\n\n<Breadcrumbs {items} on:navigate={(e) => goto(e.detail.value)} />"
+    "usage": "<script lang=\"ts\">\n  import { Breadcrumbs } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"projects\", label: \"Projects\" },\n    { value: \"poodle\", label: \"Poodle\", current: true },\n  ];\n</script>\n\n<Breadcrumbs {items} onNavigate={(value) => console.log(value)} />"
   },
   "bulk-action-bar": {
     "props": [
@@ -455,46 +483,40 @@
         "name": "showSelectAll",
         "type": "boolean",
         "default": "false",
-        "description": "Shows a select-all or deselect-all action before the bulk actions."
+        "description": "Shows a select-all action before the bulk actions."
       },
       {
         "name": "allSelected",
         "type": "boolean",
         "default": "false",
-        "description": "Controls whether the select-all action presents as deselect-all."
+        "description": "Lets the parent suppress the select-all affordance once everything is already selected."
       },
       {
         "name": "selectAllLabel",
         "type": "string",
         "default": "\"Select all\"",
         "description": "Label for the select-all button."
-      },
-      {
-        "name": "deselectAllLabel",
-        "type": "string",
-        "default": "\"Deselect all\"",
-        "description": "Label for the deselect-all button."
       }
     ],
     "slots": [],
     "events": [
       {
-        "name": "action",
-        "payload": "{ id: string }",
-        "description": "Fires when a bulk action is triggered."
+        "name": "onAction",
+        "payload": "(id: string) => void",
+        "description": "Called when a bulk action is triggered."
       },
       {
-        "name": "clear",
-        "payload": "void",
-        "description": "Fires when the selection is cleared."
+        "name": "onClear",
+        "payload": "() => void",
+        "description": "Called when the selection is cleared."
       },
       {
-        "name": "selectAll",
-        "payload": "void",
-        "description": "Fires when the select-all or deselect-all control is triggered."
+        "name": "onSelectAll",
+        "payload": "() => void",
+        "description": "Called when the select-all control is triggered."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { BulkActionBar } from \"@poodle/svelte\";\n\n  const actions = [\n    { id: \"delete\", label: \"Delete\", tone: \"danger\" },\n    { id: \"archive\", label: \"Archive\" },\n  ];\n</script>\n\n<BulkActionBar selectionCount={3} totalCount={50} {actions} showSelectAll />"
+    "usage": "<script lang=\"ts\">\n  import { BulkActionBar } from \"@poodle/svelte\";\n\n  const actions = [\n    { id: \"delete\", label: \"Delete\", tone: \"danger\" },\n    { id: \"archive\", label: \"Archive\" },\n  ];\n</script>\n\n<BulkActionBar\n  selectionCount={3}\n  totalCount={50}\n  {actions}\n  showSelectAll\n  onAction={(id) => console.log(id)}\n  onClear={() => console.log(\"clear\")}\n/>"
   },
   "button": {
     "props": [
@@ -574,7 +596,7 @@
         "name": "pressed",
         "type": "boolean | null",
         "default": "null",
-        "description": "Pressed state for toggle buttons. When non-null, button renders aria-pressed and fires pressedChange."
+        "description": "Pressed state for toggle buttons. When non-null, button renders aria-pressed and calls onPressedChange."
       },
       {
         "name": "defaultPressed",
@@ -650,31 +672,36 @@
       },
       {
         "name": "leading",
-        "description": "Custom leading content replacing the leading icon."
+        "description": "Leading snippet content replacing the leadingIcon prop."
       },
       {
         "name": "trailing",
-        "description": "Custom trailing content replacing the trailing icon."
+        "description": "Trailing snippet content replacing the trailingIcon prop."
       }
     ],
     "events": [
       {
-        "name": "click",
-        "payload": "MouseEvent",
-        "description": "Fires when the button is clicked."
+        "name": "onClick",
+        "payload": "(event: MouseEvent) => void",
+        "description": "Called when the button is clicked."
       },
       {
-        "name": "focus",
-        "payload": "FocusEvent",
-        "description": "Fires when the button receives focus."
+        "name": "onFocus",
+        "payload": "(event: FocusEvent) => void",
+        "description": "Called when the button receives focus."
       },
       {
-        "name": "blur",
-        "payload": "FocusEvent",
-        "description": "Fires when the button loses focus."
+        "name": "onBlur",
+        "payload": "(event: FocusEvent) => void",
+        "description": "Called when the button loses focus."
+      },
+      {
+        "name": "onPressedChange",
+        "payload": "(pressed: boolean) => void",
+        "description": "Called when toggle state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Button variant=\"primary\" tone=\"default\" leadingIcon=\"plus\" on:click={() => console.log(\"clicked\")}>\n  Create Item\n</Button>"
+    "usage": "<script lang=\"ts\">\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Button variant=\"primary\" tone=\"default\" leadingIcon=\"plus\" onClick={() => console.log(\"clicked\")}>\n  Create Item\n</Button>"
   },
   "calendar": {
     "props": [
@@ -706,7 +733,7 @@
         "name": "value",
         "type": "string | DateRangeValue | null",
         "default": "null",
-        "description": "Controlled selected value. String in single mode, DateRangeValue in range mode."
+        "description": "Bindable selected value. String in single mode, DateRangeValue in range mode."
       },
       {
         "name": "defaultValue",
@@ -718,7 +745,7 @@
         "name": "visibleMonth",
         "type": "string | null",
         "default": "null",
-        "description": "Controlled visible month in YYYY-MM format."
+        "description": "Bindable visible month in YYYY-MM format."
       },
       {
         "name": "weekStartsOn",
@@ -743,30 +770,73 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the calendar."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string | DateRangeValue) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected date or range changes."
+      },
+      {
+        "name": "onMonthChange",
+        "type": "((month: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the visible month changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string } | { value: DateRangeValue }",
-        "description": "Fires when the selected date or range changes."
-      },
-      {
-        "name": "monthChange",
-        "payload": "{ month: string }",
-        "description": "Fires when the visible month changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { Calendar } from \"@poodle/svelte\";\n\n  let selectedDate: string | null = null;\n</script>\n\n<Calendar bind:value={selectedDate} weekStartsOn=\"monday\" locale=\"en-US\" />\n\n<!-- Range mode -->\n<Calendar mode=\"range\" ariaLabel=\"Select a date range\" />"
   },
   "callout": {
     "props": [
       {
+        "name": "tone",
+        "type": "StatusTone | \"neutral\"",
+        "default": "\"neutral\"",
+        "description": "Semantic tone and color treatment."
+      },
+      {
+        "name": "title",
+        "type": "string | null",
+        "default": "null",
+        "description": "Bold heading text."
+      },
+      {
+        "name": "message",
+        "type": "string | null",
+        "default": "null",
+        "description": "Body text rendered in a paragraph."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Accessible label for the callout region."
+      },
+      {
+        "name": "announceMode",
+        "type": "\"none\" | \"polite\" | \"assertive\"",
+        "default": "\"none\"",
+        "description": "ARIA live-region behavior."
+      },
+      {
+        "name": "dismissible",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether to show a dismiss control."
+      },
+      {
+        "name": "dismissLabel",
+        "type": "string",
+        "default": "\"Dismiss message\"",
+        "description": "Accessible label for the dismiss button."
+      },
+      {
         "name": "size",
         "type": "ControlSize | null",
         "default": "null",
-        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
+        "description": "Explicit semantic size override."
       },
       {
         "name": "sizeRole",
@@ -778,73 +848,31 @@
         "name": "density",
         "type": "ControlDensity | null",
         "default": "null",
-        "description": "Explicit density override. Supports compact, default, and comfortable."
-      },
-      {
-        "name": "tone",
-        "type": "StatusTone | \"neutral\"",
-        "default": "\"neutral\"",
-        "description": "Visual tone indicating the callout severity."
-      },
-      {
-        "name": "title",
-        "type": "string | null",
-        "default": "null",
-        "description": "Title text for the callout."
-      },
-      {
-        "name": "message",
-        "type": "string | null",
-        "default": "null",
-        "description": "Body message text."
-      },
-      {
-        "name": "ariaLabel",
-        "type": "string | null",
-        "default": "null",
-        "description": "Accessible label for the callout."
-      },
-      {
-        "name": "announceMode",
-        "type": "\"none\" | \"polite\" | \"assertive\"",
-        "default": "\"none\"",
-        "description": "ARIA live region announcement mode."
-      },
-      {
-        "name": "dismissible",
-        "type": "boolean",
-        "default": "false",
-        "description": "Whether the callout can be dismissed."
-      },
-      {
-        "name": "dismissLabel",
-        "type": "string",
-        "default": "\"Dismiss message\"",
-        "description": "Accessible label for the dismiss button."
+        "description": "Explicit density override for spacing."
       }
     ],
     "slots": [
       {
+        "name": "children",
+        "description": "Additional body content snippet rendered inside the callout content area."
+      },
+      {
         "name": "icon",
-        "description": "Custom icon replacing the default tone icon."
+        "description": "Snippet override for the default tone-based icon."
       },
       {
         "name": "actions",
-        "description": "Action buttons rendered in the callout."
-      },
-      {
-        "name": "default",
-        "description": "Rich body content replacing the message prop."
+        "description": "Action snippet rendered on the right side of the callout."
       }
     ],
     "events": [
       {
-        "name": "dismiss",
-        "payload": "void",
-        "description": "Fires when the callout is dismissed."
+        "name": "onDismiss",
+        "payload": "() => void",
+        "description": "Called when the dismiss control is activated."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Callout } from \"@poodle/svelte\";\n</script>\n\n<Callout tone=\"warning\" title=\"Unsaved changes\" message=\"You have unsaved changes that will be lost.\" dismissible />"
+    "usage": "<script lang=\"ts\">\n  import { Callout } from \"@poodle/svelte\";\n</script>\n\n<Callout\n  tone=\"warning\"\n  title=\"Heads up\"\n  message=\"This message can be dismissed.\"\n  dismissible\n  onDismiss={() => console.log(\"dismissed\")}\n/>"
   },
   "card": {
     "props": [
@@ -876,7 +904,7 @@
         "name": "media",
         "type": "boolean",
         "default": "false",
-        "description": "Whether the card contains a media slot."
+        "description": "Whether the card contains media and should apply the media-region treatment."
       },
       {
         "name": "ariaLabel",
@@ -887,8 +915,8 @@
     ],
     "slots": [
       {
-        "name": "media",
-        "description": "Media content (image, video) rendered at the top or side."
+        "name": "mediaContent",
+        "description": "Media content rendered at the top or side."
       },
       {
         "name": "header",
@@ -899,12 +927,12 @@
         "description": "Footer content with actions or metadata."
       },
       {
-        "name": "default",
+        "name": "children",
         "description": "Main body content of the card."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Card } from \"@poodle/svelte\";\n</script>\n\n<Card variant=\"default\" layout=\"vertical\">\n  <svelte:fragment slot=\"header\">Project Alpha</svelte:fragment>\n  <p>A brief description of the project and its current status.</p>\n  <svelte:fragment slot=\"footer\">Updated 2 hours ago</svelte:fragment>\n</Card>"
+    "usage": "<script lang=\"ts\">\n  import { Card } from \"@poodle/svelte\";\n</script>\n\n<Card variant=\"default\" layout=\"vertical\">\n  {#snippet header()}Project Alpha{/snippet}\n  <p>A brief description of the project and its current status.</p>\n  {#snippet footer()}Updated 2 hours ago{/snippet}\n</Card>"
   },
   "card-radio-group": {
     "props": [
@@ -955,21 +983,21 @@
         "type": "boolean",
         "default": "false",
         "description": "Whether the entire group is disabled."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected card changes."
       }
     ],
     "slots": [
       {
         "name": "card",
-        "description": "Custom card renderer. Receives slot props: item, checked, disabled."
+        "description": "Custom card renderer snippet. Receives: item, checked, disabled."
       }
     ],
-    "events": [
-      {
-        "name": "change",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected card changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { CardRadioGroup } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"basic\", label: \"Basic\", description: \"For personal use\" },\n    { value: \"pro\", label: \"Pro\", description: \"For teams\" },\n  ];\n\n  let plan = \"basic\";\n</script>\n\n<CardRadioGroup {items} bind:value={plan} columns={2} />"
   },
   "checkbox": {
@@ -1000,9 +1028,9 @@
       },
       {
         "name": "checked",
-        "type": "boolean",
-        "default": "false",
-        "description": "Controlled checked state."
+        "type": "boolean | undefined",
+        "default": "undefined",
+        "description": "Bindable checked state. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultChecked",
@@ -1051,16 +1079,16 @@
         "type": "string | null",
         "default": "null",
         "description": "Optional selected-state color override used for the checked and mixed indicator fill/border."
+      },
+      {
+        "name": "onCheckedChange",
+        "type": "((checked: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the checked state changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "checkedChange",
-        "payload": "{ checked: boolean }",
-        "description": "Fires when the checked state changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { Checkbox } from \"@poodle/svelte\";\n\n  let agreed = false;\n</script>\n\n<Checkbox label=\"I agree to the terms\" bind:checked={agreed} selectedColor=\"#22c55e\" />"
   },
   "code": {
@@ -1179,17 +1207,17 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the toggle button."
+      },
+      {
+        "name": "onToggle",
+        "type": "((isCollapsed: boolean) => void) | null",
+        "default": "null",
+        "description": "Called when the collapsed state changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "toggle",
-        "payload": "{ isCollapsed: boolean }",
-        "description": "Fires when the collapsed state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { CollapseToggle } from \"@poodle/svelte\";\n\n  let collapsed = false;\n</script>\n\n<CollapseToggle {collapsed} direction=\"left\" ariaLabel=\"Toggle sidebar\" on:toggle={(e) => (collapsed = e.detail.isCollapsed)} />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { CollapseToggle } from \"@poodle/svelte\";\n\n  let collapsed = false;\n</script>\n\n<CollapseToggle {collapsed} direction=\"left\" ariaLabel=\"Toggle sidebar\" onToggle={(next) => (collapsed = next)} />"
   },
   "collapsible": {
     "props": [
@@ -1246,6 +1274,12 @@
         "type": "ControlDensity | null",
         "default": "null",
         "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the open state changes."
       }
     ],
     "slots": [
@@ -1258,13 +1292,7 @@
         "description": "Content revealed when the collapsible is open."
       }
     ],
-    "events": [
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { Collapsible } from \"@poodle/svelte\";\n</script>\n\n<Collapsible title=\"Advanced options\" description=\"Configure additional settings\">\n  <p>Advanced configuration fields go here.</p>\n</Collapsible>"
   },
   "color-picker": {
@@ -1289,9 +1317,9 @@
       },
       {
         "name": "value",
-        "type": "string",
-        "default": "\"#6366f1\"",
-        "description": "Current color value in hex format."
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Current color value in hex format. Omit for the internal default `#6366f1`, or supply/bind it and update through onChange."
       },
       {
         "name": "swatches",
@@ -1325,9 +1353,9 @@
       },
       {
         "name": "open",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled open state of the picker popover."
+        "type": "boolean | null | undefined",
+        "default": "undefined",
+        "description": "Picker popover visibility. Omit for uncontrolled mode; when supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -1340,22 +1368,23 @@
         "type": "ColorInputMode",
         "default": "\"hex\"",
         "description": "Default color input mode."
+      },
+      {
+        "name": "onChange",
+        "type": "((value: string) => void) | null",
+        "default": "null",
+        "description": "Called when the selected color changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | null",
+        "default": "null",
+        "description": "Called when the picker open state changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "change",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected color changes."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the picker open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { ColorPicker } from \"@poodle/svelte\";\n\n  let color = \"#6366f1\";\n  const swatches = [\"#ef4444\", \"#f59e0b\", \"#10b981\", \"#3b82f6\", \"#8b5cf6\"];\n</script>\n\n<ColorPicker bind:value={color} {swatches} showAlpha />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ColorPicker } from \"@poodle/svelte\";\n\n  let color = \"#6366f1\";\n  const swatches = [\"#ef4444\", \"#f59e0b\", \"#10b981\", \"#3b82f6\", \"#8b5cf6\"];\n</script>\n\n<ColorPicker\n  value={color}\n  onChange={(nextColor) => (color = nextColor)}\n  {swatches}\n  showAlpha\n/>"
   },
   "command-palette": {
     "props": [
@@ -1429,27 +1458,27 @@
     "slots": [],
     "events": [
       {
-        "name": "queryChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the search query changes."
+        "name": "onQueryChange",
+        "payload": "(value: string) => void",
+        "description": "Called when the search query changes."
       },
       {
-        "name": "commandSelect",
-        "payload": "{ id: string }",
-        "description": "Fires when a command is selected."
+        "name": "onCommandSelect",
+        "payload": "(id: string) => void",
+        "description": "Called when a command is selected."
       },
       {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
+        "name": "onOpenChange",
+        "payload": "(open: boolean) => void",
+        "description": "Called when the open state changes."
       },
       {
-        "name": "activeChange",
-        "payload": "{ id: string | null }",
-        "description": "Fires when the active (highlighted) item changes."
+        "name": "onActiveChange",
+        "payload": "(id: string | null) => void",
+        "description": "Called when the active (highlighted) item changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { CommandPalette } from \"@poodle/svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"new-file\", label: \"New File\", shortcut: \"Ctrl+N\" },\n    { id: \"open-file\", label: \"Open File\", shortcut: \"Ctrl+O\" },\n  ];\n</script>\n\n<CommandPalette bind:open {items} on:commandSelect={(e) => handleCommand(e.detail.id)} />"
+    "usage": "<script lang=\"ts\">\n  import { CommandPalette } from \"@poodle/svelte\";\n\n  let open = false;\n  let query = \"\";\n  const items = [\n    { id: \"new-file\", title: \"New File\", shortcut: \"Ctrl+N\" },\n    { id: \"open-file\", title: \"Open File\", shortcut: \"Ctrl+O\" },\n  ];\n</script>\n\n<CommandPalette\n  {open}\n  {query}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  onQueryChange={(nextQuery) => (query = nextQuery)}\n  {items}\n  onCommandSelect={(id) => handleCommand(id)}\n/>"
   },
   "confirm-action": {
     "props": [
@@ -1511,26 +1540,15 @@
     "slots": [
       {
         "name": "trigger",
-        "description": "Custom trigger element replacing the default button."
+        "description": "Snippet for a custom trigger element replacing the default button."
       },
       {
-        "name": "default",
+        "name": "children",
         "description": "Additional content rendered in the confirmation dialog body."
       }
     ],
-    "events": [
-      {
-        "name": "confirm",
-        "payload": "void",
-        "description": "Fires when the action is confirmed."
-      },
-      {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the action is cancelled."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { ConfirmAction } from \"@poodle/svelte\";\n</script>\n\n<ConfirmAction\n  title=\"Delete this record?\"\n  description=\"This action is permanent and cannot be undone.\"\n  tone=\"danger\"\n  triggerLabel=\"Delete\"\n  on:confirm={() => deleteRecord()}\n/>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ConfirmAction, Button } from \"@poodle/svelte\";\n</script>\n\n<ConfirmAction\n  title=\"Delete this record?\"\n  description=\"This action is permanent and cannot be undone.\"\n  tone=\"danger\"\n  triggerLabel=\"Delete\"\n  onConfirm={() => deleteRecord()}\n>\n  {#snippet trigger()}\n    <Button variant=\"ghost\" tone=\"danger\">Delete</Button>\n  {/snippet}\n</ConfirmAction>"
   },
   "context-menu": {
     "props": [
@@ -1591,17 +1609,17 @@
     ],
     "events": [
       {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
+        "name": "onOpenChange",
+        "payload": "(open: boolean) => void",
+        "description": "Called when the open state changes."
       },
       {
-        "name": "action",
-        "payload": "{ value: string }",
-        "description": "Fires when a menu item is selected."
+        "name": "onAction",
+        "payload": "(value: string) => void",
+        "description": "Called when a menu item is selected."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ContextMenu } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"copy\", label: \"Copy\" },\n    { value: \"paste\", label: \"Paste\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<ContextMenu {items} on:action={(e) => handleAction(e.detail.value)}>\n  <div>Right-click me</div>\n</ContextMenu>"
+    "usage": "<script lang=\"ts\">\n  import { ContextMenu } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"copy\", label: \"Copy\" },\n    { value: \"paste\", label: \"Paste\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<ContextMenu {items} onAction={(value) => handleAction(value)}>\n  <div>Right-click me</div>\n</ContextMenu>"
   },
   "data-table": {
     "props": [
@@ -1682,12 +1700,6 @@
         "type": "TableRowAction[] | ((row: TableRow) => TableRowAction[])",
         "default": "[]",
         "description": "Richer per-row action model for single actions or action menus."
-      },
-      {
-        "name": "expandedRowWhen",
-        "type": "(row: TableRow) => boolean",
-        "default": "() => false",
-        "description": "Controls when the expanded row slot renders."
       },
       {
         "name": "filters",
@@ -1777,72 +1789,72 @@
     "slots": [
       {
         "name": "cell",
-        "description": "Custom cell rendering with `let:column`, `let:row`, and `let:value`."
+        "description": "Snippet for custom cell rendering with `(column, row, value)`."
       },
       {
         "name": "expandedRow",
-        "description": "Expanded detail row content with `let:row`."
+        "description": "Snippet for expanded detail content with `(row)`."
       },
       {
         "name": "empty",
-        "description": "Custom empty-state content."
+        "description": "Snippet for custom empty-state content."
       }
     ],
     "events": [
       {
-        "name": "sortChange",
-        "payload": "{ columnId: string; direction: TableSortDirection }",
-        "description": "Fires when the sort column or direction changes."
+        "name": "onSortChange",
+        "payload": "({ columnId: string; direction: TableSortDirection }) => void",
+        "description": "Called when the sort column or direction changes."
       },
       {
-        "name": "rowToggle",
-        "payload": "{ rowId: string; selected: boolean }",
-        "description": "Fires when a row selection is toggled."
+        "name": "onRowToggle",
+        "payload": "({ rowId: string; selected: boolean }) => void",
+        "description": "Called when a row selection is toggled."
       },
       {
-        "name": "toggleAll",
-        "payload": "{ selected: boolean }",
-        "description": "Fires when the select-all checkbox is toggled."
+        "name": "onToggleAll",
+        "payload": "({ selected: boolean }) => void",
+        "description": "Called when the select-all checkbox is toggled."
       },
       {
-        "name": "rowAction",
-        "payload": "{ rowId: string }",
-        "description": "Fires when a row action button is clicked."
+        "name": "onRowAction",
+        "payload": "({ rowId: string }) => void",
+        "description": "Called when a row action button is clicked."
       },
       {
-        "name": "rowActionSelect",
-        "payload": "{ rowId: string; row: TableRow; action: TableRowAction }",
-        "description": "Fires when a rich row action is selected."
+        "name": "onRowActionSelect",
+        "payload": "({ rowId: string; row: TableRow; action: TableRowAction }) => void",
+        "description": "Called when a rich row action is selected."
       },
       {
-        "name": "columnVisibilityChange",
-        "payload": "{ columnId: string; visible: boolean }",
-        "description": "Fires when column visibility changes."
+        "name": "onColumnVisibilityChange",
+        "payload": "({ columnId: string; visible: boolean }) => void",
+        "description": "Called when column visibility changes."
       },
       {
-        "name": "exportCsv",
-        "payload": "{ filename: string }",
-        "description": "Fires when CSV export is triggered."
+        "name": "onExportCsv",
+        "payload": "({ filename: string }) => void",
+        "description": "Called when CSV export is triggered."
       },
       {
-        "name": "rowClick",
-        "payload": "{ rowId: string; row: TableRow }",
-        "description": "Fires when a non-interactive row surface is clicked."
+        "name": "onRowClick",
+        "payload": "({ rowId: string; row: TableRow }) => void",
+        "description": "Called when a non-interactive row surface is clicked."
       },
       {
-        "name": "filterChange",
-        "payload": "{ filters: TableFilters }",
-        "description": "Fires when a column filter value changes."
+        "name": "onFilterChange",
+        "payload": "({ filters: TableFilters }) => void",
+        "description": "Called when a column filter value changes."
       },
       {
-        "name": "pageChange",
-        "payload": "{ page: number }",
-        "description": "Fires when the requested page changes."
+        "name": "onPageChange",
+        "payload": "({ page: number }) => void",
+        "description": "Called when the requested page changes."
       },
       {
-        "name": "limitChange",
-        "payload": "{ limit: number }",
-        "description": "Fires when the requested page size changes."
+        "name": "onLimitChange",
+        "payload": "({ limit: number }) => void",
+        "description": "Called when the requested page size changes."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { DataTable } from \"@poodle/svelte\";\n\n  const columns = [\n    { id: \"name\", label: \"Name\", sortable: true },\n    { id: \"email\", label: \"Email\" },\n    { id: \"role\", label: \"Role\" },\n  ];\n\n  const rows = [\n    { id: \"1\", cells: { name: \"Alice\", email: \"alice@example.com\", role: \"Admin\" } },\n    { id: \"2\", cells: { name: \"Bob\", email: \"bob@example.com\", role: \"Editor\" } },\n  ];\n</script>\n\n<DataTable {columns} {rows} selectable showColumnVisibility showExport />"
@@ -1871,7 +1883,7 @@
         "name": "value",
         "type": "string | null",
         "default": "null",
-        "description": "Controlled selected date in ISO format."
+        "description": "Selected date in ISO format. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "defaultValue",
@@ -1883,7 +1895,7 @@
         "name": "open",
         "type": "boolean | null",
         "default": "null",
-        "description": "Controlled open state of the calendar popup."
+        "description": "Calendar popup visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -1920,6 +1932,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the date picker."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected date changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the calendar popup opens or closes."
       }
     ],
     "slots": [
@@ -1928,19 +1952,8 @@
         "description": "Custom trigger content."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected date changes."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the calendar open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { DatePicker } from \"@poodle/svelte\";\n\n  let date: string | null = null;\n</script>\n\n<DatePicker bind:value={date} placeholder=\"Pick a date\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { DatePicker } from \"@poodle/svelte\";\n\n  let date: string | null = null;\n</script>\n\n<DatePicker\n  value={date}\n  onValueChange={(nextValue) => (date = nextValue)}\n  placeholder=\"Pick a date\"\n/>"
   },
   "date-range-picker": {
     "props": [
@@ -1966,7 +1979,7 @@
         "name": "value",
         "type": "DateRangeValue | null",
         "default": "null",
-        "description": "Controlled date range value."
+        "description": "Selected date range. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "defaultValue",
@@ -1978,7 +1991,7 @@
         "name": "open",
         "type": "boolean | null",
         "default": "null",
-        "description": "Controlled open state."
+        "description": "Picker visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -2015,6 +2028,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the date range picker."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: DateRangeValue) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the date range changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the picker opens or closes."
       }
     ],
     "slots": [
@@ -2023,19 +2048,8 @@
         "description": "Custom trigger content."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: DateRangeValue }",
-        "description": "Fires when the date range changes."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the picker open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { DateRangePicker } from \"@poodle/svelte\";\n\n  let range = { start: null, end: null };\n</script>\n\n<DateRangePicker bind:value={range} placeholder=\"Select date range\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { DateRangePicker } from \"@poodle/svelte\";\n\n  let range = { start: null, end: null };\n</script>\n\n<DateRangePicker\n  value={range}\n  onValueChange={(nextValue) => (range = nextValue)}\n  placeholder=\"Select date range\"\n/>"
   },
   "date-time-picker": {
     "props": [
@@ -2061,7 +2075,7 @@
         "name": "value",
         "type": "DateTimeValue | null",
         "default": "null",
-        "description": "Controlled date-time value."
+        "description": "Selected date-time value. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "defaultValue",
@@ -2073,7 +2087,7 @@
         "name": "open",
         "type": "boolean | null",
         "default": "null",
-        "description": "Controlled open state."
+        "description": "Picker visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -2110,6 +2124,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the date-time picker."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: DateTimeValue) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the date-time value changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the picker opens or closes."
       }
     ],
     "slots": [
@@ -2118,19 +2144,8 @@
         "description": "Custom trigger content."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: DateTimeValue }",
-        "description": "Fires when the date-time value changes."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the picker open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { DateTimePicker } from \"@poodle/svelte\";\n\n  let dateTime = { date: null, time: null };\n</script>\n\n<DateTimePicker bind:value={dateTime} placeholder=\"Select date and time\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { DateTimePicker } from \"@poodle/svelte\";\n\n  let dateTime = { date: null, time: null };\n</script>\n\n<DateTimePicker\n  value={dateTime}\n  onValueChange={(nextValue) => (dateTime = nextValue)}\n  placeholder=\"Select date and time\"\n/>"
   },
   "date-time-range-picker": {
     "props": [
@@ -2156,7 +2171,7 @@
         "name": "value",
         "type": "DateTimeRangeValue | null",
         "default": "null",
-        "description": "Controlled date-time range value."
+        "description": "Selected date-time range. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "defaultValue",
@@ -2168,7 +2183,7 @@
         "name": "open",
         "type": "boolean | null",
         "default": "null",
-        "description": "Controlled open state."
+        "description": "Picker visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -2205,6 +2220,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the date-time range picker."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: DateTimeRangeValue) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the date-time range changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the picker opens or closes."
       }
     ],
     "slots": [
@@ -2213,19 +2240,8 @@
         "description": "Custom trigger content."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: DateTimeRangeValue }",
-        "description": "Fires when the date-time range changes."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the picker open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { DateTimeRangePicker } from \"@poodle/svelte\";\n\n  let range = { start: { date: null, time: null }, end: { date: null, time: null } };\n</script>\n\n<DateTimeRangePicker bind:value={range} placeholder=\"Select date and time range\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { DateTimeRangePicker } from \"@poodle/svelte\";\n\n  let range = { start: { date: null, time: null }, end: { date: null, time: null } };\n</script>\n\n<DateTimeRangePicker\n  value={range}\n  onValueChange={(nextValue) => (range = nextValue)}\n  placeholder=\"Select date and time range\"\n/>"
   },
   "detail-item": {
     "props": [
@@ -2248,6 +2264,12 @@
         "description": "Description text shown below the label."
       },
       {
+        "name": "emptyText",
+        "type": "string",
+        "default": "\"—\"",
+        "description": "Fallback text shown when value is null and no custom content is provided."
+      },
+      {
         "name": "truncateValue",
         "type": "boolean",
         "default": "false",
@@ -2264,16 +2286,32 @@
         "type": "\"inline\" | \"stacked\"",
         "default": "\"inline\"",
         "description": "Layout mode for label/value arrangement."
+      },
+      {
+        "name": "presentation",
+        "type": "\"simple\" | \"surface\"",
+        "default": "\"simple\"",
+        "description": "Visual presentation mode for the row."
+      },
+      {
+        "name": "span",
+        "type": "\"full\" | \"half\" | null",
+        "default": "null",
+        "description": "Optional parent-grid span override."
       }
     ],
     "slots": [
       {
-        "name": "value",
+        "name": "valueContent",
         "description": "Custom value content replacing the value prop."
       },
       {
         "name": "action",
         "description": "Action button rendered at the end of the row."
+      },
+      {
+        "name": "children",
+        "description": "Fallback custom value content when valueContent is not provided."
       }
     ],
     "events": [],
@@ -2367,15 +2405,15 @@
     "slots": [
       {
         "name": "header",
-        "description": "Custom header content."
+        "description": "Custom header content snippet."
       },
       {
-        "name": "default",
-        "description": "Main body content."
+        "name": "children",
+        "description": "Main body content snippet."
       },
       {
-        "name": "state",
-        "description": "Custom state content for loading/error views."
+        "name": "stateContent",
+        "description": "Custom state content snippet for loading/error views."
       }
     ],
     "events": [],
@@ -2385,9 +2423,9 @@
     "props": [
       {
         "name": "open",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled open state."
+        "type": "boolean | null | undefined",
+        "default": "undefined",
+        "description": "Host-owned open state when supplied. Omit for uncontrolled mode."
       },
       {
         "name": "defaultOpen",
@@ -2496,39 +2534,40 @@
         "type": "\"dialog\" | \"alertdialog\"",
         "default": "undefined",
         "description": "Deprecated. Use role instead."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the open state changes."
+      },
+      {
+        "name": "onRequestClose",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a close is requested (Escape, backdrop, or close button)."
       }
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Dialog body content."
+        "name": "children",
+        "description": "Dialog body content snippet."
       },
       {
         "name": "header",
-        "description": "Custom header content replacing the built-in title/description."
+        "description": "Custom header snippet replacing the built-in title/description."
       },
       {
         "name": "actions",
-        "description": "Footer actions (buttons) for the dialog."
+        "description": "Footer actions snippet."
       },
       {
         "name": "footer",
-        "description": "Custom footer replacing the default actions slot."
+        "description": "Custom footer snippet replacing the actions row."
       }
     ],
-    "events": [
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
-      },
-      {
-        "name": "requestClose",
-        "payload": "void",
-        "description": "Fires when a close is requested (Escape or backdrop click)."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { Dialog, Button } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<Button on:click={() => (open = true)}>Open Dialog</Button>\n\n<Dialog\n  bind:open\n  title=\"Edit Settings\"\n  description=\"Update your preferences below.\"\n  showCloseButton\n  width=\"lg\"\n>\n  <p>Dialog content here.</p>\n  <svelte:fragment slot=\"actions\">\n    <Button variant=\"secondary\" on:click={() => (open = false)}>Cancel</Button>\n    <Button variant=\"primary\">Save</Button>\n  </svelte:fragment>\n</Dialog>\n\n<!-- Bare mode: no padding, consumer controls all layout -->\n<Dialog bind:open bare width=\"sm\">\n  <div style=\"padding: 2rem;\">Custom bare content</div>\n</Dialog>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Dialog, Button } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<Button onClick={() => (open = true)}>Open Dialog</Button>\n\n<Dialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Edit Settings\"\n  description=\"Update your preferences below.\"\n  showCloseButton\n  width=\"lg\"\n>\n  <p>Dialog content here.</p>\n  {#snippet actions()}\n    <Button variant=\"secondary\" onClick={() => (open = false)}>Cancel</Button>\n    <Button variant=\"primary\">Save</Button>\n  {/snippet}\n</Dialog>\n\n<!-- Bare mode: no padding, consumer controls all layout -->\n<Dialog open={open} onOpenChange={(nextOpen) => (open = nextOpen)} bare width=\"sm\">\n  <div style=\"padding: 2rem;\">Custom bare content</div>\n</Dialog>"
   },
   "dock-region": {
     "props": [
@@ -2603,42 +2642,50 @@
         "type": "((panelId: string, sourceEdge: DockEdge) => boolean) | null",
         "default": "null",
         "description": "Callback to determine if a dragged panel can be dropped here."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the active panel changes."
+      },
+      {
+        "name": "onCollapsedChange",
+        "type": "((isCollapsed: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the collapsed state changes."
+      },
+      {
+        "name": "onClose",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a panel tab is closed."
+      },
+      {
+        "name": "onReorder",
+        "type": "((items: string[]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when panel tabs are reordered."
+      },
+      {
+        "name": "onPanelDrop",
+        "type": "((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a panel is dropped onto this dock."
       }
     ],
     "slots": [
       {
         "name": "panel",
-        "description": "Panel content renderer. Receives slot props: item."
+        "description": "Static-panel snippet. Receives the current panel item."
+      },
+      {
+        "name": "children",
+        "description": "Flexible-body snippet. Receives the current active item."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the active panel changes."
-      },
-      {
-        "name": "collapsedChange",
-        "payload": "{ isCollapsed: boolean }",
-        "description": "Fires when the collapsed state changes."
-      },
-      {
-        "name": "close",
-        "payload": "{ value: string }",
-        "description": "Fires when a panel tab is closed."
-      },
-      {
-        "name": "reorder",
-        "payload": "{ items: string[] }",
-        "description": "Fires when panel tabs are reordered."
-      },
-      {
-        "name": "panelDrop",
-        "payload": "{ panel: PanelDragData; targetEdge: DockEdge }",
-        "description": "Fires when a panel is dropped onto this dock."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { DockRegion } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"explorer\", label: \"Explorer\", icon: \"folder\" },\n    { id: \"search\", label: \"Search\", icon: \"search\" },\n  ];\n</script>\n\n<DockRegion edge=\"left\" {items} value=\"explorer\">\n  <svelte:fragment slot=\"panel\" let:item>\n    {#if item.id === \"explorer\"}\n      <p>File explorer content</p>\n    {:else}\n      <p>Search panel content</p>\n    {/if}\n  </svelte:fragment>\n</DockRegion>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { DockRegion } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"explorer\", label: \"Explorer\", icon: \"folder\" },\n    { id: \"search\", label: \"Search\", icon: \"search\" },\n  ];\n</script>\n\n<DockRegion edge=\"left\" {items} value=\"explorer\">\n  {#snippet children(activeItem)}\n    {#if activeItem?.id === \"explorer\"}\n      <p>File explorer content</p>\n    {:else}\n      <p>Search panel content</p>\n    {/if}\n  {/snippet}\n</DockRegion>"
   },
   "drawer": {
     "props": [
@@ -2664,7 +2711,7 @@
         "name": "open",
         "type": "boolean | null",
         "default": "null",
-        "description": "Controlled open state."
+        "description": "Drawer visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -2713,31 +2760,32 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the drawer."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the open state changes."
+      },
+      {
+        "name": "onRequestClose",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a close is requested."
       }
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Drawer body content."
+        "name": "children",
+        "description": "Drawer body content snippet."
       },
       {
         "name": "actions",
-        "description": "Footer actions for the drawer."
+        "description": "Footer actions snippet for the drawer."
       }
     ],
-    "events": [
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
-      },
-      {
-        "name": "requestClose",
-        "payload": "void",
-        "description": "Fires when a close is requested."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { Drawer, Button } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<Button on:click={() => (open = true)}>Open Drawer</Button>\n\n<Drawer bind:open edge=\"right\" title=\"Item Details\">\n  <p>Detail content goes here.</p>\n  <svelte:fragment slot=\"actions\">\n    <Button variant=\"primary\">Save</Button>\n  </svelte:fragment>\n</Drawer>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Drawer, Button } from \"@poodle/svelte\";\n\n  let open = false;\n</script>\n\n<Button onClick={() => (open = true)}>Open Drawer</Button>\n\n<Drawer open={open} onOpenChange={(nextOpen) => (open = nextOpen)} edge=\"right\" title=\"Item Details\">\n  <p>Detail content goes here.</p>\n  {#snippet actions()}\n    <Button variant=\"primary\">Save</Button>\n  {/snippet}\n</Drawer>"
   },
   "duration-input": {
     "props": [
@@ -2812,21 +2860,16 @@
         "type": "string",
         "default": "\"Duration\"",
         "description": "Accessible label for the duration input."
-      }
-    ],
-    "slots": [
+      },
       {
-        "name": "default",
-        "description": "Custom content rendered alongside the duration fields."
+        "name": "onChange",
+        "type": "((detail: { hours: number; minutes: number; seconds: number; totalSeconds: number }) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the duration value changes."
       }
     ],
-    "events": [
-      {
-        "name": "change",
-        "payload": "{ hours: number; minutes: number; seconds: number; totalSeconds: number }",
-        "description": "Fires when the duration value changes."
-      }
-    ],
+    "slots": [],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { DurationInput } from \"@poodle/svelte\";\n\n  let hours = 1;\n  let minutes = 30;\n  let seconds = 0;\n</script>\n\n<DurationInput bind:hours bind:minutes bind:seconds showSeconds={false} />"
   },
   "editable-label": {
@@ -2853,7 +2896,7 @@
         "name": "value",
         "type": "string",
         "required": true,
-        "description": "Current text value of the editable label."
+        "description": "Current committed label. Hosts apply edits from onCommit."
       },
       {
         "name": "ariaLabel",
@@ -2918,22 +2961,22 @@
     ],
     "events": [
       {
-        "name": "editStart",
-        "payload": "void",
-        "description": "Fires when edit mode is activated."
+        "name": "onEditStart",
+        "payload": "() => void",
+        "description": "Called when edit mode is activated."
       },
       {
-        "name": "commit",
-        "payload": "{ value: string; previousValue: string }",
-        "description": "Fires when the edit is committed."
+        "name": "onCommit",
+        "payload": "(detail: { value: string; previousValue: string }) => void",
+        "description": "Called when the edit is committed."
       },
       {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the edit is cancelled."
+        "name": "onCancel",
+        "payload": "() => void",
+        "description": "Called when the edit is cancelled."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { EditableLabel } from \"@poodle/svelte\";\n\n  let name = \"Untitled Document\";\n</script>\n\n<EditableLabel bind:value={name} activationMode=\"doubleClick\" showEditIcon />"
+    "usage": "<script lang=\"ts\">\n  import { EditableLabel } from \"@poodle/svelte\";\n\n  let name = \"Untitled Document\";\n</script>\n\n<EditableLabel\n  value={name}\n  activationMode=\"doubleClick\"\n  showEditIcon\n  onCommit={({ value }) => {\n    name = value;\n    saveName(value);\n  }}\n/>"
   },
   "editable-list": {
     "props": [
@@ -2941,7 +2984,7 @@
         "name": "items",
         "type": "EditableListItem[]",
         "default": "[]",
-        "description": "Array of list items (two-way bindable)."
+        "description": "Bindable array of list items."
       },
       {
         "name": "ariaLabel",
@@ -3046,13 +3089,13 @@
         "description": "Cancel button label when workflow chrome is shown."
       },
       {
-        "name": "onsubmit",
+        "name": "onSubmit",
         "type": "() => void | Promise<void>",
         "default": "null",
         "description": "Optional submit callback; enables workflow chrome."
       },
       {
-        "name": "oncancel",
+        "name": "onCancel",
         "type": "() => void",
         "default": "null",
         "description": "Optional cancel callback; enables workflow chrome."
@@ -3079,39 +3122,39 @@
     "slots": [
       {
         "name": "item",
-        "description": "Custom item renderer. Receives slot props: item."
+        "description": "Custom item snippet. Receives the current item."
       }
     ],
     "events": [
       {
-        "name": "reorder",
-        "payload": "{ items: EditableListItem[] }",
-        "description": "Fires when items are reordered."
+        "name": "onReorder",
+        "payload": "(items: EditableListItem[]) => void",
+        "description": "Called when items are reordered."
       },
       {
-        "name": "add",
-        "payload": "{ item: EditableListItem }",
-        "description": "Fires when a new item is added."
+        "name": "onAdd",
+        "payload": "(item: EditableListItem) => void",
+        "description": "Called when a new item is added."
       },
       {
-        "name": "remove",
-        "payload": "{ id: string }",
-        "description": "Fires when an item is removed."
+        "name": "onRemove",
+        "payload": "(id: string) => void",
+        "description": "Called when an item is removed."
       },
       {
-        "name": "change",
-        "payload": "{ items: EditableListItem[] }",
-        "description": "Fires when the list items change (add or remove)."
+        "name": "onChange",
+        "payload": "(items: EditableListItem[]) => void",
+        "description": "Called whenever the list items change, including reorder, add, and remove."
       },
       {
-        "name": "submit",
-        "payload": "void",
-        "description": "Fires when the submit action is triggered."
+        "name": "onSubmit",
+        "payload": "() => void | Promise<void>",
+        "description": "Called when the submit action is triggered."
       },
       {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the cancel action is triggered."
+        "name": "onCancel",
+        "payload": "() => void",
+        "description": "Called when the cancel action is triggered."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { EditableList } from \"@poodle/svelte\";\n\n  let items = [\n    { id: \"1\", label: \"First item\" },\n    { id: \"2\", label: \"Second item\" },\n  ];\n</script>\n\n<EditableList bind:items editable addLabel=\"Add step\" addPlaceholder=\"New step\" />"
@@ -3128,7 +3171,7 @@
         "name": "value",
         "type": "string",
         "default": "\"\"",
-        "description": "Current input value."
+        "description": "Current input value. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "parsed",
@@ -3167,26 +3210,36 @@
         "description": "Error message to display."
       },
       {
+        "name": "onParse",
+        "type": "((parsed: ParsedEmbed | null, error: string | null) => void) | null",
+        "default": "null",
+        "description": "Called after debounced parsing completes."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | null",
+        "default": "null",
+        "description": "Called immediately when the input value changes."
+      },
+      {
         "name": "resolveParseState",
         "type": "((value: string, providers: string[]) => EmbedParseState) | undefined",
         "default": "undefined",
         "description": "Custom parse function override. When provided, replaces the built-in URL/embed parser."
       }
     ],
-    "slots": [],
-    "events": [
+    "slots": [
       {
-        "name": "parse",
-        "payload": "{ parsed: ParsedEmbed | null; error: string | null }",
-        "description": "Fires when the input value is parsed."
+        "name": "actionIcon",
+        "description": "Audit-mode snippet that receives actionType and replaces the default action marker."
       },
       {
-        "name": "change",
-        "payload": "{ value: string }",
-        "description": "Fires when the input value changes."
+        "name": "entryDetails",
+        "description": "Audit-mode snippet that receives entry and renders below the main row content."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { EmbedInput } from \"@poodle/svelte\";\n\n  let url = \"\";\n  let parsed = null;\n</script>\n\n<EmbedInput bind:value={url} on:parse={(e) => (parsed = e.detail.parsed)} placeholder=\"Paste a YouTube or Vimeo URL...\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { EmbedInput } from \"@poodle/svelte\";\n\n  let url = \"\";\n  let parsed = null;\n</script>\n\n<EmbedInput\n  value={url}\n  onValueChange={(nextValue) => (url = nextValue)}\n  onParse={(nextParsed) => (parsed = nextParsed)}\n  placeholder=\"Paste a YouTube or Vimeo URL...\"\n/>"
   },
   "embed-preview": {
     "props": [
@@ -3492,27 +3545,27 @@
     ],
     "events": [
       {
-        "name": "change",
-        "payload": "{ files: FileUploadItem[] }",
-        "description": "Fires when the file list changes."
+        "name": "onChange",
+        "payload": "(files: FileUploadItem[]) => void",
+        "description": "Called when the file list changes."
       },
       {
-        "name": "upload",
-        "payload": "{ files: File[] }",
-        "description": "Fires when new validated files are ready for app-owned upload work."
+        "name": "onUpload",
+        "payload": "(files: File[]) => void",
+        "description": "Called when new validated files are ready for app-owned upload work."
       },
       {
-        "name": "error",
-        "payload": "{ file: File; message: string }",
-        "description": "Fires when a file fails validation."
+        "name": "onError",
+        "payload": "({ file: File; message: string }) => void",
+        "description": "Called when a file fails validation."
       },
       {
-        "name": "remove",
-        "payload": "{ item: FileUploadItem }",
-        "description": "Fires when a file is removed."
+        "name": "onRemove",
+        "payload": "(item: FileUploadItem) => void",
+        "description": "Called when a file is removed."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { DEFAULT_COMPRESSION, FileUpload } from \"@poodle/svelte\";\n\n  let files = [];\n</script>\n\n<FileUpload\n  accept=\"image/*,.pdf\"\n  multiple\n  maxSize={5242880}\n  compress\n  compressionOptions={DEFAULT_COMPRESSION}\n  bind:files\n/>"
+    "usage": "<script lang=\"ts\">\n  import { DEFAULT_COMPRESSION, FileUpload } from \"@poodle/svelte\";\n\n  let files = [];\n</script>\n\n<FileUpload\n  accept=\"image/*,.pdf\"\n  multiple\n  maxSize={5242880}\n  compress\n  compressionOptions={DEFAULT_COMPRESSION}\n  bind:files\n  onUpload={(selectedFiles) => console.log(selectedFiles)}\n/>"
   },
   "filter-toolbar": {
     "props": [
@@ -3579,20 +3632,24 @@
     ],
     "slots": [
       {
-        "name": "actions",
-        "description": "Action buttons in the toolbar header."
+        "name": "summary",
+        "description": "Optional summary snippet replacing summaryText."
       },
       {
-        "name": "default",
-        "description": "Filter controls placed in the grid."
+        "name": "actions",
+        "description": "Action buttons snippet in the toolbar header."
+      },
+      {
+        "name": "children",
+        "description": "Filter controls snippet placed in the grid."
       },
       {
         "name": "secondary",
-        "description": "Secondary content below the main filters."
+        "description": "Secondary content snippet below the main filters."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FilterToolbar } from \"@poodle/svelte\";\n  import { Select } from \"@poodle/svelte\";\n</script>\n\n<FilterToolbar ariaLabel=\"User filters\" collapsible>\n  <Select options={[{ value: \"admin\", label: \"Admin\" }, { value: \"user\", label: \"User\" }]} placeholder=\"Role\" />\n</FilterToolbar>"
+    "usage": "<script lang=\"ts\">\n  import { FilterToolbar, Button, Select } from \"@poodle/svelte\";\n</script>\n\n<FilterToolbar ariaLabel=\"User filters\" collapsible>\n  {#snippet actions()}\n    <Button variant=\"ghost\" size=\"sm\">Reset</Button>\n  {/snippet}\n\n  <Select options={[{ value: \"admin\", label: \"Admin\" }, { value: \"user\", label: \"User\" }]} placeholder=\"Role\" />\n</FilterToolbar>"
   },
   "form-actions": {
     "props": [
@@ -3638,9 +3695,9 @@
       },
       {
         "name": "open",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled open state."
+        "type": "boolean | null | undefined",
+        "default": "undefined",
+        "description": "Dialog visibility. When supplied, the host owns updates through onOpenChange. Omit for uncontrolled mode."
       },
       {
         "name": "title",
@@ -3700,47 +3757,53 @@
         "name": "showDefaultActions",
         "type": "boolean",
         "default": "true",
-        "description": "When false, hides the built-in submit/cancel buttons and expects an actions slot."
+        "description": "When false, hides the built-in submit/cancel buttons and expects a custom actions snippet."
       },
       {
         "name": "ariaLabel",
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the dialog."
+      },
+      {
+        "name": "onSubmit",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the built-in submit button is used."
+      },
+      {
+        "name": "onCancel",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the dialog is cancelled or closed."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the open state changes."
       }
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Form content. Receives: { submitting }."
+        "name": "children",
+        "description": "Default body snippet when no dedicated body snippet is provided."
       },
       {
-        "name": "subtitle",
-        "description": "Optional rich subtitle content. Receives: { submitting }."
+        "name": "body",
+        "description": "Form body snippet. Receives: submitting."
+      },
+      {
+        "name": "subtitleContent",
+        "description": "Optional rich subtitle snippet. Receives: submitting."
       },
       {
         "name": "actions",
-        "description": "Optional custom footer actions. Receives: { submitting }."
+        "description": "Optional custom footer actions snippet. Receives: submitting."
       }
     ],
-    "events": [
-      {
-        "name": "submit",
-        "payload": "void",
-        "description": "Fires when the built-in submit button is used."
-      },
-      {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the dialog is cancelled or closed."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { FormDialog } from \"@poodle/svelte\";\n\n  let open = false;\n  let submitting = false;\n</script>\n\n<FormDialog bind:open title=\"Create User\" subtitle=\"Invite a new teammate.\" {submitting} on:submit={() => { submitting = true; }}>\n  <input type=\"text\" placeholder=\"Name\" />\n  <input type=\"email\" placeholder=\"Email\" />\n</FormDialog>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { FormDialog } from \"@poodle/svelte\";\n\n  let open = false;\n  let submitting = false;\n</script>\n\n<FormDialog\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  title=\"Create User\"\n  subtitle=\"Invite a new teammate.\"\n  {submitting}\n  onSubmit={() => {\n    submitting = true;\n  }}\n>\n  {#snippet body(submitting)}\n    <input type=\"text\" placeholder=\"Name\" />\n    <input type=\"email\" placeholder=\"Email\" disabled={submitting} />\n  {/snippet}\n</FormDialog>"
   },
   "form-layout": {
     "props": [
@@ -3878,21 +3941,21 @@
     "slots": [
       {
         "name": "trigger",
-        "description": "Element that triggers the hover card."
+        "description": "Snippet for the element that triggers the hover card."
       },
       {
-        "name": "default",
+        "name": "children",
         "description": "Hover card content."
       }
     ],
     "events": [
       {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
+        "name": "onOpenChange",
+        "payload": "(open: boolean) => void",
+        "description": "Called when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { HoverCard } from \"@poodle/svelte\";\n</script>\n\n<HoverCard placement=\"top\">\n  <svelte:fragment slot=\"trigger\">\n    <a href=\"/profile\">@alice</a>\n  </svelte:fragment>\n  <div>\n    <strong>Alice Johnson</strong>\n    <p>Software Engineer</p>\n  </div>\n</HoverCard>"
+    "usage": "<script lang=\"ts\">\n  import { HoverCard } from \"@poodle/svelte\";\n</script>\n\n<HoverCard placement=\"top\">\n  {#snippet trigger()}\n    <a href=\"/profile\">@alice</a>\n  {/snippet}\n  <div>\n    <strong>Alice Johnson</strong>\n    <p>Software Engineer</p>\n  </div>\n</HoverCard>"
   },
   "icon": {
     "props": [
@@ -4045,24 +4108,29 @@
     "slots": [
       {
         "name": "default",
-        "description": "Custom icon content replacing the icon prop."
+        "description": "Default snippet for custom glyph content replacing the icon prop."
       }
     ],
     "events": [
       {
-        "name": "click",
-        "payload": "MouseEvent",
-        "description": "Fires when the button is clicked."
+        "name": "onClick",
+        "payload": "(event: MouseEvent) => void",
+        "description": "Called when the button is clicked."
       },
       {
-        "name": "focus",
-        "payload": "FocusEvent",
-        "description": "Fires when the button receives focus."
+        "name": "onFocus",
+        "payload": "(event: FocusEvent) => void",
+        "description": "Called when the button receives focus."
       },
       {
-        "name": "blur",
-        "payload": "FocusEvent",
-        "description": "Fires when the button loses focus."
+        "name": "onBlur",
+        "payload": "(event: FocusEvent) => void",
+        "description": "Called when the button loses focus."
+      },
+      {
+        "name": "onPressedChange",
+        "payload": "(pressed: boolean) => void",
+        "description": "Called when toggle state changes."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { IconButton } from \"@poodle/svelte\";\n  import { trash2, plus, settings } from \"@poodle/icons-lucide\";\n</script>\n\n<!-- Direct import (tree-shakeable) -->\n<IconButton icon={trash2} ariaLabel=\"Delete item\" variant=\"ghost\" tone=\"danger\" tooltip=\"Delete\" />\n<IconButton icon={plus} ariaLabel=\"Add\" variant=\"primary\" />\n\n<!-- String name (built-in internals) -->\n<IconButton icon=\"search\" ariaLabel=\"Search\" variant=\"secondary\" />"
@@ -4170,43 +4238,48 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the card."
+      },
+      {
+        "name": "onClick",
+        "type": "((event: MouseEvent) => void) | null",
+        "default": "null",
+        "description": "Called when an interactive card is activated."
+      },
+      {
+        "name": "onSelectedChange",
+        "type": "((selected: boolean) => void) | null",
+        "default": "null",
+        "description": "Called when a selectable card toggles state."
       }
     ],
     "slots": [
       {
         "name": "leading",
-        "description": "Leading visual content (icon, avatar, etc.)."
+        "description": "Snippet for leading visual content such as an icon, avatar, or thumbnail."
+      },
+      {
+        "name": "titleContent",
+        "description": "Snippet for rich title content when the plain string title is not enough."
       },
       {
         "name": "badges",
-        "description": "Badge elements displayed on the card."
+        "description": "Snippet for inline badge content beside the title."
       },
       {
         "name": "footer",
-        "description": "Footer content below the main body."
+        "description": "Snippet for footer content below the subtitle."
       },
       {
         "name": "actions",
-        "description": "Explicit action trigger composition near the trailing edge."
+        "description": "Snippet for explicit action controls near the trailing edge."
       },
       {
         "name": "trailing",
-        "description": "Trailing content on the right side."
+        "description": "Snippet for trailing content on the right side."
       }
     ],
-    "events": [
-      {
-        "name": "click",
-        "payload": "MouseEvent",
-        "description": "Fires when the card is clicked."
-      },
-      {
-        "name": "selectedChange",
-        "payload": "{ selected: boolean }",
-        "description": "Fires when a selectable card toggles state."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { ListCard } from \"@poodle/svelte\";\n</script>\n\n<ListCard title=\"Alice Johnson\" subtitle=\"Software Engineer\" meta=\"Active\" href=\"/team/alice\">\n  <svelte:fragment slot=\"leading\">\n    <img src=\"/avatars/alice.jpg\" alt=\"Alice\" />\n  </svelte:fragment>\n</ListCard>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ListCard } from \"@poodle/svelte\";\n</script>\n\n<ListCard title=\"Alice Johnson\" subtitle=\"Software Engineer\" meta=\"Active\" href=\"/team/alice\" onClick={() => console.log(\"open\")}>\n  {#snippet leading()}\n    <img src=\"/avatars/alice.jpg\" alt=\"Alice\" />\n  {/snippet}\n</ListCard>"
   },
   "list-card-counter": {
     "props": [
@@ -4408,7 +4481,7 @@
         "name": "value",
         "type": "string",
         "default": "\"\"",
-        "description": "Current markdown content."
+        "description": "Current markdown content. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "placeholder",
@@ -4457,17 +4530,17 @@
         "type": "ControlDensity | null",
         "default": "null",
         "description": "Explicit density override for toolbar and pane spacing."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | null",
+        "default": "null",
+        "description": "Called when the markdown content changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "change",
-        "payload": "{ value: string }",
-        "description": "Fires when the markdown content changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@poodle/svelte\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor bind:value={content} mode=\"split\" minHeight=\"20rem\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@poodle/svelte\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
   },
   "media-picker": {
     "props": [
@@ -4529,22 +4602,22 @@
     "slots": [],
     "events": [
       {
-        "name": "select",
-        "payload": "{ item: MediaPickerItem }",
-        "description": "Fires when a media item is selected."
+        "name": "onSelect",
+        "payload": "(item: MediaPickerItem) => void",
+        "description": "Called when a media item is selected."
       },
       {
-        "name": "upload",
-        "payload": "{ files: FileUploadItem[] }",
-        "description": "Fires when files are uploaded."
+        "name": "onUpload",
+        "payload": "(files: FileUploadItem[]) => void",
+        "description": "Called when files are added in the upload tab."
       },
       {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the open state changes."
+        "name": "onOpenChange",
+        "payload": "(open: boolean) => void",
+        "description": "Called when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { MediaPicker } from \"@poodle/svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"1\", name: \"hero.jpg\", url: \"/images/hero.jpg\", type: \"image\" },\n    { id: \"2\", name: \"logo.png\", url: \"/images/logo.png\", type: \"image\" },\n  ];\n</script>\n\n<MediaPicker bind:open {items} accept=\"image/*\" on:select={(e) => console.log(e.detail.item)} />"
+    "usage": "<script lang=\"ts\">\n  import { MediaPicker } from \"@poodle/svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"1\", label: \"hero.jpg\", thumbnailUrl: \"/images/hero.jpg\", kind: \"image\" },\n    { id: \"2\", label: \"logo.png\", thumbnailUrl: \"/images/logo.png\", kind: \"image\" },\n  ];\n</script>\n\n<MediaPicker\n  {open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  {items}\n  accept=\"image/*\"\n  onSelect={(item) => console.log(item)}\n/>"
   },
   "media-browse-panel": {
     "props": [
@@ -4606,17 +4679,17 @@
     "slots": [],
     "events": [
       {
-        "name": "select",
-        "payload": "{ item: MediaPickerItem }",
-        "description": "Fires when a media item is selected."
+        "name": "onSelect",
+        "payload": "(item: MediaPickerItem) => void",
+        "description": "Called when a media item is selected."
       },
       {
-        "name": "loadMore",
-        "payload": "void",
-        "description": "Fires when the load-more action is triggered."
+        "name": "onLoadMore",
+        "payload": "() => void",
+        "description": "Called when the load-more action is triggered."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { MediaBrowsePanel, type MediaPickerItem } from \"@poodle/svelte\";\n\n  const items: MediaPickerItem[] = [\n    { id: \"1\", label: \"Hero banner\", kind: \"image\", meta: \"Image\" },\n    { id: \"2\", label: \"Launch trailer\", kind: \"video\", meta: \"Video\" },\n  ];\n</script>\n\n<MediaBrowsePanel\n  {items}\n  hasMore\n  on:select={(event) => console.log(event.detail.item)}\n  on:loadMore={() => console.log(\"load more\")}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MediaBrowsePanel, type MediaPickerItem } from \"@poodle/svelte\";\n\n  const items: MediaPickerItem[] = [\n    { id: \"1\", label: \"Hero banner\", kind: \"image\", meta: \"Image\" },\n    { id: \"2\", label: \"Launch trailer\", kind: \"video\", meta: \"Video\" },\n  ];\n</script>\n\n<MediaBrowsePanel\n  {items}\n  hasMore\n  onSelect={(item) => console.log(item)}\n  onLoadMore={() => console.log(\"load more\")}\n/>"
   },
   "media-upload-status-panel": {
     "props": [
@@ -4666,27 +4739,27 @@
     "slots": [],
     "events": [
       {
-        "name": "uploadAnyway",
-        "payload": "void",
-        "description": "Fires when the user chooses to upload a duplicate as new."
+        "name": "onUploadAnyway",
+        "payload": "() => void",
+        "description": "Called when the user chooses to upload a duplicate as new."
       },
       {
-        "name": "selectDuplicate",
-        "payload": "void",
-        "description": "Fires when the user chooses the existing duplicate media item."
+        "name": "onSelectDuplicate",
+        "payload": "() => void",
+        "description": "Called when the user chooses the existing duplicate media item."
       },
       {
-        "name": "clearUpload",
-        "payload": "void",
-        "description": "Fires when the user resets the upload flow."
+        "name": "onClearUpload",
+        "payload": "() => void",
+        "description": "Called when the user resets the upload flow."
       },
       {
-        "name": "selectUploaded",
-        "payload": "void",
-        "description": "Fires when the user chooses the newly uploaded media item."
+        "name": "onSelectUploaded",
+        "payload": "() => void",
+        "description": "Called when the user chooses the newly uploaded media item."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { MediaUploadStatusPanel } from \"@poodle/svelte\";\n</script>\n\n<MediaUploadStatusPanel\n  uploadStep=\"duplicate\"\n  duplicateLabel=\"hero-banner.jpg\"\n  on:uploadAnyway={() => console.log(\"upload anyway\")}\n  on:selectDuplicate={() => console.log(\"select duplicate\")}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MediaUploadStatusPanel } from \"@poodle/svelte\";\n</script>\n\n<MediaUploadStatusPanel\n  uploadStep=\"duplicate\"\n  duplicateLabel=\"hero-banner.jpg\"\n  onUploadAnyway={() => console.log(\"upload anyway\")}\n  onSelectDuplicate={() => console.log(\"select duplicate\")}\n/>"
   },
   "media-preview": {
     "props": [
@@ -4777,16 +4850,16 @@
     ],
     "slots": [
       {
-        "name": "media",
-        "description": "Custom media content (image, video element, etc.)."
+        "name": "mediaContent",
+        "description": "Custom media content snippet (image, video element, and so on)."
       },
       {
-        "name": "default",
-        "description": "Body content below the media."
+        "name": "children",
+        "description": "Body content snippet below the media."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MediaPreview } from \"@poodle/svelte\";\n</script>\n\n<MediaPreview\n  title=\"Sunset at the Beach\"\n  eyebrow=\"Photography\"\n  description=\"A beautiful sunset captured at the coast.\"\n  kind=\"image\"\n  aspectRatio=\"landscape\"\n>\n  <svelte:fragment slot=\"media\">\n    <img src=\"/photos/sunset.jpg\" alt=\"Sunset\" />\n  </svelte:fragment>\n</MediaPreview>"
+    "usage": "<script lang=\"ts\">\n  import { MediaPreview } from \"@poodle/svelte\";\n</script>\n\n<MediaPreview\n  title=\"Sunset at the Beach\"\n  eyebrow=\"Photography\"\n  description=\"A beautiful sunset captured at the coast.\"\n  kind=\"image\"\n  aspectRatio=\"landscape\"\n>\n  {#snippet mediaContent()}\n    <img src=\"/photos/sunset.jpg\" alt=\"Sunset\" />\n  {/snippet}\n</MediaPreview>"
   },
   "media-thumbnail": {
     "props": [
@@ -4923,7 +4996,7 @@
         "description": "Fires when a menu item is selected."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Menu } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"edit\", label: \"Edit\" },\n    { value: \"duplicate\", label: \"Duplicate\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<Menu {items} on:action={(e) => console.log(e.detail.value)}>\n  <svelte:fragment slot=\"trigger\">\n    <Button variant=\"secondary\">Actions</Button>\n  </svelte:fragment>\n</Menu>"
+    "usage": "<script lang=\"ts\">\n  import { Menu } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"edit\", label: \"Edit\" },\n    { value: \"duplicate\", label: \"Duplicate\" },\n    { type: \"separator\" },\n    { value: \"delete\", label: \"Delete\", tone: \"danger\" },\n  ];\n</script>\n\n<Menu {items} onAction={(value) => console.log(value)}>\n  {#snippet trigger()}\n    <Button variant=\"secondary\">Actions</Button>\n  {/snippet}\n</Menu>"
   },
   "menubar": {
     "props": [
@@ -4968,22 +5041,83 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the menubar."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the active top-level menu changes."
+      },
+      {
+        "name": "onAction",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a submenu action is committed."
       }
     ],
     "slots": [],
-    "events": [
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Menubar } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"file\", label: \"File\", items: [\n      { value: \"new\", label: \"New\" },\n      { value: \"open\", label: \"Open\" },\n    ]},\n    { value: \"edit\", label: \"Edit\", items: [\n      { value: \"undo\", label: \"Undo\" },\n      { value: \"redo\", label: \"Redo\" },\n    ]},\n  ];\n</script>\n\n<Menubar {items} onAction={(value) => console.log(value)} />"
+  },
+  "navigation-menu": {
+    "props": [
       {
-        "name": "valueChange",
-        "payload": "{ value: string | null }",
-        "description": "Fires when the active menu changes."
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
       },
       {
-        "name": "action",
-        "payload": "{ value: string }",
-        "description": "Fires when a menu action is selected."
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"chrome\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "value",
+        "type": "string | null",
+        "default": "null",
+        "description": "Controlled active navigation item value."
+      },
+      {
+        "name": "defaultValue",
+        "type": "string | null",
+        "default": "null",
+        "description": "Initial active navigation item for uncontrolled mode."
+      },
+      {
+        "name": "items",
+        "type": "NavigationMenuItem[]",
+        "default": "[]",
+        "description": "Array of top-level navigation items."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Accessible label for the navigation region."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the active navigation item changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Menubar } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"file\", label: \"File\", children: [\n      { value: \"new\", label: \"New\" },\n      { value: \"open\", label: \"Open\" },\n    ]},\n    { value: \"edit\", label: \"Edit\", children: [\n      { value: \"undo\", label: \"Undo\" },\n      { value: \"redo\", label: \"Redo\" },\n    ]},\n  ];\n</script>\n\n<Menubar {items} on:action={(e) => console.log(e.detail.value)} />"
+    "slots": [
+      {
+        "name": "children",
+        "description": "Snippet rendered in the viewport. Receives activeValue and activeItem."
+      }
+    ],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { NavigationMenu } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"home\", label: \"Home\" },\n    { value: \"components\", label: \"Components\" },\n  ];\n\n  let active = \"components\";\n</script>\n\n<NavigationMenu {items} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => { if (value) active = value; }}>\n  {#snippet children(activeValue, activeItem)}\n    <p>Active section: {activeItem?.label ?? activeValue}</p>\n  {/snippet}\n</NavigationMenu>"
   },
   "meta-bar": {
     "props": [
@@ -5162,6 +5296,12 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the nav card."
+      },
+      {
+        "name": "onClick",
+        "type": "((event: MouseEvent) => void) | null",
+        "default": "null",
+        "description": "Called when the card is activated as a button or link."
       }
     ],
     "slots": [
@@ -5170,74 +5310,8 @@
         "description": "Icon content displayed in the card."
       }
     ],
-    "events": [
-      {
-        "name": "click",
-        "payload": "MouseEvent",
-        "description": "Fires when the card is clicked."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  <svelte:fragment slot=\"icon\">📊</svelte:fragment>\n</NavCard>"
-  },
-  "navigation-menu": {
-    "props": [
-      {
-        "name": "size",
-        "type": "ControlSize | null",
-        "default": "null",
-        "description": "Explicit size override. Supports xs, sm, md, lg, and xl."
-      },
-      {
-        "name": "sizeRole",
-        "type": "\"chrome\" | \"control\" | \"prominent\"",
-        "default": "\"chrome\"",
-        "description": "Semantic size offset relative to the inherited presentation scale."
-      },
-      {
-        "name": "density",
-        "type": "ControlDensity | null",
-        "default": "null",
-        "description": "Explicit density override. Supports compact, default, and comfortable."
-      },
-      {
-        "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled active menu value."
-      },
-      {
-        "name": "defaultValue",
-        "type": "string | null",
-        "default": "null",
-        "description": "Initial active value for uncontrolled mode."
-      },
-      {
-        "name": "items",
-        "type": "NavigationMenuItem[]",
-        "default": "[]",
-        "description": "Array of navigation menu items."
-      },
-      {
-        "name": "ariaLabel",
-        "type": "string | null",
-        "default": "null",
-        "description": "Accessible label for the navigation menu."
-      }
-    ],
-    "slots": [
-      {
-        "name": "default",
-        "description": "Custom menu content. Receives slot props: activeValue, activeItem."
-      }
-    ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string | null }",
-        "description": "Fires when the active menu value changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { NavigationMenu } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"products\", label: \"Products\" },\n    { value: \"pricing\", label: \"Pricing\" },\n    { value: \"docs\", label: \"Documentation\" },\n  ];\n</script>\n\n<NavigationMenu {items} ariaLabel=\"Main navigation\" />"
   },
   "number-input": {
     "props": [
@@ -5269,7 +5343,7 @@
         "name": "value",
         "type": "number | string | null",
         "default": "null",
-        "description": "Controlled value. Numeric bindings stay numeric; string-form bindings round-trip as strings."
+        "description": "Bindable value. Numeric bindings stay numeric; string-form bindings round-trip as strings."
       },
       {
         "name": "defaultValue",
@@ -5372,46 +5446,52 @@
         "type": "string | null",
         "default": "null",
         "description": "ID of the element describing this input."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: number | string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the value changes."
+      },
+      {
+        "name": "onValidationChange",
+        "type": "((detail: { status: InputValidationStatus; valid: boolean; message: string }) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when validation status changes."
+      },
+      {
+        "name": "onSubmit",
+        "type": "((value: number | string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the value is submitted."
+      },
+      {
+        "name": "onIncrement",
+        "type": "((value: number | string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the value is incremented."
+      },
+      {
+        "name": "onDecrement",
+        "type": "((value: number | string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the value is decremented."
+      },
+      {
+        "name": "onFocus",
+        "type": "((event: FocusEvent) => void) | undefined",
+        "default": "undefined",
+        "description": "Native focus passthrough."
+      },
+      {
+        "name": "onBlur",
+        "type": "((event: FocusEvent) => void) | undefined",
+        "default": "undefined",
+        "description": "Native blur passthrough."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: number | string | null }",
-        "description": "Fires when the value changes."
-      },
-      {
-        "name": "validationChange",
-        "payload": "{ status: InputValidationStatus; valid: boolean; message: string }",
-        "description": "Fires when validation status changes."
-      },
-      {
-        "name": "submit",
-        "payload": "{ value: number | string | null }",
-        "description": "Fires when the value is submitted (e.g. Enter key)."
-      },
-      {
-        "name": "increment",
-        "payload": "{ value: number | string | null }",
-        "description": "Fires when the value is incremented."
-      },
-      {
-        "name": "decrement",
-        "payload": "{ value: number | string | null }",
-        "description": "Fires when the value is decremented."
-      },
-      {
-        "name": "focus",
-        "payload": "FocusEvent",
-        "description": "Fires when the input receives focus."
-      },
-      {
-        "name": "blur",
-        "payload": "FocusEvent",
-        "description": "Fires when the input loses focus."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { NumberInput } from \"@poodle/svelte\";\n\n  let quantity: number | null = 1;\n</script>\n\n<NumberInput id=\"quantity\" bind:value={quantity} min={0} max={100} step={1} showSteppers />"
   },
   "order-by": {
@@ -5444,7 +5524,7 @@
         "name": "value",
         "type": "OrderByValue",
         "default": "[]",
-        "description": "Ordered multi-field sort state."
+        "description": "Ordered multi-field sort state. Hosts should update it from onChange."
       },
       {
         "name": "activeSort",
@@ -5480,12 +5560,12 @@
     "slots": [],
     "events": [
       {
-        "name": "change",
-        "payload": "{ value: OrderByValue; sort: ActiveSort | null }",
-        "description": "Fires when the sort configuration changes."
+        "name": "onChange",
+        "payload": "(value: OrderByValue) => void",
+        "description": "Called when the sort configuration changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { OrderBy, type OrderByValue } from \"@poodle/svelte\";\n\n  const fields = [\n    { key: \"name\", label: \"Name\" },\n    { key: \"date\", label: \"Date\", defaultDirection: \"desc\" },\n    { key: \"priority\", label: \"Priority\" },\n  ];\n\n  let value: OrderByValue = [];\n</script>\n\n<OrderBy {fields} bind:value on:change={(e) => console.log(e.detail.value)} />"
+    "usage": "<script lang=\"ts\">\n  import { OrderBy, type OrderByValue } from \"@poodle/svelte\";\n\n  const fields = [\n    { key: \"name\", label: \"Name\" },\n    { key: \"date\", label: \"Date\", defaultDirection: \"desc\" },\n    { key: \"priority\", label: \"Priority\" },\n  ];\n\n  let value: OrderByValue = [];\n</script>\n\n<OrderBy {fields} {value} onChange={(nextValue) => (value = nextValue)} />"
   },
   "page-header": {
     "props": [
@@ -5627,12 +5707,12 @@
     "slots": [],
     "events": [
       {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the cancel button is clicked."
+        "name": "onCancel",
+        "payload": "() => void",
+        "description": "Called when the cancel button is clicked."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { PageLoading } from \"@poodle/svelte\";\n</script>\n\n<PageLoading visible presentation=\"inline\" message=\"Loading your data...\" />\n\n<PageLoading visible message=\"Loading your data...\" canCancel on:cancel={() => abortRequest()} />"
+    "usage": "<script lang=\"ts\">\n  import { PageLoading } from \"@poodle/svelte\";\n</script>\n\n<PageLoading visible presentation=\"inline\" message=\"Loading your data...\" />\n\n<PageLoading visible message=\"Loading your data...\" canCancel onCancel={() => abortRequest()} />"
   },
   "list-container": {
     "props": [
@@ -5753,50 +5833,50 @@
     ],
     "slots": [
       {
+        "name": "children",
+        "description": "Primary list content snippet."
+      },
+      {
         "name": "breadcrumbs",
-        "description": "Optional breadcrumbs rendered in the header."
+        "description": "Optional breadcrumbs snippet rendered in the header."
       },
       {
         "name": "actions",
-        "description": "Header actions rendered next to the title block."
+        "description": "Header actions snippet rendered next to the title block."
       },
       {
         "name": "filters",
-        "description": "Filter controls rendered between the header and content."
+        "description": "Filter controls snippet rendered between the header and content."
       },
       {
         "name": "batch",
-        "description": "Batch-action strip rendered above the main content."
-      },
-      {
-        "name": "default",
-        "description": "Primary list content."
+        "description": "Batch-action snippet rendered above the main content."
       },
       {
         "name": "pagination",
-        "description": "Optional override for the full pagination footer."
+        "description": "Optional snippet override for the full pagination footer."
       },
       {
         "name": "loading",
-        "description": "Optional override for the loading state."
+        "description": "Optional snippet override for the loading state."
       },
       {
         "name": "error",
-        "description": "Optional override for the error state."
+        "description": "Optional snippet override for the error state."
       },
       {
         "name": "empty",
-        "description": "Optional override for the empty state."
+        "description": "Optional snippet override for the empty state."
       }
     ],
     "events": [
       {
-        "name": "pageChange",
-        "payload": "{ page: number }",
-        "description": "Fires when the built-in pagination or pagination summary changes page."
+        "name": "onPageChange",
+        "payload": "(page: number) => void",
+        "description": "Called when the built-in pagination requests a different page."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ListContainer } from \"@poodle/svelte\";\n  import { Button, Field, TextInput, Select } from \"@poodle/svelte\";\n\n  let page = 1;\n</script>\n\n<ListContainer\n  title=\"Workflow incidents\"\n  subtitle=\"Monitor, filter, and page through operational events.\"\n  currentPage={page}\n  totalPages={12}\n  totalItems={120}\n  pageSize={10}\n  on:pageChange={(event) => (page = event.detail.page)}\n>\n  <svelte:fragment slot=\"actions\">\n    <Button>Add incident</Button>\n  </svelte:fragment>\n\n  <svelte:fragment slot=\"filters\">\n    <Field label=\"Search\">\n      <TextInput type=\"search\" placeholder=\"Search incidents\" />\n    </Field>\n  </svelte:fragment>\n\n  <div>Your list content goes here.</div>\n</ListContainer>"
+    "usage": "<script lang=\"ts\">\n  import { ListContainer } from \"@poodle/svelte\";\n  import { Button, Field, TextInput, Select } from \"@poodle/svelte\";\n\n  let page = 1;\n</script>\n\n<ListContainer\n  title=\"Workflow incidents\"\n  subtitle=\"Monitor, filter, and page through operational events.\"\n  currentPage={page}\n  totalPages={12}\n  totalItems={120}\n  pageSize={10}\n  onPageChange={(nextPage) => (page = nextPage)}\n>\n  {#snippet actions()}\n    <Button>Add incident</Button>\n  {/snippet}\n\n  {#snippet filters()}\n    <Field label=\"Search\">\n      <TextInput type=\"search\" placeholder=\"Search incidents\" />\n    </Field>\n  {/snippet}\n\n  <div>Your list content goes here.</div>\n</ListContainer>"
   },
   "pagination": {
     "props": [
@@ -5925,22 +6005,23 @@
         "type": "string",
         "default": "\"\"",
         "description": "Additional CSS class on the root element."
+      },
+      {
+        "name": "onPageChange",
+        "type": "((page: number) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the current page changes."
+      },
+      {
+        "name": "onLimitChange",
+        "type": "((limit: number) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the page size changes via the limit selector."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "pageChange",
-        "payload": "{ page: number }",
-        "description": "Fires when the current page changes. When a controller is provided, the controller method is called instead."
-      },
-      {
-        "name": "limitChange",
-        "payload": "{ limit: number }",
-        "description": "Fires when the page size changes via the limit selector."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { Pagination } from \"@poodle/svelte\";\n\n  let page = 1;\n  let limit = 25;\n</script>\n\n<!-- Basic numbered pagination -->\n<Pagination currentPage={page} totalPages={10} on:pageChange={(e) => (page = e.detail.page)} />\n\n<!-- Simple variant with page size selector -->\n<Pagination\n  {page}\n  {limit}\n  total={248}\n  variant=\"simple\"\n  showLimitSelector\n  limitOptions={[10, 25, 50, 100]}\n  on:pageChange={(e) => (page = e.detail.page)}\n  on:limitChange={(e) => { limit = e.detail.limit; page = 1; }}\n/>\n\n<!-- Standalone (no container chrome) -->\n<Pagination currentPage={1} totalPages={10} standalone />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Pagination } from \"@poodle/svelte\";\n\n  let page = 1;\n  let limit = 25;\n</script>\n\n<!-- Basic numbered pagination -->\n<Pagination currentPage={page} totalPages={10} onPageChange={(nextPage) => (page = nextPage)} />\n\n<!-- Simple variant with page size selector -->\n<Pagination\n  {page}\n  {limit}\n  total={248}\n  variant=\"simple\"\n  showLimitSelector\n  limitOptions={[10, 25, 50, 100]}\n  onPageChange={(nextPage) => (page = nextPage)}\n  onLimitChange={(nextLimit) => { limit = nextLimit; page = 1; }}\n/>\n\n<!-- Standalone (no container chrome) -->\n<Pagination currentPage={1} totalPages={10} standalone />"
   },
   "pagination-summary": {
     "props": [
@@ -6051,27 +6132,27 @@
     "slots": [
       {
         "name": "toolbar",
-        "description": "Toolbar content for search and filter controls."
+        "description": "Snippet for toolbar content such as search and filter controls."
       },
       {
         "name": "selection",
-        "description": "Selection summary display area."
+        "description": "Snippet for the selection summary area."
       },
       {
-        "name": "default",
-        "description": "Main body content with browsable items."
+        "name": "children",
+        "description": "Snippet for the main body content with browsable items."
       },
       {
-        "name": "state",
-        "description": "Custom state content for loading/error views."
+        "name": "stateContent",
+        "description": "Snippet for custom loading/error/empty state content."
       },
       {
         "name": "footer",
-        "description": "Footer content with actions."
+        "description": "Snippet for footer actions."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { PickerShell } from \"@poodle/svelte\";\n</script>\n\n<PickerShell title=\"Select Items\" description=\"Browse and pick items\" resultCount={42} selectionCount={3}>\n  <svelte:fragment slot=\"toolbar\">\n    <input type=\"search\" placeholder=\"Search...\" />\n  </svelte:fragment>\n  <p>Item list goes here.</p>\n</PickerShell>"
+    "usage": "<script lang=\"ts\">\n  import { PickerShell } from \"@poodle/svelte\";\n</script>\n\n<PickerShell title=\"Select Items\" description=\"Browse and pick items\" resultCount={42} selectionCount={3}>\n  {#snippet toolbar()}\n    <input type=\"search\" placeholder=\"Search...\" />\n  {/snippet}\n  <p>Item list goes here.</p>\n</PickerShell>"
   },
   "pill": {
     "props": [
@@ -6137,9 +6218,9 @@
       },
       {
         "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled code value."
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable code value. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -6224,22 +6305,23 @@
         "type": "ValidationState",
         "default": "\"none\"",
         "description": "Field-level validation state. Invalid is also inferred automatically when error is present."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called whenever the sanitized code value changes."
+      },
+      {
+        "name": "onComplete",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the value reaches the configured length."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires whenever the sanitized code value changes."
-      },
-      {
-        "name": "complete",
-        "payload": "{ value: string }",
-        "description": "Fires when the value reaches the configured length."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@poodle/svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  on:valueChange={(e) => (code = e.detail.value)}\n  on:complete={(e) => verify(e.detail.value)}\n/>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@poodle/svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
   },
   "password-requirements": {
     "props": [
@@ -6352,7 +6434,7 @@
         "description": "Fires when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@poodle/svelte\";\n</script>\n\n<Popover placement=\"bottom-start\">\n  <Button slot=\"trigger\">Open Popover</Button>\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
+    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@poodle/svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger()}\n    <Button>Open Popover</Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
   },
   "progress": {
     "props": [
@@ -6425,9 +6507,9 @@
       },
       {
         "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled selected value."
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable selected value. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -6476,17 +6558,17 @@
         "type": "string | null",
         "default": "null",
         "description": "Optional selected-state color override used for the selected indicator border and dot."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected value changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected value changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { RadioGroup } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"sm\", label: \"Small\" },\n    { value: \"md\", label: \"Medium\" },\n    { value: \"lg\", label: \"Large\" },\n  ];\n\n  let size = \"md\";\n</script>\n\n<RadioGroup {options} bind:value={size} orientation=\"vertical\" selectedColor=\"#22c55e\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { RadioGroup } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"sm\", label: \"Small\" },\n    { value: \"md\", label: \"Medium\" },\n    { value: \"lg\", label: \"Large\" },\n  ];\n\n  let size = \"md\";\n</script>\n\n<RadioGroup {options} value={size} orientation=\"vertical\" selectedColor=\"#22c55e\" onValueChange={(value) => (size = value)} />"
   },
   "range-slider": {
     "props": [
@@ -6512,7 +6594,7 @@
         "name": "value",
         "type": "[number, number]",
         "default": "[0, 100]",
-        "description": "Controlled range value as [min, max] tuple."
+        "description": "Bindable range value as [min, max] tuple."
       },
       {
         "name": "min",
@@ -6561,21 +6643,22 @@
         "type": "string | null",
         "default": "null",
         "description": "Human-readable text for the upper thumb value."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: [number, number]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the range value changes during drag."
+      },
+      {
+        "name": "onValueCommit",
+        "type": "((value: [number, number]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the range value is committed."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: [number, number] }",
-        "description": "Fires when the range value changes during drag."
-      },
-      {
-        "name": "valueCommit",
-        "payload": "{ value: [number, number] }",
-        "description": "Fires when the range value is committed (drag end)."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { RangeSlider } from \"@poodle/svelte\";\n\n  let priceRange: [number, number] = [20, 80];\n</script>\n\n<RangeSlider bind:value={priceRange} min={0} max={100} step={5} />"
   },
   "rating": {
@@ -6600,9 +6683,9 @@
       },
       {
         "name": "value",
-        "type": "number | null",
-        "default": "null",
-        "description": "Controlled rating value."
+        "type": "number | null | undefined",
+        "default": "undefined",
+        "description": "Bindable rating value. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -6633,16 +6716,16 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the rating."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: number | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the rating value changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: number | null }",
-        "description": "Fires when the rating value changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { Rating } from \"@poodle/svelte\";\n\n  let stars: number | null = 3;\n</script>\n\n<Rating bind:value={stars} max={5} allowClear />"
   },
   "region": {
@@ -6770,38 +6853,38 @@
     ],
     "slots": [
       {
-        "name": "state",
-        "description": "Custom state content for loading/error views."
+        "name": "stateContent",
+        "description": "Snippet for custom loading/error/empty state content passed through to PickerShell."
       }
     ],
     "events": [
       {
-        "name": "queryChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the search query changes."
+        "name": "onQueryChange",
+        "payload": "(value: string) => void",
+        "description": "Called when the search query changes."
       },
       {
-        "name": "selectionChange",
-        "payload": "{ selectedIds: string[] }",
-        "description": "Fires when the selection changes."
+        "name": "onSelectionChange",
+        "payload": "(selectedIds: string[]) => void",
+        "description": "Called when the selection changes."
       },
       {
-        "name": "confirm",
-        "payload": "{ selectedIds: string[] }",
-        "description": "Fires when the selection is confirmed."
+        "name": "onConfirm",
+        "payload": "(selectedIds: string[]) => void",
+        "description": "Called when the selection is confirmed."
       },
       {
-        "name": "cancel",
-        "payload": "void",
-        "description": "Fires when the picker is cancelled."
+        "name": "onCancel",
+        "payload": "() => void",
+        "description": "Called when the picker is cancelled."
       },
       {
-        "name": "drillContext",
-        "payload": "{ context: DrillDownContext }",
-        "description": "Fires when a drill-down context changes."
+        "name": "onDrillContext",
+        "payload": "(context: DrillDownContext) => void",
+        "description": "Called when the drill-down context changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { RelationPicker } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n\n  let selected: string[] = [];\n</script>\n\n<RelationPicker title=\"Select Users\" {items} bind:selectedIds={selected} on:confirm={(e) => save(e.detail.selectedIds)} />"
+    "usage": "<script lang=\"ts\">\n  import { RelationPicker } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n\n  let selected: string[] = [];\n</script>\n\n<RelationPicker\n  title=\"Select Users\"\n  {items}\n  selectedIds={selected}\n  onSelectionChange={(nextSelected) => (selected = nextSelected)}\n  onConfirm={(nextSelected) => save(nextSelected)}\n/>"
   },
   "resize-handle": {
     "props": [
@@ -6845,24 +6928,24 @@
     "slots": [],
     "events": [
       {
-        "name": "resizeStart",
-        "payload": "{ position: number }",
-        "description": "Fires when a resize drag begins."
+        "name": "onResizeStart",
+        "payload": "(position: number) => void",
+        "description": "Called when a resize drag begins."
       },
       {
-        "name": "resizeMove",
-        "payload": "{ delta: number }",
-        "description": "Fires during resize drag with the delta."
+        "name": "onResizeMove",
+        "payload": "(delta: number) => void",
+        "description": "Called during resize drag with the pixel delta."
       },
       {
-        "name": "resizeEnd",
-        "payload": "{ position: number }",
-        "description": "Fires when a resize drag ends."
+        "name": "onResizeEnd",
+        "payload": "(position: number) => void",
+        "description": "Called when a resize drag ends."
       },
       {
-        "name": "resizeStep",
-        "payload": "{ delta: number }",
-        "description": "Fires when resized via keyboard step."
+        "name": "onResizeStep",
+        "payload": "(delta: number) => void",
+        "description": "Called when resized via keyboard step."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { ResizeHandle } from \"@poodle/svelte\";\n</script>\n\n<ResizeHandle orientation=\"horizontal\" ariaLabel=\"Resize sidebar\" ariaValueNow={50} />"
@@ -6898,6 +6981,12 @@
         "type": "boolean",
         "default": "false",
         "description": "Whether the scroll region is keyboard-focusable."
+      },
+      {
+        "name": "onScroll",
+        "type": "((event: Event) => void) | null",
+        "default": "null",
+        "description": "Called when the viewport scroll position changes."
       }
     ],
     "slots": [
@@ -6906,13 +6995,7 @@
         "description": "Scrollable content."
       }
     ],
-    "events": [
-      {
-        "name": "scroll",
-        "payload": "Event",
-        "description": "Fires when the container is scrolled."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { ScrollShell } from \"@poodle/svelte\";\n</script>\n\n<ScrollShell direction=\"vertical\" padding=\"md\" style=\"max-height: 300px;\">\n  <p>Long scrollable content goes here...</p>\n</ScrollShell>"
   },
   "segmented-control": {
@@ -6937,9 +7020,9 @@
       },
       {
         "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled selected value."
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable selected value. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -6976,17 +7059,17 @@
         "type": "boolean",
         "default": "true",
         "description": "Whether all segments are rendered with equal width."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected segment changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected segment changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { SegmentedControl } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"list\", label: \"List\" },\n    { value: \"grid\", label: \"Grid\" },\n    { value: \"board\", label: \"Board\" },\n  ];\n\n  let view = \"list\";\n</script>\n\n<SegmentedControl {options} bind:value={view} />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { SegmentedControl } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"list\", label: \"List\" },\n    { value: \"grid\", label: \"Grid\" },\n    { value: \"board\", label: \"Board\" },\n  ];\n\n  let view = \"list\";\n</script>\n\n<SegmentedControl {options} value={view} onValueChange={(value) => (view = value)} />"
   },
   "select": {
     "props": [
@@ -7016,9 +7099,9 @@
       },
       {
         "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled selected value."
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable selected value. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -7037,30 +7120,6 @@
         "type": "SelectItems",
         "default": "[]",
         "description": "Array of select options or grouped option objects."
-      },
-      {
-        "name": "items",
-        "type": "SelectItem[] | null",
-        "default": "null",
-        "description": "Legacy flat list of selectable items. Normalized into options internally."
-      },
-      {
-        "name": "groups",
-        "type": "SelectGroup[] | null",
-        "default": "null",
-        "description": "Legacy grouped items. Normalized into option groups internally."
-      },
-      {
-        "name": "loadItems",
-        "type": "(() => Promise<SelectItem[]>) | null",
-        "default": "null",
-        "description": "Async loader for flat options. Fetched automatically on mount."
-      },
-      {
-        "name": "loadGroups",
-        "type": "(() => Promise<SelectGroup[]>) | null",
-        "default": "null",
-        "description": "Async loader for grouped options. Fetched automatically on mount."
       },
       {
         "name": "loadKey",
@@ -7111,10 +7170,22 @@
         "description": "Form field name."
       },
       {
-        "name": "onchange",
-        "type": "((value: string) => void) | null",
-        "default": "null",
-        "description": "Direct callback fired on value change."
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Callback fired when the selected value changes."
+      },
+      {
+        "name": "onQueryChange",
+        "type": "((query: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Callback fired when the search query changes in searchable mode."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Callback fired when the custom dropdown opens or closes."
       },
       {
         "name": "searchable",
@@ -7150,40 +7221,19 @@
     "slots": [
       {
         "name": "option",
-        "description": "Custom rendering for each option row. Receives: option, highlighted, selected, index. Presence forces custom mode."
+        "description": "Snippet prop for each custom option row. Receives: option, highlighted, selected, index. Presence forces custom mode."
       },
       {
         "name": "trigger",
-        "description": "Custom trigger rendering. Receives: selectedOption, open, placeholder. Presence forces custom mode."
+        "description": "Snippet prop for custom trigger rendering. Receives: selectedOption, open, placeholder. Presence forces custom mode."
       },
       {
         "name": "empty",
-        "description": "Custom empty-state for no matching options. Receives: query."
+        "description": "Snippet prop for the custom empty state. Receives: query."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected value changes."
-      },
-      {
-        "name": "change",
-        "payload": "{ value: string }",
-        "description": "Alias for valueChange."
-      },
-      {
-        "name": "queryChange",
-        "payload": "{ query: string }",
-        "description": "Fires when the search query changes (searchable mode only)."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the dropdown opens/closes (custom mode only)."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { Select } from \"@poodle/svelte\";\n\n  const fruits = [\n    { value: \"apple\", label: \"Apple\" },\n    { value: \"banana\", label: \"Banana\" },\n    { value: \"cherry\", label: \"Cherry\" },\n  ];\n</script>\n\n<!-- Native (default) -->\n<Select options={fruits} placeholder=\"Choose a fruit\" />\n\n<!-- Custom dropdown with rich options -->\n<Select options={fruits} native={false} placeholder=\"Choose...\" />\n\n<!-- Searchable -->\n<Select options={fruits} searchable placeholder=\"Search fruits...\" />\n\n<!-- Freeform autocomplete -->\n<Select options={fruits} searchable freeform placeholder=\"Type or pick...\" />\n\n<!-- Custom option rendering -->\n<Select options={countries} placeholder=\"Choose a country\">\n  <div slot=\"option\" let:option let:selected>\n    <span>{option.icon} {option.label}</span>\n    {#if selected}<strong>✓</strong>{/if}\n  </div>\n</Select>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Select } from \"@poodle/svelte\";\n\n  const fruits = [\n    { value: \"apple\", label: \"Apple\" },\n    { value: \"banana\", label: \"Banana\" },\n    { value: \"cherry\", label: \"Cherry\" },\n  ];\n</script>\n\n<!-- Native (default) -->\n<Select options={fruits} placeholder=\"Choose a fruit\" />\n\n<!-- Custom dropdown with rich options -->\n<Select options={fruits} native={false} placeholder=\"Choose...\" />\n\n<!-- Searchable -->\n<Select options={fruits} searchable placeholder=\"Search fruits...\" />\n\n<!-- Freeform autocomplete -->\n<Select options={fruits} searchable freeform placeholder=\"Type or pick...\" />\n\n<!-- Custom rendering with snippets -->\n<Select options={fruits} native={false} placeholder=\"Choose a fruit\">\n  {#snippet trigger({ selectedOption, placeholder })}\n    <span>{selectedOption?.label ?? placeholder}</span>\n  {/snippet}\n\n  {#snippet option({ option, selected })}\n    <span>{option.label}{selected ? \" ✓\" : \"\"}</span>\n  {/snippet}\n</Select>"
   },
   "selection-summary": {
     "props": [
@@ -7222,22 +7272,23 @@
         "type": "number",
         "default": "4",
         "description": "Maximum number of items shown before truncation."
+      },
+      {
+        "name": "onRemove",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Called when an item is removed from the selection."
+      },
+      {
+        "name": "onClear",
+        "type": "(() => void) | null",
+        "default": "null",
+        "description": "Called when all items are cleared."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "remove",
-        "payload": "{ id: string }",
-        "description": "Fires when an item is removed from the selection."
-      },
-      {
-        "name": "clear",
-        "payload": "void",
-        "description": "Fires when all items are cleared."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { SelectionSummary } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n</script>\n\n<SelectionSummary {items} maxVisibleItems={3} on:remove={(e) => deselect(e.detail.id)} on:clear={clearAll} />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { SelectionSummary } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"1\", label: \"Alice\" },\n    { id: \"2\", label: \"Bob\" },\n    { id: \"3\", label: \"Charlie\" },\n  ];\n</script>\n\n<SelectionSummary {items} maxVisibleItems={3} onRemove={(id) => deselect(id)} onClear={clearAll} />"
   },
   "separator": {
     "props": [
@@ -7301,17 +7352,17 @@
         "type": "ControlDensity | null",
         "default": "null",
         "description": "Explicit density override. Supports compact, default, and comfortable."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a navigation item is activated."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when a navigation item is activated."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { SidebarNav } from \"@poodle/svelte\";\n\n  const groups = [\n    {\n      id: \"main\",\n      label: \"Navigation\",\n      items: [\n        { value: \"dashboard\", label: \"Dashboard\" },\n        { value: \"projects\", label: \"Projects\", href: \"/projects\" },\n        { value: \"settings\", label: \"Settings\" },\n      ],\n    },\n  ];\n\n  let active = \"dashboard\";\n</script>\n\n<SidebarNav {groups} value={active} ariaLabel=\"Main navigation\" on:valueChange={(e) => (active = e.detail.value)} />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { SidebarNav } from \"@poodle/svelte\";\n\n  const groups = [\n    {\n      id: \"main\",\n      label: \"Navigation\",\n      items: [\n        { value: \"dashboard\", label: \"Dashboard\" },\n        { value: \"projects\", label: \"Projects\", href: \"/projects\" },\n        { value: \"settings\", label: \"Settings\" },\n      ],\n    },\n  ];\n\n  let active = \"dashboard\";\n</script>\n\n<SidebarNav {groups} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => (active = value)} />"
   },
   "skeleton": {
     "props": [
@@ -7435,7 +7486,7 @@
         "name": "value",
         "type": "number",
         "default": "0",
-        "description": "Current slider value."
+        "description": "Bindable slider value."
       },
       {
         "name": "min",
@@ -7478,21 +7529,22 @@
         "type": "string | null",
         "default": "null",
         "description": "Human-readable text for the current value."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: number) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the slider value changes during drag."
+      },
+      {
+        "name": "onValueCommit",
+        "type": "((value: number) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the slider value is committed."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: number }",
-        "description": "Fires when the slider value changes during drag."
-      },
-      {
-        "name": "valueCommit",
-        "payload": "{ value: number }",
-        "description": "Fires when the slider value is committed (drag end)."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { Slider } from \"@poodle/svelte\";\n\n  let volume = 50;\n</script>\n\n<Slider bind:value={volume} min={0} max={100} ariaLabel=\"Volume\" />"
   },
   "spacer": {
@@ -7581,6 +7633,18 @@
         "type": "string",
         "default": "\"More actions\"",
         "description": "Accessible label for the dropdown menu."
+      },
+      {
+        "name": "onClick",
+        "type": "((event: MouseEvent) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the primary button is clicked."
+      },
+      {
+        "name": "onAction",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a dropdown menu item is selected."
       }
     ],
     "slots": [
@@ -7589,19 +7653,8 @@
         "description": "Primary button label content."
       }
     ],
-    "events": [
-      {
-        "name": "click",
-        "payload": "MouseEvent",
-        "description": "Fires when the primary button is clicked."
-      },
-      {
-        "name": "action",
-        "payload": "{ value: string }",
-        "description": "Fires when a dropdown menu item is selected."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { SplitButton } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"save-draft\", label: \"Save as Draft\" },\n    { value: \"schedule\", label: \"Schedule\" },\n  ];\n</script>\n\n<SplitButton type=\"submit\" variant=\"primary\" {items} on:click={() => publish()} on:action={(e) => handleAction(e.detail.value)}>\n  Publish\n</SplitButton>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { SplitButton } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"save-draft\", label: \"Save as Draft\" },\n    { value: \"schedule\", label: \"Schedule\" },\n  ];\n</script>\n\n<SplitButton type=\"submit\" variant=\"primary\" {items} onClick={() => publish()} onAction={(value) => handleAction(value)}>\n  Publish\n</SplitButton>"
   },
   "split-view": {
     "props": [
@@ -7705,31 +7758,31 @@
     "slots": [
       {
         "name": "primary",
-        "description": "Content for the primary (left or top) pane."
+        "description": "Primary-pane snippet."
       },
       {
         "name": "secondary",
-        "description": "Content for the secondary (right or bottom) pane."
+        "description": "Secondary-pane snippet."
       }
     ],
     "events": [
       {
-        "name": "ratioChange",
-        "payload": "{ ratio: number }",
-        "description": "Fires when the split ratio changes."
+        "name": "onRatioChange",
+        "payload": "(ratio: number) => void",
+        "description": "Called when the split ratio changes."
       },
       {
-        "name": "primaryCollapsedChange",
-        "payload": "{ isCollapsed: boolean }",
-        "description": "Fires when the primary pane collapse state changes."
+        "name": "onPrimaryCollapsedChange",
+        "payload": "(isCollapsed: boolean) => void",
+        "description": "Called when the primary pane collapse state changes."
       },
       {
-        "name": "secondaryCollapsedChange",
-        "payload": "{ isCollapsed: boolean }",
-        "description": "Fires when the secondary pane collapse state changes."
+        "name": "onSecondaryCollapsedChange",
+        "payload": "(isCollapsed: boolean) => void",
+        "description": "Called when the secondary pane collapse state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { SplitView } from \"@poodle/svelte\";\n</script>\n\n<SplitView orientation=\"horizontal\" defaultRatio={0.3} showCollapsePrimary>\n  <svelte:fragment slot=\"primary\">\n    <p>Sidebar content</p>\n  </svelte:fragment>\n  <svelte:fragment slot=\"secondary\">\n    <p>Main content</p>\n  </svelte:fragment>\n</SplitView>"
+    "usage": "<script lang=\"ts\">\n  import { SplitView } from \"@poodle/svelte\";\n</script>\n\n<SplitView orientation=\"horizontal\" defaultRatio={0.3} showCollapsePrimary>\n  {#snippet primary()}\n    <p>Sidebar content</p>\n  {/snippet}\n  {#snippet secondary()}\n    <p>Main content</p>\n  {/snippet}\n</SplitView>"
   },
   "stack": {
     "props": [
@@ -7804,20 +7857,44 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the status bar."
+      },
+      {
+        "name": "chrome",
+        "type": "boolean",
+        "default": "false",
+        "description": "Whether the bar renders with border-top and panel background."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit size override for text and padding."
+      },
+      {
+        "name": "sizeRole",
+        "type": "\"chrome\" | \"control\" | \"prominent\"",
+        "default": "\"chrome\"",
+        "description": "Semantic size offset relative to the inherited presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override for padding and gap."
       }
     ],
     "slots": [
       {
         "name": "leading",
-        "description": "Content on the left side of the status bar."
+        "description": "Content snippet on the left side of the status bar."
       },
       {
         "name": "trailing",
-        "description": "Content on the right side of the status bar."
+        "description": "Content snippet on the right side of the status bar."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { StatusBar } from \"@poodle/svelte\";\n</script>\n\n<StatusBar summary=\"3 items selected\">\n  <svelte:fragment slot=\"leading\">Ready</svelte:fragment>\n  <svelte:fragment slot=\"trailing\">Ln 42, Col 8</svelte:fragment>\n</StatusBar>"
+    "usage": "<script lang=\"ts\">\n  import { StatusBar } from \"@poodle/svelte\";\n</script>\n\n<StatusBar summary=\"3 items selected\">\n  {#snippet leading()}Ready{/snippet}\n  {#snippet trailing()}Ln 42, Col 8{/snippet}\n</StatusBar>"
   },
   "status-indicator": {
     "props": [
@@ -7925,9 +8002,9 @@
       },
       {
         "name": "checked",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled checked state."
+        "type": "boolean | undefined",
+        "default": "undefined",
+        "description": "Bindable checked state. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultChecked",
@@ -8006,16 +8083,16 @@
         "type": "SwitchTone",
         "default": "\"primary\"",
         "description": "Color tone for the right (on) state. Supports default, primary, success, warning, and danger."
+      },
+      {
+        "name": "onCheckedChange",
+        "type": "((checked: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the checked state changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "checkedChange",
-        "payload": "{ checked: boolean }",
-        "description": "Fires when the checked state changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { Switch } from \"@poodle/svelte\";\n\n  let notifications = true;\n</script>\n\n<Switch\n  label=\"Enable notifications\"\n  bind:checked={notifications}\n  onColor=\"#22c55e\"\n  offColor=\"#cbd5e1\"\n/>"
   },
   "table": {
@@ -8134,36 +8211,38 @@
         "type": "string | null",
         "default": "null",
         "description": "Optional URL query param key used to preserve the active tab in browser history."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the active tab changes."
+      },
+      {
+        "name": "onReorder",
+        "type": "((items: string[]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when tabs are reordered."
+      },
+      {
+        "name": "onClose",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when a tab close button is requested."
       }
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Tab panel content. Receives slot props: activeValue."
+        "name": "children",
+        "description": "Snippet for tab panel content. Receives the active tab value."
       },
       {
         "name": "actions",
-        "description": "Actions rendered alongside the tab list."
+        "description": "Snippet rendered alongside the tab list."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the active tab changes."
-      },
-      {
-        "name": "reorder",
-        "payload": "{ items: string[] }",
-        "description": "Fires when tabs are reordered."
-      },
-      {
-        "name": "close",
-        "payload": "{ value: string }",
-        "description": "Fires when a tab close button is clicked."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { Tabs } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"overview\", label: \"Overview\" },\n    { value: \"settings\", label: \"Settings\", count: 3, separator: true },\n  ];\n</script>\n\n<Tabs {items} defaultValue=\"overview\" historyKey=\"tab\">\n  {#snippet default({ activeValue })}\n    {#if activeValue === \"overview\"}\n      <p>Overview content here.</p>\n    {:else}\n      <p>Settings content here.</p>\n    {/if}\n  {/snippet}\n</Tabs>"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { Tabs } from \"@poodle/svelte\";\n\n  const items = [\n    { value: \"overview\", label: \"Overview\" },\n    { value: \"settings\", label: \"Settings\", count: 3, separator: true },\n  ];\n</script>\n\n<Tabs {items} defaultValue=\"overview\" historyKey=\"tab\">\n  {#snippet children(activeValue)}\n    {#if activeValue === \"overview\"}\n      <p>Overview content here.</p>\n    {:else}\n      <p>Settings content here.</p>\n    {/if}\n  {/snippet}\n</Tabs>"
   },
   "text-input": {
     "props": [
@@ -8498,9 +8577,9 @@
       },
       {
         "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled time value (e.g. \"14:30\")."
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable time value (e.g. \"14:30\"). Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -8543,16 +8622,16 @@
         "type": "string | null",
         "default": "null",
         "description": "ID of the element describing this input."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the time value changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string | null }",
-        "description": "Fires when the time value changes."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { TimeInput } from \"@poodle/svelte\";\n\n  let time = \"09:00\";\n</script>\n\n<TimeInput id=\"start-time\" bind:value={time} min=\"08:00\" max=\"18:00\" step={60} />"
   },
   "time-zone-select": {
@@ -8583,9 +8662,9 @@
       },
       {
         "name": "value",
-        "type": "string | null",
-        "default": "null",
-        "description": "Controlled selected time zone."
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Bindable selected time zone. Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -8628,17 +8707,29 @@
         "type": "string | undefined",
         "default": "undefined",
         "description": "Form field name."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected time zone changes."
+      },
+      {
+        "name": "onQueryChange",
+        "type": "((query: string) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the search query changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the dropdown opens or closes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string }",
-        "description": "Fires when the selected time zone changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { TimeZoneSelect } from \"@poodle/svelte\";\n\n  let tz = \"America/New_York\";\n</script>\n\n<TimeZoneSelect id=\"tz\" bind:value={tz} placeholder=\"Select time zone\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { TimeZoneSelect } from \"@poodle/svelte\";\n\n  let tz = \"America/New_York\";\n</script>\n\n<TimeZoneSelect id=\"tz\" value={tz} placeholder=\"Select time zone\" onValueChange={(value) => (tz = value)} />"
   },
   "toast-stack": {
     "props": [
@@ -8676,17 +8767,17 @@
     "slots": [],
     "events": [
       {
-        "name": "dismiss",
-        "payload": "{ id: string }",
-        "description": "Fires when a toast is dismissed."
+        "name": "onDismiss",
+        "payload": "(id: string) => void",
+        "description": "Called when a toast is dismissed."
       },
       {
-        "name": "action",
-        "payload": "{ id: string }",
-        "description": "Fires when a toast action button is clicked."
+        "name": "onAction",
+        "payload": "(id: string) => void",
+        "description": "Called when a toast action button is clicked."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { ToastStack } from \"@poodle/svelte\";\n\n  let toasts = [\n    { id: \"1\", title: \"Saved\", description: \"Your changes have been saved.\" },\n  ];\n</script>\n\n<ToastStack items={toasts} on:dismiss={(e) => { toasts = toasts.filter(t => t.id !== e.detail.id); }} />"
+    "usage": "<script lang=\"ts\">\n  import { ToastStack } from \"@poodle/svelte\";\n\n  let toasts = [\n    { id: \"1\", title: \"Saved\", description: \"Your changes have been saved.\" },\n  ];\n</script>\n\n<ToastStack items={toasts} onDismiss={(id) => { toasts = toasts.filter(t => t.id !== id); }} />"
   },
   "toast-host": {
     "props": [
@@ -8742,19 +8833,25 @@
         "type": "((id: string) => void) | null",
         "default": "null",
         "description": "Optional callback when a toast action button is activated."
+      },
+      {
+        "name": "onDismiss",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Optional callback after a toast is dismissed from the backing store."
       }
     ],
     "slots": [],
     "events": [
       {
-        "name": "dismiss",
-        "payload": "{ id: string }",
-        "description": "Fires after the host dismisses a toast from the backing store."
+        "name": "onDismiss",
+        "payload": "(id: string) => void",
+        "description": "Called after the host dismisses a toast from the backing store."
       },
       {
-        "name": "action",
-        "payload": "{ id: string }",
-        "description": "Fires when a toast action button is clicked."
+        "name": "onAction",
+        "payload": "(id: string) => void",
+        "description": "Called when a toast action button is clicked."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { writable } from \"svelte/store\";\n  import { ToastHost, type ToastHostStoreItem } from \"@poodle/svelte\";\n\n  const toasts = writable<ToastHostStoreItem[]>([\n    { id: \"1\", variant: \"success\", title: \"Saved\", message: \"Your settings were updated.\" },\n    { id: \"2\", variant: \"error\", message: \"Publishing failed.\" },\n  ]);\n\n  const store = {\n    toasts,\n    dismiss(id: string) {\n      toasts.update((items) => items.filter((item) => item.id !== id));\n    }\n  };\n</script>\n\n<ToastHost {store} />"
@@ -8763,9 +8860,9 @@
     "props": [
       {
         "name": "value",
-        "type": "string | string[] | null",
-        "default": "null",
-        "description": "Controlled selected value(s)."
+        "type": "string | string[] | null | undefined",
+        "default": "undefined",
+        "description": "Bindable selected value(s). Leave undefined for uncontrolled mode."
       },
       {
         "name": "defaultValue",
@@ -8814,17 +8911,17 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the toggle group."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: string | string[]) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the selected value(s) change."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: string | string[] }",
-        "description": "Fires when the selected value(s) change."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { ToggleGroup } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"left\", label: \"Left\" },\n    { value: \"center\", label: \"Center\" },\n    { value: \"right\", label: \"Right\" },\n  ];\n</script>\n\n<ToggleGroup {options} defaultValue=\"left\" ariaLabel=\"Text alignment\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ToggleGroup } from \"@poodle/svelte\";\n\n  const options = [\n    { value: \"left\", label: \"Left\" },\n    { value: \"center\", label: \"Center\" },\n    { value: \"right\", label: \"Right\" },\n  ];\n</script>\n\n<ToggleGroup {options} defaultValue=\"left\" ariaLabel=\"Text alignment\" onValueChange={(value) => console.log(value)} />"
   },
   "toolbar": {
     "props": [
@@ -8903,18 +9000,18 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Trigger element the tooltip is anchored to."
       }
     ],
     "events": [
       {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the tooltip open state changes."
+        "name": "onOpenChange",
+        "payload": "(open: boolean) => void",
+        "description": "Called when the tooltip open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Tooltip } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Tooltip content=\"Save your work\" placement=\"top\">\n  <Button>Save</Button>\n</Tooltip>"
+    "usage": "<script lang=\"ts\">\n  import { Tooltip } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<Tooltip content=\"Save your work\" placement=\"top\" onOpenChange={(open) => console.log(open)}>\n  <Button>Save</Button>\n</Tooltip>"
   },
   "tri-state-switch": {
     "props": [
@@ -8977,17 +9074,17 @@
         "type": "string | null",
         "default": "null",
         "description": "Optional color override for the selected included state."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: TriStateValue) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the tri-state value changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: TriStateValue }",
-        "description": "Fires when the tri-state value changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { TriStateSwitch } from \"@poodle/svelte\";\n\n  let filter = \"default\";\n</script>\n\n<TriStateSwitch bind:value={filter} ariaLabel=\"Include archived items\" excludedColor=\"#ef4444\" includedColor=\"#22c55e\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { TriStateSwitch } from \"@poodle/svelte\";\n\n  let filter = \"default\";\n</script>\n\n<TriStateSwitch value={filter} ariaLabel=\"Include archived items\" excludedColor=\"#ef4444\" includedColor=\"#22c55e\" onValueChange={(value) => (filter = value)} />"
   },
   "ui-presentation-provider": {
     "props": [
@@ -9098,7 +9195,7 @@
         "name": "value",
         "type": "ZonedDateTimeValue | null",
         "default": "null",
-        "description": "Controlled date/time/zone value."
+        "description": "Selected date/time/zone value. When supplied, the host owns updates through onValueChange."
       },
       {
         "name": "defaultValue",
@@ -9110,7 +9207,7 @@
         "name": "open",
         "type": "boolean | null",
         "default": "null",
-        "description": "Controlled open state of the picker."
+        "description": "Picker visibility. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -9153,6 +9250,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the picker."
+      },
+      {
+        "name": "onValueChange",
+        "type": "((value: ZonedDateTimeValue) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the date/time/zone value changes."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the picker opens or closes."
       }
     ],
     "slots": [
@@ -9161,19 +9270,8 @@
         "description": "Custom trigger content for the picker."
       }
     ],
-    "events": [
-      {
-        "name": "valueChange",
-        "payload": "{ value: ZonedDateTimeValue }",
-        "description": "Fires when the date/time/zone value changes."
-      },
-      {
-        "name": "openChange",
-        "payload": "{ open: boolean }",
-        "description": "Fires when the picker open state changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { DateTimeZonePicker } from \"@poodle/svelte\";\n\n  let meeting = { date: null, time: null, timeZone: \"America/New_York\" };\n</script>\n\n<DateTimeZonePicker bind:value={meeting} placeholder=\"Pick date, time & zone\" />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { DateTimeZonePicker } from \"@poodle/svelte\";\n\n  let meeting = { date: null, time: null, timeZone: \"America/New_York\" };\n</script>\n\n<DateTimeZonePicker\n  value={meeting}\n  onValueChange={(nextValue) => (meeting = nextValue)}\n  placeholder=\"Pick date, time & zone\"\n/>"
   },
   "action-discovery-panel": {
     "props": [
@@ -9218,22 +9316,23 @@
         "type": "ControlDensity | null",
         "default": "null",
         "description": "Explicit density override for group, list, and skeleton spacing."
+      },
+      {
+        "name": "onItemSelect",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Called when an action item is selected."
+      },
+      {
+        "name": "onActiveChange",
+        "type": "((id: string | null) => void) | null",
+        "default": "null",
+        "description": "Called when the active item changes."
       }
     ],
     "slots": [],
-    "events": [
-      {
-        "name": "itemSelect",
-        "payload": "{ id: string }",
-        "description": "Fires when an action item is selected."
-      },
-      {
-        "name": "activeChange",
-        "payload": "{ id: string | null }",
-        "description": "Fires when the active item changes."
-      }
-    ],
-    "usage": "<script lang=\"ts\">\n  import { ActionDiscoveryPanel } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"copy\", label: \"Copy\", shortcut: \"Cmd+C\" },\n    { id: \"paste\", label: \"Paste\", shortcut: \"Cmd+V\" },\n  ];\n</script>\n\n<ActionDiscoveryPanel {items} on:itemSelect={(e) => console.log(e.detail.id)} />"
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { ActionDiscoveryPanel } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"copy\", label: \"Copy\", shortcut: \"Cmd+C\" },\n    { id: \"paste\", label: \"Paste\", shortcut: \"Cmd+V\" },\n  ];\n</script>\n\n<ActionDiscoveryPanel {items} onItemSelect={(id) => console.log(id)} />"
   },
   "app-header": {
     "props": [
@@ -9265,15 +9364,15 @@
     "slots": [
       {
         "name": "identity",
-        "description": "Custom content for the identity/logo area."
+        "description": "Custom content snippet for the identity/logo area."
       },
       {
         "name": "actions",
-        "description": "Primary action buttons in the header."
+        "description": "Primary action button snippet for the header."
       },
       {
         "name": "utility",
-        "description": "Utility controls (e.g. user menu, settings)."
+        "description": "Utility control snippet (for example user menu or settings)."
       }
     ],
     "events": [],
@@ -9316,6 +9415,12 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the nav card."
+      },
+      {
+        "name": "onClick",
+        "type": "((event: MouseEvent) => void) | null",
+        "default": "null",
+        "description": "Called when the card is activated as a button or link."
       }
     ],
     "slots": [
@@ -9324,13 +9429,7 @@
         "description": "Icon content displayed in the card."
       }
     ],
-    "events": [
-      {
-        "name": "click",
-        "payload": "MouseEvent",
-        "description": "Fires when the card is clicked."
-      }
-    ],
+    "events": [],
     "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  <svelte:fragment slot=\"icon\">📊</svelte:fragment>\n</NavCard>"
   }
 }

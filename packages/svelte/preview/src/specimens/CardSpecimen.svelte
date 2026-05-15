@@ -7,19 +7,19 @@
   <SpecimenGroup label="Default variant">
     <div class="poodle-specimen__cards">
       <Card ariaLabel="Project card">
-        <svelte:fragment slot="header">
+        {#snippet header()}
           <h3 class="poodle-card-title">Project Alpha</h3>
-        </svelte:fragment>
+        {/snippet}
         <p class="poodle-card-body">A design system component library for building consistent interfaces.</p>
-        <svelte:fragment slot="footer">
+        {#snippet footer()}
           <span class="poodle-card-meta">Updated 2 days ago</span>
-        </svelte:fragment>
+        {/snippet}
       </Card>
 
       <Card ariaLabel="Stats card">
-        <svelte:fragment slot="header">
+        {#snippet header()}
           <h3 class="poodle-card-title">Monthly report</h3>
-        </svelte:fragment>
+        {/snippet}
         <p class="poodle-card-body">48 components shipped across 3 packages this month.</p>
       </Card>
     </div>
@@ -27,27 +27,27 @@
 
   <SpecimenGroup label="Outlined variant">
     <Card variant="outlined" ariaLabel="Outlined card">
-      <svelte:fragment slot="header">
+      {#snippet header()}
         <h3 class="poodle-card-title">Outlined card</h3>
-      </svelte:fragment>
+      {/snippet}
       <p class="poodle-card-body">This card uses a subtle border instead of elevation.</p>
     </Card>
   </SpecimenGroup>
 
   <SpecimenGroup label="Elevated variant">
     <Card variant="elevated" ariaLabel="Elevated card">
-      <svelte:fragment slot="header">
+      {#snippet header()}
         <h3 class="poodle-card-title">Elevated card</h3>
-      </svelte:fragment>
+      {/snippet}
       <p class="poodle-card-body">This card uses a drop shadow for visual prominence.</p>
     </Card>
   </SpecimenGroup>
 
   <SpecimenGroup label="Interactive">
     <Card interactive ariaLabel="Clickable card">
-      <svelte:fragment slot="header">
+      {#snippet header()}
         <h3 class="poodle-card-title">Interactive card</h3>
-      </svelte:fragment>
+      {/snippet}
       <p class="poodle-card-body">Hover to see the interactive state. Cursor changes to pointer.</p>
     </Card>
   </SpecimenGroup>

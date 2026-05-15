@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, tick } from "svelte";
+  import { tick } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -19,14 +19,13 @@
   export let placeholder: string | null = null;
   export let maxLength: number | null = null;
   export let showEditIcon = false;
+  export let onEditStart: (() => void) | undefined = undefined;
+  export let onCommit:
+    | ((detail: { value: string; previousValue: string }) => void)
+    | undefined = undefined;
+  export let onCancel: (() => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
-
-  const dispatch = createEventDispatcher<{
-    editStart: void;
-    commit: { value: string; previousValue: string };
-    cancel: void;
-  }>();
 
   let isEditing = false;
   let draftValue = value;
@@ -46,7 +45,7 @@
 
     draftValue = value;
     isEditing = true;
-    dispatch("editStart");
+    onEditStart?.();
     await tick();
 
     if (inputElement) {
@@ -59,13 +58,13 @@
     const trimmed = draftValue.trim();
     const previousValue = value;
     isEditing = false;
-    dispatch("commit", { value: trimmed, previousValue });
+    onCommit?.({ value: trimmed, previousValue });
   }
 
   function cancel(): void {
     isEditing = false;
     draftValue = value;
-    dispatch("cancel");
+    onCancel?.();
   }
 </script>
 
@@ -85,9 +84,9 @@
       value={draftValue}
       {placeholder}
       maxlength={maxLength}
-      on:input={(event) => (draftValue = (event.currentTarget).value)}
-      on:blur={() => commit()}
-      on:keydown={(event) => {
+      oninput={(event) => (draftValue = (event.currentTarget).value)}
+      onblur={() => commit()}
+      onkeydown={(event) => {
         if (event.key === "Enter") commit();
         if (event.key === "Escape") { event.preventDefault(); cancel(); }
       }}
@@ -99,9 +98,9 @@
       class:poodle-editable-label__display--empty={isEmpty}
       disabled={disabled}
       aria-label={ariaLabel}
-      on:dblclick={() => { if (activationMode === "doubleClick") startEditing(); }}
-      on:click={() => { if (activationMode === "enterOrSpace") startEditing(); }}
-      on:keydown={(event) => {
+      ondblclick={() => { if (activationMode === "doubleClick") startEditing(); }}
+      onclick={() => { if (activationMode === "enterOrSpace") startEditing(); }}
+      onkeydown={(event) => {
         if (activationMode === "enterOrSpace" && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
           startEditing();

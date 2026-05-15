@@ -13,16 +13,16 @@ Updated: 2026-04-13
   disabled states, three visual variants, semantic size roles, and five explicit
   control sizes
 - Out of scope: transport controls, DAW-specific command widgets
-- Toggle behavior: Button supports `pressed`/`defaultPressed` props and `pressedChange` event for toggle-button use cases
+- Toggle behavior: Button supports `pressed`/`defaultPressed` props and `onPressedChange` for toggle-button use cases
 
 ## 2. Anatomy
 
 ```text
 [Root .button]  <button>
   ├── [Spinner .button__spinner] (conditional, when loading)
-  ├── [Leading Icon .button__icon] (optional, via slot or leadingIcon prop)
-  ├── [Label .button__label] (optional, via default slot)
-  ├── [Trailing Icon .button__icon] (optional, via slot or trailingIcon prop)
+  ├── [Leading Icon .button__icon] (optional, via `leading()` snippet or `leadingIcon` prop)
+  ├── [Label .button__label] (optional, via children content)
+  ├── [Trailing Icon .button__icon] (optional, via `trailing()` snippet or `trailingIcon` prop)
   └── [Chevron .button__chevron] (optional, when chevron=true)
 ```
 
@@ -73,19 +73,19 @@ Updated: 2026-04-13
 | `ariaExpanded` | yes — `aria_expanded: Option<bool>` | `None` means do not set `aria-expanded`; `Some(true \| false)` mirrors disclosure state. |
 | `type`, `form`, `formaction`, `formenctype`, `formmethod`, `formnovalidate`, `formtarget` | no | HTML form submission only; native/desktop renderers use different models. |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| default | label text content; absence triggers icon-only mode |
-| leading | custom leading icon content (overrides leadingIcon prop) |
-| trailing | custom trailing icon content (overrides trailingIcon prop) |
+| default children | label text content; absence triggers icon-only mode |
+| `leading()` | custom leading content (overrides `leadingIcon`) |
+| `trailing()` | custom trailing content (overrides `trailingIcon`) |
 
 ### Controlled And Uncontrolled
 
 - Command actions: no persistent value model for click behavior
-- Toggle mode (controlled): set `pressed` prop; listen to `pressedChange` to update
-- Toggle mode (uncontrolled): set `defaultPressed`; component manages internal state; `pressedChange` fires on each toggle
+- Toggle mode (controlled): set `pressed`; either bind it directly or listen to `onPressedChange` and update in host code
+- Toggle mode (uncontrolled): set `defaultPressed`; component manages internal state; `onPressedChange` fires on each toggle
 
 ## 4. States
 
@@ -99,17 +99,17 @@ Updated: 2026-04-13
 | focus | keyboard focus | `outline: border-width-focus solid accent-focusRing`, `outline-offset: 0.125rem` |
 | disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
 | loading | `loading=true` | spinner visible, button disabled |
-| icon-only | no default slot content | square button, no min-width |
+| icon-only | no children content | square button, no min-width |
 | pressed | `pressed=true` or uncontrolled toggle active | non-primary variants get accent fill, accent border, inverse text; `aria-pressed="true"` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `click` | activation completed | `MouseEvent` | suppressed while disabled or loading |
-| `focus` | focus enters root | `FocusEvent` | passthrough |
-| `blur` | focus leaves root | `FocusEvent` | passthrough |
-| `pressedChange` | toggle state changes | `{ pressed: boolean }` | fires when button is in toggle mode (`pressed` non-null or `defaultPressed` set) |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onClick` | activation completed | `MouseEvent` | suppressed while disabled or loading |
+| `onFocus` | focus enters root | `FocusEvent` | passthrough |
+| `onBlur` | focus leaves root | `FocusEvent` | passthrough |
+| `onPressedChange` | toggle state changes | `boolean` | fires when button is in toggle mode (`pressed` non-null or `defaultPressed` set) |
 
 ## 6. Accessibility
 
@@ -345,7 +345,7 @@ When a button is in toggle mode and pressed, non-primary variants receive accent
 | `--poodle-button-text` | `var(--poodle-color-text-inverse)` |
 | `--poodle-button-shadow` | `none` |
 
-Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is set. The `data-pressed` attribute reflects the current pressed state. `aria-pressed` is set to `"true"` or `"false"` accordingly. The `pressedChange` event fires on every toggle.
+Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is set. The `data-pressed` attribute reflects the current pressed state. `aria-pressed` is set to `"true"` or `"false"` accordingly. The `onPressedChange` callback fires on every toggle.
 
 ## 9. Svelte Notes
 
@@ -357,13 +357,13 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is set. 
 - `data-has-leading` and `data-has-trailing` emit presence-only (value is truthy or attribute is omitted)
 - `isUnavailable = disabled || loading` — both disable the native button
 - Icon and spinner supporting visuals resolve through the shared supporting-size mapping rather than a fixed absolute size
-- Supports named slots `leading` and `trailing` for custom icon content
+- Supports `leading()` and `trailing()` snippet content for custom icon content
 - Treatment token: `--poodle-treatment-interactive-radius` with fallback to `--poodle-radius-control`
 - Secondary variant uses elevation stacking: `color-mix` toward `var(--poodle-color-text-primary)` rather than toward a separate elevated background token; the surface color (`--poodle-surface` with fallback to `--poodle-color-background-surface`) is mixed at 88% idle / 80% hover / 84% active with text-primary
 - Danger tone defines all three interaction states (idle, hover, active) for fill and border inline in the danger CSS custom properties, keeping hover/active within the red family rather than deferring to generic `--poodle-button-fill-hover`/`--poodle-button-border-hover`
 - `data-pressed` emits the current pressed boolean when button is in toggle mode; omitted entirely for non-toggle buttons
 - `isToggle` derived from `pressed !== null || defaultPressed`; controlled mode when `pressed !== null`, uncontrolled otherwise
-- `pressedChange` event dispatches on every toggle activation, before the `click` event
+- `onPressedChange` fires on every toggle activation, before the `onClick` callback
 - Chevron renders `chevron-down` icon from registry at size `sm`, positioned after all other content
 
 ## 10. GPUI Notes

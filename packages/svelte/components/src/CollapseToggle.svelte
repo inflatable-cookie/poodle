@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -13,10 +11,7 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    toggle: { isCollapsed: boolean };
-  }>();
+  export let onToggle: ((isCollapsed: boolean) => void) | null = null;
 
   const uiPresentation = getUiPresentation();
 
@@ -35,7 +30,7 @@
 
   function handleClick(): void {
     if (disabled) return;
-    dispatch("toggle", { isCollapsed: !collapsed });
+    onToggle?.(!collapsed);
   }
 </script>
 

@@ -23,7 +23,7 @@ Updated: 2026-03-30
         ├── [Header .drawer__header]  <div> (conditional)
         │     ├── [Title]  <strong>
         │     └── [Description]  <p>
-        ├── [Body] (slot)
+        ├── [Body] (`children` snippet)
         └── [Actions .drawer__actions]  <div> (conditional)
 ```
 
@@ -33,7 +33,7 @@ Updated: 2026-03-30
 | Backdrop | no | modal background block (only when modal) | overlay background color |
 | Surface | yes | edge-anchored container | surface background, border, elevation, padding |
 | Header | no | title and description region | typography, spacing |
-| Body | yes | primary content area (default slot) | caller-owned |
+| Body | yes | primary content area (`children` snippet) | caller-owned |
 | Actions | no | footer action row | flex layout, spacing |
 
 ## 3. Props And Inputs
@@ -42,7 +42,7 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null` | `null` | no | controlled open state |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | drawer visibility; when supplied, the host owns updates through `onOpenChange`; omit the prop for uncontrolled mode |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial state |
 | `edge` | `DrawerEdge: "left" \| "right" \| "top" \| "bottom"` | `"right"` | no | anchored edge |
 | `modal` | `boolean` | `true` | no | whether background becomes inert |
@@ -61,17 +61,17 @@ Updated: 2026-03-30
 DrawerEdge: "left" | "right" | "top" | "bottom"
 ```
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| default | primary body content |
-| actions | footer action buttons |
+| `children` | primary body content |
+| `actions` | footer action buttons |
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` plus `openChange` event
-- uncontrolled: `defaultOpen`
+- controlled: `open` plus `onOpenChange` callback
+- uncontrolled: omit `open` and use `defaultOpen`
 - modality is governed by `modal`
 
 ## 4. States
@@ -90,12 +90,12 @@ DrawerEdge: "left" | "right" | "top" | "bottom"
 A small state machine is appropriate: closed, opening, open, closing, with
 modal vs non-modal posture.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | drawer opens or closes | `{ open: boolean }` | state ownership callback |
-| `requestClose` | user attempts dismissal | void | escape, backdrop, or explicit close intent |
+| `onOpenChange` | drawer opens or closes | `boolean` | state ownership callback |
+| `onRequestClose` | user attempts dismissal | `void` | escape, backdrop, or explicit close intent |
 
 ## 6. Accessibility
 
@@ -264,6 +264,7 @@ modal vs non-modal posture.
 - backdrop rendered as a `<button>` element for accessible click handling
 - body scroll lock applied only in modal posture
 - surface overflow set to `auto` for built-in scroll support
+- composition is snippet-first: `children` and optional `actions`
 
 ## 10. GPUI Notes
 
@@ -313,13 +314,13 @@ modal vs non-modal posture.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Right edge (default) | `edge` not set (defaults to `"right"`), `title="Settings"`, `description="Configure your preferences."`, actions slot with Cancel (secondary) and Save (primary) buttons | Drawer slides in from right edge with header, body content, and footer action row |
+| Right edge (default) | `edge` not set (defaults to `"right"`), `title="Settings"`, `description="Configure your preferences."`, actions snippet with Cancel (secondary) and Save (primary) buttons | Drawer slides in from right edge with header, body content, and footer action row |
 
 ### Left Edge
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Left edge | `edge="left"`, `title="Navigation"`, no actions slot | Drawer slides in from left edge with header and body content only, no footer actions |
+| Left edge | `edge="left"`, `title="Navigation"`, no actions snippet | Drawer slides in from left edge with header and body content only, no footer actions |
 
 ## 14. Approval And Adoption Notes
 

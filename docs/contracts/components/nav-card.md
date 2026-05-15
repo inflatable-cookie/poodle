@@ -49,6 +49,7 @@ Updated: 2026-03-15
 | `badge` | `string \| null` | `null` | no | inline badge text |
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name |
+| `onClick` | `((event: MouseEvent) => void) \| null` | `null` | no | called when the card is activated; suppressed while disabled |
 
 ### Slots
 
@@ -71,11 +72,11 @@ Updated: 2026-03-15
 | focus | keyboard focus | accent focus ring |
 | disabled | `disabled=true` | reduced opacity, not-allowed cursor |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `click` | card activated | `MouseEvent` | suppressed while disabled; native navigation for `<a>` |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onClick` | card activated | `MouseEvent` | suppressed while disabled; anchor roots still use native navigation |
 
 ## 6. Accessibility
 
@@ -90,7 +91,7 @@ Updated: 2026-03-15
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` | activates card (navigates for links, fires click for buttons) |
+| `Enter` | activates card (navigates for links, calls `onClick` for buttons) |
 | `Space` | activates card (button mode only) |
 | `Tab` | moves focus to/from card |
 
@@ -239,7 +240,7 @@ Updated: 2026-03-15
 - `data-disabled` attribute on root when disabled
 - Arrow SVG is always in DOM, opacity-toggled on hover
 - Badge rendered inline within title row when badge prop is non-null
-- Click event handler on root; `<a>` also navigates natively
+- `onClick` handler on root; `<a>` still navigates natively when `href` is present
 
 ## 10. GPUI Notes
 
@@ -256,7 +257,7 @@ Updated: 2026-03-15
 
 - [ ] renders as link when href provided, button otherwise
 - [ ] disabled state suppresses interaction and removes href
-- [ ] click event fires correctly
+- [ ] `onClick` runs correctly
 - [ ] keyboard activation matches
 
 ### Tier 2: Visual Parity

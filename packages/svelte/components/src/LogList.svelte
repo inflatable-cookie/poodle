@@ -10,64 +10,96 @@
   import UiPresentationProvider from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
+    AuditLogEntry,
     ControlDensity,
     ControlSize,
-    SemanticControlSizeRole,
-  } from "./types";
-
-  import type {
-    AuditLogEntry,
     LogActionType,
     LogActor,
     LogEntry,
     LogFilter,
     LogLevel,
+    SemanticControlSizeRole,
   } from "./types";
 
-  export let entries: LogEntry[] = [];
-  export let variant: "auto" | "stream" | "audit" = "auto";
-  export let maxEntries = 500;
-  export let autoScroll = true;
-  export let filterLevel: LogLevel | null = null;
-  export let filterText = "";
-  export let ariaLabel = "Log output";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    entries?: LogEntry[];
+    variant?: "auto" | "stream" | "audit";
+    maxEntries?: number;
+    autoScroll?: boolean;
+    filterLevel?: LogLevel | null;
+    filterText?: string;
+    ariaLabel?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    loading?: boolean;
+    error?: string | null;
+    emptyMessage?: string;
+    filters?: LogFilter[];
+    filterValues?: Record<string, string>;
+    page?: number;
+    pageSize?: number;
+    total?: number | undefined;
+    onFilterChange?: ((field: string, value: string) => void) | undefined;
+    onClearFilters?: (() => void) | undefined;
+    onPageChange?: ((page: number) => void) | undefined;
+    onRefresh?: (() => void) | undefined;
+    onExport?: (() => void) | undefined;
+    actionIcon?: Snippet<[LogActionType]> | undefined;
+    entryDetails?: Snippet<[AuditLogEntry]> | undefined;
+    getActionType?: ((action: string) => LogActionType) | undefined;
+    formatAction?: ((action: string) => string) | undefined;
+    formatResourceType?: ((resourceType: string) => string) | undefined;
+    getActorHref?: ((actor: LogActor) => string) | undefined;
+    getResourceHref?:
+      | ((resourceType: string, resourceId: string, action: string) => string | null)
+      | undefined;
+  }
 
-  export let loading = false;
-  export let error: string | null = null;
-  export let emptyMessage = "No log entries found";
-  export let filters: LogFilter[] = [];
-  export let filterValues: Record<string, string> = {};
-  export let page = 1;
-  export let pageSize = 50;
-  export let total: number | undefined = undefined;
-  export let onFilterChange: ((field: string, value: string) => void) | undefined = undefined;
-  export let onClearFilters: (() => void) | undefined = undefined;
-  export let onPageChange: ((page: number) => void) | undefined = undefined;
-  export let onRefresh: (() => void) | undefined = undefined;
-  export let onExport: (() => void) | undefined = undefined;
-  export let actionIcon: Snippet<[LogActionType]> | undefined = undefined;
-  export let entryDetails: Snippet<[AuditLogEntry]> | undefined = undefined;
-  export let getActionType: ((action: string) => LogActionType) | undefined = undefined;
-  export let formatAction: ((action: string) => string) | undefined = undefined;
-  export let formatResourceType: ((resourceType: string) => string) | undefined = undefined;
-  export let getActorHref: ((actor: LogActor) => string) | undefined = undefined;
-  export let getResourceHref:
-    | ((resourceType: string, resourceId: string, action: string) => string | null)
-    | undefined = undefined;
+  let {
+    entries = [],
+    variant = "auto",
+    maxEntries = 500,
+    autoScroll = true,
+    filterLevel = $bindable<LogLevel | null>(null),
+    filterText = $bindable(""),
+    ariaLabel = "Log output",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    loading = false,
+    error = null,
+    emptyMessage = "No log entries found",
+    filters = [],
+    filterValues = {},
+    page = 1,
+    pageSize = 50,
+    total = undefined,
+    onFilterChange = undefined,
+    onClearFilters = undefined,
+    onPageChange = undefined,
+    onRefresh = undefined,
+    onExport = undefined,
+    actionIcon = undefined,
+    entryDetails = undefined,
+    getActionType = undefined,
+    formatAction = undefined,
+    formatResourceType = undefined,
+    getActorHref = undefined,
+    getResourceHref = undefined,
+  }: Props = $props();
 
-  let scrollContainer: HTMLDivElement | null = null;
-  let isUserScrolled = false;
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedVariant =
-    variant === "auto" ? (entries.some(isAuditEntry) ? "audit" : "stream") : variant;
+  let scrollContainer = $state<HTMLDivElement | null>(null);
+  let isUserScrolled = $state(false);
 
-  $: displayEntries =
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedVariant = $derived(
+    variant === "auto" ? (entries.some(isAuditEntry) ? "audit" : "stream") : variant,
+  );
+  const displayEntries = $derived(
     resolvedVariant === "stream"
       ? entries
           .filter(isStreamEntry)
@@ -76,19 +108,18 @@
             (entry) => !filterText || entry.message.toLowerCase().includes(filterText.toLowerCase()),
           )
           .slice(-maxEntries)
-      : [];
-
-  $: levelCounts = {
+      : [],
+  );
+  const levelCounts = $derived({
     info: entries.filter((entry) => isStreamEntry(entry) && entry.level === "info").length,
     warn: entries.filter((entry) => isStreamEntry(entry) && entry.level === "warn").length,
     error: entries.filter((entry) => isStreamEntry(entry) && entry.level === "error").length,
-  };
-
-  $: auditEntries = resolvedVariant === "audit" ? entries.filter(isAuditEntry) : [];
-  $: hasAuditToolbar = filters.length > 0 || !!onRefresh || !!onExport;
-  $: hasActiveFilters = Object.values(filterValues).some((value) => value?.trim());
-  $: totalPages = total ? Math.max(1, Math.ceil(total / pageSize)) : 1;
-  $: showPagination = total !== undefined && total > pageSize;
+  });
+  const auditEntries = $derived(resolvedVariant === "audit" ? entries.filter(isAuditEntry) : []);
+  const hasAuditToolbar = $derived(filters.length > 0 || !!onRefresh || !!onExport);
+  const hasActiveFilters = $derived(Object.values(filterValues).some((value) => value?.trim()));
+  const totalPages = $derived(total ? Math.max(1, Math.ceil(total / pageSize)) : 1);
+  const showPagination = $derived(total !== undefined && total > pageSize);
 
   function isStreamEntry(entry: LogEntry): entry is Extract<LogEntry, { message: string }> {
     return "message" in entry;
@@ -113,12 +144,14 @@
     });
   }
 
-  $: if (resolvedVariant === "stream" && autoScroll && !isUserScrolled && scrollContainer) {
-    scrollContainer.scrollTop = scrollContainer.scrollHeight;
-  }
+  $effect(() => {
+    if (resolvedVariant === "stream" && autoScroll && !isUserScrolled && scrollContainer) {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  });
 
-  function formatStreamTimestamp(ts: Date | string | number): string {
-    const date = ts instanceof Date ? ts : new Date(ts);
+  function formatStreamTimestamp(timestamp: Date | string | number): string {
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
     return date.toLocaleTimeString("en-US", { hour12: false, fractionalSecondDigits: 3 });
   }
 
@@ -241,7 +274,7 @@
               {/each}
 
               {#if hasActiveFilters && onClearFilters}
-                <Button variant="ghost" size="sm" leadingIcon="x" on:click={onClearFilters}>
+                <Button variant="ghost" size="sm" leadingIcon="x" onClick={onClearFilters}>
                   Clear
                 </Button>
               {/if}
@@ -256,11 +289,11 @@
                 size="sm"
                 loading={loading}
                 ariaLabel="Refresh"
-                on:click={onRefresh}
+                onClick={onRefresh}
               />
             {/if}
             {#if onExport}
-              <Button variant="ghost" size="sm" leadingIcon="download" disabled={loading} on:click={onExport}>
+              <Button variant="ghost" size="sm" leadingIcon="download" disabled={loading} onClick={onExport}>
                 Export
               </Button>
             {/if}
@@ -356,7 +389,7 @@
               size="sm"
               ariaLabel="Previous page"
               disabled={page <= 1 || loading}
-              on:click={() => requestPage(page - 1)}
+              onClick={() => requestPage(page - 1)}
             />
             <span class="poodle-log-list__pagination-page">Page {page} of {totalPages}</span>
             <IconButton
@@ -365,7 +398,7 @@
               size="sm"
               ariaLabel="Next page"
               disabled={page >= totalPages || loading}
-              on:click={() => requestPage(page + 1)}
+              onClick={() => requestPage(page + 1)}
             />
           </div>
         </div>
@@ -385,7 +418,7 @@
             type="button"
             class="poodle-log-list__filter-btn"
             class:poodle-active={filterLevel === null}
-            on:click={() => (filterLevel = null)}
+            onclick={() => (filterLevel = null)}
           >
             All <span class="poodle-log-list__count">{entries.length}</span>
           </button>
@@ -393,7 +426,7 @@
             type="button"
             class="poodle-log-list__filter-btn poodle-log-list__filter-btn--info"
             class:poodle-active={filterLevel === "info"}
-            on:click={() => (filterLevel = filterLevel === "info" ? null : "info")}
+            onclick={() => (filterLevel = filterLevel === "info" ? null : "info")}
           >
             Info <span class="poodle-log-list__count">{levelCounts.info}</span>
           </button>
@@ -401,7 +434,7 @@
             type="button"
             class="poodle-log-list__filter-btn poodle-log-list__filter-btn--warn"
             class:poodle-active={filterLevel === "warn"}
-            on:click={() => (filterLevel = filterLevel === "warn" ? null : "warn")}
+            onclick={() => (filterLevel = filterLevel === "warn" ? null : "warn")}
           >
             Warn <span class="poodle-log-list__count">{levelCounts.warn}</span>
           </button>
@@ -409,7 +442,7 @@
             type="button"
             class="poodle-log-list__filter-btn poodle-log-list__filter-btn--error"
             class:poodle-active={filterLevel === "error"}
-            on:click={() => (filterLevel = filterLevel === "error" ? null : "error")}
+            onclick={() => (filterLevel = filterLevel === "error" ? null : "error")}
           >
             Error <span class="poodle-log-list__count">{levelCounts.error}</span>
           </button>
@@ -424,7 +457,7 @@
         />
       </div>
 
-      <div class="poodle-log-list__scroll" bind:this={scrollContainer} on:scroll={handleScroll}>
+      <div class="poodle-log-list__scroll" bind:this={scrollContainer} onscroll={handleScroll}>
         {#if displayEntries.length === 0}
           <div class="poodle-log-list__empty">No log entries{filterLevel || filterText ? " match filters" : ""}</div>
         {:else}
@@ -442,7 +475,7 @@
         <button
           type="button"
           class="poodle-log-list__scroll-btn"
-          on:click={scrollToBottom}
+          onclick={scrollToBottom}
           aria-label="Scroll to latest"
         >
           New entries
@@ -561,67 +594,66 @@
   }
 
   .poodle-log-list__audit-entry {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.875rem;
+    padding: 1rem;
+    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
-  .poodle-log-list__audit-entry:last-child {
-    border-bottom: none;
+  .poodle-log-list__audit-entry:first-child {
+    border-top: 0;
   }
 
   .poodle-log-list__audit-icon {
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 999px;
-    display: flex;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 88%, transparent);
-    color: var(--poodle-color-text-secondary);
+    border-radius: var(--poodle-radius-pill);
+    font-family: var(--poodle-typography-label-family);
     font-size: 0.75rem;
     font-weight: 700;
+    color: var(--poodle-color-text-primary);
+    background: color-mix(in srgb, var(--poodle-color-border-subtle) 35%, transparent);
   }
 
   .poodle-log-list__audit-icon[data-action-type="create"],
   .poodle-log-list__audit-icon[data-action-type="restore"] {
-    background: color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 16%, transparent);
-    color: var(--poodle-color-status-success, #22c55e);
-  }
-
-  .poodle-log-list__audit-icon[data-action-type="delete"] {
-    background: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 16%, transparent);
-    color: var(--poodle-color-status-danger, #ef4444);
+    background: color-mix(in srgb, var(--poodle-color-status-success) 18%, transparent);
+    color: var(--poodle-color-status-success);
   }
 
   .poodle-log-list__audit-icon[data-action-type="update"],
   .poodle-log-list__audit-icon[data-action-type="upload"] {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent);
     color: var(--poodle-color-accent-base);
   }
 
+  .poodle-log-list__audit-icon[data-action-type="delete"] {
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent);
+    color: var(--poodle-color-status-danger);
+  }
+
   .poodle-log-list__audit-icon[data-action-type="security"] {
-    background: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 16%, transparent);
-    color: var(--poodle-color-status-warning, #f59e0b);
+    background: color-mix(in srgb, var(--poodle-color-status-warning) 18%, transparent);
+    color: var(--poodle-color-status-warning);
   }
 
   .poodle-log-list__audit-body {
-    flex: 1;
-    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.5rem;
+    min-width: 0;
   }
 
   .poodle-log-list__audit-main {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
     flex-wrap: wrap;
-    font-size: 0.875rem;
-    line-height: 1.4;
+    gap: 0.5rem;
+    min-width: 0;
   }
 
   .poodle-log-list__audit-actor {
@@ -629,35 +661,37 @@
     color: var(--poodle-color-text-primary);
   }
 
-  .poodle-log-list__audit-link {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .poodle-log-list__audit-link:hover {
-    text-decoration: underline;
-  }
-
   .poodle-log-list__audit-resource {
     color: var(--poodle-color-text-secondary);
+    min-width: 0;
   }
 
   .poodle-log-list__audit-resource-label {
-    font-style: italic;
     color: var(--poodle-color-text-primary);
-  }
-
-  .poodle-log-list__audit-details {
-    color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
+    margin-left: 0.125rem;
   }
 
   .poodle-log-list__audit-time {
     margin-left: auto;
-    color: var(--poodle-color-text-secondary);
-    font-size: 0.75rem;
-    flex-shrink: 0;
+    color: var(--poodle-color-text-tertiary, var(--poodle-color-text-secondary));
+    font-size: 0.8125rem;
     white-space: nowrap;
+  }
+
+  .poodle-log-list__audit-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+    text-underline-offset: 0.125rem;
+  }
+
+  .poodle-log-list__audit-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .poodle-log-list__audit-details {
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.875rem;
   }
 
   .poodle-log-list__pagination {
@@ -667,7 +701,6 @@
     gap: 1rem;
     padding: 0.75rem 1rem;
     border-top: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent);
   }
 
   .poodle-log-list__pagination-info,
@@ -683,62 +716,74 @@
   }
 
   .poodle-log-list__scroll {
-    max-height: 20rem;
-    overflow-y: auto;
-    font-family: var(--poodle-typography-code-family);
-    font-size: 0.75rem;
-    line-height: 1.6;
+    position: relative;
+    max-height: 24rem;
+    overflow: auto;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--poodle-color-background-canvas) 94%, transparent), var(--poodle-color-background-canvas));
   }
 
   .poodle-log-list__entry {
-    display: flex;
-    gap: 0.625rem;
-    padding: 0.125rem 0.5rem;
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.5rem 0.875rem;
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    border-top: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 55%, transparent);
+  }
+
+  .poodle-log-list__entry:first-child {
+    border-top: 0;
+  }
+
+  .poodle-log-list__entry[data-level="info"] {
+    color: var(--poodle-color-text-primary);
   }
 
   .poodle-log-list__entry[data-level="warn"] {
-    background: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 8%, transparent);
+    color: color-mix(in srgb, var(--poodle-color-status-warning) 84%, var(--poodle-color-text-primary));
   }
 
   .poodle-log-list__entry[data-level="error"] {
-    background: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 8%, transparent);
+    color: color-mix(in srgb, var(--poodle-color-status-danger) 84%, var(--poodle-color-text-primary));
   }
 
   .poodle-log-list__ts,
   .poodle-log-list__level {
-    flex-shrink: 0;
+    white-space: nowrap;
+    color: var(--poodle-color-text-secondary);
   }
 
   .poodle-log-list__level {
-    width: 3rem;
-    text-align: right;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .poodle-log-list__msg {
-    flex: 1;
     min-width: 0;
     word-break: break-word;
   }
 
   .poodle-log-list__empty {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
     color: var(--poodle-color-text-secondary);
     text-align: center;
   }
 
   .poodle-log-list__scroll-btn {
     position: absolute;
-    bottom: 0.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    border: none;
-    border-radius: 999px;
+    right: 1rem;
+    bottom: 1rem;
+    border: 0;
+    border-radius: var(--poodle-radius-pill);
     padding: 0.375rem 0.75rem;
     background: var(--poodle-color-accent-base);
-    color: var(--poodle-color-accent-onBase, white);
-    box-shadow: var(--poodle-shadow-md);
+    color: var(--poodle-color-text-onAccent);
+    font: inherit;
+    font-size: 0.75rem;
     cursor: pointer;
+    box-shadow: var(--poodle-elevation-overlay);
   }
 </style>

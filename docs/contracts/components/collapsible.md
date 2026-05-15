@@ -64,7 +64,7 @@ Updated: 2026-03-30
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` (non-null) plus `openChange` event
+- controlled: supplying `open` makes it host-owned through `onOpenChange`
 - uncontrolled: `defaultOpen` with internal state management
 
 ## 4. States
@@ -83,11 +83,11 @@ Updated: 2026-03-30
 - `data-open`: `"true"` or `"false"` on root `.collapsible`
 - `data-disabled`: `"true"` or `"false"` on root `.collapsible`
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | user toggles disclosure | `{ open: boolean }` | suppressed while disabled (button disabled) |
+| `onOpenChange` | user toggles disclosure | `boolean` | suppressed while disabled (button disabled) |
 
 ## 6. Accessibility
 
@@ -288,7 +288,7 @@ Updated: 2026-03-30
 - [ ] open-state semantics match (`aria-expanded`, `aria-controls`)
 - [ ] region role and `aria-labelledby` on content match
 - [ ] disabled behavior matches (opacity on root, cursor on trigger)
-- [ ] openChange event payload matches
+- [ ] onOpenChange callback payload matches
 - [ ] controlled and uncontrolled modes match
 - [ ] trigger slot override preserves button semantics
 - [ ] `aria-label` fallback when no title matches

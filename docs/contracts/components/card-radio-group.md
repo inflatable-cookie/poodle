@@ -8,7 +8,7 @@ Updated: 2026-03-30
 - Component name: `CardRadioGroup`
 - Layer: `composites`
 - Summary: a radio group rendered as a grid of Card primitives, each with a radio indicator, title, and optional description -- suitable for plan selection, size pickers, and similar exclusive-choice UIs
-- In scope: single selection from a set of card-based options, radio indicator with checked/unchecked states, configurable grid columns, per-item and group-level disabled states, keyboard navigation (arrow keys with roving tabindex), custom card content via slot, size and density variants
+- In scope: single selection from a set of card-based options, radio indicator with checked/unchecked states, configurable grid columns, per-item and group-level disabled states, keyboard navigation (arrow keys with roving tabindex), custom card content via snippet, size and density variants
 - Out of scope: multi-select (use CheckboxGroup), inline radio buttons (use RadioGroup), card content editing, drag-and-drop reordering
 
 ## 2. Anatomy
@@ -23,7 +23,7 @@ Updated: 2026-03-30
               │           │     └── [Dot .card-radio-group__dot]  (when checked)
               │           └── [Title .card-radio-group__title]
               ├── [Description .card-radio-group__description]  <p> (optional)
-              └── [CardSlot]  (optional, via "card" slot)
+              └── [CardContent]  (optional, via `card(...)` snippet)
 ```
 
 ### Parts
@@ -38,7 +38,7 @@ Updated: 2026-03-30
 | Dot | `<span>` | no | Inner dot visible only when checked |
 | Title | `<span>` | yes | Item label text |
 | Description | `<p>` | no | Optional item description text |
-| CardSlot | slot | no | Custom content via named `card` slot |
+| CardContent | snippet | no | Custom content via `card(...)` snippet |
 
 ## 3. Props And Inputs
 
@@ -66,10 +66,10 @@ type CardRadioItem = {
 };
 ```
 
-### Slots
+### Snippets
 
-| Slot | Scope | Purpose |
-|------|-------|---------|
+| Snippet | Scope | Purpose |
+|---------|-------|---------|
 | `card` | `{ item: CardRadioItem, checked: boolean, disabled: boolean }` | Custom content rendered inside each Card, below the description |
 
 ### Controlled And Uncontrolled

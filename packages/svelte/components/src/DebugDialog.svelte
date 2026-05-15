@@ -33,7 +33,7 @@
 </script>
 
 {#if hasValue}
-  <Button type="button" variant={triggerVariant} size={triggerSize} on:click={() => (open = true)}>
+  <Button type="button" variant={triggerVariant} size={triggerSize} onClick={() => (open = true)}>
     {triggerLabel}
   </Button>
 
@@ -43,7 +43,7 @@
     width="lg"
     {showCloseButton}
     {closeLabel}
-    on:openChange={(event) => (open = event.detail.open)}
+    onOpenChange={(nextOpen) => (open = nextOpen)}
   >
     <Code source={source} language="json" maxHeight={maxHeight} />
   </Dialog>

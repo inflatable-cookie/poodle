@@ -14,8 +14,8 @@
     <EditableLabel
       bind:value={title}
       ariaLabel="Project title"
-      on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}" (was: "${e.detail.previousValue}")`)}
-      on:cancel={() => (lastEvent = "Edit cancelled")}
+      onCommit={(detail) => (lastEvent = `Committed: "${detail.value}" (was: "${detail.previousValue}")`)}
+      onCancel={() => (lastEvent = "Edit cancelled")}
     />
   </SpecimenGroup>
 
@@ -25,7 +25,7 @@
       ariaLabel="Project title"
       activationMode="enterOrSpace"
       showEditIcon
-      on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}"`)}
+      onCommit={(detail) => (lastEvent = `Committed: "${detail.value}"`)}
     />
   </SpecimenGroup>
 
@@ -35,7 +35,7 @@
       ariaLabel="Description"
       activationMode="enterOrSpace"
       emptyText="Add a description…"
-      on:commit={(e) => (lastEvent = `Committed: "${e.detail.value}"`)}
+      onCommit={(detail) => (lastEvent = `Committed: "${detail.value}"`)}
     />
   </SpecimenGroup>
 

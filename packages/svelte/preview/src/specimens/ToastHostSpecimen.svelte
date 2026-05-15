@@ -43,7 +43,7 @@
     <p class="poodle-specimen__copy">
       The host owns timer policy and fixed positioning while `ToastStack` stays presentational.
     </p>
-    <Button variant="secondary" on:click={pushToast}>Add toast</Button>
+    <Button variant="secondary" onClick={pushToast}>Add toast</Button>
   </SpecimenGroup>
 
   <div class="poodle-specimen__surface">

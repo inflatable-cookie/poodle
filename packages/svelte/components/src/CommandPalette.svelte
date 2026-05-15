@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, tick } from "svelte";
+  import { onDestroy, tick } from "svelte";
 
   import Icon from "./Icon.svelte";
   import TextInput from "./TextInput.svelte";
@@ -15,86 +15,114 @@
 
   import type { CommandActionItem, DiscoveryState } from "./types";
 
-  export let open = false;
-  export let title = "Command palette";
-  export let description: string | null = null;
-  export let query = "";
-  export let items: CommandActionItem[] = [];
-  export let state: DiscoveryState = "ready";
-  export let ariaLabel: string | null = null;
-  export let invocationHint: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    open?: boolean;
+    title?: string;
+    description?: string | null;
+    query?: string;
+    items?: CommandActionItem[];
+    state?: DiscoveryState;
+    ariaLabel?: string | null;
+    invocationHint?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onQueryChange?: ((value: string) => void) | undefined;
+    onCommandSelect?: ((id: string) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onActiveChange?: ((id: string | null) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    queryChange: { value: string };
-    commandSelect: { id: string };
-    openChange: { open: boolean };
-    activeChange: { id: string | null };
-  }>();
-
-  let previousFocusedElement: HTMLElement | null = null;
-  let activeId: string | null = null;
-  let wasOpen = false;
-  let previousHtmlOverflow = "";
-  let previousBodyOverflow = "";
-  let panel: ActionDiscoveryPanel;
   const uiPresentation = getUiPresentation();
   const queryInputId = "command-palette-query";
   const statusId = "command-palette-status";
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  let {
+    open = false,
+    title = "Command palette",
+    description = null,
+    query = "",
+    items = [],
+    state: discoveryState = "ready",
+    ariaLabel = null,
+    invocationHint = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onQueryChange = undefined,
+    onCommandSelect = undefined,
+    onOpenChange = undefined,
+    onActiveChange = undefined,
+  }: Props = $props();
 
-  $: enabledItems = items.filter((item) => !item.disabled);
-  $: if (open && !wasOpen) {
-    previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    previousHtmlOverflow = document.documentElement.style.overflow;
-    previousBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    wasOpen = true;
-    queueMicrotask(async () => {
-      await tick();
-      const input = document.getElementById(queryInputId) as HTMLInputElement | null;
-      input?.focus();
-      if (enabledItems.length > 0) {
-        activeId = enabledItems[0]?.id ?? null;
-        dispatch("activeChange", { id: activeId });
-      }
-    });
-  }
-  $: if (!open && wasOpen) {
-    wasOpen = false;
-    activeId = null;
-    document.documentElement.style.overflow = previousHtmlOverflow;
-    document.body.style.overflow = previousBodyOverflow;
-    previousFocusedElement?.focus();
-  }
-  $: if (open && enabledItems.length > 0 && (!activeId || !enabledItems.some((item) => item.id === activeId))) {
-    activeId = enabledItems[0]?.id ?? null;
-    dispatch("activeChange", { id: activeId });
-  }
-  $: if (open && enabledItems.length === 0 && activeId !== null) {
-    activeId = null;
-    dispatch("activeChange", { id: null });
-  }
-  $: activeItem = enabledItems.find((item) => item.id === activeId) ?? null;
-  $: paletteStatus =
-    state === "loading"
+  let previousFocusedElement: HTMLElement | null = null;
+  let activeId = $state<string | null>(null);
+  let wasOpen = $state(false);
+  let previousHtmlOverflow = $state("");
+  let previousBodyOverflow = $state("");
+  let panel = $state<ActionDiscoveryPanel | null>(null);
+
+  let resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  let resolvedDensity = $derived(density ?? $uiPresentation.density);
+  let currentQuery = $derived(query);
+  let enabledItems = $derived(items.filter((item) => !item.disabled));
+  let activeItem = $derived(enabledItems.find((item) => item.id === activeId) ?? null);
+  let paletteStatus = $derived(
+    discoveryState === "loading"
       ? "Loading commands."
-      : state === "error"
+      : discoveryState === "error"
         ? "Command palette unavailable."
-        : state === "empty"
+        : discoveryState === "empty"
           ? "No commands are available in this workspace."
-          : state === "no-results"
-            ? `No commands match "${query}".`
-            : `${enabledItems.length} command${enabledItems.length === 1 ? "" : "s"} available.${activeItem ? ` Active command: ${activeItem.title}.` : ""}`;
+          : discoveryState === "no-results"
+            ? `No commands match "${currentQuery}".`
+            : `${enabledItems.length} command${enabledItems.length === 1 ? "" : "s"} available.${activeItem ? ` Active command: ${activeItem.title}.` : ""}`,
+  );
+
+  $effect(() => {
+    if (open && !wasOpen) {
+      previousFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      previousHtmlOverflow = document.documentElement.style.overflow;
+      previousBodyOverflow = document.body.style.overflow;
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      wasOpen = true;
+      queueMicrotask(async () => {
+        await tick();
+        const input = document.getElementById(queryInputId) as HTMLInputElement | null;
+        input?.focus();
+        if (enabledItems.length > 0) {
+          activeId = enabledItems[0]?.id ?? null;
+          onActiveChange?.(activeId);
+        }
+      });
+    }
+
+    if (!open && wasOpen) {
+      wasOpen = false;
+      activeId = null;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      previousFocusedElement?.focus();
+    }
+  });
+
+  $effect(() => {
+    if (open && enabledItems.length > 0 && (!activeId || !enabledItems.some((item) => item.id === activeId))) {
+      activeId = enabledItems[0]?.id ?? null;
+      onActiveChange?.(activeId);
+    }
+  });
+
+  $effect(() => {
+    if (open && enabledItems.length === 0 && activeId !== null) {
+      activeId = null;
+      onActiveChange?.(null);
+    }
+  });
 
   function close(): void {
-    open = false;
-    dispatch("openChange", { open: false });
+    onOpenChange?.(false);
   }
 
   function trapFocus(event: KeyboardEvent): void {
@@ -152,7 +180,7 @@
     }
     if (event.key === "Enter" && activeId) {
       event.preventDefault();
-      dispatch("commandSelect", { id: activeId });
+      onCommandSelect?.(activeId);
     }
   }
 
@@ -165,11 +193,11 @@
   });
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if open}
-  <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-  <div class="poodle-command-palette__overlay" aria-hidden="true" on:click={close}></div>
+  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+  <div class="poodle-command-palette__overlay" aria-hidden="true" onclick={close}></div>
   <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
     <div
       class="poodle-command-palette"
@@ -191,7 +219,7 @@
           {#if invocationHint}
             <span class="poodle-command-palette__hint">{invocationHint}</span>
           {/if}
-          <button type="button" class="poodle-command-palette__close" aria-label="Close command palette" on:click={close}>
+          <button type="button" class="poodle-command-palette__close" aria-label="Close command palette" onclick={close}>
             <Icon name="x" />
           </button>
         </div>
@@ -201,16 +229,16 @@
         <TextInput
           id={queryInputId}
           type="search"
-          value={query}
+          value={currentQuery}
           ariaLabel="Search commands"
           describedBy={statusId}
           placeholder="Search commands, panels, and actions"
-          onValueChange={(nextValue) => dispatch("queryChange", { value: nextValue })}
-          onClear={() => dispatch("queryChange", { value: "" })}
+          onValueChange={(nextValue) => onQueryChange?.(nextValue)}
+          onClear={() => onQueryChange?.("")}
           onCancel={close}
           onSubmit={() => {
             if (activeId) {
-              dispatch("commandSelect", { id: activeId });
+              onCommandSelect?.(activeId);
             }
           }}
         />
@@ -223,15 +251,15 @@
       <ActionDiscoveryPanel
         bind:this={panel}
         {items}
-        {state}
+        state={discoveryState}
         bind:activeId
         ariaLabel="Command results"
         size={resolvedSize}
         density={resolvedDensity}
-        on:itemSelect={(e) => dispatch("commandSelect", e.detail)}
-        on:activeChange={(e) => {
-          activeId = e.detail.id;
-          dispatch("activeChange", e.detail);
+        onItemSelect={(id) => onCommandSelect?.(id)}
+        onActiveChange={(id) => {
+          activeId = id;
+          onActiveChange?.(id);
         }}
       />
     </div>
@@ -342,18 +370,14 @@
     justify-content: center;
     width: var(--poodle-command-palette-close-size);
     height: var(--poodle-command-palette-close-size);
-    padding: 0;
+    min-height: 0;
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.0625rem);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 62%, transparent);
+    background: transparent;
     color: var(--poodle-color-text-secondary);
     cursor: pointer;
+    padding: 0;
     font: inherit;
-  }
-
-  .poodle-command-palette__close:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent);
-    color: var(--poodle-color-text-primary);
   }
 
   .poodle-command-palette__close:focus-visible {
@@ -361,25 +385,21 @@
     outline-offset: 0.125rem;
   }
 
+  .poodle-command-palette__query {
+    min-width: 0;
+  }
+
   .poodle-command-palette__status {
     margin: 0;
     color: var(--poodle-color-text-secondary);
-    font-size: 0.8125rem;
-    line-height: 1.5;
-  }
-
-  :global([data-theme="light"]) .poodle-command-palette {
-    border-color: color-mix(in srgb, var(--poodle-color-border-default) 24%, transparent);
-    box-shadow:
-      0 1.125rem 2.75rem rgba(49, 66, 85, 0.1),
-      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.72);
+    font-size: 0.75rem;
+    line-height: 1.4;
   }
 
   @media (max-width: 45rem) {
     .poodle-command-palette {
-      width: min(100vw - 1.25rem, 45rem);
-      max-height: calc(100vh - 1.25rem);
-      padding: 1rem;
+      width: calc(100vw - 1rem);
+      padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x-sm, 0.75rem);
     }
 
     .poodle-command-palette__header {
@@ -387,7 +407,7 @@
     }
 
     .poodle-command-palette__meta {
-      justify-content: flex-start;
+      justify-content: space-between;
     }
   }
 </style>

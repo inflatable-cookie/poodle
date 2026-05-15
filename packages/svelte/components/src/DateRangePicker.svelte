@@ -1,80 +1,94 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextDateRangePickerId = 0;
 </script>
 
 <script lang="ts">
-  import { onMount } from "svelte";
-
   import Calendar from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
-  export let value: DateRangeValue | null = null;
-  export let defaultValue: DateRangeValue = { start: null, end: null };
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let placeholder = "Select date range";
-  export let weekStartsOn: CalendarWeekStart = "monday";
-  export let locale = "en-US";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onValueChange: ((value: DateRangeValue) => void) | undefined = undefined;
-  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
+  interface Props {
+    value?: DateRangeValue | null | undefined;
+    defaultValue?: DateRangeValue;
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    placeholder?: string;
+    weekStartsOn?: CalendarWeekStart;
+    locale?: string;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: DateRangeValue) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+  }
+
+  let {
+    value = undefined,
+    defaultValue = { start: null, end: null },
+    open = undefined,
+    defaultOpen = false,
+    placeholder = "Select date range",
+    weekStartsOn = "monday",
+    locale = "en-US",
+    disabled = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    onOpenChange = undefined,
+  }: Props = $props();
 
   const surfaceId = `poodle-date-range-picker-surface-${++nextDateRangePickerId}`;
   const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
-  let uncontrolledValue = normalizeDateRange(defaultValue);
-  let uncontrolledOpen = defaultOpen;
-  let visibleMonth = monthAnchorIso(defaultValue.start ?? todayIsoDate());
+  let uncontrolledValue = $state<DateRangeValue>({ start: null, end: null });
+  let uncontrolledOpen = $state(false);
+  let visibleMonth = $state(todayIsoDate());
+  let seededDefaults = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = normalizeDateRange(value ?? uncontrolledValue);
-  $: isOpen = open ?? uncontrolledOpen;
-  $: if (currentValue.start) {
-    visibleMonth = monthAnchorIso(currentValue.start);
-  }
-  $: valueLabel = currentValue.start
-    ? `${formatDateLabel(currentValue.start, locale)}${
-        currentValue.end ? ` – ${formatDateLabel(currentValue.end, locale)}` : " – End date"
-      }`
-    : placeholder;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledValue = $derived(value !== undefined);
+  const hasControlledOpen = $derived(open !== undefined);
+  const currentValue = $derived(normalizeDateRange(hasControlledValue ? value ?? { start: null, end: null } : uncontrolledValue));
+  const isOpen = $derived(hasControlledOpen ? open === true : uncontrolledOpen);
+  const valueLabel = $derived(
+    currentValue.start
+      ? `${formatDateLabel(currentValue.start, locale)}${
+          currentValue.end ? ` – ${formatDateLabel(currentValue.end, locale)}` : " – End date"
+        }`
+      : placeholder,
+  );
 
-  function setOpen(nextOpen: boolean): void {
-    if (open === null) {
-      uncontrolledOpen = nextOpen;
+  $effect.pre(() => {
+    if (seededDefaults) {
+      return;
     }
 
-    onOpenChange?.(nextOpen);
-  }
+    uncontrolledValue = normalizeDateRange(defaultValue);
+    uncontrolledOpen = defaultOpen;
+    visibleMonth = monthAnchorIso(defaultValue.start ?? todayIsoDate());
+    seededDefaults = true;
+  });
 
-  function commitValue(nextValue: DateRangeValue): void {
-    const normalized = normalizeDateRange(nextValue);
+  $effect(() => {
+    if (currentValue.start) {
+      visibleMonth = monthAnchorIso(currentValue.start);
+    }
+  });
 
-    if (value === null) {
-      uncontrolledValue = normalized;
+  $effect(() => {
+    if (!isOpen) {
+      return;
     }
 
-    if (normalized.start) {
-      visibleMonth = monthAnchorIso(normalized.start);
-    }
-
-    if (normalized.start && normalized.end) {
-      setOpen(false);
-    }
-
-    onValueChange?.(normalized);
-  }
-
-  onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
-      if (!isOpen || !rootElement) {
+      if (!rootElement) {
         return;
       }
 
@@ -84,7 +98,7 @@
     }
 
     function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
+      if (event.key === "Escape") {
         event.preventDefault();
         setOpen(false);
       }
@@ -98,6 +112,32 @@
       document.removeEventListener("keydown", handleKeydown);
     };
   });
+
+  function setOpen(nextOpen: boolean): void {
+    if (!hasControlledOpen) {
+      uncontrolledOpen = nextOpen;
+    }
+
+    onOpenChange?.(nextOpen);
+  }
+
+  function commitValue(nextValue: DateRangeValue): void {
+    const normalized = normalizeDateRange(nextValue);
+
+    if (!hasControlledValue) {
+      uncontrolledValue = normalized;
+    }
+
+    if (normalized.start) {
+      visibleMonth = monthAnchorIso(normalized.start);
+    }
+
+    if (normalized.start && normalized.end) {
+      setOpen(false);
+    }
+
+    onValueChange?.(normalized);
+  }
 </script>
 
 <div bind:this={rootElement} class="poodle-date-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
@@ -134,7 +174,7 @@
         size={resolvedSize}
         density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
-        onValueChange={(value) => commitValue(value as DateRangeValue)}
+        onValueChange={(nextValue) => commitValue(nextValue as DateRangeValue)}
         onMonthChange={(month) => (visibleMonth = month)}
       />
     </div>
@@ -213,31 +253,33 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Size variants */
   .poodle-date-range-picker[data-size="xs"] .poodle-date-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 1.5rem;
     font-size: 0.75rem;
   }
 
+  .poodle-date-range-picker[data-size="xs"] .poodle-date-range-picker__indicator { font-size: 0.625rem; }
+
   .poodle-date-range-picker[data-size="sm"] .poodle-date-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 1.75rem;
   }
 
+  .poodle-date-range-picker[data-size="sm"] .poodle-date-range-picker__indicator { font-size: 0.6875rem; }
+
   .poodle-date-range-picker[data-size="lg"] .poodle-date-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 2.75rem;
     font-size: 0.9375rem;
   }
 
+  .poodle-date-range-picker[data-size="lg"] .poodle-date-range-picker__indicator { font-size: 0.8125rem; }
+
   .poodle-date-range-picker[data-size="xl"] .poodle-date-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 3.25rem;
     font-size: 1rem;
   }
 
-  /* Density variants */
+  .poodle-date-range-picker[data-size="xl"] .poodle-date-range-picker__indicator { font-size: 0.875rem; }
+
   .poodle-date-range-picker[data-density="compact"] .poodle-date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
   .poodle-date-range-picker[data-density="comfortable"] .poodle-date-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

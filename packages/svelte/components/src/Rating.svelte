@@ -58,9 +58,10 @@
   function setValue(nextValue: number | null): void {
     if (value === undefined) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    value = nextValue;
     onValueChange?.(nextValue);
   }
 

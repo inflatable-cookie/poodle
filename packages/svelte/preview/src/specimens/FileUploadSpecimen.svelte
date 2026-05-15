@@ -17,7 +17,7 @@
       maxFiles={5}
       maxSize={5 * 1024 * 1024}
       bind:files={imageFiles}
-      on:error={(e) => (errorMsg = e.detail.message)}
+      onError={({ message }) => (errorMsg = message)}
     />
   </SpecimenGroup>
 
@@ -38,7 +38,7 @@
       compressionOptions={{ ...DEFAULT_COMPRESSION, maxWidth: 1200, maxHeight: 800, quality: 0.8 }}
       bind:files={compressedFiles}
       validate={(file) => (file.name.includes(" ") ? "Filename cannot contain spaces" : null)}
-      on:error={(e) => (errorMsg = e.detail.message)}
+      onError={({ message }) => (errorMsg = message)}
     />
   </SpecimenGroup>
 

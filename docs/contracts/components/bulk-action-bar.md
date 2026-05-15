@@ -52,10 +52,12 @@ Updated: 2026-03-30
 | `actions` | `BulkAction[]` | `[]` | no | available bulk action definitions |
 | `loading` | `boolean` | `false` | no | disables all actions while a batch workflow is running |
 | `disabled` | `boolean` | `false` | no | disables all interactions without changing the displayed selection |
-| `showSelectAll` | `boolean` | `false` | no | shows a select-all / deselect-all action ahead of bulk actions |
-| `allSelected` | `boolean` | `false` | no | controls whether the select-all action presents as deselect-all |
-| `selectAllLabel` | `string` | `"Select all"` | no | label used when `allSelected` is false |
-| `deselectAllLabel` | `string` | `"Deselect all"` | no | label used when `allSelected` is true |
+| `showSelectAll` | `boolean` | `false` | no | shows a select-all action ahead of bulk actions |
+| `allSelected` | `boolean` | `false` | no | lets the parent suppress the select-all affordance once everything is already selected |
+| `selectAllLabel` | `string` | `"Select all"` | no | label used for the select-all control |
+| `onAction` | `((id: string) => void) \| null` | `null` | no | callback fired when a bulk action is triggered |
+| `onClear` | `(() => void) \| null` | `null` | no | callback fired when the selection is cleared |
+| `onSelectAll` | `(() => void) \| null` | `null` | no | callback fired when the select-all control is triggered |
 
 ### BulkAction Type
 
@@ -84,17 +86,17 @@ type BulkAction = {
 | danger action | action has `tone="danger"` | IconButton renders with danger tone |
 | warning action | action has `tone="warning"` | wrapper overrides IconButton color to status-warning |
 | with total | `totalCount` provided | summary shows "N selected of M visible rows" |
-| select all | `showSelectAll=true` | action row shows select-all or deselect-all text button |
+| select all | `showSelectAll=true` and `allSelected=false` | action row shows a select-all control ahead of the action icons |
 | loading | `loading=true` | all action controls disabled |
 | disabled | `disabled=true` | all action controls disabled |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `action` | action IconButton clicked | `{id: string}` | identifies which action was triggered |
-| `clear` | clear IconButton clicked | `void` | parent should clear selection |
-| `selectAll` | select-all / deselect-all clicked | `void` | parent decides whether to select all or clear all |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onAction` | action IconButton clicked | `string` | receives the triggered action id |
+| `onClear` | clear IconButton clicked | none | parent should clear selection |
+| `onSelectAll` | select-all control clicked | none | parent should select all visible items |
 
 ## 6. Accessibility
 
@@ -258,8 +260,8 @@ summary font-size, or action gap.
 ### Tier 1: Strict Parity
 
 - [ ] selectionCount and totalCount display correctly
-- [ ] action event fires with correct id
-- [ ] clear event fires correctly
+- [ ] `onAction` fires with correct id
+- [ ] `onClear` fires correctly
 - [ ] danger tone produces distinct IconButton styling
 - [ ] warning tone overrides IconButton color to status-warning
 

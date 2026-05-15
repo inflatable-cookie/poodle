@@ -78,7 +78,7 @@ Updated: 2026-03-30
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (non-null) plus `onValueChange` callback
+- controlled: supplying `value` makes it host-owned through `onValueChange`
 - uncontrolled: `defaultValue` with internal state; defaults to `null` (single)
   or `[]` (multiple) when `defaultValue` is `null`
 

@@ -50,6 +50,8 @@ Updated: 2026-03-30
 | `size` | `ControlSize \| null` | `null` | no | Explicit absolute size override |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic size intent for presentation context resolution |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
+| `onRemove` | `((id: string) => void) \| null` | `null` | no | called when an item is removed from the selection |
+| `onClear` | `(() => void) \| null` | `null` | no | called when all items are cleared |
 
 ### Slots
 
@@ -73,12 +75,12 @@ The component always renders (not conditionally hidden when empty). The chips co
 
 No internal component state.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `remove` | Chip remove button clicked | `{ id: string }` | Host removes the item from selection |
-| `clear` | Clear button clicked | `void` | Host clears all selections |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onRemove` | chip remove button clicked | `string` | host removes the item from selection |
+| `onClear` | clear button clicked | none | host clears all selections |
 
 ## 6. Accessibility
 
@@ -229,7 +231,7 @@ No density variants or light theme overrides in the current implementation.
 
 - `data-size` resolves via `resolveSemanticControlSize` from presentation context
 - `data-density` resolves via presentation context with explicit override
-- Uses `createEventDispatcher` for `remove` and `clear` events
+- Uses callback props for remove and clear actions
 - `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
 - Uses `Icon` primitive with `name="x"` for the remove icon
 - Imports `getUiPresentation` and `resolveSemanticControlSize` from `@poodle/svelte`

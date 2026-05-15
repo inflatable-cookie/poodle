@@ -12,7 +12,7 @@ Updated: 2026-03-30
   sticky toast treatment, and store-to-stack item mapping
 - In scope: store subscription, fixed-position viewport host, auto-dismiss
   timers, sticky toast treatment via tone or explicit flag, dismiss wiring,
-  action event passthrough, placement variants, responsive narrow-viewport
+  action callback passthrough, placement variants, responsive narrow-viewport
   treatment, variant-to-tone normalization
 - Out of scope: toast creation API, persistence, cross-tab sync, app-specific
   retry logic, toast animation (owned by ToastStack)
@@ -47,6 +47,7 @@ Updated: 2026-03-30
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Forwarded to `ToastStack` |
 | `density` | `ControlDensity \| null` | `null` | no | Forwarded to `ToastStack` |
 | `onAction` | `((id: string) => void) \| null` | `null` | no | Optional callback when a toast action button fires |
+| `onDismiss` | `((id: string) => void) \| null` | `null` | no | Optional callback after a toast is dismissed from the store |
 
 ### Types
 
@@ -100,12 +101,12 @@ internally but can be configured via `autoDismissMs` and `stickyTones`.
 - `items: ToastItem[]` -- normalized toast items derived from store subscription
 - `timers: Map<string, ReturnType<typeof setTimeout>>` -- active auto-dismiss timers
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `dismiss` | After host dismiss wiring runs (manual or auto) | `{ id: string }` | Store dismiss is called first, then event dispatched |
-| `action` | Toast action button pressed | `{ id: string }` | `onAction` callback called first (if provided), then event dispatched |
+| Callback | When It Fires | Signature | Notes |
+|----------|---------------|-----------|-------|
+| `onDismiss` | After host dismiss wiring runs (manual or auto) | `(id: string) => void` | Store dismiss is called first, then callback runs |
+| `onAction` | Toast action button pressed | `(id: string) => void` | Called when a toast action button is activated |
 
 ## 6. Accessibility
 
@@ -255,7 +256,7 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 - [ ] variant-to-tone mapping matches
 - [ ] sticky determination logic matches (explicit sticky flag + stickyTones)
 - [ ] auto-dismiss timer behavior matches
-- [ ] dismiss and action event payloads match
+- [ ] `onDismiss` and `onAction` callback payloads match
 - [ ] host only renders when items exist
 
 ### Tier 2: Visual Parity
@@ -288,4 +289,4 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Action toast | Store with toast including `actionLabel="Retry"`, `onAction` handler wired | Toast with action button; clicking fires action event |
+| Action toast | Store with toast including `actionLabel="Retry"`, `onAction` handler wired | Toast with action button; clicking calls the action callback |

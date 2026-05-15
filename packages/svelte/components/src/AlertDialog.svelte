@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
   import Button from "./Button.svelte";
   import Dialog from "./Dialog.svelte";
@@ -7,31 +7,54 @@
 
   import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let open: boolean | null = null;
-  export let title: string;
-  export let description: string | null = null;
-  export let itemLabel: string | null = null;
-  export let itemValue: string | null = null;
-  export let tone: AlertDialogTone = "danger";
-  export let confirmLabel = "Confirm";
-  export let cancelLabel = "Cancel";
-  export let ariaLabel: string | null = null;
-  export let workingLabel = "Working…";
-  export let onConfirm: (() => void | Promise<void>) | null = null;
-  export let onCancel: (() => void) | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    open?: boolean | null | undefined;
+    title: string;
+    description?: string | null;
+    itemLabel?: string | null;
+    itemValue?: string | null;
+    tone?: AlertDialogTone;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    ariaLabel?: string | null;
+    workingLabel?: string;
+    onConfirm?: (() => void | Promise<void>) | null;
+    onCancel?: (() => void) | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    confirm: void;
-    cancel: void;
-    openChange: { open: boolean };
-  }>();
+  let {
+    open = $bindable<boolean | null | undefined>(undefined),
+    title,
+    description = null,
+    itemLabel = null,
+    itemValue = null,
+    tone = "danger",
+    confirmLabel = "Confirm",
+    cancelLabel = "Cancel",
+    ariaLabel = null,
+    workingLabel = "Working…",
+    onConfirm = null,
+    onCancel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onOpenChange = undefined,
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let working = false;
+  let working = $state(false);
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const confirmTone = $derived(tone === "danger" ? "danger" as const : "default" as const);
+  const isControlled = $derived(open !== undefined);
 
   async function handleConfirm(): Promise<void> {
     if (working) {
@@ -43,8 +66,6 @@
     try {
       if (onConfirm) {
         await onConfirm();
-      } else {
-        dispatch("confirm");
       }
 
       setOpen(false);
@@ -55,78 +76,73 @@
     }
   }
 
-  function handleCancel(): void {
-    if (onCancel) {
-      onCancel();
-    } else {
-      dispatch("cancel");
+  function setOpen(nextOpen: boolean): void {
+    if (isControlled) {
+      open = nextOpen;
     }
 
+    onOpenChange?.(nextOpen);
+  }
+
+  function handleCancel(): void {
+    onCancel?.();
     setOpen(false);
   }
 
-  function setOpen(nextOpen: boolean): void {
-    if (open !== null) {
-      dispatch("openChange", { open: nextOpen });
+  function handleDialogOpenChange(nextOpen: boolean): void {
+    if (!nextOpen && !working) {
+      onCancel?.();
     }
-  }
 
-  function handleOpenChange(event: CustomEvent<{ open: boolean }>): void {
-    if (!event.detail.open && !working) {
-      handleCancel();
-    } else {
-      dispatch("openChange", event.detail);
-    }
+    onOpenChange?.(nextOpen);
   }
-
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: confirmTone = tone === "danger" ? "danger" as const : "default" as const;
 </script>
 
 <div data-size={resolvedSize} data-density={resolvedDensity}>
-<Dialog
-  {open}
-  {title}
-  {description}
-  role="alertdialog"
-  width="sm"
-  {ariaLabel}
-  size={resolvedSize}
-  density={resolvedDensity}
-  dismissOnEscape={!working}
-  dismissOnBackdrop={!working}
-  showCloseButton={!working}
-  on:openChange={handleOpenChange}
->
-  {#if itemLabel && itemValue}
-    <p class="poodle-alert-dialog__item-detail">
-      <strong>{itemLabel}:</strong> {itemValue}
-    </p>
-  {/if}
+  <Dialog
+    {open}
+    {title}
+    {description}
+    role="alertdialog"
+    width="sm"
+    {ariaLabel}
+    size={resolvedSize}
+    density={resolvedDensity}
+    dismissOnEscape={!working}
+    dismissOnBackdrop={!working}
+    showCloseButton={!working}
+    onOpenChange={handleDialogOpenChange}
+  >
+    {#snippet actions()}
+      <Button
+        variant="ghost"
+        size={resolvedSize}
+        density={resolvedDensity}
+        onClick={handleCancel}
+        disabled={working}
+      >
+        {cancelLabel}
+      </Button>
+      <Button
+        variant="primary"
+        tone={confirmTone}
+        size={resolvedSize}
+        density={resolvedDensity}
+        onClick={handleConfirm}
+        disabled={working}
+      >
+        {working ? workingLabel : confirmLabel}
+      </Button>
+    {/snippet}
 
-  <slot />
+    {#if itemLabel && itemValue}
+      <p class="poodle-alert-dialog__item-detail">
+        <strong>{itemLabel}:</strong> {itemValue}
+      </p>
+    {/if}
 
-  <svelte:fragment slot="actions">
-    <Button
-      variant="ghost"
-      size={resolvedSize}
-      on:click={handleCancel}
-      disabled={working}
-    >
-      {cancelLabel}
-    </Button>
-    <Button
-      variant="primary"
-      tone={confirmTone}
-      size={resolvedSize}
-      on:click={handleConfirm}
-      disabled={working}
-    >
-      {working ? workingLabel : confirmLabel}
-    </Button>
-  </svelte:fragment>
-</Dialog>
+    {@render children?.()}
+  </Dialog>
 </div>
 
 <style>

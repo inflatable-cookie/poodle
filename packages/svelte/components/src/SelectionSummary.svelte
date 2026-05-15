@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -10,11 +8,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    remove: { id: string };
-    clear: void;
-  }>();
+  export let onRemove: ((id: string) => void) | null = null;
+  export let onClear: (() => void) | null = null;
 
   const uiPresentation = getUiPresentation();
 
@@ -33,7 +28,7 @@
         <button
           type="button"
           class="poodle-selection-summary__chip"
-          on:click={() => dispatch("remove", { id: item.id })}
+          on:click={() => onRemove?.(item.id)}
           aria-label={`Remove ${item.label}`}
         >
           {item.label}
@@ -43,7 +38,7 @@
       {#if overflowCount > 0}
         <span class="poodle-selection-summary__overflow">+{overflowCount} more</span>
       {/if}
-      <button type="button" class="poodle-selection-summary__clear" on:click={() => dispatch("clear")}>Clear</button>
+      <button type="button" class="poodle-selection-summary__clear" on:click={() => onClear?.()}>Clear</button>
     {/if}
   </div>
 </section>

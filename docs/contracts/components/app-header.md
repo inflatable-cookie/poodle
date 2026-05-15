@@ -9,7 +9,7 @@ Updated: 2026-03-22
 - Layer: `composites`
 - Summary: a global shell header for app identity, global actions, and
   window-level utility status
-- In scope: app identity with title and subtitle, global action slots, optional
+- In scope: app identity with title and subtitle, global action snippets, optional
   utility indicators, drag-region posture, responsive collapse
 - Out of scope: project-specific title/details, transport controls, timeline or
   mixer widgets
@@ -19,18 +19,18 @@ Updated: 2026-03-22
 ```text
 [Root Header]  <header>
   ├── [Identity Region]
-  │     └── [Title Group]  (when no identity slot)
+  │     └── [Title Group]  (when no identity snippet)
   │           ├── <strong> title
   │           └── <span> subtitle  (optional)
-  ├── [Actions Region]  (optional slot)
-  └── [Utility Region]  (optional slot)
+  ├── [Actions Region]  (optional snippet)
+  └── [Utility Region]  (optional snippet)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root Header | yes | top shell chrome | background, border, height |
-| Identity Region | yes | app name/icon or custom identity slot | typography, icon, spacing |
-| Title Group | no | default identity when no slot provided | title + subtitle layout |
+| Identity Region | yes | app name/icon or custom identity snippet | typography, icon, spacing |
+| Title Group | no | default identity when no identity snippet is provided | title + subtitle layout |
 | Actions Region | no | global shell actions | gap, action roles |
 | Utility Region | no | connection/status indicators | text, status, spacing |
 
@@ -38,18 +38,18 @@ Updated: 2026-03-22
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `title` | `string \| null` | `null` | no | visible app title; ignored when `identity` slot is provided |
+| `title` | `string \| null` | `null` | no | visible app title; ignored when `identity()` is provided |
 | `subtitle` | `string \| null` | `null` | no | secondary text shown alongside title in baseline alignment |
 | `dragRegion` | `boolean` | `false` | no | enables native window drag posture via `data-drag-region` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the header; falls back to `title` |
 
-## 4. Slots
+## 4. Snippets
 
-| Slot | Purpose | Fallback |
-|------|---------|----------|
-| `identity` | custom identity content (logo, branded element) | title/subtitle text |
-| `actions` | primary global actions (buttons, menubar) | none |
-| `utility` | trailing utility controls (icon buttons, status) | none |
+| Snippet | Purpose | Fallback |
+|---------|---------|----------|
+| `identity()` | custom identity content (logo, branded element) | title/subtitle text |
+| `actions()` | primary global actions (buttons, menubar) | none |
+| `utility()` | trailing utility controls (icon buttons, status) | none |
 
 ## 5. States
 

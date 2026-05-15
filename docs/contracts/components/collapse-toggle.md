@@ -40,6 +40,7 @@ Updated: 2026-03-30
 | `size` | `ControlSize \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for padding |
+| `onToggle` | `((isCollapsed: boolean) => void) \| null` | `null` | no | called when the collapsed state changes |
 
 ### CollapseDirection Type
 
@@ -49,8 +50,8 @@ type CollapseDirection = "left" | "right" | "up" | "down";
 
 ### Controlled And Uncontrolled
 
-- `collapsed` is externally managed; the component dispatches `toggle` events
-  and the parent updates the prop
+- `collapsed` is externally managed; the component calls `onToggle` with the
+  next state and the parent updates the prop
 
 ### Icon Direction Logic
 
@@ -70,11 +71,11 @@ type CollapseDirection = "left" | "right" | "up" | "down";
 | disabled | `disabled=true` | opacity 0.4, cursor default, non-interactive |
 | focus-visible | keyboard focus | focus ring outline |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `toggle` | user clicks the button (when not disabled) | `{ isCollapsed: boolean }` | payload contains the NEW collapsed state (toggled from current) |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onToggle` | user clicks the button (when not disabled) | `boolean` | receives the new collapsed state (toggled from current) |
 
 ## 6. Accessibility
 
@@ -199,7 +200,7 @@ Density controls button padding only.
 
 - [ ] `<button>` with `aria-expanded` correctly reflects collapsed state
 - [ ] `aria-label` defaults to "Collapse"/"Expand" based on state
-- [ ] `toggle` event fires with `{ isCollapsed: boolean }` (new state)
+- [ ] `onToggle` callback receives the new collapsed state
 - [ ] icon direction flips between collapsed and expanded states
 - [ ] disabled state prevents interaction and applies opacity
 

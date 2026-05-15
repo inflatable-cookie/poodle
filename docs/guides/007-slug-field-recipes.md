@@ -75,14 +75,14 @@ rules.
     pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
     maxLength={64}
     validate={validateSlug}
-    on:valueChange={(event) => {
-      slug = event.detail.value;
+    onValueChange={(nextValue) => {
+      slug = nextValue;
     }}
-    on:validationChange={(event) => {
-      slugStatus = event.detail.status;
-      slugError = event.detail.status === "invalid" ? event.detail.message || null : null;
+    onValidationChange={(detail) => {
+      slugStatus = detail.status;
+      slugError = detail.status === "invalid" ? detail.message || null : null;
     }}
-    on:blur={handleSlugBlur}
+    onBlur={handleSlugBlur}
   />
 </Field>
 ```

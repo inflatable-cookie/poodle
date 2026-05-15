@@ -12,8 +12,7 @@
     { value: "mixer", label: "Mixer" },
   ];
 
-  function handleStaticReorder(event: CustomEvent<{ items: string[] }>): void {
-    const order = event.detail.items;
+  function handleStaticReorder(order: string[]): void {
     staticItems = order.map((id) => staticItems.find((i) => i.value === id)!);
   }
 
@@ -22,8 +21,7 @@
     { value: "inspector", label: "Inspector" },
   ];
 
-  function handleStaticVerticalReorder(event: CustomEvent<{ items: string[] }>): void {
-    const order = event.detail.items;
+  function handleStaticVerticalReorder(order: string[]): void {
     staticVerticalItems = order.map((id) => staticVerticalItems.find((i) => i.value === id)!);
   }
 
@@ -77,8 +75,8 @@
     return true;
   }
 
-  function handleLeftDrop(event: CustomEvent<{ panel: { panelId: string; sourceEdge: DockEdge }; targetEdge: DockEdge }>): void {
-    const { panelId, sourceEdge } = event.detail.panel;
+  function handleLeftDrop({ panel }: { panel: { panelId: string; sourceEdge: DockEdge }; targetEdge: DockEdge }): void {
+    const { panelId, sourceEdge } = panel;
     if (sourceEdge === "right") {
       const item = rightItems.find((i) => i.value === panelId);
       if (!item) return;
@@ -90,8 +88,8 @@
     }
   }
 
-  function handleRightDrop(event: CustomEvent<{ panel: { panelId: string; sourceEdge: DockEdge }; targetEdge: DockEdge }>): void {
-    const { panelId, sourceEdge } = event.detail.panel;
+  function handleRightDrop({ panel }: { panel: { panelId: string; sourceEdge: DockEdge }; targetEdge: DockEdge }): void {
+    const { panelId, sourceEdge } = panel;
     if (sourceEdge === "left") {
       const item = leftItems.find((i) => i.value === panelId);
       if (!item) return;
@@ -103,12 +101,12 @@
     }
   }
 
-  function handleLeftReorder(event: CustomEvent<{ items: string[] }>): void {
-    leftItems = event.detail.items.map((id) => leftItems.find((i) => i.value === id)!);
+  function handleLeftReorder(items: string[]): void {
+    leftItems = items.map((id) => leftItems.find((i) => i.value === id)!);
   }
 
-  function handleRightReorder(event: CustomEvent<{ items: string[] }>): void {
-    rightItems = event.detail.items.map((id) => rightItems.find((i) => i.value === id)!);
+  function handleRightReorder(items: string[]): void {
+    rightItems = items.map((id) => rightItems.find((i) => i.value === id)!);
   }
 </script>
 
@@ -120,11 +118,13 @@
         edge="top"
         sizing="static"
         items={staticItems}
-        on:reorder={handleStaticReorder}
+        onReorder={handleStaticReorder}
       >
-        <div slot="panel" let:item class="poodle-specimen__static-panel">
-          {item.label}
-        </div>
+        {#snippet panel(item)}
+          <div class="poodle-specimen__static-panel">
+            {item.label}
+          </div>
+        {/snippet}
       </DockRegion>
     </div>
   </SpecimenGroup>
@@ -136,11 +136,13 @@
         edge="left"
         sizing="static"
         items={staticVerticalItems}
-        on:reorder={handleStaticVerticalReorder}
+        onReorder={handleStaticVerticalReorder}
       >
-        <div slot="panel" let:item class="poodle-specimen__static-panel">
-          {item.label}
-        </div>
+        {#snippet panel(item)}
+          <div class="poodle-specimen__static-panel">
+            {item.label}
+          </div>
+        {/snippet}
       </DockRegion>
     </div>
   </SpecimenGroup>
@@ -154,12 +156,14 @@
         items={flexItems}
         value={flexActivePanel}
         collapsed={false}
-        on:valueChange={(e) => (flexActivePanel = e.detail.value)}
+        onValueChange={(value) => (flexActivePanel = value)}
       >
-        <div class="poodle-specimen__panel-content">
-          <strong>{flexActivePanel}</strong>
-          <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
-        </div>
+        {#snippet children()}
+          <div class="poodle-specimen__panel-content">
+            <strong>{flexActivePanel}</strong>
+            <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+          </div>
+        {/snippet}
       </DockRegion>
     </div>
   </SpecimenGroup>
@@ -174,7 +178,7 @@
         value={flexActivePanel}
         collapsed={true}
         collapsedPosture="icon-strip"
-        on:valueChange={(e) => (flexActivePanel = e.detail.value)}
+        onValueChange={(value) => (flexActivePanel = value)}
       />
     </div>
   </SpecimenGroup>
@@ -190,13 +194,15 @@
         value={interactiveActive}
         collapsed={interactiveCollapsed}
         collapsedPosture="icon-strip"
-        on:valueChange={(e) => (interactiveActive = e.detail.value)}
-        on:collapsedChange={(e) => (interactiveCollapsed = e.detail.isCollapsed)}
+        onValueChange={(value) => (interactiveActive = value)}
+        onCollapsedChange={(isCollapsed) => (interactiveCollapsed = isCollapsed)}
       >
-        <div class="poodle-specimen__panel-content">
-          <strong>{interactiveActive}</strong>
-          <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
-        </div>
+        {#snippet children()}
+          <div class="poodle-specimen__panel-content">
+            <strong>{interactiveActive}</strong>
+            <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
+          </div>
+        {/snippet}
       </DockRegion>
       <div class="poodle-specimen__flex-main">
         Main content area
@@ -218,13 +224,15 @@
         value={bottomActive}
         collapsed={bottomCollapsed}
         collapsedPosture="icon-strip"
-        on:valueChange={(e) => (bottomActive = e.detail.value)}
-        on:collapsedChange={(e) => (bottomCollapsed = e.detail.isCollapsed)}
+        onValueChange={(value) => (bottomActive = value)}
+        onCollapsedChange={(isCollapsed) => (bottomCollapsed = isCollapsed)}
       >
-        <div class="poodle-specimen__panel-content">
-          <strong>{bottomActive}</strong>
-          <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
-        </div>
+        {#snippet children()}
+          <div class="poodle-specimen__panel-content">
+            <strong>{bottomActive}</strong>
+            <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
+          </div>
+        {/snippet}
       </DockRegion>
     </div>
   </SpecimenGroup>
@@ -240,14 +248,16 @@
           value={leftActive}
           ariaLabel="Left dock"
           {canAcceptPanel}
-          on:valueChange={(e) => (leftActive = e.detail.value)}
-          on:reorder={handleLeftReorder}
-          on:panelDrop={handleLeftDrop}
+          onValueChange={(value) => (leftActive = value)}
+          onReorder={handleLeftReorder}
+          onPanelDrop={handleLeftDrop}
         >
-          <div class="poodle-specimen__panel-content">
-            <strong>{leftActive}</strong>
-            <p>Left dock — {leftItems.length} panels</p>
-          </div>
+          {#snippet children()}
+            <div class="poodle-specimen__panel-content">
+              <strong>{leftActive}</strong>
+              <p>Left dock — {leftItems.length} panels</p>
+            </div>
+          {/snippet}
         </DockRegion>
       </div>
       <div class="poodle-specimen__frame poodle-specimen__dnd-region">
@@ -258,14 +268,16 @@
           value={rightActive}
           ariaLabel="Right dock"
           {canAcceptPanel}
-          on:valueChange={(e) => (rightActive = e.detail.value)}
-          on:reorder={handleRightReorder}
-          on:panelDrop={handleRightDrop}
+          onValueChange={(value) => (rightActive = value)}
+          onReorder={handleRightReorder}
+          onPanelDrop={handleRightDrop}
         >
-          <div class="poodle-specimen__panel-content">
-            <strong>{rightActive}</strong>
-            <p>Right dock — {rightItems.length} panels</p>
-          </div>
+          {#snippet children()}
+            <div class="poodle-specimen__panel-content">
+              <strong>{rightActive}</strong>
+              <p>Right dock — {rightItems.length} panels</p>
+            </div>
+          {/snippet}
         </DockRegion>
       </div>
     </div>

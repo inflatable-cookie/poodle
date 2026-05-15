@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import Progress from "./Progress.svelte";
   import Spinner from "./Spinner.svelte";
 
@@ -12,8 +11,7 @@
   export let canCancel = false;
   export let ariaLabel: string | null = null;
   export let presentation: PageLoadingPresentation = "overlay";
-
-  const dispatch = createEventDispatcher<{ cancel: void }>();
+  export let onCancel: (() => void) | undefined = undefined;
 
   $: isIndeterminate = value === null;
   $: isOverlay = presentation === "overlay";
@@ -47,7 +45,7 @@
         <button
           type="button"
           class="poodle-page-loading__cancel"
-          on:click={() => dispatch("cancel")}
+          onclick={() => onCancel?.()}
         >
           Cancel
         </button>

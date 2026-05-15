@@ -58,7 +58,7 @@
                       className="docs-link-chip"
                       variant="ghost"
                       size="sm"
-                      on:click={() => onSelectSection(sectionId)}
+                      onclick={() => onSelectSection(sectionId)}
                     >
                       {catalogEntryMap[sectionId].title}
                     </Button>
@@ -150,7 +150,7 @@
             className="docs-section-card"
             variant="ghost"
             ariaLabel={`Open ${entry.title}`}
-            on:click={() => onSelectSection(entry.id)}
+            onclick={() => onSelectSection(entry.id)}
           >
             <div>
               <Eyebrow>{entry.eyebrow}</Eyebrow>
@@ -196,9 +196,9 @@
         <div class="poodle-brand-proof-grid">
           {#each brandProofCards as card}
             <Card variant={card.variant}>
-              <div slot="header">
+              {#snippet header()}
                 <Eyebrow>{card.eyebrow}</Eyebrow>
-              </div>
+              {/snippet}
               <strong class="poodle-detail-card-value">{card.title}</strong>
               <p class="poodle-detail-card-meta">{card.summary}</p>
             </Card>

@@ -14,7 +14,7 @@ Updated: 2026-03-30
 - In scope: URL and embed code input via TextInput (rows=3), debounced parsing,
   provider detection (YouTube, Vimeo, generic URL, iframe embed code),
   provider restriction, error and success status display, parsed result
-  output via two-way binding
+  output via callbacks and host-owned state
 - Out of scope: file upload, custom provider plugins
 
 ## 2. Anatomy
@@ -45,13 +45,15 @@ Updated: 2026-03-30
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string` | `"embed-input"` | no | id attribute for the TextInput |
-| `value` | `string` | `""` | no | current input text; supports two-way binding |
-| `parsed` | `ParsedEmbed \| null` | `null` | no | parsed embed result; supports two-way binding — updated after parsing |
+| `value` | `string` | `""` | no | current input text; when supplied, the host owns updates through `onValueChange` |
+| `parsed` | `ParsedEmbed \| null` | `null` | no | parsed embed result from the current input |
 | `placeholder` | `string` | `"Paste a URL or embed code..."` | no | placeholder text for the TextInput |
 | `parseDebounce` | `number` | `300` | no | debounce delay in milliseconds before parsing |
 | `providers` | `string[]` | `[]` | no | allowed provider names; empty array means all providers allowed |
 | `disabled` | `boolean` | `false` | no | disables the TextInput input |
-| `error` | `string \| null` | `null` | no | external error message; supports two-way binding |
+| `error` | `string \| null` | `null` | no | external error message |
+| `onParse` | `((parsed: ParsedEmbed \| null, error: string \| null) => void) \| null` | `null` | no | called after debounced parsing completes |
+| `onValueChange` | `((value: string) => void) \| null` | `null` | no | called immediately when the input value changes |
 | `resolveParseState` | `((value: string, providers: string[]) => EmbedParseState) \| undefined` | `undefined` | no | optional custom parse resolver; defaults to the built-in `resolveEmbedParseState` helper |
 
 ### Exported Helper Surface
@@ -109,10 +111,8 @@ None.
 
 ### Controlled And Uncontrolled
 
-- `value` supports two-way binding (`bind:value`)
-- `parsed` supports two-way binding (`bind:parsed`) — updated after parsing
-- `error` supports two-way binding (`bind:error`) — set internally for
-  provider restriction violations
+- `value` is host-owned when supplied; update it through `onValueChange`
+- `parsed` and `error` are outputs surfaced through `onParse`
 
 ## 4. States
 
@@ -129,15 +129,15 @@ None.
 ### Component States
 
 - `parseTimer` (internal): setTimeout handle for debounced parsing
-- `parsed` (bindable): result of last successful parse
-- `error` (bindable): current error message
+- `parsed`: result of last successful parse
+- `error`: current error message
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `parse` | after debounced parsing completes | `{ parsed: ParsedEmbed \| null, error: string \| null }` | fires on every parse attempt, including failures |
-| `change` | input value changes | `{ value: string }` | fires immediately on every input change (before debounce) |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onParse` | after debounced parsing completes | `ParsedEmbed \| null`, `string \| null` | runs on every parse attempt, including failures |
+| `onValueChange` | input value changes | `string` | runs immediately on every input change (before debounce) |
 
 ## 6. Accessibility
 
@@ -221,7 +221,7 @@ None.
 
 ## 9. Svelte Notes
 
-- Uses `createEventDispatcher` for `parse` and `change` events
+- Uses callback props for parse and value-change notifications
 - Composes `TextInput` and `Pill` from `@poodle/svelte`
 - Debounce uses `setTimeout`/`clearTimeout` with configurable delay
 - Parsing is routed through the exported `resolveEmbedParseState` helper in
@@ -230,8 +230,8 @@ None.
 - callers can override parsing with `resolveParseState` when they need a richer
   provider/parser contract while keeping the same Poodle UI shell
 - TextInput receives the `id` prop directly
-- TextInput `on:valueChange` event drives input handling — value is extracted
-  from `event.detail.value`
+- TextInput `onValueChange` callback drives input handling directly with the
+  next string value
 - Pill uses `sizeRole="chrome"` (not `size="xs"`)
 
 ## 10. GPUI Notes
@@ -270,7 +270,7 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| URL or embed code input | default props, `bind:value`, `bind:parsed`, `placeholder="Paste a YouTube URL, Vimeo link, or embed code..."` | TextInput with placeholder; status area shows parse result when URL is entered |
+| URL or embed code input | default props, `value`, `onValueChange`, `onParse`, `placeholder="Paste a YouTube URL, Vimeo link, or embed code..."` | TextInput with placeholder; status area shows parse result when URL is entered |
 
 ### With Field Wrapper
 

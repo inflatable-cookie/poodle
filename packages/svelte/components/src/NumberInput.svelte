@@ -212,11 +212,13 @@
   function commitValue(nextValue: number | null): void {
     if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = coerceOutgoingValue(nextValue);
     }
 
-    value = coerceOutgoingValue(nextValue);
-    onValueChange?.(value);
-    void runValidation(value);
+    const outgoingValue = coerceOutgoingValue(nextValue);
+    onValueChange?.(outgoingValue);
+    void runValidation(outgoingValue);
   }
 
   function handleInput(event: Event): void {

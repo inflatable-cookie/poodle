@@ -24,30 +24,30 @@ Updated: 2026-03-30
 ```text
 [Root Section .list-container]  <section>
   ├── [PageHeader]  PageHeader composite
-  │     ├── [Breadcrumbs] (optional, via slot)
-  │     └── [Actions] (optional, via slot)
+  │     ├── [Breadcrumbs] (optional, via `breadcrumbs` snippet)
+  │     └── [Actions] (optional, via `actions` snippet)
   ├── [ready state: state="ready"]
   │     ├── [Filters .list-container__filters]  <div> (optional)
-  │     │     └── (slot: filters)
+  │     │     └── (`filters` snippet)
   │     ├── [Batch .list-container__batch]  <div> (optional)
-  │     │     └── (slot: batch)
+  │     │     └── (`batch` snippet)
   │     ├── [Content .list-container__content]  <div>
-  │     │     └── (slot: default)
+  │     │     └── (`children` snippet)
   │     └── [Pagination .list-container__pagination]  <div> (optional)
   │           ├── [PaginationSummary] (optional)
   │           ├── [Pagination]
-  │           └── (or slot: pagination — full override)
+  │           └── (or `pagination` snippet — full override)
   ├── [loading state: state="loading"]
   │     └── [State .list-container__state]  <div>
-  │           ├── (slot: loading — override)
+  │           ├── (`loading` snippet — override)
   │           └── Callout (tone="pending") — default
   ├── [error state: state="error"]
   │     └── [State .list-container__state]  <div>
-  │           ├── (slot: error — override)
+  │           ├── (`error` snippet — override)
   │           └── Callout (tone="danger") — default
   └── [empty state: state="empty"]
         └── [State .list-container__state]  <div>
-              ├── (slot: empty — override)
+              ├── (`empty` snippet — override)
               └── EmptyState — default
 ```
 
@@ -86,6 +86,7 @@ Updated: 2026-03-30
 | `paginationAriaLabel` | `string \| null` | `null` | no | accessible label for built-in Pagination; defaults to "List pagination" |
 | `showPagination` | `boolean` | `true` | no | whether built-in pagination may render |
 | `showPaginationSummary` | `boolean` | `true` | no | whether built-in PaginationSummary may render when total data is available |
+| `onPageChange` | `((page: number) => void) \| null` | `null` | no | callback fired when built-in pagination requests a different page |
 
 ### Types
 
@@ -96,11 +97,11 @@ type BrowseState = "ready" | "empty" | "loading" | "error" | "no-results";
 type EmptyStateVariant = "neutral" | "search" | "firstRun";
 ```
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| default | host-owned ready-state content |
+| `children` | host-owned ready-state content |
 | `breadcrumbs` | page breadcrumbs passed through to PageHeader |
 | `actions` | page-level actions passed through to PageHeader |
 | `filters` | filter controls (typically FilterToolbar) |
@@ -134,11 +135,11 @@ type EmptyStateVariant = "neutral" | "search" | "firstRun";
 - `shouldShowPagination`: `showPagination && state === "ready" && totalPages > 1`
 - `shouldShowPaginationSummary`: `shouldShowPagination && showPaginationSummary && totalItems !== null && pageSize !== null`
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `pageChange` | built-in Pagination requests a different page | `{ page: number }` | only emitted when using built-in pagination; forwarded from Pagination primitive |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onPageChange` | built-in Pagination requests a different page | `number` | only used when the built-in pagination region is active |
 
 ## 6. Accessibility
 
@@ -184,7 +185,7 @@ type EmptyStateVariant = "neutral" | "search" | "firstRun";
 - Parent expectations: list pages, admin browse views, content libraries
 - Child expectations: host provides filters, batch strip, and content
 - Resizing rules: caller content is fully responsible for row/card/grid
-  responsiveness inside the content slot
+  responsiveness inside the `children` snippet
 
 ## 8. Token Usage — Exact Values
 
@@ -239,17 +240,16 @@ None.
 
 ## 9. Svelte Notes
 
-- Uses `createEventDispatcher` for `pageChange` event
 - Composes `Callout`, `Pagination`, `PaginationSummary` from
   `@poodle/svelte` and `EmptyState`, `PageHeader` from
   local composites
-- PageHeader rendering branches on `$$slots.breadcrumbs` and `$$slots.actions`
-  to avoid empty slot wrappers — four branches handle all combinations
+- PageHeader rendering branches on `breadcrumbs` and `actions` snippet
+  presence to avoid empty wrapper output
 - Filters, batch, and content regions only render in `state="ready"`
-- Pagination region renders when `shouldShowPagination` is true or when
-  `$$slots.pagination` is populated
-- Built-in Pagination's `on:pageChange` event is forwarded through
-  `forwardPageChange` helper
+- Pagination region renders when `shouldShowPagination` is true or when the
+  `pagination` snippet is provided
+- Built-in Pagination's `onPageChange` callback is forwarded through the
+  local `onPageChange` prop
 - PaginationSummary receives `totalItems ?? 0` and `pageSize ?? 1` to
   satisfy non-null requirements
 
@@ -270,7 +270,7 @@ None.
 - [ ] all props have the same meaning and defaults
 - [ ] header, filters, batch, content, and state-region responsibilities match
 - [ ] ready/loading/error/empty state switching matches
-- [ ] `pageChange` timing and payload meaning match
+- [ ] `onPageChange` timing and payload meaning match
 - [ ] built-in pagination and summary placement match
 - [ ] section labeling: `aria-label` defaults to `title`
 - [ ] error Callout uses `announceMode="assertive"`

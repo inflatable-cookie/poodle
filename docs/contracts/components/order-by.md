@@ -138,9 +138,9 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 
 ### Controlled And Uncontrolled
 
-- Sort state is controlled via `value` (multi-field) or `activeSort` (single-field legacy)
+- Sort state is host-owned via `value` (multi-field) or `activeSort` (single-field legacy)
 - `value` takes precedence over `activeSort` when non-empty
-- All mutations fire the `change` event and call `onChange`; the parent is responsible for updating `value`
+- All mutations call `onChange`; the parent is responsible for updating `value`
 
 ## 4. States
 
@@ -165,13 +165,11 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 - Non-empty: field labels joined with `, `, each suffixed with `↑` (asc) or `↓` (desc)
 - Compact mode with 3+ fields: first two items shown, then ` +N` where N is the remaining count
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `change` | any sort mutation (add, remove, reorder, direction toggle, clear all) | `{ value: OrderByValue, sort: ActiveSort \| null }` | `sort` is the first element converted to ActiveSort format, or null if empty |
-
-The `onChange` callback prop is also called with just the `value` argument on every mutation.
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onChange` | any sort mutation (add, remove, reorder, direction toggle, clear all) | `OrderByValue` | parent-owned sort state should be updated from this callback |
 
 ## 6. Accessibility
 
@@ -505,12 +503,12 @@ The panel uses the following internal component instances:
 
 ## 12. Svelte Notes
 
-- The component wraps its trigger and panel in a `Popover` component with `bind:open`
+- The component wraps its trigger and panel in a `Popover` component with explicit open state wiring
 - Size resolves from `size` prop or from inherited presentation context via `resolveSemanticControlSize`
 - Density resolves from `density` prop or from inherited presentation context
 - The `activeSort` prop provides backward compatibility: when `value` is empty, `activeSort` is converted to a one-element value; on every mutation, `activeSort` is updated to reflect the first value element
 - CSS classes `order-by__item--dragging` and `order-by__item--drop-target` are toggled via Svelte's `class:` directive
-- The add-field Select fires its `onchange` handler which calls `addField(key)`, then resets its own value to `""` to allow re-selection
+- The add-field Select uses its value-change callback to call `addField(key)`, then resets its own value to `""` to allow re-selection
 - The "Clear all" button and footer are only shown when 2 or more fields are active
 - The reset `×` button in the trigger area uses `stopPropagation` and `preventDefault` to avoid triggering the popover
 
@@ -524,7 +522,7 @@ The panel uses the following internal component instances:
 - [ ] direction toggle flips between `"asc"` and `"desc"`
 - [ ] move up/down swaps adjacent items in value array
 - [ ] drag reorder moves item from source index to target index
-- [ ] change event payload shape matches `{ value, sort }`
+- [ ] `onChange` fires with the full `value` array on every mutation
 - [ ] `onChange` callback called with `value` on every mutation
 - [ ] `activeSort` legacy bridging: value-to-activeSort and activeSort-to-value
 - [ ] clear-all resets value to `[]` and activeSort to `null`

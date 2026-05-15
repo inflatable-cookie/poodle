@@ -1,14 +1,34 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import type { CardVariant } from "./types";
 
-  export let className = "";
-  export { className as class };
-  export let variant: CardVariant = "default";
-  export let layout: "vertical" | "horizontal" | "compact" = "vertical";
-  export let interactive = false;
-  export let selected = false;
-  export let media = false;
-  export let ariaLabel: string | null = null;
+  interface Props {
+    class?: string;
+    variant?: CardVariant;
+    layout?: "vertical" | "horizontal" | "compact";
+    interactive?: boolean;
+    selected?: boolean;
+    media?: boolean;
+    ariaLabel?: string | null;
+    mediaContent?: Snippet;
+    header?: Snippet;
+    footer?: Snippet;
+    children?: Snippet;
+  }
+
+  let {
+    class: className = "",
+    variant = "default",
+    layout = "vertical",
+    interactive = false,
+    selected = false,
+    media = false,
+    ariaLabel = null,
+    mediaContent,
+    header,
+    footer,
+    children,
+  }: Props = $props();
 </script>
 
 <article
@@ -19,25 +39,25 @@
   data-selected={selected}
   aria-label={ariaLabel ?? undefined}
 >
-  {#if $$slots.media}
+  {#if mediaContent}
     <div class="poodle-card__media" data-has-media={media}>
-      <slot name="media" />
+      {@render mediaContent()}
     </div>
   {/if}
 
-  {#if $$slots.header}
+  {#if header}
     <div class="poodle-card__header">
-      <slot name="header" />
+      {@render header()}
     </div>
   {/if}
 
   <div class="poodle-card__body">
-    <slot />
+    {@render children?.()}
   </div>
 
-  {#if $$slots.footer}
+  {#if footer}
     <div class="poodle-card__footer">
-      <slot name="footer" />
+      {@render footer()}
     </div>
   {/if}
 </article>

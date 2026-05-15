@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Eyebrow from "./Eyebrow.svelte";
   import ListCard from "./ListCard.svelte";
   import Skeleton from "./Skeleton.svelte";
@@ -22,11 +20,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    itemSelect: { id: string };
-    activeChange: { id: string | null };
-  }>();
+  export let onItemSelect: ((id: string) => void) | null = null;
+  export let onActiveChange: ((id: string | null) => void) | null = null;
 
   let itemElements: Array<HTMLElement | null> = [];
   const uiPresentation = getUiPresentation();
@@ -56,7 +51,7 @@
   }
 
   export function selectActive(): void {
-    if (activeId) dispatch("itemSelect", { id: activeId });
+    if (activeId) onItemSelect?.(activeId);
   }
 
   export function getEnabledItems(): CommandActionItem[] {
@@ -65,7 +60,7 @@
 
   function setActive(id: string | null): void {
     activeId = id;
-    dispatch("activeChange", { id });
+    onActiveChange?.(id);
 
     if (id) {
       const idx = enabledItems.findIndex((item) => item.id === id);
@@ -130,7 +125,7 @@
                   interactive={!item.disabled}
                   disabled={item.disabled ?? false}
                   ariaLabel={item.title}
-                  on:click={() => dispatch("itemSelect", { id: item.id })}
+                  onClick={() => onItemSelect?.(item.id)}
                   on:mouseenter={() => setActive(item.id)}
                   on:focus={() => setActive(item.id)}
                 >

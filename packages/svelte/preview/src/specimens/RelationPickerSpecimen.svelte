@@ -97,7 +97,7 @@
       {items}
       selectedIds={selected}
       selectionMode="multiple"
-      on:selectionChange={(e) => (selected = e.detail.selectedIds)}
+      onSelectionChange={(nextSelected) => (selected = nextSelected)}
     />
     <p>Selected: <strong>{selected.join(", ")}</strong></p>
   </SpecimenGroup>
@@ -118,7 +118,7 @@
       selectedIds={drillSelected}
       selectionMode="multiple"
       {drillDown}
-      on:selectionChange={(e) => (drillSelected = e.detail.selectedIds)}
+      onSelectionChange={(nextSelected) => (drillSelected = nextSelected)}
     />
     {#if drillSelected.length > 0}
       <p>Selected: <strong>{drillSelected.join(", ")}</strong></p>
@@ -134,7 +134,7 @@
           {items}
           selectedIds={compactSelected}
           selectionMode="multiple"
-          on:selectionChange={(e) => (compactSelected = e.detail.selectedIds)}
+          onSelectionChange={(nextSelected) => (compactSelected = nextSelected)}
         />
         <RelationPicker
           title="Prominent actions"

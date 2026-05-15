@@ -1,77 +1,91 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, tick } from "svelte";
+  import { onDestroy, tick, type Snippet } from "svelte";
 
   import CollapseToggle from "./CollapseToggle.svelte";
   import Tabs from "./Tabs.svelte";
   import type {
     ControlDensity,
     ControlSize,
+    DockCollapsedPosture,
+    DockEdge,
+    DockEmphasis,
+    DockSizing,
+    PanelDragData,
+    PanelTabItem,
     SemanticControlSizeRole,
     TabItem,
   } from "./types";
 
-  import type {
-    DockEdge,
-    DockEmphasis,
-    DockCollapsedPosture,
-    DockSizing,
-    PanelDragData,
-    PanelTabItem,
-  } from "./types";
+  interface Props {
+    edge?: DockEdge;
+    sizing?: DockSizing;
+    collapsible?: boolean;
+    collapsed?: boolean;
+    collapsedPosture?: DockCollapsedPosture;
+    emphasis?: DockEmphasis;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    items?: PanelTabItem[];
+    value?: string | null;
+    ariaLabel?: string | null;
+    canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
+    onValueChange?: ((value: string) => void) | undefined;
+    onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
+    onClose?: ((value: string) => void) | undefined;
+    onReorder?: ((items: string[]) => void) | undefined;
+    onPanelDrop?: ((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined;
+    panel?: Snippet<[PanelTabItem]>;
+    children?: Snippet<[PanelTabItem | null]>;
+  }
 
-  export let edge: DockEdge = "left";
-  export let sizing: DockSizing = "flexible";
-  export let collapsible = false;
-  export let collapsed = false;
-  export let collapsedPosture: DockCollapsedPosture = "icon-strip";
-  export let emphasis: DockEmphasis = "standard";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let items: PanelTabItem[] = [];
-  export let value: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let canAcceptPanel: ((panelId: string, sourceEdge: DockEdge) => boolean) | null = null;
+  let {
+    edge = "left",
+    sizing = "flexible",
+    collapsible = false,
+    collapsed = false,
+    collapsedPosture = "icon-strip",
+    emphasis = "standard",
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    items = [],
+    value = null,
+    ariaLabel = null,
+    canAcceptPanel = null,
+    onValueChange = undefined,
+    onCollapsedChange = undefined,
+    onClose = undefined,
+    onReorder = undefined,
+    onPanelDrop = undefined,
+    panel,
+    children,
+  }: Props = $props();
 
   const PANEL_DRAG_TYPE = "application/x-poodle-panel-drag";
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-    collapsedChange: { isCollapsed: boolean };
-    close: { value: string };
-    reorder: { items: string[] };
-    panelDrop: { panel: PanelDragData; targetEdge: DockEdge };
-  }>();
+  const isVerticalEdge = $derived(edge === "left" || edge === "right");
+  const activeItem = $derived(items.find((item) => item.value === value) ?? items[0] ?? null);
+  const collapseDirection = $derived(({ left: "left", right: "right", top: "up", bottom: "down" } as const)[edge]);
+  const tabOrientation = $derived(
+    collapsed && collapsedPosture === "icon-strip" && isVerticalEdge ? "vertical" : "horizontal",
+  );
+  const tabItems = $derived.by<TabItem[]>(() =>
+    items.map((item) => ({
+      value: item.value,
+      label: item.label,
+      icon: item.icon ?? undefined,
+      closable: item.closable,
+    })),
+  );
+  const stackDirection = $derived(isVerticalEdge ? "column" : "row");
+  const showIconStrip = $derived(collapsed && collapsedPosture === "icon-strip");
+  const showHidden = $derived(collapsed && collapsedPosture === "hidden");
 
-  // ── Derived state ──────────────────────────────────────────────────
-
-  $: activeItem = items.find((item) => item.value === value) ?? items[0] ?? null;
-
-  $: collapseDirection = (
-    { left: "left", right: "right", top: "up", bottom: "down" } as const
-  )[edge];
-
-  $: tabOrientation =
-    collapsed && collapsedPosture === "icon-strip" && isVerticalEdge ? "vertical" : "horizontal";
-
-  $: tabItems = items.map<TabItem>((item) => ({
-    value: item.value,
-    label: item.label,
-    icon: item.icon ?? undefined,
-    closable: item.closable,
-  }));
-
-  $: isVerticalEdge = edge === "left" || edge === "right";
-  $: stackDirection = isVerticalEdge ? "column" : "row";
-  $: showIconStrip = collapsed && collapsedPosture === "icon-strip";
-  $: showHidden = collapsed && collapsedPosture === "hidden";
-
-  // ── Compact mode (auto-collapse labels when too narrow) ─────────────
-
-  let stripEl: HTMLElement | null = null;
-  let isCompact = false;
-  let resizeObserver: ResizeObserver | null = null;
-  let fullLabelScrollWidth = 0;
+  let stripEl = $state<HTMLElement | null>(null);
+  let isCompact = $state(false);
+  let resizeObserver = $state<ResizeObserver | null>(null);
+  let fullLabelScrollWidth = $state(0);
 
   function checkCompact(el: HTMLElement): void {
     if (!el || items.length === 0) {
@@ -84,15 +98,12 @@
     const containerWidth = el.clientWidth;
 
     if (!isCompact) {
-      // Currently showing full labels — cache their natural width
       fullLabelScrollWidth = list.scrollWidth;
-      const shouldCompact = list.scrollWidth > containerWidth + 2;
-      isCompact = shouldCompact;
-    } else {
-      // Currently compact — only un-compact if container is wide enough for full labels
-      // No buffer needed — if fullLabelScrollWidth fits, show full labels
-      isCompact = fullLabelScrollWidth > containerWidth;
+      isCompact = list.scrollWidth > containerWidth + 2;
+      return;
     }
+
+    isCompact = fullLabelScrollWidth > containerWidth;
   }
 
   function observeStrip(el: HTMLElement) {
@@ -104,7 +115,6 @@
     resizeObserver = new ResizeObserver(check);
     resizeObserver.observe(el);
 
-    // Also observe the tab list itself — its scrollWidth changes when items render
     tick().then(() => {
       const list = el.querySelector("[role='tablist']");
       if (list) resizeObserver?.observe(list);
@@ -121,52 +131,41 @@
 
   onDestroy(() => resizeObserver?.disconnect());
 
-  // ── Drag-and-drop state ────────────────────────────────────────────
-
-  let isDragOver = false;
-  let dropInsertIndex = -1;
-  let dragSourceIndex = -1;
-
-  // ── Flexible mode: tab event handlers ──────────────────────────────
+  let isDragOver = $state(false);
+  let dropInsertIndex = $state(-1);
+  let dragSourceIndex = $state(-1);
 
   function handleValueChange(nextValue: string): void {
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
     if (collapsed) {
-      dispatch("collapsedChange", { isCollapsed: false });
+      onCollapsedChange?.(false);
     }
   }
 
   function handleReorder(nextItems: string[]): void {
-    dispatch("reorder", { items: nextItems });
+    onReorder?.(nextItems);
   }
 
   function handleClose(nextValue: string): void {
-    dispatch("close", { value: nextValue });
+    onClose?.(nextValue);
   }
 
   function handleCollapseToggle(): void {
-    dispatch("collapsedChange", { isCollapsed: !collapsed });
-
+    onCollapsedChange?.(!collapsed);
     if (!collapsed) {
-      // Collapsing — focus will move to collapse toggle via DOM
       void tick();
     }
   }
 
-  // ── Cross-region drag-and-drop (flexible + static) ─────────────────
-
   function handleStripDragStart(event: DragEvent): void {
     if (!event.dataTransfer) return;
 
-    // Find which tab is being dragged by examining the event target
-    // event.target is the .poodle-tabs__item div (draggable element)
-    // The tab button (with id="poodle-tab-{tabsId}-{item.value}") is a child
     const target = event.target as HTMLElement;
     const tab = target.querySelector?.("[role='tab']") ?? target.closest?.("[role='tab']");
     if (!tab) return;
 
     const tabId = tab.getAttribute("id") ?? "";
-    const item = items.find((i) => tabId.endsWith(`-${i.value}`));
+    const item = items.find((entry) => tabId.endsWith(`-${entry.value}`));
     if (!item) return;
 
     const data: PanelDragData = { panelId: item.value, sourceEdge: edge };
@@ -202,13 +201,10 @@
     }
 
     if (data.sourceEdge === edge && sizing === "flexible") return;
-
     if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
 
-    dispatch("panelDrop", { panel: data, targetEdge: edge });
+    onPanelDrop?.({ panel: data, targetEdge: edge });
   }
-
-  // ── Static mode: internal reorder drag-and-drop ────────────────────
 
   function handleStackItemDragStart(event: DragEvent, index: number): void {
     if (!event.dataTransfer) return;
@@ -245,19 +241,17 @@
       return;
     }
 
-    // Internal reorder within static region
     if (data.sourceEdge === edge && dragSourceIndex >= 0) {
-      const order = items.map((i) => i.value);
+      const order = items.map((item) => item.value);
       const [moved] = order.splice(dragSourceIndex, 1);
       order.splice(index, 0, moved);
       dragSourceIndex = -1;
-      dispatch("reorder", { items: order });
+      onReorder?.(order);
       return;
     }
 
-    // Cross-region drop
     if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
-    dispatch("panelDrop", { panel: data, targetEdge: edge });
+    onPanelDrop?.({ panel: data, targetEdge: edge });
   }
 
   function handleStackDragEnd(): void {
@@ -275,19 +269,17 @@
   data-collapsed={collapsed || undefined}
   data-collapsed-posture={collapsed ? collapsedPosture : undefined}
   aria-label={ariaLabel ?? `${edge} dock`}
-  on:dragover={handleRegionDragOver}
-  on:dragleave={handleRegionDragLeave}
-  on:drop={handleRegionDrop}
+  ondragover={handleRegionDragOver}
+  ondragleave={handleRegionDragLeave}
+  ondrop={handleRegionDrop}
 >
   {#if isDragOver}
     <div class="poodle-dock-region__drop-zone"></div>
   {/if}
 
   {#if sizing === "static"}
-    <!-- Static: stacked panels, no tabs, no collapse -->
     <div class="poodle-dock-region__stack" data-direction={stackDirection}>
       {#each items as item, index (item.value)}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
           class="poodle-dock-region__stack-item"
           data-drop-target={dropInsertIndex === index || undefined}
@@ -295,73 +287,67 @@
           draggable="true"
           role="group"
           aria-label={item.label ?? `Panel ${index + 1}`}
-          on:dragstart={(e) => handleStackItemDragStart(e, index)}
-          on:dragover={(e) => handleStackItemDragOver(e, index)}
-          on:dragleave={handleStackItemDragLeave}
-          on:drop={(e) => handleStackItemDrop(e, index)}
-          on:dragend={handleStackDragEnd}
+          ondragstart={(event) => handleStackItemDragStart(event, index)}
+          ondragover={(event) => handleStackItemDragOver(event, index)}
+          ondragleave={handleStackItemDragLeave}
+          ondrop={(event) => handleStackItemDrop(event, index)}
+          ondragend={handleStackDragEnd}
         >
-          <slot name="panel" {item} />
+          {@render panel?.(item)}
         </div>
       {/each}
     </div>
-
   {:else if showHidden}
-    <!-- Flexible collapsed (hidden): just the collapse toggle -->
     {#if collapsible}
       <div class="poodle-dock-region__edge-toggle">
         <CollapseToggle
-          collapsed={collapsed}
+          {collapsed}
           direction={collapseDirection}
           ariaLabel={`Expand ${edge} dock`}
-          on:toggle={handleCollapseToggle}
+          onToggle={handleCollapseToggle}
         />
       </div>
     {/if}
-
   {:else if showIconStrip && isVerticalEdge}
-    <!-- Flexible collapsed (icon-strip) for left/right: collapse toggle + vertical tabs -->
     <div class="poodle-dock-region__strip" data-orientation="vertical">
       {#if collapsible}
         <CollapseToggle
-          collapsed={collapsed}
+          {collapsed}
           direction={collapseDirection}
           ariaLabel={`Expand ${edge} dock`}
-          on:toggle={handleCollapseToggle}
+          onToggle={handleCollapseToggle}
         />
       {/if}
-        <Tabs
-          variant="strip"
-          orientation="vertical"
-          size={size}
-          {sizeRole}
-          density={density}
-          items={tabItems}
-          value={activeItem?.value ?? ""}
-          reorderable={true}
-          ariaLabel={ariaLabel ?? `${edge} dock panels`}
-          onValueChange={handleValueChange}
-          onReorder={handleReorder}
-          onClose={handleClose}
-        />
+      <Tabs
+        variant="strip"
+        orientation="vertical"
+        {size}
+        {sizeRole}
+        {density}
+        items={tabItems}
+        value={activeItem?.value ?? ""}
+        reorderable={true}
+        ariaLabel={ariaLabel ?? `${edge} dock panels`}
+        onValueChange={handleValueChange}
+        onReorder={handleReorder}
+        onClose={handleClose}
+      />
     </div>
-
   {:else if showIconStrip}
-    <!-- Flexible collapsed (icon-strip) for top/bottom: horizontal tabs, no body -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       class="poodle-dock-region__strip"
       data-orientation="horizontal"
       data-compact={isCompact || undefined}
-      on:dragstart={handleStripDragStart}
+      ondragstart={handleStripDragStart}
     >
       <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
           variant="strip"
           orientation="horizontal"
-          size={size}
+          {size}
           {sizeRole}
-          density={density}
+          {density}
           showTooltips={isCompact}
           items={tabItems}
           value={activeItem?.value ?? ""}
@@ -374,30 +360,28 @@
       </div>
       {#if collapsible}
         <CollapseToggle
-          collapsed={collapsed}
+          {collapsed}
           direction={collapseDirection}
           ariaLabel={`Expand ${edge} dock`}
-          on:toggle={handleCollapseToggle}
+          onToggle={handleCollapseToggle}
         />
       {/if}
     </div>
-
   {:else}
-    <!-- Flexible expanded: horizontal tabs + body -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
       class="poodle-dock-region__strip"
       data-orientation="horizontal"
       data-compact={isCompact || undefined}
-      on:dragstart={handleStripDragStart}
+      ondragstart={handleStripDragStart}
     >
       <div class="poodle-dock-region__tabs" use:observeStrip>
         <Tabs
           variant="strip"
           orientation="horizontal"
-          size={size}
+          {size}
           {sizeRole}
-          density={density}
+          {density}
           showTooltips={isCompact}
           items={tabItems}
           value={activeItem?.value ?? ""}
@@ -410,16 +394,16 @@
       </div>
       {#if collapsible}
         <CollapseToggle
-          collapsed={collapsed}
+          {collapsed}
           direction={collapseDirection}
           ariaLabel={`Collapse ${edge} dock`}
-          on:toggle={handleCollapseToggle}
+          onToggle={handleCollapseToggle}
         />
       {/if}
     </div>
 
     <div class="poodle-dock-region__body">
-      <slot activeItem={activeItem} />
+      {@render children?.(activeItem)}
     </div>
   {/if}
 </section>
@@ -435,7 +419,6 @@
     background: color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
-  /* Emphasis variants */
   .poodle-dock-region[data-emphasis="quiet"] {
     border-color: transparent;
     background: transparent;
@@ -444,8 +427,6 @@
   .poodle-dock-region[data-emphasis="strong"] {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle));
   }
-
-  /* ── Static mode ── */
 
   .poodle-dock-region[data-sizing="static"] {
     grid-template-rows: 1fr;
@@ -480,8 +461,6 @@
     box-shadow: inset 0 0 0 0.125rem var(--poodle-color-accent-base);
     border-radius: var(--poodle-radius-control);
   }
-
-  /* ── Flexible expanded ── */
 
   .poodle-dock-region[data-sizing="flexible"]:not([data-collapsed]) {
     grid-template-rows: auto minmax(0, 1fr);
@@ -520,127 +499,89 @@
     border-bottom: 0;
   }
 
-  /* Compact mode: icon-only horizontal tabs when strip is too narrow */
   .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__label),
   .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__close) {
     display: none;
   }
 
   .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__tab) {
-    padding: 0 0.5rem;
+    min-width: 2.25rem;
     justify-content: center;
+    padding-inline: 0;
   }
 
   .poodle-dock-region__strip[data-compact] :global(.poodle-tabs__list) {
-    overflow: visible;
+    justify-content: flex-start;
   }
 
   .poodle-dock-region__body {
+    min-width: 0;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
   }
-
-  /* ── Flexible collapsed (icon-strip) ── */
 
   .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"] {
-    grid-template-rows: 1fr;
+    min-width: 0;
+    min-height: 0;
   }
 
-  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"] {
-    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-  }
-
-  .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
-    border-top: 0.0625rem solid var(--poodle-color-border-subtle);
-  }
-
-  /* Side docks collapse to narrow icon strip */
   .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="left"],
   .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="right"] {
-    width: fit-content;
+    grid-template-columns: 1fr;
   }
 
-  /* Top/bottom docks collapse to a thin horizontal strip */
   .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="top"],
   .poodle-dock-region[data-collapsed][data-collapsed-posture="icon-strip"][data-edge="bottom"] {
-    height: fit-content;
+    grid-template-rows: 1fr;
   }
 
   .poodle-dock-region__strip[data-orientation="vertical"] {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    padding: 0;
+    align-items: center;
+    gap: var(--poodle-space-stack-sm);
+    padding-block: 0.5rem;
     border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
   .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs) {
-    flex: 1 1 0;
-    min-height: 0;
-  }
-
-  .poodle-dock-region__strip[data-orientation="vertical"] > :global(.poodle-collapse-toggle) {
-    align-self: center;
-    padding: var(--poodle-space-panel-y, 0.5rem) 0;
-  }
-
-  /* Override Tabs grid so the list column stretches to fill the strip width.
-     The default vertical Tabs uses `grid-template-columns: auto minmax(0,1fr)`
-     which sizes the list to content. We need it to fill so the active item's
-     accent border sits flush on the strip's right divider. */
-  .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs) {
-    grid-template-columns: 1fr !important;
+    width: 100%;
   }
 
   .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__list) {
-    border-right: 0 !important;
+    flex-direction: column;
+    align-items: stretch;
+    border-bottom: 0;
   }
 
-  /* Ensure items' accent border overlaps the strip's border-right */
   .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
-    margin-right: -0.0625rem !important;
+    width: 100%;
   }
 
-  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] {
-    border-right: 0;
-    border-left: 0.0625rem solid var(--poodle-color-border-subtle);
+  .poodle-dock-region__strip[data-orientation="vertical"] > :global(.collapse-toggle) {
+    flex: 0 0 auto;
   }
-
-  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {
-    border-right: 0;
-    border-left: 0.125rem solid transparent;
-    margin-right: 0 !important;
-    margin-left: -0.125rem !important;
-  }
-
-  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item[data-selected="true"]) {
-    border-left-color: var(--poodle-color-accent-base);
-  }
-
-  /* ── Flexible collapsed (hidden) ── */
 
   .poodle-dock-region[data-collapsed][data-collapsed-posture="hidden"] {
-    border-color: transparent;
-    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .poodle-dock-region__edge-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--poodle-space-panel-y, 0.5rem);
+    padding: 0.5rem;
   }
-
-  /* ── Drop zone overlay ── */
 
   .poodle-dock-region__drop-zone {
     position: absolute;
     inset: 0;
-    z-index: 10;
-    border: 0.125rem dashed var(--poodle-color-accent-base);
-    border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+    z-index: 1;
     pointer-events: none;
+    border: 0.125rem dashed color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent);
+    border-radius: var(--poodle-radius-surface);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent);
   }
 </style>

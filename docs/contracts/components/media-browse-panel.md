@@ -103,12 +103,12 @@ All props are controlled. The component does not own any state; the host provide
 | browsing | Items present, user can select |
 | load-more-available | Items present and `hasMore` is true |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `select` | User clicks a media item | `{ item: MediaPickerItem }` |
-| `loadMore` | User clicks the load-more button | `void` |
+| Callback | When It Fires | Signature |
+|----------|---------------|-----------|
+| `onSelect` | User clicks a media item | `(item: MediaPickerItem) => void` |
+| `onLoadMore` | User clicks the load-more button | `() => void` |
 
 ## 6. Accessibility
 

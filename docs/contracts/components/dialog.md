@@ -12,7 +12,7 @@ Updated: 2026-03-30
 - In scope: modal semantics, backdrop, title/description, focus trap,
   dismissal on escape and backdrop, focus restoration, body scroll lock,
   dialog and alertdialog roles, width presets, bare mode, custom header/footer
-  slots
+  snippets
 - Out of scope: anchored contextual overlays, full-screen multi-step workflows,
   toast notifications, edge-anchored drawers
 
@@ -25,19 +25,19 @@ Updated: 2026-03-30
       ├── [Close Button .dialog__close]  <IconButton> (optional, receives resolvedSize)
       │
       │   ── when bare=true ──
-      ├── [Slot: default]  (no structural wrappers)
+      ├── [Snippet: children]  (no structural wrappers)
       │
       │   ── when bare=false ──
-      ├── [Header .dialog__header]  <div> (optional: when `header` slot used, OR title/description provided)
-      │   ├── [Slot: header]  (custom header content, replaces built-in title/description)
-      │   ├── [Title]  <strong>  (built-in, when no header slot)
-      │   └── [Description]  <p>  (built-in, when no header slot)
+      ├── [Header .dialog__header]  <div> (optional: when `header` snippet used, OR title/description provided)
+      │   ├── [Snippet: header]  (custom header content, replaces built-in title/description)
+      │   ├── [Title]  <strong>  (built-in, when no header snippet)
+      │   └── [Description]  <p>  (built-in, when no header snippet)
       ├── [Body .dialog__body]  <div>
-      │   └── [Slot: default]
-      ├── [Footer .dialog__footer]  <div> (optional, when footer slot used — replaces actions)
-      │   └── [Slot: footer]
-      └── [Actions .dialog__actions]  <div> (optional, when actions slot used and no footer slot)
-          └── [Slot: actions]
+      │   └── [Snippet: children]
+      ├── [Footer .dialog__footer]  <div> (optional, when footer snippet used — replaces actions)
+      │   └── [Snippet: footer]
+      └── [Actions .dialog__actions]  <div> (optional, when actions snippet used and no footer snippet)
+          └── [Snippet: actions]
 ```
 
 | Part | Required | Description | Token Targets |
@@ -46,10 +46,10 @@ Updated: 2026-03-30
 | Backdrop | yes | background scrim and interaction block | overlay background, cursor |
 | Surface | yes | modal content container | border, radius, background, elevation, padding, max sizing, width presets |
 | Close Button | no | dismiss affordance in the top-right corner; receives `resolvedSize` and uses `sizeRole="chrome"` | position, z-index |
-| Header | no | title and description region, or custom header slot content | gap, margin, typography |
+| Header | no | title and description region, or custom header snippet content | gap, margin, typography |
 | Body | yes | primary content area | min-width |
 | Footer | no | custom footer region (replaces actions when present) | margin |
-| Actions | no | action button row (only when footer slot is not used) | flex layout, gap, margin |
+| Actions | no | action button row (only when footer snippet is not used) | flex layout, gap, margin |
 
 ## 3. Props And Inputs
 
@@ -57,10 +57,10 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null` | `null` | no | controlled open state; `null` = uncontrolled |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | dialog visibility; when supplied, the host owns updates through `onOpenChange`; omit the prop for uncontrolled mode |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
-| `title` | `string \| null` | `null` | no | visible title text; ignored when `header` slot is used |
-| `description` | `string \| null` | `null` | no | visible supporting description; ignored when `header` slot is used |
+| `title` | `string \| null` | `null` | no | visible title text; ignored when `header` snippet is used |
+| `description` | `string \| null` | `null` | no | visible supporting description; ignored when `header` snippet is used |
 | `role` | `"dialog" \| "alertdialog"` | `"dialog"` | no | semantic ARIA role for the surface |
 | `kind` | `"dialog" \| "alertdialog" \| undefined` | `undefined` | no | **deprecated** — legacy alias for `role`; when provided, overrides `role` |
 | `width` | `"sm" \| "md" \| "lg" \| "xl" \| "full"` | `"md"` | no | surface width preset |
@@ -87,20 +87,20 @@ Updated: 2026-03-30
 | `"xl"` | `min(64rem, 100%)` (1024px) |
 | `"full"` | `100%` |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| default | body content (or full content when `bare=true`) |
-| header (named) | custom header content; replaces built-in title/description when present |
-| footer (named) | custom footer content; replaces the actions row when present |
-| actions (named) | action button row (renders `.dialog__actions` wrapper when present and no footer slot) |
+| `children` | body content (or full content when `bare=true`) |
+| `header` | custom header content; replaces built-in title/description when present |
+| `footer` | custom footer content; replaces the actions row when present |
+| `actions` | action button row (renders `.dialog__actions` wrapper when present and no `footer` snippet) |
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` (non-null) plus `openChange` event
-- uncontrolled: `defaultOpen` with internal state management
-- close requests may be observed separately through `requestClose` event
+- controlled: supplying `open` makes it host-owned through `onOpenChange`
+- uncontrolled: omit `open` and use `defaultOpen`
+- close requests may be observed separately through `onRequestClose` callback
 
 ## 4. States
 
@@ -117,12 +117,12 @@ Updated: 2026-03-30
 - No intermediate opening/closing animation states in current implementation
 - Body scroll locked while open (`document.body.style.overflow = "hidden"`)
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | dialog opens or closes | `{ open: boolean }` | state ownership callback |
-| `requestClose` | user attempts dismissal (escape or backdrop) | void | fires before openChange(false) |
+| `onOpenChange` | dialog opens or closes | `boolean` | state ownership callback |
+| `onRequestClose` | user attempts dismissal (escape or backdrop) | `void` | runs before `onOpenChange(false)` |
 
 ## 6. Accessibility
 
@@ -168,13 +168,13 @@ Updated: 2026-03-30
 - Surface: width controlled by `width` prop preset (default `min(34rem, 100%)`),
   height constrained to `min(80vh, 42rem)` with overflow auto
 - Content flows vertically: header, body, actions/footer
-- When `bare=true`, surface has no padding and no internal structure — default
-  slot renders directly inside the surface
+- When `bare=true`, surface has no padding and no internal structure — the
+  `children` snippet renders directly inside the surface
 
 ### Composition
 
 - parent expectations: confirmation flows, settings sheets, focused tasks
-- child expectations: structured header/body/footer content via props and slots;
+- child expectations: structured header/body/footer content via props and snippets;
   or fully custom layout via `bare` mode
 - resizing: surface respects viewport constraints; overflow scrolls within
   surface
@@ -329,15 +329,17 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 - Surface uses `bind:this` for DOM reference needed by focus trap
 - Entire dialog tree conditionally rendered with `{#if isOpen}` (mount/unmount)
 - Close button rendered only when `showCloseButton=true`; receives `size={resolvedSize}` and `sizeRole="chrome"`
-- Header rendered when `header` slot is used OR when `title`/`description` is provided
-  - When `header` slot is present, it replaces the built-in title/description
-  - Built-in title/description render only when no `header` slot is used
-- Footer slot renders `.dialog__footer` wrapper; when present, suppresses the
-  actions slot entirely
-- Actions wrapper rendered only when named `actions` slot is used
-  (`$$slots.actions`) and no `footer` slot is present
-- When `bare=true`, the default slot renders directly inside the surface with
-  no header, body, actions, or footer wrappers
+- Header rendered when the `header` snippet is used OR when
+  `title`/`description` is provided
+  - When the `header` snippet is present, it replaces the built-in
+    title/description
+  - Built-in title/description render only when no `header` snippet is used
+- Footer snippet renders `.dialog__footer` wrapper; when present, suppresses
+  the actions snippet entirely
+- Actions wrapper rendered only when the `actions` snippet is used and no
+  `footer` snippet is present
+- When `bare=true`, the `children` snippet renders directly inside the surface
+  with no header, body, actions, or footer wrappers
 
 ## 10. GPUI Notes
 
@@ -361,7 +363,7 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 - [ ] escape dismissal behavior matches (respects dismissOnEscape)
 - [ ] backdrop dismissal behavior matches (respects dismissOnBackdrop)
 - [ ] body scroll lock while open matches
-- [ ] openChange and requestClose event payloads match
+- [ ] onOpenChange and onRequestClose callback payloads match
 - [ ] controlled and uncontrolled modes match
 - [ ] bare mode disables padding and internal structure
 
@@ -459,8 +461,8 @@ Triggered by "Open custom" button:
 
 | Property | Value |
 |----------|-------|
-| `header` slot | Custom header with icon and styled title |
-| `footer` slot | Custom footer with status text and action buttons |
+| `header` snippet | Custom header with icon and styled title |
+| `footer` snippet | Custom footer with status text and action buttons |
 
 ## 14. Approval And Adoption Notes
 

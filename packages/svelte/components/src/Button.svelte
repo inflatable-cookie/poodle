@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
   import Icon from "./Icon.svelte";
   import {
@@ -17,73 +17,119 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let variant: ButtonVariant = "secondary";
-  export let tone: ButtonTone = "default";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let type: HTMLButtonElement["type"] = "button";
-  export let form: string | null = null;
-  export let formaction: string | null = null;
-  export let formenctype:
-    | "application/x-www-form-urlencoded"
-    | "multipart/form-data"
-    | "text/plain"
-    | null = null;
-  export let formmethod: "get" | "post" | "dialog" | null = null;
-  export let formnovalidate = false;
-  export let formtarget: "_self" | "_blank" | "_parent" | "_top" | string | null = null;
-  export let disabled = false;
-  export let loading = false;
-  export let leadingIcon: IconProp | null = null;
-  export let trailingIcon: IconProp | null = null;
-  export let chevron = false;
-  /** Toggle pressed state. When provided (non-null), button acts as a toggle with aria-pressed. */
-  export let pressed: boolean | null = null;
-  /** Initial pressed state for uncontrolled toggle mode. */
-  export let defaultPressed = false;
-  export let ariaLabel: string | null = null;
-  export let ariaExpanded: boolean | null = null;
-  export let describedBy: string | null = null;
-  export let className = "";
-  export let style: string | null = null;
+  interface Props {
+    variant?: ButtonVariant;
+    tone?: ButtonTone;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    type?: HTMLButtonElement["type"];
+    form?: string | null;
+    formaction?: string | null;
+    formenctype?:
+      | "application/x-www-form-urlencoded"
+      | "multipart/form-data"
+      | "text/plain"
+      | null;
+    formmethod?: "get" | "post" | "dialog" | null;
+    formnovalidate?: boolean;
+    formtarget?: "_self" | "_blank" | "_parent" | "_top" | string | null;
+    disabled?: boolean;
+    loading?: boolean;
+    leadingIcon?: IconProp | null;
+    trailingIcon?: IconProp | null;
+    chevron?: boolean;
+    pressed?: boolean | null;
+    defaultPressed?: boolean;
+    ariaLabel?: string | null;
+    ariaExpanded?: boolean | null;
+    describedBy?: string | null;
+    className?: string;
+    style?: string | null;
+    onClick?: ((event: MouseEvent) => void) | null;
+    onFocus?: ((event: FocusEvent) => void) | null;
+    onBlur?: ((event: FocusEvent) => void) | null;
+    onPressedChange?: ((pressed: boolean) => void) | null;
+    children?: Snippet<[]>;
+    leading?: Snippet<[]>;
+    trailing?: Snippet<[]>;
+    [key: string]: unknown;
+  }
 
-  const dispatch = createEventDispatcher<{
-    click: MouseEvent;
-    focus: FocusEvent;
-    blur: FocusEvent;
-    pressedChange: { pressed: boolean };
-  }>();
+  let {
+    variant = "secondary",
+    tone = "default",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    type = "button",
+    form = null,
+    formaction = null,
+    formenctype = null,
+    formmethod = null,
+    formnovalidate = false,
+    formtarget = null,
+    disabled = false,
+    loading = false,
+    leadingIcon = null,
+    trailingIcon = null,
+    chevron = false,
+    pressed = $bindable<boolean | null>(null),
+    defaultPressed = false,
+    ariaLabel = null,
+    ariaExpanded = null,
+    describedBy = null,
+    className = "",
+    style = null,
+    onClick = null,
+    onFocus = null,
+    onBlur = null,
+    onPressedChange = null,
+    children,
+    leading,
+    trailing,
+    ...restProps
+  }: Props = $props();
 
-  let uncontrolledPressed = defaultPressed;
-  $: isToggle = pressed !== null || defaultPressed;
-  $: pressedControlled = pressed !== null;
-  $: currentPressed = pressedControlled ? pressed === true : uncontrolledPressed;
+  const uiPresentation = getUiPresentation();
+
+  let seededDefaultPressed = $state(false);
+  let uncontrolledPressed = $state(false);
+
+  $effect.pre(() => {
+    if (!seededDefaultPressed && pressed === null) {
+      uncontrolledPressed = defaultPressed;
+      seededDefaultPressed = true;
+    }
+  });
+
+  const isToggle = $derived(pressed !== null || defaultPressed);
+  const pressedControlled = $derived(pressed !== null);
+  const currentPressed = $derived(pressedControlled ? pressed === true : uncontrolledPressed);
+  const isUnavailable = $derived(disabled || loading);
+  const iconOnly = $derived(!children);
+  const hasLeading = $derived(Boolean(leading) || Boolean(leadingIcon) || loading);
+  const hasTrailing = $derived(Boolean(trailing) || Boolean(trailingIcon) || chevron);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedIconSize = $derived(resolveSupportingVisualSize(resolvedSize));
 
   function handleClick(event: MouseEvent): void {
     if (isToggle) {
       const next = !currentPressed;
-      if (!pressedControlled) {
+      if (pressedControlled) {
+        pressed = next;
+      } else {
         uncontrolledPressed = next;
       }
-      dispatch("pressedChange", { pressed: next });
+      onPressedChange?.(next);
     }
-    dispatch("click", event);
+    onClick?.(event);
   }
-
-  const uiPresentation = getUiPresentation();
-
-  $: isUnavailable = disabled || loading;
-  $: iconOnly = !$$slots.default;
-  $: hasLeading = $$slots.leading || leadingIcon || loading;
-  $: hasTrailing = $$slots.trailing || trailingIcon || chevron;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 </script>
 
 <button
-  {...$$restProps}
+  {...restProps}
   {type}
   form={form ?? undefined}
   formaction={formaction ?? undefined}
@@ -108,9 +154,13 @@
   aria-expanded={ariaExpanded === null ? undefined : ariaExpanded ? "true" : "false"}
   aria-describedby={describedBy ?? undefined}
   aria-busy={loading ? "true" : undefined}
-  on:click={handleClick}
-  on:focus={(event) => dispatch("focus", event)}
-  on:blur={(event) => dispatch("blur", event)}
+  onclick={handleClick}
+  onfocus={(event) => {
+    onFocus?.(event);
+  }}
+  onblur={(event) => {
+    onBlur?.(event);
+  }}
 >
   {#if loading}
     <span class="poodle-button__spinner" aria-hidden="true">
@@ -118,26 +168,26 @@
     </span>
   {/if}
 
-  {#if $$slots.leading || leadingIcon}
+  {#if leading || leadingIcon}
     <span class="poodle-button__icon" aria-hidden="true">
-      {#if $$slots.leading}
-        <slot name="leading" />
+      {#if leading}
+        {@render leading()}
       {:else if leadingIcon}
         <Icon icon={leadingIcon} size={resolvedIconSize} />
       {/if}
     </span>
   {/if}
 
-  {#if $$slots.default}
+  {#if children}
     <span class="poodle-button__label">
-      <slot />
+      {@render children()}
     </span>
   {/if}
 
-  {#if $$slots.trailing || trailingIcon}
+  {#if trailing || trailingIcon}
     <span class="poodle-button__icon" aria-hidden="true">
-      {#if $$slots.trailing}
-        <slot name="trailing" />
+      {#if trailing}
+        {@render trailing()}
       {:else if trailingIcon}
         <Icon icon={trailingIcon} size={resolvedIconSize} />
       {/if}

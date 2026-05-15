@@ -10,9 +10,9 @@ Updated: 2026-03-30
 - Summary: a reusable workflow shell for selecting one or more items from a
   searchable candidate set; provides layout framing, not item semantics
 - In scope: title/description header, meta area with result and selection counts,
-  search toolbar slot, selected-summary slot, result list body, state messaging
-  with loading spinner, status live-region announcements, confirm/cancel footer
-  slot, inline/popover/modal posture
+  snippet-based toolbar and selection areas, result list body, state messaging
+  with loading spinner, status live-region announcements, snippet-based footer,
+  inline/popover/modal posture
 - Out of scope: domain-specific relation logic, fetch policy, item renderer
   semantics, destructive confirmation policy
 
@@ -31,15 +31,15 @@ consequences.
   │     └── [Meta]
   │           ├── [ResultCount]    (optional)
   │           └── [SelectionCount]
-  ├── [Toolbar]                (slot, optional)
-  ├── [Selection]              (slot, optional)
+  ├── [Toolbar]                (snippet, optional)
+  ├── [Selection]              (snippet, optional)
   ├── [Status <p>]             (optional, visually hidden sr-only live region)
-  ├── [Body]                   (default slot, shown when state="ready"; scrollable)
+  ├── [Body]                   (children snippet, shown when state="ready"; scrollable)
   ├── [State]                  (shown when state!="ready")
   │     ├── [Spinner]          (when state="loading", fallback only)
   │     ├── [StateTitle <strong>]
   │     └── [StateMessage <p>] (optional)
-  └── [Footer]                 (slot, optional)
+  └── [Footer]                 (snippet, optional)
 ```
 
 ### Parts
@@ -52,13 +52,13 @@ consequences.
 | Title | `<h3>` | Picker heading text |
 | Description | `<p>` | Optional subheading below title |
 | Meta | `<div>` | Result count and selection count display |
-| Toolbar | `<div>` | Slot wrapper for search field and filters |
-| Selection | `<div>` | Slot wrapper for selection summary |
+| Toolbar | `<div>` | Snippet wrapper for search field and filters |
+| Selection | `<div>` | Snippet wrapper for selection summary |
 | Status | `<p>` | Visually hidden (sr-only); `role="status"`, `aria-live="polite"`, `aria-atomic="true"`; placed after toolbar and selection in DOM order |
-| Body | `<div>` | Default slot, visible only when `state="ready"`; scrollable (`overflow-y: auto`, `min-height: 0`) |
+| Body | `<div>` | Children snippet, visible only when `state="ready"`; scrollable (`overflow-y: auto`, `min-height: 0`) |
 | State | `<div>` | Fallback state display, visible when `state!="ready"` |
 | Spinner | `<span>` | Wraps `Spinner` primitive (`variant="grid"`, `tone="accent"`), shown in loading state fallback |
-| Footer | `<div>` | Slot wrapper for confirm/cancel actions |
+| Footer | `<div>` | Snippet wrapper for confirm/cancel actions |
 
 ## 3. Props And Inputs
 
@@ -78,15 +78,15 @@ consequences.
 | `statusText` | `string \| null` | `null` | no | Live-region status text for screen readers |
 | `statusId` | `string \| null` | `null` | no | DOM id for the status element (for `aria-describedby`) |
 
-### Slots
+### Snippets
 
-| Slot | Purpose | When Rendered |
-|------|---------|---------------|
+| Snippet | Purpose | When Rendered |
+|---------|---------|---------------|
 | `toolbar` | Search field, filters, breadcrumbs | Always (if provided) |
 | `selection` | Selection summary chips | Always (if provided) |
-| `state` | Custom state content override | When `state!="ready"` and slot provided |
+| `stateContent` | Custom state content override | When `state!="ready"` and snippet provided |
 | `footer` | Confirm/cancel actions | Always (if provided) |
-| default | Candidate list / result content | When `state="ready"` |
+| `children` | Candidate list / result content | When `state="ready"` |
 
 ### Controlled And Uncontrolled
 
@@ -97,7 +97,7 @@ controls which region is visible (body vs state area).
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| ready | `state="ready"` | Body slot visible with candidate content |
+| ready | `state="ready"` | Body snippet visible with candidate content |
 | empty | `state="empty"` | State area shown with fallback title/message |
 | loading | `state="loading"` | State area shown with Spinner (`variant="grid"`, `tone="accent"`) and loading message |
 | error | `state="error"` | State area shown with error message |
@@ -109,15 +109,15 @@ No internal component state. PickerShell is a layout container.
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| none | -- | -- | PickerShell is a layout shell; events come from slotted children |
+| none | -- | -- | PickerShell is a layout shell; events come from nested snippet content |
 
 ## 6. Accessibility
 
 - Root is a `<section>` landmark with optional `aria-label`
 - Status element uses `role="status"`, `aria-live="polite"`, `aria-atomic="true"`
 - Status element has configurable `id` via `statusId` prop for `aria-describedby` references
-- Keyboard interaction is delegated entirely to slotted children
-- Focus entry goes to slotted toolbar/content, not the shell itself
+- Keyboard interaction is delegated entirely to nested snippet content
+- Focus entry goes to toolbar/content inside the supplied snippets, not the shell itself
 - Spinner in loading state is `aria-hidden="true"`
 
 ## 7. Layout
@@ -267,19 +267,19 @@ None.
 ## 9. Svelte Notes
 
 - Root is `<section class="picker-shell">` with `data-variant` and `data-state` attributes
-- Uses Svelte `$$slots` checks for conditional slot rendering (toolbar, selection, state, footer)
+- Uses snippet presence checks for conditional toolbar, selection, state, and footer rendering
 - Status text is visually hidden (sr-only) but kept in the DOM for screen reader live region announcements
-- Status element is placed after toolbar and selection slots in the DOM order
+- Status element is placed after toolbar and selection snippets in the DOM order
 - Body area is scrollable with `overflow-y: auto` and `min-height: 0`
 - Grid uses `grid-template-rows: auto` instead of explicit row template
-- State fallback shows `stateTitle` (or "Picker state") and optional `stateMessage` when no `state` slot provided
+- State fallback shows `stateTitle` (or "Picker state") and optional `stateMessage` when no `stateContent` snippet is provided
 - Loading state prepends shared `Spinner` primitive (`variant="grid"`, `tone="accent"`) before state title
 - Imports `Spinner` from `@poodle/svelte`
 
 ## 10. GPUI Notes
 
 - Expected crate/module surface: `poodle_gpui::composites::picker_shell`
-- Implementation should preserve slot-equivalent regions as child containers
+- Implementation should preserve snippet-equivalent regions as child containers
 - Status live region needs platform-appropriate accessibility announcement
 
 ## 11. Parity Checklist
@@ -301,7 +301,7 @@ None.
 
 ### Tier 3: Implementation Freedom
 
-- [ ] rendering internals and slot mechanism stay internal
+- [ ] rendering internals and snippet mechanism stay internal
 
 ## 12. Specimen Definitions
 

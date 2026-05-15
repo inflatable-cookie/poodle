@@ -93,12 +93,12 @@ type ToastItem = {
 
 No internal state. Toast list is externally managed.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `dismiss` | dismiss button clicked | `{ id: string }` | host removes toast from items |
-| `action` | action button clicked | `{ id: string }` | host handles the action (e.g. navigate, retry) |
+| Callback | When It Fires | Signature | Notes |
+|----------|---------------|-----------|-------|
+| `onDismiss` | dismiss button clicked | `(id: string) => void` | host removes toast from items |
+| `onAction` | action button clicked | `(id: string) => void` | host handles the action (e.g. navigate, retry) |
 
 ## 6. Accessibility
 

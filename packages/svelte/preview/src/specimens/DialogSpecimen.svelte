@@ -15,44 +15,44 @@
   <div class="poodle-specimen">
     <div class="poodle-specimen__row">
       <Eyebrow>Informational</Eyebrow>
-      <Button variant="secondary" on:click={() => (basicOpen = true)}>View details</Button>
+      <Button variant="secondary" onClick={() => (basicOpen = true)}>View details</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Form</Eyebrow>
-      <Button variant="secondary" on:click={() => (formOpen = true)}>Create project</Button>
+      <Button variant="secondary" onClick={() => (formOpen = true)}>Create project</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Custom header</Eyebrow>
-      <Button variant="secondary" on:click={() => (contentOnlyOpen = true)}>View changelog</Button>
+      <Button variant="secondary" onClick={() => (contentOnlyOpen = true)}>View changelog</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Custom footer</Eyebrow>
-      <Button variant="secondary" on:click={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
+      <Button variant="secondary" onClick={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Bare mode</Eyebrow>
-      <Button variant="secondary" on:click={() => (bareOpen = true)}>Preview image</Button>
+      <Button variant="secondary" onClick={() => (bareOpen = true)}>Preview image</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Scrollable</Eyebrow>
-      <Button variant="secondary" on:click={() => (scrollableOpen = true)}>View log</Button>
+      <Button variant="secondary" onClick={() => (scrollableOpen = true)}>View log</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Width presets</Eyebrow>
       {#each ["sm", "md", "lg", "xl"] as w}
-        <Button variant="secondary" on:click={() => (widthOpenMap[w] = true)}>{w}</Button>
+        <Button variant="secondary" onClick={() => (widthOpenMap[w] = true)}>{w}</Button>
       {/each}
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Non-dismissible</Eyebrow>
-      <Button variant="secondary" on:click={() => (wideOpen = true)}>Open persistent</Button>
+      <Button variant="secondary" onClick={() => (wideOpen = true)}>Open persistent</Button>
     </div>
   </div>
 </Surface>
@@ -63,7 +63,7 @@
   open={basicOpen}
   title="Keyboard shortcuts"
   showCloseButton
-  on:openChange={(e) => (basicOpen = e.detail.open)}
+  onOpenChange={(open) => (basicOpen = open)}
 >
   <div class="poodle-shortcuts-list">
     <div class="poodle-shortcut"><kbd>⌘ K</kbd> <span>Command palette</span></div>
@@ -80,7 +80,7 @@
   description="Set up a new project workspace."
   width="lg"
   showCloseButton
-  on:openChange={(e) => (formOpen = e.detail.open)}
+  onOpenChange={(open) => (formOpen = open)}
 >
   <div class="poodle-form-grid">
     <Field label="Project name" id="dialog-project-name">
@@ -102,23 +102,23 @@
       <Checkbox id="dialog-private" label="Make this project private" />
     </div>
   </div>
-  <svelte:fragment slot="actions">
-    <Button variant="ghost" on:click={() => (formOpen = false)}>Cancel</Button>
-    <Button on:click={() => (formOpen = false)}>Create project</Button>
-  </svelte:fragment>
+  {#snippet actions()}
+    <Button variant="ghost" onClick={() => (formOpen = false)}>Cancel</Button>
+    <Button onClick={() => (formOpen = false)}>Create project</Button>
+  {/snippet}
 </Dialog>
 
 <Dialog
   open={contentOnlyOpen}
   showCloseButton
-  on:openChange={(e) => (contentOnlyOpen = e.detail.open)}
+  onOpenChange={(open) => (contentOnlyOpen = open)}
 >
-  <svelte:fragment slot="header">
+  {#snippet header()}
     <div class="poodle-changelog-header">
       <h2 class="poodle-changelog-header__title">What's new</h2>
       <Pill tone="info" appearance="badge">v2.4.0</Pill>
     </div>
-  </svelte:fragment>
+  {/snippet}
   <div class="poodle-changelog">
     <div class="poodle-changelog__entry">
       <strong>Dialog flexibility improvements</strong>
@@ -135,20 +135,20 @@
   open={customFooterOpen}
   title="Terms of service"
   showCloseButton
-  on:openChange={(e) => (customFooterOpen = e.detail.open)}
+  onOpenChange={(open) => (customFooterOpen = open)}
 >
   <div class="poodle-terms-body">
     <p>By using this service, you agree to our terms and conditions.</p>
   </div>
-  <svelte:fragment slot="footer">
+  {#snippet footer()}
     <div class="poodle-split-footer">
       <a href="#terms" class="poodle-split-footer__link">Read full terms</a>
       <div class="poodle-split-footer__actions">
-        <Button variant="ghost" on:click={() => (customFooterOpen = false)}>Decline</Button>
-        <Button on:click={() => (customFooterOpen = false)}>Accept</Button>
+        <Button variant="ghost" onClick={() => (customFooterOpen = false)}>Decline</Button>
+        <Button onClick={() => (customFooterOpen = false)}>Accept</Button>
       </div>
     </div>
-  </svelte:fragment>
+  {/snippet}
 </Dialog>
 
 <Dialog
@@ -156,7 +156,7 @@
   bare
   width="lg"
   ariaLabel="Image preview"
-  on:openChange={(e) => (bareOpen = e.detail.open)}
+  onOpenChange={(open) => (bareOpen = open)}
 >
   <div class="poodle-image-preview">
     <div class="poodle-image-preview__canvas">
@@ -168,8 +168,8 @@
         <span>2.4 MB · Uploaded today</span>
       </div>
       <div class="poodle-image-preview__actions">
-        <Button variant="ghost" on:click={() => (bareOpen = false)}>Close</Button>
-        <Button leadingIcon="download" on:click={() => (bareOpen = false)}>Download</Button>
+        <Button variant="ghost" onClick={() => (bareOpen = false)}>Close</Button>
+        <Button leadingIcon="download" onClick={() => (bareOpen = false)}>Download</Button>
       </div>
     </div>
   </div>
@@ -180,7 +180,7 @@
   title="Activity log"
   description="Recent activity across all projects."
   showCloseButton
-  on:openChange={(e) => (scrollableOpen = e.detail.open)}
+  onOpenChange={(open) => (scrollableOpen = open)}
 >
   <div class="poodle-log-list">
     {#each Array(20) as _, i}
@@ -192,10 +192,10 @@
       </div>
     {/each}
   </div>
-  <svelte:fragment slot="actions">
-    <Button variant="ghost" on:click={() => (scrollableOpen = false)}>Close</Button>
-    <Button on:click={() => (scrollableOpen = false)}>Export log</Button>
-  </svelte:fragment>
+  {#snippet actions()}
+    <Button variant="ghost" onClick={() => (scrollableOpen = false)}>Close</Button>
+    <Button onClick={() => (scrollableOpen = false)}>Export log</Button>
+  {/snippet}
 </Dialog>
 
 {#each ["sm", "md", "lg", "xl"] as w}
@@ -204,12 +204,12 @@
     width={w as "sm" | "md" | "lg" | "xl"}
     title="Width: {w}"
     showCloseButton
-    on:openChange={(e) => (widthOpenMap[w] = e.detail.open)}
+    onOpenChange={(open) => (widthOpenMap[w] = open)}
   >
     <p>This dialog uses <code>width="{w}"</code>.</p>
-    <svelte:fragment slot="actions">
-      <Button on:click={() => (widthOpenMap[w] = false)}>Close</Button>
-    </svelte:fragment>
+    {#snippet actions()}
+      <Button onClick={() => (widthOpenMap[w] = false)}>Close</Button>
+    {/snippet}
   </Dialog>
 {/each}
 
@@ -218,12 +218,12 @@
   title="Processing"
   dismissOnBackdrop={false}
   dismissOnEscape={false}
-  on:openChange={(e) => (wideOpen = e.detail.open)}
+  onOpenChange={(open) => (wideOpen = open)}
 >
   <p>This dialog cannot be dismissed by clicking the backdrop or pressing Escape.</p>
-  <svelte:fragment slot="actions">
-    <Button on:click={() => (wideOpen = false)}>Done</Button>
-  </svelte:fragment>
+  {#snippet actions()}
+    <Button onClick={() => (wideOpen = false)}>Done</Button>
+  {/snippet}
 </Dialog>
 
 <style>

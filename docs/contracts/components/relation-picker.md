@@ -16,14 +16,14 @@ Updated: 2026-03-30
 ```text
 [Root]
   └── [PickerShell]
-        ├── [Toolbar]  (slot)
+        ├── [Toolbar]  (snippet)
         │     ├── [DrillBreadcrumbs]  (when drilling or post-drill with breadcrumbs)
         │     │     ├── [BackButton]  Icon: chevron-left
         │     │     ├── [Separator]   "/"
         │     │     └── [BreadcrumbItem...]
         │     ├── [DrillLevelLabel]   (when drilling)
         │     ├── [TextInput type="search"]       (drill search or main search)
-        ├── [SelectionSummary]  (slot: selection, hidden while drilling)
+        ├── [SelectionSummary]  (selection snippet, hidden while drilling)
         ├── [DrillList]         (when drilling, replaces candidate list)
         │     └── [DrillListItem...]
         │           └── [DrillButton]
@@ -41,8 +41,8 @@ Updated: 2026-03-30
         │           │     └── [CandidateCopy]
         │           │           ├── [Label]       <strong>
         │           │           └── [Detail]      <small> (description + meta, optional)
-        ├── [State]             (slot, for custom state content via PickerShell)
-        └── [Footer]            (slot)
+        ├── [State]             (stateContent snippet, via PickerShell)
+        └── [Footer]            (footer snippet)
               └── [FormActions]
                     ├── [FooterNote]
                     └── [FooterActions]
@@ -139,17 +139,17 @@ type PickerVariant = "inline" | "popover" | "modal";
 type SelectionMode = "single" | "multiple";
 ```
 
-### Slots
+### Snippets
 
-| Slot | Scope | Notes |
-|------|-------|-------|
-| `state` | none | Custom state content, passed through to PickerShell's `state` slot |
+| Snippet | Signature | Notes |
+|---------|-----------|-------|
+| `stateContent` | `()` | Custom state content, passed through to PickerShell's `stateContent` snippet |
 
 ### Controlled / Uncontrolled
 
 - `selectedIds` and `query` are controlled props; host owns final state
 - Drill-down state (depth, selections, drill search query) is managed internally
-- `query` is also mutated internally on search and passed back via `queryChange`
+- `query` is also updated internally on search and passed back via `onQueryChange`
 
 ## 4. States
 
@@ -171,15 +171,15 @@ type SelectionMode = "single" | "multiple";
 
 Internal drill-down state includes: `drillDepth`, `drillSelections` (map of level key to selected item), `drillSearchQuery`, `drillItems`, `drillLoading`, `finalItemsLoaded`, `finalItemsLoading`.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `queryChange` | Search query changes (typing or clear) | `{ value: string }` |
-| `selectionChange` | Selection toggled (single or multiple) | `{ selectedIds: string[] }` |
-| `confirm` | Confirm button clicked | `{ selectedIds: string[] }` |
-| `cancel` | Cancel button clicked | `void` |
-| `drillContext` | Drill-down level selected | `{ context: DrillDownContext }` |
+| Callback | When It Fires | Signature |
+|----------|---------------|-----------|
+| `onQueryChange` | Search query changes (typing or clear) | `(value: string) => void` |
+| `onSelectionChange` | Selection toggled (single or multiple) | `(selectedIds: string[]) => void` |
+| `onConfirm` | Confirm button clicked | `(selectedIds: string[]) => void` |
+| `onCancel` | Cancel button clicked | `() => void` |
+| `onDrillContext` | Drill-down level selected | `(context: DrillDownContext) => void` |
 
 ## 6. Accessibility
 
@@ -478,11 +478,11 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 - Uses `createEventDispatcher` for all events
 - Internal `statusId` used for `aria-describedby` on search field
 - `candidateButtons` array for programmatic focus management
-- Drill-down state is reactive via Svelte `$:` declarations
+- Drill-down state is reactive via runes-based derived and effect logic
 - Drill search query (`drillSearchQuery`) is separate from main `query` prop
 - `loadDrillItems()` handles both sync (array) and async (function) level items, with client-side filtering for sync items
 - `loadFinalItems()` calls `drillDown.finalItems` with accumulated context and query
-- `drillSelect()` advances drill depth, records selection, dispatches `drillContext`
+- `drillSelect()` advances drill depth, records selection, and calls `onDrillContext`
 - `drillBack()` decrements depth, removes level selection, clears final items
 - `drillNavigateTo()` jumps to any breadcrumb depth, clearing subsequent selections
 - `handleDrillSearchKeydown()` intercepts Escape and Backspace (when search empty) to navigate back

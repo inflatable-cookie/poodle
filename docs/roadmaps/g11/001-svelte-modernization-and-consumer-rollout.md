@@ -3,7 +3,7 @@
 Status: active
 Owner: Poodle core
 Depends on: g10 closeout
-Updated: 2026-05-14
+Updated: 2026-05-15
 
 ## Purpose
 
@@ -234,6 +234,73 @@ Reason:
 - remove obsolete compatibility aliases that survived earlier waves only for
   rollout safety
 
+## Remaining Dispatcher Audit
+
+Snapshot taken after the current callback-first sweep.
+
+### Highest Spread Remaining Seams
+
+No high-spread public dispatcher seams remain in the audited consumer set.
+
+### Internal Or Low-Consumer Seams
+
+No meaningful internal dispatcher seams remain from the audited set. The last
+low-consumer cleanup batch covered:
+
+- `ActionDiscoveryPanel`
+- `SelectionSummary`
+- `CollapseToggle`
+
+### Completed Since Snapshot
+
+- `OrderBy`: dispatcher removed; public seam is now callback-only via `onChange`
+- `ListContainer`: dispatcher removed; public seam is now callback-only via `onPageChange`
+- `BulkActionBar`: dispatcher removed; public seam is now callback-only via `onAction`, `onClear`, and `onSelectAll`
+- `EditableList`: dispatcher removed; public seam is now callback-only via `onReorder`, `onAdd`, `onRemove`, `onChange`, `onSubmit`, and `onCancel`
+- `FileUpload`: dispatcher removed; public seam is now callback-only via `onChange`, `onUpload`, `onError`, and `onRemove`
+- `DataTable`: dispatcher removed; public seam is now callback-only via `onSortChange`, `onRowToggle`, `onToggleAll`, `onRowAction`, `onRowActionSelect`, `onColumnVisibilityChange`, `onExportCsv`, `onRowClick`, `onFilterChange`, `onPageChange`, and `onLimitChange`
+- `Button` and `IconButton`: dispatcher removed; public seams are now callback-only via `onClick`, `onFocus`, `onBlur`, and `onPressedChange`
+- `MarkdownEditor`: dispatcher removed; public seam is now callback-only via `onValueChange` while preserving `bind:value`
+- `NavCard`: dispatcher removed; public seam is now callback-only via `onClick`
+- `ListCard`: dispatcher removed; public seams are now callback-only via `onClick` and `onSelectedChange`
+- `ResizeHandle`: dispatcher removed; public seams are now callback-only via `onResizeStart`, `onResizeMove`, `onResizeEnd`, and `onResizeStep`
+- `SplitView`: dispatcher removed; public seams are now callback-only via `onRatioChange`, `onPrimaryCollapsedChange`, and `onSecondaryCollapsedChange`
+- `EmbedInput`: dispatcher removed; public seams are now callback-only via `onParse` and `onValueChange`
+- `ScrollShell`: dispatcher removed; public seam is now callback-only via `onScroll`
+- `BlockEditor`: dispatcher removed; public seam is now callback-only via `onChange`
+- `ColorPicker`: dispatcher removed; public seams are now callback-only via `onChange` and `onOpenChange`
+- `ActionDiscoveryPanel`: dispatcher removed; public seams are now callback-only via `onItemSelect` and `onActiveChange`
+- `SelectionSummary`: dispatcher removed; public seams are now callback-only via `onRemove` and `onClear`
+- `CollapseToggle`: dispatcher removed; public seam is now callback-only via `onToggle`
+- `ListContainer` and `FilterToolbar`: moved to runes-based internals and snippet-first composition
+- `ListCard`: moved to runes-based internals and snippet-first composition, with Underlay `EntityListCard` migrated to the new snippet surface
+- `DataTable`: moved to runes-based internals and snippet-first composition, with `cell`, `expandedRow`, and `empty` migrated to snippet props across the active consumer set
+- `PickerShell` and `RelationPicker`: moved to runes-based internals and snippet-first composition, with `PickerShell` replacing toolbar/selection/state/footer slots and `RelationPicker` consuming the new shell surface directly
+- `DockRegion` and `SplitView`: moved to runes-based internals and snippet-first composition, with `DockRegion` replacing `panel`/body slots and `SplitView` replacing primary/secondary slots across Aura, Finch, and the preview surface
+- `EditableList` and `LogList`: moved to runes-based internals, with `EditableList` keeping its bindable item model on a cleaner ownership boundary and `LogList` moving its internal filters to bindable state without prop mutation footguns
+- `Calendar`, `DatePicker`, `DateRangePicker`, `DateTimePicker`, `DateTimeRangePicker`, and `DateTimeZonePicker`: moved to runes-based internals and cleaned up seeded default-state ownership across the full picker cluster
+- `ColorPicker`: moved to runes-based internals and cleaned up value/open ownership without changing visual behavior
+- `BlockEditor`: moved to runes-based internals and snippet-first composition, replacing the old `block` / `type-picker` / `add-picker` slot surface across the specimen and Underlay Nightfire wrapper
+- `CardRadioGroup`: moved to runes-based internals and snippet-first composition, replacing the old `card` slot surface in the active Dairy consumer
+
+### Risk Notes
+
+- `DataTable` has moderate file count but broad root spread and many event
+  seams, so it is a real migration tranche, not a cleanup footnote.
+- `NavCard` and `ListCard` were simpler mechanically, but both were highly
+  visible layout surfaces and needed the same parity caution as `TextInput`.
+
+## Next Batch Order
+
+The public dispatcher audit is effectively closed. Next waves should focus on:
+
+1. non-event modernization
+   - remaining legacy slot/snippet and controlled/uncontrolled cleanups
+   - specimen/doc language cleanup where stale event terminology still survives
+2. residue audit
+   - internal wrappers that still lag modern callback/style parity
+   - docs/specimens that still describe event-era behavior
+
 ## Consumer Update Rules
 
 - Underlay first for any component it wraps, shapes, or normalizes
@@ -346,7 +413,7 @@ Measured as files with actual component usage, not just package installation.
     flows
 - mixed event surfaces:
   - `bind:value`
-  - `on:valueChange`
+  - `onValueChange`
   - legacy callback prop `onchange={(value) => ...}` still appears in live
     consumers
 - grouped/custom select usage exists inside Underlay-owned surfaces such as
@@ -355,7 +422,7 @@ Measured as files with actual component usage, not just package installation.
 `TextInput` current downstream patterns:
 
 - common controlled forms use `bind:value`
-- event-driven controlled forms also use `on:valueChange`
+- event-driven controlled forms also use `onValueChange`
 - multiline usage via `rows={...}` is live in admin editing flows
 - search usage via `type="search"` is live in relation selectors and filters
 - direct desktop usage exists but is light: `soundcheck` and `loophole/aura`
@@ -439,3 +506,86 @@ Before code changes:
 2. decide the canonical modern public shape and which legacy props or events
    will be removed, retained temporarily, or bridged
 3. only then implement the Poodle change and migrate consumers in the same wave
+
+## Post-Dispatcher Audit
+
+Snapshot taken after the dispatcher cleanup, ownership cleanup, and docs/specimen
+residue pass.
+
+### Current Shape
+
+- no `createEventDispatcher` files remain in `packages/svelte/components/src`
+- legacy internal structure is still widespread:
+  - `60/124` component files still use `export let`
+  - `48/124` component files still use `$:` reactive labels
+  - `25/124` component files still expose slot-heavy composition surfaces
+
+This is now a different tranche from the public-event rollout. The remaining
+work is about internal modernization and composition shape, not event cleanup.
+
+### Highest Legacy-Structure Hotspots
+
+Top files by combined `export let` + `$:` + slot density:
+
+- `Pagination.svelte`
+- `CommandPalette.svelte`
+- `OrderBy.svelte`
+- `Field.svelte`
+- `EditableLabel.svelte`
+- `MediaThumbnail.svelte`
+- `MediaPicker.svelte`
+
+Top files by slot density:
+
+- `Collapsible.svelte`
+- `Field.svelte`
+- `ActionDiscoveryPanel.svelte`
+- `NavCard.svelte`
+- `DetailSection.svelte`
+- `MediaThumbnail.svelte`
+
+### Next Tranche
+
+If `g11` continues, the next worthwhile batch is not another broad repo sweep.
+It is a focused implementation tranche on the highest-spread core composites
+and shells that still define downstream composition style:
+
+1. remaining operational/data controls:
+   - `Pagination`
+   - `OrderBy`
+   - `MediaThumbnail`
+   - `MediaPicker`
+2. remaining form/layout wrappers:
+   - `Field`
+   - `Collapsible`
+   - `ActionDiscoveryPanel`
+3. already completed in this lane:
+   - `Card`
+   - `DetailItem`
+   - `DetailShell`
+   - `AppHeader`
+   - `MediaPreview`
+   - `StatusBar`
+   - `Callout`
+   - `CommandPalette`
+   - `Calendar`
+   - `DatePicker`
+   - `DateRangePicker`
+   - `DateTimePicker`
+   - `DateTimeRangePicker`
+   - `DateTimeZonePicker`
+   - `ColorPicker`
+   - `BlockEditor`
+   - `CardRadioGroup`
+
+Target for that tranche:
+
+- move from `export let` / `$:` internals to runes-based state where it makes
+  the component simpler
+- replace named-slot-first public APIs with snippet-first surfaces where the
+  composition contract should now be modernized
+- preserve visual parity and size/density behavior as hard constraints
+
+Do not reopen low-value syntax churn on small primitives first. The remaining
+value is concentrated in the components that shape downstream composition
+patterns.

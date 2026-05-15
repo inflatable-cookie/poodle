@@ -69,7 +69,7 @@ Updated: 2026-04-09
 | Strip | flexible only | tab/collapse chrome area |
 | Tabs | flexible only | Tabs primitive (variant="strip") |
 | CollapseToggle | conditional | collapse/expand affordance; only rendered when `collapsible=true` |
-| Body | flexible expanded only | active panel content slot |
+| Body | flexible expanded only | active panel content snippet |
 | Stack | static only | flex container for stacked panels |
 | Stack Item | static only | draggable panel wrapper |
 | Drop Zone | conditional | overlay shown during cross-region drag |
@@ -110,8 +110,15 @@ modes render icon-only tabs.
 
 ### Controlled And Uncontrolled
 
-- Active panel (`value`) is typically controlled by the parent shell
-- Collapse state (`collapsed`) is externally owned via `collapsedChange` event
+- Active panel (`value`) is typically controlled by the parent shell via `onValueChange`
+- Collapse state (`collapsed`) is externally owned via `onCollapsedChange`
+
+### Snippets
+
+| Snippet | When Used | Payload |
+|---------|-----------|---------|
+| `panel` | static mode | `PanelTabItem` |
+| `children` | flexible expanded mode | `PanelTabItem \| null` |
 
 ## 4. States
 
@@ -137,18 +144,18 @@ Uses `ResizeObserver` with overflow detection and hysteresis to prevent oscillat
 
 ### Click-to-Expand
 
-Clicking a tab in any collapsed state dispatches both `valueChange` (to activate
-the panel) and `collapsedChange` with `isCollapsed: false` (to expand the region).
+Clicking a tab in any collapsed state runs both `onValueChange` (to activate
+the panel) and `onCollapsedChange(false)` (to expand the region).
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | active panel changes | `{ value: string }` | tab click or keyboard |
-| `collapsedChange` | region collapses or expands | `{ isCollapsed: boolean }` | toggle click or tab click when collapsed |
-| `close` | closable tab dismissed | `{ value: string }` | forwarded from Tabs |
-| `reorder` | tabs or stack items reordered | `{ items: string[] }` | within-region reorder |
-| `panelDrop` | panel dropped from another region | `{ panel: PanelDragData; targetEdge: DockEdge }` | cross-region transfer |
+| `onValueChange` | active panel changes | `string` | tab click or keyboard |
+| `onCollapsedChange` | region collapses or expands | `boolean` | toggle click or tab click when collapsed |
+| `onClose` | closable tab dismissed | `string` | forwarded from Tabs |
+| `onReorder` | tabs or stack items reordered | `string[]` | within-region reorder |
+| `onPanelDrop` | panel dropped from another region | `{ panel: PanelDragData; targetEdge: DockEdge }` | cross-region transfer |
 
 ### PanelDragData
 

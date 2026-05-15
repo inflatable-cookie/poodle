@@ -64,37 +64,37 @@
     },
   ];
 
-  function handleSortChange(event: CustomEvent<{ columnId: string; direction: "asc" | "desc" }>): void {
-    sortColumnId = event.detail.columnId;
-    sortDirection = event.detail.direction;
-    lastAction = `Sorted by ${event.detail.columnId} ${event.detail.direction}`;
+  function handleSortChange(payload: { columnId: string; direction: "asc" | "desc" }): void {
+    sortColumnId = payload.columnId;
+    sortDirection = payload.direction;
+    lastAction = `Sorted by ${payload.columnId} ${payload.direction}`;
   }
 
-  function handleRowToggle(event: CustomEvent<{ rowId: string; selected: boolean }>): void {
-    if (event.detail.selected) {
-      selectedRowIds = [...selectedRowIds, event.detail.rowId];
+  function handleRowToggle(payload: { rowId: string; selected: boolean }): void {
+    if (payload.selected) {
+      selectedRowIds = [...selectedRowIds, payload.rowId];
     } else {
-      selectedRowIds = selectedRowIds.filter((id) => id !== event.detail.rowId);
+      selectedRowIds = selectedRowIds.filter((id) => id !== payload.rowId);
     }
-    lastAction = `Toggled row ${event.detail.rowId}: ${event.detail.selected ? "selected" : "deselected"}`;
+    lastAction = `Toggled row ${payload.rowId}: ${payload.selected ? "selected" : "deselected"}`;
   }
 
-  function handleToggleAll(event: CustomEvent<{ selected: boolean }>): void {
-    selectedRowIds = event.detail.selected ? rows.map((r) => r.id) : [];
-    lastAction = event.detail.selected ? "Selected all rows" : "Deselected all rows";
+  function handleToggleAll(payload: { selected: boolean }): void {
+    selectedRowIds = payload.selected ? rows.map((r) => r.id) : [];
+    lastAction = payload.selected ? "Selected all rows" : "Deselected all rows";
   }
 
-  function handleRowAction(event: CustomEvent<{ rowId: string }>): void {
-    lastAction = `Action on row ${event.detail.rowId}`;
+  function handleRowAction(payload: { rowId: string }): void {
+    lastAction = `Action on row ${payload.rowId}`;
   }
 
-  function handleColumnVisibility(event: CustomEvent<{ columnId: string; visible: boolean }>): void {
-    if (event.detail.visible) {
-      hiddenColumnIds = hiddenColumnIds.filter((id) => id !== event.detail.columnId);
+  function handleColumnVisibility(payload: { columnId: string; visible: boolean }): void {
+    if (payload.visible) {
+      hiddenColumnIds = hiddenColumnIds.filter((id) => id !== payload.columnId);
     } else {
-      hiddenColumnIds = [...hiddenColumnIds, event.detail.columnId];
+      hiddenColumnIds = [...hiddenColumnIds, payload.columnId];
     }
-    lastAction = `${event.detail.visible ? "Showed" : "Hid"} column: ${event.detail.columnId}`;
+    lastAction = `${payload.visible ? "Showed" : "Hid"} column: ${payload.columnId}`;
   }
 </script>
 
@@ -111,11 +111,11 @@
       showColumnVisibility
       showExport
       ariaLabel="Team members"
-      on:sortChange={handleSortChange}
-      on:rowToggle={handleRowToggle}
-      on:toggleAll={handleToggleAll}
-      on:rowAction={handleRowAction}
-      on:columnVisibilityChange={handleColumnVisibility}
+      onSortChange={handleSortChange}
+      onRowToggle={handleRowToggle}
+      onToggleAll={handleToggleAll}
+      onRowAction={handleRowAction}
+      onColumnVisibilityChange={handleColumnVisibility}
     />
     {#if lastAction}
       <p class="poodle-last-action">Last action: <strong>{lastAction}</strong></p>
@@ -133,9 +133,9 @@
       striped
       stickyHeader
       ariaLabel="Directory table"
-      on:filterChange={(event) => (filters = event.detail.filters)}
-      on:pageChange={(event) => (pagination = { ...pagination, page: event.detail.page })}
-      on:limitChange={(event) => (pagination = { ...pagination, page: 1, limit: event.detail.limit })}
+      onFilterChange={({ filters: nextFilters }) => (filters = nextFilters)}
+      onPageChange={({ page }) => (pagination = { ...pagination, page })}
+      onLimitChange={({ limit }) => (pagination = { ...pagination, page: 1, limit })}
     />
   </SpecimenGroup>
 
@@ -160,10 +160,10 @@
       expandedRowIds={expandedIncidentId ? [expandedIncidentId] : []}
       ariaLabel="Active incidents"
     >
-      <svelte:fragment slot="cell" let:column let:row>
+      {#snippet cell(column, row)}
         {@const incident = row.data as Incident | undefined}
         {#if column.id === "expand"}
-          <button type="button" class="poodle-expand-button" on:click={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
+          <button type="button" class="poodle-expand-button" onclick={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
             {expandedIncidentId === row.id ? "Hide" : "Show"}
           </button>
         {:else if column.id === "status"}
@@ -173,8 +173,8 @@
         {:else}
           {row.cells[column.id]}
         {/if}
-      </svelte:fragment>
-      <svelte:fragment slot="expandedRow" let:row>
+      {/snippet}
+      {#snippet expandedRow(row)}
         {@const incident = row.data as Incident | undefined}
         {#if incident}
           <div class="poodle-incident-detail">
@@ -183,7 +183,7 @@
             <span>Updated {new Date(incident.updatedAt).toLocaleString()}</span>
           </div>
         {/if}
-      </svelte:fragment>
+      {/snippet}
     </DataTable>
   </SpecimenGroup>
 

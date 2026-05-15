@@ -231,7 +231,9 @@
   $effect(() => {
     if (isSlug && source !== null) {
       if (!userEditedSlug || liveValue === previousGeneratedSlug || liveValue === "") {
-        previousGeneratedSlug = generatedSlug;
+        if (previousGeneratedSlug !== generatedSlug) {
+          previousGeneratedSlug = generatedSlug;
+        }
         if (liveValue !== generatedSlug) {
           commitValue(generatedSlug, { markSlugEdited: false, immediate: true });
         }
@@ -352,7 +354,9 @@
     options: { markSlugEdited?: boolean; immediate?: boolean } = {},
   ): void {
     liveValue = nextValue;
-    value = nextValue;
+    if (value !== undefined) {
+      value = nextValue;
+    }
 
     if (isSlug && options.markSlugEdited !== false) {
       userEditedSlug = true;

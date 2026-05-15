@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
   import Callout from "./Callout.svelte";
   import Pagination from "./Pagination.svelte";
@@ -10,63 +10,103 @@
 
   import type { BrowseState, EmptyStateVariant } from "./types";
 
-  export let title: string;
-  export let subtitle: string | null = null;
-  export let eyebrow: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let state: Exclude<BrowseState, "no-results"> = "ready";
-  export let loadingMessage: string | null = "Loading items...";
-  export let errorTitle: string | null = "Unable to load list";
-  export let errorMessage: string | null = null;
-  export let emptyTitle: string | null = "Nothing here yet";
-  export let emptyMessage: string | null = null;
-  export let emptyVariant: EmptyStateVariant = "neutral";
-  export let currentPage = 1;
-  export let totalPages = 1;
-  export let totalItems: number | null = null;
-  export let pageSize: number | null = null;
-  export let siblingCount = 1;
-  export let paginationAriaLabel: string | null = null;
-  export let showPagination = true;
-  export let showPaginationSummary = true;
+  interface Props {
+    title: string;
+    subtitle?: string | null;
+    eyebrow?: string | null;
+    ariaLabel?: string | null;
+    state?: Exclude<BrowseState, "no-results">;
+    loadingMessage?: string | null;
+    errorTitle?: string | null;
+    errorMessage?: string | null;
+    emptyTitle?: string | null;
+    emptyMessage?: string | null;
+    emptyVariant?: EmptyStateVariant;
+    currentPage?: number;
+    totalPages?: number;
+    totalItems?: number | null;
+    pageSize?: number | null;
+    siblingCount?: number;
+    paginationAriaLabel?: string | null;
+    showPagination?: boolean;
+    showPaginationSummary?: boolean;
+    onPageChange?: ((page: number) => void) | null;
+    children?: Snippet<[]>;
+    breadcrumbs?: Snippet<[]>;
+    actions?: Snippet<[]>;
+    filters?: Snippet<[]>;
+    batch?: Snippet<[]>;
+    pagination?: Snippet<[]>;
+    loading?: Snippet<[]>;
+    error?: Snippet<[]>;
+    empty?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    pageChange: { page: number };
-  }>();
+  let {
+    title,
+    subtitle = null,
+    eyebrow = null,
+    ariaLabel = null,
+    state = "ready",
+    loadingMessage = "Loading items...",
+    errorTitle = "Unable to load list",
+    errorMessage = null,
+    emptyTitle = "Nothing here yet",
+    emptyMessage = null,
+    emptyVariant = "neutral",
+    currentPage = 1,
+    totalPages = 1,
+    totalItems = null,
+    pageSize = null,
+    siblingCount = 1,
+    paginationAriaLabel = null,
+    showPagination = true,
+    showPaginationSummary = true,
+    onPageChange = null,
+    children,
+    breadcrumbs,
+    actions,
+    filters,
+    batch,
+    pagination,
+    loading,
+    error,
+    empty,
+  }: Props = $props();
 
-  $: shouldShowPagination =
-    showPagination && state === "ready" && totalPages > 1;
-  $: shouldShowPaginationSummary =
+  const shouldShowPagination = $derived(showPagination && state === "ready" && totalPages > 1);
+  const shouldShowPaginationSummary = $derived(
     shouldShowPagination &&
-    showPaginationSummary &&
-    totalItems !== null &&
-    pageSize !== null;
+      showPaginationSummary &&
+      totalItems !== null &&
+      pageSize !== null
+  );
 
   function forwardPageChange(page: number): void {
-    dispatch("pageChange", { page });
+    onPageChange?.(page);
   }
 </script>
 
 <section class="poodle-list-container" aria-label={ariaLabel ?? title} data-state={state}>
-  {#if $$slots.breadcrumbs && $$slots.actions}
+  {#if breadcrumbs && actions}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet breadcrumbs()}
-        <slot name="breadcrumbs" />
+        {@render breadcrumbs()}
       {/snippet}
       {#snippet actions()}
-        <slot name="actions" />
+        {@render actions()}
       {/snippet}
     </PageHeader>
-  {:else if $$slots.breadcrumbs}
+  {:else if breadcrumbs}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet breadcrumbs()}
-        <slot name="breadcrumbs" />
+        {@render breadcrumbs()}
       {/snippet}
     </PageHeader>
-  {:else if $$slots.actions}
+  {:else if actions}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet actions()}
-        <slot name="actions" />
+        {@render actions()}
       {/snippet}
     </PageHeader>
   {:else}
@@ -74,26 +114,26 @@
   {/if}
 
   {#if state === "ready"}
-    {#if $$slots.filters}
+    {#if filters}
       <div class="poodle-list-container__filters">
-        <slot name="filters" />
+        {@render filters()}
       </div>
     {/if}
 
-    {#if $$slots.batch}
+    {#if batch}
       <div class="poodle-list-container__batch">
-        <slot name="batch" />
+        {@render batch()}
       </div>
     {/if}
 
     <div class="poodle-list-container__content">
-      <slot />
+      {@render children?.()}
     </div>
 
-    {#if shouldShowPagination || $$slots.pagination}
+    {#if shouldShowPagination || pagination}
       <div class="poodle-list-container__pagination">
-        {#if $$slots.pagination}
-          <slot name="pagination" />
+        {#if pagination}
+          {@render pagination()}
         {:else}
           {#if shouldShowPaginationSummary}
             <PaginationSummary
@@ -116,24 +156,24 @@
     {/if}
   {:else if state === "loading"}
     <div class="poodle-list-container__state">
-      {#if $$slots.loading}
-        <slot name="loading" />
+      {#if loading}
+        {@render loading()}
       {:else}
         <Callout tone="pending" message={loadingMessage} />
       {/if}
     </div>
   {:else if state === "error"}
     <div class="poodle-list-container__state">
-      {#if $$slots.error}
-        <slot name="error" />
+      {#if error}
+        {@render error()}
       {:else}
         <Callout tone="danger" title={errorTitle} message={errorMessage} announceMode="assertive" />
       {/if}
     </div>
   {:else}
     <div class="poodle-list-container__state">
-      {#if $$slots.empty}
-        <slot name="empty" />
+      {#if empty}
+        {@render empty()}
       {:else}
         <EmptyState title={emptyTitle ?? "Nothing here yet"} message={emptyMessage} variant={emptyVariant} />
       {/if}

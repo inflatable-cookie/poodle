@@ -13,8 +13,8 @@ Updated: 2026-03-27
   leading icon/thumbnail, title, badges, subtitle, footer counters, meta,
   explicit actions, selectable state, and optional link-root navigation
 - In scope: interactive and disabled states, leading shape variants, leading fill
-  variants (tint/solid), custom accent color theming, badges slot, footer slot
-  with counter helper, explicit actions slot, title truncation, meta display
+  variants (tint/solid), custom accent color theming, snippet-based leading,
+  badges, footer, actions, and trailing composition, title truncation, meta display
   with tabular-nums, compact layout, selected state, and reorder-affordance
   presentation
 - Out of scope: drag-and-drop workflow ownership, batch-submit reorder flows,
@@ -26,16 +26,16 @@ Updated: 2026-03-27
 [Root .list-card]  <div> | <a>
   ├── [Sash .list-card__sash]  <span> (optional, diagonal corner ribbon)
   ├── [Handle .list-card__handle]  <span> (optional, reorder affordance only)
-  ├── [Leading .list-card__leading]  (optional, via leading slot)
+  ├── [Leading .list-card__leading]  (optional, via leading snippet)
   ├── [Body .list-card__body]  <div>
   │   ├── [Header .list-card__header]  <div>
-  │   │   ├── [Title .list-card__title]  <span> (text prop or title slot)
-  │   │   └── [Badges .list-card__badges]  (optional, via badges slot)
+  │   │   ├── [Title .list-card__title]  <span> (text prop or titleContent snippet)
+  │   │   └── [Badges .list-card__badges]  (optional, via badges snippet)
   │   ├── [Subtitle .list-card__subtitle]  <span> (optional)
-  │   └── [Footer .list-card__footer]  (optional, via footer slot)
+  │   └── [Footer .list-card__footer]  (optional, via footer snippet)
   ├── [Meta .list-card__meta]  <span> (optional)
-  ├── [Actions .list-card__actions]  (optional, via actions slot)
-  └── [Trailing .list-card__trailing]  (optional, via trailing slot)
+  ├── [Actions .list-card__actions]  (optional, via actions snippet)
+  └── [Trailing .list-card__trailing]  (optional, via trailing snippet)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -43,7 +43,7 @@ Updated: 2026-03-27
 | Root | yes | flex row container; `position: relative; overflow: hidden` when sash present | padding, border, radius, background, gap |
 | Sash | no | diagonal ribbon in top-left corner | position, background, color, font, transform |
 | Handle | no | compact reorder affordance; visual only | size, color, spacing |
-| Leading | no | avatar, icon, or thumbnail slot | width, height, border-radius, background, color |
+| Leading | no | avatar, icon, or thumbnail snippet | width, height, border-radius, background, color |
 | Body | yes | title/subtitle/footer column | flex, gap |
 | Header | yes | title + badges row | flex, gap, alignment |
 | Title | yes | primary text, truncated | font, color, overflow |
@@ -52,7 +52,7 @@ Updated: 2026-03-27
 | Footer | no | counter icons or links row | flex, gap |
 | Meta | no | right-aligned metadata | font-size, color, font-variant-numeric |
 | Actions | no | explicit action trigger area | flex alignment |
-| Trailing | no | action button or indicator slot | flex alignment |
+| Trailing | no | action button or indicator snippet | flex alignment |
 
 ## 3. Props And Inputs
 
@@ -64,7 +64,7 @@ Updated: 2026-03-27
 | `subtitle` | `string \| null` | `null` | no | secondary display text |
 | `meta` | `string \| null` | `null` | no | right-aligned metadata text |
 | `href` | `string \| null` | `null` | no | when present and not disabled/selectable, renders a real link root |
-| `leadingShape` | `"circle" \| "rounded-square"` | `"circle"` | no | shape of the leading slot container |
+| `leadingShape` | `"circle" \| "rounded-square"` | `"circle"` | no | shape of the leading snippet container |
 | `leadingFill` | `"tint" \| "solid"` | `"tint"` | no | fill style — tint uses translucent accent, solid uses opaque accent with white icon |
 | `accentColor` | `string \| null` | `null` | no | custom CSS color for leading background and icon; overrides theme accent |
 | `layout` | `"default" \| "compact"` | `"default"` | no | compact mode is for dense list and reorder contexts |
@@ -80,23 +80,26 @@ Updated: 2026-03-27
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
+| `onClick` | `((event: MouseEvent) => void) \| null` | `null` | no | called when an interactive card is activated; suppressed while disabled |
+| `onSelectedChange` | `((selected: boolean) => void) \| null` | `null` | no | called when a selectable card toggles; suppressed while disabled |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| title | custom rich title content when plain string title is not enough |
-| leading | avatar, icon, or media thumbnail |
-| badges | pills or badges displayed inline with the title |
-| footer | counter icons, links, or supplementary info below subtitle |
-| actions | explicit action trigger composition |
-| trailing | action button or status indicator |
+| Snippet | Purpose |
+|---------|---------|
+| `titleContent` | custom rich title content when plain string title is not enough |
+| `subtitleContent` | custom rich subtitle content when plain subtitle text is not enough |
+| `leading` | avatar, icon, or media thumbnail |
+| `badges` | pills or badges displayed inline with the title |
+| `footer` | counter icons, links, or supplementary info below subtitle |
+| `actions` | explicit action trigger composition |
+| `trailing` | action button or status indicator |
 
 ### Controlled And Uncontrolled
 
 - Display component; interaction state is externally controlled. Selection is
   host-owned through `selected`, with toggles requested through
-  `selectedChange`.
+  `onSelectedChange`.
 
 ## 4. States
 
@@ -112,12 +115,12 @@ Updated: 2026-03-27
 | compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |
 | not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `click` | card activated (when interactive) | `MouseEvent` | suppressed while disabled |
-| `selectedChange` | selectable card toggled | `{ selected: boolean }` | suppressed while disabled |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onClick` | card activated (when interactive) | `MouseEvent` | suppressed while disabled |
+| `onSelectedChange` | selectable card toggled | `boolean` | receives the next selected state; suppressed while disabled |
 
 ## 6. Accessibility
 
@@ -159,11 +162,11 @@ Updated: 2026-03-27
 - parent expectations: list views, sidebar navigation, search results
 - child expectations: leading icon/avatar/thumbnail, badges (Pill, Badge),
   footer counters (ListCardCounter), explicit actions or trailing status via
-  slots, and optional rich title composition via the `title` slot when the
-  title needs inline formatting rather than plain text
+  snippets, and optional rich title composition via the `titleContent` snippet
+  when the title needs inline formatting rather than plain text
 - resizing: fills parent width, height auto-fits content
 - context menu: wrap ListCard in ContextMenu for right-click actions
-- explicit menu/action composition should use the `actions` slot rather than
+- explicit menu/action composition should use the `actions` snippet rather than
   coupling menu trigger ownership to the leading media area
 
 ## 8. Token Usage — Exact Values
@@ -233,7 +236,7 @@ Updated: 2026-03-27
 | `pointer-events` | `none` |
 | `z-index` | `1` |
 
-### Leading slot
+### Leading snippet
 
 | Property | Value |
 |----------|-------|
@@ -319,7 +322,7 @@ Updated: 2026-03-27
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-variant-numeric` | `tabular-nums` |
 
-### Trailing slot
+### Trailing snippet
 
 | Property | Value |
 |----------|-------|
@@ -329,7 +332,7 @@ Updated: 2026-03-27
 
 ## 9. Helper: ListCardCounter
 
-A small companion component for rendering icon + count pairs in the footer slot.
+A small companion component for rendering icon + count pairs in the footer snippet.
 
 ### Props
 
@@ -359,12 +362,12 @@ A small companion component for rendering icon + count pairs in the footer slot.
 - `--list-card-accent` custom property set via inline style when `accentColor` is provided
 - `--list-card-sash` custom property set via inline style when `sashColor` is provided
 - Root gets `position: relative; overflow: hidden` via `list-card--has-sash` class when sash is present
-- Interactive mode adds `on:click` handler and `on:keydown` for Enter/Space
+- Interactive mode adds click handling and keydown handling for Enter/Space
 - Title text always truncated with ellipsis
-- Leading slot provides default container styling (circle or rounded-square)
-- Trailing slot is unstyled pass-through
-- Badges slot renders inline with title in the header row
-- Footer slot renders below subtitle for counter icons
+- Leading snippet provides default container styling (circle or rounded-square)
+- Trailing snippet is unstyled pass-through
+- Badges snippet renders inline with title in the header row
+- Footer snippet renders below subtitle for counter icons
 - Context menu composition: wrap ListCard in ContextMenu for right-click actions — no direct coupling
 
 ## 11. GPUI Notes
@@ -394,7 +397,7 @@ A small companion component for rendering icon + count pairs in the footer slot.
 - [ ] border and border-radius match
 - [ ] hover background and border match
 - [ ] focus ring matches
-- [ ] leading slot default styling matches (circle and rounded-square)
+- [ ] leading snippet default styling matches (circle and rounded-square)
 - [ ] title truncation matches
 - [ ] subtitle and meta typography match
 - [ ] disabled opacity matches
@@ -404,7 +407,7 @@ A small companion component for rendering icon + count pairs in the footer slot.
 ### Tier 3: Implementation Freedom
 
 - [ ] transition timing is platform-owned
-- [ ] slot mechanism is platform-owned
+- [ ] snippet mechanism is platform-owned
 
 ## 13. Known Deltas
 
@@ -434,14 +437,14 @@ A small companion component for rendering icon + count pairs in the footer slot.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| API integration guide | `title`, `subtitle`, `meta="Draft"`, `interactive`, badges slot with accent Pill "New" | Card with pill badge inline next to title |
-| Q4 planning deck | `title`, `subtitle`, `interactive`, badges slot with muted Badge "3" + caution Pill "Review" | Card with multiple badges inline next to title |
+| API integration guide | `title`, `subtitle`, `meta="Draft"`, `interactive`, badges snippet with accent Pill "New" | Card with pill badge inline next to title |
+| Q4 planning deck | `title`, `subtitle`, `interactive`, badges snippet with muted Badge "3" + caution Pill "Review" | Card with multiple badges inline next to title |
 
 ### With Footer Counters
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Design system | `title`, `subtitle`, `leadingShape="rounded-square"`, `interactive`, badges slot with positive Pill "Active", footer with 3 ListCardCounters | Card with badge, and footer row showing icon+count pairs (24 docs, 8 images, 3 sub-folders) |
+| Design system | `title`, `subtitle`, `leadingShape="rounded-square"`, `interactive`, badges snippet with positive Pill "Active", footer with 3 ListCardCounters | Card with badge, and footer row showing icon+count pairs (24 docs, 8 images, 3 sub-folders) |
 | Brand guidelines | `title`, `subtitle`, `leadingShape="rounded-square"`, `interactive`, footer with 2 ListCardCounters | Card with footer row showing icon+count pairs (6 docs, 42 images) |
 
 ### Solid Fill With Accent Colors
@@ -464,7 +467,7 @@ A small companion component for rendering icon + count pairs in the footer slot.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Unpublished draft | `interactive`, `notLive`, `meta="Draft"` | Card with dashed border, reduced opacity, greyscale filter; restores on hover |
-| Staging environment | `interactive`, `notLive`, `leadingShape="rounded-square"`, badges slot with caution Pill "Pending" | Not-live card with badge |
+| Staging environment | `interactive`, `notLive`, `leadingShape="rounded-square"`, badges snippet with caution Pill "Pending" | Not-live card with badge |
 
 ### Corner Sash Badges
 

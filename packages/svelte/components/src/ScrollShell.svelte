@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { joinStyles, overflowForDirection, scaleToSpace } from "./internal";
 
   import type { ScrollDirection, SpaceScale } from "./types";
@@ -10,10 +8,7 @@
   export let asRole: "region" | "group" | null = null;
   export let label: string | null = null;
   export let focusable = false;
-
-  const dispatch = createEventDispatcher<{
-    scroll: Event;
-  }>();
+  export let onScroll: ((event: Event) => void) | null = null;
 
   $: needsHorizontal = direction === "horizontal" || direction === "both";
 
@@ -34,7 +29,7 @@
     role={asRole ?? (focusable ? "region" : undefined)}
     aria-label={label ?? (focusable ? "Scrollable content" : undefined)}
     style={viewportStyle}
-    on:scroll={(event) => dispatch("scroll", event)}
+    on:scroll={(event) => onScroll?.(event)}
   >
     <div class="poodle-scroll-shell__content" class:poodle-scroll-shell__content--h={needsHorizontal}>
       <slot />

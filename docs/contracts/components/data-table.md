@@ -137,7 +137,7 @@ type TablePagination = {
 | `rowActionLabel` | `string` | `"Open"` | no | label for row action buttons |
 | `showRowActions` | `boolean` | `true` | no | row action column visibility |
 | `rowActions` | `TableRowAction[] \| ((row: TableRow) => TableRowAction[])` | `[]` | no | richer per-row action model |
-| `expandedRowIds` | `string[]` | `[]` | no | shows the `expandedRow` slot for rows whose ids are present |
+| `expandedRowIds` | `string[]` | `[]` | no | shows the `expandedRow` snippet for rows whose ids are present |
 | `emptyMessage` | `string` | `"No rows match the current view."` | no | empty posture copy |
 | `ariaLabel` | `string` | `"Data table"` | no | accessible table name |
 | `hiddenColumnIds` | `string[]` | `[]` | no | ids of columns currently hidden |
@@ -153,29 +153,29 @@ type TablePagination = {
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `sortChange` | sortable header clicked | `{ columnId: string; direction: TableSortDirection }` |
-| `rowToggle` | individual row selection changes | `{ rowId: string; selected: boolean }` |
-| `toggleAll` | select-all checkbox changes | `{ selected: boolean }` |
-| `rowAction` | row action button clicked | `{ rowId: string }` |
-| `rowActionSelect` | rich row action selected | `{ rowId: string; row: TableRow; action: TableRowAction }` |
-| `columnVisibilityChange` | column visibility toggled | `{ columnId: string; visible: boolean }` |
-| `exportCsv` | CSV export completed | `{ filename: string }` |
-| `rowClick` | non-interactive row surface clicked | `{ rowId: string; row: TableRow }` |
-| `filterChange` | column filter value changes | `{ filters: TableFilters }` |
-| `pageChange` | pagination page changes | `{ page: number }` |
-| `limitChange` | page-size changes | `{ limit: number }` |
+| Callback | When It Fires | Payload |
+|----------|---------------|---------|
+| `onSortChange` | sortable header clicked | `{ columnId: string; direction: TableSortDirection }` |
+| `onRowToggle` | individual row selection changes | `{ rowId: string; selected: boolean }` |
+| `onToggleAll` | select-all checkbox changes | `{ selected: boolean }` |
+| `onRowAction` | row action button clicked | `{ rowId: string }` |
+| `onRowActionSelect` | rich row action selected | `{ rowId: string; row: TableRow; action: TableRowAction }` |
+| `onColumnVisibilityChange` | column visibility toggled | `{ columnId: string; visible: boolean }` |
+| `onExportCsv` | CSV export completed | `{ filename: string }` |
+| `onRowClick` | non-interactive row surface clicked | `{ rowId: string; row: TableRow }` |
+| `onFilterChange` | column filter value changes | `{ filters: TableFilters }` |
+| `onPageChange` | pagination page changes | `{ page: number }` |
+| `onLimitChange` | page-size changes | `{ limit: number }` |
 
-## 6. Slots
+## 6. Snippets
 
-| Slot | Scope | Purpose |
-|------|-------|---------|
-| `cell` | `{ column, row, value }` | host-owned custom cell rendering |
-| `expandedRow` | `{ row }` | host-owned detail content beneath matching rows |
-| `empty` | none | host-owned empty state |
+| Snippet | Signature | Purpose |
+|---------|-----------|---------|
+| `cell` | `(column, row, value)` | host-owned custom cell rendering |
+| `expandedRow` | `(row)` | host-owned detail content beneath matching rows |
+| `empty` | `()` | host-owned empty state |
 
 ## 7. States
 
@@ -222,10 +222,10 @@ When `showExport` or `showColumnVisibility` is true, a toolbar renders above
 the table:
 
 - **Export button**: icon (download) + "Export" label; triggers client-side CSV
-  generation and download, then dispatches `exportCsv`
+  generation and download, then calls `onExportCsv`
 - **Column visibility**: Popover (placement: bottom-end) with Checkbox list of
-  hideable columns (`hideable !== false`); toggling dispatches
-  `columnVisibilityChange`
+  hideable columns (`hideable !== false`); toggling calls
+  `onColumnVisibilityChange`
 - Only columns where `hideable` is not explicitly `false` appear in the
   visibility menu
 - Hidden columns are excluded from both rendering and CSV export

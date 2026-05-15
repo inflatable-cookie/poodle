@@ -95,9 +95,10 @@
 
     if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    value = nextValue;
     onValueChange?.(nextValue);
 
     if (nextValue.length === length) {

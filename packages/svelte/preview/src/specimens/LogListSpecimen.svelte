@@ -101,7 +101,7 @@
   <SpecimenGroup label="Log output with filtering">
     <LogList {entries} ariaLabel="Application logs" />
     <div class="poodle-specimen__actions">
-      <Button variant="secondary" on:click={addEntry}>Add log entry</Button>
+      <Button variant="secondary" onClick={addEntry}>Add log entry</Button>
     </div>
   </SpecimenGroup>
 

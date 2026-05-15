@@ -1,21 +1,39 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import Spinner from "./Spinner.svelte";
 
   import type { BrowseState } from "./types";
 
-  export let title: string | null = null;
-  export let scrollMode: "shell" | "body" = "body";
-  export let state: Exclude<BrowseState, "no-results"> = "ready";
-  export let ariaLabel: string | null = null;
-  export let stateTitle: string | null = null;
-  export let stateMessage: string | null = null;
+  interface Props {
+    title?: string | null;
+    scrollMode?: "shell" | "body";
+    state?: Exclude<BrowseState, "no-results">;
+    ariaLabel?: string | null;
+    stateTitle?: string | null;
+    stateMessage?: string | null;
+    header?: Snippet;
+    stateContent?: Snippet;
+    children?: Snippet;
+  }
+
+  let {
+    title = null,
+    scrollMode = "body",
+    state = "ready",
+    ariaLabel = null,
+    stateTitle = null,
+    stateMessage = null,
+    header,
+    stateContent,
+    children,
+  }: Props = $props();
 </script>
 
 <section class="poodle-detail-shell" data-scroll-mode={scrollMode} aria-label={ariaLabel ?? undefined}>
-  {#if $$slots.header || title}
+  {#if header || title}
     <div class="poodle-detail-shell__header">
-      {#if $$slots.header}
-        <slot name="header" />
+      {#if header}
+        {@render header()}
       {:else if title}
         <h2>{title}</h2>
       {/if}
@@ -24,12 +42,12 @@
 
   {#if state === "ready"}
     <div class="poodle-detail-shell__body">
-      <slot />
+      {@render children?.()}
     </div>
   {:else}
     <div class="poodle-detail-shell__state" data-state={state}>
-      {#if $$slots.state}
-        <slot name="state" />
+      {#if stateContent}
+        {@render stateContent()}
       {:else}
         {#if state === "loading"}
           <span class="poodle-detail-shell__spinner" aria-hidden="true">

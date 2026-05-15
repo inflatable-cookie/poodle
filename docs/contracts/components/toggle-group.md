@@ -206,7 +206,7 @@ Updated: 2026-03-15
 - [ ] role switching (radiogroup vs group) matches
 - [ ] per-item state exposure (aria-checked vs aria-pressed) matches
 - [ ] disabled-item and disabled-group behavior matches
-- [ ] valueChange event payload type matches selectionMode
+- [ ] `onValueChange` payload type matches `selectionMode`
 - [ ] keyboard navigation matches
 
 ### Tier 2: Visual Parity

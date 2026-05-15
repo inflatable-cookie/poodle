@@ -9,9 +9,9 @@ Updated: 2026-04-09
 - Layer: `foundation`
 - Summary: a label/value pair for displaying read-only metadata within detail
   sections, supporting inline and stacked layouts, optional info description
-  popovers, optional action slots, and surface presentation for elevated cards
-- In scope: label/value display, optional custom value content via slots,
-  optional action slot, description popover (info icon with Popover), inline
+  popovers, optional trailing action content, and surface presentation for elevated cards
+- In scope: label/value display, optional custom value content via snippets,
+  optional trailing action content, description popover (info icon with Popover), inline
   grid layout, stacked layout, surface presentation variant, responsive
   breakpoint collapse, full/half column span in parent grids
 - Out of scope: section headers, inline editing, complex metadata composition,
@@ -29,9 +29,9 @@ Updated: 2026-04-09
   │                       └── [Info Icon .detail-item__info-icon]  <span>
   │                             └── Icon name="info"
   ├── [Value .detail-item__value]  <dd>
-  │     ├── slot:value OR slot:default OR text value OR emptyText
-  └── [Action .detail-item__action]  <div> (conditional, when action slot present)
-        └── slot:action
+  │     ├── valueContent() OR children() OR text value OR emptyText
+  └── [Action .detail-item__action]  <div> (conditional, when action snippet present)
+        └── action()
 ```
 
 | Part | Required | Description | Token Targets |
@@ -45,13 +45,13 @@ Updated: 2026-04-09
 | Value | yes | semantic `<dd>` element for the metadata value | color, font-family, font-size, line-height, word-break |
 | Action | no | container for action slot content (e.g. buttons, links) | none (container) |
 
-### Slots (Svelte)
+### Snippets (Svelte)
 
-| Slot | Description |
-|------|-------------|
-| `value` | Custom value content; replaces text value rendering |
-| `default` | Fallback custom value content when `value` slot is not used |
-| `action` | Optional trailing action content (e.g. button, link) rendered in the action column |
+| Snippet | Description |
+|---------|-------------|
+| `valueContent()` | Custom value content; replaces text value rendering |
+| `children()` | Fallback custom value content when `valueContent()` is not used |
+| `action()` | Optional trailing action content (for example a button or link) rendered in the action column |
 
 ## 3. Props
 
@@ -69,13 +69,13 @@ Updated: 2026-04-09
 
 ## 4. Behavior
 
-- When `value` slot is present, it replaces the simple text value rendering
-- When `default` slot is present (and no `value` slot), default slot content is rendered
-- When neither slot is present, `value` prop text is displayed; if `value` is null, `emptyText` is shown
+- When `valueContent()` is present, it replaces the simple text value rendering
+- When `children()` is present (and no `valueContent()` is present), children content is rendered
+- When neither snippet is present, `value` prop text is displayed; if `value` is null, `emptyText` is shown
 - When `truncateValue` is true, value text overflows with ellipsis
 - When `description` is set, an info icon appears next to the label that opens a Popover on click
 - When `span="full"`, root spans all columns in the parent grid
-- When `action` slot is present, an action column is rendered after the value
+- When `action()` is present, an action column is rendered after the value
 
 ### Responsive Behavior
 
@@ -140,7 +140,7 @@ All layout modes collapse to `grid-template-columns: 1fr` with auto row placemen
 ### Composition
 
 - Parent expectations: detail sections, metadata grids, settings panels
-- Child expectations: text values, custom slot content, optional action buttons
+- Child expectations: text values, custom snippet content, optional action buttons
 - Resizing: stretches to parent width
 
 ## 8. Token Usage -- Exact Values

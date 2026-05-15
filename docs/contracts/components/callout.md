@@ -8,12 +8,12 @@ Updated: 2026-03-25
 - Component name: `Callout`
 - Layer: `foundation`
 - Summary: contextual messaging block with tone-specific coloring, optional
-  dismissal, action slots, and ARIA announcement support. Consolidates the
+  dismissal, action snippets, and ARIA announcement support. Consolidates the
   former Banner and Callout components into a single primitive.
 - In scope: neutral, info, success, warning, danger, and pending tones;
-  inline contextual content; dismissible messaging; action slots; optional
+  inline contextual content; dismissible messaging; action snippets; optional
   icon override; ARIA live-region announcements; title, message prop, and
-  body slot
+  body snippet
 - Out of scope: toast notifications, alert dialogs, full-width page banners
 
 ## 2. Anatomy
@@ -21,12 +21,12 @@ Updated: 2026-03-25
 ```text
 [Root .callout]  <section>
   ├── [Body .callout__body]
-  │     ├── [Icon .callout__icon]  (slot or default based on tone)
+  │     ├── [Icon .callout__icon]  (snippet or default based on tone)
   │     └── [Content .callout__content]
   │           ├── <strong>  (title, optional)
   │           ├── <p>  (message prop, optional)
-  │           └── <slot>  (body, default slot)
-  ├── [Actions .callout__actions]  (named slot, optional)
+  │           └── children()  (body snippet)
+  ├── [Actions .callout__actions]  (actions snippet, optional)
   └── [Dismiss .callout__dismiss]  (button, optional)
 ```
 
@@ -68,17 +68,17 @@ type CalloutAnnounceMode = "none" | "polite" | "assertive"
 type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pending"
 ```
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | body content rendered inside `.callout__content` |
-| icon | named slot to override the default tone-based icon |
-| actions | named slot for action buttons (e.g. Resolve, Inspect) |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | body content rendered inside `.callout__content` |
+| `icon()` | override for the default tone-based icon |
+| `actions()` | action buttons or links (e.g. Resolve, Inspect) |
 
 ### Controlled And Uncontrolled
 
-- Dismiss state is uncontrolled; parent handles via `on:dismiss` event
+- Dismiss state is uncontrolled; parent handles via `onDismiss`
 
 ## 4. States
 
@@ -97,11 +97,11 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 
 - dismissible: shows close button when `dismissible` is true
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `dismiss` | dismiss button clicked | `void` | only available when `dismissible` is true |
+| Callback | When It Fires | Signature | Notes |
+|----------|---------------|-----------|-------|
+| `onDismiss` | dismiss button clicked | `() => void` | only available when `dismissible` is true |
 
 ## 6. Accessibility
 
@@ -348,7 +348,7 @@ no icon slot override is provided.
 - [ ] all six tone values produce distinct visual treatments
 - [ ] announceMode controls ARIA live-region behavior
 - [ ] dismissible state shows/hides close button
-- [ ] dismiss event fires on close button click
+- [ ] `onDismiss` fires on close button click
 - [ ] aria-label passthrough matches
 - [ ] default indicator mapping per tone matches
 - [ ] icon slot override behavior matches

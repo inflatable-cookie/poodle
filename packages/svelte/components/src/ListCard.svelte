@@ -1,74 +1,117 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let title: string;
-  export let subtitle: string | null = null;
-  export let meta: string | null = null;
-  export let href: string | null = null;
-  export let leadingShape: "circle" | "rounded-square" = "circle";
-  export let leadingFill: "tint" | "solid" = "tint";
-  export let accentColor: string | null = null;
-  export let layout: "default" | "compact" = "default";
-  export let interactive = false;
-  export let disabled = false;
-  export let selectable = false;
-  export let selected = false;
-  export let selectionIndicator: "none" | "checkbox" = "none";
-  export let showReorderHandle = false;
-  export let notLive = false;
-  export let sash: string | null = null;
-  export let sashColor: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let contextMenuItems: MenuItem[] | null = null;
-  export let contextMenuAriaLabel: string | null = null;
-  export let contextMenuTrigger: "context" | "leading" = "context";
-  export let onContextAction: ((value: string) => void) | null = null;
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    title: string;
+    subtitle?: string | null;
+    meta?: string | null;
+    href?: string | null;
+    leadingShape?: "circle" | "rounded-square";
+    leadingFill?: "tint" | "solid";
+    accentColor?: string | null;
+    layout?: "default" | "compact";
+    interactive?: boolean;
+    disabled?: boolean;
+    selectable?: boolean;
+    selected?: boolean;
+    selectionIndicator?: "none" | "checkbox";
+    showReorderHandle?: boolean;
+    notLive?: boolean;
+    sash?: string | null;
+    sashColor?: string | null;
+    ariaLabel?: string | null;
+    contextMenuItems?: MenuItem[] | null;
+    contextMenuAriaLabel?: string | null;
+    contextMenuTrigger?: "context" | "leading";
+    onClick?: ((event: MouseEvent) => void) | null;
+    onSelectedChange?: ((selected: boolean) => void) | null;
+    onContextAction?: ((value: string) => void) | null;
+    titleContent?: Snippet<[]>;
+    subtitleContent?: Snippet<[]>;
+    leading?: Snippet<[]>;
+    badges?: Snippet<[]>;
+    footer?: Snippet<[]>;
+    actions?: Snippet<[]>;
+    trailing?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    click: MouseEvent;
-    selectedChange: { selected: boolean };
-  }>();
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    title,
+    subtitle = null,
+    meta = null,
+    href = null,
+    leadingShape = "circle",
+    leadingFill = "tint",
+    accentColor = null,
+    layout = "default",
+    interactive = false,
+    disabled = false,
+    selectable = false,
+    selected = false,
+    selectionIndicator = "none",
+    showReorderHandle = false,
+    notLive = false,
+    sash = null,
+    sashColor = null,
+    ariaLabel = null,
+    contextMenuItems = null,
+    contextMenuAriaLabel = null,
+    contextMenuTrigger = "context",
+    onClick = null,
+    onSelectedChange = null,
+    onContextAction = null,
+    titleContent,
+    subtitleContent,
+    leading,
+    badges,
+    footer,
+    actions,
+    trailing,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedContextMenuSize = resolveSemanticControlSize($uiPresentation.sizeScale, "chrome");
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isCompact = layout === "compact";
-  $: isInteractive = Boolean(href) || interactive || selectable;
-  $: showSelectionIndicator = selectable && selectionIndicator === "checkbox";
-  $: showSelectionOverlay = showSelectionIndicator && Boolean($$slots.leading);
-  $: actionableContextMenuItems = menuNavigableItems(contextMenuItems ?? []);
-  $: hasContextMenu = (contextMenuItems?.length ?? 0) > 0;
-  $: useLeadingContextMenu = contextMenuTrigger === "leading" && hasContextMenu && !selectable;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedContextMenuSize = $derived(resolveSemanticControlSize($uiPresentation.sizeScale, "chrome"));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isCompact = $derived(layout === "compact");
+  const isInteractive = $derived(Boolean(href) || interactive || selectable);
+  const showSelectionIndicator = $derived(selectable && selectionIndicator === "checkbox");
+  const showSelectionOverlay = $derived(showSelectionIndicator && Boolean(leading));
+  const actionableContextMenuItems = $derived(menuNavigableItems(contextMenuItems ?? []));
+  const hasContextMenu = $derived((contextMenuItems?.length ?? 0) > 0);
+  const useLeadingContextMenu = $derived(contextMenuTrigger === "leading" && hasContextMenu && !selectable);
 
-  let rootElement: HTMLElement | null = null;
-  let leadingElement: HTMLSpanElement | null = null;
-  let overlayElement: HTMLDivElement | null = null;
-  let contextMenuOpen = false;
-  let contextMenuAnchorPoint: { x: number; y: number } | null = null;
-  let contextMenuAdjustedPosition: { left: string; top: string } | null = null;
-  let contextMenuHighlightIndex = 0;
-  let contextMenuItemElements: Array<HTMLButtonElement | null> = [];
+  let rootElement = $state<HTMLElement | null>(null);
+  let leadingElement = $state<HTMLElement | null>(null);
+  let overlayElement = $state<HTMLDivElement | null>(null);
+  let contextMenuOpen = $state(false);
+  let contextMenuAnchorPoint = $state<{ x: number; y: number } | null>(null);
+  let contextMenuAdjustedPosition = $state<{ left: string; top: string } | null>(null);
+  let contextMenuHighlightIndex = $state(0);
+  let contextMenuItemElements = $state<Array<HTMLButtonElement | null>>([]);
 
   function handleClick(event: MouseEvent) {
     if (disabled) return;
 
     if (selectable) {
       event.preventDefault();
-      dispatch("selectedChange", { selected: !selected });
+      onSelectedChange?.(!selected);
       return;
     }
 
     if (interactive || href) {
-      dispatch("click", event);
+      onClick?.(event);
     }
   }
 
@@ -78,9 +121,9 @@
     if ((interactive || selectable) && (event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
       if (selectable) {
-        dispatch("selectedChange", { selected: !selected });
+        onSelectedChange?.(!selected);
       } else {
-        dispatch("click", new MouseEvent("click"));
+        onClick?.(new MouseEvent("click"));
       }
     }
   }
@@ -154,7 +197,16 @@
     }
   }
 
-  $: if (contextMenuOpen) {
+  function handleRootKeydown(event: KeyboardEvent) {
+    handleKeydown(event);
+    handleContextMenuKeydown(event);
+  }
+
+  $effect(() => {
+    if (!contextMenuOpen) {
+      return;
+    }
+
     contextMenuAdjustedPosition = null;
     tick().then(() => {
       if (overlayElement && contextMenuAnchorPoint) {
@@ -178,7 +230,7 @@
 
       contextMenuItemElements[contextMenuHighlightIndex]?.focus();
     });
-  }
+  });
 
   onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
@@ -226,9 +278,9 @@
       accentColor ? `--list-card-accent: ${accentColor}` : '',
       sashColor ? `--list-card-sash: ${sashColor}` : '',
     ].filter(Boolean).join('; ') || undefined}
-    on:click={handleClick}
-    on:contextmenu={handleContextMenu}
-    on:keydown={handleContextMenuKeydown}
+    onclick={handleClick}
+    oncontextmenu={handleContextMenu}
+    onkeydown={handleContextMenuKeydown}
   >
     {#if sash}
       <span class="poodle-list-card__sash" aria-label={sash}>{sash}</span>
@@ -247,37 +299,60 @@
       </span>
     {/if}
 
-    {#if $$slots.leading}
-      <span
-        bind:this={leadingElement}
-        class="poodle-list-card__leading"
-        data-interactive={useLeadingContextMenu}
-        data-selection-overlay={showSelectionOverlay}
-        role={useLeadingContextMenu ? "button" : undefined}
-        tabindex={useLeadingContextMenu && !disabled ? 0 : undefined}
-        aria-label={useLeadingContextMenu ? (contextMenuAriaLabel ?? `${title} actions`) : undefined}
-        on:click={toggleContextMenuFromLeading}
-        on:keydown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            toggleContextMenuFromLeading(event);
-          }
-        }}
-      >
-        <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
-          <slot name="leading" />
-        </span>
-        {#if showSelectionOverlay}
-          <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
-            <span class="poodle-list-card__selection-box">
-              {#if selected}
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
-                </svg>
-              {/if}
-            </span>
+    {#if leading}
+      {#if useLeadingContextMenu && !disabled}
+        <button
+          bind:this={leadingElement}
+          type="button"
+          class="poodle-list-card__leading poodle-list-card__leading-button"
+          data-interactive={true}
+          data-selection-overlay={showSelectionOverlay}
+          aria-label={contextMenuAriaLabel ?? `${title} actions`}
+          onclick={toggleContextMenuFromLeading}
+          onkeydown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              toggleContextMenuFromLeading(event);
+            }
+          }}
+        >
+          <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
+            {@render leading()}
           </span>
-        {/if}
-      </span>
+          {#if showSelectionOverlay}
+            <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
+              <span class="poodle-list-card__selection-box">
+                {#if selected}
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+                  </svg>
+                {/if}
+              </span>
+            </span>
+          {/if}
+        </button>
+      {:else}
+        <span
+          bind:this={leadingElement}
+          class="poodle-list-card__leading"
+          data-interactive={useLeadingContextMenu}
+          data-selection-overlay={showSelectionOverlay}
+        >
+          <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
+            {@render leading()}
+          </span>
+          {#if showSelectionOverlay}
+            <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
+              <span class="poodle-list-card__selection-box">
+                {#if selected}
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+                  </svg>
+                {/if}
+              </span>
+            </span>
+          {/if}
+        </span>
+      {/if}
     {:else if showSelectionIndicator}
       <span class="poodle-list-card__selection-indicator" aria-hidden="true">
         <span class="poodle-list-card__selection-box">
@@ -293,26 +368,28 @@
     <div class="poodle-list-card__body">
       <div class="poodle-list-card__header">
         <span class="poodle-list-card__title">
-          <slot name="title">{title}</slot>
+          {#if titleContent}
+            {@render titleContent()}
+          {:else}
+            {title}
+          {/if}
         </span>
-        {#if $$slots.badges}
+        {#if badges}
           <span class="poodle-list-card__badges">
-            <slot name="badges" />
+            {@render badges()}
           </span>
         {/if}
       </div>
-      {#if subtitle}
+      {#if subtitleContent}
         <span class="poodle-list-card__subtitle">
-          <slot name="subtitle">{subtitle}</slot>
+          {@render subtitleContent()}
         </span>
-      {:else if $$slots.subtitle}
-        <span class="poodle-list-card__subtitle">
-          <slot name="subtitle" />
-        </span>
+      {:else if subtitle}
+        <span class="poodle-list-card__subtitle">{subtitle}</span>
       {/if}
-      {#if $$slots.footer}
+      {#if footer}
         <div class="poodle-list-card__footer">
-          <slot name="footer" />
+          {@render footer()}
         </div>
       {/if}
     </div>
@@ -321,15 +398,15 @@
       <span class="poodle-list-card__meta">{meta}</span>
     {/if}
 
-    {#if $$slots.actions}
+    {#if actions}
       <span class="poodle-list-card__actions">
-        <slot name="actions" />
+        {@render actions()}
       </span>
     {/if}
 
-    {#if $$slots.trailing}
+    {#if trailing}
       <span class="poodle-list-card__trailing">
-        <slot name="trailing" />
+        {@render trailing()}
       </span>
     {/if}
   </a>
@@ -356,10 +433,9 @@
       accentColor ? `--list-card-accent: ${accentColor}` : '',
       sashColor ? `--list-card-sash: ${sashColor}` : '',
     ].filter(Boolean).join('; ') || undefined}
-    on:click={handleClick}
-    on:keydown={handleKeydown}
-    on:contextmenu={handleContextMenu}
-    on:keydown={handleContextMenuKeydown}
+    onclick={handleClick}
+    onkeydown={handleRootKeydown}
+    oncontextmenu={handleContextMenu}
   >
     {#if sash}
       <span class="poodle-list-card__sash" aria-label={sash}>{sash}</span>
@@ -378,37 +454,60 @@
       </span>
     {/if}
 
-    {#if $$slots.leading}
-      <span
-        bind:this={leadingElement}
-        class="poodle-list-card__leading"
-        data-interactive={useLeadingContextMenu}
-        data-selection-overlay={showSelectionOverlay}
-        role={useLeadingContextMenu ? "button" : undefined}
-        tabindex={useLeadingContextMenu && !disabled ? 0 : undefined}
-        aria-label={useLeadingContextMenu ? (contextMenuAriaLabel ?? `${title} actions`) : undefined}
-        on:click={toggleContextMenuFromLeading}
-        on:keydown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            toggleContextMenuFromLeading(event);
-          }
-        }}
-      >
-        <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
-          <slot name="leading" />
-        </span>
-        {#if showSelectionOverlay}
-          <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
-            <span class="poodle-list-card__selection-box">
-              {#if selected}
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
-                </svg>
-              {/if}
-            </span>
+    {#if leading}
+      {#if useLeadingContextMenu && !disabled}
+        <button
+          bind:this={leadingElement}
+          type="button"
+          class="poodle-list-card__leading poodle-list-card__leading-button"
+          data-interactive={true}
+          data-selection-overlay={showSelectionOverlay}
+          aria-label={contextMenuAriaLabel ?? `${title} actions`}
+          onclick={toggleContextMenuFromLeading}
+          onkeydown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              toggleContextMenuFromLeading(event);
+            }
+          }}
+        >
+          <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
+            {@render leading()}
           </span>
-        {/if}
-      </span>
+          {#if showSelectionOverlay}
+            <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
+              <span class="poodle-list-card__selection-box">
+                {#if selected}
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+                  </svg>
+                {/if}
+              </span>
+            </span>
+          {/if}
+        </button>
+      {:else}
+        <span
+          bind:this={leadingElement}
+          class="poodle-list-card__leading"
+          data-interactive={useLeadingContextMenu}
+          data-selection-overlay={showSelectionOverlay}
+        >
+          <span class="poodle-list-card__leading-content" aria-hidden={showSelectionOverlay ? "true" : undefined}>
+            {@render leading()}
+          </span>
+          {#if showSelectionOverlay}
+            <span class="poodle-list-card__selection-indicator poodle-list-card__selection-indicator--overlay" aria-hidden="true">
+              <span class="poodle-list-card__selection-box">
+                {#if selected}
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3.5 8.25l2.75 2.75L12.5 4.75" />
+                  </svg>
+                {/if}
+              </span>
+            </span>
+          {/if}
+        </span>
+      {/if}
     {:else if showSelectionIndicator}
       <span class="poodle-list-card__selection-indicator" aria-hidden="true">
         <span class="poodle-list-card__selection-box">
@@ -424,26 +523,28 @@
     <div class="poodle-list-card__body">
       <div class="poodle-list-card__header">
         <span class="poodle-list-card__title">
-          <slot name="title">{title}</slot>
+          {#if titleContent}
+            {@render titleContent()}
+          {:else}
+            {title}
+          {/if}
         </span>
-        {#if $$slots.badges}
+        {#if badges}
           <span class="poodle-list-card__badges">
-            <slot name="badges" />
+            {@render badges()}
           </span>
         {/if}
       </div>
-      {#if subtitle}
+      {#if subtitleContent}
         <span class="poodle-list-card__subtitle">
-          <slot name="subtitle">{subtitle}</slot>
+          {@render subtitleContent()}
         </span>
-      {:else if $$slots.subtitle}
-        <span class="poodle-list-card__subtitle">
-          <slot name="subtitle" />
-        </span>
+      {:else if subtitle}
+        <span class="poodle-list-card__subtitle">{subtitle}</span>
       {/if}
-      {#if $$slots.footer}
+      {#if footer}
         <div class="poodle-list-card__footer">
-          <slot name="footer" />
+          {@render footer()}
         </div>
       {/if}
     </div>
@@ -452,15 +553,15 @@
       <span class="poodle-list-card__meta">{meta}</span>
     {/if}
 
-    {#if $$slots.actions}
+    {#if actions}
       <span class="poodle-list-card__actions">
-        <slot name="actions" />
+        {@render actions()}
       </span>
     {/if}
 
-    {#if $$slots.trailing}
+    {#if trailing}
       <span class="poodle-list-card__trailing">
-        <slot name="trailing" />
+        {@render trailing()}
       </span>
     {/if}
   </div>
@@ -490,8 +591,8 @@
           data-tone={item.tone ?? "default"}
           role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
           aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
-          on:click={() => activateContextMenuItem(item)}
-          on:keydown={(event) => {
+          onclick={() => activateContextMenuItem(item)}
+          onkeydown={(event) => {
             if (event.key === "ArrowDown") {
               event.preventDefault();
               moveContextMenuHighlight(1);
@@ -756,6 +857,13 @@
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-list-card__leading-button {
+    padding: 0;
+    border: 0;
+    appearance: none;
+    text-align: inherit;
   }
 
   .poodle-list-card__leading[data-interactive="true"] {

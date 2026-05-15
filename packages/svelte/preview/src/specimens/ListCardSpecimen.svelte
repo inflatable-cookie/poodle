@@ -15,18 +15,22 @@
         subtitle="Updated by Clay · 2h ago"
         meta="14.2 MB"
         interactive
-        on:click={() => (lastClick = "design-system-v2.figma")}
+        onClick={() => (lastClick = "design-system-v2.figma")}
       >
-        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
       </ListCard>
       <ListCard
         title="component-specs.pdf"
         subtitle="Shared with team · Yesterday"
         meta="2.8 MB"
         interactive
-        on:click={() => (lastClick = "component-specs.pdf")}
+        onClick={() => (lastClick = "component-specs.pdf")}
       >
-        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
       </ListCard>
       <ListCard
         title="brand-assets.zip"
@@ -34,7 +38,9 @@
         meta="48 MB"
         disabled
       >
-        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={layers} />
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -46,21 +52,25 @@
         subtitle="Manage invoices and payment methods"
         href="#billing"
       >
-        <svelte:fragment slot="leading"><Icon name="credit-card" /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon name="credit-card" />
+        {/snippet}
+        {#snippet badges()}
           <Pill appearance="badge" tone="neutral">2</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
       <ListCard
         title="Project Alpha"
         subtitle="Replaces the old media-trigger pattern with explicit actions"
         interactive
-        on:click={() => (lastClick = "Project Alpha")}
+        onClick={() => (lastClick = "Project Alpha")}
       >
-        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
-        <svelte:fragment slot="actions">
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
+        {#snippet actions()}
           <IconButton icon="ellipsis" ariaLabel="Project actions" variant="ghost" />
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -72,22 +82,26 @@
         subtitle="Batch-selection ready"
         selectable
         selected={selectedCard}
-        on:selectedChange={(event) => (selectedCard = event.detail.selected)}
+        onSelectedChange={(selected) => (selectedCard = selected)}
       >
-        <svelte:fragment slot="leading"><Icon name="check-square" /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon name="check-square" />
+        {/snippet}
+        {#snippet badges()}
           <Pill tone="success">Chosen</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
       <ListCard
         title="Compact reorder item"
         layout="compact"
         showReorderHandle
       >
-        <svelte:fragment slot="leading"><Icon name="grip" /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon name="grip" />
+        {/snippet}
+        {#snippet badges()}
           <Pill appearance="badge" tone="neutral">Draft</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
       <ListCard
         title="Reordered item"
@@ -95,13 +109,13 @@
         layout="compact"
         showReorderHandle
       >
-        <svelte:fragment slot="title">
+        {#snippet titleContent()}
           <span>Week 2</span>
           <span style="color: var(--poodle-color-text-secondary);"> → Week 1: Cash Flow</span>
-        </svelte:fragment>
-        <svelte:fragment slot="badges">
+        {/snippet}
+        {#snippet badges()}
           <Pill tone="info">Move</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -114,9 +128,11 @@
         meta="3.1 MB"
         leadingShape="rounded-square"
         interactive
-        on:click={() => (lastClick = "hero-banner.png")}
+        onClick={() => (lastClick = "hero-banner.png")}
       >
-        <svelte:fragment slot="leading"><Icon name="image" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="image" />
+        {/snippet}
       </ListCard>
       <ListCard
         title="onboarding-flow.mp4"
@@ -124,9 +140,11 @@
         meta="128 MB"
         leadingShape="rounded-square"
         interactive
-        on:click={() => (lastClick = "onboarding-flow.mp4")}
+        onClick={() => (lastClick = "onboarding-flow.mp4")}
       >
-        <svelte:fragment slot="leading"><Icon name="play" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="play" />
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -138,24 +156,28 @@
         subtitle="Updated yesterday"
         meta="Draft"
         interactive
-        on:click={() => (lastClick = "API integration guide")}
+        onClick={() => (lastClick = "API integration guide")}
       >
-        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
+        {#snippet badges()}
           <Pill tone="info">New</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
       <ListCard
         title="Q4 planning deck"
         subtitle="Shared with leadership"
         interactive
-        on:click={() => (lastClick = "Q4 planning deck")}
+        onClick={() => (lastClick = "Q4 planning deck")}
       >
-        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon icon={layers} />
+        {/snippet}
+        {#snippet badges()}
           <Pill appearance="badge" tone="neutral">3</Pill>
           <Pill tone="warning">Review</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -167,30 +189,34 @@
         subtitle="12 contributors"
         leadingShape="rounded-square"
         interactive
-        on:click={() => (lastClick = "Design system")}
+        onClick={() => (lastClick = "Design system")}
       >
-        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
+        {#snippet badges()}
           <Pill tone="success">Active</Pill>
-        </svelte:fragment>
-        <svelte:fragment slot="footer">
+        {/snippet}
+        {#snippet footer()}
           <ListCardCounter icon="file-text" count={24} tooltip="24 documents" />
           <ListCardCounter icon="image" count={8} tooltip="8 images" />
           <ListCardCounter icon="layers" count={3} tooltip="3 sub-folders" href="#sub-folders" />
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
       <ListCard
         title="Brand guidelines"
         subtitle="Last updated 2 weeks ago"
         leadingShape="rounded-square"
         interactive
-        on:click={() => (lastClick = "Brand guidelines")}
+        onClick={() => (lastClick = "Brand guidelines")}
       >
-        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
-        <svelte:fragment slot="footer">
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
+        {#snippet footer()}
           <ListCardCounter icon="file-text" count={6} tooltip="6 documents" />
           <ListCardCounter icon="image" count={42} tooltip="42 images" />
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -214,9 +240,11 @@
         leadingFill="solid"
         accentColor="#6366f1"
         interactive
-        on:click={() => (lastClick = "Design tokens")}
+        onClick={() => (lastClick = "Design tokens")}
       >
-        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={layers} />
+        {/snippet}
       </ListCard>
       <ListCard
         title="Components"
@@ -225,9 +253,11 @@
         leadingFill="solid"
         accentColor="#ec4899"
         interactive
-        on:click={() => (lastClick = "Components")}
+        onClick={() => (lastClick = "Components")}
       >
-        <svelte:fragment slot="leading"><Icon icon={grid2x2} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={grid2x2} />
+        {/snippet}
       </ListCard>
       <ListCard
         title="Documentation"
@@ -236,9 +266,11 @@
         leadingFill="solid"
         accentColor="#14b8a6"
         interactive
-        on:click={() => (lastClick = "Documentation")}
+        onClick={() => (lastClick = "Documentation")}
       >
-        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
       </ListCard>
       <ListCard
         title="Default accent (no custom color)"
@@ -246,9 +278,11 @@
         leadingShape="rounded-square"
         leadingFill="solid"
         interactive
-        on:click={() => (lastClick = "Default accent")}
+        onClick={() => (lastClick = "Default accent")}
       >
-        <svelte:fragment slot="leading"><Icon icon={folder} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -269,9 +303,11 @@
         ]}
         contextMenuAriaLabel="File actions"
         onContextAction={(value) => (lastClick = `Action: ${value}`)}
-        on:click={() => (lastClick = "Card clicked")}
+        onClick={() => (lastClick = "Card clicked")}
       >
-        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -293,9 +329,11 @@
           subtitle="Still supported for arbitrary content"
           meta="12 KB"
           interactive
-          on:click={() => (lastClick = "Card clicked")}
+          onClick={() => (lastClick = "Card clicked")}
         >
-          <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+          {#snippet leading()}
+            <Icon name="file-text" />
+          {/snippet}
         </ListCard>
       </ContextMenu>
     </div>
@@ -309,9 +347,11 @@
         meta="Draft"
         interactive
         notLive
-        on:click={() => (lastClick = "Unpublished draft")}
+        onClick={() => (lastClick = "Unpublished draft")}
       >
-        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
       </ListCard>
       <ListCard
         title="Staging environment"
@@ -320,10 +360,12 @@
         notLive
         leadingShape="rounded-square"
       >
-        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
-        <svelte:fragment slot="badges">
+        {#snippet leading()}
+          <Icon icon={layers} />
+        {/snippet}
+        {#snippet badges()}
           <Pill tone="warning" size="md">Pending</Pill>
-        </svelte:fragment>
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>
@@ -335,9 +377,11 @@
         subtitle="No credit card required"
         sash="Free"
         interactive
-        on:click={() => (lastClick = "Free tier plan")}
+        onClick={() => (lastClick = "Free tier plan")}
       >
-        <svelte:fragment slot="leading"><Icon icon={layers} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={layers} />
+        {/snippet}
       </ListCard>
       <ListCard
         title="Premium integration"
@@ -348,9 +392,11 @@
         leadingFill="solid"
         accentColor="#6366f1"
         interactive
-        on:click={() => (lastClick = "Premium integration")}
+        onClick={() => (lastClick = "Premium integration")}
       >
-        <svelte:fragment slot="leading"><Icon icon={grid2x2} /></svelte:fragment>
+        {#snippet leading()}
+          <Icon icon={grid2x2} />
+        {/snippet}
       </ListCard>
       <ListCard
         title="Legacy connector"
@@ -358,9 +404,11 @@
         sash="EOL"
         sashColor="#ef4444"
         interactive
-        on:click={() => (lastClick = "Legacy connector")}
+        onClick={() => (lastClick = "Legacy connector")}
       >
-        <svelte:fragment slot="leading"><Icon name="file-text" /></svelte:fragment>
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
       </ListCard>
     </div>
   </SpecimenGroup>

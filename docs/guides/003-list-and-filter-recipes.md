@@ -69,7 +69,7 @@ pagination placement. Render the actual list or grid in the default slot.
       <Field id="project-status" label="Status">
         <Select
           id="project-status"
-          items={[
+          options={[
             { value: "all", label: "All statuses" },
             { value: "active", label: "Active" },
             { value: "archived", label: "Archived" }

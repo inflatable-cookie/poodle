@@ -7,29 +7,29 @@
 <SpecimenLayout>
   <SpecimenGroup label="Default (no chrome)">
     <StatusBar>
-      <svelte:fragment slot="leading">
+      {#snippet leading()}
         <span class="poodle-status-item">main</span>
         <span class="poodle-status-item">0 errors</span>
-      </svelte:fragment>
-      <svelte:fragment slot="trailing">
+      {/snippet}
+      {#snippet trailing()}
         <span class="poodle-status-item">Ln 42, Col 18</span>
         <span class="poodle-status-item">UTF-8</span>
         <span class="poodle-status-item">TypeScript</span>
-      </svelte:fragment>
+      {/snippet}
     </StatusBar>
   </SpecimenGroup>
 
   <SpecimenGroup label="With chrome">
     <StatusBar chrome>
-      <svelte:fragment slot="leading">
+      {#snippet leading()}
         <span class="poodle-status-item">main</span>
         <span class="poodle-status-item">0 errors</span>
-      </svelte:fragment>
-      <svelte:fragment slot="trailing">
+      {/snippet}
+      {#snippet trailing()}
         <span class="poodle-status-item">Ln 42, Col 18</span>
         <span class="poodle-status-item">UTF-8</span>
         <span class="poodle-status-item">TypeScript</span>
-      </svelte:fragment>
+      {/snippet}
     </StatusBar>
   </SpecimenGroup>
 
@@ -40,10 +40,10 @@
   <svelte:fragment slot="sizes" let:size>
     <div class="poodle-variant-block">
       <StatusBar chrome summary="Status bar" {size}>
-        <svelte:fragment slot="trailing">
+        {#snippet trailing()}
           <span class="poodle-status-item">UTF-8</span>
           <span class="poodle-status-item">TypeScript</span>
-        </svelte:fragment>
+        {/snippet}
       </StatusBar>
     </div>
   </svelte:fragment>
@@ -51,10 +51,10 @@
   <svelte:fragment slot="densities" let:density>
     <div class="poodle-variant-block">
       <StatusBar chrome summary="Status bar" {density}>
-        <svelte:fragment slot="trailing">
+        {#snippet trailing()}
           <span class="poodle-status-item">UTF-8</span>
           <span class="poodle-status-item">TypeScript</span>
-        </svelte:fragment>
+        {/snippet}
       </StatusBar>
     </div>
   </svelte:fragment>

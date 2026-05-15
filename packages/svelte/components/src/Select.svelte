@@ -182,7 +182,9 @@
   // ── Custom mode handlers ─────────────────────────────────────
 
   function commitValue(nextValue: string): void {
-    value = nextValue;
+    if (value !== undefined) {
+      value = nextValue;
+    }
     onValueChange?.(nextValue);
   }
 

@@ -1,8 +1,25 @@
 <script lang="ts">
-  export let title: string | null = null;
-  export let subtitle: string | null = null;
-  export let dragRegion = false;
-  export let ariaLabel: string | null = null;
+  import type { Snippet } from "svelte";
+
+  interface Props {
+    title?: string | null;
+    subtitle?: string | null;
+    dragRegion?: boolean;
+    ariaLabel?: string | null;
+    identity?: Snippet;
+    actions?: Snippet;
+    utility?: Snippet;
+  }
+
+  let {
+    title = null,
+    subtitle = null,
+    dragRegion = false,
+    ariaLabel = null,
+    identity,
+    actions,
+    utility,
+  }: Props = $props();
 </script>
 
 <header
@@ -11,8 +28,8 @@
   aria-label={ariaLabel ?? title ?? undefined}
 >
   <div class="poodle-app-header__identity">
-    {#if $$slots.identity}
-      <slot name="identity" />
+    {#if identity}
+      {@render identity()}
     {:else if title}
       <div class="poodle-app-header__title-group">
         <strong>{title}</strong>
@@ -23,15 +40,15 @@
     {/if}
   </div>
 
-  {#if $$slots.actions}
+  {#if actions}
     <div class="poodle-app-header__actions">
-      <slot name="actions" />
+      {@render actions()}
     </div>
   {/if}
 
-  {#if $$slots.utility}
+  {#if utility}
     <div class="poodle-app-header__utility">
-      <slot name="utility" />
+      {@render utility()}
     </div>
   {/if}
 </header>

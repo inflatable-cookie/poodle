@@ -251,7 +251,7 @@ Updated: 2026-03-15
 - [ ] carry logic matches (60→increment, 0→decrement)
 - [ ] ArrowUp/Down keyboard behavior matches
 - [ ] min/max validation matches
-- [ ] change event payload matches
+- [ ] `onChange` payload matches
 
 ### Tier 2: Visual Parity
 

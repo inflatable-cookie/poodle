@@ -425,7 +425,7 @@ None (video player uses hardcoded dark-on-black colors).
 - Fullscreen uses native `requestFullscreen` / `exitFullscreen` API
 - `onDestroy` cleans up animation frame and timeout
 - Click on root toggles play; control bar uses `stopPropagation` to prevent double-toggle
-- Big play button uses `on:click|stopPropagation` to prevent root click handler
+- Big play button stops click propagation to prevent the root click handler from firing too
 - Wrapper keydown handler only activates on Space/Enter when `event.target === wrapperEl`
 - `document.fullscreenchange` listener updates `isFullscreen` state
 - SVG icons are inline (not Icon primitive) -- play, pause, mute, unmute, fullscreen, exit-fullscreen

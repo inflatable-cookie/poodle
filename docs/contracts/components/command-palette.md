@@ -51,10 +51,10 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean` | `false` | no | controls visibility; two-way bindable |
+| `open` | `boolean` | `false` | no | controls visibility; host updates it through `onOpenChange` |
 | `title` | `string` | `"Command palette"` | no | dialog heading |
 | `description` | `string \| null` | `null` | no | secondary text below title |
-| `query` | `string` | `""` | no | current search query value |
+| `query` | `string` | `""` | no | current search query value; host updates it through `onQueryChange` |
 | `items` | `CommandActionItem[]` | `[]` | no | action items to display |
 | `state` | `DiscoveryState` | `"ready"` | no | controls panel posture |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for dialog; falls back to `title` |
@@ -63,14 +63,17 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for the palette shell and nested result spacing |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `queryChange` | user types in the search field or clears it | `{ value: string }` |
-| `commandSelect` | user selects a command (click, Enter) | `{ id: string }` |
-| `openChange` | palette closes (Escape, backdrop click, close button) | `{ open: boolean }` |
-| `activeChange` | active command changes via keyboard or mouse | `{ id: string \| null }` |
+| Callback | When It Fires | Signature |
+|----------|---------------|-----------|
+| `onQueryChange` | user types in the search field or clears it | `(value: string) => void` |
+| `onCommandSelect` | user selects a command (click, Enter) | `(id: string) => void` |
+| `onOpenChange` | palette closes (Escape, backdrop click, close button) | `(open: boolean) => void` |
+| `onActiveChange` | active command changes via keyboard or mouse | `(id: string \| null) => void` |
+
+`open` and `query` are host-owned when supplied. The component requests changes
+through `onOpenChange` and `onQueryChange` rather than mutating those props.
 
 ## 6. States
 
@@ -288,8 +291,8 @@ Uses `CommandActionItem` and `DiscoveryState` from `ActionDiscoveryPanel`.
 ## 10. Composition
 
 - Composes: `TextInput type="search"`, `Icon`, `ActionDiscoveryPanel`
-- The TextInput type="search" dispatches `valueChange`, `clear`, `cancel`, and `submit`
-  events which are mapped to palette events
+- The TextInput type="search" callbacks are forwarded into `onQueryChange`,
+  `onCommandSelect`, and `onOpenChange`
 - ActionDiscoveryPanel is bound with `activeId` for two-way active tracking
 - Loading treatment is delegated to `ActionDiscoveryPanel`, which remains
   Skeleton-based rather than Spinner-based because it is preserving result-row structure

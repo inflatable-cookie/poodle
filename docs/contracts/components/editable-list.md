@@ -44,7 +44,7 @@ Updated: 2026-04-09
 |------|---------|----------|-------|
 | Session Root | `<div>` | yes | Flex column wrapper, wraps in `UiPresentationProvider` |
 | Live Region | `<div>` | yes | Visually hidden, `aria-live="polite"`, `aria-atomic="true"` for move announcements |
-| Header | `<div>` | conditional | Workflow chrome row with cancel/submit buttons; shown when `onsubmit` or `oncancel` is non-null |
+| Header | `<div>` | conditional | Workflow chrome row with cancel/submit buttons; shown when `onSubmit` or `onCancel` is non-null |
 | Error | `<div>` | conditional | Error alert surface, `role="alert"`, danger-styled |
 | Info | `<div>` | conditional | Info status surface, `role="status"`, accent-styled |
 | Long List Warning | `<div>` | conditional | Same styling as info; shown when item count exceeds `longListThreshold` |
@@ -85,8 +85,12 @@ Updated: 2026-04-09
 | `windowSize` | `number \| null` | `null` | no | Optional page window size for very large reorder sessions |
 | `submitLabel` | `string` | `"Save Order"` | no | Submit button label when workflow chrome is shown |
 | `cancelLabel` | `string` | `"Cancel"` | no | Cancel button label when workflow chrome is shown |
-| `onsubmit` | `(() => void \| Promise<void>) \| null` | `null` | no | Optional submit callback; when non-null enables workflow chrome |
-| `oncancel` | `(() => void) \| null` | `null` | no | Optional cancel callback; when non-null enables workflow chrome |
+| `onSubmit` | `(() => void \| Promise<void>) \| null` | `null` | no | Optional submit callback; when non-null enables workflow chrome |
+| `onCancel` | `(() => void) \| null` | `null` | no | Optional cancel callback; when non-null enables workflow chrome |
+| `onReorder` | `((items: T[]) => void) \| null` | `null` | no | Callback fired when items are reordered |
+| `onAdd` | `((item: T) => void) \| null` | `null` | no | Callback fired when a new item is added |
+| `onRemove` | `((id: string) => void) \| null` | `null` | no | Callback fired when an item is removed |
+| `onChange` | `((items: T[]) => void) \| null` | `null` | no | Callback fired whenever the list items change |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for row and handle geometry |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for row padding and list spacing |
@@ -113,7 +117,10 @@ type ReorderableItem = EditableListItem;
 
 ### Controlled / Uncontrolled
 
-`items` supports two-way binding. The component mutates the array order internally (splice and re-insert) and dispatches `reorder` with the updated array. The windowed view uses `windowStart` offset for correct global indexing.
+`items` is intentionally bindable. Reorder, add, and remove operations produce
+new arrays rather than mutating the existing one in place, then surface the
+result through the bindable prop plus `onReorder` and `onChange`. The windowed
+view uses `windowStart` offset for correct global indexing.
 
 ## 4. States
 
@@ -145,16 +152,16 @@ type ReorderableItem = EditableListItem;
 | `newItemText` (internal) | Current input value |
 | `canAdd` (derived) | `editable && !disabled && (maxItems === null || items.length < maxItems)` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `reorder` | Items reordered via drag-and-drop or keyboard | `{ items: T[] }` |
-| `add` | New item added via the input | `{ item: T }` |
-| `remove` | Item removed via the remove button | `{ id: string }` |
-| `change` | Item added, removed, or reordered | `{ items: T[] }` |
-| `submit` | Submit action triggered (before callback) | `void` |
-| `cancel` | Cancel action triggered (before callback) | `void` |
+| Callback | When It Fires | Payload |
+|----------|---------------|---------|
+| `onReorder` | Items reordered via drag-and-drop or keyboard | `T[]` |
+| `onAdd` | New item added via the input | `T` |
+| `onRemove` | Item removed via the remove button | `string` |
+| `onChange` | Item added, removed, or reordered | `T[]` |
+| `onSubmit` | Submit action triggered | none |
+| `onCancel` | Cancel action triggered | none |
 
 ## 6. Accessibility
 
@@ -506,20 +513,19 @@ Standalone component. Uses `Button` for workflow chrome (header and window nav).
 ## 9. Svelte Notes
 
 - Generic component: `<script lang="ts" generics="T extends { id: string; label?: string }">`
-- Uses `createEventDispatcher` for events
 - Wraps in `UiPresentationProvider` to propagate resolved size and density
 - Uses native HTML5 drag-and-drop API (`dragstart`, `dragover`, `drop`, `dragend`)
 - `event.dataTransfer.effectAllowed = "move"` for correct drag cursor
-- `moveItem(fromIndex, toIndex)` splices and re-inserts; dispatches `reorder` after mutation; calls `ensureIndexVisible()` for windowed mode; announces move via live region
+- `moveItem(fromIndex, toIndex)` splices and re-inserts; calls `onReorder` and `onChange`; calls `ensureIndexVisible()` for windowed mode; announces move via live region
 - Keyboard reordering uses `requestAnimationFrame` to focus the moved item after DOM update via `querySelector('[data-reorder-index="${targetIndex}"]')`
 - `grabbedIndex` tracks keyboard grab state; visual class `--grabbed` applied
 - `isUnavailable` computed from `disabled || submitting`
-- `showWorkflowChrome` computed from `onsubmit !== null || oncancel !== null`
+- `showWorkflowChrome` computed from `onSubmit !== null || onCancel !== null`
 - `isLongList` computed from `longListThreshold` and item count
 - Windowed mode: `visibleItems = items.slice(windowStart, windowEnd)`, global index = `windowStart + localIndex`
 - Items keyed by `item.id` for stable Svelte `{#each}` rendering
-- `handleSubmit()` dispatches `submit` event then awaits `onsubmit()` callback
-- `handleCancel()` dispatches `cancel` event then calls `oncancel()` callback, resets `grabbedIndex`
+- `handleSubmit()` awaits `onSubmit()` when dirty and available
+- `handleCancel()` calls `onCancel()` and resets `grabbedIndex`
 - New item IDs generated with `Date.now()` + random suffix
 - Input `keydown` handler prevents default on Enter to avoid form submission
 - Remove button uses `stopPropagation` to prevent drag initiation
@@ -534,13 +540,13 @@ Not yet implemented. Reordering behavior may need a simplified drag-and-drop or 
 ### Tier 1: Strict Parity
 
 - [ ] All props have the same meaning and defaults
-- [ ] Event names and payloads match
+- [ ] Callback names and payloads match
 - [ ] EditableListItem type is identical
 - [ ] Drag-and-drop reorder behavior matches
 - [ ] Keyboard reorder behavior matches (grab, move, drop, cancel)
 - [ ] maxItems enforcement matches (hides add row, shows counter)
 - [ ] Enter-to-add behavior matches
-- [ ] Workflow chrome visibility gated on `onsubmit`/`oncancel`
+- [ ] Workflow chrome visibility gated on `onSubmit`/`onCancel`
 - [ ] Dirty gating on submit button
 - [ ] Windowed mode paging and navigation matches
 
@@ -585,13 +591,13 @@ Not yet implemented. Reordering behavior may need a simplified drag-and-drop or 
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Drag to reorder | 5 items, `ariaLabel="Reorderable items"`, reorder event logs new order | List with drag handles; drag or keyboard (Space then Arrow) to reorder |
+| Drag to reorder | 5 items, `ariaLabel="Reorderable items"`, `onReorder` logs new order | List with drag handles; drag or keyboard (Space then Arrow) to reorder |
 
 ### Workflow Chrome
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With workflow | 5 items, `onsubmit` and `oncancel` provided, `dirty=false` initially | Header with disabled Save Order button and Cancel button; submit enables after reorder |
+| With workflow | 5 items, `onSubmit` and `onCancel` provided, `dirty=false` initially | Header with disabled Save Order button and Cancel button; submit enables after reorder |
 
 ### Disabled
 

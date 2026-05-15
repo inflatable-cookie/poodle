@@ -12,7 +12,7 @@ Updated: 2026-03-30
   open/close state internally, supports custom trigger snippet and body content
 - In scope: default trigger button, custom trigger snippet, configurable tone
   (danger/warning), confirm/cancel labels, AlertDialog composition, body
-  content slot, internal open state management, size and density support
+  content snippet, internal open state management, size and density support
 - Out of scope: multi-step confirmation, undo workflows, inline confirmation
   patterns (non-dialog), form submission within the dialog, async loading
   state during confirmation
@@ -23,7 +23,7 @@ Updated: 2026-03-30
 [TriggerZone]
   ├── [TriggerSlot .confirm-action__trigger]  <span role="presentation"> (when trigger snippet provided)
   │     └── (snippet: trigger)
-  └── [DefaultTrigger]  Button (variant="secondary", tone derived) (when no trigger slot)
+  └── [DefaultTrigger]  Button (variant="secondary", tone derived) (when no trigger snippet)
 
 [AlertDialog]  AlertDialog primitive
   └── [BodySlot]  (optional, via children snippet)
@@ -31,7 +31,7 @@ Updated: 2026-03-30
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| TriggerZone | yes | either a custom trigger slot wrapper or default Button | delegates to Button or custom element |
+| TriggerZone | yes | either a custom trigger snippet wrapper or default Button | delegates to Button or custom element |
 | DefaultTrigger | conditional | Button with `variant="secondary"` and tone derived from the `tone` prop | delegates to Button contract |
 | TriggerSlot | conditional | `<span role="presentation">` wrapper with click/keydown handlers | layout only |
 | AlertDialog | yes | AlertDialog primitive managing the confirmation dialog | delegates to AlertDialog contract |
@@ -46,7 +46,7 @@ Updated: 2026-03-30
 | `title` | `string` | — | yes | AlertDialog title text |
 | `description` | `string \| null` | `null` | no | AlertDialog description text |
 | `tone` | `"danger" \| "warning"` | `"danger"` | no | visual tone; maps to AlertDialog tone and default trigger Button tone |
-| `triggerLabel` | `string` | `"Delete"` | no | label for the default trigger Button (ignored when trigger slot is used) |
+| `triggerLabel` | `string` | `"Delete"` | no | label for the default trigger Button (ignored when trigger snippet is used) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for the AlertDialog confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the AlertDialog cancel button |
 | `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked when the confirm action is accepted |
@@ -85,8 +85,7 @@ type AlertDialogTone = "danger" | "warning";
 
 ### Component States
 
-- `open` (internal boolean): controls AlertDialog visibility; passed as
-  `open || null` to AlertDialog (falsy maps to null for uncontrolled initial state)
+- `open` (internal boolean): controls AlertDialog visibility directly
 - Derived: `triggerTone` — maps `tone === "danger"` to `"danger"` Button tone,
   all others to `"default"`
 
@@ -136,7 +135,7 @@ type AlertDialogTone = "danger" | "warning";
 - composes: `AlertDialog` and `Button` from `@poodle/svelte`
 - parent expectations: toolbars, list item actions, settings forms
 - child expectations: AlertDialog primitive, Button primitive, optional body
-  content via default slot
+  content via `children` snippet
 - resizing rules: trigger is inline, dialog is modal overlay
 
 ## 8. Token Usage — Exact Values
@@ -159,7 +158,7 @@ type AlertDialogTone = "danger" | "warning";
 
 | ConfirmAction Prop | AlertDialog Prop |
 |-------------------|-----------------|
-| `open \|\| null` | `open` |
+| `open` | `open` |
 | `title` | `title` |
 | `description` | `description` |
 | `tone` | `tone` |
@@ -182,13 +181,11 @@ None.
 ## 9. Svelte Notes
 
 - composes `AlertDialog` and `Button` from `@poodle/svelte`
-- `open` is passed to AlertDialog as `open || null` (falsy to null for
-  uncontrolled initial state)
+- `open` is passed straight through to AlertDialog
 - handles `openChange` from AlertDialog to sync internal open state
 - trigger tone derivation: `tone === "danger" ? "danger" : "default"`
 - custom trigger wrapper `<span>` receives `data-size` and `data-density`
   resolved from `resolveSemanticControlSize` and `getUiPresentation`
-- `$$slots.trigger` check determines custom vs default trigger rendering
 - `AlertDialogTone`, `ControlSize`, `SemanticControlSizeRole`, `ControlDensity`
   types imported from `@poodle/svelte`
 - size resolves via `resolveSemanticControlSize` with `sizeRole="control"`
@@ -208,8 +205,8 @@ None.
 - [ ] all props have the same meaning and defaults
 - [ ] callback names and payloads match
 - [ ] trigger tone derivation logic matches (danger->danger, warning->default)
-- [ ] custom trigger slot behavior matches (click and keyboard activation)
-- [ ] open state passed as `open || null` to AlertDialog
+- [ ] custom trigger snippet behavior matches (click and keyboard activation)
+- [ ] open state passes straight through to AlertDialog
 - [ ] dialog closes after confirm and cancel events
 
 ### Tier 2: Visual Parity

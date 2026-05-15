@@ -53,16 +53,16 @@
   <SpecimenGroup label="Full app window header (title + menubar + utility)">
     <div class="poodle-specimen__frame poodle-specimen__frame--app">
       <AppHeader title="Poodle Studio">
-        <svelte:fragment slot="actions">
+        {#snippet actions()}
           <div class="poodle-specimen__menubar-inline">
             <Menubar items={menuItems} ariaLabel="Application menu" />
           </div>
-        </svelte:fragment>
-        <svelte:fragment slot="utility">
+        {/snippet}
+        {#snippet utility()}
           <IconButton icon="search" sizeRole="chrome" variant="ghost" ariaLabel="Search" />
           <IconButton icon="bell" sizeRole="chrome" variant="ghost" ariaLabel="Notifications" />
           <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
-        </svelte:fragment>
+        {/snippet}
       </AppHeader>
       <div class="poodle-specimen__app-body">
         <p>Application content area</p>
@@ -73,13 +73,13 @@
   <SpecimenGroup label="With title, actions, and utility">
     <div class="poodle-specimen__frame">
       <AppHeader title="My Application">
-        <svelte:fragment slot="actions">
+        {#snippet actions()}
           <Button sizeRole="chrome" variant="ghost">New</Button>
           <Button sizeRole="chrome" variant="ghost">Open</Button>
-        </svelte:fragment>
-        <svelte:fragment slot="utility">
+        {/snippet}
+        {#snippet utility()}
           <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
-        </svelte:fragment>
+        {/snippet}
       </AppHeader>
     </div>
   </SpecimenGroup>
@@ -93,14 +93,14 @@
   <SpecimenGroup label="Custom identity slot">
     <div class="poodle-specimen__frame">
       <AppHeader>
-        <svelte:fragment slot="identity">
+        {#snippet identity()}
           <span class="poodle-specimen__logo">P</span>
           <strong>Poodle Studio</strong>
-        </svelte:fragment>
-        <svelte:fragment slot="utility">
+        {/snippet}
+        {#snippet utility()}
           <IconButton icon="bell" sizeRole="chrome" variant="ghost" ariaLabel="Notifications" />
           <IconButton icon="user" sizeRole="chrome" variant="ghost" ariaLabel="Account" />
-        </svelte:fragment>
+        {/snippet}
       </AppHeader>
     </div>
   </SpecimenGroup>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import { createEventDispatcher } from "svelte";
   import Icon from "./Icon.svelte";
   import IconButton from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -21,15 +20,12 @@
   export let showSelectAll = false;
   export let allSelected = false;
   export let selectAllLabel = "Select all";
+  export let onAction: ((id: string) => void) | null = null;
+  export let onClear: (() => void) | null = null;
+  export let onSelectAll: (() => void) | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    action: { id: string };
-    clear: void;
-    selectAll: void;
-  }>();
 
   const uiPresentation = getUiPresentation();
 
@@ -62,7 +58,7 @@
         variant="ghost"
         sizeRole="chrome"
         disabled={isUnavailable}
-        on:click={() => dispatch("selectAll")}
+        on:click={() => onSelectAll?.()}
       />
     {/if}
   </div>
@@ -84,7 +80,7 @@
             tone={actionTone === "danger" ? "danger" : "default"}
             size={resolvedSize}
             disabled={actionsDisabled || action.disabled}
-            on:click={() => dispatch("action", { id: action.id })}
+            on:click={() => onAction?.(action.id)}
           >
             <svelte:component this={action.icon} size={16} />
           </IconButton>
@@ -97,7 +93,7 @@
             tone={actionTone === "danger" ? "danger" : "default"}
             size={resolvedSize}
             disabled={actionsDisabled || action.disabled}
-            on:click={() => dispatch("action", { id: action.id })}
+            on:click={() => onAction?.(action.id)}
           />
         {/if}
       </span>
@@ -108,7 +104,7 @@
       variant="ghost"
       size={resolvedSize}
       disabled={isUnavailable}
-      on:click={() => dispatch("clear")}
+      on:click={() => onClear?.()}
     />
   </div>
 </div>

@@ -1,15 +1,14 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextTooltipId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import Icon from "./Icon.svelte";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
-    resolveSupportingVisualSize,
   } from "./presentation";
   import Spinner from "./Spinner.svelte";
   import { resolveOverlayPosition } from "./overlay-position";
@@ -23,53 +22,89 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let variant: ButtonVariant = "ghost";
-  export let tone: ButtonTone = "default";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let icon: IconProp;
-  export let ariaLabel: string;
-  export let tooltip: string | null = null;
-  export let tooltipPlacement: OverlayPlacement = "top";
-  export let disabled = false;
-  export let loading = false;
-  /** Toggle pressed state. When provided (non-null), acts as a toggle with aria-pressed. */
-  export let pressed: boolean | null = null;
-  /** Initial pressed state for uncontrolled toggle mode. */
-  export let defaultPressed = false;
-  export let describedBy: string | null = null;
-  export let type: HTMLButtonElement["type"] = "button";
+  interface Props {
+    variant?: ButtonVariant;
+    tone?: ButtonTone;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    icon: IconProp;
+    ariaLabel: string;
+    tooltip?: string | null;
+    tooltipPlacement?: OverlayPlacement;
+    disabled?: boolean;
+    loading?: boolean;
+    pressed?: boolean | null;
+    defaultPressed?: boolean;
+    describedBy?: string | null;
+    type?: HTMLButtonElement["type"];
+    onClick?: ((event: MouseEvent) => void) | null;
+    onFocus?: ((event: FocusEvent) => void) | null;
+    onBlur?: ((event: FocusEvent) => void) | null;
+    onPressedChange?: ((pressed: boolean) => void) | null;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    click: MouseEvent;
-    pressedChange: { pressed: boolean };
-    focus: FocusEvent;
-    blur: FocusEvent;
-  }>();
+  let {
+    variant = "ghost",
+    tone = "default",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    icon,
+    ariaLabel,
+    tooltip = null,
+    tooltipPlacement = "top",
+    disabled = false,
+    loading = false,
+    pressed = $bindable<boolean | null>(null),
+    defaultPressed = false,
+    describedBy = null,
+    type = "button",
+    onClick = null,
+    onFocus = null,
+    onBlur = null,
+    onPressedChange = null,
+    children,
+  }: Props = $props();
+
   const uiPresentation = getUiPresentation();
 
   const tooltipId = `poodle-icon-tooltip-${++nextTooltipId}`;
-  let tooltipOpen = false;
-  let timer: ReturnType<typeof setTimeout> | null = null;
-  let buttonElement: HTMLButtonElement | null = null;
-  let tooltipElement: HTMLSpanElement | null = null;
-  let resolvedTooltipPlacement: OverlayPlacement = tooltipPlacement;
-  let tooltipStyle = "";
+  let tooltipOpen = $state(false);
+  let timer = $state<ReturnType<typeof setTimeout> | null>(null);
+  let buttonElement = $state<HTMLButtonElement | null>(null);
+  let tooltipElement = $state<HTMLSpanElement | null>(null);
+  let resolvedTooltipPlacement = $state<OverlayPlacement>("top");
+  let tooltipStyle = $state("");
+  let seededDefaultPressed = $state(false);
+  let uncontrolledPressed = $state(false);
 
-  let uncontrolledPressed = defaultPressed;
+  $effect.pre(() => {
+    if (!seededDefaultPressed && pressed === null) {
+      uncontrolledPressed = defaultPressed;
+      seededDefaultPressed = true;
+    }
+  });
 
-  $: isUnavailable = disabled || loading;
-  $: isToggle = pressed !== null || defaultPressed;
-  $: pressedControlled = pressed !== null;
-  $: currentPressed = pressedControlled ? pressed === true : uncontrolledPressed;
-  $: tooltipText = tooltip ?? ariaLabel;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedIconSize = resolvedSize;
-  $: if (tooltipOpen && tooltipText) {
-    void updateTooltipPosition();
-  }
+  const isUnavailable = $derived(disabled || loading);
+  const isToggle = $derived(pressed !== null || defaultPressed);
+  const pressedControlled = $derived(pressed !== null);
+  const currentPressed = $derived(pressedControlled ? pressed === true : uncontrolledPressed);
+  const tooltipText = $derived(tooltip ?? ariaLabel);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedIconSize = $derived(resolvedSize);
+
+  $effect(() => {
+    resolvedTooltipPlacement = tooltipPlacement;
+  });
+
+  $effect(() => {
+    if (tooltipOpen && tooltipText) {
+      void updateTooltipPosition();
+    }
+  });
 
   function scheduleOpen(): void {
     clearTimer();
@@ -115,6 +150,29 @@
     }
   }
 
+  function handleFocus(event: FocusEvent): void {
+    scheduleOpen();
+    onFocus?.(event);
+  }
+
+  function handleBlur(event: FocusEvent): void {
+    dismiss();
+    onBlur?.(event);
+  }
+
+  function handleClick(event: MouseEvent): void {
+    if (isToggle) {
+      const next = !currentPressed;
+      if (pressedControlled) {
+        pressed = next;
+      } else {
+        uncontrolledPressed = next;
+      }
+      onPressedChange?.(next);
+    }
+    onClick?.(event);
+  }
+
   onMount(() => {
     window.addEventListener("resize", handleViewportChange);
     window.addEventListener("scroll", handleViewportChange, true);
@@ -131,8 +189,8 @@
 <span
   class="poodle-icon-button-wrap"
   role="presentation"
-  on:mouseenter={scheduleOpen}
-  on:mouseleave={dismiss}
+  onmouseenter={scheduleOpen}
+  onmouseleave={dismiss}
 >
   <button
     {type}
@@ -149,23 +207,10 @@
     aria-describedby={tooltipOpen ? tooltipId : describedBy ?? undefined}
     aria-busy={loading ? "true" : undefined}
     aria-pressed={isToggle ? (currentPressed ? "true" : "false") : undefined}
-    on:click={(event) => {
-      if (isToggle) {
-        const next = !currentPressed;
-        if (pressedControlled) {
-          pressed = next;
-        } else {
-          uncontrolledPressed = next;
-        }
-        dispatch("pressedChange", { pressed: next });
-      }
-      dispatch("click", event);
-    }}
-    on:focus={scheduleOpen}
-    on:blur={dismiss}
-    on:focus={(event) => dispatch("focus", event)}
-    on:blur={(event) => dispatch("blur", event)}
-    on:keydown={(event) => {
+    onclick={handleClick}
+    onfocus={handleFocus}
+    onblur={handleBlur}
+    onkeydown={(event) => {
       if (event.key === "Escape") dismiss();
     }}
   >
@@ -175,7 +220,11 @@
       </span>
     {:else}
       <span class="poodle-icon-button__glyph" aria-hidden="true">
-        <slot><Icon icon={icon} size={resolvedIconSize} /></slot>
+        {#if children}
+          {@render children()}
+        {:else}
+          <Icon icon={icon} size={resolvedIconSize} />
+        {/if}
       </span>
     {/if}
   </button>

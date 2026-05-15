@@ -41,13 +41,15 @@
   let itemElements = $state<Array<HTMLButtonElement | null>>([]);
   let uncontrolledOpen = $state(false);
   let uncontrolledAnchorPoint = $state<{ x: number; y: number } | null>(null);
+  let seededDefaults = $state(false);
   let highlightIndex = $state(0);
   let adjustedPosition = $state<{ left: string; top: string } | null>(null);
 
   $effect.pre(() => {
-    if (!rootElement) {
+    if (!seededDefaults) {
       uncontrolledOpen = defaultOpen;
       uncontrolledAnchorPoint = anchorPoint;
+      seededDefaults = true;
     }
   });
 

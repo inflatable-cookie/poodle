@@ -9,12 +9,16 @@
   <SpecimenGroup label="Basic horizontal layout">
     <div class="poodle-specimen__frame">
       <SplitView orientation="horizontal">
-        <div slot="primary" class="poodle-specimen__fill">
-          <Region label="Sidebar" color="blue" />
-        </div>
-        <div slot="secondary" class="poodle-specimen__fill">
-          <Region label="Main content" color="green" />
-        </div>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Sidebar" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Main content" color="green" />
+          </div>
+        {/snippet}
       </SplitView>
     </div>
   </SpecimenGroup>
@@ -22,12 +26,16 @@
   <SpecimenGroup label="Basic vertical layout">
     <div class="poodle-specimen__frame poodle-specimen__frame--tall">
       <SplitView orientation="vertical">
-        <div slot="primary" class="poodle-specimen__fill">
-          <Region label="Editor" color="blue" />
-        </div>
-        <div slot="secondary" class="poodle-specimen__fill">
-          <Region label="Terminal" color="purple" />
-        </div>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Editor" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Terminal" color="purple" />
+          </div>
+        {/snippet}
       </SplitView>
     </div>
   </SpecimenGroup>
@@ -40,12 +48,16 @@
         showCollapsePrimary
         showCollapseSecondary
       >
-        <div slot="primary" class="poodle-specimen__fill">
-          <Region label="Primary" color="blue" />
-        </div>
-        <div slot="secondary" class="poodle-specimen__fill">
-          <Region label="Secondary" color="green" />
-        </div>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Primary" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Secondary" color="green" />
+          </div>
+        {/snippet}
       </SplitView>
     </div>
   </SpecimenGroup>
@@ -58,12 +70,16 @@
         showCollapsePrimary
         showCollapseSecondary
       >
-        <div slot="primary" class="poodle-specimen__fill">
-          <Region label="Top" color="blue" />
-        </div>
-        <div slot="secondary" class="poodle-specimen__fill">
-          <Region label="Bottom" color="purple" />
-        </div>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Top" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Bottom" color="purple" />
+          </div>
+        {/snippet}
       </SplitView>
     </div>
   </SpecimenGroup>
@@ -76,23 +92,31 @@
         ratio={0.25}
         showCollapsePrimary
       >
-        <div slot="primary" class="poodle-specimen__fill">
-          <Region label="Explorer" color="blue" />
-        </div>
-        <div slot="secondary" class="poodle-specimen__fill">
-          <SplitView
-            orientation="vertical"
-            ratio={0.65}
-            showCollapseSecondary
-          >
-            <div slot="primary" class="poodle-specimen__fill">
-              <Region label="Editor" color="green" />
-            </div>
-            <div slot="secondary" class="poodle-specimen__fill">
-              <Region label="Terminal" color="purple" />
-            </div>
-          </SplitView>
-        </div>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Explorer" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <SplitView
+              orientation="vertical"
+              ratio={0.65}
+              showCollapseSecondary
+            >
+              {#snippet primary()}
+                <div class="poodle-specimen__fill">
+                  <Region label="Editor" color="green" />
+                </div>
+              {/snippet}
+              {#snippet secondary()}
+                <div class="poodle-specimen__fill">
+                  <Region label="Terminal" color="purple" />
+                </div>
+              {/snippet}
+            </SplitView>
+          </div>
+        {/snippet}
       </SplitView>
     </div>
   </SpecimenGroup>
@@ -106,12 +130,16 @@
         showCollapsePrimary
         showCollapseSecondary
       >
-        <div slot="primary" class="poodle-specimen__fill">
-          <Region label="Left" color="blue" />
-        </div>
-        <div slot="secondary" class="poodle-specimen__fill">
-          <Region label="Right" color="green" />
-        </div>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Left" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Right" color="green" />
+          </div>
+        {/snippet}
       </SplitView>
     </div>
   </SpecimenGroup>

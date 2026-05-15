@@ -49,19 +49,19 @@
     },
   ];
 
-  function handleChange(event: CustomEvent<{ blocks: EditorBlock[] }>): void {
-    blocks = event.detail.blocks;
+  function handleChange(nextBlocks: EditorBlock[]): void {
+    blocks = nextBlocks;
   }
 
-  function handleSingleChange(event: CustomEvent<{ blocks: EditorBlock[] }>): void {
-    singleBlocks = event.detail.blocks;
+  function handleSingleChange(nextBlocks: EditorBlock[]): void {
+    singleBlocks = nextBlocks;
   }
 </script>
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Consumer-driven block types">
-    <BlockEditor {blocks} {blockTypes} on:change={handleChange}>
-      <svelte:fragment slot="block" let:block let:disabled let:update>
+    <BlockEditor {blocks} {blockTypes} onChange={handleChange}>
+      {#snippet block({ block, disabled, update })}
         {#if block.type === "divider"}
           <hr class="poodle-block-divider" />
         {:else if block.type === "heading"}
@@ -71,7 +71,7 @@
             placeholder="Heading..."
             disabled={disabled}
             value={block.content ?? block.data?.text ?? ""}
-            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
           />
         {:else if block.type === "code"}
           <textarea
@@ -79,7 +79,7 @@
             placeholder="Code..."
             disabled={disabled}
             value={block.content ?? block.data?.text ?? ""}
-            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
             rows="3"
           ></textarea>
         {:else if block.type === "quote"}
@@ -88,7 +88,7 @@
             placeholder="Quote..."
             disabled={disabled}
             value={block.content ?? block.data?.text ?? ""}
-            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
             rows="2"
           ></textarea>
         {:else}
@@ -97,11 +97,11 @@
             placeholder="Type something..."
             disabled={disabled}
             value={block.content ?? block.data?.text ?? ""}
-            on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
             rows="2"
           ></textarea>
         {/if}
-      </svelte:fragment>
+      {/snippet}
     </BlockEditor>
     <p class="poodle-specimen__count">{blocks.length} blocks</p>
   </SpecimenGroup>
@@ -112,18 +112,18 @@
       {blockTypes}
       blockTypeItems={groupedTypeOptions}
       mode="single"
-      on:change={handleSingleChange}
+      onChange={handleSingleChange}
     >
-      <svelte:fragment slot="block" let:block let:disabled let:update>
+      {#snippet block({ block, disabled, update })}
         <input
           type="text"
           class="poodle-block-input poodle-block-input--heading"
           placeholder="Heading..."
           disabled={disabled}
           value={block.content ?? block.data?.text ?? ""}
-          on:input={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+          oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
         />
-      </svelte:fragment>
+      {/snippet}
     </BlockEditor>
     <p class="poodle-specimen__count">Single posture hides reorder, add, and remove controls while the built-in picker accepts grouped Nightfire-style options.</p>
   </SpecimenGroup>

@@ -41,13 +41,15 @@
   let triggerElements = $state<Array<HTMLButtonElement | null>>([]);
   let menuItemElements = $state<Array<HTMLButtonElement | null>>([]);
   let uncontrolledValue = $state<string | null>(null);
+  let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
   let highlightIndex = $state(0);
   let lastOpenValue = $state<string | null>(null);
 
   $effect.pre(() => {
-    if (!rootElement) {
+    if (!seededDefaultValue) {
       uncontrolledValue = defaultValue;
+      seededDefaultValue = true;
     }
   });
 

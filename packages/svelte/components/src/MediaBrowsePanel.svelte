@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Button from "./Button.svelte";
   import Callout from "./Callout.svelte";
   import UiPresentationProvider from "./UiPresentationProvider.svelte";
@@ -23,11 +21,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    select: { item: MediaPickerItem };
-    loadMore: void;
-  }>();
+  export let onSelect: ((item: MediaPickerItem) => void) | undefined = undefined;
+  export let onLoadMore: (() => void) | undefined = undefined;
   const uiPresentation = getUiPresentation();
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
@@ -56,7 +51,7 @@
           <button
             type="button"
             class="poodle-media-browse-panel__item"
-            on:click={() => dispatch("select", { item })}
+            onclick={() => onSelect?.(item)}
           >
             <MediaThumbnail
               kind={toMediaKind(item.kind)}
@@ -82,7 +77,7 @@
 
       {#if hasMore}
         <div class="poodle-media-browse-panel__actions">
-          <Button variant="secondary" size={resolvedSize} on:click={() => dispatch("loadMore")} disabled={loading}>
+          <Button variant="secondary" size={resolvedSize} onClick={() => onLoadMore?.()} disabled={loading}>
             {loading ? "Loading..." : loadMoreLabel}
           </Button>
         </div>

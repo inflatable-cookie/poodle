@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import { getFocusableElements } from "./internal";
   import { portal } from "./portal";
@@ -8,101 +8,124 @@
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  /** Controlled open state. Pass `null` for uncontrolled mode. */
-  export let open: boolean | null = null;
-  /** Initial open state for uncontrolled mode. */
-  export let defaultOpen = false;
-  /** Optional title rendered in the built-in header. Ignored when `header` slot is used. */
-  export let title: string | null = null;
-  /** Optional description below the title. Ignored when `header` slot is used. */
-  export let description: string | null = null;
-  /** ARIA role. Defaults to "dialog". AlertDialog sets "alertdialog". */
-  export let role: "dialog" | "alertdialog" = "dialog";
-  /** Whether Escape key closes the dialog. */
-  export let dismissOnEscape = true;
-  /** Whether clicking the backdrop closes the dialog. */
-  export let dismissOnBackdrop = true;
-  /** Accessible label when no visible title is provided. */
-  export let ariaLabel: string | null = null;
-  /** Custom CSS class applied to the surface element. */
-  export let contentClassName = "";
-  /** Custom inline style applied to the surface element. */
-  export let contentStyle = "";
-  /** Custom CSS class applied to the backdrop element. */
-  export let overlayClassName = "";
-  /** Show a close button in the top-right corner. */
-  export let showCloseButton = false;
-  /** Accessible label for the close button. */
-  export let closeLabel = "Close dialog";
-  /** Surface width preset. Defaults to "md". */
-  export let width: "sm" | "md" | "lg" | "xl" | "full" = "md";
-  /** When true, the surface has no internal padding or structure — consumers control all layout. */
-  export let bare = false;
-  /** Explicit size override. */
-  export let size: ControlSize | null = null;
-  /** Explicit close button size override. Defaults to the dialog size. */
-  export let closeButtonSize: ControlSize | null = null;
-  /** Semantic size role. */
-  export let sizeRole: SemanticControlSizeRole = "control";
-  /** Explicit density override. */
-  export let density: ControlDensity | null = null;
+  interface Props {
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    title?: string | null;
+    description?: string | null;
+    role?: "dialog" | "alertdialog";
+    dismissOnEscape?: boolean;
+    dismissOnBackdrop?: boolean;
+    ariaLabel?: string | null;
+    contentClassName?: string;
+    contentStyle?: string;
+    overlayClassName?: string;
+    showCloseButton?: boolean;
+    closeLabel?: string;
+    width?: "sm" | "md" | "lg" | "xl" | "full";
+    bare?: boolean;
+    size?: ControlSize | null;
+    closeButtonSize?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onRequestClose?: (() => void) | undefined;
+    kind?: "dialog" | "alertdialog" | undefined;
+    children?: Snippet<[]>;
+    header?: Snippet<[]>;
+    footer?: Snippet<[]>;
+    actions?: Snippet<[]>;
+  }
 
-  // Legacy compat: accept `kind` as alias for `role`
-  /** @deprecated Use `role` instead. */
-  export let kind: "dialog" | "alertdialog" | undefined = undefined;
-
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-    requestClose: void;
-  }>();
+  let {
+    open = $bindable<boolean | null | undefined>(undefined),
+    defaultOpen = false,
+    title = null,
+    description = null,
+    role = "dialog",
+    dismissOnEscape = true,
+    dismissOnBackdrop = true,
+    ariaLabel = null,
+    contentClassName = "",
+    contentStyle = "",
+    overlayClassName = "",
+    showCloseButton = false,
+    closeLabel = "Close dialog",
+    width = "md",
+    bare = false,
+    size = null,
+    closeButtonSize = null,
+    sizeRole = "control",
+    density = null,
+    onOpenChange = undefined,
+    onRequestClose = undefined,
+    kind = undefined,
+    children,
+    header,
+    footer,
+    actions,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let surfaceElement: HTMLDivElement | null = null;
-  let uncontrolledOpen = defaultOpen;
-  let lastFocusedElement: HTMLElement | null = null;
-  let bodyOverflow: string | null = null;
-  let previousOpen = false;
+  let surfaceElement = $state<HTMLDivElement | null>(null);
+  let uncontrolledOpen = $state(false);
+  let seededDefaultOpen = $state(false);
+  let lastFocusedElement = $state<HTMLElement | null>(null);
+  let bodyOverflow = $state<string | null>(null);
+  let previousOpen = $state(false);
 
-  $: effectiveRole = kind ?? role;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedCloseButtonSize = closeButtonSize ?? resolveSemanticControlSize($uiPresentation.sizeScale, "chrome");
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
-  $: if (isOpen && !previousOpen) {
-    lastFocusedElement = document.activeElement as HTMLElement | null;
-    tick().then(() => {
-      const focusable = getFocusableElements(surfaceElement);
-      focusable[0]?.focus() ?? surfaceElement?.focus();
-    });
-
-    if (typeof document !== "undefined") {
-      bodyOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
+  $effect.pre(() => {
+    if (!seededDefaultOpen && open === undefined) {
+      uncontrolledOpen = defaultOpen;
+      seededDefaultOpen = true;
     }
-  }
-  $: if (!isOpen && previousOpen) {
-    if (typeof document !== "undefined" && bodyOverflow !== null) {
-      document.body.style.overflow = bodyOverflow;
+  });
+
+  const effectiveRole = $derived(kind ?? role);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedCloseButtonSize = $derived(closeButtonSize ?? resolveSemanticControlSize($uiPresentation.sizeScale, "chrome"));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(open !== undefined);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+
+  $effect(() => {
+    if (isOpen && !previousOpen) {
+      lastFocusedElement = document.activeElement as HTMLElement | null;
+      tick().then(() => {
+        const focusable = getFocusableElements(surfaceElement);
+        focusable[0]?.focus() ?? surfaceElement?.focus();
+      });
+
+      if (typeof document !== "undefined") {
+        bodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+      }
     }
 
-    lastFocusedElement?.focus();
-  }
-  $: previousOpen = isOpen;
+    if (!isOpen && previousOpen) {
+      if (typeof document !== "undefined" && bodyOverflow !== null) {
+        document.body.style.overflow = bodyOverflow;
+      }
+
+      lastFocusedElement?.focus();
+    }
+
+    previousOpen = isOpen;
+  });
 
   function setOpen(nextOpen: boolean): void {
-    open = nextOpen;
-
-    if (!isControlled) {
+    if (isControlled) {
+      open = nextOpen;
+    } else {
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function requestClose(): void {
-    dispatch("requestClose");
+    onRequestClose?.();
     setOpen(false);
   }
 
@@ -151,6 +174,12 @@
       }
     };
   });
+
+  onDestroy(() => {
+    if (bodyOverflow !== null) {
+      document.body.style.overflow = bodyOverflow;
+    }
+  });
 </script>
 
 {#if isOpen}
@@ -159,7 +188,7 @@
       type="button"
       class={`poodle-dialog__backdrop ${overlayClassName}`}
       aria-label="Dismiss dialog backdrop"
-      on:click={() => {
+      onclick={() => {
         if (dismissOnBackdrop) {
           requestClose();
         }
@@ -174,29 +203,29 @@
       tabindex="-1"
       aria-label={title ? undefined : ariaLabel ?? undefined}
       aria-modal="true"
-      on:keydown={trapFocus}
+      onkeydown={trapFocus}
     >
       {#if bare}
         {#if showCloseButton}
           <div class="poodle-dialog__close poodle-dialog__close--overlay">
-            <IconButton
-              type="button"
-              icon="x"
-              ariaLabel={closeLabel}
-              variant="ghost"
-              sizeRole="chrome"
-              size={resolvedCloseButtonSize}
-              on:click={requestClose}
-            />
-          </div>
-        {/if}
-        <slot />
+              <IconButton
+                type="button"
+                icon="x"
+                ariaLabel={closeLabel}
+                variant="ghost"
+                sizeRole="chrome"
+                size={resolvedCloseButtonSize}
+                onClick={requestClose}
+              />
+            </div>
+          {/if}
+        {@render children?.()}
       {:else}
-        {#if $$slots.header || title || description || showCloseButton}
+        {#if header || title || description || showCloseButton}
           <div class="poodle-dialog__header-row">
-            {#if $$slots.header}
+            {#if header}
               <div class="poodle-dialog__header">
-                <slot name="header" />
+                {@render header()}
               </div>
             {:else if title || description}
               <div class="poodle-dialog__header">
@@ -219,7 +248,7 @@
                   variant="ghost"
                   sizeRole="chrome"
                   size={resolvedCloseButtonSize}
-                  on:click={requestClose}
+                  onClick={requestClose}
                 />
               </div>
             {/if}
@@ -227,16 +256,16 @@
         {/if}
 
         <div class="poodle-dialog__body">
-          <slot />
+          {@render children?.()}
         </div>
 
-        {#if $$slots.footer}
+        {#if footer}
           <div class="poodle-dialog__footer">
-            <slot name="footer" />
+            {@render footer()}
           </div>
-        {:else if $$slots.actions}
+        {:else if actions}
           <div class="poodle-dialog__actions">
-            <slot name="actions" />
+            {@render actions()}
           </div>
         {/if}
       {/if}

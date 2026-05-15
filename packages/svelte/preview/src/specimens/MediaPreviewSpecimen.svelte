@@ -13,7 +13,9 @@
       kind="image"
       aspectRatio="landscape"
     >
-      <div slot="media" class="poodle-placeholder-media">Image placeholder</div>
+      {#snippet mediaContent()}
+        <div class="poodle-placeholder-media">Image placeholder</div>
+      {/snippet}
     </MediaPreview>
   </SpecimenGroup>
 
@@ -25,7 +27,9 @@
       kind="video"
       aspectRatio="video"
     >
-      <div slot="media" class="poodle-placeholder-media">Video placeholder</div>
+      {#snippet mediaContent()}
+        <div class="poodle-placeholder-media">Video placeholder</div>
+      {/snippet}
     </MediaPreview>
   </SpecimenGroup>
 

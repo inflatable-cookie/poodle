@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Button from "./Button.svelte";
   import Spinner from "./Spinner.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -15,13 +13,10 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    uploadAnyway: void;
-    selectDuplicate: void;
-    clearUpload: void;
-    selectUploaded: void;
-  }>();
+  export let onUploadAnyway: (() => void) | undefined = undefined;
+  export let onSelectDuplicate: (() => void) | undefined = undefined;
+  export let onClearUpload: (() => void) | undefined = undefined;
+  export let onSelectUploaded: (() => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
 
@@ -41,8 +36,8 @@
       <strong>{duplicateLabel}</strong>
     {/if}
     <div class="poodle-media-upload-status-panel__actions">
-      <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("uploadAnyway")}>Upload as new</Button>
-      <Button variant="primary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("selectDuplicate")}>Use existing</Button>
+      <Button variant="secondary" size={resolvedSize} density={resolvedDensity} onClick={() => onUploadAnyway?.()}>Upload as new</Button>
+      <Button variant="primary" size={resolvedSize} density={resolvedDensity} onClick={() => onSelectDuplicate?.()}>Use existing</Button>
     </div>
   </div>
 {:else if uploadStep === "uploading"}
@@ -61,14 +56,14 @@
   <div class="poodle-media-upload-status-panel poodle-media-upload-status-panel--success" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>Upload complete.</p>
     <div class="poodle-media-upload-status-panel__actions">
-      <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("clearUpload")}>Upload another</Button>
-      <Button variant="primary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("selectUploaded")}>Use this media</Button>
+      <Button variant="secondary" size={resolvedSize} density={resolvedDensity} onClick={() => onClearUpload?.()}>Upload another</Button>
+      <Button variant="primary" size={resolvedSize} density={resolvedDensity} onClick={() => onSelectUploaded?.()}>Use this media</Button>
     </div>
   </div>
 {:else if uploadStep === "error"}
   <div class="poodle-media-upload-status-panel poodle-media-upload-status-panel--danger" data-size={resolvedSize} data-density={resolvedDensity}>
     <p>{uploadError || "Upload failed"}</p>
-    <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("clearUpload")}>Try again</Button>
+    <Button variant="secondary" size={resolvedSize} density={resolvedDensity} onClick={() => onClearUpload?.()}>Try again</Button>
   </div>
 {/if}
 

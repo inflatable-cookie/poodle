@@ -22,14 +22,14 @@ Updated: 2026-03-30
 ```text
 [Root .split-view]  <div aria-label>
   ├── [PrimaryPane .split-view__pane--primary]  <div>
-  │     └── (slot: primary)
+  │     └── (snippet: primary)
   ├── [Divider .split-view__divider]  <div>
   │     ├── [ResizeHandle]  ResizeHandle primitive
   │     └── [Toggles .split-view__toggles]  <div> (optional)
   │           ├── [CollapseToggle: primary]  CollapseToggle primitive (optional)
   │           └── [CollapseToggle: secondary]  CollapseToggle primitive (optional)
   └── [SecondaryPane .split-view__pane--secondary]  <div>
-        └── (slot: secondary)
+        └── (snippet: secondary)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -65,20 +65,20 @@ Updated: 2026-03-30
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
 | `primary` | content for the primary (first) pane |
 | `secondary` | content for the secondary (second) pane |
 
 ### Controlled And Uncontrolled
 
-- controlled: `ratio` plus `ratioChange` event
+- controlled: `ratio` plus `onRatioChange`
 - uncontrolled: `defaultRatio` (internal state tracks ratio)
 - fixed-size: `primarySize` or `secondarySize` override ratio-based allocation
 - collapse states (`primaryCollapsed`, `secondaryCollapsed`) are externally
-  owned; changes dispatched via events
+  owned; changes requested through callbacks
 
 ## 4. States
 
@@ -98,13 +98,13 @@ Updated: 2026-03-30
 
 Internal state: `uncontrolledRatio`, `dragMousePos` for resize tracking.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `ratioChange` | resize commits or streams | `{ ratio: number }` | host decides persistence cadence |
-| `primaryCollapsedChange` | primary pane collapse state changes | `{ isCollapsed: boolean }` | fires on toggle click or drag-to-collapse |
-| `secondaryCollapsedChange` | secondary pane collapse state changes | `{ isCollapsed: boolean }` | fires on toggle click or drag-to-collapse |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onRatioChange` | resize commits or streams | `number` | host decides persistence cadence |
+| `onPrimaryCollapsedChange` | primary pane collapse state changes | `boolean` | runs on toggle click or drag-to-collapse |
+| `onSecondaryCollapsedChange` | secondary pane collapse state changes | `boolean` | runs on toggle click or drag-to-collapse |
 
 ## 6. Accessibility
 
@@ -120,7 +120,7 @@ Internal state: `uncontrolledRatio`, `dragMousePos` for resize tracking.
 
 | Key | Behavior |
 |-----|----------|
-| arrow keys on divider | adjusts ratio via `resizeStep` events |
+| arrow keys on divider | adjusts ratio via `ResizeHandle` step callbacks |
 | `Home` / `End` | optional jump to min/max positions (delegated to ResizeHandle) |
 | `Enter` / `Space` | on collapse toggle: toggles pane collapse |
 | `Tab` | reaches divider, toggles, and pane content in logical order |
@@ -154,7 +154,7 @@ Internal state: `uncontrolledRatio`, `dragMousePos` for resize tracking.
 
 - composes: `ResizeHandle`, `CollapseToggle` primitives
 - parent expectations: workspace shells, panel layouts, utility views
-- child expectations: any content via primary/secondary slots
+- child expectations: any content via primary/secondary snippets
 - resizing rules: child focus continuity should survive ratio changes and
   collapse/restore operations
 
@@ -302,11 +302,11 @@ None.
 
 - `data-size` attribute on root reflects resolved size via `resolveSemanticControlSize`
 - `data-density` attribute on root reflects resolved density
-- uses `createEventDispatcher` for all events
+- uses callback props for ratio and collapse-state change requests
 - `bind:this={container}` on root for computing raw ratio from mouse position
 - `rawRatio()` converts mouse position to ratio using container bounding rect
 - primary/secondary collapse toggles use `CollapseToggle` from `@poodle/svelte`
-- resize events handled via `ResizeHandle` `resizeStart`/`resizeMove`/`resizeStep` events
+- resize callbacks handled via `ResizeHandle` `onResizeStart` / `onResizeMove` / `onResizeStep`
 - pane content conditionally rendered: `{#if !primaryCollapsed}` / `{#if !secondaryCollapsed}`
 - `SplitOrientation`, `CollapseDirection`, `ControlSize`, `SemanticControlSizeRole`,
   `ControlDensity` types imported from `@poodle/svelte`
@@ -352,10 +352,10 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Horizontal split | `orientation="horizontal"`, primary slot with "Primary pane", secondary slot with "Secondary pane" | Two side-by-side panes divided by a vertical divider; resizable horizontally |
+| Horizontal split | `orientation="horizontal"`, primary snippet with "Primary pane", secondary snippet with "Secondary pane" | Two side-by-side panes divided by a vertical divider; resizable horizontally |
 
 ### Group: Vertical Split
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Vertical split | `orientation="vertical"`, primary slot with "Primary pane", secondary slot with "Secondary pane" | Two stacked panes divided by a horizontal divider; resizable vertically |
+| Vertical split | `orientation="vertical"`, primary snippet with "Primary pane", secondary snippet with "Secondary pane" | Two stacked panes divided by a horizontal divider; resizable vertically |

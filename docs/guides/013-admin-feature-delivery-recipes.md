@@ -171,7 +171,7 @@ actions rather than entity CRUD.
 ```svelte
 <PageHeader title="Job Queue" backHref="/system" backLabel="Back to system">
   {#snippet actions()}
-    <Button type="button" variant="ghost" on:click={() => pageData.refetch()}>
+    <Button type="button" variant="ghost" onClick={() => pageData.refetch()}>
       Refresh
     </Button>
   {/snippet}
@@ -182,7 +182,7 @@ actions rather than entity CRUD.
 </div>
 
 <Field id="system-jobs-status-filter" label="Status">
-  <Select id="system-jobs-status-filter" bind:value={statusFilter} items={statusOptions} />
+  <Select id="system-jobs-status-filter" bind:value={statusFilter} options={statusOptions} />
 </Field>
 
 <DataTable
@@ -368,7 +368,7 @@ transform-style actions.
         icon={squareCheckIcon}
         ariaLabel={isSelectionMode ? "Cancel selection" : "Select items"}
         tooltip={isSelectionMode ? "Cancel Selection" : "Select Items"}
-        on:click={toggleSelectionMode}
+        onClick={toggleSelectionMode}
       />
     {/if}
     {#if !isSelectionMode}
@@ -382,8 +382,8 @@ transform-style actions.
   href={isSelectionMode ? undefined : detailHref}
   selectable={isSelectionMode}
   selected={selection.isSelected(item.id)}
-  on:selectedChange={(event) => {
-    if (isSelectionMode) selection.toggle(item.id, event.detail.selected);
+  onSelectedChange={(selected) => {
+    if (isSelectionMode) selection.toggle(item.id, selected);
   }}
 />
 
@@ -393,9 +393,9 @@ transform-style actions.
   actions={batchActions}
   showSelectAll
   allSelected={selection.count > 0 && selection.count === items.length}
-  on:clear={handleClearSelection}
-  on:selectAll={handleSelectAll}
-  on:action={handleBatchAction}
+  onClear={handleClearSelection}
+  onSelectAll={handleSelectAll}
+  onAction={handleBatchAction}
 />
 ```
 

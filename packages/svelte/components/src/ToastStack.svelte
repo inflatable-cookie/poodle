@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Button from "./Button.svelte";
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -13,11 +11,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    dismiss: { id: string };
-    action: { id: string };
-  }>();
+  export let onDismiss: ((id: string) => void) | undefined = undefined;
+  export let onAction: ((id: string) => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
 
@@ -34,7 +29,7 @@
       aria-live={item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
     >
-      <button type="button" class="poodle-toast__dismiss" aria-label={`Dismiss ${item.title}`} on:click={() => dispatch("dismiss", { id: item.id })}>
+      <button type="button" class="poodle-toast__dismiss" aria-label={`Dismiss ${item.title}`} onclick={() => onDismiss?.(item.id)}>
         <Icon name="x" />
       </button>
 
@@ -47,7 +42,7 @@
 
       {#if item.actionLabel}
         <div class="poodle-toast__actions">
-          <Button variant="secondary" size={resolvedSize} density={resolvedDensity} on:click={() => dispatch("action", { id: item.id })}>
+          <Button variant="secondary" size={resolvedSize} density={resolvedDensity} onClick={() => onAction?.(item.id)}>
             {item.actionLabel}
           </Button>
         </div>

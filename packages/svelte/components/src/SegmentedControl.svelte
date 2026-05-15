@@ -42,11 +42,13 @@
 
   const generatedName = `poodle-segmented-control-${++nextSegmentedControlId}`;
   let uncontrolledValue = $state<string | null>(null);
+  let seededDefaultValue = $state(false);
   const uiPresentation = getUiPresentation();
 
   $effect.pre(() => {
-    if (uncontrolledValue === null) {
+    if (!seededDefaultValue) {
       uncontrolledValue = defaultValue;
+      seededDefaultValue = true;
     }
   });
 

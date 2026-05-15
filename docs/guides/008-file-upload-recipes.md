@@ -19,8 +19,7 @@ owned by the host app.
 
   let files: FileUploadItem[] = [];
 
-  function handleUpload(event: CustomEvent<{ files: File[] }>) {
-    const selectedFiles = event.detail.files;
+  function handleUpload(selectedFiles: File[]) {
     // start app-owned upload orchestration here
   }
 </script>
@@ -29,7 +28,7 @@ owned by the host app.
   accept="image/*,.pdf"
   multiple
   bind:files
-  on:upload={handleUpload}
+  onUpload={handleUpload}
 />
 ```
 
@@ -51,7 +50,7 @@ owned by the host app.
 ## App-Owned Upload Queue
 
 - derive queue state in the route or form
-- use `on:upload` or `onUpload` to start queue work
+- use `onUpload` to start queue work
 - use `bind:files` for current file state
 - use component methods like `updateProgress` and `setError` only if the app is
   managing per-item upload state inside the same file list

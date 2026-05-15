@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick, type Snippet } from "svelte";
   import { fade } from "svelte/transition";
 
   import { getFocusableElements } from "./internal";
@@ -7,59 +7,101 @@
 
   import type { ControlDensity, ControlSize, DrawerEdge, SemanticControlSizeRole } from "./types";
 
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let edge: DrawerEdge = "right";
-  export let modal = true;
-  export let title: string | null = null;
-  export let description: string | null = null;
-  export let dismissOnEscape = true;
-  export let dismissOnBackdrop = true;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    edge?: DrawerEdge;
+    modal?: boolean;
+    title?: string | null;
+    description?: string | null;
+    dismissOnEscape?: boolean;
+    dismissOnBackdrop?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onRequestClose?: (() => void) | undefined;
+    children?: Snippet<[]>;
+    actions?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-    requestClose: void;
-  }>();
+  let {
+    open = $bindable<boolean | null | undefined>(undefined),
+    defaultOpen = false,
+    edge = "right",
+    modal = true,
+    title = null,
+    description = null,
+    dismissOnEscape = true,
+    dismissOnBackdrop = true,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onOpenChange = undefined,
+    onRequestClose = undefined,
+    children,
+    actions,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
   const duration = 200;
 
-  let surfaceElement: HTMLDivElement | null = null;
-  let uncontrolledOpen = defaultOpen;
-  let lastFocusedElement: HTMLElement | null = null;
-  let bodyOverflow: string | null = null;
-  let previousOpen = false;
+  let surfaceElement = $state<HTMLDivElement | null>(null);
+  let uncontrolledOpen = $state(false);
+  let seededDefaultOpen = $state(false);
+  let lastFocusedElement = $state<HTMLElement | null>(null);
+  let bodyOverflow = $state<string | null>(null);
+  let previousOpen = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
-
-  $: if (isOpen && !previousOpen) {
-    lastFocusedElement = document.activeElement as HTMLElement | null;
-    tick().then(() => {
-      const focusable = getFocusableElements(surfaceElement);
-      focusable[0]?.focus() ?? surfaceElement?.focus();
-    });
-
-    if (typeof document !== "undefined" && modal) {
-      bodyOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
+  $effect.pre(() => {
+    if (!seededDefaultOpen && open === undefined) {
+      uncontrolledOpen = defaultOpen;
+      seededDefaultOpen = true;
     }
-  }
-  $: if (!isOpen && previousOpen) {
-    if (typeof document !== "undefined" && bodyOverflow !== null) {
+  });
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(open !== undefined);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+
+  $effect(() => {
+    if (isOpen && !previousOpen) {
+      lastFocusedElement = document.activeElement as HTMLElement | null;
+      tick().then(() => {
+        const focusable = getFocusableElements(surfaceElement);
+        focusable[0]?.focus() ?? surfaceElement?.focus();
+      });
+    }
+
+    if (!isOpen && previousOpen) {
+      lastFocusedElement?.focus();
+    }
+
+    previousOpen = isOpen;
+  });
+
+  $effect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    if (isOpen && modal) {
+      if (bodyOverflow === null) {
+        bodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+      }
+
+      return;
+    }
+
+    if (bodyOverflow !== null) {
       document.body.style.overflow = bodyOverflow;
       bodyOverflow = null;
     }
-
-    lastFocusedElement?.focus();
-  }
-  $: previousOpen = isOpen;
+  });
 
   /** Custom Svelte transition: slides from the configured edge. */
   function slideEdge(node: HTMLElement) {
@@ -68,21 +110,22 @@
 
     return {
       duration,
-      css: (t: number, u: number) =>
-        `transform: translate${axis}(${u * sign * 100}%)`,
+      css: (_t: number, u: number) => `transform: translate${axis}(${u * sign * 100}%)`,
     };
   }
 
   function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
+    if (isControlled) {
+      open = nextOpen;
+    } else {
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function requestClose(): void {
-    dispatch("requestClose");
+    onRequestClose?.();
     setOpen(false);
   }
 
@@ -128,8 +171,16 @@
 
       if (bodyOverflow !== null) {
         document.body.style.overflow = bodyOverflow;
+        bodyOverflow = null;
       }
     };
+  });
+
+  onDestroy(() => {
+    if (typeof document !== "undefined" && bodyOverflow !== null) {
+      document.body.style.overflow = bodyOverflow;
+      bodyOverflow = null;
+    }
   });
 </script>
 
@@ -141,7 +192,7 @@
         class="poodle-drawer__backdrop"
         aria-label="Dismiss drawer backdrop"
         transition:fade={{ duration }}
-        on:click={() => {
+        onclick={() => {
           if (dismissOnBackdrop) {
             requestClose();
           }
@@ -157,7 +208,7 @@
       aria-modal={modal ? "true" : undefined}
       aria-label={title ? undefined : ariaLabel ?? undefined}
       transition:slideEdge
-      on:keydown={trapFocus}
+      onkeydown={trapFocus}
     >
       {#if title || description}
         <div class="poodle-drawer__header">
@@ -172,12 +223,12 @@
       {/if}
 
       <div class="poodle-drawer__body">
-        <slot />
+        {@render children?.()}
       </div>
 
-      {#if $$slots.actions}
+      {#if actions}
         <div class="poodle-drawer__actions">
-          <slot name="actions" />
+          {@render actions()}
         </div>
       {/if}
     </div>
@@ -262,15 +313,4 @@
     justify-content: flex-end;
     margin-top: var(--poodle-space-stack-md);
   }
-
-  /* Size variants */
-  .poodle-drawer[data-size="xs"] .poodle-drawer__header strong { font-size: 0.8125rem; }
-  .poodle-drawer[data-size="xs"] .poodle-drawer__header p { font-size: 0.75rem; }
-  .poodle-drawer[data-size="sm"] .poodle-drawer__header strong { font-size: 0.875rem; }
-  .poodle-drawer[data-size="lg"] .poodle-drawer__header strong { font-size: 1.0625rem; }
-  .poodle-drawer[data-size="xl"] .poodle-drawer__header strong { font-size: 1.125rem; }
-
-  /* Density variants */
-  .poodle-drawer[data-density="compact"] .poodle-drawer__surface { padding: 0.5rem 0.75rem; }
-  .poodle-drawer[data-density="comfortable"] .poodle-drawer__surface { padding: 1rem 1.25rem; }
 </style>

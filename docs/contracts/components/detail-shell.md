@@ -29,11 +29,11 @@ type DetailShellState = "ready" | "empty" | "loading" | "error";
 ```text
 [Root Shell]  <section> aria-label
   ├── [Header Region]  (optional)
-  │     └── slot:header  OR  <h2> title
+  │     └── header()  OR  <h2> title
   ├── [Body]  (when state="ready")
-  │     └── slot:default
+  │     └── children()
   └── [State Region]  (when state != "ready")
-        └── slot:state  OR  default state content
+        └── stateContent()  OR  default state content
               ├── <strong> stateTitle
               └── <p> stateMessage  (optional)
 ```
@@ -56,13 +56,13 @@ type DetailShellState = "ready" | "empty" | "loading" | "error";
 | `stateTitle` | `string \| null` | `null` | no | heading text for state region; falls back to "Detail state" |
 | `stateMessage` | `string \| null` | `null` | no | body text for state region |
 
-## 5. Slots
+## 5. Snippets
 
-| Slot | Purpose | Fallback |
-|------|---------|----------|
-| `header` | custom header content (PageHeader, actions) | `<h2>{title}</h2>` when title is set |
-| `state` | custom state region content | default `<strong>` + `<p>` state display |
-| default | body content when `state="ready"` | none |
+| Snippet | Purpose | Fallback |
+|---------|---------|----------|
+| `header()` | custom header content (PageHeader, actions) | `<h2>{title}</h2>` when title is set |
+| `stateContent()` | custom state region content | default `<strong>` + `<p>` state display |
+| `children()` | body content when `state="ready"` | none |
 
 ## 6. Events
 

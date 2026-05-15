@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Button from "./Button.svelte";
   import IconButton from "./IconButton.svelte";
   import Popover from "./Popover.svelte";
@@ -30,10 +28,6 @@
   export let compact = false;
   export let showClearButton = true;
   export let onChange: ((value: OrderByValue) => void) | null = null;
-
-  const dispatch = createEventDispatcher<{
-    change: { value: OrderByValue; sort: ActiveSort | null };
-  }>();
 
   const uiPresentation = getUiPresentation();
   let open = false;
@@ -87,7 +81,6 @@
       : null;
 
     onChange?.(nextValue);
-    dispatch("change", { value: nextValue, sort: activeSort });
   }
 
   function addField(key: string): void {

@@ -45,13 +45,13 @@ type CardVariant = "default" | "elevated" | "outlined";
 
 ```text
 [Card]  ariaLabel, hasMedia=true
-  ├── slot:media
+  ├── mediaContent()
   │     └── [MediaThumbnail]
   │           ├── frame with aspect ratio
-  │           │     ├── slot:media content  (ready)
+  │           │     ├── rendered media content  (ready)
   │           │     └── state display       (loading/error/empty)
   │           └── badge overlay  (optional)
-  ├── slot:header
+  ├── header()
   │     └── [Header]
   │           ├── [Heading]
   │           │     ├── <p> eyebrow       (optional)
@@ -62,19 +62,19 @@ type CardVariant = "default" | "elevated" | "outlined";
   │                 └── <li> meta[...]
   └── [Body]
         ├── <p> caption  (optional)
-        └── slot:default
+        └── children()
 ```
 
 | Part | Required | Description |
 |------|----------|-------------|
 | Card | yes | outer card container with variant and media flag |
-| MediaThumbnail | yes | framed preview area in card media slot |
+| MediaThumbnail | yes | framed preview area in the card media region |
 | Header | yes | title block with optional eyebrow, description, metadata |
 | Eyebrow | no | uppercase secondary label above title |
 | Title | yes | primary heading |
 | Description | no | secondary text below title |
 | Meta List | no | pill-styled metadata items |
-| Body | no | caption and default slot content below header |
+| Body | no | caption and children snippet content below header |
 
 ## 4. Props
 
@@ -95,12 +95,12 @@ type CardVariant = "default" | "elevated" | "outlined";
 | `stateTitle` | `string \| null` | `null` | no | heading for non-ready state in thumbnail |
 | `stateMessage` | `string \| null` | `null` | no | body text for non-ready state in thumbnail |
 
-## 5. Slots
+## 5. Snippets
 
-| Slot | Purpose | Fallback |
-|------|---------|----------|
-| `media` | custom media content inside MediaThumbnail frame | MediaThumbnail placeholder |
-| default | additional body content below caption | none |
+| Snippet | Purpose | Fallback |
+|---------|---------|----------|
+| `mediaContent()` | custom media content inside the MediaThumbnail frame | MediaThumbnail placeholder |
+| `children()` | additional body content below the caption | none |
 
 ## 6. Events
 
@@ -112,7 +112,7 @@ State posture is delegated to the `MediaThumbnail` component in both runtimes:
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| ready | `state="ready"` | media slot or placeholder visible in frame |
+| ready | `state="ready"` | media content or placeholder visible in frame |
 | loading | `state="loading"` | `MediaThumbnail` loading posture rendered in frame |
 | error | `state="error"` | `MediaThumbnail` error posture rendered in frame |
 | empty | `state="empty"` | `MediaThumbnail` empty posture rendered in frame |
@@ -211,13 +211,13 @@ Card header and body always render regardless of media state.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Image preview | `title="Hero banner"`, `description="Main landing page banner image for the product launch."`, `eyebrow="Image"`, `meta=["1920 x 1080", "245 KB", "PNG"]`, `kind="image"`, `aspectRatio="landscape"`, media slot with placeholder | framed landscape media area with title, description, eyebrow label, and metadata chips below |
+| Image preview | `title="Hero banner"`, `description="Main landing page banner image for the product launch."`, `eyebrow="Image"`, `meta=["1920 x 1080", "245 KB", "PNG"]`, `kind="image"`, `aspectRatio="landscape"`, mediaContent snippet with placeholder | framed landscape media area with title, description, eyebrow label, and metadata chips below |
 
 ### Video Preview
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Video preview | `title="Onboarding walkthrough"`, `eyebrow="Video"`, `meta=["3:42", "48 MB"]`, `kind="video"`, `aspectRatio="video"`, media slot with placeholder | framed video-ratio media area with title, eyebrow, and duration/size metadata |
+| Video preview | `title="Onboarding walkthrough"`, `eyebrow="Video"`, `meta=["3:42", "48 MB"]`, `kind="video"`, `aspectRatio="video"`, mediaContent snippet with placeholder | framed video-ratio media area with title, eyebrow, and duration/size metadata |
 
 ### Error State
 

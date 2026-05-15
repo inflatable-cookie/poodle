@@ -1,87 +1,160 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import type { Snippet } from "svelte";
 
   import CollapseToggle from "./CollapseToggle.svelte";
   import ResizeHandle from "./ResizeHandle.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { CollapseDirection, ControlDensity, ControlSize, SemanticControlSizeRole, SplitOrientation } from "./types";
+  import type {
+    CollapseDirection,
+    ControlDensity,
+    ControlSize,
+    SemanticControlSizeRole,
+    SplitOrientation,
+  } from "./types";
 
-  export let orientation: SplitOrientation = "horizontal";
-  export let ratio = 0.5;
-  export let defaultRatio = 0.5;
-  export let minPrimarySize: number | null = null;
-  export let minSecondarySize: number | null = null;
-  export let primarySize: number | null = null;
-  export let secondarySize: number | null = null;
-  export let primaryCollapsed = false;
-  export let secondaryCollapsed = false;
-  export let showCollapsePrimary = false;
-  export let showCollapseSecondary = false;
-  export let ariaLabel: string | null = null;
-  export let disabled = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    orientation?: SplitOrientation;
+    ratio?: number | undefined;
+    defaultRatio?: number;
+    minPrimarySize?: number | null;
+    minSecondarySize?: number | null;
+    primarySize?: number | null;
+    secondarySize?: number | null;
+    primaryCollapsed?: boolean | undefined;
+    secondaryCollapsed?: boolean | undefined;
+    showCollapsePrimary?: boolean;
+    showCollapseSecondary?: boolean;
+    ariaLabel?: string | null;
+    disabled?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onRatioChange?: ((ratio: number) => void) | null;
+    onPrimaryCollapsedChange?: ((isCollapsed: boolean) => void) | null;
+    onSecondaryCollapsedChange?: ((isCollapsed: boolean) => void) | null;
+    primary?: Snippet<[]>;
+    secondary?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    ratioChange: { ratio: number };
-    primaryCollapsedChange: { isCollapsed: boolean };
-    secondaryCollapsedChange: { isCollapsed: boolean };
-  }>();
+  let {
+    orientation = "horizontal",
+    ratio = $bindable<number | undefined>(undefined),
+    defaultRatio = 0.5,
+    minPrimarySize = null,
+    minSecondarySize = null,
+    primarySize = null,
+    secondarySize = null,
+    primaryCollapsed = $bindable<boolean | undefined>(undefined),
+    secondaryCollapsed = $bindable<boolean | undefined>(undefined),
+    showCollapsePrimary = false,
+    showCollapseSecondary = false,
+    ariaLabel = null,
+    disabled = false,
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    onRatioChange = null,
+    onPrimaryCollapsedChange = null,
+    onSecondaryCollapsedChange = null,
+    primary,
+    secondary,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let container: HTMLDivElement | null = null;
-  let uncontrolledRatio = defaultRatio;
-  let dragMousePos = 0;
+  let container = $state<HTMLDivElement | null>(null);
+  let uncontrolledRatio = $state(0.5);
+  let uncontrolledPrimaryCollapsed = $state(false);
+  let uncontrolledSecondaryCollapsed = $state(false);
+  let dragMousePos = $state(0);
+  let seededDefaultRatio = $state(false);
 
-  // ── Derived ──────────────────────────────────────────────────────
+  $effect.pre(() => {
+    if (!seededDefaultRatio && ratio === undefined) {
+      uncontrolledRatio = defaultRatio;
+      seededDefaultRatio = true;
+    }
+  });
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledRatio = $derived(ratio !== undefined);
+  const hasControlledPrimaryCollapsed = $derived(primaryCollapsed !== undefined);
+  const hasControlledSecondaryCollapsed = $derived(secondaryCollapsed !== undefined);
+  const currentRatio = $derived(
+    Math.min(0.95, Math.max(0.05, hasControlledRatio ? (ratio ?? defaultRatio) : uncontrolledRatio)),
+  );
+  const isPrimaryCollapsed = $derived(
+    hasControlledPrimaryCollapsed ? primaryCollapsed === true : uncontrolledPrimaryCollapsed,
+  );
+  const isSecondaryCollapsed = $derived(
+    hasControlledSecondaryCollapsed ? secondaryCollapsed === true : uncontrolledSecondaryCollapsed,
+  );
 
-  $: currentRatio = Math.min(0.95, Math.max(0.05, ratio ?? uncontrolledRatio));
-
-  $: primaryFlex = primaryCollapsed
-    ? "0 0 0"
-    : primarySize != null
-      ? `0 0 ${primarySize}px`
-    : secondarySize != null
-      ? "1 1 0"
-    : secondaryCollapsed
-      ? "1 1 0"
-      : `0 0 ${currentRatio * 100}%`;
-
-  $: secondaryFlex = secondaryCollapsed
-    ? "0 0 0"
-    : secondarySize != null
-      ? `0 0 ${secondarySize}px`
-    : primaryCollapsed || primarySize != null
-      ? "1 1 0"
-      : "1 1 0";
-
-  $: primaryMinStyle = minPrimarySize != null && !primaryCollapsed
-    ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minPrimarySize}px`
-    : "";
-
-  $: secondaryMinStyle = minSecondarySize != null && !secondaryCollapsed
-    ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minSecondarySize}px`
-    : "";
-
-  $: hasToggles = showCollapsePrimary || showCollapseSecondary;
-  $: beforeDirection = (orientation === "horizontal" ? "left" : "up") as CollapseDirection;
-  $: afterDirection = (orientation === "horizontal" ? "right" : "down") as CollapseDirection;
-
-  // ── Ratio management ─────────────────────────────────────────────
+  const primaryFlex = $derived(
+    isPrimaryCollapsed
+      ? "0 0 0"
+      : primarySize != null
+        ? `0 0 ${primarySize}px`
+        : secondarySize != null
+          ? "1 1 0"
+          : isSecondaryCollapsed
+            ? "1 1 0"
+            : `0 0 ${currentRatio * 100}%`,
+  );
+  const secondaryFlex = $derived(
+    isSecondaryCollapsed
+      ? "0 0 0"
+      : secondarySize != null
+        ? `0 0 ${secondarySize}px`
+        : isPrimaryCollapsed || primarySize != null
+          ? "1 1 0"
+          : "1 1 0",
+  );
+  const primaryMinStyle = $derived(
+    minPrimarySize != null && !isPrimaryCollapsed
+      ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minPrimarySize}px`
+      : "",
+  );
+  const secondaryMinStyle = $derived(
+    minSecondarySize != null && !isSecondaryCollapsed
+      ? `min-${orientation === "horizontal" ? "width" : "height"}: ${minSecondarySize}px`
+      : "",
+  );
+  const hasToggles = $derived(showCollapsePrimary || showCollapseSecondary);
+  const beforeDirection = $derived((orientation === "horizontal" ? "left" : "up") as CollapseDirection);
+  const afterDirection = $derived((orientation === "horizontal" ? "right" : "down") as CollapseDirection);
 
   function setRatio(nextRatio: number): void {
     const clamped = Math.min(0.95, Math.max(0.05, nextRatio));
-    uncontrolledRatio = clamped;
-    ratio = clamped;
-    dispatch("ratioChange", { ratio: clamped });
+    if (hasControlledRatio) {
+      ratio = clamped;
+    } else {
+      uncontrolledRatio = clamped;
+    }
+
+    onRatioChange?.(clamped);
   }
 
-  // ── Resize via ResizeHandle events ──────────────────────────────
+  function setPrimaryCollapsed(nextCollapsed: boolean): void {
+    if (hasControlledPrimaryCollapsed) {
+      primaryCollapsed = nextCollapsed;
+    } else {
+      uncontrolledPrimaryCollapsed = nextCollapsed;
+    }
+
+    onPrimaryCollapsedChange?.(nextCollapsed);
+  }
+
+  function setSecondaryCollapsed(nextCollapsed: boolean): void {
+    if (hasControlledSecondaryCollapsed) {
+      secondaryCollapsed = nextCollapsed;
+    } else {
+      uncontrolledSecondaryCollapsed = nextCollapsed;
+    }
+
+    onSecondaryCollapsedChange?.(nextCollapsed);
+  }
 
   function rawRatio(mousePos: number): number {
     if (!container) return currentRatio;
@@ -92,78 +165,71 @@
     return (mousePos - start) / total;
   }
 
-  function handleResizeStart(e: CustomEvent<{ position: number }>): void {
-    dragMousePos = e.detail.position;
+  function handleResizeStart(position: number): void {
+    dragMousePos = position;
 
-    // Uncollapse on drag start from collapsed position
-    if (primaryCollapsed) {
+    if (isPrimaryCollapsed) {
       setRatio(0.05);
-      primaryCollapsed = false;
-      dispatch("primaryCollapsedChange", { isCollapsed: false });
+      setPrimaryCollapsed(false);
     }
-    if (secondaryCollapsed) {
+    if (isSecondaryCollapsed) {
       setRatio(0.95);
-      secondaryCollapsed = false;
-      dispatch("secondaryCollapsedChange", { isCollapsed: false });
+      setSecondaryCollapsed(false);
     }
   }
 
-  function handleResizeMove(e: CustomEvent<{ delta: number }>): void {
+  function handleResizeMove(delta: number): void {
     if (!container) return;
-    dragMousePos += e.detail.delta;
+    dragMousePos += delta;
     const raw = rawRatio(dragMousePos);
 
     if (raw <= 0.02) {
-      if (!primaryCollapsed) {
-        primaryCollapsed = true;
+      if (!isPrimaryCollapsed) {
+        setPrimaryCollapsed(true);
         setRatio(0.5);
-        dispatch("primaryCollapsedChange", { isCollapsed: true });
       }
-    } else if (raw >= 0.98) {
-      if (!secondaryCollapsed) {
-        secondaryCollapsed = true;
-        setRatio(0.5);
-        dispatch("secondaryCollapsedChange", { isCollapsed: true });
-      }
-    } else {
-      if (primaryCollapsed) {
-        primaryCollapsed = false;
-        dispatch("primaryCollapsedChange", { isCollapsed: false });
-      }
-      if (secondaryCollapsed) {
-        secondaryCollapsed = false;
-        dispatch("secondaryCollapsedChange", { isCollapsed: false });
-      }
-      setRatio(raw);
+      return;
     }
+
+    if (raw >= 0.98) {
+      if (!isSecondaryCollapsed) {
+        setSecondaryCollapsed(true);
+        setRatio(0.5);
+      }
+      return;
+    }
+
+    if (isPrimaryCollapsed) {
+      setPrimaryCollapsed(false);
+    }
+    if (isSecondaryCollapsed) {
+      setSecondaryCollapsed(false);
+    }
+    setRatio(raw);
   }
 
-  function handleResizeStep(e: CustomEvent<{ delta: number }>): void {
+  function handleResizeStep(delta: number): void {
     if (!container) return;
     const rect = container.getBoundingClientRect();
     const total = orientation === "horizontal" ? rect.width : rect.height;
     if (total <= 0) return;
-    setRatio(currentRatio + e.detail.delta / total);
+    setRatio(currentRatio + delta / total);
   }
 
-  // ── Collapse toggles ─────────────────────────────────────────────
-
-  function toggleCollapsePrimary(e: CustomEvent<{ isCollapsed: boolean }>): void {
-    primaryCollapsed = e.detail.isCollapsed;
-    dispatch("primaryCollapsedChange", { isCollapsed: primaryCollapsed });
+  function toggleCollapsePrimary(nextCollapsed: boolean): void {
+    setPrimaryCollapsed(nextCollapsed);
   }
 
-  function toggleCollapseSecondary(e: CustomEvent<{ isCollapsed: boolean }>): void {
-    secondaryCollapsed = e.detail.isCollapsed;
-    dispatch("secondaryCollapsedChange", { isCollapsed: secondaryCollapsed });
+  function toggleCollapseSecondary(nextCollapsed: boolean): void {
+    setSecondaryCollapsed(nextCollapsed);
   }
 </script>
 
 <div
   class="poodle-split-view"
   data-orientation={orientation}
-  data-primary-collapsed={primaryCollapsed || undefined}
-  data-secondary-collapsed={secondaryCollapsed || undefined}
+  data-primary-collapsed={isPrimaryCollapsed || undefined}
+  data-secondary-collapsed={isSecondaryCollapsed || undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
   aria-label={ariaLabel ?? "Split view"}
@@ -173,8 +239,8 @@
     class="poodle-split-view__pane poodle-split-view__pane--primary"
     style="flex: {primaryFlex}; overflow: hidden; {primaryMinStyle}"
   >
-    {#if !primaryCollapsed}
-      <slot name="primary" />
+    {#if !isPrimaryCollapsed}
+      {@render primary?.()}
     {/if}
   </div>
 
@@ -186,31 +252,31 @@
   >
     <ResizeHandle
       {orientation}
-      disabled={disabled}
+      {disabled}
       ariaLabel="Resize"
-      on:resizeStart={handleResizeStart}
-      on:resizeMove={handleResizeMove}
-      on:resizeStep={handleResizeStep}
+      onResizeStart={handleResizeStart}
+      onResizeMove={handleResizeMove}
+      onResizeStep={handleResizeStep}
     />
 
     {#if hasToggles}
       <div class="poodle-split-view__toggles">
-        {#if showCollapsePrimary && !secondaryCollapsed}
+        {#if showCollapsePrimary && !isSecondaryCollapsed}
           <CollapseToggle
             direction={beforeDirection}
-            collapsed={primaryCollapsed}
-            disabled={disabled}
-            ariaLabel={primaryCollapsed ? "Expand primary" : "Collapse primary"}
-            on:toggle={toggleCollapsePrimary}
+            collapsed={isPrimaryCollapsed}
+            {disabled}
+            ariaLabel={isPrimaryCollapsed ? "Expand primary" : "Collapse primary"}
+            onToggle={toggleCollapsePrimary}
           />
         {/if}
-        {#if showCollapseSecondary && !primaryCollapsed}
+        {#if showCollapseSecondary && !isPrimaryCollapsed}
           <CollapseToggle
             direction={afterDirection}
-            collapsed={secondaryCollapsed}
-            disabled={disabled}
-            ariaLabel={secondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
-            on:toggle={toggleCollapseSecondary}
+            collapsed={isSecondaryCollapsed}
+            {disabled}
+            ariaLabel={isSecondaryCollapsed ? "Expand secondary" : "Collapse secondary"}
+            onToggle={toggleCollapseSecondary}
           />
         {/if}
       </div>
@@ -221,8 +287,8 @@
     class="poodle-split-view__pane poodle-split-view__pane--secondary"
     style="flex: {secondaryFlex}; overflow: hidden; {secondaryMinStyle}"
   >
-    {#if !secondaryCollapsed}
-      <slot name="secondary" />
+    {#if !isSecondaryCollapsed}
+      {@render secondary?.()}
     {/if}
   </div>
 </div>
@@ -245,8 +311,6 @@
     min-height: 0;
   }
 
-  /* ── Divider ─────────────────────────────────────────────────── */
-
   .poodle-split-view__divider {
     position: relative;
     display: flex;
@@ -261,36 +325,41 @@
   }
 
   .poodle-split-view__divider[data-orientation="vertical"] {
-    height: 0.5rem;
     width: 100%;
+    height: 0.5rem;
   }
-
-  /* ── Collapse toggles overlay ────────────────────────────────── */
 
   .poodle-split-view__toggles {
     position: absolute;
-    z-index: 1;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    pointer-events: none;
-  }
-
-  .poodle-split-view__toggles :global(*) {
-    pointer-events: auto;
+    justify-content: center;
+    gap: 0.125rem;
+    padding: 0.125rem;
+    border-radius: var(--poodle-radius-pill);
+    background: color-mix(
+      in srgb,
+      var(--poodle-color-background-panel) 92%,
+      var(--poodle-color-background-elevated)
+    );
+    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent);
   }
 
   .poodle-split-view__divider[data-orientation="horizontal"] .poodle-split-view__toggles {
-    flex-direction: column;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    flex-direction: column;
   }
 
   .poodle-split-view__divider[data-orientation="vertical"] .poodle-split-view__toggles {
-    flex-direction: row;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    flex-direction: row;
+  }
+
+  .poodle-split-view__divider[data-disabled] .poodle-split-view__toggles {
+    opacity: var(--poodle-state-opacity-disabled);
   }
 </style>

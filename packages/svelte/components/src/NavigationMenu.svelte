@@ -40,11 +40,13 @@
   let rootElement = $state<HTMLDivElement | null>(null);
   let triggerElements = $state<Array<HTMLButtonElement | null>>([]);
   let uncontrolledValue = $state<string | null>(null);
+  let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
 
   $effect.pre(() => {
-    if (uncontrolledValue === null) {
+    if (!seededDefaultValue) {
       uncontrolledValue = defaultValue;
+      seededDefaultValue = true;
     }
   });
 
@@ -57,9 +59,14 @@
 
   $effect(() => {
     if (selectedIndex >= 0) {
-      focusIndex = selectedIndex;
-    } else if (firstEnabledIndex(items) >= 0 && focusIndex === 0) {
-      focusIndex = firstEnabledIndex(items);
+      if (focusIndex !== selectedIndex) {
+        focusIndex = selectedIndex;
+      }
+    } else {
+      const nextEnabledIndex = firstEnabledIndex(items);
+      if (nextEnabledIndex >= 0 && focusIndex !== nextEnabledIndex) {
+        focusIndex = nextEnabledIndex;
+      }
     }
   });
 

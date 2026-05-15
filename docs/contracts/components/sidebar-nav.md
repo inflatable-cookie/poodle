@@ -283,8 +283,8 @@ None.
 - Items with `href` and not disabled render as `<a>`, otherwise as `<button>`
 - `aria-current="page"` applied to active items regardless of element type
 - `data-separated` attribute on groups tracks whether multiple visible groups exist
-- Click dispatches `valueChange` event unless item is disabled
-- Uses `createEventDispatcher` for the `valueChange` event
+- Item activation calls `onValueChange` unless the item is disabled
+- Uses callback props instead of a dispatcher event surface
 
 ## 10. GPUI Notes
 

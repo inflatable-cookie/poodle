@@ -58,7 +58,8 @@ Updated: 2026-03-21
 
 ### Controlled And Uncontrolled
 
-- controlled committed value: `value` prop is the source of truth
+- committed value is host-owned: `value` prop is the source of truth, and the
+  host applies accepted edits from `onCommit`
 - transient editing state (isEditing, draftValue) owned internally by the component
 - `inputElement` ref available internally for focus management
 
@@ -89,13 +90,13 @@ Updated: 2026-03-21
 | editing -> view (commit) | `Enter` or blur | `commit` fires with trimmed value and previousValue |
 | editing -> view (cancel) | `Escape` | edit discarded, `cancel` fires, original value restored |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `editStart` | edit mode begins | `void` | optional callback |
-| `commit` | edit is confirmed | `{ value: string; previousValue: string }` | always fires on commit (host decides whether to apply) |
-| `cancel` | edit is abandoned | `void` | optional callback |
+| Callback | When It Fires | Signature | Notes |
+|----------|---------------|-----------|-------|
+| `onEditStart` | edit mode begins | `() => void` | optional callback |
+| `onCommit` | edit is confirmed | `(detail: { value: string; previousValue: string }) => void` | always fires on commit (host decides whether to apply) |
+| `onCancel` | edit is abandoned | `() => void` | optional callback |
 
 ## 6. Accessibility
 

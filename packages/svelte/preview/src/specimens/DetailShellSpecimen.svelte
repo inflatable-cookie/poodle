@@ -8,9 +8,9 @@
   <SpecimenGroup label="Layout structure">
     <div class="poodle-specimen__demo">
       <DetailShell ariaLabel="Layout regions">
-        <svelte:fragment slot="header">
+        {#snippet header()}
           <Region label="Header" color="#5b9bd5" minHeight="3rem" />
-        </svelte:fragment>
+        {/snippet}
         <Region label="Section 1" color="#70ad47" minHeight="3rem" />
         <Region label="Section 2" color="#ed7d31" minHeight="3rem" />
         <Region label="Section 3" color="#a855f7" minHeight="3rem" />
@@ -21,14 +21,14 @@
   <SpecimenGroup label="Multi-section layout with header">
     <div class="poodle-specimen__demo">
       <DetailShell ariaLabel="Project detail view">
-        <svelte:fragment slot="header">
+        {#snippet header()}
           <PageHeader title="Poodle Design System" eyebrow="Project" subtitle="A comprehensive component library.">
             {#snippet actions()}
               <Pill appearance="badge" tone="success">Active</Pill>
               <Button variant="secondary">Edit</Button>
             {/snippet}
           </PageHeader>
-        </svelte:fragment>
+        {/snippet}
         <DetailSection title="General">
           <DetailItem label="Owner" value="Clay" />
           <DetailItem label="Created" value="March 2025" />

@@ -532,7 +532,7 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 - Uncontrolled mode: internal `uncontrolledValue` state, controlled mode: `value` prop passthrough
 - Items list can be reordered via drag events or keyboard Alt+Arrow
 - Module-level `nextTabsId` counter for unique IDs across instances
-- Close button uses `on:click|stopPropagation`
+- Close button stops click propagation so the parent tab does not also activate
 - Panel slot receives `activeValue` as slot prop
 
 ## 10. GPUI Notes

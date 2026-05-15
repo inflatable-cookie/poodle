@@ -25,14 +25,13 @@ callback-driven media-library orchestration into the Poodle composite.
 </script>
 
 <MediaPicker
-  bind:open
+  open={open}
+  onOpenChange={(nextOpen) => (open = nextOpen)}
   {items}
-  on:select={(event) => {
-    const item = event.detail.item;
+  onSelect={(item) => {
     // app-owned selection handling
   }}
-  on:upload={(event) => {
-    const files = event.detail.files;
+  onUpload={(files) => {
     // app-owned upload queue handling
   }}
 />

@@ -82,11 +82,11 @@ None.
 | `isIndeterminate` (derived) | `value === null` |
 | `isOverlay` (derived) | `presentation === "overlay"` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `cancel` | User clicks the cancel button | `void` | Only fires when `canCancel` is true |
+| Callback | When It Fires | Signature | Notes |
+|----------|---------------|-----------|-------|
+| `onCancel` | User clicks the cancel button | `() => void` | Only available when `canCancel` is true |
 
 ## 6. Accessibility
 
@@ -247,7 +247,7 @@ None.
 - Composes the `Progress` primitive for determinate mode
 - `isIndeterminate` reactive: `value === null`
 - `presentation` toggles between overlay/backdrop treatment and inline flow layout
-- Uses `createEventDispatcher` for `cancel` event
+- Uses the `onCancel` callback for the cancel action
 
 ## 10. GPUI Notes
 
@@ -260,7 +260,7 @@ None.
 ### Tier 1: Strict Parity
 
 - [ ] all props have the same meaning and defaults
-- [ ] cancel event fires with same trigger
+- [ ] `onCancel` fires with the same trigger
 - [ ] indeterminate vs determinate logic matches
 - [ ] overlay vs inline presentation matches
 - [ ] visible toggle fully removes/adds the component

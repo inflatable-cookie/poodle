@@ -65,6 +65,9 @@
 
   function refreshPreviewSurface(): void {
     if (!appShell) return;
+    if (typeof document !== "undefined") {
+      applyThemeAttributes(document.documentElement, { theme, density, controlSize });
+    }
     applyThemeAttributes(appShell, { theme, density, controlSize });
     liveTokenValues = readSemanticTokenValues(appShell);
     appliedPreviewModeKey = previewModeKey;

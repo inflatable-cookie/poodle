@@ -21,7 +21,7 @@ Updated: 2026-03-26
 ```text
 [Wrapper .icon-button-wrap]  <span>
   └── [Root .icon-button]  <button>
-        ├── [Glyph .icon-button__glyph]  <span>  (when not loading; contains default slot for custom icon content)
+        ├── [Glyph .icon-button__glyph]  <span>  (when not loading; contains default children content for custom glyph content)
         ├── [Spinner .icon-button__spinner]  <span>  (when loading)
         └── [Tooltip .icon-button__tooltip]  <span role="tooltip">  (shown on hover/focus)
 ```
@@ -30,7 +30,7 @@ Updated: 2026-03-26
 |------|----------|-------------|---------------|
 | Wrapper | yes | outer positioning container for button and tooltip | — |
 | Root | yes | compact action surface, square button | background, border, radius, focus ring, size |
-| Glyph | yes | visible icon character display; contains default slot for custom icon content | icon color, icon size, code font |
+| Glyph | yes | visible icon character display; contains default children content for custom glyph content | icon color, icon size, code font |
 | Spinner | no | shared `Spinner` primitive replacing glyph | spinner tokens via primitive contract |
 | Tooltip | no | built-in tooltip surface shown on hover/focus after 300ms delay | background, text color, radius, padding, placement |
 
@@ -87,6 +87,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 - Command-only by default
 - Optional controlled pressed state through `pressed`; when `pressed`
   is not null, `aria-pressed` is rendered
+- `pressed` is bindable for host-owned toggle state
 
 ## 4. States
 
@@ -108,13 +109,14 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 - `isUnavailable` combines disabled and loading for interaction gating
 - Loading and disabled both suppress click events
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `click` | activation completes | `MouseEvent` | suppressed while disabled or loading |
-| `focus` | focus enters root | `FocusEvent` | passthrough |
-| `blur` | focus leaves root | `FocusEvent` | passthrough |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onClick` | activation completes | `MouseEvent` | suppressed while disabled or loading |
+| `onFocus` | focus enters root | `FocusEvent` | passthrough |
+| `onBlur` | focus leaves root | `FocusEvent` | passthrough |
+| `onPressedChange` | toggle state changes | `boolean` | fires when the icon button is in toggle mode |
 
 ## 6. Accessibility
 
@@ -172,7 +174,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 ### Composition
 
 - parent expectations: toolbars, shell actions, cards, headers
-- child expectations: icon only (no text content, no slots)
+- child expectations: icon only (no text content; optional default snippet for custom glyph content)
 - resizing rules: icon button does not wrap or expand to fit text
 
 ## 8. Token Usage — Exact Values

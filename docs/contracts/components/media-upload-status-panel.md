@@ -107,14 +107,14 @@ All props are controlled. The host owns workflow state and transitions between s
 | complete | `--success` | `var(--poodle-color-success-base)` |
 | error | `--danger` | `var(--poodle-color-danger-base)` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `uploadAnyway` | User clicks "Upload as new" in duplicate state | `void` |
-| `selectDuplicate` | User clicks "Use existing" in duplicate state | `void` |
-| `clearUpload` | User clicks "Upload another" (complete) or "Try again" (error) | `void` |
-| `selectUploaded` | User clicks "Use this media" in complete state | `void` |
+| Callback | When It Fires | Signature |
+|----------|---------------|-----------|
+| `onUploadAnyway` | User clicks "Upload as new" in duplicate state | `() => void` |
+| `onSelectDuplicate` | User clicks "Use existing" in duplicate state | `() => void` |
+| `onClearUpload` | User clicks "Upload another" (complete) or "Try again" (error) | `() => void` |
+| `onSelectUploaded` | User clicks "Use this media" in complete state | `() => void` |
 
 ## 6. Accessibility
 

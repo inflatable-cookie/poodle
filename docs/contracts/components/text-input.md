@@ -58,7 +58,7 @@ Updated: 2026-04-17
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string` | none | yes | element id for label association |
-| `value` | `string \| null` | `null` | no | controlled value; when non-null, component is controlled |
+| `value` | `string \| null` | `null` | no | host-owned value when supplied; `null` remains a valid controlled empty state |
 | `defaultValue` | `string` | `""` | no | uncontrolled initial value |
 | `placeholder` | `string \| null` | `null` | no | hint text when empty |
 | `name` | `string \| undefined` | `undefined` | no | form submission name |
@@ -238,8 +238,8 @@ Updated: 2026-04-17
 | `Home/End` | moves to start/end |
 | `Shift+Arrow` | extends selection |
 | platform copy/cut/paste/select-all shortcuts | operate on text selection |
-| `Enter` | fires `submit` event with current value |
-| `Escape` | fires `cancel` event |
+| `Enter` | calls `onSubmit` with the current value |
+| `Escape` | calls `onCancel` |
 | `Tab` | moves focus out of the control |
 
 ### Focus And Announcement
@@ -493,7 +493,7 @@ indicator slot.
 - [ ] value/change semantics match (controlled and uncontrolled)
 - [ ] caret navigation and selection semantics match
 - [ ] accessible naming and invalid/readonly/disabled state exposure match
-- [ ] Enter fires submit event; Escape fires cancel event
+- [ ] Enter calls `onSubmit`; Escape calls `onCancel`
 - [ ] text-focused shortcut suppression matches
 - [ ] maxLength enforcement matches
 - [ ] prefix/suffix are non-editable and visually separated

@@ -39,8 +39,8 @@ or section-level validity logic across multiple fields.
   <TextInput
     id="name"
     value={name}
-    on:valueChange={(event) => {
-      name = event.detail.value;
+    onValueChange={(nextValue) => {
+      name = nextValue;
     }}
     required
   />
@@ -62,12 +62,12 @@ or section-level validity logic across multiple fields.
       const exists = value === "taken";
       return exists ? { valid: false, message: "That slug is already in use." } : { valid: true };
     }}
-    on:valueChange={(event) => {
-      slug = event.detail.value;
+    onValueChange={(nextValue) => {
+      slug = nextValue;
     }}
-    on:validationChange={(event) => {
-      slugStatus = event.detail.status;
-      slugMessage = event.detail.message;
+    onValidationChange={(detail) => {
+      slugStatus = detail.status;
+      slugMessage = detail.message;
     }}
   />
 </Field>

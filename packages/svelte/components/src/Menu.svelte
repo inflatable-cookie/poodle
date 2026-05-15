@@ -50,14 +50,16 @@
   let overlayElement = $state<HTMLDivElement | null>(null);
   let itemElements = $state<Array<HTMLButtonElement | null>>([]);
   let uncontrolledOpen = $state(false);
+  let seededDefaultOpen = $state(false);
   let highlightIndex = $state(0);
   let resolvedPlacement = $state<OverlayPlacement>("bottom-start");
   let overlayStyle = $state("");
 
   $effect.pre(() => {
-    if (!rootElement) {
+    if (!seededDefaultOpen) {
       uncontrolledOpen = defaultOpen;
       resolvedPlacement = placement;
+      seededDefaultOpen = true;
     }
   });
 

@@ -79,27 +79,44 @@
   const uiPresentation = getUiPresentation();
   let tabElements = $state<Array<HTMLButtonElement | null>>([]);
   let uncontrolledValue = $state<string | null>(null);
+  let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
   let renderedItems = $state<TabItem[]>([]);
-  let prevItems = $state<TabItem[] | null>(null);
+  let lastItemsSignature = $state("");
   let lastSyncedValue = $state<string | null>(null);
   let tooltipIndex = $state<number | null>(null);
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let dragSourceIndex = $state<number | null>(null);
   let dropTargetIndex = $state<number | null>(null);
 
+  function getItemsSignature(nextItems: TabItem[]): string {
+    return JSON.stringify(
+      nextItems.map((item) => ({
+        value: item.value,
+        label: item.label,
+        icon: item.icon ?? null,
+        disabled: item.disabled ?? false,
+        closable: item.closable ?? false,
+        count: item.count ?? null,
+        separator: item.separator ?? false,
+      })),
+    );
+  }
+
   $effect.pre(() => {
-    if (prevItems === items) {
+    const itemsSignature = getItemsSignature(items);
+    if (itemsSignature === lastItemsSignature) {
       return;
     }
 
-    prevItems = items;
+    lastItemsSignature = itemsSignature;
     renderedItems = items;
   });
 
   $effect.pre(() => {
-    if (uncontrolledValue === null) {
+    if (!seededDefaultValue) {
       uncontrolledValue = defaultValue;
+      seededDefaultValue = true;
     }
   });
 

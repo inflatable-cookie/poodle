@@ -1,27 +1,51 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import Card from "./Card.svelte";
   import MediaThumbnail from "./MediaThumbnail.svelte";
 
   import type { AspectRatio, CardVariant, MediaKind, MediaState } from "./types";
 
-  export let title: string;
-  export let description: string | null = null;
-  export let eyebrow: string | null = null;
-  export let caption: string | null = null;
-  export let meta: string[] = [];
-  export let badge: string | null = null;
-  export let thumbnailMeta: string | null = null;
-  export let kind: MediaKind = "image";
-  export let state: MediaState = "ready";
-  export let aspectRatio: AspectRatio = "landscape";
-  export let variant: CardVariant = "default";
-  export let ariaLabel: string | null = null;
-  export let stateTitle: string | null = null;
-  export let stateMessage: string | null = null;
+  interface Props {
+    title: string;
+    description?: string | null;
+    eyebrow?: string | null;
+    caption?: string | null;
+    meta?: string[];
+    badge?: string | null;
+    thumbnailMeta?: string | null;
+    kind?: MediaKind;
+    state?: MediaState;
+    aspectRatio?: AspectRatio;
+    variant?: CardVariant;
+    ariaLabel?: string | null;
+    stateTitle?: string | null;
+    stateMessage?: string | null;
+    mediaContent?: Snippet;
+    children?: Snippet;
+  }
+
+  let {
+    title,
+    description = null,
+    eyebrow = null,
+    caption = null,
+    meta = [],
+    badge = null,
+    thumbnailMeta = null,
+    kind = "image",
+    state = "ready",
+    aspectRatio = "landscape",
+    variant = "default",
+    ariaLabel = null,
+    stateTitle = null,
+    stateMessage = null,
+    mediaContent,
+    children,
+  }: Props = $props();
 </script>
 
 <Card {variant} media={true} ariaLabel={ariaLabel ?? title}>
-  <div slot="media">
+  {#snippet mediaContent()}
     <MediaThumbnail
       {kind}
       {state}
@@ -33,40 +57,41 @@
       stateTitle={stateTitle}
       stateMessage={stateMessage}
     >
-      <slot name="media" />
+      {@render mediaContent?.()}
     </MediaThumbnail>
-  </div>
+  {/snippet}
 
-  <div slot="header" class="poodle-media-preview__header">
-    <div class="poodle-media-preview__heading">
-      {#if eyebrow}
-        <p class="poodle-media-preview__eyebrow">{eyebrow}</p>
-      {/if}
-      <h3>{title}</h3>
-      {#if description}
-        <p class="poodle-media-preview__description">{description}</p>
+  {#snippet header()}
+    <div class="poodle-media-preview__header">
+      <div class="poodle-media-preview__heading">
+        {#if eyebrow}
+          <p class="poodle-media-preview__eyebrow">{eyebrow}</p>
+        {/if}
+        <h3>{title}</h3>
+        {#if description}
+          <p class="poodle-media-preview__description">{description}</p>
+        {/if}
+      </div>
+
+      {#if thumbnailMeta || meta.length > 0}
+        <ul class="poodle-media-preview__meta" aria-label="preview metadata">
+          {#if thumbnailMeta}
+            <li>{thumbnailMeta}</li>
+          {/if}
+          {#each meta as item}
+            <li>{item}</li>
+          {/each}
+        </ul>
       {/if}
     </div>
-
-    {#if thumbnailMeta || meta.length > 0}
-      <ul class="poodle-media-preview__meta" aria-label="preview metadata">
-        {#if thumbnailMeta}
-          <li>{thumbnailMeta}</li>
-        {/if}
-        {#each meta as item}
-          <li>{item}</li>
-        {/each}
-      </ul>
-    {/if}
-  </div>
+  {/snippet}
 
   <div class="poodle-media-preview__body">
     {#if caption}
       <p class="poodle-media-preview__caption">{caption}</p>
     {/if}
-    <slot />
+    {@render children?.()}
   </div>
-
 </Card>
 
 <style>

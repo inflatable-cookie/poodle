@@ -12,22 +12,22 @@
 <div class="poodle-specimen">
   <SpecimenGroup label="Upload status panel">
     <div class="poodle-specimen__actions">
-      <button type="button" on:click={() => (uploadStep = "checking")}>Checking</button>
-      <button type="button" on:click={() => (uploadStep = "duplicate")}>Duplicate</button>
-      <button type="button" on:click={() => (uploadStep = "uploading")}>Uploading</button>
-      <button type="button" on:click={() => (uploadStep = "finalising")}>Finalising</button>
-      <button type="button" on:click={() => (uploadStep = "complete")}>Complete</button>
-      <button type="button" on:click={() => (uploadStep = "error")}>Error</button>
+      <button type="button" onclick={() => (uploadStep = "checking")}>Checking</button>
+      <button type="button" onclick={() => (uploadStep = "duplicate")}>Duplicate</button>
+      <button type="button" onclick={() => (uploadStep = "uploading")}>Uploading</button>
+      <button type="button" onclick={() => (uploadStep = "finalising")}>Finalising</button>
+      <button type="button" onclick={() => (uploadStep = "complete")}>Complete</button>
+      <button type="button" onclick={() => (uploadStep = "error")}>Error</button>
     </div>
     <MediaUploadStatusPanel
       {uploadStep}
       duplicateLabel="hero-banner.jpg"
       uploadProgress={62}
       uploadError="Upload failed because the file could not be finalised."
-      on:uploadAnyway={() => (lastAction = "Upload anyway")}
-      on:selectDuplicate={() => (lastAction = "Select duplicate")}
-      on:clearUpload={() => (lastAction = "Clear upload")}
-      on:selectUploaded={() => (lastAction = "Select uploaded")}
+      onUploadAnyway={() => (lastAction = "Upload anyway")}
+      onSelectDuplicate={() => (lastAction = "Select duplicate")}
+      onClearUpload={() => (lastAction = "Clear upload")}
+      onSelectUploaded={() => (lastAction = "Select uploaded")}
     />
     <p>Last action: <strong>{lastAction}</strong></p>
   </SpecimenGroup>

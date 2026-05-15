@@ -1,19 +1,47 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import Spinner from "./Spinner.svelte";
 
   import type { BrowseState, PickerVariant } from "./types";
 
-  export let title: string;
-  export let description: string | null = null;
-  export let variant: PickerVariant = "inline";
-  export let state: BrowseState = "ready";
-  export let ariaLabel: string | null = null;
-  export let resultCount: number | null = null;
-  export let selectionCount = 0;
-  export let stateTitle: string | null = null;
-  export let stateMessage: string | null = null;
-  export let statusText: string | null = null;
-  export let statusId: string | null = null;
+  interface Props {
+    title: string;
+    description?: string | null;
+    variant?: PickerVariant;
+    state?: BrowseState;
+    ariaLabel?: string | null;
+    resultCount?: number | null;
+    selectionCount?: number;
+    stateTitle?: string | null;
+    stateMessage?: string | null;
+    statusText?: string | null;
+    statusId?: string | null;
+    toolbar?: Snippet<[]>;
+    selection?: Snippet<[]>;
+    stateContent?: Snippet<[]>;
+    footer?: Snippet<[]>;
+    children?: Snippet<[]>;
+  }
+
+  let {
+    title,
+    description = null,
+    variant = "inline",
+    state = "ready",
+    ariaLabel = null,
+    resultCount = null,
+    selectionCount = 0,
+    stateTitle = null,
+    stateMessage = null,
+    statusText = null,
+    statusId = null,
+    toolbar,
+    selection,
+    stateContent,
+    footer,
+    children,
+  }: Props = $props();
 </script>
 
 <section
@@ -37,15 +65,15 @@
     </div>
   </div>
 
-  {#if $$slots.toolbar}
+  {#if toolbar}
     <div class="poodle-picker-shell__toolbar">
-      <slot name="toolbar" />
+      {@render toolbar()}
     </div>
   {/if}
 
-  {#if $$slots.selection}
+  {#if selection}
     <div class="poodle-picker-shell__selection">
-      <slot name="selection" />
+      {@render selection()}
     </div>
   {/if}
 
@@ -58,12 +86,12 @@
 
   {#if state === "ready"}
     <div class="poodle-picker-shell__body">
-      <slot />
+      {@render children?.()}
     </div>
   {:else}
     <div class="poodle-picker-shell__state">
-      {#if $$slots.state}
-        <slot name="state" />
+      {#if stateContent}
+        {@render stateContent()}
       {:else}
         {#if state === "loading"}
           <span class="poodle-picker-shell__spinner" aria-hidden="true">
@@ -78,9 +106,9 @@
     </div>
   {/if}
 
-  {#if $$slots.footer}
+  {#if footer}
     <div class="poodle-picker-shell__footer">
-      <slot name="footer" />
+      {@render footer()}
     </div>
   {/if}
 </section>

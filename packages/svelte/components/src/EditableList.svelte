@@ -1,84 +1,133 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
-  import { createEventDispatcher, onDestroy } from "svelte";
-  import type { Snippet } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
+
   import Button from "./Button.svelte";
   import UiPresentationProvider from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  import type {
-    ControlDensity,
-    ControlSize,
-    SemanticControlSizeRole,
-  } from "./types";
+  interface Props {
+    items?: T[];
+    ariaLabel?: string;
+    disabled?: boolean;
+    reorderable?: boolean;
+    editable?: boolean;
+    addLabel?: string;
+    addPlaceholder?: string;
+    maxItems?: number | null;
+    removable?: boolean;
+    embeddedHandle?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    dirty?: boolean;
+    submitting?: boolean;
+    errorMessage?: string | null;
+    infoMessage?: string | null;
+    longListThreshold?: number | null;
+    longListWarningText?: string | null;
+    windowSize?: number | null;
+    submitLabel?: string;
+    cancelLabel?: string;
+    showWorkflowChrome?: boolean;
+    onSubmit?: (() => void | Promise<void>) | null;
+    onCancel?: (() => void) | null;
+    onReorder?: ((items: T[]) => void) | null;
+    onAdd?: ((item: T) => void) | null;
+    onRemove?: ((id: string) => void) | null;
+    onChange?: ((items: T[]) => void) | null;
+    item?: Snippet<[T]> | undefined;
+  }
 
-  export let items: T[] = [];
-  export let ariaLabel = "Editable list";
-  export let disabled = false;
-  export let reorderable = true;
-  /** Show add-item input and remove buttons. */
-  export let editable = false;
-  export let addLabel = "Add item";
-  export let addPlaceholder = "New item";
-  export let maxItems: number | null = null;
-  export let removable = false;
-  export let embeddedHandle = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let dirty = false;
-  export let submitting = false;
-  export let errorMessage: string | null = null;
-  export let infoMessage: string | null = null;
-  export let longListThreshold: number | null = 50;
-  export let longListWarningText: string | null = null;
-  export let windowSize: number | null = null;
-  export let submitLabel = "Save Order";
-  export let cancelLabel = "Cancel";
-  export let showWorkflowChrome = true;
-  export let onsubmit: (() => void | Promise<void>) | null = null;
-  export let oncancel: (() => void) | null = null;
-  export let item: Snippet<[T]> | undefined = undefined;
+  let {
+    items = $bindable<T[]>([]),
+    ariaLabel = "Editable list",
+    disabled = false,
+    reorderable = true,
+    editable = false,
+    addLabel = "Add item",
+    addPlaceholder = "New item",
+    maxItems = null,
+    removable = false,
+    embeddedHandle = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    dirty = false,
+    submitting = false,
+    errorMessage = null,
+    infoMessage = null,
+    longListThreshold = 50,
+    longListWarningText = null,
+    windowSize = null,
+    submitLabel = "Save Order",
+    cancelLabel = "Cancel",
+    showWorkflowChrome = true,
+    onSubmit = null,
+    onCancel = null,
+    onReorder = null,
+    onAdd = null,
+    onRemove = null,
+    onChange = null,
+    item,
+  }: Props = $props();
 
-  const dispatch = createEventDispatcher<{
-    reorder: { items: T[] };
-    add: { item: T };
-    remove: { id: string };
-    change: { items: T[] };
-    submit: void;
-    cancel: void;
-  }>();
-
-  let newItemText = "";
-  let draggingIndex: number | null = null;
-  let dropTargetIndex: number | null = null;
-  let grabbedIndex: number | null = null;
-  let lastMovedId: string | null = null;
-  let windowPageIndex = 0;
-  let liveMessage = "";
-  let clearLastMovedTimeout: ReturnType<typeof setTimeout> | null = null;
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isUnavailable = disabled || submitting;
-  $: canAdd = editable && !isUnavailable && (maxItems === null || items.length < maxItems);
-  $: showRemove = editable || removable;
-  $: effectiveShowWorkflowChrome = showWorkflowChrome && (onsubmit !== null || oncancel !== null);
-  $: isLongList = longListThreshold !== null && longListThreshold > 0 && items.length > longListThreshold;
-  $: effectiveLongListWarning =
+  let newItemText = $state("");
+  let draggingIndex = $state<number | null>(null);
+  let dropTargetIndex = $state<number | null>(null);
+  let grabbedIndex = $state<number | null>(null);
+  let lastMovedId = $state<string | null>(null);
+  let windowPageIndex = $state(0);
+  let liveMessage = $state("");
+  let clearLastMovedTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isUnavailable = $derived(disabled || submitting);
+  const canAdd = $derived(
+    editable && !isUnavailable && (maxItems === null || items.length < maxItems),
+  );
+  const showRemove = $derived(editable || removable);
+  const effectiveShowWorkflowChrome = $derived(
+    showWorkflowChrome && (onSubmit !== null || onCancel !== null),
+  );
+  const isLongList = $derived(
+    longListThreshold !== null && longListThreshold > 0 && items.length > longListThreshold,
+  );
+  const effectiveLongListWarning = $derived(
     longListWarningText ??
-    `This list has ${items.length} items. Reordering large lists can be error-prone; consider chunked moves and save often.`;
-  $: effectiveWindowSize = windowSize !== null && windowSize > 0 ? windowSize : items.length;
-  $: isWindowed = windowSize !== null && windowSize > 0 && items.length > effectiveWindowSize;
-  $: windowPageCount = isWindowed ? Math.ceil(items.length / effectiveWindowSize) : 1;
-  $: if (!isWindowed) {
-    windowPageIndex = 0;
-  } else if (windowPageIndex >= windowPageCount) {
-    windowPageIndex = Math.max(windowPageCount - 1, 0);
+      `This list has ${items.length} items. Reordering large lists can be error-prone; consider chunked moves and save often.`,
+  );
+  const effectiveWindowSize = $derived(
+    windowSize !== null && windowSize > 0 ? windowSize : items.length,
+  );
+  const isWindowed = $derived(
+    windowSize !== null && windowSize > 0 && items.length > effectiveWindowSize,
+  );
+  const windowPageCount = $derived(
+    isWindowed ? Math.ceil(items.length / effectiveWindowSize) : 1,
+  );
+  const windowStart = $derived(isWindowed ? windowPageIndex * effectiveWindowSize : 0);
+  const windowEnd = $derived(Math.min(windowStart + effectiveWindowSize, items.length));
+  const visibleItems = $derived(items.slice(windowStart, windowEnd));
+
+  $effect(() => {
+    if (!isWindowed && windowPageIndex !== 0) {
+      windowPageIndex = 0;
+      return;
+    }
+
+    if (isWindowed && windowPageIndex >= windowPageCount) {
+      windowPageIndex = Math.max(windowPageCount - 1, 0);
+    }
+  });
+
+  function commitItems(nextItems: T[]): void {
+    items = nextItems;
+    onChange?.(nextItems);
   }
-  $: windowStart = isWindowed ? windowPageIndex * effectiveWindowSize : 0;
-  $: windowEnd = Math.min(windowStart + effectiveWindowSize, items.length);
-  $: visibleItems = items.slice(windowStart, windowEnd);
 
   function announce(message: string): void {
     liveMessage = message;
@@ -110,7 +159,8 @@
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(toIndex, 0, moved);
     items = updated;
-    dispatch("reorder", { items: updated });
+    onReorder?.(updated);
+    onChange?.(updated);
     ensureIndexVisible(toIndex);
     markLastMoved(moved.id);
     announce(`Moved ${moved.label ?? moved.id} to position ${toIndex + 1} of ${updated.length}.`);
@@ -157,7 +207,9 @@
         announce("Dropped item.");
       } else {
         grabbedIndex = index;
-        announce(`Grabbed ${items[index]?.label ?? items[index]?.id ?? "item"}. Use arrow keys to move, Escape to cancel.`);
+        announce(
+          `Grabbed ${items[index]?.label ?? items[index]?.id ?? "item"}. Use arrow keys to move, Escape to cancel.`,
+        );
       }
       return;
     }
@@ -185,8 +237,8 @@
     }
 
     requestAnimationFrame(() => {
-      const el = document.querySelector<HTMLElement>(`[data-reorder-index="${targetIndex}"]`);
-      el?.focus();
+      const element = document.querySelector<HTMLElement>(`[data-reorder-index="${targetIndex}"]`);
+      element?.focus();
     });
   }
 
@@ -197,17 +249,19 @@
       id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       label,
     } as T;
-    items = [...items, newItem];
+    const updated = [...items, newItem];
+    items = updated;
     newItemText = "";
-    dispatch("add", { item: newItem });
-    dispatch("change", { items });
+    onAdd?.(newItem);
+    onChange?.(updated);
   }
 
   function removeItem(id: string): void {
     if (isUnavailable) return;
-    items = items.filter((i) => i.id !== id);
-    dispatch("remove", { id });
-    dispatch("change", { items });
+    const updated = items.filter((entry) => entry.id !== id);
+    items = updated;
+    onRemove?.(id);
+    onChange?.(updated);
   }
 
   function handleAddKeydown(event: KeyboardEvent): void {
@@ -218,16 +272,14 @@
   }
 
   async function handleSubmit(): Promise<void> {
-    if (!onsubmit || isUnavailable || !dirty) return;
-    dispatch("submit");
-    await onsubmit();
+    if (!onSubmit || isUnavailable || !dirty) return;
+    await onSubmit();
   }
 
   function handleCancel(): void {
-    if (!oncancel || isUnavailable) return;
-    dispatch("cancel");
+    if (!onCancel || isUnavailable) return;
     grabbedIndex = null;
-    oncancel();
+    onCancel();
   }
 
   function previousWindowPage(): void {
@@ -251,10 +303,10 @@
 
     {#if effectiveShowWorkflowChrome}
       <div class="poodle-editable-list-session__header">
-        <Button variant="secondary" on:click={handleCancel} disabled={isUnavailable}>
+        <Button variant="secondary" onClick={handleCancel} disabled={isUnavailable}>
           {cancelLabel}
         </Button>
-        <Button variant="primary" on:click={handleSubmit} disabled={!dirty || isUnavailable}>
+        <Button variant="primary" onClick={handleSubmit} disabled={!dirty || isUnavailable}>
           {#if submitting}
             Saving...
           {:else}
@@ -284,13 +336,13 @@
 
     {#if isWindowed}
       <div class="poodle-editable-list-session__window-nav">
-        <Button variant="secondary" on:click={previousWindowPage} disabled={isUnavailable || windowPageIndex === 0}>
+        <Button variant="secondary" onClick={previousWindowPage} disabled={isUnavailable || windowPageIndex === 0}>
           Previous
         </Button>
         <span class="poodle-editable-list-session__window-label">
           Page {windowPageIndex + 1} of {windowPageCount} · Items {windowStart + 1}-{windowEnd} of {items.length}
         </span>
-        <Button variant="secondary" on:click={nextWindowPage} disabled={isUnavailable || windowPageIndex >= windowPageCount - 1}>
+        <Button variant="secondary" onClick={nextWindowPage} disabled={isUnavailable || windowPageIndex >= windowPageCount - 1}>
           Next
         </Button>
       </div>
@@ -300,7 +352,7 @@
       class="poodle-editable-list"
       class:poodle-editable-list--embedded-handle={embeddedHandle}
       role="listbox"
-      aria-label={ariaLabel}
+      {ariaLabel}
       data-disabled={isUnavailable}
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -320,11 +372,11 @@
           aria-label={`Reorder ${reorderItem.label ?? reorderItem.id}. Position ${index + 1} of ${items.length}. Press space to grab, then arrow keys to move.`}
           data-reorder-index={index}
           draggable={reorderable && !isUnavailable}
-          on:dragstart={(e) => handleDragStart(e, index)}
-          on:dragover={(e) => handleDragOver(e, index)}
-          on:drop={(e) => handleDrop(e, index)}
-          on:dragend={handleDragEnd}
-          on:keydown={(e) => handleKeydown(e, index)}
+          ondragstart={(event) => handleDragStart(event, index)}
+          ondragover={(event) => handleDragOver(event, index)}
+          ondrop={(event) => handleDrop(event, index)}
+          ondragend={handleDragEnd}
+          onkeydown={(event) => handleKeydown(event, index)}
         >
           {#if reorderable && !embeddedHandle}
             <span class="poodle-editable-list__handle" aria-hidden="true">
@@ -351,7 +403,10 @@
               class="poodle-editable-list__remove"
               disabled={isUnavailable}
               aria-label={`Remove ${reorderItem.label ?? reorderItem.id}`}
-              on:click|stopPropagation={() => removeItem(reorderItem.id)}
+              onclick={(event) => {
+                event.stopPropagation();
+                removeItem(reorderItem.id);
+              }}
             >
               <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -370,13 +425,13 @@
           bind:value={newItemText}
           placeholder={addPlaceholder}
           disabled={isUnavailable}
-          on:keydown={handleAddKeydown}
+          onkeydown={handleAddKeydown}
         />
         <button
           type="button"
           class="poodle-editable-list__add-btn"
           disabled={!newItemText.trim() || !canAdd}
-          on:click={addItem}
+          onclick={addItem}
         >
           {addLabel}
         </button>
@@ -527,30 +582,24 @@
     padding: var(--poodle-editable-list-item-y) var(--poodle-editable-list-item-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    cursor: grab;
+    background: transparent;
+    font-size: var(--poodle-editable-list-font-size);
+    color: var(--poodle-color-text-primary);
+    outline: none;
     transition:
-      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
-      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+      background-color 120ms ease,
+      border-color 120ms ease,
+      box-shadow 120ms ease,
+      opacity 120ms ease;
   }
 
   .poodle-editable-list__item:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface));
-  }
-
-  .poodle-editable-list__item--embedded-handle {
-    padding: 0;
-    border-color: transparent;
-    background: transparent;
-  }
-
-  .poodle-editable-list__item--embedded-handle:hover {
-    background: transparent;
+    background: color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent);
   }
 
   .poodle-editable-list__item:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: -0.0625rem;
+    border-color: var(--poodle-color-accent-focusRing);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing);
   }
 
   .poodle-editable-list__item--dragging {
@@ -558,44 +607,24 @@
   }
 
   .poodle-editable-list__item--drop-target,
-  .poodle-editable-list__item--grabbed {
-    border-color: var(--poodle-color-accent-base);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-surface));
-  }
-
+  .poodle-editable-list__item--grabbed,
   .poodle-editable-list__item--last-moved {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-surface));
-    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 32%, transparent);
-    animation: poodle-editable-list-last-moved 1.4s ease-out;
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent);
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
   }
 
-  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--drop-target,
-  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--grabbed {
-    background: transparent;
-  }
-
-  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--last-moved {
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .poodle-editable-list__item--embedded-handle.poodle-editable-list__item--last-moved :global(.poodle-list-card) {
-    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent);
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-surface));
-    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 32%, transparent);
-    animation: poodle-editable-list-last-moved 1.4s ease-out;
+  .poodle-editable-list__item--embedded-handle {
+    padding-inline: 0;
   }
 
   .poodle-editable-list__handle {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
     width: var(--poodle-editable-list-handle-size);
     height: var(--poodle-editable-list-handle-size);
     color: var(--poodle-color-text-secondary);
+    flex-shrink: 0;
     cursor: grab;
   }
 
@@ -605,35 +634,32 @@
   }
 
   .poodle-editable-list__content {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-editable-list-font-size);
-    color: var(--poodle-color-text-primary);
-  }
-
-  .poodle-editable-list__item--embedded-handle .poodle-editable-list__content {
-    display: block;
-    width: 100%;
   }
 
   .poodle-editable-list__remove {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    width: var(--poodle-editable-list-handle-size);
-    height: var(--poodle-editable-list-handle-size);
-    padding: 0;
+    width: calc(var(--poodle-size-control-height) - 0.25rem);
+    height: calc(var(--poodle-size-control-height) - 0.25rem);
     border: 0;
-    border-radius: 0.25rem;
+    border-radius: var(--poodle-radius-control);
     background: transparent;
     color: var(--poodle-color-text-secondary);
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   .poodle-editable-list__remove:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
     color: var(--poodle-color-status-danger);
+  }
+
+  .poodle-editable-list__remove:disabled {
+    cursor: not-allowed;
+    opacity: var(--poodle-state-opacity-disabled);
   }
 
   .poodle-editable-list__remove svg {
@@ -641,25 +667,14 @@
     height: 0.75rem;
   }
 
-  @keyframes poodle-editable-list-last-moved {
-    0% {
-      background: color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface));
-      box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-base) 38%, transparent);
-    }
-
-    100% {
-      background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, var(--poodle-color-background-surface));
-      box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 32%, transparent);
-    }
-  }
-
   .poodle-editable-list__add {
     display: flex;
-    gap: 0.375rem;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .poodle-editable-list__add-input {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
@@ -667,38 +682,24 @@
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
     color: var(--poodle-color-text-primary);
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-editable-list-font-size);
-    outline: none;
+    font: inherit;
   }
 
   .poodle-editable-list__add-input:focus {
+    outline: none;
     border-color: var(--poodle-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus)
-      color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent);
-  }
-
-  .poodle-editable-list__add-input::placeholder {
-    color: var(--poodle-color-text-secondary);
+    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing);
   }
 
   .poodle-editable-list__add-btn {
-    display: inline-flex;
-    align-items: center;
     height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-color-border-default);
+    border: 0;
     border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+    background: var(--poodle-color-accent-base);
+    color: var(--poodle-color-text-onAccent);
+    font: inherit;
     cursor: pointer;
-    font-family: var(--poodle-typography-label-family);
-    font-size: var(--poodle-typography-label-size);
-    font-weight: var(--poodle-typography-label-weight);
-  }
-
-  .poodle-editable-list__add-btn:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
   }
 
   .poodle-editable-list__add-btn:disabled {
@@ -707,9 +708,8 @@
   }
 
   .poodle-editable-list__count {
-    font-size: var(--poodle-typography-label-size);
-    color: var(--poodle-color-text-secondary);
-    font-variant-numeric: tabular-nums;
     align-self: flex-end;
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-label-size);
   }
 </style>

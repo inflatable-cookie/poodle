@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Dialog from "./Dialog.svelte";
   import FileUpload from "./FileUpload.svelte";
   import Tabs from "./Tabs.svelte";
@@ -26,12 +24,9 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    select: { item: MediaPickerItem };
-    upload: { files: FileUploadItem[] };
-    openChange: { open: boolean };
-  }>();
+  export let onSelect: ((item: MediaPickerItem) => void) | undefined = undefined;
+  export let onUpload: ((files: FileUploadItem[]) => void) | undefined = undefined;
+  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
 
   let activeTab = "browse";
   let searchQuery = "";
@@ -40,6 +35,8 @@
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
+  $: isControlled = open !== null;
+  $: isOpen = isControlled ? open === true : false;
 
   const tabItems: TabItem[] = [
     { value: "browse", label: "Browse" },
@@ -53,25 +50,21 @@
     : items;
 
   function handleSelect(item: MediaPickerItem): void {
-    dispatch("select", { item });
-    dispatch("openChange", { open: false });
+    onSelect?.(item);
+    onOpenChange?.(false);
   }
 
-  function handleUploadChange(event: CustomEvent<{ files: FileUploadItem[] }>): void {
-    uploadFiles = event.detail.files;
-    dispatch("upload", { files: uploadFiles });
-  }
-
-  function handleOpenChange(event: CustomEvent<{ open: boolean }>): void {
-    dispatch("openChange", event.detail);
+  function handleUploadChange(nextFiles: FileUploadItem[]): void {
+    uploadFiles = nextFiles;
+    onUpload?.(uploadFiles);
   }
 </script>
 
 <Dialog
-  {open}
+  open={isOpen}
   {title}
   kind="dialog"
-  on:openChange={handleOpenChange}
+  onOpenChange={onOpenChange}
 >
   <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
     <div class="poodle-media-picker" data-size={resolvedSize} data-density={resolvedDensity}>
@@ -102,7 +95,7 @@
                 class="poodle-media-picker__item"
                 role="option"
                 aria-selected="false"
-                on:click={() => handleSelect(item)}
+                onclick={() => handleSelect(item)}
               >
                 {#if item.thumbnailUrl}
                   <img class="poodle-media-picker__thumb" src={item.thumbnailUrl} alt="" />
@@ -127,7 +120,7 @@
             maxSize={maxFileSize}
             multiple
             files={uploadFiles}
-            on:change={handleUploadChange}
+            onChange={handleUploadChange}
           />
         </div>
       {/if}

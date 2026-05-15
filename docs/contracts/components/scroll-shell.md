@@ -10,7 +10,7 @@ Updated: 2026-03-15
 - Summary: a reusable scrolling boundary with explicit viewport ownership,
   direction control, focus behavior, and assistive-technology expectations
 - In scope: viewport shell, overflow axis control, keyboard reachability,
-  optional region labeling, interior padding, scroll event forwarding
+  optional region labeling, interior padding, scroll callback forwarding
 - Out of scope: virtualized list semantics, custom scrollbar styling as a
   contract requirement, inertial physics tuning, scroll-position value model
 
@@ -41,6 +41,7 @@ Updated: 2026-03-15
 | `asRole` | `"region" \| "group" \| null` | `null` | no | semantic opt-in; defaults to "region" when focusable is true |
 | `label` | `string \| null` | `null` | no | accessible label; defaults to "Scrollable content" when focusable is true and no label provided |
 | `focusable` | `boolean` | `false` | no | adds viewport to tab order for keyboard scrolling |
+| `onScroll` | `((event: Event) => void) \| null` | `null` | no | called when the viewport scroll position changes |
 
 ### Slots
 
@@ -68,11 +69,11 @@ Updated: 2026-03-15
 State table is sufficient. Scroll position is runtime state, not a public value
 model in this baseline contract.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `scroll` | viewport scroll position changes | native `Event` | forwarded from viewport element |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onScroll` | viewport scroll position changes | native `Event` | forwarded from the viewport element |
 
 ## 6. Accessibility
 
@@ -209,7 +210,7 @@ Applied when direction is `"horizontal"` or `"both"`:
 - `focusable=true` adds `tabindex="0"` to viewport, and defaults role to
   `"region"` and aria-label to `"Scrollable content"` (both overridable via
   props)
-- `scroll` event is forwarded from the viewport element
+- `onScroll` is called from the viewport element's native scroll event
 - native browser scrolling is used; no JavaScript-driven scroll simulation
 - `overscroll-behavior: contain` prevents scroll chaining to parent
 
@@ -235,7 +236,7 @@ Applied when direction is `"horizontal"` or `"both"`:
 - [ ] focusability rules match (focusable adds to tab order)
 - [ ] keyboard scrolling behavior matches when viewport is focused
 - [ ] named-region semantics match (default role/label when focusable)
-- [ ] scroll event forwarding matches
+- [ ] scroll callback forwarding matches
 
 ### Tier 2: Visual Parity
 

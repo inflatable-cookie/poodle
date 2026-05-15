@@ -19,17 +19,17 @@
 
   <SpecimenGroup label="With action slot">
     <DetailItem label="Email" value="clay@example.com">
-      <svelte:fragment slot="action">
+      {#snippet action()}
         <Button variant="secondary" size="sm">Change</Button>
-      </svelte:fragment>
+      {/snippet}
     </DetailItem>
   </SpecimenGroup>
 
   <SpecimenGroup label="With value slot">
     <DetailItem label="Status">
-      <svelte:fragment slot="value">
+      {#snippet valueContent()}
         <Pill tone="success" appearance="badge">Active</Pill>
-      </svelte:fragment>
+      {/snippet}
     </DetailItem>
   </SpecimenGroup>
 
@@ -47,9 +47,9 @@
       <DetailItem label="Name" value="Alice Chen" presentation="surface" />
       <DetailItem label="Role" value="Engineer" presentation="surface" />
       <DetailItem label="Email" value="alice@example.com" presentation="surface">
-        <svelte:fragment slot="action">
+        {#snippet action()}
           <Button variant="secondary" size="sm">Edit</Button>
-        </svelte:fragment>
+        {/snippet}
       </DetailItem>
     </DetailSection>
   </SpecimenGroup>

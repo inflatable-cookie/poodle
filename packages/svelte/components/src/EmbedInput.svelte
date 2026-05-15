@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { onDestroy } from "svelte";
 
   import TextInput from "./TextInput.svelte";
   import Pill from "./Pill.svelte";
@@ -16,28 +16,32 @@
   export let providers: string[] = [];
   export let disabled = false;
   export let error: string | null = null;
+  export let onParse: ((parsed: ParsedEmbed | null, error: string | null) => void) | null = null;
+  export let onValueChange: ((value: string) => void) | null = null;
   export let resolveParseState:
     | ((value: string, providers: string[]) => EmbedParseState)
     | undefined = undefined;
 
-  const dispatch = createEventDispatcher<{
-    parse: { parsed: ParsedEmbed | null; error: string | null };
-    change: { value: string };
-  }>();
-
   let parseTimer: ReturnType<typeof setTimeout> | null = null;
+  let uncontrolledValue = value;
+
+  $: hasControlledValue = $$props.value !== undefined;
+  $: currentValue = hasControlledValue ? value : uncontrolledValue;
 
   function doParse(): void {
-    const nextState = (resolveParseState ?? resolveEmbedParseState)(value, providers);
+    const nextState = (resolveParseState ?? resolveEmbedParseState)(currentValue, providers);
     parsed = nextState.parsed;
     error = nextState.error;
 
-    dispatch("parse", { parsed, error });
+    onParse?.(parsed, error);
   }
 
-  function handleValueChange(event: CustomEvent<{ value: string }>): void {
-    value = event.detail.value;
-    dispatch("change", { value });
+  function handleValueChange(nextValue: string): void {
+    if (!hasControlledValue) {
+      uncontrolledValue = nextValue;
+    }
+
+    onValueChange?.(nextValue);
 
     if (parseTimer) {
       clearTimeout(parseTimer);
@@ -45,12 +49,18 @@
 
     parseTimer = setTimeout(doParse, parseDebounce);
   }
+
+  onDestroy(() => {
+    if (parseTimer) {
+      clearTimeout(parseTimer);
+    }
+  });
 </script>
 
 <div class="poodle-embed-input">
   <TextInput
     {id}
-    {value}
+    value={currentValue}
     {placeholder}
     disabled={disabled}
     rows={3}

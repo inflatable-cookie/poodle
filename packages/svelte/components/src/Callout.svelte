@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
+  import type { Snippet } from "svelte";
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import Spinner from "./Spinner.svelte";
@@ -8,20 +7,22 @@
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";
 
-  export let tone: StatusTone | "neutral" = "neutral";
-  export let title: string | null = null;
-  export let message: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let announceMode: CalloutAnnounceMode = "none";
-  export let dismissible = false;
-  export let dismissLabel = "Dismiss message";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    dismiss: void;
-  }>();
+  interface Props {
+    tone?: StatusTone | "neutral";
+    title?: string | null;
+    message?: string | null;
+    ariaLabel?: string | null;
+    announceMode?: CalloutAnnounceMode;
+    dismissible?: boolean;
+    dismissLabel?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onDismiss?: (() => void) | undefined;
+    icon?: Snippet;
+    actions?: Snippet;
+    children?: Snippet;
+  }
 
   const uiPresentation = getUiPresentation();
 
@@ -33,20 +34,39 @@
     neutral: "info",
   };
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: role =
+  let {
+    tone = "neutral",
+    title = null,
+    message = null,
+    ariaLabel = null,
+    announceMode = "none",
+    dismissible = false,
+    dismissLabel = "Dismiss message",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onDismiss = undefined,
+    icon,
+    actions,
+    children,
+  }: Props = $props();
+
+  let resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  let resolvedDensity = $derived(density ?? $uiPresentation.density);
+  let role = $derived(
     announceMode === "assertive"
       ? "alert"
       : announceMode === "polite"
         ? "status"
-        : undefined;
-  $: ariaLive =
+        : undefined,
+  );
+  let ariaLive = $derived(
     announceMode === "assertive"
       ? "assertive" as const
       : announceMode === "polite"
         ? "polite" as const
-        : undefined;
+        : undefined,
+  );
 </script>
 
 <section
@@ -60,8 +80,8 @@
 >
   <div class="poodle-callout__body">
     <span class="poodle-callout__icon" aria-hidden="true">
-      {#if $$slots.icon}
-        <slot name="icon" />
+      {#if icon}
+        {@render icon()}
       {:else if tone === "pending"}
         <Spinner variant="ring" size={resolvedSize} sizeRole="chrome" tone="accent" />
       {:else}
@@ -76,13 +96,13 @@
       {#if message}
         <p>{message}</p>
       {/if}
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 
-  {#if $$slots.actions}
+  {#if actions}
     <div class="poodle-callout__actions">
-      <slot name="actions" />
+      {@render actions()}
     </div>
   {/if}
 
@@ -91,7 +111,7 @@
       type="button"
       class="poodle-callout__dismiss"
       aria-label={dismissLabel}
-      on:click={() => dispatch("dismiss")}
+      onclick={() => onDismiss?.()}
     >
       <Icon name="x" />
     </button>
@@ -224,7 +244,6 @@
     }
   }
 
-  /* Size variants */
   .poodle-callout[data-size="xs"] .poodle-callout__icon {
     width: 0.875rem;
     height: 0.875rem;
@@ -263,9 +282,4 @@
   .poodle-callout[data-size="xl"] .poodle-callout__content { font-size: 1.0625rem; }
   .poodle-callout[data-size="xl"] .poodle-callout__content strong { font-size: 1.125rem; }
   .poodle-callout[data-size="xl"] .poodle-callout__dismiss { width: 2.25rem; height: 2.25rem; }
-  .poodle-callout[data-size="xl"] { gap: 1rem; }
-
-  /* Density variants */
-  .poodle-callout[data-density="compact"] { padding-inline: 0.5rem; }
-  .poodle-callout[data-density="comfortable"] { padding-inline: 1.25rem; }
-</style>
+ </style>

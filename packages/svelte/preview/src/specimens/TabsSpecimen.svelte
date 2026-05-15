@@ -179,7 +179,7 @@
       {/if}
       <button
         class="poodle-specimen__collapse-btn"
-        on:click={() => (panelCollapsed = !panelCollapsed)}
+        onclick={() => (panelCollapsed = !panelCollapsed)}
       >
         {panelCollapsed ? "→" : "←"}
       </button>

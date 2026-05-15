@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
   import Button from "./Button.svelte";
   import Dialog from "./Dialog.svelte";
@@ -8,52 +8,83 @@
 
   import FormLayout from "./FormLayout.svelte";
 
-  export let open: boolean | null = null;
-  export let title: string;
-  export let subtitle: string | null = null;
-  export let description: string | null = null;
-  export let submitLabel = "Submit";
-  export let cancelLabel = "Cancel";
-  export let submitting = false;
-  export let error: string | null = null;
-  export let success: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let width: string | null = null;
-  export let columns = 6;
-  export let showDefaultActions = true;
-  /** When true, the Dialog body renders the default slot directly with no FormLayout wrapper. */
-  export let bare = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    open?: boolean | null | undefined;
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    submitLabel?: string;
+    cancelLabel?: string;
+    submitting?: boolean;
+    error?: string | null;
+    success?: string | null;
+    ariaLabel?: string | null;
+    width?: string | null;
+    columns?: number;
+    showDefaultActions?: boolean;
+    bare?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onSubmit?: (() => void) | undefined;
+    onCancel?: (() => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    children?: Snippet<[]>;
+    body?: Snippet<[boolean]>;
+    actions?: Snippet<[boolean]>;
+    subtitleContent?: Snippet<[boolean]>;
+  }
+
+  let {
+    open = $bindable<boolean | null | undefined>(undefined),
+    title,
+    subtitle = null,
+    description = null,
+    submitLabel = "Submit",
+    cancelLabel = "Cancel",
+    submitting = false,
+    error = null,
+    success = null,
+    ariaLabel = null,
+    width = null,
+    columns = 6,
+    showDefaultActions = true,
+    bare = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onSubmit = undefined,
+    onCancel = undefined,
+    onOpenChange = undefined,
+    children,
+    body,
+    actions,
+    subtitleContent,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  const dispatch = createEventDispatcher<{
-    submit: void;
-    cancel: void;
-    openChange: { open: boolean };
-  }>();
-
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedShowActions = bare ? false : showDefaultActions;
-  $: resolvedDescription = subtitle ?? description;
-  $: contentStyle = width ? `--poodle-form-dialog-width: ${width};` : "";
-  $: contentClassName = width ? "form-dialog__surface" : "";
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedShowActions = $derived(bare ? false : showDefaultActions);
+  const resolvedDescription = $derived(subtitle ?? description);
+  const contentStyle = $derived(width ? `--poodle-form-dialog-width: ${width};` : "");
+  const contentClassName = $derived(width ? "form-dialog__surface" : "");
 
   function handleSubmit(): void {
-    dispatch("submit");
+    onSubmit?.();
   }
 
   function notifyCancel(): void {
-    dispatch("cancel");
+    onCancel?.();
   }
 
   function setOpen(nextOpen: boolean): void {
-    if (open !== null) {
-      dispatch("openChange", { open: nextOpen });
+    if (open !== undefined) {
+      open = nextOpen;
     }
+
+    onOpenChange?.(nextOpen);
   }
 
   function handleCancel(): void {
@@ -61,20 +92,20 @@
     setOpen(false);
   }
 
-  function handleOpenChange(event: CustomEvent<{ open: boolean }>): void {
-    if (!event.detail.open && !submitting) {
+  function handleDialogOpenChange(nextOpen: boolean): void {
+    if (!nextOpen && !submitting) {
       notifyCancel();
     }
 
-    dispatch("openChange", event.detail);
+    onOpenChange?.(nextOpen);
   }
 </script>
 
 <Dialog
   {open}
   title={title}
-  description={$$slots.subtitle ? null : resolvedDescription}
-  kind="dialog"
+  description={subtitleContent ? null : resolvedDescription}
+  role="dialog"
   {ariaLabel}
   size={resolvedSize}
   density={resolvedDensity}
@@ -83,33 +114,43 @@
   showCloseButton={true}
   {contentClassName}
   {contentStyle}
-  on:openChange={handleOpenChange}
+  onOpenChange={handleDialogOpenChange}
 >
-  {#if $$slots.subtitle}
-    <div class="poodle-form-dialog__header">
-      <div class="poodle-form-dialog__subtitle">
-        <slot name="subtitle" {submitting} />
+  {#if subtitleContent}
+    {#snippet header()}
+      <div class="poodle-form-dialog__header">
+        <div class="poodle-form-dialog__subtitle">
+          {@render subtitleContent(submitting)}
+        </div>
       </div>
-    </div>
+    {/snippet}
   {/if}
 
   {#if bare}
-    <slot {submitting} />
+    {#if body}
+      {@render body(submitting)}
+    {:else}
+      {@render children?.()}
+    {/if}
   {:else}
     <FormLayout {error} {success} {columns}>
-      <slot {submitting} />
+      {#if body}
+        {@render body(submitting)}
+      {:else}
+        {@render children?.()}
+      {/if}
     </FormLayout>
   {/if}
 
-  <svelte:fragment slot="actions">
-    {#if $$slots.actions}
-      <slot name="actions" {submitting} />
+  {#snippet actions()}
+    {#if actions}
+      {@render actions(submitting)}
     {:else if resolvedShowActions}
       <Button
         variant="ghost"
         size={resolvedSize}
         density={resolvedDensity}
-        on:click={handleCancel}
+        onClick={handleCancel}
         disabled={submitting}
       >
         {cancelLabel}
@@ -118,13 +159,13 @@
         variant="primary"
         size={resolvedSize}
         density={resolvedDensity}
-        on:click={handleSubmit}
+        onClick={handleSubmit}
         disabled={submitting}
       >
         {submitting ? "Submitting..." : submitLabel}
       </Button>
     {/if}
-  </svelte:fragment>
+  {/snippet}
 </Dialog>
 
 <style>

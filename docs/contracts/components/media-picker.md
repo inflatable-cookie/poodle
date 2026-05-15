@@ -77,7 +77,8 @@ None.
 
 ### Controlled / Uncontrolled
 
-`open` is controlled externally. The component dispatches `openChange` to request state changes. `activeTab` and `searchQuery` are internal state.
+`open` is externally owned when non-null and updated through `onOpenChange`.
+`activeTab` and `searchQuery` are internal state.
 
 ## 4. States
 
@@ -99,15 +100,16 @@ None.
 | uploading | Upload tab active, showing file upload zone |
 | searching | Browse tab with active search query filtering results |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `select` | User clicks a media item | `{ item: MediaPickerItem }` |
-| `upload` | Files added via upload tab | `{ files: FileUploadItem[] }` |
-| `openChange` | Dialog open state changes | `{ open: boolean }` |
+| Callback | When It Fires | Signature |
+|----------|---------------|-----------|
+| `onSelect` | User clicks a media item | `(item: MediaPickerItem) => void` |
+| `onUpload` | Files added via upload tab | `(files: FileUploadItem[]) => void` |
+| `onOpenChange` | Dialog open state changes | `(open: boolean) => void` |
 
-Selecting an item dispatches both `select` and `openChange({ open: false })` to auto-close the dialog.
+Selecting an item calls both `onSelect` and `onOpenChange(false)` so the host
+can close the dialog.
 
 ## 6. Accessibility
 
@@ -285,7 +287,8 @@ Composed from `Dialog`, `Tabs`, `TextInput`, and `FileUpload` primitives. Wraps 
 - Composes `Dialog`, `Tabs`, `TextInput`, `FileUpload` from `@poodle/svelte`
 - Wraps content in `UiPresentationProvider` with resolved size and density
 - `filteredItems` reactive statement filters by label case-insensitively
-- Selecting an item dispatches both `select` and `openChange(false)` to auto-close
+- Selecting an item calls both `onSelect` and `onOpenChange(false)` so the host
+  can close the dialog
 - `activeTab` is internal state toggling between `"browse"` and `"upload"`
 - `uploadFiles` tracked internally for two-way state with `FileUpload`
 - Uses `resolveSemanticControlSize()` to derive effective size

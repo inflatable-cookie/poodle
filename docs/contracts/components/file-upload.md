@@ -137,14 +137,14 @@ interface ImageCompressionOptions {
 | `files` | `FileUploadItem[]` | `[]` |
 | `isDragActive` | `boolean` | `false` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `change` | files added or removed | `{ files: FileUploadItem[] }` | full file list |
-| `upload` | validated files added | `{ files: File[] }` | ready for app-owned upload orchestration |
-| `error` | file fails validation | `{ file: File, message: string }` | rejected file and reason |
-| `remove` | file removed from list | `{ item: FileUploadItem }` | removed item |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onChange` | files added, removed, or status-updated | `FileUploadItem[]` | full file list |
+| `onUpload` | validated files added | `File[]` | ready for app-owned upload orchestration |
+| `onError` | file fails validation | `{ file: File, message: string }` | rejected file and reason |
+| `onRemove` | file removed from list | `FileUploadItem` | removed item |
 
 ## 6. Accessibility
 

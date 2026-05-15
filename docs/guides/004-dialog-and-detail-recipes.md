@@ -32,14 +32,15 @@ detail pages and modal forms without recreating old app-shell helpers.
 </script>
 
 <FormDialog
-  bind:open
+  open={open}
+  onOpenChange={(nextOpen) => (open = nextOpen)}
   title="Invite user"
   description="Add a new user to this workspace."
   submitLabel="Invite"
   cancelLabel="Cancel"
   {submitting}
   {error}
-  on:submit={() => {
+  onSubmit={() => {
     submitting = true;
   }}
 >
@@ -50,7 +51,7 @@ detail pages and modal forms without recreating old app-shell helpers.
   <Field id="invite-role" label="Role" required>
     <Select
       id="invite-role"
-      items={[
+      options={[
         { value: "admin", label: "Administrator" },
         { value: "editor", label: "Editor" }
       ]}
@@ -98,7 +99,8 @@ detail-page updates app-owned.
 
 ```svelte
 <AlertDialog
-  bind:open={deleteDialogOpen}
+  open={deleteDialogOpen}
+  onOpenChange={(nextOpen) => (deleteDialogOpen = nextOpen)}
   title="Permanently delete version?"
   description="This will permanently delete this version and its stored file. This cannot be undone."
   itemLabel="Version"
@@ -155,6 +157,7 @@ detail-page updates app-owned.
   ]}
   variant="card"
   size="sm"
+  onValueChange={(value) => (activeTab = value)}
   ariaLabel="Project sections"
 />
 

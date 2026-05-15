@@ -22,9 +22,9 @@
       {actions}
       showSelectAll
       {allSelected}
-      on:action={(e) => (lastAction = e.detail.id)}
-      on:selectAll={() => (allSelected = true)}
-      on:clear={() => (allSelected = false)}
+      onAction={(id) => (lastAction = id)}
+      onSelectAll={() => (allSelected = true)}
+      onClear={() => (allSelected = false)}
     />
     {#if lastAction}
       <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>

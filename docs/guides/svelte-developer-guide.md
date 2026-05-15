@@ -83,7 +83,7 @@ Or simply apply the data attributes in your HTML:
   import { search } from "@poodle/icons-lucide";
 </script>
 
-<Button variant="primary" on:click={() => console.log("clicked")}>
+<Button variant="primary" onClick={() => console.log("clicked")}>
   Save Changes
 </Button>
 
@@ -299,7 +299,9 @@ All components follow consistent naming conventions:
 The pattern works identically across all value-bearing components:
 - `value` / `defaultValue` — text, select, radio
 - `checked` / `defaultChecked` — checkboxes, switches
-- When `value` is `null`, the component is uncontrolled. When it's a non-null value, the component is controlled.
+- Supplying the controlled prop makes the component host-owned. Omitting it
+  leaves the component on its `default*` path. `null` is a valid controlled
+  empty value when the contract allows it.
 
 **Presentation props:**
 ```svelte
@@ -340,16 +342,16 @@ Modern Poodle Svelte components prefer callback props over dispatcher events:
 
 <Checkbox
   id="agree"
-  on:checkedChange={(e) => agreed = e.detail.checked}
+  onCheckedChange={(checked) => agreed = checked}
 />
 
 <Dialog
   open={showDialog}
-  on:openChange={(e) => showDialog = e.detail.open}
-  on:requestClose={() => showDialog = false}
+  onOpenChange={(nextOpen) => (showDialog = nextOpen)}
+  onRequestClose={() => (showDialog = false)}
 />
 
-<Button on:click={(e) => handleClick(e.detail)} />
+<Button onClick={handleClick} />
 ```
 
 **Naming conventions:**
@@ -362,7 +364,7 @@ Modern Poodle Svelte components prefer callback props over dispatcher events:
 - `onCancel` — TextInput on Escape
 - `onFocus`, `onBlur`, `onKeyDown` — standard DOM event passthrough callbacks
 
-### Slot patterns
+### Composition patterns
 
 Compatibility note:
 
@@ -372,14 +374,18 @@ Compatibility note:
   legacy slot surfaces unless the component is intentionally staying on a
   compatibility-first contract during migration
 
-Components use named slots for flexible composition:
+Components use snippets or slots for flexible composition, depending on the surface:
 
 ```svelte
-<!-- Button: leading/trailing slots for icons or custom content -->
+<!-- Button: leading/trailing snippets for icons or custom content -->
 <Button variant="secondary">
-  <Icon icon={download} slot="leading" />
+  {#snippet leading()}
+    <Icon icon={download} />
+  {/snippet}
   Download Report
-  <Pill slot="trailing" tone="success" size="xs">New</Pill>
+  {#snippet trailing()}
+    <Pill tone="success" size="xs">New</Pill>
+  {/snippet}
 </Button>
 
 <!-- Field: default slot receives accessibility bindings -->
@@ -392,13 +398,13 @@ Components use named slots for flexible composition:
   />
 </Field>
 
-<!-- Dialog: default slot for content, actions slot for buttons -->
-<Dialog title="Confirm" open={show} on:requestClose={() => show = false}>
+<!-- Dialog: children content plus an actions snippet -->
+<Dialog title="Confirm" open={show} onRequestClose={() => (show = false)}>
   <p>Are you sure?</p>
-  <svelte:fragment slot="actions">
-    <Button variant="ghost" on:click={() => show = false}>Cancel</Button>
-    <Button variant="primary" tone="danger" on:click={handleDelete}>Delete</Button>
-  </svelte:fragment>
+  {#snippet actions()}
+    <Button variant="ghost" onClick={() => (show = false)}>Cancel</Button>
+    <Button variant="primary" tone="danger" onClick={handleDelete}>Delete</Button>
+  {/snippet}
 </Dialog>
 ```
 
@@ -743,14 +749,14 @@ Flex-aware spacer element that pushes siblings apart.
   let open = false;
 </script>
 
-<Button on:click={() => open = true}>Open Dialog</Button>
+<Button onClick={() => (open = true)}>Open Dialog</Button>
 
-<Dialog title="Confirm Action" {open} on:requestClose={() => open = false}>
+<Dialog title="Confirm Action" {open} onRequestClose={() => (open = false)}>
   <p>This action cannot be undone. Are you sure?</p>
-  <svelte:fragment slot="actions">
-    <Button variant="ghost" on:click={() => open = false}>Cancel</Button>
-    <Button variant="primary" tone="danger" on:click={handleConfirm}>Delete</Button>
-  </svelte:fragment>
+  {#snippet actions()}
+    <Button variant="ghost" onClick={() => (open = false)}>Cancel</Button>
+    <Button variant="primary" tone="danger" onClick={handleConfirm}>Delete</Button>
+  {/snippet}
 </Dialog>
 ```
 
@@ -759,7 +765,12 @@ Flex-aware spacer element that pushes siblings apart.
 Slide-out panel from a screen edge:
 
 ```svelte
-<Drawer title="Settings" edge="right" open={showDrawer} on:requestClose={() => showDrawer = false}>
+<Drawer
+  title="Settings"
+  edge="right"
+  open={showDrawer}
+  onOpenChange={(nextOpen) => (showDrawer = nextOpen)}
+>
   <!-- drawer content -->
 </Drawer>
 ```
@@ -830,8 +841,8 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
   {rows}
   selectable
   sortable
-  on:sortChange={(e) => handleSort(e.detail)}
-  on:selectionChange={(e) => handleSelection(e.detail)}
+  onSortChange={handleSort}
+  onToggleAll={handleSelection}
 />
 ```
 
@@ -983,7 +994,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   id="terms"
   label="I agree to the terms"
   checked={agreed}
-  on:checkedChange={(e) => agreed = e.detail.checked}
+  onCheckedChange={(checked) => (agreed = checked)}
 />
 ```
 
@@ -994,7 +1005,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   id="notifications"
   label="Enable notifications"
   checked={enabled}
-  on:checkedChange={(e) => enabled = e.detail.checked}
+  onCheckedChange={(checked) => (enabled = checked)}
 />
 ```
 
@@ -1039,7 +1050,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   ]}
   value={country}
   placeholder="Select a country"
-  on:valueChange={(e) => country = e.detail.value}
+  onValueChange={(value) => country = value}
 />
 ```
 
@@ -1080,7 +1091,9 @@ Grouped options:
 </script>
 
 <PageHeader title="User Details">
-  <Breadcrumbs slot="breadcrumbs" items={breadcrumbItems} />
+  {#snippet breadcrumbs()}
+    <Breadcrumbs items={breadcrumbItems} />
+  {/snippet}
 </PageHeader>
 
 <DetailShell>
@@ -1120,7 +1133,12 @@ Grouped options:
   ];
 </script>
 
-<CommandPalette {open} {actions} on:select={(e) => handleAction(e.detail)} on:close={() => open = false} />
+<CommandPalette
+  {open}
+  items={actions}
+  onCommandSelect={handleAction}
+  onOpenChange={(nextOpen) => (open = nextOpen)}
+/>
 ```
 
 ---
@@ -1268,7 +1286,7 @@ interface MenuItem {
   </Field>
 
   <svelte:fragment slot="actions">
-    <Button variant="primary" on:click={() => { submitted = true; }}>Submit</Button>
+    <Button variant="primary" onClick={() => { submitted = true; }}>Submit</Button>
   </svelte:fragment>
 </FormLayout>
 ```
@@ -1299,7 +1317,7 @@ interface MenuItem {
   let showConfirm = false;
 </script>
 
-<Button tone="danger" on:click={() => showConfirm = true}>Delete Account</Button>
+<Button tone="danger" onClick={() => { showConfirm = true; }}>Delete Account</Button>
 
 <AlertDialog
   open={showConfirm}
@@ -1308,8 +1326,8 @@ interface MenuItem {
   description="This will permanently delete your account and all associated data. This action cannot be undone."
   confirmLabel="Delete"
   cancelLabel="Cancel"
-  on:confirm={handleDelete}
-  on:cancel={() => showConfirm = false}
+  onConfirm={handleDelete}
+  onCancel={() => showConfirm = false}
 />
 ```
 

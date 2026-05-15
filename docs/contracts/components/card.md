@@ -10,8 +10,8 @@ Updated: 2026-03-15
 - Summary: a contained surface for grouping related content with optional media,
   header, body, and footer regions
 - In scope: default, outlined, and elevated variants; vertical, horizontal, and
-  compact layouts; interactive and selected states; media, header, body, and
-  footer slots
+  compact layouts; interactive and selected states; optional media, header,
+  body, and footer snippets
 - Out of scope: card carousels, card grids (see NavCardGrid), drag-and-drop
   reordering
 
@@ -19,10 +19,10 @@ Updated: 2026-03-15
 
 ```text
 [Root .card]  <article>
-  ├── [Media .card__media]  (optional, via media slot)
-  ├── [Header .card__header]  (optional, via header slot)
-  ├── [Body .card__body]  (default slot)
-  └── [Footer .card__footer]  (optional, via footer slot)
+  ├── [Media .card__media]  (optional, via mediaContent snippet)
+  ├── [Header .card__header]  (optional, via header snippet)
+  ├── [Body .card__body]  (children snippet)
+  └── [Footer .card__footer]  (optional, via footer snippet)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -30,7 +30,7 @@ Updated: 2026-03-15
 | Root | yes | grid container with variant-driven styling | background, border, radius, shadow, padding, gap |
 | Media | no | overflow-clipped region for images or video | overflow, border-radius |
 | Header | no | title and metadata region | typography |
-| Body | yes | primary content area via default slot | — |
+| Body | yes | primary content area via children snippet | — |
 | Footer | no | action or metadata row with top border | padding-top, border-top |
 
 ## 3. Props And Inputs
@@ -46,14 +46,14 @@ Updated: 2026-03-15
 | `media` | `boolean` | `false` | no | enables media slot region |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when interactive |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| media | image or video content, clipped to card radius |
-| header | title, subtitle, metadata content |
-| default | primary body content |
-| footer | actions or supplementary metadata with top divider |
+| Snippet | Purpose |
+|---------|---------|
+| `mediaContent()` | image or video content, clipped to the card radius |
+| `header()` | title, subtitle, or metadata content |
+| `children()` | primary body content |
+| `footer()` | actions or supplementary metadata with top divider |
 
 ### Controlled And Uncontrolled
 
@@ -109,7 +109,7 @@ Updated: 2026-03-15
 ### Composition
 
 - parent expectations: page grids, dashboard layouts, list views
-- child expectations: media, header, body, footer via slots
+- child expectations: media, header, body, footer via snippets
 - resizing: fills parent width, height auto-fits content
 
 ## 8. Token Usage — Exact Values

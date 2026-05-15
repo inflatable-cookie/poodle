@@ -41,10 +41,12 @@
   const uiPresentation = getUiPresentation();
   const accordionId = ++nextAccordionId;
   let uncontrolledValue = $state<string | string[] | null>(null);
+  let seededDefaultValue = $state(false);
 
   $effect.pre(() => {
-    if (uncontrolledValue === null) {
+    if (!seededDefaultValue) {
       uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+      seededDefaultValue = true;
     }
   });
 

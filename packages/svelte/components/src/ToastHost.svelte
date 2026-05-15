@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, createEventDispatcher } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import type { Readable } from "svelte/store";
 
   import ToastStack from "./ToastStack.svelte";
@@ -20,11 +20,7 @@
   export let sizeRole: SemanticControlSizeRole = "chrome";
   export let density: ControlDensity | null = null;
   export let onAction: ((id: string) => void) | null = null;
-
-  const dispatch = createEventDispatcher<{
-    dismiss: { id: string };
-    action: { id: string };
-  }>();
+  export let onDismiss: ((id: string) => void) | null = null;
 
   let items: ToastItem[] = [];
 
@@ -87,12 +83,11 @@
   function handleDismiss(id: string) {
     clearTimer(id);
     store.dismiss(id);
-    dispatch("dismiss", { id });
+    onDismiss?.(id);
   }
 
   function handleAction(id: string) {
     onAction?.(id);
-    dispatch("action", { id });
   }
 
   onMount(() => {
@@ -120,8 +115,8 @@
       {size}
       {sizeRole}
       {density}
-      on:dismiss={(event) => handleDismiss(event.detail.id)}
-      on:action={(event) => handleAction(event.detail.id)}
+      onDismiss={handleDismiss}
+      onAction={handleAction}
     />
   </div>
 {/if}

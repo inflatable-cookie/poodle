@@ -12,9 +12,9 @@ Updated: 2026-04-09
   switching infrastructure, and leaves block payload shape and rendering fully
   consumer-owned
 - In scope: single or multi posture, optional block CRUD, optional type
-  switching via Select or slot override, optional reordering (drag-and-drop +
+  switching via Select or snippet override, optional reordering (drag-and-drop +
   arrow buttons), consumer-provided block type definitions, opaque block
-  payloads, slotted block content rendering, size and density variants
+  payloads, snippet-rendered block content, size and density variants
 - Out of scope: built-in block types, built-in block rendering, rich text editing within blocks, collaborative editing, undo/redo history, block nesting, server persistence
 
 ## 2. Anatomy
@@ -32,7 +32,7 @@ Updated: 2026-04-09
         │           ├── [AddSelect .block-editor__add-select]  Select (variant="ghost", menuMinWidth="10rem", trigger slot with plus icon)
         │           └── [RemoveBtn .block-editor__tool-btn.block-editor__remove-btn]  <button> Icon x (hidden when 1 block)
         └── [Content .block-editor__content]
-              └── [BlockSlot]  named "block" slot; fallback: minimal <textarea>
+              └── [BlockContent]  `block(...)` snippet; fallback: minimal <textarea>
 ```
 
 ### Parts
@@ -56,7 +56,7 @@ Updated: 2026-04-09
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `blocks` | `EditorBlock[]` | `[]` | no | Array of block data objects; bind for two-way |
+| `blocks` | `EditorBlock[]` | `[]` | no | Array of block data objects; host-owned and updated through `onChange` |
 | `blockTypes` | `BlockTypeDefinition[]` | `[]` | no | Consumer provides all available block types; drives both the type-switch Select and the add-block Select |
 | `blockTypeItems` | `BlockTypeDefinition[] \| BlockTypeGroup[] \| null` | `null` | no | Optional richer type input for built-in pickers; supports flat or grouped Nightfire-style menus |
 | `disabled` | `boolean` | `false` | no | Disables all editing controls |
@@ -97,22 +97,22 @@ type EditorBlock = {
 };
 ```
 
-### Slots
+### Snippets
 
-| Slot | Scope | Purpose |
-|------|-------|---------|
+| Snippet | Scope | Purpose |
+|---------|-------|---------|
 | `block` | `{ block: EditorBlock, index: number, disabled: boolean, update: (updates: Partial<EditorBlock>) => void }` | Custom rendering for block content; when not provided, falls back to a minimal `<textarea>` |
-| `type-picker` | `{ block: EditorBlock, index: number, disabled: boolean, options: SelectOption[], groupedOptions: SelectItems, changeType: (type: BlockType) => void }` | Override the built-in type-change control while keeping the shell |
-| `add-picker` | `{ block: EditorBlock, index: number, disabled: boolean, options: SelectOption[], groupedOptions: SelectItems, addBlock: (type: BlockType) => void }` | Override the built-in add-block control while keeping the shell |
+| `typePicker` | `{ block: EditorBlock, index: number, disabled: boolean, options: SelectOption[], groupedOptions: SelectItems, changeType: (type: BlockType) => void }` | Override the built-in type-change control while keeping the shell |
+| `addPicker` | `{ block: EditorBlock, index: number, disabled: boolean, options: SelectOption[], groupedOptions: SelectItems, addBlock: (type: BlockType) => void }` | Override the built-in add-block control while keeping the shell |
 
 ### Fallback Block Renderer
 
-When the `block` slot is not provided, the only fallback is a minimal `<textarea>` with `placeholder="Type something..."` and `rows="1"`. That fallback reads and writes `block.content` only for legacy convenience. There are no built-in type-specific renderers (no heading, code, quote, list, image, or divider rendering). Consumers are expected to provide a `block` slot for meaningful rendering and should treat the full block object as opaque, consumer-owned data.
+When the `block` snippet is not provided, the only fallback is a minimal `<textarea>` with `placeholder="Type something..."` and `rows="1"`. That fallback reads and writes `block.content` only for legacy convenience. There are no built-in type-specific renderers (no heading, code, quote, list, image, or divider rendering). Consumers are expected to provide a `block` snippet for meaningful rendering and should treat the full block object as opaque, consumer-owned data.
 
 ### Controlled And Uncontrolled
 
-- `blocks` supports two-way binding (`bind:blocks`)
-- Mutations also surfaced via the `change` event
+- `blocks` are host-owned and updated through `onChange`
+- there is no bindable `blocks` surface in the current Svelte implementation
 
 ## 4. States
 
@@ -135,11 +135,11 @@ When the `block` slot is not provided, the only fallback is a minimal `<textarea
 | `dragSourceIndex` | Index of the block being dragged |
 | `dragOverIndex` | Index of the current drop target |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `change` | After any mutation (add, remove, move, type change, content update) | `{ blocks: EditorBlock[] }` | Fires with a shallow copy of the blocks array |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onChange` | after any mutation (add, remove, move, type change, content update) | `EditorBlock[]` | runs with a shallow copy of the blocks array |
 
 ## 6. Accessibility
 

@@ -9,12 +9,12 @@
   <div class="poodle-specimen">
     <div class="poodle-specimen__row">
       <Eyebrow>Right edge (default)</Eyebrow>
-      <Button variant="secondary" on:click={() => (rightOpen = true)}>Open right drawer</Button>
+      <Button variant="secondary" onClick={() => (rightOpen = true)}>Open right drawer</Button>
     </div>
 
     <div class="poodle-specimen__row">
       <Eyebrow>Left edge</Eyebrow>
-      <Button variant="secondary" on:click={() => (leftOpen = true)}>Open left drawer</Button>
+      <Button variant="secondary" onClick={() => (leftOpen = true)}>Open left drawer</Button>
     </div>
   </div>
 </Surface>
@@ -23,20 +23,20 @@
   open={rightOpen}
   title="Settings"
   description="Configure your preferences."
-  on:openChange={(e) => (rightOpen = e.detail.open)}
+  onOpenChange={(open) => (rightOpen = open)}
 >
   <p>Drawer content goes here. You can put forms, navigation, or any other content.</p>
-  <svelte:fragment slot="actions">
-    <Button variant="secondary" on:click={() => (rightOpen = false)}>Cancel</Button>
-    <Button on:click={() => (rightOpen = false)}>Save</Button>
-  </svelte:fragment>
+  {#snippet actions()}
+    <Button variant="secondary" onClick={() => (rightOpen = false)}>Cancel</Button>
+    <Button onClick={() => (rightOpen = false)}>Save</Button>
+  {/snippet}
 </Drawer>
 
 <Drawer
   open={leftOpen}
   edge="left"
   title="Navigation"
-  on:openChange={(e) => (leftOpen = e.detail.open)}
+  onOpenChange={(open) => (leftOpen = open)}
 >
   <p>Side navigation or filters can live in a left-edge drawer.</p>
 </Drawer>

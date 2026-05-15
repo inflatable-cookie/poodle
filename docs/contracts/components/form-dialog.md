@@ -11,8 +11,8 @@ Updated: 2026-04-09
   FormLayout body, submitting-state dismiss control, status callouts, optional
   default submit/cancel actions, and caller-owned custom actions when needed
 - In scope: controlled open state, title and subtitle/description, form
-  content via default slot, optional default submit and cancel buttons, custom
-  actions slot, status callouts via FormLayout, dismiss prevention during
+  content via snippets, optional default submit and cancel buttons, custom
+  actions snippet, status callouts via FormLayout, dismiss prevention during
   submission, custom dialog width via CSS custom property
 - Out of scope: form validation logic, field-level errors (handled by
   individual Field components), multi-step forms, file upload handling
@@ -20,18 +20,18 @@ Updated: 2026-04-09
 ## 2. Anatomy
 
 ```text
-[Dialog]  Dialog primitive (kind="dialog")
-  ├── [Header .form-dialog__header]  (optional, when subtitle slot provided)
+[Dialog]  Dialog primitive (`role="dialog"`)
+  ├── [Header .form-dialog__header]  (optional, when subtitle snippet provided)
   │     └── [Subtitle .form-dialog__subtitle]  <div>
-  │           └── (slot: subtitle)
+  │           └── (snippet: subtitleContent)
   ├── [FormLayout]  FormLayout composite (columns={columns})  -- when bare=false
   │     ├── [ErrorDisplay]  (when error is set, handled by FormLayout)
   │     ├── [SuccessDisplay]  (when success is set, handled by FormLayout)
-  │     └── [FormContent]  (via default slot)
-  ├── [BareContent]  (via default slot, rendered directly)  -- when bare=true
-  └── [Actions slot]
-        ├── [Custom actions]  (slot: actions) — when provided
-        └── [Default actions]  when resolvedShowActions=true and no actions slot
+  │     └── [FormContent]  (via `body` snippet or `children`)
+  ├── [BareContent]  (via `body` snippet or `children`, rendered directly)  -- when bare=true
+  └── [Actions]
+        ├── [Custom actions]  (`actions` snippet) — when provided
+        └── [Default actions]  when resolvedShowActions=true and no actions snippet
               ├── [CancelButton]  Button (variant="ghost")
               └── [SubmitButton]  Button (variant="primary")
 ```
@@ -39,11 +39,11 @@ Updated: 2026-04-09
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Dialog | yes | Dialog primitive with controlled open state | delegates to Dialog contract |
-| Header | no | subtitle container rendered when subtitle slot is provided | margin-bottom spacing |
+| Header | no | subtitle container rendered when subtitle snippet is provided | margin-bottom spacing |
 | Subtitle | no | rich subtitle content area | text-secondary, body typography |
 | FormLayout | conditional | FormLayout composite for form structure and error/success display; rendered when `bare=false` | delegates to FormLayout contract |
-| BareContent | conditional | slot content rendered directly without FormLayout wrapper; rendered when `bare=true` | none (consumer controls layout) |
-| FormContent | yes (via slot) | form fields and content provided by consumer | layout delegated to FormLayout (or consumer when bare) |
+| BareContent | conditional | snippet content rendered directly without FormLayout wrapper; rendered when `bare=true` | none (consumer controls layout) |
+| FormContent | yes (via snippet) | form fields and content provided by consumer | layout delegated to FormLayout (or consumer when bare) |
 | CancelButton | conditional | ghost Button for canceling; disabled during submission | delegates to Button contract |
 | SubmitButton | conditional | primary Button for submission; shows "Submitting..." text when submitting | delegates to Button contract |
 
@@ -53,7 +53,7 @@ Updated: 2026-04-09
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled (Dialog manages visibility) |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | dialog visibility; when supplied, the host owns updates through `onOpenChange`; omit the prop for uncontrolled mode |
 | `title` | `string` | — | yes | dialog title |
 | `subtitle` | `string \| null` | `null` | no | primary description text; takes precedence over `description` |
 | `description` | `string \| null` | `null` | no | alias/fallback description text; used when `subtitle` is null |
@@ -65,25 +65,26 @@ Updated: 2026-04-09
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the dialog |
 | `width` | `string \| null` | `null` | no | custom dialog width CSS value (applied via `--poodle-form-dialog-width`) |
 | `columns` | `number` | `6` | no | number of columns passed through to FormLayout; ignored when `bare=true` |
-| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons; expects an `actions` slot; automatically set to false when `bare=true` |
-| `bare` | `boolean` | `false` | no | when true, renders the default slot directly without a FormLayout wrapper and automatically sets `showDefaultActions` to false; use for embedding reusable form components that already own their own FormLayout |
+| `showDefaultActions` | `boolean` | `true` | no | when false, suppresses built-in cancel/submit buttons; expects an `actions` snippet; automatically set to false when `bare=true` |
+| `bare` | `boolean` | `false` | no | when true, renders snippet content directly without a FormLayout wrapper and automatically sets `showDefaultActions` to false; use for embedding reusable form components that already own their own FormLayout |
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for dialog and action controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for dialog and action controls |
 
-### Slots
+### Snippets
 
-| Slot | Provided Context | Description |
+| Snippet | Provided Context | Description |
 |------|-----------------|-------------|
-| default | `{ submitting: boolean }` | form content (fields, inputs); receives submitting state for conditional rendering |
-| `subtitle` | `{ submitting: boolean }` | optional rich subtitle content rendered below the title; when provided, the `description` prop is not passed to Dialog |
-| `actions` | `{ submitting: boolean }` | optional custom footer actions; replaces default submit/cancel buttons |
+| `children` | none | fallback body content when no `body` snippet is provided |
+| `body` | `submitting: boolean` | form content (fields, inputs); receives submitting state for conditional rendering |
+| `subtitleContent` | `submitting: boolean` | optional rich subtitle content rendered below the title; when provided, the `description` prop is not passed to Dialog |
+| `actions` | `submitting: boolean` | optional custom footer actions; replaces default submit/cancel buttons |
 
 ### Controlled And Uncontrolled
 
-- `open` is controlled externally; host must handle `openChange` event to
+- `open` is externally owned when supplied; host must handle `onOpenChange` to
   update the value
-- When `open` is `null`, the Dialog manages its own visibility
+- omitting `open` leaves the underlying Dialog on its internal uncontrolled path
 
 ## 4. States
 
@@ -91,26 +92,28 @@ Updated: 2026-04-09
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| closed | `open` is falsy/null | dialog not visible |
+| closed | `open` is false or omitted and internal state is false | dialog not visible |
 | open | `open` is true | dialog visible with form content and action buttons |
 | submitting | `submitting` is true | submit button shows "Submitting..." text, both buttons disabled, dismiss on Escape and backdrop disabled |
 | error | `error` is set | FormLayout displays error message above form content |
 | success | `success` is set | FormLayout displays success message above form content |
-| shell mode | `showDefaultActions` is false | caller supplies the full footer via the `actions` slot |
-| bare mode | `bare` is true | slot content rendered directly without FormLayout wrapper; `showDefaultActions` automatically set to false |
+| shell mode | `showDefaultActions` is false | caller supplies the full footer via the `actions` snippet |
+| bare mode | `bare` is true | snippet content rendered directly without FormLayout wrapper; `showDefaultActions` automatically set to false |
 | custom width | `width` is set | dialog surface uses the specified width (capped at 100%) |
 
 ### Component States
 
-No additional internal state. All state is externally controlled via props.
+No additional form workflow state is owned internally. `submitting`, `error`,
+and `success` are host-owned. `open` may still use the underlying Dialog's
+uncontrolled path when the prop is omitted.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `submit` | user clicks the built-in submit button | `void` | host is responsible for async logic and setting `submitting`/`error` |
-| `cancel` | dialog requests cancellation (cancel button, Escape, backdrop, close button) | `void` | fired before `openChange` when applicable |
-| `openChange` | dialog open state changes | `{ open: boolean }` | host must update `open` prop; cancel event also fires when closing while not submitting |
+| `onSubmit` | user clicks the built-in submit button | `void` | host is responsible for async logic and setting `submitting`/`error` |
+| `onCancel` | dialog requests cancellation (cancel button, Escape, backdrop, close button) | `void` | runs before `onOpenChange(false)` when applicable |
+| `onOpenChange` | dialog open state changes | `boolean` | host must update `open` prop; cancel callback also runs when closing while not submitting |
 
 ## 6. Accessibility
 
@@ -123,7 +126,7 @@ No additional internal state. All state is externally controlled via props.
 - Both buttons: `disabled` attribute set during submitting state
 - Dismiss: Escape and backdrop dismiss disabled during submitting
   (`dismissOnEscape={!submitting}`, `dismissOnBackdrop={!submitting}`)
-- Description: when subtitle slot is provided, `description` is not passed to
+- Description: when subtitle snippet is provided, `description` is not passed to
   Dialog to avoid duplicate description announcement
 
 ### Keyboard
@@ -148,9 +151,9 @@ No additional internal state. All state is externally controlled via props.
 - Custom width: applied via `--poodle-form-dialog-width` CSS custom property,
   capped with `min(var(--poodle-form-dialog-width, 34rem), 100%)`
 - FormLayout: `columns={columns}` (default 6) — passed through to FormLayout
-- When `bare=true`: no FormLayout wrapper; slot content rendered directly,
+- When `bare=true`: no FormLayout wrapper; snippet content rendered directly,
   allowing embedded components that own their own FormLayout
-- Actions: standard Dialog actions slot layout (flex row, right-aligned)
+- Actions: standard Dialog actions snippet layout (flex row, right-aligned)
 
 ### Composition
 
@@ -158,7 +161,7 @@ No additional internal state. All state is externally controlled via props.
   `FormLayout` from composites
 - parent expectations: any view needing a modal form (user creation, settings
   edit, etc.)
-- child expectations: form fields and action primitives via slots
+- child expectations: form fields and action primitives via snippets
 - resizing rules: delegated to Dialog; form content scrolls if it exceeds
   dialog height
 
@@ -202,23 +205,24 @@ None.
 
 ## 9. Svelte Notes
 
-- uses `createEventDispatcher` for `submit`, `cancel`, and `openChange` events
+- uses callback props for `onSubmit`, `onCancel`, and `onOpenChange`
 - composes `Dialog`, `Button` from `@poodle/svelte` and `FormLayout`
   from `@poodle/svelte`
 - submit button text switches between `submitLabel` and `"Submitting..."`
-- cancel handler calls internal `setOpen(false)` which emits `openChange`
-  when `open !== null`
-- `handleOpenChange` prevents cancel event during submitting state but
-  always forwards `openChange`
+- cancel handler closes through `onOpenChange(false)` and only mutates local
+  state when the component is actually uncontrolled
+- `handleDialogOpenChange` prevents cancel callback during submitting state but
+  always forwards `onOpenChange`
 - `subtitle` takes precedence over `description` via `resolvedDescription`
   reactive binding
-- when subtitle slot is provided, `description` is set to null on the Dialog
+- when subtitle snippet is provided, `description` is set to null on the Dialog
   to avoid duplication
 - custom width is applied through `contentStyle` and `contentClassName`
   props on Dialog; the global `.form-dialog__surface` class sets the width
 - Dialog receives `showCloseButton={true}` always
-- `bare` mode: when true, the default slot is rendered directly without a
-  FormLayout wrapper; `resolvedShowActions` is derived as `bare ? false : showDefaultActions`
+- `bare` mode: when true, snippet content is rendered directly without a
+  FormLayout wrapper; `resolvedShowActions` is derived as
+  `bare ? false : showDefaultActions`
 - `columns` prop (default 6) is passed through to `FormLayout` as `{columns}`;
   ignored when bare mode is active since FormLayout is not rendered
 - `size`, `sizeRole`, and `density` are resolved via `getUiPresentation()` and
@@ -237,13 +241,13 @@ None.
 ### Tier 1: Strict Parity
 
 - [ ] all shell props have the same meaning and defaults
-- [ ] event names and payloads match
+- [ ] callback names and payloads match
 - [ ] submitting state disables dismiss and buttons
 - [ ] submit button text changes to "Submitting..." during submitting
-- [ ] slot context provides submitting boolean
+- [ ] snippet context provides submitting boolean
 - [ ] subtitle takes precedence over description
-- [ ] cancel event fires on Escape/backdrop/cancel button (not during submitting)
-- [ ] `bare` mode renders slot directly without FormLayout, sets showDefaultActions to false
+- [ ] cancel callback fires on Escape/backdrop/cancel button (not during submitting)
+- [ ] `bare` mode renders snippet content directly without FormLayout, sets showDefaultActions to false
 - [ ] `columns` prop passes through to FormLayout (default 6)
 
 ### Tier 2: Visual Parity
@@ -275,4 +279,4 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Shell mode with custom actions | `title="Edit workspace settings"`, `subtitle="Update shared defaults for this workspace."`, `showDefaultActions=false`, `width="40rem"`, success set after save, actions slot contains caller-owned FormActions | dialog renders custom footer actions, shows success callout, and uses wider shell sizing |
+| Shell mode with custom actions | `title="Edit workspace settings"`, `subtitle="Update shared defaults for this workspace."`, `showDefaultActions=false`, `width="40rem"`, success set after save, actions snippet contains caller-owned FormActions | dialog renders custom footer actions, shows success callout, and uses wider shell sizing |

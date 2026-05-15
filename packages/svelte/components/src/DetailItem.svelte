@@ -1,16 +1,39 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import Icon from "./Icon.svelte";
   import Popover from "./Popover.svelte";
 
-  export let label: string;
-  export let description: string | null = null;
-  export let value: string | number | null = null;
-  export let emptyText = "—";
-  export let truncateValue = false;
-  export let ariaLabel: string | null = null;
-  export let layout: "inline" | "stacked" = "inline";
-  export let presentation: "simple" | "surface" = "simple";
-  export let span: "full" | "half" | null = null;
+  interface Props {
+    label: string;
+    description?: string | null;
+    value?: string | number | null;
+    emptyText?: string;
+    truncateValue?: boolean;
+    ariaLabel?: string | null;
+    layout?: "inline" | "stacked";
+    presentation?: "simple" | "surface";
+    span?: "full" | "half" | null;
+    valueContent?: Snippet;
+    action?: Snippet;
+    children?: Snippet;
+  }
+
+  let {
+    label,
+    description = null,
+    value = null,
+    emptyText = "—",
+    truncateValue = false,
+    ariaLabel = null,
+    layout = "inline",
+    presentation = "simple",
+    span = null,
+    valueContent,
+    action,
+    children,
+  }: Props = $props();
+
+  let renderedValue = $derived(value === null ? emptyText : String(value));
 </script>
 
 <div
@@ -39,18 +62,18 @@
   </div>
 
   <dd class:poodle-truncate={truncateValue} class="poodle-detail-item__value">
-    {#if $$slots.value}
-      <slot name="value" />
-    {:else if $$slots.default}
-      <slot />
+    {#if valueContent}
+      {@render valueContent()}
+    {:else if children}
+      {@render children()}
     {:else}
-      {value === null ? emptyText : String(value)}
+      {renderedValue}
     {/if}
   </dd>
 
-  {#if $$slots.action}
+  {#if action}
     <div class="poodle-detail-item__action">
-      <slot name="action" />
+      {@render action()}
     </div>
   {/if}
 </div>
@@ -120,8 +143,6 @@
     white-space: nowrap;
   }
 
-  /* ── Info icon popover (matches Field pattern) ── */
-
   .poodle-detail-item__info-trigger {
     display: inline-flex;
     align-items: center;
@@ -173,8 +194,6 @@
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.0625rem;
   }
-
-  /* ── Surface presentation ── */
 
   .poodle-detail-item[data-presentation="surface"] {
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;

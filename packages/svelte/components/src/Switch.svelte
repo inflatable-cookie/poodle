@@ -105,9 +105,10 @@
 
     if (!isControlled) {
       uncontrolledChecked = nextChecked;
+    } else {
+      checked = nextChecked;
     }
 
-    checked = nextChecked;
     onCheckedChange?.(nextChecked);
   }
 </script>

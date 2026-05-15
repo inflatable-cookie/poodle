@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -37,13 +37,6 @@
 
   const uiPresentation = getUiPresentation();
 
-  const dispatch = createEventDispatcher<{
-    change: { files: FileUploadItem[] };
-    upload: { files: File[] };
-    error: { file: File; message: string };
-    remove: { item: FileUploadItem };
-  }>();
-
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
 
@@ -69,7 +62,6 @@
 
       if (multiple && files.length >= maxFiles) {
         const message = `Maximum of ${maxFiles} files allowed`;
-        dispatch("error", { file, message });
         onError?.({ file, message });
         break;
       }
@@ -82,7 +74,6 @@
       });
 
       if (error) {
-        dispatch("error", { file, message: error });
         onError?.({ file, message: error });
         continue;
       }
@@ -111,11 +102,9 @@
       filesToUpload.push(processedFile);
     }
 
-    dispatch("change", { files });
     onChange?.(files);
 
     if (filesToUpload.length > 0) {
-      dispatch("upload", { files: filesToUpload });
       onUpload?.(filesToUpload);
     }
   }
@@ -132,8 +121,6 @@
     }
 
     files = files.filter((f) => f.id !== id);
-    dispatch("remove", { item });
-    dispatch("change", { files });
     onRemove?.(item);
     onChange?.(files);
   }
@@ -148,7 +135,6 @@
           }
         : f,
     );
-    dispatch("change", { files });
     onChange?.(files);
   }
 
@@ -156,7 +142,6 @@
     files = files.map((f) =>
       f.id === id ? { ...f, status: "error" as const, error: message } : f,
     );
-    dispatch("change", { files });
     onChange?.(files);
   }
 
@@ -168,7 +153,6 @@
     }
 
     files = [];
-    dispatch("change", { files });
     onChange?.(files);
   }
 

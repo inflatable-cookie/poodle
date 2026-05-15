@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { createEventDispatcher, tick } from "svelte";
+  import type { Snippet } from "svelte";
+  import { tick } from "svelte";
 
   import Icon from "./Icon.svelte";
   import Select from "./Select.svelte";
@@ -19,42 +20,87 @@
 
   import type { EditorBlock, BlockType, BlockTypeDefinition } from "./types";
 
-  export let blocks: EditorBlock[] = [];
-  export let blockTypes: BlockTypeDefinition[] = [];
-  export let blockTypeItems: BlockTypeItems | null = null;
-  export let disabled = false;
-  export let ariaLabel = "Block editor";
-  export let mode: BlockEditorMode = "multi";
-  export let allowReorder: boolean | null = null;
-  export let allowAdd: boolean | null = null;
-  export let allowRemove: boolean | null = null;
-  export let allowTypeChange: boolean | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface TypePickerSnippetProps {
+    block: EditorBlock;
+    index: number;
+    disabled: boolean;
+    options: SelectOption[];
+    groupedOptions: SelectItems;
+    changeType: (type: BlockType) => void;
+  }
 
-  const dispatch = createEventDispatcher<{
-    change: { blocks: EditorBlock[] };
-  }>();
+  interface AddPickerSnippetProps {
+    block: EditorBlock;
+    index: number;
+    disabled: boolean;
+    options: SelectOption[];
+    groupedOptions: SelectItems;
+    addBlock: (type: BlockType) => void;
+  }
 
-  let activeBlockId: string | null = null;
-  let dragSourceIndex: number | null = null;
-  let dragOverIndex: number | null = null;
+  interface BlockSnippetProps {
+    block: EditorBlock;
+    index: number;
+    disabled: boolean;
+    update: (updates: Partial<EditorBlock>) => void;
+  }
+
+  interface Props {
+    blocks?: EditorBlock[];
+    blockTypes?: BlockTypeDefinition[];
+    blockTypeItems?: BlockTypeItems | null;
+    disabled?: boolean;
+    ariaLabel?: string;
+    mode?: BlockEditorMode;
+    allowReorder?: boolean | null;
+    allowAdd?: boolean | null;
+    allowRemove?: boolean | null;
+    allowTypeChange?: boolean | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onChange?: ((blocks: EditorBlock[]) => void) | null;
+    typePicker?: Snippet<[TypePickerSnippetProps]>;
+    addPicker?: Snippet<[AddPickerSnippetProps]>;
+    block?: Snippet<[BlockSnippetProps]>;
+  }
+
+  let {
+    blocks = [],
+    blockTypes = [],
+    blockTypeItems = null,
+    disabled = false,
+    ariaLabel = "Block editor",
+    mode = "multi",
+    allowReorder = null,
+    allowAdd = null,
+    allowRemove = null,
+    allowTypeChange = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onChange = null,
+    typePicker,
+    addPicker,
+    block,
+  }: Props = $props();
+
+  let activeBlockId = $state<string | null>(null);
+  let dragSourceIndex = $state<number | null>(null);
+  let dragOverIndex = $state<number | null>(null);
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedBlockTypeItems = blockTypeItems ?? blockTypes;
-  $: selectItems = toSelectItems(resolvedBlockTypeItems);
-  $: selectOptions = flattenSelectItems(selectItems);
-  $: canReorder = allowReorder ?? (mode === "multi");
-  $: canAdd = allowAdd ?? (mode === "multi");
-  $: canRemove = allowRemove ?? (mode === "multi");
-  $: canTypeChange = allowTypeChange ?? true;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedBlockTypeItems = $derived(blockTypeItems ?? blockTypes);
+  const selectItems = $derived(toSelectItems(resolvedBlockTypeItems));
+  const selectOptions = $derived(flattenSelectItems(selectItems));
+  const canReorder = $derived(allowReorder ?? (mode === "multi"));
+  const canAdd = $derived(allowAdd ?? (mode === "multi"));
+  const canRemove = $derived(allowRemove ?? (mode === "multi"));
+  const canTypeChange = $derived(allowTypeChange ?? true);
 
-  function isBlockTypeGroupArray(
-    value: BlockTypeItems,
-  ): value is BlockTypeGroup[] {
+  function isBlockTypeGroupArray(value: BlockTypeItems): value is BlockTypeGroup[] {
     return value.length > 0 && "options" in value[0];
   }
 
@@ -78,61 +124,68 @@
   }
 
   function flattenSelectItems(items: SelectItems): SelectOption[] {
-    if (items.length === 0) return [];
+    if (items.length === 0) {
+      return [];
+    }
+
     if ("options" in items[0]) {
       return (items as SelectOptionGroup[]).flatMap((group) => group.options);
     }
+
     return items as SelectOption[];
   }
 
-  function emitChange(): void {
-    dispatch("change", { blocks: [...blocks] });
+  function emitChange(nextBlocks: EditorBlock[]): void {
+    onChange?.([...nextBlocks]);
   }
 
-  function addBlock(type: BlockType, afterIndex: number): void {
+  function addBlockAfter(index: number, type: BlockType): void {
     const newBlock: EditorBlock = {
       id: crypto.randomUUID(),
       type,
       content: "",
       data: {},
     };
-    blocks = [...blocks.slice(0, afterIndex + 1), newBlock, ...blocks.slice(afterIndex + 1)];
-    emitChange();
+    const nextBlocks = [...blocks.slice(0, index + 1), newBlock, ...blocks.slice(index + 1)];
+    emitChange(nextBlocks);
 
     tick().then(() => {
       activeBlockId = newBlock.id;
     });
   }
 
-  function removeBlock(index: number): void {
-    if (blocks.length <= 1) return;
-    blocks = blocks.filter((_, i) => i !== index);
-    emitChange();
+  function removeBlockAt(index: number): void {
+    if (blocks.length <= 1) {
+      return;
+    }
+
+    emitChange(blocks.filter((_, blockIndex) => blockIndex !== index));
   }
 
   function moveBlock(index: number, direction: -1 | 1): void {
     const target = index + direction;
-    if (target < 0 || target >= blocks.length) return;
-    const copy = [...blocks];
-    [copy[index], copy[target]] = [copy[target], copy[index]];
-    blocks = copy;
-    emitChange();
+    if (target < 0 || target >= blocks.length) {
+      return;
+    }
+
+    const nextBlocks = [...blocks];
+    [nextBlocks[index], nextBlocks[target]] = [nextBlocks[target], nextBlocks[index]];
+    emitChange(nextBlocks);
   }
 
   function updateBlock(index: number, updates: Partial<EditorBlock>): void {
-    blocks[index] = { ...blocks[index], ...updates };
-    blocks = [...blocks];
-    emitChange();
+    emitChange(blocks.map((blockItem, blockIndex) => (blockIndex === index ? { ...blockItem, ...updates } : blockItem)));
   }
 
   function changeType(index: number, type: BlockType): void {
-    blocks[index] = { ...blocks[index], type };
-    blocks = [...blocks];
-    emitChange();
+    emitChange(blocks.map((blockItem, blockIndex) => (blockIndex === index ? { ...blockItem, type } : blockItem)));
   }
 
   function handleDragStart(event: DragEvent, index: number): void {
-    if (disabled || !canReorder || !event.dataTransfer) return;
+    if (disabled || !canReorder || !event.dataTransfer) {
+      return;
+    }
+
     dragSourceIndex = index;
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", String(index));
@@ -143,39 +196,52 @@
       dragOverIndex = null;
       return;
     }
+
     if (dragSourceIndex === null || dragSourceIndex === index) {
       dragOverIndex = null;
       return;
     }
+
     event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "move";
+    }
     dragOverIndex = index;
   }
 
   function handleDragLeave(): void {
-    if (!canReorder) return;
+    if (!canReorder) {
+      return;
+    }
+
     dragOverIndex = null;
   }
 
   function handleDrop(event: DragEvent, targetIndex: number): void {
-    if (!canReorder) return;
+    if (!canReorder) {
+      return;
+    }
+
     event.preventDefault();
     if (dragSourceIndex === null || dragSourceIndex === targetIndex) {
       dragSourceIndex = null;
       dragOverIndex = null;
       return;
     }
-    const copy = [...blocks];
-    const [moved] = copy.splice(dragSourceIndex, 1);
-    copy.splice(targetIndex, 0, moved);
-    blocks = copy;
+
+    const nextBlocks = [...blocks];
+    const [moved] = nextBlocks.splice(dragSourceIndex, 1);
+    nextBlocks.splice(targetIndex, 0, moved);
     dragSourceIndex = null;
     dragOverIndex = null;
-    emitChange();
+    emitChange(nextBlocks);
   }
 
   function handleDragEnd(): void {
-    if (!canReorder) return;
+    if (!canReorder) {
+      return;
+    }
+
     dragSourceIndex = null;
     dragOverIndex = null;
   }
@@ -189,47 +255,48 @@
     data-density={resolvedDensity}
     aria-label={ariaLabel}
   >
-    {#each blocks as block, index (block.id)}
-      <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+    {#each blocks as blockItem, index (blockItem.id)}
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div
         class="poodle-block-editor__block"
-        class:poodle-active={activeBlockId === block.id}
+        class:poodle-active={activeBlockId === blockItem.id}
         class:poodle-drag-over={dragOverIndex === index}
         class:poodle-dragging={dragSourceIndex === index}
-        data-type={block.type}
-        on:focusin={() => (activeBlockId = block.id)}
-        on:dragover={(e) => handleDragOver(e, index)}
-        on:dragleave={handleDragLeave}
-        on:drop={(e) => handleDrop(e, index)}
+        data-type={blockItem.type}
+        onfocusin={() => (activeBlockId = blockItem.id)}
+        ondragover={(event) => handleDragOver(event, index)}
+        ondragleave={handleDragLeave}
+        ondrop={(event) => handleDrop(event, index)}
         role="group"
-        aria-label={`${block.type} block`}
+        aria-label={`${blockItem.type} block`}
       >
         <div class="poodle-block-editor__toolbar">
           <div class="poodle-block-editor__toolbar-left">
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span
               class="poodle-block-editor__drag-grip"
               draggable="true"
               hidden={!canReorder}
-              on:dragstart={(e) => handleDragStart(e, index)}
-              on:dragend={handleDragEnd}
+              ondragstart={(event) => handleDragStart(event, index)}
+              ondragend={handleDragEnd}
               title="Drag to reorder"
               aria-hidden="true"
             ><Icon name="grip-vertical" /></span>
 
             {#if canTypeChange}
-              <slot
-                name="type-picker"
-                {block}
-                {index}
-                disabled={disabled}
-                options={selectOptions}
-                groupedOptions={selectItems}
-                changeType={(type: BlockType) => changeType(index, type)}
-              >
+              {#if typePicker}
+                {@render typePicker({
+                  block: blockItem,
+                  index,
+                  disabled,
+                  options: selectOptions,
+                  groupedOptions: selectItems,
+                  changeType: (type: BlockType) => changeType(index, type),
+                })}
+              {:else}
                 <div class="poodle-block-editor__type-select">
                   <Select
-                    value={block.type}
+                    value={blockItem.type}
                     options={selectItems}
                     native={false}
                     variant="ghost"
@@ -239,7 +306,7 @@
                     onValueChange={(nextValue) => changeType(index, nextValue)}
                   />
                 </div>
-              </slot>
+              {/if}
             {/if}
           </div>
 
@@ -249,27 +316,34 @@
                 type="button"
                 class="poodle-block-editor__tool-btn"
                 disabled={disabled || index === 0}
-                on:click|stopPropagation={() => moveBlock(index, -1)}
+                onclick={(event) => {
+                  event.stopPropagation();
+                  moveBlock(index, -1);
+                }}
                 aria-label="Move up"
               ><Icon name="arrow-up" /></button>
               <button
                 type="button"
                 class="poodle-block-editor__tool-btn"
                 disabled={disabled || index === blocks.length - 1}
-                on:click|stopPropagation={() => moveBlock(index, 1)}
+                onclick={(event) => {
+                  event.stopPropagation();
+                  moveBlock(index, 1);
+                }}
                 aria-label="Move down"
               ><Icon name="arrow-down" /></button>
             {/if}
             {#if canAdd}
-              <slot
-                name="add-picker"
-                {block}
-                {index}
-                disabled={disabled}
-                options={selectOptions}
-                groupedOptions={selectItems}
-                addBlock={(type: BlockType) => addBlock(type, index)}
-              >
+              {#if addPicker}
+                {@render addPicker({
+                  block: blockItem,
+                  index,
+                  disabled,
+                  options: selectOptions,
+                  groupedOptions: selectItems,
+                  addBlock: (type: BlockType) => addBlockAfter(index, type),
+                })}
+              {:else}
                 <div class="poodle-block-editor__add-select">
                   <Select
                     value={null}
@@ -279,7 +353,7 @@
                     menuMinWidth="10rem"
                     ariaLabel="Add block after this one"
                     {disabled}
-                    onValueChange={(nextValue) => addBlock(nextValue, index)}
+                    onValueChange={(nextValue) => addBlockAfter(index, nextValue)}
                   >
                     {#snippet trigger()}
                       <span class="poodle-block-editor__tool-btn" aria-hidden="true">
@@ -288,14 +362,17 @@
                     {/snippet}
                   </Select>
                 </div>
-              </slot>
+              {/if}
             {/if}
             {#if canRemove && blocks.length > 1}
               <button
                 type="button"
                 class="poodle-block-editor__tool-btn poodle-block-editor__remove-btn"
                 disabled={disabled}
-                on:click|stopPropagation={() => removeBlock(index)}
+                onclick={(event) => {
+                  event.stopPropagation();
+                  removeBlockAt(index);
+                }}
                 aria-label="Remove block"
               ><Icon name="x" /></button>
             {/if}
@@ -303,22 +380,24 @@
         </div>
 
         <div class="poodle-block-editor__content">
-          <slot
-            name="block"
-            {block}
-            {index}
-            disabled={disabled}
-            update={(updates: Partial<EditorBlock>) => updateBlock(index, updates)}
-          >
+          {#if block}
+            {@render block({
+              block: blockItem,
+              index,
+              disabled,
+              update: (updates: Partial<EditorBlock>) => updateBlock(index, updates),
+            })}
+          {:else}
             <textarea
               class="poodle-block-editor__input"
               placeholder="Type something..."
               disabled={disabled}
-              value={block.content ?? ""}
-              on:input={(e) => updateBlock(index, { content: (e.currentTarget as HTMLTextAreaElement).value })}
+              value={blockItem.content ?? ""}
+              oninput={(event) =>
+                updateBlock(index, { content: (event.currentTarget as HTMLTextAreaElement).value })}
               rows="1"
             ></textarea>
-          </slot>
+          {/if}
         </div>
       </div>
     {/each}
@@ -338,10 +417,8 @@
     --poodle-block-editor-content-y: 0.375rem;
     --poodle-block-editor-input-x: 0.375rem;
     --poodle-block-editor-input-y: 0.25rem;
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-surface);
-    padding: var(--poodle-block-editor-shell-y) var(--poodle-block-editor-shell-x);
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: var(--poodle-block-editor-stack-gap);
@@ -510,7 +587,6 @@
     min-height: 1.5rem;
   }
 
-  /* Minimal fallback input (used when no block slot is provided) */
   .poodle-block-editor__input {
     width: 100%;
     padding: var(--poodle-block-editor-input-y) var(--poodle-block-editor-input-x);

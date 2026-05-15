@@ -4,8 +4,8 @@
   import type { MediaPickerItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
-  let open: boolean | null = null;
-  let compactOpen: boolean | null = null;
+  let open = false;
+  let compactOpen = false;
   let selected = "";
   let compactSelected = "";
 
@@ -21,13 +21,13 @@
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Media picker dialog">
-    <Button variant="secondary" on:click={() => (open = true)}>Select media</Button>
+    <Button variant="secondary" onClick={() => (open = true)}>Select media</Button>
     <MediaPicker
       {open}
       items={sampleItems}
       title="Select an asset"
-      on:select={(e) => { selected = e.detail.item.label; open = false; }}
-      on:openChange={(e) => (open = e.detail.open ? true : null)}
+      onSelect={(item) => { selected = item.label; open = false; }}
+      onOpenChange={(nextOpen) => (open = nextOpen)}
     />
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
@@ -37,13 +37,13 @@
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="poodle-specimen__stack">
-        <Button variant="secondary" on:click={() => (compactOpen = true)}>Open compact picker</Button>
+        <Button variant="secondary" onClick={() => (compactOpen = true)}>Open compact picker</Button>
         <MediaPicker
           open={compactOpen}
           items={sampleItems}
           title="Compact asset picker"
-          on:select={(e) => { compactSelected = e.detail.item.label; compactOpen = false; }}
-          on:openChange={(e) => (compactOpen = e.detail.open ? true : null)}
+          onSelect={(item) => { compactSelected = item.label; compactOpen = false; }}
+          onOpenChange={(nextOpen) => (compactOpen = nextOpen)}
         />
         <MediaPicker
           open={false}

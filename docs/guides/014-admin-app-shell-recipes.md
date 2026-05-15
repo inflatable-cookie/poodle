@@ -88,7 +88,7 @@ account layout, and public project-detail layout.
     </aside>
   {/if}
 
-  <Drawer bind:open={mobileNavOpen} title="Navigation">
+  <Drawer open={mobileNavOpen} onOpenChange={(nextOpen) => (mobileNavOpen = nextOpen)} title="Navigation">
     <!-- host-owned mobile nav tree -->
   </Drawer>
 

@@ -54,7 +54,7 @@ Updated: 2026-04-09
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string` | `""` | no | Markdown content (two-way bindable) |
+| `value` | `string` | `""` | no | Markdown content; when supplied, the host owns updates through `onValueChange` |
 | `name` | `string \| null` | `null` | no | Optional textarea `name` for native form submission |
 | `placeholder` | `string` | `"Write markdown..."` | no | Placeholder text for the textarea |
 | `disabled` | `boolean` | `false` | no | Disables editing and toolbar actions |
@@ -66,6 +66,7 @@ Updated: 2026-04-09
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for toolbar and mode controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for toolbar and pane spacing |
+| `onValueChange` | `((value: string) => void) \| null` | `null` | no | Optional callback fired when the markdown content changes |
 
 ### Slots
 
@@ -73,7 +74,8 @@ None.
 
 ### Controlled / Uncontrolled
 
-`value` supports two-way binding. `mode` is internally managed but can be set from outside.
+`value` is host-owned when supplied and should be updated through `onValueChange`.
+`mode` is internally managed but can be set from outside.
 
 ## 4. States
 
@@ -97,11 +99,11 @@ None.
 | preview | Only preview pane visible; toolbar tools disabled |
 | split | Both textarea and preview visible side by side |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `change` | Value changes (typing or toolbar insertion) | `{ value: string }` |
+| Callback | When It Fires | Payload |
+|----------|---------------|---------|
+| `onValueChange` | Value changes (typing or toolbar insertion) | `string` |
 
 ## 6. Accessibility
 
@@ -367,7 +369,8 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 - Preview uses `{@html previewHtml}` for reactive rendering
 - `tick()` used after insertion to restore cursor selection
 - `mode` is reactive; changing it shows/hides textarea and preview
-- `handleInput()` dispatches `change` event on every textarea input
+- `handleInput()` calls `onValueChange` on every textarea input while the host
+  owns `value`
 - `textareaEl` bound for programmatic selection manipulation
 - Wraps content in `UiPresentationProvider` with resolved size and density
 
@@ -380,7 +383,7 @@ Not yet implemented.
 ### Tier 1: Strict Parity
 
 - [ ] All props have the same meaning and defaults
-- [ ] `change` event payload matches
+- [ ] `onValueChange` callback payload matches
 - [ ] Toolbar actions produce correct markdown syntax
 - [ ] Edit/Preview/Split mode switching behavior matches
 - [ ] Disabled state disables all tools and editing

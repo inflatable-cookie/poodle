@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
@@ -20,10 +19,7 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-  }>();
+  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
   const collapsibleId = ++nextCollapsibleId;
@@ -39,7 +35,7 @@
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 </script>
 
@@ -52,7 +48,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={`poodle-collapsible-content-${collapsibleId}`}
     aria-label={title ? undefined : ariaLabel ?? undefined}
-    on:click={() => setOpen(!isOpen)}
+    onclick={() => setOpen(!isOpen)}
   >
     <span class="poodle-collapsible__heading">
       {#if $$slots.trigger}

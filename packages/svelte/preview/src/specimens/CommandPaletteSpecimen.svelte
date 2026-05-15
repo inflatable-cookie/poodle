@@ -5,16 +5,21 @@
 
   let open = false;
   let compactOpen = false;
+  let query = "";
+  let compactQuery = "";
 </script>
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Command Palette">
     <p class="poodle-specimen__hint">Click below to open the palette. Close with Escape, click outside, or the X button.</p>
     <div>
-      <Button on:click={() => (open = true)}>Open Command Palette</Button>
+      <Button onClick={() => (open = true)}>Open Command Palette</Button>
     </div>
     <CommandPalette
-      bind:open
+      open={open}
+      {query}
+      onOpenChange={(nextOpen) => (open = nextOpen)}
+      onQueryChange={(nextQuery) => (query = nextQuery)}
       items={[
         { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
         { id: "open", title: "Open File", shortcut: "Ctrl+O", group: "File" },
@@ -30,10 +35,12 @@
   <SpecimenGroup label="Semantic presentation">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <div class="poodle-specimen__stack">
-        <Button on:click={() => (compactOpen = true)}>Open compact palette</Button>
+        <Button onClick={() => (compactOpen = true)}>Open compact palette</Button>
         <CommandPalette
           open={compactOpen}
-          on:openChange={(e) => (compactOpen = e.detail.open)}
+          query={compactQuery}
+          onOpenChange={(nextOpen) => (compactOpen = nextOpen)}
+          onQueryChange={(nextQuery) => (compactQuery = nextQuery)}
           items={[
             { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
             { id: "open", title: "Open File", shortcut: "Ctrl+O", group: "File" },

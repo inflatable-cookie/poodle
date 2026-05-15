@@ -65,24 +65,26 @@ Updated: 2026-03-16
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string` | `"#6366f1"` | no | current hex color value (#RRGGBB or #RRGGBBAA) |
+| `value` | `string` | `"#6366f1"` | no | current hex color value (#RRGGBB or #RRGGBBAA); when supplied, the host owns updates through `onChange` |
 | `swatches` | `string[]` | `[]` | no | preset hex color values |
 | `showInput` | `boolean` | `true` | no | whether to show the inline hex text input |
 | `showAlpha` | `boolean` | `false` | no | whether to show alpha slider and alpha channel inputs |
 | `disabled` | `boolean` | `false` | no | disables all interaction |
 | `ariaLabel` | `string` | `"Color picker"` | no | accessible label for the root element |
-| `open` | `boolean \| null` | `null` | no | controlled open state; `null` means uncontrolled |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | picker visibility; omit for uncontrolled mode, or supply a boolean and own updates through `onOpenChange` |
 | `defaultOpen` | `boolean` | `false` | no | initial open state when uncontrolled |
 | `defaultMode` | `ColorInputMode` | `"hex"` | no | initial input mode (hex/rgb/hsl) |
+| `onChange` | `((value: string) => void) \| null` | `null` | no | called when the selected color changes |
+| `onOpenChange` | `((open: boolean) => void) \| null` | `null` | no | called when the picker open state changes |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
 ### Controlled And Uncontrolled
 
-- `value` is a bindable prop; parent controls the color
-- `open` follows the DatePicker pattern: `null` means uncontrolled (internal
-  state), boolean means parent-controlled
+- `value` is host-owned when supplied; update it through `onChange`
+- `open` follows the DatePicker pattern: omit it for uncontrolled internal
+  state, or supply a boolean and own updates through `onOpenChange`
 - Internal HSV state (h, s, v, alpha) is derived from `value` prop
 
 ## 4. States
@@ -109,12 +111,12 @@ Updated: 2026-03-16
 | `inputMode` | `ColorInputMode` | `defaultMode` |
 | `isOpen` | `boolean` | `open ?? uncontrolledOpen` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `change` | color changes via gradient, slider, input, or swatch | `{ value: string }` | hex string |
-| `openChange` | popover opens or closes | `{ open: boolean }` | fired for both controlled and uncontrolled |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onChange` | color changes via gradient, slider, input, or swatch | `string` | normalized hex string |
+| `onOpenChange` | popover opens or closes | `boolean` | runs for both controlled and uncontrolled use |
 
 ## 6. Accessibility
 
@@ -378,8 +380,8 @@ Updated: 2026-03-16
 - [ ] `disabled` opacity and pointer-events behavior matches
 - [ ] `open` / `defaultOpen` controlled/uncontrolled pattern matches
 - [ ] `defaultMode` initial input mode matches
-- [ ] `change` event payload `{ value: string }` matches
-- [ ] `openChange` event payload `{ open: boolean }` matches
+- [ ] `onChange` callback payload `string` matches
+- [ ] `onOpenChange` callback payload `boolean` matches
 - [ ] gradient pad role="slider" and aria-valuetext match
 - [ ] surface role="dialog" matches
 - [ ] trigger aria-haspopup and aria-expanded match

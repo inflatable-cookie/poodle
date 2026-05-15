@@ -37,12 +37,12 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Interactive stack">
-    <Button variant="secondary" on:click={addToast}>Add toast</Button>
+    <Button variant="secondary" onClick={addToast}>Add toast</Button>
     <div class="poodle-toast-container">
       <ToastStack
         {items}
-        on:dismiss={(e) => (items = items.filter((t) => t.id !== e.detail.id))}
-        on:action={(e) => (items = items.filter((t) => t.id !== e.detail.id))}
+        onDismiss={(id) => (items = items.filter((t) => t.id !== id))}
+        onAction={(id) => (items = items.filter((t) => t.id !== id))}
       />
     </div>
   </SpecimenGroup>

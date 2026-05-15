@@ -2,6 +2,8 @@
   import { Callout } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  let dismissed = false;
 </script>
 
 <SpecimenLayout>
@@ -28,17 +30,30 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Dismissible" bare>
-    <Callout
-      tone="info"
-      title="Dismissible callout"
-      message="This callout can be dismissed by the user."
-      dismissible
-    />
+    {#if !dismissed}
+      <Callout
+        tone="info"
+        title="Dismissible callout"
+        message="This callout can be dismissed by the user."
+        dismissible
+        onDismiss={() => (dismissed = true)}
+      />
+    {:else}
+      <Callout tone="success" message="Dismiss callback fired." />
+    {/if}
   </SpecimenGroup>
 
   <SpecimenGroup label="Without title" bare>
     <Callout tone="info">
       A simple inline callout without a title for brief contextual notes.
+    </Callout>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="With actions" bare>
+    <Callout tone="warning" title="Quota warning" message="API usage is approaching the current workspace limit.">
+      {#snippet actions()}
+        <button type="button" class="poodle-callout-action">Review limits</button>
+      {/snippet}
     </Callout>
   </SpecimenGroup>
 
@@ -54,3 +69,16 @@
     </Callout>
   </svelte:fragment>
 </SpecimenLayout>
+
+<style>
+  .poodle-callout-action {
+    min-height: 0;
+    padding: 0.375rem 0.625rem;
+    border: 0.0625rem solid var(--poodle-color-border-subtle);
+    border-radius: var(--poodle-radius-control);
+    background: transparent;
+    color: var(--poodle-color-text-primary);
+    font: inherit;
+    cursor: pointer;
+  }
+</style>

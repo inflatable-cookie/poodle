@@ -50,7 +50,7 @@ type SplitOrientation = "horizontal" | "vertical";
 
 ### Controlled And Uncontrolled
 
-- The handle emits resize deltas via events; the host controls actual sizing
+- The handle requests resize updates via callbacks; the host controls actual sizing
 - No internal size state is maintained
 - The handle does not know about panel dimensions or constraints
 
@@ -66,14 +66,14 @@ type SplitOrientation = "horizontal" | "vertical";
 | disabled | `disabled=true` | opacity 0.4, default cursor, no interaction, `tabindex=-1` |
 | focus-visible | keyboard focus | focus ring outline around the handle |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `resizeStart` | `mousedown` on handle (when not disabled) | `{ position: number }` | `position` is `clientX` (horizontal) or `clientY` (vertical) |
-| `resizeMove` | `mousemove` on window during drag | `{ delta: number }` | pixel delta since last move event |
-| `resizeEnd` | `mouseup` on window after drag | `{ position: number }` | final `clientX`/`clientY` position |
-| `resizeStep` | arrow key, Home, or End pressed | `{ delta: number }` | `+/-8` for arrow keys, `+/-9999` for Home/End |
+| Callback | When It Runs | Payload | Notes |
+|----------|--------------|---------|-------|
+| `onResizeStart` | `mousedown` on handle (when not disabled) | `number` | position is `clientX` (horizontal) or `clientY` (vertical) |
+| `onResizeMove` | `mousemove` on window during drag | `number` | pixel delta since last move event |
+| `onResizeEnd` | `mouseup` on window after drag | `number` | final `clientX`/`clientY` position |
+| `onResizeStep` | arrow key, Home, or End pressed | `number` | `+/-8` for arrow keys, `+/-9999` for Home/End |
 
 ## 6. Accessibility
 
@@ -218,8 +218,8 @@ type SplitOrientation = "horizontal" | "vertical";
 - [ ] `role="separator"` with `aria-orientation` matches
 - [ ] `aria-valuenow`, `aria-valuemin`, `aria-valuemax` passed through
 - [ ] `aria-label` defaults to "Resize"
-- [ ] `resizeStart`, `resizeMove`, `resizeEnd` events fire with correct payloads
-- [ ] `resizeStep` fires with +/-8 for arrows, +/-9999 for Home/End
+- [ ] `onResizeStart`, `onResizeMove`, `onResizeEnd` callbacks run with correct payloads
+- [ ] `onResizeStep` runs with +/-8 for arrows, +/-9999 for Home/End
 - [ ] disabled state: `tabindex="-1"`, no interaction, opacity 0.4
 
 ### Tier 2: Visual Parity

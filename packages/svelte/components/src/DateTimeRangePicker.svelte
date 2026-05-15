@@ -1,10 +1,8 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextDateTimeRangePickerId = 0;
 </script>
 
 <script lang="ts">
-  import { onMount } from "svelte";
-
   import Calendar from "./Calendar.svelte";
   import TimeInput from "./TimeInput.svelte";
   import {
@@ -18,69 +16,92 @@
 
   import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, DateTimeRangeValue, SemanticControlSizeRole } from "./types";
 
-  export let value: DateTimeRangeValue | null = null;
-  export let defaultValue: DateTimeRangeValue = {
-    start: { date: null, time: null },
-    end: { date: null, time: null },
-  };
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let placeholder = "Select date and time range";
-  export let weekStartsOn: CalendarWeekStart = "monday";
-  export let locale = "en-US";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onValueChange: ((value: DateTimeRangeValue) => void) | undefined = undefined;
-  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
+  interface Props {
+    value?: DateTimeRangeValue | null | undefined;
+    defaultValue?: DateTimeRangeValue;
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    placeholder?: string;
+    weekStartsOn?: CalendarWeekStart;
+    locale?: string;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: DateTimeRangeValue) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+  }
+
+  let {
+    value = undefined,
+    defaultValue = {
+      start: { date: null, time: null },
+      end: { date: null, time: null },
+    },
+    open = undefined,
+    defaultOpen = false,
+    placeholder = "Select date and time range",
+    weekStartsOn = "monday",
+    locale = "en-US",
+    disabled = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    onOpenChange = undefined,
+  }: Props = $props();
 
   const surfaceId = `poodle-date-time-range-picker-surface-${++nextDateTimeRangePickerId}`;
   const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = null;
-  let uncontrolledValue = normalizeDateTimeRangeValue(defaultValue);
-  let uncontrolledOpen = defaultOpen;
-  let visibleMonth = monthAnchorIso(defaultValue.start.date ?? todayIsoDate());
-
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = normalizeDateTimeRangeValue(value ?? uncontrolledValue);
-  $: currentRange = normalizeDateRange({
-    start: currentValue.start.date,
-    end: currentValue.end.date,
+  let uncontrolledValue = $state<DateTimeRangeValue>({
+    start: { date: null, time: null },
+    end: { date: null, time: null },
   });
-  $: isOpen = open ?? uncontrolledOpen;
-  $: if (currentValue.start.date) {
-    visibleMonth = monthAnchorIso(currentValue.start.date);
-  }
-  $: valueLabel = formatDateTimeRangeLabel(currentValue, locale) || placeholder;
+  let uncontrolledOpen = $state(false);
+  let visibleMonth = $state(todayIsoDate());
+  let seededDefaults = $state(false);
 
-  function setOpen(nextOpen: boolean): void {
-    if (open === null) {
-      uncontrolledOpen = nextOpen;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledValue = $derived(value !== undefined);
+  const hasControlledOpen = $derived(open !== undefined);
+  const currentValue = $derived(normalizeDateTimeRangeValue(hasControlledValue ? value : uncontrolledValue));
+  const currentRange = $derived(
+    normalizeDateRange({
+      start: currentValue.start.date,
+      end: currentValue.end.date,
+    }),
+  );
+  const isOpen = $derived(hasControlledOpen ? open === true : uncontrolledOpen);
+  const valueLabel = $derived(formatDateTimeRangeLabel(currentValue, locale) || placeholder);
+
+  $effect.pre(() => {
+    if (seededDefaults) {
+      return;
     }
 
-    onOpenChange?.(nextOpen);
-  }
+    uncontrolledValue = normalizeDateTimeRangeValue(defaultValue);
+    uncontrolledOpen = defaultOpen;
+    visibleMonth = monthAnchorIso(defaultValue.start.date ?? todayIsoDate());
+    seededDefaults = true;
+  });
 
-  function commitValue(nextValue: DateTimeRangeValue): void {
-    const normalized = normalizeDateTimeRangeValue(nextValue);
+  $effect(() => {
+    if (currentValue.start.date) {
+      visibleMonth = monthAnchorIso(currentValue.start.date);
+    }
+  });
 
-    if (value === null) {
-      uncontrolledValue = normalized;
+  $effect(() => {
+    if (!isOpen) {
+      return;
     }
 
-    if (normalized.start.date) {
-      visibleMonth = monthAnchorIso(normalized.start.date);
-    }
-
-    onValueChange?.(normalized);
-  }
-
-  onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
-      if (!isOpen || !rootElement) {
+      if (!rootElement) {
         return;
       }
 
@@ -90,7 +111,7 @@
     }
 
     function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
+      if (event.key === "Escape") {
         event.preventDefault();
         setOpen(false);
       }
@@ -104,6 +125,28 @@
       document.removeEventListener("keydown", handleKeydown);
     };
   });
+
+  function setOpen(nextOpen: boolean): void {
+    if (!hasControlledOpen) {
+      uncontrolledOpen = nextOpen;
+    }
+
+    onOpenChange?.(nextOpen);
+  }
+
+  function commitValue(nextValue: DateTimeRangeValue): void {
+    const normalized = normalizeDateTimeRangeValue(nextValue);
+
+    if (!hasControlledValue) {
+      uncontrolledValue = normalized;
+    }
+
+    if (normalized.start.date) {
+      visibleMonth = monthAnchorIso(normalized.start.date);
+    }
+
+    onValueChange?.(normalized);
+  }
 </script>
 
 <div bind:this={rootElement} class="poodle-date-time-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
@@ -164,9 +207,9 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} start time` : "Start time"}
-              onValueChange={(value) =>
+              onValueChange={(nextValue) =>
                 commitValue({
-                  start: { ...currentValue.start, time: value },
+                  start: { ...currentValue.start, time: nextValue },
                   end: currentValue.end,
                 })}
             />
@@ -183,10 +226,10 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} end time` : "End time"}
-              onValueChange={(value) =>
+              onValueChange={(nextValue) =>
                 commitValue({
                   start: currentValue.start,
-                  end: { ...currentValue.end, time: value },
+                  end: { ...currentValue.end, time: nextValue },
                 })}
             />
           </div>
@@ -293,31 +336,33 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Size variants */
   .poodle-date-time-range-picker[data-size="xs"] .poodle-date-time-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 1.5rem;
     font-size: 0.75rem;
   }
 
+  .poodle-date-time-range-picker[data-size="xs"] .poodle-date-time-range-picker__indicator { font-size: 0.625rem; }
+
   .poodle-date-time-range-picker[data-size="sm"] .poodle-date-time-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 1.75rem;
   }
 
+  .poodle-date-time-range-picker[data-size="sm"] .poodle-date-time-range-picker__indicator { font-size: 0.6875rem; }
+
   .poodle-date-time-range-picker[data-size="lg"] .poodle-date-time-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 2.75rem;
     font-size: 0.9375rem;
   }
 
+  .poodle-date-time-range-picker[data-size="lg"] .poodle-date-time-range-picker__indicator { font-size: 0.8125rem; }
+
   .poodle-date-time-range-picker[data-size="xl"] .poodle-date-time-range-picker__trigger {
-    min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    min-height: 3.25rem;
     font-size: 1rem;
   }
 
-  /* Density variants */
+  .poodle-date-time-range-picker[data-size="xl"] .poodle-date-time-range-picker__indicator { font-size: 0.875rem; }
+
   .poodle-date-time-range-picker[data-density="compact"] .poodle-date-time-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
   .poodle-date-time-range-picker[data-density="comfortable"] .poodle-date-time-range-picker__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
 </style>

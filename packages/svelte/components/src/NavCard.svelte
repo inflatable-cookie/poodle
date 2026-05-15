@@ -1,23 +1,18 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   export let title: string;
   export let description: string | null = null;
   export let href: string | null = null;
   export let badge: string | null = null;
   export let disabled = false;
   export let ariaLabel: string | null = null;
-
-  const dispatch = createEventDispatcher<{
-    click: MouseEvent;
-  }>();
+  export let onClick: ((event: MouseEvent) => void) | null = null;
 
   function handleClick(event: MouseEvent): void {
     if (disabled) {
       event.preventDefault();
       return;
     }
-    dispatch("click", event);
+    onClick?.(event);
   }
 </script>
 

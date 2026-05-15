@@ -58,13 +58,13 @@
         totalItems={24}
         pageSize={3}
         showPaginationSummary={false}
-        on:pageChange={(event) => (page = event.detail.page)}
+        onPageChange={(nextPage) => (page = nextPage)}
       >
-        <svelte:fragment slot="actions">
+        {#snippet actions()}
           <IconButton icon="plus" variant="primary" sizeRole="chrome" ariaLabel="Create incident" tooltip="Create incident" />
-        </svelte:fragment>
+        {/snippet}
 
-        <svelte:fragment slot="filters">
+        {#snippet filters()}
           <FilterToolbar
             ariaLabel="Operational queue filters"
             columns={2}
@@ -72,7 +72,7 @@
             bind:collapsed={filtersCollapsed}
             summaryText={filterSummaryText}
           >
-            <svelte:fragment slot="actions">
+            {#snippet actions()}
               <IconButton
                 icon="refresh-cw"
                 variant="ghost"
@@ -80,7 +80,7 @@
                 ariaLabel="Refresh queues"
                 tooltip="Refresh queues"
               />
-            </svelte:fragment>
+            {/snippet}
             <TextInput id="list-container-search-input" type="search" placeholder="Search queues" ariaLabel="Search queues" />
             <Select
               id="list-container-status-select"
@@ -94,15 +94,15 @@
               ]}
             />
           </FilterToolbar>
-        </svelte:fragment>
+        {/snippet}
 
-        <svelte:fragment slot="batch">
+        {#snippet batch()}
           <div class="poodle-specimen__batch">
             <Pill tone="neutral" appearance="badge">3 selected</Pill>
             <Button variant="ghost" sizeRole="chrome">Archive</Button>
             <Button variant="ghost" sizeRole="chrome">Mute alerts</Button>
           </div>
-        </svelte:fragment>
+        {/snippet}
 
         <div class="poodle-specimen__list">
           {#each items as item}
@@ -122,10 +122,10 @@
   <SpecimenGroup label="State handling">
     <Surface padding="lg" border="subtle">
       <div class="poodle-specimen__state-buttons">
-        <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "ready")}>Ready</Button>
-        <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "loading")}>Loading</Button>
-        <Button variant={state === "empty" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "empty")}>Empty</Button>
-        <Button variant={state === "error" ? "primary" : "ghost"} sizeRole="chrome" on:click={() => (state = "error")}>Error</Button>
+        <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "ready")}>Ready</Button>
+        <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "loading")}>Loading</Button>
+        <Button variant={state === "empty" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "empty")}>Empty</Button>
+        <Button variant={state === "error" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "error")}>Error</Button>
       </div>
 
       <ListContainer

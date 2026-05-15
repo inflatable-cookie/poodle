@@ -29,18 +29,18 @@
 <div class="poodle-specimen">
   <SpecimenGroup label="Browse panel">
     <div class="poodle-specimen__actions">
-      <button type="button" on:click={() => { loading = true; error = null; lastAction = "Loading"; }}>Loading</button>
-      <button type="button" on:click={() => { loading = false; error = "Failed to load media"; lastAction = "Error"; }}>Error</button>
-      <button type="button" on:click={() => { loading = false; error = null; items = []; lastAction = "Empty"; }}>Empty</button>
-      <button type="button" on:click={reset}>Reset</button>
+      <button type="button" onclick={() => { loading = true; error = null; lastAction = "Loading"; }}>Loading</button>
+      <button type="button" onclick={() => { loading = false; error = "Failed to load media"; lastAction = "Error"; }}>Error</button>
+      <button type="button" onclick={() => { loading = false; error = null; items = []; lastAction = "Empty"; }}>Empty</button>
+      <button type="button" onclick={reset}>Reset</button>
     </div>
     <MediaBrowsePanel
       {loading}
       {error}
       {items}
       hasMore={items.length > 0}
-      on:select={(event) => (lastAction = `Selected ${event.detail.item.label}`)}
-      on:loadMore={() => (lastAction = "Load more")}
+      onSelect={(item) => (lastAction = `Selected ${item.label}`)}
+      onLoadMore={() => (lastAction = "Load more")}
     />
     <p>Last action: <strong>{lastAction}</strong></p>
   </SpecimenGroup>

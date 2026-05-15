@@ -41,10 +41,12 @@
   const generatedName = `poodle-radio-group-${++nextRadioGroupId}`;
   const uiPresentation = getUiPresentation();
   let uncontrolledValue = $state<string | null>(null);
+  let seededDefaultValue = $state(false);
 
   $effect.pre(() => {
-    if (uncontrolledValue === null) {
+    if (!seededDefaultValue) {
       uncontrolledValue = defaultValue;
+      seededDefaultValue = true;
     }
   });
 

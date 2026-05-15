@@ -100,7 +100,7 @@
         <button
           class="poodle-icon-cell"
           class:poodle-copied={copiedName === name}
-          on:click={() => copyName(name)}
+          onclick={() => copyName(name)}
           title={name}
         >
           <Icon icon={name} />
@@ -130,7 +130,7 @@
           <button
             class="poodle-icon-cell"
             class:poodle-copied={copiedName === name}
-            on:click={() => copyName(name)}
+            onclick={() => copyName(name)}
             title={name}
           >
             <Icon icon={name} />

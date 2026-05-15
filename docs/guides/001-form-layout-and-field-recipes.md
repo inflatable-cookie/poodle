@@ -144,11 +144,11 @@ owns the field and text-input capabilities needed to express that workflow.
 </script>
 
 <Field id="title" label="Title" span={3} required>
-  <TextInput id="title" value={title} on:valueChange={(e) => handleTitleInput(e.detail.value)} />
+  <TextInput id="title" value={title} onValueChange={handleTitleInput} />
 </Field>
 
 <Field id="slug" label="Slug" span={3}>
-  <TextInput id="slug" value={slug} on:valueChange={(e) => handleSlugInput(e.detail.value)} />
+  <TextInput id="slug" value={slug} onValueChange={handleSlugInput} />
 </Field>
 ```
 

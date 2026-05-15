@@ -16,33 +16,33 @@
 <SpecimenLayout>
   <SpecimenGroup label="Variants">
     <div class="poodle-specimen__row">
-      <Button variant="primary" on:click={() => log("Primary")}>Primary</Button>
-      <Button variant="secondary" on:click={() => log("Secondary")}>Secondary</Button>
-      <Button variant="ghost" on:click={() => log("Ghost")}>Ghost</Button>
+      <Button variant="primary" onClick={() => log("Primary")}>Primary</Button>
+      <Button variant="secondary" onClick={() => log("Secondary")}>Secondary</Button>
+      <Button variant="ghost" onClick={() => log("Ghost")}>Ghost</Button>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Danger tone">
     <div class="poodle-specimen__row">
-      <Button variant="primary" tone="danger" on:click={() => log("Danger primary")}>Danger primary</Button>
-      <Button variant="secondary" tone="danger" on:click={() => log("Danger secondary")}>Danger secondary</Button>
-      <Button variant="ghost" tone="danger" on:click={() => log("Danger ghost")}>Danger ghost</Button>
+      <Button variant="primary" tone="danger" onClick={() => log("Danger primary")}>Danger primary</Button>
+      <Button variant="secondary" tone="danger" onClick={() => log("Danger secondary")}>Danger secondary</Button>
+      <Button variant="ghost" tone="danger" onClick={() => log("Danger ghost")}>Danger ghost</Button>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="With icons">
     <div class="poodle-specimen__row">
-      <Button leadingIcon="plus" on:click={() => log("Leading icon")}>Create</Button>
-      <Button trailingIcon="external-link" on:click={() => log("Trailing icon")}>Open</Button>
-      <Button leadingIcon="save" trailingIcon="check" on:click={() => log("Both icons")}>Save</Button>
+      <Button leadingIcon="plus" onClick={() => log("Leading icon")}>Create</Button>
+      <Button trailingIcon="external-link" onClick={() => log("Trailing icon")}>Open</Button>
+      <Button leadingIcon="save" trailingIcon="check" onClick={() => log("Both icons")}>Save</Button>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="With chevron">
     <div class="poodle-specimen__row">
-      <Button chevron on:click={() => log("Chevron")}>Options</Button>
-      <Button variant="primary" chevron on:click={() => log("Primary chevron")}>Actions</Button>
-      <Button leadingIcon="filter" chevron on:click={() => log("Icon + chevron")}>Filter</Button>
+      <Button chevron onClick={() => log("Chevron")}>Options</Button>
+      <Button variant="primary" chevron onClick={() => log("Primary chevron")}>Actions</Button>
+      <Button leadingIcon="filter" chevron onClick={() => log("Icon + chevron")}>Filter</Button>
     </div>
   </SpecimenGroup>
 
@@ -59,8 +59,7 @@
       <Button
         variant="secondary"
         leadingIcon="star"
-        defaultPressed={false}
-        on:pressedChange={(e) => (bookmarked = e.detail.pressed)}
+        bind:pressed={bookmarked}
       >{bookmarked ? "Bookmarked" : "Bookmark"}</Button>
       <Button variant="secondary" leadingIcon="heart" defaultPressed={false}>Like</Button>
       <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Locked</Button>
@@ -68,13 +67,19 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Form overrides">
-    <form class="poodle-specimen__form" on:submit|preventDefault={() => log(`Submitted via ${intent}`)}>
+    <form
+      class="poodle-specimen__form"
+      onsubmit={(event) => {
+        event.preventDefault();
+        log(`Submitted via ${intent}`);
+      }}
+    >
       <input type="hidden" name="intent" value={intent} />
       <div class="poodle-specimen__row">
         <Button
           type="submit"
           variant="secondary"
-          on:click={() => {
+          onClick={() => {
             intent = "save";
           }}
         >
@@ -85,7 +90,7 @@
           variant="primary"
           formaction="/publish"
           formnovalidate
-          on:click={() => {
+          onClick={() => {
             intent = "publish";
           }}
         >
@@ -98,11 +103,11 @@
   <p class="poodle-specimen__log">{clickLog}</p>
 
   <svelte:fragment slot="sizes" let:size>
-    <Button variant="primary" {size} leadingIcon="plus" on:click={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
+    <Button variant="primary" {size} leadingIcon="plus" onClick={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Button variant="secondary" {density} leadingIcon="download" on:click={() => log(`Density ${density}`)}>Action</Button>
+    <Button variant="secondary" {density} leadingIcon="download" onClick={() => log(`Density ${density}`)}>Action</Button>
   </svelte:fragment>
 </SpecimenLayout>
 

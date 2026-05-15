@@ -57,9 +57,9 @@
       summaryText="Showing 24 of 156 items"
       ariaLabel="Collapsible filters"
     >
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <IconButton icon="refresh-cw" sizeRole="chrome" ariaLabel="Refresh" />
-      </svelte:fragment>
+      {/snippet}
       <TextInput id="col-search" type="search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="col-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
@@ -73,9 +73,9 @@
       summaryText="3 filters active"
       ariaLabel="Collapsed filters"
     >
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <IconButton icon="refresh-cw" sizeRole="chrome" ariaLabel="Refresh" />
-      </svelte:fragment>
+      {/snippet}
       <TextInput id="col2-search" type="search" placeholder="Search…" ariaLabel="Search" />
       <Select id="col2-status" options={statusOptions} defaultValue="active" ariaLabel="Status" />
     </FilterToolbar>
@@ -86,9 +86,9 @@
       <TextInput id="proj-search" type="search" placeholder="Filter projects…" ariaLabel="Filter" />
       <Select id="proj-status" options={statusOptions} defaultValue="all" ariaLabel="Status" />
       <Select id="proj-type" options={typeOptions} defaultValue="all" ariaLabel="Type" />
-      <svelte:fragment slot="secondary">
+      {#snippet secondary()}
         <Button variant="secondary" sizeRole="chrome">Reset all</Button>
-      </svelte:fragment>
+      {/snippet}
     </FilterToolbar>
   </SpecimenGroup>
 </div>

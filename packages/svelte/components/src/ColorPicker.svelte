@@ -1,10 +1,8 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextColorPickerId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
-
   import Slider from "./Slider.svelte";
   import SegmentedControl from "./SegmentedControl.svelte";
   import NumberInput from "./NumberInput.svelte";
@@ -22,73 +20,101 @@
 
   import type { ColorInputMode, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    value?: string | undefined;
+    swatches?: string[];
+    showInput?: boolean;
+    showAlpha?: boolean;
+    disabled?: boolean;
+    ariaLabel?: string;
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    defaultMode?: ColorInputMode;
+    onChange?: ((value: string) => void) | null;
+    onOpenChange?: ((open: boolean) => void) | null;
+  }
 
-  export let value = "#6366f1";
-  export let swatches: string[] = [];
-  export let showInput = true;
-  export let showAlpha = false;
-  export let disabled = false;
-  export let ariaLabel = "Color picker";
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let defaultMode: ColorInputMode = "hex";
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    value = $bindable<string | undefined>(undefined),
+    swatches = [],
+    showInput = true,
+    showAlpha = false,
+    disabled = false,
+    ariaLabel = "Color picker",
+    open = undefined,
+    defaultOpen = false,
+    defaultMode = "hex",
+    onChange = null,
+    onOpenChange = null,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
-
-  const dispatch = createEventDispatcher<{
-    change: { value: string };
-    openChange: { open: boolean };
-  }>();
 
   const pickerId = ++nextColorPickerId;
   const surfaceId = `poodle-color-picker-surface-${pickerId}`;
 
-  let rootElement: HTMLDivElement | null = null;
-  let gradientElement: HTMLDivElement | null = null;
-  let uncontrolledOpen = defaultOpen;
-  let placement: "below" | "above" = "below";
-  let inputMode: ColorInputMode = defaultMode;
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let gradientElement = $state<HTMLDivElement | null>(null);
+  let uncontrolledValue = $state("#6366f1");
+  let uncontrolledOpen = $state(false);
+  let placement = $state<"below" | "above">("below");
+  let inputMode = $state<ColorInputMode>("hex");
+  let h = $state(0);
+  let s = $state(0);
+  let v = $state(0);
+  let alpha = $state(1);
+  let pinnedHex = $state<string | null>(null);
+  let hexInput = $state("#6366f1");
+  let triggerHexInput = $state("#6366f1");
+  let dragging = $state(false);
+  let seededDefaults = $state(false);
 
-  // Internal HSV state
-  let h = 0;
-  let s = 0;
-  let v = 0;
-  let alpha = 1;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledValue = $derived(value !== undefined);
+  const currentValue = $derived(hasControlledValue ? value ?? "#6366f1" : uncontrolledValue);
+  const isOpen = $derived(open === undefined ? uncontrolledOpen : open === true);
+  const computedHex = $derived(hsvToHex(h, s, v, showAlpha && alpha < 1 ? alpha : undefined));
+  const currentHex = $derived(pinnedHex ?? computedHex);
+  const currentRgb = $derived(hsvToRgb(h, s, v));
+  const currentHsl = $derived(hsvToHsl(h, s, v));
+  const previewColor = $derived(
+    showAlpha ? `rgba(${currentRgb.r}, ${currentRgb.g}, ${currentRgb.b}, ${alpha})` : currentHex,
+  );
 
-  // Tracks the authoritative hex to avoid HSV round-trip drift.
-  // Set when syncing from an external hex; cleared when the user
-  // changes colour via gradient/slider (which must recompute from HSV).
-  let pinnedHex: string | null = null;
+  $effect.pre(() => {
+    if (seededDefaults) {
+      return;
+    }
 
-  // Text input state
-  let hexInput = value;
+    uncontrolledValue = value ?? "#6366f1";
+    uncontrolledOpen = defaultOpen;
+    inputMode = defaultMode;
+    syncFromHex(value ?? "#6366f1");
+    seededDefaults = true;
+  });
 
-  // Initialise from prop
-  syncFromHex(value);
+  $effect(() => {
+    if (isValidHex(currentValue)) {
+      syncFromHex(currentValue);
+    }
+  });
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isOpen = open ?? uncontrolledOpen;
-
-  // Keep internal state in sync when value prop changes externally
-  $: if (isValidHex(value)) {
-    syncFromHex(value);
-  }
-
-  // Derived colours — use pinnedHex when available to avoid rounding drift
-  $: computedHex = hsvToHex(h, s, v, showAlpha && alpha < 1 ? alpha : undefined);
-  $: currentHex = pinnedHex ?? computedHex;
-  $: currentRgb = hsvToRgb(h, s, v);
-  $: currentHsl = hsvToHsl(h, s, v);
-  $: previewColor = showAlpha
-    ? `rgba(${currentRgb.r}, ${currentRgb.g}, ${currentRgb.b}, ${alpha})`
-    : currentHex;
+  $effect(() => {
+    triggerHexInput = currentHex;
+  });
 
   function syncFromHex(hex: string): void {
-    if (!isValidHex(hex)) return;
+    if (!isValidHex(hex)) {
+      return;
+    }
+
     const norm = normalizeHex(hex);
     const hsv = hexToHsv(norm);
     h = hsv.h;
@@ -104,46 +130,48 @@
     }
     pinnedHex = norm;
     hexInput = norm;
+    triggerHexInput = norm;
   }
 
   function commitColor(): void {
-    // Clear pinned hex — the user changed colour via controls,
-    // so we must derive hex from the current HSV state.
     pinnedHex = null;
     const out = hsvToHex(h, s, v, showAlpha && alpha < 1 ? alpha : undefined);
-    value = out;
+    if (hasControlledValue) {
+      value = out;
+    } else {
+      uncontrolledValue = out;
+    }
     hexInput = out;
-    dispatch("change", { value: out });
+    onChange?.(out);
   }
 
-  /** Commit using the pinned hex (preserves exact hex from text input / swatch). */
   function commitFromPinned(): void {
     const out = pinnedHex ?? hsvToHex(h, s, v, showAlpha && alpha < 1 ? alpha : undefined);
-    value = out;
+    if (hasControlledValue) {
+      value = out;
+    } else {
+      uncontrolledValue = out;
+    }
     hexInput = out;
-    dispatch("change", { value: out });
+    onChange?.(out);
   }
 
   function setOpen(next: boolean): void {
     if (next && rootElement) {
       const rect = rootElement.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      // Surface is roughly 22rem tall (~352px); flip if not enough room below
       placement = spaceBelow < 360 ? "above" : "below";
     }
-    if (open === null) {
+    if (open === undefined) {
       uncontrolledOpen = next;
     }
-    dispatch("openChange", { open: next });
+    onOpenChange?.(next);
   }
 
   function toggleOpen(): void {
     if (disabled) return;
     setOpen(!isOpen);
   }
-
-  // ── Gradient pad pointer tracking ────────────────────────────
-  let dragging = false;
 
   function updateFromPointer(event: PointerEvent): void {
     if (!gradientElement) return;
@@ -199,19 +227,16 @@
     }
   }
 
-  // ── Hue slider ───────────────────────────────────────────────
   function onHueChange(value: number): void {
     h = value;
     commitColor();
   }
 
-  // ── Alpha slider ─────────────────────────────────────────────
   function onAlphaChange(value: number): void {
     alpha = value / 100;
     commitColor();
   }
 
-  // ── Mode toggle ──────────────────────────────────────────────
   const modeOptions = [
     { value: "hex", label: "Hex" },
     { value: "rgb", label: "RGB" },
@@ -222,7 +247,6 @@
     inputMode = value as ColorInputMode;
   }
 
-  // ── Hex text input ───────────────────────────────────────────
   function onHexInput(event: Event): void {
     const raw = (event.currentTarget as HTMLInputElement).value;
     hexInput = raw;
@@ -236,11 +260,6 @@
   function onHexBlur(): void {
     hexInput = currentHex;
   }
-
-  // ── Trigger text input (inline hex field) ────────────────────
-  let triggerHexInput = value;
-
-  $: triggerHexInput = currentHex;
 
   function onTriggerHexInput(event: Event): void {
     const raw = (event.currentTarget as HTMLInputElement).value;
@@ -256,7 +275,6 @@
     triggerHexInput = currentHex;
   }
 
-  // ── RGB inputs ───────────────────────────────────────────────
   function toNumericInputValue(value: string | number | null): number | null {
     const nextValue = value;
 
@@ -272,10 +290,7 @@
     return Number.isFinite(parsedValue) ? parsedValue : null;
   }
 
-  function onRgbChange(
-    channel: "r" | "g" | "b",
-    value: string | number | null
-  ): void {
+  function onRgbChange(channel: "r" | "g" | "b", value: string | number | null): void {
     const val = toNumericInputValue(value) ?? 0;
     const rgb = { ...currentRgb };
     rgb[channel] = val;
@@ -286,11 +301,7 @@
     commitColor();
   }
 
-  // ── HSL inputs ───────────────────────────────────────────────
-  function onHslChange(
-    channel: "h" | "s" | "l",
-    value: string | number | null
-  ): void {
+  function onHslChange(channel: "h" | "s" | "l", value: string | number | null): void {
     const val = toNumericInputValue(value) ?? 0;
     const hsl = { ...currentHsl };
     hsl[channel] = val;
@@ -301,30 +312,31 @@
     commitColor();
   }
 
-  // ── Alpha input (shared across modes) ────────────────────────
   function onAlphaInputChange(value: string | number | null): void {
     alpha = (toNumericInputValue(value) ?? 100) / 100;
     commitColor();
   }
 
-  // ── Swatches ─────────────────────────────────────────────────
   function selectSwatch(hex: string): void {
     if (disabled) return;
     syncFromHex(hex);
     commitFromPinned();
   }
 
-  // ── Document listeners (outside click & escape) ──────────────
-  onMount(() => {
+  $effect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     function handlePointerDown(event: MouseEvent): void {
-      if (!isOpen || !rootElement) return;
+      if (!rootElement) return;
       if (!rootElement.contains(event.target as Node)) {
         setOpen(false);
       }
     }
 
     function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape" && isOpen) {
+      if (event.key === "Escape") {
         event.preventDefault();
         setOpen(false);
       }
@@ -358,7 +370,7 @@
       aria-expanded={isOpen}
       aria-controls={surfaceId}
       disabled={disabled}
-      on:click={toggleOpen}
+      onclick={toggleOpen}
     >
       <span
         class="poodle-color-picker__preview"
@@ -375,8 +387,8 @@
         disabled={disabled}
         maxlength="9"
         aria-label="Hex color value"
-        on:input={onTriggerHexInput}
-        on:blur={onTriggerHexBlur}
+        oninput={onTriggerHexInput}
+        onblur={onTriggerHexBlur}
       />
     {/if}
   </div>
@@ -403,10 +415,10 @@
           aria-valuenow={Math.round(s)}
           aria-valuetext="Saturation {s}%, Brightness {v}%"
           bind:this={gradientElement}
-          on:pointerdown={onGradientPointerDown}
-          on:pointermove={onGradientPointerMove}
-          on:pointerup={onGradientPointerUp}
-          on:keydown={onGradientKeydown}
+          onpointerdown={onGradientPointerDown}
+          onpointermove={onGradientPointerMove}
+          onpointerup={onGradientPointerUp}
+          onkeydown={onGradientKeydown}
         >
           <div
             class="poodle-color-picker__gradient-thumb"
@@ -472,8 +484,8 @@
                 value={hexInput}
                 maxlength="9"
                 aria-label="Hex color"
-                on:input={onHexInput}
-                on:blur={onHexBlur}
+                oninput={onHexInput}
+                onblur={onHexBlur}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">Hex</span>
             </div>
@@ -629,7 +641,7 @@
               role="option"
               aria-selected={currentHex === hex ? "true" : "false"}
               aria-label={hex}
-              on:click={() => selectSwatch(hex)}
+              onclick={() => selectSwatch(hex)}
             ></button>
           {/each}
         </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, tick } from "svelte";
+  import { tick } from "svelte";
   import { marked } from "marked";
 
   import Icon from "./Icon.svelte";
@@ -25,27 +25,34 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    change: { value: string };
-  }>();
+  export let onValueChange: ((value: string) => void) | null = null;
 
   let textareaEl: HTMLTextAreaElement | null = null;
   const uiPresentation = getUiPresentation();
+  let uncontrolledValue = value;
 
   $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
   $: resolvedDensity = density ?? $uiPresentation.density;
+  $: hasControlledValue = $$props.value !== undefined;
+  $: currentValue = hasControlledValue ? value : uncontrolledValue;
+
+  function setValue(nextValue: string): void {
+    if (!hasControlledValue) {
+      uncontrolledValue = nextValue;
+    }
+
+    onValueChange?.(nextValue);
+  }
 
   function insertMarkdown(before: string, after = ""): void {
     if (!textareaEl || disabled) return;
 
     const start = textareaEl.selectionStart;
     const end = textareaEl.selectionEnd;
-    const selected = value.slice(start, end);
+    const selected = currentValue.slice(start, end);
     const replacement = `${before}${selected || "text"}${after}`;
 
-    value = value.slice(0, start) + replacement + value.slice(end);
-    dispatch("change", { value });
+    setValue(currentValue.slice(0, start) + replacement + currentValue.slice(end));
 
     tick().then(() => {
       if (!textareaEl) return;
@@ -60,21 +67,19 @@
     if (!textareaEl || disabled) return;
 
     const start = textareaEl.selectionStart;
-    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
-    const lineEnd = value.indexOf("\n", start);
-    const end = lineEnd === -1 ? value.length : lineEnd;
-    const line = value.slice(lineStart, end);
+    const lineStart = currentValue.lastIndexOf("\n", start - 1) + 1;
+    const lineEnd = currentValue.indexOf("\n", start);
+    const end = lineEnd === -1 ? currentValue.length : lineEnd;
+    const line = currentValue.slice(lineStart, end);
 
-    value = value.slice(0, lineStart) + `${prefix}${line}` + value.slice(end);
-    dispatch("change", { value });
+    setValue(currentValue.slice(0, lineStart) + `${prefix}${line}` + currentValue.slice(end));
   }
 
   function handleInput(event: Event): void {
-    value = (event.currentTarget as HTMLTextAreaElement).value;
-    dispatch("change", { value });
+    setValue((event.currentTarget as HTMLTextAreaElement).value);
   }
 
-  $: previewHtml = renderHtml ? renderHtml(value) : marked.parse(value, { async: false }) as string;
+  $: previewHtml = renderHtml ? renderHtml(currentValue) : marked.parse(currentValue, { async: false }) as string;
 
   const toolbarActions = [
     { label: "Bold", icon: "bold", action: () => insertMarkdown("**", "**") },
@@ -103,7 +108,7 @@
             title={tool.label}
             aria-label={tool.label}
             disabled={disabled || mode === "preview"}
-            on:click={tool.action}
+            onclick={tool.action}
           >
             <Icon icon={tool.icon} />
           </button>
@@ -115,19 +120,19 @@
           type="button"
           class="poodle-md-editor__mode-btn"
           class:poodle-active={mode === "edit"}
-          on:click={() => (mode = "edit")}
+          onclick={() => (mode = "edit")}
         >Edit</button>
         <button
           type="button"
           class="poodle-md-editor__mode-btn"
           class:poodle-active={mode === "split"}
-          on:click={() => (mode = "split")}
+          onclick={() => (mode = "split")}
         >Split</button>
         <button
           type="button"
           class="poodle-md-editor__mode-btn"
           class:poodle-active={mode === "preview"}
-          on:click={() => (mode = "preview")}
+          onclick={() => (mode = "preview")}
         >Preview</button>
       </div>
     </div>
@@ -143,14 +148,14 @@
           {required}
           aria-label={ariaLabel}
           style="min-height: {minHeight}"
-          on:input={handleInput}
-          value={value}
+          oninput={handleInput}
+          value={currentValue}
         ></textarea>
       {/if}
 
       {#if mode !== "edit"}
         <div class="poodle-md-editor__preview" aria-label="Preview">
-          {#if value.trim()}
+          {#if currentValue.trim()}
             {@html previewHtml}
           {:else}
             <p class="poodle-md-editor__preview-empty">Nothing to preview</p>

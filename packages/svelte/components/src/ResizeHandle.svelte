@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy } from "svelte";
 
   import type { SplitOrientation } from "./types";
 
@@ -9,13 +9,10 @@
   export let ariaValueNow: number | null = null;
   export let ariaValueMin = 0;
   export let ariaValueMax = 100;
-
-  const dispatch = createEventDispatcher<{
-    resizeStart: { position: number };
-    resizeMove: { delta: number };
-    resizeEnd: { position: number };
-    resizeStep: { delta: number };
-  }>();
+  export let onResizeStart: ((position: number) => void) | null = null;
+  export let onResizeMove: ((delta: number) => void) | null = null;
+  export let onResizeEnd: ((position: number) => void) | null = null;
+  export let onResizeStep: ((delta: number) => void) | null = null;
 
   let isDragging = false;
   let lastPosition = 0;
@@ -26,7 +23,7 @@
     event.preventDefault();
     isDragging = true;
     lastPosition = orientation === "horizontal" ? event.clientX : event.clientY;
-    dispatch("resizeStart", { position: lastPosition });
+    onResizeStart?.(lastPosition);
     startListening();
   }
 
@@ -35,13 +32,13 @@
     const pos = orientation === "horizontal" ? event.clientX : event.clientY;
     const delta = pos - lastPosition;
     lastPosition = pos;
-    dispatch("resizeMove", { delta });
+    onResizeMove?.(delta);
   }
 
   function handlePointerUp(): void {
     if (!isDragging) return;
     isDragging = false;
-    dispatch("resizeEnd", { position: lastPosition });
+    onResizeEnd?.(lastPosition);
     stopListening();
   }
 
@@ -67,16 +64,16 @@
 
     if (event.key === prevKey) {
       event.preventDefault();
-      dispatch("resizeStep", { delta: -step });
+      onResizeStep?.(-step);
     } else if (event.key === nextKey) {
       event.preventDefault();
-      dispatch("resizeStep", { delta: step });
+      onResizeStep?.(step);
     } else if (event.key === "Home") {
       event.preventDefault();
-      dispatch("resizeStep", { delta: -9999 });
+      onResizeStep?.(-9999);
     } else if (event.key === "End") {
       event.preventDefault();
-      dispatch("resizeStep", { delta: 9999 });
+      onResizeStep?.(9999);
     }
   }
 

@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextCalendarId = 0;
 </script>
 
@@ -25,99 +25,166 @@
 
   import type { CalendarWeekStart, ControlDensity, ControlSize, DateRangeValue, SemanticControlSizeRole } from "./types";
 
-  export let mode: "single" | "range" = "single";
-  export let value: string | DateRangeValue | null = null;
-  export let defaultValue: string | DateRangeValue | null = null;
-  export let visibleMonth: string | null = null;
-  export let weekStartsOn: CalendarWeekStart = "monday";
-  export let locale = "en-US";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onValueChange: ((value: string | DateRangeValue) => void) | undefined = undefined;
-  export let onMonthChange: ((month: string) => void) | undefined = undefined;
+  interface Props {
+    mode?: "single" | "range";
+    value?: string | DateRangeValue | null | undefined;
+    defaultValue?: string | DateRangeValue | null;
+    visibleMonth?: string | null | undefined;
+    weekStartsOn?: CalendarWeekStart;
+    locale?: string;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string | DateRangeValue) => void) | undefined;
+    onMonthChange?: ((month: string) => void) | undefined;
+  }
+
+  const EMPTY_RANGE: DateRangeValue = { start: null, end: null };
+
+  let {
+    mode = "single",
+    value = $bindable<string | DateRangeValue | null | undefined>(undefined),
+    defaultValue = null,
+    visibleMonth = $bindable<string | null | undefined>(undefined),
+    weekStartsOn = "monday",
+    locale = "en-US",
+    disabled = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    onMonthChange = undefined,
+  }: Props = $props();
 
   const gridId = `poodle-calendar-grid-${++nextCalendarId}`;
   const uiPresentation = getUiPresentation();
-
-  // Single mode state
-  let uncontrolledSingleValue: string | null =
-    mode === "single" && typeof defaultValue === "string" ? defaultValue : null;
-
-  // Range mode state
-  let uncontrolledRangeValue: DateRangeValue =
-    mode === "range" && defaultValue !== null && typeof defaultValue === "object"
-      ? normalizeDateRange(defaultValue as DateRangeValue)
-      : { start: null, end: null };
-
-  let uncontrolledMonth = monthAnchorIso(
-    visibleMonth ??
-    (mode === "range"
-      ? (typeof defaultValue === "object" && defaultValue !== null ? (defaultValue as DateRangeValue).start : null) ?? todayIsoDate()
-      : (typeof defaultValue === "string" ? defaultValue : null) ?? todayIsoDate())
-  );
-
-  let focusIso = mode === "range"
-    ? (typeof defaultValue === "object" && defaultValue !== null ? (defaultValue as DateRangeValue).start : null) ?? todayIsoDate()
-    : (typeof defaultValue === "string" ? defaultValue : null) ?? todayIsoDate();
-
+  let uncontrolledSingleValue = $state<string | null>(null);
+  let uncontrolledRangeValue = $state<DateRangeValue>(EMPTY_RANGE);
+  let uncontrolledMonth = $state(todayIsoDate());
+  let focusIso = $state(todayIsoDate());
+  let seededDefaults = $state(false);
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-
-  // Resolved current values based on mode
-  $: currentSingleValue = mode === "single"
-    ? (typeof value === "string" ? value : null) ?? uncontrolledSingleValue
-    : null;
-  $: currentRangeValue = mode === "range"
-    ? normalizeDateRange(
-        (value !== null && typeof value === "object" ? value as DateRangeValue : null) ?? uncontrolledRangeValue
-      )
-    : { start: null, end: null };
-
-  $: currentMonth = monthAnchorIso(visibleMonth ?? uncontrolledMonth);
-  $: weeks = buildCalendarWeeks(currentMonth, weekStartsOn);
-  $: weekdayLabels = getWeekdayLabels(weekStartsOn, locale);
-  $: monthLabel = formatMonthLabel(currentMonth, locale);
-
-  // Update focusIso when values change
-  $: if (mode === "single" && currentSingleValue) {
-    focusIso = currentSingleValue;
-  }
-  $: if (mode === "range") {
-    if (currentRangeValue.end) {
-      focusIso = currentRangeValue.end;
-    } else if (currentRangeValue.start) {
-      focusIso = currentRangeValue.start;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledValue = $derived(value !== undefined);
+  const hasControlledVisibleMonth = $derived(visibleMonth !== undefined);
+  const currentSingleValue = $derived(
+    mode === "single" ? (hasControlledValue ? (typeof value === "string" ? value : null) : uncontrolledSingleValue) : null,
+  );
+  const currentRangeValue = $derived.by(() => {
+    if (mode !== "range") {
+      return EMPTY_RANGE;
     }
-  }
 
-  // Day state helpers for range mode
+    return normalizeDateRange(
+      hasControlledValue
+        ? value !== null && typeof value === "object"
+          ? (value as DateRangeValue)
+          : EMPTY_RANGE
+        : uncontrolledRangeValue,
+    );
+  });
+  const currentMonth = $derived(monthAnchorIso(hasControlledVisibleMonth ? visibleMonth ?? uncontrolledMonth : uncontrolledMonth));
+  const weeks = $derived(buildCalendarWeeks(currentMonth, weekStartsOn));
+  const weekdayLabels = $derived(getWeekdayLabels(weekStartsOn, locale));
+  const monthLabel = $derived(formatMonthLabel(currentMonth, locale));
+
+  $effect.pre(() => {
+    if (seededDefaults) {
+      return;
+    }
+
+    uncontrolledSingleValue = mode === "single" && typeof defaultValue === "string" ? defaultValue : null;
+    uncontrolledRangeValue =
+      mode === "range" && defaultValue !== null && typeof defaultValue === "object"
+        ? normalizeDateRange(defaultValue as DateRangeValue)
+        : EMPTY_RANGE;
+    uncontrolledMonth = monthAnchorIso(
+      visibleMonth ??
+        (mode === "range"
+          ? (typeof defaultValue === "object" && defaultValue !== null ? (defaultValue as DateRangeValue).start : null) ??
+              todayIsoDate()
+          : (typeof defaultValue === "string" ? defaultValue : null) ?? todayIsoDate()),
+    );
+    focusIso =
+      mode === "range"
+        ? (typeof defaultValue === "object" && defaultValue !== null ? (defaultValue as DateRangeValue).start : null) ??
+          todayIsoDate()
+        : (typeof defaultValue === "string" ? defaultValue : null) ?? todayIsoDate();
+    seededDefaults = true;
+  });
+
+  $effect(() => {
+    if (mode === "single" && currentSingleValue) {
+      focusIso = currentSingleValue;
+      return;
+    }
+
+    if (mode === "range") {
+      if (currentRangeValue.end) {
+        focusIso = currentRangeValue.end;
+      } else if (currentRangeValue.start) {
+        focusIso = currentRangeValue.start;
+      }
+    }
+  });
+
   function isRangeStart(iso: string): boolean {
     return mode === "range" && currentRangeValue.start === iso;
   }
+
   function isRangeEnd(iso: string): boolean {
     return mode === "range" && currentRangeValue.end === iso;
   }
+
   function isInRange(iso: string): boolean {
     return mode === "range" && isIsoDateWithinRange(iso, currentRangeValue);
   }
+
   function isSelected(iso: string): boolean {
     if (mode === "single") {
       return currentSingleValue === iso;
     }
+
     return isRangeStart(iso) || isRangeEnd(iso);
   }
 
   function setMonth(nextMonth: string): void {
-    if (visibleMonth === null) {
+    if (hasControlledVisibleMonth) {
+      visibleMonth = nextMonth;
+    } else {
       uncontrolledMonth = nextMonth;
     }
 
     onMonthChange?.(nextMonth);
+  }
+
+  function commitSingleValue(nextValue: string): void {
+    if (hasControlledValue) {
+      value = nextValue;
+    } else {
+      uncontrolledSingleValue = nextValue;
+    }
+
+    focusIso = nextValue;
+    onValueChange?.(nextValue);
+  }
+
+  function commitRange(nextValue: DateRangeValue): void {
+    const normalized = normalizeDateRange(nextValue);
+
+    if (hasControlledValue) {
+      value = normalized;
+    } else {
+      uncontrolledRangeValue = normalized;
+    }
+
+    focusIso = normalized.end ?? normalized.start ?? focusIso;
+    onValueChange?.(normalized);
   }
 
   function selectDate(iso: string): void {
@@ -126,37 +193,21 @@
     }
 
     if (mode === "single") {
-      if (value === null) {
-        uncontrolledSingleValue = iso;
-      }
-
-      focusIso = iso;
-      onValueChange?.(iso as never);
-    } else {
-      // Range mode: two-click selection
-      if (!currentRangeValue.start || currentRangeValue.end) {
-        commitRange({ start: iso, end: null });
-        return;
-      }
-
-      if (compareIsoDate(iso, currentRangeValue.start) < 0) {
-        commitRange({ start: iso, end: currentRangeValue.start });
-        return;
-      }
-
-      commitRange({ start: currentRangeValue.start, end: iso });
-    }
-  }
-
-  function commitRange(nextValue: DateRangeValue): void {
-    const normalized = normalizeDateRange(nextValue);
-
-    if (value === null) {
-      uncontrolledRangeValue = normalized;
+      commitSingleValue(iso);
+      return;
     }
 
-    focusIso = normalized.end ?? normalized.start ?? focusIso;
-    onValueChange?.(normalized as never);
+    if (!currentRangeValue.start || currentRangeValue.end) {
+      commitRange({ start: iso, end: null });
+      return;
+    }
+
+    if (compareIsoDate(iso, currentRangeValue.start) < 0) {
+      commitRange({ start: iso, end: currentRangeValue.start });
+      return;
+    }
+
+    commitRange({ start: currentRangeValue.start, end: iso });
   }
 
   async function focusDate(iso: string): Promise<void> {
@@ -382,18 +433,15 @@
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 44%, var(--poodle-color-border-default));
   }
 
-  /* Single mode: selected day */
   .poodle-calendar__day[data-selected="true"] {
     background: var(--poodle-color-accent-base);
     color: var(--poodle-color-text-inverse);
   }
 
-  /* Range mode: in-range days */
   .poodle-calendar__day[data-in-range="true"] {
     background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
   }
 
-  /* Range mode: range endpoints */
   .poodle-calendar__day[data-range-start="true"],
   .poodle-calendar__day[data-range-end="true"] {
     background: var(--poodle-color-accent-base);
@@ -430,7 +478,6 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Size variants */
   .poodle-calendar[data-size="xs"] { --calendar-cell-size: 1.75rem; }
   .poodle-calendar[data-size="sm"] { --calendar-cell-size: 2rem; }
   .poodle-calendar[data-size="lg"] { --calendar-cell-size: 2.5rem; }
@@ -487,7 +534,6 @@
     font-size: 0.9375rem;
   }
 
-  /* Density variants */
   .poodle-calendar[data-density="compact"] .poodle-calendar__grid { gap: 0; }
   .poodle-calendar[data-density="compact"] .poodle-calendar__week,
   .poodle-calendar[data-density="compact"] .poodle-calendar__weekdays { gap: 0; }

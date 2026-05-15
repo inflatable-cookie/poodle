@@ -1,31 +1,58 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import type { Snippet } from "svelte";
+
   import CollapseToggle from "./CollapseToggle.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let ariaLabel = "Filters";
-  export let summaryText: string | null = null;
-  export let collapsible = true;
-  export let collapsed = true;
-  export let columns = 4;
-  export let minItemWidth = "10rem";
-  export let sticky = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    ariaLabel?: string;
+    summaryText?: string | null;
+    collapsible?: boolean;
+    collapsed?: boolean;
+    columns?: number;
+    minItemWidth?: string;
+    sticky?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    children?: Snippet<[]>;
+    summary?: Snippet<[]>;
+    actions?: Snippet<[]>;
+    secondary?: Snippet<[]>;
+  }
+
+  let {
+    ariaLabel = "Filters",
+    summaryText = null,
+    collapsible = true,
+    collapsed = $bindable(false),
+    columns = 4,
+    minItemWidth = "10rem",
+    sticky = false,
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    children,
+    summary,
+    actions,
+    secondary,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
-  function handleHeaderClick(e: MouseEvent) {
+  function handleHeaderClick(e: MouseEvent): void {
     if (!collapsible) return;
+
     const target = e.target as HTMLElement;
-    if (target.closest('.poodle-filter-toolbar__actions') || target.closest('.poodle-collapse-toggle')) return;
+    if (target.closest(".poodle-filter-toolbar__actions") || target.closest(".poodle-collapse-toggle")) return;
+
     collapsed = !collapsed;
   }
+
 </script>
 
 <div
@@ -41,59 +68,75 @@
     <button
       type="button"
       class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button"
-      on:click={handleHeaderClick}
+      onclick={handleHeaderClick}
       aria-expanded="false"
       aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
     >
       <CollapseToggle
-        collapsed={collapsed}
+        {collapsed}
         ariaLabel="Show filters"
-        on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
+        onToggle={(isCollapsed) => (collapsed = isCollapsed)}
       />
 
-      {#if $$slots.summary}
+      {#if summary}
         <span class="poodle-filter-toolbar__summary">
-          <slot name="summary" />
+          {@render summary()}
         </span>
       {:else if summaryText}
         <span class="poodle-filter-toolbar__summary">{summaryText}</span>
       {/if}
 
-      {#if $$slots.actions}
+      {#if actions}
         <span class="poodle-filter-toolbar__actions">
-          <slot name="actions" />
+          {@render actions()}
         </span>
       {/if}
     </button>
   {:else}
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-    <div
-      class="poodle-filter-toolbar__header"
-      class:poodle-filter-toolbar__header--clickable={collapsible}
-      on:click={handleHeaderClick}
-    >
-      {#if collapsible}
+    {#if collapsible}
+      <button
+        type="button"
+        class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
+        aria-expanded={String(!collapsed)}
+        onclick={handleHeaderClick}
+      >
         <CollapseToggle
-          collapsed={collapsed}
+          {collapsed}
           ariaLabel={collapsed ? "Show filters" : "Hide filters"}
-          on:toggle={(e) => (collapsed = e.detail.isCollapsed)}
+          onToggle={(isCollapsed) => (collapsed = isCollapsed)}
         />
-      {/if}
 
-      {#if $$slots.summary}
-        <div class="poodle-filter-toolbar__summary">
-          <slot name="summary" />
-        </div>
-      {:else if summaryText}
-        <p class="poodle-filter-toolbar__summary">{summaryText}</p>
-      {/if}
+        {#if summary}
+          <span class="poodle-filter-toolbar__summary">
+            {@render summary()}
+          </span>
+        {:else if summaryText}
+          <span class="poodle-filter-toolbar__summary">{summaryText}</span>
+        {/if}
 
-      {#if $$slots.actions}
-        <div class="poodle-filter-toolbar__actions">
-          <slot name="actions" />
-        </div>
-      {/if}
-    </div>
+        {#if actions}
+          <span class="poodle-filter-toolbar__actions">
+            {@render actions()}
+          </span>
+        {/if}
+      </button>
+    {:else}
+      <div class="poodle-filter-toolbar__header">
+        {#if summary}
+          <div class="poodle-filter-toolbar__summary">
+            {@render summary()}
+          </div>
+        {:else if summaryText}
+          <p class="poodle-filter-toolbar__summary">{summaryText}</p>
+        {/if}
+
+        {#if actions}
+          <div class="poodle-filter-toolbar__actions">
+            {@render actions()}
+          </div>
+        {/if}
+      </div>
+    {/if}
   {/if}
 
   {#if !collapsible || !collapsed}
@@ -102,13 +145,13 @@
       style:--ft-columns={columns}
       style:--ft-min-width={minItemWidth}
     >
-      <slot />
+      {@render children?.()}
     </div>
   {/if}
 
-  {#if $$slots.secondary}
+  {#if secondary}
     <div class="poodle-filter-toolbar__secondary">
-      <slot name="secondary" />
+      {@render secondary()}
     </div>
   {/if}
 </div>
@@ -194,8 +237,6 @@
     align-items: center;
   }
 
-  /* ── Size variants ──────────────────────────────────────────── */
-
   .poodle-filter-toolbar[data-size="xs"] .poodle-filter-toolbar__summary {
     font-size: 0.6875rem;
   }
@@ -212,7 +253,6 @@
     font-size: 0.875rem;
   }
 
-  /* Density variants */
   .poodle-filter-toolbar[data-density="compact"] { gap: 0.25rem; padding-inline: 0.25rem; }
   .poodle-filter-toolbar[data-density="compact"] .poodle-filter-toolbar__controls { gap: 0.25rem; }
   .poodle-filter-toolbar[data-density="comfortable"] { gap: var(--poodle-space-inline-md); padding-inline: 0.5rem; }

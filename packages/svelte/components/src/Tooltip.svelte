@@ -36,11 +36,13 @@
   let bubbleElement = $state<HTMLSpanElement | null>(null);
   let resolvedPlacement = $state<OverlayPlacement>("top");
   let bubbleStyle = $state("");
+  let seededDefaults = $state(false);
 
   $effect.pre(() => {
-    if (!rootElement) {
+    if (!seededDefaults) {
       uncontrolledOpen = defaultOpen;
       resolvedPlacement = placement;
+      seededDefaults = true;
     }
   });
 

@@ -76,13 +76,15 @@ type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for badge and shortcut chips |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for group, list, and skeleton spacing |
+| `onItemSelect` | `((id: string) => void) \| null` | `null` | no | called when an action item is selected |
+| `onActiveChange` | `((id: string \| null) => void) \| null` | `null` | no | called when the active item changes |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload |
-|-------|---------------|---------|
-| `itemSelect` | user clicks an item or calls `selectActive()` | `{ id: string }` |
-| `activeChange` | active item changes via keyboard or mouse | `{ id: string \| null }` |
+| Callback | When It Runs | Payload |
+|----------|--------------|---------|
+| `onItemSelect` | user clicks an item or calls `selectActive()` | `string` |
+| `onActiveChange` | active item changes via keyboard or mouse | `string \| null` |
 
 ## 6. Exported Methods
 
@@ -90,7 +92,7 @@ type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
 |--------|-----------|-------------|
 | `moveActive` | `(step: 1 \| -1) => void` | move active highlight up or down through enabled items, wrapping at boundaries |
 | `moveToBoundary` | `(direction: "start" \| "end") => void` | jump active highlight to first or last enabled item |
-| `selectActive` | `() => void` | dispatch `itemSelect` for the currently active item |
+| `selectActive` | `() => void` | calls `onItemSelect` for the currently active item |
 | `getEnabledItems` | `() => CommandActionItem[]` | return the current list of non-disabled items |
 
 These methods are designed for parent components (such as `CommandPalette`) to
