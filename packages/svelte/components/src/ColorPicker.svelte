@@ -200,14 +200,14 @@
   }
 
   // ── Hue slider ───────────────────────────────────────────────
-  function onHueChange(event: CustomEvent<{ value: number }>): void {
-    h = event.detail.value;
+  function onHueChange(value: number): void {
+    h = value;
     commitColor();
   }
 
   // ── Alpha slider ─────────────────────────────────────────────
-  function onAlphaChange(event: CustomEvent<{ value: number }>): void {
-    alpha = event.detail.value / 100;
+  function onAlphaChange(value: number): void {
+    alpha = value / 100;
     commitColor();
   }
 
@@ -218,8 +218,8 @@
     { value: "hsl", label: "HSL" },
   ];
 
-  function onModeChange(event: CustomEvent<{ value: string }>): void {
-    inputMode = event.detail.value as ColorInputMode;
+  function onModeChange(value: string): void {
+    inputMode = value as ColorInputMode;
   }
 
   // ── Hex text input ───────────────────────────────────────────
@@ -257,8 +257,8 @@
   }
 
   // ── RGB inputs ───────────────────────────────────────────────
-  function toNumericInputValue(event: CustomEvent<{ value: string | number | null }>): number | null {
-    const nextValue = event.detail.value;
+  function toNumericInputValue(value: string | number | null): number | null {
+    const nextValue = value;
 
     if (nextValue === null || nextValue === "") {
       return null;
@@ -274,9 +274,9 @@
 
   function onRgbChange(
     channel: "r" | "g" | "b",
-    event: CustomEvent<{ value: string | number | null }>
+    value: string | number | null
   ): void {
-    const val = toNumericInputValue(event) ?? 0;
+    const val = toNumericInputValue(value) ?? 0;
     const rgb = { ...currentRgb };
     rgb[channel] = val;
     const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
@@ -289,9 +289,9 @@
   // ── HSL inputs ───────────────────────────────────────────────
   function onHslChange(
     channel: "h" | "s" | "l",
-    event: CustomEvent<{ value: string | number | null }>
+    value: string | number | null
   ): void {
-    const val = toNumericInputValue(event) ?? 0;
+    const val = toNumericInputValue(value) ?? 0;
     const hsl = { ...currentHsl };
     hsl[channel] = val;
     const hsv = hslToHsv(hsl.h, hsl.s, hsl.l);
@@ -302,8 +302,8 @@
   }
 
   // ── Alpha input (shared across modes) ────────────────────────
-  function onAlphaInputChange(event: CustomEvent<{ value: string | number | null }>): void {
-    alpha = (toNumericInputValue(event) ?? 100) / 100;
+  function onAlphaInputChange(value: string | number | null): void {
+    alpha = (toNumericInputValue(value) ?? 100) / 100;
     commitColor();
   }
 
@@ -427,7 +427,7 @@
               ariaLabel="Hue"
               size={resolvedSize}
               density={resolvedDensity}
-              on:valueChange={onHueChange}
+              onValueChange={onHueChange}
             />
           </div>
 
@@ -445,7 +445,7 @@
                 ariaLabel="Opacity"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={onAlphaChange}
+                onValueChange={onAlphaChange}
               />
             </div>
           {/if}
@@ -459,7 +459,7 @@
             ariaLabel="Color input mode"
             size={resolvedSize}
             density={resolvedDensity}
-            on:valueChange={onModeChange}
+            onValueChange={onModeChange}
           />
         </div>
 
@@ -488,7 +488,7 @@
                   ariaLabel="Alpha"
                   size={resolvedSize}
                   density={resolvedDensity}
-                  on:valueChange={onAlphaInputChange}
+                  onValueChange={onAlphaInputChange}
                 />
                 <span class="poodle-color-picker__input-label" aria-hidden="true">A</span>
               </div>
@@ -504,7 +504,7 @@
                 ariaLabel="Red"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={(e) => onRgbChange("r", e)}
+                onValueChange={(value) => onRgbChange("r", value)}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">R</span>
             </div>
@@ -518,7 +518,7 @@
                 ariaLabel="Green"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={(e) => onRgbChange("g", e)}
+                onValueChange={(value) => onRgbChange("g", value)}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">G</span>
             </div>
@@ -532,7 +532,7 @@
                 ariaLabel="Blue"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={(e) => onRgbChange("b", e)}
+                onValueChange={(value) => onRgbChange("b", value)}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">B</span>
             </div>
@@ -547,7 +547,7 @@
                   ariaLabel="Alpha"
                   size={resolvedSize}
                   density={resolvedDensity}
-                  on:valueChange={onAlphaInputChange}
+                  onValueChange={onAlphaInputChange}
                 />
                 <span class="poodle-color-picker__input-label" aria-hidden="true">A</span>
               </div>
@@ -563,7 +563,7 @@
                 ariaLabel="Hue"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={(e) => onHslChange("h", e)}
+                onValueChange={(value) => onHslChange("h", value)}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">H</span>
             </div>
@@ -577,7 +577,7 @@
                 ariaLabel="Saturation"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={(e) => onHslChange("s", e)}
+                onValueChange={(value) => onHslChange("s", value)}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">S</span>
             </div>
@@ -591,7 +591,7 @@
                 ariaLabel="Lightness"
                 size={resolvedSize}
                 density={resolvedDensity}
-                on:valueChange={(e) => onHslChange("l", e)}
+                onValueChange={(value) => onHslChange("l", value)}
               />
               <span class="poodle-color-picker__input-label" aria-hidden="true">L</span>
             </div>
@@ -606,7 +606,7 @@
                   ariaLabel="Alpha"
                   size={resolvedSize}
                   density={resolvedDensity}
-                  on:valueChange={onAlphaInputChange}
+                  onValueChange={onAlphaInputChange}
                 />
                 <span class="poodle-color-picker__input-label" aria-hidden="true">A</span>
               </div>

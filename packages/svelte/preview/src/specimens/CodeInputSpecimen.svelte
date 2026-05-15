@@ -14,8 +14,8 @@
       value={code}
       label="Verification code"
       hint="Enter the 6-digit code from your authenticator app."
-      on:valueChange={(event) => { code = event.detail.value; completed = false; }}
-      on:complete={() => { completed = true; }}
+      onValueChange={(value) => { code = value; completed = false; }}
+      onComplete={() => { completed = true; }}
     />
     {#if completed}
       <p>Completed value: <strong>{code}</strong></p>

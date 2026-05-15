@@ -12,7 +12,7 @@ Updated: 2026-04-01
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, visual variants
   (text/card/pill/strip/block), reorderable tabs, closable tabs, tab counts,
-  optional visual separators, actions slot, lightweight URL query sync
+  optional visual separators, trailing actions snippet, lightweight URL query sync
 - Out of scope: docking, overflow menus
 
 ## 2. Anatomy
@@ -60,6 +60,9 @@ Updated: 2026-04-01
 | `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |
 | `historyKey` | `string \| null` | `null` | no | syncs the active tab to a URL query param with replaceState |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `onValueChange` | `(value: string) => void` | `undefined` | no | callback fired when the active tab changes |
+| `onReorder` | `(items: string[]) => void` | `undefined` | no | callback fired when tabs are reordered |
+| `onClose` | `(value: string) => void` | `undefined` | no | callback fired when a tab close is requested |
 
 ### TabItem Type
 
@@ -75,7 +78,7 @@ Updated: 2026-04-01
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `valueChange` event (Svelte dispatch)
+- controlled: `value` plus `onValueChange` callback
 - uncontrolled: `defaultValue` — internal state tracks selection
 - fallback: first non-disabled tab is selected when neither value nor defaultValue is set
 - `activationMode` changes whether focus movement commits selection
@@ -100,13 +103,13 @@ Updated: 2026-04-01
 - Roving focus: `focusIndex` tracks which tab has `tabindex="0"`, all others get `tabindex="-1"`
 - Drag state: `dragSourceIndex` and `dropTargetIndex` for reorder
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | active tab changes | `{ value: string }` | fires on click, or on focus when activationMode="automatic" |
-| `reorder` | tab order changes | `{ items: string[] }` | new value order array |
-| `close` | close button clicked or Delete key on closable tab | `{ value: string }` | tab value being closed |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | active tab changes | `string` | called on click, or on focus when `activationMode="automatic"` |
+| `onReorder` | tab order changes | `string[]` | new value order array |
+| `onClose` | close button clicked or Delete key on closable tab | `string` | tab value being closed |
 
 ## 6. Accessibility
 

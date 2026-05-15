@@ -38,7 +38,7 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string \| null` | `null` | no | controlled selected value |
+| `value` | `string \| null \| undefined` | `undefined` | no | controlled selected value; leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `options` | `SegmentedControlOption[]` | none | yes | segment list |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
@@ -61,7 +61,7 @@ Updated: 2026-03-30
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `valueChange` event
+- controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue`
 
 ### Internal State
@@ -86,11 +86,11 @@ Updated: 2026-03-30
 Roving-focus via native radio group behavior and single-selected-option state
 are required.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | selection changes | `{ value: string }` | one segment selected at a time |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | selection changes | `string` | one segment selected at a time |
 
 ## 6. Accessibility
 
@@ -238,7 +238,7 @@ are required.
 - [ ] roving focus and directional navigation match
 - [ ] abbreviated-label accessible names match
 - [ ] disabled group and disabled segment behavior match
-- [ ] valueChange event payload matches
+- [ ] onValueChange callback payload matches
 
 ### Tier 2: Visual Parity
 

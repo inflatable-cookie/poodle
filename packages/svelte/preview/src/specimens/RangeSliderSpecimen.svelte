@@ -15,7 +15,7 @@
       min={0}
       max={100}
       ariaLabel="Price range"
-      on:valueChange={(e) => (priceRange = e.detail.value)}
+      onValueChange={(value) => (priceRange = value)}
     />
     <p>${priceRange[0]} – ${priceRange[1]}</p>
   </SpecimenGroup>
@@ -27,7 +27,7 @@
       max={65}
       step={5}
       ariaLabel="Age range"
-      on:valueChange={(e) => (ageRange = e.detail.value)}
+      onValueChange={(value) => (ageRange = value)}
     />
     <p>Ages {ageRange[0]} – {ageRange[1]}</p>
   </SpecimenGroup>

@@ -10,7 +10,7 @@
     <div class="poodle-specimen">
       <div class="poodle-specimen__item">
         <Eyebrow>Default</Eyebrow>
-        <TriStateSwitch value={filter} ariaLabel="Filter mode" on:valueChange={(e) => (filter = e.detail.value)} />
+        <TriStateSwitch value={filter} ariaLabel="Filter mode" onValueChange={(value) => (filter = value)} />
         <span class="poodle-specimen__value">{filter}</span>
       </div>
 
@@ -21,7 +21,7 @@
 
       <div class="poodle-specimen__item">
         <Eyebrow>Custom colors</Eyebrow>
-        <TriStateSwitch value={filter} excludedColor="#ef4444" defaultColor="#64748b" includedColor="#22c55e" ariaLabel="Custom colors" on:valueChange={(e) => (filter = e.detail.value)} />
+        <TriStateSwitch value={filter} excludedColor="#ef4444" defaultColor="#64748b" includedColor="#22c55e" ariaLabel="Custom colors" onValueChange={(value) => (filter = value)} />
       </div>
 
       <div class="poodle-specimen__item">
@@ -32,11 +32,11 @@
   </Surface>
 
   <svelte:fragment slot="sizes" let:size>
-    <TriStateSwitch value="default" {size} ariaLabel="Switch at {size}" />
+    <TriStateSwitch value="default" {size} ariaLabel={"Switch at " + size} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <TriStateSwitch value="default" {density} ariaLabel="Switch at {density}" />
+    <TriStateSwitch value="default" {density} ariaLabel={"Switch at " + density} />
   </svelte:fragment>
 </SpecimenLayout>
 

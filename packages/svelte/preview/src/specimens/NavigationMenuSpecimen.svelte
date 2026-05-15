@@ -20,9 +20,11 @@
       {items}
       value={active}
       ariaLabel="Main navigation"
-      on:valueChange={(e) => { if (e.detail.value) active = e.detail.value; }}
+      onValueChange={(value) => { if (value) active = value; }}
     >
+      {#snippet children(activeValue)}
       <p>Active section: <strong>{active}</strong></p>
+      {/snippet}
     </NavigationMenu>
   </SpecimenGroup>
 
@@ -31,7 +33,7 @@
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <NavigationMenu {items} value="components" {density} ariaLabel="{density} navigation" />
+    <NavigationMenu {items} value="components" {density} ariaLabel={density + " navigation"} />
   </svelte:fragment>
 </SpecimenLayout>
 

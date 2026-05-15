@@ -1,37 +1,57 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextTooltipId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import { resolveOverlayPosition } from "./overlay-position";
   import type { OverlayPlacement } from "./types";
 
-  export let content: string;
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let delayMs = 300;
-  export let placement: OverlayPlacement = "top";
+  interface Props {
+    content: string;
+    open?: boolean | null;
+    defaultOpen?: boolean;
+    delayMs?: number;
+    placement?: OverlayPlacement;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-  }>();
+  let {
+    content,
+    open = $bindable<boolean | null>(null),
+    defaultOpen = false,
+    delayMs = 300,
+    placement = "top",
+    onOpenChange = undefined,
+    children,
+  }: Props = $props();
 
   const tooltipId = `poodle-tooltip-${++nextTooltipId}`;
   let timer: ReturnType<typeof setTimeout> | null = null;
-  let uncontrolledOpen = defaultOpen;
-  let rootElement: HTMLSpanElement | null = null;
-  let triggerElement: HTMLElement | null = null;
-  let bubbleElement: HTMLSpanElement | null = null;
-  let resolvedPlacement: OverlayPlacement = placement;
-  let bubbleStyle = "";
+  let uncontrolledOpen = $state(false);
+  let rootElement = $state<HTMLSpanElement | null>(null);
+  let triggerElement = $state<HTMLElement | null>(null);
+  let bubbleElement = $state<HTMLSpanElement | null>(null);
+  let resolvedPlacement = $state<OverlayPlacement>("top");
+  let bubbleStyle = $state("");
 
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
-  $: if (isOpen) {
-    void updateTooltipPosition();
-  }
+  $effect.pre(() => {
+    if (!rootElement) {
+      uncontrolledOpen = defaultOpen;
+      resolvedPlacement = placement;
+    }
+  });
+
+  const isControlled = $derived(open !== null);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+
+  $effect(() => {
+    if (isOpen) {
+      void updateTooltipPosition();
+    }
+  });
 
   function setOpen(nextOpen: boolean): void {
     if (!nextOpen && triggerElement) {
@@ -40,9 +60,11 @@
 
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
+    } else {
+      open = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function scheduleOpen(): void {
@@ -190,17 +212,17 @@
   bind:this={rootElement}
   class="poodle-tooltip"
   role="presentation"
-  on:pointerenter={handlePointerEnter}
-  on:pointerleave={handlePointerLeave}
-  on:focusin={handleFocusIn}
-  on:focusout={handleFocusOut}
-  on:keydown={(event) => {
+  onpointerenter={handlePointerEnter}
+  onpointerleave={handlePointerLeave}
+  onfocusin={handleFocusIn}
+  onfocusout={handleFocusOut}
+  onkeydown={(event) => {
     if (event.key === "Escape") {
       dismiss();
     }
   }}
 >
-  <slot />
+  {@render children?.()}
 
   {#if isOpen}
     <span

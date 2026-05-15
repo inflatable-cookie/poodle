@@ -1,37 +1,64 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextPopoverId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, tick, type Snippet } from "svelte";
 
   import { getFocusableElements } from "./internal";
 
   import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let placement: OverlayPlacement = "bottom-start";
-  export let offset = 8;
-  export let dismissOnOutsideInteract = true;
-  export let initialFocus: PopoverInitialFocus = "first-focusable";
-  export let ariaLabel: string | null = null;
-  export let block = false;
+  interface Props {
+    open?: boolean | null;
+    defaultOpen?: boolean;
+    placement?: OverlayPlacement;
+    offset?: number;
+    dismissOnOutsideInteract?: boolean;
+    initialFocus?: PopoverInitialFocus;
+    ariaLabel?: string | null;
+    block?: boolean;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    trigger?: Snippet<[]>;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-  }>();
+  let {
+    open = $bindable<boolean | null>(null),
+    defaultOpen = false,
+    placement = "bottom-start",
+    offset = 8,
+    dismissOnOutsideInteract = true,
+    initialFocus = "first-focusable",
+    ariaLabel = null,
+    block = false,
+    onOpenChange = undefined,
+    trigger,
+    children,
+  }: Props = $props();
 
   const popoverId = `poodle-popover-${++nextPopoverId}`;
-  let rootElement: HTMLDivElement | null = null;
-  let triggerElement: HTMLDivElement | null = null;
-  let surfaceElement: HTMLDivElement | null = null;
-  let uncontrolledOpen = defaultOpen;
-  let previousOpen = false;
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let triggerElement = $state<HTMLDivElement | null>(null);
+  let surfaceElement = $state<HTMLDivElement | null>(null);
+  let uncontrolledOpen = $state(false);
+  let previousOpen = $state(false);
 
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
-  $: if (isOpen && !previousOpen) {
+  $effect.pre(() => {
+    if (!rootElement) {
+      uncontrolledOpen = defaultOpen;
+    }
+  });
+
+  const isControlled = $derived(open !== null);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+
+  $effect(() => {
+    if (!(isOpen && !previousOpen)) {
+      previousOpen = isOpen;
+      return;
+    }
+
     tick().then(() => {
       if (!surfaceElement) {
         return;
@@ -46,8 +73,9 @@
         getFocusableElements(surfaceElement)[0]?.focus();
       }
     });
-  }
-  $: previousOpen = isOpen;
+
+    previousOpen = isOpen;
+  });
 
   function setOpen(nextOpen: boolean): void {
     if (isControlled) {
@@ -56,7 +84,7 @@
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
 
     if (!nextOpen) {
       triggerElement?.focus();
@@ -100,15 +128,15 @@
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? popoverId : undefined}
-    on:click={() => setOpen(!isOpen)}
-    on:keydown={(event) => {
+    onclick={() => setOpen(!isOpen)}
+    onkeydown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         setOpen(!isOpen);
       }
     }}
   >
-    <slot name="trigger" />
+    {@render trigger?.()}
   </div>
 
   {#if isOpen}
@@ -122,7 +150,7 @@
       role="dialog"
       aria-label={ariaLabel ?? undefined}
     >
-      <slot />
+      {@render children?.()}
     </div>
   {/if}
 </div>

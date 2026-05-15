@@ -85,11 +85,11 @@ type TriStateValue = "excluded" | "default" | "included"
 Native radio-group keyboard behavior and single-selected-option state are
 required. Exactly one of three states is always selected.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | selected segment changes | `{ value: TriStateValue }` | one segment selected at a time |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | selected segment changes | `TriStateValue` | one segment selected at a time |
 
 ## 6. Accessibility
 
@@ -269,7 +269,7 @@ required. Exactly one of three states is always selected.
 - [ ] symbolic segment accessible labels match
 - [ ] directional navigation and roving focus match
 - [ ] disabled behavior matches
-- [ ] valueChange event payload matches
+- [ ] onValueChange callback payload matches
 
 ### Tier 2: Visual Parity
 

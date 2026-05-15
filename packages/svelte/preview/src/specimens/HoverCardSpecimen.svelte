@@ -6,7 +6,9 @@
 <div class="poodle-specimen">
   <SpecimenGroup label="Default (top placement)">
     <HoverCard ariaLabel="User preview">
-      <span slot="trigger" class="poodle-trigger-link">@clay</span>
+      {#snippet trigger()}
+        <span class="poodle-trigger-link">@clay</span>
+      {/snippet}
       <div class="poodle-card-content">
         <strong>Clay</strong>
         <p>Design systems engineer working on Poodle. Loves component architecture and accessibility.</p>
@@ -16,7 +18,9 @@
 
   <SpecimenGroup label="Bottom placement">
     <HoverCard placement="bottom" ariaLabel="Repository info">
-      <span slot="trigger" class="poodle-trigger-link">poodle/svelte-primitives</span>
+      {#snippet trigger()}
+        <span class="poodle-trigger-link">poodle/svelte-primitives</span>
+      {/snippet}
       <div class="poodle-card-content">
         <strong>svelte-primitives</strong>
         <p>Core primitive components for the Poodle design system. 64 components, 94% coverage.</p>

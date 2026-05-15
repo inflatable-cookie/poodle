@@ -46,10 +46,10 @@
     value={activePanelId}
     items={tabItems}
     ariaLabel="Token tools"
-    on:valueChange={(event) =>
-      onSelectPanel(event.detail.value as "token-summary-section" | "token-inspector")}
-    let:activeValue
+    onValueChange={(value) =>
+      onSelectPanel(value as "token-summary-section" | "token-inspector")}
   >
+    {#snippet children(activeValue)}
     {#if activeValue === "token-summary-section"}
       <Grid columns="repeat(auto-fit, minmax(14rem, 1fr))" gap="md">
         {#each keySemanticTokens as token}
@@ -75,8 +75,8 @@
             value={inspectorQuery}
             placeholder="Filter tokens by path"
             ariaLabel="Filter semantic tokens"
-            on:valueChange={onQueryChange}
-            on:clear={onQueryClear}
+            onValueChange={onQueryChange}
+            onClear={onQueryClear}
           />
         </div>
         <p class="poodle-inspector-count">{matchingTokenCount} semantic tokens shown</p>
@@ -88,6 +88,7 @@
         />
       </Stack>
     {/if}
+    {/snippet}
   </Tabs>
 </Stack>
 

@@ -29,6 +29,7 @@
       bind:value={planValue}
       columns={2}
       ariaLabel="Select a plan"
+      onValueChange={(value) => (planValue = value)}
     />
     {#if planValue}
       <p>Selected: <strong>{planValue}</strong></p>
@@ -41,6 +42,7 @@
       bind:value={sizeValue}
       columns={3}
       ariaLabel="Select an instance size"
+      onValueChange={(value) => (sizeValue = value)}
     />
     {#if sizeValue}
       <p>Selected: <strong>{sizeValue}</strong></p>

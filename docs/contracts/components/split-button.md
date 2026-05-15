@@ -99,12 +99,12 @@ type MenuItem = {
 | disabled | `disabled=true` or `loading=true` | `opacity: state-opacity-disabled`, `cursor: not-allowed` |
 | loading | `loading=true` | spinner in primary half, control disabled |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `click` | primary button activated | `MouseEvent` | suppressed while disabled or loading; native form submission still occurs when `type="submit"` |
-| `action` | menu item selected | `{value: string}` | fires after menu closes |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onClick` | primary button activated | `MouseEvent` | suppressed while disabled or loading; native form submission still occurs when `type="submit"` |
+| `onAction` | menu item selected | `string` | called after menu closes |
 
 ## 6. Accessibility
 
@@ -355,7 +355,7 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 ### Tier 1: Strict Parity
 
 - [ ] variant and size props produce matching visual output
-- [ ] primary click fires click event, item selection fires action event
+- [ ] primary click calls `onClick`, item selection calls `onAction`
 - [ ] keyboard navigation matches (ArrowDown/Up, Home/End, Enter/Space, Escape)
 - [ ] disabled and loading states suppress interaction
 - [ ] menu ARIA roles match (menu, menuitem, separator)
@@ -419,7 +419,7 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Last action | (reactive display) | Text showing the last triggered action from click or menu item selection; confirms event wiring |
+| Last action | (reactive display) | Text showing the last triggered action from primary click or menu item selection; confirms callback wiring |
 
 ## 14. Approval And Adoption Notes
 

@@ -1,35 +1,50 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Select from "./Select.svelte";
   import { defaultTimeZoneOptions } from "./date";
-  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";
 
-  export let id: string | undefined = undefined;
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let placeholder: string | null = "Search time zones...";
-  export let options: TimeZoneOption[] = [];
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let name: string | undefined = undefined;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    id?: string;
+    value?: string | null | undefined;
+    defaultValue?: string | null;
+    placeholder?: string | null;
+    options?: TimeZoneOption[];
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    name?: string | undefined;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string) => void) | undefined;
+    onQueryChange?: ((query: string) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-  }>();
+  let {
+    id = undefined,
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = null,
+    placeholder = "Search time zones...",
+    options = [],
+    disabled = false,
+    ariaLabel = null,
+    describedBy = null,
+    name = undefined,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    onQueryChange = undefined,
+    onOpenChange = undefined,
+  }: Props = $props();
 
-  $: availableOptions = options.length > 0 ? options : defaultTimeZoneOptions();
-  $: selectOptions = availableOptions.map((o) => ({
+  const availableOptions = $derived(options.length > 0 ? options : defaultTimeZoneOptions());
+  const selectOptions = $derived(availableOptions.map((o) => ({
     value: o.value,
     label: o.label,
     disabled: o.disabled,
-  }));
+  })));
 </script>
 
 <Select
@@ -47,5 +62,7 @@
   {density}
   searchable
   emptyMessage="No matching time zones"
-  on:valueChange={(e) => dispatch("valueChange", e.detail)}
+  {onValueChange}
+  {onQueryChange}
+  {onOpenChange}
 />

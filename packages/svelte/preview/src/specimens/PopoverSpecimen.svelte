@@ -6,7 +6,9 @@
 <div class="poodle-specimen">
   <SpecimenGroup label="Default (bottom-start)">
     <Popover ariaLabel="Quick settings">
-      <Button variant="secondary" slot="trigger">Open popover</Button>
+      {#snippet trigger()}
+        <Button variant="secondary">Open popover</Button>
+      {/snippet}
       <div class="poodle-popover-content">
         <strong>Quick settings</strong>
         <p>Adjust your display preferences or notification settings from this panel.</p>
@@ -16,7 +18,9 @@
 
   <SpecimenGroup label="Top placement">
     <Popover placement="top" ariaLabel="Help tip">
-      <Button variant="secondary" slot="trigger">Show help</Button>
+      {#snippet trigger()}
+        <Button variant="secondary">Show help</Button>
+      {/snippet}
       <div class="poodle-popover-content">
         <p>Popovers can be anchored to any side of their trigger element.</p>
       </div>

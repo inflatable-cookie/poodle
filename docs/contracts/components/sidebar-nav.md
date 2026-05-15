@@ -75,8 +75,8 @@ None.
 
 ### Controlled And Uncontrolled
 
-Active item is controlled via `value` prop. The component dispatches
-`valueChange` events but does not manage selection state internally.
+Active item is controlled via `value` prop. The component reports activation
+through `onValueChange`.
 
 ## 4. States
 
@@ -89,11 +89,11 @@ Active item is controlled via `value` prop. The component dispatches
 | disabled | Item `disabled: true` | Reduced opacity, `cursor: not-allowed`, no activation |
 | focus-visible | Keyboard focus on item | Focus ring via `--poodle-border-width-focus` and `--poodle-color-accent-focusRing` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | User activates a non-disabled item | `{ value: string }` | Fires on both link and button items |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | User activates a non-disabled item | `string` | Called for both link and button items |
 
 ## 6. Accessibility
 

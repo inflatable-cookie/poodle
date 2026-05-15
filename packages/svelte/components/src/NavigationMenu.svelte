@@ -1,52 +1,76 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextNavigationMenuId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount, type Snippet } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let items: NavigationMenuItem[] = [];
-  export let ariaLabel: string | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
+  interface Props {
+    value?: string | null;
+    defaultValue?: string | null;
+    items?: NavigationMenuItem[];
+    ariaLabel?: string | null;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string | null) => void) | undefined;
+    children?: Snippet<[string | null, NavigationMenuItem | null]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string | null };
-  }>();
+  let {
+    value = $bindable<string | null>(null),
+    defaultValue = null,
+    items = [],
+    ariaLabel = null,
+    sizeRole = "chrome",
+    size = null,
+    density = null,
+    onValueChange = undefined,
+    children,
+  }: Props = $props();
 
   const menuId = ++nextNavigationMenuId;
   const uiPresentation = getUiPresentation();
 
-  let rootElement: HTMLDivElement | null = null;
-  let triggerElements: Array<HTMLButtonElement | null> = [];
-  let uncontrolledValue = defaultValue;
-  let focusIndex = 0;
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let triggerElements = $state<Array<HTMLButtonElement | null>>([]);
+  let uncontrolledValue = $state<string | null>(null);
+  let focusIndex = $state(0);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = value ?? uncontrolledValue;
-  $: currentItem = items.find((item) => item.value === currentValue) ?? null;
-  $: selectedIndex = items.findIndex((item) => item.value === currentValue);
-  $: if (selectedIndex >= 0) {
-    focusIndex = selectedIndex;
-  } else if (firstEnabledIndex(items) >= 0 && focusIndex === 0) {
-    focusIndex = firstEnabledIndex(items);
-  }
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(value !== null);
+  const currentValue = $derived(isControlled ? value : uncontrolledValue);
+  const currentItem = $derived(items.find((item) => item.value === currentValue) ?? null);
+  const selectedIndex = $derived(items.findIndex((item) => item.value === currentValue));
+
+  $effect(() => {
+    if (selectedIndex >= 0) {
+      focusIndex = selectedIndex;
+    } else if (firstEnabledIndex(items) >= 0 && focusIndex === 0) {
+      focusIndex = firstEnabledIndex(items);
+    }
+  });
 
   function setValue(nextValue: string | null): void {
-    if (value === null) {
+    if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 
   function toggleValue(nextValue: string): void {
@@ -138,9 +162,9 @@
         id={`poodle-navigation-menu-trigger-${menuId}-${item.value}`}
         aria-expanded={currentValue === item.value ? "true" : "false"}
         aria-controls={currentValue === item.value ? `poodle-navigation-menu-panel-${menuId}-${item.value}` : undefined}
-        on:focus={() => (focusIndex = index)}
-        on:click={() => toggleValue(item.value)}
-        on:keydown={(event) => handleKeydown(event, index)}
+        onfocus={() => (focusIndex = index)}
+        onclick={() => toggleValue(item.value)}
+        onkeydown={(event) => handleKeydown(event, index)}
       >
         <span class="poodle-navigation-menu__label">{item.label}</span>
       </button>
@@ -153,7 +177,7 @@
       id={`poodle-navigation-menu-panel-${menuId}-${currentItem.value}`}
       aria-labelledby={`poodle-navigation-menu-trigger-${menuId}-${currentItem.value}`}
     >
-      <slot activeValue={currentItem.value} activeItem={currentItem} />
+      {@render children?.(currentItem.value, currentItem)}
     </div>
   {/if}
 </div>

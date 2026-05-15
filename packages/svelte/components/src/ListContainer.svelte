@@ -109,7 +109,7 @@
             {totalPages}
             {siblingCount}
             ariaLabel={paginationAriaLabel ?? "List pagination"}
-            on:pageChange={(event) => forwardPageChange(event.detail.page)}
+            onPageChange={forwardPageChange}
           />
         {/if}
       </div>

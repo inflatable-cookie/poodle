@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
@@ -23,11 +23,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: DateRangeValue };
-    openChange: { open: boolean };
-  }>();
+  export let onValueChange: ((value: DateRangeValue) => void) | undefined = undefined;
+  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
 
   const surfaceId = `poodle-date-range-picker-surface-${++nextDateRangePickerId}`;
   const uiPresentation = getUiPresentation();
@@ -54,7 +51,7 @@
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function commitValue(nextValue: DateRangeValue): void {
@@ -72,7 +69,7 @@
       setOpen(false);
     }
 
-    dispatch("valueChange", { value: normalized });
+    onValueChange?.(normalized);
   }
 
   onMount(() => {
@@ -112,7 +109,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
     aria-label={ariaLabel ?? undefined}
-    on:click={() => setOpen(!isOpen)}
+    onclick={() => setOpen(!isOpen)}
   >
     <span class="poodle-date-range-picker__value" data-placeholder={currentValue.start === null}>
       {valueLabel}
@@ -137,8 +134,8 @@
         size={resolvedSize}
         density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
-        on:valueChange={(event) => commitValue(event.detail.value as DateRangeValue)}
-        on:monthChange={(event) => (visibleMonth = event.detail.month)}
+        onValueChange={(value) => commitValue(value as DateRangeValue)}
+        onMonthChange={(month) => (visibleMonth = month)}
       />
     </div>
   {/if}

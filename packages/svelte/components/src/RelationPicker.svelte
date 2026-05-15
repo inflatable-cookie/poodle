@@ -302,9 +302,9 @@
             value={drillSearchQuery}
             ariaLabel={`Search ${currentLevel?.label ?? "items"}`}
             placeholder={currentLevel?.searchPlaceholder ?? `Search ${currentLevel?.label?.toLowerCase() ?? 'items'}...`}
-            on:valueChange={(e) => { drillSearchQuery = e.detail.value; }}
-            on:clear={() => { drillSearchQuery = ""; }}
-            on:keydown={handleDrillSearchKeydown}
+            onValueChange={(nextValue) => { drillSearchQuery = nextValue; }}
+            onClear={() => { drillSearchQuery = ""; }}
+            onKeyDown={handleDrillSearchKeydown}
           />
         {:else}
           {#if drillDown && drillBreadcrumbs.length > 0}
@@ -337,8 +337,8 @@
             value={query}
             ariaLabel="Search picker results"
             describedBy={statusId}
-            on:valueChange={(event) => { query = event.detail.value; dispatch("queryChange", event.detail); }}
-            on:clear={() => { query = ""; dispatch("queryChange", { value: "" }); }}
+            onValueChange={(nextValue) => { query = nextValue; dispatch("queryChange", { value: nextValue }); }}
+            onClear={() => { query = ""; dispatch("queryChange", { value: "" }); }}
           />
         {/if}
       </div>

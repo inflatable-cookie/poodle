@@ -26,7 +26,7 @@
       options={planOptions}
       value={selectedPlan}
       ariaLabel="Select plan"
-      on:valueChange={(e) => (selectedPlan = e.detail.value)}
+      onValueChange={(value) => (selectedPlan = value)}
     />
     <p>Selected: <strong>{selectedPlan}</strong></p>
   </SpecimenGroup>
@@ -37,7 +37,7 @@
       value={selectedSize}
       orientation="horizontal"
       ariaLabel="Select size"
-      on:valueChange={(e) => (selectedSize = e.detail.value)}
+      onValueChange={(value) => (selectedSize = value)}
     />
     <p>Selected: <strong>{selectedSize}</strong></p>
   </SpecimenGroup>
@@ -52,7 +52,7 @@
       value={selectedPlan}
       selectedColor="#22c55e"
       ariaLabel="Select plan with custom selected color"
-      on:valueChange={(e) => (selectedPlan = e.detail.value)}
+      onValueChange={(value) => (selectedPlan = value)}
     />
   </SpecimenGroup>
 

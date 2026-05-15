@@ -162,47 +162,48 @@
 </script>
 
 <Popover bind:open placement="bottom-start" ariaLabel={ariaLabel} block>
-  <div
-    slot="trigger"
-    class="poodle-order-by"
-    role="group"
-    aria-label={ariaLabel}
-    data-disabled={disabled}
-    data-compact={compact}
-    data-size={resolvedSize}
-    data-density={resolvedDensity}
-  >
-    <button
-      type="button"
-      class="poodle-order-by__trigger"
-      disabled={disabled}
+  {#snippet trigger()}
+    <div
+      class="poodle-order-by"
+      role="group"
       aria-label={ariaLabel}
+      data-disabled={disabled}
+      data-compact={compact}
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
     >
-      <span class="poodle-order-by__label">Sort by</span>
-      <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
-        {triggerText}
-      </span>
-      <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
-    </button>
-
-    {#if showClearButton && effectiveValue.length > 0}
       <button
         type="button"
-        class="poodle-order-by__reset"
-        on:click|stopPropagation|preventDefault={clearAll}
+        class="poodle-order-by__trigger"
         disabled={disabled}
-        aria-label="Clear sort"
+        aria-label={ariaLabel}
       >
-        <IconButton
-          icon="x"
-          ariaLabel="Clear sort"
-          variant="ghost"
-          size={resolvedSize}
-          disabled={disabled}
-        />
+        <span class="poodle-order-by__label">Sort by</span>
+        <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
+          {triggerText}
+        </span>
+        <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
       </button>
-    {/if}
-  </div>
+
+      {#if showClearButton && effectiveValue.length > 0}
+        <button
+          type="button"
+          class="poodle-order-by__reset"
+          on:click|stopPropagation|preventDefault={clearAll}
+          disabled={disabled}
+          aria-label="Clear sort"
+        >
+          <IconButton
+            icon="x"
+            ariaLabel="Clear sort"
+            variant="ghost"
+            size={resolvedSize}
+            disabled={disabled}
+          />
+        </button>
+      {/if}
+    </div>
+  {/snippet}
 
   <div class="poodle-order-by__panel">
     {#if effectiveValue.length > 0}
@@ -262,13 +263,13 @@
     {#if canAddMore && availableFields.length > 0}
       <div class="poodle-order-by__add">
         <Select
-          items={selectItems}
+          options={selectItems}
           bind:value={addFieldValue}
           placeholder="+ Add field"
           ariaLabel="Add sort field"
           size={resolvedSize}
           density={resolvedDensity}
-          onchange={addField}
+          onValueChange={addField}
           disabled={disabled}
         />
       </div>

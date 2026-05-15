@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
   import TimeInput from "./TimeInput.svelte";
@@ -29,11 +29,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: DateTimeValue };
-    openChange: { open: boolean };
-  }>();
+  export let onValueChange: ((value: DateTimeValue) => void) | undefined = undefined;
+  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
 
   const surfaceId = `poodle-date-time-picker-surface-${++nextDateTimePickerId}`;
   const uiPresentation = getUiPresentation();
@@ -58,7 +55,7 @@
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function commitValue(nextValue: DateTimeValue): void {
@@ -72,7 +69,7 @@
       visibleMonth = monthAnchorIso(normalized.date);
     }
 
-    dispatch("valueChange", { value: normalized });
+    onValueChange?.(normalized);
   }
 
   onMount(() => {
@@ -112,7 +109,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
     aria-label={ariaLabel ?? undefined}
-    on:click={() => setOpen(!isOpen)}
+    onclick={() => setOpen(!isOpen)}
   >
     <span
       class="poodle-date-time-picker__value"
@@ -140,8 +137,8 @@
           size={resolvedSize}
           density={resolvedDensity}
           ariaLabel={ariaLabel ?? "Date"}
-          on:valueChange={(event) => commitValue({ ...currentValue, date: event.detail.value as string | null })}
-          on:monthChange={(event) => (visibleMonth = event.detail.month)}
+          onValueChange={(value) => commitValue({ ...currentValue, date: value as string | null })}
+          onMonthChange={(month) => (visibleMonth = month)}
         />
 
         <div class="poodle-date-time-picker__time-section">
@@ -155,7 +152,7 @@
             size={resolvedSize}
             density={resolvedDensity}
             ariaLabel={ariaLabel ? `${ariaLabel} time` : "Time"}
-            on:valueChange={(event) => commitValue({ ...currentValue, time: event.detail.value })}
+            onValueChange={(value) => commitValue({ ...currentValue, time: value })}
           />
         </div>
       </div>

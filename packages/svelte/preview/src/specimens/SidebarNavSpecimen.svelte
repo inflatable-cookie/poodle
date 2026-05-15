@@ -48,7 +48,7 @@
         ariaLabel="Catalogue navigation"
         groups={catalogueGroups}
         value={catalogueValue}
-        on:valueChange={(event) => (catalogueValue = event.detail.value)}
+        onValueChange={(value) => (catalogueValue = value)}
       />
     </div>
   </SpecimenGroup>
@@ -59,7 +59,7 @@
         ariaLabel="Verification navigation"
         groups={harnessGroups}
         value={harnessValue}
-        on:valueChange={(event) => (harnessValue = event.detail.value)}
+        onValueChange={(value) => (harnessValue = value)}
       />
     </div>
   </SpecimenGroup>

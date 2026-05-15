@@ -77,7 +77,7 @@ MenuItem: {
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (string) plus `valueChange` event
+- controlled: `value` (string) plus `onValueChange` callback
 - uncontrolled: `value` is null, uses `defaultValue` as initial state
 - `value` represents which top-level menu is currently open; null means all
   closed
@@ -106,12 +106,12 @@ MenuItem: {
 - `lastOpenValue`: tracks last opened menu for hover-to-switch behavior
 - Outside click: document mousedown listener closes open menu
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | open menu changes or closes | `{ value: string \| null }` | null when all menus close |
-| `action` | submenu item commits | `{ value: string }` | disabled and separator rows never fire |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | open menu changes or closes | `string \| null` | null when all menus close |
+| `onAction` | submenu item commits | `string` | disabled and separator rows never fire |
 
 ## 6. Accessibility
 
@@ -372,7 +372,7 @@ MenuItem: {
 - [ ] escape closes menu and restores focus to trigger
 - [ ] outside click closes menu
 - [ ] hover-to-switch between triggers when menu is open
-- [ ] valueChange and action event semantics match
+- [ ] `onValueChange` and `onAction` callback semantics match
 - [ ] disabled trigger and disabled item behavior match
 
 ### Tier 2: Visual Parity

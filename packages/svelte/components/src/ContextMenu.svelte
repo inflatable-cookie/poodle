@@ -1,43 +1,68 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 
-  export let items: MenuItem[] = [];
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let anchorPoint: { x: number; y: number } | null = null;
-  export let ariaLabel: string | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
+  interface Props {
+    items?: MenuItem[];
+    open?: boolean | null;
+    defaultOpen?: boolean;
+    anchorPoint?: { x: number; y: number } | null;
+    ariaLabel?: string | null;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onAction?: ((value: string) => void) | undefined;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-    action: { value: string };
-  }>();
+  let {
+    items = [],
+    open = $bindable<boolean | null>(null),
+    defaultOpen = false,
+    anchorPoint = null,
+    ariaLabel = null,
+    sizeRole = "chrome",
+    size = null,
+    density = null,
+    onOpenChange = undefined,
+    onAction = undefined,
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let rootElement: HTMLDivElement | null = null;
-  let overlayElement: HTMLDivElement | null = null;
-  let itemElements: Array<HTMLButtonElement | null> = [];
-  let uncontrolledOpen = defaultOpen;
-  let uncontrolledAnchorPoint = anchorPoint;
-  let highlightIndex = 0;
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let overlayElement = $state<HTMLDivElement | null>(null);
+  let itemElements = $state<Array<HTMLButtonElement | null>>([]);
+  let uncontrolledOpen = $state(false);
+  let uncontrolledAnchorPoint = $state<{ x: number; y: number } | null>(null);
+  let highlightIndex = $state(0);
+  let adjustedPosition = $state<{ left: string; top: string } | null>(null);
 
-  let adjustedPosition: { left: string; top: string } | null = null;
+  $effect.pre(() => {
+    if (!rootElement) {
+      uncontrolledOpen = defaultOpen;
+      uncontrolledAnchorPoint = anchorPoint;
+    }
+  });
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
-  $: currentAnchorPoint = anchorPoint ?? uncontrolledAnchorPoint;
-  $: actionableItems = menuNavigableItems(items);
-  $: if (isOpen) {
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(open !== null);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+  const currentAnchorPoint = $derived(anchorPoint ?? uncontrolledAnchorPoint);
+  const actionableItems = $derived(menuNavigableItems(items));
+
+  $effect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     adjustedPosition = null;
     tick().then(() => {
       if (overlayElement && currentAnchorPoint) {
@@ -61,18 +86,20 @@
 
       itemElements[highlightIndex]?.focus();
     });
-  }
+  });
 
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
+    } else {
+      open = nextOpen;
     }
 
     if (!nextOpen) {
       highlightIndex = 0;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function moveHighlight(direction: 1 | -1): void {
@@ -100,7 +127,7 @@
       return;
     }
 
-    dispatch("action", { value: item.value });
+    onAction?.(item.value);
     setOpen(false);
   }
 
@@ -140,12 +167,12 @@
   role="button"
   tabindex="0"
   aria-haspopup="menu"
-  on:contextmenu={(event) => {
+  oncontextmenu={(event) => {
     event.preventDefault();
     uncontrolledAnchorPoint = { x: event.clientX, y: event.clientY };
     setOpen(true);
   }}
-  on:keydown={(event) => {
+  onkeydown={(event) => {
     if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
       event.preventDefault();
       const target = event.currentTarget as HTMLElement;
@@ -155,7 +182,7 @@
     }
   }}
 >
-  <slot />
+  {@render children?.()}
 
   {#if isOpen && currentAnchorPoint}
     <div
@@ -178,8 +205,8 @@
             disabled={item.disabled === true}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
             aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
-            on:click={() => activateItem(item)}
-            on:keydown={(event) => {
+            onclick={() => activateItem(item)}
+            onkeydown={(event) => {
               if (event.key === "ArrowDown") {
                 event.preventDefault();
                 moveHighlight(1);
@@ -281,28 +308,35 @@
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
-  /* Size variants */
   .poodle-context-menu[data-size="xs"] .poodle-context-menu__item {
-    min-height: var(--poodle-size-control-height);
-    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
+    min-height: 1.5rem;
+    padding: 0.25rem 0.375rem;
     font-size: 0.75rem;
   }
 
   .poodle-context-menu[data-size="sm"] .poodle-context-menu__item {
-    min-height: var(--poodle-size-control-height);
+    min-height: 1.75rem;
+    padding: 0.3125rem 0.4375rem;
+    font-size: 0.8125rem;
   }
 
   .poodle-context-menu[data-size="lg"] .poodle-context-menu__item {
-    min-height: var(--poodle-size-control-height);
+    min-height: 2.25rem;
+    padding: 0.4375rem 0.5625rem;
     font-size: 0.9375rem;
   }
 
   .poodle-context-menu[data-size="xl"] .poodle-context-menu__item {
-    min-height: var(--poodle-size-control-height);
+    min-height: 2.5rem;
+    padding: 0.5rem 0.625rem;
     font-size: 1rem;
   }
 
-  /* Density variants */
-  .poodle-context-menu[data-density="compact"] .poodle-context-menu__item { padding-inline: 0.375rem; }
-  .poodle-context-menu[data-density="comfortable"] .poodle-context-menu__item { padding-inline: 0.75rem; }
+  .poodle-context-menu[data-density="compact"] .poodle-context-menu__item {
+    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
+  }
+
+  .poodle-context-menu[data-density="comfortable"] .poodle-context-menu__item {
+    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+  }
 </style>

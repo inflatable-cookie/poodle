@@ -286,7 +286,7 @@
           { kind: "separator", label: "", value: "sep-1" },
           { label: "Delete", value: "delete" },
         ]}
-        on:action={(e) => (lastClick = `Action: ${e.detail.value}`)}
+        onAction={(value) => (lastClick = `Action: ${value}`)}
       >
         <ListCard
           title="Legacy wrapper path"

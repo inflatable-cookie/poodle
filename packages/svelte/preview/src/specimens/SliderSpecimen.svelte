@@ -15,7 +15,7 @@
       min={0}
       max={100}
       ariaLabel="Volume"
-      on:valueChange={(e) => (volume = e.detail.value)}
+      onValueChange={(value) => (volume = value)}
     />
     <p>Volume: <strong>{volume}%</strong></p>
   </SpecimenGroup>
@@ -27,7 +27,7 @@
       max={100}
       step={10}
       ariaLabel="Opacity"
-      on:valueChange={(e) => (opacity = e.detail.value)}
+      onValueChange={(value) => (opacity = value)}
     />
     <p>Opacity: <strong>{opacity}%</strong></p>
   </SpecimenGroup>

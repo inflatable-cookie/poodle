@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -9,50 +7,78 @@
     SwitchTone,
   } from "./types";
 
-  export let id: string | undefined = undefined;
-  export let checked: boolean | null = null;
-  export let defaultChecked = false;
-  export let disabled = false;
-  export let readOnly = false;
-  export let label: string | null = null;
-  export let leftLabel: string | null = null;
-  export let rightLabel: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let name: string | undefined = undefined;
-  export let offColor: string | null = null;
-  export let onColor: string | null = null;
-  export let leftTone: SwitchTone = "default";
-  export let rightTone: SwitchTone = "primary";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    checkedChange: { checked: boolean };
-    checked: boolean;
-  }>();
+  interface Props {
+    id?: string | undefined;
+    checked?: boolean | undefined;
+    defaultChecked?: boolean;
+    disabled?: boolean;
+    readOnly?: boolean;
+    label?: string | null;
+    leftLabel?: string | null;
+    rightLabel?: string | null;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    name?: string | undefined;
+    offColor?: string | null;
+    onColor?: string | null;
+    leftTone?: SwitchTone;
+    rightTone?: SwitchTone;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onCheckedChange?: ((checked: boolean) => void) | undefined;
+  }
 
   const uiPresentation = getUiPresentation();
-  let uncontrolledChecked = defaultChecked;
 
-  $: isControlled = checked !== null;
-  $: currentChecked = isControlled ? checked === true : uncontrolledChecked;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedOffColor = offColor ?? toneToColor(leftTone);
-  $: resolvedOnColor = onColor ?? toneToColor(rightTone);
-  $: fallbackAriaLabel = [leftLabel, rightLabel]
-    .filter((value): value is string => Boolean(value && value.trim()))
-    .join(" / ");
-  $: computedAriaLabel =
-    label ??
-    ariaLabel ??
-    (fallbackAriaLabel || null);
-  $: switchStyles = [
+  let {
+    id = undefined,
+    checked = $bindable<boolean | undefined>(undefined),
+    defaultChecked = false,
+    disabled = false,
+    readOnly = false,
+    label = null,
+    leftLabel = null,
+    rightLabel = null,
+    ariaLabel = null,
+    describedBy = null,
+    name = undefined,
+    offColor = null,
+    onColor = null,
+    leftTone = "default",
+    rightTone = "primary",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onCheckedChange = undefined,
+  }: Props = $props();
+
+  let seededDefaultChecked = $state(false);
+  let uncontrolledChecked = $state(false);
+
+  const isControlled = $derived(checked !== undefined);
+  const currentChecked = $derived(isControlled ? checked === true : uncontrolledChecked);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedOffColor = $derived(offColor ?? toneToColor(leftTone));
+  const resolvedOnColor = $derived(onColor ?? toneToColor(rightTone));
+  const fallbackAriaLabel = $derived(
+    [leftLabel, rightLabel]
+      .filter((value): value is string => Boolean(value && value.trim()))
+      .join(" / ")
+  );
+  const computedAriaLabel = $derived(label ?? ariaLabel ?? (fallbackAriaLabel || null));
+  const switchStyles = $derived([
     resolvedOffColor ? `--poodle-switch-off-color: ${resolvedOffColor}` : "",
     resolvedOnColor ? `--poodle-switch-on-color: ${resolvedOnColor}` : "",
-  ].filter(Boolean).join("; ") || undefined;
+  ].filter(Boolean).join("; ") || undefined);
+
+  $effect(() => {
+    if (!seededDefaultChecked && checked === undefined) {
+      uncontrolledChecked = defaultChecked;
+      seededDefaultChecked = true;
+    }
+  });
 
   function toneToColor(tone: SwitchTone): string | null {
     switch (tone) {
@@ -81,8 +107,8 @@
       uncontrolledChecked = nextChecked;
     }
 
-    dispatch("checkedChange", { checked: nextChecked });
-    dispatch("checked", nextChecked);
+    checked = nextChecked;
+    onCheckedChange?.(nextChecked);
   }
 </script>
 
@@ -106,7 +132,7 @@
     aria-label={computedAriaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-readonly={readOnly ? "true" : undefined}
-    on:change={handleChange}
+    onchange={handleChange}
   />
   {#if leftLabel}
     <span class="poodle-switch__label poodle-switch__label--left">{leftLabel}</span>

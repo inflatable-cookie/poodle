@@ -1,39 +1,65 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let id: string | undefined = undefined;
-  export let checked = false;
-  export let defaultChecked = false;
-  export let mixed = false;
-  export let disabled = false;
-  export let readOnly = false;
-  export let label: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let selectedColor: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    checkedChange: { checked: boolean };
-  }>();
+  interface Props {
+    id?: string | undefined;
+    checked?: boolean | undefined;
+    defaultChecked?: boolean;
+    mixed?: boolean;
+    disabled?: boolean;
+    readOnly?: boolean;
+    label?: string | null;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    selectedColor?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onCheckedChange?: ((checked: boolean) => void) | undefined;
+  }
 
   let input: HTMLInputElement | null = null;
-  let uncontrolledChecked = defaultChecked;
   const uiPresentation = getUiPresentation();
 
-  $: currentChecked = checked ?? uncontrolledChecked;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: checkboxStyles = selectedColor ? `--poodle-checkbox-selected-color: ${selectedColor}` : undefined;
-  $: if (input) {
-    input.indeterminate = mixed;
-  }
+  let {
+    id = undefined,
+    checked = $bindable<boolean | undefined>(undefined),
+    defaultChecked = false,
+    mixed = false,
+    disabled = false,
+    readOnly = false,
+    label = null,
+    ariaLabel = null,
+    describedBy = null,
+    selectedColor = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onCheckedChange = undefined,
+  }: Props = $props();
+
+  let seededDefaultChecked = $state(false);
+  let uncontrolledChecked = $state(false);
+
+  const currentChecked = $derived(checked === undefined ? uncontrolledChecked : checked);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const checkboxStyles = $derived(selectedColor ? `--poodle-checkbox-selected-color: ${selectedColor}` : undefined);
+
+  $effect(() => {
+    if (!seededDefaultChecked && checked === undefined) {
+      uncontrolledChecked = defaultChecked;
+      seededDefaultChecked = true;
+    }
+  });
+
+  $effect(() => {
+    if (input) {
+      input.indeterminate = mixed;
+    }
+  });
 
   function handleChange(event: Event): void {
     const nextChecked = (event.currentTarget as HTMLInputElement).checked;
@@ -43,8 +69,12 @@
       return;
     }
 
-    uncontrolledChecked = nextChecked;
-    dispatch("checkedChange", { checked: nextChecked });
+    if (checked === undefined) {
+      uncontrolledChecked = nextChecked;
+    }
+
+    checked = nextChecked;
+    onCheckedChange?.(nextChecked);
   }
 </script>
 
@@ -59,7 +89,7 @@
     aria-label={label ? undefined : ariaLabel ?? undefined}
     aria-describedby={describedBy ?? undefined}
     aria-readonly={readOnly ? "true" : undefined}
-    on:change={handleChange}
+    onchange={handleChange}
   />
   <span class="poodle-checkbox__indicator" aria-hidden="true">
     {#if mixed}

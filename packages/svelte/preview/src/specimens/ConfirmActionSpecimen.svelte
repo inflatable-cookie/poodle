@@ -13,7 +13,7 @@
       description="This record will be permanently removed."
       triggerLabel="Delete record"
       confirmLabel="Delete"
-      on:confirm={() => (lastAction = "Record deleted")}
+      onConfirm={() => (lastAction = "Record deleted")}
     />
   </SpecimenGroup>
 
@@ -24,7 +24,7 @@
       tone="warning"
       triggerLabel="Archive project"
       confirmLabel="Archive"
-      on:confirm={() => (lastAction = "Project archived")}
+      onConfirm={() => (lastAction = "Project archived")}
     />
   </SpecimenGroup>
 
@@ -34,11 +34,11 @@
       description="This will clear all active filters and show all items."
       tone="warning"
       confirmLabel="Clear all"
-      on:confirm={() => (lastAction = "Filters cleared")}
+      onConfirm={() => (lastAction = "Filters cleared")}
     >
-      <svelte:fragment slot="trigger">
+      {#snippet trigger()}
         <Button variant="ghost">Clear filters</Button>
-      </svelte:fragment>
+      {/snippet}
     </ConfirmAction>
   </SpecimenGroup>
 
@@ -47,7 +47,7 @@
       title="Revoke API key?"
       description="This key will immediately stop working."
       confirmLabel="Revoke"
-      on:confirm={() => (lastAction = "Key revoked")}
+      onConfirm={() => (lastAction = "Key revoked")}
     >
       <div class="poodle-key-display">
         <code>pk_live_abc123...xyz789</code>

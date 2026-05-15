@@ -35,7 +35,7 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string \| string[] \| null` | `null` | no | controlled selected value(s) |
+| `value` | `string \| string[] \| null \| undefined` | `undefined` | no | controlled selected value(s); leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| string[] \| null` | `null` | no | uncontrolled initial value(s) |
 | `options` | `ToggleGroupOption[]` | none | yes | item list |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
@@ -56,7 +56,7 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `valueChange` event
+- controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue`
 - In single mode, value is `string | null`
 - In multiple mode, value is `string[]`
@@ -78,11 +78,11 @@ Updated: 2026-03-15
 - Selected items tracked as `string` (single mode) or `string[]` (multiple mode)
 - `data-selected` attribute on selected items for styling hooks
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | selection changes | `{ value: string \| string[] }` | payload type matches selectionMode |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | selection changes | `string \| string[]` | payload type matches selectionMode |
 
 ## 6. Accessibility
 

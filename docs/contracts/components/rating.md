@@ -48,11 +48,9 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- Supports both controlled (`value`) and uncontrolled (`defaultValue`) patterns
-- When `value` is provided, the component is controlled and selection changes
-  are communicated via `valueChange` events
-- When only `defaultValue` is provided, the component manages its own internal
-  selected value
+- bindable value plus callback: `value`, `onValueChange`
+- leave `value` undefined to use uncontrolled mode seeded by `defaultValue`
+- pass `value={null}` to use a controlled empty state
 
 ## 4. States
 
@@ -72,11 +70,11 @@ Updated: 2026-03-15
 | `selectedValue` | `number \| null` | currently selected rating value |
 | `focusIndex` | `number` | index of the currently focusable item (roving focus) |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user selects or clears a rating | `{ value: number \| null }` | fires on click or keyboard select |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user selects or clears a rating | `number \| null` | fires on click or keyboard select |
 
 ## 6. Accessibility
 
@@ -213,8 +211,8 @@ Updated: 2026-03-15
   `focusIndex` receives `tabindex="0"`
 - Filled state is determined by comparing each item's index against the current
   selected value and applied via `data-filled` attribute
-- Supports both controlled and uncontrolled patterns with `value` /
-  `defaultValue` props
+- Supports both controlled and uncontrolled patterns with bindable `value` and
+  `defaultValue`
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 

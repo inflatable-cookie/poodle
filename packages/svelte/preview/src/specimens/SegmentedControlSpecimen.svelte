@@ -25,7 +25,7 @@
       options={viewOptions}
       value={view}
       ariaLabel="View mode"
-      on:valueChange={(e) => (view = e.detail.value)}
+      onValueChange={(value) => (view = value)}
     />
     <p>View: <strong>{view}</strong></p>
   </SpecimenGroup>
@@ -53,10 +53,10 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <SegmentedControl options={viewOptions} defaultValue="grid" {size} ariaLabel="{size} view mode" />
+    <SegmentedControl options={viewOptions} defaultValue="grid" {size} ariaLabel={size + " view mode"} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <SegmentedControl options={viewOptions} defaultValue="grid" {density} ariaLabel="{density} view mode" />
+    <SegmentedControl options={viewOptions} defaultValue="grid" {density} ariaLabel={density + " view mode"} />
   </svelte:fragment>
 </SpecimenLayout>

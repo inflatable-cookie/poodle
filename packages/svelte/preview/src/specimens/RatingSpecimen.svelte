@@ -11,7 +11,7 @@
     <Rating
       value={rating}
       ariaLabel="Rating"
-      on:valueChange={(e) => { if (e.detail.value != null) rating = e.detail.value; }}
+      onValueChange={(value) => { if (value != null) rating = value; }}
     />
     <p>Rating: <strong>{rating} / 5</strong></p>
   </SpecimenGroup>

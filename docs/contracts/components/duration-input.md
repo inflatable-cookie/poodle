@@ -60,8 +60,9 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- Values are controlled via `hours`, `minutes`, `seconds` props
-- Changes dispatched via `change` event; parent updates props
+- Bindable segment values plus callback: `hours`, `minutes`, `seconds`,
+  `onChange`
+- Callers can bind any or all segment values directly
 
 ## 4. States
 
@@ -75,11 +76,11 @@ Updated: 2026-03-15
 | disabled | `disabled=true` | reduced opacity, fields not editable |
 | invalid | total out of min/max bounds | danger border color |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `change` | any segment value changes | `{hours: number, minutes: number, seconds: number, totalSeconds: number}` | fires after carry logic applied |
+| `onChange` | any segment value changes | `{hours: number, minutes: number, seconds: number, totalSeconds: number}` | fires after carry logic applied |
 
 ## 6. Accessibility
 

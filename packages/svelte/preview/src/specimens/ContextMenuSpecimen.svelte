@@ -18,7 +18,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Right-click the area below">
-    <ContextMenu {items} on:action={(e) => (lastAction = e.detail.value)}>
+    <ContextMenu {items} onAction={(value) => (lastAction = value)}>
       <div class="poodle-target-area">
         <p>Right-click here to open context menu</p>
       </div>

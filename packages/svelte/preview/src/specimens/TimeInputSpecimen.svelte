@@ -10,7 +10,7 @@
     <div class="poodle-specimen">
       <div class="poodle-specimen__item">
         <Eyebrow>Default</Eyebrow>
-        <TimeInput id="start-time" ariaLabel="Start time" on:valueChange={(e) => { if (e.detail.value) time = e.detail.value; }} />
+        <TimeInput id="start-time" ariaLabel="Start time" onValueChange={(value) => { if (value) time = value; }} />
         {#if time}<span class="poodle-specimen__value">{time}</span>{/if}
       </div>
 

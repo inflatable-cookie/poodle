@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
   import TimeInput from "./TimeInput.svelte";
@@ -31,11 +31,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: ZonedDateTimeValue };
-    openChange: { open: boolean };
-  }>();
+  export let onValueChange: ((value: ZonedDateTimeValue) => void) | undefined = undefined;
+  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
 
   const surfaceId = `poodle-date-time-zone-picker-surface-${++nextDateTimeZonePickerId}`;
   const uiPresentation = getUiPresentation();
@@ -62,7 +59,7 @@
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function commitValue(nextValue: ZonedDateTimeValue): void {
@@ -76,7 +73,7 @@
       visibleMonth = monthAnchorIso(normalized.date);
     }
 
-    dispatch("valueChange", { value: normalized });
+    onValueChange?.(normalized);
   }
 
   onMount(() => {
@@ -116,7 +113,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
     aria-label={ariaLabel ?? undefined}
-    on:click={() => setOpen(!isOpen)}
+    onclick={() => setOpen(!isOpen)}
   >
     <span
       class="poodle-date-time-zone-picker__value"
@@ -144,8 +141,8 @@
           size={resolvedSize}
           density={resolvedDensity}
           ariaLabel={ariaLabel ?? "Date"}
-          on:valueChange={(event) => commitValue({ ...currentValue, date: event.detail.value as string | null })}
-          on:monthChange={(event) => (visibleMonth = event.detail.month)}
+          onValueChange={(value) => commitValue({ ...currentValue, date: value as string | null })}
+          onMonthChange={(month) => (visibleMonth = month)}
         />
 
         <div class="poodle-date-time-zone-picker__fields">
@@ -160,7 +157,7 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} time` : "Time"}
-              on:valueChange={(event) => commitValue({ ...currentValue, time: event.detail.value })}
+              onValueChange={(value) => commitValue({ ...currentValue, time: value })}
             />
           </div>
 
@@ -176,7 +173,7 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} time zone` : "Time zone"}
-              on:valueChange={(event) => commitValue({ ...currentValue, timeZone: event.detail.value })}
+              onValueChange={(value) => commitValue({ ...currentValue, timeZone: value })}
             />
           </div>
         </div>

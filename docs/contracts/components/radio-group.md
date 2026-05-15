@@ -42,7 +42,7 @@ Updated: 2026-03-24
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string \| null` | `null` | no | controlled selected value |
+| `value` | `string \| null \| undefined` | `undefined` | no | controlled selected value; leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `options` | `RadioGroupOption[]` | none | yes | array of selectable options |
 | `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | no | layout and navigation axis |
@@ -65,7 +65,7 @@ Updated: 2026-03-24
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (non-null) plus `valueChange` event handler
+- controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue` sets the initial selection; component owns its own
   state thereafter
 - a module-level `nextRadioGroupId` counter generates unique name attributes when
@@ -91,11 +91,11 @@ Updated: 2026-03-24
 - internal selected value (uncontrolled mode)
 - roving focus tracked via native radio group behavior
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user selects a different option | `{ value: string }` | only fires when selection changes; suppressed when disabled |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user selects a different option | `string` | only fires when selection changes; suppressed when disabled |
 
 ## 6. Accessibility
 

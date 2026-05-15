@@ -25,7 +25,7 @@
     items={tabs}
     variant="text"
     ariaLabel="Specimen view"
-    on:valueChange={(e) => (activeTab = e.detail.value as typeof activeTab)}
+    onValueChange={(value) => (activeTab = value as typeof activeTab)}
   />
 
   <div class="poodle-specimen-layout__content">

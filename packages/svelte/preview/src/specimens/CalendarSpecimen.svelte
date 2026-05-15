@@ -10,7 +10,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Default">
-    <Calendar ariaLabel="Select a date" on:valueChange={(e) => (selected = e.detail.value as string)} />
+    <Calendar ariaLabel="Select a date" onValueChange={(value) => (selected = value as string)} />
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
@@ -28,7 +28,7 @@
     <Calendar
       mode="range"
       ariaLabel="Select a date range"
-      on:valueChange={(e) => (range = e.detail.value as DateRangeValue)}
+      onValueChange={(value) => (range = value as DateRangeValue)}
     />
     {#if range.start}
       <p>{range.start} &rarr; {range.end || "..."}</p>

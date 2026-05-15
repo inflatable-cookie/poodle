@@ -51,8 +51,7 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- controlled-only in this baseline contract; parent owns the value and updates
-  it via the `valueChange` event
+- bindable value plus callbacks: `value`, `onValueChange`, `onValueCommit`
 
 ### CSS Custom Properties
 
@@ -76,12 +75,12 @@ Updated: 2026-03-15
 - current value state
 - active drag/keyboard-adjustment state (native input handles this)
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | value changes during interaction (input event) | `{ value: number }` | live updates during drag or keyboard |
-| `valueCommit` | interaction finishes (change event) | `{ value: number }` | fires on mouseup/touchend/keyup commit |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | value changes during interaction (input event) | `number` | live updates during drag or keyboard |
+| `onValueCommit` | interaction finishes (change event) | `number` | fires on mouseup/touchend/keyup commit |
 
 ## 6. Accessibility
 
@@ -306,7 +305,7 @@ Updated: 2026-03-15
 - Focus ring uses a compound `box-shadow` on the thumb pseudo-element rather
   than outline, combining the focus ring with the existing drop shadow
 - Vertical orientation uses `transform: rotate(-90deg)` on the native input
-- `valueChange` fires on the `input` event (live during drag); `valueCommit`
+- `onValueChange` fires on the `input` event (live during drag); `onValueCommit`
   fires on the `change` event (on release)
 - `data-orientation`, `data-disabled`, `data-size`, and `data-density` attributes on root drive
   layout and state styling
@@ -332,7 +331,7 @@ Updated: 2026-03-15
 
 - [ ] value/min/max/step semantics match
 - [ ] keyboard adjustment semantics match (arrows, Home, End)
-- [ ] valueChange fires during interaction, valueCommit fires on release
+- [ ] onValueChange fires during interaction, onValueCommit fires on release
 - [ ] slider accessibility exposure matches (role, value, min, max, valuetext)
 - [ ] orientation affects keyboard navigation axis
 - [ ] disabled behavior matches

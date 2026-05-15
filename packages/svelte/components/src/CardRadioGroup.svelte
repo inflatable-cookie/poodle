@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Card from "./Card.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -15,10 +13,7 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    change: { value: string };
-  }>();
+  export let onValueChange: ((value: string) => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
 
@@ -30,7 +25,7 @@
     const item = items.find((i) => i.value === itemValue);
     if (item?.disabled) return;
     value = itemValue;
-    dispatch("change", { value: itemValue });
+    onValueChange?.(itemValue);
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
@@ -81,8 +76,8 @@
       aria-checked={isChecked ? "true" : "false"}
       aria-disabled={isItemDisabled ? "true" : undefined}
       data-card-radio-index={index}
-      on:click={() => !isItemDisabled && select(item.value)}
-      on:keydown={(e) => !isItemDisabled && handleKeydown(e, index)}
+      onclick={() => !isItemDisabled && select(item.value)}
+      onkeydown={(e) => !isItemDisabled && handleKeydown(e, index)}
     >
       <Card
         interactive={!isItemDisabled}

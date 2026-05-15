@@ -9,9 +9,9 @@ Updated: 2026-03-30
 - Layer: `foundation`
 - Summary: a persistent navigation control that owns top-level nav triggers
   and an associated viewport surface for content disclosure, with pill-style
-  trigger buttons and slot-driven viewport content
+  trigger buttons and snippet-driven viewport content
 - In scope: top-level navigation items, active open state, associated viewport
-  surface, keyboard movement across triggers, slot-driven viewport content
+  surface, keyboard movement across triggers, snippet-driven viewport content
   receiving activeValue and activeItem, disabled items, controlled/uncontrolled
   value
 - Out of scope: routing, breadcrumbs, shell-specific sidebars, workstation
@@ -25,7 +25,7 @@ Updated: 2026-03-30
   ├── [List .navigation-menu__list]  <nav>
   │     └── [Trigger .navigation-menu__trigger]...  <button>
   └── [Viewport .navigation-menu__viewport]  <div>  (when value is set)
-        └── {default slot — receives activeValue, activeItem}
+        └── {children snippet — receives activeValue, activeItem}
 ```
 
 | Part | Required | Description | Token Targets |
@@ -58,17 +58,18 @@ Updated: 2026-03-30
 | `icon` | `string \| null` | `null` | no | optional icon |
 | `disabled` | `boolean` | `false` | no | prevents activation |
 
-### Slot
+### Snippet
 
-- The default slot receives `activeValue` (the currently active item value or
-  null) and `activeItem` (the full `NavigationMenuItem` object or null)
-- Slot content is rendered inside the viewport when an item is active
+- The `children` snippet receives `activeValue` (the currently active item
+  value or null) and `activeItem` (the full `NavigationMenuItem` object or
+  null)
+- Snippet content is rendered inside the viewport when an item is active
 - The host is responsible for rendering appropriate content based on the
   active value
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (string) plus `valueChange` event
+- controlled: `value` (string) plus `onValueChange` callback
 - uncontrolled: `value` is null, uses `defaultValue` as initial state
 - `value` represents which navigation item is currently active/open; null
   means none active
@@ -93,11 +94,11 @@ Updated: 2026-03-30
 - `focusIndex`: roving tabindex position across triggers
 - Viewport visibility: shown when value is non-null, hidden otherwise
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | active item changes or closes | `{ value: string \| null }` | null when no item is active |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | active item changes or closes | `string \| null` | null when no item is active |
 
 ## 6. Accessibility
 
@@ -293,7 +294,7 @@ Updated: 2026-03-30
 - [ ] arrow down/enter/space opens viewport
 - [ ] escape closes viewport and restores focus to trigger
 - [ ] roving tabindex (0/-1) on triggers matches
-- [ ] valueChange event semantics match
+- [ ] `onValueChange` callback semantics match
 - [ ] disabled trigger behavior matches (aria-disabled, opacity, cursor)
 - [ ] slot receives activeValue and activeItem
 

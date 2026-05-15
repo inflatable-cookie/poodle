@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { type Snippet } from "svelte";
 
   import AlertDialog from "./AlertDialog.svelte";
   import Button from "./Button.svelte";
@@ -7,50 +7,57 @@
 
   import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let title: string;
-  export let description: string | null = null;
-  export let tone: AlertDialogTone = "danger";
-  export let triggerLabel = "Delete";
-  export let confirmLabel = "Confirm";
-  export let cancelLabel = "Cancel";
-  export let onConfirm: (() => void | Promise<void>) | null = null;
-  export let onCancel: (() => void) | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    title: string;
+    description?: string | null;
+    tone?: AlertDialogTone;
+    triggerLabel?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    onConfirm?: (() => void | Promise<void>) | null;
+    onCancel?: (() => void) | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    trigger?: Snippet<[]>;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    confirm: void;
-    cancel: void;
-  }>();
+  let {
+    title,
+    description = null,
+    tone = "danger",
+    triggerLabel = "Delete",
+    confirmLabel = "Confirm",
+    cancelLabel = "Cancel",
+    onConfirm = null,
+    onCancel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    trigger,
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let open: boolean = false;
+  let open = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: triggerTone = tone === "danger" ? "danger" as const : "default" as const;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const triggerTone = $derived(tone === "danger" ? "danger" as const : "default" as const);
 
   function handleTrigger(): void {
     open = true;
   }
 
   async function handleConfirm(): Promise<void> {
-    if (onConfirm) {
-      await onConfirm();
-    } else {
-      dispatch("confirm");
-    }
+    await onConfirm?.();
     open = false;
   }
 
   function handleCancel(): void {
-    if (onCancel) {
-      onCancel();
-    } else {
-      dispatch("cancel");
-    }
+    onCancel?.();
     open = false;
   }
 
@@ -59,24 +66,24 @@
   }
 </script>
 
-{#if $$slots.trigger}
+{#if trigger}
   <span
     class="poodle-confirm-action__trigger"
     data-size={resolvedSize}
     data-density={resolvedDensity}
     role="presentation"
-    on:click={handleTrigger}
-    on:keydown={(e) => {
+    onclick={handleTrigger}
+    onkeydown={(e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         handleTrigger();
       }
     }}
   >
-    <slot name="trigger" />
+    {@render trigger?.()}
   </span>
 {:else}
-  <Button variant="secondary" tone={triggerTone} size={resolvedSize} density={resolvedDensity} on:click={handleTrigger}>
+  <Button variant="secondary" tone={triggerTone} size={resolvedSize} density={resolvedDensity} onclick={handleTrigger}>
     {triggerLabel}
   </Button>
 {/if}
@@ -94,5 +101,5 @@
   on:cancel={handleCancel}
   on:openChange={handleOpenChange}
 >
-  <slot />
+  {@render children?.()}
 </AlertDialog>

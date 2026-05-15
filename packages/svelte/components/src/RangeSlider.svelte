@@ -1,74 +1,83 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { clamp, joinStyles, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    value?: [number, number];
+    min?: number;
+    max?: number;
+    step?: number;
+    orientation?: Orientation;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    lowerValueText?: string | null;
+    upperValueText?: string | null;
+    onValueChange?: ((value: [number, number]) => void) | undefined;
+    onValueCommit?: ((value: [number, number]) => void) | undefined;
+  }
 
-  export let value: [number, number] = [0, 100];
-  export let min = 0;
-  export let max = 100;
-  export let step = 1;
-  export let orientation: Orientation = "horizontal";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let lowerValueText: string | null = null;
-  export let upperValueText: string | null = null;
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    value = $bindable<[number, number]>([0, 100]),
+    min = 0,
+    max = 100,
+    step = 1,
+    orientation = "horizontal",
+    disabled = false,
+    ariaLabel = null,
+    lowerValueText = null,
+    upperValueText = null,
+    onValueChange = undefined,
+    onValueCommit = undefined,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: [number, number] };
-    valueCommit: { value: [number, number] };
-  }>();
-
-  let displayLower = Math.min(value[0], value[1]);
-  let displayUpper = Math.max(value[0], value[1]);
-
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: safeMax = max <= min ? min + 1 : max;
-  // Sync from prop
-  $: displayLower = clamp(Math.min(value[0], value[1]), min, safeMax);
-  $: displayUpper = clamp(Math.max(value[0], value[1]), min, safeMax);
-  $: lowerPercent = ((displayLower - min) / (safeMax - min)) * 100;
-  $: upperPercent = ((displayUpper - min) / (safeMax - min)) * 100;
-  $: rangeStyle = joinStyles([
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const safeMax = $derived(max <= min ? min + 1 : max);
+  const displayLower = $derived(clamp(Math.min(value[0], value[1]), min, safeMax));
+  const displayUpper = $derived(clamp(Math.max(value[0], value[1]), min, safeMax));
+  const lowerPercent = $derived(((displayLower - min) / (safeMax - min)) * 100);
+  const upperPercent = $derived(((displayUpper - min) / (safeMax - min)) * 100);
+  const rangeStyle = $derived(joinStyles([
     `--poodle-range-start: ${lowerPercent}%`,
     `--poodle-range-end: ${upperPercent}%`,
-  ]);
+  ]));
 
   function handleLowerInput(event: Event): void {
     const raw = Number((event.currentTarget as HTMLInputElement).value);
     const snapped = clamp(snapToStep(raw, min, step), min, displayUpper);
-    displayLower = snapped;
-    dispatch("valueChange", { value: [snapped, displayUpper] });
+    value = [snapped, displayUpper];
+    onValueChange?.([snapped, displayUpper]);
   }
 
   function handleLowerChange(event: Event): void {
     const raw = Number((event.currentTarget as HTMLInputElement).value);
     const snapped = clamp(snapToStep(raw, min, step), min, displayUpper);
-    displayLower = snapped;
-    dispatch("valueCommit", { value: [snapped, displayUpper] });
+    value = [snapped, displayUpper];
+    onValueCommit?.([snapped, displayUpper]);
   }
 
   function handleUpperInput(event: Event): void {
     const raw = Number((event.currentTarget as HTMLInputElement).value);
     const snapped = clamp(snapToStep(raw, min, step), displayLower, safeMax);
-    displayUpper = snapped;
-    dispatch("valueChange", { value: [displayLower, snapped] });
+    value = [displayLower, snapped];
+    onValueChange?.([displayLower, snapped]);
   }
 
   function handleUpperChange(event: Event): void {
     const raw = Number((event.currentTarget as HTMLInputElement).value);
     const snapped = clamp(snapToStep(raw, min, step), displayLower, safeMax);
-    displayUpper = snapped;
-    dispatch("valueCommit", { value: [displayLower, snapped] });
+    value = [displayLower, snapped];
+    onValueCommit?.([displayLower, snapped]);
   }
 </script>
 
@@ -87,8 +96,8 @@
     disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
     aria-valuetext={lowerValueText ?? undefined}
-    on:input={handleLowerInput}
-    on:change={handleLowerChange}
+    oninput={handleLowerInput}
+    onchange={handleLowerChange}
   />
 
   <input
@@ -101,8 +110,8 @@
     disabled={disabled}
     aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
     aria-valuetext={upperValueText ?? undefined}
-    on:input={handleUpperInput}
-    on:change={handleUpperChange}
+    oninput={handleUpperInput}
+    onchange={handleUpperChange}
   />
 </div>
 

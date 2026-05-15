@@ -13,17 +13,17 @@
     <Checkbox
       label="Enable email notifications"
       checked={notifications}
-      on:checkedChange={(e) => (notifications = e.detail.checked)}
+      onCheckedChange={(checked) => (notifications = checked)}
     />
     <Checkbox
       label="Subscribe to marketing emails"
       checked={marketing}
-      on:checkedChange={(e) => (marketing = e.detail.checked)}
+      onCheckedChange={(checked) => (marketing = checked)}
     />
     <Checkbox
       label="I agree to the terms and conditions"
       checked={terms}
-      on:checkedChange={(e) => (terms = e.detail.checked)}
+      onCheckedChange={(checked) => (terms = checked)}
     />
   </SpecimenGroup>
 

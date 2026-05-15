@@ -54,7 +54,7 @@
     {placeholder}
     disabled={disabled}
     rows={3}
-    on:valueChange={handleValueChange}
+    onValueChange={handleValueChange}
   />
 
   <div class="poodle-embed-input__status">

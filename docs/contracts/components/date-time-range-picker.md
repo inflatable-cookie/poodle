@@ -80,9 +80,9 @@ DateTimeRangeValue: {
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` plus `valueChange` event
+- controlled value: `value` plus `onValueChange` callback
 - uncontrolled value: `defaultValue`
-- controlled open: `open` plus `openChange` event
+- controlled open: `open` plus `onOpenChange` callback
 - uncontrolled open: `defaultOpen`
 
 ## 4. States
@@ -101,15 +101,15 @@ DateTimeRangeValue: {
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| value committed | user changes any date or time field | `valueChange` fires with current range |
+| value committed | user changes any date or time field | `onValueChange` runs with current range |
 | dismissed | Escape or click outside | overlay closes without changing value |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user changes any date or time selection | `{ value: DateTimeRangeValue }` | fires on each constituent change |
-| `openChange` | overlay opens or closes | `{ open: boolean }` | fires on open and close transitions |
+| `onValueChange` | user changes any date or time selection | `DateTimeRangeValue` | runs on each constituent change |
+| `onOpenChange` | overlay opens or closes | `boolean` | runs on open and close transitions |
 
 ## 6. Accessibility
 
@@ -319,8 +319,8 @@ DateTimeRangeValue: {
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match (fires on constituent change)
-- [ ] openChange fires on open and close transitions
+- [ ] value and onValueChange semantics match (runs on constituent change)
+- [ ] onOpenChange runs on open and close transitions
 - [ ] Escape closes overlay without changing value
 - [ ] outside click closes overlay
 - [ ] disabled state prevents interaction

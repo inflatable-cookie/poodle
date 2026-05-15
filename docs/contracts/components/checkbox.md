@@ -40,7 +40,7 @@ Updated: 2026-03-24
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| undefined` | `undefined` | no | element id for external label association |
-| `checked` | `boolean` | `false` | no | controlled checked state; when provided, component is controlled |
+| `checked` | `boolean \| undefined` | `undefined` | no | bindable checked state; leave undefined for uncontrolled mode |
 | `defaultChecked` | `boolean` | `false` | no | uncontrolled initial checked state |
 | `mixed` | `boolean` | `false` | no | sets indeterminate visual and assistive state; controlled only |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
@@ -55,7 +55,7 @@ Updated: 2026-03-24
 
 ### Controlled And Uncontrolled
 
-- controlled: `checked` plus `checkedChange` event handler
+- controlled: bindable `checked` plus `onCheckedChange`
 - uncontrolled: `defaultChecked` sets the initial state; component owns its own
   state thereafter
 - `mixed` is controlled-only and sets the indeterminate property on the native
@@ -83,11 +83,11 @@ Updated: 2026-03-24
 - internal checked state (uncontrolled mode)
 - indeterminate property set via JS on native input
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `checkedChange` | user toggles the control | `{ checked: boolean }` | suppressed when disabled; when readOnly, the native change is reverted so no event fires; mixed state resolves to checked on first toggle |
+| `onCheckedChange` | user toggles the control | `boolean` | suppressed when disabled; when readOnly, the native change is reverted so no callback fires; mixed state resolves to checked on first toggle |
 
 ## 6. Accessibility
 

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -45,11 +43,8 @@
   export let sizeRole: SemanticControlSizeRole = "control";
   export let size: ControlSize | null = null;
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    pageChange: { page: number };
-    limitChange: { limit: number };
-  }>();
+  export let onPageChange: ((page: number) => void) | undefined = undefined;
+  export let onLimitChange: ((limit: number) => void) | undefined = undefined;
 
   const uiPresentation = getUiPresentation();
 
@@ -106,14 +101,6 @@
     }
 
     return result;
-  }
-
-  function requestPage(page: number): void {
-    if (page < 1 || page > safeTotalPages || page === safeCurrentPage) {
-      return;
-    }
-
-    dispatch("pageChange", { page });
   }
 
   function getScrollParent(element: HTMLElement): HTMLElement | null {
@@ -177,10 +164,10 @@
       } else if (controller.goToPage) {
         await controller.goToPage(nextPage);
       } else {
-        dispatch("pageChange", { page: nextPage });
+        onPageChange?.(nextPage);
       }
     } else {
-      dispatch("pageChange", { page: nextPage });
+      onPageChange?.(nextPage);
     }
 
     scrollIntoView();
@@ -192,7 +179,7 @@
     if (controller) {
       await controller.setPageSize(nextLimit);
     } else {
-      dispatch("limitChange", { limit: nextLimit });
+      onLimitChange?.(nextLimit);
     }
 
     scrollIntoView();
@@ -227,7 +214,7 @@
             id="pagination-limit"
             value={effectiveLimit}
             disabled={isLoading}
-            on:change={handleLimitChange}
+            onchange={handleLimitChange}
           >
             {#each limitOptions as option}
               <option value={option}>{option}</option>
@@ -245,7 +232,7 @@
               class="poodle-pagination__button"
               disabled={!hasPrevPage || isLoading}
               aria-label="First page"
-              on:click={() => handlePageRequest(1)}
+              onclick={() => handlePageRequest(1)}
             >
               ««
             </button>
@@ -256,7 +243,7 @@
             class="poodle-pagination__button"
             disabled={!hasPrevPage || isLoading}
             aria-label="Previous page"
-            on:click={() => handlePageRequest(safeCurrentPage - 1)}
+            onclick={() => handlePageRequest(safeCurrentPage - 1)}
           >
             {#if variant === "simple"}Prev{:else}Previous{/if}
           </button>
@@ -273,7 +260,7 @@
                     data-current={visiblePage === safeCurrentPage}
                     aria-current={visiblePage === safeCurrentPage ? "page" : undefined}
                     aria-label={`Page ${visiblePage}`}
-                    on:click={() => handlePageRequest(visiblePage)}
+                    onclick={() => handlePageRequest(visiblePage)}
                   >
                     {visiblePage}
                   </button>
@@ -295,7 +282,7 @@
             class="poodle-pagination__button"
             disabled={!hasNextPage || isLoading}
             aria-label="Next page"
-            on:click={() => handlePageRequest(safeCurrentPage + 1)}
+            onclick={() => handlePageRequest(safeCurrentPage + 1)}
           >
             {#if variant === "simple"}Next{:else}Next{/if}
           </button>
@@ -306,7 +293,7 @@
               class="poodle-pagination__button"
               disabled={!hasNextPage || isLoading}
               aria-label="Last page"
-              on:click={() => handlePageRequest(safeTotalPages)}
+              onclick={() => handlePageRequest(safeTotalPages)}
             >
               »»
             </button>

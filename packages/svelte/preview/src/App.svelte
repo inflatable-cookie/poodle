@@ -142,7 +142,7 @@
         items={topTabs}
         variant="pill"
         ariaLabel="Main navigation"
-        on:valueChange={(event) => navigateToSection(event.detail.value as SectionId)}
+        onValueChange={(value) => navigateToSection(value as SectionId)}
       />
       <div class="poodle-app-top-bar__pills">
         <Pill>{theme}</Pill>

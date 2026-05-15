@@ -1,49 +1,67 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let value: number | null = null;
-  export let defaultValue: number | null = null;
-  export let max = 5;
-  export let allowClear = false;
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-
   const uiPresentation = getUiPresentation();
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: number | null };
-  }>();
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    value = $bindable<number | null | undefined>(undefined),
+    defaultValue = null,
+    max = 5,
+    allowClear = false,
+    disabled = false,
+    ariaLabel = null,
+    onValueChange = undefined,
+  }: {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    value?: number | null | undefined;
+    defaultValue?: number | null;
+    max?: number;
+    allowClear?: boolean;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    onValueChange?: ((value: number | null) => void) | undefined;
+  } = $props();
 
   let itemElements: Array<HTMLButtonElement | null> = [];
-  let uncontrolledValue = defaultValue;
-  let focusIndex = (defaultValue ?? 1) - 1;
-  let hoverIndex = -1;
+  let uncontrolledValue = $state<number | null>(null);
+  let focusIndex = $state(0);
+  let hoverIndex = $state(-1);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = value ?? uncontrolledValue;
-  $: itemCount = Math.max(1, Math.floor(max));
-  $: if (currentValue !== null) {
-    focusIndex = Math.max(0, Math.min(itemCount - 1, currentValue - 1));
-  }
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const currentValue = $derived(value === undefined ? uncontrolledValue : value);
+  const itemCount = $derived(Math.max(1, Math.floor(max)));
+
+  $effect(() => {
+    if (value === undefined && uncontrolledValue === null && defaultValue !== null) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  $effect(() => {
+    if (currentValue !== null) {
+      focusIndex = Math.max(0, Math.min(itemCount - 1, currentValue - 1));
+    }
+  });
 
   // When hovering, show filled up to hover position; otherwise show filled up to value
-  $: displayValue = hoverIndex >= 0 ? hoverIndex + 1 : (currentValue ?? 0);
+  const displayValue = $derived(hoverIndex >= 0 ? hoverIndex + 1 : (currentValue ?? 0));
 
   function setValue(nextValue: number | null): void {
-    if (value === null) {
+    if (value === undefined) {
       uncontrolledValue = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    value = nextValue;
+    onValueChange?.(nextValue);
   }
 
   function selectIndex(index: number): void {
@@ -70,7 +88,7 @@
   aria-label={ariaLabel ?? undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
-  on:mouseleave={() => (hoverIndex = -1)}
+  onmouseleave={() => (hoverIndex = -1)}
 >
   {#each Array.from({ length: itemCount }, (_, index) => index) as index}
     <button
@@ -84,10 +102,10 @@
       aria-checked={currentValue === index + 1 ? "true" : "false"}
       aria-label={`${index + 1} of ${itemCount}`}
       tabindex={focusIndex === index ? 0 : -1}
-      on:mouseenter={() => { if (!disabled) hoverIndex = index; }}
-      on:focus={() => moveFocus(index)}
-      on:click={() => selectIndex(index)}
-      on:keydown={(event) => {
+      onmouseenter={() => { if (!disabled) hoverIndex = index; }}
+      onfocus={() => moveFocus(index)}
+      onclick={() => selectIndex(index)}
+      onkeydown={(event) => {
         if (event.key === "ArrowRight" || event.key === "ArrowUp") {
           event.preventDefault();
           moveFocus(index + 1);

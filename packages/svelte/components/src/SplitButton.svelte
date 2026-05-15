@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";
   import {
@@ -18,44 +18,66 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let variant: ButtonVariant = "secondary";
-  export let tone: ButtonTone = "default";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let type: HTMLButtonElement["type"] = "button";
-  export let items: MenuItem[] = [];
-  export let disabled = false;
-  export let loading = false;
-  export let ariaLabel: string | null = null;
-  export let menuAriaLabel = "More actions";
+  interface Props {
+    variant?: ButtonVariant;
+    tone?: ButtonTone;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    type?: HTMLButtonElement["type"];
+    items?: MenuItem[];
+    disabled?: boolean;
+    loading?: boolean;
+    ariaLabel?: string | null;
+    menuAriaLabel?: string;
+    onClick?: ((event: MouseEvent) => void) | undefined;
+    onAction?: ((value: string) => void) | undefined;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    click: MouseEvent;
-    action: { value: string };
-  }>();
+  let {
+    variant = "secondary",
+    tone = "default",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    type = "button",
+    items = [],
+    disabled = false,
+    loading = false,
+    ariaLabel = null,
+    menuAriaLabel = "More actions",
+    onClick = undefined,
+    onAction = undefined,
+    children,
+  }: Props = $props();
 
-  let rootElement: HTMLDivElement | null = null;
-  let toggleElement: HTMLButtonElement | null = null;
-  let menuElement: HTMLDivElement | null = null;
-  let itemElements: Array<HTMLButtonElement | null> = [];
-  let menuOpen = false;
-  let highlightIndex = 0;
-  let menuPlacement: "bottom-start" | "top-start" = "bottom-start";
-  let menuMaxHeight: string | null = null;
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let toggleElement = $state<HTMLButtonElement | null>(null);
+  let menuElement = $state<HTMLDivElement | null>(null);
+  let itemElements = $state<Array<HTMLButtonElement | null>>([]);
+  let menuOpen = $state(false);
+  let highlightIndex = $state(0);
+  let menuPlacement = $state<"bottom-start" | "top-start">("bottom-start");
+  let menuMaxHeight = $state<string | null>(null);
   const uiPresentation = getUiPresentation();
 
-  $: isUnavailable = disabled || loading;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedVisualSize = resolveSupportingVisualSize(resolvedSize);
-  $: actionableItems = menuNavigableItems(items);
-  $: if (menuOpen) {
+  const isUnavailable = $derived(disabled || loading);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedVisualSize = $derived(resolveSupportingVisualSize(resolvedSize));
+  const actionableItems = $derived(menuNavigableItems(items));
+
+  $effect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
     tick().then(async () => {
       syncMenuLayout();
       itemElements[highlightIndex]?.focus();
     });
-  }
+  });
 
   function toggleMenu(): void {
     if (isUnavailable) return;
@@ -125,7 +147,7 @@
 
   function activateItem(item: MenuItem): void {
     if (item.disabled || item.kind === "separator") return;
-    dispatch("action", { value: item.value });
+    onAction?.(item.value);
     closeMenu();
   }
 
@@ -172,7 +194,7 @@
     disabled={isUnavailable}
     aria-label={ariaLabel ?? undefined}
     aria-busy={loading ? "true" : undefined}
-    on:click={(event) => dispatch("click", event)}
+    onclick={(event) => onClick?.(event)}
   >
     {#if loading}
       <span class="poodle-split-button__spinner" aria-hidden="true">
@@ -180,7 +202,7 @@
       </span>
     {/if}
     <span class="poodle-split-button__label">
-      <slot />
+      {@render children?.()}
     </span>
   </button>
 
@@ -194,8 +216,8 @@
     aria-haspopup="true"
     aria-expanded={menuOpen ? "true" : "false"}
     aria-label={menuAriaLabel}
-    on:click={toggleMenu}
-    on:keydown={(event) => {
+    onclick={toggleMenu}
+    onkeydown={(event) => {
       if (event.key === "ArrowDown") {
         event.preventDefault();
         if (!menuOpen) {
@@ -234,8 +256,8 @@
             class="poodle-split-button__item"
             disabled={item.disabled === true}
             role="menuitem"
-            on:click={() => activateItem(item)}
-            on:keydown={(event) => {
+            onclick={() => activateItem(item)}
+            onkeydown={(event) => {
               if (event.key === "ArrowDown") {
                 event.preventDefault();
                 moveHighlight(1);

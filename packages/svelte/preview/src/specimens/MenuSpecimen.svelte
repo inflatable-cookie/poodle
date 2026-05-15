@@ -33,8 +33,10 @@
     <div class="poodle-specimen">
       <div class="poodle-specimen__row">
         <Eyebrow>With shortcuts</Eyebrow>
-        <Menu items={fileItems} ariaLabel="File menu" on:action={(e) => (lastAction = e.detail.value)}>
-          <Button variant="secondary" slot="trigger">File</Button>
+        <Menu items={fileItems} ariaLabel="File menu" onAction={(value) => (lastAction = value)}>
+          {#snippet trigger()}
+            <Button variant="secondary">File</Button>
+          {/snippet}
         </Menu>
         {#if lastAction}
           <span class="poodle-specimen__hint">Last: {lastAction}</span>
@@ -44,14 +46,18 @@
       <div class="poodle-specimen__row">
         <Eyebrow>With checkboxes</Eyebrow>
         <Menu items={settingsItems} ariaLabel="Settings menu">
-          <Button variant="secondary" slot="trigger">Settings</Button>
+          {#snippet trigger()}
+            <Button variant="secondary">Settings</Button>
+          {/snippet}
         </Menu>
       </div>
 
       <div class="poodle-specimen__row">
         <Eyebrow>Destructive action</Eyebrow>
         <Menu items={destructiveItems} ariaLabel="Item actions">
-          <Button variant="secondary" slot="trigger">Actions</Button>
+          {#snippet trigger()}
+            <Button variant="secondary">Actions</Button>
+          {/snippet}
         </Menu>
       </div>
     </div>
@@ -59,13 +65,17 @@
 
   <svelte:fragment slot="sizes" let:size>
     <Menu items={fileItems} {size} ariaLabel={size + " menu"}>
-      <Button variant="secondary" {size} slot="trigger">{size.toUpperCase()}</Button>
+      {#snippet trigger()}
+        <Button variant="secondary" {size}>{size.toUpperCase()}</Button>
+      {/snippet}
     </Menu>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
     <Menu items={fileItems} {density} ariaLabel="{density} menu">
-      <Button variant="secondary" {density} slot="trigger">{density}</Button>
+      {#snippet trigger()}
+        <Button variant="secondary" {density}>{density}</Button>
+      {/snippet}
     </Menu>
   </svelte:fragment>
 </SpecimenLayout>

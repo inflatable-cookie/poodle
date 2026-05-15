@@ -162,6 +162,23 @@ Reason:
   controlled/uncontrolled friction
 - they are used widely across Underlay-root admin apps and direct forms
 
+Current execution state:
+
+- `Select`
+  - Poodle component, docs, and specimen moved to the callback-first Svelte 5 surface
+  - consumer rollout completed across `underlay`, `underlay-reference`,
+    `contact-patch`, `songsprout`, `loophole/composer`, and `acowtancy/dairy`
+- `TextInput`
+  - Poodle component, docs, guide examples, and specimen moved to bindable
+    value plus callback props (`onValueChange`, `onValidationChange`,
+    `onSubmit`, `onCancel`, `onClear`, `onKeyDown`, `onFocus`, `onBlur`)
+  - Poodle-side consumers updated
+  - non-`dairy` consumer rollout completed across `underlay`,
+    `underlay-reference`, `contact-patch`, `songsprout`, and
+    `loophole/composer`
+  - `acowtancy/dairy` remains the open `TextInput` batch because it still has
+    the largest concentration of app-owned wrappers and Nightfire/editor forms
+
 ### Wave 2 — Overlay And Menu Primitives
 
 Priority components:
@@ -281,6 +298,133 @@ Known highest-priority consumer surfaces from current local scan:
 Known import-shape diversity that may need cleanup during rollout:
 
 - `@poodle/svelte`
+- `@poodle/svelte-primitives`
+- `@poodle/svelte-composites`
+
+## Wave 1 Inventory Baseline
+
+Scope:
+
+- `Select`
+- `TextInput`
+
+### Root Coverage
+
+Measured as files with actual component usage, not just package installation.
+
+| Root | TextInput files | Select files | Notes |
+|------|-----------------|--------------|-------|
+| `underlay` | 9 | 4 | Core auth flows, `EntityList`, Nightfire media/type select |
+| `underlay-reference` | 15 | 9 | `acme-admin`, `acme-front`, `acme-ui` all in play |
+| `contact-patch` | 5 | 4 | Mostly `cp-admin`; account/media/user flows |
+| `compli-me` | 9 | 6 | `admin` plus `front` auth pages |
+| `acowtancy` | 69 | 29 | Biggest hotspot by far: `dairy` and `froyo` forms, selectors, Nightfire editors |
+| `songsprout` | 10 | 1 | `greenhouse` and `bloom`; mostly auth and media edit |
+| `loophole/composer` | 6 | 6 | `composer-admin` editing/detail flows |
+| `finch/app-electron` | 0 | 0 | Direct Poodle user, but not of these two components in current scan |
+| `soundcheck` | 1 | 0 | One direct `TextInput` usage |
+| `loophole/aura` | 1 | 0 | One direct `TextInput` usage |
+
+### Hotspots
+
+- `acowtancy/dairy`
+  - dominant heavy consumer for both components
+  - forms, filters, relation selectors, Nightfire question editors
+- `underlay`
+  - canonical wrapper and pattern layer for many downstream auth/list flows
+- `underlay-reference/acme-admin`, `contact-patch/cp-admin`,
+  `compli-me/admin`, `loophole/composer/composer-admin`
+  - repeated admin-account/media/detail usage patterns
+
+### Usage Pattern Notes
+
+`Select` current downstream patterns:
+
+- mixed canonical and compatibility inputs:
+  - `options={...}`
+  - `items={...}` still present in real consumers and is common in older admin
+    flows
+- mixed event surfaces:
+  - `bind:value`
+  - `on:valueChange`
+  - legacy callback prop `onchange={(value) => ...}` still appears in live
+    consumers
+- grouped/custom select usage exists inside Underlay-owned surfaces such as
+  `NightfireTypeSelect`
+
+`TextInput` current downstream patterns:
+
+- common controlled forms use `bind:value`
+- event-driven controlled forms also use `on:valueChange`
+- multiline usage via `rows={...}` is live in admin editing flows
+- search usage via `type="search"` is live in relation selectors and filters
+- direct desktop usage exists but is light: `soundcheck` and `loophole/aura`
+
+### Wave 1 Modernization Implications
+
+- `Select` must be treated as the harder seam first, because it still has live
+  compatibility alias usage (`items`) and multiple event styles in downstream
+  apps
+- `TextInput` has wider usage volume, but the public shape looks more stable;
+  most risk is around controlled/value patterns, multiline/search behavior, and
+  validation ergonomics
+- Underlay must lead the rollout for both components because its auth/pattern
+  surfaces feed multiple app families
+- `acowtancy/dairy` should be treated as the downstream proving ground after
+  Underlay because it carries the highest real usage density
+
+## Wave 1 Target Posture
+
+This is the current target direction for implementation work. Treat it as the
+ modernization brief unless new evidence from the consumer sweep forces a better
+ answer.
+
+### `Select`
+
+Target outcome:
+
+- one canonical option input shape: `options`
+- no long-term parallel compatibility props for:
+  - `items`
+  - `groups`
+  - `loadItems`
+  - `loadGroups`
+- modern callback-first change surface instead of treating
+  `createEventDispatcher` events and `onchange` callback prop as co-equal
+- modern composition surface for trigger, option, and empty rendering instead
+  of extending legacy slot dependence further
+
+Implication:
+
+- existing downstream `items=` and `onchange=` usage should be migrated, not
+  preserved as the end state
+
+Current execution status:
+
+- Poodle-side `Select` rewrite started
+- component contract moved to Svelte 5 runes, bindable `value`,
+  callback-first state change hooks, and snippet-based custom rendering
+- legacy `items`, `groups`, `loadItems`, `loadGroups`, and `onchange`
+  removed from the Poodle component surface
+- in-repo `Select` consumers, specimen, and component docs updated
+- downstream consumer migration still pending; `underlay` is the next boundary
+
+### `TextInput`
+
+Target outcome:
+
+- keep the useful semantic breadth: text, search, slug, multiline, validation
+- preserve a single clear controlled/uncontrolled model
+- move to callback-first value, submit, cancel, clear, and validation hooks
+  instead of dispatcher-first public semantics
+- modernize leading/trailing composition without extending legacy slot posture
+- keep multiline and search behavior explicit and well-scoped; avoid carrying
+  ambiguous “auto magic” further unless it materially improves the API
+
+Implication:
+
+- `TextInput` is likely a deeper internal modernization with a smaller public
+  contract rewrite than `Select`
 - `@poodle/svelte-primitives`
 - `@poodle/svelte-composites`
 

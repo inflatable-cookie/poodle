@@ -1,9 +1,9 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextTabsId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import Icon from "./Icon.svelte";
   import Pill from "./Pill.svelte";
@@ -30,63 +30,101 @@
     TabVariant,
   } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let items: TabItem[] = [];
-  export let variant: TabVariant = "text";
-  export let orientation: Orientation = "horizontal";
-  export let activationMode: TabActivationMode = "automatic";
-  /** When false, hides the bottom border indicator line on the text variant. */
-  export let bordered = true;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let reorderable = false;
-  export let ariaLabel: string | null = null;
-  export let showTooltips = false;
-  export let historyKey: string | null = null;
+  interface Props {
+    value?: string | null;
+    defaultValue?: string | null;
+    items?: TabItem[];
+    variant?: TabVariant;
+    orientation?: Orientation;
+    activationMode?: TabActivationMode;
+    bordered?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    reorderable?: boolean;
+    ariaLabel?: string | null;
+    showTooltips?: boolean;
+    historyKey?: string | null;
+    onValueChange?: ((value: string) => void) | undefined;
+    onReorder?: ((items: string[]) => void) | undefined;
+    onClose?: ((value: string) => void) | undefined;
+    children?: Snippet<[string]>;
+    actions?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-    reorder: { items: string[] };
-    close: { value: string };
-  }>();
+  let {
+    value = $bindable<string | null>(null),
+    defaultValue = null,
+    items = [],
+    variant = "text",
+    orientation = "horizontal",
+    activationMode = "automatic",
+    bordered = true,
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    reorderable = false,
+    ariaLabel = null,
+    showTooltips = false,
+    historyKey = null,
+    onValueChange = undefined,
+    onReorder = undefined,
+    onClose = undefined,
+    children,
+    actions,
+  }: Props = $props();
 
   const tabsId = ++nextTabsId;
-  let tabElements: Array<HTMLButtonElement | null> = [];
-  let uncontrolledValue = defaultValue;
-  let focusIndex = 0;
-  let renderedItems: TabItem[] = items;
-  let prevItems = items;
-  let lastSyncedValue: string | null = null;
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
+  let tabElements = $state<Array<HTMLButtonElement | null>>([]);
+  let uncontrolledValue = $state<string | null>(null);
+  let focusIndex = $state(0);
+  let renderedItems = $state<TabItem[]>([]);
+  let prevItems = $state<TabItem[] | null>(null);
+  let lastSyncedValue = $state<string | null>(null);
+  let tooltipIndex = $state<number | null>(null);
+  let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
+  let dragSourceIndex = $state<number | null>(null);
+  let dropTargetIndex = $state<number | null>(null);
 
-  $: if (items !== prevItems) {
+  $effect.pre(() => {
+    if (prevItems === items) {
+      return;
+    }
+
     prevItems = items;
     renderedItems = items;
-  }
-  $: isControlled = value !== null;
-  $: currentValue =
+  });
+
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  const isControlled = $derived(value !== null);
+  const currentValue = $derived(
     (isControlled ? value : uncontrolledValue) ??
-    renderedItems[firstEnabledIndex(renderedItems)]?.value ??
-    null;
-  $: selectedIndex = renderedItems.findIndex((item) => item.value === currentValue);
-  $: if (selectedIndex >= 0) {
-    focusIndex = selectedIndex;
-  }
-  $: hasPanel = $$slots.default;
-  $: isVertical = orientation === "vertical";
-  $: hasTooltips = isVertical || showTooltips;
-  $: resolvedVariant = variant === "underline" ? "text" : variant;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
+      renderedItems[firstEnabledIndex(renderedItems)]?.value ??
+      null,
+  );
+  const selectedIndex = $derived(renderedItems.findIndex((item) => item.value === currentValue));
+  const hasPanel = $derived(children !== undefined);
+  const isVertical = $derived(orientation === "vertical");
+  const hasTooltips = $derived(isVertical || showTooltips);
+  const resolvedVariant = $derived(variant === "underline" ? "text" : variant);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedIconSize = $derived(resolveSupportingVisualSize(resolvedSize));
+
+  $effect(() => {
+    if (selectedIndex >= 0) {
+      focusIndex = selectedIndex;
+    }
+  });
 
   // ── Tooltip (vertical icon-only mode) ──
-
-  let tooltipIndex: number | null = null;
-  let tooltipTimer: ReturnType<typeof setTimeout> | null = null;
 
   function scheduleTooltip(index: number): void {
     clearTooltip();
@@ -110,9 +148,11 @@
   function setValue(nextValue: string): void {
     if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 
   function replaceUrlTabParam(nextValue: string): void {
@@ -146,10 +186,12 @@
     return () => window.removeEventListener("popstate", handlePopState);
   });
 
-  $: if (isBrowser && historyKey && currentValue && currentValue !== lastSyncedValue) {
-    replaceUrlTabParam(currentValue);
-    lastSyncedValue = currentValue;
-  }
+  $effect(() => {
+    if (isBrowser && historyKey && currentValue && currentValue !== lastSyncedValue) {
+      replaceUrlTabParam(currentValue);
+      lastSyncedValue = currentValue;
+    }
+  });
 
   function moveFocus(nextIndex: number): void {
     focusIndex = nextIndex;
@@ -166,15 +208,12 @@
 
   // ── Reorder (keyboard + drag-and-drop) ──
 
-  let dragSourceIndex: number | null = null;
-  let dropTargetIndex: number | null = null;
-
   function applyReorder(fromIndex: number, toIndex: number): void {
     const result = applyReorderItems(renderedItems, fromIndex, toIndex);
     renderedItems = result.items;
     focusIndex = result.focusIndex;
     tick().then(() => tabElements[result.focusIndex]?.focus());
-    dispatch("reorder", { items: result.items.map((item) => item.value) });
+    onReorder?.(result.items.map((item) => item.value));
   }
 
   function requestReorder(index: number, direction: -1 | 1): void {
@@ -274,7 +313,7 @@
 
     if (event.key === "Delete" && renderedItems[index]?.closable) {
       event.preventDefault();
-      dispatch("close", { value: renderedItems[index].value });
+      onClose?.(renderedItems[index].value);
     }
   }
 </script>
@@ -301,13 +340,13 @@
         data-drag-source={dragSourceIndex === index || undefined}
         data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
         draggable={reorderable && !item.disabled}
-        on:dragstart={(e) => handleDragStart(e, index)}
-        on:dragover={(e) => handleDragOver(e, index)}
-        on:dragleave={handleDragLeave}
-        on:drop={(e) => handleDrop(e, index)}
-        on:dragend={handleDragEnd}
-        on:mouseenter={() => hasTooltips && scheduleTooltip(index)}
-        on:mouseleave={() => hasTooltips && dismissTooltip()}
+        ondragstart={(e) => handleDragStart(e, index)}
+        ondragover={(e) => handleDragOver(e, index)}
+        ondragleave={handleDragLeave}
+        ondrop={(e) => handleDrop(e, index)}
+        ondragend={handleDragEnd}
+        onmouseenter={() => hasTooltips && scheduleTooltip(index)}
+        onmouseleave={() => hasTooltips && dismissTooltip()}
       >
         <button
           bind:this={tabElements[index]}
@@ -319,9 +358,9 @@
           tabindex={focusIndex === index ? 0 : -1}
           aria-selected={currentValue === item.value ? "true" : "false"}
           aria-controls={hasPanel ? `poodle-tabpanel-${tabsId}-${item.value}` : undefined}
-          on:focus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
-          on:blur={() => hasTooltips && dismissTooltip()}
-          on:pointerdown={(event) => {
+          onfocus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
+          onblur={() => hasTooltips && dismissTooltip()}
+          onpointerdown={(event) => {
             if (
               reorderable &&
               event.button === 0 &&
@@ -331,8 +370,8 @@
               setValue(item.value);
             }
           }}
-          on:click={() => setValue(item.value)}
-          on:keydown={(event) => {
+          onclick={() => setValue(item.value)}
+          onkeydown={(event) => {
             if (event.key === "Escape" && hasTooltips) dismissTooltip();
             handleKeydown(event, index);
           }}
@@ -353,7 +392,10 @@
             type="button"
             class="poodle-tabs__close"
             aria-label={`Close ${item.label}`}
-            on:click|stopPropagation={() => dispatch("close", { value: item.value })}
+            onclick={(event) => {
+              event.stopPropagation();
+              onClose?.(item.value);
+            }}
           >
             <Icon name="x" size={resolvedIconSize} />
           </button>
@@ -371,9 +413,9 @@
       {/if}
     {/each}
 
-    {#if $$slots.actions}
+    {#if actions}
       <div class="poodle-tabs__actions">
-        <slot name="actions" />
+        {@render actions()}
       </div>
     {/if}
   </div>
@@ -386,7 +428,7 @@
       tabindex="0"
       aria-labelledby={`poodle-tab-${tabsId}-${currentValue}`}
     >
-      <slot activeValue={currentValue} />
+      {@render children?.(currentValue)}
     </div>
   {/if}
 </div>

@@ -25,11 +25,13 @@
       {label}
       {#if description}
         <Popover placement="top" offset={6} ariaLabel="More information">
-          <span slot="trigger" class="poodle-detail-item__info-trigger">
-            <span class="poodle-detail-item__info-icon" aria-label="More information">
-              <Icon name="info" />
+          {#snippet trigger()}
+            <span class="poodle-detail-item__info-trigger">
+              <span class="poodle-detail-item__info-icon" aria-label="More information">
+                <Icon name="info" />
+              </span>
             </span>
-          </span>
+          {/snippet}
           <p class="poodle-detail-item__info-content">{description}</p>
         </Popover>
       {/if}

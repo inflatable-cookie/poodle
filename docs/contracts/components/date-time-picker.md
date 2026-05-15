@@ -70,9 +70,9 @@ DateTimeValue: { date: string | null; time: string | null }
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` plus `valueChange` event
+- controlled value: `value` plus `onValueChange` callback
 - uncontrolled value: `defaultValue`
-- controlled open: `open` plus `openChange` event
+- controlled open: `open` plus `onOpenChange` callback
 - uncontrolled open: `defaultOpen`
 
 ## 4. States
@@ -91,15 +91,15 @@ DateTimeValue: { date: string | null; time: string | null }
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| value committed | user selects date and enters time | `valueChange` fires with current value |
+| value committed | user selects date and enters time | `onValueChange` runs with current value |
 | dismissed | Escape or click outside | overlay closes without changing value |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user changes date or time selection | `{ value: DateTimeValue }` | fires on each date or time change |
-| `openChange` | overlay opens or closes | `{ open: boolean }` | fires on open and close transitions |
+| `onValueChange` | user changes date or time selection | `DateTimeValue` | runs on each date or time change |
+| `onOpenChange` | overlay opens or closes | `boolean` | runs on open and close transitions |
 
 ## 6. Accessibility
 
@@ -293,8 +293,8 @@ DateTimeValue: { date: string | null; time: string | null }
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match (fires on date or time change)
-- [ ] openChange fires on open and close transitions
+- [ ] value and onValueChange semantics match (runs on date or time change)
+- [ ] onOpenChange runs on open and close transitions
 - [ ] Escape closes overlay without changing value
 - [ ] outside click closes overlay
 - [ ] disabled state prevents interaction

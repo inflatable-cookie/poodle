@@ -9,8 +9,8 @@ Updated: 2026-03-30
 - Layer: `composites`
 - Summary: a convenience composite that pairs a trigger button with an
   AlertDialog for confirming destructive or significant actions — handles
-  open/close state internally, supports custom trigger slot and body content
-- In scope: default trigger button, custom trigger slot, configurable tone
+  open/close state internally, supports custom trigger snippet and body content
+- In scope: default trigger button, custom trigger snippet, configurable tone
   (danger/warning), confirm/cancel labels, AlertDialog composition, body
   content slot, internal open state management, size and density support
 - Out of scope: multi-step confirmation, undo workflows, inline confirmation
@@ -21,12 +21,12 @@ Updated: 2026-03-30
 
 ```text
 [TriggerZone]
-  ├── [TriggerSlot .confirm-action__trigger]  <span role="presentation"> (when trigger slot provided)
-  │     └── (slot: trigger)
+  ├── [TriggerSlot .confirm-action__trigger]  <span role="presentation"> (when trigger snippet provided)
+  │     └── (snippet: trigger)
   └── [DefaultTrigger]  Button (variant="secondary", tone derived) (when no trigger slot)
 
 [AlertDialog]  AlertDialog primitive
-  └── [BodySlot]  (optional, via default slot)
+  └── [BodySlot]  (optional, via children snippet)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -49,8 +49,8 @@ Updated: 2026-03-30
 | `triggerLabel` | `string` | `"Delete"` | no | label for the default trigger Button (ignored when trigger slot is used) |
 | `confirmLabel` | `string` | `"Confirm"` | no | label for the AlertDialog confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | label for the AlertDialog cancel button |
-| `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked when the confirm action is accepted; falls back to the `confirm` event when absent |
-| `onCancel` | `(() => void) \| null` | `null` | no | callback invoked when the dialog is canceled or dismissed; falls back to the `cancel` event when absent |
+| `onConfirm` | `(() => void \| Promise<void>) \| null` | `null` | no | callback invoked when the confirm action is accepted |
+| `onCancel` | `(() => void) \| null` | `null` | no | callback invoked when the dialog is canceled or dismissed |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -61,12 +61,12 @@ Updated: 2026-03-30
 type AlertDialogTone = "danger" | "warning";
 ```
 
-### Slots
+### Snippets
 
-| Slot | Description |
+| Snippet | Description |
 |------|-------------|
 | `trigger` | custom trigger element; replaces the default Button |
-| default | body content rendered inside the AlertDialog, between description and action buttons |
+| `children` | body content rendered inside the AlertDialog, between description and action buttons |
 
 ### Controlled And Uncontrolled
 
@@ -90,12 +90,12 @@ type AlertDialogTone = "danger" | "warning";
 - Derived: `triggerTone` — maps `tone === "danger"` to `"danger"` Button tone,
   all others to `"default"`
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `confirm` | user clicks the confirm button in the AlertDialog | `void` | dialog closes after firing |
-| `cancel` | user clicks cancel, presses Escape, or clicks backdrop | `void` | dialog closes after firing |
+| Prop | When It Fires | Payload | Notes |
+|------|---------------|---------|-------|
+| `onConfirm` | user clicks the confirm button in the AlertDialog | `void` | dialog closes after completion |
+| `onCancel` | user clicks cancel, presses Escape, or clicks backdrop | `void` | dialog closes after firing |
 
 ## 6. Accessibility
 
@@ -181,7 +181,6 @@ None.
 
 ## 9. Svelte Notes
 
-- uses `createEventDispatcher` for `confirm` and `cancel` events
 - composes `AlertDialog` and `Button` from `@poodle/svelte`
 - `open` is passed to AlertDialog as `open || null` (falsy to null for
   uncontrolled initial state)
@@ -207,7 +206,7 @@ None.
 ### Tier 1: Strict Parity
 
 - [ ] all props have the same meaning and defaults
-- [ ] event names and payloads match
+- [ ] callback names and payloads match
 - [ ] trigger tone derivation logic matches (danger->danger, warning->default)
 - [ ] custom trigger slot behavior matches (click and keyboard activation)
 - [ ] open state passed as `open || null` to AlertDialog
@@ -242,7 +241,7 @@ None.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Custom trigger slot | `title="Remove all filters?"`, `description="This will clear all active filters..."`, `tone="warning"`, `confirmLabel="Clear all"`, trigger slot contains ghost Button "Clear filters" | ghost button as trigger; clicking opens warning AlertDialog |
+| Custom trigger | `title="Remove all filters?"`, `description="This will clear all active filters..."`, `tone="warning"`, `confirmLabel="Clear all"`, trigger snippet contains ghost Button "Clear filters" | ghost button as trigger; clicking opens warning AlertDialog |
 
 ### With Body Content
 

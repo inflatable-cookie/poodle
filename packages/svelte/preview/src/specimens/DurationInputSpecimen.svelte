@@ -15,7 +15,7 @@
       bind:hours
       bind:minutes
       bind:seconds
-      on:change={(e) => (lastChange = `${e.detail.totalSeconds}s total`)}
+      onChange={(detail) => (lastChange = `${detail.totalSeconds}s total`)}
     />
     <p>Total: {hours}h {minutes}m {seconds}s</p>
   </SpecimenGroup>

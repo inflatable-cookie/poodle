@@ -63,10 +63,10 @@ CalendarWeekStart: "sunday" | "monday"
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` (non-null) plus `valueChange` event
+- controlled value: `value` (non-null) plus `onValueChange` callback
 - uncontrolled value: `defaultValue` sets the initial selection; component owns
   its own state
-- controlled open: `open` (non-null) plus `openChange` event
+- controlled open: `open` (non-null) plus `onOpenChange` callback
 - uncontrolled open: `defaultOpen` sets the initial open state; component owns
   its own state
 
@@ -99,14 +99,14 @@ CalendarWeekStart: "sunday" | "monday"
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | closed | initial, Escape, outside click, date selected | surface hidden, trigger shows value or placeholder |
-| open | trigger click, Enter, Space | surface visible with Calendar, `openChange` fires |
+| open | trigger click, Enter, Space | surface visible with Calendar, `onOpenChange` runs |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user selects a date in the Calendar | `{ value: string }` | ISO date string; also closes the picker |
-| `openChange` | open state changes | `{ open: boolean }` | fires on open and close |
+| `onValueChange` | user selects a date in the Calendar | `string` | ISO date string; also closes the picker |
+| `onOpenChange` | open state changes | `boolean` | runs on open and close |
 
 ## 6. Accessibility
 
@@ -280,8 +280,8 @@ CalendarWeekStart: "sunday" | "monday"
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match (controlled and uncontrolled)
-- [ ] open and openChange semantics match (controlled and uncontrolled)
+- [ ] value and onValueChange semantics match (controlled and uncontrolled)
+- [ ] open and onOpenChange semantics match (controlled and uncontrolled)
 - [ ] trigger-to-popup relationship matches (haspopup, expanded, controls)
 - [ ] surface role="dialog" matches
 - [ ] Escape closes and returns focus to trigger

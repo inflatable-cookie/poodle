@@ -19,7 +19,7 @@ Updated: 2026-03-15
 
 ```text
 [Root .menu]  <div>
-  ├── [Trigger .menu__trigger]  <div role="button"> (wraps trigger slot)
+  ├── [Trigger .menu__trigger]  <div role="button"> (wraps trigger snippet)
   └── [Overlay .menu__overlay]  <div role="menu">
         └── [Item .menu__item | Separator .menu__separator]...
               └── [Meta .menu__meta] (optional shortcut label)
@@ -36,11 +36,11 @@ Updated: 2026-03-15
 
 ## 3. Props And Inputs
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| `trigger` | named slot for custom trigger content; wrapped in `<div class="menu__trigger">` with `role="button"` |
+| `trigger` | named snippet for custom trigger content; wrapped in `<div class="menu__trigger">` with `role="button"` |
 
 ### Public Props
 
@@ -55,6 +55,8 @@ Updated: 2026-03-15
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | menu label when item set needs one |
 | `triggerAriaLabel` | `string \| null` | `null` | no | accessible label for the trigger wrapper, useful for icon-only triggers |
+| `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the menu opens or closes |
+| `onAction` | `(value: string) => void` | `undefined` | no | called when an actionable item commits |
 
 ### Type Definitions
 
@@ -74,7 +76,7 @@ OverlayPlacement: "bottom-start" | "bottom-end" | "top-start" | "top-end"
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` (boolean) plus `openChange` event
+- controlled: `open` (boolean) plus `onOpenChange(open)`
 - uncontrolled: `open` is null, uses `defaultOpen` as initial state
 - selection/check state lives in `items` and remains externally owned
 
@@ -94,12 +96,12 @@ OverlayPlacement: "bottom-start" | "bottom-end" | "top-start" | "top-end"
 
 Open/closed state and current highlighted item index are required.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Prop | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | menu opens or closes | `{ open: boolean }` | trigger and dismissal driven |
-| `action` | actionable item commits | `{ value: string }` | disabled and separator rows never fire |
+| `onOpenChange` | menu opens or closes | `boolean` | trigger and dismissal driven |
+| `onAction` | actionable item commits | `string` | disabled and separator rows never fire |
 
 ## 6. Accessibility
 

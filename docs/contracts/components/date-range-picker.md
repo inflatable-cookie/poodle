@@ -62,9 +62,9 @@ DateRangeValue: { start: string | null; end: string | null }
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` plus `valueChange` event
+- controlled value: `value` plus `onValueChange` callback
 - uncontrolled value: `defaultValue`
-- controlled open: `open` plus `openChange` event
+- controlled open: `open` plus `onOpenChange` callback
 - uncontrolled open: `defaultOpen`
 
 ## 4. States
@@ -83,16 +83,16 @@ DateRangeValue: { start: string | null; end: string | null }
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| value committed | user selects both start and end | `valueChange` fires with complete range |
-| auto-close | both start and end selected | overlay closes, `openChange` fires with `{ open: false }` |
+| value committed | user selects both start and end | `onValueChange` runs with complete range |
+| auto-close | both start and end selected | overlay closes, `onOpenChange` runs with `false` |
 | dismissed | Escape or click outside | overlay closes without changing value |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user completes a range selection | `{ value: DateRangeValue }` | fires when both start and end are selected |
-| `openChange` | overlay opens or closes | `{ open: boolean }` | fires on open and close transitions |
+| `onValueChange` | user completes a range selection | `DateRangeValue` | runs when both start and end are selected |
+| `onOpenChange` | overlay opens or closes | `boolean` | runs on open and close transitions |
 
 ## 6. Accessibility
 
@@ -258,8 +258,8 @@ DateRangeValue: { start: string | null; end: string | null }
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match (fires on complete range only)
-- [ ] openChange fires on open and close transitions
+- [ ] value and onValueChange semantics match (fires on complete range only)
+- [ ] onOpenChange runs on open and close transitions
 - [ ] auto-close when both start and end are selected matches
 - [ ] Escape closes overlay without changing value
 - [ ] outside click closes overlay

@@ -290,10 +290,10 @@ All components follow consistent naming conventions:
 **Value props** follow the controlled/uncontrolled pattern:
 ```svelte
 <!-- Controlled: parent owns state -->
-<TextInput id="name" value={name} on:valueChange={(e) => name = e.detail.value} />
+<TextInput id="name" value={name} onValueChange={(value) => name = value} />
 
 <!-- Uncontrolled: component owns state -->
-<TextInput id="name" defaultValue="Alice" on:valueChange={(e) => console.log(e.detail.value)} />
+<TextInput id="name" defaultValue="Alice" onValueChange={(value) => console.log(value)} />
 ```
 
 The pattern works identically across all value-bearing components:
@@ -320,32 +320,22 @@ Every interactive component requires an `id` prop for form label association or 
 
 ### Event patterns
 
-Compatibility note:
-
-- much of the current public component surface still dispatches typed events via
-  `createEventDispatcher`
-- that is the existing compatibility contract, not the preferred direction for
-  new component APIs
-- for new or substantially reshaped components, prefer callback props first and
-  keep event dispatch only where it is needed for compatibility with existing
-  consumers
-
-Components dispatch typed events via Svelte's `createEventDispatcher`:
+Modern Poodle Svelte components prefer callback props over dispatcher events:
 
 ```svelte
 <TextInput
   id="email"
-  on:valueChange={(e) => email = e.detail.value}
-  on:submit={(e) => handleSubmit(e.detail.value)}
-  on:cancel={() => resetForm()}
-  on:focus={(e) => handleFocus(e.detail)}
-  on:blur={(e) => handleBlur(e.detail)}
+  onValueChange={(value) => email = value}
+  onSubmit={(value) => handleSubmit(value)}
+  onCancel={() => resetForm()}
+  onFocus={handleFocus}
+  onBlur={handleBlur}
 />
 
 <Select
   id="role"
   options={roleOptions}
-  on:valueChange={(e) => role = e.detail.value}
+  onValueChange={(value) => role = value}
 />
 
 <Checkbox
@@ -363,14 +353,14 @@ Components dispatch typed events via Svelte's `createEventDispatcher`:
 ```
 
 **Naming conventions:**
-- `valueChange` — value-bearing controls (TextInput, Select, RadioGroup)
+- `onValueChange` — value-bearing controls (TextInput, Select, RadioGroup)
 - `checkedChange` — boolean toggles (Checkbox, Switch)
 - `pressedChange` — toggle buttons (Button with pressed prop)
-- `openChange` — overlays (Dialog, Drawer, Popover)
+- `onOpenChange` — modern callback form for overlays and disclosures
 - `requestClose` — modal dismiss requests
-- `submit` — TextInput on Enter
-- `cancel` — TextInput on Escape
-- `click`, `focus`, `blur` — standard DOM events
+- `onSubmit` — TextInput on Enter
+- `onCancel` — TextInput on Escape
+- `onFocus`, `onBlur`, `onKeyDown` — standard DOM event passthrough callbacks
 
 ### Slot patterns
 
@@ -531,7 +521,7 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
   <TextInput
     id="name"
     value={name}
-    on:valueChange={(e) => name = e.detail.value}
+    onValueChange={(value) => name = value}
     placeholder="Enter your name"
   />
 </Field>
@@ -551,7 +541,7 @@ The `Field` component handles labels, descriptions, hints, validation messages, 
       { value: "viewer", label: "Viewer" },
     ]}
     value={role}
-    on:valueChange={(e) => role = e.detail.value}
+    onValueChange={(value) => role = value}
   />
 </Field>
 ```
@@ -782,7 +772,9 @@ Positioned floating content anchored to a trigger:
 
 ```svelte
 <Popover placement="bottom-start">
-  <Button slot="trigger">Options</Button>
+  {#snippet trigger()}
+    <Button>Options</Button>
+  {/snippet}
   <div>Popover content here</div>
 </Popover>
 ```
@@ -863,7 +855,7 @@ Full-featured data table with sorting, column visibility, bulk actions, and expo
   items={tabs}
   value={activeTab}
   variant="underline"
-  on:valueChange={(e) => activeTab = e.detail.value}
+  onValueChange={(value) => activeTab = value}
 />
 ```
 
@@ -920,8 +912,10 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
   ];
 </script>
 
-<Menu {items} on:select={(e) => handleAction(e.detail.value)}>
-  <Button slot="trigger" variant="ghost">Actions</Button>
+<Menu {items} onAction={handleAction}>
+  {#snippet trigger()}
+    <Button variant="ghost">Actions</Button>
+  {/snippet}
 </Menu>
 ```
 
@@ -1015,7 +1009,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
     { value: "enterprise", label: "Enterprise", isDisabled: true },
   ]}
   value={plan}
-  on:valueChange={(e) => plan = e.detail.value}
+  onValueChange={(value) => plan = value}
 />
 ```
 
@@ -1029,7 +1023,7 @@ Tab variants: `"underline"` | `"card"` | `"pill"` | `"strip"`
     { value: "list", label: "List" },
   ]}
   value={view}
-  on:valueChange={(e) => view = e.detail.value}
+  onValueChange={(value) => view = value}
 />
 ```
 
@@ -1253,7 +1247,7 @@ interface MenuItem {
       id="name"
       value={name}
       validationState={nameError ? "invalid" : "none"}
-      on:valueChange={(e) => name = e.detail.value}
+      onValueChange={(value) => name = value}
     />
   </Field>
 
@@ -1269,7 +1263,7 @@ interface MenuItem {
       type="email"
       value={email}
       validationState={emailError ? "invalid" : "none"}
-      on:valueChange={(e) => email = e.detail.value}
+      onValueChange={(value) => email = value}
     />
   </Field>
 

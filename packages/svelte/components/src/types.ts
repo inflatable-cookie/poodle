@@ -7,6 +7,11 @@ export type IconProp = IconNodes | string;
 
 export type ValidationState = "none" | "invalid" | "valid" | "pending";
 export type InputValidationStatus = "idle" | "validating" | "valid" | "invalid";
+export type TextInputValidationChange = {
+  status: InputValidationStatus;
+  valid: boolean;
+  message: string;
+};
 
 export type ValidationResult = {
   valid: boolean;
@@ -152,6 +157,23 @@ export interface SelectOptionGroup {
 }
 
 export type SelectItems = SelectOption[] | SelectOptionGroup[];
+
+export interface SelectTriggerRenderState {
+  selectedOption: SelectOption | null;
+  open: boolean;
+  placeholder: string | null;
+}
+
+export interface SelectOptionRenderState {
+  option: SelectOption;
+  highlighted: boolean;
+  selected: boolean;
+  index: number;
+}
+
+export interface SelectEmptyRenderState {
+  query: string;
+}
 
 /** Async option loader for Select. Returns flat or grouped options. */
 export type SelectLoadOptions = () => Promise<SelectItems>;

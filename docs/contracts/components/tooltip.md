@@ -41,6 +41,7 @@ Updated: 2026-03-15
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial state |
 | `delayMs` | `number` | `300` | no | open delay in milliseconds |
 | `placement` | `OverlayPlacement` | `"top"` | no | placement hint |
+| `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the tooltip opens or closes |
 
 ### Type Definitions
 
@@ -52,15 +53,15 @@ OverlayPlacement:
   "right" | "right-start" | "right-end"
 ```
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| default | trigger element |
+| `children` | trigger element |
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` plus `openChange` event
+- controlled: `open` plus `onOpenChange(open)`
 - uncontrolled: `defaultOpen`
 - the trigger or subject owns the tooltip relationship and focus context
 
@@ -78,11 +79,11 @@ OverlayPlacement:
 
 Closed, pending-open, and open states are required.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Prop | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | tooltip opens or closes | `{ open: boolean }` | hover, focus, escape, or leave driven |
+| `onOpenChange` | tooltip opens or closes | `boolean` | hover, focus, escape, or leave driven |
 
 ## 6. Accessibility
 

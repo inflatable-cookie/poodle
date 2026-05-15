@@ -31,7 +31,7 @@ Updated: 2026-04-11
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| null` | `null` | no | HTML id for label association |
-| `value` | `string \| null` | `null` | no | controlled value in HH:MM or HH:MM:SS format |
+| `value` | `string \| null \| undefined` | `undefined` | no | controlled value in HH:MM or HH:MM:SS format; leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `min` | `string \| null` | `null` | no | earliest allowed time |
 | `max` | `string \| null` | `null` | no | latest allowed time |
@@ -45,7 +45,7 @@ Updated: 2026-04-11
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (non-null) plus `valueChange` event
+- controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue` sets the initial value; component owns its own state
 - do not mix controlled and uncontrolled modes simultaneously
 
@@ -64,14 +64,14 @@ Updated: 2026-04-11
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| empty -> populated | user enters time or value prop set | valueChange fires |
-| populated -> empty | value cleared | valueChange fires with null |
+| empty -> populated | user enters time or value prop set | onValueChange fires |
+| populated -> empty | value cleared | onValueChange fires with null |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user changes the time value | `{ value: string \| null }` | fires on native change/input event |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user changes the time value | `string \| null` | fires on native input event |
 
 ## 6. Accessibility
 
@@ -180,7 +180,7 @@ Updated: 2026-04-11
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match
+- [ ] value and onValueChange semantics match
 - [ ] min, max, step constraints match
 - [ ] disabled state matches
 - [ ] accessible name from label or ariaLabel matches

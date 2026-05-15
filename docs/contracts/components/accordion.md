@@ -29,7 +29,7 @@ Updated: 2026-03-30
   │   │       └── [Indicator .accordion__indicator]  <span aria-hidden>
   │   │           └── [Icon name="chevron-down" size="sm"]
   │   └── [Panel .accordion__panel]  <div role="region" aria-labelledby> (conditional)
-  │       └── [Slot: default { item, isOpen }]
+  │       └── [Snippet: children(item, isOpen)]
   └── [...]
 ```
 
@@ -70,15 +70,15 @@ Updated: 2026-03-30
 | `description` | `string` | no | supporting description text |
 | `disabled` | `boolean` | no | suppresses interaction for this item |
 
-### Slots
+### Snippets
 
-| Slot | Purpose | Slot Props |
-|------|---------|------------|
-| default | panel content for each item | `{ item: AccordionItem, isOpen: boolean }` |
+| Snippet | Purpose | Arguments |
+|---------|---------|-----------|
+| `children` | panel content for each item | `(item: AccordionItem, isOpen: boolean)` |
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (non-null) plus `valueChange` event
+- controlled: `value` (non-null) plus `onValueChange` callback
 - uncontrolled: `defaultValue` with internal state; defaults to `null` (single)
   or `[]` (multiple) when `defaultValue` is `null`
 
@@ -98,11 +98,11 @@ Updated: 2026-03-30
 - `data-open`: `"true"` or `"false"` on each `.accordion__item`
 - Items rendered via `{#each items as item (item.value)}` with keyed identity
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user expands or collapses an item | `{ value: string \| string[] \| null }` | fires on every toggle; suppressed for disabled items |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user expands or collapses an item | `string \| string[] \| null` | called on every toggle; suppressed for disabled items |
 
 ## 6. Accessibility
 
@@ -307,7 +307,7 @@ Updated: 2026-03-30
 - [ ] disabled item behavior matches (cursor, opacity, non-interactive)
 - [ ] single vs multiple expansion posture matches
 - [ ] collapsible behavior matches in single mode
-- [ ] valueChange event payload matches
+- [ ] `onValueChange` callback payload matches
 - [ ] controlled and uncontrolled modes match
 
 ### Tier 2: Visual Parity

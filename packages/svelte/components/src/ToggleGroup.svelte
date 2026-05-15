@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -9,27 +8,45 @@
     ToggleGroupOption,
   } from "./types";
 
-  export let value: string | string[] | null = null;
-  export let defaultValue: string | string[] | null = null;
-  export let options: ToggleGroupOption[] = [];
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let selectionMode: "single" | "multiple" = "single";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
+  interface Props {
+    value?: string | string[] | null | undefined;
+    defaultValue?: string | string[] | null;
+    options?: ToggleGroupOption[];
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    selectionMode?: "single" | "multiple";
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    onValueChange?: ((value: string | string[]) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string | string[] };
-  }>();
+  let {
+    value = $bindable<string | string[] | null | undefined>(undefined),
+    defaultValue = null,
+    options = [],
+    size = null,
+    sizeRole = "control",
+    density = null,
+    selectionMode = "single",
+    disabled = false,
+    ariaLabel = null,
+    onValueChange = undefined,
+  }: Props = $props();
 
-  let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+  let uncontrolledValue = $state<string | string[] | null>(null);
   const uiPresentation = getUiPresentation();
 
-  $: controlled = value !== null;
-  $: currentValue = controlled ? value : uncontrolledValue;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+    }
+  });
+
+  const controlled = $derived(value !== undefined);
+  const currentValue = $derived(controlled ? value : uncontrolledValue);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   function isSelected(optionValue: string): boolean {
     if (selectionMode === "multiple") {
@@ -53,9 +70,11 @@
 
     if (!controlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 </script>
 
@@ -77,7 +96,7 @@
       aria-label={option.ariaLabel ?? undefined}
       aria-pressed={selectionMode === "multiple" ? (isSelected(option.value) ? "true" : "false") : undefined}
       aria-checked={selectionMode === "single" ? (isSelected(option.value) ? "true" : "false") : undefined}
-      on:click={() => toggle(option.value)}
+      onclick={() => toggle(option.value)}
     >
       {option.label}
     </button>

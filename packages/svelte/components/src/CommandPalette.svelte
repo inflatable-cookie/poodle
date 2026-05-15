@@ -205,10 +205,10 @@
           ariaLabel="Search commands"
           describedBy={statusId}
           placeholder="Search commands, panels, and actions"
-          on:valueChange={(event) => dispatch("queryChange", event.detail)}
-          on:clear={() => dispatch("queryChange", { value: "" })}
-          on:cancel={close}
-          on:submit={() => {
+          onValueChange={(nextValue) => dispatch("queryChange", { value: nextValue })}
+          onClear={() => dispatch("queryChange", { value: "" })}
+          onCancel={close}
+          onSubmit={() => {
             if (activeId) {
               dispatch("commandSelect", { id: activeId });
             }

@@ -34,7 +34,7 @@ Updated: 2026-03-30
 | Prop | Type | Default |
 |------|------|---------|
 | `id` | `string \| null` | `null` |
-| `value` | `string \| null` | `null` |
+| `value` | `string \| null \| undefined` | `undefined` |
 | `defaultValue` | `string` | `""` |
 | `name` | `string` | `"code"` |
 | `label` | `string` | `"Verification code"` |
@@ -50,16 +50,18 @@ Updated: 2026-03-30
 | `density` | `ControlDensity \| null` | `null` |
 | `validationState` | `ValidationState` | `"none"` |
 
-## 4. Events
+## 4. Callbacks
 
-| Event | Payload | When |
+| Callback | Payload | When |
 |------|---------|------|
-| `valueChange` | `{ value: string }` | whenever the sanitized code changes |
-| `complete` | `{ value: string }` | when the code reaches `length` digits |
+| `onValueChange` | `string` | whenever the sanitized code changes |
+| `onComplete` | `string` | when the code reaches `length` digits |
 
 ## 5. Behavior
 
 - The input sanitizes to digits only and clamps to `length`
+- Leave `value` undefined to use uncontrolled mode seeded by `defaultValue`
+- Pass `value=""` to use a controlled empty state
 - A single real input owns:
   - browser autofill
   - one-time-code autocomplete
@@ -164,7 +166,7 @@ Updated: 2026-03-30
 - [ ] fixed-length semantics match (length prop controls slot count)
 - [ ] auto-advance behavior matches (digit entry moves to next slot)
 - [ ] backspace-retreat behavior matches (empty slot backspace goes to previous)
-- [ ] complete event fires when all slots filled
+- [ ] onComplete fires when all slots filled
 - [ ] mask prop toggles obscured input
 - [ ] group role with aria-label matches
 

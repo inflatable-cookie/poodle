@@ -78,7 +78,7 @@
       <Tabs
         items={tabItems}
         value={activeTab}
-        on:valueChange={(e) => (activeTab = e.detail.value)}
+        onValueChange={(value) => (activeTab = value)}
       />
 
       {#if activeTab === "browse"}

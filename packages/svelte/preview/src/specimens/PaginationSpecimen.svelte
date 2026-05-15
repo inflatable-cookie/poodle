@@ -19,7 +19,7 @@
       currentPage={page1}
       totalPages={10}
       ariaLabel="Results pagination"
-      on:pageChange={(e) => (page1 = e.detail.page)}
+      onPageChange={(page) => (page1 = page)}
     />
     <p>Page <strong>{page1}</strong> of 10</p>
   </SpecimenGroup>
@@ -30,7 +30,7 @@
       totalPages={20}
       siblingCount={2}
       ariaLabel="Extended pagination"
-      on:pageChange={(e) => (page2 = e.detail.page)}
+      onPageChange={(page) => (page2 = page)}
     />
     <p>Page <strong>{page2}</strong> of 20</p>
   </SpecimenGroup>
@@ -48,9 +48,9 @@
       showLimitSelector
       limitOptions={[10, 25, 50, 100]}
       ariaLabel="Simple pagination"
-      on:pageChange={(e) => (page3 = e.detail.page)}
-      on:limitChange={(e) => {
-        limit3 = e.detail.limit;
+      onPageChange={(page) => (page3 = page)}
+      onLimitChange={(limit) => {
+        limit3 = limit;
         page3 = 1;
       }}
     />
@@ -64,7 +64,7 @@
       total={140}
       variant="full"
       ariaLabel="Full pagination"
-      on:pageChange={(e) => (page4 = e.detail.page)}
+      onPageChange={(page) => (page4 = page)}
     />
     <p>Page <strong>{page4}</strong> of 7</p>
   </SpecimenGroup>

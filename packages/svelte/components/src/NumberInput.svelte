@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import Icon from "./Icon.svelte";
   import { formatNumber, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -14,76 +12,122 @@
     ValidationState,
   } from "./types";
 
-  export let id = "";
-  export let value: number | string | null = null;
-  export let defaultValue: number | string | null = null;
-  export let placeholder: string | null = null;
-  export let name: string | undefined = undefined;
-  export let disabled = false;
-  export let readOnly = false;
-  export let required = false;
-  export let min: number | string | null = null;
-  export let max: number | string | null = null;
-  export let step: number | string | null = null;
-  export let precision: number | null = null;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let prefix: string | null = null;
-  export let suffix: string | null = null;
-  export let validate: InputValidator | undefined = undefined;
-  export let validationContext: unknown = undefined;
-  export let validationState: ValidationState = "none";
-  export let showSteppers = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface NumberInputValidationChange {
+    status: InputValidationStatus;
+    valid: boolean;
+    message: string;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: number | string | null };
-    validationChange: { status: InputValidationStatus; valid: boolean; message: string };
-    submit: { value: number | string | null };
-    increment: { value: number | string | null };
-    decrement: { value: number | string | null };
-    focus: FocusEvent;
-    blur: FocusEvent;
-  }>();
+  interface Props {
+    id?: string;
+    value?: number | string | null | undefined;
+    defaultValue?: number | string | null;
+    placeholder?: string | null;
+    name?: string | undefined;
+    disabled?: boolean;
+    readOnly?: boolean;
+    required?: boolean;
+    min?: number | string | null;
+    max?: number | string | null;
+    step?: number | string | null;
+    precision?: number | null;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    prefix?: string | null;
+    suffix?: string | null;
+    validate?: InputValidator | undefined;
+    validationContext?: unknown;
+    validationState?: ValidationState;
+    showSteppers?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: number | string | null) => void) | undefined;
+    onValidationChange?: ((detail: NumberInputValidationChange) => void) | undefined;
+    onSubmit?: ((value: number | string | null) => void) | undefined;
+    onIncrement?: ((value: number | string | null) => void) | undefined;
+    onDecrement?: ((value: number | string | null) => void) | undefined;
+    onFocus?: ((event: FocusEvent) => void) | undefined;
+    onBlur?: ((event: FocusEvent) => void) | undefined;
+  }
 
   const uiPresentation = getUiPresentation();
 
-  let internalValidationStatus: InputValidationStatus = "idle";
-  let validationMessage = "";
-  let activeValidationKey = 0;
-  let uncontrolledValue: number | null = null;
-  let draftValue = "";
-  let isEditing = false;
+  let {
+    id = "",
+    value = $bindable<number | string | null | undefined>(undefined),
+    defaultValue = null,
+    placeholder = null,
+    name = undefined,
+    disabled = false,
+    readOnly = false,
+    required = false,
+    min = null,
+    max = null,
+    step = null,
+    precision = null,
+    ariaLabel = null,
+    describedBy = null,
+    prefix = null,
+    suffix = null,
+    validate = undefined,
+    validationContext = undefined,
+    validationState = "none",
+    showSteppers = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    onValidationChange = undefined,
+    onSubmit = undefined,
+    onIncrement = undefined,
+    onDecrement = undefined,
+    onFocus = undefined,
+    onBlur = undefined,
+  }: Props = $props();
 
-  $: valueMode = inferValueMode(value, defaultValue);
-  $: parsedValue = parseNumberish(value);
-  $: parsedDefaultValue = parseNumberish(defaultValue);
-  $: parsedMin = parseNumberish(min);
-  $: parsedMax = parseNumberish(max);
-  $: resolvedStep = parseStep(step);
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = value !== null;
-  $: currentValue = isControlled ? parsedValue : uncontrolledValue;
-  $: if (!isControlled && uncontrolledValue === null && parsedDefaultValue !== null) {
-    uncontrolledValue = parsedDefaultValue;
-  }
-  $: effectiveValidationState = validate
-    ? internalValidationStatus === "validating"
-      ? "pending"
-      : internalValidationStatus === "valid"
-        ? "valid"
-        : internalValidationStatus === "invalid"
-          ? "invalid"
-          : validationState
-    : validationState;
-  $: ariaInvalid = effectiveValidationState === "invalid" ? true : undefined;
-  $: ariaBusy = effectiveValidationState === "pending" ? true : undefined;
-  $: if (!isEditing) {
-    draftValue = formatNumber(currentValue, precision);
-  }
+  let internalValidationStatus = $state<InputValidationStatus>("idle");
+  let validationMessage = $state("");
+  let activeValidationKey = $state(0);
+  let uncontrolledValue = $state<number | null>(null);
+  let draftValue = $state("");
+  let isEditing = $state(false);
+
+  const valueMode = $derived(inferValueMode(value, defaultValue));
+  const parsedValue = $derived(parseNumberish(value));
+  const parsedDefaultValue = $derived(parseNumberish(defaultValue));
+  const parsedMin = $derived(parseNumberish(min));
+  const parsedMax = $derived(parseNumberish(max));
+  const resolvedStep = $derived(parseStep(step));
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived(isControlled ? parsedValue : uncontrolledValue);
+  const effectiveValidationState = $derived(
+    validate
+      ? internalValidationStatus === "validating"
+        ? "pending"
+        : internalValidationStatus === "valid"
+          ? "valid"
+          : internalValidationStatus === "invalid"
+            ? "invalid"
+            : validationState
+      : validationState
+  );
+  const ariaInvalid = $derived(effectiveValidationState === "invalid" ? true : undefined);
+  const ariaBusy = $derived(effectiveValidationState === "pending" ? true : undefined);
+
+  $effect(() => {
+    if (!isControlled && uncontrolledValue === null && parsedDefaultValue !== null) {
+      uncontrolledValue = parsedDefaultValue;
+    }
+  });
+
+  $effect(() => {
+    if (!isEditing) {
+      draftValue = formatNumber(currentValue, precision);
+    }
+  });
 
   function inferValueMode(
     currentValue: number | string | null,
@@ -120,7 +164,7 @@
   }
 
   function emitValidationChange(): void {
-    dispatch("validationChange", {
+    onValidationChange?.({
       status: internalValidationStatus,
       valid: internalValidationStatus === "valid" || internalValidationStatus === "idle",
       message: validationMessage,
@@ -171,7 +215,7 @@
     }
 
     value = coerceOutgoingValue(nextValue);
-    dispatch("valueChange", { value });
+    onValueChange?.(value);
     void runValidation(value);
   }
 
@@ -201,7 +245,7 @@
       }
     }
 
-    dispatch("blur", event);
+    onBlur?.(event);
   }
 
   function adjust(delta: number, eventName: "increment" | "decrement"): void {
@@ -209,7 +253,13 @@
     const nextValue = clampIfNeeded(snapToStep(baseline + delta, parsedMin ?? 0, resolvedStep));
     commitValue(nextValue);
     draftValue = formatNumber(nextValue, precision);
-    dispatch(eventName, { value: coerceOutgoingValue(nextValue) });
+    const outgoingValue = coerceOutgoingValue(nextValue);
+    if (eventName === "increment") {
+      onIncrement?.(outgoingValue);
+      return;
+    }
+
+    onDecrement?.(outgoingValue);
   }
 </script>
 
@@ -240,15 +290,15 @@
       aria-describedby={describedBy ?? undefined}
       aria-invalid={ariaInvalid}
       aria-busy={ariaBusy}
-      on:input={handleInput}
-      on:focus={(event) => {
+      oninput={handleInput}
+      onfocus={(event) => {
         isEditing = true;
-        dispatch("focus", event);
+        onFocus?.(event);
       }}
-      on:blur={handleBlur}
-      on:keydown={(event) => {
+      onblur={handleBlur}
+      onkeydown={(event) => {
         if (event.key === "Enter") {
-          dispatch("submit", { value: coerceOutgoingValue(currentValue) });
+          onSubmit?.(coerceOutgoingValue(currentValue));
         }
 
         if (event.key === "ArrowUp" && !readOnly) {
@@ -265,10 +315,10 @@
 
     {#if showSteppers}
       <div class="poodle-number-input__steppers">
-        <button type="button" disabled={disabled || readOnly} on:click={() => adjust(resolvedStep, "increment")}>
+        <button type="button" disabled={disabled || readOnly} onclick={() => adjust(resolvedStep, "increment")}>
           <Icon name="plus" />
         </button>
-        <button type="button" disabled={disabled || readOnly} on:click={() => adjust(-resolvedStep, "decrement")}>
+        <button type="button" disabled={disabled || readOnly} onclick={() => adjust(-resolvedStep, "decrement")}>
           <Icon name="minus" />
         </button>
       </div>

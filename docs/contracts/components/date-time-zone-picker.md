@@ -86,9 +86,9 @@ TimeZoneOption: {
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` plus `valueChange` event
+- controlled value: `value` plus `onValueChange` callback
 - uncontrolled value: `defaultValue`
-- controlled open: `open` plus `openChange` event
+- controlled open: `open` plus `onOpenChange` callback
 - uncontrolled open: `defaultOpen`
 
 ## 4. States
@@ -107,15 +107,15 @@ TimeZoneOption: {
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| value committed | user changes any date, time, or timezone field | `valueChange` fires with current value |
+| value committed | user changes any date, time, or timezone field | `onValueChange` runs with current value |
 | dismissed | Escape or click outside | overlay closes without changing value |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user changes date, time, or timezone | `{ value: ZonedDateTimeValue }` | fires on each constituent change |
-| `openChange` | overlay opens or closes | `{ open: boolean }` | fires on open and close transitions |
+| `onValueChange` | user changes date, time, or timezone | `ZonedDateTimeValue` | runs on each constituent change |
+| `onOpenChange` | overlay opens or closes | `boolean` | runs on open and close transitions |
 
 ## 6. Accessibility
 
@@ -324,8 +324,8 @@ TimeZoneOption: {
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match (fires on constituent change)
-- [ ] openChange fires on open and close transitions
+- [ ] value and onValueChange semantics match (runs on constituent change)
+- [ ] onOpenChange runs on open and close transitions
 - [ ] Escape closes overlay without changing value
 - [ ] outside click closes overlay
 - [ ] disabled state prevents interaction

@@ -30,8 +30,8 @@ vocabulary, such as “Save” and “Save and close”, belongs in app code.
     { value: "save-and-close", label: "Save and close" }
   ];
 
-  function handleIntentChange(event: CustomEvent<{ value: string }>) {
-    intent = event.detail.value;
+  function handleIntentChange(value: string) {
+    intent = value;
   }
 </script>
 
@@ -41,7 +41,7 @@ vocabulary, such as “Save” and “Save and close”, belongs in app code.
   type="submit"
   variant="primary"
   items={items}
-  on:action={handleIntentChange}
+  onAction={handleIntentChange}
 >
   {intent === "save-and-close" ? "Save and close" : "Save"}
 </SplitButton>
@@ -74,14 +74,15 @@ Those wrappers mostly encode app vocabulary, not reusable UI semantics.
     { value: "delete", label: "Delete", tone: "danger" }
   ];
 
-  function handleAction(event: CustomEvent<{ value: string }>) {
-    const action = event.detail.value;
+  function handleAction(action: string) {
     // map to app-owned behavior here
   }
 </script>
 
-<Menu items={items} on:action={handleAction}>
-  <Button variant="secondary">Actions</Button>
+<Menu items={items} onAction={handleAction}>
+  {#snippet trigger()}
+    <Button variant="secondary">Actions</Button>
+  {/snippet}
 </Menu>
 ```
 

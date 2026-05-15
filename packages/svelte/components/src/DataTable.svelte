@@ -264,10 +264,12 @@
 
       {#if showColumnVisibility && hideableColumns.length > 0}
         <Popover placement="bottom-end" ariaLabel="Column visibility">
-          <span slot="trigger" class="poodle-data-table__toolbar-btn">
-            <Icon name="columns-3" />
-            Columns
-          </span>
+          {#snippet trigger()}
+            <span class="poodle-data-table__toolbar-btn">
+              <Icon name="columns-3" />
+              Columns
+            </span>
+          {/snippet}
           <div class="poodle-data-table__col-menu" role="menu">
             {#each hideableColumns as column}
               <label class="poodle-data-table__col-menu-item">
@@ -351,13 +353,13 @@
                   <Select
                     id={getFilterInputId(column)}
                     value={filters[column.id] ?? ""}
-                    items={[
+                    options={[
                       { value: "", label: "All" },
                       ...column.filterOptions.map((option) =>
                         typeof option === "string" ? { value: option, label: option } : option,
                       ),
                     ]}
-                    onchange={(value) => requestFilterChange(column.id, value)}
+                    onValueChange={(nextValue) => requestFilterChange(column.id, nextValue)}
                     ariaLabel={`Filter ${column.label}`}
                     clearable
                     valueLabel="All"
@@ -368,7 +370,7 @@
                     type="date"
                     value={filters[column.id] ?? ""}
                     ariaLabel={`Filter ${column.label}`}
-                    on:valueChange={(event) => requestFilterChange(column.id, event.detail.value)}
+                    onValueChange={(nextValue) => requestFilterChange(column.id, nextValue)}
                   />
                 {:else}
                   <TextInput
@@ -378,7 +380,7 @@
                     placeholder={`Filter ${column.label.toLowerCase()}...`}
                     ariaLabel={`Filter ${column.label}`}
                     debounce={300}
-                    on:valueChange={(event) => requestFilterChange(column.id, event.detail.value)}
+                    onValueChange={(nextValue) => requestFilterChange(column.id, nextValue)}
                   />
                 {/if}
               {/if}
@@ -493,17 +495,19 @@
                       items={actions.map(toMenuItem)}
                       ariaLabel={`Actions for ${getRowPrimaryLabel(row)}`}
                       placement="bottom-end"
-                      on:action={(event) => handleMenuAction(row, actions, event.detail.value)}
+                      onAction={(value) => handleMenuAction(row, actions, value)}
                     >
-                      <span slot="trigger" class="poodle-data-table__actions-trigger" data-row-action-trigger="true">
-                        <IconButton
-                          icon="ellipsis"
-                          variant="ghost"
-                          sizeRole="chrome"
-                          ariaLabel={`Actions for ${getRowPrimaryLabel(row)}`}
-                          tooltip="Actions"
-                        />
-                      </span>
+                      {#snippet trigger()}
+                        <span class="poodle-data-table__actions-trigger" data-row-action-trigger="true">
+                          <IconButton
+                            icon="ellipsis"
+                            variant="ghost"
+                            sizeRole="chrome"
+                            ariaLabel={`Actions for ${getRowPrimaryLabel(row)}`}
+                            tooltip="Actions"
+                          />
+                        </span>
+                      {/snippet}
                     </Menu>
                   {/if}
                 {:else if showLegacyRowAction}
@@ -543,8 +547,8 @@
             <Select
               id={`${ariaLabel.replace(/\s+/g, "-").toLowerCase()}-limit`}
               value={String(pagination.limit)}
-              items={limitOptions.map((option) => ({ value: String(option), label: String(option) }))}
-              onchange={(value) => requestLimitChange(Number(value))}
+              options={limitOptions.map((option) => ({ value: String(option), label: String(option) }))}
+              onValueChange={(nextValue) => requestLimitChange(Number(nextValue))}
               ariaLabel="Items per page"
             />
             <span>per page</span>

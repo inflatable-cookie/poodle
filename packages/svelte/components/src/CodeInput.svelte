@@ -1,60 +1,90 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import Field from "./Field.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
-  export let id: string | null = null;
-  export let value: string | null = null;
-  export let defaultValue = "";
-  export let name = "code";
-  export let label = "Authenticator code";
-  export let hint: string | null = null;
-  export let error: string | null = null;
-  export let disabled = false;
-  export let length = 6;
-  export let mask = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let autocomplete: HTMLInputAttributes["autocomplete"] = "one-time-code";
-  export let validationState: ValidationState = "none";
-
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-    complete: { value: string };
-  }>();
+  interface Props {
+    id?: string | null;
+    value?: string | null | undefined;
+    defaultValue?: string;
+    name?: string;
+    label?: string;
+    hint?: string | null;
+    error?: string | null;
+    disabled?: boolean;
+    length?: number;
+    mask?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    autocomplete?: HTMLInputAttributes["autocomplete"];
+    validationState?: ValidationState;
+    onValueChange?: ((value: string) => void) | undefined;
+    onComplete?: ((value: string) => void) | undefined;
+  }
 
   const uiPresentation = getUiPresentation();
 
-  let uncontrolledValue = defaultValue;
-  let inputRef: HTMLInputElement | null = null;
-  let caretIndex = 0;
-  let hasFocus = false;
+  let {
+    id = null,
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = "",
+    name = "code",
+    label = "Authenticator code",
+    hint = null,
+    error = null,
+    disabled = false,
+    length = 6,
+    mask = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    autocomplete = "one-time-code",
+    validationState = "none",
+    onValueChange = undefined,
+    onComplete = undefined,
+  }: Props = $props();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: effectiveId = id ?? `code-${name}`;
-  $: isControlled = value !== null;
-  $: currentValue = sanitizeValue(isControlled ? value ?? "" : uncontrolledValue);
-  $: digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
-  $: effectiveValidationState = error ? "invalid" : validationState;
-  $: activeCaretIndex = Math.min(caretIndex, Math.max(length - 1, 0));
-  $: slotBorderColor =
+  let seededDefaultValue = $state(false);
+  let uncontrolledValue = $state("");
+  let inputRef: HTMLInputElement | null = null;
+  let caretIndex = $state(0);
+  let hasFocus = $state(false);
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const effectiveId = $derived(id ?? `code-${name}`);
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived(sanitizeValue(isControlled ? value ?? "" : uncontrolledValue));
+  const digits = $derived(Array.from({ length }, (_, index) => currentValue[index] ?? ""));
+  const effectiveValidationState = $derived(error ? "invalid" : validationState);
+  const activeCaretIndex = $derived(Math.min(caretIndex, Math.max(length - 1, 0)));
+  const slotBorderColor = $derived(
     effectiveValidationState === "invalid"
       ? "var(--poodle-color-status-danger)"
-      : "var(--poodle-color-border-default)";
-  $: slotFocusColor =
+      : "var(--poodle-color-border-default)"
+  );
+  const slotFocusColor = $derived(
     effectiveValidationState === "invalid"
       ? "var(--poodle-color-status-danger)"
-      : "var(--poodle-color-accent-border)";
-  $: slotFocusRing =
+      : "var(--poodle-color-accent-border)"
+  );
+  const slotFocusRing = $derived(
     effectiveValidationState === "invalid"
       ? "color-mix(in srgb, var(--poodle-color-status-danger) 24%, transparent)"
-      : "color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)";
+      : "color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)"
+  );
+
+  $effect(() => {
+    if (!seededDefaultValue && value === undefined) {
+      uncontrolledValue = sanitizeValue(defaultValue);
+      seededDefaultValue = true;
+    }
+  });
 
   function sanitizeValue(input: string): string {
     return input.replace(/\D/g, "").slice(0, length);
@@ -67,10 +97,11 @@
       uncontrolledValue = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    value = nextValue;
+    onValueChange?.(nextValue);
 
     if (nextValue.length === length) {
-      dispatch("complete", { value: nextValue });
+      onComplete?.(nextValue);
     }
   }
 

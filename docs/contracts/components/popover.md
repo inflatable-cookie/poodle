@@ -20,7 +20,7 @@ Updated: 2026-03-15
 [Root .popover]  <div>
   ├── [Trigger .popover__trigger]  <div>
   └── [Surface .popover__surface]  <div> (conditional)
-        └── [Content] (slot)
+        └── [Content] (children snippet)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -43,6 +43,8 @@ Updated: 2026-03-15
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal |
 | `initialFocus` | `"first-focusable" \| "content" \| "none"` | `"first-focusable"` | no | initial focus strategy |
 | `ariaLabel` | `string \| null` | `null` | no | optional label when no internal heading exists |
+| `block` | `boolean` | `false` | no | makes the trigger and root expand to available width |
+| `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the open state changes |
 
 ### Type Definitions
 
@@ -54,16 +56,16 @@ OverlayPlacement:
   "right" | "right-start" | "right-end"
 ```
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| trigger | trigger element |
-| default | popover body content |
+| `trigger` | trigger element |
+| `children` | popover body content |
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` plus `openChange` event
+- controlled: `open` plus `onOpenChange(open)`
 - uncontrolled: `defaultOpen`
 - popover content state remains external to the primitive
 
@@ -81,11 +83,11 @@ OverlayPlacement:
 
 Open/closed state and placement state are required.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Prop | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | popover opens or closes | `{ open: boolean }` | trigger, outside interact, or escape driven |
+| `onOpenChange` | popover opens or closes | `boolean` | trigger, outside interact, or escape driven |
 
 ## 6. Accessibility
 

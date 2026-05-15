@@ -10,7 +10,7 @@
   <SpecimenGroup label="Default">
     <DatePicker
       ariaLabel="Select date"
-      on:valueChange={(e) => (selected = e.detail.value)}
+      onValueChange={(value) => (selected = value)}
     />
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>

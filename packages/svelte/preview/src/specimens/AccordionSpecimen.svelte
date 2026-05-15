@@ -40,9 +40,10 @@
       selectionMode="single"
       defaultValue="getting-started"
       ariaLabel="Single-select accordion"
-      let:item
     >
+      {#snippet children(item)}
       <p>{singleContent[item.value]}</p>
+      {/snippet}
     </Accordion>
   </SpecimenGroup>
 
@@ -52,9 +53,10 @@
       selectionMode="multiple"
       defaultValue={["design", "keyboard"]}
       ariaLabel="Multi-select accordion"
-      let:item
     >
+      {#snippet children(item)}
       <p>{multiContent[item.value]}</p>
+      {/snippet}
     </Accordion>
   </SpecimenGroup>
 </div>

@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
 
   import Calendar from "./Calendar.svelte";
   import TimeInput from "./TimeInput.svelte";
@@ -33,11 +33,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: DateTimeRangeValue };
-    openChange: { open: boolean };
-  }>();
+  export let onValueChange: ((value: DateTimeRangeValue) => void) | undefined = undefined;
+  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
 
   const surfaceId = `poodle-date-time-range-picker-surface-${++nextDateTimeRangePickerId}`;
   const uiPresentation = getUiPresentation();
@@ -64,7 +61,7 @@
       uncontrolledOpen = nextOpen;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function commitValue(nextValue: DateTimeRangeValue): void {
@@ -78,7 +75,7 @@
       visibleMonth = monthAnchorIso(normalized.start.date);
     }
 
-    dispatch("valueChange", { value: normalized });
+    onValueChange?.(normalized);
   }
 
   onMount(() => {
@@ -118,7 +115,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? surfaceId : undefined}
     aria-label={ariaLabel ?? undefined}
-    on:click={() => setOpen(!isOpen)}
+    onclick={() => setOpen(!isOpen)}
   >
     <span
       class="poodle-date-time-range-picker__value"
@@ -147,12 +144,12 @@
           size={resolvedSize}
           density={resolvedDensity}
           ariaLabel={ariaLabel ?? placeholder}
-          on:valueChange={(event) =>
+          onValueChange={(nextRange) =>
             commitValue({
-              start: { ...currentValue.start, date: (event.detail.value as DateRangeValue).start },
-              end: { ...currentValue.end, date: (event.detail.value as DateRangeValue).end },
+              start: { ...currentValue.start, date: (nextRange as DateRangeValue).start },
+              end: { ...currentValue.end, date: (nextRange as DateRangeValue).end },
             })}
-          on:monthChange={(event) => (visibleMonth = event.detail.month)}
+          onMonthChange={(month) => (visibleMonth = month)}
         />
 
         <div class="poodle-date-time-range-picker__times">
@@ -167,9 +164,9 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} start time` : "Start time"}
-              on:valueChange={(event) =>
+              onValueChange={(value) =>
                 commitValue({
-                  start: { ...currentValue.start, time: event.detail.value },
+                  start: { ...currentValue.start, time: value },
                   end: currentValue.end,
                 })}
             />
@@ -186,10 +183,10 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} end time` : "End time"}
-              on:valueChange={(event) =>
+              onValueChange={(value) =>
                 commitValue({
                   start: currentValue.start,
-                  end: { ...currentValue.end, time: event.detail.value },
+                  end: { ...currentValue.end, time: value },
                 })}
             />
           </div>

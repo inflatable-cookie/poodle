@@ -36,13 +36,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "collapsible", type: "boolean", default: "true", description: "Whether the open panel can be collapsed by clicking its trigger again." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the accordion region." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "onValueChange", type: "((value: string | string[] | null) => void) | undefined", default: "undefined", description: "Called when the open panel value changes." },
     ],
     slots: [
-      { name: "default", description: "Custom panel content. Receives slot props: item, isOpen." },
+      { name: "children", description: "Snippet rendered inside each open panel. Receives item and isOpen." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: string | string[] | null }", description: "Fires when the open panel(s) change." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Accordion } from "@poodle/svelte";
 
@@ -52,7 +51,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<Accordion {items} selectionMode="single" collapsible />`,
+<Accordion {items} selectionMode="single" collapsible onValueChange={(value) => console.log(value)}>
+  {#snippet children(item)}
+    <p>{item.label} content.</p>
+  {/snippet}
+</Accordion>`,
   },
 
   "alert-dialog": {
@@ -290,12 +293,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the calendar is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the calendar." },
+      { name: "onValueChange", type: "((value: string | DateRangeValue) => void) | undefined", default: "undefined", description: "Called when the selected date or range changes." },
+      { name: "onMonthChange", type: "((month: string) => void) | undefined", default: "undefined", description: "Called when the visible month changes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string } | { value: DateRangeValue }", description: "Fires when the selected date or range changes." },
-      { name: "monthChange", payload: "{ month: string }", description: "Fires when the visible month changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Calendar } from "@poodle/svelte";
 
@@ -373,13 +375,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "columns", type: "1 | 2 | 3 | 4", default: "2", description: "Number of columns in the grid layout." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the radio group." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the selected card changes." },
     ],
     slots: [
       { name: "card", description: "Custom card renderer. Receives slot props: item, checked, disabled." },
     ],
-    events: [
-      { name: "change", payload: "{ value: string }", description: "Fires when the selected card changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { CardRadioGroup } from "@poodle/svelte";
 
@@ -400,7 +401,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the checkbox input." },
-      { name: "checked", type: "boolean", default: "false", description: "Controlled checked state." },
+      { name: "checked", type: "boolean | undefined", default: "undefined", description: "Bindable checked state. Leave undefined for uncontrolled mode." },
       { name: "defaultChecked", type: "boolean", default: "false", description: "Initial checked state for uncontrolled mode." },
       { name: "mixed", type: "boolean", default: "false", description: "Whether the checkbox is in an indeterminate state." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the checkbox is disabled." },
@@ -409,11 +410,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label when no visible label is used." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this checkbox." },
       { name: "selectedColor", type: "string | null", default: "null", description: "Optional selected-state color override used for the checked and mixed indicator fill/border." },
+      { name: "onCheckedChange", type: "((checked: boolean) => void) | undefined", default: "undefined", description: "Called when the checked state changes." },
     ],
     slots: [],
-    events: [
-      { name: "checkedChange", payload: "{ checked: boolean }", description: "Fires when the checked state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Checkbox } from "@poodle/svelte";
 
@@ -490,7 +490,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "default", description: "Content revealed when the collapsible is open." },
     ],
     events: [
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
+      { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the open state changes." },
     ],
     usage: `<script lang="ts">
   import { Collapsible } from "@poodle/svelte";
@@ -579,15 +579,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "cancelLabel", type: "string", default: '"Cancel"', description: "Label for the cancel button in the dialog." },
     ],
     slots: [
-      { name: "trigger", description: "Custom trigger element replacing the default button." },
-      { name: "default", description: "Additional content rendered in the confirmation dialog body." },
+      { name: "trigger", description: "Snippet for a custom trigger element replacing the default button." },
+      { name: "children", description: "Additional content rendered in the confirmation dialog body." },
     ],
-    events: [
-      { name: "confirm", payload: "void", description: "Fires when the action is confirmed." },
-      { name: "cancel", payload: "void", description: "Fires when the action is cancelled." },
-    ],
+    events: [],
     usage: `<script lang="ts">
-  import { ConfirmAction } from "@poodle/svelte";
+  import { ConfirmAction, Button } from "@poodle/svelte";
 </script>
 
 <ConfirmAction
@@ -595,8 +592,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   description="This action is permanent and cannot be undone."
   tone="danger"
   triggerLabel="Delete"
-  on:confirm={() => deleteRecord()}
-/>`,
+  onConfirm={() => deleteRecord()}
+>
+  {#snippet trigger()}
+    <Button variant="ghost" tone="danger">Delete</Button>
+  {/snippet}
+</ConfirmAction>`,
   },
 
   "context-menu": {
@@ -614,8 +615,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "default", description: "Trigger area that activates the context menu on right-click." },
     ],
     events: [
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
-      { name: "action", payload: "{ value: string }", description: "Fires when a menu item is selected." },
+      { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the open state changes." },
+      { name: "onAction", payload: "(value: string) => void", description: "Called when a menu item is selected." },
     ],
     usage: `<script lang="ts">
   import { ContextMenu } from "@poodle/svelte";
@@ -628,7 +629,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<ContextMenu {items} on:action={(e) => handleAction(e.detail.value)}>
+<ContextMenu {items} onAction={(value) => handleAction(value)}>
   <div>Right-click me</div>
 </ContextMenu>`,
   },
@@ -714,14 +715,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date picker." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the selected date changes." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the calendar popup opens or closes." },
     ],
     slots: [
       { name: "default", description: "Custom trigger content." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected date changes." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the calendar open state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { DatePicker } from "@poodle/svelte";
 
@@ -745,14 +745,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date range picker." },
+      { name: "onValueChange", type: "((value: DateRangeValue) => void) | undefined", default: "undefined", description: "Called when the date range changes." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the picker opens or closes." },
     ],
     slots: [
       { name: "default", description: "Custom trigger content." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: DateRangeValue }", description: "Fires when the date range changes." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { DateRangePicker } from "@poodle/svelte";
 
@@ -776,14 +775,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date-time picker." },
+      { name: "onValueChange", type: "((value: DateTimeValue) => void) | undefined", default: "undefined", description: "Called when the date-time value changes." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the picker opens or closes." },
     ],
     slots: [
       { name: "default", description: "Custom trigger content." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: DateTimeValue }", description: "Fires when the date-time value changes." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { DateTimePicker } from "@poodle/svelte";
 
@@ -807,14 +805,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "locale", type: "string", default: '"en-US"', description: "Locale for date formatting." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the date-time range picker." },
+      { name: "onValueChange", type: "((value: DateTimeRangeValue) => void) | undefined", default: "undefined", description: "Called when the date-time range changes." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the picker opens or closes." },
     ],
     slots: [
       { name: "default", description: "Custom trigger content." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: DateTimeRangeValue }", description: "Fires when the date-time range changes." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { DateTimeRangePicker } from "@poodle/svelte";
 
@@ -1054,13 +1051,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "maxTotalSeconds", type: "number | null", default: "null", description: "Maximum total duration in seconds." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "ariaLabel", type: "string", default: '"Duration"', description: "Accessible label for the duration input." },
+      { name: "onChange", type: "((detail: { hours: number; minutes: number; seconds: number; totalSeconds: number }) => void) | undefined", default: "undefined", description: "Called when the duration value changes." },
     ],
-    slots: [
-      { name: "default", description: "Custom content rendered alongside the duration fields." },
-    ],
-    events: [
-      { name: "change", payload: "{ hours: number; minutes: number; seconds: number; totalSeconds: number }", description: "Fires when the duration value changes." },
-    ],
+    slots: [],
+    events: [],
     usage: `<script lang="ts">
   import { DurationInput } from "@poodle/svelte";
 
@@ -1509,20 +1503,20 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the hover card." },
     ],
     slots: [
-      { name: "trigger", description: "Element that triggers the hover card." },
-      { name: "default", description: "Hover card content." },
+      { name: "trigger", description: "Snippet for the element that triggers the hover card." },
+      { name: "children", description: "Hover card content." },
     ],
     events: [
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
+      { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the open state changes." },
     ],
     usage: `<script lang="ts">
   import { HoverCard } from "@poodle/svelte";
 </script>
 
 <HoverCard placement="top">
-  <svelte:fragment slot="trigger">
+  {#snippet trigger()}
     <a href="/profile">@alice</a>
-  </svelte:fragment>
+  {/snippet}
   <div>
     <strong>Alice Johnson</strong>
     <p>Software Engineer</p>
@@ -1971,10 +1965,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<Menu {items} on:action={(e) => console.log(e.detail.value)}>
-  <svelte:fragment slot="trigger">
+<Menu {items} onAction={(value) => console.log(value)}>
+  {#snippet trigger()}
     <Button variant="secondary">Actions</Button>
-  </svelte:fragment>
+  {/snippet}
 </Menu>`,
   },
 
@@ -1987,30 +1981,61 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active menu for uncontrolled mode." },
       { name: "items", type: "MenubarItem[]", default: "[]", description: "Array of top-level menubar items." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the menubar." },
+      { name: "onValueChange", type: "((value: string | null) => void) | undefined", default: "undefined", description: "Called when the active top-level menu changes." },
+      { name: "onAction", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a submenu action is committed." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the active menu changes." },
-      { name: "action", payload: "{ value: string }", description: "Fires when a menu action is selected." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Menubar } from "@poodle/svelte";
 
   const items = [
-    { value: "file", label: "File", children: [
+    { value: "file", label: "File", items: [
       { value: "new", label: "New" },
       { value: "open", label: "Open" },
     ]},
-    { value: "edit", label: "Edit", children: [
+    { value: "edit", label: "Edit", items: [
       { value: "undo", label: "Undo" },
       { value: "redo", label: "Redo" },
     ]},
   ];
 </script>
 
-<Menubar {items} on:action={(e) => console.log(e.detail.value)} />`,
+<Menubar {items} onAction={(value) => console.log(value)} />`,
   },
 
+  "navigation-menu": {
+    props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "value", type: "string | null", default: "null", description: "Controlled active navigation item value." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial active navigation item for uncontrolled mode." },
+      { name: "items", type: "NavigationMenuItem[]", default: "[]", description: "Array of top-level navigation items." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the navigation region." },
+      { name: "onValueChange", type: "((value: string | null) => void) | undefined", default: "undefined", description: "Called when the active navigation item changes." },
+    ],
+    slots: [
+      { name: "children", description: "Snippet rendered in the viewport. Receives activeValue and activeItem." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { NavigationMenu } from "@poodle/svelte";
+
+  const items = [
+    { value: "home", label: "Home" },
+    { value: "components", label: "Components" },
+  ];
+
+  let active = "components";
+</script>
+
+<NavigationMenu {items} value={active} ariaLabel="Main navigation" onValueChange={(value) => { if (value) active = value; }}>
+  {#snippet children(activeValue, activeItem)}
+    <p>Active section: {activeItem?.label ?? activeValue}</p>
+  {/snippet}
+</NavigationMenu>`,
+  },
   "meta-bar": {
     props: [
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the meta bar region." },
@@ -2108,35 +2133,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </NavCard>`,
   },
 
-  "navigation-menu": {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled active menu value." },
-      { name: "defaultValue", type: "string | null", default: "null", description: "Initial active value for uncontrolled mode." },
-      { name: "items", type: "NavigationMenuItem[]", default: "[]", description: "Array of navigation menu items." },
-      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the navigation menu." },
-    ],
-    slots: [
-      { name: "default", description: "Custom menu content. Receives slot props: activeValue, activeItem." },
-    ],
-    events: [
-      { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the active menu value changes." },
-    ],
-    usage: `<script lang="ts">
-  import { NavigationMenu } from "@poodle/svelte";
-
-  const items = [
-    { value: "products", label: "Products" },
-    { value: "pricing", label: "Pricing" },
-    { value: "docs", label: "Documentation" },
-  ];
-</script>
-
-<NavigationMenu {items} ariaLabel="Main navigation" />`,
-  },
-
   "number-input": {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
@@ -2161,17 +2157,16 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "showSteppers", type: "boolean", default: "false", description: "Whether to show increment/decrement stepper buttons." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the input." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
+      { name: "onValueChange", type: "((value: number | string | null) => void) | undefined", default: "undefined", description: "Called when the value changes." },
+      { name: "onValidationChange", type: "((detail: { status: InputValidationStatus; valid: boolean; message: string }) => void) | undefined", default: "undefined", description: "Called when validation status changes." },
+      { name: "onSubmit", type: "((value: number | string | null) => void) | undefined", default: "undefined", description: "Called when the value is submitted." },
+      { name: "onIncrement", type: "((value: number | string | null) => void) | undefined", default: "undefined", description: "Called when the value is incremented." },
+      { name: "onDecrement", type: "((value: number | string | null) => void) | undefined", default: "undefined", description: "Called when the value is decremented." },
+      { name: "onFocus", type: "((event: FocusEvent) => void) | undefined", default: "undefined", description: "Native focus passthrough." },
+      { name: "onBlur", type: "((event: FocusEvent) => void) | undefined", default: "undefined", description: "Native blur passthrough." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: number | string | null }", description: "Fires when the value changes." },
-      { name: "validationChange", payload: "{ status: InputValidationStatus; valid: boolean; message: string }", description: "Fires when validation status changes." },
-      { name: "submit", payload: "{ value: number | string | null }", description: "Fires when the value is submitted (e.g. Enter key)." },
-      { name: "increment", payload: "{ value: number | string | null }", description: "Fires when the value is incremented." },
-      { name: "decrement", payload: "{ value: number | string | null }", description: "Fires when the value is decremented." },
-      { name: "focus", payload: "FocusEvent", description: "Fires when the input receives focus." },
-      { name: "blur", payload: "FocusEvent", description: "Fires when the input loses focus." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { NumberInput } from "@poodle/svelte";
 
@@ -2367,12 +2362,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the pagination nav element." },
       { name: "className", type: "string", default: '""', description: "Additional CSS class on the root element." },
+      { name: "onPageChange", type: "((page: number) => void) | undefined", default: "undefined", description: "Called when the current page changes." },
+      { name: "onLimitChange", type: "((limit: number) => void) | undefined", default: "undefined", description: "Called when the page size changes via the limit selector." },
     ],
     slots: [],
-    events: [
-      { name: "pageChange", payload: "{ page: number }", description: "Fires when the current page changes. When a controller is provided, the controller method is called instead." },
-      { name: "limitChange", payload: "{ limit: number }", description: "Fires when the page size changes via the limit selector." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Pagination } from "@poodle/svelte";
 
@@ -2381,7 +2375,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <!-- Basic numbered pagination -->
-<Pagination currentPage={page} totalPages={10} on:pageChange={(e) => (page = e.detail.page)} />
+<Pagination currentPage={page} totalPages={10} onPageChange={(nextPage) => (page = nextPage)} />
 
 <!-- Simple variant with page size selector -->
 <Pagination
@@ -2391,8 +2385,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   variant="simple"
   showLimitSelector
   limitOptions={[10, 25, 50, 100]}
-  on:pageChange={(e) => (page = e.detail.page)}
-  on:limitChange={(e) => { limit = e.detail.limit; page = 1; }}
+  onPageChange={(nextPage) => (page = nextPage)}
+  onLimitChange={(nextLimit) => { limit = nextLimit; page = 1; }}
 />
 
 <!-- Standalone (no container chrome) -->
@@ -2476,7 +2470,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "code-input": {
     props: [
       { name: "id", type: "string | null", default: "null", description: "Optional control id. Falls back to a derived id from the name when omitted." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled code value." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable code value. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string", default: '""', description: "Initial value for uncontrolled mode." },
       { name: "name", type: "string", default: '"code"', description: "Hidden input name for form submission." },
       { name: "label", type: "string", default: '"Authenticator code"', description: "Field label rendered by the built-in Field wrapper." },
@@ -2491,12 +2485,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "validationState", type: 'ValidationState', default: '"none"', description: "Field-level validation state. Invalid is also inferred automatically when error is present." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called whenever the sanitized code value changes." },
+      { name: "onComplete", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the value reaches the configured length." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires whenever the sanitized code value changes." },
-      { name: "complete", payload: "{ value: string }", description: "Fires when the value reaches the configured length." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { CodeInput } from "@poodle/svelte";
 
@@ -2508,8 +2501,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   value={code}
   label="Verification code"
   hint="Enter the 6-digit code from your authenticator app."
-  on:valueChange={(e) => (code = e.detail.value)}
-  on:complete={(e) => verify(e.detail.value)}
+  onValueChange={(value) => (code = value)}
+  onComplete={(value) => verify(value)}
 />`,
   },
 
@@ -2566,8 +2559,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Popover, Button } from "@poodle/svelte";
 </script>
 
-<Popover placement="bottom-start">
-  <Button slot="trigger">Open Popover</Button>
+<Popover placement="bottom-start" onOpenChange={(open) => console.log(open)}>
+  {#snippet trigger()}
+    <Button>Open Popover</Button>
+  {/snippet}
   <div style="padding: 1rem;">
     <p>Popover content goes here.</p>
   </div>
@@ -2599,7 +2594,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable selected value. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "RadioGroupOption[]", default: "[]", description: "Array of radio option definitions." },
       { name: "orientation", type: "Orientation", default: '"vertical"', description: "Layout orientation of the radio options." },
@@ -2608,11 +2603,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this group." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
       { name: "selectedColor", type: "string | null", default: "null", description: "Optional selected-state color override used for the selected indicator border and dot." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the selected value changes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { RadioGroup } from "@poodle/svelte";
 
@@ -2625,7 +2619,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let size = "md";
 </script>
 
-<RadioGroup {options} bind:value={size} orientation="vertical" selectedColor="#22c55e" />`,
+<RadioGroup {options} value={size} orientation="vertical" selectedColor="#22c55e" onValueChange={(value) => (size = value)} />`,
   },
 
   "range-slider": {
@@ -2642,12 +2636,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the range slider." },
       { name: "lowerValueText", type: "string | null", default: "null", description: "Human-readable text for the lower thumb value." },
       { name: "upperValueText", type: "string | null", default: "null", description: "Human-readable text for the upper thumb value." },
+      { name: "onValueChange", type: "((value: [number, number]) => void) | undefined", default: "undefined", description: "Called when the range value changes during drag." },
+      { name: "onValueCommit", type: "((value: [number, number]) => void) | undefined", default: "undefined", description: "Called when the range value is committed." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: [number, number] }", description: "Fires when the range value changes during drag." },
-      { name: "valueCommit", payload: "{ value: [number, number] }", description: "Fires when the range value is committed (drag end)." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { RangeSlider } from "@poodle/svelte";
 
@@ -2662,17 +2655,16 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "number | null", default: "null", description: "Controlled rating value." },
+      { name: "value", type: "number | null | undefined", default: "undefined", description: "Bindable rating value. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "max", type: "number", default: "5", description: "Maximum number of stars." },
       { name: "allowClear", type: "boolean", default: "false", description: "Whether clicking the current value clears the rating." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the rating input is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the rating." },
+      { name: "onValueChange", type: "((value: number | null) => void) | undefined", default: "undefined", description: "Called when the rating value changes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: number | null }", description: "Fires when the rating value changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Rating } from "@poodle/svelte";
 
@@ -2793,18 +2785,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable selected value. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "options", type: "SegmentedControlOption[]", default: "[]", description: "Array of segment option definitions." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the control is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the segmented control." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
       { name: "equalWidth", type: "boolean", default: "true", description: "Whether all segments are rendered with equal width." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the selected segment changes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected segment changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { SegmentedControl } from "@poodle/svelte";
 
@@ -2817,7 +2808,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let view = "list";
 </script>
 
-<SegmentedControl {options} bind:value={view} />`,
+<SegmentedControl {options} value={view} onValueChange={(value) => (view = value)} />`,
   },
 
   select: {
@@ -2826,14 +2817,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the select." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled selected value." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable selected value. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial value for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: "null", description: "Placeholder text when no option is selected." },
       { name: "options", type: "SelectItems", default: "[]", description: "Array of select options or grouped option objects." },
-      { name: "items", type: "SelectItem[] | null", default: "null", description: "Legacy flat list of selectable items. Normalized into options internally." },
-      { name: "groups", type: "SelectGroup[] | null", default: "null", description: "Legacy grouped items. Normalized into option groups internally." },
-      { name: "loadItems", type: "(() => Promise<SelectItem[]>) | null", default: "null", description: "Async loader for flat options. Fetched automatically on mount." },
-      { name: "loadGroups", type: "(() => Promise<SelectGroup[]>) | null", default: "null", description: "Async loader for grouped options. Fetched automatically on mount." },
       { name: "loadKey", type: "string | null", default: "null", description: "Cache-busting key for async loaders. Changing this value resets and re-fetches." },
       { name: "clearable", type: "boolean", default: "false", description: "Whether a clear option is shown to reset the value." },
       { name: "required", type: "boolean", default: "false", description: "Whether the native select has the required attribute." },
@@ -2842,7 +2829,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
-      { name: "onchange", type: "((value: string) => void) | null", default: "null", description: "Direct callback fired on value change." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Callback fired when the selected value changes." },
+      { name: "onQueryChange", type: "((query: string) => void) | undefined", default: "undefined", description: "Callback fired when the search query changes in searchable mode." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Callback fired when the custom dropdown opens or closes." },
       { name: "searchable", type: "boolean", default: "false", description: "Renders a custom dropdown with search/filter input instead of native <select>." },
       { name: "freeform", type: "boolean", default: "false", description: "With searchable, query text becomes the value if no option selected. Options act as suggestions." },
       { name: "native", type: "boolean | undefined", default: "undefined", description: "Explicit mode override. true = always native, false = always custom, undefined = auto." },
@@ -2850,16 +2839,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "loadOptions", type: "SelectLoadOptions | null", default: "null", description: "Unified async loader returning flat or grouped options." },
     ],
     slots: [
-      { name: "option", description: "Custom rendering for each option row. Receives: option, highlighted, selected, index. Presence forces custom mode." },
-      { name: "trigger", description: "Custom trigger rendering. Receives: selectedOption, open, placeholder. Presence forces custom mode." },
-      { name: "empty", description: "Custom empty-state for no matching options. Receives: query." },
+      { name: "option", description: "Snippet prop for each custom option row. Receives: option, highlighted, selected, index. Presence forces custom mode." },
+      { name: "trigger", description: "Snippet prop for custom trigger rendering. Receives: selectedOption, open, placeholder. Presence forces custom mode." },
+      { name: "empty", description: "Snippet prop for the custom empty state. Receives: query." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected value changes." },
-      { name: "change", payload: "{ value: string }", description: "Alias for valueChange." },
-      { name: "queryChange", payload: "{ query: string }", description: "Fires when the search query changes (searchable mode only)." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the dropdown opens/closes (custom mode only)." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Select } from "@poodle/svelte";
 
@@ -2882,12 +2866,15 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <!-- Freeform autocomplete -->
 <Select options={fruits} searchable freeform placeholder="Type or pick..." />
 
-<!-- Custom option rendering -->
-<Select options={countries} placeholder="Choose a country">
-  <div slot="option" let:option let:selected>
-    <span>{option.icon} {option.label}</span>
-    {#if selected}<strong>✓</strong>{/if}
-  </div>
+<!-- Custom rendering with snippets -->
+<Select options={fruits} native={false} placeholder="Choose a fruit">
+  {#snippet trigger({ selectedOption, placeholder })}
+    <span>{selectedOption?.label ?? placeholder}</span>
+  {/snippet}
+
+  {#snippet option({ option, selected })}
+    <span>{option.label}{selected ? " ✓" : ""}</span>
+  {/snippet}
 </Select>`,
   },
 
@@ -2943,11 +2930,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a navigation item is activated." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when a navigation item is activated." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { SidebarNav } from "@poodle/svelte";
 
@@ -2966,7 +2952,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   let active = "dashboard";
 </script>
 
-<SidebarNav {groups} value={active} ariaLabel="Main navigation" on:valueChange={(e) => (active = e.detail.value)} />`,
+<SidebarNav {groups} value={active} ariaLabel="Main navigation" onValueChange={(value) => (active = value)} />`,
   },
 
   skeleton: {
@@ -3022,12 +3008,11 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "disabled", type: "boolean", default: "false", description: "Whether the slider is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the slider." },
       { name: "valueText", type: "string | null", default: "null", description: "Human-readable text for the current value." },
+      { name: "onValueChange", type: "((value: number) => void) | undefined", default: "undefined", description: "Called when the slider value changes during drag." },
+      { name: "onValueCommit", type: "((value: number) => void) | undefined", default: "undefined", description: "Called when the slider value is committed." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: number }", description: "Fires when the slider value changes during drag." },
-      { name: "valueCommit", payload: "{ value: number }", description: "Fires when the slider value is committed (drag end)." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Slider } from "@poodle/svelte";
 
@@ -3068,14 +3053,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "loading", type: "boolean", default: "false", description: "Whether the button shows a loading spinner." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the primary button." },
       { name: "menuAriaLabel", type: "string", default: '"More actions"', description: "Accessible label for the dropdown menu." },
+      { name: "onClick", type: "((event: MouseEvent) => void) | undefined", default: "undefined", description: "Called when the primary button is clicked." },
+      { name: "onAction", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a dropdown menu item is selected." },
     ],
     slots: [
       { name: "default", description: "Primary button label content." },
     ],
-    events: [
-      { name: "click", payload: "MouseEvent", description: "Fires when the primary button is clicked." },
-      { name: "action", payload: "{ value: string }", description: "Fires when a dropdown menu item is selected." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { SplitButton } from "@poodle/svelte";
 
@@ -3085,7 +3069,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<SplitButton type="submit" variant="primary" {items} on:click={() => publish()} on:action={(e) => handleAction(e.detail.value)}>
+<SplitButton type="submit" variant="primary" {items} onClick={() => publish()} onAction={(value) => handleAction(value)}>
   Publish
 </SplitButton>`,
   },
@@ -3224,7 +3208,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the switch." },
-      { name: "checked", type: "boolean | null", default: "null", description: "Controlled checked state." },
+      { name: "checked", type: "boolean | undefined", default: "undefined", description: "Bindable checked state. Leave undefined for uncontrolled mode." },
       { name: "defaultChecked", type: "boolean", default: "false", description: "Initial checked state for uncontrolled mode." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the switch is disabled." },
       { name: "readOnly", type: "boolean", default: "false", description: "Whether the switch is read-only." },
@@ -3238,11 +3222,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onColor", type: "string | null", default: "null", description: "Optional on-state accent override used for the thumb and active track tint." },
       { name: "leftTone", type: "SwitchTone", default: '"default"', description: "Color tone for the left (off) state. Supports default, primary, success, warning, and danger." },
       { name: "rightTone", type: "SwitchTone", default: '"primary"', description: "Color tone for the right (on) state. Supports default, primary, success, warning, and danger." },
+      { name: "onCheckedChange", type: "((checked: boolean) => void) | undefined", default: "undefined", description: "Called when the checked state changes." },
     ],
     slots: [],
-    events: [
-      { name: "checkedChange", payload: "{ checked: boolean }", description: "Fires when the checked state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Switch } from "@poodle/svelte";
 
@@ -3298,16 +3281,15 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the tab list." },
       { name: "showTooltips", type: "boolean", default: "false", description: "Whether to show tooltips on tab triggers." },
       { name: "historyKey", type: "string | null", default: "null", description: "Optional URL query param key used to preserve the active tab in browser history." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the active tab changes." },
+      { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when tabs are reordered." },
+      { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a tab close button is requested." },
     ],
     slots: [
-      { name: "default", description: "Tab panel content. Receives slot props: activeValue." },
-      { name: "actions", description: "Actions rendered alongside the tab list." },
+      { name: "children", description: "Snippet for tab panel content. Receives the active tab value." },
+      { name: "actions", description: "Snippet rendered alongside the tab list." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the active tab changes." },
-      { name: "reorder", payload: "{ items: string[] }", description: "Fires when tabs are reordered." },
-      { name: "close", payload: "{ value: string }", description: "Fires when a tab close button is clicked." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { Tabs } from "@poodle/svelte";
 
@@ -3318,7 +3300,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <Tabs {items} defaultValue="overview" historyKey="tab">
-  {#snippet default({ activeValue })}
+  {#snippet children(activeValue)}
     {#if activeValue === "overview"}
       <p>Overview content here.</p>
     {:else}
@@ -3424,7 +3406,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | null", default: "null", description: "HTML id attribute for the input." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled time value (e.g. \"14:30\")." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable time value (e.g. \"14:30\"). Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial time value for uncontrolled mode." },
       { name: "min", type: "string | null", default: "null", description: "Minimum allowed time." },
       { name: "max", type: "string | null", default: "null", description: "Maximum allowed time." },
@@ -3432,11 +3414,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the time input." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this input." },
+      { name: "onValueChange", type: "((value: string | null) => void) | undefined", default: "undefined", description: "Called when the time value changes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string | null }", description: "Fires when the time value changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { TimeInput } from "@poodle/svelte";
 
@@ -3452,7 +3433,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "id", type: "string | undefined", default: "undefined", description: "HTML id attribute for the select." },
-      { name: "value", type: "string | null", default: "null", description: "Controlled selected time zone." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Bindable selected time zone. Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial time zone for uncontrolled mode." },
       { name: "placeholder", type: "string | null", default: '"Select time zone"', description: "Placeholder text when no value is selected." },
       { name: "options", type: "TimeZoneOption[]", default: "[]", description: "Available time zone options." },
@@ -3460,18 +3441,19 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the select." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this select." },
       { name: "name", type: "string | undefined", default: "undefined", description: "Form field name." },
+      { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the selected time zone changes." },
+      { name: "onQueryChange", type: "((query: string) => void) | undefined", default: "undefined", description: "Called when the search query changes." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the dropdown opens or closes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string }", description: "Fires when the selected time zone changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { TimeZoneSelect } from "@poodle/svelte";
 
   let tz = "America/New_York";
 </script>
 
-<TimeZoneSelect id="tz" bind:value={tz} placeholder="Select time zone" />`,
+<TimeZoneSelect id="tz" value={tz} placeholder="Select time zone" onValueChange={(value) => (tz = value)} />`,
   },
 
   "toast-stack": {
@@ -3537,7 +3519,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "toggle-group": {
     props: [
-      { name: "value", type: "string | string[] | null", default: "null", description: "Controlled selected value(s)." },
+      { name: "value", type: "string | string[] | null | undefined", default: "undefined", description: "Bindable selected value(s). Leave undefined for uncontrolled mode." },
       { name: "defaultValue", type: "string | string[] | null", default: "null", description: "Initial selected value(s) for uncontrolled mode." },
       { name: "options", type: "ToggleGroupOption[]", default: "[]", description: "Array of toggle options." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
@@ -3546,11 +3528,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Whether one or many toggles can be active." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle group." },
+      { name: "onValueChange", type: "((value: string | string[]) => void) | undefined", default: "undefined", description: "Called when the selected value(s) change." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: string | string[] }", description: "Fires when the selected value(s) change." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { ToggleGroup } from "@poodle/svelte";
 
@@ -3561,7 +3542,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<ToggleGroup {options} defaultValue="left" ariaLabel="Text alignment" />`,
+<ToggleGroup {options} defaultValue="left" ariaLabel="Text alignment" onValueChange={(value) => console.log(value)} />`,
   },
 
   toolbar: {
@@ -3596,17 +3577,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "placement", type: "OverlayPlacement", default: '"top"', description: "Preferred placement of the tooltip." },
     ],
     slots: [
-      { name: "default", description: "Trigger element the tooltip is anchored to." },
+      { name: "children", description: "Trigger element the tooltip is anchored to." },
     ],
     events: [
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the tooltip open state changes." },
+      { name: "onOpenChange", payload: "(open: boolean) => void", description: "Called when the tooltip open state changes." },
     ],
     usage: `<script lang="ts">
   import { Tooltip } from "@poodle/svelte";
   import { Button } from "@poodle/svelte";
 </script>
 
-<Tooltip content="Save your work" placement="top">
+<Tooltip content="Save your work" placement="top" onOpenChange={(open) => console.log(open)}>
   <Button>Save</Button>
 </Tooltip>`,
   },
@@ -3623,18 +3604,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "excludedColor", type: "string | null", default: "null", description: "Optional color override for the selected excluded state." },
       { name: "defaultColor", type: "string | null", default: "null", description: "Optional color override for the selected default state." },
       { name: "includedColor", type: "string | null", default: "null", description: "Optional color override for the selected included state." },
+      { name: "onValueChange", type: "((value: TriStateValue) => void) | undefined", default: "undefined", description: "Called when the tri-state value changes." },
     ],
     slots: [],
-    events: [
-      { name: "valueChange", payload: "{ value: TriStateValue }", description: "Fires when the tri-state value changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { TriStateSwitch } from "@poodle/svelte";
 
   let filter = "default";
 </script>
 
-<TriStateSwitch bind:value={filter} ariaLabel="Include archived items" excludedColor="#ef4444" includedColor="#22c55e" />`,
+<TriStateSwitch value={filter} ariaLabel="Include archived items" excludedColor="#ef4444" includedColor="#22c55e" onValueChange={(value) => (filter = value)} />`,
   },
 
   "ui-presentation-provider": {
@@ -3692,14 +3672,13 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "timeZoneOptions", type: "TimeZoneOption[]", default: "[]", description: "Available time zone options." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the picker is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the picker." },
+      { name: "onValueChange", type: "((value: ZonedDateTimeValue) => void) | undefined", default: "undefined", description: "Called when the date/time/zone value changes." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the picker opens or closes." },
     ],
     slots: [
       { name: "default", description: "Custom trigger content for the picker." },
     ],
-    events: [
-      { name: "valueChange", payload: "{ value: ZonedDateTimeValue }", description: "Fires when the date/time/zone value changes." },
-      { name: "openChange", payload: "{ open: boolean }", description: "Fires when the picker open state changes." },
-    ],
+    events: [],
     usage: `<script lang="ts">
   import { DateTimeZonePicker } from "@poodle/svelte";
 

@@ -34,27 +34,27 @@
       <div class="poodle-specimen__item">
         <Eyebrow>Default</Eyebrow>
         <Field id="name-field" label="Name" description="Enter your full name.">
-          <TextInput id="name-field" placeholder="Jane Doe" on:valueChange={(event) => (name = event.detail.value)} />
+          <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => (name = nextValue)} />
         </Field>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>With validation</Eyebrow>
         <Field id="email-field" label="Email" description="A valid email address is required." validationState={validationState} error={validationState === "invalid" ? "Please enter a valid email address." : null}>
-          <TextInput id="email-field" value={email} {validationState} on:valueChange={(event) => { email = event.detail.value; validationState = email.includes("@") ? "valid" : "invalid"; }} />
+          <TextInput id="email-field" value={email} {validationState} onValueChange={(nextValue) => { email = nextValue; validationState = nextValue.includes("@") ? "valid" : "invalid"; }} />
         </Field>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Slug</Eyebrow>
         <Field id="slug-field" label="Slug" description="Generates from the title until the user edits it." validationState={slugStatus === "validating" ? "pending" : slugStatus === "invalid" ? "invalid" : slugStatus === "valid" ? "valid" : "none"} error={slugStatus === "invalid" ? "That slug is not available." : null}>
-          <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" prefix="/projects/" maxLength={64} validate={validateSlug} on:valueChange={(event) => (slug = event.detail.value)} on:validationChange={(event) => { slugStatus = event.detail.status; }} />
+          <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" prefix="/projects/" maxLength={64} validate={validateSlug} onValueChange={(nextValue) => (slug = nextValue)} onValidationChange={(detail) => { slugStatus = detail.status; }} />
         </Field>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Search</Eyebrow>
-        <TextInput id="search-field" type="search" placeholder="Search..." value={searchQuery} on:valueChange={(event) => (searchQuery = event.detail.value)} on:clear={() => (searchQuery = "")} />
+        <TextInput id="search-field" type="search" placeholder="Search..." value={searchQuery} onValueChange={(nextValue) => (searchQuery = nextValue)} onClear={() => (searchQuery = "")} />
       </div>
 
       <div class="poodle-specimen__item">

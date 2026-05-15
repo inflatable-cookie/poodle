@@ -1,9 +1,8 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let triStateSwitchInstanceCount = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -13,39 +12,52 @@
     TriStateValue,
   } from "./types";
 
-  export let value: TriStateValue = "default";
-  export let options: Record<TriStateValue, string> = {
-    excluded: "Exclude",
-    default: "Default",
-    included: "Include",
-  };
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let disabled = false;
-  export let ariaLabel: string;
-  export let excludedColor: string | null = null;
-  export let defaultColor: string | null = null;
-  export let includedColor: string | null = null;
+  interface Props {
+    value?: TriStateValue;
+    options?: Record<TriStateValue, string>;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    disabled?: boolean;
+    ariaLabel: string;
+    excludedColor?: string | null;
+    defaultColor?: string | null;
+    includedColor?: string | null;
+    onValueChange?: ((value: TriStateValue) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: TriStateValue };
-  }>();
+  let {
+    value = $bindable<TriStateValue>("default"),
+    options = {
+      excluded: "Exclude",
+      default: "Default",
+      included: "Include",
+    },
+    size = null,
+    sizeRole = "control",
+    density = null,
+    disabled = false,
+    ariaLabel,
+    excludedColor = null,
+    defaultColor = null,
+    includedColor = null,
+    onValueChange = undefined,
+  }: Props = $props();
 
   const orderedValues: TriStateValue[] = ["excluded", "default", "included"];
   const instanceId = ++triStateSwitchInstanceCount;
   const groupName = `poodle-tri-state-switch-${instanceId}`;
   const uiPresentation = getUiPresentation();
 
-  $: selectedIndex = Math.max(0, orderedValues.indexOf(value));
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: triStateStyles = [
+  const selectedIndex = $derived(Math.max(0, orderedValues.indexOf(value)));
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const triStateStyles = $derived([
     excludedColor ? `--poodle-tri-state-excluded-color: ${excludedColor}` : "",
     defaultColor ? `--poodle-tri-state-default-color: ${defaultColor}` : "",
     includedColor ? `--poodle-tri-state-included-color: ${includedColor}` : "",
     `--poodle-tri-state-active-index: ${selectedIndex}`,
-  ].filter(Boolean).join("; ") || undefined;
+  ].filter(Boolean).join("; ") || undefined);
 
   function handleSelect(nextValue: TriStateValue): void {
     if (disabled || value === nextValue) {
@@ -53,7 +65,7 @@
     }
 
     value = nextValue;
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 </script>
 
@@ -83,7 +95,7 @@
         checked={value === optionValue}
         disabled={disabled}
         aria-label={options[optionValue]}
-        on:change={() => handleSelect(optionValue)}
+        onchange={() => handleSelect(optionValue)}
       />
       <span class="poodle-tri-state-switch__segment">{options[optionValue]}</span>
     </label>

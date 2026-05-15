@@ -53,7 +53,7 @@
       value={theme}
       options={themeOptions}
       ariaLabel="Theme"
-      on:valueChange={(event) => onThemeChange(event.detail.value as string)}
+      onValueChange={(value) => onThemeChange(value as string)}
     />
   </div>
 
@@ -63,7 +63,7 @@
       value={density}
       options={densityOptions}
       ariaLabel="Density"
-      on:valueChange={(event) => onDensityChange(event.detail.value as string)}
+      onValueChange={(value) => onDensityChange(value as string)}
     />
   </div>
 
@@ -73,7 +73,7 @@
       value={controlSize}
       options={controlSizeOptions}
       ariaLabel="Control size"
-      on:valueChange={(event) => onControlSizeChange(event.detail.value as string)}
+      onValueChange={(value) => onControlSizeChange(value as string)}
     />
   </div>
 
@@ -83,7 +83,7 @@
       value={appearanceTreatment}
       options={appearanceTreatmentOptions}
       ariaLabel="Appearance treatment"
-      on:valueChange={(event) => onAppearanceTreatmentChange(event.detail.value as string)}
+      onValueChange={(value) => onAppearanceTreatmentChange(value as string)}
     />
   </div>
 
@@ -94,8 +94,8 @@
       placeholder="Find component..."
       value={search}
       ariaLabel="Search components"
-      on:valueChange={(event) => onSearchChange(event.detail.value)}
-      on:clear={() => onSearchChange("")}
+      onValueChange={onSearchChange}
+      onClear={() => onSearchChange("")}
     />
   </div>
 </div>

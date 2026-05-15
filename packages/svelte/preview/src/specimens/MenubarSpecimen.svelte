@@ -44,7 +44,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Application menu bar">
-    <Menubar {items} ariaLabel="Application menu" on:action={(e) => (lastAction = e.detail.value)} />
+    <Menubar {items} ariaLabel="Application menu" onAction={(value) => (lastAction = value)} />
     {#if lastAction}
       <p>Last action: <strong>{lastAction}</strong></p>
     {/if}
@@ -55,6 +55,6 @@
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <Menubar {items} {density} ariaLabel="{density} menu bar" />
+    <Menubar {items} {density} ariaLabel={density + " menu bar"} />
   </svelte:fragment>
 </SpecimenLayout>

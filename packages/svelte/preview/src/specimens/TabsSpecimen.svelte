@@ -53,9 +53,10 @@
       items={basicTabs}
       defaultValue="overview"
       ariaLabel="Section tabs"
-      let:activeValue
     >
+      {#snippet children(activeValue)}
       <p>Active tab: <strong>{activeValue}</strong></p>
+      {/snippet}
     </Tabs>
   </SpecimenGroup>
 
@@ -69,15 +70,15 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Card variant (closable, reorderable)">
-    <Tabs
-      items={closableTabs}
-      variant="card"
-      defaultValue="App.svelte"
-      reorderable
-      ariaLabel="Open files"
-      on:close={(e) => (lastClosed = e.detail.value)}
-      on:reorder={(e) => (lastReorder = e.detail.items.join(", "))}
-    />
+      <Tabs
+        items={closableTabs}
+        variant="card"
+        defaultValue="App.svelte"
+        reorderable
+        ariaLabel="Open files"
+        onClose={(value) => (lastClosed = value)}
+        onReorder={(items) => (lastReorder = items.join(", "))}
+      />
     {#if lastClosed}
       <p>Closed: <strong>{lastClosed}</strong></p>
     {/if}
@@ -126,8 +127,8 @@
         defaultValue="editor"
         reorderable
         ariaLabel="Workspace surfaces"
-        on:close={(e) => (lastClosed = e.detail.value)}
-        on:reorder={(e) => (lastReorder = e.detail.items.join(", "))}
+        onClose={(value) => (lastClosed = value)}
+        onReorder={(items) => (lastReorder = items.join(", "))}
       />
       <div class="poodle-specimen__surface-body">
         <p>Surface content area</p>
@@ -161,7 +162,7 @@
             defaultValue="explorer"
             reorderable
             ariaLabel="Side panel tabs"
-            on:close={(e) => (lastClosed = e.detail.value)}
+            onClose={(value) => (lastClosed = value)}
           />
           <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
             <p>Panel body — expanded</p>
@@ -192,9 +193,10 @@
       defaultValue="details"
       historyKey="tab"
       ariaLabel="Detail sections"
-      let:activeValue
     >
+      {#snippet children(activeValue)}
       <p>Active tab: <strong>{activeValue}</strong></p>
+      {/snippet}
     </Tabs>
   </SpecimenGroup>
 </div>

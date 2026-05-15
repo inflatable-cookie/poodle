@@ -1,42 +1,62 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextAccordionId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let items: AccordionItem[] = [];
-  export let value: string | string[] | null = null;
-  export let defaultValue: string | string[] | null = null;
-  export let selectionMode: "single" | "multiple" = "single";
-  export let collapsible = true;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    items?: AccordionItem[];
+    value?: string | string[] | null;
+    defaultValue?: string | string[] | null;
+    selectionMode?: "single" | "multiple";
+    collapsible?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string | string[] | null) => void) | undefined;
+    children?: Snippet<[AccordionItem, boolean]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string | string[] | null };
-  }>();
+  let {
+    items = [],
+    value = $bindable<string | string[] | null>(null),
+    defaultValue = null,
+    selectionMode = "single",
+    collapsible = true,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
   const accordionId = ++nextAccordionId;
-  let uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+  let uncontrolledValue = $state<string | string[] | null>(null);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = value !== null;
-  $: currentValue = isControlled ? value : uncontrolledValue;
-  $: openValues = Array.isArray(currentValue)
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue ?? (selectionMode === "multiple" ? [] : null);
+    }
+  });
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(value !== null);
+  const currentValue = $derived(isControlled ? value : uncontrolledValue);
+  const openValues = $derived(Array.isArray(currentValue)
     ? currentValue
     : currentValue
       ? [currentValue]
-      : [];
+      : []);
 
   function toggle(itemValue: string): void {
     const currentlyOpen = openValues.includes(itemValue);
@@ -54,9 +74,11 @@
 
     if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 </script>
 
@@ -77,7 +99,7 @@
           disabled={item.disabled === true}
           aria-expanded={openValues.includes(item.value) ? "true" : "false"}
           aria-controls={`poodle-accordion-panel-${accordionId}-${item.value}`}
-          on:click={() => toggle(item.value)}
+          onclick={() => toggle(item.value)}
         >
           <span class="poodle-accordion__summary">
             <span class="poodle-accordion__title">{item.label}</span>
@@ -97,7 +119,7 @@
           aria-labelledby={`poodle-accordion-trigger-${accordionId}-${item.value}`}
           transition:slide={{ duration: 180 }}
         >
-          <slot item={item} isOpen={true} />
+          {@render children?.(item, true)}
         </div>
       {/if}
     </section>

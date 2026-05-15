@@ -64,7 +64,7 @@ MenuItem: {
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` (boolean) plus `openChange` event
+- controlled: `open` (boolean) plus `onOpenChange(open)`
 - uncontrolled: `open` is null, uses `defaultOpen` as initial state
 - the invocation target and anchor point are external inputs; the menu does not
   own context selection itself
@@ -86,12 +86,12 @@ MenuItem: {
 Open/closed state, invocation anchor position, and current highlighted item
 index are required.
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Prop | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | menu opens or closes | `{ open: boolean }` | pointer, keyboard, or dismissal driven |
-| `action` | actionable item commits | `{ value: string }` | disabled and separator rows never fire |
+| `onOpenChange` | menu opens or closes | `boolean` | pointer, keyboard, or dismissal driven |
+| `onAction` | actionable item commits | `string` | disabled and separator rows never fire |
 
 ## 6. Accessibility
 

@@ -1,7 +1,7 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-05-14
 
 ## 1. Purpose
 
@@ -11,12 +11,12 @@ Updated: 2026-04-09
   (platform `<select>` element) or custom mode (styled dropdown overlay with
   optional search input), supporting flat options, option groups, lazy option
   loading, searchable filtering, freeform text entry, custom option rendering
-  via slots, and filter-friendly clear/reset behavior
+  via snippet props, and filter-friendly clear/reset behavior
 - In scope: single value selection, placeholder, flat options, grouped options
   (optgroup), disabled options, lazy option/group loading, clearable reset
   state, native select accessibility, custom dropdown with keyboard navigation,
   searchable/filterable lists, freeform text-as-value, custom option/trigger/empty
-  slot rendering
+  snippet rendering
 - Out of scope: multi-select, command-palette ranking, arbitrary menu content
 - Supersedes: `Combobox` (deprecated; use `Select` with `searchable` prop instead)
 
@@ -43,7 +43,7 @@ Updated: 2026-04-09
   │     ├── [Clear Button .select__clear]  <button> (clearable + has selection)
   │     └── [Indicator .select__indicator]  <span> (decorative chevron)
   ├── [Trigger Button .select__trigger]  <button> (non-searchable)
-  │     ├── [Value/Slot .select__value | slot:trigger]
+  │     ├── [Value/Snippet .select__value | trigger snippet]
   │     ├── [Clear Button .select__clear]  <button> (clearable + has selection)
   │     └── [Indicator .select__indicator]  <span> (conditional: hidden when variant="ghost")
   ├── [Hidden Input]  <input type="hidden"> (when name prop set, for form submission)
@@ -51,12 +51,12 @@ Updated: 2026-04-09
         ├── [Group .select__group]  <div role="group"> (grouped options)
         │     ├── [Group Label .select__group-label]
         │     └── [Option Button .select__option]  <button role="option">
-        │           ├── [slot:option] (custom rendering) OR
+        │           ├── [option snippet] (custom rendering) OR
         │           ├── [Option Icon .select__option-icon] (optional)
         │           ├── [Option Label .select__option-label]
         │           └── [Option Description .select__option-description] (optional)
         ├── [Option Button .select__option]  <button role="option"> (flat options)
-        └── [Empty .select__empty | slot:empty]  (when no filtered matches)
+        └── [Empty .select__empty | empty snippet]  (when no filtered matches)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -74,15 +74,15 @@ Updated: 2026-04-09
 | Option Description | no | secondary text under option label | color, font-size |
 | Group | no | labeled group of options in dropdown | none (container) |
 | Group Label | no | group header text | font-weight, color, font-size |
-| Empty | custom mode | "no results" message or slot | color, font-size, padding |
+| Empty | custom mode | "no results" message or snippet | color, font-size, padding |
 | Clear Button | no | clears selection back to default | icon color |
 | Option | native mode | selectable value in native select | text color, font-weight |
 | Option Group | native mode | labeled group of options in native select | font-weight, text color |
 
-### Slots (Svelte / Custom Mode)
+### Snippet Props (Svelte / Custom Mode)
 
-| Slot | Props | Description |
-|------|-------|-------------|
+| Snippet | Props | Description |
+|---------|-------|-------------|
 | `option` | `{ option, highlighted, selected, index }` | Custom rendering for each option in the dropdown |
 | `trigger` | `{ selectedOption, open, placeholder }` | Custom rendering for the trigger button content (non-searchable only) |
 | `empty` | `{ query }` | Custom rendering for the empty state when no options match the search query |
@@ -94,12 +94,10 @@ Updated: 2026-04-09
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| undefined` | `undefined` | no | HTML id for the select element |
-| `value` | `string \| null` | `null` | no | controlled selected value |
+| `value` | `string \| null \| undefined` | `undefined` | no | bindable selected value; leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial value |
 | `placeholder` | `string \| null` | `null` | no | shown when no value selected |
 | `options` | `SelectItems` | — | yes | array of `SelectOption` or `SelectOptionGroup` |
-| `items` | `LegacySelectItem[] \| null` | `null` | no | deprecated compatibility alias for flat option arrays using `disabled` instead of `isDisabled` |
-| `groups` | `LegacySelectGroup[] \| null` | `null` | no | deprecated compatibility alias for grouped option data using `items` / nested `groups` |
 | `disabled` | `boolean` | `false` | no | disables the select |
 | `required` | `boolean` | `false` | no | forwards native required semantics |
 | `validationState` | `ValidationState` | `"none"` | no | drives trigger border color (`invalid`→danger, `valid`→success, `pending`→accent) and sets `aria-invalid` when `"invalid"` |
@@ -113,12 +111,12 @@ Updated: 2026-04-09
 | `native` | `boolean \| undefined` | `undefined` | no | explicit mode override: `true` forces native select, `false` forces custom dropdown, `undefined` uses auto-detection |
 | `emptyMessage` | `string` | `"No matches"` | no | text shown in custom dropdown when no options match the search query |
 | `loadOptions` | `SelectLoadOptions \| null` | `null` | no | unified async option loader; returns flat or grouped options |
-| `loadItems` | `(() => Promise<LegacySelectItem[]>) \| null` | `null` | no | deprecated lazy flat option loader; use `loadOptions` |
-| `loadGroups` | `(() => Promise<LegacySelectGroup[]>) \| null` | `null` | no | deprecated lazy grouped option loader; use `loadOptions` |
 | `loadKey` | `string \| null` | `null` | no | invalidates cached lazy options when it changes |
 | `variant` | `"default" \| "ghost"` | `"default"` | no | visual variant; `"ghost"` strips border, background, box-shadow, padding, min-height, and hides the chevron indicator |
 | `menuMinWidth` | `string \| null` | `null` | no | minimum width for the dropdown listbox (e.g. `"12rem"`); when set, listbox uses `width: max-content` instead of matching trigger width, and viewport-aware horizontal anchor flipping occurs (right-anchors if menu would overflow right edge) |
-| `onchange` | `((value: string) => void) \| null` | `null` | no | callback prop for existing caller styles; `valueChange` remains the canonical event |
+| `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | callback fired when the selected value changes |
+| `onQueryChange` | `((query: string) => void) \| undefined` | `undefined` | no | callback fired when the searchable query changes |
+| `onOpenChange` | `((open: boolean) => void) \| undefined` | `undefined` | no | callback fired when the custom dropdown opens or closes |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -130,25 +128,26 @@ SelectOption: { value: string; label: string; isDisabled?: boolean; disabled?: b
 SelectOptionGroup: { label: string; options: SelectOption[] }
 SelectItems: SelectOption[] | SelectOptionGroup[]
 SelectLoadOptions: () => Promise<SelectItems>
-LegacySelectItem: { value: string; label: string; disabled?: boolean; isDisabled?: boolean }
-LegacySelectGroup: { label: string; items?: LegacySelectItem[]; groups?: LegacySelectGroup[] }
+SelectTriggerRenderState: { selectedOption: SelectOption | null; open: boolean; placeholder: string | null }
+SelectOptionRenderState: { option: SelectOption; highlighted: boolean; selected: boolean; index: number }
+SelectEmptyRenderState: { query: string }
 ```
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `valueChange` event
+- controlled: `bind:value` or `value` plus `onValueChange`
 - uncontrolled: `defaultValue`
-- lazy: `loadOptions` (preferred) or `loadItems` / `loadGroups` (deprecated) populate internal options once per `loadKey`
+- lazy: `loadOptions` populates internal options once per `loadKey`
 
 ### Mode Resolution
 
 The component automatically determines whether to render a native `<select>` or a custom dropdown overlay. The resolution cascade is:
 
-1. `native=true` -- always native `<select>` (searchable/slots ignored)
+1. `native=true` -- always native `<select>` (searchable/snippets ignored)
 2. `native=false` -- always custom dropdown
 3. `searchable=true` -- custom dropdown (search input as trigger)
-4. `option` slot present -- custom dropdown (custom option rendering requires overlay)
-5. `trigger` slot present -- custom dropdown
+4. `option` snippet present -- custom dropdown (custom option rendering requires overlay)
+5. `trigger` snippet present -- custom dropdown
 6. Otherwise -- native `<select>`
 
 ## 4. States
@@ -166,29 +165,28 @@ The component automatically determines whether to render a native `<select>` or 
 | load error | lazy loader fails | native fallback option shows the error message |
 | open (custom) | dropdown is visible | `data-open="true"` on root, listbox rendered |
 | highlighted (custom) | keyboard nav or hover over option | `data-highlighted="true"` on option, accent background mix |
-| empty results (custom) | searchable query matches no options | empty message or empty slot rendered in listbox |
+| empty results (custom) | searchable query matches no options | empty message or empty snippet rendered in listbox |
 | ghost variant | `variant="ghost"` | no border, background, box-shadow, padding, or min-height on root; no chevron indicator on non-searchable trigger; focus-within treatment fully transparent |
 
 ### Component States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| value selected | user picks an option | `valueChange` fires with selected option value |
+| value selected | user picks an option | `value` updates and `onValueChange` fires with selected option value |
 | placeholder shown | no value and placeholder set | placeholder option displayed, disabled in dropdown |
-| query active (custom) | user types in searchable input | options filtered by query, `queryChange` fires |
+| query active (custom) | user types in searchable input | options filtered by query, `onQueryChange` fires |
 | highlight tracked (custom) | ArrowDown/ArrowUp or hover | one option visually highlighted via `data-highlighted` |
-| value committed (custom) | Enter on highlighted option or click | `valueChange` fires, dropdown closes |
+| value committed (custom) | Enter on highlighted option or click | `value` updates, dropdown closes |
 | dismissed (custom) | Escape or click outside | dropdown closes without changing value |
 | freeform commit (custom) | blur or Enter with no highlight, `freeform=true` | query text becomes the value |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user selects a different option | `{ value: string }` | fires on native change event or custom option commit |
-| `change` | user selects a different option | `{ value: string }` | alias event for existing caller styles |
-| `queryChange` | user types in searchable input | `{ query: string }` | custom mode with `searchable` only; fires on every input change |
-| `openChange` | dropdown opens or closes | `{ open: boolean }` | custom mode only; fires on open and close transitions |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user selects a different option | `value: string` | fires on native change or custom option commit |
+| `onQueryChange` | user types in searchable input | `query: string` | custom mode with `searchable` only; fires on every input change |
+| `onOpenChange` | dropdown opens or closes | `open: boolean` | custom mode only; fires on open and close transitions |
 
 ## 6. Accessibility
 
@@ -211,7 +209,7 @@ The component automatically determines whether to render a native `<select>` or 
 - Group: `role="group"` with `aria-label` from group label
 - Disabled options: native `disabled` attribute on button
 - Clear button: `aria-label="Clear selection"`
-- Module-level `nextSelectId` counter generates unique ids for ARIA relationships
+- Per-instance generated ids back the combobox/listbox ARIA relationships when `id` is not supplied
 
 ### Keyboard (Native Mode)
 
@@ -426,10 +424,10 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - Freeform mode: when `freeform=true` and `searchable=true`, the query text becomes the selected value on commit if no option is highlighted
 - `data-variant` attribute on root reflects the `variant` prop; ghost variant strips all field chrome (border, background, shadow, padding, min-height) and hides the chevron indicator on non-searchable triggers
 - `menuMinWidth` prop sets an inline `min-width` style on the listbox and switches it to `width: max-content` (class `select__listbox--auto-width`); on open, viewport-aware horizontal anchor flipping checks whether left-anchoring would overflow the right edge and applies `select__listbox--align-end` if so
-- Three named slots available in custom mode:
-  - `option` -- slot props: `{ option, highlighted, selected, index }` -- custom rendering for each option row
-  - `trigger` -- slot props: `{ selectedOption, open, placeholder }` -- custom trigger button content (non-searchable only)
-  - `empty` -- slot props: `{ query }` -- custom empty state when no options match
+- Three named snippet props available in custom mode:
+  - `option` -- snippet props: `{ option, highlighted, selected, index }` -- custom rendering for each option row
+  - `trigger` -- snippet props: `{ selectedOption, open, placeholder }` -- custom trigger button content (non-searchable only)
+  - `empty` -- snippet props: `{ query }` -- custom empty state when no options match
 - Options support optional `icon` (rendered via Icon component) and `description` (secondary text) fields
 - Clearable mode renders a clear button (X icon) inside the trigger when a value is selected
 - When the dropdown is closed, the searchable input text resets to the selected option's label (or empty if no selection, unless freeform)
@@ -446,7 +444,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match
+- [ ] value and onValueChange semantics match
 - [ ] placeholder behavior matches (displayed when no value, secondary color)
 - [ ] disabled state matches (whole control and individual options)
 - [ ] option groups supported on both platforms

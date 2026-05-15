@@ -1,46 +1,67 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextRadioGroupId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, Orientation, RadioGroupOption, SemanticControlSizeRole } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let options: RadioGroupOption[] = [];
-  export let orientation: Orientation = "vertical";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let name: string | undefined = undefined;
-  export let selectedColor: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    value?: string | null | undefined;
+    defaultValue?: string | null;
+    options?: RadioGroupOption[];
+    orientation?: Orientation;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    name?: string | undefined;
+    selectedColor?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-  }>();
+  let {
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = null,
+    options = [],
+    orientation = "vertical",
+    disabled = false,
+    ariaLabel = null,
+    describedBy = null,
+    name = undefined,
+    selectedColor = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+  }: Props = $props();
 
   const generatedName = `poodle-radio-group-${++nextRadioGroupId}`;
   const uiPresentation = getUiPresentation();
-  let uncontrolledValue = defaultValue;
+  let uncontrolledValue = $state<string | null>(null);
 
-  $: isControlled = value !== null;
-  $: currentValue = isControlled ? value : uncontrolledValue;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: radioGroupStyles = selectedColor ? `--poodle-radio-selected-color: ${selectedColor}` : undefined;
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived(isControlled ? value : uncontrolledValue);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const radioGroupStyles = $derived(selectedColor ? `--poodle-radio-selected-color: ${selectedColor}` : undefined);
 
   function handleChange(nextValue: string): void {
     if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 </script>
 
@@ -64,7 +85,7 @@
         value={option.value}
         checked={currentValue === option.value}
         disabled={disabled || option.disabled === true}
-        on:change={() => handleChange(option.value)}
+        onchange={() => handleChange(option.value)}
       />
       <span class="poodle-radio-group__indicator" aria-hidden="true">
         <span class="poodle-radio-group__dot"></span>

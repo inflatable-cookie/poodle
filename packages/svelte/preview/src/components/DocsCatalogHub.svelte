@@ -112,13 +112,14 @@
             ]}
             defaultValue="accordion-foundation"
             ariaLabel="Disclosure primitive example"
-            let:item
           >
+            {#snippet children(item)}
             <p class="poodle-detail-card-meta">
               {item.value === "accordion-foundation"
                 ? "Foundation-safe grouped disclosure now exists for more web-oriented products and docs surfaces."
                 : "Single-block reveal belongs to Collapsible; grouped disclosure belongs to Accordion."}
             </p>
+            {/snippet}
           </Accordion>
 
           <Collapsible

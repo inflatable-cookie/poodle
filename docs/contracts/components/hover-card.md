@@ -20,9 +20,9 @@ Updated: 2026-03-15
 ```text
 [Root .hover-card]  <span>
   ├── [Trigger .hover-card__trigger]  <span>  role="button"  tabindex="0"
-  │     └── {trigger slot}
+  │     └── {trigger snippet}
   └── [Surface .hover-card__surface]  <span>  role="dialog"  tabindex="-1"  (when open)
-        └── {default slot}
+        └── {children snippet}
 ```
 
 | Part | Required | Description | Token Targets |
@@ -43,6 +43,7 @@ Updated: 2026-03-15
 | `closeDelayMs` | `number` | `120` | no | milliseconds before closing on leave |
 | `placement` | `OverlayPlacement` | `"top"` | no | surface positioning relative to trigger |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the surface dialog |
+| `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the open state changes |
 
 ### Type Definitions
 
@@ -54,16 +55,16 @@ OverlayPlacement:
   "right" | "right-start" | "right-end"
 ```
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
+| Snippet | Purpose |
 |------|---------|
-| trigger | trigger element content |
-| default | surface preview content |
+| `trigger` | trigger element content |
+| `children` | surface preview content |
 
 ### Controlled And Uncontrolled
 
-- controlled: `open` prop plus `openChange` event
+- controlled: `open` prop plus `onOpenChange(open)`
 - uncontrolled: `defaultOpen` — internal state tracks visibility
 - module-level `nextHoverCardId` counter for unique IDs across instances
 - separate `openTimer` and `closeTimer` managed internally, cleared on component destroy
@@ -87,11 +88,11 @@ OverlayPlacement:
 - Surface hover: mouseenter on surface cancels close timer, mouseleave schedules close
 - Hover entering the surface must cancel the close timer to maintain continuity
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Prop | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `openChange` | open state changes | `{ open: boolean }` | fires on hover intent, focus, escape, or leave |
+| `onOpenChange` | open state changes | `boolean` | fires on hover intent, focus, escape, or leave |
 
 ## 6. Accessibility
 
@@ -202,7 +203,7 @@ No `data-placement` attribute is emitted — positioning is entirely JS-driven.
 - Timers cleared on `onDestroy`
 - Surface mouseenter cancels close timer; mouseleave schedules close
 - Escape keydown on trigger or surface calls `clearTimers()` then `setOpen(false)`
-- Slots: named `trigger` slot, default slot for surface content
+- Snippets: named `trigger` snippet, `children` snippet for surface content
 - Surface uses fixed positioning with 8px gap from trigger and 8px viewport padding
 - Max-width is 22rem (narrower than Popover's 24rem)
 

@@ -1,64 +1,92 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextMenubarId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, tick } from "svelte";
 
   import { findNextEnabledIndex, firstEnabledIndex, menuNavigableItems } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, MenubarItem, MenuItem, SemanticControlSizeRole } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let items: MenubarItem[] = [];
-  export let ariaLabel: string | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
+  interface Props {
+    value?: string | null;
+    defaultValue?: string | null;
+    items?: MenubarItem[];
+    ariaLabel?: string | null;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string | null) => void) | undefined;
+    onAction?: ((value: string) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string | null };
-    action: { value: string };
-  }>();
+  let {
+    value = $bindable<string | null>(null),
+    defaultValue = null,
+    items = [],
+    ariaLabel = null,
+    sizeRole = "chrome",
+    size = null,
+    density = null,
+    onValueChange = undefined,
+    onAction = undefined,
+  }: Props = $props();
 
   const menubarId = ++nextMenubarId;
   const uiPresentation = getUiPresentation();
 
-  let rootElement: HTMLDivElement | null = null;
-  let triggerElements: Array<HTMLButtonElement | null> = [];
-  let menuItemElements: Array<HTMLButtonElement | null> = [];
-  let uncontrolledValue = defaultValue;
-  let focusIndex = 0;
-  let highlightIndex = 0;
-  let lastOpenValue: string | null = null;
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let triggerElements = $state<Array<HTMLButtonElement | null>>([]);
+  let menuItemElements = $state<Array<HTMLButtonElement | null>>([]);
+  let uncontrolledValue = $state<string | null>(null);
+  let focusIndex = $state(0);
+  let highlightIndex = $state(0);
+  let lastOpenValue = $state<string | null>(null);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = value ?? uncontrolledValue;
-  $: currentMenu = items.find((item) => item.value === currentValue) ?? null;
-  $: actionableItems = menuNavigableItems(currentMenu?.items ?? []);
-  $: selectedIndex = items.findIndex((item) => item.value === currentValue);
-  $: if (selectedIndex >= 0) {
-    focusIndex = selectedIndex;
-  } else if (firstEnabledIndex(items) >= 0 && focusIndex === 0) {
-    focusIndex = firstEnabledIndex(items);
-  }
-  $: if (currentValue !== lastOpenValue) {
-    highlightIndex = 0;
-    lastOpenValue = currentValue;
-  }
-  $: if (currentValue && actionableItems.length > 0) {
+  $effect.pre(() => {
+    if (!rootElement) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const currentValue = $derived(value ?? uncontrolledValue);
+  const currentMenu = $derived(items.find((item) => item.value === currentValue) ?? null);
+  const actionableItems = $derived(menuNavigableItems(currentMenu?.items ?? []));
+  const selectedIndex = $derived(items.findIndex((item) => item.value === currentValue));
+
+  $effect(() => {
+    if (selectedIndex >= 0) {
+      focusIndex = selectedIndex;
+    } else if (firstEnabledIndex(items) >= 0 && focusIndex === 0) {
+      focusIndex = firstEnabledIndex(items);
+    }
+  });
+
+  $effect(() => {
+    if (currentValue !== lastOpenValue) {
+      highlightIndex = 0;
+      lastOpenValue = currentValue;
+    }
+  });
+
+  $effect(() => {
+    if (currentValue && actionableItems.length > 0) {
     tick().then(() => menuItemElements[highlightIndex]?.focus());
-  }
+    }
+  });
 
   function setValue(nextValue: string | null): void {
     if (value === null) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 
   function moveTriggerFocus(nextIndex: number): void {
@@ -102,7 +130,7 @@
       return;
     }
 
-    dispatch("action", { value: item.value });
+    onAction?.(item.value);
     setValue(null);
     triggerElements[focusIndex]?.focus();
   }
@@ -149,14 +177,14 @@
           aria-haspopup="menu"
           aria-expanded={currentValue === item.value ? "true" : "false"}
           aria-controls={currentValue === item.value ? `poodle-menubar-menu-${menubarId}-${item.value}` : undefined}
-          on:focus={() => (focusIndex = index)}
-          on:click={() => setValue(currentValue === item.value ? null : item.value)}
-          on:mouseenter={() => {
+          onfocus={() => (focusIndex = index)}
+          onclick={() => setValue(currentValue === item.value ? null : item.value)}
+          onmouseenter={() => {
             if (currentValue !== null && currentValue !== item.value && !item.disabled) {
               openMenuAtIndex(index);
             }
           }}
-          on:keydown={(event) => {
+          onkeydown={(event) => {
             if (event.key === "ArrowRight") {
               event.preventDefault();
               moveTriggerFocus(findNextEnabledIndex(items, index, 1));
@@ -209,8 +237,8 @@
                   disabled={menuItem.disabled === true}
                   role={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? `menuitem${menuItem.kind}` : "menuitem"}
                   aria-checked={menuItem.kind === "checkbox" || menuItem.kind === "radio" ? (menuItem.checked ? "true" : "false") : undefined}
-                  on:click={() => activateItem(menuItem)}
-                  on:keydown={(event) => {
+                  onclick={() => activateItem(menuItem)}
+                  onkeydown={(event) => {
                     if (event.key === "ArrowDown") {
                       event.preventDefault();
                       moveMenuHighlight(1);

@@ -73,10 +73,10 @@ DateRangeValue: { start: string | null; end: string | null }
 
 ### Controlled And Uncontrolled
 
-- controlled value: `value` (non-null) plus `valueChange` event
+- controlled value: `value` (non-null) plus `onValueChange` callback
 - uncontrolled value: `defaultValue` sets the initial selection; component owns
   its own state
-- controlled month: `visibleMonth` (non-null) plus `monthChange` event
+- controlled month: `visibleMonth` (non-null) plus `onMonthChange` callback
 - uncontrolled month: component manages visible month internally
 
 ## 4. States
@@ -102,18 +102,18 @@ DateRangeValue: { start: string | null; end: string | null }
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | idle | initial render | grid shows current or visible month |
-| value selected | user clicks/presses day (single mode) | `valueChange` fires, day receives selected treatment |
+| value selected | user clicks/presses day (single mode) | `onValueChange` runs, day receives selected treatment |
 | start selected | first click on a day (range mode) | start is set, end is cleared; waiting for second click |
-| complete range | second click on a day (range mode) | end is set (swapped with start if before start); `valueChange` fires |
-| month navigated | user clicks prev/next or PageUp/PageDown | `monthChange` fires, grid rebuilds |
+| complete range | second click on a day (range mode) | end is set (swapped with start if before start); `onValueChange` runs |
+| month navigated | user clicks prev/next or PageUp/PageDown | `onMonthChange` runs, grid rebuilds |
 | focus roving | arrow key navigation | focus moves between days via roving tabindex |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Runs | Payload | Notes |
 |-------|---------------|---------|-------|
-| `valueChange` | user selects a day | `{ value: string }` (single) or `{ value: DateRangeValue }` (range) | ISO date string in single mode; `{ start, end }` in range mode |
-| `monthChange` | visible month changes via nav or keyboard | `{ month: string }` | ISO month string `YYYY-MM` |
+| `onValueChange` | user selects a day | `string` (single) or `DateRangeValue` (range) | ISO date string in single mode; `{ start, end }` in range mode |
+| `onMonthChange` | visible month changes via nav or keyboard | `string` | ISO month string `YYYY-MM` |
 
 ## 6. Accessibility
 
@@ -416,8 +416,8 @@ DateRangeValue: { start: string | null; end: string | null }
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match (controlled and uncontrolled)
-- [ ] visibleMonth and monthChange semantics match
+- [ ] value and onValueChange semantics match (controlled and uncontrolled)
+- [ ] visibleMonth and onMonthChange semantics match
 - [ ] selected-day semantics match (aria-selected, visual treatment)
 - [ ] month navigation and keyboard movement match (arrows, Home/End, PageUp/PageDown)
 - [ ] day-grid accessibility semantics match (grid, row, gridcell roles)

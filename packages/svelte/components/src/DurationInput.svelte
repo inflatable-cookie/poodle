@@ -1,34 +1,54 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let hours = 0;
-  export let minutes = 0;
-  export let seconds = 0;
-  export let showSeconds = true;
-  export let maxHours = 99;
-  export let minTotalSeconds = 0;
-  export let maxTotalSeconds: number | null = null;
-  export let disabled = false;
-  export let ariaLabel = "Duration";
+  interface DurationInputChange {
+    hours: number;
+    minutes: number;
+    seconds: number;
+    totalSeconds: number;
+  }
+
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    showSeconds?: boolean;
+    maxHours?: number;
+    minTotalSeconds?: number;
+    maxTotalSeconds?: number | null;
+    disabled?: boolean;
+    ariaLabel?: string;
+    onChange?: ((detail: DurationInputChange) => void) | undefined;
+  }
 
   const uiPresentation = getUiPresentation();
 
-  const dispatch = createEventDispatcher<{
-    change: { hours: number; minutes: number; seconds: number; totalSeconds: number };
-  }>();
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    hours = $bindable(0),
+    minutes = $bindable(0),
+    seconds = $bindable(0),
+    showSeconds = true,
+    maxHours = 99,
+    minTotalSeconds = 0,
+    maxTotalSeconds = null,
+    disabled = false,
+    ariaLabel = "Duration",
+    onChange = undefined,
+  }: Props = $props();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: totalSeconds = hours * 3600 + minutes * 60 + seconds;
-  $: isUnderMin = totalSeconds < minTotalSeconds;
-  $: isOverMax = maxTotalSeconds !== null && totalSeconds > maxTotalSeconds;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const totalSeconds = $derived(hours * 3600 + minutes * 60 + seconds);
+  const isUnderMin = $derived(totalSeconds < minTotalSeconds);
+  const isOverMax = $derived(maxTotalSeconds !== null && totalSeconds > maxTotalSeconds);
 
   function clamp(val: number, min: number, max: number): number {
     return Math.min(Math.max(val, min), max);
@@ -38,7 +58,7 @@
     hours = h;
     minutes = m;
     seconds = s;
-    dispatch("change", {
+    onChange?.({
       hours: h,
       minutes: m,
       seconds: s,
@@ -131,9 +151,9 @@
       value={pad(hours)}
       disabled={disabled}
       aria-label="Hours"
-      on:input={(e) => handleSegmentInput(e, "hours")}
-      on:keydown={(e) => handleSegmentKeydown(e, "hours")}
-      on:focus={(e) => (e.currentTarget as HTMLInputElement).select()}
+      oninput={(e) => handleSegmentInput(e, "hours")}
+      onkeydown={(e) => handleSegmentKeydown(e, "hours")}
+      onfocus={(e) => (e.currentTarget as HTMLInputElement).select()}
     />
   </div>
 
@@ -149,9 +169,9 @@
       value={pad(minutes)}
       disabled={disabled}
       aria-label="Minutes"
-      on:input={(e) => handleSegmentInput(e, "minutes")}
-      on:keydown={(e) => handleSegmentKeydown(e, "minutes")}
-      on:focus={(e) => (e.currentTarget as HTMLInputElement).select()}
+      oninput={(e) => handleSegmentInput(e, "minutes")}
+      onkeydown={(e) => handleSegmentKeydown(e, "minutes")}
+      onfocus={(e) => (e.currentTarget as HTMLInputElement).select()}
     />
   </div>
 
@@ -168,9 +188,9 @@
         value={pad(seconds)}
         disabled={disabled}
         aria-label="Seconds"
-        on:input={(e) => handleSegmentInput(e, "seconds")}
-        on:keydown={(e) => handleSegmentKeydown(e, "seconds")}
-        on:focus={(e) => (e.currentTarget as HTMLInputElement).select()}
+        oninput={(e) => handleSegmentInput(e, "seconds")}
+        onkeydown={(e) => handleSegmentKeydown(e, "seconds")}
+        onfocus={(e) => (e.currentTarget as HTMLInputElement).select()}
       />
     </div>
   {/if}

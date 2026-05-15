@@ -13,17 +13,17 @@
     <Switch
       label="Dark mode"
       checked={darkMode}
-      on:checkedChange={(e) => (darkMode = e.detail.checked)}
+      onCheckedChange={(checked) => (darkMode = checked)}
     />
     <Switch
       label="Auto-save drafts"
       checked={autoSave}
-      on:checkedChange={(e) => (autoSave = e.detail.checked)}
+      onCheckedChange={(checked) => (autoSave = checked)}
     />
     <Switch
       label="Compact view"
       checked={compactView}
-      on:checkedChange={(e) => (compactView = e.detail.checked)}
+      onCheckedChange={(checked) => (compactView = checked)}
     />
   </SpecimenGroup>
 

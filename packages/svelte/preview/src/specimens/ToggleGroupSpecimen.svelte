@@ -32,7 +32,7 @@
       options={viewOptions}
       value={view}
       ariaLabel="View mode"
-      on:valueChange={(e) => (view = e.detail.value as string)}
+      onValueChange={(value) => (view = value as string)}
     />
     <p class="poodle-specimen__hint">View: <strong>{view}</strong></p>
   </SpecimenGroup>
@@ -51,7 +51,7 @@
       value={tags}
       selectionMode="multiple"
       ariaLabel="Filter tags"
-      on:valueChange={(e) => (tags = e.detail.value as string[])}
+      onValueChange={(value) => (tags = value as string[])}
     />
     <p class="poodle-specimen__hint">Selected: <strong>{tags.join(", ") || "none"}</strong></p>
   </SpecimenGroup>
@@ -66,11 +66,11 @@
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <ToggleGroup options={viewOptions} defaultValue="grid" {size} ariaLabel="{size} toggle group" />
+    <ToggleGroup options={viewOptions} defaultValue="grid" {size} ariaLabel={size + " toggle group"} />
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <ToggleGroup options={viewOptions} defaultValue="grid" {density} ariaLabel="{density} toggle group" />
+    <ToggleGroup options={viewOptions} defaultValue="grid" {density} ariaLabel={density + " toggle group"} />
   </svelte:fragment>
 </SpecimenLayout>
 

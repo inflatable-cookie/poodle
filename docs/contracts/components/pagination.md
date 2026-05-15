@@ -139,7 +139,7 @@ and totalPages.
 
 ### Controlled And Uncontrolled
 
-- Controlled mode: parent passes `page` / `currentPage` and handles `pageChange` event
+- Controlled mode: parent passes `page` / `currentPage` and handles `onPageChange`
 - Controller mode: parent passes a `controller` object; the component calls controller methods directly for prev/next/goToPage/setPageSize
 - The component does not own page state; the parent or controller drives it
 
@@ -180,24 +180,24 @@ inserted. For example, with `siblingCount=1` and `currentPage=5` of 20 pages:
 1  ...  4  5  6  ...  20
 ```
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `pageChange` | user clicks a page, previous, next, first, or last button | `{ page: number }` | not fired for clicks on current page, disabled buttons, or when controller handles the navigation directly |
-| `limitChange` | user selects a new page size from the limit dropdown | `{ limit: number }` | not fired when controller handles the change directly via `setPageSize()` |
+| `onPageChange` | user clicks a page, previous, next, first, or last button | `number` | not called for clicks on current page, disabled buttons, or when controller handles the navigation directly |
+| `onLimitChange` | user selects a new page size from the limit dropdown | `number` | not called when controller handles the change directly via `setPageSize()` |
 
-### Event Dispatch Logic
+### Callback Dispatch Logic
 
 When a controller is present:
 - Adjacent page moves (prev/next) call `controller.prevPage()` / `controller.nextPage()` directly; no event dispatched
 - Non-adjacent jumps call `controller.goToPage(page)` if available; no event dispatched
-- Non-adjacent jumps dispatch `pageChange` event only when `controller.goToPage` is not available
+- Non-adjacent jumps call `onPageChange` only when `controller.goToPage` is not available
 - Limit changes call `controller.setPageSize(limit)` directly; no event dispatched
 
 When no controller is present:
-- All page changes dispatch `pageChange` with `{ page }`
-- All limit changes dispatch `limitChange` with `{ limit }`
+- All page changes call `onPageChange(page)`
+- All limit changes call `onLimitChange(limit)`
 
 After any page or limit change, scroll targeting executes if configured.
 

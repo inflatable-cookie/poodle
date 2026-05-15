@@ -1,51 +1,60 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import { clamp, joinStyles, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, Orientation, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    value?: number;
+    min?: number;
+    max?: number;
+    step?: number;
+    orientation?: Orientation;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    valueText?: string | null;
+    onValueChange?: ((value: number) => void) | undefined;
+    onValueCommit?: ((value: number) => void) | undefined;
+  }
 
-  export let value = 0;
-  export let min = 0;
-  export let max = 100;
-  export let step = 1;
-  export let orientation: Orientation = "horizontal";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let valueText: string | null = null;
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    value = $bindable(0),
+    min = 0,
+    max = 100,
+    step = 1,
+    orientation = "horizontal",
+    disabled = false,
+    ariaLabel = null,
+    valueText = null,
+    onValueChange = undefined,
+    onValueCommit = undefined,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: number };
-    valueCommit: { value: number };
-  }>();
-
-  let displayValue = value;
-
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: safeMax = max <= min ? min + 1 : max;
-  // Sync displayValue when the prop changes from outside
-  $: displayValue = clamp(snapToStep(value, min, step), min, safeMax);
-  $: percentage = ((displayValue - min) / (safeMax - min)) * 100;
-  $: sliderStyle = joinStyles([`--poodle-slider-percent: ${percentage}%`]);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const safeMax = $derived(max <= min ? min + 1 : max);
+  const displayValue = $derived(clamp(snapToStep(value, min, step), min, safeMax));
+  const percentage = $derived(((displayValue - min) / (safeMax - min)) * 100);
+  const sliderStyle = $derived(joinStyles([`--poodle-slider-percent: ${percentage}%`]));
 
   function handleInput(event: Event): void {
     const next = clamp(snapToStep(Number((event.currentTarget as HTMLInputElement).value), min, step), min, safeMax);
-    displayValue = next;
-    dispatch("valueChange", { value: next });
+    value = next;
+    onValueChange?.(next);
   }
 
   function handleChange(event: Event): void {
     const next = clamp(snapToStep(Number((event.currentTarget as HTMLInputElement).value), min, step), min, safeMax);
-    displayValue = next;
-    dispatch("valueCommit", { value: next });
+    value = next;
+    onValueCommit?.(next);
   }
 </script>
 
@@ -63,8 +72,8 @@
     disabled={disabled}
     aria-label={ariaLabel ?? undefined}
     aria-valuetext={valueText ?? undefined}
-    on:input={handleInput}
-    on:change={handleChange}
+    oninput={handleInput}
+    onchange={handleChange}
   />
 </div>
 

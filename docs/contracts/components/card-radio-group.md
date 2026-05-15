@@ -75,7 +75,7 @@ type CardRadioItem = {
 ### Controlled And Uncontrolled
 
 - `value` supports two-way binding (`bind:value`)
-- Selection state is also surfaced via the `change` event
+- Selection state is also surfaced via `onValueChange`
 
 ## 4. States
 
@@ -97,11 +97,11 @@ type CardRadioItem = {
 | `isChecked` (derived) | `value === item.value` per item |
 | `isItemDisabled` (derived) | `disabled || item.disabled === true` per item |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `change` | User selects an option | `{ value: string }` | Fires after value update; does not fire for disabled items |
+| `onValueChange` | User selects an option | `string` | Fires after value update; does not fire for disabled items |
 
 ## 6. Accessibility
 

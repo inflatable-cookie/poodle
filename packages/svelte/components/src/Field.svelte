@@ -60,11 +60,13 @@
       </label>
       {#if infoText}
         <Popover placement="top" offset={6} ariaLabel="Field description">
-          <span slot="trigger" class="poodle-field__info-trigger-wrap">
-            <span class="poodle-field__info-icon" aria-label="More information">
-              <Icon name="info" />
+          {#snippet trigger()}
+            <span class="poodle-field__info-trigger-wrap">
+              <span class="poodle-field__info-icon" aria-label="More information">
+                <Icon name="info" />
+              </span>
             </span>
-          </span>
+          {/snippet}
           <p class="poodle-field__info-content">{infoText}</p>
         </Popover>
       {/if}

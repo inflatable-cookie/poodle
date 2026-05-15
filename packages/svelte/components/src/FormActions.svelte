@@ -35,10 +35,12 @@
 
   {#if hasDangerMenu}
     <div class="poodle-form-actions__danger-menu" data-visible={showResponsiveDangerSwap ? "responsive" : "always"}>
-      <Menu items={collapsedDangerItems} ariaLabel="More actions" placement="top-end" on:action={(event) => handleDangerAction(event.detail.value)}>
-        <span slot="trigger">
+      <Menu items={collapsedDangerItems} ariaLabel="More actions" placement="top-end" onAction={handleDangerAction}>
+        {#snippet trigger()}
+          <span>
           <IconButton icon="ellipsis" ariaLabel="More actions" variant="ghost" sizeRole="chrome" />
-        </span>
+          </span>
+        {/snippet}
       </Menu>
     </div>
   {/if}

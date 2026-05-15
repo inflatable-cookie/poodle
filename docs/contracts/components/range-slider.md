@@ -55,8 +55,7 @@ Updated: 2026-03-15
 
 ### Controlled And Uncontrolled
 
-- controlled-only in this baseline contract; parent owns the value pair and
-  updates it via the `valueChange` event
+- bindable value pair plus callbacks: `value`, `onValueChange`, `onValueCommit`
 - the lower <= upper invariant is always preserved; if a thumb is dragged past
   the other, it clamps to the other thumb's position
 
@@ -84,12 +83,12 @@ Updated: 2026-03-15
 - lower value and upper value
 - active thumb identity (which thumb is being adjusted)
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | either thumb changes value during interaction | `{ value: [number, number] }` | live updates; lower <= upper invariant preserved |
-| `valueCommit` | interaction finishes on either thumb | `{ value: [number, number] }` | fires on mouseup/touchend/keyup commit |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | either thumb changes value during interaction | `[number, number]` | live updates; lower <= upper invariant preserved |
+| `onValueCommit` | interaction finishes on either thumb | `[number, number]` | fires on mouseup/touchend/keyup commit |
 
 ## 6. Accessibility
 
@@ -323,7 +322,7 @@ Updated: 2026-03-15
   mode, `bottom` and `calc(end - start)` for height in vertical mode
 - Lower thumb input has its max clamped to the upper value; upper thumb input
   has its min clamped to the lower value, preserving the lower<=upper invariant
-- `valueChange` fires on the `input` event (live during drag); `valueCommit`
+- `onValueChange` fires on the `input` event (live during drag); `onValueCommit`
   fires on the `change` event (on release)
 - `data-orientation`, `data-disabled`, `data-size`, and `data-density` attributes on root drive
   layout and state styling
@@ -352,7 +351,7 @@ Updated: 2026-03-15
 - [ ] per-thumb accessibility (distinct aria-labels, separate focus) matches
 - [ ] keyboard adjustment behavior matches (arrows, Home, End per-thumb)
 - [ ] Tab navigation between thumbs matches
-- [ ] valueChange fires during interaction, valueCommit fires on release
+- [ ] onValueChange fires during interaction, onValueCommit fires on release
 - [ ] disabled behavior matches
 
 ### Tier 2: Visual Parity

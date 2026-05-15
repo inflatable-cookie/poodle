@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import Icon from "./Icon.svelte";
@@ -11,95 +11,129 @@
     InputValidationStatus,
     InputValidator,
     SemanticControlSizeRole,
+    TextInputValidationChange,
     ValidationResult,
     ValidationState,
   } from "./types";
 
-  export let id = "";
-  export let value: string | null = null;
-  export let defaultValue = "";
-  export let placeholder: string | null = null;
-  export let name: string | undefined = undefined;
-  export let autocomplete: HTMLInputAttributes["autocomplete"] = undefined;
-  export let disabled = false;
-  export let readOnly = false;
-  export let required = false;
-  export let pattern: string | undefined = undefined;
-  export let spellcheck: HTMLInputAttributes["spellcheck"] = undefined;
-  export let autocapitalize: HTMLInputAttributes["autocapitalize"] = undefined;
-  export let enterKeyHint:
-    | "enter"
-    | "done"
-    | "go"
-    | "next"
-    | "previous"
-    | "search"
-    | "send"
-    | null = null;
-  export let debounce: number | null = null;
-  export let validate: InputValidator | undefined = undefined;
-  export let validationContext: unknown = undefined;
-  export let validationKey: unknown = undefined;
-  export let validationDebounce = 300;
-  export let validateOnBlur = true;
-  export let showValidationStatus = true;
-  export let validationState: ValidationState = "none";
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let list: string | null = null;
-  export let inputMode:
-    | "none"
-    | "search"
-    | "text"
-    | "tel"
-    | "url"
-    | "email"
-    | "numeric"
-    | "decimal"
-    | null = null;
-  export let type: HTMLInputElement["type"] | "multiline" | "slug" = "text";
-  /** Number of visible text rows. When > 1 and type is not explicitly set, auto-switches to multiline. */
-  export let rows: number | null = null;
-  /** Resize behaviour for multiline mode. */
-  export let resize: "vertical" | "horizontal" | "both" | "none" = "vertical";
-  /** Source value used to auto-generate a slug when type="slug". */
-  export let source: string | null = null;
-  export let prefix: string | null = null;
-  export let suffix: string | null = null;
-  export let maxLength: number | null = null;
-  export let showCharCount = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  /** When type="search", whether to show the clear button when the input has a value. */
-  export let showClearButton = true;
+  interface Props {
+    id?: string;
+    value?: string | null;
+    defaultValue?: string;
+    placeholder?: string | null;
+    name?: string | undefined;
+    autocomplete?: HTMLInputAttributes["autocomplete"];
+    disabled?: boolean;
+    readOnly?: boolean;
+    required?: boolean;
+    pattern?: string | undefined;
+    spellcheck?: HTMLInputAttributes["spellcheck"];
+    autocapitalize?: HTMLInputAttributes["autocapitalize"];
+    enterKeyHint?:
+      | "enter"
+      | "done"
+      | "go"
+      | "next"
+      | "previous"
+      | "search"
+      | "send"
+      | null;
+    debounce?: number | null;
+    validate?: InputValidator | undefined;
+    validationContext?: unknown;
+    validationKey?: unknown;
+    validationDebounce?: number;
+    validateOnBlur?: boolean;
+    showValidationStatus?: boolean;
+    validationState?: ValidationState;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    list?: string | null;
+    inputMode?:
+      | "none"
+      | "search"
+      | "text"
+      | "tel"
+      | "url"
+      | "email"
+      | "numeric"
+      | "decimal"
+      | null;
+    type?: HTMLInputElement["type"] | "multiline" | "slug";
+    rows?: number | null;
+    resize?: "vertical" | "horizontal" | "both" | "none";
+    source?: string | null;
+    prefix?: string | null;
+    suffix?: string | null;
+    maxLength?: number | null;
+    showCharCount?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    showClearButton?: boolean;
+    onValueChange?: ((value: string) => void) | undefined;
+    onValidationChange?: ((detail: TextInputValidationChange) => void) | undefined;
+    onSubmit?: ((value: string) => void) | undefined;
+    onCancel?: (() => void) | undefined;
+    onClear?: (() => void) | undefined;
+    onKeyDown?: ((event: KeyboardEvent) => void) | undefined;
+    onFocus?: ((event: FocusEvent) => void) | undefined;
+    onBlur?: ((event: FocusEvent) => void) | undefined;
+    leading?: Snippet<[]>;
+    trailing?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-    validationChange: { status: InputValidationStatus; valid: boolean; message: string };
-    submit: { value: string };
-    cancel: void;
-    clear: void;
-    keydown: KeyboardEvent;
-    focus: FocusEvent;
-    blur: FocusEvent;
-  }>();
+  let {
+    id = "",
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = "",
+    placeholder = null,
+    name = undefined,
+    autocomplete = undefined,
+    disabled = false,
+    readOnly = false,
+    required = false,
+    pattern = undefined,
+    spellcheck = undefined,
+    autocapitalize = undefined,
+    enterKeyHint = null,
+    debounce = null,
+    validate = undefined,
+    validationContext = undefined,
+    validationKey = undefined,
+    validationDebounce = 300,
+    validateOnBlur = true,
+    showValidationStatus = true,
+    validationState = "none",
+    ariaLabel = null,
+    describedBy = null,
+    list = null,
+    inputMode = null,
+    type = "text",
+    rows = null,
+    resize = "vertical",
+    source = null,
+    prefix = null,
+    suffix = null,
+    maxLength = null,
+    showCharCount = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    showClearButton = true,
+    onValueChange = undefined,
+    onValidationChange = undefined,
+    onSubmit = undefined,
+    onCancel = undefined,
+    onClear = undefined,
+    onKeyDown = undefined,
+    onFocus = undefined,
+    onBlur = undefined,
+    leading: leadingSnippet = undefined,
+    trailing: trailingSnippet = undefined,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
-  let uncontrolledValue = defaultValue;
-  let liveValue = value ?? defaultValue;
-  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let validationTimer: ReturnType<typeof setTimeout> | null = null;
-  let activeValidationKey: string | null = null;
-  let internalValidationStatus: InputValidationStatus = "idle";
-  let internalValidationMessage = "";
-  let lastValidatedValue = "";
-  let previousContextKey = serializeValidationContext(mergeValidationContext(validationContext, validationKey));
-  let previousValidationSnapshot = "";
-  let previousControlledValue = value;
-  let userEditedSlug = false;
-  let previousGeneratedSlug = "";
-
   const RESERVED_SLUGS = [
     "new",
     "edit",
@@ -119,99 +153,129 @@
     "search",
   ] as const;
 
-  $: isSearch = type === "search";
-  $: isSlug = type === "slug";
-  $: canClear = isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0;
-  $: hasLeadingAffordance = Boolean($$slots.leading) || isSearch;
-  $: hasTrailingAffordance = Boolean($$slots.trailing);
-  $: isControlled = value !== null;
-  $: if (isControlled) {
-    if (value !== previousControlledValue) {
-      previousControlledValue = value;
-      liveValue = value ?? "";
-    }
-  } else {
-    previousControlledValue = value;
-    liveValue = uncontrolledValue;
-  }
-  $: currentValue = liveValue;
-  $: effectiveValidationState = validate
-    ? internalValidationStatus === "validating"
-      ? "pending"
-      : internalValidationStatus === "valid"
-        ? "valid"
-        : internalValidationStatus === "invalid"
-          ? "invalid"
-          : validationState
-    : validationState;
-  $: ariaInvalid = effectiveValidationState === "invalid" ? true : undefined;
-  $: ariaBusy = effectiveValidationState === "pending" ? true : undefined;
-  $: charCount = currentValue.length;
-  $: charCountText = maxLength ? `${charCount}/${maxLength}` : `${charCount}`;
-  $: isOverLimit = maxLength !== null && charCount > maxLength;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  // Auto-detect multiline: explicit type="multiline", or rows > 1 with default type
-  $: isMultiline = type === "multiline" || (type === "text" && rows !== null && rows > 1);
-  $: nativeInputType = isSlug ? "text" : type;
-  $: showValidationIndicator = showValidationStatus && effectiveValidationState !== "none";
-  $: validationIcon =
+  let liveValue = $state("");
+  let debounceTimer: ReturnType<typeof setTimeout> | null = $state(null);
+  let validationTimer: ReturnType<typeof setTimeout> | null = $state(null);
+  let activeValidationKey: string | null = $state(null);
+  let internalValidationStatus: InputValidationStatus = $state("idle");
+  let internalValidationMessage = $state("");
+  let lastValidatedValue = $state("");
+  let previousContextKey = $state("");
+  let previousValidationSnapshot = $state("");
+  let userEditedSlug = $state(false);
+  let previousGeneratedSlug = $state("");
+
+  const isSearch = $derived(type === "search");
+  const isSlug = $derived(type === "slug");
+  const isMultiline = $derived(type === "multiline" || (type === "text" && rows !== null && rows > 1));
+  const nativeInputType = $derived(isSlug ? "text" : type);
+  const hasLeadingAffordance = $derived(Boolean(leadingSnippet) || isSearch);
+  const hasTrailingAffordance = $derived(Boolean(trailingSnippet));
+  const currentValue = $derived(liveValue);
+  const canClear = $derived(isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0);
+  const effectiveValidationState = $derived(
+    validate
+      ? internalValidationStatus === "validating"
+        ? "pending"
+        : internalValidationStatus === "valid"
+          ? "valid"
+          : internalValidationStatus === "invalid"
+            ? "invalid"
+            : validationState
+      : validationState
+  );
+  const ariaInvalid = $derived(effectiveValidationState === "invalid" ? true : undefined);
+  const ariaBusy = $derived(effectiveValidationState === "pending" ? true : undefined);
+  const charCount = $derived(currentValue.length);
+  const charCountText = $derived(maxLength ? `${charCount}/${maxLength}` : `${charCount}`);
+  const isOverLimit = $derived(maxLength !== null && charCount > maxLength);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const showValidationIndicator = $derived(showValidationStatus && effectiveValidationState !== "none");
+  const validationIcon = $derived(
     effectiveValidationState === "valid"
       ? "check"
       : effectiveValidationState === "invalid"
         ? "x"
-        : null;
-  $: effectiveValidationContext = mergeValidationContext(validationContext, validationKey);
-  $: contextKey = serializeValidationContext(effectiveValidationContext);
-  $: generatedSlug = isSlug ? slugify(source ?? "") : "";
-  $: fieldEndAdornmentCount =
-    Number(hasTrailingAffordance) + Number(canClear) + Number(showValidationIndicator);
-  $: controlPaddingStart = hasLeadingAffordance
-    ? "calc(var(--poodle-text-input-padding-inline) + var(--poodle-icon-size-default) + var(--poodle-text-input-adornment-gap))"
-    : "var(--poodle-text-input-padding-inline)";
-  $: controlPaddingEnd = fieldEndAdornmentCount > 0
-    ? `calc(var(--poodle-text-input-padding-inline) + (${fieldEndAdornmentCount} * var(--poodle-icon-size-default)) + (${fieldEndAdornmentCount} * var(--poodle-text-input-adornment-gap)))`
-    : "var(--poodle-text-input-padding-inline)";
-  $: multilineBottomPadding = showCharCount
-    ? "calc(var(--poodle-text-input-padding-block) + 1.5rem)"
-    : "var(--poodle-text-input-padding-block)";
+        : null
+  );
+  const effectiveValidationContext = $derived(mergeValidationContext(validationContext, validationKey));
+  const contextKey = $derived(serializeValidationContext(effectiveValidationContext));
+  const generatedSlug = $derived(isSlug ? slugify(source ?? "") : "");
+  const fieldEndAdornmentCount = $derived(
+    Number(hasTrailingAffordance) + Number(canClear) + Number(showValidationIndicator)
+  );
+  const controlPaddingStart = $derived(
+    hasLeadingAffordance
+      ? "calc(var(--poodle-text-input-padding-inline) + var(--poodle-icon-size-default) + (var(--poodle-text-input-adornment-gap) * 1.5))"
+      : "var(--poodle-text-input-padding-inline)"
+  );
+  const controlPaddingEnd = $derived(
+    fieldEndAdornmentCount > 0
+      ? `calc(var(--poodle-text-input-padding-inline) + (${fieldEndAdornmentCount} * var(--poodle-icon-size-default)) + (${fieldEndAdornmentCount} * var(--poodle-text-input-adornment-gap)))`
+      : "var(--poodle-text-input-padding-inline)"
+  );
+  const multilineBottomPadding = $derived(
+    showCharCount
+      ? "calc(var(--poodle-text-input-padding-block) + 1.5rem)"
+      : "var(--poodle-text-input-padding-block)"
+  );
 
-  $: if (isSlug && source !== null) {
-    if (!userEditedSlug || liveValue === previousGeneratedSlug || liveValue === "") {
-      previousGeneratedSlug = generatedSlug;
-      if (liveValue !== generatedSlug) {
-        liveValue = generatedSlug;
-        if (!isControlled) {
-          uncontrolledValue = generatedSlug;
+  $effect(() => {
+    const resolvedValue = (value ?? defaultValue) || "";
+    if (resolvedValue !== liveValue) {
+      liveValue = resolvedValue;
+    }
+  });
+
+  $effect(() => {
+    if (isSlug && source !== null) {
+      if (!userEditedSlug || liveValue === previousGeneratedSlug || liveValue === "") {
+        previousGeneratedSlug = generatedSlug;
+        if (liveValue !== generatedSlug) {
+          commitValue(generatedSlug, { markSlugEdited: false, immediate: true });
         }
-        dispatch("valueChange", { value: generatedSlug });
       }
     }
-  }
+  });
 
-  $: if (validate && liveValue !== lastValidatedValue) {
-    triggerValidation(liveValue, false);
-  }
-
-  $: if (validate && contextKey !== previousContextKey) {
-    previousContextKey = contextKey;
-    if (liveValue) {
+  $effect(() => {
+    if (validate && liveValue !== lastValidatedValue) {
       triggerValidation(liveValue, false);
     }
-  }
+  });
 
-  $: validationSnapshot = validate
-    ? `${internalValidationStatus}::${internalValidationMessage}`
-    : "";
+  $effect(() => {
+    if (validate && contextKey !== previousContextKey) {
+      previousContextKey = contextKey;
+      if (liveValue) {
+        triggerValidation(liveValue, false);
+      }
+    }
+  });
 
-  $: if (validate && validationSnapshot !== previousValidationSnapshot) {
-    previousValidationSnapshot = validationSnapshot;
-    dispatch("validationChange", {
-      status: internalValidationStatus,
-      valid: internalValidationStatus === "valid" || internalValidationStatus === "idle",
-      message: internalValidationMessage,
-    });
-  }
+  $effect(() => {
+    const snapshot = validate ? `${internalValidationStatus}::${internalValidationMessage}` : "";
+    if (validate && snapshot !== previousValidationSnapshot) {
+      previousValidationSnapshot = snapshot;
+      onValidationChange?.({
+        status: internalValidationStatus,
+        valid: internalValidationStatus === "valid" || internalValidationStatus === "idle",
+        message: internalValidationMessage,
+      });
+    }
+  });
+
+  $effect(() => {
+    if (!validate) {
+      clearValidationTimers();
+      activeValidationKey = null;
+      internalValidationStatus = "idle";
+      internalValidationMessage = "";
+      lastValidatedValue = "";
+      previousValidationSnapshot = "";
+    }
+  });
 
   onDestroy(() => {
     if (debounceTimer) {
@@ -270,49 +334,76 @@
     return isSlug ? slugify(input) : input;
   }
 
-  function handleInput(event: Event): void {
-    const nextValue = normalizeInputValue((event.currentTarget as HTMLInputElement).value);
+  function emitValueChange(nextValue: string, immediate: boolean): void {
+    if (immediate || !debounce || debounce <= 0) {
+      onValueChange?.(nextValue);
+      return;
+    }
+
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      onValueChange?.(nextValue);
+    }, debounce);
+  }
+
+  function commitValue(
+    nextValue: string,
+    options: { markSlugEdited?: boolean; immediate?: boolean } = {},
+  ): void {
     liveValue = nextValue;
-    if (isSlug) {
+    value = nextValue;
+
+    if (isSlug && options.markSlugEdited !== false) {
       userEditedSlug = true;
     }
 
-    if (!isControlled) {
-      uncontrolledValue = nextValue;
-    }
+    emitValueChange(nextValue, options.immediate === true);
+  }
 
-    if (debounce && debounce > 0) {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        dispatch("valueChange", { value: nextValue });
-      }, debounce);
-    } else {
-      dispatch("valueChange", { value: nextValue });
-    }
+  function flushDebouncedValue(): void {
+    if (!debounceTimer) return;
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+    onValueChange?.(liveValue);
+  }
+
+  function handleInput(event: Event): void {
+    const nextValue = normalizeInputValue((event.currentTarget as HTMLInputElement).value);
+    commitValue(nextValue, { markSlugEdited: isSlug });
+  }
+
+  function handleSubmit(): void {
+    onSubmit?.(liveValue);
+  }
+
+  function handleCancel(): void {
+    onCancel?.();
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    dispatch("keydown", event);
+    onKeyDown?.(event);
 
     if (event.key === "Enter") {
-      dispatch("submit", { value: liveValue });
+      handleSubmit();
     }
 
     if (event.key === "Escape") {
-      dispatch("cancel");
+      handleCancel();
     }
   }
 
   function handleClear(): void {
-    liveValue = "";
-    if (isSlug) {
-      userEditedSlug = true;
+    commitValue("", { markSlugEdited: isSlug, immediate: true });
+    onClear?.();
+  }
+
+  function handleBlurEvent(event: FocusEvent): void {
+    flushDebouncedValue();
+    if (validate && validateOnBlur) {
+      triggerValidation(liveValue, true);
     }
-    if (!isControlled) {
-      uncontrolledValue = "";
-    }
-    dispatch("valueChange", { value: "" });
-    dispatch("clear");
+    onBlur?.(event);
   }
 
   function buildValidationKey(inputValue: string, context: unknown): string {
@@ -324,14 +415,6 @@
       clearTimeout(validationTimer);
       validationTimer = null;
     }
-  }
-
-  $: if (!validate) {
-    clearValidationTimers();
-    activeValidationKey = null;
-    internalValidationStatus = "idle";
-    internalValidationMessage = "";
-    lastValidatedValue = "";
   }
 
   function triggerValidation(inputValue: string, immediate: boolean): void {
@@ -347,8 +430,8 @@
       return;
     }
 
-    const validationKey = buildValidationKey(inputValue, effectiveValidationContext);
-    activeValidationKey = validationKey;
+    const nextValidationKey = buildValidationKey(inputValue, effectiveValidationContext);
+    activeValidationKey = nextValidationKey;
     internalValidationStatus = "validating";
     internalValidationMessage = "";
 
@@ -357,13 +440,13 @@
         const result = isSlug
           ? await validateSlugValue(inputValue)
           : await validate?.(inputValue, effectiveValidationContext);
-        if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+        if (activeValidationKey !== nextValidationKey || inputValue !== liveValue) return;
         internalValidationStatus = result?.valid ? "valid" : "invalid";
         internalValidationMessage = result?.message ?? "";
         lastValidatedValue = inputValue;
         activeValidationKey = null;
       } catch {
-        if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+        if (activeValidationKey !== nextValidationKey || inputValue !== liveValue) return;
         internalValidationStatus = "invalid";
         internalValidationMessage = "Could not validate";
         lastValidatedValue = inputValue;
@@ -371,12 +454,7 @@
       }
     };
 
-    if (immediate) {
-      void runValidation();
-      return;
-    }
-
-    if (validationDebounce <= 0) {
+    if (immediate || validationDebounce <= 0) {
       void runValidation();
       return;
     }
@@ -425,9 +503,9 @@
   {/if}
 
   <div class="poodle-text-input__field">
-    {#if $$slots.leading}
+    {#if leadingSnippet}
       <span class="poodle-text-input__affordance poodle-text-input__affordance--leading">
-        <slot name="leading" />
+        {@render leadingSnippet()}
       </span>
     {:else if isSearch}
       <span class="poodle-text-input__affordance poodle-text-input__affordance--leading" aria-hidden="true">
@@ -454,28 +532,18 @@
         aria-describedby={describedBy ?? undefined}
         aria-invalid={ariaInvalid}
         aria-busy={ariaBusy}
-        on:input={handleInput}
-        on:keydown={(event) => {
+        oninput={handleInput}
+        onkeydown={(event) => {
+          onKeyDown?.(event);
           if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-            dispatch("submit", { value: currentValue });
+            handleSubmit();
           }
           if (event.key === "Escape") {
-            dispatch("cancel");
+            handleCancel();
           }
-          dispatch("keydown", event);
         }}
-        on:focus={(event) => dispatch("focus", event)}
-        on:blur={(event) => {
-          if (debounceTimer) {
-            clearTimeout(debounceTimer);
-            debounceTimer = null;
-            dispatch("valueChange", { value: liveValue });
-          }
-          if (validate && validateOnBlur) {
-            triggerValidation(liveValue, true);
-          }
-          dispatch("blur", event);
-        }}
+        onfocus={onFocus}
+        onblur={handleBlurEvent}
       ></textarea>
     {:else}
       <input
@@ -500,26 +568,16 @@
         aria-describedby={describedBy ?? undefined}
         aria-invalid={ariaInvalid}
         aria-busy={ariaBusy}
-        on:input={handleInput}
-        on:keydown={handleKeydown}
-        on:focus={(event) => dispatch("focus", event)}
-        on:blur={(event) => {
-          if (debounceTimer) {
-            clearTimeout(debounceTimer);
-            debounceTimer = null;
-            dispatch("valueChange", { value: liveValue });
-          }
-          if (validate && validateOnBlur) {
-            triggerValidation(liveValue, true);
-          }
-          dispatch("blur", event);
-        }}
+        oninput={handleInput}
+        onkeydown={handleKeydown}
+        onfocus={onFocus}
+        onblur={handleBlurEvent}
       />
     {/if}
 
-    {#if $$slots.trailing}
+    {#if trailingSnippet}
       <span class="poodle-text-input__affordance poodle-text-input__affordance--trailing">
-        <slot name="trailing" />
+        {@render trailingSnippet()}
       </span>
     {/if}
 
@@ -528,7 +586,7 @@
         class="poodle-text-input__clear"
         type="button"
         aria-label="Clear search query"
-        on:click={handleClear}
+        onclick={handleClear}
       >
         <Icon icon="x" />
       </button>
@@ -592,6 +650,8 @@
     --poodle-text-input-adornment-gap: var(--poodle-space-inline-sm);
     --poodle-text-input-density-inline-adjust: 0rem;
     --poodle-text-input-density-block-adjust: 0rem;
+    --poodle-text-input-font-size: var(--poodle-typography-body-size);
+    --poodle-text-input-line-height: var(--poodle-typography-body-lineHeight);
     display: flex;
     align-items: center;
     min-height: var(--poodle-size-control-height);
@@ -628,20 +688,69 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  .poodle-text-input__control {
-    display: block;
-    width: 100%;
-    height: calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2));
-    box-sizing: border-box;
-    border: 0;
-    background: transparent;
-    color: inherit;
+  .poodle-text-input[data-size="xs"] {
+    min-height: 1.5rem;
+    --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) - 0.25rem);
+    --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) - 0.125rem);
+    --poodle-text-input-font-size: 0.75rem;
+  }
+
+  .poodle-text-input[data-size="sm"] {
+    min-height: 1.75rem;
+    --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) - 0.125rem);
+    --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) - 0.0625rem);
+    --poodle-text-input-font-size: 0.8125rem;
+  }
+
+  .poodle-text-input[data-size="md"] {
+    min-height: var(--poodle-size-control-height-md, var(--poodle-size-control-height));
+  }
+
+  .poodle-text-input[data-size="lg"] {
+    min-height: 2.75rem;
+    --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + 0.125rem);
+    --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + 0.0625rem);
+    --poodle-text-input-font-size: 0.9375rem;
+  }
+
+  .poodle-text-input[data-size="xl"] {
+    min-height: 3.25rem;
+    --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + 0.1875rem);
+    --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + 0.125rem);
+    --poodle-text-input-font-size: 1rem;
+  }
+
+  .poodle-text-input[data-density="compact"] {
+    --poodle-text-input-density-inline-adjust: -0.125rem;
+    --poodle-text-input-density-block-adjust: -0.0625rem;
+  }
+
+  .poodle-text-input[data-density="comfortable"] {
+    --poodle-text-input-density-inline-adjust: 0.125rem;
+    --poodle-text-input-density-block-adjust: 0.0625rem;
+  }
+
+  .poodle-text-input__affix {
+    display: inline-flex;
+    align-items: center;
+    align-self: stretch;
+    padding-inline: 0.625rem;
     font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-typography-body-size);
-    line-height: var(--poodle-typography-body-lineHeight);
-    outline: 0;
-    padding-left: var(--poodle-text-input-control-padding-start, var(--poodle-text-input-padding-inline));
-    padding-right: var(--poodle-text-input-control-padding-end, var(--poodle-text-input-padding-inline));
+    font-size: var(--poodle-text-input-font-size);
+    line-height: var(--poodle-text-input-line-height);
+    font-weight: var(--poodle-typography-body-weight);
+    color: var(--poodle-color-text-secondary);
+    opacity: var(--poodle-state-opacity-muted);
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .poodle-text-input__affix--prefix {
+    border-right: 0.0625rem solid var(--poodle-color-border-default);
+  }
+
+  .poodle-text-input__affix--suffix {
+    border-left: 0.0625rem solid var(--poodle-color-border-default);
   }
 
   .poodle-text-input__field {
@@ -649,54 +758,74 @@
     flex: 1;
     min-width: 0;
     display: flex;
-    align-items: center;
+    align-items: stretch;
   }
 
-  .poodle-text-input[data-type="slug"] .poodle-text-input__control {
-    font-family: var(--poodle-typography-code-family);
-    font-size: calc(var(--poodle-typography-body-size) * var(--poodle-typography-code-adjustmentRatio));
-  }
-
-  .poodle-text-input[data-type="slug"] .poodle-text-input__affix {
-    font-family: var(--poodle-typography-code-family);
-    font-size: calc(var(--poodle-typography-body-size) * var(--poodle-typography-code-adjustmentRatio));
+  .poodle-text-input__control {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: var(--poodle-typography-body-family);
+    font-size: var(--poodle-text-input-font-size);
+    line-height: var(--poodle-text-input-line-height);
+    font-weight: var(--poodle-typography-body-weight);
+    padding-block: calc(var(--poodle-text-input-padding-block) + var(--poodle-text-input-density-block-adjust));
+    padding-inline-start: var(--poodle-text-input-control-padding-start);
+    padding-inline-end: var(--poodle-text-input-control-padding-end);
+    outline: none;
   }
 
   .poodle-text-input__control::placeholder {
-    color: var(--poodle-color-text-muted, color-mix(in srgb, var(--poodle-color-text-secondary) 60%, transparent));
+    color: var(--poodle-color-text-muted);
   }
 
-  .poodle-text-input__affordance {
+  .poodle-text-input__control:disabled {
+    cursor: not-allowed;
+  }
+
+  .poodle-text-input__control--multiline {
+    min-height: calc(1lh * 4);
+    padding-block-end: var(--poodle-text-input-multiline-padding-end);
+    resize: vertical;
+  }
+
+  .poodle-text-input--multiline {
+    align-items: stretch;
+    min-height: auto;
+  }
+
+  .poodle-text-input__affordance,
+  .poodle-text-input__validation-indicator,
+  .poodle-text-input__clear {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    inset-block: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--poodle-color-icon-muted);
-    font-family: var(--poodle-typography-code-family);
-    font-size: var(--poodle-icon-size-default);
-    pointer-events: none;
+    width: calc(var(--poodle-icon-size-default) + var(--poodle-text-input-adornment-gap));
+    color: var(--poodle-color-text-muted);
   }
 
   .poodle-text-input__affordance--leading {
-    left: var(--poodle-text-input-padding-inline);
+    inset-inline-start: 0.5rem;
   }
 
   .poodle-text-input__affordance--trailing {
-    right: var(--poodle-text-input-padding-inline);
+    inset-inline-end: calc(var(--poodle-text-input-adornment-gap) * 2 + var(--poodle-icon-size-default));
+  }
+
+  .poodle-text-input__clear {
+    inset-inline-end: calc(var(--poodle-icon-size-default) + var(--poodle-text-input-adornment-gap));
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
   }
 
   .poodle-text-input__validation-indicator {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: var(--poodle-text-input-padding-inline);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--poodle-color-icon-muted);
-    pointer-events: none;
+    inset-inline-end: 0.5rem;
   }
 
   .poodle-text-input__validation-indicator--pending {
@@ -711,142 +840,23 @@
     color: var(--poodle-color-status-danger);
   }
 
-  .poodle-text-input__affix {
-    display: inline-flex;
-    align-items: center;
-    color: var(--poodle-color-text-secondary);
-    font-family: var(--poodle-typography-body-family);
-    font-size: var(--poodle-typography-body-size);
-    white-space: nowrap;
-    user-select: none;
-  }
-
-  .poodle-text-input__affix--prefix {
-    padding-inline-start: var(--poodle-text-input-padding-inline);
-    border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent);
-  }
-
-  .poodle-text-input__affix--suffix {
-    padding-inline-start: var(--poodle-text-input-padding-inline);
-    padding-inline-end: var(--poodle-text-input-padding-inline);
-    border-left: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent);
-    margin-inline-start: var(--poodle-text-input-adornment-gap);
-  }
-
   .poodle-text-input__char-count {
-    display: inline-flex;
-    align-items: center;
-    color: var(--poodle-color-text-secondary);
-    font-family: var(--poodle-typography-code-family);
-    font-size: 0.6875rem;
-    white-space: nowrap;
+    position: absolute;
+    inset-inline-end: 0.5rem;
+    inset-block-end: 0.375rem;
+    font: var(--poodle-typography-code-xs);
+    color: var(--poodle-color-text-muted);
+    pointer-events: none;
   }
 
   .poodle-text-input__char-count--over {
     color: var(--poodle-color-status-danger);
   }
 
-  /* Search clear button */
-  .poodle-text-input__clear {
-    position: absolute;
-    top: 50%;
-    right: var(--poodle-text-input-padding-inline);
-    transform: translateY(-50%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--poodle-icon-size-default);
-    height: var(--poodle-icon-size-default);
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--poodle-color-icon-muted);
-    cursor: pointer;
-    border-radius: calc(
-      var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control)) - 0.0625rem
-    );
-  }
-
-  /* When clear + validation both present, offset clear button inward */
-  .poodle-text-input__field > .poodle-text-input__clear + .poodle-text-input__validation-indicator {
-    right: calc(var(--poodle-text-input-padding-inline) + var(--poodle-icon-size-default) + 0.25rem);
-  }
-
-  .poodle-text-input__clear:hover {
-    background: var(
-      --poodle-treatment-interactive-subtle-fill-hover,
-      color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)
-    );
-    color: var(--poodle-color-text-primary);
-  }
-
-  .poodle-text-input__clear:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.125rem;
-  }
-
-  /* Density variants */
-  .poodle-text-input[data-density="compact"] {
-    --poodle-text-input-adornment-gap: calc(var(--poodle-space-inline-sm) - 0.125rem);
-    --poodle-text-input-density-inline-adjust: -0.125rem;
-    --poodle-text-input-density-block-adjust: -0.125rem;
-  }
-
-  .poodle-text-input[data-density="comfortable"] {
-    --poodle-text-input-adornment-gap: calc(var(--poodle-space-inline-sm) + 0.125rem);
-    --poodle-text-input-density-inline-adjust: 0.125rem;
-    --poodle-text-input-density-block-adjust: 0.125rem;
-  }
-
-  /* Multiline (textarea) mode */
-  .poodle-text-input--multiline {
-    min-height: auto;
-    position: relative;
-  }
-
-  .poodle-text-input--multiline .poodle-text-input__char-count {
-    position: absolute;
-    bottom: 0.375rem;
-    right: 0.5rem;
-    pointer-events: none;
-    opacity: 0.7;
-  }
-
-  .poodle-text-input__control--multiline {
-    min-height: calc(1lh * 4);
-    resize: vertical;
-    line-height: var(--poodle-typography-body-lineHeight);
-    padding-top: var(--poodle-text-input-padding-block);
-    padding-bottom: var(--poodle-text-input-multiline-padding-end, var(--poodle-text-input-padding-block));
-  }
-
-  .poodle-text-input--multiline[data-density="compact"] .poodle-text-input__control--multiline {
-    padding: calc(var(--poodle-space-control-y, 0.375rem) - 0.125rem) calc(var(--poodle-space-control-x) - 0.125rem);
-  }
-
-  .poodle-text-input--multiline[data-density="comfortable"] .poodle-text-input__control--multiline {
-    padding: calc(var(--poodle-space-control-y, 0.375rem) + 0.125rem) calc(var(--poodle-space-control-x) + 0.125rem);
-  }
-
-  /* Size variants */
-  .poodle-text-input[data-size="xs"] { min-height: 1.5rem; }
-  .poodle-text-input[data-size="xs"] .poodle-text-input__control { height: calc(1.5rem - 0.125rem); font-size: 0.75rem; }
-
-  .poodle-text-input[data-size="sm"] { min-height: 1.75rem; }
-  .poodle-text-input[data-size="sm"] .poodle-text-input__control { height: calc(1.75rem - 0.125rem); font-size: 0.8125rem; }
-
-  .poodle-text-input[data-size="lg"] { min-height: 2.75rem; }
-  .poodle-text-input[data-size="lg"] .poodle-text-input__control { height: calc(2.75rem - 0.125rem); font-size: 0.9375rem; }
-
-  .poodle-text-input[data-size="xl"] { min-height: 3.25rem; }
-  .poodle-text-input[data-size="xl"] .poodle-text-input__control { height: calc(3.25rem - 0.125rem); font-size: 1rem; }
-
-  .poodle-text-input {
-    --poodle-text-input-padding-inline: calc(
-      var(--poodle-space-control-x) + var(--poodle-text-input-density-inline-adjust)
-    );
-    --poodle-text-input-padding-block: calc(
-      var(--poodle-space-control-y) + var(--poodle-text-input-density-block-adjust)
-    );
+  .poodle-text-input[data-type="slug"] .poodle-text-input__control,
+  .poodle-text-input[data-type="slug"] .poodle-text-input__affix--prefix,
+  .poodle-text-input[data-type="slug"] .poodle-text-input__affix--suffix {
+    font-family: var(--poodle-typography-code-family);
+    font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio));
   }
 </style>

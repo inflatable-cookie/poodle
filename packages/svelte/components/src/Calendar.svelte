@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, tick } from "svelte";
+  import { tick } from "svelte";
 
   import {
     addDays,
@@ -36,11 +36,8 @@
   export let size: ControlSize | null = null;
   export let sizeRole: SemanticControlSizeRole = "control";
   export let density: ControlDensity | null = null;
-
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string } | { value: DateRangeValue };
-    monthChange: { month: string };
-  }>();
+  export let onValueChange: ((value: string | DateRangeValue) => void) | undefined = undefined;
+  export let onMonthChange: ((month: string) => void) | undefined = undefined;
 
   const gridId = `poodle-calendar-grid-${++nextCalendarId}`;
   const uiPresentation = getUiPresentation();
@@ -120,7 +117,7 @@
       uncontrolledMonth = nextMonth;
     }
 
-    dispatch("monthChange", { month: nextMonth });
+    onMonthChange?.(nextMonth);
   }
 
   function selectDate(iso: string): void {
@@ -134,7 +131,7 @@
       }
 
       focusIso = iso;
-      dispatch("valueChange", { value: iso });
+      onValueChange?.(iso as never);
     } else {
       // Range mode: two-click selection
       if (!currentRangeValue.start || currentRangeValue.end) {
@@ -159,7 +156,7 @@
     }
 
     focusIso = normalized.end ?? normalized.start ?? focusIso;
-    dispatch("valueChange", { value: normalized });
+    onValueChange?.(normalized as never);
   }
 
   async function focusDate(iso: string): Promise<void> {
@@ -226,7 +223,7 @@
       class="poodle-calendar__nav"
       disabled={disabled}
       aria-label="Previous month"
-      on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))))}
+      onclick={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))))}
     >
       <span aria-hidden="true">&#x2039;</span>
     </button>
@@ -240,7 +237,7 @@
       class="poodle-calendar__nav"
       disabled={disabled}
       aria-label="Next month"
-      on:click={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))))}
+      onclick={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))))}
     >
       <span aria-hidden="true">&#x203A;</span>
     </button>
@@ -274,9 +271,9 @@
               disabled={disabled}
               aria-label={formatDateLabel(day.iso, locale)}
               tabindex={focusIso === day.iso ? 0 : -1}
-              on:click={() => selectDate(day.iso)}
-              on:focus={() => (focusIso = day.iso)}
-              on:keydown={(event) => handleDayKeydown(event, day.iso)}
+              onclick={() => selectDate(day.iso)}
+              onfocus={() => (focusIso = day.iso)}
+              onkeydown={(event) => handleDayKeydown(event, day.iso)}
             >
               {day.label}
             </button>

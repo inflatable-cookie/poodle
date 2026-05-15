@@ -223,7 +223,7 @@
                         options={[{ value: "", label: filter.placeholder ?? "All" }, ...filter.options]}
                         value={filterValues[filter.field] ?? ""}
                         describedBy={describedBy}
-                        on:valueChange={(event) => onFilterChange?.(filter.field, event.detail.value)}
+                        onValueChange={(nextValue) => onFilterChange?.(filter.field, nextValue)}
                       />
                     </Field>
                   {:else if filter.type === "date"}
@@ -233,7 +233,7 @@
                         type="date"
                         value={filterValues[filter.field] ?? ""}
                         describedBy={describedBy}
-                        on:valueChange={(event) => onFilterChange?.(filter.field, event.detail.value)}
+                        onValueChange={(nextValue) => onFilterChange?.(filter.field, nextValue)}
                       />
                     </Field>
                   {/if}

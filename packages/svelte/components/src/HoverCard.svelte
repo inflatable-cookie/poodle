@@ -1,37 +1,58 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextHoverCardId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, tick } from "svelte";
+  import { onDestroy, tick, type Snippet } from "svelte";
 
   import type { OverlayPlacement } from "./types";
 
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let openDelayMs = 180;
-  export let closeDelayMs = 120;
-  export let placement: OverlayPlacement = "top";
-  export let ariaLabel: string | null = null;
+  interface Props {
+    open?: boolean | null;
+    defaultOpen?: boolean;
+    openDelayMs?: number;
+    closeDelayMs?: number;
+    placement?: OverlayPlacement;
+    ariaLabel?: string | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    trigger?: Snippet<[]>;
+    children?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-  }>();
+  let {
+    open = $bindable<boolean | null>(null),
+    defaultOpen = false,
+    openDelayMs = 180,
+    closeDelayMs = 120,
+    placement = "top",
+    ariaLabel = null,
+    onOpenChange = undefined,
+    trigger,
+    children,
+  }: Props = $props();
 
   const hoverCardId = `poodle-hover-card-${++nextHoverCardId}`;
   let openTimer: ReturnType<typeof setTimeout> | null = null;
   let closeTimer: ReturnType<typeof setTimeout> | null = null;
-  let uncontrolledOpen = defaultOpen;
-  let triggerElement: HTMLSpanElement | null = null;
-  let surfaceElement: HTMLSpanElement | null = null;
-  let surfaceStyle = "";
+  let uncontrolledOpen = $state(false);
+  let triggerElement = $state<HTMLSpanElement | null>(null);
+  let surfaceElement = $state<HTMLSpanElement | null>(null);
+  let surfaceStyle = $state("");
 
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
+  $effect.pre(() => {
+    if (!triggerElement) {
+      uncontrolledOpen = defaultOpen;
+    }
+  });
+
+  const isControlled = $derived(open !== null);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
+    } else {
+      open = nextOpen;
     }
 
     if (nextOpen) {
@@ -39,7 +60,7 @@
       tick().then(positionSurface);
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function positionSurface(): void {
@@ -134,11 +155,11 @@
 <span
   class="poodle-hover-card"
   role="presentation"
-  on:mouseenter={scheduleOpen}
-  on:mouseleave={scheduleClose}
-  on:focusin={scheduleOpen}
-  on:focusout={scheduleClose}
-  on:keydown={(event) => {
+  onmouseenter={scheduleOpen}
+  onmouseleave={scheduleClose}
+  onfocusin={scheduleOpen}
+  onfocusout={scheduleClose}
+  onkeydown={(event) => {
     if (event.key === "Escape") {
       clearTimers();
       setOpen(false);
@@ -153,7 +174,7 @@
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? hoverCardId : undefined}
   >
-    <slot name="trigger" />
+    {@render trigger?.()}
   </span>
 
   {#if isOpen}
@@ -165,10 +186,10 @@
       tabindex="-1"
       aria-label={ariaLabel ?? undefined}
       style={surfaceStyle}
-      on:mouseenter={clearTimers}
-      on:mouseleave={scheduleClose}
+      onmouseenter={clearTimers}
+      onmouseleave={scheduleClose}
     >
-      <slot />
+      {@render children?.()}
     </span>
   {/if}
 </span>

@@ -70,7 +70,7 @@ Updated: 2026-04-17
 | `spellcheck` | `boolean \| undefined` | `undefined` | no | native spellcheck attribute |
 | `autocapitalize` | `string \| undefined` | `undefined` | no | native autocapitalize attribute |
 | `enterKeyHint` | `"enter" \| "done" \| "go" \| "next" \| "previous" \| "search" \| "send" \| null` | `null` | no | native enterkeyhint attribute |
-| `debounce` | `number \| null` | `null` | no | delays `valueChange` while typing |
+| `debounce` | `number \| null` | `null` | no | delays `onValueChange` while typing |
 | `validate` | `InputValidator \| undefined` | `undefined` | no | optional validator function for sync or async validation |
 | `validationContext` | `unknown` | `undefined` | no | app-owned context passed to `validate` |
 | `validationKey` | `unknown` | `undefined` | no | optional stable value merged into validation context when validation must re-run after identity changes |
@@ -94,20 +94,30 @@ Updated: 2026-04-17
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `onValueChange` | `(value: string) => void` | `undefined` | no | callback fired when the value changes; respects `debounce` |
+| `onValidationChange` | `(detail: { status: "idle" \| "validating" \| "valid" \| "invalid"; valid: boolean; message: string }) => void` | `undefined` | no | fired when built-in validation status changes |
+| `onSubmit` | `(value: string) => void` | `undefined` | no | fires on Enter, or Cmd/Ctrl+Enter in multiline mode |
+| `onCancel` | `() => void` | `undefined` | no | fires on Escape |
+| `onClear` | `() => void` | `undefined` | no | fires when the built-in search clear button is used |
+| `onKeyDown` | `(event: KeyboardEvent) => void` | `undefined` | no | native keydown passthrough |
+| `onFocus` | `(event: FocusEvent) => void` | `undefined` | no | native focus passthrough |
+| `onBlur` | `(event: FocusEvent) => void` | `undefined` | no | native blur passthrough |
+| `leading` | `Snippet` | `undefined` | no | optional leading affordance snippet; replaces named `leading` slot |
+| `trailing` | `Snippet` | `undefined` | no | optional trailing affordance snippet; replaces named `trailing` slot |
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` (non-null) plus `valueChange` event
+- controlled: `value` plus `onValueChange`
 - uncontrolled: `defaultValue` sets the initial value; component owns its own state
 - do not mix controlled and uncontrolled modes simultaneously
-- when `type="slug"`, `valueChange` also fires for source-driven auto-generation
+- when `type="slug"`, `onValueChange` also fires for source-driven auto-generation
   so parent-controlled forms stay in sync
 
 ### Validation
 
 - `validationState` remains available for caller-owned visual state
-- when `validate` is provided, `TextInput` owns validation timing and emits
-  `validationChange`
+- when `validate` is provided, `TextInput` owns validation timing and calls
+  `onValidationChange`
 - built-in validation maps:
   - `idle` -> keep caller-provided `validationState`
   - `validating` -> `pending`
@@ -186,17 +196,18 @@ Updated: 2026-04-17
 | invalid-indicator | `validationState="invalid"` | trailing cross icon shows in danger color |
 | char-over | character count exceeds maxLength | char count text color switches to `status-danger` |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user edits value | `{ value: string }` | fires on each input change |
-| `validationChange` | built-in validation status changes | `{ status: "idle" \| "validating" \| "valid" \| "invalid"; valid: boolean; message: string }` | only fires when `validate` is provided |
-| `submit` | Enter key pressed | `{ value: string }` | fires current value |
-| `cancel` | Escape key pressed | `void` | fires with no payload |
-| `clear` | built-in search clear button pressed | `void` | only emitted in search mode |
-| `focus` | input receives focus | `FocusEvent` | native focus event passthrough |
-| `blur` | input loses focus | `FocusEvent` | native blur event passthrough |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user edits value | `string` | fires on each input change; respects `debounce` |
+| `onValidationChange` | built-in validation status changes | `{ status: "idle" \| "validating" \| "valid" \| "invalid"; valid: boolean; message: string }` | only fires when `validate` is provided |
+| `onSubmit` | Enter key pressed | `string` | fires current value |
+| `onCancel` | Escape key pressed | none | fires with no payload |
+| `onClear` | built-in search clear button pressed | none | only used in search mode |
+| `onFocus` | input receives focus | `FocusEvent` | native focus passthrough |
+| `onBlur` | input loses focus | `FocusEvent` | native blur passthrough |
+| `onKeyDown` | keydown on the control | `KeyboardEvent` | native keydown passthrough |
 
 ## 6. Accessibility
 
@@ -451,8 +462,7 @@ indicator slot.
   attribute selectors
 - non-`none` validation states also render a built-in trailing indicator:
   shared spinner for `pending`, `circle-check` for `valid`, `circle-x` for `invalid`
-- Controlled mode: when `value` prop is non-null, the input value is bound to
-  it; `valueChange` must be handled to update
+- Controlled mode: when `value` is host-owned, `onValueChange` must update it
 - Uncontrolled mode: internal state initialized from `defaultValue`
 - Browser autofill, IME, selection, and undo behavior remain native
 - `prefix` and `suffix` props render static text with separator borders;

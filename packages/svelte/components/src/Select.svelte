@@ -1,227 +1,134 @@
-<script context="module" lang="ts">
-  let nextSelectId = 0;
-</script>
-
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, type Snippet } from "svelte";
 
   import Icon from "./Icon.svelte";
-  import { firstEnabledIndex } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
-    IconProp,
     SemanticControlSizeRole,
-    SelectItems,
+    SelectEmptyRenderState,
     SelectLoadOptions,
+    SelectItems,
+    SelectOptionRenderState,
     SelectOption,
     SelectOptionGroup,
+    SelectTriggerRenderState,
     ValidationState,
   } from "./types";
 
-  // ── Legacy compat types ──────────────────────────────────────
-  type LegacySelectItem = {
-    value: string;
-    label: string;
+  interface Props {
+    id?: string;
+    name?: string;
+    value?: string | null;
+    defaultValue?: string | null;
+    options?: SelectItems;
+    loadOptions?: SelectLoadOptions | null;
+    loadKey?: string | null;
+    valueLabel?: string | null;
+    placeholder?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
     disabled?: boolean;
-    isDisabled?: boolean;
-  };
+    required?: boolean;
+    validationState?: ValidationState;
+    clearable?: boolean;
+    searchable?: boolean;
+    freeform?: boolean;
+    native?: boolean;
+    emptyMessage?: string;
+    variant?: "default" | "ghost";
+    menuMinWidth?: string | null;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    onValueChange?: ((value: string) => void) | undefined;
+    onQueryChange?: ((query: string) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    trigger?: Snippet<[SelectTriggerRenderState]>;
+    option?: Snippet<[SelectOptionRenderState]>;
+    empty?: Snippet<[SelectEmptyRenderState]>;
+  }
 
-  type LegacySelectGroup = {
-    label: string;
-    items?: LegacySelectItem[];
-    groups?: LegacySelectGroup[];
-  };
+  let {
+    id = undefined,
+    name = undefined,
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = null,
+    options = [],
+    loadOptions = null,
+    loadKey = null,
+    valueLabel = null,
+    placeholder = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    disabled = false,
+    required = false,
+    validationState = "none",
+    clearable = false,
+    searchable = false,
+    freeform = false,
+    native = undefined,
+    emptyMessage = "No matches",
+    variant = "default",
+    menuMinWidth = null,
+    ariaLabel = null,
+    describedBy = null,
+    onValueChange = undefined,
+    onQueryChange = undefined,
+    onOpenChange = undefined,
+    trigger: triggerSnippet = undefined,
+    option: optionSnippet = undefined,
+    empty: emptySnippet = undefined,
+  }: Props = $props();
 
-  // ── Props ────────────────────────────────────────────────────
-
-  // Identity & form
-  export let id: string | undefined = undefined;
-  export let name: string | undefined = undefined;
-
-  // Value
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-
-  // Options
-  export let options: SelectItems = [];
-  /** @deprecated Use `options` with flat or grouped array */
-  export let items: LegacySelectItem[] | null = null;
-  /** @deprecated Use `options` with SelectOptionGroup[] */
-  export let groups: LegacySelectGroup[] | null = null;
-  export let loadOptions: SelectLoadOptions | null = null;
-  /** @deprecated Use `loadOptions` */
-  export let loadItems: (() => Promise<LegacySelectItem[]>) | null = null;
-  /** @deprecated Use `loadOptions` */
-  export let loadGroups: (() => Promise<LegacySelectGroup[]>) | null = null;
-  export let loadKey: string | null = null;
-  export let valueLabel: string | null = null;
-
-  // Presentation
-  export let placeholder: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-
-  // Behavior
-  export let disabled = false;
-  export let required = false;
-  export let validationState: ValidationState = "none";
-  export let clearable = false;
-  /** When true, renders a custom dropdown with search/filter input. */
-  export let searchable = false;
-  /** When true with searchable, query text becomes the value if no option selected. */
-  export let freeform = false;
-  /**
-   * Explicit native/custom mode override.
-   * - `true`: always native `<select>` (searchable/slots ignored)
-   * - `false`: always custom dropdown
-   * - `undefined`: auto (native unless searchable or option slot provided)
-   */
-  export let native: boolean | undefined = undefined;
-  export let emptyMessage = "No matches";
-
-  // Appearance
-  /**
-   * Visual variant of the trigger.
-   * - `"default"`: standard bordered input appearance
-   * - `"ghost"`: no border, background, or chevron — bare trigger
-   */
-  export let variant: "default" | "ghost" = "default";
-  /** Minimum width for the dropdown listbox (e.g. "12rem"). */
-  export let menuMinWidth: string | null = null;
-
-  // Accessibility
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-
-  // Callbacks
-  export let onchange: ((value: string) => void) | null = null;
-
-  // ── Internal state ───────────────────────────────────────────
-
-  const selectId = id ?? `poodle-select-${++nextSelectId}`;
-  const listboxId = `${selectId}-listbox`;
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-    change: { value: string };
-    queryChange: { query: string };
-    openChange: { open: boolean };
-  }>();
-
+  const generatedSelectId = `poodle-select-${crypto.randomUUID()}`;
   const uiPresentation = getUiPresentation();
-  let rootElement: HTMLDivElement | null = null;
-  let uncontrolledValue = defaultValue;
-  let open = false;
-  let query = "";
-  let highlightIndex = 0;
-  let placement: "below" | "above" = "below";
-  let alignEnd = false;
+  let rootElement: HTMLDivElement | null = $state(null);
+  let open = $state(false);
+  let query = $state("");
+  let highlightIndex = $state(0);
+  let placement: "below" | "above" = $state("below");
+  let alignEnd = $state(false);
+  let loadedOptions: SelectItems | null = $state(null);
+  let loadState: "idle" | "loading" | "loaded" | "error" = $state("idle");
+  let loadError: string | null = $state(null);
+  let lastLoadKey: string | null = $state(null);
 
-  // Async loading state
-  let loadedOptions: SelectItems | null = null;
-  let loadState: "idle" | "loading" | "loaded" | "error" = "idle";
-  let loadError: string | null = null;
-  let lastLoadKey: string | null = null;
-
-  // Legacy compat loading
-  let loadedItems: LegacySelectItem[] | null = null;
-  let loadedGroups: LegacySelectGroup[] | null = null;
-
-  // ── Derived state ────────────────────────────────────────────
-
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = value !== null;
-  $: currentValue = (isControlled ? value : uncontrolledValue) ?? "";
-  $: useCustom = native === true ? false : native === false ? true : searchable || $$slots.option;
-  $: isLazy = Boolean(loadOptions || loadItems || loadGroups);
-  $: clearValue = defaultValue ?? "";
-  $: placeholderValue = clearable ? clearValue : "";
-  $: placeholderLabel = placeholder ?? (clearable ? valueLabel ?? "All" : null);
-
-  // Normalize options from all sources
-  $: normalizedOptions = (() => {
-    if (loadedOptions) return loadedOptions;
-    if (loadedGroups) return normalizeGroups(loadedGroups);
-    if (loadedItems) return normalizeItems(loadedItems);
-    if (groups) return normalizeGroups(groups);
-    return normalizeItems(items ?? options);
-  })();
-
-  $: flatOptions = flattenOptions(normalizedOptions);
-  $: hasCurrentOption = flatOptions.some((o) => o.value === currentValue);
-  $: hasSelection = currentValue !== "" && currentValue !== clearValue;
-  $: isGrouped = normalizedOptions.length > 0 && "options" in normalizedOptions[0];
-  $: selectedOption = flatOptions.find((o) => o.value === currentValue) ?? null;
-
-  // Custom mode: filtering
-  $: filteredOptions = searchable && query.length > 0
-    ? flatOptions.filter((o) => !(o.disabled || o.isDisabled) && o.label.toLowerCase().includes(query.toLowerCase()))
-    : flatOptions.filter((o) => !(o.disabled || o.isDisabled));
-
-  $: filteredGroups = searchable && query.length > 0
-    ? filterGroups(normalizedOptions, query)
-    : normalizedOptions;
-
-  // Keep query in sync with selected option when closed
-  $: if (!open && selectedOption && !freeform) {
-    query = selectedOption.label;
-  } else if (!open && !selectedOption && !freeform) {
-    query = "";
-  }
-
-  // Clamp highlight
-  $: if (filteredOptions.length > 0 && highlightIndex >= filteredOptions.length) {
-    highlightIndex = 0;
-  }
-
-  $: highlightedOptionId =
+  const selectId = $derived(id ?? generatedSelectId);
+  const listboxId = $derived(`${selectId}-listbox`);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const currentValue = $derived((value ?? defaultValue) ?? "");
+  const useCustom = $derived(
+    native === true ? false : native === false ? true : searchable || Boolean(optionSnippet) || Boolean(triggerSnippet)
+  );
+  const isLazy = $derived(Boolean(loadOptions));
+  const clearValue = $derived(defaultValue ?? "");
+  const placeholderValue = $derived(clearable ? clearValue : "");
+  const placeholderLabel = $derived(placeholder ?? (clearable ? valueLabel ?? "All" : null));
+  const normalizedOptions = $derived(loadedOptions ?? options);
+  const flatOptions = $derived(flattenOptions(normalizedOptions));
+  const hasCurrentOption = $derived(flatOptions.some((entry) => entry.value === currentValue));
+  const hasSelection = $derived(currentValue !== "" && currentValue !== clearValue);
+  const isGrouped = $derived(normalizedOptions.length > 0 && "options" in normalizedOptions[0]);
+  const selectedOption = $derived(flatOptions.find((entry) => entry.value === currentValue) ?? null);
+  const filteredOptions = $derived(
+    searchable && query.length > 0
+      ? flatOptions.filter((entry) => !isOptionDisabled(entry) && entry.label.toLowerCase().includes(query.toLowerCase()))
+      : flatOptions.filter((entry) => !isOptionDisabled(entry))
+  );
+  const filteredGroups = $derived(
+    searchable && query.length > 0 ? filterGroups(normalizedOptions, query) : normalizedOptions
+  );
+  const highlightedOptionId = $derived(
     open && filteredOptions.length > 0 && highlightIndex >= 0
       ? `${listboxId}-option-${highlightIndex}`
-      : undefined;
-
-  // Async loading
-  $: if (loadKey !== lastLoadKey) {
-    lastLoadKey = loadKey;
-    loadedOptions = null;
-    loadedItems = null;
-    loadedGroups = null;
-    loadState = "idle";
-    loadError = null;
-  }
-
-  $: if (isLazy && loadState === "idle") {
-    void startLoad();
-  }
+      : undefined
+  );
 
   // ── Helpers ──────────────────────────────────────────────────
-
-  function normalizeItems(source: LegacySelectItem[] | SelectItems | null): SelectItems {
-    if (!source || source.length === 0) return [];
-    if ("options" in source[0]) return source as SelectItems;
-    return (source as LegacySelectItem[]).map((o) => ({
-      value: o.value,
-      label: o.label,
-      disabled: o.isDisabled ?? o.disabled ?? false,
-    }));
-  }
-
-  function normalizeGroups(source: LegacySelectGroup[]): SelectOptionGroup[] {
-    return source.flatMap((group) => {
-      const ownOptions = (group.items ?? []).map((o) => ({
-        value: o.value,
-        label: o.label,
-        disabled: o.isDisabled ?? o.disabled ?? false,
-      }));
-      const nested = group.groups?.length ? normalizeGroups(group.groups) : [];
-      if (group.label.trim().length === 0) {
-        return [...(ownOptions.length ? [{ label: "", options: ownOptions }] : []), ...nested];
-      }
-      return [...(ownOptions.length ? [{ label: group.label, options: ownOptions }] : []), ...nested];
-    });
-  }
 
   function flattenOptions(source: SelectItems): SelectOption[] {
     if (source.length === 0) return [];
@@ -257,13 +164,7 @@
     loadState = "loading";
     loadError = null;
     try {
-      if (loadOptions) {
-        loadedOptions = await loadOptions();
-      } else if (loadGroups) {
-        loadedGroups = await loadGroups();
-      } else if (loadItems) {
-        loadedItems = await loadItems();
-      }
+      loadedOptions = loadOptions ? await loadOptions() : [];
       loadState = "loaded";
     } catch (error) {
       loadState = "error";
@@ -281,12 +182,8 @@
   // ── Custom mode handlers ─────────────────────────────────────
 
   function commitValue(nextValue: string): void {
-    if (!isControlled) {
-      uncontrolledValue = nextValue;
-    }
-    dispatch("valueChange", { value: nextValue });
-    dispatch("change", { value: nextValue });
-    onchange?.(nextValue);
+    value = nextValue;
+    onValueChange?.(nextValue);
   }
 
   function setOpen(nextOpen: boolean): void {
@@ -305,11 +202,11 @@
       }
     }
     open = nextOpen;
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
 
     if (nextOpen) {
       highlightIndex = selectedOption
-        ? filteredOptions.findIndex((o) => o.value === selectedOption!.value)
+        ? filteredOptions.findIndex((entry) => entry.value === selectedOption.value)
         : 0;
       if (highlightIndex < 0) highlightIndex = 0;
     }
@@ -331,7 +228,7 @@
     query = (event.currentTarget as HTMLInputElement).value;
     highlightIndex = 0;
     if (!open) setOpen(true);
-    dispatch("queryChange", { query });
+    onQueryChange?.(query);
 
     if (freeform) {
       commitValue(query);
@@ -377,6 +274,33 @@
     query = "";
     commitValue(clearValue);
   }
+
+  $effect(() => {
+    if (!open && !freeform) {
+      query = selectedOption?.label ?? "";
+    }
+  });
+
+  $effect(() => {
+    if (filteredOptions.length > 0 && highlightIndex >= filteredOptions.length) {
+      highlightIndex = 0;
+    }
+  });
+
+  $effect(() => {
+    if (loadKey !== lastLoadKey) {
+      lastLoadKey = loadKey;
+      loadedOptions = null;
+      loadState = "idle";
+      loadError = null;
+    }
+  });
+
+  $effect(() => {
+    if (isLazy && loadState === "idle") {
+      void startLoad();
+    }
+  });
 
   onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
@@ -436,16 +360,16 @@
           aria-autocomplete="list"
           aria-activedescendant={highlightedOptionId}
           aria-describedby={describedBy ?? undefined}
-          on:focus={() => { if (!open) setOpen(true); }}
-          on:input={handleInputInput}
-          on:keydown={handleKeydown}
+          onfocus={() => { if (!open) setOpen(true); }}
+          oninput={handleInputInput}
+          onkeydown={handleKeydown}
         />
         {#if clearable && hasSelection && !disabled}
           <button
             type="button"
             class="poodle-select__clear"
             aria-label="Clear selection"
-            on:click={handleClear}
+            onclick={handleClear}
           >
             <Icon name="x" size="xs" />
           </button>
@@ -467,23 +391,25 @@
           aria-controls={open ? listboxId : undefined}
           aria-label={ariaLabel ?? undefined}
           aria-describedby={describedBy ?? undefined}
-          on:click={handleTriggerClick}
-          on:keydown={handleKeydown}
+          onclick={handleTriggerClick}
+          onkeydown={handleKeydown}
         >
-          {#if $$slots.trigger}
-            <slot name="trigger" selectedOption={selectedOption} {open} {placeholder} />
-          {:else}
-            <span class="poodle-select__value" data-placeholder={!hasSelection}>
-              {selectedOption?.label ?? placeholder ?? ""}
-            </span>
-          {/if}
+          <span class="poodle-select__trigger-content">
+            {#if triggerSnippet}
+              {@render triggerSnippet({ selectedOption, open, placeholder })}
+            {:else}
+              <span class="poodle-select__value" data-placeholder={!hasSelection}>
+                {selectedOption?.label ?? placeholder ?? ""}
+              </span>
+            {/if}
+          </span>
         </button>
         {#if clearable && hasSelection && !disabled}
           <button
             type="button"
             class="poodle-select__clear"
             aria-label="Clear selection"
-            on:click={handleClear}
+            onclick={handleClear}
           >
             <Icon name="x" size="xs" />
           </button>
@@ -525,25 +451,36 @@
                   {@const flatIdx = flatOptions.indexOf(option)}
                   <button
                     type="button"
-                    class="poodle-select__option"
-                    id={`${listboxId}-option-${flatIdx}`}
-                    role="option"
-                    aria-selected={currentValue === option.value ? "true" : "false"}
-                    data-highlighted={highlightIndex === flatIdx}
-                    disabled={isOptionDisabled(option)}
-                    on:mouseenter={() => (highlightIndex = flatIdx)}
-                    on:click={() => selectOption(option)}
+                  class="poodle-select__option"
+                  id={`${listboxId}-option-${flatIdx}`}
+                  role="option"
+                  aria-selected={currentValue === option.value ? "true" : "false"}
+                  data-highlighted={highlightIndex === flatIdx}
+                  disabled={isOptionDisabled(option)}
+                    onmouseenter={() => (highlightIndex = flatIdx)}
+                    onclick={() => selectOption(option)}
                   >
-                    {#if $$slots.option}
-                      <slot name="option" {option} highlighted={highlightIndex === flatIdx} selected={currentValue === option.value} index={flatIdx} />
+                    {#if optionSnippet}
+                      <span class="poodle-select__option-content">
+                        {@render optionSnippet({
+                          option,
+                          highlighted: highlightIndex === flatIdx,
+                          selected: currentValue === option.value,
+                          index: flatIdx,
+                        })}
+                      </span>
                     {:else}
                       {#if option.icon}
                         <span class="poodle-select__option-icon"><Icon icon={option.icon} size="sm" /></span>
                       {/if}
-                      <span class="poodle-select__option-label">{option.label}</span>
-                      {#if option.description}
-                        <span class="poodle-select__option-description">{option.description}</span>
-                      {/if}
+                      <span class="poodle-select__option-content">
+                        <span class="poodle-select__option-body">
+                          <span class="poodle-select__option-label">{option.label}</span>
+                          {#if option.description}
+                            <span class="poodle-select__option-description">{option.description}</span>
+                          {/if}
+                        </span>
+                      </span>
                     {/if}
                   </button>
                 {/each}
@@ -562,22 +499,36 @@
                   {@const flatIdx = filteredOptions.indexOf(option)}
                   <button
                     type="button"
-                    class="poodle-select__option"
-                    id={`${listboxId}-option-${flatIdx}`}
-                    role="option"
-                    aria-selected={currentValue === option.value ? "true" : "false"}
-                    data-highlighted={highlightIndex === flatIdx}
-                    disabled={isOptionDisabled(option)}
-                    on:mouseenter={() => (highlightIndex = flatIdx)}
-                    on:click={() => selectOption(option)}
+                  class="poodle-select__option"
+                  id={`${listboxId}-option-${flatIdx}`}
+                  role="option"
+                  aria-selected={currentValue === option.value ? "true" : "false"}
+                  data-highlighted={highlightIndex === flatIdx}
+                  disabled={isOptionDisabled(option)}
+                    onmouseenter={() => (highlightIndex = flatIdx)}
+                    onclick={() => selectOption(option)}
                   >
-                    {#if $$slots.option}
-                      <slot name="option" {option} highlighted={highlightIndex === flatIdx} selected={currentValue === option.value} index={flatIdx} />
+                    {#if optionSnippet}
+                      <span class="poodle-select__option-content">
+                        {@render optionSnippet({
+                          option,
+                          highlighted: highlightIndex === flatIdx,
+                          selected: currentValue === option.value,
+                          index: flatIdx,
+                        })}
+                      </span>
                     {:else}
-                      <span class="poodle-select__option-label">{option.label}</span>
-                      {#if option.description}
-                        <span class="poodle-select__option-description">{option.description}</span>
+                      {#if option.icon}
+                        <span class="poodle-select__option-icon"><Icon icon={option.icon} size="sm" /></span>
                       {/if}
+                      <span class="poodle-select__option-content">
+                        <span class="poodle-select__option-body">
+                          <span class="poodle-select__option-label">{option.label}</span>
+                          {#if option.description}
+                            <span class="poodle-select__option-description">{option.description}</span>
+                          {/if}
+                        </span>
+                      </span>
                     {/if}
                   </button>
                 {/each}
@@ -594,27 +545,38 @@
               aria-selected={currentValue === option.value ? "true" : "false"}
               data-highlighted={highlightIndex === index}
               disabled={isOptionDisabled(option)}
-              on:mouseenter={() => (highlightIndex = index)}
-              on:click={() => selectOption(option)}
+              onmouseenter={() => (highlightIndex = index)}
+              onclick={() => selectOption(option)}
             >
-              {#if $$slots.option}
-                <slot name="option" {option} highlighted={highlightIndex === index} selected={currentValue === option.value} {index} />
+              {#if optionSnippet}
+                <span class="poodle-select__option-content">
+                  {@render optionSnippet({
+                    option,
+                    highlighted: highlightIndex === index,
+                    selected: currentValue === option.value,
+                    index,
+                  })}
+                </span>
               {:else}
                 {#if option.icon}
                   <span class="poodle-select__option-icon"><Icon icon={option.icon} size="sm" /></span>
                 {/if}
-                <span class="poodle-select__option-label">{option.label}</span>
-                {#if option.description}
-                  <span class="poodle-select__option-description">{option.description}</span>
-                {/if}
+                <span class="poodle-select__option-content">
+                  <span class="poodle-select__option-body">
+                    <span class="poodle-select__option-label">{option.label}</span>
+                    {#if option.description}
+                      <span class="poodle-select__option-description">{option.description}</span>
+                    {/if}
+                  </span>
+                </span>
               {/if}
             </button>
           {/each}
         {/if}
 
         {#if filteredOptions.length === 0}
-          {#if $$slots.empty}
-            <slot name="empty" {query} />
+          {#if emptySnippet}
+            {@render emptySnippet({ query })}
           {:else}
             <div class="poodle-select__empty">{emptyMessage}</div>
           {/if}
@@ -636,7 +598,7 @@
       aria-label={ariaLabel ?? undefined}
       aria-describedby={describedBy ?? undefined}
       aria-invalid={validationState === "invalid" ? "true" : undefined}
-      on:change={handleNativeChange}
+      onchange={handleNativeChange}
     >
       {#if placeholderLabel}
         <option value={placeholderValue} disabled={!clearable && required}>{placeholderLabel}</option>
@@ -784,16 +746,18 @@
 
   /* Trigger area (searchable) */
   .poodle-select__trigger-area {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0 var(--poodle-space-control-x);
+    gap: 0.375rem;
+    padding: 0 calc(var(--poodle-space-control-x) + 1.5rem) 0 var(--poodle-space-control-x);
     min-height: var(--poodle-size-control-height);
   }
 
   .poodle-select__input {
     flex: 1;
     min-width: 0;
+    width: 100%;
     height: var(--poodle-size-control-height);
     padding: 0;
     border: 0;
@@ -813,8 +777,9 @@
   .poodle-select__trigger {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.375rem;
     flex: 1;
+    width: 100%;
     min-width: 0;
     min-height: var(--poodle-size-control-height);
     padding: 0;
@@ -830,6 +795,13 @@
 
   .poodle-select__trigger:disabled {
     cursor: not-allowed;
+  }
+
+  .poodle-select__trigger-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
   }
 
   .poodle-select__value {
@@ -906,7 +878,7 @@
   /* Option */
   .poodle-select__option {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
     width: 100%;
     padding: 0.375rem 0.5rem;
@@ -937,14 +909,29 @@
   .poodle-select__option-icon {
     display: inline-flex;
     flex-shrink: 0;
+    margin-top: 0.125rem;
   }
 
-  .poodle-select__option-label {
+  .poodle-select__option-content {
+    display: block;
     flex: 1;
     min-width: 0;
   }
 
+  .poodle-select__option-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .poodle-select__option-label {
+    display: block;
+    min-width: 0;
+  }
+
   .poodle-select__option-description {
+    display: block;
     color: var(--poodle-color-text-secondary);
     font-size: 0.6875rem;
   }
@@ -999,11 +986,15 @@
   .poodle-select[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
   .poodle-select--custom[data-density="compact"] { padding: 0; }
   .poodle-select--custom[data-density="compact"] .poodle-select__trigger-area,
-  .poodle-select--custom[data-density="compact"] .poodle-select__trigger { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
+  .poodle-select--custom[data-density="compact"] .poodle-select__trigger {
+    padding: 0 calc(var(--poodle-space-control-x) + 1.375rem) 0 calc(var(--poodle-space-control-x) - 0.125rem);
+  }
   .poodle-select--custom[data-density="compact"] .poodle-select__trigger { padding: 0; }
   .poodle-select--custom[data-density="comfortable"] { padding: 0; }
   .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger-area,
-  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger {
+    padding: 0 calc(var(--poodle-space-control-x) + 1.625rem) 0 calc(var(--poodle-space-control-x) + 0.125rem);
+  }
   .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger { padding: 0; }
 
   /* ═══ SIZE VARIANTS ═══ */

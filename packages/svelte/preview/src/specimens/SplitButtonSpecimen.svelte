@@ -24,17 +24,17 @@
     <div class="poodle-specimen">
       <div class="poodle-specimen__row">
         <Eyebrow>Primary</Eyebrow>
-        <SplitButton variant="primary" items={saveItems} on:click={() => (lastAction = "Save")} on:action={(e) => (lastAction = e.detail.value)}>Save</SplitButton>
+        <SplitButton variant="primary" items={saveItems} onClick={() => (lastAction = "Save")} onAction={(value) => (lastAction = value)}>Save</SplitButton>
       </div>
 
       <div class="poodle-specimen__row">
         <Eyebrow>Secondary</Eyebrow>
-        <SplitButton variant="secondary" items={exportItems} on:click={() => (lastAction = "Export")} on:action={(e) => (lastAction = e.detail.value)}>Export</SplitButton>
+        <SplitButton variant="secondary" items={exportItems} onClick={() => (lastAction = "Export")} onAction={(value) => (lastAction = value)}>Export</SplitButton>
       </div>
 
       <div class="poodle-specimen__row">
         <Eyebrow>Danger</Eyebrow>
-        <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} on:click={() => (lastAction = "Delete")} on:action={(e) => (lastAction = e.detail.value)}>Delete</SplitButton>
+        <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} onClick={() => (lastAction = "Delete")} onAction={(value) => (lastAction = value)}>Delete</SplitButton>
       </div>
 
       <div class="poodle-specimen__row">

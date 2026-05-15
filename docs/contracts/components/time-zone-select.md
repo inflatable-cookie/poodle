@@ -7,28 +7,25 @@ Updated: 2026-03-30
 
 - Component name: `TimeZoneSelect`
 - Layer: `foundation`
-- Summary: a timezone-value control for choosing a named time zone, using a
-  styled native select with an indicator chevron inside a field-chrome shell
+- Summary: a timezone-value control for choosing a named time zone, implemented
+  as a thin wrapper around `Select` with timezone-specific option defaults
 - In scope: timezone selection, placeholder behavior, disabled state, optional
   host-provided option set, default timezone list fallback
 - Out of scope: offset math, locale-specific timezone display policy,
-  scheduling workflows, custom searchable overlay
+  scheduling workflows, and custom rendering rules beyond what `Select`
+  already supports
 
 ## 2. Anatomy
 
 ```text
-[Shell .time-zone-select]  <div>
-  ├── [Control .time-zone-select__control]  <select>
-  │     ├── [Placeholder <option>] (conditional, when placeholder set and no value)
-  │     └── [Option <option>]...
-  └── [Indicator .time-zone-select__indicator]  <span> (decorative chevron)
+[Wrapper .time-zone-select]  <Select>
+  └── [Option list]  TimeZoneOption[] -> SelectOption[]
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Shell | yes | field chrome wrapper | border, radius, background, focus ring |
-| Control | yes | native select element | typography, text color, appearance reset |
-| Indicator | yes | decorative disclosure chevron | icon color, typography |
+| Wrapper | yes | forwards props to `Select` | inherits `Select` token usage |
+| Option list | yes | timezone options mapped into `Select` options | label, value, disabled |
 
 ## 3. Props And Inputs
 
@@ -37,9 +34,9 @@ Updated: 2026-03-30
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| undefined` | `undefined` | no | HTML id for the select element |
-| `value` | `string \| null` | `null` | no | controlled selected timezone identifier |
+| `value` | `string \| null \| undefined` | `undefined` | no | controlled selected timezone identifier; leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial timezone |
-| `placeholder` | `string \| null` | `"Select time zone"` | no | shown when no value selected |
+| `placeholder` | `string \| null` | `"Search time zones..."` | no | shown when no value selected |
 | `options` | `TimeZoneOption[]` | `defaultTimeZoneOptions()` | no | timezone option list |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -48,6 +45,9 @@ Updated: 2026-03-30
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `name` | `string \| undefined` | `undefined` | no | form field name |
+| `onValueChange` | `(value: string) => void \| undefined` | `undefined` | no | called when the selected time zone changes |
+| `onQueryChange` | `(query: string) => void \| undefined` | `undefined` | no | called when the search query changes |
+| `onOpenChange` | `(open: boolean) => void \| undefined` | `undefined` | no | called when the searchable dropdown opens or closes |
 
 ### Type Definitions
 
@@ -57,7 +57,7 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 
 ### Controlled And Uncontrolled
 
-- controlled: `value` plus `valueChange` event
+- controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue`
 - when no options provided, component uses `defaultTimeZoneOptions()` fallback
 
@@ -67,169 +67,92 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| placeholder | no value selected, placeholder prop set | placeholder text in secondary color |
-| selected | value matches an option | timezone label displayed in primary color |
-| focus-within | select receives focus | border-color and box-shadow change on shell |
-| disabled | `disabled=true` | reduced opacity on shell, non-interactive |
+| placeholder | no value selected, placeholder prop set | placeholder text shown by `Select` |
+| selected | value matches an option | selected timezone label shown by `Select` |
+| open | searchable dropdown opened | option list and query field shown by `Select` |
+| disabled | `disabled=true` | reduced opacity and non-interactive state from `Select` |
 
 ### Component States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| value selected | user picks a timezone | `valueChange` fires with timezone identifier |
-| placeholder shown | no value and placeholder set | placeholder option displayed |
+| value selected | user picks a timezone | `onValueChange` fires with timezone identifier |
+| query updated | user types into searchable mode | `onQueryChange` fires with query text |
+| dropdown toggled | overlay opens or closes | `onOpenChange` fires with open state |
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
-|-------|---------------|---------|-------|
-| `valueChange` | user selects a different timezone | `{ value: string }` | fires on native change event |
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | user selects a different timezone | `string` | fires on select value change |
+| `onQueryChange` | search query changes | `string` | searchable mode only |
+| `onOpenChange` | dropdown open state changes | `boolean` | custom searchable mode only |
 
 ## 6. Accessibility
 
 ### Semantics
 
-- Role: native `<select>` element provides built-in accessibility
+- Role: inherited from `Select` searchable mode
 - Required attributes: accessible name from external label or `ariaLabel`
 - Optional attributes: `aria-describedby` from `describedBy`
-- `disabled` attribute set on select when `disabled`
+- disabled semantics delegated to `Select`
 - Labeling rules: placeholder text is not the accessible name
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `Space` / `Enter` | opens native select dropdown (platform-dependent) |
-| `Arrow Down` / `Arrow Up` | navigates options within native dropdown |
-| `Escape` | closes native dropdown |
+| `Space` / `Enter` | opens dropdown or selects highlighted option |
+| `Arrow Down` / `Arrow Up` | navigates options within the dropdown |
+| `Escape` | closes dropdown |
 | `Tab` | exits the control |
 
 ### Focus And Announcement
 
-- focus entry: shell receives visible focus treatment (border-color, box-shadow changes)
+- focus entry: inherited from `Select`
 - focus exit: focus treatment clears
-- live-region behavior: none; native select handles value announcement
-- GPUI-native accessibility mapping notes: GPUI must expose select semantics with option list, selected value, and expanded state through native accessibility tree
+- live-region behavior: none
+- GPUI-native accessibility mapping notes: GPUI must preserve `Select` semantics with selected value, expanded state, and option list
 
 ## 7. Layout
 
 ### Sizing
 
-- Shell min-height follows `size-control-height` token
-- Shell uses grid layout with two columns: select fills available space, indicator is auto-sized
-- Indicator is pointer-events: none to allow click-through to native select
+- sizing and spacing are inherited from `Select`
+- searchable mode is always enabled
 
 ### Composition
 
 - parent expectations: forms, settings rows, zoned datetime pickers, Field wrapper
 - child expectations: options only
-- resizing rules: shell stretches to parent width; value display truncates if needed
+- resizing rules: inherited from `Select`
 
 ## 8. Token Usage — Exact Values
 
-### Shell `.time-zone-select`
-
-| Property | Value |
-|----------|-------|
-| `display` | `grid` |
-| `grid-template-columns` | `minmax(0, 1fr) auto` |
-| `align-items` | `center` |
-| `gap` | `var(--poodle-space-inline-sm)` |
-| `min-height` | `var(--poodle-size-control-height)` |
-| `padding` | `0 var(--poodle-space-control-x)` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `var(--poodle-color-background-surface)` |
-| `transition` | `border-color, box-shadow, background` |
-
-### Shell — focus-within
-
-| Property | Value |
-|----------|-------|
-| `border-color` | `var(--poodle-color-accent-focusRing)` |
-| `box-shadow` | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
-
-### Shell — disabled
-
-| Property | Value |
-|----------|-------|
-| `opacity` | `var(--poodle-state-opacity-disabled)` |
-
-### Control `.time-zone-select__control`
-
-| Property | Value |
-|----------|-------|
-| `min-width` | `0` |
-| `width` | `100%` |
-| `height` | `calc(var(--poodle-size-control-height) - (var(--poodle-border-width-default) * 2))` |
-| `padding` | `0` |
-| `border` | `0` |
-| `background` | `transparent` |
-| `color` | `var(--poodle-color-text-primary)` |
-| `font-family` | `var(--poodle-typography-body-family)` |
-| `font-size` | `var(--poodle-typography-body-size)` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
-| `outline` | `0` |
-| `appearance` | `none` |
-
-### Control — placeholder state
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
-
-### Indicator `.time-zone-select__indicator`
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-icon-muted)` |
-| `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.75rem` |
-| `line-height` | `1` |
-| `pointer-events` | `none` |
-
-### Size adjustments
-
-| Size | Property | Value |
-|------|----------|-------|
-| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
-| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
-| `xs` | `font-size` | `0.75rem` |
-| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
-| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.0625rem)` |
-| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
-| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
-| `lg` | `font-size` | `0.9375rem` |
-| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
-| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
-| `xl` | `font-size` | `1rem` |
+- Inherits `Select` token usage exactly for size, density, typography, focus, placeholder, disabled, and searchable-overlay behavior
+- Adds no wrapper-specific visual tokens beyond timezone option mapping
 
 ## 9. Svelte Notes
 
-- Uses a native `<select>` element for full platform accessibility
-- `appearance: none` on the select removes native browser chrome; the custom indicator provides the disclosure chevron
-- `data-placeholder="true"` attribute on shell signals placeholder state for CSS targeting
-- Placeholder rendered as a disabled `<option>` with `selected` when no value is set
+- Delegates rendering and interaction entirely to `Select`
 - `defaultTimeZoneOptions()` utility provides a reasonable IANA timezone list as fallback
-- Transition applies to border-color, box-shadow, and background for smooth focus treatment
-- `data-size` data attribute on shell reflects the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- Maps `TimeZoneOption[]` into `Select` options
+- searchable mode is always enabled
 
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::time_zone_select`
 - Spec struct: `TimeZoneSelectSpec` in primitives crate
-- GPUI must model the select as a trigger that opens a platform-appropriate option list
-- Must expose selected value, expanded state, and option list through native accessibility tree
+- GPUI must preserve `Select` semantics while using the same default timezone option source
 - `defaultTimeZoneOptions()` equivalent must be available in Rust
-- The indicator chevron is decorative and does not need separate accessibility exposure
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] value and valueChange semantics match
-- [ ] placeholder behavior matches (displayed when no value, secondary color)
+- [ ] value and onValueChange semantics match
+- [ ] searchable behavior matches
+- [ ] placeholder behavior matches
 - [ ] disabled state matches
 - [ ] accessible name from label or ariaLabel matches
 - [ ] describedBy relationship matches
@@ -237,27 +160,21 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 
 ### Tier 2: Visual Parity
 
-- [ ] shell height uses control-height token
-- [ ] shell grid layout matches (minmax column, auto indicator)
-- [ ] focus-within treatment matches (border-color, box-shadow with 28% mix)
-- [ ] placeholder color (text-secondary) matches
-- [ ] indicator color (icon-muted) and font (code-family, 0.75rem) match
+- [ ] visual parity matches `Select`
 - [ ] disabled opacity matches
-- [ ] control typography (body-family, body-size, body-lineHeight) matches
-- [ ] all five sizes visually match (height, padding, font-size per size table)
+- [ ] all five sizes visually match
 
 ### Tier 3: Implementation Freedom
 
-- [ ] native `<select>` dropdown vs GPUI custom overlay stays internal
+- [ ] underlying option list implementation stays internal
 - [ ] default timezone list ordering may vary
-- [ ] transition timing is platform-owned
+- [ ] overlay timing and positioning stay runtime-owned
 
 ## 12. Known Deltas
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| native select dropdown appearance differs per platform | native `<select>` renders platform-native dropdowns | allowed | keep value/selection semantics strict |
-| GPUI may use custom overlay instead of native select | GPUI has no native `<select>` equivalent | allowed | must preserve timezone option navigation |
+| underlying select implementation differs per runtime | wrapper delegates to runtime-specific `Select` implementation | allowed | keep `Select` semantics and timezone option meaning strict |
 | default timezone list ordering may differ | platform timezone registries vary | allowed | keep public timezone value meaning strict |
 
 ## 13. Specimen Definitions

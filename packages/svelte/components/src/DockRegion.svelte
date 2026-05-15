@@ -129,19 +129,19 @@
 
   // ── Flexible mode: tab event handlers ──────────────────────────────
 
-  function handleValueChange(event: CustomEvent<{ value: string }>): void {
-    dispatch("valueChange", event.detail);
+  function handleValueChange(nextValue: string): void {
+    dispatch("valueChange", { value: nextValue });
     if (collapsed) {
       dispatch("collapsedChange", { isCollapsed: false });
     }
   }
 
-  function handleReorder(event: CustomEvent<{ items: string[] }>): void {
-    dispatch("reorder", event.detail);
+  function handleReorder(nextItems: string[]): void {
+    dispatch("reorder", { items: nextItems });
   }
 
-  function handleClose(event: CustomEvent<{ value: string }>): void {
-    dispatch("close", event.detail);
+  function handleClose(nextValue: string): void {
+    dispatch("close", { value: nextValue });
   }
 
   function handleCollapseToggle(): void {
@@ -340,9 +340,9 @@
           value={activeItem?.value ?? ""}
           reorderable={true}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
-          on:valueChange={handleValueChange}
-          on:reorder={handleReorder}
-          on:close={handleClose}
+          onValueChange={handleValueChange}
+          onReorder={handleReorder}
+          onClose={handleClose}
         />
     </div>
 
@@ -367,9 +367,9 @@
           value={activeItem?.value ?? ""}
           reorderable={true}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
-          on:valueChange={handleValueChange}
-          on:reorder={handleReorder}
-          on:close={handleClose}
+          onValueChange={handleValueChange}
+          onReorder={handleReorder}
+          onClose={handleClose}
         />
       </div>
       {#if collapsible}
@@ -403,9 +403,9 @@
           value={activeItem?.value ?? ""}
           reorderable={true}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
-          on:valueChange={handleValueChange}
-          on:reorder={handleReorder}
-          on:close={handleClose}
+          onValueChange={handleValueChange}
+          onReorder={handleReorder}
+          onClose={handleClose}
         />
       </div>
       {#if collapsible}

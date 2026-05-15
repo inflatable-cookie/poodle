@@ -1,9 +1,8 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextSegmentedControlId = 0;
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -13,36 +12,57 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let options: SegmentedControlOption[] = [];
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let name: string | undefined = undefined;
-  export let equalWidth = true;
+  interface Props {
+    value?: string | null | undefined;
+    defaultValue?: string | null;
+    options?: SegmentedControlOption[];
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    name?: string | undefined;
+    equalWidth?: boolean;
+    onValueChange?: ((value: string) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-  }>();
+  let {
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = null,
+    options = [],
+    size = null,
+    sizeRole = "control",
+    density = null,
+    disabled = false,
+    ariaLabel = null,
+    name = undefined,
+    equalWidth = true,
+    onValueChange = undefined,
+  }: Props = $props();
 
   const generatedName = `poodle-segmented-control-${++nextSegmentedControlId}`;
-  let uncontrolledValue = defaultValue;
+  let uncontrolledValue = $state<string | null>(null);
   const uiPresentation = getUiPresentation();
 
-  $: isControlled = value !== null;
-  $: currentValue = isControlled ? value : uncontrolledValue;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived(isControlled ? value : uncontrolledValue);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   function handleChange(nextValue: string): void {
     if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 </script>
 
@@ -64,7 +84,7 @@
         checked={currentValue === option.value}
         disabled={disabled || option.disabled === true}
         aria-label={option.ariaLabel ?? undefined}
-        on:change={() => handleChange(option.value)}
+        onchange={() => handleChange(option.value)}
       />
       <span class="poodle-segmented-control__label">{option.label}</span>
     </label>

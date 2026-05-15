@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import type {
     ControlDensity,
     ControlSize,
@@ -9,22 +7,32 @@
 
   import type { SidebarNavGroup, SidebarNavItem } from "./types";
 
-  export let groups: SidebarNavGroup[] = [];
-  export let value: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    groups?: SidebarNavGroup[];
+    value?: string | null;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string };
-  }>();
+  let {
+    groups = [],
+    value = $bindable<string | null>(null),
+    ariaLabel = null,
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    onValueChange = undefined,
+  }: Props = $props();
 
-  $: visibleGroups = groups.filter((group) => group.items.length > 0);
+  const visibleGroups = $derived(groups.filter((group) => group.items.length > 0));
 
   function handleItemActivation(item: SidebarNavItem): void {
     if (item.disabled) return;
-    dispatch("valueChange", { value: item.value });
+    value = item.value;
+    onValueChange?.(item.value);
   }
 </script>
 
@@ -54,7 +62,7 @@
                 class:poodle-sidebar-nav__item--active={item.value === value}
                 href={item.href}
                 aria-current={item.value === value ? "page" : undefined}
-                on:click={() => handleItemActivation(item)}
+                onclick={() => handleItemActivation(item)}
               >
                 {item.label}
               </a>
@@ -65,7 +73,7 @@
                 class:poodle-sidebar-nav__item--active={item.value === value}
                 aria-current={item.value === value ? "page" : undefined}
                 disabled={item.disabled}
-                on:click={() => handleItemActivation(item)}
+                onclick={() => handleItemActivation(item)}
               >
                 {item.label}
               </button>

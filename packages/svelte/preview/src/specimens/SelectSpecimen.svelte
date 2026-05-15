@@ -50,6 +50,7 @@
   let selectedCountry: string | null = null;
   let selectedFramework: string | null = null;
   let freeformValue: string | null = null;
+  let customCountry: string | null = null;
 </script>
 
 <SpecimenLayout>
@@ -62,7 +63,7 @@
             options={fruitOptions}
             placeholder="Choose a fruit"
             ariaLabel="Fruit selection"
-            on:valueChange={(e) => (selectedFruit = e.detail.value)}
+            onValueChange={(nextValue) => (selectedFruit = nextValue)}
           />
           {#if selectedFruit}<span class="poodle-specimen__value">{selectedFruit}</span>{/if}
         </div>
@@ -76,7 +77,7 @@
             placeholder="Choose a country"
             native={false}
             ariaLabel="Country selection"
-            on:valueChange={(e) => (selectedCountry = e.detail.value)}
+            onValueChange={(nextValue) => (selectedCountry = nextValue)}
           />
           {#if selectedCountry}<span class="poodle-specimen__value">{selectedCountry}</span>{/if}
         </div>
@@ -90,7 +91,7 @@
             placeholder="Search frameworks..."
             searchable
             ariaLabel="Framework search"
-            on:valueChange={(e) => (selectedFramework = e.detail.value)}
+            onValueChange={(nextValue) => (selectedFramework = nextValue)}
           />
           {#if selectedFramework}<span class="poodle-specimen__value">{selectedFramework}</span>{/if}
         </div>
@@ -105,9 +106,48 @@
             searchable
             freeform
             ariaLabel="Freeform"
-            on:valueChange={(e) => (freeformValue = e.detail.value)}
+            onValueChange={(nextValue) => (freeformValue = nextValue)}
           />
           {#if freeformValue}<span class="poodle-specimen__value">{freeformValue}</span>{/if}
+        </div>
+      </div>
+
+      <div class="poodle-specimen__row">
+        <Eyebrow>Snippet rendering</Eyebrow>
+        <div class="poodle-specimen__field">
+          <Select
+            options={richOptions}
+            placeholder="Custom country"
+            native={false}
+            ariaLabel="Custom country selection"
+            onValueChange={(nextValue) => (customCountry = nextValue)}
+          >
+            {#snippet trigger({ selectedOption, placeholder })}
+              <span class="poodle-specimen__trigger">
+                <span>{selectedOption?.label ?? placeholder ?? ""}</span>
+                {#if selectedOption}
+                  <Pill size="sm" appearance="subtle" tone="info">picked</Pill>
+                {/if}
+              </span>
+            {/snippet}
+
+            {#snippet option({ option, selected })}
+              <span class="poodle-specimen__option">
+                <span class="poodle-specimen__option-label">{option.label}</span>
+                {#if option.description}
+                  <span class="poodle-specimen__option-description">{option.description}</span>
+                {/if}
+                {#if selected}
+                  <Pill size="sm" appearance="badge" tone="success">current</Pill>
+                {/if}
+              </span>
+            {/snippet}
+
+            {#snippet empty({ query })}
+              <div class="poodle-specimen__empty">No match for "{query}"</div>
+            {/snippet}
+          </Select>
+          {#if customCountry}<span class="poodle-specimen__value">{customCountry}</span>{/if}
         </div>
       </div>
 
@@ -175,6 +215,32 @@
   }
 
   .poodle-specimen__value {
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-specimen__trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .poodle-specimen__option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .poodle-specimen__option-label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .poodle-specimen__option-description,
+  .poodle-specimen__empty {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);
   }

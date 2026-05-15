@@ -1,52 +1,87 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { onMount, tick, type Snippet } from "svelte";
 
   import { menuNavigableItems } from "./internal";
   import { resolveOverlayPosition } from "./overlay-position";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
-  import type { ControlDensity, ControlSize, MenuItem, OverlayPlacement, SemanticControlSizeRole } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    MenuItem,
+    OverlayPlacement,
+    SemanticControlSizeRole,
+  } from "./types";
 
-  export let items: MenuItem[] = [];
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let placement: OverlayPlacement = "bottom-start";
-  export let ariaLabel: string | null = null;
-  export let triggerAriaLabel: string | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
+  interface Props {
+    items?: MenuItem[];
+    open?: boolean | null;
+    defaultOpen?: boolean;
+    placement?: OverlayPlacement;
+    ariaLabel?: string | null;
+    triggerAriaLabel?: string | null;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    onAction?: ((value: string) => void) | undefined;
+    trigger?: Snippet<[]>;
+  }
 
-  const dispatch = createEventDispatcher<{
-    openChange: { open: boolean };
-    action: { value: string };
-  }>();
+  let {
+    items = [],
+    open = $bindable<boolean | null>(null),
+    defaultOpen = false,
+    placement = "bottom-start",
+    ariaLabel = null,
+    triggerAriaLabel = null,
+    sizeRole = "chrome",
+    size = null,
+    density = null,
+    onOpenChange = undefined,
+    onAction = undefined,
+    trigger,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let rootElement: HTMLDivElement | null = null;
-  let triggerElement: HTMLDivElement | null = null;
-  let overlayElement: HTMLDivElement | null = null;
-  let itemElements: Array<HTMLButtonElement | null> = [];
-  let uncontrolledOpen = defaultOpen;
-  let highlightIndex = 0;
-  let resolvedPlacement: OverlayPlacement = placement;
-  let overlayStyle = "";
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let triggerElement = $state<HTMLDivElement | null>(null);
+  let overlayElement = $state<HTMLDivElement | null>(null);
+  let itemElements = $state<Array<HTMLButtonElement | null>>([]);
+  let uncontrolledOpen = $state(false);
+  let highlightIndex = $state(0);
+  let resolvedPlacement = $state<OverlayPlacement>("bottom-start");
+  let overlayStyle = $state("");
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
-  $: actionableItems = menuNavigableItems(items);
-  $: if (isOpen) {
+  $effect.pre(() => {
+    if (!rootElement) {
+      uncontrolledOpen = defaultOpen;
+      resolvedPlacement = placement;
+    }
+  });
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(open !== null);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+  const actionableItems = $derived(menuNavigableItems(items));
+
+  $effect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     tick().then(() => {
       void updateOverlayPosition();
       itemElements[highlightIndex]?.focus();
     });
-  }
+  });
 
   function setOpen(nextOpen: boolean): void {
-    if (!isControlled) {
+    if (isControlled) {
+      open = nextOpen;
+    } else {
       uncontrolledOpen = nextOpen;
     }
 
@@ -54,7 +89,7 @@
       highlightIndex = 0;
     }
 
-    dispatch("openChange", { open: nextOpen });
+    onOpenChange?.(nextOpen);
   }
 
   function moveHighlight(direction: 1 | -1): void {
@@ -82,7 +117,7 @@
       return;
     }
 
-    dispatch("action", { value: item.value });
+    onAction?.(item.value);
     setOpen(false);
   }
 
@@ -167,10 +202,10 @@
     tabindex="0"
     aria-expanded={isOpen ? "true" : "false"}
     aria-label={triggerAriaLabel ?? undefined}
-    on:click={handleTriggerClick}
-    on:keydown={handleTriggerKeydown}
+    onclick={handleTriggerClick}
+    onkeydown={handleTriggerKeydown}
   >
-    <slot name="trigger" />
+    {@render trigger?.()}
   </div>
 
   {#if isOpen}
@@ -195,8 +230,8 @@
             data-tone={item.tone ?? "default"}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}
             aria-checked={item.kind === "checkbox" || item.kind === "radio" ? (item.checked ? "true" : "false") : undefined}
-            on:click={() => activateItem(item)}
-            on:keydown={(event) => {
+            onclick={() => activateItem(item)}
+            onkeydown={(event) => {
               if (event.key === "ArrowDown") {
                 event.preventDefault();
                 moveHighlight(1);

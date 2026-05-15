@@ -10,7 +10,7 @@
     <div class="poodle-specimen">
       <div class="poodle-specimen__item">
         <Eyebrow>Default</Eyebrow>
-        <TimeZoneSelect ariaLabel="Time zone" on:valueChange={(e) => (zone = e.detail.value)} />
+        <TimeZoneSelect ariaLabel="Time zone" onValueChange={(value) => (zone = value)} />
         {#if zone}<span class="poodle-specimen__value">{zone}</span>{/if}
       </div>
 

@@ -25,7 +25,7 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 
 ## Core Props
 
-- `value: number | string | null`
+- `value: number | string | null | undefined`
 - `defaultValue: number | string | null`
 - `min: number | string | null`
 - `max: number | string | null`
@@ -41,15 +41,15 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
   `id`, `name`, `placeholder`, `disabled`, `readOnly`, `required`,
   `ariaLabel`, `describedBy`, `size`, `sizeRole`, `density`
 
-## Events
+## Callbacks
 
-- `valueChange`
-- `validationChange`
-- `submit`
-- `increment`
-- `decrement`
-- `focus`
-- `blur`
+- `onValueChange`
+- `onValidationChange`
+- `onSubmit`
+- `onIncrement`
+- `onDecrement`
+- `onFocus`
+- `onBlur`
 
 ## Usage
 
@@ -72,6 +72,8 @@ This replaces the old split between `NumberEntry` and `NumberInput`.
 - string-form consumers round-trip string values while still getting numeric
   input behavior
 - steppers, clamping, and precision are shared across both modes
+- leave `value` undefined to use uncontrolled mode seeded by `defaultValue`
+- pass `value={null}` for a controlled empty state
 
 ## 2. Accessibility
 

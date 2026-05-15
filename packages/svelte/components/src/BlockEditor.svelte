@@ -236,7 +236,7 @@
                     menuMinWidth="10rem"
                     ariaLabel="Block type"
                     {disabled}
-                    on:valueChange={(e) => changeType(index, e.detail.value)}
+                    onValueChange={(nextValue) => changeType(index, nextValue)}
                   />
                 </div>
               </slot>
@@ -279,13 +279,13 @@
                     menuMinWidth="10rem"
                     ariaLabel="Add block after this one"
                     {disabled}
-                    on:valueChange={(e) => addBlock(e.detail.value, index)}
+                    onValueChange={(nextValue) => addBlock(nextValue, index)}
                   >
-                    <svelte:fragment slot="trigger">
+                    {#snippet trigger()}
                       <span class="poodle-block-editor__tool-btn" aria-hidden="true">
                         <Icon name="plus" />
                       </span>
-                    </svelte:fragment>
+                    {/snippet}
                   </Select>
                 </div>
               </slot>

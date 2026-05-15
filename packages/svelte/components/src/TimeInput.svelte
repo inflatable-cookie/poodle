@@ -1,41 +1,64 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let id: string | null = null;
-  export let value: string | null = null;
-  export let defaultValue: string | null = null;
-  export let min: string | null = null;
-  export let max: string | null = null;
-  export let step = 60;
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let describedBy: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    id?: string | null;
+    value?: string | null | undefined;
+    defaultValue?: string | null;
+    min?: string | null;
+    max?: string | null;
+    step?: number;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    describedBy?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string | null) => void) | undefined;
+  }
 
-  const dispatch = createEventDispatcher<{
-    valueChange: { value: string | null };
-  }>();
+  let {
+    id = null,
+    value = $bindable<string | null | undefined>(undefined),
+    defaultValue = null,
+    min = null,
+    max = null,
+    step = 60,
+    disabled = false,
+    ariaLabel = null,
+    describedBy = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = undefined,
+  }: Props = $props();
   const uiPresentation = getUiPresentation();
 
-  let uncontrolledValue = defaultValue;
+  let uncontrolledValue = $state<string | null>(null);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: currentValue = value ?? uncontrolledValue ?? "";
+  $effect.pre(() => {
+    if (uncontrolledValue === null) {
+      uncontrolledValue = defaultValue;
+    }
+  });
+
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived((isControlled ? value : uncontrolledValue) ?? "");
 
   function handleInput(event: Event): void {
     const nextValue = (event.currentTarget as HTMLInputElement).value || null;
 
-    if (value === null) {
+    if (!isControlled) {
       uncontrolledValue = nextValue;
+    } else {
+      value = nextValue;
     }
 
-    dispatch("valueChange", { value: nextValue });
+    onValueChange?.(nextValue);
   }
 </script>
 
@@ -52,7 +75,7 @@
   disabled={disabled}
   aria-label={ariaLabel ?? undefined}
   aria-describedby={describedBy ?? undefined}
-  on:input={handleInput}
+  oninput={handleInput}
 />
 
 <style>

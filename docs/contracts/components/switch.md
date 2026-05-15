@@ -40,7 +40,7 @@ Updated: 2026-04-01
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `id` | `string \| undefined` | `undefined` | no | element id for external label association |
-| `checked` | `boolean \| null` | `null` | no | controlled on/off state; when non-null, component is controlled |
+| `checked` | `boolean \| undefined` | `undefined` | no | bindable on/off state; leave undefined for uncontrolled mode |
 | `defaultChecked` | `boolean` | `false` | no | uncontrolled initial state |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `readOnly` | `boolean` | `false` | no | allows focus and reading but reverts any change attempt |
@@ -60,7 +60,7 @@ Updated: 2026-04-01
 
 ### Controlled And Uncontrolled
 
-- controlled: `checked` (non-null) plus `checkedChange` event handler
+- controlled: bindable `checked` plus `onCheckedChange`
 - uncontrolled: `defaultChecked` sets the initial state; component owns its own
   state thereafter
 - visual overrides: `offColor` and `onColor` take precedence over `leftTone`
@@ -86,11 +86,11 @@ Updated: 2026-04-01
 
 - internal checked state (uncontrolled mode)
 
-## 5. Events
+## 5. Callbacks
 
-| Event | When It Fires | Payload | Notes |
+| Callback | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `checkedChange` | user toggles the switch | `{ checked: boolean }` | suppressed when disabled; when readOnly, the native change is reverted so no event fires |
+| `onCheckedChange` | user toggles the switch | `boolean` | suppressed when disabled; when readOnly, the native change is reverted so no callback fires |
 
 ## 6. Accessibility
 
