@@ -4,6 +4,9 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [svelte()],
+  build: {
+    chunkSizeWarningLimit: 2200,
+  },
   resolve: {
     alias: {
       "@poodle/svelte": fileURLToPath(new URL("../components/src/index.ts", import.meta.url)),

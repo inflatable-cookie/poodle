@@ -31,7 +31,7 @@
   ];
 </script>
 
-<SpecimenLayout>
+<SpecimenLayout showDensities={false}>
   <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="poodle-hint">
       Import individual icons from <code>@poodle/icons-lucide</code>.
@@ -149,13 +149,6 @@
     </div>
   </svelte:fragment>
 
-  <svelte:fragment slot="densities" let:density>
-    <div class="poodle-size-demo">
-      <Icon icon={star} {density} />
-      <Icon icon={heart} {density} />
-      <Icon icon={settings} {density} />
-    </div>
-  </svelte:fragment>
 </SpecimenLayout>
 
 <style>

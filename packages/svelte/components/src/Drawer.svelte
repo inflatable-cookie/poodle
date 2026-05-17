@@ -262,10 +262,10 @@
     z-index: 1;
     pointer-events: auto;
     width: min(28rem, 100vw);
-    height: 100vh;
+    height: 100dvh;
     overflow: auto;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
-    border: 0.0625rem solid var(
+    border: 0 solid var(
       --poodle-treatment-surface-elevated-border,
       color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)
     );
@@ -281,10 +281,26 @@
     box-shadow: var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog));
   }
 
+  .poodle-drawer[data-edge="left"] .poodle-drawer__surface {
+    border-inline-end-width: 0.0625rem;
+  }
+
+  .poodle-drawer[data-edge="right"] .poodle-drawer__surface {
+    border-inline-start-width: 0.0625rem;
+  }
+
+  .poodle-drawer[data-edge="top"] .poodle-drawer__surface {
+    border-block-end-width: 0.0625rem;
+  }
+
+  .poodle-drawer[data-edge="bottom"] .poodle-drawer__surface {
+    border-block-start-width: 0.0625rem;
+  }
+
   .poodle-drawer[data-edge="top"] .poodle-drawer__surface,
   .poodle-drawer[data-edge="bottom"] .poodle-drawer__surface {
     width: 100vw;
-    height: min(24rem, 100vh);
+    height: min(24rem, 100dvh);
   }
 
   .poodle-drawer__header {

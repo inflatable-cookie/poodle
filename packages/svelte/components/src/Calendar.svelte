@@ -66,7 +66,13 @@
   let uncontrolledMonth = $state(todayIsoDate());
   let focusIso = $state(todayIsoDate());
   let seededDefaults = $state(false);
+  let editingMonth = $state(false);
+  let editingYear = $state(false);
+  let monthDraft = $state("");
+  let yearDraft = $state("");
   let dayElements: Record<string, HTMLButtonElement | undefined> = {};
+  let monthSelectElement: HTMLSelectElement | null = $state(null);
+  let yearInputElement: HTMLInputElement | null = $state(null);
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -89,9 +95,22 @@
     );
   });
   const currentMonth = $derived(monthAnchorIso(hasControlledVisibleMonth ? visibleMonth ?? uncontrolledMonth : uncontrolledMonth));
+  const currentMonthDate = $derived(parseIsoDate(currentMonth) ?? parseIsoDate(todayIsoDate())!);
   const weeks = $derived(buildCalendarWeeks(currentMonth, weekStartsOn));
   const weekdayLabels = $derived(getWeekdayLabels(weekStartsOn, locale));
   const monthLabel = $derived(formatMonthLabel(currentMonth, locale));
+  const monthName = $derived(
+    new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(currentMonthDate)
+  );
+  const yearLabel = $derived(String(currentMonthDate.getUTCFullYear()));
+  const monthOptions = $derived(
+    Array.from({ length: 12 }, (_, monthIndex) => ({
+      value: String(monthIndex),
+      label: new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(
+        new Date(Date.UTC(2000, monthIndex, 1))
+      ),
+    }))
+  );
 
   $effect.pre(() => {
     if (seededDefaults) {
@@ -133,6 +152,27 @@
     }
   });
 
+  $effect(() => {
+    if (!editingMonth || !monthSelectElement) {
+      return;
+    }
+
+    tick().then(() => {
+      monthSelectElement?.focus();
+    });
+  });
+
+  $effect(() => {
+    if (!editingYear || !yearInputElement) {
+      return;
+    }
+
+    tick().then(() => {
+      yearInputElement?.focus();
+      yearInputElement?.select();
+    });
+  });
+
   function isRangeStart(iso: string): boolean {
     return mode === "range" && currentRangeValue.start === iso;
   }
@@ -161,6 +201,99 @@
     }
 
     onMonthChange?.(nextMonth);
+  }
+
+  function startYearEditing(): void {
+    if (disabled) {
+      return;
+    }
+
+    editingMonth = false;
+    yearDraft = yearLabel;
+    editingYear = true;
+  }
+
+  function startMonthEditing(): void {
+    if (disabled) {
+      return;
+    }
+
+    editingYear = false;
+    monthDraft = String(currentMonthDate.getUTCMonth());
+    editingMonth = true;
+  }
+
+  function stopMonthEditing(): void {
+    editingMonth = false;
+  }
+
+  function stopYearEditing(): void {
+    editingYear = false;
+  }
+
+  function commitMonthDraft(): void {
+    const parsedMonth = Number(monthDraft);
+
+    if (!Number.isInteger(parsedMonth) || parsedMonth < 0 || parsedMonth > 11) {
+      stopMonthEditing();
+      return;
+    }
+
+    const nextDate = new Date(Date.UTC(currentMonthDate.getUTCFullYear(), parsedMonth, 1));
+    setMonth(monthAnchorIso(formatIsoDate(nextDate) ?? currentMonth));
+    stopMonthEditing();
+  }
+
+  function commitYearDraft(): void {
+    const trimmed = yearDraft.trim();
+    const parsedYear = Number(trimmed);
+
+    if (!Number.isInteger(parsedYear) || trimmed.length !== 4) {
+      stopYearEditing();
+      return;
+    }
+
+    const nextDate = new Date(Date.UTC(parsedYear, currentMonthDate.getUTCMonth(), 1));
+    setMonth(monthAnchorIso(formatIsoDate(nextDate) ?? currentMonth));
+    stopYearEditing();
+  }
+
+  function handlePreviousMonth(): void {
+    setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))));
+  }
+
+  function handleNextMonth(): void {
+    setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))));
+  }
+
+  function handleMonthDraftChange(event: Event): void {
+    monthDraft = (event.currentTarget as HTMLSelectElement).value;
+    commitMonthDraft();
+  }
+
+  function handleYearDraftBeforeInput(event: InputEvent): void {
+    if (
+      event.data &&
+      !/^\d+$/.test(event.data) &&
+      event.inputType !== "deleteContentBackward" &&
+      event.inputType !== "deleteContentForward"
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    if (
+      event.data &&
+      /^\d+$/.test(event.data) &&
+      yearDraft.length >= 4 &&
+      event.inputType.startsWith("insert")
+    ) {
+      event.preventDefault();
+    }
+  }
+
+  function handleYearDraftInput(event: Event): void {
+    yearDraft = (event.currentTarget as HTMLInputElement).value;
   }
 
   function commitSingleValue(nextValue: string): void {
@@ -274,13 +407,82 @@
       class="poodle-calendar__nav"
       disabled={disabled}
       aria-label="Previous month"
-      onclick={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, -1))))}
+      onclick={handlePreviousMonth}
     >
       <span aria-hidden="true">&#x2039;</span>
     </button>
 
     <div class="poodle-calendar__month" aria-live="polite">
-      {monthLabel}
+      {#if editingMonth}
+        <select
+          bind:this={monthSelectElement}
+          class="poodle-calendar__month-select"
+          value={monthDraft}
+          aria-label="Select month"
+          onchange={handleMonthDraftChange}
+          onblur={stopMonthEditing}
+          onkeydown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              stopMonthEditing();
+            }
+          }}
+        >
+          {#each monthOptions as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
+      {:else}
+        <button
+          type="button"
+          class="poodle-calendar__month-button"
+          disabled={disabled}
+          aria-label={`Edit month, currently ${monthName}`}
+          ondblclick={startMonthEditing}
+        >
+          <span class="poodle-calendar__month-name">{monthName}</span>
+        </button>
+      {/if}
+      {#if editingYear}
+        <input
+          bind:this={yearInputElement}
+          class="poodle-calendar__year-input"
+          type="number"
+          min="1"
+          max="9999"
+          step="1"
+          inputmode="numeric"
+          aria-label="Edit year"
+          value={yearDraft}
+          onbeforeinput={handleYearDraftBeforeInput}
+          oninput={handleYearDraftInput}
+          onblur={commitYearDraft}
+          onkeydown={(event) => {
+            if (["e", "E", "+", "-", "."].includes(event.key)) {
+              event.preventDefault();
+              return;
+            }
+
+            if (event.key === "Enter") {
+              event.preventDefault();
+              commitYearDraft();
+            } else if (event.key === "Escape") {
+              event.preventDefault();
+              stopYearEditing();
+            }
+          }}
+        />
+      {:else}
+        <button
+          type="button"
+          class="poodle-calendar__year-button"
+          disabled={disabled}
+          aria-label={`Edit year, currently ${yearLabel}`}
+          ondblclick={startYearEditing}
+        >
+          {yearLabel}
+        </button>
+      {/if}
     </div>
 
     <button
@@ -288,7 +490,7 @@
       class="poodle-calendar__nav"
       disabled={disabled}
       aria-label="Next month"
-      onclick={() => setMonth(monthAnchorIso(formatIsoDate(addMonths(parseIsoDate(currentMonth)!, 1))))}
+      onclick={handleNextMonth}
     >
       <span aria-hidden="true">&#x203A;</span>
     </button>
@@ -356,11 +558,78 @@
   }
 
   .poodle-calendar__month {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
     font-family: var(--poodle-typography-label-family);
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
     text-align: center;
+  }
+
+  .poodle-calendar__month-name {
+    white-space: nowrap;
+  }
+
+  .poodle-calendar__month-button,
+  .poodle-calendar__year-button {
+    padding: 0;
+    border: 0;
+    border-bottom: 0.0625rem dashed color-mix(in srgb, var(--poodle-color-text-secondary) 72%, transparent);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: 1.2;
+    cursor: text;
+    transition:
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-calendar__month-button:hover:not(:disabled),
+  .poodle-calendar__year-button:hover:not(:disabled) {
+    color: var(--poodle-color-text-primary);
+    border-bottom-color: color-mix(in srgb, var(--poodle-color-accent-base) 72%, transparent);
+  }
+
+  .poodle-calendar__month-select,
+  .poodle-calendar__year-input {
+    box-sizing: border-box;
+    min-width: 4.5ch;
+    min-height: 1.75em;
+    padding: 0.125rem 0.25rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default));
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--poodle-color-background-surface) 88%, var(--poodle-color-background-elevated));
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: 1.4;
+    text-align: center;
+    outline: 0;
+    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 18%, transparent);
+  }
+
+  .poodle-calendar__month-select {
+    width: auto;
+  }
+
+  .poodle-calendar__year-input {
+    width: 5ch;
+  }
+
+  .poodle-calendar__year-input::-webkit-outer-spin-button,
+  .poodle-calendar__year-input::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+  }
+
+  .poodle-calendar__year-input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
   }
 
   .poodle-calendar__nav {

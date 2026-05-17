@@ -8,7 +8,7 @@
 </script>
 
 <div class="poodle-slider-specimen">
-<SpecimenLayout>
+<SpecimenLayout showDensities={false}>
   <SpecimenGroup label="Default">
     <Slider
       value={volume}
@@ -40,9 +40,6 @@
     <Slider value={50} min={0} max={100} {size} ariaLabel={"Slider at " + size} />
   </svelte:fragment>
 
-  <svelte:fragment slot="densities" let:density>
-    <Slider value={50} min={0} max={100} {density} ariaLabel={"Slider at " + density + " density"} />
-  </svelte:fragment>
 </SpecimenLayout>
 </div>
 

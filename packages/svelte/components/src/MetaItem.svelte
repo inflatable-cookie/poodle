@@ -67,10 +67,10 @@
   }
 
   .poodle-meta-item[data-typography="inherit"] {
-    --poodle-meta-item-gap: 0.4286em;
-    --poodle-meta-item-label-font-size: 0.7857em;
+    --poodle-meta-item-gap: 0.375em;
+    --poodle-meta-item-label-font-size: 0.6875em;
     --poodle-meta-item-value-font-size: 1em;
-    line-height: 1.4;
+    line-height: inherit;
   }
 
   .poodle-meta-item__value :global(*) {

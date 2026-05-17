@@ -33,57 +33,75 @@
     <div class="poodle-specimen">
       <div class="poodle-specimen__item">
         <Eyebrow>Default</Eyebrow>
-        <Field id="name-field" label="Name" description="Enter your full name.">
-          <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => (name = nextValue)} />
-        </Field>
+        <div class="poodle-specimen__control">
+          <Field id="name-field" label="Name" description="Enter your full name.">
+            <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => (name = nextValue)} />
+          </Field>
+        </div>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>With validation</Eyebrow>
-        <Field id="email-field" label="Email" description="A valid email address is required." validationState={validationState} error={validationState === "invalid" ? "Please enter a valid email address." : null}>
-          <TextInput id="email-field" value={email} {validationState} onValueChange={(nextValue) => { email = nextValue; validationState = nextValue.includes("@") ? "valid" : "invalid"; }} />
-        </Field>
+        <div class="poodle-specimen__control">
+          <Field id="email-field" label="Email" description="A valid email address is required." validationState={validationState} error={validationState === "invalid" ? "Please enter a valid email address." : null}>
+            <TextInput id="email-field" value={email} {validationState} onValueChange={(nextValue) => { email = nextValue; validationState = nextValue.includes("@") ? "valid" : "invalid"; }} />
+          </Field>
+        </div>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Slug</Eyebrow>
-        <Field id="slug-field" label="Slug" description="Generates from the title until the user edits it." validationState={slugStatus === "validating" ? "pending" : slugStatus === "invalid" ? "invalid" : slugStatus === "valid" ? "valid" : "none"} error={slugStatus === "invalid" ? "That slug is not available." : null}>
-          <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" prefix="/projects/" maxLength={64} validate={validateSlug} onValueChange={(nextValue) => (slug = nextValue)} onValidationChange={(detail) => { slugStatus = detail.status; }} />
-        </Field>
+        <div class="poodle-specimen__control">
+          <Field id="slug-field" label="Slug" description="Generates from the title until the user edits it." validationState={slugStatus === "validating" ? "pending" : slugStatus === "invalid" ? "invalid" : slugStatus === "valid" ? "valid" : "none"} error={slugStatus === "invalid" ? "That slug is not available." : null}>
+            <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" prefix="/projects/" maxLength={64} validate={validateSlug} onValueChange={(nextValue) => (slug = nextValue)} onValidationChange={(detail) => { slugStatus = detail.status; }} />
+          </Field>
+        </div>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Search</Eyebrow>
-        <TextInput id="search-field" type="search" placeholder="Search..." value={searchQuery} onValueChange={(nextValue) => (searchQuery = nextValue)} onClear={() => (searchQuery = "")} />
+        <div class="poodle-specimen__control">
+          <TextInput id="search-field" type="search" placeholder="Search..." value={searchQuery} onValueChange={(nextValue) => (searchQuery = nextValue)} onClear={() => (searchQuery = "")} />
+        </div>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Prefix and suffix</Eyebrow>
-        <TextInput id="price-field" prefix="$" suffix="USD" placeholder="0.00" inputMode="decimal" />
+        <div class="poodle-specimen__control">
+          <TextInput id="price-field" prefix="$" suffix="USD" placeholder="0.00" inputMode="decimal" />
+        </div>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Disabled</Eyebrow>
-        <Field id="disabled-field" label="API key">
-          <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
-        </Field>
+        <div class="poodle-specimen__control">
+          <Field id="disabled-field" label="API key">
+            <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
+          </Field>
+        </div>
       </div>
 
       <div class="poodle-specimen__item">
         <Eyebrow>Multiline</Eyebrow>
-        <Field id="multiline-field" label="Description">
-          <TextInput id="multiline-field" type="multiline" rows={3} maxLength={280} showCharCount placeholder="Enter a description..." />
-        </Field>
+        <div class="poodle-specimen__control">
+          <Field id="multiline-field" label="Description">
+            <TextInput id="multiline-field" type="multiline" rows={3} maxLength={280} showCharCount placeholder="Enter a description..." />
+          </Field>
+        </div>
       </div>
     </div>
   </Surface>
 
   <svelte:fragment slot="sizes" let:size>
-    <TextInput id={"size-" + size} {size} placeholder={size.toUpperCase()} />
+    <div class="poodle-specimen__control">
+      <TextInput id={"size-" + size} {size} placeholder={size.toUpperCase()} />
+    </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <TextInput id={"density-" + density} {density} placeholder="Type here" />
+    <div class="poodle-specimen__control">
+      <TextInput id={"density-" + density} {density} placeholder="Type here" />
+    </div>
   </svelte:fragment>
 </SpecimenLayout>
 
@@ -98,5 +116,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+  }
+
+  .poodle-specimen__control {
+    max-width: 20rem;
   }
 </style>

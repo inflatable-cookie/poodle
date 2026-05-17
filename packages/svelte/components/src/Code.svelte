@@ -211,6 +211,7 @@
 
   .poodle-code__toolbar-actions {
     display: flex;
+    margin-left: auto;
     gap: 0.25rem;
   }
 

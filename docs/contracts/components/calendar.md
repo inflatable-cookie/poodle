@@ -12,7 +12,8 @@ Updated: 2026-03-15
   week start policy
 - In scope: month navigation, day-grid semantics, single-date selection,
   date-range selection (two-click start/end), week start policy, controlled
-  and uncontrolled value and visible month, roving tabindex focus management
+  and uncontrolled value and visible month, roving tabindex focus management,
+  direct month and year jumps from the header
 - Out of scope: time selection, recurrence, timezone handling, scheduling
   workflows
 
@@ -23,6 +24,10 @@ Updated: 2026-03-15
   ├── [Header .calendar__header]  <div>
   │     ├── [Previous Button .calendar__nav]  <button>
   │     ├── [Month Label .calendar__month]  <span>
+  │     │     ├── [Month Trigger .calendar__month-button]  <button>
+  │     │     ├── [Month Select .calendar__month-select]  <select>
+  │     │     ├── [Year Trigger .calendar__year-button]  <button>
+  │     │     └── [Year Input .calendar__year-input]  <input>
   │     └── [Next Button .calendar__nav]  <button>
   ├── [Weekday Row .calendar__weekdays]  <div>
   │     └── [Weekday Label .calendar__weekday]... <span>
@@ -38,6 +43,10 @@ Updated: 2026-03-15
 | Header | yes | month navigation row | grid columns, gap |
 | Previous Button | yes | navigates to previous month | border, radius, background, color, focus ring |
 | Month Label | yes | displays current visible month and year | label typography, text-align |
+| Month Trigger | conditional | inline affordance that opens month selection on double-click | underline, hover color |
+| Month Select | conditional | inline month dropdown while editing | border, radius, background, focus ring |
+| Year Trigger | conditional | inline affordance that opens year editing on double-click | underline, hover color |
+| Year Input | conditional | inline numeric year editor while editing | border, radius, background, focus ring |
 | Next Button | yes | navigates to next month | border, radius, background, color, focus ring |
 | Weekday Row | yes | row of day-of-week labels | grid columns |
 | Weekday Label | yes | individual day-of-week abbreviation | label typography, text color, text-transform |
@@ -106,6 +115,8 @@ DateRangeValue: { start: string | null; end: string | null }
 | start selected | first click on a day (range mode) | start is set, end is cleared; waiting for second click |
 | complete range | second click on a day (range mode) | end is set (swapped with start if before start); `onValueChange` runs |
 | month navigated | user clicks prev/next or PageUp/PageDown | `onMonthChange` runs, grid rebuilds |
+| month editing | user double-clicks the month label | inline month dropdown opens; choosing a month updates `visibleMonth` |
+| year editing | user double-clicks the year label | inline numeric year editor opens; Enter or blur commits, Escape cancels |
 | focus roving | arrow key navigation | focus moves between days via roving tabindex |
 
 ## 5. Callbacks
@@ -143,6 +154,16 @@ DateRangeValue: { start: string | null; end: string | null }
 | `Page Up` | moves focus to same day previous month |
 | `Enter` / `Space` | selects the focused day |
 | `Tab` | exits the calendar grid |
+
+Header editing:
+
+| Action | Behavior |
+|--------|----------|
+| `Double-click month` | opens inline month dropdown |
+| `Double-click year` | opens inline numeric year editor |
+| `Enter` in year editor | commits year change |
+| `Escape` in month or year editor | cancels inline editing |
+| `Arrow Up/Down` in year editor | increments or decrements the year through the native number input behavior |
 
 ### Focus And Announcement
 

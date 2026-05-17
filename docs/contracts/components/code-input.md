@@ -41,6 +41,7 @@ Updated: 2026-03-30
 | `hint` | `string \| null` | `null` |
 | `error` | `string \| null` | `null` |
 | `mask` | `boolean` | `false` |
+| `numbersOnly` | `boolean` | `true` |
 | `disabled` | `boolean` | `false` |
 | `length` | `number` | `6` |
 | `ariaLabel` | `string \| null` | `null` |
@@ -59,7 +60,8 @@ Updated: 2026-03-30
 
 ## 5. Behavior
 
-- The input sanitizes to digits only and clamps to `length`
+- By default the input sanitizes to digits only and clamps to `length`
+- Set `numbersOnly={false}` to allow arbitrary text input up to `length`
 - Leave `value` undefined to use uncontrolled mode seeded by `defaultValue`
 - Pass `value=""` to use a controlled empty state
 - A single real input owns:
@@ -71,13 +73,15 @@ Updated: 2026-03-30
 - When `mask` is true, filled slots display a bullet character instead of the
   digit
 - Clicking any slot focuses the real input and moves the caret
+- Clicking a filled slot selects that character so typing replaces it in place
 - The component composes its own `Field` wrapper so callers can use `label`,
   `hint`, and `error` directly
 
 ## 6. Accessibility
 
-- Hidden input carries `autocomplete="one-time-code"`, `inputmode="numeric"`,
-  and `aria-label` from the `ariaLabel` prop
+- Hidden input carries `aria-label` from the `ariaLabel` prop
+- Real input uses `inputmode="numeric"` and `pattern="[0-9]*"` when
+  `numbersOnly=true`; otherwise it falls back to plain text entry
 - Visual slots are `aria-hidden="true"` -- only the real input is in the
   accessibility tree
 - Focus ring appears on the active slot to indicate which digit is next
@@ -139,13 +143,19 @@ Updated: 2026-03-30
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| 6-digit code | `length={6}`, `ariaLabel="Verification code"` | Six empty slots; typing auto-advances; displays entered code on completion |
+| 6-digit code | `length={6}`, `ariaLabel="Verification code"` | Six empty slots; digits only; typing auto-advances; displays entered code on completion |
 
 ### 4-digit Masked
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | 4-digit masked | `length={4}`, `mask`, `ariaLabel="PIN"` | Four slots with password masking; entered characters display as dots |
+
+### Alphanumeric
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Alphanumeric | `length={6}`, `numbersOnly={false}`, `ariaLabel="Recovery code"` | Six slots accepting letters and digits; clicking an earlier slot allows in-place replacement |
 
 ### Disabled
 

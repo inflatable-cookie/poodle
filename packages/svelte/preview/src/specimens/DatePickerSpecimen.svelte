@@ -8,28 +8,44 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Default">
-    <DatePicker
-      ariaLabel="Select date"
-      onValueChange={(value) => (selected = value)}
-    />
+    <div class="poodle-specimen__control">
+      <DatePicker
+        ariaLabel="Select date"
+        onValueChange={(value) => (selected = value)}
+      />
+    </div>
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
   </SpecimenGroup>
 
   <SpecimenGroup label="With default value">
-    <DatePicker defaultValue="2026-03-14" ariaLabel="Pre-filled date" />
+    <div class="poodle-specimen__control">
+      <DatePicker defaultValue="2026-03-14" ariaLabel="Pre-filled date" />
+    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
-    <DatePicker placeholder="Disabled" disabled ariaLabel="Disabled date picker" />
+    <div class="poodle-specimen__control">
+      <DatePicker placeholder="Disabled" disabled ariaLabel="Disabled date picker" />
+    </div>
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <DatePicker {size} ariaLabel={size} />
+    <div class="poodle-specimen__control">
+      <DatePicker {size} ariaLabel={size} />
+    </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <DatePicker {density} />
+    <div class="poodle-specimen__control">
+      <DatePicker {density} />
+    </div>
   </svelte:fragment>
 </SpecimenLayout>
+
+<style>
+  .poodle-specimen__control {
+    max-width: 20rem;
+  }
+</style>

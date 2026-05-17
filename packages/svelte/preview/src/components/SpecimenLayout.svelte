@@ -1,17 +1,25 @@
 <script lang="ts">
   import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte";
 
-  export let activeTab: "examples" | "sizes" | "densities" = "examples";
-  /** When true, size/density variants render without a Surface wrapper. */
-  export let bareVariants = false;
-  /** Layout direction for size/density variants. */
-  export let variantDirection: "row" | "column" = "column";
+  let {
+    activeTab = "examples",
+    bareVariants = false,
+    variantDirection = "column",
+    showSizes = true,
+    showDensities = true,
+  }: {
+    activeTab?: "examples" | "sizes" | "densities";
+    bareVariants?: boolean;
+    variantDirection?: "row" | "column";
+    showSizes?: boolean;
+    showDensities?: boolean;
+  } = $props();
 
-  const tabs: TabItem[] = [
+  const tabs: TabItem[] = $derived([
     { value: "examples", label: "Examples" },
-    { value: "sizes", label: "Sizes" },
-    { value: "densities", label: "Densities" },
-  ];
+    ...(showSizes ? [{ value: "sizes", label: "Sizes" }] : []),
+    ...(showDensities ? [{ value: "densities", label: "Densities" }] : []),
+  ]);
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
   const densities = ["compact", "default", "comfortable"] as const;
@@ -31,7 +39,7 @@
   <div class="poodle-specimen-layout__content">
     {#if activeTab === "examples"}
       <slot />
-    {:else if activeTab === "sizes"}
+    {:else if activeTab === "sizes" && showSizes}
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each controlSizes as size}
@@ -47,7 +55,7 @@
           </div>
         </Surface>
       {/if}
-    {:else if activeTab === "densities"}
+    {:else if activeTab === "densities" && showDensities}
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each densities as density}

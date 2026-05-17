@@ -15,7 +15,7 @@
   }: Props = $props();
 
   setPillContext({
-    size: "sm",
+    size: "md",
     typography: "inherit",
   });
 </script>
@@ -35,6 +35,7 @@
     align-items: center;
     gap: 0.5rem;
     min-width: 0;
+    line-height: 1.4;
   }
 
   .poodle-meta-bar > :global(*) {
@@ -73,6 +74,26 @@
   .poodle-meta-bar > :global(.poodle-meta-item:has(.poodle-pill) .poodle-meta-item__label) {
     display: none;
   }
+
+  .poodle-meta-bar :global(.poodle-code--inline) {
+    font-size: calc(1em * var(--poodle-typography-code-adjustmentRatio));
+    line-height: inherit;
+  }
+
+  .poodle-meta-bar :global(.poodle-code--inline-wrap) {
+    gap: 0.1875rem;
+  }
+
+  .poodle-meta-bar :global(.poodle-code__copy--inline) {
+    width: 1em;
+    height: 1em;
+  }
+
+  .poodle-meta-bar :global(.poodle-code__copy--inline svg) {
+    width: 0.8125em;
+    height: 0.8125em;
+  }
+
   @media (max-width: 40rem) {
     .poodle-meta-bar[data-separators="true"] > :global(* + [data-separator="true"]) {
       padding-inline-start: 0.75rem;

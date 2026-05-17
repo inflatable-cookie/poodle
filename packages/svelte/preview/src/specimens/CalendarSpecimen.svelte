@@ -11,6 +11,7 @@
 <SpecimenLayout>
   <SpecimenGroup label="Default">
     <Calendar ariaLabel="Select a date" onValueChange={(value) => (selected = value as string)} />
+    <p class="poodle-specimen__hint">Double-click the month to choose a month, or the year to edit the year directly.</p>
     {#if selected}
       <p>Selected: <strong>{selected}</strong></p>
     {/if}
@@ -55,3 +56,11 @@
     <Calendar {density} />
   </svelte:fragment>
 </SpecimenLayout>
+
+<style>
+  .poodle-specimen__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
+</style>

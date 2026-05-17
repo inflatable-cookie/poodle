@@ -4,7 +4,7 @@
 
   import { resolveEmbedParseState } from "./embed-input";
   import type { EmbedParseState } from "./embed-input";
-  import type { ParsedEmbed } from "./types";
+  import type { ControlDensity, ControlSize, ParsedEmbed, SemanticControlSizeRole } from "./types";
 
   let {
     id = "embed-input",
@@ -15,6 +15,9 @@
     providers = [],
     disabled = false,
     error = $bindable<string | null>(null),
+    size = null,
+    sizeRole = "control",
+    density = null,
     onParse = null,
     onValueChange = null,
     resolveParseState = undefined,
@@ -27,6 +30,9 @@
     providers?: string[];
     disabled?: boolean;
     error?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
     onParse?: ((parsed: ParsedEmbed | null, error: string | null) => void) | null;
     onValueChange?: ((value: string) => void) | null;
     resolveParseState?: ((value: string, providers: string[]) => EmbedParseState) | undefined;
@@ -66,9 +72,13 @@
 <div class="poodle-embed-input">
   <TextInput
     {id}
+    type="multiline"
     {value}
     {placeholder}
     disabled={disabled}
+    {size}
+    {sizeRole}
+    {density}
     rows={3}
     onValueChange={handleValueChange}
   />

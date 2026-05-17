@@ -3,6 +3,7 @@
   import { Field } from "@poodle/svelte";
   import type { ParsedEmbed } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let parsed: ParsedEmbed | null = null;
   let value = "";
@@ -34,76 +35,96 @@
   }));
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Supported providers">
-    <table class="poodle-providers">
-      <thead>
-        <tr><th>Provider</th><th>Detected patterns</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>youtube</code></td><td><code>youtube.com/watch?v=</code>, <code>youtube.com/embed/</code>, <code>youtu.be/</code></td></tr>
-        <tr><td><code>vimeo</code></td><td><code>vimeo.com/{'{'}id{'}'}</code></td></tr>
-        <tr><td><code>generic</code></td><td>Any valid URL, or <code>&lt;iframe&gt;</code> embed code</td></tr>
-      </tbody>
-    </table>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Detection matrix">
-    <table class="poodle-providers">
-      <thead>
-        <tr><th>Input</th><th>Resolved state</th></tr>
-      </thead>
-      <tbody>
-        {#each detectionSamples as sample}
-          <tr>
-            <td>
-              <strong>{sample.label}</strong>
-              <div class="poodle-providers__detail"><code>{sample.input}</code></div>
-            </td>
-            <td>
-              {#if sample.result.error}
-                <span class="poodle-providers__error">{sample.result.error}</span>
-              {:else if sample.result.parsed}
-                <code>{JSON.stringify(sample.result.parsed)}</code>
-              {:else}
-                <span>empty</span>
-              {/if}
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="URL or embed code input">
-    <EmbedInput
-      bind:value
-      bind:parsed
-      placeholder="Paste a YouTube URL, Vimeo link, or embed code..."
-    />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="With Field wrapper">
-    <Field label="Video embed" id="embed-input-video">
-      <EmbedInput
-        placeholder="https://youtube.com/watch?v=..."
-      />
-    </Field>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Restricted providers">
-    <EmbedInput
-      providers={["youtube", "vimeo"]}
-      placeholder="Only YouTube and Vimeo allowed..."
-    />
-  </SpecimenGroup>
-
-  {#if parsed}
-    <SpecimenGroup label="Parsed result">
-      <pre class="poodle-parsed">{JSON.stringify(parsed, null, 2)}</pre>
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup label="Supported providers">
+      <table class="poodle-providers">
+        <thead>
+          <tr><th>Provider</th><th>Detected patterns</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>youtube</code></td><td><code>youtube.com/watch?v=</code>, <code>youtube.com/embed/</code>, <code>youtu.be/</code></td></tr>
+          <tr><td><code>vimeo</code></td><td><code>vimeo.com/{'{'}id{'}'}</code></td></tr>
+          <tr><td><code>generic</code></td><td>Any valid URL, or <code>&lt;iframe&gt;</code> embed code</td></tr>
+        </tbody>
+      </table>
     </SpecimenGroup>
-  {/if}
-</div>
+
+    <SpecimenGroup label="Detection matrix">
+      <table class="poodle-providers">
+        <thead>
+          <tr><th>Input</th><th>Resolved state</th></tr>
+        </thead>
+        <tbody>
+          {#each detectionSamples as sample}
+            <tr>
+              <td>
+                <strong>{sample.label}</strong>
+                <div class="poodle-providers__detail"><code>{sample.input}</code></div>
+              </td>
+              <td>
+                {#if sample.result.error}
+                  <span class="poodle-providers__error">{sample.result.error}</span>
+                {:else if sample.result.parsed}
+                  <code>{JSON.stringify(sample.result.parsed)}</code>
+                {:else}
+                  <span>empty</span>
+                {/if}
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="URL or embed code input">
+      <EmbedInput
+        bind:value
+        bind:parsed
+        placeholder="Paste a YouTube URL, Vimeo link, or embed code..."
+      />
+    </SpecimenGroup>
+
+    <SpecimenGroup label="With Field wrapper">
+      <Field label="Video embed" id="embed-input-video">
+        <EmbedInput
+          placeholder="https://youtube.com/watch?v=..."
+        />
+      </Field>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Restricted providers">
+      <EmbedInput
+        providers={["youtube", "vimeo"]}
+        placeholder="Only YouTube and Vimeo allowed..."
+      />
+    </SpecimenGroup>
+
+    {#if parsed}
+      <SpecimenGroup label="Parsed result">
+        <pre class="poodle-parsed">{JSON.stringify(parsed, null, 2)}</pre>
+      </SpecimenGroup>
+    {/if}
+  </div>
+
+  <svelte:fragment slot="sizes" let:size>
+    <EmbedInput
+      id={"embed-size-" + size}
+      {size}
+      ariaLabel={"Embed input at " + size}
+      placeholder="Paste a URL or embed code..."
+    />
+  </svelte:fragment>
+
+  <svelte:fragment slot="densities" let:density>
+    <EmbedInput
+      id={"embed-density-" + density}
+      {density}
+      ariaLabel={"Embed input at " + density + " density"}
+      placeholder="Paste a URL or embed code..."
+    />
+  </svelte:fragment>
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {

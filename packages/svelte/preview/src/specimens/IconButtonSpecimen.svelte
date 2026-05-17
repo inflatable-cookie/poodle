@@ -11,7 +11,7 @@
   let starred = false;
 </script>
 
-<SpecimenLayout>
+<SpecimenLayout showDensities={false}>
   <SpecimenGroup label="Variants">
     <div class="poodle-button-row">
       <IconButton icon={plus} ariaLabel="Add" variant="primary" />
@@ -54,9 +54,6 @@
     <IconButton icon={star} ariaLabel={`Favorite (${size})`} variant="secondary" {size} />
   </svelte:fragment>
 
-  <svelte:fragment slot="densities" let:density>
-    <IconButton icon={settings} ariaLabel="Settings" variant="secondary" {density} />
-  </svelte:fragment>
 </SpecimenLayout>
 
 <style>

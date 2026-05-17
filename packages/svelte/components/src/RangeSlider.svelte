@@ -207,6 +207,7 @@
     background: var(--poodle-color-background-elevated);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
     appearance: none;
+    cursor: pointer;
     pointer-events: auto;
   }
 
@@ -217,6 +218,7 @@
     border-radius: 999px;
     background: var(--poodle-color-background-elevated);
     box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent);
+    cursor: pointer;
     pointer-events: auto;
   }
 

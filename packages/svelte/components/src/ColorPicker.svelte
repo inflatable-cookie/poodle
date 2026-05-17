@@ -892,8 +892,16 @@
     min-width: 0;
   }
 
+  .poodle-color-picker__channel-field :global(.poodle-number-input__field) {
+    height: 2rem;
+    min-height: 0;
+  }
+
   .poodle-color-picker__channel-field :global(input) {
     min-height: 0;
+    font-family: var(--poodle-typography-code-family);
+    font-size: 0.75rem;
+    text-align: center;
   }
 
   .poodle-color-picker__text-input {

@@ -31,6 +31,18 @@
     />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Alphanumeric">
+    <CodeInput
+      id="code-alphanumeric"
+      label="Recovery code"
+      hint="Supports letters and numbers when the consumer opts in."
+      defaultValue="AB12"
+      length={6}
+      numbersOnly={false}
+      autocomplete="off"
+    />
+  </SpecimenGroup>
+
   <SpecimenGroup label="With error">
     <CodeInput
       id="code-error"

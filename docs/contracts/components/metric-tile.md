@@ -53,6 +53,7 @@ Updated: 2026-03-30
 | `trend` | `"up" \| "down" \| "flat" \| null` | `null` | no | trend direction indicator |
 | `trendLabel` | `string \| null` | `null` | no | descriptive label for trend (e.g. "+12.3%", "-8%") |
 | `sparklineData` | `number[] \| null` | `null` | no | data points for inline sparkline; requires 2+ values to render |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | overrides inherited UI presentation density for tile padding and internal spacing only |
 
 ### Slots
 
@@ -113,6 +114,7 @@ None. MetricTile is a non-interactive display component.
 - Minimum content height driven by label + value stack
 - Sparkline: fixed `4rem` wide, `1.5rem` tall
 - Internal gap between label, body, and trend rows
+- Density affects padding and internal gaps, not typography or sparkline size
 
 ### Composition
 
@@ -148,6 +150,14 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 | border | `0.0625rem solid transparent` |
 | border-radius | `var(--poodle-radius-surface)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent)` |
+
+### Density Overrides
+
+| `data-density` | Root Gap | Root Padding | Body Gap |
+|----------------|----------|--------------|----------|
+| `compact` | `0.375rem` | `0.5rem 0.75rem` | `0.5rem` |
+| `default` | `var(--poodle-space-inline-sm)` | `0.625rem var(--poodle-space-panel-x)` | `var(--poodle-space-inline-md)` |
+| `comfortable` | `0.625rem` | `0.75rem 1.25rem` | `0.875rem` |
 
 ### Label `.state-tile__label`
 
@@ -236,6 +246,7 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 
 - Root uses `<div class="state-tile">` with CSS class prefix `state-tile__`
   (not `metric-tile__`)
+- `density` resolves from UI presentation context when not provided explicitly
 - Sparkline is built via a pure `buildSparkline()` function that generates an
   SVG path from data points
 - Trend icons use the `Icon` primitive (no explicit `size` prop — inherits

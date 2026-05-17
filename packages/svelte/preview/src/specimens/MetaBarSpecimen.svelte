@@ -18,7 +18,7 @@
   <SpecimenGroup label="No separators">
     <MetaBar showSeparators={false}>
       <MetaItem label="Type">Media</MetaItem>
-      <Pill tone="info">Public</Pill>
+      <Pill tone="neutral">Public</Pill>
       <MetaItem>1920 × 1080</MetaItem>
     </MetaBar>
   </SpecimenGroup>

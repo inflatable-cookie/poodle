@@ -64,8 +64,12 @@
     --poodle-pill-border: color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
     --poodle-pill-text: var(--poodle-color-text-secondary);
     --poodle-pill-min-height: 1.25rem;
-    --poodle-pill-padding-y: 0.1875rem;
-    --poodle-pill-padding-x: 0.5rem;
+    --poodle-pill-min-width-base: 0rem;
+    --poodle-pill-min-width-adjust: 0rem;
+    --poodle-pill-padding-y-base: 0.1875rem;
+    --poodle-pill-padding-x-base: 0.625rem;
+    --poodle-pill-padding-y-adjust: 0rem;
+    --poodle-pill-padding-x-adjust: 0rem;
     --poodle-pill-font-size: 0.6875rem;
     --poodle-pill-gap: 0.25rem;
     display: inline-flex;
@@ -73,7 +77,10 @@
     justify-content: center;
     gap: var(--poodle-pill-gap);
     min-height: var(--poodle-pill-min-height);
-    padding: var(--poodle-pill-padding-y) var(--poodle-pill-padding-x);
+    min-width: calc(var(--poodle-pill-min-width-base) + var(--poodle-pill-min-width-adjust));
+    padding:
+      calc(var(--poodle-pill-padding-y-base) + var(--poodle-pill-padding-y-adjust))
+      calc(var(--poodle-pill-padding-x-base) + var(--poodle-pill-padding-x-adjust));
     border: 0.0625rem solid var(--poodle-pill-border);
     border-radius: 999px;
     background: var(--poodle-pill-fill);
@@ -86,26 +93,26 @@
   }
 
   .poodle-pill[data-tone="success"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface));
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
   .poodle-pill[data-tone="info"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface));
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
   .poodle-pill[data-tone="warning"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface));
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
   .poodle-pill[data-tone="danger"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface));
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle));
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 14%, var(--poodle-color-background-surface));
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 38%, var(--poodle-color-border-subtle));
     --poodle-pill-text: var(--poodle-color-text-primary);
   }
 
@@ -121,31 +128,39 @@
 
   .poodle-pill[data-size="sm"] {
     --poodle-pill-min-height: 1rem;
-    --poodle-pill-padding-y: 0.125rem;
-    --poodle-pill-padding-x: 0.375rem;
+    --poodle-pill-min-width-base: 2.5rem;
+    --poodle-pill-padding-y-base: 0.125rem;
+    --poodle-pill-padding-x-base: 0.5rem;
     --poodle-pill-font-size: 0.625rem;
     --poodle-pill-gap: 0.1875rem;
   }
 
   .poodle-pill[data-size="xs"] {
     --poodle-pill-min-height: 0.875rem;
-    --poodle-pill-padding-y: 0.0625rem;
-    --poodle-pill-padding-x: 0.3125rem;
+    --poodle-pill-min-width-base: 2.125rem;
+    --poodle-pill-padding-y-base: 0.0625rem;
+    --poodle-pill-padding-x-base: 0.4375rem;
     --poodle-pill-font-size: 0.5625rem;
     --poodle-pill-gap: 0.15625rem;
   }
 
+  .poodle-pill[data-size="md"] {
+    --poodle-pill-min-width-base: 2.875rem;
+  }
+
   .poodle-pill[data-size="lg"] {
     --poodle-pill-min-height: 1.375rem;
-    --poodle-pill-padding-y: 0.25rem;
-    --poodle-pill-padding-x: 0.625rem;
+    --poodle-pill-min-width-base: 3.25rem;
+    --poodle-pill-padding-y-base: 0.25rem;
+    --poodle-pill-padding-x-base: 0.75rem;
     --poodle-pill-font-size: 0.75rem;
   }
 
   .poodle-pill[data-size="xl"] {
     --poodle-pill-min-height: 1.5rem;
-    --poodle-pill-padding-y: 0.3125rem;
-    --poodle-pill-padding-x: 0.75rem;
+    --poodle-pill-min-width-base: 3.625rem;
+    --poodle-pill-padding-y-base: 0.3125rem;
+    --poodle-pill-padding-x-base: 0.9375rem;
     --poodle-pill-font-size: 0.8125rem;
   }
 
@@ -156,36 +171,41 @@
   .poodle-pill[data-typography="inherit"][data-size="xs"] {
     --poodle-pill-font-size: 0.5786em;
     --poodle-pill-min-height: 1.5556em;
-    --poodle-pill-padding-y: 0.1111em;
-    --poodle-pill-padding-x: 0.5556em;
+    --poodle-pill-min-width-base: 2.4444em;
+    --poodle-pill-padding-y-base: 0.1111em;
+    --poodle-pill-padding-x-base: 0.7778em;
   }
 
   .poodle-pill[data-typography="inherit"][data-size="sm"] {
     --poodle-pill-font-size: 0.6429em;
     --poodle-pill-min-height: 1.6em;
-    --poodle-pill-padding-y: 0.2em;
-    --poodle-pill-padding-x: 0.6em;
+    --poodle-pill-min-width-base: 2.8571em;
+    --poodle-pill-padding-y-base: 0.2em;
+    --poodle-pill-padding-x-base: 0.8em;
   }
 
   .poodle-pill[data-typography="inherit"][data-size="md"] {
     --poodle-pill-font-size: 0.7071em;
     --poodle-pill-min-height: 1.8182em;
-    --poodle-pill-padding-y: 0.2727em;
-    --poodle-pill-padding-x: 0.7273em;
+    --poodle-pill-min-width-base: 3.2727em;
+    --poodle-pill-padding-y-base: 0.2727em;
+    --poodle-pill-padding-x-base: 0.9091em;
   }
 
   .poodle-pill[data-typography="inherit"][data-size="lg"] {
     --poodle-pill-font-size: 0.7714em;
     --poodle-pill-min-height: 1.8333em;
-    --poodle-pill-padding-y: 0.3333em;
-    --poodle-pill-padding-x: 0.8333em;
+    --poodle-pill-min-width-base: 3.5833em;
+    --poodle-pill-padding-y-base: 0.3333em;
+    --poodle-pill-padding-x-base: 1em;
   }
 
   .poodle-pill[data-typography="inherit"][data-size="xl"] {
     --poodle-pill-font-size: 0.8357em;
     --poodle-pill-min-height: 1.8462em;
-    --poodle-pill-padding-y: 0.3846em;
-    --poodle-pill-padding-x: 0.9231em;
+    --poodle-pill-min-width-base: 3.9231em;
+    --poodle-pill-padding-y-base: 0.3846em;
+    --poodle-pill-padding-x-base: 1.1538em;
   }
 
   .poodle-pill[data-font="mono"] {
@@ -205,23 +225,23 @@
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="success"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success) 18%, transparent);
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success) 42%, transparent);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-success, #22c55e) 42%, transparent);
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="info"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info) 18%, transparent);
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info) 42%, transparent);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 42%, transparent);
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="warning"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning) 18%, transparent);
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning) 42%, transparent);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-warning, #f59e0b) 42%, transparent);
   }
 
   .poodle-pill[data-appearance="badge"][data-tone="danger"] {
-    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger) 18%, transparent);
-    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger) 42%, transparent);
+    --poodle-pill-fill: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 18%, transparent);
+    --poodle-pill-border: color-mix(in srgb, var(--poodle-color-status-danger, #ef4444) 42%, transparent);
   }
 
   .poodle-pill[data-muted="true"] {
@@ -230,25 +250,29 @@
 
   /* Density variants */
   .poodle-pill[data-density="compact"] {
-    --poodle-pill-padding-y: 0;
-    --poodle-pill-padding-x: 0.375rem;
+    --poodle-pill-min-width-adjust: -0.09375rem;
+    --poodle-pill-padding-y-adjust: -0.0625rem;
+    --poodle-pill-padding-x-adjust: -0.125rem;
     --poodle-pill-gap: 0.125rem;
   }
 
   .poodle-pill[data-density="comfortable"] {
-    --poodle-pill-padding-y: 0;
-    --poodle-pill-padding-x: 0.625rem;
+    --poodle-pill-min-width-adjust: 0.1875rem;
+    --poodle-pill-padding-y-adjust: 0.0625rem;
+    --poodle-pill-padding-x-adjust: 0.125rem;
     --poodle-pill-gap: 0.25rem;
   }
 
   .poodle-pill[data-typography="inherit"][data-density="compact"] {
-    --poodle-pill-padding-y: 0;
-    --poodle-pill-padding-x: 0.5455em;
+    --poodle-pill-min-width-adjust: -0.1364em;
+    --poodle-pill-padding-y-adjust: -0.0909em;
+    --poodle-pill-padding-x-adjust: -0.1818em;
   }
 
   .poodle-pill[data-typography="inherit"][data-density="comfortable"] {
-    --poodle-pill-padding-y: 0;
-    --poodle-pill-padding-x: 0.9091em;
+    --poodle-pill-min-width-adjust: 0.2727em;
+    --poodle-pill-padding-y-adjust: 0.0909em;
+    --poodle-pill-padding-x-adjust: 0.1818em;
   }
 
   .poodle-pill :global(svg),

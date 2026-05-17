@@ -340,11 +340,18 @@
   }
 
   .poodle-file-upload__dropzone {
+    --poodle-file-upload-dropzone-min-height: 8rem;
+    --poodle-file-upload-dropzone-padding-x: var(--poodle-space-panel-x, 1.5rem);
+    --poodle-file-upload-dropzone-padding-y: var(--poodle-space-panel-y, 1.5rem);
+    --poodle-file-upload-content-gap: 0.375rem;
+    --poodle-file-upload-item-padding: 0.75rem;
+    --poodle-file-upload-label-size: 0.875rem;
+    --poodle-file-upload-hint-size: 0.8125rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 8rem;
-    padding: var(--poodle-space-panel-y, 1.5rem) var(--poodle-space-panel-x, 1.5rem);
+    min-height: var(--poodle-file-upload-dropzone-min-height);
+    padding: var(--poodle-file-upload-dropzone-padding-y) var(--poodle-file-upload-dropzone-padding-x);
     border: 0.125rem dashed var(--poodle-color-border-default, #444);
     border-radius: var(--poodle-radius-surface, 0.5rem);
     background: transparent;
@@ -376,7 +383,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--poodle-file-upload-content-gap);
     text-align: center;
   }
 
@@ -394,7 +401,7 @@
   }
 
   .poodle-file-upload__label {
-    font-size: 0.875rem;
+    font-size: var(--poodle-file-upload-label-size);
     color: var(--poodle-color-text-secondary, #999);
   }
 
@@ -405,7 +412,7 @@
 
   .poodle-file-upload__hint,
   .poodle-file-upload__size {
-    font-size: 0.8125rem;
+    font-size: var(--poodle-file-upload-hint-size);
     color: var(--poodle-color-text-tertiary, #777);
   }
 
@@ -423,7 +430,7 @@
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem;
+    padding: var(--poodle-file-upload-item-padding);
     border-radius: var(--poodle-radius-surface, 0.5rem);
     background: var(--poodle-color-background-panel, #1a1a1a);
   }
@@ -512,7 +519,9 @@
 
   /* Size variants */
   .poodle-file-upload[data-size="xs"] .poodle-file-upload__dropzone {
-    min-height: 5rem;
+    --poodle-file-upload-dropzone-min-height: 5rem;
+    --poodle-file-upload-label-size: 0.75rem;
+    --poodle-file-upload-hint-size: 0.6875rem;
   }
 
   .poodle-file-upload[data-size="xs"] .poodle-file-upload__icon {
@@ -520,28 +529,22 @@
     height: 1.5rem;
   }
 
-  .poodle-file-upload[data-size="xs"] .poodle-file-upload__label {
-    font-size: 0.75rem;
-  }
-
-  .poodle-file-upload[data-size="xs"] .poodle-file-upload__hint {
-    font-size: 0.6875rem;
-  }
-
   .poodle-file-upload[data-size="sm"] .poodle-file-upload__dropzone {
-    min-height: 6rem;
+    --poodle-file-upload-dropzone-min-height: 6rem;
+  }
+
+  .poodle-file-upload[data-size="md"] .poodle-file-upload__dropzone {
+    --poodle-file-upload-dropzone-min-height: 8rem;
   }
 
   .poodle-file-upload[data-size="lg"] .poodle-file-upload__dropzone {
-    min-height: 10rem;
-  }
-
-  .poodle-file-upload[data-size="lg"] .poodle-file-upload__label {
-    font-size: 0.9375rem;
+    --poodle-file-upload-dropzone-min-height: 10rem;
+    --poodle-file-upload-label-size: 0.9375rem;
   }
 
   .poodle-file-upload[data-size="xl"] .poodle-file-upload__dropzone {
-    min-height: 12rem;
+    --poodle-file-upload-dropzone-min-height: 12rem;
+    --poodle-file-upload-label-size: 1rem;
   }
 
   .poodle-file-upload[data-size="xl"] .poodle-file-upload__icon {
@@ -549,11 +552,23 @@
     height: 2.5rem;
   }
 
-  .poodle-file-upload[data-size="xl"] .poodle-file-upload__label {
-    font-size: 1rem;
+  .poodle-file-upload[data-density="compact"] .poodle-file-upload__dropzone {
+    --poodle-file-upload-dropzone-padding-x: 1rem;
+    --poodle-file-upload-dropzone-padding-y: 1rem;
+    --poodle-file-upload-content-gap: 0.25rem;
   }
 
-  /* Density variants */
-  .poodle-file-upload[data-density="compact"] { padding-inline: 0.75rem; }
-  .poodle-file-upload[data-density="comfortable"] { padding-inline: 1.25rem; }
+  .poodle-file-upload[data-density="compact"] .poodle-file-upload__item {
+    --poodle-file-upload-item-padding: 0.625rem;
+  }
+
+  .poodle-file-upload[data-density="comfortable"] .poodle-file-upload__dropzone {
+    --poodle-file-upload-dropzone-padding-x: 1.75rem;
+    --poodle-file-upload-dropzone-padding-y: 1.75rem;
+    --poodle-file-upload-content-gap: 0.5rem;
+  }
+
+  .poodle-file-upload[data-density="comfortable"] .poodle-file-upload__item {
+    --poodle-file-upload-item-padding: 0.875rem;
+  }
 </style>

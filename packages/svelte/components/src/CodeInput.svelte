@@ -16,6 +16,7 @@
     disabled?: boolean;
     length?: number;
     mask?: boolean;
+    numbersOnly?: boolean;
     ariaLabel?: string | null;
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
@@ -39,6 +40,7 @@
     disabled = false,
     length = 6,
     mask = false,
+    numbersOnly = true,
     ariaLabel = null,
     size = null,
     sizeRole = "control",
@@ -54,6 +56,7 @@
   let inputRef: HTMLInputElement | null = null;
   let caretIndex = $state(0);
   let hasFocus = $state(false);
+  let pendingSelection: { start: number; end: number } | null = $state(null);
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -87,7 +90,8 @@
   });
 
   function sanitizeValue(input: string): string {
-    return input.replace(/\D/g, "").slice(0, length);
+    const normalized = numbersOnly ? input.replace(/\D/g, "") : input;
+    return normalized.slice(0, length);
   }
 
   function updateValue(nextRawValue: string): void {
@@ -112,19 +116,55 @@
     caretIndex = Math.min(selectionStart, Math.max(length - 1, 0));
   }
 
+  function applyPendingSelection(): void {
+    if (!inputRef || !pendingSelection) return;
+    inputRef.setSelectionRange(pendingSelection.start, pendingSelection.end);
+    caretIndex = Math.min(pendingSelection.start, Math.max(length - 1, 0));
+    pendingSelection = null;
+  }
+
+  function setActivePosition(index: number, selectFilled: boolean): void {
+    if (!inputRef) return;
+
+    const maxPosition = Math.max(Math.min(currentValue.length, length - 1), 0);
+    const nextPosition = Math.min(Math.max(index, 0), maxPosition);
+    const selectionEnd = selectFilled && nextPosition < currentValue.length
+      ? nextPosition + 1
+      : nextPosition;
+
+    inputRef.setSelectionRange(nextPosition, selectionEnd);
+    caretIndex = nextPosition;
+  }
+
   function handleInput(event: Event): void {
     const input = event.currentTarget as HTMLInputElement;
     updateValue(input.value);
-    syncCaret();
+    requestAnimationFrame(() => {
+      applyPendingSelection();
+      syncCaret();
+    });
   }
 
-  function handleKeydown(): void {
+  function handleKeydown(event: KeyboardEvent): void {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      if (!inputRef) return;
+      const nextPosition = event.key === "ArrowLeft" ? caretIndex - 1 : caretIndex + 1;
+      setActivePosition(nextPosition, true);
+      return;
+    }
+
     requestAnimationFrame(syncCaret);
   }
 
   function handleFocus(): void {
     hasFocus = true;
-    caretIndex = Math.min(currentValue.length, Math.max(length - 1, 0));
+    requestAnimationFrame(() => {
+      const hadPendingSelection = pendingSelection !== null;
+      applyPendingSelection();
+      if (hadPendingSelection) return;
+      setActivePosition(Math.min(currentValue.length, Math.max(length - 1, 0)), false);
+    });
   }
 
   function handleBlur(): void {
@@ -137,8 +177,50 @@
     if (!inputRef) return;
 
     const nextPosition = Math.min(index, currentValue.length);
-    inputRef.setSelectionRange(nextPosition, nextPosition);
-    caretIndex = Math.min(nextPosition, Math.max(length - 1, 0));
+    const selectionEnd = index < currentValue.length ? index + 1 : nextPosition;
+    pendingSelection = { start: nextPosition, end: selectionEnd };
+    requestAnimationFrame(() => {
+      applyPendingSelection();
+    });
+  }
+
+  function handleBeforeInput(event: InputEvent): void {
+    if (disabled) {
+      return;
+    }
+
+    if (!inputRef || !event.inputType.startsWith("insert")) {
+      if (
+        numbersOnly &&
+        event.data &&
+        !/^\d+$/.test(event.data) &&
+        event.inputType !== "deleteContentBackward" &&
+        event.inputType !== "deleteContentForward"
+      ) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    const nextData = numbersOnly ? (event.data ?? "").replace(/\D/g, "") : (event.data ?? "");
+
+    if (nextData.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const selectionStart = inputRef.selectionStart ?? currentValue.length;
+    const selectionEnd = inputRef.selectionEnd ?? selectionStart;
+    const replacementEnd = Math.max(selectionEnd, Math.min(selectionStart + nextData.length, currentValue.length));
+    const nextValue =
+      `${currentValue.slice(0, selectionStart)}${nextData}${currentValue.slice(replacementEnd)}`.slice(0, length);
+    const nextCaretPosition = Math.min(selectionStart + nextData.length, length - 1);
+
+    event.preventDefault();
+    updateValue(nextValue);
+    requestAnimationFrame(() => {
+      setActivePosition(nextCaretPosition, true);
+    });
   }
 
   function displayDigit(digit: string): string {
@@ -172,8 +254,8 @@
         id={effectiveId}
         class="poodle-code-input__control"
         type="text"
-        inputmode="numeric"
-        pattern="[0-9]*"
+        inputmode={numbersOnly ? "numeric" : "text"}
+        pattern={numbersOnly ? "[0-9]*" : undefined}
         maxlength={length}
         {disabled}
         value={currentValue}
@@ -181,9 +263,9 @@
         aria-label={ariaLabel ?? label}
         aria-describedby={describedBy ?? undefined}
         aria-invalid={effectiveValidationState === "invalid" ? "true" : undefined}
+        onbeforeinput={handleBeforeInput}
         oninput={handleInput}
         onkeydown={handleKeydown}
-        onkeyup={handleKeydown}
         onfocus={handleFocus}
         onblur={handleBlur}
       />
@@ -196,6 +278,7 @@
           class:poodle-code-input__slot--filled={digit.length > 0}
           class:poodle-code-input__slot--split-after={length === 6 && index === 2}
           tabindex={-1}
+          onmousedown={(event) => event.preventDefault()}
           onclick={() => handleSlotClick(index)}
           aria-hidden="true"
         >
@@ -217,10 +300,11 @@
   .poodle-code-input__control {
     position: absolute;
     inset: 0;
-    width: 100%;
+    width: 120%;
     height: 100%;
     opacity: 0;
     cursor: text;
+    pointer-events: none;
     z-index: 1;
   }
 

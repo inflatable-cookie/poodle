@@ -6,25 +6,41 @@
 
 <SpecimenLayout>
   <SpecimenGroup label="Default">
-    <DateTimePicker ariaLabel="Select date and time" />
+    <div class="poodle-specimen__control">
+      <DateTimePicker ariaLabel="Select date and time" />
+    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="With default value">
-    <DateTimePicker
-      defaultValue={{ date: "2026-03-14", time: "14:30" }}
-      ariaLabel="Pre-filled date time"
-    />
+    <div class="poodle-specimen__control">
+      <DateTimePicker
+        defaultValue={{ date: "2026-03-14", time: "14:30" }}
+        ariaLabel="Pre-filled date time"
+      />
+    </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
-    <DateTimePicker disabled ariaLabel="Disabled date time picker" />
+    <div class="poodle-specimen__control">
+      <DateTimePicker disabled ariaLabel="Disabled date time picker" />
+    </div>
   </SpecimenGroup>
 
   <svelte:fragment slot="sizes" let:size>
-    <DateTimePicker {size} ariaLabel={size} />
+    <div class="poodle-specimen__control">
+      <DateTimePicker {size} ariaLabel={size} />
+    </div>
   </svelte:fragment>
 
   <svelte:fragment slot="densities" let:density>
-    <DateTimePicker {density} />
+    <div class="poodle-specimen__control">
+      <DateTimePicker {density} />
+    </div>
   </svelte:fragment>
 </SpecimenLayout>
+
+<style>
+  .poodle-specimen__control {
+    max-width: 20rem;
+  }
+</style>

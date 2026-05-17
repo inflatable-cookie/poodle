@@ -261,10 +261,17 @@
 
 <style>
   .poodle-context-menu__overlay {
+    --poodle-context-menu-overlay-padding: 0.25rem;
+    --poodle-context-menu-item-min-height: 2rem;
+    --poodle-context-menu-item-padding-y-base: 0.375rem;
+    --poodle-context-menu-item-padding-x-base: 0.5rem;
+    --poodle-context-menu-item-padding-y-adjust: 0rem;
+    --poodle-context-menu-item-padding-x-adjust: 0rem;
+    --poodle-context-menu-separator-margin: 0.25rem;
     position: fixed;
     z-index: var(--poodle-overlay-z-menu);
     min-width: 14rem;
-    padding: 0.25rem;
+    padding: var(--poodle-context-menu-overlay-padding);
     border: 0.0625rem solid var(
       --poodle-treatment-surface-elevated-border,
       color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)
@@ -282,8 +289,10 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     width: 100%;
-    min-height: var(--poodle-size-control-height);
-    padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
+    min-height: var(--poodle-context-menu-item-min-height);
+    padding:
+      calc(var(--poodle-context-menu-item-padding-y-base) + var(--poodle-context-menu-item-padding-y-adjust))
+      calc(var(--poodle-context-menu-item-padding-x-base) + var(--poodle-context-menu-item-padding-x-adjust));
     border: 0;
     border-radius: calc(var(--poodle-radius-control) - 0.125rem);
     background: transparent;
@@ -314,39 +323,63 @@
   .poodle-context-menu__separator {
     width: 100%;
     height: 0.0625rem;
-    margin: 0.25rem 0;
+    margin: var(--poodle-context-menu-separator-margin) 0;
     background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
   }
 
   .poodle-context-menu[data-size="xs"] .poodle-context-menu__item {
-    min-height: 1.5rem;
-    padding: 0.25rem 0.375rem;
+    --poodle-context-menu-item-min-height: 1.5rem;
+    --poodle-context-menu-item-padding-y-base: 0.25rem;
+    --poodle-context-menu-item-padding-x-base: 0.375rem;
     font-size: 0.75rem;
   }
 
   .poodle-context-menu[data-size="sm"] .poodle-context-menu__item {
-    min-height: 1.75rem;
-    padding: 0.3125rem 0.4375rem;
+    --poodle-context-menu-item-min-height: 1.75rem;
+    --poodle-context-menu-item-padding-y-base: 0.3125rem;
+    --poodle-context-menu-item-padding-x-base: 0.4375rem;
     font-size: 0.8125rem;
   }
 
+  .poodle-context-menu[data-size="md"] .poodle-context-menu__item {
+    --poodle-context-menu-item-min-height: 2rem;
+    --poodle-context-menu-item-padding-y-base: 0.375rem;
+    --poodle-context-menu-item-padding-x-base: 0.5rem;
+    font-size: 0.875rem;
+  }
+
   .poodle-context-menu[data-size="lg"] .poodle-context-menu__item {
-    min-height: 2.25rem;
-    padding: 0.4375rem 0.5625rem;
+    --poodle-context-menu-item-min-height: 2.25rem;
+    --poodle-context-menu-item-padding-y-base: 0.4375rem;
+    --poodle-context-menu-item-padding-x-base: 0.5625rem;
     font-size: 0.9375rem;
   }
 
   .poodle-context-menu[data-size="xl"] .poodle-context-menu__item {
-    min-height: 2.5rem;
-    padding: 0.5rem 0.625rem;
+    --poodle-context-menu-item-min-height: 2.5rem;
+    --poodle-context-menu-item-padding-y-base: 0.5rem;
+    --poodle-context-menu-item-padding-x-base: 0.625rem;
     font-size: 1rem;
   }
 
-  .poodle-context-menu[data-density="compact"] .poodle-context-menu__item {
-    min-height: calc(var(--poodle-size-control-height) - 0.25rem);
+  .poodle-context-menu[data-density="compact"] .poodle-context-menu__overlay {
+    --poodle-context-menu-overlay-padding: 0.1875rem;
+    --poodle-context-menu-item-padding-y-adjust: -0.125rem;
+    --poodle-context-menu-item-padding-x-adjust: -0.125rem;
+    --poodle-context-menu-separator-margin: 0.1875rem;
   }
 
-  .poodle-context-menu[data-density="comfortable"] .poodle-context-menu__item {
-    min-height: calc(var(--poodle-size-control-height) + 0.25rem);
+  .poodle-context-menu[data-density="default"] .poodle-context-menu__overlay {
+    --poodle-context-menu-overlay-padding: 0.25rem;
+    --poodle-context-menu-item-padding-y-adjust: 0rem;
+    --poodle-context-menu-item-padding-x-adjust: 0rem;
+    --poodle-context-menu-separator-margin: 0.25rem;
+  }
+
+  .poodle-context-menu[data-density="comfortable"] .poodle-context-menu__overlay {
+    --poodle-context-menu-overlay-padding: 0.3125rem;
+    --poodle-context-menu-item-padding-y-adjust: 0.125rem;
+    --poodle-context-menu-item-padding-x-adjust: 0.125rem;
+    --poodle-context-menu-separator-margin: 0.3125rem;
   }
 </style>

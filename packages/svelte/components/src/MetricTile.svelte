@@ -1,5 +1,8 @@
 <script lang="ts">
   import { default as Icon } from "./Icon.svelte";
+  import { getUiPresentation } from "./presentation";
+
+  import type { ControlDensity } from "./types";
 
   let {
     label,
@@ -8,6 +11,7 @@
     trend = null,
     trendLabel = null,
     sparklineData = null,
+    density = null,
   }: {
     label: string;
     value: string;
@@ -15,7 +19,11 @@
     trend?: "up" | "down" | "flat" | null;
     trendLabel?: string | null;
     sparklineData?: number[] | null;
+    density?: ControlDensity | null;
   } = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   const sparklinePath = $derived(
     sparklineData && sparklineData.length > 1 ? buildSparkline(sparklineData) : null
@@ -39,7 +47,7 @@
   }
 </script>
 
-<div class="poodle-state-tile" aria-label={ariaLabel ?? `${label}: ${value}`}>
+<div class="poodle-state-tile" data-density={resolvedDensity} aria-label={ariaLabel ?? `${label}: ${value}`}>
   <span class="poodle-state-tile__label">{label}</span>
   <div class="poodle-state-tile__body">
     <strong class="poodle-state-tile__value">{value}</strong>
@@ -74,9 +82,13 @@
 
 <style>
   .poodle-state-tile {
+    --poodle-state-tile-gap: var(--poodle-space-inline-sm);
+    --poodle-state-tile-padding-y: 0.625rem;
+    --poodle-state-tile-padding-x: var(--poodle-space-panel-x);
+    --poodle-state-tile-body-gap: var(--poodle-space-inline-md);
     display: grid;
-    gap: var(--poodle-space-inline-sm);
-    padding: 0.625rem var(--poodle-space-panel-x);
+    gap: var(--poodle-state-tile-gap);
+    padding: var(--poodle-state-tile-padding-y) var(--poodle-state-tile-padding-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-surface);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent);
@@ -91,7 +103,7 @@
   .poodle-state-tile__body {
     display: flex;
     align-items: center;
-    gap: var(--poodle-space-inline-md);
+    gap: var(--poodle-state-tile-body-gap);
   }
 
   .poodle-state-tile__value {
@@ -129,6 +141,20 @@
   .poodle-state-tile__trend-arrow {
     font-size: 0.875rem;
     line-height: 1;
+  }
+
+  .poodle-state-tile[data-density="compact"] {
+    --poodle-state-tile-gap: 0.375rem;
+    --poodle-state-tile-padding-y: 0.5rem;
+    --poodle-state-tile-padding-x: 0.75rem;
+    --poodle-state-tile-body-gap: 0.5rem;
+  }
+
+  .poodle-state-tile[data-density="comfortable"] {
+    --poodle-state-tile-gap: 0.625rem;
+    --poodle-state-tile-padding-y: 0.75rem;
+    --poodle-state-tile-padding-x: 1.25rem;
+    --poodle-state-tile-body-gap: 0.875rem;
   }
 
   :global([data-theme="light"]) .poodle-state-tile {
