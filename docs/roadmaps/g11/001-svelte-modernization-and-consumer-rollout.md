@@ -628,3 +628,63 @@ Target for that tranche:
 Do not reopen low-value syntax churn on small primitives first. The remaining
 value is concentrated in the components that shape downstream composition
 patterns.
+
+## Consumer Closeout
+
+Status: consumer rollout closed for the audited stale Poodle contract set.
+
+### Audited Result
+
+- all listed consumer roots now scan clean for the audited stale Poodle
+  contract patterns
+- the rollout covered:
+  - `underlay`
+  - `underlay-reference`
+  - `contact-patch`
+  - `compli-me`
+  - `acowtancy/dairy`
+  - `songsprout`
+  - `loophole/composer`
+  - `finch/app-electron`
+  - `soundcheck`
+  - `loophole/aura`
+
+### Validated Roots
+
+The post-rollout validation matrix passed in the roots that were already
+expected to compile cleanly:
+
+- `underlay`: `effigy check:types`
+- `underlay-reference/acme-admin`: `bun x tsc -p ./tsconfig.json`
+- `compli-me/admin`: `bun x tsc -p ./tsconfig.json`
+- `contact-patch/cp-admin`: `bun x tsc -p ./tsconfig.json`
+- `loophole/composer/composer-admin`: `bun x tsc -p ./tsconfig.json`
+- `songsprout/greenhouse`: `bun x tsc -p ./tsconfig.json`
+
+`git diff --check` passed in every touched consumer root.
+
+### Known External Blockers
+
+These remain outside the Poodle consumer-contract closeout itself:
+
+- `acowtancy/dairy`
+  - pre-existing exported-type failures in:
+    - `src/lib/forms/learning/activity-form/inline-create.ts`
+    - `src/lib/nightfire/questions/editors/index.ts`
+- `underlay-reference/acme-front`
+  - pre-existing missing Underlay client modules
+- `soundcheck`
+  - local environment/type setup issues (`svelte`, `vite/client`)
+- `finch/app-electron`
+  - local environment/type setup issue (`svelte` type defs)
+- `loophole/aura`
+  - broad pre-existing TS6 config/module-resolution issues
+
+### End State
+
+`g11` is complete for:
+
+- Poodle Svelte component modernization
+- public contract cleanup
+- docs/specimen cleanup
+- audited consumer rollout across the listed app set
