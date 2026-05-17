@@ -47,7 +47,7 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null` | `null` | no | Controls dialog visibility |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | Controls dialog visibility when supplied; omit for the internal closed path |
 | `items` | `MediaPickerItem[]` | `[]` | no | Available media items to browse |
 | `accept` | `string` | `"image/*"` | no | File type filter for uploads |
 | `maxFileSize` | `number` | `25 * 1024 * 1024` (25 MB) | no | Maximum upload file size in bytes, passed as `maxSize` to FileUpload |
@@ -77,8 +77,9 @@ None.
 
 ### Controlled / Uncontrolled
 
-`open` is externally owned when non-null and updated through `onOpenChange`.
-`activeTab` and `searchQuery` are internal state.
+Supplying `open` makes dialog visibility host-owned through `onOpenChange`.
+Omitting it leaves the picker on its internal closed/open path. `activeTab`,
+`searchQuery`, and pending upload files are internal state.
 
 ## 4. States
 

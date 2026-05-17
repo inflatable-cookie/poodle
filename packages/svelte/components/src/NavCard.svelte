@@ -1,11 +1,27 @@
 <script lang="ts">
-  export let title: string;
-  export let description: string | null = null;
-  export let href: string | null = null;
-  export let badge: string | null = null;
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let onClick: ((event: MouseEvent) => void) | null = null;
+  import type { Snippet } from "svelte";
+
+  interface Props {
+    title: string;
+    description?: string | null;
+    href?: string | null;
+    badge?: string | null;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    onClick?: ((event: MouseEvent) => void) | null;
+    icon?: Snippet;
+  }
+
+  let {
+    title,
+    description = null,
+    href = null,
+    badge = null,
+    disabled = false,
+    ariaLabel = null,
+    onClick = null,
+    icon,
+  }: Props = $props();
 
   function handleClick(event: MouseEvent): void {
     if (disabled) {
@@ -22,11 +38,11 @@
     {href}
     aria-label={ariaLabel ?? title}
     data-disabled={disabled}
-    on:click={handleClick}
+    onclick={handleClick}
   >
-    {#if $$slots.icon}
+    {#if icon}
       <span class="poodle-nav-card__icon" aria-hidden="true">
-        <slot name="icon" />
+        {@render icon()}
       </span>
     {/if}
     <div class="poodle-nav-card__content">
@@ -51,11 +67,11 @@
     aria-label={ariaLabel ?? title}
     disabled={disabled}
     data-disabled={disabled}
-    on:click={handleClick}
+    onclick={handleClick}
   >
-    {#if $$slots.icon}
+    {#if icon}
       <span class="poodle-nav-card__icon" aria-hidden="true">
-        <slot name="icon" />
+        {@render icon()}
       </span>
     {/if}
     <div class="poodle-nav-card__content">

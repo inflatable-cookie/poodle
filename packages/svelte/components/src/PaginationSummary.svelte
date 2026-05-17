@@ -1,11 +1,18 @@
 <script lang="ts">
-  export let currentPage = 1;
-  export let totalPages = 1;
-  export let totalItems = 0;
-  export let pageSize = 5;
+  let {
+    currentPage = 1,
+    totalPages = 1,
+    totalItems = 0,
+    pageSize = 5,
+  }: {
+    currentPage?: number;
+    totalPages?: number;
+    totalItems?: number;
+    pageSize?: number;
+  } = $props();
 
-  $: fromItem = totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
-  $: toItem = Math.min(currentPage * pageSize, totalItems);
+  const fromItem = $derived(totalItems === 0 ? 0 : ((currentPage - 1) * pageSize) + 1);
+  const toItem = $derived(Math.min(currentPage * pageSize, totalItems));
 </script>
 
 <div

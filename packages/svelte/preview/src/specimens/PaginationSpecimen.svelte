@@ -3,14 +3,14 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let page1 = 1;
-  let page2 = 5;
-  let page3 = 2;
-  let limit3 = 25;
-  let page4 = 1;
+  let page1 = $state(1);
+  let page2 = $state(5);
+  let page3 = $state(2);
+  let limit3 = $state(25);
+  let page4 = $state(1);
 
   const totalItems = 248;
-  const totalPagesForLimit3 = Math.ceil(totalItems / limit3);
+  const totalPagesForLimit3 = $derived(Math.ceil(totalItems / limit3));
 </script>
 
 <SpecimenLayout>

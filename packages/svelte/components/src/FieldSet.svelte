@@ -1,16 +1,28 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { scaleToSpace } from "./internal";
   import type { SpaceScale } from "./types";
 
-  export let legend: string | null = null;
-  export let columns: number = 1;
-  export let gap: SpaceScale = "md";
-  export let span: number | "full" | null = null;
+  interface Props {
+    legend?: string | null;
+    columns?: number;
+    gap?: SpaceScale;
+    span?: number | "full" | null;
+    children?: Snippet;
+  }
 
-  $: gridStyle = [
+  let {
+    legend = null,
+    columns = 1,
+    gap = "md",
+    span = null,
+    children,
+  }: Props = $props();
+
+  const gridStyle = $derived([
     `grid-template-columns: repeat(${columns}, minmax(0, 1fr))`,
     `gap: ${scaleToSpace(gap)}`,
-  ].join("; ");
+  ].join("; "));
 </script>
 
 <fieldset
@@ -21,7 +33,7 @@
     <legend class="poodle-fieldset__legend">{legend}</legend>
   {/if}
   <div class="poodle-fieldset__fields" style={gridStyle}>
-    <slot />
+    {@render children?.()}
   </div>
 </fieldset>
 

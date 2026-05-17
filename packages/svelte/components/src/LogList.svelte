@@ -249,7 +249,8 @@
               {#each filters as filter}
                 <div class="poodle-log-list__filter">
                   {#if filter.type === "select" && filter.options}
-                    <Field id={`log-filter-${filter.field}`} label={filter.label} let:describedBy>
+                    <Field id={`log-filter-${filter.field}`} label={filter.label}>
+                      {#snippet control({ describedBy })}
                       <Select
                         id={`log-filter-${filter.field}`}
                         name={filter.field}
@@ -258,9 +259,11 @@
                         describedBy={describedBy}
                         onValueChange={(nextValue) => onFilterChange?.(filter.field, nextValue)}
                       />
+                      {/snippet}
                     </Field>
                   {:else if filter.type === "date"}
-                    <Field id={`log-filter-${filter.field}`} label={filter.label} let:describedBy>
+                    <Field id={`log-filter-${filter.field}`} label={filter.label}>
+                      {#snippet control({ describedBy })}
                       <TextInput
                         id={`log-filter-${filter.field}`}
                         type="date"
@@ -268,6 +271,7 @@
                         describedBy={describedBy}
                         onValueChange={(nextValue) => onFilterChange?.(filter.field, nextValue)}
                       />
+                      {/snippet}
                     </Field>
                   {/if}
                 </div>

@@ -18,7 +18,7 @@ Updated: 2026-03-30
 
 ```text
 [Root .toolbar]  <div role="toolbar">
-  └── [Default Slot] (focusable tool items)
+  └── [Children] (focusable tool items)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -37,11 +37,11 @@ Updated: 2026-03-30
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when no visible title exists |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | focusable tool items (buttons, toggles, selects) |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | focusable tool items (buttons, toggles, selects) |
 
 ### Controlled And Uncontrolled
 

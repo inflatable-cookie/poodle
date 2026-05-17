@@ -5,19 +5,30 @@
 
   import type { ButtonVariant, ControlSize } from "./types";
 
-  export let value: unknown | null = null;
-  export let title = "Debug data";
-  export let triggerLabel = "View debug data";
-  export let maxHeight = "min(60vh, 32rem)";
-  export let triggerVariant: ButtonVariant = "ghost";
-  export let triggerSize: ControlSize | null = "sm";
-  export let showCloseButton = true;
-  export let closeLabel = "Close debug dialog";
+  let {
+    value = null,
+    title = "Debug data",
+    triggerLabel = "View debug data",
+    maxHeight = "min(60vh, 32rem)",
+    triggerVariant = "ghost",
+    triggerSize = "sm",
+    showCloseButton = true,
+    closeLabel = "Close debug dialog",
+  }: {
+    value?: unknown | null;
+    title?: string;
+    triggerLabel?: string;
+    maxHeight?: string;
+    triggerVariant?: ButtonVariant;
+    triggerSize?: ControlSize | null;
+    showCloseButton?: boolean;
+    closeLabel?: string;
+  } = $props();
 
-  let open = false;
+  let open = $state(false);
 
-  $: hasValue = value !== null && value !== undefined;
-  $: source = stringifyValue(value);
+  const hasValue = $derived(value !== null && value !== undefined);
+  const source = $derived(stringifyValue(value));
 
   function stringifyValue(input: unknown): string {
     if (input === null || input === undefined) {

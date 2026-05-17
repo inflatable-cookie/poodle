@@ -6,22 +6,36 @@
 
   import type { MediaUploadWorkflowStep } from "./types";
 
-  export let uploadStep: MediaUploadWorkflowStep = "checking";
-  export let duplicateLabel: string | null = null;
-  export let uploadProgress = 0;
-  export let uploadError: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onUploadAnyway: (() => void) | undefined = undefined;
-  export let onSelectDuplicate: (() => void) | undefined = undefined;
-  export let onClearUpload: (() => void) | undefined = undefined;
-  export let onSelectUploaded: (() => void) | undefined = undefined;
+  let {
+    uploadStep = "checking",
+    duplicateLabel = null,
+    uploadProgress = 0,
+    uploadError = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onUploadAnyway = undefined,
+    onSelectDuplicate = undefined,
+    onClearUpload = undefined,
+    onSelectUploaded = undefined,
+  }: {
+    uploadStep?: MediaUploadWorkflowStep;
+    duplicateLabel?: string | null;
+    uploadProgress?: number;
+    uploadError?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onUploadAnyway?: (() => void) | undefined;
+    onSelectDuplicate?: (() => void) | undefined;
+    onClearUpload?: (() => void) | undefined;
+    onSelectUploaded?: (() => void) | undefined;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
 {#if uploadStep === "checking"}

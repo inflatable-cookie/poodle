@@ -2,22 +2,35 @@
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let value: number | null = null;
-  export let max = 100;
-  export let indeterminate = false;
-  export let ariaLabel: string | null = null;
-  export let valueText: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
+  interface Props {
+    value?: number | null;
+    max?: number;
+    indeterminate?: boolean;
+    ariaLabel?: string | null;
+    valueText?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+  }
+
+  let {
+    value = null,
+    max = 100,
+    indeterminate = false,
+    ariaLabel = null,
+    valueText = null,
+    size = null,
+    sizeRole = "control",
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: safeMax = max <= 0 ? 100 : max;
-  $: safeValue = value === null ? null : Math.min(Math.max(value, 0), safeMax);
-  $: percentage = safeValue === null ? 0 : safeValue / safeMax;
-  $: computedValueText =
-    !indeterminate && safeValue !== null ? `${Math.round(percentage * 100)}%` : null;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
+  const safeMax = $derived(max <= 0 ? 100 : max);
+  const safeValue = $derived(value === null ? null : Math.min(Math.max(value, 0), safeMax));
+  const percentage = $derived(safeValue === null ? 0 : safeValue / safeMax);
+  const computedValueText = $derived(
+    !indeterminate && safeValue !== null ? `${Math.round(percentage * 100)}%` : null
+  );
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
 </script>
 
 <div

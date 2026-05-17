@@ -388,14 +388,15 @@ Components use snippets or slots for flexible composition, depending on the surf
   {/snippet}
 </Button>
 
-<!-- Field: default slot receives accessibility bindings -->
+<!-- Field: use control(...) only when the child needs field-owned accessibility bindings -->
 <Field id="email" label="Email" validationState="invalid" error="Required">
-  <TextInput
-    slot:let={{ describedBy, validationState }}
-    id="email"
-    {describedBy}
-    {validationState}
-  />
+  {#snippet control({ describedBy, validationState })}
+    <TextInput
+      id="email"
+      {describedBy}
+      {validationState}
+    />
+  {/snippet}
 </Field>
 
 <!-- Dialog: children content plus an actions snippet -->
@@ -556,23 +557,22 @@ The `Field` component:
 - Renders the `<label>` associated with the control via `for={id}`
 - Shows required indicator (`*`) when `required` is true
 - Optional label is opt-in via `optionalLabel`
-- Shows description text below the label (always visible)
-- Shows a `hint` tooltip via an info icon next to the label (progressive disclosure for longer help text)
+- Shows `description` or `hint` in an info popover next to the label
 - Shows error or pending messages based on `validationState`
-- Provides `describedBy` to child controls via slot props for ARIA binding
+- Provides `describedBy` to advanced child controls via the `control(...)` snippet for ARIA binding
 - Supports grid layout via `span` and `gridArea` props
 
 ### Hints vs descriptions
 
-Use `description` for always-visible help text that users need to see. Use `hint` for supplemental guidance that can be revealed on demand:
+Use `description` for the primary info-popover copy. Use `hint` only as a legacy alias when migrating older call sites:
 
 ```svelte
-<!-- Always-visible help -->
+<!-- Primary info-popover copy -->
 <Field id="pw" label="Password" description="Must be at least 8 characters." required>
   <TextInput id="pw" type="password" />
 </Field>
 
-<!-- Progressive-disclosure hint -->
+<!-- Legacy alias -->
 <Field id="slug" label="URL Slug" hint="Lowercase letters, numbers, and hyphens only.">
   <TextInput id="slug" />
 </Field>

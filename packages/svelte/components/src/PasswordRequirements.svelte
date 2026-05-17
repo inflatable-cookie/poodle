@@ -1,19 +1,33 @@
 <script lang="ts">
   import type { PasswordRequirementsPolicy } from "./types";
 
-  export let password = "";
-  export let requirements: PasswordRequirementsPolicy | null = null;
-  export let loading = false;
-  export let error: string | null = null;
-  export let title = "Password requirements";
-  export let hint: string | null = "Avoid common words, patterns, and personal information.";
-  export let loadingLabel = "Loading requirements...";
+  interface Props {
+    password?: string;
+    requirements?: PasswordRequirementsPolicy | null;
+    loading?: boolean;
+    error?: string | null;
+    title?: string;
+    hint?: string | null;
+    loadingLabel?: string;
+  }
 
-  $: effectiveRequirements = requirements;
-  $: lengthMet = effectiveRequirements ? password.length >= effectiveRequirements.minLength : false;
-  $: mixedCaseMet = !effectiveRequirements?.requireMixedCase || (/[a-z]/.test(password) && /[A-Z]/.test(password));
-  $: digitMet = !effectiveRequirements?.requireDigit || /\d/.test(password);
-  $: specialMet = !effectiveRequirements?.requireSpecial || /[^a-zA-Z0-9]/.test(password);
+  let {
+    password = "",
+    requirements = null,
+    loading = false,
+    error = null,
+    title = "Password requirements",
+    hint = "Avoid common words, patterns, and personal information.",
+    loadingLabel = "Loading requirements...",
+  }: Props = $props();
+
+  const effectiveRequirements = $derived(requirements);
+  const lengthMet = $derived(effectiveRequirements ? password.length >= effectiveRequirements.minLength : false);
+  const mixedCaseMet = $derived(
+    !effectiveRequirements?.requireMixedCase || (/[a-z]/.test(password) && /[A-Z]/.test(password))
+  );
+  const digitMet = $derived(!effectiveRequirements?.requireDigit || /\d/.test(password));
+  const specialMet = $derived(!effectiveRequirements?.requireSpecial || /[^a-zA-Z0-9]/.test(password));
 </script>
 
 <div class="poodle-password-requirements" aria-live="polite">

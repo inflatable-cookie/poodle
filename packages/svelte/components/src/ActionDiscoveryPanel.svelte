@@ -13,30 +13,45 @@
 
   import type { CommandActionItem, DiscoveryState } from "./types";
 
-  export let items: CommandActionItem[] = [];
-  export let state: DiscoveryState = "ready";
-  export let activeId: string | null = null;
-  export let ariaLabel = "Actions";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onItemSelect: ((id: string) => void) | null = null;
-  export let onActiveChange: ((id: string | null) => void) | null = null;
+  interface Props {
+    items?: CommandActionItem[];
+    state?: DiscoveryState;
+    activeId?: string | null;
+    ariaLabel?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onItemSelect?: ((id: string) => void) | null;
+    onActiveChange?: ((id: string | null) => void) | null;
+  }
 
-  let itemElements: Array<HTMLElement | null> = [];
+  let {
+    items = [],
+    state: discoveryState = "ready",
+    activeId = $bindable<string | null>(null),
+    ariaLabel = "Actions",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onItemSelect = null,
+    onActiveChange = null,
+  }: Props = $props();
+
+  let itemElements = $state<Array<HTMLElement | null>>([]);
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-
-  $: enabledItems = items.filter((item) => !item.disabled);
-  $: groupedItems = items.reduce<Record<string, CommandActionItem[]>>((acc, item) => {
-    const group = item.group ?? "Commands";
-    acc[group] ??= [];
-    acc[group].push(item);
-    return acc;
-  }, {});
-  $: groupEntries = Object.entries(groupedItems);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const enabledItems = $derived(items.filter((item) => !item.disabled));
+  const groupedItems = $derived.by(() =>
+    items.reduce<Record<string, CommandActionItem[]>>((acc, item) => {
+      const group = item.group ?? "Commands";
+      acc[group] ??= [];
+      acc[group].push(item);
+      return acc;
+    }, {}),
+  );
+  const groupEntries = $derived(Object.entries(groupedItems));
 
   export function moveActive(step: 1 | -1): void {
     if (enabledItems.length === 0) return;
@@ -81,7 +96,7 @@
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
-    {#if state === "loading"}
+    {#if discoveryState === "loading"}
       <div class="poodle-action-discovery-panel__state">
         <div class="poodle-action-discovery-panel__skeletons" aria-hidden="true">
           {#each Array.from({ length: 5 }) as _}
@@ -92,17 +107,17 @@
           {/each}
         </div>
       </div>
-    {:else if state === "error"}
+    {:else if discoveryState === "error"}
       <EmptyState
         title="Could not load actions"
         message="Actions could not be loaded. Try again."
       />
-    {:else if state === "empty"}
+    {:else if discoveryState === "empty"}
       <EmptyState
         title="No actions available"
         message="No actions are available in this context."
       />
-    {:else if state === "no-results"}
+    {:else if discoveryState === "no-results"}
       <EmptyState
         title="No matching actions"
         message="No actions match the current search."
@@ -115,7 +130,7 @@
           <ul class="poodle-action-discovery-panel__list">
             {#each groupItems as item (item.id)}
               <li
-                bind:this={itemElements[enabledItems.findIndex((e) => e.id === item.id)]}
+                bind:this={itemElements[enabledItems.findIndex((enabledItem) => enabledItem.id === item.id)]}
                 role="option"
                 aria-selected={activeId === item.id}
               >
@@ -126,10 +141,10 @@
                   disabled={item.disabled ?? false}
                   ariaLabel={item.title}
                   onClick={() => onItemSelect?.(item.id)}
-                  on:mouseenter={() => setActive(item.id)}
-                  on:focus={() => setActive(item.id)}
+                  onmouseenter={() => setActive(item.id)}
+                  onfocus={() => setActive(item.id)}
                 >
-                  <svelte:fragment slot="trailing">
+                  {#snippet trailing()}
                     <span class="poodle-action-discovery-panel__trailing">
                       {#if item.badge}
                         <span class="poodle-action-discovery-panel__badge">{item.badge}</span>
@@ -138,7 +153,7 @@
                         <kbd class="poodle-action-discovery-panel__kbd">{item.shortcut}</kbd>
                       {/if}
                     </span>
-                  </svelte:fragment>
+                  {/snippet}
                 </ListCard>
               </li>
             {/each}
@@ -259,29 +274,41 @@
     border-radius: var(--poodle-radius-control);
     background: color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent);
     color: var(--poodle-color-text-secondary);
+    font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-action-discovery-chip-font-size);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .poodle-action-discovery-panel__badge {
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
+    color: var(--poodle-color-accent-base);
   }
 
   .poodle-action-discovery-panel__kbd {
     font-family: var(--poodle-typography-code-family);
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   .poodle-action-discovery-panel__state {
+    min-height: 10rem;
     display: grid;
-    gap: var(--poodle-space-stack-sm);
+    place-items: center;
   }
 
   .poodle-action-discovery-panel__skeletons {
     display: grid;
-    gap: var(--poodle-space-stack-sm);
+    gap: var(--poodle-action-discovery-list-gap);
+    width: 100%;
+    padding: var(--poodle-action-discovery-skeleton-pad);
   }
 
   .poodle-action-discovery-panel__skeleton-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--poodle-space-inline-md);
-    padding: var(--poodle-action-discovery-skeleton-pad);
-    border-radius: calc(var(--poodle-radius-surface) - 0.125rem);
-    background: color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--poodle-action-discovery-chip-gap);
   }
 </style>

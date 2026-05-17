@@ -4,17 +4,28 @@
 
   type PageLoadingPresentation = "overlay" | "inline";
 
-  export let visible = true;
-  export let value: number | null = null;
-  export let max: number = 100;
-  export let message: string | null = null;
-  export let canCancel = false;
-  export let ariaLabel: string | null = null;
-  export let presentation: PageLoadingPresentation = "overlay";
-  export let onCancel: (() => void) | undefined = undefined;
+  let {
+    visible = true,
+    value = null,
+    max = 100,
+    message = null,
+    canCancel = false,
+    ariaLabel = null,
+    presentation = "overlay",
+    onCancel = undefined,
+  }: {
+    visible?: boolean;
+    value?: number | null;
+    max?: number;
+    message?: string | null;
+    canCancel?: boolean;
+    ariaLabel?: string | null;
+    presentation?: PageLoadingPresentation;
+    onCancel?: (() => void) | undefined;
+  } = $props();
 
-  $: isIndeterminate = value === null;
-  $: isOverlay = presentation === "overlay";
+  const isIndeterminate = $derived(value === null);
+  const isOverlay = $derived(presentation === "overlay");
 </script>
 
 {#if visible}

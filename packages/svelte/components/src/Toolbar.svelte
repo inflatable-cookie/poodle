@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { getFocusableElements } from "./internal";
   import { controlHeightRem, getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -9,18 +10,30 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let orientation: Orientation = "horizontal";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let ariaLabel: string | null = null;
+  interface Props {
+    orientation?: Orientation;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    ariaLabel?: string | null;
+    children?: Snippet;
+  }
+
+  let {
+    orientation = "horizontal",
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    ariaLabel = null,
+    children,
+  }: Props = $props();
 
   let rootElement: HTMLDivElement | null = null;
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: toolbarStyle = `--poodle-toolbar-control-height: ${controlHeightRem(resolvedSize)}rem;`;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const toolbarStyle = $derived(`--poodle-toolbar-control-height: ${controlHeightRem(resolvedSize)}rem;`);
 
   function focusSibling(direction: 1 | -1): void {
     const focusable = getFocusableElements(rootElement);
@@ -45,7 +58,7 @@
   role="toolbar"
   tabindex="0"
   aria-label={ariaLabel ?? undefined}
-  on:keydown={(event) => {
+  onkeydown={(event) => {
     if (
       orientation === "horizontal" &&
       (event.key === "ArrowRight" || event.key === "ArrowLeft")
@@ -63,7 +76,7 @@
     }
   }}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

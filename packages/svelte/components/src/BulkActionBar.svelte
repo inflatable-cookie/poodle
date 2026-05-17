@@ -12,27 +12,46 @@
     SemanticControlSizeRole
   } from "./types";
 
-  export let selectionCount = 0;
-  export let totalCount: number | null = null;
-  export let actions: BulkAction[] = [];
-  export let loading = false;
-  export let disabled = false;
-  export let showSelectAll = false;
-  export let allSelected = false;
-  export let selectAllLabel = "Select all";
-  export let onAction: ((id: string) => void) | null = null;
-  export let onClear: (() => void) | null = null;
-  export let onSelectAll: (() => void) | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
+  interface Props {
+    selectionCount?: number;
+    totalCount?: number | null;
+    actions?: BulkAction[];
+    loading?: boolean;
+    disabled?: boolean;
+    showSelectAll?: boolean;
+    allSelected?: boolean;
+    selectAllLabel?: string;
+    onAction?: ((id: string) => void) | null;
+    onClear?: (() => void) | null;
+    onSelectAll?: (() => void) | null;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+  }
+
+  let {
+    selectionCount = 0,
+    totalCount = null,
+    actions = [],
+    loading = false,
+    disabled = false,
+    showSelectAll = false,
+    allSelected = false,
+    selectAllLabel = "Select all",
+    onAction = null,
+    onClear = null,
+    onSelectAll = null,
+    sizeRole = "control",
+    size = null,
+    density = null,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isUnavailable = disabled || loading;
-  $: actionsDisabled = isUnavailable || selectionCount === 0;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isUnavailable = $derived(disabled || loading);
+  const actionsDisabled = $derived(isUnavailable || selectionCount === 0);
 
   function isIconComponent(icon: BulkAction["icon"]): icon is Component<any> {
     return icon != null && typeof icon !== "string" && !Array.isArray(icon);
@@ -58,7 +77,7 @@
         variant="ghost"
         sizeRole="chrome"
         disabled={isUnavailable}
-        on:click={() => onSelectAll?.()}
+        onClick={() => onSelectAll?.()}
       />
     {/if}
   </div>
@@ -72,6 +91,7 @@
         data-tone={actionTone !== "default" ? actionTone : undefined}
       >
         {#if action.icon && isIconComponent(action.icon)}
+          {@const DynamicIcon = action.icon}
           <IconButton
             icon={fallbackIcon}
             ariaLabel={action.label}
@@ -80,9 +100,9 @@
             tone={actionTone === "danger" ? "danger" : "default"}
             size={resolvedSize}
             disabled={actionsDisabled || action.disabled}
-            on:click={() => onAction?.(action.id)}
+            onClick={() => onAction?.(action.id)}
           >
-            <svelte:component this={action.icon} size={16} />
+            <DynamicIcon size={16} />
           </IconButton>
         {:else}
           <IconButton
@@ -93,7 +113,7 @@
             tone={actionTone === "danger" ? "danger" : "default"}
             size={resolvedSize}
             disabled={actionsDisabled || action.disabled}
-            on:click={() => onAction?.(action.id)}
+            onClick={() => onAction?.(action.id)}
           />
         {/if}
       </span>
@@ -104,7 +124,7 @@
       variant="ghost"
       size={resolvedSize}
       disabled={isUnavailable}
-      on:click={() => onClear?.()}
+      onClick={() => onClear?.()}
     />
   </div>
 </div>

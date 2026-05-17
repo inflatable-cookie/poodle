@@ -11,7 +11,7 @@ Updated: 2026-03-30
   supporting actions, decorative visual, and variant-driven background
   treatment — supports neutral, search, and first-run postures
 - In scope: title, descriptive copy, optional illustration/icon via visual
-  slot, action group via actions slot, variant-driven background styling,
+  snippet, action group via actions snippet, variant-driven background styling,
   compact size variant, density-aware spacing
 - Out of scope: async loading progress, blocking errors, app-specific
   onboarding flows
@@ -21,12 +21,12 @@ Updated: 2026-03-30
 ```text
 [Root .empty-state]  <section aria-label>
   ├── [Visual .empty-state__visual]  <div aria-hidden="true">
-  │     └── (slot: visual) or default Icon per variant
+  │     └── (snippet: visual()) or default Icon per variant
   ├── [Copy .empty-state__copy]  <div>
   │     ├── [Title]  <h3>
   │     └── [Message]  <p> (optional)
-  └── [Actions .empty-state__actions]  <div> (optional, slot-driven)
-        └── (slot: actions)
+  └── [Actions .empty-state__actions]  <div> (optional, snippet-driven)
+        └── (snippet: actions())
 ```
 
 | Part | Required | Description | Token Targets |
@@ -36,7 +36,7 @@ Updated: 2026-03-30
 | Copy | yes | title heading and optional message paragraph | text-primary, text-secondary, typography |
 | Title | yes | `<h3>` primary empty-state message | font-size, line-height |
 | Message | no | `<p>` supporting explanation | text-secondary, font-size |
-| Actions | no | flex container for remediation/creation action buttons (slot-driven) | gap |
+| Actions | no | flex container for remediation/creation action buttons (snippet-driven) | gap |
 
 ## 3. Props And Inputs
 
@@ -51,17 +51,17 @@ Updated: 2026-03-30
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label; falls back to `title` when null |
 
-### Slots
+### Snippets
 
-| Slot | Description |
-|------|-------------|
-| `visual` | custom visual content replacing the default variant icon |
-| `actions` | remediation or creation action buttons |
+| Snippet | Description |
+|---------|-------------|
+| `visual()` | custom visual content replacing the default variant icon |
+| `actions()` | remediation or creation action buttons |
 
 ### Controlled And Uncontrolled
 
 - declarative state composite
-- action behavior remains host-owned via the actions slot
+- action behavior remains host-owned via the actions snippet
 - no internal state
 
 ## 4. States
@@ -120,8 +120,8 @@ No component-owned events. Action behavior is delegated to slotted children.
 
 - composes: `Icon` primitive (for default variant icons)
 - parent expectations: `DetailShell`, settings scopes, browse surfaces
-- child expectations: text, icon/illustration (via visual slot), action
-  primitives (via actions slot)
+- child expectations: text, icon/illustration (via visual snippet), action
+  primitives (via actions snippet)
 - resizing rules: actions may wrap below the message on narrow widths
 
 ## 8. Token Usage — Exact Values
@@ -251,8 +251,8 @@ None.
 - `data-variant` attribute on root `<section>` controls variant-specific background
 - `data-size` attribute on root reflects the size prop
 - `data-density` attribute reflects resolved density from prop or inherited presentation
-- visual slot uses `$$slots.visual` check to detect custom content
-- actions slot rendered conditionally via `$$slots.actions` check
+- `visual` snippet overrides the default icon when present
+- `actions` snippet renders conditionally when present
 - `ariaLabel` on `<section>` falls back to `title` when null
 - `Icon` imported from `@poodle/svelte`
 - `EmptyStateVariant` and `EmptyStateSize` types imported from shared `types.ts`

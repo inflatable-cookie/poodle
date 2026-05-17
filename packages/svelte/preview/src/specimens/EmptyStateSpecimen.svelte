@@ -7,9 +7,9 @@
 <div class="poodle-specimen">
   <SpecimenGroup label="Neutral">
     <EmptyState title="No projects yet" message="Create your first project to get started.">
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button>Create project</Button>
-      </svelte:fragment>
+      {/snippet}
     </EmptyState>
   </SpecimenGroup>
 
@@ -19,9 +19,9 @@
       title="No results found"
       message="Try adjusting your search terms or clearing filters."
     >
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="secondary">Clear filters</Button>
-      </svelte:fragment>
+      {/snippet}
     </EmptyState>
   </SpecimenGroup>
 
@@ -39,9 +39,9 @@
       title="No captured emails found"
       message="Emails will appear here when sent in development mode."
     >
-      <svelte:fragment slot="visual">
+      {#snippet visual()}
         <Icon name="mail" />
-      </svelte:fragment>
+      {/snippet}
     </EmptyState>
   </SpecimenGroup>
 </div>

@@ -1,38 +1,50 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
-
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let src: string;
-  export let poster: string | null = null;
-  export let aspectRatio: number = 16 / 9;
-  export let ariaLabel = "Video player";
-  export let showCaptions = false;
-  export let captionsSrc: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    src: string;
+    poster?: string | null;
+    aspectRatio?: number;
+    ariaLabel?: string;
+    showCaptions?: boolean;
+    captionsSrc?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+  }
 
-  let videoEl: HTMLVideoElement | null = null;
-  let wrapperEl: HTMLDivElement | null = null;
-  let isPlaying = false;
-  let currentTime = 0;
-  let duration = 0;
-  let volume = 1;
-  let isMuted = false;
-  let isFullscreen = false;
-  let showControls = true;
-  let controlsTimeout: ReturnType<typeof setTimeout> | null = null;
-  let animFrame: number | null = null;
+  let {
+    src,
+    poster = null,
+    aspectRatio = 16 / 9,
+    ariaLabel = "Video player",
+    showCaptions = false,
+    captionsSrc = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+  }: Props = $props();
+
+  let videoEl = $state<HTMLVideoElement | null>(null);
+  let wrapperEl = $state<HTMLDivElement | null>(null);
+  let isPlaying = $state(false);
+  let currentTime = $state(0);
+  let duration = $state(0);
+  let volume = $state(1);
+  let isMuted = $state(false);
+  let isFullscreen = $state(false);
+  let showControls = $state(true);
+  let controlsTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
+  let animFrame = $state<number | null>(null);
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: formattedCurrent = formatTime(currentTime);
-  $: formattedDuration = formatTime(duration);
-  $: progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const formattedCurrent = $derived(formatTime(currentTime));
+  const formattedDuration = $derived(formatTime(duration));
+  const progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
 
   function formatTime(sec: number): string {
     const m = Math.floor(sec / 60);
@@ -106,36 +118,40 @@
     }
   }
 
-  onMount(() => {
-    if (!videoEl) return;
+  function handlePlay(): void {
+    isPlaying = true;
+    updateTime();
+    resetControlsTimer();
+  }
 
-    videoEl.addEventListener("play", () => {
-      isPlaying = true;
-      updateTime();
-      resetControlsTimer();
-    });
-    videoEl.addEventListener("pause", () => {
-      isPlaying = false;
-      showControls = true;
-      if (animFrame !== null) cancelAnimationFrame(animFrame);
-    });
-    videoEl.addEventListener("ended", () => {
-      isPlaying = false;
-      showControls = true;
-      if (animFrame !== null) cancelAnimationFrame(animFrame);
-    });
-    videoEl.addEventListener("loadedmetadata", () => {
-      duration = videoEl?.duration ?? 0;
-    });
-
-    document.addEventListener("fullscreenchange", () => {
-      isFullscreen = !!document.fullscreenElement;
-    });
-  });
-
-  onDestroy(() => {
+  function handlePause(): void {
+    isPlaying = false;
+    showControls = true;
     if (animFrame !== null) cancelAnimationFrame(animFrame);
-    if (controlsTimeout) clearTimeout(controlsTimeout);
+  }
+
+  function handleEnded(): void {
+    isPlaying = false;
+    showControls = true;
+    if (animFrame !== null) cancelAnimationFrame(animFrame);
+  }
+
+  function handleLoadedMetadata(): void {
+    duration = videoEl?.duration ?? 0;
+  }
+
+  function handleFullscreenChange(): void {
+    isFullscreen = !!document.fullscreenElement;
+  }
+
+  $effect(() => {
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      if (animFrame !== null) cancelAnimationFrame(animFrame);
+      if (controlsTimeout) clearTimeout(controlsTimeout);
+    };
   });
 </script>
 
@@ -145,21 +161,25 @@
   style="aspect-ratio: {aspectRatio}"
   role="button"
   tabindex="0"
-  on:mousemove={resetControlsTimer}
-  on:click={togglePlay}
-  on:keydown={handleWrapperKeydown}
+  onmousemove={resetControlsTimer}
+  onclick={togglePlay}
+  onkeydown={handleWrapperKeydown}
   aria-label={ariaLabel}
   aria-pressed={isPlaying}
   data-size={resolvedSize}
   data-density={resolvedDensity}
 >
-  <!-- svelte-ignore a11y-media-has-caption -->
+  <!-- svelte-ignore a11y_media_has_caption -->
   <video
     bind:this={videoEl}
     {src}
     poster={poster ?? undefined}
     preload="metadata"
     playsinline
+    onplay={handlePlay}
+    onpause={handlePause}
+    onended={handleEnded}
+    onloadedmetadata={handleLoadedMetadata}
   >
     {#if showCaptions && captionsSrc}
       <track kind="captions" src={captionsSrc} default />
@@ -170,7 +190,10 @@
     <button
       type="button"
       class="poodle-video-player__big-play"
-      on:click|stopPropagation={togglePlay}
+      onclick={(event) => {
+        event.stopPropagation();
+        togglePlay();
+      }}
       aria-label="Play video"
     >
       <svg viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
@@ -180,8 +203,13 @@
     </button>
   {/if}
 
-  <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-  <div class="poodle-video-player__controls" class:poodle-visible={showControls} on:click|stopPropagation>
+  <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+  <div
+    class="poodle-video-player__controls"
+    class:poodle-visible={showControls}
+    role="presentation"
+    onclick={(event) => event.stopPropagation()}
+  >
     <div class="poodle-video-player__progress-bar">
       <div class="poodle-video-player__progress-fill" style="width: {progress}%"></div>
       <input
@@ -191,7 +219,7 @@
         max={duration || 0}
         step="0.1"
         value={currentTime}
-        on:input={handleSeek}
+        oninput={handleSeek}
         aria-label="Seek"
       />
     </div>
@@ -201,7 +229,10 @@
         <button
           type="button"
           class="poodle-video-player__btn"
-          on:click|stopPropagation={togglePlay}
+          onclick={(event) => {
+            event.stopPropagation();
+            togglePlay();
+          }}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {#if isPlaying}
@@ -219,7 +250,10 @@
         <button
           type="button"
           class="poodle-video-player__btn"
-          on:click|stopPropagation={toggleMute}
+          onclick={(event) => {
+            event.stopPropagation();
+            toggleMute();
+          }}
           aria-label={isMuted ? "Unmute" : "Mute"}
         >
           {#if isMuted || volume === 0}
@@ -241,7 +275,7 @@
           max="1"
           step="0.01"
           value={isMuted ? 0 : volume}
-          on:input={handleVolume}
+          oninput={handleVolume}
           aria-label="Volume"
         />
 
@@ -252,7 +286,10 @@
         <button
           type="button"
           class="poodle-video-player__btn"
-          on:click|stopPropagation={toggleFullscreen}
+          onclick={(event) => {
+            event.stopPropagation();
+            toggleFullscreen();
+          }}
           aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
         >
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true">

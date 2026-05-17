@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack, type Snippet } from "svelte";
   import type { IconSet } from "./icon-registry";
 
   import { setIconSet } from "./icon-registry";
@@ -8,9 +9,17 @@
   // a Phosphor equivalent, or a custom set.
   // String-based icon lookups resolve from this set first. If not found
   // and @poodle/icons-lucide is installed, icons are lazily auto-imported.
-  export let icons: IconSet;
+  interface Props {
+    icons: IconSet;
+    children?: Snippet;
+  }
 
-  setIconSet(icons);
+  const {
+    icons,
+    children,
+  }: Props = $props();
+
+  setIconSet(untrack(() => icons));
 </script>
 
-<slot />
+{@render children?.()}

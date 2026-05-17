@@ -1,21 +1,35 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
 
   type StatusIndicatorTypography = "label" | "inherit";
 
-  export let status: StatusTone = "neutral";
-  export let label: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let typography: StatusIndicatorTypography = "label";
+  let {
+    status = "neutral",
+    label = null,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    typography = "label",
+    children = undefined,
+  }: {
+    status?: StatusTone;
+    label?: string | null;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    typography?: StatusIndicatorTypography;
+    children?: Snippet;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
 <span
@@ -30,7 +44,7 @@
   {#if label}
     <span class="poodle-status-indicator__label">{label}</span>
   {:else}
-    <slot />
+    {@render children?.()}
   {/if}
 </span>
 

@@ -83,6 +83,10 @@ None.
 
 All props are controlled. The component does not own any state; the host provides items, loading, and error.
 
+Internally, the panel resolves semantic size and density from presentation
+context, but it does not maintain browse, selection, or loading state of its
+own.
+
 ## 4. States
 
 ### Visual States

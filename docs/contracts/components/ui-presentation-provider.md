@@ -21,7 +21,7 @@ Updated: 2026-03-30
 
 ```text
 [Root .ui-presentation-provider]  <div style="--poodle-size-control-height: ...; ...">
-  └── [Slot: default] (all descendant content)
+  └── [Children] (all descendant content)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -90,8 +90,8 @@ size against the provider's `sizeScale`:
 ### Controlled And Uncontrolled
 
 - Both `density` and `sizeScale` are externally controlled props
-- The context store is reactive: changes to props are reflected immediately
-  in the store, cascading to all descendant consumers
+- Changes to props are reflected immediately in the context store, cascading to
+  all descendant consumers
 
 ## 4. States
 
@@ -173,8 +173,7 @@ Example for `density="default"`, `sizeScale="md"`:
 - Creates or updates a Svelte context store via `setUiPresentation()`
 - If a store already exists in context (from an outer provider), it updates
   the existing store rather than creating a new one
-- Reactive: `$: presentation.set({ density, sizeScale })` keeps the store
-  in sync when props change
+- An effect keeps the context store in sync when props change
 - Helper functions from `presentation.ts`:
   - `controlHeightRem(sizeScale)` computes the control height value
   - `controlSpaceXRem(density)` computes horizontal control spacing
@@ -182,7 +181,7 @@ Example for `density="default"`, `sizeScale="md"`:
   - `panelSpaceYRem(density)` computes vertical panel spacing
 - No `data-size` or `data-density` attributes on the root; the provider is
   not a visual component
-- Default slot renders all children
+- `children()` renders all descendant content
 
 ## 10. GPUI Notes
 

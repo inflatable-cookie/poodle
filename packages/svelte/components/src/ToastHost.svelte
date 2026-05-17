@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
   import type { Readable } from "svelte/store";
 
   import ToastStack from "./ToastStack.svelte";
@@ -11,18 +10,31 @@
   } from "./types";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let store: ToastHostStore;
-  export let autoDismissMs = 6000;
-  export let stickyTones: ToastItem["tone"][] = ["danger"];
-  export let placement: ToastHostPlacement = "bottom-end";
-  export let ariaLabel = "Notifications";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let onAction: ((id: string) => void) | null = null;
-  export let onDismiss: ((id: string) => void) | null = null;
+  let {
+    store,
+    autoDismissMs = 6000,
+    stickyTones = ["danger"],
+    placement = "bottom-end",
+    ariaLabel = "Notifications",
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    onAction = null,
+    onDismiss = null,
+  }: {
+    store: ToastHostStore;
+    autoDismissMs?: number;
+    stickyTones?: ToastItem["tone"][];
+    placement?: ToastHostPlacement;
+    ariaLabel?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onAction?: ((id: string) => void) | null;
+    onDismiss?: ((id: string) => void) | null;
+  } = $props();
 
-  let items: ToastItem[] = [];
+  let items = $state<ToastItem[]>([]);
 
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -90,7 +102,7 @@
     onAction?.(id);
   }
 
-  onMount(() => {
+  $effect(() => {
     const unsubscribe = (store.toasts as Readable<ToastHostStoreItem[]>).subscribe((next) => {
       items = next.map(normalizeToast);
       reconcileTimers(next);
@@ -101,9 +113,11 @@
     };
   });
 
-  onDestroy(() => {
-    for (const timer of timers.values()) clearTimeout(timer);
-    timers.clear();
+  $effect(() => {
+    return () => {
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+    };
   });
 </script>
 

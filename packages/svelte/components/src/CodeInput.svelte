@@ -154,7 +154,7 @@
   error={error}
   validationState={effectiveValidationState}
 >
-  <svelte:fragment let:describedBy>
+  {#snippet control({ describedBy })}
     <input type="hidden" {name} value={currentValue} />
 
     <div
@@ -203,7 +203,7 @@
         </button>
       {/each}
     </div>
-  </svelte:fragment>
+  {/snippet}
 </Field>
 
 <style>

@@ -9,7 +9,7 @@ Updated: 2026-03-15
 - Layer: `foundation`
 - Summary: a context provider that makes an icon registry available to all
   descendant Icon components
-- In scope: setting icon registry context, rendering slot children
+- In scope: setting icon registry context, rendering child content
 - Out of scope: icon rendering (see Icon), icon registration APIs, lazy loading
   of icon sets
 
@@ -17,7 +17,7 @@ Updated: 2026-03-15
 
 ```text
 [Root]  (no DOM element)
-  └── [Slot: default]  (children)
+  └── [Children]  (descendant content)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -32,11 +32,11 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `icons` | `IconSet` | — | yes | icon set instance providing name-to-SVG mappings |
 
-### Slots
+### Composition
 
-| Slot | Purpose |
-|------|---------|
-| default | child components that may contain Icon instances |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | child components that may contain Icon instances |
 
 ### Controlled And Uncontrolled
 
@@ -97,7 +97,7 @@ visual output.
 ## 9. Svelte Notes
 
 - Uses `setIconRegistry(registry)` to provide context via Svelte's `setContext`
-- Renders only `<slot />` with no wrapper element
+- Renders only `children()` with no wrapper element
 - Registry prop is reactive; context updates if registry changes
 - Import: `import { setIconRegistry } from './icon-registry'`
 

@@ -1,22 +1,31 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
   import Tooltip from "./Tooltip.svelte";
 
-  export let datetime: Date | string | number;
-  export let live = true;
-  export let interval = 30_000;
-  export let ariaLabel: string | null = null;
-  export let short = true;
-  export let typography: "body" | "inherit" = "body";
-  export let tooltipFormat: "full" | "date" | "datetime" = "datetime";
-  export let timezone: string | null = null;
+  let {
+    datetime,
+    live = true,
+    interval = 30_000,
+    ariaLabel = null,
+    short = true,
+    typography = "body",
+    tooltipFormat = "datetime",
+    timezone = null,
+  }: {
+    datetime: Date | string | number;
+    live?: boolean;
+    interval?: number;
+    ariaLabel?: string | null;
+    short?: boolean;
+    typography?: "body" | "inherit";
+    tooltipFormat?: "full" | "date" | "datetime";
+    timezone?: string | null;
+  } = $props();
 
-  let now = Date.now();
-  let timer: ReturnType<typeof setInterval> | null = null;
+  let now = $state(Date.now());
 
-  $: timestamp = toTimestamp(datetime);
-  $: relativeText = formatRelative(timestamp, now, short);
-  $: absoluteText = formatAbsolute(timestamp, tooltipFormat, timezone);
+  const timestamp = $derived(toTimestamp(datetime));
+  const relativeText = $derived(formatRelative(timestamp, now, short));
+  const absoluteText = $derived(formatAbsolute(timestamp, tooltipFormat, timezone));
 
   function toTimestamp(dt: Date | string | number): number {
     if (dt instanceof Date) return dt.getTime();
@@ -113,18 +122,19 @@
     }
   }
 
-  onMount(() => {
-    if (live) {
-      timer = setInterval(() => {
-        now = Date.now();
-      }, interval);
+  $effect(() => {
+    if (!live) {
+      return;
     }
-  });
 
-  onDestroy(() => {
-    if (timer !== null) {
+    now = Date.now();
+    const timer = setInterval(() => {
+      now = Date.now();
+    }, interval);
+
+    return () => {
       clearInterval(timer);
-    }
+    };
   });
 </script>
 

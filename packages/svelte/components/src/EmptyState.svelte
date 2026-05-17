@@ -1,26 +1,43 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import Icon from "./Icon.svelte";
   import { getUiPresentation } from "./presentation";
   import type { ControlDensity } from "./types";
 
   import type { EmptyStateSize, EmptyStateVariant } from "./types";
 
-  export let title: string;
-  export let message: string | null = null;
-  export let variant: EmptyStateVariant = "neutral";
-  export let size: EmptyStateSize = "default";
-  export let density: ControlDensity | null = null;
-  export let ariaLabel: string | null = null;
+  interface Props {
+    title: string;
+    message?: string | null;
+    variant?: EmptyStateVariant;
+    size?: EmptyStateSize;
+    density?: ControlDensity | null;
+    ariaLabel?: string | null;
+    visual?: Snippet;
+    actions?: Snippet;
+  }
+
+  let {
+    title,
+    message = null,
+    variant = "neutral",
+    size = "default",
+    density = null,
+    ariaLabel = null,
+    visual,
+    actions,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
 <section class="poodle-empty-state" data-variant={variant} data-size={size} data-density={resolvedDensity} aria-label={ariaLabel ?? title}>
   <div class="poodle-empty-state__visual" aria-hidden="true">
-    {#if $$slots.visual}
-      <slot name="visual" />
+    {#if visual}
+      {@render visual()}
     {:else}
       {#if variant === "search"}
         <Icon name="search" />
@@ -39,9 +56,9 @@
     {/if}
   </div>
 
-  {#if $$slots.actions}
+  {#if actions}
     <div class="poodle-empty-state__actions">
-      <slot name="actions" />
+      {@render actions()}
     </div>
   {/if}
 </section>

@@ -17,7 +17,7 @@ Updated: 2026-03-15
 
 ```text
 [Root .grid]  <div>
-  └── [Content] (slot)
+  └── [Content] (children snippet)
 ```
 
 | Part | Required | Description | Token Targets |

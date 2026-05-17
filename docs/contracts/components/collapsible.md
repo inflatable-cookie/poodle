@@ -11,7 +11,7 @@ Updated: 2026-03-30
 - Layer: `foundation`
 - Summary: a single disclosure container with a trigger and revealable content
 - In scope: controlled or uncontrolled open state, heading copy, trigger
-  affordance, inline reveal posture, disabled state, trigger slot override
+  affordance, inline reveal posture, disabled state, trigger snippet override
 - Out of scope: grouped selection logic, routing, or full accordion ownership
 
 ## 2. Anatomy
@@ -20,22 +20,22 @@ Updated: 2026-03-30
 [Root .collapsible]  <section data-open data-disabled>
   ├── [Trigger .collapsible__trigger]  <button aria-expanded aria-controls>
   │   ├── [Heading .collapsible__heading]  <span>
-  │   │   ├── [Slot: trigger { isOpen }]  (named slot, or default heading)
-  │   │   ├── [Title .collapsible__title]  <span> (when no trigger slot)
-  │   │   └── [Description .collapsible__description]  <span> (optional, when no trigger slot)
+  │   │   ├── [Snippet: trigger({ isOpen })]  (or default heading)
+  │   │   ├── [Title .collapsible__title]  <span> (when no trigger snippet)
+  │   │   └── [Description .collapsible__description]  <span> (optional, when no trigger snippet)
   │   └── [Indicator .collapsible__indicator]  <span aria-hidden>
   │       └── [Icon name="chevron-down" size="sm"]
   └── [Content .collapsible__content]  <div role="region" aria-labelledby> (conditional)
-      └── [Slot: default]
+      └── [Snippet: children()]
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | disclosure section container | border, radius, background, shadow, padding, gap |
 | Trigger | yes | interactive button for expand/collapse | grid layout, color, cursor, focus ring |
-| Heading | yes | title/description container or trigger slot target | gap |
-| Title | no | heading text (when no trigger slot) | heading family, weight, size |
-| Description | no | supporting description (when no trigger slot) | secondary color, size |
+| Heading | yes | title/description container or trigger snippet target | gap |
+| Title | no | heading text (when no trigger snippet) | heading family, weight, size |
+| Description | no | supporting description (when no trigger snippet) | secondary color, size |
 | Indicator | yes | chevron rotation indicator | secondary color, transition |
 | Content | conditional | expanded content region | min-width, padding-top |
 
@@ -45,7 +45,7 @@ Updated: 2026-03-30
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `open` | `boolean \| null` | `null` | no | controlled open state; `null` = uncontrolled |
+| `open` | `boolean \| null \| undefined` | `undefined` | no | controlled open state when supplied; omit for uncontrolled mode |
 | `defaultOpen` | `boolean` | `false` | no | uncontrolled initial open state |
 | `title` | `string \| null` | `null` | no | visible heading text |
 | `description` | `string \| null` | `null` | no | visible supporting description |
@@ -55,12 +55,12 @@ Updated: 2026-03-30
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label when no title present |
 
-### Slots
+### Snippets
 
-| Slot | Purpose | Slot Props |
-|------|---------|------------|
-| default | collapsible content | none |
-| trigger (named) | custom trigger heading content | `{ isOpen: boolean }` |
+| Snippet | Purpose | Props |
+|---------|---------|-------|
+| `children()` | collapsible content | none |
+| `trigger({ isOpen })` | custom trigger heading content | `{ isOpen: boolean }` |
 
 ### Controlled And Uncontrolled
 
@@ -130,7 +130,7 @@ Updated: 2026-03-30
 
 - parent expectations: settings groups, sidebars, drawers, docs notes, compact
   web disclosure surfaces
-- child expectations: arbitrary slot content
+- child expectations: arbitrary snippet or child content
 - resizing: root stretches to container width; content flows naturally
 
 ## 8. Token Usage — Exact Values

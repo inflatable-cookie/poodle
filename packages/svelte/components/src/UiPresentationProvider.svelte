@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import {
     controlHeightRem,
     controlSpaceXRem,
@@ -8,29 +9,40 @@
   } from "./presentation";
   import type { ControlDensity, ControlSize } from "./types";
 
-  export let density: ControlDensity = "default";
-  export let sizeScale: ControlSize = "md";
+  interface Props {
+    density?: ControlDensity;
+    sizeScale?: ControlSize;
+    children?: Snippet;
+  }
+
+  let {
+    density = "default",
+    sizeScale = "md",
+    children,
+  }: Props = $props();
 
   const presentation = setUiPresentation({
-    density,
-    sizeScale,
+    density: "default",
+    sizeScale: "md",
   });
 
-  $: presentation.set({
-    density,
-    sizeScale,
+  $effect(() => {
+    presentation.set({
+      density,
+      sizeScale,
+    });
   });
 
-  $: providerStyle = [
+  const providerStyle = $derived([
     `--poodle-size-control-height: ${controlHeightRem(sizeScale)}rem`,
     `--poodle-space-control-x: ${controlSpaceXRem(density)}rem`,
     `--poodle-space-panel-x: ${panelSpaceXRem(density)}rem`,
     `--poodle-space-panel-y: ${panelSpaceYRem(density)}rem`,
-  ].join("; ");
+  ].join("; "));
 </script>
 
 <div class="poodle-ui-presentation-provider" style={providerStyle}>
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

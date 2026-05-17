@@ -1,9 +1,19 @@
 <script lang="ts">
-  export let ariaLabel: string | null = null;
+  import type { Snippet } from "svelte";
+
+  interface Props {
+    ariaLabel?: string | null;
+    children?: Snippet;
+  }
+
+  let {
+    ariaLabel = null,
+    children,
+  }: Props = $props();
 </script>
 
 <span class="poodle-eyebrow" aria-label={ariaLabel ?? undefined}>
-  <slot />
+  {@render children?.()}
 </span>
 
 <style>

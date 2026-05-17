@@ -18,13 +18,13 @@ Updated: 2026-03-15
 
 ```text
 [Root .box]  <div>
-  └── [Content] (slot)
+  └── [Content] (children snippet)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | neutral layout container | padding, sizing, overflow |
-| Content | yes | arbitrary slotted children | none (caller-owned) |
+| Content | yes | arbitrary child content | none (caller-owned) |
 
 ## 3. Props And Inputs
 

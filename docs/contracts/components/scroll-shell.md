@@ -20,7 +20,7 @@ Updated: 2026-03-15
 [Root .scroll-shell]  <div>
   └── [Viewport .scroll-shell__viewport]  <div>
         └── [Content .scroll-shell__content / .scroll-shell__content--h]
-              └── [Children...] (slot)
+              └── [Children...]
 ```
 
 | Part | Required | Description | Token Targets |
@@ -43,11 +43,11 @@ Updated: 2026-03-15
 | `focusable` | `boolean` | `false` | no | adds viewport to tab order for keyboard scrolling |
 | `onScroll` | `((event: Event) => void) \| null` | `null` | no | called when the viewport scroll position changes |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | scrolled content |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | scrolled content |
 
 ### Controlled And Uncontrolled
 

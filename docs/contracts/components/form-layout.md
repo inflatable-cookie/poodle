@@ -30,10 +30,10 @@ Updated: 2026-03-30
   │     └── [ErrorList]  <ul>
   │           └── [ErrorItem]  <li> per field error
   ├── [Grid .form-layout__grid]  <div>
-  │     └── (slot: default — form fields)
+  │     └── (snippet: children() — form fields)
   └── [Actions .form-layout__actions]  <div> (optional)
         └── [FormActions]  FormActions primitive
-              └── (slot: actions)
+              └── (snippet: actions())
 ```
 
 | Part | Required | Description | Token Targets |
@@ -58,12 +58,12 @@ Updated: 2026-03-30
 | `fieldErrors` | `Record<string, string> \| null` | `null` | no | per-field error map; keys are field names, values are error messages |
 | `description` | `string \| null` | `null` | no | introductory text above the form |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | form fields (placed in the grid; Field `span` prop controls `grid-column: span N`) |
-| `actions` | action buttons (rendered inside FormActions primitive) |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | form fields (placed in the grid; Field `span` prop controls `grid-column: span N`) |
+| `actions()` | action buttons rendered inside FormActions |
 
 ### Grid Column System
 
@@ -100,7 +100,7 @@ forms (e.g. inside a dialog), use `columns={1}`.
 
 ### Component States
 
-No internal state. All visual variation is driven by props and slots.
+No internal state. All visual variation is driven by props and snippets.
 
 ## 5. Events
 
@@ -254,7 +254,7 @@ None.
 - Field `span` prop maps to `grid-column: span N` naturally
 - At 2-col breakpoint, `span 6` fields use `grid-column: 1 / -1` to stay
   full width; all other spans reset to `span 1`
-- `$$slots.actions` used to detect whether the actions slot is populated
+- `actions` snippet presence controls whether FormActions is rendered
 - Callout receives `message` prop (not children/slot)
 
 ## 10. GPUI Notes

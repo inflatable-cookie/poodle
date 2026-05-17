@@ -1,15 +1,25 @@
 <script lang="ts">
-  export let value = 0;
-  export let min = 0;
-  export let max = 100;
-  export let low: number | null = null;
-  export let high: number | null = null;
-  export let optimum: number | null = null;
-  export let ariaLabel: string | null = null;
+  let {
+    value = 0,
+    min = 0,
+    max = 100,
+    low = null,
+    high = null,
+    optimum = null,
+    ariaLabel = null,
+  }: {
+    value?: number;
+    min?: number;
+    max?: number;
+    low?: number | null;
+    high?: number | null;
+    optimum?: number | null;
+    ariaLabel?: string | null;
+  } = $props();
 
-  $: safeMax = max <= min ? min + 1 : max;
-  $: safeValue = Math.min(Math.max(value, min), safeMax);
-  $: percentage = ((safeValue - min) / (safeMax - min)) * 100;
+  const safeMax = $derived(max <= min ? min + 1 : max);
+  const safeValue = $derived(Math.min(Math.max(value, min), safeMax));
+  const percentage = $derived(((safeValue - min) / (safeMax - min)) * 100);
 </script>
 
 <div class="poodle-meter" aria-label={ariaLabel ?? undefined}>

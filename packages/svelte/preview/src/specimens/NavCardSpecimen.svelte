@@ -14,7 +14,7 @@
         description="Learn the basics of the component library."
         onClick={() => (lastClick = "Getting Started")}
       >
-        <svelte:fragment slot="icon"><Icon icon={house} /></svelte:fragment>
+        {#snippet icon()}<Icon icon={house} />{/snippet}
       </NavCard>
       <NavCard
         title="Components"
@@ -22,21 +22,21 @@
         badge="New"
         onClick={() => (lastClick = "Components")}
       >
-        <svelte:fragment slot="icon"><Icon icon={layers} /></svelte:fragment>
+        {#snippet icon()}<Icon icon={layers} />{/snippet}
       </NavCard>
       <NavCard
         title="Tokens"
         description="Design tokens and theming system."
         onClick={() => (lastClick = "Tokens")}
       >
-        <svelte:fragment slot="icon"><Icon icon={slidersHorizontal} /></svelte:fragment>
+        {#snippet icon()}<Icon icon={slidersHorizontal} />{/snippet}
       </NavCard>
       <NavCard
         title="API Reference"
         description="Complete component API documentation."
         disabled
       >
-        <svelte:fragment slot="icon"><Icon icon={fileText} /></svelte:fragment>
+        {#snippet icon()}<Icon icon={fileText} />{/snippet}
       </NavCard>
     </Grid>
   </SpecimenGroup>

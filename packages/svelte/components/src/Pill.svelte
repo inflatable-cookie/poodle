@@ -1,26 +1,45 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import { getPillContext, type PillTypography } from "./pill-context";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
 
-  export let tone: PillTone = "neutral";
-  export let appearance: PillAppearance = "solid";
-  export let size: PillSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let font: PillFont = "normal";
-  export let typography: PillTypography = "label";
-  export let accent: string | null = null;
-  export let muted = false;
-  export let ariaLabel: string | null = null;
+  let {
+    tone = "neutral",
+    appearance = "solid",
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    font = "normal",
+    typography = "label",
+    accent = null,
+    muted = false,
+    ariaLabel = null,
+    children = undefined,
+  }: {
+    tone?: PillTone;
+    appearance?: PillAppearance;
+    size?: PillSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    font?: PillFont;
+    typography?: PillTypography;
+    accent?: string | null;
+    muted?: boolean;
+    ariaLabel?: string | null;
+    children?: Snippet;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
   const pillContext = getPillContext();
 
-  $: resolvedSize = (pillContext?.size ?? size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as PillSize;
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: resolvedTypography = pillContext?.typography ?? typography;
+  const resolvedSize = $derived(
+    (pillContext?.size ?? size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as PillSize,
+  );
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedTypography = $derived(pillContext?.typography ?? typography);
 </script>
 
 <span
@@ -36,7 +55,7 @@
   aria-label={ariaLabel ?? undefined}
   style:--poodle-pill-accent={accent ?? undefined}
 >
-  <slot />
+  {@render children?.()}
 </span>
 
 <style>

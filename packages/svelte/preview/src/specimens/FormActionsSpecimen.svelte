@@ -36,9 +36,9 @@
     <FormActions align="end" {dangerItems}>
       <Button variant="ghost">Back</Button>
       <Button variant="primary">Save changes</Button>
-      <svelte:fragment slot="danger">
+      {#snippet danger()}
         <Button variant="ghost" tone="danger">Discard draft</Button>
-      </svelte:fragment>
+      {/snippet}
     </FormActions>
   </SpecimenGroup>
 </div>

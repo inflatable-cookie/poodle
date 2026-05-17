@@ -10,7 +10,7 @@ Updated: 2026-03-15
 - Summary: a navigational card that links to a destination with icon, title,
   optional badge, description, and directional arrow
 - In scope: link and button rendering, badge display, hover arrow reveal,
-  disabled state, icon slot
+  disabled state, icon snippet
 - Out of scope: card grids (see NavCardGrid), nested navigation, breadcrumb
   integration
 
@@ -18,7 +18,7 @@ Updated: 2026-03-15
 
 ```text
 [Root .nav-card]  <a> or <button>
-  ├── [Icon .nav-card__icon]  (optional, via icon slot)
+  ├── [Icon .nav-card__icon]  (optional, via icon snippet)
   ├── [Content .nav-card__content]  <div>
   │   ├── [Title .nav-card__title]  <span>
   │   │   ├── [Title text]
@@ -51,11 +51,11 @@ Updated: 2026-03-15
 | `ariaLabel` | `string \| null` | `null` | no | accessible name |
 | `onClick` | `((event: MouseEvent) => void) \| null` | `null` | no | called when the card is activated; suppressed while disabled |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| icon | custom icon content for leading indicator |
+| Snippet | Purpose |
+|---------|---------|
+| `icon()` | custom icon content for leading indicator |
 
 ### Controlled And Uncontrolled
 
@@ -112,7 +112,7 @@ Updated: 2026-03-15
 ### Composition
 
 - parent expectations: NavCardGrid, navigation panels, settings pages
-- child expectations: icon via slot
+- child expectations: icon via `icon()` snippet
 - resizing: fills parent width
 
 ## 8. Token Usage — Exact Values
@@ -157,7 +157,7 @@ Updated: 2026-03-15
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
-### Icon slot
+### Icon
 
 | Property | Value |
 |----------|-------|

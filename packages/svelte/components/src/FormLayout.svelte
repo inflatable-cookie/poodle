@@ -1,12 +1,30 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import Callout from "./Callout.svelte";
   import FormActions from "./FormActions.svelte";
 
-  export let columns = 6;
-  export let error: string | null = null;
-  export let success: string | null = null;
-  export let fieldErrors: Record<string, string> | null = null;
-  export let description: string | null = null;
+  interface Props {
+    columns?: number;
+    error?: string | null;
+    success?: string | null;
+    fieldErrors?: Record<string, string> | null;
+    description?: string | null;
+    actions?: Snippet;
+    children?: Snippet;
+  }
+
+  let {
+    columns = 6,
+    error = null,
+    success = null,
+    fieldErrors = null,
+    description = null,
+    actions,
+    children,
+  }: Props = $props();
+
+  const hasFieldErrors = $derived(fieldErrors && Object.keys(fieldErrors).length > 0);
 </script>
 
 <div class="poodle-form-layout">
@@ -22,7 +40,7 @@
     <Callout tone="success" message={success} />
   {/if}
 
-  {#if fieldErrors && Object.keys(fieldErrors).length > 0}
+  {#if hasFieldErrors}
     <div class="poodle-form-layout__field-errors" role="alert" aria-live="polite">
       <p>Please fix the following errors:</p>
       <ul>
@@ -34,13 +52,13 @@
   {/if}
 
   <div class="poodle-form-layout__grid" style:--fl-columns={columns}>
-    <slot />
+    {@render children?.()}
   </div>
 
-  {#if $$slots.actions}
+  {#if actions}
     <div class="poodle-form-layout__actions">
       <FormActions>
-        <slot name="actions" />
+        {@render actions()}
       </FormActions>
     </div>
   {/if}

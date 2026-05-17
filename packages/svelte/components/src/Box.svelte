@@ -1,29 +1,44 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import { joinStyles, overflowValue, scaleToSpace } from "./internal";
 
   import type { OverflowMode, SpaceScale } from "./types";
 
-  export let padding: SpaceScale = "none";
-  export let width: string | null = null;
-  export let height: string | null = null;
-  export let minWidth: string | null = null;
-  export let minHeight: string | null = null;
-  export let overflow: OverflowMode = "visible";
-  export let asRole: string | null = null;
-  export let ariaLabel: string | null = null;
+  let {
+    padding = "none",
+    width = null,
+    height = null,
+    minWidth = null,
+    minHeight = null,
+    overflow = "visible",
+    asRole = null,
+    ariaLabel = null,
+    children = undefined,
+  }: {
+    padding?: SpaceScale;
+    width?: string | null;
+    height?: string | null;
+    minWidth?: string | null;
+    minHeight?: string | null;
+    overflow?: OverflowMode;
+    asRole?: string | null;
+    ariaLabel?: string | null;
+    children?: Snippet;
+  } = $props();
 
-  $: style = joinStyles([
+  const style = $derived(joinStyles([
     `padding: ${scaleToSpace(padding)}`,
     width ? `width: ${width}` : null,
     height ? `height: ${height}` : null,
     minWidth ? `min-width: ${minWidth}` : null,
     minHeight ? `min-height: ${minHeight}` : null,
     `overflow: ${overflowValue(overflow)}`,
-  ]);
+  ]));
 </script>
 
 <div class="poodle-box" role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import {
     alignItemsValue,
     joinStyles,
@@ -8,29 +10,43 @@
 
   import type { LayoutAlign, LayoutJustify, SpaceScale } from "./types";
 
-  export let direction: "column" | "row" = "column";
-  export let gap: SpaceScale = "md";
-  export let align: LayoutAlign = direction === "column" ? "stretch" : "center";
-  export let justify: LayoutJustify = "start";
-  export let wrap = false;
-  export let padding: SpaceScale = "none";
-  export let asRole: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let className = "";
-  export { className as class };
+  let {
+    direction = "column",
+    gap = "md",
+    align = undefined,
+    justify = "start",
+    wrap = false,
+    padding = "none",
+    asRole = null,
+    ariaLabel = null,
+    class: className = "",
+    children = undefined,
+  }: {
+    direction?: "column" | "row";
+    gap?: SpaceScale;
+    align?: LayoutAlign | undefined;
+    justify?: LayoutJustify;
+    wrap?: boolean;
+    padding?: SpaceScale;
+    asRole?: string | null;
+    ariaLabel?: string | null;
+    class?: string;
+    children?: Snippet;
+  } = $props();
 
-  $: style = joinStyles([
+  const resolvedAlign = $derived(align ?? (direction === "column" ? "stretch" : "center"));
+  const style = $derived(joinStyles([
     `flex-direction: ${direction}`,
     `gap: ${scaleToSpace(gap)}`,
     `padding: ${scaleToSpace(padding)}`,
-    `align-items: ${alignItemsValue(align)}`,
+    `align-items: ${alignItemsValue(resolvedAlign)}`,
     `justify-content: ${justifyContentValue(justify)}`,
     `flex-wrap: ${wrap ? "wrap" : "nowrap"}`,
-  ]);
+  ]));
 </script>
 
 <div class={`poodle-stack ${className}`.trim()} role={asRole ?? undefined} aria-label={ariaLabel ?? undefined} style={style}>
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

@@ -1,14 +1,27 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import { joinStyles } from "./internal";
 
   import type { SpaceScale, SurfaceBorder, SurfaceTone } from "./types";
 
-  export let tone: SurfaceTone = "panel";
-  export let border: SurfaceBorder = "subtle";
-  export let padding: SpaceScale = "md";
-  export let elevated = false;
-  export let asRole: "region" | "group" | null = null;
-  export let label: string | null = null;
+  let {
+    tone = "panel",
+    border = "subtle",
+    padding = "md",
+    elevated = false,
+    asRole = null,
+    label = null,
+    children = undefined,
+  }: {
+    tone?: SurfaceTone;
+    border?: SurfaceBorder;
+    padding?: SpaceScale;
+    elevated?: boolean;
+    asRole?: "region" | "group" | null;
+    label?: string | null;
+    children?: Snippet;
+  } = $props();
 
   function surfacePadding(scale: SpaceScale): string {
     switch (scale) {
@@ -19,7 +32,7 @@
     }
   }
 
-  $: style = joinStyles([`padding: ${surfacePadding(padding)}`]);
+  const style = $derived(joinStyles([`padding: ${surfacePadding(padding)}`]));
 </script>
 
 <div
@@ -31,7 +44,7 @@
   aria-label={label ?? undefined}
   style={style}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

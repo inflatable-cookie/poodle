@@ -10,7 +10,7 @@ Updated: 2026-03-30
 - Summary: a titled grouping of related detail rows, supporting a description,
   optional section-level actions, multi-column body layout, and a divider
   posture for visual separation between stacked sections
-- In scope: section heading with optional description, actions slot for
+- In scope: section heading with optional description, actions snippet for
   section-level controls, multi-column body grid (1/2/3 columns), responsive
   collapse to single column on narrow viewports, separated/unseparated visual
   posture, accessible region labeling
@@ -26,9 +26,9 @@ Updated: 2026-03-30
   │     │     ├── [Title .detail-section__title]  <h3> (optional)
   │     │     └── [Description .detail-section__description]  <p> (optional)
   │     └── [Actions .detail-section__actions]  <div> (optional)
-  │           └── (slot: actions)
+  │           └── (snippet: actions())
   └── [Body .detail-section__body]  <div>
-        └── (slot: default)
+        └── (snippet: children())
 ```
 
 | Part | Required | Description | Token Targets |
@@ -53,12 +53,12 @@ Updated: 2026-03-30
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the root `<section>` when no visible title exists |
 | `columns` | `1 \| 2 \| 3` | `1` | no | number of columns for the body grid |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | detail rows or custom body content |
-| `actions` | section-level action buttons rendered in the header |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | detail rows or custom body content |
+| `actions()` | section-level action content rendered in the header |
 
 ### Controlled And Uncontrolled
 
@@ -80,7 +80,7 @@ Updated: 2026-03-30
 
 ### Component States
 
-No internal state. All visual variation is driven by props and slots.
+No internal state. All visual variation is driven by props and snippets.
 
 ## 5. Events
 
@@ -215,13 +215,13 @@ None.
 ## 9. Svelte Notes
 
 - Root element is a `<section>` with scoped CSS class `detail-section`
-- Header is conditionally rendered when `title`, `description`, or `$$slots.actions`
-  is truthy
+- Header is conditionally rendered when `title`, `description`, or `actions`
+  is present
 - Title is an `<h3>` element; description is a `<p>` element
 - Multi-column layout driven by `data-columns` attribute on root
 - Responsive collapse uses a viewport media query (`max-width: 60rem`), not a
   container query
-- `$$slots.actions` used to detect whether the actions slot is populated
+- `actions` snippet presence controls the header action area
 
 ## 10. GPUI Notes
 

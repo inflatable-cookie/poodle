@@ -1,9 +1,25 @@
 <script lang="ts">
-  export let title: string | null = null;
-  export let description: string | null = null;
-  export let separated = true;
-  export let ariaLabel: string | null = null;
-  export let columns: 1 | 2 | 3 = 1;
+  import type { Snippet } from "svelte";
+
+  interface Props {
+    title?: string | null;
+    description?: string | null;
+    separated?: boolean;
+    ariaLabel?: string | null;
+    columns?: 1 | 2 | 3;
+    actions?: Snippet;
+    children?: Snippet;
+  }
+
+  let {
+    title = null,
+    description = null,
+    separated = true,
+    ariaLabel = null,
+    columns = 1,
+    actions,
+    children,
+  }: Props = $props();
 </script>
 
 <section
@@ -12,7 +28,7 @@
   data-columns={columns}
   aria-label={ariaLabel ?? undefined}
 >
-  {#if title || description || $$slots.actions}
+  {#if title || description || actions}
     <div class="poodle-detail-section__header">
       <div class="poodle-detail-section__title-block">
         {#if title}
@@ -22,15 +38,15 @@
           <p class="poodle-detail-section__description">{description}</p>
         {/if}
       </div>
-      {#if $$slots.actions}
+      {#if actions}
         <div class="poodle-detail-section__actions">
-          <slot name="actions" />
+          {@render actions()}
         </div>
       {/if}
     </div>
   {/if}
   <div class="poodle-detail-section__body">
-    <slot />
+    {@render children?.()}
   </div>
 </section>
 

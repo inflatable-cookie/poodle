@@ -2,21 +2,33 @@
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, TableColumn, TableRow } from "./types";
 
-  export let columns: TableColumn[] = [];
-  export let rows: TableRow[] = [];
-  export let caption: string | null = null;
-  export let emptyMessage = "No rows available.";
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  let {
+    columns = [],
+    rows = [],
+    caption = null,
+    emptyMessage = "No rows available.",
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+  }: {
+    columns?: TableColumn[];
+    rows?: TableRow[];
+    caption?: string | null;
+    emptyMessage?: string;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: rowHeaderColumnId =
-    columns.find((column) => column.isRowHeader)?.id ?? columns[0]?.id ?? null;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const rowHeaderColumnId = $derived(
+    columns.find((column) => column.isRowHeader)?.id ?? columns[0]?.id ?? null,
+  );
 </script>
 
 <div class="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>

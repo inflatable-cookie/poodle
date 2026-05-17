@@ -16,13 +16,13 @@ Updated: 2026-03-15
 
 ```text
 [Root .eyebrow]
-  └── [Text content (default slot)]
+  └── [Text content]
 ```
 
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
 | Root | `<span>` | yes | inline element with uppercase label styling |
-| Text content | slot | yes | short label text via default slot |
+| Text content | snippet | yes | short label text via `children()` |
 
 ## 3. Props And Inputs
 
@@ -104,8 +104,8 @@ No internal state.
 
 ## 9. Svelte Notes
 
-- Renders as a simple styled `<p>` element with a default slot
-- No wrapper overhead; the root element is the `<p>` itself
+- Renders as a simple styled `<span>` element with `children()`
+- No wrapper overhead; the root element is the `<span>` itself
 - `margin: 0` resets browser default margins
 
 ## 10. GPUI Notes

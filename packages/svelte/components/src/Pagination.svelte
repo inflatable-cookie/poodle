@@ -1,3 +1,7 @@
+<script module lang="ts">
+  let nextPaginationId = 0;
+</script>
+
 <script lang="ts">
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -19,68 +23,102 @@
     goToPage?: (page: number) => void | Promise<void>;
   }
 
-  export let controller: PaginationControllerLike | null = null;
-  export let currentPage: number | null = null;
-  export let totalPages: number | null = null;
-  export let page: number | null = null;
-  export let limit: number | null = null;
-  export let total: number | null = null;
-  export let siblingCount = 1;
-  export let showLimitSelector = false;
-  export let limitOptions: number[] = [30, 50, 100];
-  export let showInfo = true;
-  export let compact = false;
-  export let variant: "numbered" | "full" | "simple" = "numbered";
-  export let scrollTarget: HTMLElement | string | false = false;
-  export let scrollOffset = 16;
-  export let className = "";
-  export let loading = false;
-  /** When true, renders with container padding, border, and background. */
-  export let chrome = false;
-  /** @deprecated Use chrome instead. */
-  export let standalone: boolean | undefined = undefined;
-  export let ariaLabel: string | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
-  export let onPageChange: ((page: number) => void) | undefined = undefined;
-  export let onLimitChange: ((limit: number) => void) | undefined = undefined;
+  interface Props {
+    controller?: PaginationControllerLike | null;
+    currentPage?: number | null;
+    totalPages?: number | null;
+    page?: number | null;
+    limit?: number | null;
+    total?: number | null;
+    siblingCount?: number;
+    showLimitSelector?: boolean;
+    limitOptions?: number[];
+    showInfo?: boolean;
+    compact?: boolean;
+    variant?: "numbered" | "full" | "simple";
+    scrollTarget?: HTMLElement | string | false;
+    scrollOffset?: number;
+    className?: string;
+    loading?: boolean;
+    chrome?: boolean;
+    standalone?: boolean | undefined;
+    ariaLabel?: string | null;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    onPageChange?: ((page: number) => void) | undefined;
+    onLimitChange?: ((limit: number) => void) | undefined;
+  }
+
+  let {
+    controller = null,
+    currentPage = null,
+    totalPages = null,
+    page = null,
+    limit = null,
+    total = null,
+    siblingCount = 1,
+    showLimitSelector = false,
+    limitOptions = [30, 50, 100],
+    showInfo = true,
+    compact = false,
+    variant = "numbered",
+    scrollTarget = false,
+    scrollOffset = 16,
+    className = "",
+    loading = false,
+    chrome = false,
+    standalone = undefined,
+    ariaLabel = null,
+    sizeRole = "control",
+    size = null,
+    density = null,
+    onPageChange = undefined,
+    onLimitChange = undefined,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const limitSelectId = `poodle-pagination-limit-${++nextPaginationId}`;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: effectiveLimit = controller?.pageSize ?? limit ?? 20;
-  $: effectiveTotal = controller?.total ?? total;
-  $: rawTotalPages =
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const effectiveLimit = $derived(controller?.pageSize ?? limit ?? 20);
+  const effectiveTotal = $derived(controller?.total ?? total);
+  const rawTotalPages = $derived(
     controller?.totalPages ??
-    totalPages ??
-    (effectiveTotal !== null && effectiveLimit > 0
-      ? Math.ceil(effectiveTotal / effectiveLimit)
-      : 1);
-  $: safeTotalPages = Math.max(1, rawTotalPages ?? 1);
-  $: rawCurrentPage = controller?.currentPage ?? page ?? currentPage ?? 1;
-  $: safeCurrentPage = Math.min(Math.max(1, rawCurrentPage), safeTotalPages);
-  $: startItem =
+      totalPages ??
+      (effectiveTotal !== null && effectiveLimit > 0
+        ? Math.ceil(effectiveTotal / effectiveLimit)
+        : 1),
+  );
+  const safeTotalPages = $derived(Math.max(1, rawTotalPages ?? 1));
+  const rawCurrentPage = $derived(controller?.currentPage ?? page ?? currentPage ?? 1);
+  const safeCurrentPage = $derived(Math.min(Math.max(1, rawCurrentPage), safeTotalPages));
+  const startItem = $derived(
     controller?.showingFrom ??
-    ((effectiveTotal ?? 0) === 0 ? 0 : (safeCurrentPage - 1) * effectiveLimit + 1);
-  $: endItem =
+      ((effectiveTotal ?? 0) === 0 ? 0 : (safeCurrentPage - 1) * effectiveLimit + 1),
+  );
+  const endItem = $derived(
     controller?.showingTo ??
-    Math.min(safeCurrentPage * effectiveLimit, effectiveTotal ?? safeCurrentPage * effectiveLimit);
-  $: hasPrevPage = controller?.hasPrevPage ?? safeCurrentPage > 1;
-  $: hasNextPage = controller?.hasNextPage ?? safeCurrentPage < safeTotalPages;
-  $: isLoading = controller?.loading ?? loading;
-  $: supportsGoToPage = typeof controller?.goToPage === "function";
-  $: visiblePages = buildVisiblePages(safeCurrentPage, safeTotalPages, siblingCount);
+      Math.min(safeCurrentPage * effectiveLimit, effectiveTotal ?? safeCurrentPage * effectiveLimit),
+  );
+  const hasPrevPage = $derived(controller?.hasPrevPage ?? safeCurrentPage > 1);
+  const hasNextPage = $derived(controller?.hasNextPage ?? safeCurrentPage < safeTotalPages);
+  const isLoading = $derived(controller?.loading ?? loading);
+  const supportsGoToPage = $derived(typeof controller?.goToPage === "function");
+  const visiblePages = $derived(buildVisiblePages(safeCurrentPage, safeTotalPages, siblingCount));
+  const showRoot = $derived(safeTotalPages > 1 || showLimitSelector);
+  const showInfoSummary = $derived(showInfo && (effectiveTotal ?? 0) > 0);
+  const rootClassName = $derived(`poodle-pagination${className ? ` ${className}` : ""}`);
 
   function buildVisiblePages(
-    page: number,
+    pageValue: number,
     count: number,
-    siblings: number
+    siblings: number,
   ): Array<number | "ellipsis"> {
     const pages = new Set<number>([1, count]);
 
-    for (let candidate = page - siblings; candidate <= page + siblings; candidate += 1) {
+    for (let candidate = pageValue - siblings; candidate <= pageValue + siblings; candidate += 1) {
       if (candidate >= 1 && candidate <= count) {
         pages.add(candidate);
       }
@@ -121,7 +159,7 @@
   }
 
   function scrollIntoView(): void {
-    if (scrollTarget === false) return;
+    if (scrollTarget === false || typeof document === "undefined") return;
 
     let element: HTMLElement | null = null;
 
@@ -186,9 +224,9 @@
   }
 </script>
 
-{#if safeTotalPages > 1 || showLimitSelector}
+{#if showRoot}
   <nav
-    class="poodle-pagination {className}"
+    class={rootClassName}
     class:poodle-pagination--compact={compact}
     class:poodle-pagination--loading={isLoading}
     class:poodle-pagination--chrome={standalone !== undefined ? !standalone : chrome}
@@ -196,7 +234,7 @@
     data-size={resolvedSize}
     data-density={resolvedDensity}
   >
-    {#if showInfo && (effectiveTotal ?? 0) > 0}
+    {#if showInfoSummary}
       <div class="poodle-pagination__info">
         {#if effectiveTotal !== null}
           Showing {startItem} to {endItem} of {effectiveTotal.toLocaleString()}
@@ -209,9 +247,9 @@
     <div class="poodle-pagination__controls-wrapper">
       {#if showLimitSelector && limitOptions.length > 0}
         <div class="poodle-pagination__limit">
-          <label for="pagination-limit">Show</label>
+          <label for={limitSelectId}>Show</label>
           <select
-            id="pagination-limit"
+            id={limitSelectId}
             value={effectiveLimit}
             disabled={isLoading}
             onchange={handleLimitChange}
@@ -284,7 +322,7 @@
             aria-label="Next page"
             onclick={() => handlePageRequest(safeCurrentPage + 1)}
           >
-            {#if variant === "simple"}Next{:else}Next{/if}
+            Next
           </button>
 
           {#if variant === "full" && supportsGoToPage}
@@ -435,13 +473,11 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Size variants */
   .poodle-pagination[data-size="xs"] .poodle-pagination__button { min-width: 1.5rem; height: 1.5rem; font-size: 0.6875rem; }
   .poodle-pagination[data-size="sm"] .poodle-pagination__button { min-width: 1.75rem; height: 1.75rem; }
   .poodle-pagination[data-size="lg"] .poodle-pagination__button { min-width: 2.75rem; height: 2.75rem; font-size: 0.875rem; }
   .poodle-pagination[data-size="xl"] .poodle-pagination__button { min-width: 3.25rem; height: 3.25rem; font-size: 0.9375rem; }
 
-  /* Density variants */
   .poodle-pagination[data-density="compact"] .poodle-pagination__controls,
   .poodle-pagination[data-density="compact"] .poodle-pagination__pages {
     gap: 0.0625rem;

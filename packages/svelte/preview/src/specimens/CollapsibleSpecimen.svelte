@@ -27,6 +27,19 @@
     </Collapsible>
   </SpecimenGroup>
 
+  <SpecimenGroup bare label="Custom trigger">
+    <Collapsible defaultOpen ariaLabel="Toggle custom section">
+      {#snippet trigger({ isOpen })}
+        <div>
+          <strong>Deployment details</strong>
+          <p>{isOpen ? "Expanded" : "Collapsed"} state with custom heading content.</p>
+        </div>
+      {/snippet}
+      <p>Environment: production</p>
+      <p>Region: eu-west-1</p>
+    </Collapsible>
+  </SpecimenGroup>
+
   <svelte:fragment slot="sizes" let:size>
     <Collapsible title="Collapsible at {size}" {size}>
       <p>Content at <strong>{size}</strong> size.</p>

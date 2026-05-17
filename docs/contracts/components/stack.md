@@ -18,13 +18,13 @@ Updated: 2026-03-15
 
 ```text
 [Root .stack]  <div>
-  └── [Content] (slot)
+  └── [Content] (children snippet)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | vertical flex container | gap, padding, alignment |
-| Content | yes | ordered block children | none (caller-owned) |
+| Content | yes | ordered child content | none (caller-owned) |
 
 ## 3. Props And Inputs
 

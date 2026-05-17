@@ -3,18 +3,32 @@
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";
 
-  export let variant: SpinnerVariant = "ring";
-  export let size: SpinnerSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let tone: SpinnerTone = "current";
-  export let ariaLabel: string | null = null;
-  export let className = "";
-  export let style: string | null = null;
+  let {
+    variant = "ring",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    tone = "current",
+    ariaLabel = null,
+    class: className = "",
+    style = null,
+    ...restProps
+  }: {
+    variant?: SpinnerVariant;
+    size?: SpinnerSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    tone?: SpinnerTone;
+    ariaLabel?: string | null;
+    class?: string;
+    style?: string | null;
+  } & Record<string, unknown> = $props();
+
   const uiPresentation = getUiPresentation();
-  $: resolvedSize =
-    (size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as SpinnerSize;
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(
+    (size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as SpinnerSize,
+  );
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   const gridCells = [
     { id: 0, phase: "tl" },
@@ -27,7 +41,7 @@
 </script>
 
 <span
-  {...$$restProps}
+  {...restProps}
   class={`poodle-spinner ${className}`.trim()}
   data-variant={variant}
   data-size={resolvedSize}

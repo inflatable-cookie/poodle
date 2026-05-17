@@ -1,8 +1,9 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   let nextCollapsibleId = 0;
 </script>
 
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 
   import Icon from "./Icon.svelte";
@@ -10,25 +11,58 @@
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let open: boolean | null = null;
-  export let defaultOpen = false;
-  export let title: string | null = null;
-  export let description: string | null = null;
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
+  interface TriggerSnippetProps {
+    isOpen: boolean;
+  }
+
+  interface Props {
+    open?: boolean | null | undefined;
+    defaultOpen?: boolean;
+    title?: string | null;
+    description?: string | null;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+    trigger?: Snippet<[TriggerSnippetProps]>;
+    children?: Snippet;
+  }
+
+  let {
+    open = undefined,
+    defaultOpen = false,
+    title = null,
+    description = null,
+    disabled = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onOpenChange = undefined,
+    trigger,
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
   const collapsibleId = ++nextCollapsibleId;
-  let uncontrolledOpen = defaultOpen;
+  let uncontrolledOpen = $state(false);
+  let seededDefaultOpen = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : uncontrolledOpen;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(open !== undefined);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+
+  $effect.pre(() => {
+    if (seededDefaultOpen) {
+      return;
+    }
+
+    uncontrolledOpen = defaultOpen;
+    seededDefaultOpen = true;
+  });
 
   function setOpen(nextOpen: boolean): void {
     if (!isControlled) {
@@ -51,8 +85,8 @@
     onclick={() => setOpen(!isOpen)}
   >
     <span class="poodle-collapsible__heading">
-      {#if $$slots.trigger}
-        <slot name="trigger" {isOpen} />
+      {#if trigger}
+        {@render trigger({ isOpen })}
       {:else}
         {#if title}
           <span class="poodle-collapsible__title">{title}</span>
@@ -74,7 +108,7 @@
       aria-labelledby={`poodle-collapsible-trigger-${collapsibleId}`}
       transition:slide={{ duration: 180 }}
     >
-      <slot />
+      {@render children?.()}
     </div>
   {/if}
 </section>
@@ -159,7 +193,6 @@
     padding-top: 0.125rem;
   }
 
-  /* Size variants */
   .poodle-collapsible[data-size="xs"] .poodle-collapsible__title {
     font-size: 0.8125rem;
   }
@@ -192,7 +225,6 @@
     font-size: 0.9375rem;
   }
 
-  /* Density variants */
   .poodle-collapsible[data-density="compact"] { padding-inline: 0.5rem; }
   .poodle-collapsible[data-density="comfortable"] { padding-inline: 1rem; }
 </style>

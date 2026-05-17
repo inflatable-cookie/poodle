@@ -1,44 +1,81 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   import Icon from "./Icon.svelte";
   import Spinner from "./Spinner.svelte";
-  import { getUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize } from "./presentation";
+  import {
+    getUiPresentation,
+    resolveSemanticControlSize,
+    resolveSupportingVisualSize,
+  } from "./presentation";
 
   import type { AspectRatio, MediaKind, MediaState } from "./types";
 
-  export let kind: MediaKind = "image";
-  export let state: MediaState = "ready";
-  export let aspectRatio: AspectRatio = "landscape";
-  export let title: string | null = null;
-  export let badge: string | null = null;
-  export let meta: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let stateTitle: string | null = null;
-  export let stateMessage: string | null = null;
-  export let presentation: "default" | "compact" = "default";
-  export let frameWidth: "fill" | "xl" | number | string | null = "fill";
+  interface Props {
+    kind?: MediaKind;
+    state?: MediaState;
+    aspectRatio?: AspectRatio;
+    title?: string | null;
+    badge?: string | null;
+    meta?: string | null;
+    ariaLabel?: string | null;
+    stateTitle?: string | null;
+    stateMessage?: string | null;
+    presentation?: "default" | "compact";
+    frameWidth?: "fill" | "xl" | number | string | null;
+    children?: Snippet;
+  }
+
+  let {
+    kind = "image",
+    state = "ready",
+    aspectRatio = "landscape",
+    title = null,
+    badge = null,
+    meta = null,
+    ariaLabel = null,
+    stateTitle = null,
+    stateMessage = null,
+    presentation = "default",
+    frameWidth = "fill",
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
-  $: resolvedKind = kind === "pdf" || kind === "other" ? "document" : kind;
-  $: rootStyle =
+  const resolvedKind = $derived(kind === "pdf" || kind === "other" ? "document" : kind);
+  const rootStyle = $derived(
     frameWidth === null || frameWidth === undefined || frameWidth === "fill"
       ? "inline-size: 100%;"
       : frameWidth === "xl"
         ? "inline-size: min(100%, 24rem);"
-        : `inline-size: ${typeof frameWidth === "number" ? `${frameWidth}px` : frameWidth};`;
-
-  $: resolvedStateTitle =
+        : `inline-size: ${typeof frameWidth === "number" ? `${frameWidth}px` : frameWidth};`,
+  );
+  const resolvedStateTitle = $derived(
     stateTitle ??
-    (state === "loading"
-      ? "Loading preview"
-      : state === "error"
-        ? "Preview unavailable"
-        : "No preview");
-  $: fallbackIcon =
-    resolvedKind === "audio" ? "music" : resolvedKind === "video" ? "play" : resolvedKind === "document" ? "file-text" : resolvedKind === "embed" ? "external-link" : "image";
-  $: resolvedVisualSize = resolveSemanticControlSize($uiPresentation.sizeScale, "control");
-  $: resolvedSupportingSize = resolveSupportingVisualSize(resolvedVisualSize);
-  $: resolvedSpinnerSize =
-    presentation === "compact" ? resolveSupportingVisualSize(resolvedSupportingSize) : resolvedSupportingSize;
+      (state === "loading"
+        ? "Loading preview"
+        : state === "error"
+          ? "Preview unavailable"
+          : "No preview"),
+  );
+  const fallbackIcon = $derived(
+    resolvedKind === "audio"
+      ? "music"
+      : resolvedKind === "video"
+        ? "play"
+        : resolvedKind === "document"
+          ? "file-text"
+          : resolvedKind === "embed"
+            ? "external-link"
+            : "image",
+  );
+  const resolvedVisualSize = $derived(resolveSemanticControlSize($uiPresentation.sizeScale, "control"));
+  const resolvedSupportingSize = $derived(resolveSupportingVisualSize(resolvedVisualSize));
+  const resolvedSpinnerSize = $derived(
+    presentation === "compact"
+      ? resolveSupportingVisualSize(resolvedSupportingSize)
+      : resolvedSupportingSize,
+  );
 </script>
 
 <figure
@@ -53,8 +90,8 @@
 >
   <div class="poodle-media-thumbnail__frame">
     {#if state === "ready"}
-      {#if $$slots.default}
-        <slot />
+      {#if children}
+        {@render children()}
       {:else}
         <div class="poodle-media-thumbnail__placeholder" aria-hidden="true">
           <Icon name={fallbackIcon} size={resolvedVisualSize} />

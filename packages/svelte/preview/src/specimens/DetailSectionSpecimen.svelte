@@ -16,9 +16,9 @@
 
   <SpecimenGroup label="With actions">
     <DetailSection title="Billing">
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="secondary" size="sm">Edit</Button>
-      </svelte:fragment>
+      {/snippet}
       <DetailItem label="Plan" value="Pro" />
       <DetailItem label="Billing cycle" value="Monthly" />
       <DetailItem label="Next invoice" value="April 1, 2026" />

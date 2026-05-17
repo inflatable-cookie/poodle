@@ -36,9 +36,9 @@
         </DetailSection>
         <Separator />
         <DetailSection title="Configuration">
-          <svelte:fragment slot="actions">
+          {#snippet actions()}
             <Button variant="ghost">Reset</Button>
-          </svelte:fragment>
+          {/snippet}
           <DetailItem label="Theme" value="Dark" />
           <DetailItem label="Density" value="Compact" />
           <DetailItem label="Default size" value="Medium" />

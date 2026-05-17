@@ -25,6 +25,11 @@ region (root)
 | `root` | yes | Dashed placeholder container | border, radius, padding |
 | `label` | yes | Centered uppercase placeholder copy | label color, label typography |
 
+## 3. Composition
+
+Region does not accept child content. It renders only the optional `label`
+inside the placeholder block.
+
 ## 3. Props And Inputs
 
 | Prop | Type | Default | Required | Notes |

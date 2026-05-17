@@ -3,15 +3,23 @@
 
   import type { ParsedEmbed } from "./types";
 
-  export let parsed: ParsedEmbed | null = null;
-  export let aspectRatio: number | "auto" = 16 / 9;
-  export let loading = false;
-  export let error: string | null = null;
-  export let emptyMessage = "No embed to preview";
+  let {
+    parsed = null,
+    aspectRatio = 16 / 9,
+    loading = false,
+    error = null,
+    emptyMessage = "No embed to preview",
+  }: {
+    parsed?: ParsedEmbed | null;
+    aspectRatio?: number | "auto";
+    loading?: boolean;
+    error?: string | null;
+    emptyMessage?: string;
+  } = $props();
 
-  $: embedUrl = parsed ? getEmbedUrl(parsed) : null;
-  $: isAudio = parsed?.provider === "audioboom";
-  $: effectiveAspectRatio = isAudio ? "auto" : aspectRatio;
+  const embedUrl = $derived(parsed ? getEmbedUrl(parsed) : null);
+  const isAudio = $derived(parsed?.provider === "audioboom");
+  const effectiveAspectRatio = $derived(isAudio ? "auto" : aspectRatio);
 
   function getEmbedUrl(embed: ParsedEmbed): string | null {
     switch (embed.provider) {

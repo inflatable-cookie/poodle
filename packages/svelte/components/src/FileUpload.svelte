@@ -1,13 +1,8 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
-
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, FileUploadItem, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
   import {
     DEFAULT_COMPRESSION,
     compressImage,
@@ -18,30 +13,51 @@
     type ImageCompressionOptions,
   } from "./file-upload";
 
-  export let accept: string | null = null;
-  export let maxSize: number = 10 * 1024 * 1024;
-  export let multiple = false;
-  export let maxFiles = 10;
-  export let showPreview = true;
-  export let disabled = false;
-  export let files: FileUploadItem[] = [];
-  export let validate: ((file: File) => string | null) | undefined = undefined;
-  export let compress = false;
-  export let compressionOptions: ImageCompressionOptions = DEFAULT_COMPRESSION;
-  export let onChange: ((files: FileUploadItem[]) => void) | undefined = undefined;
-  export let onUpload: ((files: File[]) => void) | undefined = undefined;
-  export let onError:
-    | ((event: FileUploadValidationError) => void)
-    | undefined = undefined;
-  export let onRemove: ((item: FileUploadItem) => void) | undefined = undefined;
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    accept = null,
+    maxSize = 10 * 1024 * 1024,
+    multiple = false,
+    maxFiles = 10,
+    showPreview = true,
+    disabled = false,
+    files = $bindable([]),
+    validate = undefined,
+    compress = false,
+    compressionOptions = DEFAULT_COMPRESSION,
+    onChange = undefined,
+    onUpload = undefined,
+    onError = undefined,
+    onRemove = undefined,
+  }: {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    accept?: string | null;
+    maxSize?: number;
+    multiple?: boolean;
+    maxFiles?: number;
+    showPreview?: boolean;
+    disabled?: boolean;
+    files?: FileUploadItem[];
+    validate?: ((file: File) => string | null) | undefined;
+    compress?: boolean;
+    compressionOptions?: ImageCompressionOptions;
+    onChange?: ((files: FileUploadItem[]) => void) | undefined;
+    onUpload?: ((files: File[]) => void) | undefined;
+    onError?: ((event: FileUploadValidationError) => void) | undefined;
+    onRemove?: ((item: FileUploadItem) => void) | undefined;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   let inputElement: HTMLInputElement | null = null;
-  let dragActive = false;
+  let dragActive = $state(false);
 
   function createPreviewUrl(file: File): string | null {
     if (!showPreview || !file.type.startsWith("image/")) {
@@ -201,12 +217,14 @@
     }
   }
 
-  onDestroy(() => {
+  $effect(() => {
+    return () => {
     for (const f of files) {
       if (f.previewUrl) {
         URL.revokeObjectURL(f.previewUrl);
       }
     }
+    };
   });
 </script>
 
@@ -217,11 +235,11 @@
     role="button"
     tabindex={disabled ? -1 : 0}
     aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
-    on:drop={handleDrop}
-    on:dragover={handleDragOver}
-    on:dragleave={handleDragLeave}
-    on:click={handleClick}
-    on:keydown={handleKeydown}
+    ondrop={handleDrop}
+    ondragover={handleDragOver}
+    ondragleave={handleDragLeave}
+    onclick={handleClick}
+    onkeydown={handleKeydown}
   >
     <input
       bind:this={inputElement}
@@ -230,7 +248,7 @@
       {multiple}
       {disabled}
       class="poodle-file-upload__input"
-      on:change={handleInputChange}
+      onchange={handleInputChange}
       tabindex="-1"
     />
     <div class="poodle-file-upload__dropzone-content">
@@ -294,7 +312,10 @@
             type="button"
             class="poodle-file-upload__remove"
             aria-label="Remove {item.file.name}"
-            on:click|stopPropagation={() => removeFile(item.id)}
+            onclick={(event) => {
+              event.stopPropagation();
+              removeFile(item.id);
+            }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" />

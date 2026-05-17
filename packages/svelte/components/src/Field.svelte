@@ -1,43 +1,79 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import Icon from "./Icon.svelte";
   import Popover from "./Popover.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
-  export let id: string;
-  export let label: string;
-  /** Description shown in an info popover next to the label. */
-  export let description: string | null = null;
-  /** @deprecated Use `description` instead. Alias kept for backward compatibility. */
-  export let hint: string | null = null;
-  export let error: string | null = null;
-  export let pendingMessage: string | null = null;
-  export let validationState: ValidationState = "none";
-  export let required = false;
-  export let optionalLabel: string | null = null;
-  export let span: number | "full" | null = null;
-  export let gridArea: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface FieldControlProps {
+    describedBy: string | null;
+    descriptionId: null;
+    errorId: string | null;
+    messageId: string | null;
+    validationState: ValidationState;
+  }
+
+  interface Props {
+    id: string;
+    label: string;
+    description?: string | null;
+    hint?: string | null;
+    error?: string | null;
+    pendingMessage?: string | null;
+    validationState?: ValidationState;
+    required?: boolean;
+    optionalLabel?: string | null;
+    span?: number | "full" | null;
+    gridArea?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    control?: Snippet<[FieldControlProps]>;
+    children?: Snippet;
+  }
+
+  let {
+    id,
+    label,
+    description = null,
+    hint = null,
+    error = null,
+    pendingMessage = null,
+    validationState = "none",
+    required = false,
+    optionalLabel = null,
+    span = null,
+    gridArea = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    control,
+    children,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-
-  // Merge hint and description — both render in the same popover
-  $: infoText = description ?? hint;
-
-  $: errorId = error ? `${id}-error` : null;
-  $: pendingId = pendingMessage ? `${id}-pending` : null;
-  $: messageId =
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const infoText = $derived(description ?? hint);
+  const errorId = $derived(error ? `${id}-error` : null);
+  const pendingId = $derived(pendingMessage ? `${id}-pending` : null);
+  const messageId = $derived(
     validationState === "invalid" && errorId
       ? errorId
       : validationState === "pending" && pendingId
         ? pendingId
-        : null;
-  $: describedBy = messageId ?? null;
+        : null,
+  );
+  const describedBy = $derived(messageId ?? null);
+  const fieldStyle = $derived(
+    [
+      span ? (span === "full" ? "grid-column: 1 / -1" : `grid-column: span ${span}`) : "",
+      gridArea ? `grid-area: ${gridArea}` : "",
+    ]
+      .filter(Boolean)
+      .join("; ") || undefined,
+  );
 </script>
 
 <div
@@ -45,10 +81,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-validation-state={validationState}
-  style={[
-    span ? (span === "full" ? "grid-column: 1 / -1" : `grid-column: span ${span}`) : "",
-    gridArea ? `grid-area: ${gridArea}` : "",
-  ].filter(Boolean).join("; ") || undefined}
+  style={fieldStyle}
 >
   <div class="poodle-field__header">
     <div class="poodle-field__label-row">
@@ -77,13 +110,17 @@
   </div>
 
   <div class="poodle-field__control">
-    <slot
-      {describedBy}
-      descriptionId={null}
-      {errorId}
-      {messageId}
-      {validationState}
-    />
+    {#if control}
+      {@render control({
+        describedBy,
+        descriptionId: null,
+        errorId,
+        messageId,
+        validationState,
+      })}
+    {:else}
+      {@render children?.()}
+    {/if}
   </div>
 
   {#if validationState === "invalid" && error}
@@ -156,7 +193,6 @@
     color: var(--poodle-color-status-danger);
   }
 
-  /* Size variants */
   .poodle-field[data-size="xs"] .poodle-field__label-row { font-size: 0.6875rem; }
   .poodle-field[data-size="xs"] .poodle-field__message,
   .poodle-field[data-size="xs"] .poodle-field__optional { font-size: 0.625rem; }
@@ -172,8 +208,6 @@
   .poodle-field[data-size="xl"] .poodle-field__label-row { font-size: 0.9375rem; }
   .poodle-field[data-size="xl"] .poodle-field__message,
   .poodle-field[data-size="xl"] .poodle-field__optional { font-size: 0.875rem; }
-
-  /* ── Info icon ── */
 
   .poodle-field__info-trigger-wrap {
     display: inline-flex;
@@ -204,8 +238,6 @@
     color: var(--poodle-color-text-primary);
   }
 
-  /* ── Info popover content ── */
-
   .poodle-field__info-content {
     margin: 0;
     color: var(--poodle-color-text-primary);
@@ -214,14 +246,12 @@
     line-height: 1.5;
   }
 
-  /* Override Popover's min-width for this compact use case */
   .poodle-field__label-row :global(.poodle-popover__surface) {
     min-width: 10rem;
     max-width: 22rem;
     padding: 0.5rem 0.625rem;
   }
 
-  /* Remove Popover trigger's default focus ring — the icon handles it */
   .poodle-field__label-row :global(.poodle-popover__trigger:focus-visible) {
     outline: none;
   }

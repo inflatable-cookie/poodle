@@ -9,8 +9,8 @@ Updated: 2026-03-30
 - Layer: `foundation`
 - Summary: a labeled field wrapper that owns label, info popover,
   validation message, and error-message relationships around a single
-  form control; it provides accessibility wiring to slotted controls
-  via slot props
+  form control; it provides accessibility wiring to advanced controls
+  via a dedicated snippet
 - In scope: label, required/optional marker, description/hint popover
   via info icon, error text, pending text, size/density scaling,
   control/message relationship wiring via slot props, grid-column span
@@ -31,7 +31,7 @@ Updated: 2026-03-30
   │     │           ├── trigger: [Info Icon .field__info-icon]
   │     │           └── surface: [Info Content .field__info-content] <p>
   │     └── [Optional Marker .field__optional] (conditional)
-  ├── [Control Slot] (default slot, receives describedBy and validation props)
+  ├── [Control Content]
   └── [Validation Message .field__message] (conditional)
         ├── [Error .field__message--error]
         └── [Pending .field__message--pending]
@@ -47,7 +47,7 @@ Updated: 2026-03-30
 | Info Icon | no | small icon button inside label row; scales with label font-size via em units | pill radius, secondary background |
 | Optional Marker | no | text marker when field is not required | body typography, secondary text color |
 | Required Marker | no | visual required indicator | status-danger color |
-| Control Slot | yes | injected input/select/textarea control | inherited from child control |
+| Control Content | yes | injected input/select/textarea control | inherited from child control |
 | Validation Message | no | error or pending copy below the control | body typography, status color |
 
 ## 3. Props And Inputs
@@ -82,11 +82,12 @@ renders inside a Popover triggered by an info icon next to the label. This
 ensures forms align consistently without varying-height help text between
 label and control.
 
-### Slot Contract
+### Composition
 
-| Slot | Purpose | Props Passed |
-|------|---------|-------------|
-| default | exactly one form control | `describedBy`, `descriptionId` (always null), `errorId`, `messageId`, `validationState` |
+| Snippet | Purpose | Props Passed |
+|---------|---------|-------------|
+| `children()` | default field content for simple controls | none |
+| `control(...)` | advanced control content needing field-owned accessibility wiring | `describedBy`, `descriptionId` (always null), `errorId`, `messageId`, `validationState` |
 
 - `describedBy`: computed string for the child control's `aria-describedby`,
   containing the error or pending message id as appropriate

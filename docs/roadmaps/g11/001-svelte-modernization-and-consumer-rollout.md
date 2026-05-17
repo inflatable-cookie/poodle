@@ -516,33 +516,16 @@ residue pass.
 
 - no `createEventDispatcher` files remain in `packages/svelte/components/src`
 - legacy internal structure is still widespread:
-  - `60/124` component files still use `export let`
-  - `48/124` component files still use `$:` reactive labels
-  - `25/124` component files still expose slot-heavy composition surfaces
+- `0/124` component files still use `export let`
+- `0/124` component files still use `$:` reactive labels
+- `0/124` component files still expose slot-heavy composition surfaces
 
 This is now a different tranche from the public-event rollout. The remaining
 work is about internal modernization and composition shape, not event cleanup.
 
 ### Highest Legacy-Structure Hotspots
 
-Top files by combined `export let` + `$:` + slot density:
-
-- `Pagination.svelte`
-- `CommandPalette.svelte`
-- `OrderBy.svelte`
-- `Field.svelte`
-- `EditableLabel.svelte`
-- `MediaThumbnail.svelte`
-- `MediaPicker.svelte`
-
-Top files by slot density:
-
-- `Collapsible.svelte`
-- `Field.svelte`
-- `ActionDiscoveryPanel.svelte`
-- `NavCard.svelte`
-- `DetailSection.svelte`
-- `MediaThumbnail.svelte`
+No legacy-structure hotspots remain in `packages/svelte/components/src`.
 
 ### Next Tranche
 
@@ -550,16 +533,19 @@ If `g11` continues, the next worthwhile batch is not another broad repo sweep.
 It is a focused implementation tranche on the highest-spread core composites
 and shells that still define downstream composition style:
 
-1. remaining operational/data controls:
-   - `Pagination`
-   - `OrderBy`
-   - `MediaThumbnail`
-   - `MediaPicker`
-2. remaining form/layout wrappers:
+1. recently completed in this lane:
+   - `UiPresentationProvider`
+   - `FieldSet`
+   - `MetaBar`
+   - `MetaItem`
+   - `ListCardCounter`
+   - `Region`
+   - `Eyebrow`
+   - `IconProvider`
+   - `Separator`
+   - `Spacer`
    - `Field`
-   - `Collapsible`
-   - `ActionDiscoveryPanel`
-3. already completed in this lane:
+2. already completed in this lane:
    - `Card`
    - `DetailItem`
    - `DetailShell`
@@ -573,6 +559,59 @@ and shells that still define downstream composition style:
    - `DateRangePicker`
    - `DateTimePicker`
    - `DateTimeRangePicker`
+   - `Collapsible`
+   - `ActionDiscoveryPanel`
+   - `Pagination`
+   - `OrderBy`
+   - `MediaThumbnail`
+   - `Skeleton`
+   - `MetricTile`
+   - `PaginationSummary`
+   - `NavCard`
+   - `Toolbar`
+   - `ScrollShell`
+   - `UiPresentationProvider`
+   - `FieldSet`
+   - `MetaBar`
+   - `MediaPicker`
+   - `MediaBrowsePanel`
+   - `EmptyState`
+   - `DetailSection`
+   - `FormLayout`
+   - `EditableLabel`
+   - `Progress`
+   - `VideoPlayer`
+   - `PasswordRequirements`
+   - `MarkdownEditor`
+   - `AudioPlayer`
+   - `FormActions`
+   - `TimeAgo`
+   - `Meter`
+   - `Code`
+   - `Table`
+   - `Breadcrumbs`
+   - `FileUpload`
+   - `EmbedInput`
+   - `MediaUploadStatusPanel`
+   - `Pill`
+   - `StatusIndicator`
+   - `Icon`
+   - `Stack`
+   - `Box`
+   - `DebugDialog`
+   - `PageLoading`
+   - `Spinner`
+   - `ResizeHandle`
+   - `ToastHost`
+   - `ListGrid`
+   - `ToastStack`
+   - `Grid`
+   - `Surface`
+   - `EmbedPreview`
+   - `CollapseToggle`
+   - `SelectionSummary`
+   - `BulkActionBar`
+   - `AudioPlayer`
    - `DateTimeZonePicker`
    - `ColorPicker`
    - `BlockEditor`

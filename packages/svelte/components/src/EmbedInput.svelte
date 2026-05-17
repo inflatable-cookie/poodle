@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
-
   import TextInput from "./TextInput.svelte";
   import Pill from "./Pill.svelte";
 
@@ -8,28 +6,36 @@
   import type { EmbedParseState } from "./embed-input";
   import type { ParsedEmbed } from "./types";
 
-  export let id = "embed-input";
-  export let value = "";
-  export let parsed: ParsedEmbed | null = null;
-  export let placeholder = "Paste a URL or embed code...";
-  export let parseDebounce = 300;
-  export let providers: string[] = [];
-  export let disabled = false;
-  export let error: string | null = null;
-  export let onParse: ((parsed: ParsedEmbed | null, error: string | null) => void) | null = null;
-  export let onValueChange: ((value: string) => void) | null = null;
-  export let resolveParseState:
-    | ((value: string, providers: string[]) => EmbedParseState)
-    | undefined = undefined;
+  let {
+    id = "embed-input",
+    value = $bindable(""),
+    parsed = $bindable<ParsedEmbed | null>(null),
+    placeholder = "Paste a URL or embed code...",
+    parseDebounce = 300,
+    providers = [],
+    disabled = false,
+    error = $bindable<string | null>(null),
+    onParse = null,
+    onValueChange = null,
+    resolveParseState = undefined,
+  }: {
+    id?: string;
+    value?: string;
+    parsed?: ParsedEmbed | null;
+    placeholder?: string;
+    parseDebounce?: number;
+    providers?: string[];
+    disabled?: boolean;
+    error?: string | null;
+    onParse?: ((parsed: ParsedEmbed | null, error: string | null) => void) | null;
+    onValueChange?: ((value: string) => void) | null;
+    resolveParseState?: ((value: string, providers: string[]) => EmbedParseState) | undefined;
+  } = $props();
 
   let parseTimer: ReturnType<typeof setTimeout> | null = null;
-  let uncontrolledValue = value;
-
-  $: hasControlledValue = $$props.value !== undefined;
-  $: currentValue = hasControlledValue ? value : uncontrolledValue;
 
   function doParse(): void {
-    const nextState = (resolveParseState ?? resolveEmbedParseState)(currentValue, providers);
+    const nextState = (resolveParseState ?? resolveEmbedParseState)(value, providers);
     parsed = nextState.parsed;
     error = nextState.error;
 
@@ -37,9 +43,7 @@
   }
 
   function handleValueChange(nextValue: string): void {
-    if (!hasControlledValue) {
-      uncontrolledValue = nextValue;
-    }
+    value = nextValue;
 
     onValueChange?.(nextValue);
 
@@ -50,17 +54,19 @@
     parseTimer = setTimeout(doParse, parseDebounce);
   }
 
-  onDestroy(() => {
-    if (parseTimer) {
-      clearTimeout(parseTimer);
-    }
+  $effect(() => {
+    return () => {
+      if (parseTimer) {
+        clearTimeout(parseTimer);
+      }
+    };
   });
 </script>
 
 <div class="poodle-embed-input">
   <TextInput
     {id}
-    value={currentValue}
+    {value}
     {placeholder}
     disabled={disabled}
     rows={3}

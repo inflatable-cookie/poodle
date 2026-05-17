@@ -3,38 +3,69 @@
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let source = "";
-  export let language: string | null = null;
-  export let showLineNumbers = false;
-  export let highlightLines: number[] = [];
-  export let showCopyButton = true;
-  export let maxHeight: string | null = null;
-  export let inline = false;
-  export let ariaLabel: string | null = null;
-  export let inlineVariant: "default" | "plain" = "default";
-  export let typography: "body" | "inline" = "body";
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
+  let {
+    source = "",
+    language = null,
+    showLineNumbers = false,
+    highlightLines = [],
+    showCopyButton = true,
+    maxHeight = null,
+    inline = false,
+    ariaLabel = null,
+    inlineVariant = "default",
+    typography = "body",
+    sizeRole = "chrome",
+    size = null,
+    density = null,
+  }: {
+    source?: string;
+    language?: string | null;
+    showLineNumbers?: boolean;
+    highlightLines?: number[];
+    showCopyButton?: boolean;
+    maxHeight?: string | null;
+    inline?: boolean;
+    ariaLabel?: string | null;
+    inlineVariant?: "default" | "plain";
+    typography?: "body" | "inline";
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let copied = false;
+  let copied = $state(false);
+  let copyResetTimer: ReturnType<typeof setTimeout> | null = null;
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: lines = source.split("\n");
-  $: highlightSet = new Set(highlightLines);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const lines = $derived(source.split("\n"));
+  const highlightSet = $derived(new Set(highlightLines));
 
   async function copyToClipboard(): Promise<void> {
     try {
       await navigator.clipboard.writeText(source);
+      if (copyResetTimer !== null) {
+        clearTimeout(copyResetTimer);
+      }
       copied = true;
-      setTimeout(() => { copied = false; }, 2000);
+      copyResetTimer = setTimeout(() => {
+        copied = false;
+        copyResetTimer = null;
+      }, 2000);
     } catch {
       // Fallback for browsers without clipboard API
     }
   }
+
+  $effect(() => {
+    return () => {
+      if (copyResetTimer !== null) {
+        clearTimeout(copyResetTimer);
+      }
+    };
+  });
 </script>
 
 {#if inline}
@@ -61,7 +92,7 @@
         type="button"
         class="poodle-code__copy poodle-code__copy--inline"
         aria-label={copied ? "Copied" : "Copy to clipboard"}
-        on:click={copyToClipboard}
+        onclick={copyToClipboard}
       >
         {#if copied}
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -96,7 +127,7 @@
               type="button"
               class="poodle-code__copy"
               aria-label={copied ? "Copied" : "Copy to clipboard"}
-              on:click={copyToClipboard}
+              onclick={copyToClipboard}
             >
               {#if copied}
                 <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">

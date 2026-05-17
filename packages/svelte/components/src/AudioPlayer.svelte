@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -7,29 +6,40 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let src: string;
-  export let ariaLabel = "Audio player";
-  export let showSpeedControl = false;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    src: string;
+    ariaLabel?: string;
+    showSpeedControl?: boolean;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+  }
 
-  let audioEl: HTMLAudioElement | null = null;
-  let isPlaying = false;
-  let currentTime = 0;
-  let duration = 0;
-  let volume = 1;
-  let playbackRate = 1;
-  let isMuted = false;
-  let animFrame: number | null = null;
+  let {
+    src,
+    ariaLabel = "Audio player",
+    showSpeedControl = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+  }: Props = $props();
+
+  let audioEl = $state<HTMLAudioElement | null>(null);
+  let isPlaying = $state(false);
+  let currentTime = $state(0);
+  let duration = $state(0);
+  let volume = $state(1);
+  let playbackRate = $state(1);
+  let isMuted = $state(false);
+  let animFrame = $state<number | null>(null);
   const uiPresentation = getUiPresentation();
 
   const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-  $: formattedCurrent = formatTime(currentTime);
-  $: formattedDuration = formatTime(duration);
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const formattedCurrent = $derived(formatTime(currentTime));
+  const formattedDuration = $derived(formatTime(duration));
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   function formatTime(sec: number): string {
     const m = Math.floor(sec / 60);
@@ -81,41 +91,48 @@
     }
   }
 
-  onMount(() => {
-    if (!audioEl) return;
+  function handlePlay(): void {
+    isPlaying = true;
+    updateTime();
+  }
 
-    audioEl.addEventListener("play", () => {
-      isPlaying = true;
-      updateTime();
-    });
-    audioEl.addEventListener("pause", () => {
-      isPlaying = false;
-      if (animFrame !== null) cancelAnimationFrame(animFrame);
-    });
-    audioEl.addEventListener("ended", () => {
-      isPlaying = false;
-      if (animFrame !== null) cancelAnimationFrame(animFrame);
-    });
-    audioEl.addEventListener("loadedmetadata", () => {
-      duration = audioEl?.duration ?? 0;
-    });
-    audioEl.addEventListener("durationchange", () => {
-      duration = audioEl?.duration ?? 0;
-    });
-  });
-
-  onDestroy(() => {
+  function handlePause(): void {
+    isPlaying = false;
     if (animFrame !== null) cancelAnimationFrame(animFrame);
+  }
+
+  function handleEnded(): void {
+    isPlaying = false;
+    if (animFrame !== null) cancelAnimationFrame(animFrame);
+  }
+
+  function updateDuration(): void {
+    duration = audioEl?.duration ?? 0;
+  }
+
+  $effect(() => {
+    return () => {
+      if (animFrame !== null) cancelAnimationFrame(animFrame);
+    };
   });
 </script>
 
 <div class="poodle-audio-player" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
-  <audio bind:this={audioEl} {src} preload="metadata"></audio>
+  <audio
+    bind:this={audioEl}
+    {src}
+    preload="metadata"
+    onplay={handlePlay}
+    onpause={handlePause}
+    onended={handleEnded}
+    onloadedmetadata={updateDuration}
+    ondurationchange={updateDuration}
+  ></audio>
 
   <button
     type="button"
     class="poodle-audio-player__play"
-    on:click={togglePlay}
+    onclick={togglePlay}
     aria-label={isPlaying ? "Pause" : "Play"}
   >
     {#if isPlaying}
@@ -139,7 +156,7 @@
     max={duration || 0}
     step="0.1"
     value={currentTime}
-    on:input={handleSeek}
+    oninput={handleSeek}
     aria-label="Seek"
   />
 
@@ -148,7 +165,7 @@
   <button
     type="button"
     class="poodle-audio-player__mute"
-    on:click={toggleMute}
+    onclick={toggleMute}
     aria-label={isMuted ? "Unmute" : "Mute"}
   >
     {#if isMuted || volume === 0}
@@ -171,7 +188,7 @@
     max="1"
     step="0.01"
     value={isMuted ? 0 : volume}
-    on:input={handleVolume}
+    oninput={handleVolume}
     aria-label="Volume"
   />
 
@@ -179,7 +196,7 @@
     <select
       class="poodle-audio-player__speed"
       value={playbackRate}
-      on:change={(e) => setSpeed(Number((e.currentTarget as HTMLSelectElement).value))}
+      onchange={(e) => setSpeed(Number((e.currentTarget as HTMLSelectElement).value))}
       aria-label="Playback speed"
     >
       {#each speedOptions as speed}

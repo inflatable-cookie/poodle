@@ -5,40 +5,60 @@
 
   import type { ControlDensity, ControlSize, EditableLabelActivationMode, SemanticControlSizeRole } from "./types";
 
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    value?: string;
+    ariaLabel?: string;
+    disabled?: boolean;
+    activationMode?: EditableLabelActivationMode;
+    selectOnFocus?: boolean;
+    variant?: "default" | "flush";
+    emptyText?: string | null;
+    placeholder?: string | null;
+    maxLength?: number | null;
+    showEditIcon?: boolean;
+    onEditStart?: (() => void) | undefined;
+    onCommit?: ((detail: { value: string; previousValue: string }) => void) | undefined;
+    onCancel?: (() => void) | undefined;
+  }
 
-  export let value: string;
-  export let ariaLabel = "Edit label";
-  export let disabled = false;
-  export let activationMode: EditableLabelActivationMode = "doubleClick";
-  export let selectOnFocus = true;
-  export let variant: "default" | "flush" = "default";
-  export let emptyText: string | null = null;
-  export let placeholder: string | null = null;
-  export let maxLength: number | null = null;
-  export let showEditIcon = false;
-  export let onEditStart: (() => void) | undefined = undefined;
-  export let onCommit:
-    | ((detail: { value: string; previousValue: string }) => void)
-    | undefined = undefined;
-  export let onCancel: (() => void) | undefined = undefined;
+  let {
+    size = null,
+    sizeRole = "control",
+    density = null,
+    value = $bindable(""),
+    ariaLabel = "Edit label",
+    disabled = false,
+    activationMode = "doubleClick",
+    selectOnFocus = true,
+    variant = "default",
+    emptyText = null,
+    placeholder = null,
+    maxLength = null,
+    showEditIcon = false,
+    onEditStart = undefined,
+    onCommit = undefined,
+    onCancel = undefined,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  let isEditing = false;
-  let draftValue = value;
-  let inputElement: HTMLInputElement | null = null;
+  let isEditing = $state(false);
+  let draftValue = $state(value);
+  let inputElement = $state<HTMLInputElement | null>(null);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: if (!isEditing) {
-    draftValue = value;
-  }
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const displayValue = $derived(value || emptyText || "");
+  const isEmpty = $derived(!value && !!emptyText);
 
-  $: displayValue = value || emptyText || "";
-  $: isEmpty = !value && !!emptyText;
+  $effect(() => {
+    if (!isEditing) {
+      draftValue = value;
+    }
+  });
 
   async function startEditing(): Promise<void> {
     if (disabled || activationMode === "programmatic") return;

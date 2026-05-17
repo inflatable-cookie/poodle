@@ -1,7 +1,7 @@
 # MediaThumbnail
 
 Status: contract
-Updated: 2026-03-25
+Updated: 2026-05-15
 
 ## 1. Purpose
 
@@ -78,11 +78,11 @@ type AspectRatio = "square" | "landscape" | "portrait" | "video";
 | `presentation` | `"default" \| "compact"` | `"default"` | no | compact hides caption and state message |
 | `frameWidth` | `"fill" \| "xl" \| number \| string \| null` | `"fill"` | no | explicit frame width; `"fill"` stretches to parent width, `"xl"` applies a preset wide size, number sets px width, string sets arbitrary CSS value, null removes inline width |
 
-## 5. Slots
+## 5. Snippets
 
-| Slot | Purpose | Fallback |
-|------|---------|----------|
-| default | media content inside the frame (image, video element, etc.) | placeholder icon based on `kind` |
+| Snippet | Purpose | Fallback |
+|---------|---------|----------|
+| `children()` | media content inside the frame (image, video element, etc.) | placeholder icon based on `kind` |
 
 ## 6. Events
 

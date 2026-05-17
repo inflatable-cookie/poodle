@@ -18,14 +18,20 @@ validation or submission ownership.
 fieldset (root)
 ├── legend (optional)
 └── fields grid
-    └── slotted field content
+    └── child field content
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | `root` | yes | Native `<fieldset>` wrapper | spacing, layout |
 | `legend` | no | Optional grouping label | label typography, spacing |
-| `fields` | yes | Grid wrapper for slotted content | gap spacing |
+| `fields` | yes | Grid wrapper for child content | gap spacing |
+
+## 3.1 Composition
+
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | Child `Field` components and other grouped form content |
 
 ## 3. Props And Inputs
 

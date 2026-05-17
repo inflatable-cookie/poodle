@@ -12,22 +12,29 @@
    * - A string name resolved from the `IconProvider` icon set, or lazily
    *   auto-imported from `@poodle/icons-lucide`
    */
-  export let icon: IconNodes | string | null = null;
-  /** @deprecated Use `icon` instead. Alias kept for internal convenience. */
-  export let name: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let ariaLabel: string | null = null;
+  let {
+    icon = null,
+    name = null,
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    ariaLabel = null,
+  }: {
+    icon?: IconNodes | string | null;
+    name?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    ariaLabel?: string | null;
+  } = $props();
 
   const iconSet = getIconSet();
-  let nodes: IconNodes = [];
   const uiPresentation = getUiPresentation();
 
-  $: resolvedIcon = icon ?? name;
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: nodes = resolveIconNodes(resolvedIcon, iconSet);
+  const resolvedIcon = $derived(icon ?? name);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const nodes = $derived(resolveIconNodes(resolvedIcon, iconSet));
 </script>
 
 <svg

@@ -6,18 +6,28 @@
 
   import type { ToastItem } from "./types";
 
-  export let items: ToastItem[] = [];
-  export let ariaLabel = "Notifications";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let onDismiss: ((id: string) => void) | undefined = undefined;
-  export let onAction: ((id: string) => void) | undefined = undefined;
+  let {
+    items = [],
+    ariaLabel = "Notifications",
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    onDismiss = undefined,
+    onAction = undefined,
+  }: {
+    items?: ToastItem[];
+    ariaLabel?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onDismiss?: ((id: string) => void) | undefined;
+    onAction?: ((id: string) => void) | undefined;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
 <section class="poodle-toast-stack" aria-label={ariaLabel} aria-live="polite" aria-atomic="false" role="list" data-size={resolvedSize} data-density={resolvedDensity}>

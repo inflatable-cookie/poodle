@@ -54,10 +54,10 @@
       <Field label="Notes" id="fl-notes" span={6}>
         <TextInput id="fl-notes" placeholder="Any additional notes…" rows={3} />
       </Field>
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="ghost">Cancel</Button>
         <Button variant="primary">Create user</Button>
-      </svelte:fragment>
+      {/snippet}
     </FormLayout>
   </SpecimenGroup>
 
@@ -90,10 +90,10 @@
       <Field label="Bio" id="fl-mix-bio" span={6}>
         <TextInput id="fl-mix-bio" placeholder="Tell us about yourself…" rows={3} />
       </Field>
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="ghost">Cancel</Button>
         <Button variant="primary">Save</Button>
-      </svelte:fragment>
+      {/snippet}
     </FormLayout>
   </SpecimenGroup>
 
@@ -106,9 +106,9 @@
         <TextInput id="fl-bio" placeholder="Tell us about yourself…" rows={3} />
       </Field>
       <Checkbox id="fl-agree" label="I agree to the terms" />
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="primary">Save profile</Button>
-      </svelte:fragment>
+      {/snippet}
     </FormLayout>
   </SpecimenGroup>
 
@@ -126,9 +126,9 @@
       <Field label="Role" id="fl-err-role" span={3} validationState="invalid" error="A role is required">
         <Select id="fl-err-role" options={roleOptions} defaultValue="" ariaLabel="Role" />
       </Field>
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="primary">Retry</Button>
-      </svelte:fragment>
+      {/snippet}
     </FormLayout>
   </SpecimenGroup>
 
@@ -137,9 +137,9 @@
       <Field label="Site name" id="fl-site">
         <TextInput id="fl-site" value="My Project" />
       </Field>
-      <svelte:fragment slot="actions">
+      {#snippet actions()}
         <Button variant="primary">Save</Button>
-      </svelte:fragment>
+      {/snippet}
     </FormLayout>
   </SpecimenGroup>
 </div>

@@ -26,7 +26,7 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Slot content">
+  <SpecimenGroup label="Child content">
     <StatusIndicator status="success">Build passing</StatusIndicator>
   </SpecimenGroup>
 

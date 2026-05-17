@@ -1,22 +1,33 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
-
   import type { SplitOrientation } from "./types";
 
-  export let orientation: SplitOrientation = "horizontal";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let ariaValueNow: number | null = null;
-  export let ariaValueMin = 0;
-  export let ariaValueMax = 100;
-  export let onResizeStart: ((position: number) => void) | null = null;
-  export let onResizeMove: ((delta: number) => void) | null = null;
-  export let onResizeEnd: ((position: number) => void) | null = null;
-  export let onResizeStep: ((delta: number) => void) | null = null;
+  let {
+    orientation = "horizontal",
+    disabled = false,
+    ariaLabel = null,
+    ariaValueNow = null,
+    ariaValueMin = 0,
+    ariaValueMax = 100,
+    onResizeStart = null,
+    onResizeMove = null,
+    onResizeEnd = null,
+    onResizeStep = null,
+  }: {
+    orientation?: SplitOrientation;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    ariaValueNow?: number | null;
+    ariaValueMin?: number;
+    ariaValueMax?: number;
+    onResizeStart?: ((position: number) => void) | null;
+    onResizeMove?: ((delta: number) => void) | null;
+    onResizeEnd?: ((position: number) => void) | null;
+    onResizeStep?: ((delta: number) => void) | null;
+  } = $props();
 
-  let isDragging = false;
-  let lastPosition = 0;
-  let isListening = false;
+  let isDragging = $state(false);
+  let lastPosition = $state(0);
+  let isListening = $state(false);
 
   function handlePointerDown(event: MouseEvent): void {
     if (disabled) return;
@@ -77,12 +88,15 @@
     }
   }
 
-  onDestroy(() => {
-    stopListening();
+  $effect(() => {
+    return () => {
+      stopListening();
+    };
   });
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
   class="poodle-resize-handle"
   data-orientation={orientation}
@@ -95,8 +109,8 @@
   aria-valuemin={ariaValueMin}
   aria-valuemax={ariaValueMax}
   tabindex={disabled ? -1 : 0}
-  on:mousedown={handlePointerDown}
-  on:keydown={handleKeydown}
+  onmousedown={handlePointerDown}
+  onkeydown={handleKeydown}
 >
   <span class="poodle-resize-handle__line" aria-hidden="true"></span>
 </div>

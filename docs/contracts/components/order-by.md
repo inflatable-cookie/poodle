@@ -1,7 +1,7 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-15
 
 ## 1. Purpose
 
@@ -138,9 +138,14 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 
 ### Controlled And Uncontrolled
 
-- Sort state is host-owned via `value` (multi-field) or `activeSort` (single-field legacy)
-- `value` takes precedence over `activeSort` when non-empty
-- All mutations call `onChange`; the parent is responsible for updating `value`
+- Controlled multi-field mode: provide `value`; the component mirrors edits
+  through `onChange`
+- Controlled legacy mode: provide `activeSort` without `value`; the component
+  treats it as a one-item sort list and mirrors edits back through `activeSort`
+- Uncontrolled fallback: when neither `value` nor `activeSort` is provided, the
+  component owns its local sort state
+- When both are present, `value` is the source of truth and `activeSort` is
+  mirrored from the first active sort item
 
 ## 4. States
 

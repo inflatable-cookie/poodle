@@ -2,17 +2,28 @@
   import { pxToRem } from "@poodle/svelte-tokens";
   import type { SkeletonShape, SkeletonPreset } from "./types";
 
-  export let shape: SkeletonShape = "line";
-  export let preset: SkeletonPreset | null = null;
-  export let width: string | null = null;
-  export let height: string | null = null;
-  export let lines: number = 3;
-  export let animated = true;
+  let {
+    shape = "line",
+    preset = null,
+    width = null,
+    height = null,
+    lines = 3,
+    animated = true,
+  }: {
+    shape?: SkeletonShape;
+    preset?: SkeletonPreset | null;
+    width?: string | null;
+    height?: string | null;
+    lines?: number;
+    animated?: boolean;
+  } = $props();
 
-  $: resolvedWidth =
-    width ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? "100%" : "100%");
-  $: resolvedHeight =
-    height ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? pxToRem(96) : pxToRem(14));
+  const resolvedWidth = $derived(
+    width ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? "100%" : "100%")
+  );
+  const resolvedHeight = $derived(
+    height ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? pxToRem(96) : pxToRem(14))
+  );
 </script>
 
 {#if preset === "table-row"}

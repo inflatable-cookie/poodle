@@ -1,14 +1,25 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
 
-  export let label: string;
-  export let value: string;
-  export let ariaLabel: string | null = null;
-  export let trend: "up" | "down" | "flat" | null = null;
-  export let trendLabel: string | null = null;
-  export let sparklineData: number[] | null = null;
+  let {
+    label,
+    value,
+    ariaLabel = null,
+    trend = null,
+    trendLabel = null,
+    sparklineData = null,
+  }: {
+    label: string;
+    value: string;
+    ariaLabel?: string | null;
+    trend?: "up" | "down" | "flat" | null;
+    trendLabel?: string | null;
+    sparklineData?: number[] | null;
+  } = $props();
 
-  $: sparklinePath = sparklineData && sparklineData.length > 1 ? buildSparkline(sparklineData) : null;
+  const sparklinePath = $derived(
+    sparklineData && sparklineData.length > 1 ? buildSparkline(sparklineData) : null
+  );
 
   function buildSparkline(data: number[]): string {
     const min = Math.min(...data);

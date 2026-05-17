@@ -11,30 +11,64 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  export let value = "";
-  export let name: string | null = null;
-  export let placeholder = "Write markdown...";
-  export let disabled = false;
-  export let required = false;
-  export let ariaLabel = "Markdown editor";
-  export let minHeight = "12rem";
-  export let mode: "edit" | "preview" | "split" = "edit";
+  interface Props {
+    value?: string | undefined;
+    name?: string | null;
+    placeholder?: string;
+    disabled?: boolean;
+    required?: boolean;
+    ariaLabel?: string;
+    minHeight?: string;
+    mode?: "edit" | "preview" | "split";
+    renderHtml?: ((markdown: string) => string) | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onValueChange?: ((value: string) => void) | null;
+  }
+
+  let {
+    value = undefined,
+    name = null,
+    placeholder = "Write markdown...",
+    disabled = false,
+    required = false,
+    ariaLabel = "Markdown editor",
+    minHeight = "12rem",
+    mode = "edit",
+    renderHtml = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onValueChange = null,
+  }: Props = $props();
+
   /** Custom markdown-to-HTML renderer. When provided, replaces the built-in
    *  fallback. Use this to plug in a real parser (marked, remark, etc.). */
-  export let renderHtml: ((markdown: string) => string) | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onValueChange: ((value: string) => void) | null = null;
-
-  let textareaEl: HTMLTextAreaElement | null = null;
+  let textareaEl = $state<HTMLTextAreaElement | null>(null);
   const uiPresentation = getUiPresentation();
-  let uncontrolledValue = value;
+  let uncontrolledValue = $state("");
+  let currentMode = $state<"edit" | "preview" | "split">("edit");
+  let seededState = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: hasControlledValue = $$props.value !== undefined;
-  $: currentValue = hasControlledValue ? value : uncontrolledValue;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const hasControlledValue = $derived(value !== undefined);
+  const currentValue = $derived(hasControlledValue ? (value ?? "") : uncontrolledValue);
+
+  $effect.pre(() => {
+    if (seededState) {
+      return;
+    }
+
+    uncontrolledValue = value ?? "";
+    currentMode = mode;
+    seededState = true;
+  });
+
+  $effect(() => {
+    currentMode = mode;
+  });
 
   function setValue(nextValue: string): void {
     if (!hasControlledValue) {
@@ -79,7 +113,9 @@
     setValue((event.currentTarget as HTMLTextAreaElement).value);
   }
 
-  $: previewHtml = renderHtml ? renderHtml(currentValue) : marked.parse(currentValue, { async: false }) as string;
+  const previewHtml = $derived(
+    renderHtml ? renderHtml(currentValue) : (marked.parse(currentValue, { async: false }) as string)
+  );
 
   const toolbarActions = [
     { label: "Bold", icon: "bold", action: () => insertMarkdown("**", "**") },
@@ -107,7 +143,7 @@
             class="poodle-md-editor__tool-btn"
             title={tool.label}
             aria-label={tool.label}
-            disabled={disabled || mode === "preview"}
+            disabled={disabled || currentMode === "preview"}
             onclick={tool.action}
           >
             <Icon icon={tool.icon} />
@@ -119,26 +155,26 @@
         <button
           type="button"
           class="poodle-md-editor__mode-btn"
-          class:poodle-active={mode === "edit"}
-          onclick={() => (mode = "edit")}
+          class:poodle-active={currentMode === "edit"}
+          onclick={() => (currentMode = "edit")}
         >Edit</button>
         <button
           type="button"
           class="poodle-md-editor__mode-btn"
-          class:poodle-active={mode === "split"}
-          onclick={() => (mode = "split")}
+          class:poodle-active={currentMode === "split"}
+          onclick={() => (currentMode = "split")}
         >Split</button>
         <button
           type="button"
           class="poodle-md-editor__mode-btn"
-          class:poodle-active={mode === "preview"}
-          onclick={() => (mode = "preview")}
+          class:poodle-active={currentMode === "preview"}
+          onclick={() => (currentMode = "preview")}
         >Preview</button>
       </div>
     </div>
 
-    <div class="poodle-md-editor__body" data-mode={mode}>
-      {#if mode !== "preview"}
+    <div class="poodle-md-editor__body" data-mode={currentMode}>
+      {#if currentMode !== "preview"}
         <textarea
           bind:this={textareaEl}
           class="poodle-md-editor__textarea"
@@ -153,7 +189,7 @@
         ></textarea>
       {/if}
 
-      {#if mode !== "edit"}
+      {#if currentMode !== "edit"}
         <div class="poodle-md-editor__preview" aria-label="Preview">
           {#if currentValue.trim()}
             {@html previewHtml}

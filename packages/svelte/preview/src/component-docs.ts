@@ -159,7 +159,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the box." },
     ],
     slots: [
-      { name: "default", description: "Content rendered inside the box." },
+      { name: "children", description: "Content rendered inside the box." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -484,7 +484,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   collapsible: {
     props: [
-      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
+      { name: "open", type: "boolean | null | undefined", default: "undefined", description: "Open state. When supplied, the host owns updates through onOpenChange." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
       { name: "title", type: "string | null", default: "null", description: "Title displayed in the trigger." },
       { name: "description", type: "string | null", default: "null", description: "Description shown below the title." },
@@ -496,8 +496,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onOpenChange", type: "((open: boolean) => void) | undefined", default: "undefined", description: "Called when the open state changes." },
     ],
     slots: [
-      { name: "trigger", description: "Custom trigger content. Receives slot props: isOpen." },
-      { name: "default", description: "Content revealed when the collapsible is open." },
+      { name: "trigger", description: "Custom trigger snippet. Receives isOpen." },
+      { name: "children", description: "Content snippet revealed when the collapsible is open." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -892,8 +892,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the section region." },
     ],
     slots: [
-      { name: "actions", description: "Action buttons rendered in the section header." },
-      { name: "default", description: "Body content of the section." },
+      { name: "actions", description: "Action snippet rendered in the section header." },
+      { name: "children", description: "Body content snippet for the section." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1120,9 +1120,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "maxLength", type: "number | null", default: "null", description: "Maximum character length for the input." },
       { name: "showEditIcon", type: "boolean", default: "false", description: "Whether to show an edit icon indicator." },
     ],
-    slots: [
-      { name: "default", description: "Custom display content when not in edit mode." },
-    ],
+    slots: [],
     events: [
       { name: "onEditStart", payload: "() => void", description: "Called when edit mode is activated." },
       { name: "onCommit", payload: "(detail: { value: string; previousValue: string }) => void", description: "Called when the edit is committed." },
@@ -1257,8 +1255,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the empty state region." },
     ],
     slots: [
-      { name: "visual", description: "Optional custom visual shown instead of the built-in variant icon." },
-      { name: "actions", description: "Action buttons displayed below the message." },
+      { name: "visual", description: "Optional custom visual snippet shown instead of the built-in variant icon." },
+      { name: "actions", description: "Action snippet displayed below the message." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1267,12 +1265,12 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <EmptyState title="No results found" message="Try adjusting your search or filters." size="compact">
-  <svelte:fragment slot="visual">
+  {#snippet visual()}
     <Search size={16} />
-  </svelte:fragment>
-  <svelte:fragment slot="actions">
+  {/snippet}
+  {#snippet actions()}
     <Button variant="secondary">Clear filters</Button>
-  </svelte:fragment>
+  {/snippet}
 </EmptyState>`,
   },
 
@@ -1281,7 +1279,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the eyebrow element." },
     ],
     slots: [
-      { name: "default", description: "Eyebrow text content." },
+      { name: "children", description: "Snippet for eyebrow text content." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1295,8 +1293,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "id", type: "string", required: true, description: "Unique identifier for the field, used to connect label and input." },
       { name: "label", type: "string", required: true, description: "Label text for the field." },
-      { name: "description", type: "string | null", default: "null", description: "Help text shown below the label (always visible)." },
-      { name: "hint", type: "string | null", default: "null", description: "Progressive-disclosure help text shown in a tooltip when the user hovers/focuses the info icon next to the label." },
+      { name: "description", type: "string | null", default: "null", description: "Help text shown in the field info popover." },
+      { name: "hint", type: "string | null", default: "null", description: "Deprecated alias for description. Also shown in the field info popover." },
       { name: "error", type: "string | null", default: "null", description: "Error message displayed when validation fails." },
       { name: "pendingMessage", type: "string | null", default: "null", description: "Message shown while validation is pending." },
       { name: "validationState", type: "ValidationState", default: '"none"', description: "Current validation state of the field." },
@@ -1306,7 +1304,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "gridArea", type: "string | null", default: "null", description: "CSS grid-area for custom grid placement." },
     ],
     slots: [
-      { name: "default", description: "Field input content. Receives: { describedBy, descriptionId, errorId, messageId, validationState }." },
+      { name: "children", description: "Default field content for simple controls that do not need field-provided accessibility wiring." },
+      { name: "control", description: "Snippet for advanced controls. Receives: { describedBy, descriptionId, errorId, messageId, validationState }." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1333,7 +1332,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "span", type: 'number | "full" | null', default: "null", description: "Column span within a parent form grid layout." },
     ],
     slots: [
-      { name: "default", description: "Child Field components and other form content." },
+      { name: "children", description: "Snippet for child Field components and other form content." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1431,7 +1430,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "dangerItems", type: "FormActionDangerItem[]", default: "[]", description: "Optional overflow actions used when danger content collapses on narrow containers." },
     ],
     slots: [
-      { name: "default", description: "Action buttons (e.g. Submit, Cancel)." },
+      { name: "children", description: "Action buttons (e.g. Submit, Cancel)." },
       { name: "danger", description: "Optional destructive or cancel action content shown inline on wider containers." },
     ],
     events: [],
@@ -1450,9 +1449,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <FormActions align="end" {dangerItems}>
   <Button variant="secondary">Back</Button>
   <Button variant="primary">Save</Button>
-  <svelte:fragment slot="danger">
+  {#snippet danger()}
     <Button variant="ghost" tone="danger">Discard draft</Button>
-  </svelte:fragment>
+  {/snippet}
 </FormActions>`,
   },
 
@@ -1516,8 +1515,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "description", type: "string | null", default: "null", description: "Description text shown above the form fields." },
     ],
     slots: [
-      { name: "default", description: "Form field components." },
-      { name: "actions", description: "Form action buttons." },
+      { name: "children", description: "Form field content snippet." },
+      { name: "actions", description: "Form action snippet rendered inside FormActions." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1532,9 +1531,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   <Field id="last" label="Last Name" required>
     <input id="last" type="text" />
   </Field>
-  <svelte:fragment slot="actions">
+  {#snippet actions()}
     <Button variant="primary">Submit</Button>
-  </svelte:fragment>
+  {/snippet}
 </FormLayout>`,
   },
 
@@ -1548,7 +1547,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the grid." },
     ],
     slots: [
-      { name: "default", description: "Grid item content." },
+      { name: "children", description: "Grid item content." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1634,7 +1633,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "icons", type: "IconSet", required: true, description: "A complete icon set mapping kebab-case names to SVG node arrays. Any icon set in this format works — lucide-static/icon-nodes.json, a Phosphor equivalent, or a custom set. String-based icon lookups resolve from this set first, then fall back to the 35 built-in internal icons." },
     ],
     slots: [
-      { name: "default", description: "Child content. All descendant Icon components will resolve string names from this icon set." },
+      { name: "children", description: "Snippet for child content. All descendant Icon components will resolve string names from this icon set." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -1853,7 +1852,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "media-picker": {
     props: [
-      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state of the picker." },
+      { name: "open", type: "boolean | null | undefined", default: "undefined", description: "Picker visibility. Omit for the internal closed path; when supplied, the host owns updates through onOpenChange." },
       { name: "items", type: "MediaPickerItem[]", default: "[]", description: "Available media items to choose from." },
       { name: "accept", type: "string", default: '"image/*"', description: "Accepted file types for upload." },
       { name: "maxFileSize", type: "number", default: "26214400", description: "Maximum upload file size in bytes (default 25 MB)." },
@@ -1880,7 +1879,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <MediaPicker
-  {open}
+  open={open}
   onOpenChange={(nextOpen) => (open = nextOpen)}
   {items}
   accept="image/*"
@@ -2122,7 +2121,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "showSeparators", type: "boolean", default: "true", description: "Whether to show dot separators between items." },
     ],
     slots: [
-      { name: "default", description: "MetaItem children rendered as separated inline items." },
+      { name: "children", description: "Snippet for MetaItem children rendered as separated inline items." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -2142,7 +2141,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the meta item." },
     ],
     slots: [
-      { name: "default", description: "Value content rendered after the optional label." },
+      { name: "children", description: "Snippet for value content rendered after the optional label." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -2200,7 +2199,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onClick", type: "((event: MouseEvent) => void) | null", default: "null", description: "Called when the card is activated as a button or link." },
     ],
     slots: [
-      { name: "icon", description: "Icon content displayed in the card." },
+      { name: "icon", description: "Snippet for the leading icon content." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -2208,7 +2207,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <NavCard title="Dashboard" description="View your analytics" href="/dashboard" badge="New">
-  <svelte:fragment slot="icon">📊</svelte:fragment>
+  {#snippet icon()}📊{/snippet}
 </NavCard>`,
   },
 
@@ -2535,7 +2534,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
     ],
     slots: [
-      { name: "default", description: "Pill label content." },
+      { name: "children", description: "Pill label content." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -2759,9 +2758,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "color", type: "string | null", default: "null", description: "Border and label color." },
       { name: "minHeight", type: "string", default: '"4rem"', description: "Minimum height of the region block." },
     ],
-    slots: [
-      { name: "default", description: "Content rendered inside the region." },
-    ],
+    slots: [],
     events: [],
     usage: `<script lang="ts">
   import { Region } from "@poodle/svelte";
@@ -2853,7 +2850,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onScroll", type: "((event: Event) => void) | null", default: "null", description: "Called when the viewport scroll position changes." },
     ],
     slots: [
-      { name: "default", description: "Scrollable content." },
+      { name: "children", description: "Snippet for the scrollable content." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -3212,7 +3209,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the stack." },
     ],
     slots: [
-      { name: "default", description: "Child elements laid out in the stack." },
+      { name: "children", description: "Child elements laid out in the stack." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -3256,7 +3253,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the indicator." },
     ],
     slots: [
-      { name: "default", description: "Custom label content when label prop is not provided." },
+      { name: "children", description: "Custom label content when label prop is not provided." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -3278,7 +3275,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "label", type: "string | null", default: "null", description: "Accessible label for the surface." },
     ],
     slots: [
-      { name: "default", description: "Content rendered inside the surface." },
+      { name: "children", description: "Content rendered inside the surface." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -3643,7 +3640,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toolbar." },
     ],
     slots: [
-      { name: "default", description: "Toolbar items (buttons, separators, etc.)." },
+      { name: "children", description: "Snippet for toolbar items (buttons, separators, etc.)." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -3712,7 +3709,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeScale", type: "ControlSize", default: '"md"', description: "Base size scale applied to all descendant components. Supports xs, sm, md, lg, and xl." },
     ],
     slots: [
-      { name: "default", description: "Child content that inherits the presentation settings." },
+      { name: "children", description: "Snippet for child content that inherits the presentation settings." },
     ],
     events: [],
     usage: `<script lang="ts">
@@ -3799,8 +3796,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { ActionDiscoveryPanel } from "@poodle/svelte";
 
   const items = [
-    { id: "copy", label: "Copy", shortcut: "Cmd+C" },
-    { id: "paste", label: "Paste", shortcut: "Cmd+V" },
+    { id: "copy", title: "Copy", shortcut: "Cmd+C" },
+    { id: "paste", title: "Paste", shortcut: "Cmd+V" },
   ];
 </script>
 

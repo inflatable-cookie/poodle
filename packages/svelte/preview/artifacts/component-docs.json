@@ -367,7 +367,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Content rendered inside the box."
       }
     ],
@@ -1223,9 +1223,9 @@
     "props": [
       {
         "name": "open",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled open state."
+        "type": "boolean | null | undefined",
+        "default": "undefined",
+        "description": "Open state. When supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "defaultOpen",
@@ -1285,11 +1285,11 @@
     "slots": [
       {
         "name": "trigger",
-        "description": "Custom trigger content. Receives slot props: isOpen."
+        "description": "Custom trigger snippet. Receives isOpen."
       },
       {
-        "name": "default",
-        "description": "Content revealed when the collapsible is open."
+        "name": "children",
+        "description": "Content snippet revealed when the collapsible is open."
       }
     ],
     "events": [],
@@ -2353,11 +2353,11 @@
     "slots": [
       {
         "name": "actions",
-        "description": "Action buttons rendered in the section header."
+        "description": "Action snippet rendered in the section header."
       },
       {
-        "name": "default",
-        "description": "Body content of the section."
+        "name": "children",
+        "description": "Body content snippet for the section."
       }
     ],
     "events": [],
@@ -2953,12 +2953,7 @@
         "description": "Whether to show an edit icon indicator."
       }
     ],
-    "slots": [
-      {
-        "name": "default",
-        "description": "Custom display content when not in edit mode."
-      }
-    ],
+    "slots": [],
     "events": [
       {
         "name": "onEditStart",
@@ -3320,15 +3315,15 @@
     "slots": [
       {
         "name": "visual",
-        "description": "Optional custom visual shown instead of the built-in variant icon."
+        "description": "Optional custom visual snippet shown instead of the built-in variant icon."
       },
       {
         "name": "actions",
-        "description": "Action buttons displayed below the message."
+        "description": "Action snippet displayed below the message."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { EmptyState } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<EmptyState title=\"No results found\" message=\"Try adjusting your search or filters.\" size=\"compact\">\n  <svelte:fragment slot=\"visual\">\n    <Search size={16} />\n  </svelte:fragment>\n  <svelte:fragment slot=\"actions\">\n    <Button variant=\"secondary\">Clear filters</Button>\n  </svelte:fragment>\n</EmptyState>"
+    "usage": "<script lang=\"ts\">\n  import { EmptyState } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n</script>\n\n<EmptyState title=\"No results found\" message=\"Try adjusting your search or filters.\" size=\"compact\">\n  {#snippet visual()}\n    <Search size={16} />\n  {/snippet}\n  {#snippet actions()}\n    <Button variant=\"secondary\">Clear filters</Button>\n  {/snippet}\n</EmptyState>"
   },
   "eyebrow": {
     "props": [
@@ -3341,8 +3336,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Eyebrow text content."
+        "name": "children",
+        "description": "Snippet for eyebrow text content."
       }
     ],
     "events": [],
@@ -3366,13 +3361,13 @@
         "name": "description",
         "type": "string | null",
         "default": "null",
-        "description": "Help text shown below the label (always visible)."
+        "description": "Help text shown in the field info popover."
       },
       {
         "name": "hint",
         "type": "string | null",
         "default": "null",
-        "description": "Progressive-disclosure help text shown in a tooltip when the user hovers/focuses the info icon next to the label."
+        "description": "Deprecated alias for description. Also shown in the field info popover."
       },
       {
         "name": "error",
@@ -3419,8 +3414,12 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Field input content. Receives: { describedBy, descriptionId, errorId, messageId, validationState }."
+        "name": "children",
+        "description": "Default field content for simple controls that do not need field-provided accessibility wiring."
+      },
+      {
+        "name": "control",
+        "description": "Snippet for advanced controls. Receives: { describedBy, descriptionId, errorId, messageId, validationState }."
       }
     ],
     "events": [],
@@ -3455,8 +3454,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Child Field components and other form content."
+        "name": "children",
+        "description": "Snippet for child Field components and other form content."
       }
     ],
     "events": [],
@@ -3668,7 +3667,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Action buttons (e.g. Submit, Cancel)."
       },
       {
@@ -3677,7 +3676,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FormActions } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n\n  const dangerItems = [\n    {\n      label: \"Discard draft\",\n      onSelect: () => console.log(\"discard\"),\n    },\n  ];\n</script>\n\n<FormActions align=\"end\" {dangerItems}>\n  <Button variant=\"secondary\">Back</Button>\n  <Button variant=\"primary\">Save</Button>\n  <svelte:fragment slot=\"danger\">\n    <Button variant=\"ghost\" tone=\"danger\">Discard draft</Button>\n  </svelte:fragment>\n</FormActions>"
+    "usage": "<script lang=\"ts\">\n  import { FormActions } from \"@poodle/svelte\";\n  import { Button } from \"@poodle/svelte\";\n\n  const dangerItems = [\n    {\n      label: \"Discard draft\",\n      onSelect: () => console.log(\"discard\"),\n    },\n  ];\n</script>\n\n<FormActions align=\"end\" {dangerItems}>\n  <Button variant=\"secondary\">Back</Button>\n  <Button variant=\"primary\">Save</Button>\n  {#snippet danger()}\n    <Button variant=\"ghost\" tone=\"danger\">Discard draft</Button>\n  {/snippet}\n</FormActions>"
   },
   "form-dialog": {
     "props": [
@@ -3840,16 +3839,16 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Form field components."
+        "name": "children",
+        "description": "Form field content snippet."
       },
       {
         "name": "actions",
-        "description": "Form action buttons."
+        "description": "Form action snippet rendered inside FormActions."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { FormLayout } from \"@poodle/svelte\";\n  import { Field, Button } from \"@poodle/svelte\";\n</script>\n\n<FormLayout columns={2} description=\"Enter your details below.\">\n  <Field id=\"first\" label=\"First Name\" required>\n    <input id=\"first\" type=\"text\" />\n  </Field>\n  <Field id=\"last\" label=\"Last Name\" required>\n    <input id=\"last\" type=\"text\" />\n  </Field>\n  <svelte:fragment slot=\"actions\">\n    <Button variant=\"primary\">Submit</Button>\n  </svelte:fragment>\n</FormLayout>"
+    "usage": "<script lang=\"ts\">\n  import { FormLayout } from \"@poodle/svelte\";\n  import { Field, Button } from \"@poodle/svelte\";\n</script>\n\n<FormLayout columns={2} description=\"Enter your details below.\">\n  <Field id=\"first\" label=\"First Name\" required>\n    <input id=\"first\" type=\"text\" />\n  </Field>\n  <Field id=\"last\" label=\"Last Name\" required>\n    <input id=\"last\" type=\"text\" />\n  </Field>\n  {#snippet actions()}\n    <Button variant=\"primary\">Submit</Button>\n  {/snippet}\n</FormLayout>"
   },
   "grid": {
     "props": [
@@ -3892,7 +3891,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Grid item content."
       }
     ],
@@ -4011,8 +4010,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Child content. All descendant Icon components will resolve string names from this icon set."
+        "name": "children",
+        "description": "Snippet for child content. All descendant Icon components will resolve string names from this icon set."
       }
     ],
     "events": [],
@@ -4546,9 +4545,9 @@
     "props": [
       {
         "name": "open",
-        "type": "boolean | null",
-        "default": "null",
-        "description": "Controlled open state of the picker."
+        "type": "boolean | null | undefined",
+        "default": "undefined",
+        "description": "Picker visibility. Omit for the internal closed path; when supplied, the host owns updates through onOpenChange."
       },
       {
         "name": "items",
@@ -4617,7 +4616,7 @@
         "description": "Called when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { MediaPicker } from \"@poodle/svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"1\", label: \"hero.jpg\", thumbnailUrl: \"/images/hero.jpg\", kind: \"image\" },\n    { id: \"2\", label: \"logo.png\", thumbnailUrl: \"/images/logo.png\", kind: \"image\" },\n  ];\n</script>\n\n<MediaPicker\n  {open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  {items}\n  accept=\"image/*\"\n  onSelect={(item) => console.log(item)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MediaPicker } from \"@poodle/svelte\";\n\n  let open = false;\n  const items = [\n    { id: \"1\", label: \"hero.jpg\", thumbnailUrl: \"/images/hero.jpg\", kind: \"image\" },\n    { id: \"2\", label: \"logo.png\", thumbnailUrl: \"/images/logo.png\", kind: \"image\" },\n  ];\n</script>\n\n<MediaPicker\n  open={open}\n  onOpenChange={(nextOpen) => (open = nextOpen)}\n  {items}\n  accept=\"image/*\"\n  onSelect={(item) => console.log(item)}\n/>"
   },
   "media-browse-panel": {
     "props": [
@@ -5136,8 +5135,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "MetaItem children rendered as separated inline items."
+        "name": "children",
+        "description": "Snippet for MetaItem children rendered as separated inline items."
       }
     ],
     "events": [],
@@ -5160,8 +5159,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Value content rendered after the optional label."
+        "name": "children",
+        "description": "Snippet for value content rendered after the optional label."
       }
     ],
     "events": [],
@@ -5307,11 +5306,11 @@
     "slots": [
       {
         "name": "icon",
-        "description": "Icon content displayed in the card."
+        "description": "Snippet for the leading icon content."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  <svelte:fragment slot=\"icon\">📊</svelte:fragment>\n</NavCard>"
+    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  {#snippet icon()}📊{/snippet}\n</NavCard>"
   },
   "number-input": {
     "props": [
@@ -6201,7 +6200,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Pill label content."
       }
     ],
@@ -6749,12 +6748,7 @@
         "description": "Minimum height of the region block."
       }
     ],
-    "slots": [
-      {
-        "name": "default",
-        "description": "Content rendered inside the region."
-      }
-    ],
+    "slots": [],
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { Region } from \"@poodle/svelte\";\n</script>\n\n<Region label=\"Sidebar\" color=\"blue\" minHeight=\"200px\" />"
   },
@@ -6991,8 +6985,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Scrollable content."
+        "name": "children",
+        "description": "Snippet for the scrollable content."
       }
     ],
     "events": [],
@@ -7837,7 +7831,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Child elements laid out in the stack."
       }
     ],
@@ -7919,7 +7913,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Custom label content when label prop is not provided."
       }
     ],
@@ -7967,7 +7961,7 @@
     ],
     "slots": [
       {
-        "name": "default",
+        "name": "children",
         "description": "Content rendered inside the surface."
       }
     ],
@@ -8958,8 +8952,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Toolbar items (buttons, separators, etc.)."
+        "name": "children",
+        "description": "Snippet for toolbar items (buttons, separators, etc.)."
       }
     ],
     "events": [],
@@ -9103,8 +9097,8 @@
     ],
     "slots": [
       {
-        "name": "default",
-        "description": "Child content that inherits the presentation settings."
+        "name": "children",
+        "description": "Snippet for child content that inherits the presentation settings."
       }
     ],
     "events": [],
@@ -9332,7 +9326,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { ActionDiscoveryPanel } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"copy\", label: \"Copy\", shortcut: \"Cmd+C\" },\n    { id: \"paste\", label: \"Paste\", shortcut: \"Cmd+V\" },\n  ];\n</script>\n\n<ActionDiscoveryPanel {items} onItemSelect={(id) => console.log(id)} />"
+    "usage": "<script lang=\"ts\">\n  import { ActionDiscoveryPanel } from \"@poodle/svelte\";\n\n  const items = [\n    { id: \"copy\", title: \"Copy\", shortcut: \"Cmd+C\" },\n    { id: \"paste\", title: \"Paste\", shortcut: \"Cmd+V\" },\n  ];\n</script>\n\n<ActionDiscoveryPanel {items} onItemSelect={(id) => console.log(id)} />"
   },
   "app-header": {
     "props": [
@@ -9426,10 +9420,10 @@
     "slots": [
       {
         "name": "icon",
-        "description": "Icon content displayed in the card."
+        "description": "Snippet for the leading icon content."
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  <svelte:fragment slot=\"icon\">📊</svelte:fragment>\n</NavCard>"
+    "usage": "<script lang=\"ts\">\n  import { NavCard } from \"@poodle/svelte\";\n</script>\n\n<NavCard title=\"Dashboard\" description=\"View your analytics\" href=\"/dashboard\" badge=\"New\">\n  {#snippet icon()}📊{/snippet}\n</NavCard>"
   }
 }

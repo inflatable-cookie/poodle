@@ -5,12 +5,23 @@
 
   type ListCardCounterTypography = "label" | "inherit";
 
-  export let icon: IconProp;
-  export let count: number;
-  export let tooltip: string | null = null;
-  export let href: string | null = null;
-  export let onClick: ((event: MouseEvent) => void) | null = null;
-  export let typography: ListCardCounterTypography = "label";
+  interface Props {
+    icon: IconProp;
+    count: number;
+    tooltip?: string | null;
+    href?: string | null;
+    onClick?: ((event: MouseEvent) => void) | null;
+    typography?: ListCardCounterTypography;
+  }
+
+  let {
+    icon,
+    count,
+    tooltip = null,
+    href = null,
+    onClick = null,
+    typography = "label",
+  }: Props = $props();
 
   function handleClick(e: MouseEvent): void {
     if (href) e.stopPropagation();

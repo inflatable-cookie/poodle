@@ -1,12 +1,15 @@
 <script lang="ts">
-  /** Label displayed centered in the region */
-  export let label: string = "";
+  interface Props {
+    label?: string;
+    color?: string | null;
+    minHeight?: string;
+  }
 
-  /** Custom color for border and label text (any valid CSS color) */
-  export let color: string | null = null;
-
-  /** Minimum height of the region */
-  export let minHeight: string = "4rem";
+  let {
+    label = "",
+    color = null,
+    minHeight = "4rem",
+  }: Props = $props();
 </script>
 
 <div

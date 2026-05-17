@@ -3,13 +3,13 @@
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let value: OrderByValue = [
+  let value = $state<OrderByValue>([
     { key: "updatedAt", direction: "desc" },
     { key: "title", direction: "asc" },
-  ];
+  ]);
 
-  let sizeValue: OrderByValue = [{ key: "title", direction: "asc" }];
-  let densityValue: OrderByValue = [{ key: "title", direction: "asc" }];
+  let sizeValue = $state<OrderByValue>([{ key: "title", direction: "asc" }]);
+  let densityValue = $state<OrderByValue>([{ key: "title", direction: "asc" }]);
 
   const fields: SortField[] = [
     { key: "title", label: "Title" },

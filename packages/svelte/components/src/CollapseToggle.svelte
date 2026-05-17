@@ -4,29 +4,42 @@
 
   import type { CollapseDirection, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let collapsed = false;
-  export let direction: CollapseDirection = "left";
-  export let disabled = false;
-  export let ariaLabel: string | null = null;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let density: ControlDensity | null = null;
-  export let onToggle: ((isCollapsed: boolean) => void) | null = null;
+  interface Props {
+    collapsed?: boolean;
+    direction?: CollapseDirection;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onToggle?: ((isCollapsed: boolean) => void) | null;
+  }
+
+  let {
+    collapsed = false,
+    direction = "left",
+    disabled = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "chrome",
+    density = null,
+    onToggle = null,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: expandDirection = (
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const expandDirection = $derived((
     { left: "right", right: "left", up: "down", down: "up" } as const
-  )[direction];
+  )[direction]);
 
-  $: iconName = (() => {
+  const iconName = $derived.by(() => {
     const dir = collapsed ? expandDirection : direction;
     return `chevron-${dir}` as const;
-  })();
+  });
 
-  $: label = ariaLabel ?? (collapsed ? "Expand" : "Collapse");
+  const label = $derived(ariaLabel ?? (collapsed ? "Expand" : "Collapse"));
 
   function handleClick(): void {
     if (disabled) return;
@@ -44,7 +57,7 @@
   disabled={disabled}
   aria-expanded={!collapsed}
   aria-label={label}
-  on:click={handleClick}
+  onclick={handleClick}
 >
   <Icon name={iconName} size={resolvedSize} />
 </button>

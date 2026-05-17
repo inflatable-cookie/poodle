@@ -1,8 +1,21 @@
 <script lang="ts">
-  export let label: string | null = null;
-  export let ariaLabel: string | null = null;
-  export let typography: "body" | "inherit" = "body";
-  export let separator = true;
+  import type { Snippet } from "svelte";
+
+  interface Props {
+    label?: string | null;
+    ariaLabel?: string | null;
+    typography?: "body" | "inherit";
+    separator?: boolean;
+    children?: Snippet;
+  }
+
+  let {
+    label = null,
+    ariaLabel = null,
+    typography = "body",
+    separator = true,
+    children,
+  }: Props = $props();
 </script>
 
 <span
@@ -15,7 +28,7 @@
     <span class="poodle-meta-item__label">{label}</span>
   {/if}
   <span class="poodle-meta-item__value">
-    <slot />
+    {@render children?.()}
   </span>
 </span>
 

@@ -3,20 +3,37 @@
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let items: Array<{ id: string; label: string }> = [];
-  export let maxVisibleItems = 4;
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onRemove: ((id: string) => void) | null = null;
-  export let onClear: (() => void) | null = null;
+  interface SelectionItem {
+    id: string;
+    label: string;
+  }
+
+  interface Props {
+    items?: SelectionItem[];
+    maxVisibleItems?: number;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onRemove?: ((id: string) => void) | null;
+    onClear?: (() => void) | null;
+  }
+
+  let {
+    items = [],
+    maxVisibleItems = 4,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onRemove = null,
+    onClear = null,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: visibleItems = items.slice(0, maxVisibleItems);
-  $: overflowCount = Math.max(0, items.length - visibleItems.length);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const visibleItems = $derived(items.slice(0, maxVisibleItems));
+  const overflowCount = $derived(Math.max(0, items.length - visibleItems.length));
 </script>
 
 <section class="poodle-selection-summary" aria-label="Current selection" data-size={resolvedSize} data-density={resolvedDensity}>
@@ -28,7 +45,7 @@
         <button
           type="button"
           class="poodle-selection-summary__chip"
-          on:click={() => onRemove?.(item.id)}
+          onclick={() => onRemove?.(item.id)}
           aria-label={`Remove ${item.label}`}
         >
           {item.label}
@@ -38,7 +55,7 @@
       {#if overflowCount > 0}
         <span class="poodle-selection-summary__overflow">+{overflowCount} more</span>
       {/if}
-      <button type="button" class="poodle-selection-summary__clear" on:click={() => onClear?.()}>Clear</button>
+      <button type="button" class="poodle-selection-summary__clear" onclick={() => onClear?.()}>Clear</button>
     {/if}
   </div>
 </section>

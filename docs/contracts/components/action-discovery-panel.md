@@ -51,7 +51,7 @@ type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
                     └── [ListCard]
                           ├── title
                           ├── subtitle  (description)
-                          └── trailing slot
+                          └── trailing snippet content
                                 ├── [Badge]  (optional)
                                 └── [Kbd]    (optional shortcut)
 ```
@@ -131,7 +131,7 @@ response to keyboard events.
 
 - Items grouped by `item.group` field; default group name is `"Commands"`
 - Active item receives accent-tinted background with inset box-shadow
-- Badge and shortcut (kbd) rendered in trailing slot with semantic chip sizing
+- Badge and shortcut (kbd) rendered in trailing snippet content with semantic chip sizing
 - Shortcut uses monospace (`code-family`) typography
 - Skeleton rows during loading: two Skeleton elements per row (48% and 20% width), with density-aware padding
 - Loading remains a Skeleton-based placeholder treatment rather than Spinner, because the panel is reserving result-list layout rather than indicating compact inline activity

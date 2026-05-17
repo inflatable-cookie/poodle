@@ -1,9 +1,17 @@
 <script lang="ts">
   import type { Orientation, SeparatorTone } from "./types";
 
-  export let orientation: Orientation = "horizontal";
-  export let decorative = true;
-  export let tone: SeparatorTone = "subtle";
+  interface Props {
+    orientation?: Orientation;
+    decorative?: boolean;
+    tone?: SeparatorTone;
+  }
+
+  let {
+    orientation = "horizontal",
+    decorative = true,
+    tone = "subtle",
+  }: Props = $props();
 </script>
 
 <div

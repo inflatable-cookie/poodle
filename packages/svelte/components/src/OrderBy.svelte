@@ -16,45 +16,81 @@
     SortField,
   } from "./types";
 
-  export let fields: SortField[] = [];
-  export let value: OrderByValue = [];
-  export let activeSort: ActiveSort | null = null;
-  export let ariaLabel = "Sort by";
-  export let disabled = false;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
-  export let maxFields: number | null = null;
-  export let compact = false;
-  export let showClearButton = true;
-  export let onChange: ((value: OrderByValue) => void) | null = null;
+  interface Props {
+    fields?: SortField[];
+    value?: OrderByValue | undefined;
+    activeSort?: ActiveSort | null | undefined;
+    ariaLabel?: string;
+    disabled?: boolean;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    maxFields?: number | null;
+    compact?: boolean;
+    showClearButton?: boolean;
+    onChange?: ((value: OrderByValue) => void) | null;
+  }
+
+  let {
+    fields = [],
+    value = $bindable<OrderByValue | undefined>(undefined),
+    activeSort = $bindable<ActiveSort | null | undefined>(undefined),
+    ariaLabel = "Sort by",
+    disabled = false,
+    sizeRole = "control",
+    size = null,
+    density = null,
+    maxFields = null,
+    compact = false,
+    showClearButton = true,
+    onChange = null,
+  }: Props = $props();
 
   const uiPresentation = getUiPresentation();
-  let open = false;
-  let addFieldValue = "";
-  let dragIndex: number | null = null;
-  let dragOverIndex: number | null = null;
+  let open = $state(false);
+  let addFieldValue = $state("");
+  let dragIndex = $state<number | null>(null);
+  let dragOverIndex = $state<number | null>(null);
+  let uncontrolledValue = $state<OrderByValue>([]);
+  let seededUncontrolledValue = $state(false);
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  $effect.pre(() => {
+    if (seededUncontrolledValue || value !== undefined || activeSort !== undefined) {
+      seededUncontrolledValue = true;
+      return;
+    }
 
-  $: normalizedFields = fields.map<OrderByFieldDefinition>((field) => ({
-    key: field.key ?? field.value ?? "",
-    label: field.label,
-    disabled: field.disabled,
-    defaultDirection: field.defaultDirection ?? "asc",
-  })).filter((field) => field.key.length > 0);
+    uncontrolledValue = [];
+    seededUncontrolledValue = true;
+  });
 
-  $: fieldMap = new Map(normalizedFields.map((field) => [field.key, field]));
-  $: legacyValue = activeSort ? [{ key: activeSort.field, direction: activeSort.direction }] : [];
-  $: effectiveValue = value.length > 0 ? value : legacyValue;
-  $: canAddMore = maxFields === null || effectiveValue.length < maxFields;
-  $: availableFields = normalizedFields.filter((field) => !effectiveValue.some((item) => item.key === field.key));
-  $: selectItems = availableFields.map((field) => ({ value: field.key, label: field.label }));
-  $: activeSortValue = effectiveValue.length > 0
-    ? { field: effectiveValue[0].key, direction: effectiveValue[0].direction }
-    : null;
-  $: triggerText = summarizeValue(effectiveValue);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const normalizedFields = $derived(
+    fields
+      .map<OrderByFieldDefinition>((field) => ({
+        key: field.key ?? field.value ?? "",
+        label: field.label,
+        disabled: field.disabled,
+        defaultDirection: field.defaultDirection ?? "asc",
+      }))
+      .filter((field) => field.key.length > 0),
+  );
+  const fieldMap = $derived(new Map(normalizedFields.map((field) => [field.key, field])));
+  const legacyValue = $derived(
+    activeSort ? [{ key: activeSort.field, direction: activeSort.direction }] : [],
+  );
+  const hasValueProp = $derived(value !== undefined);
+  const hasLegacyProp = $derived(activeSort !== undefined);
+  const effectiveValue = $derived(
+    hasValueProp ? value ?? [] : hasLegacyProp ? legacyValue : uncontrolledValue,
+  );
+  const canAddMore = $derived(maxFields === null || effectiveValue.length < maxFields);
+  const availableFields = $derived(
+    normalizedFields.filter((field) => !effectiveValue.some((item) => item.key === field.key)),
+  );
+  const selectItems = $derived(availableFields.map((field) => ({ value: field.key, label: field.label })));
+  const triggerText = $derived(summarizeValue(effectiveValue));
 
   function summarizeValue(nextValue: OrderByValue): string {
     if (nextValue.length === 0) {
@@ -75,10 +111,21 @@
   }
 
   function sync(nextValue: OrderByValue): void {
-    value = nextValue;
-    activeSort = nextValue.length > 0
-      ? { field: nextValue[0].key, direction: nextValue[0].direction }
-      : null;
+    if (hasValueProp) {
+      value = nextValue;
+    } else if (hasLegacyProp) {
+      activeSort = nextValue.length > 0
+        ? { field: nextValue[0].key, direction: nextValue[0].direction }
+        : null;
+    } else {
+      uncontrolledValue = nextValue;
+    }
+
+    if (hasValueProp && activeSort !== undefined) {
+      activeSort = nextValue.length > 0
+        ? { field: nextValue[0].key, direction: nextValue[0].direction }
+        : null;
+    }
 
     onChange?.(nextValue);
   }
@@ -100,13 +147,15 @@
   function toggleDirection(index: number): void {
     if (disabled) return;
 
-    sync(effectiveValue.map((item, itemIndex) => {
-      if (itemIndex !== index) return item;
-      return {
-        ...item,
-        direction: item.direction === "asc" ? "desc" : "asc",
-      };
-    }));
+    sync(
+      effectiveValue.map((item, itemIndex) => {
+        if (itemIndex !== index) return item;
+        return {
+          ...item,
+          direction: item.direction === "asc" ? "desc" : "asc",
+        };
+      }),
+    );
   }
 
   function moveField(index: number, offset: -1 | 1): void {
@@ -152,6 +201,21 @@
     if (disabled) return;
     sync([]);
   }
+
+  function handleResetClick(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    clearAll();
+  }
+
+  function handleDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  function handleDropEvent(event: DragEvent, index: number): void {
+    event.preventDefault();
+    handleDrop(index);
+  }
 </script>
 
 <Popover bind:open placement="bottom-start" ariaLabel={ariaLabel} block>
@@ -182,7 +246,7 @@
         <button
           type="button"
           class="poodle-order-by__reset"
-          on:click|stopPropagation|preventDefault={clearAll}
+          onclick={handleResetClick}
           disabled={disabled}
           aria-label="Clear sort"
         >
@@ -215,14 +279,20 @@
               draggable={!disabled}
               disabled={disabled}
               aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
-              on:dragstart={() => handleDragStart(index)}
-              on:dragenter={() => handleDragEnter(index)}
-              on:dragover|preventDefault
-              on:drop|preventDefault={() => handleDrop(index)}
-              on:dragend={clearDragState}
-              on:keydown={(e) => {
-                if (e.altKey && e.key === "ArrowUp" && index > 0) { e.preventDefault(); moveField(index, -1); }
-                if (e.altKey && e.key === "ArrowDown" && index < effectiveValue.length - 1) { e.preventDefault(); moveField(index, 1); }
+              ondragstart={() => handleDragStart(index)}
+              ondragenter={() => handleDragEnter(index)}
+              ondragover={handleDragOver}
+              ondrop={(event) => handleDropEvent(event, index)}
+              ondragend={clearDragState}
+              onkeydown={(event) => {
+                if (event.altKey && event.key === "ArrowUp" && index > 0) {
+                  event.preventDefault();
+                  moveField(index, -1);
+                }
+                if (event.altKey && event.key === "ArrowDown" && index < effectiveValue.length - 1) {
+                  event.preventDefault();
+                  moveField(index, 1);
+                }
               }}
             >
               ⠿
@@ -235,7 +305,7 @@
               size="xs"
               variant="ghost"
               disabled={disabled}
-              on:click={() => toggleDirection(index)}
+              onClick={() => toggleDirection(index)}
             />
             <IconButton
               icon="x"
@@ -244,7 +314,7 @@
               size="xs"
               variant="ghost"
               disabled={disabled}
-              on:click={() => removeField(index)}
+              onClick={() => removeField(index)}
             />
           </div>
         {/each}
@@ -359,7 +429,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
-    /* Tighten popover surface padding */
     margin: calc(-0.5 * var(--poodle-space-panel-y)) calc(-0.5 * var(--poodle-space-panel-x));
     padding: 0.375rem;
   }

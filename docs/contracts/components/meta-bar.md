@@ -20,11 +20,11 @@ Updated: 2026-03-30
 | `ariaLabel` | `string \| null` | `null` |
 | `showSeparators` | `boolean` | `true` |
 
-## 3. Slots
+## 3. Composition
 
-| Slot | Purpose |
-|------|---------|
-| default | Inline metadata items such as `MetaItem`, `Pill`, `Code`, or caller-owned content |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | Inline metadata items such as `MetaItem`, `Pill`, `Code`, or caller-owned content |
 
 ## 4. Behavior
 

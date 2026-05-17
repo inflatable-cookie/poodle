@@ -6,19 +6,26 @@
 
   import type { FormActionAlign, FormActionDangerItem, MenuItem } from "./types";
 
-  export let align: FormActionAlign = "end";
-  export let dangerItems: FormActionDangerItem[] = [];
-  export let children: Snippet | undefined = undefined;
-  export let danger: Snippet | undefined = undefined;
+  let {
+    align = "end",
+    dangerItems = [],
+    children = undefined,
+    danger = undefined,
+  }: {
+    align?: FormActionAlign;
+    dangerItems?: FormActionDangerItem[];
+    children?: Snippet;
+    danger?: Snippet;
+  } = $props();
 
-  $: hasDangerSlot = Boolean(danger);
-  $: hasDangerMenu = dangerItems.length > 0;
-  $: showResponsiveDangerSwap = hasDangerSlot && hasDangerMenu;
-  $: collapsedDangerItems = dangerItems.map<MenuItem>((item, index) => ({
+  const hasDangerSlot = $derived(Boolean(danger));
+  const hasDangerMenu = $derived(dangerItems.length > 0);
+  const showResponsiveDangerSwap = $derived(hasDangerSlot && hasDangerMenu);
+  const collapsedDangerItems = $derived(dangerItems.map<MenuItem>((item, index) => ({
     value: item.value ?? `${index}:${item.label}`,
     label: item.label,
     disabled: item.disabled === true,
-  }));
+  })));
 
   function handleDangerAction(value: string): void {
     const item = dangerItems.find((candidate, index) => (candidate.value ?? `${index}:${candidate.label}`) === value);

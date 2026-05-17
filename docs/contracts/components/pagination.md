@@ -1,7 +1,7 @@
 # Pagination
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-15
 
 ## 1. Purpose
 
@@ -122,12 +122,12 @@ jumps it calls `goToPage()` if available, otherwise falls back to the
 Page state resolves with the following priority (highest first):
 
 1. `controller.currentPage` / `controller.pageSize` / `controller.total` / `controller.totalPages`
-2. Individual props: `page` (or `currentPage`), `limit`, `total`, `totalPages`
+2. Individual props: `page`, `currentPage`, `limit`, `total`, `totalPages`
 3. Computed: `totalPages` = ceil(`total` / `limit`); `currentPage` defaults to 1; `limit` defaults to 20
 
-The `currentPage` prop takes precedence over `page` when both are provided.
-Total pages are clamped to a minimum of 1. Current page is clamped between 1
-and totalPages.
+The `page` prop currently takes precedence over `currentPage` when both are
+provided. Total pages are clamped to a minimum of 1. Current page is clamped
+between 1 and totalPages.
 
 ### Variants
 
@@ -200,6 +200,11 @@ When no controller is present:
 - All limit changes call `onLimitChange(limit)`
 
 After any page or limit change, scroll targeting executes if configured.
+
+### Internal Notes
+
+- The page-size `<select>` receives a per-instance generated id so multiple
+  Pagination controls can coexist without label/id collisions.
 
 ## 6. Accessibility
 

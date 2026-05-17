@@ -19,13 +19,13 @@ Updated: 2026-03-15
 
 ```text
 [Root .surface]  <div>
-  └── [Children...] (slot)
+  └── [Children...] (children snippet)
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | background and boundary container | background fill, border, radius, elevation shadow |
-| Children | no | arbitrary slotted content | caller-owned |
+| Children | no | arbitrary child content | caller-owned |
 
 ## 3. Props And Inputs
 
@@ -40,11 +40,11 @@ Updated: 2026-03-15
 | `asRole` | `"region" \| "group" \| null` | `null` | no | semantic role opt-in |
 | `label` | `string \| null` | `null` | no | accessible label; required when asRole="region" and no visible heading |
 
-### Slots
+### Snippets
 
-| Slot | Purpose |
-|------|---------|
-| default | arbitrary child content |
+| Snippet | Purpose |
+|---------|---------|
+| `children` | arbitrary child content |
 
 ### Controlled And Uncontrolled
 

@@ -3,13 +3,21 @@
 
   type ListGridVariant = "default" | "compact";
 
-  export let variant: ListGridVariant = "default";
-  export let minItemWidth: number | string | null = null;
-  export let gap: number | string | null = null;
-  export let className = "";
-  export { className as class };
-  export let actions: Snippet | undefined = undefined;
-  export let children: Snippet | undefined = undefined;
+  let {
+    variant = "default",
+    minItemWidth = null,
+    gap = null,
+    class: className = "",
+    actions = undefined,
+    children = undefined,
+  }: {
+    variant?: ListGridVariant;
+    minItemWidth?: number | string | null;
+    gap?: number | string | null;
+    class?: string;
+    actions?: Snippet;
+    children?: Snippet;
+  } = $props();
 
   function formatValue(value: number | string | null, defaultUnit: string): string | null {
     if (value == null) return null;
@@ -17,11 +25,13 @@
     return value;
   }
 
-  $: min = formatValue(minItemWidth, "em") ?? "360px";
-  $: gridGap = formatValue(gap, "px") ?? (variant === "compact" ? "0.5rem" : "1.25rem");
-  $: columns = variant === "compact"
-    ? "1fr"
-    : `repeat(auto-fill, minmax(min(${min}, 100%), 1fr))`;
+  const min = $derived(formatValue(minItemWidth, "em") ?? "360px");
+  const gridGap = $derived(formatValue(gap, "px") ?? (variant === "compact" ? "0.5rem" : "1.25rem"));
+  const columns = $derived(
+    variant === "compact"
+      ? "1fr"
+      : `repeat(auto-fill, minmax(min(${min}, 100%), 1fr))`,
+  );
 </script>
 
 <div

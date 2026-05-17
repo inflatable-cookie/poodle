@@ -29,7 +29,9 @@
 
 {#if currentError}
   <EmptyState {title} message={currentError.message}>
-    <Button slot="actions" variant="secondary" onclick={reset}>{retryLabel}</Button>
+    {#snippet actions()}
+      <Button variant="secondary" onclick={reset}>{retryLabel}</Button>
+    {/snippet}
   </EmptyState>
 {:else}
   <svelte:boundary onerror={handleError}>

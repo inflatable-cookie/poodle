@@ -12,21 +12,37 @@
   import MediaThumbnail from "./MediaThumbnail.svelte";
   import type { MediaKind, MediaPickerItem } from "./types";
 
-  export let loading = false;
-  export let error: string | null = null;
-  export let items: MediaPickerItem[] = [];
-  export let hasMore = false;
-  export let emptyMessage = "No media found";
-  export let loadMoreLabel = "Load more";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onSelect: ((item: MediaPickerItem) => void) | undefined = undefined;
-  export let onLoadMore: (() => void) | undefined = undefined;
+  interface Props {
+    loading?: boolean;
+    error?: string | null;
+    items?: MediaPickerItem[];
+    hasMore?: boolean;
+    emptyMessage?: string;
+    loadMoreLabel?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onSelect?: ((item: MediaPickerItem) => void) | undefined;
+    onLoadMore?: (() => void) | undefined;
+  }
+
+  let {
+    loading = false,
+    error = null,
+    items = [],
+    hasMore = false,
+    emptyMessage = "No media found",
+    loadMoreLabel = "Load more",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onSelect = undefined,
+    onLoadMore = undefined,
+  }: Props = $props();
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   function toMediaKind(kind?: MediaKind): MediaKind {
     return kind ?? "image";

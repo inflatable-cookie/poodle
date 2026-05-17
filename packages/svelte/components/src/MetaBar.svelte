@@ -1,8 +1,18 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { setPillContext } from "./pill-context";
 
-  export let ariaLabel: string | null = null;
-  export let showSeparators = true;
+  interface Props {
+    ariaLabel?: string | null;
+    showSeparators?: boolean;
+    children?: Snippet;
+  }
+
+  let {
+    ariaLabel = null,
+    showSeparators = true,
+    children,
+  }: Props = $props();
 
   setPillContext({
     size: "sm",
@@ -15,7 +25,7 @@
   data-separators={showSeparators}
   aria-label={ariaLabel ?? undefined}
 >
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

@@ -15,43 +15,71 @@
   } from "./types";
   import type { MediaPickerItem } from "./types";
 
-  export let open: boolean | null = null;
-  export let items: MediaPickerItem[] = [];
-  export let accept = "image/*";
-  export let maxFileSize: number = 25 * 1024 * 1024;
-  export let title = "Select media";
-  export let emptyMessage = "No media items found.";
-  export let size: ControlSize | null = null;
-  export let sizeRole: SemanticControlSizeRole = "control";
-  export let density: ControlDensity | null = null;
-  export let onSelect: ((item: MediaPickerItem) => void) | undefined = undefined;
-  export let onUpload: ((files: FileUploadItem[]) => void) | undefined = undefined;
-  export let onOpenChange: ((open: boolean) => void) | undefined = undefined;
+  interface Props {
+    open?: boolean | null | undefined;
+    items?: MediaPickerItem[];
+    accept?: string;
+    maxFileSize?: number;
+    title?: string;
+    emptyMessage?: string;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    onSelect?: ((item: MediaPickerItem) => void) | undefined;
+    onUpload?: ((files: FileUploadItem[]) => void) | undefined;
+    onOpenChange?: ((open: boolean) => void) | undefined;
+  }
 
-  let activeTab = "browse";
-  let searchQuery = "";
-  let uploadFiles: FileUploadItem[] = [];
+  let {
+    open = undefined,
+    items = [],
+    accept = "image/*",
+    maxFileSize = 25 * 1024 * 1024,
+    title = "Select media",
+    emptyMessage = "No media items found.",
+    size = null,
+    sizeRole = "control",
+    density = null,
+    onSelect = undefined,
+    onUpload = undefined,
+    onOpenChange = undefined,
+  }: Props = $props();
+
+  let activeTab = $state("browse");
+  let searchQuery = $state("");
+  let uploadFiles = $state<FileUploadItem[]>([]);
+  let uncontrolledOpen = $state(false);
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: isControlled = open !== null;
-  $: isOpen = isControlled ? open === true : false;
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const isControlled = $derived(open !== undefined && open !== null);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
   const tabItems: TabItem[] = [
     { value: "browse", label: "Browse" },
     { value: "upload", label: "Upload" },
   ];
 
-  $: filteredItems = searchQuery
-    ? items.filter((item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : items;
+  const filteredItems = $derived.by(() =>
+    searchQuery
+      ? items.filter((item) =>
+          item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      : items,
+  );
+
+  function requestOpenChange(nextOpen: boolean): void {
+    if (!isControlled) {
+      uncontrolledOpen = nextOpen;
+    }
+
+    onOpenChange?.(nextOpen);
+  }
 
   function handleSelect(item: MediaPickerItem): void {
     onSelect?.(item);
-    onOpenChange?.(false);
+    requestOpenChange(false);
   }
 
   function handleUploadChange(nextFiles: FileUploadItem[]): void {
@@ -64,7 +92,7 @@
   open={isOpen}
   {title}
   kind="dialog"
-  onOpenChange={onOpenChange}
+  onOpenChange={requestOpenChange}
 >
   <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
     <div class="poodle-media-picker" data-size={resolvedSize} data-density={resolvedDensity}>

@@ -4,23 +4,35 @@
 
   import type { BreadcrumbItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  export let items: BreadcrumbItem[] = [];
-  export let ariaLabel = "Breadcrumb";
-  export let maxVisibleItems: number | null = null;
-  export let forceLastItemCurrent = true;
-  export let sizeRole: SemanticControlSizeRole = "chrome";
-  export let size: ControlSize | null = null;
-  export let density: ControlDensity | null = null;
-  export let onNavigate: ((value: string) => void) | undefined = undefined;
+  let {
+    items = [],
+    ariaLabel = "Breadcrumb",
+    maxVisibleItems = null,
+    forceLastItemCurrent = true,
+    sizeRole = "chrome",
+    size = null,
+    density = null,
+    onNavigate = undefined,
+  }: {
+    items?: BreadcrumbItem[];
+    ariaLabel?: string;
+    maxVisibleItems?: number | null;
+    forceLastItemCurrent?: boolean;
+    sizeRole?: SemanticControlSizeRole;
+    size?: ControlSize | null;
+    density?: ControlDensity | null;
+    onNavigate?: ((value: string) => void) | undefined;
+  } = $props();
 
   const uiPresentation = getUiPresentation();
 
-  $: resolvedSize = size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole);
-  $: resolvedDensity = density ?? $uiPresentation.density;
-  $: visibleItems =
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const visibleItems = $derived(
     maxVisibleItems !== null && items.length > maxVisibleItems
       ? [items[0], { value: "__ellipsis__", label: "…", current: false }, ...items.slice(items.length - (maxVisibleItems - 1))]
-      : items;
+      : items,
+  );
 
   function handleNavigate(item: BreadcrumbItem): void {
     if (item.current || item.value === "__ellipsis__") {

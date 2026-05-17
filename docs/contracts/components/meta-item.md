@@ -20,11 +20,11 @@ Updated: 2026-03-30
 | `ariaLabel` | `string \| null` | `null` |
 | `typography` | `"body" \| "inherit"` | `"body"` |
 
-## 3. Slots
+## 3. Composition
 
-| Slot | Purpose |
-|------|---------|
-| default | Value content such as plain text, `Code`, `Pill`, timestamp displays, or links |
+| Snippet | Purpose |
+|---------|---------|
+| `children()` | Value content such as plain text, `Code`, `Pill`, timestamp displays, or links |
 
 ## 4. Behavior
 

@@ -1,23 +1,37 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { joinStyles, overflowForDirection, scaleToSpace } from "./internal";
 
   import type { ScrollDirection, SpaceScale } from "./types";
 
-  export let direction: ScrollDirection = "vertical";
-  export let padding: Extract<SpaceScale, "none" | "sm" | "md"> = "none";
-  export let asRole: "region" | "group" | null = null;
-  export let label: string | null = null;
-  export let focusable = false;
-  export let onScroll: ((event: Event) => void) | null = null;
+  interface Props {
+    direction?: ScrollDirection;
+    padding?: Extract<SpaceScale, "none" | "sm" | "md">;
+    asRole?: "region" | "group" | null;
+    label?: string | null;
+    focusable?: boolean;
+    onScroll?: ((event: Event) => void) | null;
+    children?: Snippet;
+  }
 
-  $: needsHorizontal = direction === "horizontal" || direction === "both";
+  let {
+    direction = "vertical",
+    padding = "none",
+    asRole = null,
+    label = null,
+    focusable = false,
+    onScroll = null,
+    children,
+  }: Props = $props();
 
-  $: viewportStyle = joinStyles([
+  const needsHorizontal = $derived(direction === "horizontal" || direction === "both");
+
+  const viewportStyle = $derived(joinStyles([
     overflowForDirection(direction),
     `padding: ${scaleToSpace(padding)}`,
     "min-width: 0",
     "min-height: 0",
-  ]);
+  ]));
 </script>
 
 <div class="poodle-scroll-shell">
@@ -29,10 +43,10 @@
     role={asRole ?? (focusable ? "region" : undefined)}
     aria-label={label ?? (focusable ? "Scrollable content" : undefined)}
     style={viewportStyle}
-    on:scroll={(event) => onScroll?.(event)}
+    onscroll={(event) => onScroll?.(event)}
   >
     <div class="poodle-scroll-shell__content" class:poodle-scroll-shell__content--h={needsHorizontal}>
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 </div>
