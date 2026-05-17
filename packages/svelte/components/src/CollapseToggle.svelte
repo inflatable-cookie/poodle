@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { CollapseDirection, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

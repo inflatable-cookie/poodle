@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Button from "./Button.svelte";
-  import Callout from "./Callout.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Callout } from "./Callout.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -9,7 +9,7 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  import MediaThumbnail from "./MediaThumbnail.svelte";
+  import { default as MediaThumbnail } from "./MediaThumbnail.svelte";
   import type { MediaKind, MediaPickerItem } from "./types";
 
   interface Props {

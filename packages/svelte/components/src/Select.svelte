@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, type Snippet } from "svelte";
 
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -86,6 +86,7 @@
   const generatedSelectId = `poodle-select-${crypto.randomUUID()}`;
   const uiPresentation = getUiPresentation();
   let rootElement: HTMLDivElement | null = $state(null);
+  let inputElement: HTMLInputElement | null = $state(null);
   let open = $state(false);
   let query = $state("");
   let highlightIndex = $state(0);
@@ -95,12 +96,16 @@
   let loadState: "idle" | "loading" | "loaded" | "error" = $state("idle");
   let loadError: string | null = $state(null);
   let lastLoadKey: string | null = $state(null);
+  let uncontrolledValue = $state("");
+  let uncontrolledValueSeeded = $state(false);
 
   const selectId = $derived(id ?? generatedSelectId);
   const listboxId = $derived(`${selectId}-listbox`);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const currentValue = $derived((value ?? defaultValue) ?? "");
+  const currentValue = $derived(
+    value !== undefined ? (value ?? "") : uncontrolledValue
+  );
   const useCustom = $derived(
     native === true ? false : native === false ? true : searchable || Boolean(optionSnippet) || Boolean(triggerSnippet)
   );
@@ -113,6 +118,7 @@
   const hasCurrentOption = $derived(flatOptions.some((entry) => entry.value === currentValue));
   const hasSelection = $derived(currentValue !== "" && currentValue !== clearValue);
   const isGrouped = $derived(normalizedOptions.length > 0 && "options" in normalizedOptions[0]);
+  const normalizedGroups = $derived(isGrouped ? (normalizedOptions as SelectOptionGroup[]) : []);
   const selectedOption = $derived(flatOptions.find((entry) => entry.value === currentValue) ?? null);
   const filteredOptions = $derived(
     searchable && query.length > 0
@@ -122,6 +128,7 @@
   const filteredGroups = $derived(
     searchable && query.length > 0 ? filterGroups(normalizedOptions, query) : normalizedOptions
   );
+  const visibleGroups = $derived(isGrouped ? (filteredGroups as SelectOptionGroup[]) : []);
   const highlightedOptionId = $derived(
     open && filteredOptions.length > 0 && highlightIndex >= 0
       ? `${listboxId}-option-${highlightIndex}`
@@ -184,6 +191,8 @@
   function commitValue(nextValue: string): void {
     if (value !== undefined) {
       value = nextValue;
+    } else {
+      uncontrolledValue = nextValue;
     }
     onValueChange?.(nextValue);
   }
@@ -224,6 +233,13 @@
   function handleTriggerClick(): void {
     if (disabled) return;
     setOpen(!open);
+  }
+
+  function handleSearchableIndicatorClick(event: MouseEvent): void {
+    event.stopPropagation();
+    if (disabled) return;
+    setOpen(!open);
+    inputElement?.focus();
   }
 
   function handleInputInput(event: Event): void {
@@ -276,6 +292,13 @@
     query = "";
     commitValue(clearValue);
   }
+
+  $effect(() => {
+    if (!uncontrolledValueSeeded) {
+      uncontrolledValue = defaultValue ?? "";
+      uncontrolledValueSeeded = true;
+    }
+  });
 
   $effect(() => {
     if (!open && !freeform) {
@@ -347,6 +370,7 @@
       <div
         class="poodle-select__trigger-area"
         role="combobox"
+        tabindex="-1"
         aria-expanded={open ? "true" : "false"}
         aria-haspopup="listbox"
         aria-controls={open ? listboxId : undefined}
@@ -354,6 +378,7 @@
       >
         <input
           id={selectId}
+          bind:this={inputElement}
           class="poodle-select__input"
           type="text"
           value={query}
@@ -376,9 +401,14 @@
             <Icon name="x" size="xs" />
           </button>
         {/if}
-        <span class="poodle-select__indicator" aria-hidden="true">
+        <button
+          type="button"
+          class="poodle-select__indicator-button"
+          aria-label={open ? "Close options" : "Open options"}
+          onclick={handleSearchableIndicatorClick}
+        >
           <Icon name="chevron-down" />
-        </span>
+        </button>
       </div>
     {:else}
       <!-- Non-searchable: button trigger -->
@@ -417,9 +447,14 @@
           </button>
         {/if}
         {#if variant !== "ghost"}
-          <span class="poodle-select__indicator" aria-hidden="true">
+          <button
+            type="button"
+            class="poodle-select__indicator-button"
+            aria-label={open ? "Close options" : "Open options"}
+            onclick={handleTriggerClick}
+          >
             <Icon name="chevron-down" />
-          </span>
+          </button>
         {/if}
       </div>
     {/if}
@@ -442,14 +477,13 @@
         style={menuMinWidth ? `min-width: ${menuMinWidth}` : undefined}
       >
         {#if isGrouped && !searchable}
-          {#each normalizedOptions as group}
-            {@const g = group as SelectOptionGroup}
-            {#if g.options.length > 0}
-              <div class="poodle-select__group" role="group" aria-label={g.label || undefined}>
-                {#if g.label}
-                  <div class="poodle-select__group-label">{g.label}</div>
+          {#each normalizedGroups as group}
+            {#if group.options.length > 0}
+              <div class="poodle-select__group" role="group" aria-label={group.label || undefined}>
+                {#if group.label}
+                  <div class="poodle-select__group-label">{group.label}</div>
                 {/if}
-                {#each g.options as option, idx}
+                {#each group.options as option, idx}
                   {@const flatIdx = flatOptions.indexOf(option)}
                   <button
                     type="button"
@@ -490,14 +524,13 @@
             {/if}
           {/each}
         {:else if isGrouped && searchable}
-          {#each filteredGroups as group}
-            {@const g = group as SelectOptionGroup}
-            {#if g.options.length > 0}
-              <div class="poodle-select__group" role="group" aria-label={g.label || undefined}>
-                {#if g.label}
-                  <div class="poodle-select__group-label">{g.label}</div>
+          {#each visibleGroups as group}
+            {#if group.options.length > 0}
+              <div class="poodle-select__group" role="group" aria-label={group.label || undefined}>
+                {#if group.label}
+                  <div class="poodle-select__group-label">{group.label}</div>
                 {/if}
-                {#each g.options as option}
+                {#each group.options as option}
                   {@const flatIdx = filteredOptions.indexOf(option)}
                   <button
                     type="button"
@@ -607,16 +640,16 @@
       {/if}
 
       {#if isGrouped}
-        {#each normalizedOptions as group}
-          {#if (group as SelectOptionGroup).label.trim().length === 0}
-            {#each (group as SelectOptionGroup).options as option (option.value)}
+        {#each normalizedGroups as group}
+          {#if group.label.trim().length === 0}
+            {#each group.options as option (option.value)}
               <option value={option.value} disabled={isOptionDisabled(option)}>
                 {option.label}
               </option>
             {/each}
           {:else}
-            <optgroup label={(group as SelectOptionGroup).label}>
-              {#each (group as SelectOptionGroup).options as option (option.value)}
+            <optgroup label={group.label}>
+              {#each group.options as option (option.value)}
                 <option value={option.value} disabled={isOptionDisabled(option)}>
                   {option.label}
                 </option>
@@ -651,12 +684,19 @@
   /* ═══ SHARED STYLES ═══ */
 
   .poodle-select {
+    --poodle-select-inline-padding-size-adjust: 0rem;
+    --poodle-select-inline-padding-density-adjust: 0rem;
+    --poodle-select-inline-padding: calc(
+      var(--poodle-space-control-x)
+      + var(--poodle-select-inline-padding-size-adjust)
+      + var(--poodle-select-inline-padding-density-adjust)
+    );
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-items: center;
     min-height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
+    padding: 0 var(--poodle-select-inline-padding);
     border: 0.0625rem solid var(
       --poodle-treatment-interactive-subtle-border,
       var(--poodle-color-border-default)
@@ -697,7 +737,7 @@
 
   .poodle-select__indicator {
     position: absolute;
-    right: var(--poodle-space-control-x);
+    right: var(--poodle-select-inline-padding);
     top: 50%;
     transform: translateY(-50%);
     color: var(--poodle-color-icon-muted);
@@ -752,7 +792,7 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0 calc(var(--poodle-space-control-x) + 1.5rem) 0 var(--poodle-space-control-x);
+    padding: 0 var(--poodle-select-inline-padding);
     min-height: var(--poodle-size-control-height);
   }
 
@@ -762,6 +802,7 @@
     width: 100%;
     height: var(--poodle-size-control-height);
     padding: 0;
+    padding-right: 1.5rem;
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -785,6 +826,7 @@
     min-width: 0;
     min-height: var(--poodle-size-control-height);
     padding: 0;
+    padding-right: 1.5rem;
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -819,6 +861,27 @@
   }
 
   /* Clear button */
+  .poodle-select__indicator-button {
+    position: absolute;
+    right: var(--poodle-select-inline-padding);
+    top: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--poodle-color-icon-muted);
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
+
+  .poodle-select__indicator-button:disabled {
+    cursor: not-allowed;
+  }
+
   .poodle-select__clear {
     display: inline-flex;
     align-items: center;
@@ -984,41 +1047,34 @@
   }
 
   /* ═══ DENSITY VARIANTS ═══ */
-  .poodle-select[data-density="compact"] { padding: 0 calc(var(--poodle-space-control-x) - 0.125rem); }
-  .poodle-select[data-density="comfortable"] { padding: 0 calc(var(--poodle-space-control-x) + 0.125rem); }
+  .poodle-select[data-density="compact"] { --poodle-select-inline-padding-density-adjust: -0.125rem; }
+  .poodle-select[data-density="comfortable"] { --poodle-select-inline-padding-density-adjust: 0.125rem; }
   .poodle-select--custom[data-density="compact"] { padding: 0; }
-  .poodle-select--custom[data-density="compact"] .poodle-select__trigger-area,
-  .poodle-select--custom[data-density="compact"] .poodle-select__trigger {
-    padding: 0 calc(var(--poodle-space-control-x) + 1.375rem) 0 calc(var(--poodle-space-control-x) - 0.125rem);
-  }
-  .poodle-select--custom[data-density="compact"] .poodle-select__trigger { padding: 0; }
   .poodle-select--custom[data-density="comfortable"] { padding: 0; }
-  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger-area,
-  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger {
-    padding: 0 calc(var(--poodle-space-control-x) + 1.625rem) 0 calc(var(--poodle-space-control-x) + 0.125rem);
-  }
-  .poodle-select--custom[data-density="comfortable"] .poodle-select__trigger { padding: 0; }
 
   /* ═══ SIZE VARIANTS ═══ */
-  .poodle-select[data-size="xs"] { min-height: 1.5rem; padding: 0 0.5rem; }
+  .poodle-select[data-size="xs"] { --poodle-select-inline-padding-size-adjust: -0.25rem; min-height: 1.5rem; }
   .poodle-select[data-size="xs"] .poodle-select__control { height: calc(1.5rem - (var(--poodle-border-width-default) * 2)); font-size: 0.75rem; }
   .poodle-select[data-size="xs"] .poodle-select__input,
   .poodle-select[data-size="xs"] .poodle-select__trigger { font-size: 0.75rem; min-height: 1.5rem; }
   .poodle-select--custom[data-size="xs"] { padding: 0; }
 
-  .poodle-select[data-size="sm"] { min-height: 1.75rem; padding: 0 0.625rem; }
+  .poodle-select[data-size="sm"] { --poodle-select-inline-padding-size-adjust: -0.125rem; min-height: 1.75rem; }
   .poodle-select[data-size="sm"] .poodle-select__control { height: calc(1.75rem - (var(--poodle-border-width-default) * 2)); }
   .poodle-select[data-size="sm"] .poodle-select__input,
   .poodle-select[data-size="sm"] .poodle-select__trigger { min-height: 1.75rem; }
   .poodle-select--custom[data-size="sm"] { padding: 0; }
 
-  .poodle-select[data-size="lg"] { min-height: 2.75rem; padding: 0 1rem; }
+  .poodle-select[data-size="md"] { --poodle-select-inline-padding-size-adjust: 0rem; }
+  .poodle-select--custom[data-size="md"] { padding: 0; }
+
+  .poodle-select[data-size="lg"] { --poodle-select-inline-padding-size-adjust: 0.125rem; min-height: 2.75rem; }
   .poodle-select[data-size="lg"] .poodle-select__control { height: calc(2.75rem - (var(--poodle-border-width-default) * 2)); font-size: 0.9375rem; }
   .poodle-select[data-size="lg"] .poodle-select__input,
   .poodle-select[data-size="lg"] .poodle-select__trigger { font-size: 0.9375rem; min-height: 2.75rem; }
   .poodle-select--custom[data-size="lg"] { padding: 0; }
 
-  .poodle-select[data-size="xl"] { min-height: 3.25rem; padding: 0 1.125rem; }
+  .poodle-select[data-size="xl"] { --poodle-select-inline-padding-size-adjust: 0.1875rem; min-height: 3.25rem; }
   .poodle-select[data-size="xl"] .poodle-select__control { height: calc(3.25rem - (var(--poodle-border-width-default) * 2)); font-size: 1rem; }
   .poodle-select[data-size="xl"] .poodle-select__input,
   .poodle-select[data-size="xl"] .poodle-select__trigger { font-size: 1rem; min-height: 3.25rem; }

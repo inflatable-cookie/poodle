@@ -1,8 +1,8 @@
 <script lang="ts">
   import { type Snippet } from "svelte";
 
-  import AlertDialog from "./AlertDialog.svelte";
-  import Button from "./Button.svelte";
+  import { default as AlertDialog } from "./AlertDialog.svelte";
+  import { default as Button } from "./Button.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { AlertDialogTone, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

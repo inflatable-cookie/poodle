@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Dialog from "./Dialog.svelte";
-  import FileUpload from "./FileUpload.svelte";
-  import Tabs from "./Tabs.svelte";
-  import TextInput from "./TextInput.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Dialog } from "./Dialog.svelte";
+  import { default as FileUpload } from "./FileUpload.svelte";
+  import { default as Tabs } from "./Tabs.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {

@@ -265,74 +265,86 @@
     gap: var(--poodle-space-inline-md);
   }
 
-  /* Size variants — set --switch-unit per size, geometry calcs use it */
-  .poodle-switch[data-size="xs"] { --switch-unit: var(--poodle-size-icon-xs); }
+  /* Size variants */
   .poodle-switch[data-size="xs"] .poodle-switch__track {
-    width: calc(var(--switch-unit) * 1.75);
-    height: calc(var(--switch-unit) * 0.875);
-    padding: 0.0625rem;
+    width: 1.75rem;
+    height: 1rem;
+    padding: 0.125rem;
   }
 
   .poodle-switch[data-size="xs"] .poodle-switch__thumb {
-    width: calc(var(--switch-unit) * 0.75 - 0.125rem);
-    height: calc(var(--switch-unit) * 0.75 - 0.125rem);
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .poodle-switch[data-size="xs"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
-    transform: translateX(0.5rem);
+    transform: translateX(0.75rem);
   }
 
-  .poodle-switch[data-size="sm"] { --switch-unit: var(--poodle-size-icon-sm); }
   .poodle-switch[data-size="sm"] .poodle-switch__track {
-    width: calc(var(--switch-unit) * 1.875);
-    height: calc(var(--switch-unit) + 0.125rem);
-    padding: 0.09375rem;
+    width: 2rem;
+    height: 1.125rem;
+    padding: 0.125rem;
   }
 
   .poodle-switch[data-size="sm"] .poodle-switch__thumb {
-    width: calc(var(--switch-unit) - 0.1875rem);
-    height: calc(var(--switch-unit) - 0.1875rem);
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   .poodle-switch[data-size="sm"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
-    transform: translateX(0.53125rem);
+    transform: translateX(0.875rem);
   }
 
-  .poodle-switch[data-size="lg"] { --switch-unit: var(--poodle-size-icon-lg); }
+  .poodle-switch[data-size="md"] .poodle-switch__track {
+    width: 2.25rem;
+    height: 1.375rem;
+    padding: 0.125rem;
+  }
+
+  .poodle-switch[data-size="md"] .poodle-switch__thumb {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .poodle-switch[data-size="md"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
+    transform: translateX(0.875rem);
+  }
+
   .poodle-switch[data-size="lg"] .poodle-switch__track {
-    width: calc(var(--switch-unit) * 2.25 + 0.25rem);
-    height: calc(var(--switch-unit) + 0.5rem);
-    padding: 0.1875rem;
+    width: 2.75rem;
+    height: 1.625rem;
+    padding: 0.125rem;
   }
 
   .poodle-switch[data-size="lg"] .poodle-switch__thumb {
-    width: var(--switch-unit);
-    height: var(--switch-unit);
+    width: 1.375rem;
+    height: 1.375rem;
   }
 
   .poodle-switch[data-size="lg"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
-    transform: translateX(calc(var(--switch-unit) + 0.0625rem));
+    transform: translateX(1.125rem);
   }
 
-  .poodle-switch[data-size="xl"] { --switch-unit: var(--poodle-size-icon-xl); }
   .poodle-switch[data-size="xl"] .poodle-switch__track {
-    width: calc(var(--switch-unit) * 2.5 + 0.375rem);
-    height: calc(var(--switch-unit) + 0.75rem);
-    padding: 0.25rem;
+    width: 3rem;
+    height: 1.75rem;
+    padding: 0.125rem;
   }
 
   .poodle-switch[data-size="xl"] .poodle-switch__thumb {
-    width: calc(var(--switch-unit) + 0.125rem);
-    height: calc(var(--switch-unit) + 0.125rem);
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .poodle-switch[data-size="xl"] .poodle-switch__control:checked ~ .poodle-switch__track .poodle-switch__thumb {
-    transform: translateX(1.875rem);
+    transform: translateX(1.25rem);
   }
 
   /* Label size variants */
-  .poodle-switch[data-size="xs"] .poodle-switch__label { font-size: 0.6875rem; }
+  .poodle-switch[data-size="xs"] .poodle-switch__label { font-size: 0.75rem; }
   .poodle-switch[data-size="sm"] .poodle-switch__label { font-size: 0.75rem; }
+  .poodle-switch[data-size="md"] .poodle-switch__label { font-size: 0.8125rem; }
   .poodle-switch[data-size="lg"] .poodle-switch__label { font-size: 0.875rem; }
-  .poodle-switch[data-size="xl"] .poodle-switch__label { font-size: 0.9375rem; }
+  .poodle-switch[data-size="xl"] .poodle-switch__label { font-size: 0.875rem; }
 </style>

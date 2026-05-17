@@ -131,6 +131,28 @@
     setOpen(false);
   }
 
+  function handleContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    uncontrolledAnchorPoint = { x: event.clientX, y: event.clientY };
+    setOpen(true);
+  }
+
+  function handleTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) {
+      return;
+    }
+
+    event.preventDefault();
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    uncontrolledAnchorPoint = { x: rect.left + 16, y: rect.top + 16 };
+    setOpen(true);
+  }
+
   onMount(() => {
     function handlePointerDown(event: MouseEvent): void {
       if (!isOpen || !rootElement) {
@@ -167,20 +189,8 @@
   role="button"
   tabindex="0"
   aria-haspopup="menu"
-  oncontextmenu={(event) => {
-    event.preventDefault();
-    uncontrolledAnchorPoint = { x: event.clientX, y: event.clientY };
-    setOpen(true);
-  }}
-  onkeydown={(event) => {
-    if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
-      event.preventDefault();
-      const target = event.currentTarget as HTMLElement;
-      const rect = target.getBoundingClientRect();
-      uncontrolledAnchorPoint = { x: rect.left + 16, y: rect.top + 16 };
-      setOpen(true);
-    }
-  }}
+  oncontextmenu={handleContextMenu}
+  onkeydown={handleTriggerKeydown}
 >
   {@render children?.()}
 

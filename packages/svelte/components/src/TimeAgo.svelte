@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Tooltip from "./Tooltip.svelte";
+  import { default as Tooltip } from "./Tooltip.svelte";
 
   let {
     datetime,

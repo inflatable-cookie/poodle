@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Button from "./Button.svelte";
-  import Spinner from "./Spinner.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 

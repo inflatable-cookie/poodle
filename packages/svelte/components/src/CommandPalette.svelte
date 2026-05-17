@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onDestroy, tick } from "svelte";
 
-  import Icon from "./Icon.svelte";
-  import TextInput from "./TextInput.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -11,7 +11,7 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  import ActionDiscoveryPanel from "./ActionDiscoveryPanel.svelte";
+  import { default as ActionDiscoveryPanel } from "./ActionDiscoveryPanel.svelte";
 
   import type { CommandActionItem, DiscoveryState } from "./types";
 
@@ -87,14 +87,8 @@
       document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
       wasOpen = true;
-      queueMicrotask(async () => {
-        await tick();
-        const input = document.getElementById(queryInputId) as HTMLInputElement | null;
-        input?.focus();
-        if (enabledItems.length > 0) {
-          activeId = enabledItems[0]?.id ?? null;
-          onActiveChange?.(activeId);
-        }
+      queueMicrotask(() => {
+        void focusSearchInput();
       });
     }
 
@@ -106,6 +100,16 @@
       previousFocusedElement?.focus();
     }
   });
+
+  async function focusSearchInput(): Promise<void> {
+    await tick();
+    const input = document.getElementById(queryInputId) as HTMLInputElement | null;
+    input?.focus();
+    if (enabledItems.length > 0) {
+      activeId = enabledItems[0]?.id ?? null;
+      onActiveChange?.(activeId);
+    }
+  }
 
   $effect(() => {
     if (open && enabledItems.length > 0 && (!activeId || !enabledItems.some((item) => item.id === activeId))) {

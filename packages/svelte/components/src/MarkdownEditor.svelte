@@ -2,8 +2,8 @@
   import { tick } from "svelte";
   import { marked } from "marked";
 
-  import Icon from "./Icon.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -28,7 +28,7 @@
   }
 
   let {
-    value = undefined,
+    value = $bindable<string | undefined>(undefined),
     name = null,
     placeholder = "Write markdown...",
     disabled = false,
@@ -71,6 +71,8 @@
   });
 
   function setValue(nextValue: string): void {
+    value = nextValue;
+
     if (!hasControlledValue) {
       uncontrolledValue = nextValue;
     }

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import type { IconProp } from "./types";
-  import Tooltip from "./Tooltip.svelte";
+  import { default as Tooltip } from "./Tooltip.svelte";
 
   type ListCardCounterTypography = "label" | "inherit";
 

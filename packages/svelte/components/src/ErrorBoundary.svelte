@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import EmptyState from "./EmptyState.svelte";
-  import Button from "./Button.svelte";
+  import { default as EmptyState } from "./EmptyState.svelte";
+  import { default as Button } from "./Button.svelte";
 
   interface Props {
     children: Snippet;

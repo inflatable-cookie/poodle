@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Button from "./Button.svelte";
-  import Code from "./Code.svelte";
-  import Dialog from "./Dialog.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Code } from "./Code.svelte";
+  import { default as Dialog } from "./Dialog.svelte";
 
   import type { ButtonVariant, ControlSize } from "./types";
 

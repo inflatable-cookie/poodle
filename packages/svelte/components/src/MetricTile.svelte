@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
 
   let {
     label,

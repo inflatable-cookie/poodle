@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Callout from "./Callout.svelte";
-  import Pagination from "./Pagination.svelte";
-  import PaginationSummary from "./PaginationSummary.svelte";
+  import { default as Callout } from "./Callout.svelte";
+  import { default as Pagination } from "./Pagination.svelte";
+  import { default as PaginationSummary } from "./PaginationSummary.svelte";
 
-  import EmptyState from "./EmptyState.svelte";
-  import PageHeader from "./PageHeader.svelte";
+  import { default as EmptyState } from "./EmptyState.svelte";
+  import { default as PageHeader } from "./PageHeader.svelte";
 
   import type { BrowseState, EmptyStateVariant } from "./types";
 
@@ -89,24 +89,28 @@
 
 <section class="poodle-list-container" aria-label={ariaLabel ?? title} data-state={state}>
   {#if breadcrumbs && actions}
+    {@const renderBreadcrumbs = breadcrumbs}
+    {@const renderActions = actions}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet breadcrumbs()}
-        {@render breadcrumbs()}
+        {@render renderBreadcrumbs()}
       {/snippet}
       {#snippet actions()}
-        {@render actions()}
+        {@render renderActions()}
       {/snippet}
     </PageHeader>
   {:else if breadcrumbs}
+    {@const renderBreadcrumbs = breadcrumbs}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet breadcrumbs()}
-        {@render breadcrumbs()}
+        {@render renderBreadcrumbs()}
       {/snippet}
     </PageHeader>
   {:else if actions}
+    {@const renderActions = actions}
     <PageHeader {title} {subtitle} {eyebrow}>
       {#snippet actions()}
-        {@render actions()}
+        {@render renderActions()}
       {/snippet}
     </PageHeader>
   {:else}

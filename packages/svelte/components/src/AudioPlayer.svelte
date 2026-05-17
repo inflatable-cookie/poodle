@@ -82,6 +82,10 @@
     audioEl.playbackRate = rate;
   }
 
+  function handleSpeedChange(event: Event): void {
+    setSpeed(Number((event.currentTarget as HTMLSelectElement).value));
+  }
+
   function updateTime(): void {
     if (audioEl) {
       currentTime = audioEl.currentTime;
@@ -196,7 +200,7 @@
     <select
       class="poodle-audio-player__speed"
       value={playbackRate}
-      onchange={(e) => setSpeed(Number((e.currentTarget as HTMLSelectElement).value))}
+      onchange={handleSpeedChange}
       aria-label="Playback speed"
     >
       {#each speedOptions as speed}

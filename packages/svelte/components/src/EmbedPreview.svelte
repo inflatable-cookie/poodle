@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Skeleton from "./Skeleton.svelte";
+  import { default as Skeleton } from "./Skeleton.svelte";
+  import { default as TextLink } from "./TextLink.svelte";
 
   import type { ParsedEmbed } from "./types";
 
@@ -79,9 +80,9 @@
     </div>
   {:else}
     <div class="poodle-embed-preview__fallback">
-      <a href={parsed.originalUrl} target="_blank" rel="noopener noreferrer">
+      <TextLink href={parsed.originalUrl} target="_blank" rel="noopener noreferrer">
         {parsed.originalUrl ?? parsed.id}
-      </a>
+      </TextLink>
     </div>
   {/if}
 </div>
@@ -154,8 +155,7 @@
     border-radius: var(--poodle-radius-surface, 0.5rem);
   }
 
-  .poodle-embed-preview__fallback a {
-    color: var(--poodle-color-accent-default, #6366f1);
+  .poodle-embed-preview__fallback :global(.poodle-text-link) {
     font-size: 0.8125rem;
     word-break: break-all;
   }

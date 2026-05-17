@@ -3,7 +3,7 @@
 
   import { getFocusableElements } from "./internal";
   import { portal } from "./portal";
-  import IconButton from "./IconButton.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";

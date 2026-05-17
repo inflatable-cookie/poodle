@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Button from "./Button.svelte";
-  import IconButton from "./IconButton.svelte";
-  import Popover from "./Popover.svelte";
-  import Select from "./Select.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
+  import { default as Popover } from "./Popover.svelte";
+  import { default as Select } from "./Select.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {

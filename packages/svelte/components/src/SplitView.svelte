@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import CollapseToggle from "./CollapseToggle.svelte";
-  import ResizeHandle from "./ResizeHandle.svelte";
+  import { default as CollapseToggle } from "./CollapseToggle.svelte";
+  import { default as ResizeHandle } from "./ResizeHandle.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     CollapseDirection,

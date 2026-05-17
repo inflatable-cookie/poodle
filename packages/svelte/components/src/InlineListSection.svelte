@@ -1,7 +1,7 @@
 <script lang="ts" generics="T">
   import type { Snippet } from "svelte";
 
-  import Card from "./Card.svelte";
+  import { default as Card } from "./Card.svelte";
 
   interface Props {
     title: string;

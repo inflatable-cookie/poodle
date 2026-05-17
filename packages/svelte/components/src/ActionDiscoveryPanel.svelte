@@ -1,15 +1,15 @@
 <script lang="ts">
-  import Eyebrow from "./Eyebrow.svelte";
-  import ListCard from "./ListCard.svelte";
-  import Skeleton from "./Skeleton.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Eyebrow } from "./Eyebrow.svelte";
+  import { default as ListCard } from "./ListCard.svelte";
+  import { default as Skeleton } from "./Skeleton.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
     ControlSize,
     SemanticControlSizeRole,
   } from "./types";
-  import EmptyState from "./EmptyState.svelte";
+  import { default as EmptyState } from "./EmptyState.svelte";
 
   import type { CommandActionItem, DiscoveryState } from "./types";
 
@@ -133,6 +133,8 @@
                 bind:this={itemElements[enabledItems.findIndex((enabledItem) => enabledItem.id === item.id)]}
                 role="option"
                 aria-selected={activeId === item.id}
+                onmouseenter={() => setActive(item.id)}
+                onfocus={() => setActive(item.id)}
               >
                 <ListCard
                   title={item.title}
@@ -141,8 +143,6 @@
                   disabled={item.disabled ?? false}
                   ariaLabel={item.title}
                   onClick={() => onItemSelect?.(item.id)}
-                  onmouseenter={() => setActive(item.id)}
-                  onfocus={() => setActive(item.id)}
                 >
                   {#snippet trailing()}
                     <span class="poodle-action-discovery-panel__trailing">

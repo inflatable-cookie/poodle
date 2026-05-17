@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Spinner from "./Spinner.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
 
   import type { BrowseState, PickerVariant } from "./types";
 

@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import Spinner from "./Spinner.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";

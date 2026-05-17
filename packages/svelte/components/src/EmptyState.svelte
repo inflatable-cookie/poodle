@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation } from "./presentation";
   import type { ControlDensity } from "./types";
 

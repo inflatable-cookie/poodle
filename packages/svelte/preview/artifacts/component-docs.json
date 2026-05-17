@@ -6690,7 +6690,13 @@
         "name": "defaultValue",
         "type": "number | null",
         "default": "null",
-        "description": "Initial value for uncontrolled mode."
+        "description": "Initial display value for uncontrolled mode."
+      },
+      {
+        "name": "step",
+        "type": "number",
+        "default": "0.5",
+        "description": "Interactive input increment. Input snaps to this step, while incoming display values may still be arbitrary fractions."
       },
       {
         "name": "max",
@@ -6725,7 +6731,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Rating } from \"@poodle/svelte\";\n\n  let stars: number | null = 3;\n</script>\n\n<Rating bind:value={stars} max={5} allowClear />"
+    "usage": "<script lang=\"ts\">\n  import { Rating } from \"@poodle/svelte\";\n\n  let stars: number | null = 3.5;\n</script>\n\n<Rating bind:value={stars} max={5} step={0.5} allowClear />"
   },
   "region": {
     "props": [

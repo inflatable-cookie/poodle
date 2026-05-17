@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Callout from "./Callout.svelte";
-  import FormActions from "./FormActions.svelte";
+  import { default as Callout } from "./Callout.svelte";
+  import { default as FormActions } from "./FormActions.svelte";
 
   interface Props {
     columns?: number;
@@ -24,7 +24,7 @@
     children,
   }: Props = $props();
 
-  const hasFieldErrors = $derived(fieldErrors && Object.keys(fieldErrors).length > 0);
+  const hasFieldErrors = $derived(Boolean(fieldErrors && Object.keys(fieldErrors).length > 0));
 </script>
 
 <div class="poodle-form-layout">
@@ -44,7 +44,7 @@
     <div class="poodle-form-layout__field-errors" role="alert" aria-live="polite">
       <p>Please fix the following errors:</p>
       <ul>
-        {#each Object.entries(fieldErrors) as [field, message]}
+        {#each Object.entries(fieldErrors ?? {}) as [field, message]}
           <li><strong>{field}</strong>: {message}</li>
         {/each}
       </ul>

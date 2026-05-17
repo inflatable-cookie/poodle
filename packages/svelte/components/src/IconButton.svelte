@@ -5,12 +5,12 @@
 <script lang="ts">
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
   } from "./presentation";
-  import Spinner from "./Spinner.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
   import { resolveOverlayPosition } from "./overlay-position";
   import type {
     ButtonTone,
@@ -35,7 +35,7 @@
     disabled?: boolean;
     loading?: boolean;
     pressed?: boolean | null;
-    defaultPressed?: boolean;
+    defaultPressed?: boolean | null;
     describedBy?: string | null;
     type?: HTMLButtonElement["type"];
     onClick?: ((event: MouseEvent) => void) | null;
@@ -58,7 +58,7 @@
     disabled = false,
     loading = false,
     pressed = $bindable<boolean | null>(null),
-    defaultPressed = false,
+    defaultPressed = null,
     describedBy = null,
     type = "button",
     onClick = null,
@@ -82,13 +82,13 @@
 
   $effect.pre(() => {
     if (!seededDefaultPressed && pressed === null) {
-      uncontrolledPressed = defaultPressed;
+      uncontrolledPressed = defaultPressed === true;
       seededDefaultPressed = true;
     }
   });
 
   const isUnavailable = $derived(disabled || loading);
-  const isToggle = $derived(pressed !== null || defaultPressed);
+  const isToggle = $derived(pressed !== null || defaultPressed !== null);
   const pressedControlled = $derived(pressed !== null);
   const currentPressed = $derived(pressedControlled ? pressed === true : uncontrolledPressed);
   const tooltipText = $derived(tooltip ?? ariaLabel);
@@ -428,14 +428,19 @@
     height: 1.75rem;
   }
 
+  .poodle-icon-button[data-size="md"] {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
   .poodle-icon-button[data-size="lg"] {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .poodle-icon-button[data-size="xl"] {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3.25rem;
+    height: 3.25rem;
   }
 
   /* ── Tooltip ── */

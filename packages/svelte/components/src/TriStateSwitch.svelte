@@ -113,7 +113,7 @@
     --poodle-tri-state-height: var(--poodle-size-control-height);
     --poodle-tri-state-x: var(--poodle-space-control-x);
     --poodle-tri-state-track-inset: 0.125rem;
-    --poodle-tri-state-min-width: 4.5rem;
+    --poodle-tri-state-min-content-width: 3rem;
     position: relative;
     display: inline-grid;
     width: max-content;
@@ -129,27 +129,27 @@
 
   .poodle-tri-state-switch[data-size="xs"] {
     --poodle-tri-state-height: 1.5rem;
-    --poodle-tri-state-min-width: 3.75rem;
+    --poodle-tri-state-min-content-width: 2.5rem;
   }
 
   .poodle-tri-state-switch[data-size="sm"] {
     --poodle-tri-state-height: 1.75rem;
-    --poodle-tri-state-min-width: 4rem;
+    --poodle-tri-state-min-content-width: 2.625rem;
   }
 
   .poodle-tri-state-switch[data-size="md"] {
     --poodle-tri-state-height: 2.25rem;
-    --poodle-tri-state-min-width: 4.5rem;
+    --poodle-tri-state-min-content-width: 3rem;
   }
 
   .poodle-tri-state-switch[data-size="lg"] {
     --poodle-tri-state-height: 2.75rem;
-    --poodle-tri-state-min-width: 5.25rem;
+    --poodle-tri-state-min-content-width: 3.375rem;
   }
 
   .poodle-tri-state-switch[data-size="xl"] {
     --poodle-tri-state-height: 3.25rem;
-    --poodle-tri-state-min-width: 6rem;
+    --poodle-tri-state-min-content-width: 3.75rem;
   }
 
   .poodle-tri-state-switch[data-density="compact"] {
@@ -233,7 +233,7 @@
     align-items: center;
     justify-content: center;
     min-height: calc(var(--poodle-tri-state-height) - (var(--poodle-tri-state-track-inset) * 2));
-    min-width: var(--poodle-tri-state-min-width);
+    min-width: calc(var(--poodle-tri-state-min-content-width) + (var(--poodle-tri-state-x) * 2));
     padding: 0 var(--poodle-tri-state-x);
     border-radius: 999px;
     color: var(--poodle-color-text-secondary);

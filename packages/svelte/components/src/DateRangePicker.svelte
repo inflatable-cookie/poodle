@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import Calendar from "./Calendar.svelte";
+  import { default as Calendar } from "./Calendar.svelte";
   import { formatDateLabel, monthAnchorIso, normalizeDateRange, todayIsoDate } from "./date";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -138,6 +138,12 @@
 
     onValueChange?.(normalized);
   }
+
+  function handleCalendarValueChange(nextValue: string | string[] | DateRangeValue): void {
+    if (typeof nextValue === "object" && !Array.isArray(nextValue)) {
+      commitValue(nextValue);
+    }
+  }
 </script>
 
 <div bind:this={rootElement} class="poodle-date-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
@@ -174,7 +180,7 @@
         size={resolvedSize}
         density={resolvedDensity}
         ariaLabel={ariaLabel ?? placeholder}
-        onValueChange={(nextValue) => commitValue(nextValue as DateRangeValue)}
+        onValueChange={handleCalendarValueChange}
         onMonthChange={(month) => (visibleMonth = month)}
       />
     </div>

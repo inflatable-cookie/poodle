@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as TextLink } from "./TextLink.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -55,7 +56,9 @@
       {#if overflowCount > 0}
         <span class="poodle-selection-summary__overflow">+{overflowCount} more</span>
       {/if}
-      <button type="button" class="poodle-selection-summary__clear" onclick={() => onClear?.()}>Clear</button>
+      <TextLink className="poodle-selection-summary__clear" onClick={() => onClear?.()}>
+        Clear
+      </TextLink>
     {/if}
   </div>
 </section>
@@ -88,19 +91,9 @@
     font-style: italic;
   }
 
-  .poodle-selection-summary__clear {
+  :global(.poodle-selection-summary__clear) {
     margin-left: auto;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
-    cursor: pointer;
-    font: inherit;
     font-size: var(--poodle-typography-label-size, 0.75rem);
-  }
-
-  .poodle-selection-summary__clear:hover {
-    color: var(--poodle-color-text-primary);
   }
 
   .poodle-selection-summary__chip {

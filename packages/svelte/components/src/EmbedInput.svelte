@@ -1,6 +1,6 @@
 <script lang="ts">
-  import TextInput from "./TextInput.svelte";
-  import Pill from "./Pill.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
+  import { default as Pill } from "./Pill.svelte";
 
   import { resolveEmbedParseState } from "./embed-input";
   import type { EmbedParseState } from "./embed-input";

@@ -145,8 +145,11 @@
 
   .poodle-editable-label__display,
   .poodle-editable-label__input {
+    box-sizing: border-box;
     width: 100%;
     min-width: 0;
+    min-height: var(--poodle-size-control-height);
+    margin: 0;
     padding: var(--poodle-space-control-y) var(--poodle-space-control-x);
     border: 0.0625rem solid transparent;
     border-radius: var(--poodle-radius-control);
@@ -179,6 +182,7 @@
   }
 
   .poodle-editable-label__input {
+    appearance: none;
     border-color: var(--poodle-color-accent-focusRing);
     background: var(--poodle-color-background-surface);
     outline: none;

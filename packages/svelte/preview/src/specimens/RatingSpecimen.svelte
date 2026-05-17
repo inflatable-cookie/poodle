@@ -4,6 +4,7 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let rating = 3;
+  let fractionalRating = 3.5;
 </script>
 
 <SpecimenLayout>
@@ -18,6 +19,17 @@
 
   <SpecimenGroup label="10-star scale">
     <Rating defaultValue={7} max={10} ariaLabel="Score out of 10" />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Half-star steps">
+    <Rating
+      value={fractionalRating}
+      step={0.5}
+      allowClear
+      ariaLabel="Half-star rating"
+      onValueChange={(value) => { fractionalRating = value ?? 0; }}
+    />
+    <p>Rating: <strong>{fractionalRating} / 5</strong></p>
   </SpecimenGroup>
 
   <SpecimenGroup label="Clearable">

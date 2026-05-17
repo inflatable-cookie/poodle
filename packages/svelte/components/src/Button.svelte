@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
     resolveSupportingVisualSize,
   } from "./presentation";
-  import Spinner from "./Spinner.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
   import type {
     ButtonTone,
     ButtonVariant,
@@ -40,7 +40,7 @@
     trailingIcon?: IconProp | null;
     chevron?: boolean;
     pressed?: boolean | null;
-    defaultPressed?: boolean;
+    defaultPressed?: boolean | null;
     ariaLabel?: string | null;
     ariaExpanded?: boolean | null;
     describedBy?: string | null;
@@ -75,7 +75,7 @@
     trailingIcon = null,
     chevron = false,
     pressed = $bindable<boolean | null>(null),
-    defaultPressed = false,
+    defaultPressed = null,
     ariaLabel = null,
     ariaExpanded = null,
     describedBy = null,
@@ -98,12 +98,12 @@
 
   $effect.pre(() => {
     if (!seededDefaultPressed && pressed === null) {
-      uncontrolledPressed = defaultPressed;
+      uncontrolledPressed = defaultPressed === true;
       seededDefaultPressed = true;
     }
   });
 
-  const isToggle = $derived(pressed !== null || defaultPressed);
+  const isToggle = $derived(pressed !== null || defaultPressed !== null);
   const pressedControlled = $derived(pressed !== null);
   const currentPressed = $derived(pressedControlled ? pressed === true : uncontrolledPressed);
   const isUnavailable = $derived(disabled || loading);
@@ -258,28 +258,35 @@
 
   .poodle-button[data-size="xs"] {
     min-width: 3.75rem;
-    height: var(--poodle-size-control-height);
+    height: 1.5rem;
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.6875rem;
   }
 
   .poodle-button[data-size="sm"] {
     min-width: 4.25rem;
-    height: var(--poodle-size-control-height);
+    height: 1.75rem;
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.75rem;
   }
 
+  .poodle-button[data-size="md"] {
+    min-width: 5rem;
+    height: 2.25rem;
+    padding: 0 var(--poodle-space-control-x);
+    font-size: 0.8125rem;
+  }
+
   .poodle-button[data-size="lg"] {
     min-width: 5.75rem;
-    height: var(--poodle-size-control-height);
+    height: 2.75rem;
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.875rem;
   }
 
   .poodle-button[data-size="xl"] {
     min-width: 6.5rem;
-    height: var(--poodle-size-control-height);
+    height: 3.25rem;
     padding: 0 var(--poodle-space-control-x);
     font-size: 0.9375rem;
   }
@@ -337,6 +344,26 @@
   .poodle-button[data-icon-only][data-size="lg"],
   .poodle-button[data-icon-only][data-size="xl"] {
     width: var(--poodle-size-control-height);
+  }
+
+  .poodle-button[data-icon-only][data-size="xs"] {
+    width: 1.5rem;
+  }
+
+  .poodle-button[data-icon-only][data-size="sm"] {
+    width: 1.75rem;
+  }
+
+  .poodle-button[data-icon-only][data-size="md"] {
+    width: 2.25rem;
+  }
+
+  .poodle-button[data-icon-only][data-size="lg"] {
+    width: 2.75rem;
+  }
+
+  .poodle-button[data-icon-only][data-size="xl"] {
+    width: 3.25rem;
   }
 
   .poodle-button[data-variant="primary"] {

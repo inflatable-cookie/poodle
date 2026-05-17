@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onDestroy, tick, type Snippet } from "svelte";
 
-  import CollapseToggle from "./CollapseToggle.svelte";
-  import Tabs from "./Tabs.svelte";
+  import { default as CollapseToggle } from "./CollapseToggle.svelte";
+  import { default as Tabs } from "./Tabs.svelte";
   import type {
     ControlDensity,
     ControlSize,

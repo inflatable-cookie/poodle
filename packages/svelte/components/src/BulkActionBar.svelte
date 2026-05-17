@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import Icon from "./Icon.svelte";
-  import IconButton from "./IconButton.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {

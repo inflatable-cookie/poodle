@@ -5,8 +5,8 @@
 <script lang="ts">
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
-  import Icon from "./Icon.svelte";
-  import Pill from "./Pill.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as Pill } from "./Pill.svelte";
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
   import {
     applyReorder as applyReorderItems,

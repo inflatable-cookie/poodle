@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import CollapseToggle from "./CollapseToggle.svelte";
+  import { default as CollapseToggle } from "./CollapseToggle.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -97,7 +97,7 @@
       <button
         type="button"
         class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
-        aria-expanded={String(!collapsed)}
+        aria-expanded={!collapsed}
         onclick={handleHeaderClick}
       >
         <CollapseToggle

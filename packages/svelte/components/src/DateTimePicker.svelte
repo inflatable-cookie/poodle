@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import Calendar from "./Calendar.svelte";
-  import TimeInput from "./TimeInput.svelte";
+  import { default as Calendar } from "./Calendar.svelte";
+  import { default as TimeInput } from "./TimeInput.svelte";
   import {
     formatDateTimeLabel,
     monthAnchorIso,
@@ -61,7 +61,7 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const hasControlledValue = $derived(value !== undefined);
   const hasControlledOpen = $derived(open !== undefined);
-  const currentValue = $derived(normalizeDateTimeValue(hasControlledValue ? value : uncontrolledValue));
+  const currentValue = $derived(normalizeDateTimeValue((hasControlledValue ? value : uncontrolledValue) ?? defaultValue));
   const isOpen = $derived(hasControlledOpen ? open === true : uncontrolledOpen);
   const valueLabel = $derived(
     formatDateTimeLabel(currentValue, locale) ||
@@ -137,6 +137,16 @@
 
     onValueChange?.(normalized);
   }
+
+  function handleDateChange(nextValue: string | string[] | { start: string | null; end: string | null }): void {
+    if (typeof nextValue === "string" || nextValue === null) {
+      commitValue({ ...currentValue, date: nextValue });
+    }
+  }
+
+  function handleTimeChange(nextValue: string | null): void {
+    commitValue({ ...currentValue, time: nextValue });
+  }
 </script>
 
 <div bind:this={rootElement} class="poodle-date-time-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
@@ -176,7 +186,7 @@
           size={resolvedSize}
           density={resolvedDensity}
           ariaLabel={ariaLabel ?? "Date"}
-          onValueChange={(nextValue) => commitValue({ ...currentValue, date: nextValue as string | null })}
+          onValueChange={handleDateChange}
           onMonthChange={(month) => (visibleMonth = month)}
         />
 
@@ -191,7 +201,7 @@
             size={resolvedSize}
             density={resolvedDensity}
             ariaLabel={ariaLabel ? `${ariaLabel} time` : "Time"}
-            onValueChange={(nextValue) => commitValue({ ...currentValue, time: nextValue })}
+            onValueChange={handleTimeChange}
           />
         </div>
       </div>

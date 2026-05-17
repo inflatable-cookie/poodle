@@ -1,8 +1,22 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+
+  interface Props {
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    value?: number | null | undefined;
+    defaultValue?: number | null;
+    max?: number;
+    step?: number;
+    allowClear?: boolean;
+    disabled?: boolean;
+    ariaLabel?: string | null;
+    onValueChange?: ((value: number | null) => void) | undefined;
+  }
 
   const uiPresentation = getUiPresentation();
 
@@ -13,56 +27,102 @@
     value = $bindable<number | null | undefined>(undefined),
     defaultValue = null,
     max = 5,
+    step = 0.5,
     allowClear = false,
     disabled = false,
     ariaLabel = null,
     onValueChange = undefined,
-  }: {
-    size?: ControlSize | null;
-    sizeRole?: SemanticControlSizeRole;
-    density?: ControlDensity | null;
-    value?: number | null | undefined;
-    defaultValue?: number | null;
-    max?: number;
-    allowClear?: boolean;
-    disabled?: boolean;
-    ariaLabel?: string | null;
-    onValueChange?: ((value: number | null) => void) | undefined;
-  } = $props();
+  }: Props = $props();
 
   let itemElements: Array<HTMLButtonElement | null> = [];
   let uncontrolledValue = $state<number | null>(null);
+  let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
   let hoverIndex = $state(-1);
+  let hoverValue = $state<number | null>(null);
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const currentValue = $derived(value === undefined ? uncontrolledValue : value);
   const itemCount = $derived(Math.max(1, Math.floor(max)));
+  const effectiveStep = $derived(resolveStep(step));
+  const isFractional = $derived(effectiveStep < 1);
+  const minSelectableValue = $derived(allowClear ? 0 : effectiveStep);
+  const currentValue = $derived(clampDisplayValue(value === undefined ? uncontrolledValue : value, itemCount));
+  const displayValue = $derived(hoverValue ?? currentValue ?? 0);
+  const sliderValueText = $derived(
+    currentValue === null || currentValue === 0
+      ? `No rating selected out of ${itemCount}`
+      : `${trimFraction(currentValue)} out of ${itemCount}`,
+  );
 
   $effect(() => {
-    if (value === undefined && uncontrolledValue === null && defaultValue !== null) {
-      uncontrolledValue = defaultValue;
+    if (!seededDefaultValue && value === undefined) {
+      uncontrolledValue = clampDisplayValue(defaultValue, itemCount);
+      seededDefaultValue = true;
     }
   });
 
   $effect(() => {
-    if (currentValue !== null) {
-      focusIndex = Math.max(0, Math.min(itemCount - 1, currentValue - 1));
+    if (currentValue !== null && currentValue > 0) {
+      focusIndex = Math.max(0, Math.min(itemCount - 1, Math.ceil(currentValue) - 1));
     }
   });
 
-  // When hovering, show filled up to hover position; otherwise show filled up to value
-  const displayValue = $derived(hoverIndex >= 0 ? hoverIndex + 1 : (currentValue ?? 0));
+  function resolveStep(nextStep: number): number {
+    if (!Number.isFinite(nextStep) || nextStep <= 0) {
+      return 1;
+    }
+
+    return Math.min(1, nextStep);
+  }
+
+  function roundToStep(nextValue: number, nextStep: number): number {
+    const rounded = Math.round(nextValue / nextStep) * nextStep;
+    return Number(rounded.toFixed(4));
+  }
+
+  function clampDisplayValue(
+    nextValue: number | null | undefined,
+    nextMax: number,
+  ): number | null {
+    if (nextValue === null || nextValue === undefined) {
+      return null;
+    }
+
+    return Number(Math.max(0, Math.min(nextMax, nextValue)).toFixed(4));
+  }
+
+  function normalizeInteractiveValue(
+    nextValue: number | null | undefined,
+    nextMax: number,
+    nextStep: number,
+  ): number | null {
+    const clamped = clampDisplayValue(nextValue, nextMax);
+    if (clamped === null) {
+      return null;
+    }
+
+    return roundToStep(clamped, nextStep);
+  }
+
+  function trimFraction(nextValue: number): string {
+    return nextValue % 1 === 0 ? `${nextValue}` : nextValue.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function getFillRatio(index: number, nextValue: number): number {
+    return Math.max(0, Math.min(1, nextValue - index));
+  }
 
   function setValue(nextValue: number | null): void {
+    const normalized = normalizeInteractiveValue(nextValue, itemCount, effectiveStep);
+
     if (value === undefined) {
-      uncontrolledValue = nextValue;
+      uncontrolledValue = normalized;
     } else {
-      value = nextValue;
+      value = normalized;
     }
 
-    onValueChange?.(nextValue);
+    onValueChange?.(normalized);
   }
 
   function selectIndex(index: number): void {
@@ -76,64 +136,168 @@
     setValue(nextValue);
   }
 
+  function getPointerValue(event: MouseEvent, index: number): number {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const relativeX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+    const rawWithinStar = rect.width === 0 ? 1 : relativeX / rect.width;
+    const snappedWithinStar = Math.max(
+      effectiveStep,
+      Math.ceil(rawWithinStar / effectiveStep) * effectiveStep,
+    );
+
+    return Math.min(itemCount, index + Math.min(1, snappedWithinStar));
+  }
+
+  function handleFractionalHover(event: MouseEvent, index: number): void {
+    if (disabled) return;
+    hoverIndex = index;
+    hoverValue = getPointerValue(event, index);
+  }
+
+  function handleFractionalSelect(event: MouseEvent, index: number): void {
+    if (disabled) return;
+
+    const nextValue = getPointerValue(event, index);
+    if (allowClear && currentValue === nextValue) {
+      setValue(null);
+      return;
+    }
+
+    setValue(nextValue);
+  }
+
   function moveFocus(nextIndex: number): void {
     focusIndex = Math.max(0, Math.min(itemCount - 1, nextIndex));
     itemElements[focusIndex]?.focus();
   }
+
+  function handleSliderKeydown(event: KeyboardEvent): void {
+    if (disabled) return;
+
+    const currentNumericValue = normalizeInteractiveValue(currentValue ?? 0, itemCount, effectiveStep) ?? 0;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setValue(Math.min(itemCount, Math.max(minSelectableValue, currentNumericValue + effectiveStep)));
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+      event.preventDefault();
+      setValue(Math.max(minSelectableValue, currentNumericValue - effectiveStep));
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      setValue(minSelectableValue);
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      setValue(itemCount);
+    }
+
+    if ((event.key === "Enter" || event.key === " ") && allowClear && currentValue !== null) {
+      event.preventDefault();
+      setValue(null);
+    }
+  }
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
   class="poodle-rating"
-  role="radiogroup"
-  tabindex="-1"
+  role={isFractional ? "slider" : "radiogroup"}
+  tabindex={disabled ? -1 : isFractional ? 0 : -1}
   aria-label={ariaLabel ?? undefined}
+  aria-valuemin={isFractional ? 0 : undefined}
+  aria-valuemax={isFractional ? itemCount : undefined}
+  aria-valuenow={isFractional ? (currentValue ?? 0) : undefined}
+  aria-valuetext={isFractional ? sliderValueText : undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
-  onmouseleave={() => (hoverIndex = -1)}
+  data-mode={isFractional ? "fractional" : "whole"}
+  onmouseleave={() => {
+    hoverIndex = -1;
+    hoverValue = null;
+  }}
+  onkeydown={isFractional ? handleSliderKeydown : undefined}
 >
   {#each Array.from({ length: itemCount }, (_, index) => index) as index}
     <button
       bind:this={itemElements[index]}
       type="button"
       class="poodle-rating__item"
-      data-filled={displayValue >= index + 1}
       data-hovered={hoverIndex === index}
       disabled={disabled}
-      role="radio"
-      aria-checked={currentValue === index + 1 ? "true" : "false"}
-      aria-label={`${index + 1} of ${itemCount}`}
-      tabindex={focusIndex === index ? 0 : -1}
-      onmouseenter={() => { if (!disabled) hoverIndex = index; }}
-      onfocus={() => moveFocus(index)}
-      onclick={() => selectIndex(index)}
-      onkeydown={(event) => {
-        if (event.key === "ArrowRight" || event.key === "ArrowUp") {
-          event.preventDefault();
-          moveFocus(index + 1);
+      role={isFractional ? undefined : "radio"}
+      aria-hidden={isFractional ? "true" : undefined}
+      aria-checked={isFractional ? undefined : currentValue === index + 1 ? "true" : "false"}
+      aria-label={isFractional ? undefined : `${index + 1} of ${itemCount}`}
+      tabindex={isFractional ? -1 : focusIndex === index ? 0 : -1}
+      onmouseenter={(event) => {
+        if (disabled) return;
+        if (isFractional) {
+          handleFractionalHover(event, index);
+        } else {
+          hoverIndex = index;
+          hoverValue = index + 1;
         }
-
-        if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
-          event.preventDefault();
-          moveFocus(index - 1);
+      }}
+      onmousemove={isFractional ? (event) => handleFractionalHover(event, index) : undefined}
+      onfocus={() => {
+        if (!isFractional) {
+          moveFocus(index);
         }
-
-        if (event.key === "Home") {
-          event.preventDefault();
-          moveFocus(0);
-        }
-
-        if (event.key === "End") {
-          event.preventDefault();
-          moveFocus(itemCount - 1);
-        }
-
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
+      }}
+      onclick={(event) => {
+        if (isFractional) {
+          handleFractionalSelect(event, index);
+        } else {
           selectIndex(index);
         }
       }}
+      onkeydown={!isFractional
+        ? (event) => {
+            if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+              event.preventDefault();
+              moveFocus(index + 1);
+            }
+
+            if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+              event.preventDefault();
+              moveFocus(index - 1);
+            }
+
+            if (event.key === "Home") {
+              event.preventDefault();
+              moveFocus(0);
+            }
+
+            if (event.key === "End") {
+              event.preventDefault();
+              moveFocus(itemCount - 1);
+            }
+
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              selectIndex(index);
+            }
+          }
+        : undefined}
     >
-      <span class="poodle-rating__glyph" aria-hidden="true"><Icon name="star" size={resolvedSize} /></span>
+      <span class="poodle-rating__glyph" aria-hidden="true">
+        <span class="poodle-rating__glyph-base">
+          <Icon name="star" size={resolvedSize} />
+        </span>
+        <span
+          class="poodle-rating__glyph-fill"
+          style={`width: ${getFillRatio(index, displayValue) * 100}%;`}
+        >
+          <span class="poodle-rating__glyph-fill-inner">
+            <Icon name="star" size={resolvedSize} />
+          </span>
+        </span>
+      </span>
     </button>
   {/each}
 </div>
@@ -143,6 +307,12 @@
     display: inline-flex;
     align-items: center;
     gap: 0.125rem;
+  }
+
+  .poodle-rating[data-mode="fractional"]:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+    border-radius: var(--poodle-radius-control);
   }
 
   .poodle-rating__item {
@@ -161,10 +331,6 @@
     transition: color 120ms ease, filter 120ms ease;
   }
 
-  .poodle-rating__item[data-filled="true"] {
-    color: var(--poodle-color-accent-base);
-  }
-
   .poodle-rating__item[data-hovered="true"] {
     filter: drop-shadow(0 0 0.375rem color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent));
   }
@@ -174,19 +340,47 @@
     outline-offset: 0.0625rem;
   }
 
+  .poodle-rating[data-mode="fractional"] .poodle-rating__item:focus-visible {
+    outline: none;
+  }
+
   .poodle-rating__glyph {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .poodle-rating__glyph :global(svg) {
+  .poodle-rating__glyph-base,
+  .poodle-rating__glyph-fill-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .poodle-rating__glyph-base :global(svg),
+  .poodle-rating__glyph-fill-inner :global(svg) {
     width: 1.125em;
     height: 1.125em;
+  }
+
+  .poodle-rating__glyph-base :global(svg) {
     stroke-width: 2;
   }
 
-  .poodle-rating__item[data-filled="true"] .poodle-rating__glyph :global(svg) {
+  .poodle-rating__glyph-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    overflow: hidden;
+    color: var(--poodle-color-accent-base);
+    pointer-events: none;
+  }
+
+  .poodle-rating__glyph-fill-inner {
+    width: max-content;
+  }
+
+  .poodle-rating__glyph-fill-inner :global(svg) {
     fill: currentColor;
     stroke-width: 1.5;
   }
@@ -196,7 +390,6 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Size variants */
   .poodle-rating[data-size="xs"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xs) + 0.75rem); height: calc(var(--poodle-size-icon-xs) + 0.75rem); }
   .poodle-rating[data-size="xs"] .poodle-rating__glyph { font-size: 0.75rem; }
   .poodle-rating[data-size="sm"] .poodle-rating__item { width: calc(var(--poodle-size-icon-sm) + 0.75rem); height: calc(var(--poodle-size-icon-sm) + 0.75rem); }
@@ -206,7 +399,6 @@
   .poodle-rating[data-size="xl"] .poodle-rating__item { width: calc(var(--poodle-size-icon-xl) + 0.75rem); height: calc(var(--poodle-size-icon-xl) + 0.75rem); }
   .poodle-rating[data-size="xl"] .poodle-rating__glyph { font-size: 1.25rem; }
 
-  /* Density variants */
   .poodle-rating[data-density="compact"] { gap: 0.0625rem; }
   .poodle-rating[data-density="comfortable"] { gap: 0.25rem; }
 </style>

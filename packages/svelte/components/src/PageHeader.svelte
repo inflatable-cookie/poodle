@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Callout from "./Callout.svelte";
-  import Icon from "./Icon.svelte";
-  import Pill from "./Pill.svelte";
+  import { default as Callout } from "./Callout.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as Pill } from "./Pill.svelte";
 
   interface Props {
     title?: string | null;

@@ -130,6 +130,12 @@
   function pad(n: number): string {
     return n.toString().padStart(2, "0");
   }
+
+  function selectInputText(event: FocusEvent): void {
+    if (event.currentTarget instanceof HTMLInputElement) {
+      event.currentTarget.select();
+    }
+  }
 </script>
 
 <div
@@ -153,11 +159,14 @@
       aria-label="Hours"
       oninput={(e) => handleSegmentInput(e, "hours")}
       onkeydown={(e) => handleSegmentKeydown(e, "hours")}
-      onfocus={(e) => (e.currentTarget as HTMLInputElement).select()}
+      onfocus={selectInputText}
     />
   </div>
 
-  <span class="poodle-duration-input__separator" aria-hidden="true">:</span>
+  <span class="poodle-duration-input__separator" aria-hidden="true">
+    <span class="poodle-duration-input__separator-spacer"></span>
+    <span class="poodle-duration-input__separator-glyph">:</span>
+  </span>
 
   <div class="poodle-duration-input__segment">
     <label class="poodle-duration-input__label" for="dur-minutes">m</label>
@@ -171,12 +180,15 @@
       aria-label="Minutes"
       oninput={(e) => handleSegmentInput(e, "minutes")}
       onkeydown={(e) => handleSegmentKeydown(e, "minutes")}
-      onfocus={(e) => (e.currentTarget as HTMLInputElement).select()}
+      onfocus={selectInputText}
     />
   </div>
 
   {#if showSeconds}
-    <span class="poodle-duration-input__separator" aria-hidden="true">:</span>
+    <span class="poodle-duration-input__separator" aria-hidden="true">
+      <span class="poodle-duration-input__separator-spacer"></span>
+      <span class="poodle-duration-input__separator-glyph">:</span>
+    </span>
 
     <div class="poodle-duration-input__segment">
       <label class="poodle-duration-input__label" for="dur-seconds">s</label>
@@ -190,7 +202,7 @@
         aria-label="Seconds"
         oninput={(e) => handleSegmentInput(e, "seconds")}
         onkeydown={(e) => handleSegmentKeydown(e, "seconds")}
-        onfocus={(e) => (e.currentTarget as HTMLInputElement).select()}
+        onfocus={selectInputText}
       />
     </div>
   {/if}
@@ -198,8 +210,11 @@
 
 <style>
   .poodle-duration-input {
+    --poodle-duration-input-digit-size: var(--poodle-typography-body-size);
+    --poodle-duration-input-label-size: 0.5625rem;
+    --poodle-duration-input-label-gap: 0.125rem;
     display: inline-flex;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 0.125rem;
     width: fit-content;
     padding: 0.25rem var(--poodle-space-control-x);
@@ -239,7 +254,7 @@
   }
 
   .poodle-duration-input__label {
-    font-size: 0.5625rem;
+    font-size: var(--poodle-duration-input-label-size);
     color: var(--poodle-color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -255,7 +270,7 @@
     background: transparent;
     color: var(--poodle-color-text-primary);
     font-family: var(--poodle-typography-code-family);
-    font-size: var(--poodle-typography-body-size);
+    font-size: var(--poodle-duration-input-digit-size);
     font-variant-numeric: tabular-nums;
     text-align: center;
     line-height: 1;
@@ -263,11 +278,26 @@
   }
 
   .poodle-duration-input__separator {
+    display: grid;
+    grid-template-rows: var(--poodle-duration-input-label-size) 1fr;
+    align-items: stretch;
     color: var(--poodle-color-text-secondary);
-    font-size: var(--poodle-typography-body-size);
+    user-select: none;
+  }
+
+  .poodle-duration-input__separator-spacer {
+    display: block;
+    min-height: 0;
+    margin-bottom: var(--poodle-duration-input-label-gap);
+  }
+
+  .poodle-duration-input__separator-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--poodle-duration-input-digit-size);
     font-weight: 600;
     line-height: 1;
-    user-select: none;
   }
 
   /* Size variants */
@@ -277,11 +307,15 @@
 
   .poodle-duration-input[data-size="xs"] .poodle-duration-input__field {
     width: 1.5rem;
-    font-size: 0.75rem;
+  }
+
+  .poodle-duration-input[data-size="xs"] {
+    --poodle-duration-input-digit-size: 0.75rem;
+    --poodle-duration-input-label-size: 0.5rem;
   }
 
   .poodle-duration-input[data-size="xs"] .poodle-duration-input__label {
-    font-size: 0.5rem;
+    --poodle-duration-input-label-size: 0.5rem;
   }
 
   .poodle-duration-input[data-size="sm"] {
@@ -290,20 +324,20 @@
 
   .poodle-duration-input[data-size="lg"] {
     padding: 0.3125rem calc(var(--poodle-space-control-x) + 0.125rem);
+    --poodle-duration-input-digit-size: 0.9375rem;
   }
 
   .poodle-duration-input[data-size="lg"] .poodle-duration-input__field {
     width: 2rem;
-    font-size: 0.9375rem;
   }
 
   .poodle-duration-input[data-size="xl"] {
     padding: 0.375rem calc(var(--poodle-space-control-x) + 0.1875rem);
+    --poodle-duration-input-digit-size: 1rem;
   }
 
   .poodle-duration-input[data-size="xl"] .poodle-duration-input__field {
     width: 2.25rem;
-    font-size: 1rem;
   }
 
   /* Density variants */

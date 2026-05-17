@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Progress from "./Progress.svelte";
-  import Spinner from "./Spinner.svelte";
+  import { default as Progress } from "./Progress.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
 
   type PageLoadingPresentation = "overlay" | "inline";
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Readable } from "svelte/store";
 
-  import ToastStack from "./ToastStack.svelte";
+  import { default as ToastStack } from "./ToastStack.svelte";
   import type {
     ToastHostPlacement,
     ToastHostStore,

@@ -2734,8 +2734,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "value", type: "number | null | undefined", default: "undefined", description: "Bindable rating value. Leave undefined for uncontrolled mode." },
-      { name: "defaultValue", type: "number | null", default: "null", description: "Initial value for uncontrolled mode." },
+      { name: "defaultValue", type: "number | null", default: "null", description: "Initial display value for uncontrolled mode." },
       { name: "max", type: "number", default: "5", description: "Maximum number of stars." },
+      { name: "step", type: "number", default: "0.5", description: "Interactive input increment. Input snaps to this step, while incoming display values may still be arbitrary fractions." },
       { name: "allowClear", type: "boolean", default: "false", description: "Whether clicking the current value clears the rating." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the rating input is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the rating." },
@@ -2746,10 +2747,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     usage: `<script lang="ts">
   import { Rating } from "@poodle/svelte";
 
-  let stars: number | null = 3;
+  let stars: number | null = 3.5;
 </script>
 
-<Rating bind:value={stars} max={5} allowClear />`,
+<Rating bind:value={stars} max={5} step={0.5} allowClear />`,
   },
 
   region: {

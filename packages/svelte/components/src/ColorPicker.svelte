@@ -3,9 +3,9 @@
 </script>
 
 <script lang="ts">
-  import Slider from "./Slider.svelte";
-  import SegmentedControl from "./SegmentedControl.svelte";
-  import NumberInput from "./NumberInput.svelte";
+  import { default as Slider } from "./Slider.svelte";
+  import { default as SegmentedControl } from "./SegmentedControl.svelte";
+  import { default as NumberInput } from "./NumberInput.svelte";
   import {
     hexToHsv,
     hsvToHex,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { formatNumber, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -103,16 +103,8 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const isControlled = $derived(value !== undefined);
   const currentValue = $derived(isControlled ? parsedValue : uncontrolledValue);
-  const effectiveValidationState = $derived(
-    validate
-      ? internalValidationStatus === "validating"
-        ? "pending"
-        : internalValidationStatus === "valid"
-          ? "valid"
-          : internalValidationStatus === "invalid"
-            ? "invalid"
-            : validationState
-      : validationState
+  const effectiveValidationState = $derived.by(() =>
+    validate ? validationStatusToState(internalValidationStatus, validationState) : validationState
   );
   const ariaInvalid = $derived(effectiveValidationState === "invalid" ? true : undefined);
   const ariaBusy = $derived(effectiveValidationState === "pending" ? true : undefined);
@@ -130,11 +122,21 @@
   });
 
   function inferValueMode(
-    currentValue: number | string | null,
+    currentValue: number | string | null | undefined,
     initialValue: number | string | null,
   ): "number" | "string" {
     if (typeof currentValue === "string" || typeof initialValue === "string") return "string";
     return "number";
+  }
+
+  function validationStatusToState(
+    status: InputValidationStatus,
+    fallback: ValidationState,
+  ): ValidationState {
+    if (status === "validating") return "pending";
+    if (status === "valid") return "valid";
+    if (status === "invalid") return "invalid";
+    return fallback;
   }
 
   function parseNumberish(input: number | string | null | undefined): number | null {

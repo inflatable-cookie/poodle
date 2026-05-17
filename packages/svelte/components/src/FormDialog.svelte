@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Button from "./Button.svelte";
-  import Dialog from "./Dialog.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Dialog } from "./Dialog.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
-  import FormLayout from "./FormLayout.svelte";
+  import { default as FormLayout } from "./FormLayout.svelte";
 
   interface Props {
     open?: boolean | null | undefined;
@@ -58,7 +58,7 @@
     onOpenChange = undefined,
     children,
     body,
-    actions,
+    actions: actionContent,
     subtitleContent,
   }: Props = $props();
 
@@ -146,8 +146,8 @@
   {/if}
 
   {#snippet actions()}
-    {#if actions}
-      {@render actions(submitting)}
+    {#if actionContent}
+      {@render actionContent(submitting)}
     {:else if resolvedShowActions}
       <Button
         variant="ghost"

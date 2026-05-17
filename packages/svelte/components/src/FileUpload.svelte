@@ -360,8 +360,8 @@
   }
 
   .poodle-file-upload__dropzone--active {
-    border-color: var(--poodle-color-accent-default, #6366f1);
-    background: color-mix(in srgb, var(--poodle-color-accent-default, #6366f1) 8%, transparent);
+    border-color: var(--poodle-color-accent-base, #6366f1);
+    background: color-mix(in srgb, var(--poodle-color-accent-base, #6366f1) 8%, transparent);
   }
 
   .poodle-file-upload__input {
@@ -399,7 +399,7 @@
   }
 
   .poodle-file-upload__browse {
-    color: var(--poodle-color-accent-default, #6366f1);
+    color: var(--poodle-color-accent-base, #6366f1);
     text-decoration: underline;
   }
 

@@ -1,18 +1,20 @@
 # Rating
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-05-17
 
 ## 1. Purpose
 
 - Component name: `Rating`
 - Layer: `foundation`
 - Summary: an ordinal judgment control for choosing a bounded score using a
-  row of selectable star items
+  row of selectable star items, with optional fractional display and stepped
+  fractional input
 - In scope: bounded item count, single-value selection, optional clear-on-repeat,
-  roving focus, disabled state
+  roving focus for whole-step mode, slider-style stepped interaction for
+  fractional mode, disabled state, partial star fill rendering
 - Out of scope: review workflows, written feedback, weighted scoring systems,
-  half-star values
+  arbitrary pointer precision beyond the configured input step
 
 ## 2. Anatomy
 
@@ -20,15 +22,22 @@ Updated: 2026-03-15
 [Root .rating]
   └── [Item .rating__item] (repeated max times)
         └── [Glyph .rating__glyph]
-              └── Icon (name="star" size="sm")
+              ├── [Base .rating__glyph-base]
+              │     └── Icon (name="star" size="sm")
+              └── [Fill .rating__glyph-fill]
+                    └── [FillInner .rating__glyph-fill-inner]
+                          └── Icon (name="star" size="sm")
 ```
 
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
-| Root | `<div>` | yes | inline-flex container with radiogroup role |
+| Root | `<div>` | yes | inline-flex container with `radiogroup` role in whole-step mode or `slider` role in fractional mode |
 | Item | `<button>` | yes | individual rating option, repeated `max` times |
 | Glyph | `<span>` | yes | icon wrapper inside each item |
-| Icon | `Icon` component | yes | star icon at size `sm` |
+| Base | `<span>` | yes | unfilled star layer |
+| Fill | `<span>` | yes | clipped filled-star layer sized by per-star fill ratio |
+| FillInner | `<span>` | yes | fixed-width fill glyph holder inside the clipped layer |
+| Icon | `Icon` component | yes | star icon at the resolved size |
 
 ## 3. Props And Inputs
 
@@ -39,6 +48,7 @@ Updated: 2026-03-15
 | `value` | `number \| null` | `null` | no | controlled selected value |
 | `defaultValue` | `number \| null` | `null` | no | uncontrolled initial value |
 | `max` | `number` | `5` | no | total number of rating items |
+| `step` | `number` | `0.5` | no | interactive input increment; values below `1` enable fractional mode, incoming display values may still be arbitrary fractions |
 | `allowClear` | `boolean` | `false` | no | whether clicking the current value deselects it |
 | `disabled` | `boolean` | `false` | no | disables all items |
 | `ariaLabel` | `string \| null` | `null` | no | accessible group label |
@@ -51,6 +61,17 @@ Updated: 2026-03-15
 - bindable value plus callback: `value`, `onValueChange`
 - leave `value` undefined to use uncontrolled mode seeded by `defaultValue`
 - pass `value={null}` to use a controlled empty state
+- incoming controlled/uncontrolled values are clamped to the valid range for
+  display, but are not quantized to `step`
+- user-generated changes are quantized to `step`
+
+### Input vs Display Value
+
+- Display accepts any fractional value within range, for example `3.7`
+- Interactive input snaps to the configured `step`
+- With the default `step={0.5}`, clicking, hovering, and keyboard changes snap
+  to half-stars
+- `step={1}` preserves whole-star selection behavior
 
 ## 4. States
 
@@ -59,9 +80,10 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | empty | no value selected | all items show unfilled color |
-| selected | value is set | items up to and including value show filled color |
-| hover/focus | item hovered or focus-visible | highlighted background on target item |
+| selected | value is set | each star fills by its per-star ratio; full stars fill completely, the active partial star fills proportionally |
+| hover/focus | item hovered or focus-visible | highlighted background on target item or glow on hovered fractional segment |
 | disabled | `disabled=true` | all items show disabled opacity, cursor not-allowed |
+| fractional | `step < 1` | root switches to slider semantics; stars remain button elements for pointer interaction but are hidden from accessibility tree |
 
 ### Component States
 
@@ -69,6 +91,7 @@ Updated: 2026-03-15
 |-------|------|-------------|
 | `selectedValue` | `number \| null` | currently selected rating value |
 | `focusIndex` | `number` | index of the currently focusable item (roving focus) |
+| `hoverValue` | `number \| null` | fractional hover preview value in fractional mode |
 
 ## 5. Callbacks
 
@@ -80,30 +103,41 @@ Updated: 2026-03-15
 
 ### Semantics
 
-- Role: `radiogroup` on root element
+- Whole-step mode (`step >= 1`):
+  - root role: `radiogroup`
+  - each item: `role="radio"`, `aria-checked`, `aria-label="{index+1} of {max}"`
+- Fractional mode (`step < 1`):
+  - root role: `slider`
+  - root exposes `aria-valuemin="0"`, `aria-valuemax="{max}"`,
+    `aria-valuenow`, and `aria-valuetext`
+  - item buttons remain pointer targets but are `aria-hidden="true"`
 - `aria-label` on root from `ariaLabel` prop
-- Each item: `role="radio"`, `aria-checked` (true for selected, false otherwise),
-  `aria-label="{index+1} of {max}"`
 - Disabled items: `disabled` attribute on button
 
 ### Keyboard
 
 | Key | Behavior |
 |-----|----------|
-| `ArrowRight` / `ArrowUp` | move focus to next item |
-| `ArrowLeft` / `ArrowDown` | move focus to previous item |
-| `Home` | move focus to first item |
-| `End` | move focus to last item |
-| `Enter` / `Space` | select the focused item |
+| Whole-step: `ArrowRight` / `ArrowUp` | move focus to next item |
+| Whole-step: `ArrowLeft` / `ArrowDown` | move focus to previous item |
+| Whole-step: `Home` | move focus to first item |
+| Whole-step: `End` | move focus to last item |
+| Whole-step: `Enter` / `Space` | select the focused item |
+| Fractional: `ArrowRight` / `ArrowUp` | increase value by `step` |
+| Fractional: `ArrowLeft` / `ArrowDown` | decrease value by `step` |
+| Fractional: `Home` | set to minimum selectable value (`0` when clearable, otherwise `step`) |
+| Fractional: `End` | set to `max` |
+| Fractional: `Enter` / `Space` | clear when `allowClear=true` and a value is present |
 
 ### Focus And Announcement
 
-- focus entry: roving tabindex; only the focusable item (`focusIndex`) has
+- whole-step focus entry: roving tabindex; only the focusable item (`focusIndex`) has
   `tabindex="0"`, all others have `tabindex="-1"`
-- focus wraps: arrow keys wrap from last to first and vice versa
+- fractional focus entry: root slider receives `tabindex="0"`
 - live-region behavior: none
-- GPUI-native accessibility mapping notes: map to a radio-group-like control
-  with bounded ordinal options
+- GPUI-native accessibility mapping notes:
+  - whole-step mode maps to a radio-group-like control
+  - fractional mode maps to a stepped slider-like control
 
 ## 7. Layout
 
@@ -112,6 +146,7 @@ Updated: 2026-03-15
 - Items pack inline with a small gap
 - Each item is a fixed 2rem x 2rem touch target
 - Icon glyph renders at 1rem font-size
+- Partial fills are achieved via a clipped overlay rather than alternate glyphs
 
 ### Composition
 
@@ -132,8 +167,12 @@ Updated: 2026-03-15
 
 | Attribute | Value |
 |-----------|-------|
-| `role` | `radiogroup` |
+| `role` | `radiogroup` when `step >= 1`; `slider` when `step < 1` |
 | `aria-label` | from `ariaLabel` prop |
+| `aria-valuemin` | `0` in fractional mode |
+| `aria-valuemax` | `max` in fractional mode |
+| `aria-valuenow` | current numeric value or `0` in fractional mode |
+| `aria-valuetext` | `"No rating selected out of {max}"` or `"{value} out of {max}"` in fractional mode |
 
 ### Item `.rating__item` (default)
 
@@ -147,7 +186,7 @@ Updated: 2026-03-15
 | `border` | `0` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
-| `color` | `color-mix(in srgb, var(--poodle-color-text-secondary) 78%, transparent)` |
+| `color` | `color-mix(in srgb, var(--poodle-color-text-secondary) 48%, transparent)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
 
@@ -155,23 +194,19 @@ Updated: 2026-03-15
 
 | Attribute | Value |
 |-----------|-------|
-| `role` | `radio` |
-| `aria-checked` | `true` if selected, `false` otherwise |
-| `aria-label` | `"{index+1} of {max}"` |
-| `tabindex` | `0` for focused item, `-1` for all others |
+| `role` | `radio` in whole-step mode |
+| `aria-checked` | `true` if selected, `false` otherwise in whole-step mode |
+| `aria-label` | `"{index+1} of {max}"` in whole-step mode |
+| `aria-hidden` | `"true"` in fractional mode |
+| `tabindex` | `0` for focused item and `-1` for others in whole-step mode; `-1` for all items in fractional mode |
 
-### Item filled `.rating__item[data-filled="true"]`
+### Item hover/focus
 
-| Property | Value |
-|----------|-------|
-| `color` | `color-mix(in srgb, var(--poodle-color-accent-base) 84%, var(--poodle-color-text-primary))` |
-
-### Item hover/focus `.rating__item:hover:not(:disabled)`, `.rating__item:focus-visible`
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent)` |
-| `outline` | `none` |
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.rating__item[data-hovered="true"]` | `filter` | `drop-shadow(0 0 0.375rem color-mix(in srgb, var(--poodle-color-accent-base) 52%, transparent))` |
+| `.rating__item:focus-visible` | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
+| `.rating[data-mode="fractional"]:focus-visible` | `outline` | same focus ring on root slider |
 
 ### Item disabled `.rating__item:disabled`
 
@@ -184,15 +219,17 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `1rem` |
-| `line-height` | `1` |
+| `position` | `relative` |
+| `display` | `inline-flex` |
 
-### Icon
+### Glyph Fill `.rating__glyph-fill`
 
-| Prop | Value |
-|------|-------|
-| `name` | `"star"` |
-| `size` | `"sm"` |
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `inset` | `0 auto 0 0` |
+| `overflow` | `hidden` |
+| `color` | `var(--poodle-color-accent-base)` |
 
 ### Size adjustments
 
@@ -207,10 +244,12 @@ Updated: 2026-03-15
 ## 9. Svelte Notes
 
 - Uses the `Icon` component internally for star glyphs
-- Roving focus is managed via a `focusIndex` state variable; only the item at
-  `focusIndex` receives `tabindex="0"`
-- Filled state is determined by comparing each item's index against the current
-  selected value and applied via `data-filled` attribute
+- Roving focus is used only in whole-step mode
+- Fractional mode uses a slider-like root with button children retained for
+  pointer hit-targets
+- Partial fill is calculated per star by clipping an accent-colored overlay
+- Incoming values are clamped for display but not quantized to `step`
+- User-generated values are quantized to `step`
 - Supports both controlled and uncontrolled patterns with bindable `value` and
   `defaultValue`
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
@@ -229,10 +268,12 @@ Updated: 2026-03-15
 
 ### Tier 1: Strict Parity
 
-- [ ] `radiogroup` semantics with `radio` items
-- [ ] `aria-checked` reflects selected state
-- [ ] roving tabindex focus management
-- [ ] keyboard navigation (arrows, home, end, enter, space)
+- [ ] whole-step radiogroup semantics with radio items
+- [ ] fractional slider semantics with stepped keyboard input
+- [ ] `aria-checked` reflects selected state in whole-step mode
+- [ ] `aria-valuenow` / `aria-valuetext` reflect fractional state
+- [ ] roving tabindex focus management in whole-step mode
+- [ ] keyboard navigation (whole-step roving, fractional step increments)
 - [ ] `allowClear` deselection behavior
 
 ### Tier 2: Visual Parity
@@ -240,9 +281,9 @@ Updated: 2026-03-15
 - [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] 2rem x 2rem item touch targets
 - [ ] 0.125rem gap between items
-- [ ] unfilled color matches 78% secondary text mix
-- [ ] filled color matches 84% accent / primary text mix
-- [ ] hover/focus background matches 14% accent mix
+- [ ] unfilled color matches 48% secondary text mix
+- [ ] partial and full fills use accent overlay clipping cleanly
+- [ ] hovered item glow matches accent drop-shadow
 - [ ] disabled opacity matches `--poodle-state-opacity-disabled`
 
 ### Tier 3: Implementation Freedom
@@ -273,6 +314,12 @@ All preview apps must render the following specimens identically.
 |-------|-------------|-----------------|
 | 10-star scale | `defaultValue=7`, `max=10`, `ariaLabel="Score out of 10"` | Row of 10 star items; first 7 filled, last 3 unfilled |
 
+### Half-star steps
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Half-star steps | `value=3.5`, `step=0.5`, `allowClear=true`, `ariaLabel="Half-star rating"` | Row of 5 star items; first 3 stars fully filled, fourth star half-filled, fifth unfilled; pointer and keyboard input snap to half-stars |
+
 ### Clearable
 
 | Label | Props/Config | Expected Visual |
@@ -290,5 +337,5 @@ All preview apps must render the following specimens identically.
 - contract status: `detailed contract`
 - approvers: pending
 - downstream adopters: quality scoring, preference capture, review forms
-- future follow-up: consider half-star or fractional rating support as a
-  separate contract extension
+- future follow-up: decide whether arbitrary display fractions plus stepped
+  input should remain the permanent model or become separate explicit props

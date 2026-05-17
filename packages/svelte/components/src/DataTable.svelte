@@ -1,14 +1,14 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Button from "./Button.svelte";
-  import Checkbox from "./Checkbox.svelte";
-  import Icon from "./Icon.svelte";
-  import IconButton from "./IconButton.svelte";
-  import Menu from "./Menu.svelte";
-  import Popover from "./Popover.svelte";
-  import Select from "./Select.svelte";
-  import TextInput from "./TextInput.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Checkbox } from "./Checkbox.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
+  import { default as Menu } from "./Menu.svelte";
+  import { default as Popover } from "./Popover.svelte";
+  import { default as Select } from "./Select.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, MenuItem, SemanticControlSizeRole } from "./types";
 

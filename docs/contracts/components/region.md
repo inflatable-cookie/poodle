@@ -30,7 +30,7 @@ region (root)
 Region does not accept child content. It renders only the optional `label`
 inside the placeholder block.
 
-## 3. Props And Inputs
+## 4. Props And Inputs
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
@@ -38,14 +38,14 @@ inside the placeholder block.
 | `color` | `string \| null` | `null` | no | Optional custom border and label color via `--region-color` |
 | `minHeight` | `string` | `"4rem"` | no | Minimum height for the placeholder region |
 
-## 4. States
+## 5. States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | no custom color | Dashed border and muted text use Poodle semantic tokens |
 | custom-color | `color` set | Border and label both adopt the supplied custom color |
 
-## 5. Accessibility
+## 6. Accessibility
 
 ### Semantics
 
@@ -66,7 +66,7 @@ Region is non-interactive and should not be keyboard-focusable.
 - GPUI-native accessibility mapping notes: preserve decorative-only behavior in
   native renderers
 
-## 6. Token Usage
+## 7. Token Usage
 
 | Part | Token | Purpose |
 |------|-------|---------|

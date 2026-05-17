@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import IconButton from "./IconButton.svelte";
-  import Menu from "./Menu.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
+  import { default as Menu } from "./Menu.svelte";
 
   import type { FormActionAlign, FormActionDangerItem, MenuItem } from "./types";
 

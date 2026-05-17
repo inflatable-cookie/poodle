@@ -2,9 +2,9 @@
   import type { Snippet } from "svelte";
   import { tick } from "svelte";
 
-  import Icon from "./Icon.svelte";
-  import Select from "./Select.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as Select } from "./Select.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     BlockEditorMode,
@@ -181,6 +181,44 @@
     emitChange(blocks.map((blockItem, blockIndex) => (blockIndex === index ? { ...blockItem, type } : blockItem)));
   }
 
+  function getTypePickerContext(blockItem: EditorBlock, index: number): TypePickerSnippetProps {
+    return {
+      block: blockItem,
+      index,
+      disabled,
+      options: selectOptions,
+      groupedOptions: selectItems,
+      changeType: (type) => changeType(index, type),
+    };
+  }
+
+  function getAddPickerContext(blockItem: EditorBlock, index: number): AddPickerSnippetProps {
+    return {
+      block: blockItem,
+      index,
+      disabled,
+      options: selectOptions,
+      groupedOptions: selectItems,
+      addBlock: (type) => addBlockAfter(index, type),
+    };
+  }
+
+  function getBlockContext(blockItem: EditorBlock, index: number): BlockSnippetProps {
+    return {
+      block: blockItem,
+      index,
+      disabled,
+      update: (updates) => updateBlock(index, updates),
+    };
+  }
+
+  function handleBlockInput(event: Event, index: number): void {
+    const target = event.currentTarget;
+    if (target instanceof HTMLTextAreaElement) {
+      updateBlock(index, { content: target.value });
+    }
+  }
+
   function handleDragStart(event: DragEvent, index: number): void {
     if (disabled || !canReorder || !event.dataTransfer) {
       return;
@@ -285,14 +323,7 @@
 
             {#if canTypeChange}
               {#if typePicker}
-                {@render typePicker({
-                  block: blockItem,
-                  index,
-                  disabled,
-                  options: selectOptions,
-                  groupedOptions: selectItems,
-                  changeType: (type: BlockType) => changeType(index, type),
-                })}
+                {@render typePicker(getTypePickerContext(blockItem, index))}
               {:else}
                 <div class="poodle-block-editor__type-select">
                   <Select
@@ -335,14 +366,7 @@
             {/if}
             {#if canAdd}
               {#if addPicker}
-                {@render addPicker({
-                  block: blockItem,
-                  index,
-                  disabled,
-                  options: selectOptions,
-                  groupedOptions: selectItems,
-                  addBlock: (type: BlockType) => addBlockAfter(index, type),
-                })}
+                {@render addPicker(getAddPickerContext(blockItem, index))}
               {:else}
                 <div class="poodle-block-editor__add-select">
                   <Select
@@ -381,20 +405,14 @@
 
         <div class="poodle-block-editor__content">
           {#if block}
-            {@render block({
-              block: blockItem,
-              index,
-              disabled,
-              update: (updates: Partial<EditorBlock>) => updateBlock(index, updates),
-            })}
+            {@render block(getBlockContext(blockItem, index))}
           {:else}
             <textarea
               class="poodle-block-editor__input"
               placeholder="Type something..."
               disabled={disabled}
               value={blockItem.content ?? ""}
-              oninput={(event) =>
-                updateBlock(index, { content: (event.currentTarget as HTMLTextAreaElement).value })}
+              oninput={(event) => handleBlockInput(event, index)}
               rows="1"
             ></textarea>
           {/if}

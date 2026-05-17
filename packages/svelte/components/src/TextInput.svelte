@@ -2,8 +2,8 @@
   import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
-  import Icon from "./Icon.svelte";
-  import Spinner from "./Spinner.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as Spinner } from "./Spinner.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -173,21 +173,23 @@
   const hasTrailingAffordance = $derived(Boolean(trailingSnippet));
   const currentValue = $derived(liveValue);
   const canClear = $derived(isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0);
-  const effectiveValidationState = $derived(
-    validate
-      ? internalValidationStatus === "validating"
-        ? "pending"
-        : internalValidationStatus === "valid"
-          ? "valid"
-          : internalValidationStatus === "invalid"
-            ? "invalid"
-            : validationState
-      : validationState
+  const effectiveValidationState = $derived.by(() =>
+    validate ? validationStatusToState(internalValidationStatus, validationState) : validationState
   );
   const ariaInvalid = $derived(effectiveValidationState === "invalid" ? true : undefined);
   const ariaBusy = $derived(effectiveValidationState === "pending" ? true : undefined);
   const charCount = $derived(currentValue.length);
   const charCountText = $derived(maxLength ? `${charCount}/${maxLength}` : `${charCount}`);
+
+  function validationStatusToState(
+    status: InputValidationStatus,
+    fallback: ValidationState,
+  ): ValidationState {
+    if (status === "validating") return "pending";
+    if (status === "valid") return "valid";
+    if (status === "invalid") return "invalid";
+    return fallback;
+  }
   const isOverLimit = $derived(maxLength !== null && charCount > maxLength);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -439,34 +441,34 @@
     internalValidationStatus = "validating";
     internalValidationMessage = "";
 
-    const runValidation = async (): Promise<void> => {
-      try {
-        const result = isSlug
-          ? await validateSlugValue(inputValue)
-          : await validate?.(inputValue, effectiveValidationContext);
-        if (activeValidationKey !== nextValidationKey || inputValue !== liveValue) return;
-        internalValidationStatus = result?.valid ? "valid" : "invalid";
-        internalValidationMessage = result?.message ?? "";
-        lastValidatedValue = inputValue;
-        activeValidationKey = null;
-      } catch {
-        if (activeValidationKey !== nextValidationKey || inputValue !== liveValue) return;
-        internalValidationStatus = "invalid";
-        internalValidationMessage = "Could not validate";
-        lastValidatedValue = inputValue;
-        activeValidationKey = null;
-      }
-    };
-
     if (immediate || validationDebounce <= 0) {
-      void runValidation();
+      void runValidation(inputValue, nextValidationKey);
       return;
     }
 
     validationTimer = setTimeout(() => {
       validationTimer = null;
-      void runValidation();
+      void runValidation(inputValue, nextValidationKey);
     }, validationDebounce);
+  }
+
+  async function runValidation(inputValue: string, validationKey: string): Promise<void> {
+    try {
+      const result = isSlug
+        ? await validateSlugValue(inputValue)
+        : await validate?.(inputValue, effectiveValidationContext);
+      if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+      internalValidationStatus = result?.valid ? "valid" : "invalid";
+      internalValidationMessage = result?.message ?? "";
+      lastValidatedValue = inputValue;
+      activeValidationKey = null;
+    } catch {
+      if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+      internalValidationStatus = "invalid";
+      internalValidationMessage = "Could not validate";
+      lastValidatedValue = inputValue;
+      activeValidationKey = null;
+    }
   }
 
   async function validateSlugValue(inputValue: string): Promise<ValidationResult> {

@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import Calendar from "./Calendar.svelte";
-  import TimeInput from "./TimeInput.svelte";
+  import { default as Calendar } from "./Calendar.svelte";
+  import { default as TimeInput } from "./TimeInput.svelte";
   import {
     formatDateTimeRangeLabel,
     monthAnchorIso,
@@ -68,7 +68,7 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const hasControlledValue = $derived(value !== undefined);
   const hasControlledOpen = $derived(open !== undefined);
-  const currentValue = $derived(normalizeDateTimeRangeValue(hasControlledValue ? value : uncontrolledValue));
+  const currentValue = $derived(normalizeDateTimeRangeValue((hasControlledValue ? value : uncontrolledValue) ?? defaultValue));
   const currentRange = $derived(
     normalizeDateRange({
       start: currentValue.start.date,
@@ -147,6 +147,31 @@
 
     onValueChange?.(normalized);
   }
+
+  function handleRangeChange(nextRange: string | string[] | DateRangeValue): void {
+    if (typeof nextRange !== "object" || Array.isArray(nextRange)) {
+      return;
+    }
+
+    commitValue({
+      start: { ...currentValue.start, date: nextRange.start },
+      end: { ...currentValue.end, date: nextRange.end },
+    });
+  }
+
+  function handleStartTimeChange(nextValue: string | null): void {
+    commitValue({
+      start: { ...currentValue.start, time: nextValue },
+      end: currentValue.end,
+    });
+  }
+
+  function handleEndTimeChange(nextValue: string | null): void {
+    commitValue({
+      start: currentValue.start,
+      end: { ...currentValue.end, time: nextValue },
+    });
+  }
 </script>
 
 <div bind:this={rootElement} class="poodle-date-time-range-picker" data-size={resolvedSize} data-density={resolvedDensity} data-open={isOpen}>
@@ -187,11 +212,7 @@
           size={resolvedSize}
           density={resolvedDensity}
           ariaLabel={ariaLabel ?? placeholder}
-          onValueChange={(nextRange) =>
-            commitValue({
-              start: { ...currentValue.start, date: (nextRange as DateRangeValue).start },
-              end: { ...currentValue.end, date: (nextRange as DateRangeValue).end },
-            })}
+          onValueChange={handleRangeChange}
           onMonthChange={(month) => (visibleMonth = month)}
         />
 
@@ -207,11 +228,7 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} start time` : "Start time"}
-              onValueChange={(nextValue) =>
-                commitValue({
-                  start: { ...currentValue.start, time: nextValue },
-                  end: currentValue.end,
-                })}
+              onValueChange={handleStartTimeChange}
             />
           </div>
 
@@ -226,11 +243,7 @@
               size={resolvedSize}
               density={resolvedDensity}
               ariaLabel={ariaLabel ? `${ariaLabel} end time` : "End time"}
-              onValueChange={(nextValue) =>
-                commitValue({
-                  start: currentValue.start,
-                  end: { ...currentValue.end, time: nextValue },
-                })}
+              onValueChange={handleEndTimeChange}
             />
           </div>
         </div>

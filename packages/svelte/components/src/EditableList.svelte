@@ -1,8 +1,8 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
   import { onDestroy, type Snippet } from "svelte";
 
-  import Button from "./Button.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -352,7 +352,7 @@
       class="poodle-editable-list"
       class:poodle-editable-list--embedded-handle={embeddedHandle}
       role="listbox"
-      {ariaLabel}
+      aria-label={ariaLabel}
       data-disabled={isUnavailable}
       data-size={resolvedSize}
       data-density={resolvedDensity}

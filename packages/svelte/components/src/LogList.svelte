@@ -1,13 +1,14 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Button from "./Button.svelte";
-  import Field from "./Field.svelte";
-  import IconButton from "./IconButton.svelte";
-  import Pill from "./Pill.svelte";
-  import Select from "./Select.svelte";
-  import TextInput from "./TextInput.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Field } from "./Field.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
+  import { default as Pill } from "./Pill.svelte";
+  import { default as Select } from "./Select.svelte";
+  import { default as TextLink } from "./TextLink.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     AuditLogEntry,
@@ -254,7 +255,7 @@
                       <Select
                         id={`log-filter-${filter.field}`}
                         name={filter.field}
-                        options={[{ value: "", label: filter.placeholder ?? "All" }, ...filter.options]}
+                        options={[{ value: "", label: filter.placeholder ?? "All" }, ...(filter.options ?? [])]}
                         value={filterValues[filter.field] ?? ""}
                         describedBy={describedBy}
                         onValueChange={(nextValue) => onFilterChange?.(filter.field, nextValue)}
@@ -337,7 +338,9 @@
                   <div class="poodle-log-list__audit-main">
                     <span class="poodle-log-list__audit-actor">
                       {#if entry.actor && getActorHref}
-                        <a href={getActorHref(entry.actor)} class="poodle-log-list__audit-link">{actorName}</a>
+                        <TextLink href={getActorHref(entry.actor)} className="poodle-log-list__audit-link" tone="inherit">
+                          {actorName}
+                        </TextLink>
                       {:else}
                         {actorName}
                       {/if}
@@ -348,12 +351,12 @@
                     </Pill>
 
                     {#if resourceHref}
-                      <a href={resourceHref} class="poodle-log-list__audit-link poodle-log-list__audit-resource">
+                      <TextLink href={resourceHref} className="poodle-log-list__audit-link poodle-log-list__audit-resource" tone="inherit">
                         {resolveResourceLabel(entry.resourceType)}
                         {#if entry.resourceLabel}
                           <span class="poodle-log-list__audit-resource-label">"{entry.resourceLabel}"</span>
                         {/if}
-                      </a>
+                      </TextLink>
                     {:else}
                       <span class="poodle-log-list__audit-resource">
                         {resolveResourceLabel(entry.resourceType)}
@@ -682,15 +685,8 @@
     white-space: nowrap;
   }
 
-  .poodle-log-list__audit-link {
-    color: inherit;
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
-    text-underline-offset: 0.125rem;
-  }
-
-  .poodle-log-list__audit-link:hover {
-    text-decoration-color: currentColor;
+  :global(.poodle-log-list__audit-link) {
+    min-width: 0;
   }
 
   .poodle-log-list__audit-details {

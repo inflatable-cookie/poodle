@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import Icon from "./Icon.svelte";
-  import Popover from "./Popover.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as Popover } from "./Popover.svelte";
 
   interface Props {
     label: string;

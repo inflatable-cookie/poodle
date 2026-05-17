@@ -6,7 +6,7 @@
   import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 
-  import Icon from "./Icon.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 

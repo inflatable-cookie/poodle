@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Select from "./Select.svelte";
+  import { default as Select } from "./Select.svelte";
   import { defaultTimeZoneOptions } from "./date";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, TimeZoneOption } from "./types";
 

@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  import Button from "./Button.svelte";
-  import Checkbox from "./Checkbox.svelte";
-  import FormActions from "./FormActions.svelte";
-  import Icon from "./Icon.svelte";
-  import TextInput from "./TextInput.svelte";
-  import UiPresentationProvider from "./UiPresentationProvider.svelte";
+  import { default as Button } from "./Button.svelte";
+  import { default as Checkbox } from "./Checkbox.svelte";
+  import { default as FormActions } from "./FormActions.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ControlDensity,
@@ -14,8 +14,8 @@
     SemanticControlSizeRole,
   } from "./types";
 
-  import PickerShell from "./PickerShell.svelte";
-  import SelectionSummary from "./SelectionSummary.svelte";
+  import { default as PickerShell } from "./PickerShell.svelte";
+  import { default as SelectionSummary } from "./SelectionSummary.svelte";
   import type {
     BrowseState,
     DrillDownConfig,
@@ -82,6 +82,9 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const currentSelectedIds = $derived(selectedIds);
   const currentQuery = $derived(query);
+  const toolbarSnippet = $derived(toolbarContent as unknown as Snippet<[]>);
+  const selectionSnippet = $derived(selectionContent as unknown as Snippet<[]>);
+  const footerSnippet = $derived(footerContent as unknown as Snippet<[]>);
 
   // Drill-down state
   let drillDepth = $state(0);
@@ -103,9 +106,7 @@
     }
   });
 
-  const drillContext = $derived(Object.fromEntries(
-    Object.entries(drillSelections).map(([key, item]) => [key, item.id]),
-  ) as DrillDownContext);
+  const drillContext = $derived(buildDrillContext());
 
   const drillBreadcrumbs = $derived(drillDown
     ? drillDown.levels
@@ -167,6 +168,12 @@
     finalItemsLoading = false;
   }
 
+  function buildDrillContext(): DrillDownContext {
+    return Object.fromEntries(
+      Object.entries(drillSelections).map(([key, item]) => [key, item.id]),
+    ) as DrillDownContext;
+  }
+
   function drillSelect(item: DrillDownItem): void {
     if (!drillDown) return;
     drillSelections[currentLevel!.key] = item;
@@ -174,10 +181,7 @@
     drillSearchQuery = "";
     drillDepth++;
 
-    const ctx = Object.fromEntries(
-      Object.entries(drillSelections).map(([key, i]) => [key, i.id]),
-    ) as DrillDownContext;
-    onDrillContext?.(ctx);
+    onDrillContext?.(buildDrillContext());
   }
 
   function drillBack(): void {
@@ -201,8 +205,7 @@
     finalItemsLoaded = null;
   }
 
-  function handleDrillSearchKeydown(event: CustomEvent<KeyboardEvent>): void {
-    const keyboardEvent = event.detail;
+  function handleDrillSearchKeydown(keyboardEvent: KeyboardEvent): void {
 
     if (keyboardEvent.key === "Escape" || (keyboardEvent.key === "Backspace" && !drillSearchQuery)) {
       if (drillDepth > 0) {
@@ -399,10 +402,10 @@
       statusId={statusId}
       stateTitle={isDrilling ? "Loading" : (browseState === "loading" ? "Loading candidates" : browseState === "error" ? "Picker unavailable" : browseState === "empty" ? "No candidates available" : "No matching candidates")}
       stateMessage={isDrilling ? "Loading items..." : (browseState === "loading" ? "Picker results are loading while selection state stays host-owned." : browseState === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : browseState === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters.")}
-      toolbar={toolbarContent}
-      selection={!isDrilling ? selectionContent : undefined}
+      toolbar={toolbarSnippet}
+      selection={!isDrilling ? selectionSnippet : undefined}
       stateContent={stateContent}
-      footer={footerContent}
+      footer={footerSnippet}
     >
       {#if isDrilling}
         <ul class="poodle-drill-list" aria-label={currentLevel?.label ?? "Items"}>

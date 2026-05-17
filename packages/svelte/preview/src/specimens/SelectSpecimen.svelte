@@ -133,13 +133,12 @@
 
             {#snippet option({ option, selected })}
               <span class="poodle-specimen__option">
-                <span class="poodle-specimen__option-label">{option.label}</span>
-                {#if option.description}
-                  <span class="poodle-specimen__option-description">{option.description}</span>
-                {/if}
-                {#if selected}
-                  <Pill size="sm" appearance="badge" tone="success">current</Pill>
-                {/if}
+                <span class="poodle-specimen__option-body">
+                  <span class="poodle-specimen__option-label">{option.label}</span>
+                  {#if option.description}
+                    <span class="poodle-specimen__option-description">{option.description}</span>
+                  {/if}
+                </span>
               </span>
             {/snippet}
 
@@ -230,12 +229,19 @@
   .poodle-specimen__option {
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
   }
 
-  .poodle-specimen__option-label {
+  .poodle-specimen__option-body {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .poodle-specimen__option-label {
     min-width: 0;
   }
 

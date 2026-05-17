@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import Card from "./Card.svelte";
-  import MediaThumbnail from "./MediaThumbnail.svelte";
+  import { default as Card } from "./Card.svelte";
+  import { default as MediaThumbnail } from "./MediaThumbnail.svelte";
 
   import type { AspectRatio, CardVariant, MediaKind, MediaState } from "./types";
 
