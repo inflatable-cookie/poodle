@@ -81,9 +81,7 @@
   });
 
   function setOpen(nextOpen: boolean): void {
-    if (isControlled) {
-      open = nextOpen;
-    } else {
+    if (!isControlled) {
       uncontrolledOpen = nextOpen;
     }
 

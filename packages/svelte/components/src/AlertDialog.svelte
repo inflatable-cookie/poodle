@@ -50,11 +50,13 @@
   const uiPresentation = getUiPresentation();
 
   let working = $state(false);
+  let uncontrolledOpen = $state(false);
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const confirmTone = $derived(tone === "danger" ? "danger" as const : "default" as const);
   const isControlled = $derived(open !== undefined);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
   async function handleConfirm(): Promise<void> {
     if (working) {
@@ -77,8 +79,8 @@
   }
 
   function setOpen(nextOpen: boolean): void {
-    if (isControlled) {
-      open = nextOpen;
+    if (!isControlled) {
+      uncontrolledOpen = nextOpen;
     }
 
     onOpenChange?.(nextOpen);
@@ -94,13 +96,13 @@
       onCancel?.();
     }
 
-    onOpenChange?.(nextOpen);
+    setOpen(nextOpen);
   }
 </script>
 
 <div data-size={resolvedSize} data-density={resolvedDensity}>
   <Dialog
-    {open}
+    open={isOpen}
     {title}
     {description}
     role="alertdialog"

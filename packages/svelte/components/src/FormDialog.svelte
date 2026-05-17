@@ -63,6 +63,7 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  let uncontrolledOpen = $state(false);
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -70,6 +71,8 @@
   const resolvedDescription = $derived(subtitle ?? description);
   const contentStyle = $derived(width ? `--poodle-form-dialog-width: ${width};` : "");
   const contentClassName = $derived(width ? "form-dialog__surface" : "");
+  const isControlled = $derived(open !== undefined);
+  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
   function handleSubmit(): void {
     onSubmit?.();
@@ -80,8 +83,8 @@
   }
 
   function setOpen(nextOpen: boolean): void {
-    if (open !== undefined) {
-      open = nextOpen;
+    if (!isControlled) {
+      uncontrolledOpen = nextOpen;
     }
 
     onOpenChange?.(nextOpen);
@@ -97,12 +100,12 @@
       notifyCancel();
     }
 
-    onOpenChange?.(nextOpen);
+    setOpen(nextOpen);
   }
 </script>
 
 <Dialog
-  {open}
+  open={isOpen}
   title={title}
   description={subtitleContent ? null : resolvedDescription}
   role="dialog"

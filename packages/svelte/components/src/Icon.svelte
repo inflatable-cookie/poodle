@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { fromStore } from "svelte/store";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { ControlSize } from "./types";
   import type { IconNodes } from "./icon-registry";
 
-  import { resolveIconNodes, getIconSet } from "./icon-registry";
+  import { resolveIconNodes, getIconSetStore } from "./icon-registry";
 
   /**
    * The icon to display. Accepts:
@@ -28,13 +29,13 @@
     ariaLabel?: string | null;
   } = $props();
 
-  const iconSet = getIconSet();
+  const iconSet = fromStore(getIconSetStore());
   const uiPresentation = getUiPresentation();
 
   const resolvedIcon = $derived(icon ?? name);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const nodes = $derived(resolveIconNodes(resolvedIcon, iconSet));
+  const nodes = $derived(resolveIconNodes(resolvedIcon, iconSet.current));
 </script>
 
 <svg

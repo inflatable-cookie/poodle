@@ -62,8 +62,6 @@
 
     if (!isControlled) {
       uncontrolledOpen = nextOpen;
-    } else {
-      open = nextOpen;
     }
 
     onOpenChange?.(nextOpen);

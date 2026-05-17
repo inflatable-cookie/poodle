@@ -1,4 +1,5 @@
 import { getContext, setContext } from "svelte";
+import { writable, type Readable, type Writable } from "svelte/store";
 import * as lucideIcons from "@poodle/icons-lucide";
 
 // ---------------------------------------------------------------------------
@@ -25,15 +26,18 @@ export type IconSet = Record<string, IconNodes>;
 // ---------------------------------------------------------------------------
 
 const POODLE_ICON_SET = Symbol("poodle-icon-set");
+const DEFAULT_ICON_SET_STORE = writable<IconSet>({});
 
 /** @internal Set an icon set via Svelte context. Used by `IconProvider`. */
-export function setIconSet(icons: IconSet): void {
-  setContext(POODLE_ICON_SET, icons);
+export function setIconSet(icons: IconSet): Writable<IconSet> {
+  const store = writable(icons);
+  setContext(POODLE_ICON_SET, store);
+  return store;
 }
 
-/** @internal Read the icon set from Svelte context. */
-export function getIconSet(): IconSet | null {
-  return getContext<IconSet>(POODLE_ICON_SET) ?? null;
+/** @internal Read the icon set store from Svelte context. */
+export function getIconSetStore(): Readable<IconSet> {
+  return getContext<Readable<IconSet>>(POODLE_ICON_SET) ?? DEFAULT_ICON_SET_STORE;
 }
 
 // ---------------------------------------------------------------------------
