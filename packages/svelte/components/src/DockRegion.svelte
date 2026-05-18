@@ -548,10 +548,18 @@
     width: 100%;
   }
 
+  .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs[data-orientation="vertical"]) {
+    grid-template-columns: 1fr;
+    --poodle-tabs-control-height: 2.5rem;
+    --poodle-tabs-control-x: 0.75rem;
+  }
+
   .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__list) {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
     border-bottom: 0;
+    border-right: 0 !important;
   }
 
   .poodle-dock-region__strip[data-orientation="vertical"] :global(.poodle-tabs__item) {

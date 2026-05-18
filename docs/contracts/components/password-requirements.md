@@ -1,7 +1,7 @@
 # PasswordRequirements
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -10,7 +10,8 @@ Updated: 2026-03-30
 - Summary: a UI-only password-policy checklist that evaluates a password
   against caller-supplied requirements
 - In scope: checklist rendering, live requirement evaluation, loading/error
-  display, shared neutral wording for basic password rules
+  display, shared neutral wording for basic password rules, size-driven panel
+  and typography scaling
 - Out of scope: fetching password policy, auth-policy fallback defaults,
   password-reset workflow orchestration
 
@@ -25,6 +26,8 @@ Updated: 2026-03-30
 | `title` | `string` | `"Password requirements"` |
 | `hint` | `string \| null` | default hint text |
 | `loadingLabel` | `string` | `"Loading requirements..."` |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` |
 
 ## 3. Data Contract
 
@@ -46,6 +49,8 @@ type PasswordRequirementsPolicy = {
 - marks checklist items complete as `password` satisfies each rule
 - may render `description` and `hint` below the checklist
 - may render a simple inline `error` message when requirements are absent
+- resolves `size` from presentation context when omitted
+- scales panel padding, title/body text, list indent, and vertical rhythm by size
 
 ## 5. Boundary
 
@@ -87,3 +92,25 @@ type PasswordRequirementsPolicy = {
   this component with the password field via `aria-describedby`
 - GPUI-native accessibility mapping notes: GPUI must expose list semantics and
   per-item pass/fail status through native accessibility APIs
+
+## 7. Sizing
+
+`PasswordRequirements` supports `size` but not `density`.
+
+Size affects:
+
+- panel padding
+- title font size
+- checklist / description / hint text size
+- list indent
+- vertical rhythm between checklist and supporting copy
+
+### Size ladder
+
+| Size | Panel padding | Title size | Body size |
+|------|---------------|------------|-----------|
+| `xs` | `0.75rem` | `0.875rem` | `0.75rem` |
+| `sm` | `0.875rem` | `0.9375rem` | `0.8125rem` |
+| `md` | `1rem` | `1rem` | `0.875rem` |
+| `lg` | `1.125rem` | `1.0625rem` | `0.9375rem` |
+| `xl` | `1.25rem` | `1.125rem` | `1rem` |

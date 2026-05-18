@@ -31,19 +31,19 @@
     </div>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <div class="poodle-specimen__row">
       <Spinner variant="ring" {size} />
       <Spinner variant="grid" {size} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <div class="poodle-specimen__row">
       <Spinner variant="ring" {density} />
       <Spinner variant="grid" {density} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

@@ -153,7 +153,6 @@ export {
 } from "./media-workflow";
 export { default as MediaPreview } from "./MediaPreview.svelte";
 export { default as MediaThumbnail } from "./MediaThumbnail.svelte";
-export { default as MediaUploadStatusPanel } from "./MediaUploadStatusPanel.svelte";
 export { default as PageHeader } from "./PageHeader.svelte";
 export { default as PickerShell } from "./PickerShell.svelte";
 export { default as RelationPicker } from "./RelationPicker.svelte";

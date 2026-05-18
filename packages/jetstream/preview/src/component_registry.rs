@@ -144,7 +144,6 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "media-picker", display_name: "MediaPicker", description: "Media asset selection dialog.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "media-preview", display_name: "MediaPreview", description: "Media asset preview.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "media-thumbnail", display_name: "MediaThumbnail", description: "Compact media thumbnail.", tier: Tier::Composite, has_specimen: true },
-    ComponentEntry { slug: "media-upload-status-panel", display_name: "MediaUploadStatusPanel", description: "Upload workflow status.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "page-header", display_name: "PageHeader", description: "Page-level header.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "page-loading", display_name: "PageLoading", description: "Full-viewport loading overlay.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "panel-header", display_name: "PanelHeader", description: "Panel title with collapse and close controls.", tier: Tier::Composite, has_specimen: true },

@@ -62,11 +62,11 @@
     />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <CodeInput id={"size-" + size} {size} label={"Code at " + size} ariaLabel={"Code at " + size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <CodeInput id={"density-" + density} {density} label={"Code at " + density} ariaLabel={"Code at " + density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

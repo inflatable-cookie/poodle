@@ -39,11 +39,11 @@
     <Checkbox label="Requires moderation" checked={true} selectedColor="#f59e0b" />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Checkbox label="Accept terms" {size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Checkbox id={"density-" + density} label="Option" {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

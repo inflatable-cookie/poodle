@@ -159,7 +159,6 @@ export const allComponents: ComponentEntry[] = [
   entry("MediaBrowsePanel", "media", "Browsable media grid with search and pagination.", true),
   entry("MediaPreview", "media", "Media asset preview with metadata and fallback.", true),
   entry("MediaThumbnail", "media", "Compact media thumbnail with overlay metadata.", true),
-  entry("MediaUploadStatusPanel", "media", "Upload progress panel with file status.", true),
 
   // Feedback
   entry("Callout", "feedback", "Informational block with tone and optional actions.", true),

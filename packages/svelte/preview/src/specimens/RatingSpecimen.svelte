@@ -40,11 +40,11 @@
     <Rating defaultValue={2} disabled ariaLabel="Disabled rating" />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Rating value={3} {size} ariaLabel={"Rating at " + size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Rating value={3} {density} ariaLabel={"Rating at " + density + " density"} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

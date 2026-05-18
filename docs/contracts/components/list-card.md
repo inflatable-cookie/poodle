@@ -9,9 +9,11 @@ Updated: 2026-03-27
 
 - Component name: `ListCard`
 - Layer: `foundation`
-- Summary: a compact horizontal card for displaying items in list views with
+- Summary: a compact card for displaying items in list views and square-ish
+  tile contexts with
   leading icon/thumbnail, title, badges, subtitle, footer counters, meta,
-  explicit actions, selectable state, and optional link-root navigation
+  explicit actions, selectable state, an exclusive trailing lane, and optional
+  link-root navigation
 - In scope: interactive and disabled states, leading shape variants, leading fill
   variants (tint/solid), custom accent color theming, snippet-based leading,
   badges, footer, actions, and trailing composition, title truncation, meta display
@@ -66,8 +68,9 @@ Updated: 2026-03-27
 | `href` | `string \| null` | `null` | no | when present and not disabled/selectable, renders a real link root |
 | `leadingShape` | `"circle" \| "rounded-square"` | `"circle"` | no | shape of the leading snippet container |
 | `leadingFill` | `"tint" \| "solid"` | `"tint"` | no | fill style — tint uses translucent accent, solid uses opaque accent with white icon |
+| `leadingSizeOffset` | `number` | `0` | no | relative leading-size step offset from the resolved card size; rounded to whole steps and clamped to the `xs`→`xl` ladder |
 | `accentColor` | `string \| null` | `null` | no | custom CSS color for leading background and icon; overrides theme accent |
-| `layout` | `"default" \| "compact"` | `"default"` | no | compact mode is for dense list and reorder contexts |
+| `layout` | `"default" \| "compact" \| "stacked"` | `"default"` | no | `compact` is for dense list and reorder contexts; `stacked` creates a square-ish tile with leading on top and a bottom utility rail |
 | `interactive` | `boolean` | `false` | no | enables hover/focus/click behavior |
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `selectable` | `boolean` | `false` | no | toggles selected state through the root interaction contract |
@@ -93,7 +96,7 @@ Updated: 2026-03-27
 | `badges` | pills or badges displayed inline with the title |
 | `footer` | counter icons, links, or supplementary info below subtitle |
 | `actions` | explicit action trigger composition |
-| `trailing` | action button or status indicator |
+| `trailing` | exclusive right-edge content; when present, replaces `meta` and `actions` |
 
 ### Controlled And Uncontrolled
 
@@ -113,6 +116,7 @@ Updated: 2026-03-27
 | disabled | `disabled=true` | reduced opacity, not-allowed cursor |
 | selected | `selected=true` | accent border and focus-style outline |
 | compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |
+| stacked | `layout="stacked"` | vertical layout with top leading area, body column, and bottom utility rail |
 | not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
 
 ## 5. Callbacks
@@ -151,7 +155,7 @@ Updated: 2026-03-27
 
 ### Sizing
 
-- Root: flex row, fills parent width
+- Root: flex row by default, stacked column when `layout="stacked"`
 - Leading: fixed square — 2rem (circle) or 2.75rem (rounded-square)
 - Body: flex 1, min-width 0 for truncation
 - Header: flex row, title truncates, badges shrink-proof
@@ -164,6 +168,13 @@ Updated: 2026-03-27
   footer counters (ListCardCounter), explicit actions or trailing status via
   snippets, and optional rich title composition via the `titleContent` snippet
   when the title needs inline formatting rather than plain text
+- right-edge composition: `meta` + `actions` may be combined, but `trailing`
+  is exclusive and replaces both so the card only has one trailing lane
+- leading-size composition: `leadingSizeOffset` shifts the leading block,
+  inner icon, and selection indicator together relative to the resolved card
+  size without changing title/meta typography
+- stacked layout: leading sits on top, subtitle may wrap to two lines, and
+  trailing/meta/actions move into a full-width bottom utility rail
 - resizing: fills parent width, height auto-fits content
 - context menu: wrap ListCard in ContextMenu for right-click actions
 - explicit menu/action composition should use the `actions` snippet rather than

@@ -31,13 +31,13 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <TimeInput id={"size-" + size} {size} ariaLabel={size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <TimeInput id={"density-" + density} {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

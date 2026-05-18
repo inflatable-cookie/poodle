@@ -73,13 +73,13 @@
     </SpecimenGroup>
   {/if}
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <EditableLabel value={size.toUpperCase()} {size} ariaLabel={"Label at " + size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <EditableLabel value="Edit me" {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

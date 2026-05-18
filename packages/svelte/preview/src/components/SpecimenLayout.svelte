@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Surface, Tabs, getUiPresentation, type TabItem } from "@poodle/svelte";
+  import type { Snippet } from "svelte";
 
   let {
     activeTab = "examples",
@@ -7,12 +8,18 @@
     variantDirection = "column",
     showSizes = true,
     showDensities = true,
+    children,
+    sizes,
+    densities,
   }: {
     activeTab?: "examples" | "sizes" | "densities";
     bareVariants?: boolean;
     variantDirection?: "row" | "column";
     showSizes?: boolean;
     showDensities?: boolean;
+    children?: Snippet;
+    sizes?: Snippet<[size: (typeof controlSizes)[number]]>;
+    densities?: Snippet<[density: (typeof controlDensities)[number]]>;
   } = $props();
 
   const tabs: TabItem[] = $derived([
@@ -22,7 +29,7 @@
   ]);
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
-  const densities = ["compact", "default", "comfortable"] as const;
+  const controlDensities = ["compact", "default", "comfortable"] as const;
 
   const uiPresentation = getUiPresentation();
 </script>
@@ -38,19 +45,19 @@
 
   <div class="poodle-specimen-layout__content">
     {#if activeTab === "examples"}
-      <slot />
+      {@render children?.()}
     {:else if activeTab === "sizes" && showSizes}
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each controlSizes as size}
-            <slot name="sizes" {size} />
+            {@render sizes?.(size)}
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
           <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
             {#each controlSizes as size}
-              <slot name="sizes" {size} />
+              {@render sizes?.(size)}
             {/each}
           </div>
         </Surface>
@@ -58,15 +65,15 @@
     {:else if activeTab === "densities" && showDensities}
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
-          {#each densities as density}
-            <slot name="densities" {density} />
+          {#each controlDensities as density}
+            {@render densities?.(density)}
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
           <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
-            {#each densities as density}
-              <slot name="densities" {density} />
+            {#each controlDensities as density}
+              {@render densities?.(density)}
             {/each}
           </div>
         </Surface>

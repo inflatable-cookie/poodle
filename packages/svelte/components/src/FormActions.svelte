@@ -3,21 +3,27 @@
 
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Menu } from "./Menu.svelte";
+  import { getUiPresentation } from "./presentation";
 
-  import type { FormActionAlign, FormActionDangerItem, MenuItem } from "./types";
+  import type { ControlDensity, FormActionAlign, FormActionDangerItem, MenuItem } from "./types";
 
   let {
     align = "end",
+    density = null,
     dangerItems = [],
     children = undefined,
     danger = undefined,
   }: {
     align?: FormActionAlign;
+    density?: ControlDensity | null;
     dangerItems?: FormActionDangerItem[];
     children?: Snippet;
     danger?: Snippet;
   } = $props();
 
+  const uiPresentation = getUiPresentation();
+
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const hasDangerSlot = $derived(Boolean(danger));
   const hasDangerMenu = $derived(dangerItems.length > 0);
   const showResponsiveDangerSwap = $derived(hasDangerSlot && hasDangerMenu);
@@ -33,7 +39,7 @@
   }
 </script>
 
-<div class="poodle-form-actions" data-align={align}>
+<div class="poodle-form-actions" data-align={align} data-density={resolvedDensity}>
   {#if hasDangerSlot}
     <div class="poodle-form-actions__danger" data-mode={showResponsiveDangerSwap ? "responsive" : "inline"}>
       {@render danger?.()}
@@ -59,11 +65,13 @@
 
 <style>
   .poodle-form-actions {
+    --poodle-form-actions-gap: var(--poodle-space-inline-md);
+    --poodle-form-actions-padding-top: var(--poodle-space-stack-sm);
     display: flex;
     flex-wrap: wrap;
-    gap: var(--poodle-space-inline-md);
+    gap: var(--poodle-form-actions-gap);
     align-items: center;
-    padding-top: var(--poodle-space-stack-sm);
+    padding-top: var(--poodle-form-actions-padding-top);
     container-type: inline-size;
   }
 
@@ -82,12 +90,27 @@
   .poodle-form-actions__danger {
     display: inline-flex;
     align-items: center;
-    gap: var(--poodle-space-inline-md);
+    gap: var(--poodle-form-actions-gap);
   }
 
   .poodle-form-actions__danger-menu {
     display: none;
     align-items: center;
+  }
+
+  .poodle-form-actions[data-density="compact"] {
+    --poodle-form-actions-gap: 0.5rem;
+    --poodle-form-actions-padding-top: 0.375rem;
+  }
+
+  .poodle-form-actions[data-density="default"] {
+    --poodle-form-actions-gap: var(--poodle-space-inline-md);
+    --poodle-form-actions-padding-top: var(--poodle-space-stack-sm);
+  }
+
+  .poodle-form-actions[data-density="comfortable"] {
+    --poodle-form-actions-gap: 0.875rem;
+    --poodle-form-actions-padding-top: 0.75rem;
   }
 
   .poodle-form-actions__danger-menu[data-visible="always"] {

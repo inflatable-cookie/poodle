@@ -11,7 +11,7 @@ use poodle_specs::{
     EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec, FilterToolbarSpec,
     FormShellSpec, InlineRemediationSpec, ListContainerSpec, LogListSpec,
     MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec,
-    MediaThumbnailSpec, MediaUploadStatusPanelSpec, MetricTileSpec,
+    MediaThumbnailSpec, MetricTileSpec,
     PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec, PickerShellSpec,
     RelationPickerSpec, RemediationBannerSpec,
     SelectionSummarySpec, ShellStatusBarSpec, SidebarNavSpec, SplitViewSpec,
@@ -354,14 +354,6 @@ impl RenderComponent<MediaBrowsePanelSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<MediaUploadStatusPanelSpec> for JetstreamAdapter {
-    type Target = JetstreamTarget;
-    fn render(&self, _spec: &MediaUploadStatusPanelSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
-        let mapped = map_style(style);
-        JetstreamNodeHandle::new("media-upload-status-panel", "MediaUploadStatusPanelSpec", WidgetKind::Panel, mapped)
-    }
-}
-
 impl RenderComponent<MetricTileSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(&self, _spec: &MetricTileSpec, style: &StyleDescriptor, _theme: &dyn ThemeProvider) -> JetstreamNodeHandle {
@@ -462,7 +454,6 @@ mod tests {
     #[test] fn editable_list() { assert_eq!(a().render(&EditableListSpec::new(), &s(), &t()).spec_type, "EditableListSpec"); }
     #[test] fn list_container() { assert_eq!(a().render(&ListContainerSpec::default(), &s(), &t()).spec_type, "ListContainerSpec"); }
     #[test] fn media_browse_panel() { assert_eq!(a().render(&MediaBrowsePanelSpec::new(), &s(), &t()).spec_type, "MediaBrowsePanelSpec"); }
-    #[test] fn media_upload_status_panel() { assert_eq!(a().render(&MediaUploadStatusPanelSpec::new(), &s(), &t()).spec_type, "MediaUploadStatusPanelSpec"); }
     #[test] fn metric_tile() { assert_eq!(a().render(&MetricTileSpec::new("L", "V"), &s(), &t()).spec_type, "MetricTileSpec"); }
     #[test] fn shell_status_bar() { assert_eq!(a().render(&ShellStatusBarSpec::default(), &s(), &t()).spec_type, "ShellStatusBarSpec"); }
     #[test] fn split_view() { assert_eq!(a().render(&SplitViewSpec::new(poodle_specs::SplitOrientation::Horizontal), &s(), &t()).spec_type, "SplitViewSpec"); }

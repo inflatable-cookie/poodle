@@ -8,9 +8,10 @@ Updated: 2026-03-22
 - Component name: `AppHeader`
 - Layer: `composites`
 - Summary: a global shell header for app identity, global actions, and
-  window-level utility status
+  window-level utility status with size- and density-aware shell scaling
 - In scope: app identity with title and subtitle, global action snippets, optional
-  utility indicators, drag-region posture, responsive collapse
+  utility indicators, drag-region posture, responsive collapse, size- and
+  density-aware shell spacing, size/density inheritance for nested controls
 - Out of scope: project-specific title/details, transport controls, timeline or
   mixer widgets
 
@@ -42,6 +43,9 @@ Updated: 2026-03-22
 | `subtitle` | `string \| null` | `null` | no | secondary text shown alongside title in baseline alignment |
 | `dragRegion` | `boolean` | `false` | no | enables native window drag posture via `data-drag-region` attribute |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the header; falls back to `title` |
+| `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for header height, title text, subtitle text, and nested controls |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override for shell spacing and nested controls |
 
 ## 4. Snippets
 
@@ -57,6 +61,9 @@ Updated: 2026-03-22
 |-------|---------|-----------------|
 | standard | default | steady shell header with three-column grid |
 | drag-region | `dragRegion=true` | header supports window dragging where supported |
+| compact density | `density="compact"` | tighter padding and inter-region spacing |
+| comfortable density | `density="comfortable"` | looser padding and inter-region spacing |
+| size ladder | `size="xs"..."xl"` | header height and title/subtitle typography scale with nested controls |
 | collapsed | viewport <= 45rem | single-column layout; utility region left-aligned |
 
 ## 6. Events
@@ -89,9 +96,9 @@ No component-owned events. Child action behavior is host-owned.
 ### Default (>45rem)
 
 - Three-column grid: `minmax(0, 1fr) auto auto`
-- Gap: `--poodle-space-inline-md`
-- Min-height: `2.75rem`
-- Padding: `0.375rem --poodle-space-panel-x`
+- Gap: `--poodle-app-header-gap`
+- Min-height: `--poodle-app-header-min-height`
+- Padding: `--poodle-app-header-padding-block --poodle-app-header-padding-inline`
 - Border-bottom: `0.0625rem solid --poodle-color-border-subtle`
 
 ### Responsive (<=45rem)
@@ -110,9 +117,9 @@ No component-owned events. Child action behavior is host-owned.
 | Part | Token | Purpose |
 |------|-------|---------|
 | Root Header | `background-panel`, `border-subtle` | shell chrome |
-| Identity title | font-size `0.9375rem`, line-height `1.2` | app identity |
-| Subtitle | `text-secondary`, font-size `0.75rem` | secondary text |
-| Actions/Utility | `space-inline-sm` gap | control grouping |
+| Identity title | `--poodle-app-header-title-size`, line-height `1.2` | app identity |
+| Subtitle | `text-secondary`, `--poodle-app-header-subtitle-size` | secondary text |
+| Actions/Utility | `--poodle-app-header-region-gap` | control grouping |
 
 ### Token Usage — Exact CSS Values
 
@@ -122,10 +129,10 @@ No component-owned events. Child action behavior is host-owned.
 |----------|-------|
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
-| `gap` | `var(--poodle-space-inline-md)` |
+| `gap` | `var(--poodle-app-header-gap)` |
 | `align-items` | `center` |
-| `min-height` | `2.75rem` |
-| `padding` | `0.375rem var(--poodle-space-panel-x)` |
+| `min-height` | `var(--poodle-app-header-min-height)` |
+| `padding` | `var(--poodle-app-header-padding-block) var(--poodle-app-header-padding-inline)` |
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 | `overflow` | `visible` |
@@ -136,7 +143,7 @@ No component-owned events. Child action behavior is host-owned.
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `var(--poodle-space-inline-sm)` |
+| `gap` | `var(--poodle-app-header-region-gap)` |
 | `min-width` | `0` |
 
 #### `.app-header__title-group`
@@ -145,14 +152,14 @@ No component-owned events. Child action behavior is host-owned.
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `baseline` |
-| `gap` | `var(--poodle-space-inline-sm)` |
+| `gap` | `var(--poodle-app-header-region-gap)` |
 | `min-width` | `0` |
 
 #### `.app-header__identity strong` (Title)
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.9375rem` |
+| `font-size` | `var(--poodle-app-header-title-size)` |
 | `line-height` | `1.2` |
 | `white-space` | `nowrap` |
 
@@ -161,7 +168,7 @@ No component-owned events. Child action behavior is host-owned.
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
+| `font-size` | `var(--poodle-app-header-subtitle-size)` |
 | `line-height` | `1.2` |
 | `white-space` | `nowrap` |
 | `overflow` | `hidden` |
@@ -192,6 +199,8 @@ No component-owned events. Child action behavior is host-owned.
 | Attribute | Element | Purpose |
 |-----------|---------|---------|
 | `data-drag-region` | `<header>` root | enables native window drag posture |
+| `data-size` | `<header>` root | size ladder for shell height and typography |
+| `data-density` | `<header>` root | density ladder for shell spacing |
 
 ## 10. Specimen Definitions
 
@@ -218,3 +227,5 @@ No component-owned events. Child action behavior is host-owned.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Custom identity slot | identity slot with custom logo badge ("P") and bold "Poodle Studio" text, utility slot with bell and user ghost IconButtons | Header with custom branded identity region replacing default title, trailing utility icons |
+| Density ladder | `density="compact" \| "default" \| "comfortable"` with actions and utility controls | Header spacing tightens or loosens while nested controls follow the same density |
+| Size ladder | `size="xs" \| "sm" \| "md" \| "lg" \| "xl"` with actions and utility controls | Header height and title/subtitle scale together while nested controls follow the same size |

@@ -42,13 +42,13 @@
     <ColorPicker value="#22c55e" disabled />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <ColorPicker value="#6366f1" {size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <ColorPicker {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

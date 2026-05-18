@@ -2,8 +2,11 @@
   import type { Snippet } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Popover } from "./Popover.svelte";
+  import { getUiPresentation } from "./presentation";
+  import type { ControlDensity } from "./types";
 
   interface Props {
+    density?: ControlDensity | null;
     label: string;
     description?: string | null;
     value?: string | number | null;
@@ -19,6 +22,7 @@
   }
 
   let {
+    density = null,
     label,
     description = null,
     value = null,
@@ -33,11 +37,15 @@
     children,
   }: Props = $props();
 
+  const uiPresentation = getUiPresentation();
+
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
   let renderedValue = $derived(value === null ? emptyText : String(value));
 </script>
 
 <div
   class="poodle-detail-item"
+  data-density={resolvedDensity}
   data-layout={layout}
   data-presentation={presentation}
   data-span={span ?? undefined}
@@ -80,13 +88,20 @@
 
 <style>
   .poodle-detail-item {
+    --poodle-detail-item-row-gap: 0.25rem;
+    --poodle-detail-item-inline-column-gap: var(--poodle-space-inline-md);
+    --poodle-detail-item-label-block-gap: var(--poodle-space-inline-sm);
+    --poodle-detail-item-surface-gap: var(--poodle-space-inline-md);
+    --poodle-detail-item-surface-padding-y: 0.625rem;
+    --poodle-detail-item-surface-padding-x: var(--poodle-space-panel-x);
+    --poodle-detail-item-surface-stacked-gap: 0.1875rem;
     display: grid;
-    gap: 0.25rem;
+    gap: var(--poodle-detail-item-row-gap);
   }
 
   .poodle-detail-item[data-layout="inline"] {
     grid-template-columns: minmax(8rem, 11.25rem) minmax(0, 1fr) auto;
-    gap: 0.25rem var(--poodle-space-inline-md);
+    gap: var(--poodle-detail-item-row-gap) var(--poodle-detail-item-inline-column-gap);
     align-items: baseline;
   }
 
@@ -114,7 +129,7 @@
   .poodle-detail-item__label-block {
     display: flex;
     align-items: baseline;
-    gap: var(--poodle-space-inline-sm);
+    gap: var(--poodle-detail-item-label-block-gap);
     min-width: 0;
   }
 
@@ -197,9 +212,9 @@
 
   .poodle-detail-item[data-presentation="surface"] {
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
-    gap: var(--poodle-space-inline-md);
+    gap: var(--poodle-detail-item-surface-gap);
     align-items: center;
-    padding: 0.625rem var(--poodle-space-panel-x);
+    padding: var(--poodle-detail-item-surface-padding-y) var(--poodle-detail-item-surface-padding-x);
     border-radius: calc(var(--poodle-radius-surface) - 0.0625rem);
     background: color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary));
   }
@@ -207,7 +222,7 @@
   .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
-    gap: 0.1875rem;
+    gap: var(--poodle-detail-item-surface-stacked-gap);
   }
 
   .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__label-block {
@@ -223,6 +238,26 @@
   .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__value {
     font-size: 1rem;
     font-weight: 600;
+  }
+
+  .poodle-detail-item[data-density="compact"] {
+    --poodle-detail-item-row-gap: 0.1875rem;
+    --poodle-detail-item-inline-column-gap: var(--poodle-space-inline-sm);
+    --poodle-detail-item-label-block-gap: 0.375rem;
+    --poodle-detail-item-surface-gap: var(--poodle-space-inline-sm);
+    --poodle-detail-item-surface-padding-y: 0.5rem;
+    --poodle-detail-item-surface-padding-x: 0.75rem;
+    --poodle-detail-item-surface-stacked-gap: 0.125rem;
+  }
+
+  .poodle-detail-item[data-density="comfortable"] {
+    --poodle-detail-item-row-gap: 0.3125rem;
+    --poodle-detail-item-inline-column-gap: 0.875rem;
+    --poodle-detail-item-label-block-gap: 0.625rem;
+    --poodle-detail-item-surface-gap: 0.875rem;
+    --poodle-detail-item-surface-padding-y: 0.75rem;
+    --poodle-detail-item-surface-padding-x: 1rem;
+    --poodle-detail-item-surface-stacked-gap: 0.25rem;
   }
 
   @media (max-width: 45rem) {

@@ -67,7 +67,7 @@
     </SpecimenGroup>
   </div>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <SpecimenGroup label={size.toUpperCase()}>
       <Button size={size} onClick={() => (sizeOpenMap[size] = true)}>
         Open {size.toUpperCase()} palette
@@ -83,9 +83,9 @@
         onQueryChange={(nextQuery) => (sizeQueryMap[size] = nextQuery)}
       />
     </SpecimenGroup>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <SpecimenGroup label={density}>
       <Button onClick={() => (densityOpenMap[density] = true)}>
         Open {density} palette
@@ -101,7 +101,7 @@
         onQueryChange={(nextQuery) => (densityQueryMap[density] = nextQuery)}
       />
     </SpecimenGroup>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

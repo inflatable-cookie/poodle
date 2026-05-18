@@ -8,10 +8,10 @@ Updated: 2026-03-27
 - Component name: `FormActions`
 - Layer: `foundation`
 - Summary: an action-row wrapper for submit, cancel, secondary, and optional
-  destructive form actions
+  destructive form actions with density-aware spacing
 - In scope: action alignment (`start`, `end`, `between`), wrapping, field-stack
-  separation, optional inline danger action content, optional collapsed overflow
-  danger actions on narrow containers
+  separation, density-aware spacing, optional inline danger action content,
+  optional collapsed overflow danger actions on narrow containers
 - Out of scope: button semantics, validation logic, sticky footer shells,
   confirmation dialogs, status text
 
@@ -37,6 +37,7 @@ Updated: 2026-03-27
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `align` | `"start" \| "end" \| "between"` | `"end"` | no | alignment rule for the action row |
+| `density` | `ControlDensity \| null` | `null` | no | explicit spacing-density override; otherwise inherits current presentation |
 | `dangerItems` | `FormActionDangerItem[]` | `[]` | no | menu items used when danger content collapses |
 
 ### Snippets
@@ -58,6 +59,8 @@ Updated: 2026-03-27
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | resting | actions aligned per `align` prop |
+| compact density | `density="compact"` | tighter top separation and tighter inline gaps |
+| comfortable density | `density="comfortable"` | looser top separation and looser inline gaps |
 | wrapped | narrow container | actions wrap to multiple lines maintaining gap |
 | danger-inline | `danger` snippet present | danger content is rendered inline |
 | danger-collapsed | `danger` snippet and `dangerItems` present in a narrow container | danger content is hidden and overflow trigger is shown |
@@ -78,7 +81,7 @@ Updated: 2026-03-27
 
 - Root stretches to parent width
 - `flex-wrap: wrap` allows actions to wrap on narrow widths
-- `padding-top` separates the action row from the field stack above
+- `padding-top` separates the action row from the field stack above and scales with density
 - Root is a container-query boundary for responsive danger-action swapping
 
 ## 8. Token Usage
@@ -89,9 +92,9 @@ Updated: 2026-03-27
 |----------|-------|
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `var(--poodle-space-inline-md)` |
+| `gap` | `var(--poodle-form-actions-gap)` |
 | `align-items` | `center` |
-| `padding-top` | `var(--poodle-space-stack-sm)` |
+| `padding-top` | `var(--poodle-form-actions-padding-top)` |
 | `container-type` | `inline-size` |
 
 ### Root Alignment
@@ -108,7 +111,7 @@ Updated: 2026-03-27
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `var(--poodle-space-inline-md)` |
+| `gap` | `var(--poodle-form-actions-gap)` |
 
 ### Danger Menu `.form-actions__danger-menu`
 
@@ -122,6 +125,14 @@ Updated: 2026-03-27
 | Condition | Result |
 |-----------|--------|
 | `@container (max-width: 31.25rem)` with both `danger` and `dangerItems` | inline danger hidden, danger menu shown |
+
+### Density Variants
+
+| Density | Gap | Top Padding |
+|---------|-----|-------------|
+| `compact` | `0.5rem` | `0.375rem` |
+| `default` | `var(--poodle-space-inline-md)` | `var(--poodle-space-stack-sm)` |
+| `comfortable` | `0.875rem` | `0.75rem` |
 
 ## 9. Svelte Notes
 
@@ -149,6 +160,7 @@ Updated: 2026-03-27
 | Start-aligned | `align="start"`, children: secondary "Back" + primary "Continue" | Buttons left-aligned |
 | Space between | `align="between"`, children: danger "Delete" + primary "Save" | Buttons spread to opposite ends |
 | Responsive danger actions | `align="end"`, `danger` snippet contains a destructive/cancel action, `dangerItems` contains matching overflow action | Danger action stays inline on wide containers and collapses to overflow on narrow containers |
+| Density ladder | `density="compact" \| "default" \| "comfortable"` | Action row spacing visibly tightens or loosens without changing child button size |
 
 ## 12. Approval And Adoption Notes
 

@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import type { CardVariant } from "./types";
+  import { getUiPresentation } from "./presentation";
+  import type { ControlDensity, CardVariant } from "./types";
 
   interface Props {
     class?: string;
     variant?: CardVariant;
     layout?: "vertical" | "horizontal" | "compact";
+    density?: ControlDensity | null;
     interactive?: boolean;
     selected?: boolean;
     media?: boolean;
@@ -20,6 +22,7 @@
     class: className = "",
     variant = "default",
     layout = "vertical",
+    density = null,
     interactive = false,
     selected = false,
     media = false,
@@ -29,12 +32,16 @@
     footer,
     children,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
 <article
   class={`poodle-card ${className}`.trim()}
   data-variant={variant}
   data-layout={layout}
+  data-density={resolvedDensity}
   data-interactive={interactive}
   data-selected={selected}
   aria-label={ariaLabel ?? undefined}
@@ -91,10 +98,14 @@
       color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle))
     );
     --poodle-recipe-card-hover-shadow: var(--poodle-treatment-surface-hover-shadow, var(--poodle-recipe-card-shadow));
+    --poodle-card-gap: var(--poodle-space-stack-md);
+    --poodle-card-padding-block: var(--poodle-space-panel-x);
+    --poodle-card-padding-inline: var(--poodle-space-panel-x);
+    --poodle-card-footer-padding-top: var(--poodle-space-stack-sm);
     display: grid;
     align-content: start;
-    gap: var(--poodle-space-stack-md);
-    padding: var(--poodle-space-panel-x);
+    gap: var(--poodle-card-gap);
+    padding: var(--poodle-card-padding-block) var(--poodle-card-padding-inline);
     border: 0.0625rem solid var(--poodle-recipe-card-border);
     border-radius: var(--poodle-recipe-card-radius);
     background: var(
@@ -169,8 +180,30 @@
   }
 
   .poodle-card[data-layout="compact"] {
-    padding: var(--poodle-space-panel-y-sm, 0.5rem) var(--poodle-space-panel-x-sm, 0.625rem);
-    gap: var(--poodle-space-stack-sm);
+    --poodle-card-padding-block: var(--poodle-space-panel-y-sm, 0.5rem);
+    --poodle-card-padding-inline: var(--poodle-space-panel-x-sm, 0.625rem);
+    --poodle-card-gap: var(--poodle-space-stack-sm);
+  }
+
+  .poodle-card[data-density="compact"] {
+    --poodle-card-gap: 0.625rem;
+    --poodle-card-padding-block: 0.75rem;
+    --poodle-card-padding-inline: 0.75rem;
+    --poodle-card-footer-padding-top: 0.625rem;
+  }
+
+  .poodle-card[data-density="default"] {
+    --poodle-card-gap: var(--poodle-space-stack-md);
+    --poodle-card-padding-block: var(--poodle-space-panel-x);
+    --poodle-card-padding-inline: var(--poodle-space-panel-x);
+    --poodle-card-footer-padding-top: var(--poodle-space-stack-sm);
+  }
+
+  .poodle-card[data-density="comfortable"] {
+    --poodle-card-gap: 1rem;
+    --poodle-card-padding-block: 1rem;
+    --poodle-card-padding-inline: 1rem;
+    --poodle-card-footer-padding-top: 0.875rem;
   }
 
   .poodle-card__media {
@@ -179,7 +212,7 @@
   }
 
   .poodle-card__footer {
-    padding-top: var(--poodle-space-stack-sm);
+    padding-top: var(--poodle-card-footer-padding-top);
     border-top: 0.0625rem solid var(--poodle-treatment-surface-divider, var(--poodle-recipe-card-divider));
   }
 </style>

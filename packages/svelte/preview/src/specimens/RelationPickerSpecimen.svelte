@@ -1,7 +1,7 @@
 <script lang="ts">
   import { RelationPicker, type PickerItem, type DrillDownConfig, type DrillDownItem } from "@poodle/svelte";
-  import { UiPresentationProvider } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const items: PickerItem[] = [
     { id: "btn", label: "Button", description: "Primary interactive control", meta: "Primitive" },
@@ -13,8 +13,10 @@
   ];
 
   let selected: string[] = ["btn", "card"];
+  let drillSelected: string[] = [];
+  let sizeSelected: string[] = ["btn"];
+  let densitySelected: string[] = ["btn"];
 
-  // Drill-down data
   const categories: DrillDownItem[] = [
     { id: "primitives", label: "Primitives", description: "Foundation-level building blocks", count: 4 },
     { id: "composites", label: "Composites", description: "Higher-level composed components", count: 3 },
@@ -79,75 +81,81 @@
     ],
     finalItems: (_query, context) => {
       const subId = context.subcategory;
-      const items = drillItems[subId] ?? [];
-      if (!_query.trim()) return items;
-      return items.filter((i) => i.label.toLowerCase().includes(_query.trim().toLowerCase()));
+      const finalItems = drillItems[subId] ?? [];
+      if (!_query.trim()) return finalItems;
+      return finalItems.filter((item) => item.label.toLowerCase().includes(_query.trim().toLowerCase()));
     },
   };
-
-  let drillSelected: string[] = [];
-  let compactSelected: string[] = ["btn"];
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Multiple selection">
-    <RelationPicker
-      title="Select components"
-      description="Choose related components."
-      {items}
-      selectedIds={selected}
-      selectionMode="multiple"
-      onSelectionChange={(nextSelected) => (selected = nextSelected)}
-    />
-    <p>Selected: <strong>{selected.join(", ")}</strong></p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Single selection">
-    <RelationPicker
-      title="Choose a parent"
-      {items}
-      selectionMode="single"
-    />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Drill-down (Category → Subcategory → Items)">
-    <RelationPicker
-      title="Browse components"
-      description="Navigate categories to find components."
-      items={[]}
-      selectedIds={drillSelected}
-      selectionMode="multiple"
-      {drillDown}
-      onSelectionChange={(nextSelected) => (drillSelected = nextSelected)}
-    />
-    {#if drillSelected.length > 0}
-      <p>Selected: <strong>{drillSelected.join(", ")}</strong></p>
-    {/if}
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Semantic presentation">
-    <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="poodle-specimen__stack">
+<SpecimenLayout bareVariants>
+  {#snippet children()}
+    <div class="poodle-specimen">
+      <SpecimenGroup label="Multiple selection" bare>
         <RelationPicker
-          title="Compact picker"
-          description="Inherited density and size should tighten breadcrumb and drill-list geometry."
+          title="Select components"
+          description="Choose related components."
           {items}
-          selectedIds={compactSelected}
+          selectedIds={selected}
           selectionMode="multiple"
-          onSelectionChange={(nextSelected) => (compactSelected = nextSelected)}
+          onSelectionChange={(nextSelected) => (selected = nextSelected)}
         />
+        <p>Selected: <strong>{selected.join(", ")}</strong></p>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Single selection" bare>
         <RelationPicker
-          title="Prominent actions"
-          description="Prominent size role should lift confirm/cancel and nested controls above the compact workspace baseline."
+          title="Choose a parent"
           {items}
-          selectedIds={compactSelected}
-          selectionMode="multiple"
-          sizeRole="prominent"
+          selectionMode="single"
         />
-      </div>
-    </UiPresentationProvider>
-  </SpecimenGroup>
-</div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Drill-down (Category → Subcategory → Items)" bare>
+        <RelationPicker
+          title="Browse components"
+          description="Navigate categories to find components."
+          items={[]}
+          selectedIds={drillSelected}
+          selectionMode="multiple"
+          {drillDown}
+          onSelectionChange={(nextSelected) => (drillSelected = nextSelected)}
+        />
+        {#if drillSelected.length > 0}
+          <p>Selected: <strong>{drillSelected.join(", ")}</strong></p>
+        {/if}
+      </SpecimenGroup>
+    </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <div class="poodle-specimen__variant">
+      <RelationPicker
+        title="Select components"
+        description="Choose related components."
+        {items}
+        selectedIds={sizeSelected}
+        selectionMode="multiple"
+        {size}
+        onSelectionChange={(nextSelected) => (sizeSelected = nextSelected)}
+      />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-specimen__variant">
+      <RelationPicker
+        title="Select components"
+        description="Choose related components."
+        {items}
+        selectedIds={densitySelected}
+        selectionMode="multiple"
+        {density}
+        onSelectionChange={(nextSelected) => (densitySelected = nextSelected)}
+      />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
@@ -156,9 +164,8 @@
     gap: 1rem;
   }
 
-  .poodle-specimen__stack {
-    display: grid;
-    gap: 0.75rem;
+  .poodle-specimen__variant {
+    width: min(100%, 28rem);
   }
 
   p {

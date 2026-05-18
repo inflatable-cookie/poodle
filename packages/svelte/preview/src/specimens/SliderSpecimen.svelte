@@ -36,9 +36,9 @@
     <Slider value={40} min={0} max={100} ariaLabel="Disabled slider" disabled />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Slider value={50} min={0} max={100} {size} ariaLabel={"Slider at " + size} />
-  </svelte:fragment>
+  {/snippet}
 
 </SpecimenLayout>
 </div>

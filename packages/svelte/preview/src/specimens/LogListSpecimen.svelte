@@ -98,14 +98,14 @@
 </script>
 
 <div class="poodle-specimen">
-  <SpecimenGroup label="Log output with filtering">
+  <SpecimenGroup label="Log output with filtering" bare>
     <LogList {entries} ariaLabel="Application logs" />
     <div class="poodle-specimen__actions">
       <Button variant="secondary" onClick={addEntry}>Add log entry</Button>
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Audit activity list">
+  <SpecimenGroup label="Audit activity list" bare>
     <LogList
       entries={auditEntries}
       ariaLabel="Audit activity"

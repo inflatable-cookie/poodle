@@ -2,80 +2,82 @@
   import { ContextMenu, Icon, IconButton, ListCard, ListCardCounter, Pill } from "@poodle/svelte";
   import { folder, layers, grid2x2 } from "@poodle/icons-lucide";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastClick = "";
   let selectedCard = false;
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Interactive list cards">
-    <div class="poodle-specimen__stack">
-      <ListCard
-        title="design-system-v2.figma"
-        subtitle="Updated by Clay · 2h ago"
-        meta="14.2 MB"
-        interactive
-        onClick={() => (lastClick = "design-system-v2.figma")}
-      >
-        {#snippet leading()}
-          <Icon icon={folder} />
-        {/snippet}
-      </ListCard>
-      <ListCard
-        title="component-specs.pdf"
-        subtitle="Shared with team · Yesterday"
-        meta="2.8 MB"
-        interactive
-        onClick={() => (lastClick = "component-specs.pdf")}
-      >
-        {#snippet leading()}
-          <Icon name="file-text" />
-        {/snippet}
-      </ListCard>
-      <ListCard
-        title="brand-assets.zip"
-        subtitle="Archived"
-        meta="48 MB"
-        disabled
-      >
-        {#snippet leading()}
-          <Icon icon={layers} />
-        {/snippet}
-      </ListCard>
-    </div>
-  </SpecimenGroup>
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup label="Interactive list cards">
+      <div class="poodle-specimen__stack">
+        <ListCard
+          title="design-system-v2.figma"
+          subtitle="Updated by Clay · 2h ago"
+          meta="14.2 MB"
+          interactive
+          onClick={() => (lastClick = "design-system-v2.figma")}
+        >
+          {#snippet leading()}
+            <Icon icon={folder} />
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="component-specs.pdf"
+          subtitle="Shared with team · Yesterday"
+          meta="2.8 MB"
+          interactive
+          onClick={() => (lastClick = "component-specs.pdf")}
+        >
+          {#snippet leading()}
+            <Icon name="file-text" />
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="brand-assets.zip"
+          subtitle="Archived"
+          meta="48 MB"
+          disabled
+        >
+          {#snippet leading()}
+            <Icon icon={layers} />
+          {/snippet}
+        </ListCard>
+      </div>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Link roots and explicit actions">
-    <div class="poodle-specimen__stack">
-      <ListCard
-        title="Billing settings"
-        subtitle="Manage invoices and payment methods"
-        href="#billing"
-      >
-        {#snippet leading()}
-          <Icon name="credit-card" />
-        {/snippet}
-        {#snippet badges()}
-          <Pill appearance="badge" tone="neutral">2</Pill>
-        {/snippet}
-      </ListCard>
-      <ListCard
-        title="Project Alpha"
-        subtitle="Replaces the old media-trigger pattern with explicit actions"
-        interactive
-        onClick={() => (lastClick = "Project Alpha")}
-      >
-        {#snippet leading()}
-          <Icon icon={folder} />
-        {/snippet}
-        {#snippet actions()}
-          <IconButton icon="ellipsis" ariaLabel="Project actions" variant="ghost" />
-        {/snippet}
-      </ListCard>
-    </div>
-  </SpecimenGroup>
+    <SpecimenGroup label="Link roots and explicit actions">
+      <div class="poodle-specimen__stack">
+        <ListCard
+          title="Billing settings"
+          subtitle="Manage invoices and payment methods"
+          href="#billing"
+        >
+          {#snippet leading()}
+            <Icon name="credit-card" />
+          {/snippet}
+          {#snippet badges()}
+            <Pill appearance="badge" tone="neutral">2</Pill>
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="Project Alpha"
+          subtitle="Replaces the old media-trigger pattern with explicit actions"
+          interactive
+          onClick={() => (lastClick = "Project Alpha")}
+        >
+          {#snippet leading()}
+            <Icon icon={folder} />
+          {/snippet}
+          {#snippet actions()}
+            <IconButton icon="ellipsis" ariaLabel="Project actions" variant="ghost" />
+          {/snippet}
+        </ListCard>
+      </div>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Selectable cards">
+    <SpecimenGroup label="Selectable cards">
     <div class="poodle-specimen__stack">
       <ListCard
         title="Selected row"
@@ -118,9 +120,9 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Rounded-square leading (thumbnails)">
+    <SpecimenGroup label="Rounded-square leading (thumbnails)">
     <div class="poodle-specimen__stack">
       <ListCard
         title="hero-banner.png"
@@ -147,9 +149,72 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="With badges">
+    <SpecimenGroup label="Leading size offset">
+    <div class="poodle-specimen__stack">
+      <ListCard
+        title="Default leading"
+        subtitle="Matches the card size ladder"
+        interactive
+      >
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
+      </ListCard>
+      <ListCard
+        title="Offset leading"
+        subtitle="Leading block steps up relative to the card size"
+        interactive
+        leadingSizeOffset={1}
+      >
+        {#snippet leading()}
+          <Icon name="file-text" />
+        {/snippet}
+      </ListCard>
+    </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Stacked layout">
+    <div class="poodle-specimen__tiles">
+      <ListCard
+        title="Release notes"
+        subtitle="Summarize the latest component changes and known migration edges."
+        layout="stacked"
+        leadingShape="rounded-square"
+        leadingFill="solid"
+        accentColor="#6366f1"
+        interactive
+      >
+        {#snippet leading()}
+          <Icon icon={layers} />
+        {/snippet}
+        {#snippet trailing()}
+          <Pill tone="success">Published</Pill>
+        {/snippet}
+      </ListCard>
+      <ListCard
+        title="Media library"
+        subtitle="Review uploads, approve assets, and keep metadata consistent across the library."
+        layout="stacked"
+        leadingShape="rounded-square"
+        interactive
+      >
+        {#snippet leading()}
+          <Icon name="image" />
+        {/snippet}
+        {#snippet footer()}
+          <ListCardCounter icon="image" count={18} tooltip="18 images" />
+          <ListCardCounter icon="file-text" count={6} tooltip="6 notes" />
+        {/snippet}
+        {#snippet trailing()}
+          <IconButton icon="ellipsis" ariaLabel="Media library actions" variant="ghost" />
+        {/snippet}
+      </ListCard>
+    </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="With badges">
     <div class="poodle-specimen__stack">
       <ListCard
         title="API integration guide"
@@ -180,9 +245,9 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="With footer counters">
+    <SpecimenGroup label="With footer counters">
     <div class="poodle-specimen__stack">
       <ListCard
         title="Design system"
@@ -219,9 +284,9 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Inherited footer counters">
+    <SpecimenGroup label="Inherited footer counters">
     <p class="poodle-specimen__inline-copy">
       Summary:
       <ListCardCounter icon="file-text" count={24} tooltip="24 documents" typography="inherit" />
@@ -229,9 +294,9 @@
       <ListCardCounter icon="image" count={8} tooltip="8 images" typography="inherit" />
       published this week.
     </p>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Solid fill with accent colors">
+    <SpecimenGroup label="Solid fill with accent colors">
     <div class="poodle-specimen__stack">
       <ListCard
         title="Design tokens"
@@ -285,9 +350,9 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="With built-in context menu">
+    <SpecimenGroup label="With built-in context menu">
     <div class="poodle-specimen__stack">
       <ListCard
         title="Right-click for actions"
@@ -310,9 +375,9 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="With wrapped context menu">
+    <SpecimenGroup label="With wrapped context menu">
     <div class="poodle-specimen__stack">
       <ContextMenu
         items={[
@@ -337,9 +402,27 @@
         </ListCard>
       </ContextMenu>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Not live (dashed border, interactive)">
+    <SpecimenGroup label="Exclusive trailing lane">
+    <div class="poodle-specimen__stack">
+      <ListCard
+        title="Workspace settings"
+        subtitle="Shared defaults and access controls"
+        meta="Updated 2h ago"
+        interactive
+      >
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
+        {#snippet trailing()}
+          <Pill tone="success">Live</Pill>
+        {/snippet}
+      </ListCard>
+    </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Not live (dashed border, interactive)">
     <div class="poodle-specimen__stack">
       <ListCard
         title="Unpublished draft"
@@ -368,9 +451,9 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Corner sash badges">
+    <SpecimenGroup label="Corner sash badges">
     <div class="poodle-specimen__stack">
       <ListCard
         title="Free tier plan"
@@ -411,22 +494,65 @@
         {/snippet}
       </ListCard>
     </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Static list card">
-    <ListCard title="Read-only item" subtitle="No click handler" />
-  </SpecimenGroup>
-
-  {#if lastClick}
-    <SpecimenGroup label="Last click">
-      <p>{lastClick}</p>
     </SpecimenGroup>
-  {/if}
-</div>
+
+    <SpecimenGroup label="Static list card">
+      <ListCard title="Read-only item" subtitle="No click handler" />
+    </SpecimenGroup>
+
+    {#if lastClick}
+      <SpecimenGroup label="Last click">
+        <p>{lastClick}</p>
+      </SpecimenGroup>
+    {/if}
+  </div>
+
+  {#snippet sizes(size)}
+    <div class="poodle-list-card-density-demo">
+      <ListCard
+        title="Workspace settings"
+        subtitle="Shared defaults and access controls"
+        interactive
+        {size}
+      >
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
+        {#snippet trailing()}
+          <Pill tone="success" {size}>Live</Pill>
+        {/snippet}
+      </ListCard>
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-list-card-density-demo">
+      <ListCard
+        title="Workspace settings"
+        subtitle="Shared defaults and access controls"
+        interactive
+        {density}
+      >
+        {#snippet leading()}
+          <Icon icon={folder} />
+        {/snippet}
+        {#snippet trailing()}
+          <Pill tone="success">Live</Pill>
+        {/snippet}
+      </ListCard>
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen { display: flex; flex-direction: column; gap: 1rem; }
   .poodle-specimen__stack { display: flex; flex-direction: column; gap: 0.25rem; }
+  .poodle-specimen__tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0.75rem;
+  }
   .poodle-specimen__inline-copy { font-size: 1rem; line-height: 1.6; color: var(--poodle-color-text-primary); }
+  .poodle-list-card-density-demo { width: min(100%, 26rem); }
   p { margin: 0; }
 </style>

@@ -28,17 +28,17 @@
     </div>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Tooltip content="Tooltip at {size}">
       <Button variant="secondary" {size}>Hover ({size})</Button>
     </Tooltip>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Tooltip content="Tooltip at {density}">
       <Button variant="secondary" {density}>Hover ({density})</Button>
     </Tooltip>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

@@ -82,6 +82,9 @@ Updated: 2026-03-30
 | `align` | `"start" \| "between"` | `"between"` | no | Action alignment posture |
 | `ariaLabel` | `string \| null` | `null` | no | Optional region label |
 | `level` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `2` | no | Heading level for the title element |
+| `size` | `ControlSize \| null` | `null` | no | Optional presentation size override for header typography and slotted actions |
+| `sizeRole` | `SemanticControlSizeRole` | `"prominent"` | no | Semantic role used when inheriting size from UI presentation |
+| `density` | `ControlDensity \| null` | `null` | no | Optional presentation density override for spacing and action rhythm |
 
 ### Slots
 
@@ -111,6 +114,8 @@ Updated: 2026-03-30
 | actionable | actions slot present | Title and actions share row (between alignment) or stack |
 | with-back | `backHref` set | Back link with arrow-left icon in actions-row alongside action buttons |
 | with-banner | `bannerMessage` or banner slot | Full-width banner below header body |
+| size variants | `size="xs"..."xl"` | Title, subtitle, eyebrow, back-link text, and slotted controls scale together |
+| density variants | `density="compact" \| "default" \| "comfortable"` | Header gaps, action spacing, and banner separation ladder tighter/looser |
 
 ### Component States
 
@@ -438,3 +443,10 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Title only | `title="Settings"` | Compact title row with no subtitle, no eyebrow, no actions |
+
+### Variant Tabs
+
+| Tab | Coverage |
+|-----|----------|
+| `Sizes` | `xs`, `sm`, `md`, `lg`, `xl` using the "Media Library" back-link + actions example |
+| `Densities` | `compact`, `default`, `comfortable` using the same representative example |

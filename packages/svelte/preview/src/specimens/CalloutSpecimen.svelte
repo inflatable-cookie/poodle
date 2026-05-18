@@ -57,17 +57,17 @@
     </Callout>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Callout tone="info" {size} title="Callout at {size}">
       Text and icon chrome scale with the size prop.
     </Callout>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Callout tone="info" {density} title="Callout at {density} density">
       Internal spacing adjusts with the density prop.
     </Callout>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

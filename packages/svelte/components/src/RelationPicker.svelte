@@ -31,7 +31,7 @@
     description?: string | null;
     items?: PickerItem[];
     selectedIds?: string[];
-    query?: string;
+    query?: string | undefined;
     selectionMode?: SelectionMode;
     variant?: PickerVariant;
     state?: BrowseState;
@@ -54,8 +54,8 @@
     title = "Select items",
     description = null,
     items = [],
-    selectedIds = [],
-    query = "",
+    selectedIds = $bindable<string[] | undefined>(undefined),
+    query = $bindable<string | undefined>(undefined),
     selectionMode = "multiple",
     variant = "inline",
     state: browseState = "ready",
@@ -76,12 +76,37 @@
 
   const statusId = "relation-picker-status";
   let candidateButtons = $state<Array<HTMLButtonElement | null>>([]);
+  let selectedItemLabels = $state<Record<string, string>>({});
+  let uncontrolledQuery = $state("");
+  let seededUncontrolledQuery = $state(false);
+  let uncontrolledSelectedIds = $state<string[]>([]);
+  let seededUncontrolledSelectedIds = $state(false);
   const uiPresentation = getUiPresentation();
+
+  $effect.pre(() => {
+    if (seededUncontrolledQuery) {
+      return;
+    }
+
+    uncontrolledQuery = query ?? "";
+    seededUncontrolledQuery = true;
+  });
+
+  $effect.pre(() => {
+    if (seededUncontrolledSelectedIds) {
+      return;
+    }
+
+    uncontrolledSelectedIds = selectedIds ? [...selectedIds] : [];
+    seededUncontrolledSelectedIds = true;
+  });
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const currentSelectedIds = $derived(selectedIds);
-  const currentQuery = $derived(query);
+  const hasQueryProp = $derived(query !== undefined);
+  const hasSelectedIdsProp = $derived(selectedIds !== undefined);
+  const currentSelectedIds = $derived(hasSelectedIdsProp ? selectedIds ?? [] : uncontrolledSelectedIds);
+  const currentQuery = $derived(hasQueryProp ? query ?? "" : uncontrolledQuery);
   const toolbarSnippet = $derived(toolbarContent as unknown as Snippet<[]>);
   const selectionSnippet = $derived(selectionContent as unknown as Snippet<[]>);
   const footerSnippet = $derived(footerContent as unknown as Snippet<[]>);
@@ -217,6 +242,27 @@
 
   // Flat picker logic — use finalItemsLoaded when drill-down provides items
   const activeItems = $derived((hasDrillCompleted && finalItemsLoaded !== null) ? finalItemsLoaded : items);
+
+  $effect(() => {
+    if (activeItems.length === 0) {
+      return;
+    }
+
+    const nextLabels = { ...selectedItemLabels };
+    let changed = false;
+
+    for (const item of activeItems) {
+      if (nextLabels[item.id] !== item.label) {
+        nextLabels[item.id] = item.label;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      selectedItemLabels = nextLabels;
+    }
+  });
+
   const filteredItems = $derived(activeItems.filter((item) =>
     currentQuery.trim().length === 0
       ? true
@@ -224,9 +270,10 @@
           value.toLowerCase().includes(currentQuery.trim().toLowerCase()),
         ),
   ));
-  const selectedItems = $derived(activeItems
-    .filter((item) => currentSelectedIds.includes(item.id))
-    .map((item) => ({ id: item.id, label: item.label })));
+  const selectedItems = $derived(currentSelectedIds.map((id) => ({
+    id,
+    label: selectedItemLabels[id] ?? id,
+  })));
   const pickerStatusText = $derived(
     browseState === "loading"
       ? "Picker results are loading."
@@ -240,7 +287,23 @@
   );
 
   function setSelection(nextIds: string[]): void {
+    if (hasSelectedIdsProp) {
+      selectedIds = nextIds;
+    } else {
+      uncontrolledSelectedIds = nextIds;
+    }
+
     onSelectionChange?.(nextIds);
+  }
+
+  function setQuery(nextQuery: string): void {
+    if (hasQueryProp) {
+      query = nextQuery;
+    } else {
+      uncontrolledQuery = nextQuery;
+    }
+
+    onQueryChange?.(nextQuery);
   }
 
   function toggleItem(id: string): void {
@@ -356,14 +419,14 @@
       value={currentQuery}
       ariaLabel="Search picker results"
       describedBy={statusId}
-      onValueChange={(nextValue) => onQueryChange?.(nextValue)}
-      onClear={() => onQueryChange?.("")}
+      onValueChange={setQuery}
+      onClear={() => setQuery("")}
     />
   {/if}
 {/snippet}
 
 {#snippet selectionContent()}
-  {#if !isDrilling}
+  {#if currentSelectedIds.length > 0}
     <SelectionSummary
       items={selectedItems}
       onRemove={(id) => setSelection(currentSelectedIds.filter((selectedId) => selectedId !== id))}
@@ -373,7 +436,7 @@
 {/snippet}
 
 {#snippet footerContent()}
-  <FormActions align="between">
+  <FormActions align="start">
     <p class="poodle-relation-picker__footer-note">
       {selectionMode === "single" ? "Single-choice selection keeps the picker confirmable without inline radio-group chrome." : "Multi-selection stays explicit through selection summary and confirm/cancel actions."}
     </p>
@@ -403,7 +466,7 @@
       stateTitle={isDrilling ? "Loading" : (browseState === "loading" ? "Loading candidates" : browseState === "error" ? "Picker unavailable" : browseState === "empty" ? "No candidates available" : "No matching candidates")}
       stateMessage={isDrilling ? "Loading items..." : (browseState === "loading" ? "Picker results are loading while selection state stays host-owned." : browseState === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : browseState === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters.")}
       toolbar={toolbarSnippet}
-      selection={!isDrilling ? selectionSnippet : undefined}
+      selection={selectionSnippet}
       stateContent={stateContent}
       footer={footerSnippet}
     >
@@ -440,6 +503,7 @@
           {#each filteredItems as item, index}
             <li
               class="poodle-relation-picker__item"
+              data-selection-mode={selectionMode}
               data-selected={currentSelectedIds.includes(item.id)}
             >
               {#if selectionMode === "multiple"}
@@ -508,7 +572,7 @@
     --poodle-relation-picker-breadcrumb-x: 0.375rem;
     --poodle-relation-picker-list-x: 0.625rem;
     --poodle-relation-picker-list-y: 0.5rem;
-    --poodle-relation-picker-list-gap: 0.125rem;
+    --poodle-relation-picker-list-gap: 0.25rem;
     --poodle-relation-picker-item-y: 0.375rem;
     --poodle-relation-picker-item-x: 0.5rem;
     --poodle-relation-picker-item-gap: 0.5rem;
@@ -560,11 +624,11 @@
   }
 
   .poodle-relation-picker[data-density="compact"] {
-    --poodle-relation-picker-list-gap: 0.0625rem;
+    --poodle-relation-picker-list-gap: 0.1875rem;
   }
 
   .poodle-relation-picker[data-density="comfortable"] {
-    --poodle-relation-picker-list-gap: 0.1875rem;
+    --poodle-relation-picker-list-gap: 0.3125rem;
   }
 
   /* Drill-down breadcrumbs */
@@ -730,6 +794,10 @@
     color: var(--poodle-color-text-primary);
   }
 
+  .poodle-relation-picker__item[data-selection-mode="single"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .poodle-relation-picker__item[data-selected="true"] {
     border-color: color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent);
     background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
@@ -739,6 +807,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 0.25rem;
+    width: 100%;
     min-width: 0;
     padding: 0;
     border: 0;
@@ -768,6 +837,8 @@
   }
 
   .poodle-relation-picker__footer-note {
+    flex: 1 1 18rem;
+    min-width: 0;
     margin: 0;
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-relation-picker-desc-size);
@@ -784,6 +855,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
+    margin-left: auto;
     justify-content: flex-end;
   }
 </style>

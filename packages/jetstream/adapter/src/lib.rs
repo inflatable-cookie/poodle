@@ -165,7 +165,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "ListContainerSpec", "MetricTileSpec",
     // Editing, media, navigation, list, operational
     "AudioPlayerSpec", "VideoPlayerSpec", "MediaPickerSpec",
-    "MediaBrowsePanelSpec", "MediaUploadStatusPanelSpec",
+    "MediaBrowsePanelSpec",
     "MarkdownEditorSpec", "BlockEditorSpec", "EmbedInputSpec",
     "EmbedPreviewSpec", "EditableListSpec",
     "ReorderableListSpec", "BreadcrumbsSpec", "CardRadioGroupSpec",

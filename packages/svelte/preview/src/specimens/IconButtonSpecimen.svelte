@@ -50,9 +50,9 @@
     </div>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <IconButton icon={star} ariaLabel={`Favorite (${size})`} variant="secondary" {size} />
-  </svelte:fragment>
+  {/snippet}
 
 </SpecimenLayout>
 

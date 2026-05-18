@@ -108,6 +108,8 @@
     --poodle-media-browse-item-gap: 0.375rem;
     --poodle-media-browse-item-pad: 0.75rem;
     --poodle-media-browse-grid-min: 11rem;
+    width: 100%;
+    box-sizing: border-box;
     min-height: 18rem;
   }
 
@@ -190,6 +192,8 @@
 
   .poodle-media-browse-panel__actions {
     display: flex;
+    width: 100%;
+    align-items: center;
     justify-content: center;
     margin-top: var(--poodle-media-browse-grid-gap);
   }

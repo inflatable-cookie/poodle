@@ -115,13 +115,16 @@
 
 <style>
   .poodle-collapsible {
+    --poodle-collapsible-fill: color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel));
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
     padding: 0.625rem var(--poodle-space-panel-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent);
     border-radius: var(--poodle-radius-surface);
-    background: color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-panel)) 82%, var(--poodle-color-background-elevated));
+    background: var(--poodle-collapsible-fill);
+    --poodle-surface: var(--poodle-collapsible-fill);
+    box-shadow: inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent);
   }
 
   .poodle-collapsible[data-open="false"] {

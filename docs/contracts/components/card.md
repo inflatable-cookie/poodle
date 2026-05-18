@@ -1,14 +1,14 @@
 # Card
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-05-18
 
 ## 1. Purpose
 
 - Component name: `Card`
 - Layer: `foundation`
 - Summary: a contained surface for grouping related content with optional media,
-  header, body, and footer regions
+  header, body, and footer regions, with density-driven spacing adjustments
 - In scope: default, outlined, and elevated variants; vertical, horizontal, and
   compact layouts; interactive and selected states; optional media, header,
   body, and footer snippets
@@ -41,6 +41,7 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `variant` | `"default" \| "outlined" \| "elevated"` | `"default"` | no | visual treatment |
 | `layout` | `"vertical" \| "horizontal" \| "compact"` | `"vertical"` | no | content arrangement |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for card spacing; when null, resolves from inherited presentation |
 | `interactive` | `boolean` | `false` | no | enables hover/focus states and pointer cursor |
 | `selected` | `boolean` | `false` | no | accent border and shadow treatment |
 | `media` | `boolean` | `false` | no | enables media slot region |
@@ -72,6 +73,8 @@ Updated: 2026-03-15
 | interactive hover | pointer enters (when interactive) | hover fill, hover border, hover shadow |
 | selected | `selected=true` | accent border color, accent inset shadow |
 | compact | `layout="compact"` | reduced padding and gap |
+| compact density | `density="compact"` or inherited compact presentation | tighter padding, gap, and footer spacing |
+| comfortable density | `density="comfortable"` or inherited comfortable presentation | looser padding, gap, and footer spacing |
 
 ## 5. Events
 
@@ -126,6 +129,10 @@ Updated: 2026-03-15
 | `--poodle-recipe-card-hover-fill` | `var(--poodle-treatment-surface-hover-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 94%, var(--poodle-color-background-panel)))` |
 | `--poodle-recipe-card-hover-border` | `var(--poodle-treatment-surface-hover-border, color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle)))` |
 | `--poodle-recipe-card-hover-shadow` | `var(--poodle-treatment-surface-hover-shadow, var(--poodle-recipe-card-shadow))` |
+| `--poodle-card-gap` | density/layout-controlled internal gap |
+| `--poodle-card-padding-block` | density/layout-controlled block padding |
+| `--poodle-card-padding-inline` | density/layout-controlled inline padding |
+| `--poodle-card-footer-padding-top` | density/layout-controlled footer top padding |
 
 ### Root (base — default variant)
 
@@ -133,8 +140,8 @@ Updated: 2026-03-15
 |----------|-------|
 | `display` | `grid` |
 | `align-content` | `start` |
-| `gap` | `var(--poodle-space-stack-md)` |
-| `padding` | `var(--poodle-space-panel-x)` |
+| `gap` | `var(--poodle-card-gap)` |
+| `padding` | `var(--poodle-card-padding-block) var(--poodle-card-padding-inline)` |
 | `border` | `0.0625rem solid var(--poodle-recipe-card-border)` |
 | `border-radius` | `var(--poodle-recipe-card-radius)` |
 | `background` | `var(--poodle-treatment-surface-fill, color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary)))` |
@@ -203,6 +210,14 @@ Updated: 2026-03-15
 | `padding` | `0.5rem 0.625rem` |
 | `gap` | `var(--poodle-space-stack-sm)` |
 
+### Density variants
+
+| Density | Gap | Padding | Footer padding-top |
+|---------|-----|---------|--------------------|
+| `compact` | `0.625rem` | `0.75rem 0.75rem` | `0.625rem` |
+| `default` | `var(--poodle-space-stack-md)` | `var(--poodle-space-panel-x) var(--poodle-space-panel-x)` | `var(--poodle-space-stack-sm)` |
+| `comfortable` | `1rem` | `1rem 1rem` | `0.875rem` |
+
 ### Media
 
 | Property | Value |
@@ -214,7 +229,7 @@ Updated: 2026-03-15
 
 | Property | Value |
 |----------|-------|
-| `padding-top` | `var(--poodle-space-stack-sm)` |
+| `padding-top` | `var(--poodle-card-footer-padding-top)` |
 | `border-top` | `0.0625rem solid var(--poodle-treatment-surface-divider, var(--poodle-recipe-card-divider))` |
 
 ## 9. Svelte Notes

@@ -141,13 +141,13 @@
     </IconProvider>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <div class="poodle-size-demo">
       <Icon icon={star} {size} />
       <Icon icon={heart} {size} />
       <Icon icon={settings} {size} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 
 </SpecimenLayout>
 

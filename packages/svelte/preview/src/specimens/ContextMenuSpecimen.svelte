@@ -28,21 +28,21 @@
     {/if}
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <ContextMenu {items} {size}>
       <div class="poodle-target-area poodle-target-area--small">
         <p>{size.toUpperCase()}</p>
       </div>
     </ContextMenu>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <ContextMenu {items} {density}>
       <div class="poodle-target-area poodle-target-area--small">
         <p>{density}</p>
       </div>
     </ContextMenu>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

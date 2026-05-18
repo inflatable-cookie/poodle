@@ -49,6 +49,7 @@ Updated: 2026-03-15
 | `badge` | `string \| null` | `null` | no | inline badge text |
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | overrides inherited UI presentation density for card padding, icon box size, and internal spacing |
 | `onClick` | `((event: MouseEvent) => void) \| null` | `null` | no | called when the card is activated; suppressed while disabled |
 
 ### Snippets
@@ -108,6 +109,7 @@ Updated: 2026-03-15
 - Icon: fixed 2rem square
 - Content: flex 1, min-width 0
 - Arrow: fixed 1rem square, right-aligned
+- Density affects padding, row gaps, and icon box size; typography stays fixed
 
 ### Composition
 
@@ -135,6 +137,14 @@ Updated: 2026-03-15
 | `font` | `inherit` |
 | `width` | `100%` |
 | `transition` | `background, border-color, box-shadow` at `motion-duration-interaction motion-easing-standard` |
+
+### Density Overrides
+
+| `data-density` | Root Gap | Root Padding | Icon Size | Content Gap | Title Gap |
+|----------------|----------|--------------|-----------|-------------|-----------|
+| `compact` | `0.625rem` | `0.5rem 0.75rem` | `1.75rem` | `0.0625rem` | `0.3125rem` |
+| `default` | `0.75rem` | `0.625rem var(--poodle-space-panel-x)` | `2rem` | `0.125rem` | `0.375rem` |
+| `comfortable` | `0.875rem` | `0.75rem 1.25rem` | `2.25rem` | `0.1875rem` | `0.4375rem` |
 
 ### Root hover
 
@@ -238,6 +248,7 @@ Updated: 2026-03-15
 
 - Renders `<a>` when `href` provided and not disabled, otherwise `<button>`
 - `data-disabled` attribute on root when disabled
+- `density` resolves from UI presentation context when not provided explicitly
 - Arrow SVG is always in DOM, opacity-toggled on hover
 - Badge rendered inline within title row when badge prop is non-null
 - `onClick` handler on root; `<a>` still navigates natively when `href` is present

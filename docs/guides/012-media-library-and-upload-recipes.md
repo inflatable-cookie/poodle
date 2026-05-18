@@ -10,8 +10,7 @@ surfaces without recreating a second media workflow kit above Poodle.
 ## Default Posture
 
 - use Poodle `MediaPicker` for lightweight local selection
-- use Poodle `MediaBrowsePanel` and `MediaUploadStatusPanel` for heavier
-  callback-driven media-library shells
+- use Poodle `MediaBrowsePanel` for heavier callback-driven media-library shells
 - use Poodle `MediaThumbnail` and `MediaPreview` for display posture
 - keep upload orchestration, duplicate detection, and media-record policy in
   host code or retained runtime helpers
@@ -49,14 +48,12 @@ wrapper.
 
 ```svelte
 <script lang="ts">
-  import {
-    MediaBrowsePanel,
-    MediaUploadStatusPanel,
-    type MediaBrowseItem
-  } from "@poodle/svelte";
+  import { MediaBrowsePanel, type MediaBrowseItem } from "@poodle/svelte";
+  import UploadWorkflowStatus from "$lib/media/UploadWorkflowStatus.svelte";
 
   let items: MediaBrowseItem[] = [];
   let uploads = [];
+  let query = "";
 </script>
 
 <div class="media-library-shell">
@@ -70,13 +67,7 @@ wrapper.
     }}
   />
 
-  <MediaUploadStatusPanel
-    title="Uploads"
-    uploads={uploads}
-    onUploadAnyway={(upload) => {
-      // host-owned retry
-    }}
-  />
+  <UploadWorkflowStatus {uploads} />
 </div>
 ```
 
@@ -166,7 +157,6 @@ multiple apps.
 
 - [MediaPicker](../contracts/components/media-picker.md)
 - [MediaBrowsePanel](../contracts/components/media-browse-panel.md)
-- [MediaUploadStatusPanel](../contracts/components/media-upload-status-panel.md)
 - [MediaPreview](../contracts/components/media-preview.md)
 - [MediaThumbnail](../contracts/components/media-thumbnail.md)
 

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { MarkdownEditor } from "@poodle/svelte";
-  import { UiPresentationProvider } from "@poodle/svelte";
-  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { MarkdownEditor, Eyebrow } from "@poodle/svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let content = `# Hello World
 
@@ -21,28 +20,50 @@ Check out [Poodle](https://example.com) for more.`;
   let compactContent = "## Compact workspace\n\nToolbar and pane spacing should tighten with density while controls still scale semantically.";
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Split view">
-    <MarkdownEditor bind:value={content} mode="split" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Edit mode">
-    <MarkdownEditor bind:value={emptyContent} mode="edit" placeholder="Start writing..." />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Disabled">
-    <MarkdownEditor value="Read-only content" disabled />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Semantic presentation">
-    <UiPresentationProvider density="compact" sizeScale="sm">
-      <div class="poodle-specimen__stack">
-        <MarkdownEditor bind:value={compactContent} mode="split" />
-        <MarkdownEditor value={compactContent} mode="preview" sizeRole="prominent" />
+<SpecimenLayout bareVariants>
+  {#snippet children()}
+    <div class="poodle-specimen">
+      <div class="poodle-specimen__item">
+        <Eyebrow>Split view</Eyebrow>
+        <MarkdownEditor bind:value={content} mode="split" />
       </div>
-    </UiPresentationProvider>
-  </SpecimenGroup>
-</div>
+
+      <div class="poodle-specimen__item">
+        <Eyebrow>Edit mode</Eyebrow>
+        <MarkdownEditor bind:value={emptyContent} mode="edit" placeholder="Start writing..." />
+      </div>
+
+      <div class="poodle-specimen__item">
+        <Eyebrow>Disabled</Eyebrow>
+        <MarkdownEditor value="Read-only content" disabled />
+      </div>
+    </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <div class="poodle-md-editor-specimen__variant-block">
+      <Eyebrow>{size}</Eyebrow>
+      <MarkdownEditor
+        value={compactContent}
+        mode="split"
+        size={size}
+        minHeight="10rem"
+      />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-md-editor-specimen__variant-block">
+      <Eyebrow>{density}</Eyebrow>
+      <MarkdownEditor
+        value={compactContent}
+        mode="split"
+        density={density}
+        minHeight="10rem"
+      />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
@@ -51,8 +72,10 @@ Check out [Poodle](https://example.com) for more.`;
     gap: 1rem;
   }
 
-  .poodle-specimen__stack {
-    display: grid;
-    gap: 0.75rem;
+  .poodle-specimen__item,
+  .poodle-md-editor-specimen__variant-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 </style>

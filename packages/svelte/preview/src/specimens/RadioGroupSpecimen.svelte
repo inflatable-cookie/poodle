@@ -56,7 +56,7 @@
     />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <RadioGroup
       options={planOptions}
       defaultValue="pro"
@@ -64,9 +64,9 @@
       {size}
       ariaLabel={"Plan at " + size}
     />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <RadioGroup
       options={planOptions}
       defaultValue="pro"
@@ -74,5 +74,5 @@
       {density}
       ariaLabel={"Plan at " + density + " density"}
     />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

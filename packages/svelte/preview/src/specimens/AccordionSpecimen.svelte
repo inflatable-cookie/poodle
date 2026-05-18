@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Accordion, type AccordionItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const singleItems: AccordionItem[] = [
     { value: "getting-started", label: "Getting started" },
@@ -23,6 +24,8 @@
     { value: "known-issues", label: "Known issues" },
   ];
 
+  const specimenVariantItems: AccordionItem[] = [{ value: "getting-started", label: "Getting started" }];
+
   const multiContent: Record<string, string> = {
     design:
       "Components consume semantic tokens like --poodle-color-text-primary and --poodle-size-control-height rather than hard-coded values. Switching themes at runtime updates every component instantly without re-rendering.",
@@ -33,38 +36,76 @@
   };
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup bare label="Single selection">
-    <Accordion
-      items={singleItems}
-      selectionMode="single"
-      defaultValue="getting-started"
-      ariaLabel="Single-select accordion"
-    >
-      {#snippet children(item)}
-      <p>{singleContent[item.value]}</p>
-      {/snippet}
-    </Accordion>
-  </SpecimenGroup>
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup bare label="Single selection">
+      <Accordion
+        items={singleItems}
+        selectionMode="single"
+        defaultValue="getting-started"
+        ariaLabel="Single-select accordion"
+      >
+        {#snippet children(item)}
+        <p>{singleContent[item.value]}</p>
+        {/snippet}
+      </Accordion>
+    </SpecimenGroup>
 
-  <SpecimenGroup bare label="Multiple selection">
-    <Accordion
-      items={multiItems}
-      selectionMode="multiple"
-      defaultValue={["design", "keyboard"]}
-      ariaLabel="Multi-select accordion"
-    >
-      {#snippet children(item)}
-      <p>{multiContent[item.value]}</p>
-      {/snippet}
-    </Accordion>
-  </SpecimenGroup>
-</div>
+    <SpecimenGroup bare label="Multiple selection">
+      <Accordion
+        items={multiItems}
+        selectionMode="multiple"
+        defaultValue={["design", "keyboard"]}
+        ariaLabel="Multi-select accordion"
+      >
+        {#snippet children(item)}
+        <p>{multiContent[item.value]}</p>
+        {/snippet}
+      </Accordion>
+    </SpecimenGroup>
+  </div>
+
+  {#snippet sizes(size)}
+    <div class="poodle-accordion-specimen__variant">
+      <Accordion
+        items={specimenVariantItems}
+        selectionMode="single"
+        defaultValue="getting-started"
+        ariaLabel={`${size} accordion`}
+        {size}
+      >
+        {#snippet children(item)}
+        <p>{singleContent[item.value]}</p>
+        {/snippet}
+      </Accordion>
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-accordion-specimen__variant">
+      <Accordion
+        items={specimenVariantItems}
+        selectionMode="single"
+        defaultValue="getting-started"
+        ariaLabel={`${density} accordion`}
+        {density}
+      >
+        {#snippet children(item)}
+        <p>{singleContent[item.value]}</p>
+        {/snippet}
+      </Accordion>
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .poodle-accordion-specimen__variant {
+    width: min(100%, 28rem);
   }
 </style>

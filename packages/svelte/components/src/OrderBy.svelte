@@ -1,7 +1,12 @@
+<script module lang="ts">
+  let nextOrderById = 0;
+</script>
+
 <script lang="ts">
+  import { onMount, tick } from "svelte";
+
   import { default as Button } from "./Button.svelte";
   import { default as IconButton } from "./IconButton.svelte";
-  import { default as Popover } from "./Popover.svelte";
   import { default as Select } from "./Select.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -47,10 +52,13 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const panelId = `poodle-order-by-${++nextOrderById}`;
   let open = $state(false);
   let addFieldValue = $state("");
   let dragIndex = $state<number | null>(null);
   let dragOverIndex = $state<number | null>(null);
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let panelElement = $state<HTMLDivElement | null>(null);
   let uncontrolledValue = $state<OrderByValue>([]);
   let seededUncontrolledValue = $state(false);
 
@@ -91,6 +99,19 @@
   );
   const selectItems = $derived(availableFields.map((field) => ({ value: field.key, label: field.label })));
   const triggerText = $derived(summarizeValue(effectiveValue));
+
+  $effect(() => {
+    if (!open) {
+      return;
+    }
+
+    tick().then(() => {
+      const firstFocusable = panelElement?.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      firstFocusable?.focus();
+    });
+  });
 
   function summarizeValue(nextValue: OrderByValue): string {
     if (nextValue.length === 0) {
@@ -202,6 +223,15 @@
     sync([]);
   }
 
+  function setOpen(nextOpen: boolean): void {
+    if (disabled) return;
+    open = nextOpen;
+  }
+
+  function toggleOpen(): void {
+    setOpen(!open);
+  }
+
   function handleResetClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -216,24 +246,61 @@
     event.preventDefault();
     handleDrop(index);
   }
+
+  onMount(() => {
+    function handlePointerDown(event: MouseEvent): void {
+      if (!open || !rootElement) {
+        return;
+      }
+
+      if (!rootElement.contains(event.target as Node)) {
+        open = false;
+      }
+    }
+
+    function handleKeydown(event: KeyboardEvent): void {
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        open = false;
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  });
 </script>
 
-<Popover bind:open placement="bottom-start" ariaLabel={ariaLabel} block>
-  {#snippet trigger()}
+<div
+  bind:this={rootElement}
+  class="poodle-order-by-popover"
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+>
+  <div
+    class="poodle-order-by"
+    role="group"
+    aria-label={ariaLabel}
+    data-disabled={disabled}
+    data-compact={compact}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+  >
     <div
-      class="poodle-order-by"
-      role="group"
-      aria-label={ariaLabel}
-      data-disabled={disabled}
-      data-compact={compact}
-      data-size={resolvedSize}
-      data-density={resolvedDensity}
+      class="poodle-order-by__trigger-wrap"
     >
       <button
         type="button"
         class="poodle-order-by__trigger"
         disabled={disabled}
         aria-label={ariaLabel}
+        aria-expanded={open ? "true" : "false"}
+        aria-controls={open ? panelId : undefined}
+        onclick={toggleOpen}
       >
         <span class="poodle-order-by__label">Sort by</span>
         <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
@@ -241,111 +308,130 @@
         </span>
         <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
       </button>
-
-      {#if showClearButton && effectiveValue.length > 0}
-        <button
-          type="button"
-          class="poodle-order-by__reset"
-          onclick={handleResetClick}
-          disabled={disabled}
-          aria-label="Clear sort"
-        >
-          <IconButton
-            icon="x"
-            ariaLabel="Clear sort"
-            variant="ghost"
-            size={resolvedSize}
-            disabled={disabled}
-          />
-        </button>
-      {/if}
     </div>
-  {/snippet}
 
-  <div class="poodle-order-by__panel">
-    {#if effectiveValue.length > 0}
-      <div class="poodle-order-by__list" role="list">
-        {#each effectiveValue as item, index (`${item.key}-${index}`)}
-          {@const field = fieldMap.get(item.key)}
-          <div
-            class="poodle-order-by__item"
-            class:poodle-order-by__item--dragging={dragIndex === index}
-            class:poodle-order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
-            role="listitem"
-          >
-            <button
-              type="button"
-              class="poodle-order-by__drag-handle"
-              draggable={!disabled}
-              disabled={disabled}
-              aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
-              ondragstart={() => handleDragStart(index)}
-              ondragenter={() => handleDragEnter(index)}
-              ondragover={handleDragOver}
-              ondrop={(event) => handleDropEvent(event, index)}
-              ondragend={clearDragState}
-              onkeydown={(event) => {
-                if (event.altKey && event.key === "ArrowUp" && index > 0) {
-                  event.preventDefault();
-                  moveField(index, -1);
-                }
-                if (event.altKey && event.key === "ArrowDown" && index < effectiveValue.length - 1) {
-                  event.preventDefault();
-                  moveField(index, 1);
-                }
-              }}
-            >
-              ⠿
-            </button>
-            <span class="poodle-order-by__item-label">{field?.label ?? item.key}</span>
-            <IconButton
-              icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
-              ariaLabel={`${field?.label ?? item.key}: ${item.direction === "asc" ? "ascending" : "descending"}. Click to toggle.`}
-              tooltip={item.direction === "asc" ? "Asc" : "Desc"}
-              size="xs"
-              variant="ghost"
-              disabled={disabled}
-              onClick={() => toggleDirection(index)}
-            />
-            <IconButton
-              icon="x"
-              ariaLabel={`Remove ${field?.label ?? item.key}`}
-              tooltip="Remove"
-              size="xs"
-              variant="ghost"
-              disabled={disabled}
-              onClick={() => removeField(index)}
-            />
-          </div>
-        {/each}
-      </div>
-    {:else}
-      <p class="poodle-order-by__empty">No sort fields</p>
-    {/if}
-
-    {#if canAddMore && availableFields.length > 0}
-      <div class="poodle-order-by__add">
-        <Select
-          options={selectItems}
-          bind:value={addFieldValue}
-          placeholder="+ Add field"
-          ariaLabel="Add sort field"
+    {#if showClearButton && effectiveValue.length > 0}
+      <span class="poodle-order-by__reset">
+        <IconButton
+          icon="x"
+          ariaLabel="Clear sort"
+          variant="ghost"
           size={resolvedSize}
-          density={resolvedDensity}
-          onValueChange={addField}
           disabled={disabled}
+          onClick={handleResetClick}
         />
-      </div>
+      </span>
     {/if}
   </div>
-</Popover>
+
+  {#if open}
+    <div
+      bind:this={panelElement}
+      id={panelId}
+      class="poodle-order-by__surface"
+      role="dialog"
+      aria-label={ariaLabel}
+      tabindex="-1"
+    >
+      <div class="poodle-order-by__panel">
+        {#if effectiveValue.length > 0}
+          <div class="poodle-order-by__list" role="list">
+            {#each effectiveValue as item, index (`${item.key}-${index}`)}
+              {@const field = fieldMap.get(item.key)}
+              <div
+                class="poodle-order-by__item"
+                class:poodle-order-by__item--dragging={dragIndex === index}
+                class:poodle-order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
+                role="listitem"
+              >
+                <button
+                  type="button"
+                  class="poodle-order-by__drag-handle"
+                  draggable={!disabled}
+                  disabled={disabled}
+                  aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
+                  ondragstart={() => handleDragStart(index)}
+                  ondragenter={() => handleDragEnter(index)}
+                  ondragover={handleDragOver}
+                  ondrop={(event) => handleDropEvent(event, index)}
+                  ondragend={clearDragState}
+                  onkeydown={(event) => {
+                    if (event.altKey && event.key === "ArrowUp" && index > 0) {
+                      event.preventDefault();
+                      moveField(index, -1);
+                    }
+                    if (event.altKey && event.key === "ArrowDown" && index < effectiveValue.length - 1) {
+                      event.preventDefault();
+                      moveField(index, 1);
+                    }
+                  }}
+                >
+                  ⠿
+                </button>
+                <span class="poodle-order-by__item-label">{field?.label ?? item.key}</span>
+                <IconButton
+                  icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
+                  ariaLabel={`${field?.label ?? item.key}: ${item.direction === "asc" ? "ascending" : "descending"}. Click to toggle.`}
+                  tooltip={item.direction === "asc" ? "Asc" : "Desc"}
+                  size="xs"
+                  variant="ghost"
+                  disabled={disabled}
+                  onClick={() => toggleDirection(index)}
+                />
+                <IconButton
+                  icon="x"
+                  ariaLabel={`Remove ${field?.label ?? item.key}`}
+                  tooltip="Remove"
+                  size="xs"
+                  variant="ghost"
+                  disabled={disabled}
+                  onClick={() => removeField(index)}
+                />
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <p class="poodle-order-by__empty">No sort fields</p>
+        {/if}
+
+        {#if canAddMore && availableFields.length > 0}
+          <div class="poodle-order-by__add">
+            <Select
+              options={selectItems}
+              bind:value={addFieldValue}
+              placeholder="+ Add field"
+              ariaLabel="Add sort field"
+              size={resolvedSize}
+              density={resolvedDensity}
+              onValueChange={addField}
+              disabled={disabled}
+            />
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
+</div>
 
 <style>
+  .poodle-order-by-popover {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+
   .poodle-order-by {
     display: flex;
     align-items: center;
     gap: 0.375rem;
     width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-order-by__trigger-wrap {
+    display: flex;
+    flex: 1;
     min-width: 0;
   }
 
@@ -370,12 +456,13 @@
     color: var(--poodle-color-text-primary);
     cursor: pointer;
     text-align: left;
+    user-select: none;
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
-  .poodle-order-by__trigger:hover:not(:disabled) {
+  .poodle-order-by__trigger:hover {
     background: color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated));
   }
 
@@ -415,10 +502,27 @@
   .poodle-order-by__reset {
     display: inline-flex;
     flex-shrink: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
+  }
+
+  .poodle-order-by__surface {
+    position: absolute;
+    z-index: var(--poodle-overlay-z-menu);
+    top: calc(100% + 0.5rem);
+    left: 0;
+    min-width: 14rem;
+    max-width: min(24rem, 90vw);
+    padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
+    border: 0.0625rem solid var(
+      --poodle-treatment-surface-elevated-border,
+      color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)
+    );
+    border-radius: var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface));
+    background: var(--poodle-color-background-elevated);
+    --poodle-surface: var(--poodle-color-background-elevated);
+    box-shadow:
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
+      0 0.625rem 1.5rem rgba(9, 13, 18, 0.22),
+      0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
   }
 
   .poodle-order-by[data-compact="true"] .poodle-order-by__label {

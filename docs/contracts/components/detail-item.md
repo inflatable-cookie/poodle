@@ -1,7 +1,7 @@
 # DetailItem
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-05-17
 
 ## 1. Purpose
 
@@ -9,7 +9,8 @@ Updated: 2026-04-09
 - Layer: `foundation`
 - Summary: a label/value pair for displaying read-only metadata within detail
   sections, supporting inline and stacked layouts, optional info description
-  popovers, optional trailing action content, and surface presentation for elevated cards
+  popovers, optional trailing action content, surface presentation for elevated cards,
+  and density-driven spacing adjustments
 - In scope: label/value display, optional custom value content via snippets,
   optional trailing action content, description popover (info icon with Popover), inline
   grid layout, stacked layout, surface presentation variant, responsive
@@ -57,6 +58,7 @@ Updated: 2026-04-09
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for layout spacing; when null, resolves from inherited presentation |
 | `label` | `string` | -- | yes | visible detail label |
 | `description` | `string \| null` | `null` | no | when set, renders an info icon Popover next to the label (matches Field pattern) |
 | `value` | `string \| number \| null` | `null` | no | simple text value fallback |
@@ -76,6 +78,8 @@ Updated: 2026-04-09
 - When `description` is set, an info icon appears next to the label that opens a Popover on click
 - When `span="full"`, root spans all columns in the parent grid
 - When `action()` is present, an action column is rendered after the value
+- When `density` is omitted, spacing resolves from inherited UI presentation density
+- When `density` is set explicitly, root gap, inline column gap, label gap, and surface padding/gaps follow that density
 
 ### Responsive Behavior
 
@@ -93,6 +97,8 @@ At viewport widths at or below `45rem`, the inline layout collapses to a single 
 | info hover | pointer enters info icon | icon background darkens, icon color shifts to text-primary |
 | info focus | keyboard focus on info trigger | focus ring around info icon |
 | info open | click info icon | Popover appears with description text |
+| compact density | `density="compact"` or inherited compact presentation | tighter row gap, inline column gap, and surface padding |
+| comfortable density | `density="comfortable"` or inherited comfortable presentation | looser row gap, inline column gap, and surface padding |
 
 ## 6. Accessibility
 
@@ -107,22 +113,34 @@ At viewport widths at or below `45rem`, the inline layout collapses to a single 
 ### Inline Layout (`layout="inline"`)
 
 - Grid layout: `grid-template-columns: minmax(8rem, 11.25rem) minmax(0, 1fr) auto`
-- Gap: `0.25rem` row gap, `var(--poodle-space-inline-md)` column gap
+- Gap:
+  - `compact`: `0.1875rem` row gap, `var(--poodle-space-inline-sm)` column gap
+  - `default`: `0.25rem` row gap, `var(--poodle-space-inline-md)` column gap
+  - `comfortable`: `0.3125rem` row gap, `0.875rem` column gap
 - All three children (label-block, value, action) placed on `grid-row: 1`
 - Alignment: `baseline`
 
 ### Stacked Layout (`layout="stacked"`)
 
 - Grid layout: single column (default)
-- Gap: `0.25rem`
+- Gap:
+  - `compact`: `0.1875rem`
+  - `default`: `0.25rem`
+  - `comfortable`: `0.3125rem`
 - Label and value stack vertically
 
 ### Surface Presentation (`presentation="surface"`)
 
 - Grid layout: `grid-template-columns: 11.25rem minmax(0, 1fr) auto`
-- Gap: `var(--poodle-space-inline-md)`
+- Gap:
+  - `compact`: `var(--poodle-space-inline-sm)`
+  - `default`: `var(--poodle-space-inline-md)`
+  - `comfortable`: `0.875rem`
 - Alignment: `center`
-- Padding: `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`
+- Padding:
+  - `compact`: `0.5rem 0.75rem`
+  - `default`: `0.625rem var(--poodle-space-panel-x)`
+  - `comfortable`: `0.75rem 1rem`
 - Border radius: `calc(var(--poodle-radius-surface) - 0.0625rem)`
 - Background: `color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))`
 
@@ -130,6 +148,10 @@ At viewport widths at or below `45rem`, the inline layout collapses to a single 
 
 - Grid layout: `grid-template-columns: minmax(0, 1fr) auto`
 - Alignment: `start`
+- Gap:
+  - `compact`: `0.125rem`
+  - `default`: `0.1875rem`
+  - `comfortable`: `0.25rem`
 - Label block spans all columns (`grid-column: 1 / -1`)
 - Value font-size increases to `1rem`, font-weight to `600`
 

@@ -50,11 +50,11 @@
     {/if}
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Menubar {items} {size} ariaLabel={size + " menu bar"} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Menubar {items} {density} ariaLabel={density + " menu bar"} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

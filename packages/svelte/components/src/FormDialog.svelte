@@ -147,7 +147,9 @@
 
   {#snippet actions()}
     {#if actionContent}
-      {@render actionContent(submitting)}
+      <div class="poodle-form-dialog__custom-actions">
+        {@render actionContent(submitting)}
+      </div>
     {:else if resolvedShowActions}
       <Button
         variant="ghost"
@@ -184,5 +186,14 @@
     color: var(--poodle-color-text-secondary);
     font-size: var(--poodle-typography-body-size, 0.875rem);
     line-height: var(--poodle-typography-body-lineHeight, 1.5);
+  }
+
+  .poodle-form-dialog__custom-actions {
+    width: 100%;
+  }
+
+  .poodle-form-dialog__custom-actions :global(.poodle-form-actions) {
+    width: 100%;
+    padding-top: 0;
   }
 </style>

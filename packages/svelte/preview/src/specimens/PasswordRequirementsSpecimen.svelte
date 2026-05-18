@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { PasswordRequirements } from "@poodle/svelte";
+  import { PasswordRequirements, TextInput } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
-  let password = "";
+  let password = $state("");
 
   const requirements = {
     minLength: 12,
@@ -14,27 +15,37 @@
   };
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Default">
-    <label class="poodle-specimen__field">
-      <span>Password</span>
-      <input bind:value={password} type="password" />
-    </label>
-    <PasswordRequirements {password} {requirements} />
-  </SpecimenGroup>
+<SpecimenLayout showSizes={true} showDensities={false}>
+  {#snippet children()}
+    <div class="poodle-specimen">
+      <SpecimenGroup label="Default">
+        <div class="poodle-password-requirements-specimen__field">
+          <label for="password-requirements-specimen-password">Password</label>
+          <TextInput id="password-requirements-specimen-password" bind:value={password} type="password" />
+        </div>
+        <PasswordRequirements {password} {requirements} />
+      </SpecimenGroup>
 
-  <SpecimenGroup label="Loading">
-    <PasswordRequirements password="" requirements={null} loading />
-  </SpecimenGroup>
+      <SpecimenGroup label="Loading">
+        <PasswordRequirements password="" requirements={null} loading />
+      </SpecimenGroup>
 
-  <SpecimenGroup label="Error">
-    <PasswordRequirements
-      password=""
-      requirements={null}
-      error="Could not load password requirements."
-    />
-  </SpecimenGroup>
-</div>
+      <SpecimenGroup label="Error">
+        <PasswordRequirements
+          password=""
+          requirements={null}
+          error="Could not load password requirements."
+        />
+      </SpecimenGroup>
+    </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <div class="poodle-password-requirements-specimen__variant">
+      <PasswordRequirements password="Example123!" {requirements} {size} />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
@@ -44,19 +55,18 @@
     max-width: 28rem;
   }
 
-  .poodle-specimen__field {
+  .poodle-password-requirements-specimen__field {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+  }
+
+  .poodle-password-requirements-specimen__field label {
     font-size: 0.875rem;
     color: var(--poodle-color-text-secondary);
   }
 
-  .poodle-specimen__field input {
-    padding: 0.625rem 0.75rem;
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
+  .poodle-password-requirements-specimen__variant {
+    width: min(100%, 28rem);
   }
 </style>

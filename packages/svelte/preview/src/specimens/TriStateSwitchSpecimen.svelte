@@ -31,13 +31,13 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <TriStateSwitch value="default" {size} ariaLabel={"Switch at " + size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <TriStateSwitch value="default" {density} ariaLabel={"Switch at " + density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

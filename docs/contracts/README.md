@@ -106,7 +106,6 @@ above it in downstream repos such as Loophole.
 - `components/media-picker.md`
 - `components/media-preview.md`
 - `components/media-thumbnail.md`
-- `components/media-upload-status-panel.md`
 - `components/menu.md`
 - `components/menubar.md`
 - `components/meta-bar.md`

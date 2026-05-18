@@ -37,7 +37,7 @@
     <StatusBar summary="3 items selected" />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <div class="poodle-variant-block">
       <StatusBar chrome summary="Status bar" {size}>
         {#snippet trailing()}
@@ -46,9 +46,9 @@
         {/snippet}
       </StatusBar>
     </div>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <div class="poodle-variant-block">
       <StatusBar chrome summary="Status bar" {density}>
         {#snippet trailing()}
@@ -57,7 +57,7 @@
         {/snippet}
       </StatusBar>
     </div>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

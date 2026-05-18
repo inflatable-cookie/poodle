@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { getUiPresentation } from "./presentation";
+  import type { ControlDensity } from "./types";
 
   interface Props {
+    density?: ControlDensity | null;
     title?: string | null;
     description?: string | null;
     separated?: boolean;
@@ -12,6 +15,7 @@
   }
 
   let {
+    density = null,
     title = null,
     description = null,
     separated = true,
@@ -20,10 +24,15 @@
     actions,
     children,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 </script>
 
 <section
   class="poodle-detail-section"
+  data-density={resolvedDensity}
   data-separated={separated}
   data-columns={columns}
   aria-label={ariaLabel ?? undefined}
@@ -52,8 +61,12 @@
 
 <style>
   .poodle-detail-section {
+    --poodle-detail-section-root-gap: calc(var(--poodle-space-stack-md) + 0.125rem);
+    --poodle-detail-section-header-gap: var(--poodle-space-inline-md);
+    --poodle-detail-section-title-gap: 0.375rem;
+    --poodle-detail-section-body-gap: var(--poodle-space-stack-sm);
     display: grid;
-    gap: calc(var(--poodle-space-stack-md) + 0.125rem);
+    gap: var(--poodle-detail-section-root-gap);
   }
 
   .poodle-detail-section[data-separated="true"] {
@@ -64,13 +77,13 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    gap: var(--poodle-space-inline-md);
+    gap: var(--poodle-detail-section-header-gap);
     align-items: start;
   }
 
   .poodle-detail-section__title-block {
     display: grid;
-    gap: 0.375rem;
+    gap: var(--poodle-detail-section-title-gap);
   }
 
   .poodle-detail-section__title,
@@ -92,7 +105,28 @@
 
   .poodle-detail-section__body {
     display: grid;
-    gap: var(--poodle-space-stack-sm);
+    gap: var(--poodle-detail-section-body-gap);
+  }
+
+  .poodle-detail-section[data-density="default"] {
+    --poodle-detail-section-root-gap: calc(var(--poodle-space-stack-md) + 0.125rem);
+    --poodle-detail-section-header-gap: 0.75rem;
+    --poodle-detail-section-title-gap: 0.375rem;
+    --poodle-detail-section-body-gap: 0.75rem;
+  }
+
+  .poodle-detail-section[data-density="compact"] {
+    --poodle-detail-section-root-gap: 0.75rem;
+    --poodle-detail-section-header-gap: var(--poodle-space-inline-sm);
+    --poodle-detail-section-title-gap: 0.25rem;
+    --poodle-detail-section-body-gap: 0.625rem;
+  }
+
+  .poodle-detail-section[data-density="comfortable"] {
+    --poodle-detail-section-root-gap: calc(var(--poodle-space-stack-lg) - 0.125rem);
+    --poodle-detail-section-header-gap: 0.875rem;
+    --poodle-detail-section-title-gap: 0.5rem;
+    --poodle-detail-section-body-gap: 1rem;
   }
 
   .poodle-detail-section[data-columns="2"] .poodle-detail-section__body {

@@ -58,13 +58,13 @@
     </div>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Pill {size}>{size.toUpperCase()}</Pill>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Pill {density}>Label</Pill>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

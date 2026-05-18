@@ -38,13 +38,13 @@ function handleClick(event: MouseEvent): void {
     <Code source="echo 'hello world'" language="bash" showCopyButton={false} />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Code source="const x = 1;" {size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Code source="const x = 1;" {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

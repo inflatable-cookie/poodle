@@ -2,6 +2,7 @@
   import type { Snippet } from "svelte";
 
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -64,45 +65,21 @@
   role="toolbar"
   aria-label={ariaLabel}
 >
-  {#if collapsible && collapsed}
-    <button
-      type="button"
-      class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button"
-      onclick={handleHeaderClick}
-      aria-expanded="false"
-      aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
-    >
-      <CollapseToggle
-        {collapsed}
-        ariaLabel="Show filters"
-        onToggle={(isCollapsed) => (collapsed = isCollapsed)}
-      />
-
-      {#if summary}
-        <span class="poodle-filter-toolbar__summary">
-          {@render summary()}
-        </span>
-      {:else if summaryText}
-        <span class="poodle-filter-toolbar__summary">{summaryText}</span>
-      {/if}
-
-      {#if actions}
-        <span class="poodle-filter-toolbar__actions">
-          {@render actions()}
-        </span>
-      {/if}
-    </button>
-  {:else}
-    {#if collapsible}
+  <UiPresentationProvider
+    sizeScale={size ?? $uiPresentation.sizeScale}
+    density={density ?? $uiPresentation.density}
+  >
+    {#if collapsible && collapsed}
       <button
         type="button"
-        class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
-        aria-expanded={!collapsed}
+        class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button"
         onclick={handleHeaderClick}
+        aria-expanded="false"
+        aria-label={summaryText ? `Show filters. ${summaryText}` : "Show filters"}
       >
         <CollapseToggle
           {collapsed}
-          ariaLabel={collapsed ? "Show filters" : "Hide filters"}
+          ariaLabel="Show filters"
           onToggle={(isCollapsed) => (collapsed = isCollapsed)}
         />
 
@@ -121,39 +98,68 @@
         {/if}
       </button>
     {:else}
-      <div class="poodle-filter-toolbar__header">
-        {#if summary}
-          <div class="poodle-filter-toolbar__summary">
-            {@render summary()}
-          </div>
-        {:else if summaryText}
-          <p class="poodle-filter-toolbar__summary">{summaryText}</p>
-        {/if}
+      {#if collapsible}
+        <button
+          type="button"
+          class="poodle-filter-toolbar__header poodle-filter-toolbar__header--button poodle-filter-toolbar__header--clickable"
+          aria-expanded={!collapsed}
+          onclick={handleHeaderClick}
+        >
+          <CollapseToggle
+            {collapsed}
+            ariaLabel={collapsed ? "Show filters" : "Hide filters"}
+            onToggle={(isCollapsed) => (collapsed = isCollapsed)}
+          />
 
-        {#if actions}
-          <div class="poodle-filter-toolbar__actions">
-            {@render actions()}
-          </div>
-        {/if}
+          {#if summary}
+            <span class="poodle-filter-toolbar__summary">
+              {@render summary()}
+            </span>
+          {:else if summaryText}
+            <span class="poodle-filter-toolbar__summary">{summaryText}</span>
+          {/if}
+
+          {#if actions}
+            <span class="poodle-filter-toolbar__actions">
+              {@render actions()}
+            </span>
+          {/if}
+        </button>
+      {:else}
+        <div class="poodle-filter-toolbar__header">
+          {#if summary}
+            <div class="poodle-filter-toolbar__summary">
+              {@render summary()}
+            </div>
+          {:else if summaryText}
+            <p class="poodle-filter-toolbar__summary">{summaryText}</p>
+          {/if}
+
+          {#if actions}
+            <div class="poodle-filter-toolbar__actions">
+              {@render actions()}
+            </div>
+          {/if}
+        </div>
+      {/if}
+    {/if}
+
+    {#if !collapsible || !collapsed}
+      <div
+        class="poodle-filter-toolbar__controls"
+        style:--ft-columns={columns}
+        style:--ft-min-width={minItemWidth}
+      >
+        {@render children?.()}
       </div>
     {/if}
-  {/if}
 
-  {#if !collapsible || !collapsed}
-    <div
-      class="poodle-filter-toolbar__controls"
-      style:--ft-columns={columns}
-      style:--ft-min-width={minItemWidth}
-    >
-      {@render children?.()}
-    </div>
-  {/if}
-
-  {#if secondary}
-    <div class="poodle-filter-toolbar__secondary">
-      {@render secondary()}
-    </div>
-  {/if}
+    {#if secondary}
+      <div class="poodle-filter-toolbar__secondary">
+        {@render secondary()}
+      </div>
+    {/if}
+  </UiPresentationProvider>
 </div>
 
 <style>
@@ -253,8 +259,33 @@
     font-size: 0.875rem;
   }
 
-  .poodle-filter-toolbar[data-density="compact"] { gap: 0.25rem; padding-inline: 0.25rem; }
-  .poodle-filter-toolbar[data-density="compact"] .poodle-filter-toolbar__controls { gap: 0.25rem; }
-  .poodle-filter-toolbar[data-density="comfortable"] { gap: var(--poodle-space-inline-md); padding-inline: 0.5rem; }
-  .poodle-filter-toolbar[data-density="comfortable"] .poodle-filter-toolbar__controls { gap: var(--poodle-space-inline-md); }
+  .poodle-filter-toolbar[data-density="compact"] {
+    gap: 0.25rem;
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .poodle-filter-toolbar[data-density="compact"] .poodle-filter-toolbar__controls {
+    gap: 0.25rem;
+  }
+
+  .poodle-filter-toolbar[data-density="default"] {
+    gap: var(--poodle-space-inline-sm);
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+  }
+
+  .poodle-filter-toolbar[data-density="default"] .poodle-filter-toolbar__controls {
+    gap: var(--poodle-space-inline-sm);
+  }
+
+  .poodle-filter-toolbar[data-density="comfortable"] {
+    gap: var(--poodle-space-inline-md);
+    padding-block: 1rem;
+    padding-inline: 1.25rem;
+  }
+
+  .poodle-filter-toolbar[data-density="comfortable"] .poodle-filter-toolbar__controls {
+    gap: var(--poodle-space-inline-md);
+  }
 </style>

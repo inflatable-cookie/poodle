@@ -2,6 +2,7 @@
   import type { Snippet } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Popover } from "./Popover.svelte";
+  import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
 
@@ -110,17 +111,19 @@
   </div>
 
   <div class="poodle-field__control">
-    {#if control}
-      {@render control({
-        describedBy,
-        descriptionId: null,
-        errorId,
-        messageId,
-        validationState,
-      })}
-    {:else}
-      {@render children?.()}
-    {/if}
+    <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+      {#if control}
+        {@render control({
+          describedBy,
+          descriptionId: null,
+          errorId,
+          messageId,
+          validationState,
+        })}
+      {:else}
+        {@render children?.()}
+      {/if}
+    </UiPresentationProvider>
   </div>
 
   {#if validationState === "invalid" && error}
@@ -136,21 +139,24 @@
 
 <style>
   .poodle-field {
+    --poodle-field-gap: var(--poodle-space-stack-sm);
+    --poodle-field-header-gap: var(--poodle-space-inline-md);
+    --poodle-field-label-gap: 0.375rem;
     display: grid;
-    gap: var(--poodle-space-stack-sm);
+    gap: var(--poodle-field-gap);
   }
 
   .poodle-field__header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--poodle-space-inline-md);
+    gap: var(--poodle-field-header-gap);
   }
 
   .poodle-field__label-row {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--poodle-field-label-gap);
     font-size: var(--poodle-typography-label-size);
   }
 
@@ -161,9 +167,9 @@
   }
 
   .poodle-field__label {
-    color: var(--poodle-color-text-primary);
+    color: color-mix(in srgb, var(--poodle-color-text-primary) 45%, var(--poodle-color-text-secondary));
     font-family: var(--poodle-typography-label-family);
-    font-size: var(--poodle-typography-label-size);
+    font-size: inherit;
     font-weight: var(--poodle-typography-label-weight);
     line-height: var(--poodle-typography-label-lineHeight);
   }
@@ -201,6 +207,10 @@
   .poodle-field[data-size="sm"] .poodle-field__message,
   .poodle-field[data-size="sm"] .poodle-field__optional { font-size: 0.6875rem; }
 
+  .poodle-field[data-size="md"] .poodle-field__label-row { font-size: 0.8125rem; }
+  .poodle-field[data-size="md"] .poodle-field__message,
+  .poodle-field[data-size="md"] .poodle-field__optional { font-size: 0.75rem; }
+
   .poodle-field[data-size="lg"] .poodle-field__label-row { font-size: 0.875rem; }
   .poodle-field[data-size="lg"] .poodle-field__message,
   .poodle-field[data-size="lg"] .poodle-field__optional { font-size: 0.8125rem; }
@@ -208,6 +218,24 @@
   .poodle-field[data-size="xl"] .poodle-field__label-row { font-size: 0.9375rem; }
   .poodle-field[data-size="xl"] .poodle-field__message,
   .poodle-field[data-size="xl"] .poodle-field__optional { font-size: 0.875rem; }
+
+  .poodle-field[data-density="compact"] {
+    --poodle-field-gap: 0.375rem;
+    --poodle-field-header-gap: 0.5rem;
+    --poodle-field-label-gap: 0.3125rem;
+  }
+
+  .poodle-field[data-density="default"] {
+    --poodle-field-gap: var(--poodle-space-stack-sm);
+    --poodle-field-header-gap: var(--poodle-space-inline-md);
+    --poodle-field-label-gap: 0.375rem;
+  }
+
+  .poodle-field[data-density="comfortable"] {
+    --poodle-field-gap: 0.625rem;
+    --poodle-field-header-gap: 0.875rem;
+    --poodle-field-label-gap: 0.4375rem;
+  }
 
   .poodle-field__info-trigger-wrap {
     display: inline-flex;

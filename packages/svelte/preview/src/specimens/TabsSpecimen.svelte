@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Tabs, type TabItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const basicTabs: TabItem[] = [
     { value: "overview", label: "Overview" },
@@ -47,128 +48,98 @@
   let panelCollapsed = false;
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Text variant (default, with indicator line)">
-    <Tabs
-      items={basicTabs}
-      defaultValue="overview"
-      ariaLabel="Section tabs"
-    >
-      {#snippet children(activeValue)}
-      <p>Active tab: <strong>{activeValue}</strong></p>
-      {/snippet}
-    </Tabs>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Text variant (no border)">
-    <Tabs
-      items={basicTabs}
-      defaultValue="overview"
-      bordered={false}
-      ariaLabel="Section tabs without border"
-    />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Card variant (closable, reorderable)">
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup label="Text variant (default, with indicator line)">
       <Tabs
-        items={closableTabs}
-        variant="card"
-        defaultValue="App.svelte"
-        reorderable
-        ariaLabel="Open files"
-        onClose={(value) => (lastClosed = value)}
-        onReorder={(items) => (lastReorder = items.join(", "))}
-      />
-    {#if lastClosed}
-      <p>Closed: <strong>{lastClosed}</strong></p>
-    {/if}
-    {#if lastReorder}
-      <p>Reordered: <strong>{lastReorder}</strong></p>
-    {/if}
-  </SpecimenGroup>
+        items={basicTabs}
+        defaultValue="overview"
+        ariaLabel="Section tabs"
+      >
+        {#snippet children(activeValue)}
+        <p>Active tab: <strong>{activeValue}</strong></p>
+        {/snippet}
+      </Tabs>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
-    <div class="poodle-specimen__frame">
+    <SpecimenGroup label="Text variant (no border)">
       <Tabs
-        items={stripTabs}
-        variant="block"
-        defaultValue="editor"
-        reorderable
-        ariaLabel="Workspace surfaces"
+        items={basicTabs}
+        defaultValue="overview"
+        bordered={false}
+        ariaLabel="Section tabs without border"
       />
-      <div class="poodle-specimen__surface-body">
-        <p>Surface content area</p>
-      </div>
-    </div>
-  </SpecimenGroup>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Pill variant (with icons)">
-    <Tabs
-      items={iconTabs}
-      variant="pill"
-      defaultValue="home"
-      ariaLabel="Navigation"
-    />
-  </SpecimenGroup>
+    <SpecimenGroup label="Card variant (closable, reorderable)">
+        <Tabs
+          items={closableTabs}
+          variant="card"
+          defaultValue="App.svelte"
+          reorderable
+          ariaLabel="Open files"
+          onClose={(value) => (lastClosed = value)}
+          onReorder={(items) => (lastReorder = items.join(", "))}
+        />
+      {#if lastClosed}
+        <p>Closed: <strong>{lastClosed}</strong></p>
+      {/if}
+      {#if lastReorder}
+        <p>Reordered: <strong>{lastReorder}</strong></p>
+      {/if}
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Underline (with icons, no panel)">
-    <Tabs
-      items={iconTabs}
-      defaultValue="home"
-      ariaLabel="Icon tabs"
-    />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Strip variant (full-width bar with icons, closable, reorderable)">
-    <div class="poodle-specimen__frame">
-      <Tabs
-        items={stripTabs}
-        variant="strip"
-        defaultValue="editor"
-        reorderable
-        ariaLabel="Workspace surfaces"
-        onClose={(value) => (lastClosed = value)}
-        onReorder={(items) => (lastReorder = items.join(", "))}
-      />
-      <div class="poodle-specimen__surface-body">
-        <p>Surface content area</p>
-      </div>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Strip variant — vertical (icon-only, collapsed panel)">
-    <div class="poodle-specimen__frame poodle-specimen__frame--row">
-      <Tabs
-        items={panelTabs}
-        variant="strip"
-        orientation="vertical"
-        defaultValue="explorer"
-        ariaLabel="Side panel tabs"
-      />
-      <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
-        <p>Panel content</p>
-      </div>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Strip variant — collapse toggle (click to toggle orientation)">
-    <div class="poodle-specimen__frame poodle-specimen__frame--row">
-      {#if !panelCollapsed}
-        <div class="poodle-specimen__panel-expanded">
-          <Tabs
-            items={panelTabs}
-            variant="strip"
-            orientation="horizontal"
-            defaultValue="explorer"
-            reorderable
-            ariaLabel="Side panel tabs"
-            onClose={(value) => (lastClosed = value)}
-          />
-          <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
-            <p>Panel body — expanded</p>
-          </div>
+    <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
+      <div class="poodle-specimen__frame">
+        <Tabs
+          items={stripTabs}
+          variant="block"
+          defaultValue="editor"
+          reorderable
+          ariaLabel="Workspace surfaces"
+        />
+        <div class="poodle-specimen__surface-body">
+          <p>Surface content area</p>
         </div>
-      {:else}
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Pill variant (with icons)">
+      <Tabs
+        items={iconTabs}
+        variant="pill"
+        defaultValue="home"
+        ariaLabel="Navigation"
+      />
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Underline (with icons, no panel)">
+      <Tabs
+        items={iconTabs}
+        defaultValue="home"
+        ariaLabel="Icon tabs"
+      />
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Strip variant (full-width bar with icons, closable, reorderable)">
+      <div class="poodle-specimen__frame">
+        <Tabs
+          items={stripTabs}
+          variant="strip"
+          defaultValue="editor"
+          reorderable
+          ariaLabel="Workspace surfaces"
+          onClose={(value) => (lastClosed = value)}
+          onReorder={(items) => (lastReorder = items.join(", "))}
+        />
+        <div class="poodle-specimen__surface-body">
+          <p>Surface content area</p>
+        </div>
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Strip variant — vertical (icon-only, collapsed panel)">
+      <div class="poodle-specimen__frame poodle-specimen__frame--row">
         <Tabs
           items={panelTabs}
           variant="strip"
@@ -176,30 +147,86 @@
           defaultValue="explorer"
           ariaLabel="Side panel tabs"
         />
-      {/if}
-      <button
-        class="poodle-specimen__collapse-btn"
-        onclick={() => (panelCollapsed = !panelCollapsed)}
-      >
-        {panelCollapsed ? "→" : "←"}
-      </button>
-    </div>
-  </SpecimenGroup>
+        <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
+          <p>Panel content</p>
+        </div>
+      </div>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Card variant with counts, separators, and URL sync">
-    <Tabs
-      items={detailTabs}
-      variant="card"
-      defaultValue="details"
-      historyKey="tab"
-      ariaLabel="Detail sections"
-    >
-      {#snippet children(activeValue)}
-      <p>Active tab: <strong>{activeValue}</strong></p>
-      {/snippet}
-    </Tabs>
-  </SpecimenGroup>
-</div>
+    <SpecimenGroup label="Strip variant — collapse toggle (click to toggle orientation)">
+      <div class="poodle-specimen__frame poodle-specimen__frame--row">
+        {#if !panelCollapsed}
+          <div class="poodle-specimen__panel-expanded">
+            <Tabs
+              items={panelTabs}
+              variant="strip"
+              orientation="horizontal"
+              defaultValue="explorer"
+              reorderable
+              ariaLabel="Side panel tabs"
+              onClose={(value) => (lastClosed = value)}
+            />
+            <div class="poodle-specimen__surface-body poodle-specimen__surface-body--fill">
+              <p>Panel body — expanded</p>
+            </div>
+          </div>
+        {:else}
+          <Tabs
+            items={panelTabs}
+            variant="strip"
+            orientation="vertical"
+            defaultValue="explorer"
+            ariaLabel="Side panel tabs"
+          />
+        {/if}
+        <button
+          class="poodle-specimen__collapse-btn"
+          onclick={() => (panelCollapsed = !panelCollapsed)}
+        >
+          {panelCollapsed ? "→" : "←"}
+        </button>
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Card variant with counts, separators, and URL sync">
+      <Tabs
+        items={detailTabs}
+        variant="card"
+        defaultValue="details"
+        historyKey="tab"
+        ariaLabel="Detail sections"
+      >
+        {#snippet children(activeValue)}
+        <p>Active tab: <strong>{activeValue}</strong></p>
+        {/snippet}
+      </Tabs>
+    </SpecimenGroup>
+  </div>
+
+  {#snippet sizes(size)}
+    <div class="poodle-specimen__variants-demo">
+      <Tabs
+        items={detailTabs}
+        variant="card"
+        defaultValue="details"
+        ariaLabel={`${size} tabs`}
+        {size}
+      />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-specimen__variants-demo">
+      <Tabs
+        items={detailTabs}
+        variant="card"
+        defaultValue="details"
+        ariaLabel={`${density} tabs`}
+        {density}
+      />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
@@ -212,6 +239,10 @@
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
     overflow: hidden;
+  }
+
+  .poodle-specimen__variants-demo {
+    width: min(100%, 28rem);
   }
 
   .poodle-specimen__surface-body {

@@ -2,8 +2,7 @@
   import { CardRadioGroup } from "@poodle/svelte";
   import type { CardRadioItem } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let planValue: string | null = "pro";
   let sizeValue: string | null = null;
@@ -22,57 +21,69 @@
   ];
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Plan selection (2 columns)">
-    <CardRadioGroup
-      items={planItems}
-      bind:value={planValue}
-      columns={2}
-      ariaLabel="Select a plan"
-      onValueChange={(value) => (planValue = value)}
-    />
-    {#if planValue}
-      <p>Selected: <strong>{planValue}</strong></p>
-    {/if}
-  </SpecimenGroup>
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup label="Plan selection (2 columns)">
+      <CardRadioGroup
+        items={planItems}
+        bind:value={planValue}
+        columns={2}
+        ariaLabel="Select a plan"
+        onValueChange={(value) => (planValue = value)}
+      />
+      {#if planValue}
+        <p>Selected: <strong>{planValue}</strong></p>
+      {/if}
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Instance size (3 columns)">
-    <CardRadioGroup
-      items={sizeItems}
-      bind:value={sizeValue}
-      columns={3}
-      ariaLabel="Select an instance size"
-      onValueChange={(value) => (sizeValue = value)}
-    />
-    {#if sizeValue}
-      <p>Selected: <strong>{sizeValue}</strong></p>
-    {/if}
-  </SpecimenGroup>
+    <SpecimenGroup label="Instance size (3 columns)">
+      <CardRadioGroup
+        items={sizeItems}
+        bind:value={sizeValue}
+        columns={3}
+        ariaLabel="Select an instance size"
+        onValueChange={(value) => (sizeValue = value)}
+      />
+      {#if sizeValue}
+        <p>Selected: <strong>{sizeValue}</strong></p>
+      {/if}
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Sizes">
-    <div class="poodle-specimen__stack">
-      {#each controlSizes as size}
-        <CardRadioGroup
-          items={sizeItems}
-          value="md"
-          columns={3}
-          {size}
-          ariaLabel="Card radio group at {size}"
-        />
-      {/each}
+    <SpecimenGroup label="Disabled group">
+      <CardRadioGroup
+        items={sizeItems}
+        value="md"
+        columns={3}
+        disabled
+        ariaLabel="Disabled selection"
+      />
+    </SpecimenGroup>
+  </div>
+
+  {#snippet sizes(size)}
+    <div class="poodle-card-radio-group-specimen__variant">
+      <CardRadioGroup
+        items={sizeItems}
+        value="md"
+        columns={3}
+        {size}
+        ariaLabel={`Card radio group at ${size}`}
+      />
     </div>
-  </SpecimenGroup>
+  {/snippet}
 
-  <SpecimenGroup label="Disabled group">
-    <CardRadioGroup
-      items={sizeItems}
-      value="md"
-      columns={3}
-      disabled
-      ariaLabel="Disabled selection"
-    />
-  </SpecimenGroup>
-</div>
+  {#snippet densities(density)}
+    <div class="poodle-card-radio-group-specimen__variant">
+      <CardRadioGroup
+        items={sizeItems}
+        value="md"
+        columns={3}
+        {density}
+        ariaLabel={`Card radio group at ${density} density`}
+      />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
@@ -81,10 +92,8 @@
     gap: 1rem;
   }
 
-  .poodle-specimen__stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+  .poodle-card-radio-group-specimen__variant {
+    width: min(100%, 40rem);
   }
 
   p { margin: 0; }

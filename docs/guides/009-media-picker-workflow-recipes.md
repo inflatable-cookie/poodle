@@ -7,8 +7,7 @@ callback-driven media-library orchestration into the Poodle composite.
 ## Default Boundary
 
 - Poodle `MediaPicker` owns local search and tab posture.
-- Poodle `MediaBrowsePanel` and `MediaUploadStatusPanel` can be reused by
-  heavier workflow shells.
+- Poodle `MediaBrowsePanel` can be reused by heavier workflow shells.
 - Apps own item loading, pagination, duplicate checks, and upload orchestration.
 - If the picker itself must coordinate backend callbacks and upload lifecycle,
   keep that as app/shared workflow code rather than inflating the Poodle
@@ -50,7 +49,6 @@ If a shared repo still needs a callback-driven media-library picker, keep it as
 the thinnest possible workflow shell over:
 
 - Poodle `MediaBrowsePanel`
-- Poodle `MediaUploadStatusPanel`
 - Poodle `FileUpload`
 - app/shared media commands
 - app/shared upload-flow state

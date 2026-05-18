@@ -92,17 +92,17 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <div class="poodle-specimen__control">
       <TextInput id={"size-" + size} {size} placeholder={size.toUpperCase()} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <div class="poodle-specimen__control">
       <TextInput id={"density-" + density} {density} placeholder="Type here" />
     </div>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

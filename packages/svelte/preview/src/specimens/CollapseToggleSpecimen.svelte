@@ -54,13 +54,13 @@
     </div>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <CollapseToggle direction="left" {size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <CollapseToggle direction="left" {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

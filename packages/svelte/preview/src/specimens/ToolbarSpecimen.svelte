@@ -26,21 +26,21 @@
     </Toolbar>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Toolbar ariaLabel="Toolbar at {size}" {size}>
       <IconButton icon="bold" ariaLabel="Bold" variant="ghost" {size} />
       <IconButton icon="italic" ariaLabel="Italic" variant="ghost" {size} />
       <Separator orientation="vertical" />
       <Button variant="secondary" {size}>Save</Button>
     </Toolbar>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Toolbar ariaLabel="Toolbar at {density}" {density}>
       <IconButton icon="bold" ariaLabel="Bold" variant="ghost" {density} />
       <IconButton icon="italic" ariaLabel="Italic" variant="ghost" {density} />
       <Separator orientation="vertical" />
       <Button variant="secondary" {density}>Save</Button>
     </Toolbar>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

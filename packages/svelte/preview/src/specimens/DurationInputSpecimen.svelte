@@ -34,13 +34,13 @@
     </SpecimenGroup>
   {/if}
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <DurationInput hours={1} minutes={30} seconds={0} {size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <DurationInput {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

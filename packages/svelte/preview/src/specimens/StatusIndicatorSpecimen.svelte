@@ -38,13 +38,13 @@
     </p>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <StatusIndicator status="success" {size} label={size.toUpperCase()} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <StatusIndicator status="success" {density} label="Success" />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

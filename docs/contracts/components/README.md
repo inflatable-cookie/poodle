@@ -80,7 +80,6 @@ primitives and layout surfaces through higher-order application components.
 - `media-picker.md`
 - `media-preview.md`
 - `media-thumbnail.md`
-- `media-upload-status-panel.md`
 - `menu.md`
 - `menubar.md`
 - `meta-bar.md`

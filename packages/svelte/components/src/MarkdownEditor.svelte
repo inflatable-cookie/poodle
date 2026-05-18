@@ -3,6 +3,7 @@
   import { marked } from "marked";
 
   import { default as Icon } from "./Icon.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
@@ -80,6 +81,29 @@
     onValueChange?.(nextValue);
   }
 
+  function syncTextareaValue(): void {
+    if (!textareaEl) return;
+    setValue(textareaEl.value);
+  }
+
+  function applyNativeTextEdit(start: number, end: number, replacement: string): void {
+    if (!textareaEl) return;
+
+    textareaEl.focus();
+    textareaEl.setSelectionRange(start, end);
+
+    const usedNativeCommand =
+      typeof document !== "undefined" &&
+      typeof document.execCommand === "function" &&
+      document.execCommand("insertText", false, replacement);
+
+    if (!usedNativeCommand) {
+      textareaEl.setRangeText(replacement, start, end, "end");
+    }
+
+    syncTextareaValue();
+  }
+
   function insertMarkdown(before: string, after = ""): void {
     if (!textareaEl || disabled) return;
 
@@ -87,8 +111,7 @@
     const end = textareaEl.selectionEnd;
     const selected = currentValue.slice(start, end);
     const replacement = `${before}${selected || "text"}${after}`;
-
-    setValue(currentValue.slice(0, start) + replacement + currentValue.slice(end));
+    applyNativeTextEdit(start, end, replacement);
 
     tick().then(() => {
       if (!textareaEl) return;
@@ -107,8 +130,13 @@
     const lineEnd = currentValue.indexOf("\n", start);
     const end = lineEnd === -1 ? currentValue.length : lineEnd;
     const line = currentValue.slice(lineStart, end);
+    applyNativeTextEdit(lineStart, end, `${prefix}${line}`);
 
-    setValue(currentValue.slice(0, lineStart) + `${prefix}${line}` + currentValue.slice(end));
+    tick().then(() => {
+      if (!textareaEl) return;
+      const nextCursor = start + prefix.length;
+      textareaEl.setSelectionRange(nextCursor, nextCursor);
+    });
   }
 
   function handleInput(event: Event): void {
@@ -154,24 +182,30 @@
       </div>
 
       <div class="poodle-md-editor__modes">
-        <button
-          type="button"
-          class="poodle-md-editor__mode-btn"
-          class:poodle-active={currentMode === "edit"}
-          onclick={() => (currentMode = "edit")}
-        >Edit</button>
-        <button
-          type="button"
-          class="poodle-md-editor__mode-btn"
-          class:poodle-active={currentMode === "split"}
-          onclick={() => (currentMode = "split")}
-        >Split</button>
-        <button
-          type="button"
-          class="poodle-md-editor__mode-btn"
-          class:poodle-active={currentMode === "preview"}
-          onclick={() => (currentMode = "preview")}
-        >Preview</button>
+        <IconButton
+          icon="pencil"
+          ariaLabel="Edit"
+          tooltip="Edit"
+          variant={currentMode === "edit" ? "secondary" : "ghost"}
+          sizeRole="chrome"
+          onClick={() => (currentMode = "edit")}
+        />
+        <IconButton
+          icon="columns-2"
+          ariaLabel="Split"
+          tooltip="Split"
+          variant={currentMode === "split" ? "secondary" : "ghost"}
+          sizeRole="chrome"
+          onClick={() => (currentMode = "split")}
+        />
+        <IconButton
+          icon="eye"
+          ariaLabel="Preview"
+          tooltip="Preview"
+          variant={currentMode === "preview" ? "secondary" : "ghost"}
+          sizeRole="chrome"
+          onClick={() => (currentMode = "preview")}
+        />
       </div>
     </div>
 
@@ -319,31 +353,7 @@
   .poodle-md-editor__modes {
     display: flex;
     gap: var(--poodle-md-editor-tool-gap);
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-control);
-    overflow: hidden;
-  }
-
-  .poodle-md-editor__mode-btn {
-    min-height: calc(var(--poodle-md-editor-tool-size) - (var(--poodle-md-editor-toolbar-y) * 0.5));
-    padding: var(--poodle-md-editor-mode-y) var(--poodle-md-editor-mode-x);
-    border: 0;
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
-    cursor: pointer;
-    font: inherit;
-    font-size: var(--poodle-typography-label-size);
-    line-height: 1;
-    transition: background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
-  }
-
-  .poodle-md-editor__mode-btn:hover {
-    background: color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent);
-  }
-
-  .poodle-md-editor__mode-btn.poodle-active {
-    background: color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent);
-    color: var(--poodle-color-text-primary);
+    padding: 0;
   }
 
   .poodle-md-editor__body {
@@ -449,7 +459,7 @@
   }
 
   .poodle-md-editor__preview :global(a) {
-    color: var(--poodle-color-accent-default, #6366f1);
+    color: var(--poodle-color-accent-base);
     text-decoration: underline;
   }
 

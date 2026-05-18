@@ -480,7 +480,12 @@
 
   .poodle-pagination[data-density="compact"] .poodle-pagination__controls,
   .poodle-pagination[data-density="compact"] .poodle-pagination__pages {
-    gap: 0.0625rem;
+    gap: 3px;
+  }
+
+  .poodle-pagination[data-density="default"] .poodle-pagination__controls,
+  .poodle-pagination[data-density="default"] .poodle-pagination__pages {
+    gap: 0.25rem;
   }
 
   .poodle-pagination--compact .poodle-pagination__controls-wrapper,
@@ -491,7 +496,7 @@
 
   .poodle-pagination[data-density="comfortable"] .poodle-pagination__controls,
   .poodle-pagination[data-density="comfortable"] .poodle-pagination__pages {
-    gap: 0.25rem;
+    gap: 0.375rem;
   }
 
   @media (max-width: 40rem) {

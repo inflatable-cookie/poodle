@@ -11,7 +11,8 @@ Updated: 2026-03-25
   `MediaThumbnail` to combine framed media, textual identity, metadata chips,
   and body content
 - In scope: title, eyebrow, description, media frame, metadata chips, caption,
-  badge, thumbnail meta, state posture, aspect ratio, card variant
+  badge, thumbnail meta, state posture, aspect ratio, card variant, size,
+  density
 - Out of scope: transport controls, editing tools, waveform/video rendering
   engines, or app-specific asset workflows
 
@@ -94,6 +95,9 @@ type CardVariant = "default" | "elevated" | "outlined";
 | `ariaLabel` | `string \| null` | `null` | no | accessible label; falls back to `title` |
 | `stateTitle` | `string \| null` | `null` | no | heading for non-ready state in thumbnail |
 | `stateMessage` | `string \| null` | `null` | no | body text for non-ready state in thumbnail |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | preview scale; resolves from presentation context when omitted |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role for inherited scale resolution |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | spacing density; resolves from presentation context when omitted |
 
 ## 5. Snippets
 
@@ -129,18 +133,25 @@ Card header and body always render regardless of media state.
 
 ## 9. Visual Rules And Precise CSS
 
+### Presentation
+
+- Root publishes `data-size` and `data-density`
+- Composition is wrapped in `UiPresentationProvider`, so nested `MediaThumbnail`
+  inherits the same presentation values
+- `Card` receives the resolved density directly
+
 ### Header, Heading, Body
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--poodle-space-stack-sm)` |
+| gap | `var(--poodle-media-preview-section-gap)` |
 
 ### Header (override)
 
 | Property | Value |
 |----------|-------|
-| gap | `var(--poodle-space-stack-md)` |
+| gap | `var(--poodle-media-preview-header-gap)` |
 
 ### Eyebrow
 
@@ -148,7 +159,7 @@ Card header and body always render regardless of media state.
 |----------|-------|
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.6875rem` |
+| font-size | `var(--poodle-media-preview-eyebrow-size)` |
 | font-weight | `600` |
 | letter-spacing | `0.12em` |
 | text-transform | `uppercase` |
@@ -158,8 +169,8 @@ Card header and body always render regardless of media state.
 | Property | Value |
 |----------|-------|
 | margin | `0` |
-| font-size | `1.25rem` |
-| line-height | `1.2` |
+| font-size | `var(--poodle-media-preview-title-size)` |
+| line-height | `var(--poodle-media-preview-title-line-height)` |
 
 ### Description, Caption, Meta
 
@@ -167,7 +178,7 @@ Card header and body always render regardless of media state.
 |----------|-------|
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.8125rem` |
+| font-size | `var(--poodle-media-preview-body-size)` |
 | line-height | `1.5` |
 
 ### Meta List
@@ -185,9 +196,27 @@ Card header and body always render regardless of media state.
 
 | Property | Value |
 |----------|-------|
-| padding | `0.375rem 0.625rem` |
+| padding | `var(--poodle-media-preview-meta-padding-y) var(--poodle-media-preview-meta-padding-x)` |
 | border-radius | `var(--poodle-radius-control)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-surface) 70%, transparent)` |
+
+### Size Variants
+
+| Size | Eyebrow | Title | Body | Meta Padding |
+|------|---------|-------|------|--------------|
+| `xs` | `0.625rem` | `0.9375rem` | `0.75rem` | `0.25rem 0.5rem` |
+| `sm` | `0.65625rem` | `1rem` | `0.78125rem` | `0.3125rem 0.5625rem` |
+| `md` | `0.6875rem` | `1.125rem` | `0.8125rem` | `0.375rem 0.625rem` |
+| `lg` | `0.71875rem` | `1.1875rem` | `0.875rem` | `0.4375rem 0.6875rem` |
+| `xl` | `0.75rem` | `1.25rem` | `0.9375rem` | `0.5rem 0.75rem` |
+
+### Density Variants
+
+| Density | Header Gap | Section Gap |
+|---------|------------|-------------|
+| `compact` | `0.625rem` | `0.375rem` |
+| `default` | `var(--poodle-space-stack-md)` | `var(--poodle-space-stack-sm)` |
+| `comfortable` | `1rem` | `0.625rem` |
 
 ### Light Theme Overrides
 
@@ -198,6 +227,8 @@ Card header and body always render regardless of media state.
 ## 10. Composition
 
 - Composes: `Card` (from primitives), `MediaThumbnail`
+- Wraps composition in `UiPresentationProvider` so nested media frame follows
+  the same size and density
 - MediaThumbnail is configured with `title={null}` and `meta={null}` since
   the preview handles its own header section
 - `badge`, `aspectRatio`, `state`, `stateTitle`, and `stateMessage` are

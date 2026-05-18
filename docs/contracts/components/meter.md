@@ -3,14 +3,14 @@
 > **Surface elevation**: Meter is a surface consumer (80% subtle contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-03-15
+Updated: 2026-05-18
 
 ## 1. Purpose
 
 - Component name: `Meter`
 - Layer: `foundation`
 - Summary: a bounded measurement display for current level within a known range
-- In scope: value, range, low/high/optimum hints, native meter semantics
+- In scope: value, range, low/high/optimum hints, native meter semantics, track-thickness sizing
 - Out of scope: progress-task completion semantics and animated loading
 
 ## 2. Anatomy
@@ -42,6 +42,8 @@ Updated: 2026-03-15
 | `high` | `number \| null` | `null` | no | high threshold hint (passed to native meter) |
 | `optimum` | `number \| null` | `null` | no | optimum value hint (passed to native meter) |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the meter |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit track-thickness size override |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role used to resolve inherited size scale |
 
 ### Controlled And Uncontrolled
 
@@ -106,7 +108,7 @@ fill color in the current implementation.
 ### Sizing
 
 - Width is parent-owned (`width: 100%`)
-- Track minimum height is `0.5rem`
+- Track thickness is size-driven
 - Root uses grid layout with `gap: 0`
 
 ### Composition
@@ -124,6 +126,7 @@ fill color in the current implementation.
 | `display` | `grid` |
 | `gap` | `0` |
 | `width` | `100%` |
+| `--poodle-meter-track-thickness` | `0.5rem` |
 
 ### Native Meter `.meter__native`
 
@@ -140,7 +143,7 @@ fill color in the current implementation.
 | `position` | `relative` |
 | `display` | `block` |
 | `overflow` | `hidden` |
-| `min-height` | `0.5rem` |
+| `min-height` | `var(--poodle-meter-track-thickness)` |
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))` |
 
@@ -159,6 +162,16 @@ fill color in the current implementation.
 |----------|-------|
 | `width` | `{percentage}%` where percentage = ((safeValue - min) / (safeMax - min)) * 100 |
 
+### Size Variants
+
+| Size | Track thickness |
+|------|-----------------|
+| `xs` | `0.25rem` |
+| `sm` | `0.375rem` |
+| `md` | `0.5rem` |
+| `lg` | `0.625rem` |
+| `xl` | `0.75rem` |
+
 ### Token Reference
 
 | Token | Role |
@@ -171,6 +184,7 @@ fill color in the current implementation.
 - Uses a hidden native `<meter>` element for browser semantics while rendering
   a fully styled custom track and fill
 - Fill uses percentage-based `width` (not `scaleX` transform as Progress does)
+- `size` resolves through presentation context and only changes track thickness
 - The `low`, `high`, and `optimum` props are passed through to the native
   `<meter>` but do not affect custom visual styling
 
@@ -193,7 +207,7 @@ fill color in the current implementation.
 - [ ] track background uses `--poodle-color-background-surface` at 88% mix
 - [ ] fill gradient uses `--poodle-color-status-success` at 82% mix with white
 - [ ] border-radius 999px pill shape matches
-- [ ] min-height of 0.5rem matches
+- [ ] track-thickness ladder matches across `xs`–`xl`
 
 ### Tier 3: Implementation Freedom
 
@@ -210,6 +224,12 @@ fill color in the current implementation.
 ## 13. Specimen Definitions
 
 All preview apps must render the following specimens identically.
+
+### Sizes
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Sizes | `value=50`, `size=xs..xl` | Track thickness steps from thin to thick across the full size ladder |
 
 ### Default (50%)
 

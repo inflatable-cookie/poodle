@@ -2,6 +2,7 @@
   import { DockRegion } from "@poodle/svelte";
   import type { PanelTabItem, DockEdge } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import { folder, code, list as listIcon, terminal } from "@poodle/icons-lucide";
 
   // ── Static dock state ──────────────────────────────────────────────
@@ -110,179 +111,239 @@
   }
 </script>
 
-<div class="poodle-specimen">
-  <!-- 1a. Static dock — horizontal (top edge, panels stack vertically) -->
-  <SpecimenGroup label="Static dock — horizontal (top edge)">
-    <div class="poodle-specimen__frame poodle-specimen__frame--short">
-      <DockRegion
-        edge="top"
-        sizing="static"
-        items={staticItems}
-        onReorder={handleStaticReorder}
-      >
-        {#snippet panel(item)}
-          <div class="poodle-specimen__static-panel">
-            {item.label}
+<SpecimenLayout bareVariants>
+  {#snippet children()}
+    <div class="poodle-specimen">
+      <!-- 1. Flexible dock (expanded) -->
+      <SpecimenGroup label="Flexible dock — expanded (left edge)" bare>
+        <div class="poodle-specimen__frame poodle-specimen__frame--flex">
+          <DockRegion
+            edge="left"
+            sizing="flexible"
+            items={flexItems}
+            value={flexActivePanel}
+            collapsed={false}
+            onValueChange={(value) => (flexActivePanel = value)}
+          >
+            {#snippet children()}
+              <div class="poodle-specimen__panel-content">
+                <strong>{flexActivePanel}</strong>
+                <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+              </div>
+            {/snippet}
+          </DockRegion>
+          <div class="poodle-specimen__flex-main">
+            Main content area
           </div>
-        {/snippet}
-      </DockRegion>
-    </div>
-  </SpecimenGroup>
+        </div>
+      </SpecimenGroup>
 
-  <!-- 1b. Static dock — vertical (left edge, panels stack horizontally) -->
-  <SpecimenGroup label="Static dock — vertical (left edge)">
-    <div class="poodle-specimen__frame">
-      <DockRegion
-        edge="left"
-        sizing="static"
-        items={staticVerticalItems}
-        onReorder={handleStaticVerticalReorder}
-      >
-        {#snippet panel(item)}
-          <div class="poodle-specimen__static-panel">
-            {item.label}
+      <!-- 2. Flexible dock (collapsed icon-strip) -->
+      <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)" bare>
+        <div class="poodle-specimen__frame poodle-specimen__frame--flex">
+          <DockRegion
+            edge="left"
+            sizing="flexible"
+            items={flexItems}
+            value={flexActivePanel}
+            collapsed={true}
+            collapsedPosture="icon-strip"
+            onValueChange={(value) => (flexActivePanel = value)}
+          />
+          <div class="poodle-specimen__flex-main">
+            Main content area
           </div>
-        {/snippet}
-      </DockRegion>
-    </div>
-  </SpecimenGroup>
+        </div>
+      </SpecimenGroup>
 
-  <!-- 2. Flexible dock (expanded) -->
-  <SpecimenGroup label="Flexible dock — expanded (left edge)">
-    <div class="poodle-specimen__frame">
-      <DockRegion
-        edge="left"
-        sizing="flexible"
-        items={flexItems}
-        value={flexActivePanel}
-        collapsed={false}
-        onValueChange={(value) => (flexActivePanel = value)}
-      >
-        {#snippet children()}
-          <div class="poodle-specimen__panel-content">
-            <strong>{flexActivePanel}</strong>
-            <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+      <!-- 3. Interactive collapse toggle -->
+      <SpecimenGroup label="Interactive collapse toggle (click to toggle)" bare>
+        <div class="poodle-specimen__frame poodle-specimen__frame--flex">
+          <DockRegion
+            edge="left"
+            sizing="flexible"
+            collapsible
+            items={interactiveItems}
+            value={interactiveActive}
+            collapsed={interactiveCollapsed}
+            collapsedPosture="icon-strip"
+            onValueChange={(value) => (interactiveActive = value)}
+            onCollapsedChange={(isCollapsed) => (interactiveCollapsed = isCollapsed)}
+          >
+            {#snippet children()}
+              <div class="poodle-specimen__panel-content">
+                <strong>{interactiveActive}</strong>
+                <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
+              </div>
+            {/snippet}
+          </DockRegion>
+          <div class="poodle-specimen__flex-main">
+            Main content area
           </div>
-        {/snippet}
-      </DockRegion>
-    </div>
-  </SpecimenGroup>
+        </div>
+      </SpecimenGroup>
 
-  <!-- 3. Flexible dock (collapsed icon-strip) -->
-  <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)">
-    <div class="poodle-specimen__frame poodle-specimen__frame--narrow">
-      <DockRegion
-        edge="left"
-        sizing="flexible"
-        items={flexItems}
-        value={flexActivePanel}
-        collapsed={true}
-        collapsedPosture="icon-strip"
-        onValueChange={(value) => (flexActivePanel = value)}
-      />
-    </div>
-  </SpecimenGroup>
-
-  <!-- 4. Interactive collapse toggle -->
-  <SpecimenGroup label="Interactive collapse toggle (click to toggle)">
-    <div class="poodle-specimen__frame poodle-specimen__frame--flex">
-      <DockRegion
-        edge="left"
-        sizing="flexible"
-        collapsible
-        items={interactiveItems}
-        value={interactiveActive}
-        collapsed={interactiveCollapsed}
-        collapsedPosture="icon-strip"
-        onValueChange={(value) => (interactiveActive = value)}
-        onCollapsedChange={(isCollapsed) => (interactiveCollapsed = isCollapsed)}
-      >
-        {#snippet children()}
-          <div class="poodle-specimen__panel-content">
-            <strong>{interactiveActive}</strong>
-            <p>Click the collapse toggle to switch between expanded and icon-strip modes.</p>
+      <!-- 4. Bottom edge collapsible dock -->
+      <SpecimenGroup label="Bottom edge dock (click to toggle)" bare>
+        <div class="poodle-specimen__frame poodle-specimen__frame--bottom-layout">
+          <div class="poodle-specimen__flex-main">
+            Editor area
           </div>
-        {/snippet}
-      </DockRegion>
-      <div class="poodle-specimen__flex-main">
-        Main content area
-      </div>
-    </div>
-  </SpecimenGroup>
+          <DockRegion
+            edge="bottom"
+            sizing="flexible"
+            collapsible
+            items={bottomItems}
+            value={bottomActive}
+            collapsed={bottomCollapsed}
+            collapsedPosture="icon-strip"
+            onValueChange={(value) => (bottomActive = value)}
+            onCollapsedChange={(isCollapsed) => (bottomCollapsed = isCollapsed)}
+          >
+            {#snippet children()}
+              <div class="poodle-specimen__panel-content">
+                <strong>{bottomActive}</strong>
+                <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
+              </div>
+            {/snippet}
+          </DockRegion>
+        </div>
+      </SpecimenGroup>
 
-  <!-- 5. Bottom edge collapsible dock -->
-  <SpecimenGroup label="Bottom edge dock (click to toggle)">
-    <div class="poodle-specimen__frame poodle-specimen__frame--bottom-layout">
-      <div class="poodle-specimen__flex-main">
-        Editor area
-      </div>
-      <DockRegion
-        edge="bottom"
-        sizing="flexible"
-        collapsible
-        items={bottomItems}
-        value={bottomActive}
-        collapsed={bottomCollapsed}
-        collapsedPosture="icon-strip"
-        onValueChange={(value) => (bottomActive = value)}
-        onCollapsedChange={(isCollapsed) => (bottomCollapsed = isCollapsed)}
-      >
-        {#snippet children()}
-          <div class="poodle-specimen__panel-content">
-            <strong>{bottomActive}</strong>
-            <p>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
+      <!-- 5. Cross-region drag-and-drop -->
+      <SpecimenGroup label="Cross-region drag-and-drop (drag tabs between docks)" bare>
+        <div class="poodle-specimen__dnd-layout">
+          <div class="poodle-specimen__frame poodle-specimen__dnd-region">
+            <DockRegion
+              edge="left"
+              sizing="flexible"
+              items={leftItems}
+              value={leftActive}
+              ariaLabel="Left dock"
+              {canAcceptPanel}
+              onValueChange={(value) => (leftActive = value)}
+              onReorder={handleLeftReorder}
+              onPanelDrop={handleLeftDrop}
+            >
+              {#snippet children()}
+                <div class="poodle-specimen__panel-content">
+                  <strong>{leftActive}</strong>
+                  <p>Left dock — {leftItems.length} panels</p>
+                </div>
+              {/snippet}
+            </DockRegion>
           </div>
-        {/snippet}
-      </DockRegion>
-    </div>
-  </SpecimenGroup>
+          <div class="poodle-specimen__frame poodle-specimen__dnd-region">
+            <DockRegion
+              edge="right"
+              sizing="flexible"
+              items={rightItems}
+              value={rightActive}
+              ariaLabel="Right dock"
+              {canAcceptPanel}
+              onValueChange={(value) => (rightActive = value)}
+              onReorder={handleRightReorder}
+              onPanelDrop={handleRightDrop}
+            >
+              {#snippet children()}
+                <div class="poodle-specimen__panel-content">
+                  <strong>{rightActive}</strong>
+                  <p>Right dock — {rightItems.length} panels</p>
+                </div>
+              {/snippet}
+            </DockRegion>
+          </div>
+        </div>
+      </SpecimenGroup>
 
-  <!-- 6. Cross-region drag-and-drop -->
-  <SpecimenGroup label="Cross-region drag-and-drop (drag tabs between docks)">
-    <div class="poodle-specimen__dnd-layout">
-      <div class="poodle-specimen__frame poodle-specimen__dnd-region">
+      <!-- 6a. Static dock — horizontal (top edge, panels stack vertically) -->
+      <SpecimenGroup label="Static dock — horizontal (top edge)" bare>
+        <div class="poodle-specimen__frame poodle-specimen__frame--short">
+          <DockRegion
+            edge="top"
+            sizing="static"
+            items={staticItems}
+            onReorder={handleStaticReorder}
+          >
+            {#snippet panel(item)}
+              <div class="poodle-specimen__static-panel">
+                {item.label}
+              </div>
+            {/snippet}
+          </DockRegion>
+        </div>
+      </SpecimenGroup>
+
+      <!-- 6b. Static dock — vertical (left edge, panels stack horizontally) -->
+      <SpecimenGroup label="Static dock — vertical (left edge)" bare>
+        <div class="poodle-specimen__frame">
+          <DockRegion
+            edge="left"
+            sizing="static"
+            items={staticVerticalItems}
+            onReorder={handleStaticVerticalReorder}
+          >
+            {#snippet panel(item)}
+              <div class="poodle-specimen__static-panel">
+                {item.label}
+              </div>
+            {/snippet}
+          </DockRegion>
+        </div>
+      </SpecimenGroup>
+    </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <div class="poodle-dock-region-specimen__variant-block">
+      <div class="poodle-dock-region-specimen__label">{size.toUpperCase()}</div>
+      <div class="poodle-specimen__frame poodle-specimen__frame--variant">
         <DockRegion
           edge="left"
           sizing="flexible"
-          items={leftItems}
-          value={leftActive}
-          ariaLabel="Left dock"
-          {canAcceptPanel}
-          onValueChange={(value) => (leftActive = value)}
-          onReorder={handleLeftReorder}
-          onPanelDrop={handleLeftDrop}
+          items={flexItems}
+          value="git"
+          {size}
         >
           {#snippet children()}
             <div class="poodle-specimen__panel-content">
-              <strong>{leftActive}</strong>
-              <p>Left dock — {leftItems.length} panels</p>
+              <strong>git</strong>
+              <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
             </div>
           {/snippet}
         </DockRegion>
-      </div>
-      <div class="poodle-specimen__frame poodle-specimen__dnd-region">
-        <DockRegion
-          edge="right"
-          sizing="flexible"
-          items={rightItems}
-          value={rightActive}
-          ariaLabel="Right dock"
-          {canAcceptPanel}
-          onValueChange={(value) => (rightActive = value)}
-          onReorder={handleRightReorder}
-          onPanelDrop={handleRightDrop}
-        >
-          {#snippet children()}
-            <div class="poodle-specimen__panel-content">
-              <strong>{rightActive}</strong>
-              <p>Right dock — {rightItems.length} panels</p>
-            </div>
-          {/snippet}
-        </DockRegion>
+        <div class="poodle-specimen__flex-main">
+          Main content area
+        </div>
       </div>
     </div>
-  </SpecimenGroup>
-</div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-dock-region-specimen__variant-block">
+      <div class="poodle-dock-region-specimen__label">{density.toUpperCase()}</div>
+      <div class="poodle-specimen__frame poodle-specimen__frame--variant">
+        <DockRegion
+          edge="left"
+          sizing="flexible"
+          items={flexItems}
+          value="git"
+          {density}
+        >
+          {#snippet children()}
+            <div class="poodle-specimen__panel-content">
+              <strong>git</strong>
+              <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+            </div>
+          {/snippet}
+        </DockRegion>
+        <div class="poodle-specimen__flex-main">
+          Main content area
+        </div>
+      </div>
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
@@ -302,14 +363,15 @@
     height: 6rem;
   }
 
-  .poodle-specimen__frame--narrow {
-    width: 3.5rem;
-    height: 16rem;
-  }
-
   .poodle-specimen__frame--flex {
     display: flex;
     align-items: stretch;
+  }
+
+  .poodle-specimen__frame--variant {
+    display: flex;
+    align-items: stretch;
+    height: 10rem;
   }
 
   .poodle-specimen__frame--bottom-layout {
@@ -389,5 +451,20 @@
 
   .poodle-specimen__dnd-region {
     height: 18rem;
+  }
+
+  .poodle-dock-region-specimen__variant-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(100%, 24rem);
+  }
+
+  .poodle-dock-region-specimen__label {
+    color: var(--poodle-color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 </style>

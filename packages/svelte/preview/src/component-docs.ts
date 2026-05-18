@@ -1953,35 +1953,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
-  "media-upload-status-panel": {
-    props: [
-      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
-      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
-      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
-      { name: "uploadStep", type: "MediaUploadWorkflowStep", default: '"checking"', description: "Current workflow posture for the upload state surface." },
-      { name: "duplicateLabel", type: "string | null", default: "null", description: "Label for the duplicate media item." },
-      { name: "uploadProgress", type: "number", default: "0", description: "Upload percentage shown during the uploading posture." },
-      { name: "uploadError", type: "string | null", default: "null", description: "Error message shown during the error posture." },
-    ],
-    slots: [],
-    events: [
-      { name: "onUploadAnyway", payload: "() => void", description: "Called when the user chooses to upload a duplicate as new." },
-      { name: "onSelectDuplicate", payload: "() => void", description: "Called when the user chooses the existing duplicate media item." },
-      { name: "onClearUpload", payload: "() => void", description: "Called when the user resets the upload flow." },
-      { name: "onSelectUploaded", payload: "() => void", description: "Called when the user chooses the newly uploaded media item." },
-    ],
-    usage: `<script lang="ts">
-  import { MediaUploadStatusPanel } from "@poodle/svelte";
-</script>
-
-<MediaUploadStatusPanel
-  uploadStep="duplicate"
-  duplicateLabel="hero-banner.jpg"
-  onUploadAnyway={() => console.log("upload anyway")}
-  onSelectDuplicate={() => console.log("select duplicate")}
-/>`,
-  },
-
   "media-preview": {
     props: [
       { name: "title", type: "string", required: true, description: "Title of the media preview." },

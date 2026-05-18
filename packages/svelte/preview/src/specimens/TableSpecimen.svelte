@@ -46,17 +46,17 @@
     <Table {columns} rows={[]} ariaLabel="Empty table" emptyMessage="No team members found." />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <div class="poodle-variant-block">
       <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Table at {size}" {size} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <div class="poodle-variant-block">
       <Table columns={minimalColumns} rows={minimalRows} ariaLabel="Table at {density}" {density} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

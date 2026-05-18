@@ -30,13 +30,13 @@
     <OrderBy {fields} value={[{ key: "title", direction: "asc" }]} disabled />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <OrderBy {fields} {size} bind:value={sizeValue} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <OrderBy {fields} {density} bind:value={densityValue} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

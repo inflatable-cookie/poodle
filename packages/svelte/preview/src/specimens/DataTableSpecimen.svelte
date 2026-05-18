@@ -3,8 +3,7 @@
   import type { TableColumn, TableFilters, TablePagination, TableRow } from "@poodle/svelte";
   import { Pill } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const columns: TableColumn[] = [
     { id: "name", label: "Name", sortable: true, hideable: false },
@@ -98,113 +97,114 @@
   }
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="With sorting, column visibility, and export">
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup bare label="With sorting, column visibility, and export">
+      <DataTable
+        {columns}
+        {rows}
+        selectable
+        {selectedRowIds}
+        {sortColumnId}
+        {sortDirection}
+        {hiddenColumnIds}
+        showColumnVisibility
+        showExport
+        ariaLabel="Team members"
+        onSortChange={handleSortChange}
+        onRowToggle={handleRowToggle}
+        onToggleAll={handleToggleAll}
+        onRowAction={handleRowAction}
+        onColumnVisibilityChange={handleColumnVisibility}
+      />
+      {#if lastAction}
+        <p class="poodle-last-action">Last action: <strong>{lastAction}</strong></p>
+      {/if}
+      <p class="poodle-selection-count">{selectedRowIds.length} of {rows.length} selected</p>
+    </SpecimenGroup>
+
+    <SpecimenGroup bare label="With filters and pagination">
+      <DataTable
+        {columns}
+        {rows}
+        {filters}
+        {pagination}
+        compact
+        striped
+        stickyHeader
+        ariaLabel="Directory table"
+        onFilterChange={({ filters: nextFilters }) => (filters = nextFilters)}
+        onPageChange={({ page }) => (pagination = { ...pagination, page })}
+        onLimitChange={({ limit }) => (pagination = { ...pagination, page: 1, limit })}
+      />
+    </SpecimenGroup>
+
+    <SpecimenGroup bare label="With custom cells and expanded rows">
+      <DataTable
+        columns={incidentColumns}
+        rows={incidentRows}
+        showRowActions={false}
+        expandedRowIds={expandedIncidentId ? [expandedIncidentId] : []}
+        ariaLabel="Active incidents"
+      >
+        {#snippet cell(column, row)}
+          {@const incident = row.data as Incident | undefined}
+          {#if column.id === "expand"}
+            <button type="button" class="poodle-expand-button" onclick={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
+              {expandedIncidentId === row.id ? "Hide" : "Show"}
+            </button>
+          {:else if column.id === "status"}
+            <Pill appearance="badge" tone={incident?.status === "open" ? "danger" : "success"}>
+              {row.cells.status}
+            </Pill>
+          {:else}
+            {row.cells[column.id]}
+          {/if}
+        {/snippet}
+        {#snippet expandedRow(row)}
+          {@const incident = row.data as Incident | undefined}
+          {#if incident}
+            <div class="poodle-incident-detail">
+              <strong>{incident.endpoint}</strong>
+              <span>Owned by {incident.owner}</span>
+              <span>Updated {new Date(incident.updatedAt).toLocaleString()}</span>
+            </div>
+          {/if}
+        {/snippet}
+      </DataTable>
+    </SpecimenGroup>
+
+    <SpecimenGroup bare label="Empty state">
+      <DataTable
+        {columns}
+        rows={[]}
+        ariaLabel="Empty data table"
+        emptyMessage="No team members match the current filters."
+      />
+    </SpecimenGroup>
+  </div>
+
+  {#snippet sizes(size)}
     <DataTable
       {columns}
       {rows}
-      selectable
-      {selectedRowIds}
-      {sortColumnId}
-      {sortDirection}
-      {hiddenColumnIds}
-      showColumnVisibility
-      showExport
-      ariaLabel="Team members"
-      onSortChange={handleSortChange}
-      onRowToggle={handleRowToggle}
-      onToggleAll={handleToggleAll}
-      onRowAction={handleRowAction}
-      onColumnVisibilityChange={handleColumnVisibility}
+      {size}
+      ariaLabel={`Data table at ${size}`}
     />
-    {#if lastAction}
-      <p class="poodle-last-action">Last action: <strong>{lastAction}</strong></p>
-    {/if}
-    <p class="poodle-selection-count">{selectedRowIds.length} of {rows.length} selected</p>
-  </SpecimenGroup>
+  {/snippet}
 
-  <SpecimenGroup label="With filters and pagination">
+  {#snippet densities(density)}
     <DataTable
       {columns}
       {rows}
-      {filters}
-      {pagination}
-      compact
-      striped
-      stickyHeader
-      ariaLabel="Directory table"
-      onFilterChange={({ filters: nextFilters }) => (filters = nextFilters)}
-      onPageChange={({ page }) => (pagination = { ...pagination, page })}
-      onLimitChange={({ limit }) => (pagination = { ...pagination, page: 1, limit })}
+      {density}
+      ariaLabel={`Data table at ${density} density`}
     />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Sizes">
-    <div class="poodle-specimen__stack">
-      {#each controlSizes as size}
-        <DataTable
-          {columns}
-          {rows}
-          {size}
-          ariaLabel="Data table at {size}"
-        />
-      {/each}
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="With custom cells and expanded rows">
-    <DataTable
-      columns={incidentColumns}
-      rows={incidentRows}
-      showRowActions={false}
-      expandedRowIds={expandedIncidentId ? [expandedIncidentId] : []}
-      ariaLabel="Active incidents"
-    >
-      {#snippet cell(column, row)}
-        {@const incident = row.data as Incident | undefined}
-        {#if column.id === "expand"}
-          <button type="button" class="poodle-expand-button" onclick={() => (expandedIncidentId = expandedIncidentId === row.id ? null : row.id)}>
-            {expandedIncidentId === row.id ? "Hide" : "Show"}
-          </button>
-        {:else if column.id === "status"}
-          <Pill appearance="badge" tone={incident?.status === "open" ? "danger" : "success"}>
-            {row.cells.status}
-          </Pill>
-        {:else}
-          {row.cells[column.id]}
-        {/if}
-      {/snippet}
-      {#snippet expandedRow(row)}
-        {@const incident = row.data as Incident | undefined}
-        {#if incident}
-          <div class="poodle-incident-detail">
-            <strong>{incident.endpoint}</strong>
-            <span>Owned by {incident.owner}</span>
-            <span>Updated {new Date(incident.updatedAt).toLocaleString()}</span>
-          </div>
-        {/if}
-      {/snippet}
-    </DataTable>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Empty state">
-    <DataTable
-      {columns}
-      rows={[]}
-      ariaLabel="Empty data table"
-      emptyMessage="No team members match the current filters."
-    />
-  </SpecimenGroup>
-</div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .poodle-specimen__stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;

@@ -155,7 +155,6 @@ pub mod media_browse_panel;
 pub mod media_picker;
 pub mod media_preview;
 pub mod media_thumbnail;
-pub mod media_upload_status_panel;
 pub mod metric_tile;
 pub mod nav_card;
 pub mod order_by;

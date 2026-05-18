@@ -1,5 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { getUiPresentation } from "./presentation";
+
+  import type { ControlDensity } from "./types";
 
   interface Props {
     title: string;
@@ -8,6 +11,7 @@
     badge?: string | null;
     disabled?: boolean;
     ariaLabel?: string | null;
+    density?: ControlDensity | null;
     onClick?: ((event: MouseEvent) => void) | null;
     icon?: Snippet;
   }
@@ -19,9 +23,13 @@
     badge = null,
     disabled = false,
     ariaLabel = null,
+    density = null,
     onClick = null,
     icon,
   }: Props = $props();
+
+  const uiPresentation = getUiPresentation();
+  const resolvedDensity = $derived(density ?? $uiPresentation.density);
 
   function handleClick(event: MouseEvent): void {
     if (disabled) {
@@ -38,6 +46,7 @@
     {href}
     aria-label={ariaLabel ?? title}
     data-disabled={disabled}
+    data-density={resolvedDensity}
     onclick={handleClick}
   >
     {#if icon}
@@ -67,6 +76,7 @@
     aria-label={ariaLabel ?? title}
     disabled={disabled}
     data-disabled={disabled}
+    data-density={resolvedDensity}
     onclick={handleClick}
   >
     {#if icon}
@@ -93,10 +103,16 @@
 
 <style>
   .poodle-nav-card {
+    --poodle-nav-card-gap: 0.75rem;
+    --poodle-nav-card-padding-y: 0.625rem;
+    --poodle-nav-card-padding-x: var(--poodle-space-panel-x);
+    --poodle-nav-card-icon-size: 2rem;
+    --poodle-nav-card-content-gap: 0.125rem;
+    --poodle-nav-card-title-gap: 0.375rem;
     display: flex;
     align-items: center;
-    gap: var(--poodle-space-inline-md);
-    padding: 0.625rem var(--poodle-space-panel-x);
+    gap: var(--poodle-nav-card-gap);
+    padding: var(--poodle-nav-card-padding-y) var(--poodle-nav-card-padding-x);
     border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent);
     border-radius: var(--poodle-radius-surface);
     background: var(--poodle-color-background-surface);
@@ -132,8 +148,8 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
+    width: var(--poodle-nav-card-icon-size);
+    height: var(--poodle-nav-card-icon-size);
     border-radius: var(--poodle-radius-control);
     background: color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
     color: var(--poodle-color-accent-base);
@@ -145,13 +161,13 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--poodle-nav-card-content-gap);
   }
 
   .poodle-nav-card__title {
     display: flex;
     align-items: center;
-    gap: var(--poodle-space-inline-sm);
+    gap: var(--poodle-nav-card-title-gap);
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);
     font-weight: 600;
@@ -188,5 +204,23 @@
 
   .poodle-nav-card:hover .poodle-nav-card__arrow {
     opacity: 1;
+  }
+
+  .poodle-nav-card[data-density="compact"] {
+    --poodle-nav-card-gap: 0.625rem;
+    --poodle-nav-card-padding-y: 0.5rem;
+    --poodle-nav-card-padding-x: 0.75rem;
+    --poodle-nav-card-icon-size: 1.75rem;
+    --poodle-nav-card-content-gap: 0.0625rem;
+    --poodle-nav-card-title-gap: 0.3125rem;
+  }
+
+  .poodle-nav-card[data-density="comfortable"] {
+    --poodle-nav-card-gap: 0.875rem;
+    --poodle-nav-card-padding-y: 0.75rem;
+    --poodle-nav-card-padding-x: 1.25rem;
+    --poodle-nav-card-icon-size: 2.25rem;
+    --poodle-nav-card-content-gap: 0.1875rem;
+    --poodle-nav-card-title-gap: 0.4375rem;
   }
 </style>

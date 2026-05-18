@@ -112,7 +112,7 @@
       onclick={() => !isItemDisabled && select(item.value)}
       onkeydown={(event) => !isItemDisabled && handleKeydown(event, index)}
     >
-      <Card interactive={!isItemDisabled} selected={isChecked} ariaLabel={item.label}>
+      <Card interactive={!isItemDisabled} selected={isChecked} density={resolvedDensity} ariaLabel={item.label}>
         {#snippet header()}
           <div class="poodle-card-radio-group__header">
             <span
@@ -284,5 +284,13 @@
 
   .poodle-card-radio-group[data-density="compact"] .poodle-card-radio-group__option :global(.poodle-card) {
     padding-inline: 0.5rem;
+  }
+
+  .poodle-card-radio-group[data-density="default"] {
+    gap: 0.75rem;
+  }
+
+  .poodle-card-radio-group[data-density="comfortable"] {
+    gap: 0.875rem;
   }
 </style>

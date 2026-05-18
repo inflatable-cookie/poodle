@@ -53,13 +53,13 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <SplitButton variant="primary" items={saveItems} {size}>Save</SplitButton>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <SplitButton variant="primary" items={saveItems} {density}>Save</SplitButton>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

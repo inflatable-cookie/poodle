@@ -78,11 +78,11 @@
     />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Pagination currentPage={1} totalPages={10} {size} ariaLabel={size + " pagination"} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Pagination totalPages={10} {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

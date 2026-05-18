@@ -71,7 +71,6 @@ pub mod media_browse_panel;
 pub mod media_picker;
 pub mod media_preview;
 pub mod media_thumbnail;
-pub mod media_upload_status_panel;
 pub mod menu;
 pub mod menubar;
 pub mod meter;
@@ -302,7 +301,6 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "media-picker" => Some(media_picker::render(theme)),
         "media-preview" => Some(media_preview::render(theme)),
         "media-thumbnail" => Some(media_thumbnail::render(theme)),
-        "media-upload-status-panel" => Some(media_upload_status_panel::render(theme)),
         "menu" => Some(menu::render(theme)),
         "menubar" => Some(menubar::render(theme)),
         "meter" => Some(meter::render(theme)),

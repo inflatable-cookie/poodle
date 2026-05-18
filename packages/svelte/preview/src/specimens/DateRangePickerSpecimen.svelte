@@ -34,17 +34,17 @@
     </div>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <div class="poodle-specimen__control">
       <DateRangePicker {size} ariaLabel={size} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <div class="poodle-specimen__control">
       <DateRangePicker {density} />
     </div>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

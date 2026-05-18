@@ -40,11 +40,11 @@
     <Breadcrumbs items={deepItems} maxVisibleItems={3} />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Breadcrumbs items={basicItems} {size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Breadcrumbs items={basicItems} {density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

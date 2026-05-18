@@ -153,7 +153,7 @@
     "search",
   ] as const;
 
-  let liveValue = $state("");
+  let uncontrolledValue = $state("");
   let debounceTimer: ReturnType<typeof setTimeout> | null = $state(null);
   let validationTimer: ReturnType<typeof setTimeout> | null = $state(null);
   let activeValidationKey: string | null = $state(null);
@@ -164,6 +164,7 @@
   let previousValidationSnapshot = $state("");
   let userEditedSlug = $state(false);
   let previousGeneratedSlug = $state("");
+  let previousDefaultValue = $state("");
 
   const isSearch = $derived(type === "search");
   const isSlug = $derived(type === "slug");
@@ -171,7 +172,8 @@
   const nativeInputType = $derived(isSlug ? "text" : type);
   const hasLeadingAffordance = $derived(Boolean(leadingSnippet) || isSearch);
   const hasTrailingAffordance = $derived(Boolean(trailingSnippet));
-  const currentValue = $derived(liveValue);
+  const isControlled = $derived(value !== undefined);
+  const currentValue = $derived(isControlled ? (value ?? "") : uncontrolledValue);
   const canClear = $derived(isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0);
   const effectiveValidationState = $derived.by(() =>
     validate ? validationStatusToState(internalValidationStatus, validationState) : validationState
@@ -224,19 +226,19 @@
   );
 
   $effect(() => {
-    const resolvedValue = (value ?? defaultValue) || "";
-    if (resolvedValue !== liveValue) {
-      liveValue = resolvedValue;
+    if (!isControlled && defaultValue !== previousDefaultValue) {
+      previousDefaultValue = defaultValue;
+      uncontrolledValue = defaultValue;
     }
   });
 
   $effect(() => {
     if (isSlug && source !== null) {
-      if (!userEditedSlug || liveValue === previousGeneratedSlug || liveValue === "") {
+      if (!userEditedSlug || currentValue === previousGeneratedSlug || currentValue === "") {
         if (previousGeneratedSlug !== generatedSlug) {
           previousGeneratedSlug = generatedSlug;
         }
-        if (liveValue !== generatedSlug) {
+        if (currentValue !== generatedSlug) {
           commitValue(generatedSlug, { markSlugEdited: false, immediate: true });
         }
       }
@@ -244,16 +246,16 @@
   });
 
   $effect(() => {
-    if (validate && liveValue !== lastValidatedValue) {
-      triggerValidation(liveValue, false);
+    if (validate && currentValue !== lastValidatedValue) {
+      triggerValidation(currentValue, false);
     }
   });
 
   $effect(() => {
     if (validate && contextKey !== previousContextKey) {
       previousContextKey = contextKey;
-      if (liveValue) {
-        triggerValidation(liveValue, false);
+      if (currentValue) {
+        triggerValidation(currentValue, false);
       }
     }
   });
@@ -355,9 +357,10 @@
     nextValue: string,
     options: { markSlugEdited?: boolean; immediate?: boolean } = {},
   ): void {
-    liveValue = nextValue;
-    if (value !== undefined) {
+    if (isControlled) {
       value = nextValue;
+    } else {
+      uncontrolledValue = nextValue;
     }
 
     if (isSlug && options.markSlugEdited !== false) {
@@ -371,7 +374,7 @@
     if (!debounceTimer) return;
     clearTimeout(debounceTimer);
     debounceTimer = null;
-    onValueChange?.(liveValue);
+    onValueChange?.(currentValue);
   }
 
   function handleInput(event: Event): void {
@@ -380,7 +383,7 @@
   }
 
   function handleSubmit(): void {
-    onSubmit?.(liveValue);
+    onSubmit?.(currentValue);
   }
 
   function handleCancel(): void {
@@ -407,7 +410,7 @@
   function handleBlurEvent(event: FocusEvent): void {
     flushDebouncedValue();
     if (validate && validateOnBlur) {
-      triggerValidation(liveValue, true);
+      triggerValidation(currentValue, true);
     }
     onBlur?.(event);
   }
@@ -457,13 +460,13 @@
       const result = isSlug
         ? await validateSlugValue(inputValue)
         : await validate?.(inputValue, effectiveValidationContext);
-      if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+      if (activeValidationKey !== validationKey || inputValue !== currentValue) return;
       internalValidationStatus = result?.valid ? "valid" : "invalid";
       internalValidationMessage = result?.message ?? "";
       lastValidatedValue = inputValue;
       activeValidationKey = null;
     } catch {
-      if (activeValidationKey !== validationKey || inputValue !== liveValue) return;
+      if (activeValidationKey !== validationKey || inputValue !== currentValue) return;
       internalValidationStatus = "invalid";
       internalValidationMessage = "Could not validate";
       lastValidatedValue = inputValue;
@@ -656,11 +659,12 @@
     --poodle-text-input-adornment-gap: var(--poodle-space-inline-sm);
     --poodle-text-input-density-inline-adjust: 0rem;
     --poodle-text-input-density-block-adjust: 0rem;
+    --poodle-text-input-control-height: var(--poodle-size-control-height);
     --poodle-text-input-font-size: var(--poodle-typography-body-size);
     --poodle-text-input-line-height: var(--poodle-typography-body-lineHeight);
     display: flex;
     align-items: center;
-    min-height: var(--poodle-size-control-height);
+    min-height: var(--poodle-text-input-control-height);
     border: 0.0625rem solid var(--poodle-text-input-border);
     border-radius: var(--poodle-text-input-radius);
     background: var(--poodle-text-input-fill);
@@ -695,35 +699,42 @@
   }
 
   .poodle-text-input[data-size="xs"] {
-    min-height: 1.5rem;
+    --poodle-text-input-control-height: 1.5rem;
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) - 0.25rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) - 0.125rem);
     --poodle-text-input-font-size: 0.75rem;
   }
 
   .poodle-text-input[data-size="sm"] {
-    min-height: 1.75rem;
+    --poodle-text-input-control-height: 1.75rem;
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) - 0.125rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) - 0.0625rem);
     --poodle-text-input-font-size: 0.8125rem;
   }
 
   .poodle-text-input[data-size="md"] {
-    min-height: var(--poodle-size-control-height-md, var(--poodle-size-control-height));
+    --poodle-text-input-control-height: var(
+      --poodle-size-control-height-md,
+      var(--poodle-size-control-height)
+    );
   }
 
   .poodle-text-input[data-size="lg"] {
-    min-height: 2.75rem;
+    --poodle-text-input-control-height: 2.75rem;
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + 0.125rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + 0.0625rem);
     --poodle-text-input-font-size: 0.9375rem;
   }
 
   .poodle-text-input[data-size="xl"] {
-    min-height: 3.25rem;
+    --poodle-text-input-control-height: 3.25rem;
     --poodle-text-input-padding-inline: calc(var(--poodle-space-control-x) + 0.1875rem);
     --poodle-text-input-padding-block: calc(var(--poodle-space-control-y) + 0.125rem);
     --poodle-text-input-font-size: 1rem;
+  }
+
+  .poodle-text-input:not(.poodle-text-input--multiline) {
+    height: var(--poodle-text-input-control-height);
   }
 
   .poodle-text-input[data-density="compact"] {
@@ -765,6 +776,7 @@
     min-width: 0;
     display: flex;
     align-items: stretch;
+    align-self: stretch;
   }
 
   .poodle-text-input__control {
@@ -784,7 +796,8 @@
   }
 
   .poodle-text-input__control::placeholder {
-    color: var(--poodle-color-text-muted);
+    color: var(--poodle-color-text-secondary);
+    opacity: var(--poodle-state-opacity-muted);
   }
 
   .poodle-text-input__control:disabled {
@@ -799,6 +812,7 @@
 
   .poodle-text-input--multiline {
     align-items: stretch;
+    height: auto;
     min-height: auto;
   }
 

@@ -63,21 +63,21 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Menu items={fileItems} {size} ariaLabel={size + " menu"}>
       {#snippet trigger()}
         <Button variant="secondary" {size}>{size.toUpperCase()}</Button>
       {/snippet}
     </Menu>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Menu items={fileItems} {density} ariaLabel="{density} menu">
       {#snippet trigger()}
         <Button variant="secondary" {density}>{density}</Button>
       {/snippet}
     </Menu>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

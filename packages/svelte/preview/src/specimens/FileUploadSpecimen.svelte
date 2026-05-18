@@ -55,21 +55,21 @@
     {/if}
   </div>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <FileUpload
       {size}
       accept="image/*"
       maxSize={5 * 1024 * 1024}
     />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <FileUpload
       {density}
       accept="image/*"
       maxSize={5 * 1024 * 1024}
     />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

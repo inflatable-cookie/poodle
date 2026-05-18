@@ -30,7 +30,9 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Loading state">
-    <MediaThumbnail kind="image" state="loading" aspectRatio="square" />
+    <div class="poodle-thumb-single">
+      <MediaThumbnail kind="image" state="loading" aspectRatio="square" />
+    </div>
   </SpecimenGroup>
 </div>
 
@@ -57,5 +59,9 @@
     color: var(--poodle-color-text-secondary);
     font-size: 0.75rem;
     font-weight: 600;
+  }
+
+  .poodle-thumb-single {
+    width: min(100%, 10rem);
   }
 </style>

@@ -26,13 +26,13 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <TimeZoneSelect {size} ariaLabel={size} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <TimeZoneSelect {density} ariaLabel={density} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

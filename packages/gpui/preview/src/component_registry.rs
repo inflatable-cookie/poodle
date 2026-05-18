@@ -556,11 +556,6 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         description: "Compact media thumbnail with overlay metadata.",
     },
     ComponentEntry {
-        slug: "media-upload-status-panel",
-        display_name: "MediaUploadStatusPanel",
-        description: "Upload progress panel with file status.",
-    },
-    ComponentEntry {
         slug: "page-header",
         display_name: "PageHeader",
         description: "Page-level header with title, actions, and breadcrumbs.",
@@ -708,8 +703,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "media-picker"
         | "media-browse-panel"
         | "media-preview"
-        | "media-thumbnail"
-        | "media-upload-status-panel" => ComponentTag::Media,
+        | "media-thumbnail" => ComponentTag::Media,
         "callout"
         | "progress"
         | "meter"

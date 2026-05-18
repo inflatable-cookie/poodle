@@ -65,13 +65,13 @@
     />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <ToggleGroup options={viewOptions} defaultValue="grid" {size} ariaLabel={size + " toggle group"} />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <ToggleGroup options={viewOptions} defaultValue="grid" {density} ariaLabel={density + " toggle group"} />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

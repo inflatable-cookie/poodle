@@ -111,7 +111,6 @@ mod media_browse_panel_specimen;
 mod media_picker_specimen;
 mod media_preview_specimen;
 mod media_thumbnail_specimen;
-mod media_upload_status_panel_specimen;
 mod meta_bar;
 mod metric_tile_specimen;
 mod nav_card;
@@ -445,11 +444,6 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "MediaBrowsePanel",
             theme,
             media_browse_panel_specimen::render(theme),
-        ),
-        "media-upload-status-panel" => specimen_card(
-            "MediaUploadStatusPanel",
-            theme,
-            media_upload_status_panel_specimen::render(theme),
         ),
         "list-container" => specimen_card(
             "ListContainer",

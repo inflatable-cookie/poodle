@@ -2,6 +2,7 @@
   import { SidebarNav } from "@poodle/svelte";
   import type { SidebarNavGroup } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let catalogueValue = "dock-region";
   let harnessValue = "pulse-runtime-foundation";
@@ -41,29 +42,53 @@
   ];
 </script>
 
-<div class="poodle-specimen">
-  <SpecimenGroup label="Single-group catalogue">
-    <div class="poodle-specimen__frame">
-      <SidebarNav
-        ariaLabel="Catalogue navigation"
-        groups={catalogueGroups}
-        value={catalogueValue}
-        onValueChange={(value) => (catalogueValue = value)}
-      />
-    </div>
-  </SpecimenGroup>
+<SpecimenLayout>
+  <div class="poodle-specimen">
+    <SpecimenGroup label="Single-group catalogue">
+      <div class="poodle-specimen__frame">
+        <SidebarNav
+          ariaLabel="Catalogue navigation"
+          groups={catalogueGroups}
+          value={catalogueValue}
+          onValueChange={(value) => (catalogueValue = value)}
+        />
+      </div>
+    </SpecimenGroup>
 
-  <SpecimenGroup label="Grouped verification nav">
+    <SpecimenGroup label="Grouped verification nav">
+      <div class="poodle-specimen__frame">
+        <SidebarNav
+          ariaLabel="Verification navigation"
+          groups={harnessGroups}
+          value={harnessValue}
+          onValueChange={(value) => (harnessValue = value)}
+        />
+      </div>
+    </SpecimenGroup>
+  </div>
+
+  {#snippet sizes(size)}
     <div class="poodle-specimen__frame">
       <SidebarNav
-        ariaLabel="Verification navigation"
+        ariaLabel={`${size} sidebar navigation`}
         groups={harnessGroups}
         value={harnessValue}
-        onValueChange={(value) => (harnessValue = value)}
+        {size}
       />
     </div>
-  </SpecimenGroup>
-</div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-specimen__frame">
+      <SidebarNav
+        ariaLabel={`${density} sidebar navigation`}
+        groups={harnessGroups}
+        value={harnessValue}
+        {density}
+      />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen {

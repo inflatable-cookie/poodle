@@ -40,15 +40,15 @@
     </Collapsible>
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Collapsible title="Collapsible at {size}" {size}>
       <p>Content at <strong>{size}</strong> size.</p>
     </Collapsible>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Collapsible title="Collapsible at {density} density" {density}>
       <p>Content at <strong>{density}</strong> density.</p>
     </Collapsible>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { FilterToolbar, ListContainer } from "@poodle/svelte";
-  import { Button, IconButton, Pill, TextInput, Select, Surface } from "@poodle/svelte";
+  import { Button, IconButton, Pill, TextInput, Select } from "@poodle/svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   type QueueItem = {
@@ -47,8 +47,7 @@
 </script>
 
 <div class="poodle-specimen">
-  <SpecimenGroup label="Ready with slots and built-in pagination">
-    <Surface padding="lg" border="subtle">
+  <SpecimenGroup label="Ready with slots and built-in pagination" bare>
       <ListContainer
         title="Operational queues"
         subtitle="Monitor health, triage issues, and navigate paged result sets."
@@ -116,11 +115,9 @@
           {/each}
         </div>
       </ListContainer>
-    </Surface>
   </SpecimenGroup>
 
-  <SpecimenGroup label="State handling">
-    <Surface padding="lg" border="subtle">
+  <SpecimenGroup label="State handling" bare>
       <div class="poodle-specimen__state-buttons">
         <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "ready")}>Ready</Button>
         <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "loading")}>Loading</Button>
@@ -141,7 +138,6 @@
           This content is only shown in the ready state.
         </div>
       </ListContainer>
-    </Surface>
   </SpecimenGroup>
 </div>
 

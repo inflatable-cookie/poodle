@@ -102,13 +102,13 @@
 
   <p class="poodle-specimen__log">{clickLog}</p>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Button variant="primary" {size} leadingIcon="plus" onClick={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Button variant="secondary" {density} leadingIcon="download" onClick={() => log(`Density ${density}`)}>Action</Button>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

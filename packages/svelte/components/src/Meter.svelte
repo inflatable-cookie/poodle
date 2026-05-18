@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { ControlSize, SemanticControlSizeRole } from "./types";
+
   let {
     value = 0,
     min = 0,
@@ -7,6 +10,8 @@
     high = null,
     optimum = null,
     ariaLabel = null,
+    size = null,
+    sizeRole = "control",
   }: {
     value?: number;
     min?: number;
@@ -15,14 +20,18 @@
     high?: number | null;
     optimum?: number | null;
     ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
   } = $props();
 
+  const uiPresentation = getUiPresentation();
   const safeMax = $derived(max <= min ? min + 1 : max);
   const safeValue = $derived(Math.min(Math.max(value, min), safeMax));
   const percentage = $derived(((safeValue - min) / (safeMax - min)) * 100);
+  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
 </script>
 
-<div class="poodle-meter" aria-label={ariaLabel ?? undefined}>
+<div class="poodle-meter" aria-label={ariaLabel ?? undefined} data-size={resolvedSize}>
   <meter
     class="poodle-meter__native"
     min={min}
@@ -39,6 +48,7 @@
 
 <style>
   .poodle-meter {
+    --poodle-meter-track-thickness: 0.5rem;
     display: grid;
     gap: 0;
     width: 100%;
@@ -54,7 +64,7 @@
     position: relative;
     display: block;
     overflow: hidden;
-    min-height: 0.5rem;
+    min-height: var(--poodle-meter-track-thickness);
     border-radius: 999px;
     background: color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary));
   }
@@ -68,5 +78,25 @@
       color-mix(in srgb, var(--poodle-color-status-success) 82%, white),
       var(--poodle-color-status-success)
     );
+  }
+
+  .poodle-meter[data-size="xs"] {
+    --poodle-meter-track-thickness: 0.25rem;
+  }
+
+  .poodle-meter[data-size="sm"] {
+    --poodle-meter-track-thickness: 0.375rem;
+  }
+
+  .poodle-meter[data-size="md"] {
+    --poodle-meter-track-thickness: 0.5rem;
+  }
+
+  .poodle-meter[data-size="lg"] {
+    --poodle-meter-track-thickness: 0.625rem;
+  }
+
+  .poodle-meter[data-size="xl"] {
+    --poodle-meter-track-thickness: 0.75rem;
   }
 </style>

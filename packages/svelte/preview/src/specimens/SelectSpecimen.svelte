@@ -182,13 +182,13 @@
     </div>
   </Surface>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <Select options={fruitOptions} placeholder="Select..." {size} ariaLabel="{size} select" />
-  </svelte:fragment>
+  {/snippet}
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <Select options={fruitOptions} placeholder="Select..." {density} ariaLabel="{density} select" />
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

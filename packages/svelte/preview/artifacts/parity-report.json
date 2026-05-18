@@ -1275,19 +1275,6 @@
       },
       {
         "packageName": "@poodle/svelte",
-        "exportName": "MediaUploadStatusPanel",
-        "kind": "component",
-        "status": "previewed",
-        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
-        "sectionIds": [
-          "catalog-hub"
-        ],
-        "sectionTitles": [
-          "Catalog hub"
-        ]
-      },
-      {
-        "packageName": "@poodle/svelte",
         "exportName": "Menu",
         "kind": "component",
         "status": "previewed",

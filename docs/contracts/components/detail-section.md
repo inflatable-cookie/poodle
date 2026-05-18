@@ -1,15 +1,15 @@
 # DetailSection
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-17
 
 ## 1. Purpose
 
 - Component name: `DetailSection`
 - Layer: `composites`
 - Summary: a titled grouping of related detail rows, supporting a description,
-  optional section-level actions, multi-column body layout, and a divider
-  posture for visual separation between stacked sections
+  optional section-level actions, multi-column body layout, a divider posture
+  for visual separation between stacked sections, and density-driven spacing
 - In scope: section heading with optional description, actions snippet for
   section-level controls, multi-column body grid (1/2/3 columns), responsive
   collapse to single column on narrow viewports, separated/unseparated visual
@@ -49,6 +49,7 @@ Updated: 2026-03-30
 |------|------|---------|----------|-------|
 | `title` | `string \| null` | `null` | no | section heading text |
 | `description` | `string \| null` | `null` | no | supporting description text below the title |
+| `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for section spacing; when null, resolves from inherited presentation |
 | `separated` | `boolean` | `true` | no | controls `data-separated` attribute for visual separation styling |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the root `<section>` when no visible title exists |
 | `columns` | `1 \| 2 \| 3` | `1` | no | number of columns for the body grid |
@@ -77,6 +78,8 @@ Updated: 2026-03-30
 | actionable | actions slot populated | header shows split layout with title block on start and actions on end |
 | separated | `separated=true` | `data-separated="true"` on root; border-top set to `0` |
 | multi-column | `columns=2` or `columns=3` | body grid uses multi-column layout |
+| compact density | `density="compact"` or inherited compact presentation | tighter section gap, header gap, title gap, and body gap |
+| comfortable density | `density="comfortable"` or inherited comfortable presentation | looser section gap, header gap, title gap, and body gap |
 
 ### Component States
 
@@ -139,8 +142,7 @@ None. DetailSection is a grouping composite with no component-owned events.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
-| padding-top | `calc(var(--poodle-space-stack-md) + 0.125rem)` |
+| gap | `var(--poodle-detail-section-root-gap)` |
 
 ### `.detail-section[data-separated="true"]`
 
@@ -155,7 +157,7 @@ None. DetailSection is a grouping composite with no component-owned events.
 | display | `flex` |
 | flex-wrap | `wrap` |
 | justify-content | `space-between` |
-| gap | `var(--poodle-space-inline-md)` |
+| gap | `var(--poodle-detail-section-header-gap)` |
 | align-items | `start` |
 
 ### TitleBlock `.detail-section__title-block`
@@ -163,7 +165,7 @@ None. DetailSection is a grouping composite with no component-owned events.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `0.375rem` |
+| gap | `var(--poodle-detail-section-title-gap)` |
 
 ### Title `.detail-section__title` and Description `.detail-section__description`
 
@@ -192,7 +194,15 @@ None. DetailSection is a grouping composite with no component-owned events.
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--poodle-space-stack-sm)` |
+| gap | `var(--poodle-detail-section-body-gap)` |
+
+### Density Variables
+
+| Density | `--poodle-detail-section-root-gap` | `--poodle-detail-section-header-gap` | `--poodle-detail-section-title-gap` | `--poodle-detail-section-body-gap` |
+|---------|------------------------------------|--------------------------------------|-------------------------------------|------------------------------------|
+| `compact` | `var(--poodle-space-stack-md)` | `var(--poodle-space-inline-sm)` | `0.25rem` | `0.625rem` |
+| `default` | `calc(var(--poodle-space-stack-md) + 0.125rem)` | `var(--poodle-space-inline-md)` | `0.375rem` | `var(--poodle-space-stack-sm)` |
+| `comfortable` | `calc(var(--poodle-space-stack-lg) - 0.125rem)` | `0.875rem` | `0.5rem` | `1rem` |
 
 ### Multi-Column Body
 

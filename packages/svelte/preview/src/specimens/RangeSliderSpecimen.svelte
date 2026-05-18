@@ -36,9 +36,9 @@
     <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
   </SpecimenGroup>
 
-  <svelte:fragment slot="sizes" let:size>
+  {#snippet sizes(size)}
     <RangeSlider value={[25, 75]} min={0} max={100} {size} ariaLabel={"Range at " + size} />
-  </svelte:fragment>
+  {/snippet}
 
 </SpecimenLayout>
 </div>

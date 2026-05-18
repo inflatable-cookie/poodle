@@ -49,7 +49,7 @@
     </SpecimenGroup>
   </div>
 
-  <svelte:fragment slot="densities" let:density>
+  {#snippet densities(density)}
     <div class="poodle-specimen__density-demo">
       <MetricTile
         label="Requests/min"
@@ -60,7 +60,7 @@
         {density}
       />
     </div>
-  </svelte:fragment>
+  {/snippet}
 </SpecimenLayout>
 
 <style>

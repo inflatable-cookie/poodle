@@ -354,11 +354,12 @@
   }
 
   .poodle-number-input__field {
+    --poodle-number-input-control-height: var(--poodle-size-control-height);
     flex: 1 1 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
-    height: var(--poodle-size-control-height);
+    height: var(--poodle-number-input-control-height);
     border: 0.0625rem solid var(--poodle-color-border-default);
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-color-background-surface);
@@ -439,15 +440,22 @@
     padding: 0 calc(var(--poodle-space-control-x) + 0.125rem);
   }
 
-  .poodle-number-input__field[data-size="xs"] { height: 1.5rem; }
+  .poodle-number-input__field[data-size="xs"] { --poodle-number-input-control-height: 1.5rem; }
   .poodle-number-input__field[data-size="xs"] .poodle-number-input__control { font-size: 0.75rem; }
 
-  .poodle-number-input__field[data-size="sm"] { height: 1.75rem; }
+  .poodle-number-input__field[data-size="sm"] { --poodle-number-input-control-height: 1.75rem; }
   .poodle-number-input__field[data-size="sm"] .poodle-number-input__control { font-size: 0.8125rem; }
 
-  .poodle-number-input__field[data-size="lg"] { height: 2.75rem; }
+  .poodle-number-input__field[data-size="md"] {
+    --poodle-number-input-control-height: var(
+      --poodle-size-control-height-md,
+      var(--poodle-size-control-height)
+    );
+  }
+
+  .poodle-number-input__field[data-size="lg"] { --poodle-number-input-control-height: 2.75rem; }
   .poodle-number-input__field[data-size="lg"] .poodle-number-input__control { font-size: 0.9375rem; }
 
-  .poodle-number-input__field[data-size="xl"] { height: 3.25rem; }
+  .poodle-number-input__field[data-size="xl"] { --poodle-number-input-control-height: 3.25rem; }
   .poodle-number-input__field[data-size="xl"] .poodle-number-input__control { font-size: 1rem; }
 </style>

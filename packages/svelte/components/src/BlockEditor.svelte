@@ -325,7 +325,7 @@
               {#if typePicker}
                 {@render typePicker(getTypePickerContext(blockItem, index))}
               {:else}
-                <div class="poodle-block-editor__type-select">
+                <div class="poodle-block-editor__type-select" class:poodle-block-editor__type-select--inset={!canReorder}>
                   <Select
                     value={blockItem.type}
                     options={selectItems}
@@ -557,6 +557,34 @@
 
   .poodle-block-editor__type-select {
     flex-shrink: 0;
+  }
+
+  .poodle-block-editor__type-select--inset {
+    --poodle-block-editor-type-picker-inset: calc(
+      var(--poodle-block-editor-content-x) + var(--poodle-block-editor-input-x) -
+        var(--poodle-block-editor-toolbar-x)
+    );
+    margin-left: var(--poodle-block-editor-type-picker-inset);
+  }
+
+  .poodle-block-editor__type-select :global(.poodle-select[data-variant="ghost"]) {
+    min-height: var(--poodle-block-editor-control-size);
+  }
+
+  .poodle-block-editor__type-select :global(.poodle-select[data-variant="ghost"] .poodle-select__trigger) {
+    min-height: var(--poodle-block-editor-control-size);
+    line-height: var(--poodle-typography-body-lineHeight);
+  }
+
+  .poodle-block-editor__type-select :global(.poodle-select[data-variant="ghost"] .poodle-select__trigger-content) {
+    min-height: var(--poodle-block-editor-control-size);
+    align-items: center;
+  }
+
+  .poodle-block-editor__type-select :global(.poodle-select[data-variant="ghost"] .poodle-select__value) {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--poodle-block-editor-control-size);
   }
 
   .poodle-block-editor__add-select {
