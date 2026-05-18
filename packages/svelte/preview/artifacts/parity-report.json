@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T08:11:58.479Z",
+  "generatedAt": "2026-05-18T17:42:21.290Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -178,18 +178,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 154,
-        "componentCount": 125,
+        "exportCount": 153,
+        "componentCount": 124,
         "helperCount": 29,
-        "previewedCount": 154,
+        "previewedCount": 153,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 154,
-        "componentCount": 125,
+        "exportCount": 153,
+        "componentCount": 124,
         "helperCount": 29,
-        "previewedCount": 154,
+        "previewedCount": 153,
         "contractOnlyCount": 0
       }
     ],

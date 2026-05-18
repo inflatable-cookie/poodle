@@ -231,8 +231,8 @@ mod tests {
 
     #[test]
     fn full_parity_component_counts() {
-        assert_eq!(SUPPORTED_PRIMITIVES.len(), 61);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 47);
+        assert_eq!(SUPPORTED_PRIMITIVES.len(), 60);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 46);
         assert_eq!(SUPPORTED_WORKSTATION.len(), 13);
     }
 }

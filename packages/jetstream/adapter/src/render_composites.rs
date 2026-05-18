@@ -451,7 +451,7 @@ mod tests {
     #[test] fn app_header() { assert_eq!(a().render(&AppHeaderSpec::default(), &s(), &t()).spec_type, "AppHeaderSpec"); }
     #[test] fn command_palette() { assert_eq!(a().render(&CommandPaletteSpec::default(), &s(), &t()).spec_type, "CommandPaletteSpec"); }
     #[test] fn dock_region() { assert_eq!(a().render(&DockRegionSpec::new(poodle_specs::DockEdge::Left, vec![]), &s(), &t()).spec_type, "DockRegionSpec"); }
-    #[test] fn editable_list() { assert_eq!(a().render(&EditableListSpec::new(), &s(), &t()).spec_type, "EditableListSpec"); }
+    #[test] fn editable_list_spec_type() { assert_eq!(a().render(&EditableListSpec::new(), &s(), &t()).spec_type, "EditableListSpec"); }
     #[test] fn list_container() { assert_eq!(a().render(&ListContainerSpec::default(), &s(), &t()).spec_type, "ListContainerSpec"); }
     #[test] fn media_browse_panel() { assert_eq!(a().render(&MediaBrowsePanelSpec::new(), &s(), &t()).spec_type, "MediaBrowsePanelSpec"); }
     #[test] fn metric_tile() { assert_eq!(a().render(&MetricTileSpec::new("L", "V"), &s(), &t()).spec_type, "MetricTileSpec"); }
