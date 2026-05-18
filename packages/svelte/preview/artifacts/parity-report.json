@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T17:55:10.841Z",
+  "generatedAt": "2026-05-18T08:11:58.479Z",
   "artifact": "packages/svelte/preview/artifacts/parity-report.json",
   "previewBasePath": "/",
   "automatedBoundary": [
@@ -178,18 +178,18 @@
     "summary": [
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 153,
-        "componentCount": 124,
+        "exportCount": 154,
+        "componentCount": 125,
         "helperCount": 29,
-        "previewedCount": 153,
+        "previewedCount": 154,
         "contractOnlyCount": 0
       },
       {
         "packageName": "@poodle/svelte",
-        "exportCount": 153,
-        "componentCount": 124,
+        "exportCount": 154,
+        "componentCount": 125,
         "helperCount": 29,
-        "previewedCount": 153,
+        "previewedCount": 154,
         "contractOnlyCount": 0
       }
     ],
@@ -366,6 +366,19 @@
       {
         "packageName": "@poodle/svelte",
         "exportName": "CardRadioGroup",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@poodle/svelte",
+        "exportName": "CardToggleGroup",
         "kind": "component",
         "status": "previewed",
         "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",

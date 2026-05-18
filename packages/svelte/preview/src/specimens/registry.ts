@@ -15,6 +15,7 @@ import CodeSpecimen from "./CodeSpecimen.svelte";
 import ColorPickerSpecimen from "./ColorPickerSpecimen.svelte";
 import CardSpecimen from "./CardSpecimen.svelte";
 import CardRadioGroupSpecimen from "./CardRadioGroupSpecimen.svelte";
+import CardToggleGroupSpecimen from "./CardToggleGroupSpecimen.svelte";
 import CheckboxSpecimen from "./CheckboxSpecimen.svelte";
 import ConfirmActionSpecimen from "./ConfirmActionSpecimen.svelte";
 import CollapsibleSpecimen from "./CollapsibleSpecimen.svelte";
@@ -141,6 +142,7 @@ export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
   "color-picker": ColorPickerSpecimen,
   card: CardSpecimen,
   "card-radio-group": CardRadioGroupSpecimen,
+  "card-toggle-group": CardToggleGroupSpecimen,
   checkbox: CheckboxSpecimen,
   collapsible: CollapsibleSpecimen,
   "confirm-action": ConfirmActionSpecimen,

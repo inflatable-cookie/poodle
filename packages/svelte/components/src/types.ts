@@ -568,6 +568,14 @@ export type CardRadioItem = {
   disabled?: boolean;
 };
 
+export type CardToggleItem = {
+  value: string;
+  label: string;
+  description?: string | null;
+  count?: string | number | null;
+  disabled?: boolean;
+};
+
 export type EditableListItem = {
   id: string;
   label: string;

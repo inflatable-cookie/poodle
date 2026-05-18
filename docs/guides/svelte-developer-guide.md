@@ -1355,7 +1355,7 @@ interface MenuItem {
 **Browse:** PageHeader, EmptyState, PageLoading
 **Media:** MediaThumbnail, MediaPreview, MediaPicker, AudioPlayer, VideoPlayer, EmbedPreview
 **Editor:** MarkdownEditor, BlockEditor, EditableList
-**Picker:** PickerShell, RelationPicker, CardRadioGroup
+**Picker:** PickerShell, RelationPicker, CardRadioGroup, CardToggleGroup
 **Layout:** SplitView, DockRegion, AppHeader, StatusBar, ResizeHandle
 **Feedback:** ToastStack, LogList
 **Discovery:** CommandPalette, ActionDiscoveryPanel

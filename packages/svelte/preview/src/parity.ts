@@ -635,6 +635,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     exportNames: [
       "BlockEditor",
       "CardRadioGroup",
+      "CardToggleGroup",
       "ConfirmAction",
       "DebugDialog",
       "EditableList",

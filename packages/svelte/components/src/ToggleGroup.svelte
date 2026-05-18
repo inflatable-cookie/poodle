@@ -16,9 +16,10 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     selectionMode?: "single" | "multiple";
+    allowDeactivation?: boolean;
     disabled?: boolean;
     ariaLabel?: string | null;
-    onValueChange?: ((value: string | string[]) => void) | undefined;
+    onValueChange?: ((value: string | string[] | null) => void) | undefined;
   }
 
   let {
@@ -29,6 +30,7 @@
     sizeRole = "control",
     density = null,
     selectionMode = "single",
+    allowDeactivation = false,
     disabled = false,
     ariaLabel = null,
     onValueChange = undefined,
@@ -59,13 +61,15 @@
   }
 
   function toggle(optionValue: string): void {
-    let nextValue: string | string[];
+    let nextValue: string | string[] | null;
 
     if (selectionMode === "multiple") {
       const current = Array.isArray(currentValue) ? currentValue : [];
       nextValue = current.includes(optionValue)
         ? current.filter((item) => item !== optionValue)
         : [...current, optionValue];
+    } else if (allowDeactivation && currentValue === optionValue) {
+      nextValue = null;
     } else {
       nextValue = optionValue;
     }

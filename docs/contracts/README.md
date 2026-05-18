@@ -47,6 +47,7 @@ above it in downstream repos such as Loophole.
 - `components/calendar.md`
 - `components/callout.md`
 - `components/card-radio-group.md`
+- `components/card-toggle-group.md`
 - `components/card.md`
 - `components/checkbox.md`
 - `components/code-input.md`

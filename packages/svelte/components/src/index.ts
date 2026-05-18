@@ -113,6 +113,7 @@ export { default as EditableList } from "./EditableList.svelte";
 export { default as ErrorBoundary } from "./ErrorBoundary.svelte";
 export { default as BlockEditor } from "./BlockEditor.svelte";
 export { default as CardRadioGroup } from "./CardRadioGroup.svelte";
+export { default as CardToggleGroup } from "./CardToggleGroup.svelte";
 export { default as CommandPalette } from "./CommandPalette.svelte";
 export { default as ConfirmAction } from "./ConfirmAction.svelte";
 export { default as DataTable } from "./DataTable.svelte";
@@ -253,6 +254,7 @@ export type {
   BlockTypeItems,
   BrowseState,
   CardRadioItem,
+  CardToggleItem,
   CenterRegionSnapshot,
   CommandActionItem,
   DiscoveryState,

@@ -405,6 +405,38 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <CardRadioGroup {items} bind:value={plan} columns={2} />`,
   },
 
+  "card-toggle-group": {
+    props: [
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "items", type: "CardToggleItem[]", default: "[]", description: "Array of card toggle option items." },
+      { name: "value", type: "string | null", default: "null", description: "Currently selected item value." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Initial uncontrolled value." },
+      { name: "allowDeactivation", type: "boolean", default: "false", description: "Whether selecting the active card clears the value." },
+      { name: "columns", type: "1 | 2 | 3 | 4", default: "2", description: "Number of columns in the grid layout." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle group." },
+      { name: "disabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
+      { name: "onValueChange", type: "((value: string | null) => void) | undefined", default: "undefined", description: "Called when the selected card changes." },
+    ],
+    slots: [
+      { name: "card", description: "Custom card renderer snippet. Receives: item, selected, disabled." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { CardToggleGroup } from "@poodle/svelte";
+
+  const items = [
+    { value: "pending", label: "Pending", description: "Waiting for review", count: 42 },
+    { value: "marked", label: "Marked", description: "Reviewed", count: 128 },
+  ];
+
+  let status = "pending";
+</script>
+
+<CardToggleGroup {items} bind:value={status} columns={2} />`,
+  },
+
   checkbox: {
     props: [
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
@@ -3613,9 +3645,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: '"compact" | "default" | "comfortable" | null', default: "null", description: "Explicit density override for group gap and item padding." },
       { name: "selectionMode", type: '"single" | "multiple"', default: '"single"', description: "Whether one or many toggles can be active." },
+      { name: "allowDeactivation", type: "boolean", default: "false", description: "Whether selecting the active single-mode item clears the value." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the entire group is disabled." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the toggle group." },
-      { name: "onValueChange", type: "((value: string | string[]) => void) | undefined", default: "undefined", description: "Called when the selected value(s) change." },
+      { name: "onValueChange", type: "((value: string | string[] | null) => void) | undefined", default: "undefined", description: "Called when the selected value(s) change." },
     ],
     slots: [],
     events: [],

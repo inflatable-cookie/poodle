@@ -13,7 +13,8 @@ Updated: 2026-03-15
   actions, presented as a wrapping set of pill-shaped items
 - In scope: single and multiple selection modes, grouped labeling, disabled
   items, disabled group, accent-tinted selected state, semantic size roles,
-  density-aware spacing, and explicit `xs | sm | md | lg | xl` size overrides
+  density-aware spacing, explicit `xs | sm | md | lg | xl` size overrides, and
+  opt-in single-select deactivation
 - Out of scope: tab-panel navigation (see Tabs), segmented shell chrome (see
   SegmentedControl), standalone pressed-state buttons (use Button with pressed prop)
 
@@ -42,6 +43,7 @@ Updated: 2026-03-15
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for gap and item padding |
 | `selectionMode` | `"single" \| "multiple"` | `"single"` | no | selection behavior |
+| `allowDeactivation` | `boolean` | `false` | no | in single mode, selecting the active item clears the value to `null` |
 | `disabled` | `boolean` | `false` | no | disables whole group |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label exists |
 
@@ -60,6 +62,8 @@ Updated: 2026-03-15
 - uncontrolled: `defaultValue`
 - In single mode, value is `string | null`
 - In multiple mode, value is `string[]`
+- `allowDeactivation` only changes single mode; multiple mode already allows
+  each item to toggle off independently
 
 ## 4. States
 
@@ -82,7 +86,10 @@ Updated: 2026-03-15
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
-| `onValueChange` | selection changes | `string \| string[]` | payload type matches selectionMode |
+| `onValueChange` | selection changes | `string \| string[] \| null` | payload type matches selectionMode; single mode may emit `null` when deactivation is enabled |
+
+In single mode with `allowDeactivation=true`, `onValueChange` may receive
+`null`.
 
 ## 6. Accessibility
 

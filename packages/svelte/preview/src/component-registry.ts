@@ -142,6 +142,7 @@ export const allComponents: ComponentEntry[] = [
   entry("EditableList", "data", "Editable/reorderable list with add, remove, and drag-and-drop.", true),
   entry("Card", "data", "Contained surface for grouped content.", true),
   entry("CardRadioGroup", "data", "Radio selection across rich card options.", true),
+  entry("CardToggleGroup", "data", "Toggleable selection across rich card options.", true),
   entry("Accordion", "data", "Expandable disclosure panels with single or multiple selection.", true),
   entry("Collapsible", "data", "Show/hide content toggle without accordion grouping.", true),
   entry("OrderBy", "data", "Sort-control toolbar for data views.", true),

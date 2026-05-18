@@ -21,6 +21,7 @@ primitives and layout surfaces through higher-order application components.
 - `calendar.md`
 - `callout.md`
 - `card-radio-group.md`
+- `card-toggle-group.md`
 - `card.md`
 - `checkbox.md`
 - `code-input.md`
