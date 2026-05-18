@@ -94,18 +94,23 @@ impl IntoElement for SelectionSummary {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let spec = &self.spec;
+        let on_remove = self.on_remove;
+        let on_clear = self.on_clear;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let _font_size = rem_to_px(size_font_rem(effective_size));
-        let _item_gap = rem_to_px(control_space_x_rem(spec.density));
+        let font_size = rem_to_px(size_font_rem(effective_size));
 
-        let gap = resolve_px(theme, spec.gap_token());
+        let gap = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.375,
+            ControlDensity::Default => control_space_x_rem(spec.density),
+            ControlDensity::Comfortable => 0.75,
+        }));
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let border = resolve_color(theme, "color.border.subtle");
         let accent = resolve_color(theme, "color.accent.base");
-        let bg = resolve_color(theme, "color.background.surface");
+        let surface = resolve_color(theme, "color.background.surface");
+        let elevated = resolve_color(theme, "color.background.elevated");
 
-        // Svelte: chip font = label-size scale; chip pad-x = size-based; internal gap = space.inline.md
         let chip_font = px(rem_to_px(match effective_size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.71875,
@@ -113,18 +118,63 @@ impl IntoElement for SelectionSummary {
             ControlSize::Lg => 0.8125,
             ControlSize::Xl => 0.875,
         }));
-        let chip_pad_x = px(rem_to_px(match effective_size {
-            ControlSize::Xs => 0.5,
-            ControlSize::Sm => 0.625,
-            ControlSize::Md => 0.75,
-            ControlSize::Lg => 0.875,
-            ControlSize::Xl => 1.0,
+        let chip_pad_x = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.625,
+            ControlDensity::Default => 0.75,
+            ControlDensity::Comfortable => 0.875,
         }));
-        let chip_internal_gap = resolve_px(theme, "space.inline.md");
-        // Svelte: overflow chip px = 0.625rem (10px)
-        let overflow_pad_x = px(rem_to_px(0.625));
+        let overflow_pad_x = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.625,
+            ControlDensity::Comfortable => 0.75,
+        }));
+        let clear_font = px(font_size);
+        let chip_min_h = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 1.0,
+            ControlSize::Sm => 1.125,
+            ControlSize::Md => 1.5,
+            ControlSize::Lg => 1.75,
+            ControlSize::Xl => 2.0,
+        }));
+        let bottom_pad = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.625,
+            ControlDensity::Comfortable => 0.75,
+        }));
+        let chip_internal_gap = gap;
+        let chip_bg = Hsla {
+            a: surface.a * 0.6 + elevated.a * 0.4,
+            ..elevated
+        };
+        let overflow_bg = Hsla {
+            a: surface.a * 0.68 + elevated.a * 0.32,
+            ..elevated
+        };
+        let stacked_border = Hsla {
+            a: border.a * 0.7,
+            ..border
+        };
+        let empty_text = resolve_color(theme, "color.text.tertiary");
 
-        let mut container = div().w_full().flex().flex_wrap().items_center().gap(gap);
+        let mut container = div()
+            .w_full()
+            .flex()
+            .flex_wrap()
+            .items_center()
+            .gap(gap)
+            .pb(bottom_pad)
+            .min_h(chip_min_h);
+
+        if spec.items.is_empty() {
+            return container
+                .child(
+                    div()
+                        .text_size(chip_font)
+                        .text_color(empty_text)
+                        .child("No selection"),
+                )
+                .into_any_element();
+        }
 
         // Selected item pills — clamped by max_visible_items if set.
         let visible_count = spec.visible_item_count();
@@ -137,11 +187,12 @@ impl IntoElement for SelectionSummary {
                 .items_center()
                 .gap(chip_internal_gap)
                 .px(chip_pad_x)
-                .py(px(3.0))
+                .min_h(chip_min_h)
                 .rounded(px(12.0))
-                .bg(bg)
+                .bg(chip_bg)
                 .border_1()
-                .border_color(border);
+                .border_color(stacked_border)
+                .cursor_pointer();
 
             pill = pill.child(
                 div()
@@ -154,7 +205,7 @@ impl IntoElement for SelectionSummary {
                 pill = pill.child(
                     div()
                         .text_size(chip_font)
-                        .text_color(text_secondary.opacity(0.7))
+                        .text_color(text_secondary)
                         .child(meta.clone()),
                 );
             }
@@ -162,11 +213,20 @@ impl IntoElement for SelectionSummary {
             // Remove button on pill
             pill = pill.child(
                 div()
-                    .cursor_pointer()
                     .text_size(chip_font)
                     .text_color(text_secondary)
                     .child("\u{2715}"),
             );
+
+            if let Some(ref handler) = on_remove {
+                let handler_ptr =
+                    handler as *const Box<dyn Fn(&str, &ClickEvent, &mut Window, &mut App)>;
+                let item_id = item.id.clone();
+                pill = pill.on_click(move |event, window, cx| {
+                    let handler = unsafe { &*handler_ptr };
+                    handler(&item_id, event, window, cx);
+                });
+            }
 
             container = container.child(pill);
         }
@@ -179,11 +239,11 @@ impl IntoElement for SelectionSummary {
                     .flex()
                     .items_center()
                     .px(overflow_pad_x)
-                    .py(px(3.0))
+                    .min_h(chip_min_h)
                     .rounded(px(12.0))
-                    .bg(bg)
+                    .bg(overflow_bg)
                     .border_1()
-                    .border_color(border)
+                    .border_color(stacked_border)
                     .text_size(chip_font)
                     .text_color(text_secondary)
                     .child(format!("+{overflow} more")),
@@ -194,15 +254,16 @@ impl IntoElement for SelectionSummary {
         if spec.has_clear_action() {
             if let Some(ref clear_action) = spec.clear_action {
                 let clear_id = SharedString::from("selection-summary-clear");
-                let mut clear_btn = div()
-                    .id(clear_id)
-                    .cursor_pointer()
-                    .text_size(chip_font)
-                    .font_weight(FontWeight::MEDIUM)
-                    .text_color(accent)
-                    .child(clear_action.label.clone());
+                let mut clear_btn = div().id(clear_id).flex().flex_grow().child(
+                    div()
+                        .cursor_pointer()
+                        .text_size(clear_font)
+                        .font_weight(FontWeight::MEDIUM)
+                        .text_color(accent)
+                        .child(clear_action.label.clone()),
+                );
 
-                if let Some(handler) = self.on_clear {
+                if let Some(handler) = on_clear {
                     clear_btn =
                         clear_btn.on_click(move |event, window, cx| handler(event, window, cx));
                 }

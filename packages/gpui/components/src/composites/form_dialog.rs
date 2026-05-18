@@ -154,7 +154,6 @@ impl IntoElement for FormDialog {
         let accent = resolve_color(theme, "color.accent.base");
         let panel_bg = resolve_color(theme, "color.background.panel");
         let control_radius = resolve_radius(theme, "radius.control");
-        let actions_gap = resolve_px(theme, "space.inline.sm");
         let body_size = resolve_px(theme, "typography.body.size");
 
         // Compose with Dialog primitive — title/description handled by Dialog
@@ -214,7 +213,7 @@ impl IntoElement for FormDialog {
 
         // Actions: custom slot > default row > nothing.
         if let Some(custom) = self.custom_actions {
-            dialog = dialog.with_actions(custom);
+            dialog = dialog.with_footer(div().w_full().child(custom));
         } else if self.show_default_actions {
             // Cancel button — text-style action
             let mut cancel_btn = div()
@@ -281,7 +280,7 @@ impl IntoElement for FormDialog {
                 .flex()
                 .flex_row()
                 .flex_wrap()
-                .gap(actions_gap)
+                .gap(resolve_px(theme, "space.inline.sm"))
                 .justify_end()
                 .child(cancel_btn)
                 .child(submit_btn);

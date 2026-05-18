@@ -1,7 +1,7 @@
 # PickerShell
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -73,8 +73,8 @@ consequences.
 | `ariaLabel` | `string \| null` | `null` | no | Accessible name for the `<section>` |
 | `resultCount` | `number \| null` | `null` | no | Displayed in meta area as "{n} results" |
 | `selectionCount` | `number` | `0` | no | Displayed in meta area as "{n} selected" |
-| `stateTitle` | `string \| null` | `null` | no | Heading shown in state area when `state!="ready"`; defaults to "Picker state" when not provided |
-| `stateMessage` | `string \| null` | `null` | no | Description shown in state area |
+| `stateTitle` | `string \| null` | `null` | no | Heading shown in state area when `state!="ready"`; otherwise falls back by state (`"Loading results"`, `"Something went wrong"`, `"Nothing here yet"`, `"No results"`) |
+| `stateMessage` | `string \| null` | `null` | no | Description shown in state area; otherwise falls back by state (`"Searching…"`, `"Search failed."`, `"No items are available yet."`, `"No results found."`) |
 | `statusText` | `string \| null` | `null` | no | Live-region status text for screen readers |
 | `statusId` | `string \| null` | `null` | no | DOM id for the status element (for `aria-describedby`) |
 
@@ -98,10 +98,10 @@ controls which region is visible (body vs state area).
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | ready | `state="ready"` | Body snippet visible with candidate content |
-| empty | `state="empty"` | State area shown with fallback title/message |
-| loading | `state="loading"` | State area shown with Spinner (`variant="grid"`, `tone="accent"`) and loading message |
-| error | `state="error"` | State area shown with error message |
-| no-results | `state="no-results"` | State area shown with no-results message |
+| empty | `state="empty"` | State area shown with fallback title `"Nothing here yet"` and fallback message `"No items are available yet."` when explicit copy is absent |
+| loading | `state="loading"` | State area shown with Spinner (`variant="grid"`, `tone="accent"`), fallback title `"Loading results"`, and fallback message `"Searching…"` when explicit copy is absent |
+| error | `state="error"` | State area shown with fallback title `"Something went wrong"` and fallback message `"Search failed."` when explicit copy is absent |
+| no-results | `state="no-results"` | State area shown with fallback title `"No results"` and fallback message `"No results found."` when explicit copy is absent |
 
 No internal component state. PickerShell is a layout container.
 

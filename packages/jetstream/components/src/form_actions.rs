@@ -8,12 +8,18 @@ use crate::theme_ext::resolve_px;
 
 pub fn js_form_actions(spec: &FormActionsSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
     let gap = resolve_px(theme, spec.action_gap_token());
+    let separation = if spec.shows_top_separation() {
+        resolve_px(theme, spec.stack_separation_token())
+    } else {
+        0.0
+    };
 
     let mut el = ui_element::div()
         .flex_row()
         .items_center()
         .gap(gap)
-        .flex_wrap();
+        .flex_wrap()
+        .pt(separation);
 
     match spec.align {
         FormActionAlign::Start => {}

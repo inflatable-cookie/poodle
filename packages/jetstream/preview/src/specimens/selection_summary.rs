@@ -4,28 +4,79 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::selection_summary::js_selection_summary;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{SelectionSummaryItem, SelectionSummarySpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, RemediationAction, SelectionSummaryItem, SelectionSummarySpec,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     let items = vec![
-        SelectionSummaryItem::new("a", "Approval still"),
-        SelectionSummaryItem::new("b", "Stem waveform"),
-        SelectionSummaryItem::new("c", "Final mix"),
+        SelectionSummaryItem::new("a", "Approval still").with_meta("Image"),
+        SelectionSummaryItem::new("b", "Stem waveform").with_meta("Audio"),
+        SelectionSummaryItem::new("c", "Final mix").with_meta("Video"),
+        SelectionSummaryItem::new("d", "Lyrics sheet").with_meta("Document"),
     ];
 
     div().flex_col().gap(24.0)
         .child(group("Multiple selections", secondary,
-            js_selection_summary(&SelectionSummarySpec::new(items), theme)
+            js_selection_summary(
+                &SelectionSummarySpec::new(items.clone())
+                    .with_clear_action(RemediationAction::new("clear", "Clear")),
+                theme,
+            )
         ))
         .child(group("Single selection", secondary,
             js_selection_summary(
                 &SelectionSummarySpec::new(vec![
-                    SelectionSummaryItem::new("x", "Selected item"),
+                    SelectionSummaryItem::new("x", "Selected item").with_meta("Primary"),
                 ]),
                 theme,
             )
+        ))
+        .child(group("Truncated", secondary,
+            js_selection_summary(
+                &SelectionSummarySpec::new(items.clone())
+                    .with_max_visible_items(2)
+                    .with_clear_action(RemediationAction::new("clear", "Clear")),
+                theme,
+            )
+        ))
+        .child(group("Sizes", secondary,
+            div().flex_col().gap(12.0)
+                .child(js_selection_summary(
+                    &SelectionSummarySpec::new(items[..3].to_vec())
+                        .with_size(ControlSize::Sm),
+                    theme,
+                ))
+                .child(js_selection_summary(
+                    &SelectionSummarySpec::new(items[..3].to_vec())
+                        .with_size(ControlSize::Md),
+                    theme,
+                ))
+                .child(js_selection_summary(
+                    &SelectionSummarySpec::new(items[..3].to_vec())
+                        .with_size(ControlSize::Lg),
+                    theme,
+                ))
+        ))
+        .child(group("Densities", secondary,
+            div().flex_col().gap(12.0)
+                .child(js_selection_summary(
+                    &SelectionSummarySpec::new(items[..3].to_vec())
+                        .with_density(ControlDensity::Compact),
+                    theme,
+                ))
+                .child(js_selection_summary(
+                    &SelectionSummarySpec::new(items[..3].to_vec())
+                        .with_density(ControlDensity::Default),
+                    theme,
+                ))
+                .child(js_selection_summary(
+                    &SelectionSummarySpec::new(items[..3].to_vec())
+                        .with_density(ControlDensity::Comfortable),
+                    theme,
+                ))
         ))
 }
 

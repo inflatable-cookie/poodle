@@ -1,7 +1,7 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SortDirection {
     Asc,
     Desc,
@@ -16,22 +16,40 @@ impl Default for SortDirection {
 #[derive(Clone, Debug)]
 pub struct SortField {
     pub value: String,
+    pub key: Option<String>,
     pub label: String,
     pub is_disabled: bool,
+    pub default_direction: SortDirection,
 }
 
 impl SortField {
     pub fn new(value: impl Into<String>, label: impl Into<String>) -> Self {
         Self {
             value: value.into(),
+            key: None,
             label: label.into(),
             is_disabled: false,
+            default_direction: SortDirection::Asc,
         }
+    }
+
+    pub fn with_key(mut self, key: impl Into<String>) -> Self {
+        self.key = Some(key.into());
+        self
     }
 
     pub fn with_disabled(mut self, disabled: bool) -> Self {
         self.is_disabled = disabled;
         self
+    }
+
+    pub fn with_default_direction(mut self, default_direction: SortDirection) -> Self {
+        self.default_direction = default_direction;
+        self
+    }
+
+    pub fn resolved_key(&self) -> &str {
+        self.key.as_deref().unwrap_or(&self.value)
     }
 }
 
@@ -50,34 +68,60 @@ impl ActiveSort {
     }
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct OrderByField {
+    pub key: String,
+    pub direction: SortDirection,
+}
+
+impl OrderByField {
+    pub fn new(key: impl Into<String>, direction: SortDirection) -> Self {
+        Self {
+            key: key.into(),
+            direction,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct OrderBySpec {
     pub fields: Vec<SortField>,
+    pub value: Vec<OrderByField>,
     pub active_sort: Option<ActiveSort>,
     pub aria_label: String,
     pub is_disabled: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    pub max_fields: Option<usize>,
+    pub compact: bool,
+    pub is_open: bool,
 }
 
 impl OrderBySpec {
     pub fn new() -> Self {
         Self {
             fields: Vec::new(),
+            value: Vec::new(),
             active_sort: None,
             aria_label: "Sort by".to_string(),
             is_disabled: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            max_fields: None,
+            compact: false,
+            is_open: false,
         }
     }
 
-    // Builder methods
-
     pub fn with_fields(mut self, fields: Vec<SortField>) -> Self {
         self.fields = fields;
+        self
+    }
+
+    pub fn with_value(mut self, value: Vec<OrderByField>) -> Self {
+        self.value = value;
         self
     }
 
@@ -96,20 +140,105 @@ impl OrderBySpec {
         self
     }
 
-    // Helper methods
+    pub fn with_max_fields(mut self, max_fields: usize) -> Self {
+        self.max_fields = Some(max_fields);
+        self
+    }
 
-    pub fn is_field_active(&self, value: &str) -> bool {
+    pub fn with_compact(mut self, compact: bool) -> Self {
+        self.compact = compact;
+        self
+    }
+
+    pub fn with_open(mut self, is_open: bool) -> Self {
+        self.is_open = is_open;
+        self
+    }
+
+    pub fn normalized_fields(&self) -> Vec<SortField> {
+        self.fields
+            .iter()
+            .filter(|field| !field.resolved_key().trim().is_empty())
+            .cloned()
+            .collect()
+    }
+
+    pub fn current_value(&self) -> Vec<OrderByField> {
+        if !self.value.is_empty() {
+            return self.value.clone();
+        }
+
         self.active_sort
             .as_ref()
-            .map(|s| s.field == value)
-            .unwrap_or(false)
+            .map(|active| {
+                vec![OrderByField::new(
+                    active.field.clone(),
+                    active.direction.clone(),
+                )]
+            })
+            .unwrap_or_default()
     }
 
-    pub fn active_direction(&self) -> Option<&SortDirection> {
-        self.active_sort.as_ref().map(|s| &s.direction)
+    pub fn has_value(&self) -> bool {
+        !self.current_value().is_empty()
     }
 
-    // Token methods
+    pub fn active_count(&self) -> usize {
+        self.current_value().len()
+    }
+
+    pub fn available_fields(&self) -> Vec<SortField> {
+        let active_keys = self
+            .current_value()
+            .into_iter()
+            .map(|item| item.key)
+            .collect::<Vec<_>>();
+
+        self.normalized_fields()
+            .into_iter()
+            .filter(|field| !active_keys.iter().any(|key| key == field.resolved_key()))
+            .collect()
+    }
+
+    pub fn active_label(&self, key: &str) -> String {
+        self.normalized_fields()
+            .into_iter()
+            .find(|field| field.resolved_key() == key)
+            .map(|field| field.label)
+            .unwrap_or_else(|| key.to_string())
+    }
+
+    pub fn active_direction(&self, key: &str) -> Option<SortDirection> {
+        self.current_value()
+            .iter()
+            .find(|item| item.key == key)
+            .map(|item| item.direction.clone())
+    }
+
+    pub fn summary_text(&self) -> String {
+        let value = self.current_value();
+        if value.is_empty() {
+            return "Sort by...".to_string();
+        }
+
+        let render_item = |item: &OrderByField| {
+            format!(
+                "{} {}",
+                self.active_label(&item.key),
+                match item.direction {
+                    SortDirection::Asc => "↑",
+                    SortDirection::Desc => "↓",
+                }
+            )
+        };
+
+        if self.compact && value.len() > 2 {
+            let head = value.iter().take(2).map(render_item).collect::<Vec<_>>();
+            return format!("{} +{}", head.join(", "), value.len() - 2);
+        }
+
+        value.iter().map(render_item).collect::<Vec<_>>().join(", ")
+    }
 
     pub fn label_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY

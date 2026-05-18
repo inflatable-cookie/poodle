@@ -33,6 +33,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 btn("Save", ButtonVariant::Primary),
             ])
         ))
+        .child(group("Dialog footer custom actions", secondary,
+            js_form_actions(&FormActionsSpec::new().with_top_separation(false), theme, vec![
+                btn("Cancel", ButtonVariant::Ghost),
+                btn("Reset defaults", ButtonVariant::Secondary),
+                btn("Save changes", ButtonVariant::Primary),
+            ])
+        ))
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

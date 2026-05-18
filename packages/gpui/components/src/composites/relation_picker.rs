@@ -1,31 +1,18 @@
-//! RelationPicker — real GPUI component backed by RelationPickerSpec.
+//! RelationPicker — GPUI relation picker backed by RelationPickerSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    BrowseState, DrillDownItem, PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode,
-};
-use poodle_specs::{
-    ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole, SpinnerSize,
-    SpinnerSpec, SpinnerTone, SpinnerVariant,
+    BrowseState, ButtonVariant, CheckboxSpec, ControlDensity, ControlSize, DrillDownItem,
+    PickerItemSpec, PickerVariant, RelationPickerSpec, SelectionMode, SemanticControlSizeRole,
 };
 use std::rc::Rc;
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
-use crate::primitives::{Icon, Spinner};
+use super::{PickerShell, SelectionSummary};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::primitives::{Button, Checkbox, Icon};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
-/// A real GPUI relation picker component backed by `RelationPickerSpec`.
-///
-/// Renders an entity relationship picker that shows items with selection state,
-/// an optional search field, and checkmarks for selected items.
-/// Argument passed to `on_drill_enter` — pairs the zero-based level
-/// index with the clicked drill-down item id. Packed into a struct so
-/// it can flow through a `cx.listener(|this, arg, w, cx|)` closure.
 #[derive(Clone, Debug)]
 pub struct DrillEnterArgs {
     pub level_index: usize,
@@ -37,12 +24,7 @@ pub struct RelationPicker {
     theme: GpuiThemeProvider,
     on_select: Option<Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
     on_breadcrumb_click: Option<Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
-    /// Fired when the user clicks a drill-down row at a non-leaf level.
     on_drill_enter: Option<Rc<dyn Fn(&DrillEnterArgs, &mut Window, &mut App) + 'static>>,
-    /// Legacy per-component drill path (pre-contract drill-down support).
-    /// Kept so existing callers that use `.with_drill_path(...)` still
-    /// render breadcrumbs the same way.
-    drill_path: Vec<String>,
 }
 
 impl std::ops::Deref for RelationPicker {
@@ -54,14 +36,7 @@ impl std::ops::Deref for RelationPicker {
 
 impl RelationPicker {
     pub fn new(items: Vec<PickerItemSpec>, theme: &GpuiThemeProvider) -> Self {
-        Self {
-            spec: RelationPickerSpec::new(items),
-            theme: theme.clone(),
-            on_select: None,
-            on_breadcrumb_click: None,
-            on_drill_enter: None,
-            drill_path: Vec::new(),
-        }
+        Self::from_spec(RelationPickerSpec::new(items), theme)
     }
 
     pub fn from_spec(spec: RelationPickerSpec, theme: &GpuiThemeProvider) -> Self {
@@ -71,11 +46,9 @@ impl RelationPicker {
             on_select: None,
             on_breadcrumb_click: None,
             on_drill_enter: None,
-            drill_path: Vec::new(),
         }
     }
 
-    // ── Forwarded spec builders ───────────────────────────────
     pub fn items(mut self, v: Vec<PickerItemSpec>) -> Self {
         self.spec.items = v;
         self
@@ -100,10 +73,6 @@ impl RelationPicker {
         self.spec.state = v;
         self
     }
-    pub fn with_drill_path(mut self, path: Vec<String>) -> Self {
-        self.drill_path = path;
-        self
-    }
     pub fn with_size(mut self, v: ControlSize) -> Self {
         self.spec.size = v;
         self
@@ -125,10 +94,6 @@ impl RelationPicker {
         self
     }
 
-    /// Fired when a breadcrumb segment is clicked. The argument is the
-    /// target depth the user wants to return to (0 = root).
-    /// Signature matches `cx.listener` so specimen code can pass it
-    /// directly.
     pub fn on_breadcrumb_click(
         mut self,
         handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
@@ -137,11 +102,6 @@ impl RelationPicker {
         self
     }
 
-    /// Fired when the user clicks a drill-down row at a non-leaf level.
-    /// The handler receives the level index and the clicked item id
-    /// packed into a `DrillEnterArgs` so it flows cleanly through
-    /// `cx.listener(...)`, and is responsible for pushing the new id
-    /// onto `spec.drill_down_path`.
     pub fn on_drill_enter(
         mut self,
         handler: impl Fn(&DrillEnterArgs, &mut Window, &mut App) + 'static,
@@ -158,423 +118,392 @@ impl IntoElement for RelationPicker {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let panel_px = rem_to_px(panel_space_x_rem(spec.density));
-        let _panel_py = rem_to_px(panel_space_y_rem(spec.density));
-        let item_gap = rem_to_px(control_space_x_rem(spec.density));
-
-        let inline_padding = px(panel_px);
-        let inline_gap = px(item_gap);
-        let body_size = px(font_size);
-        let control_radius = resolve_radius(theme, "radius.control");
+        let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = resolve_px(theme, "typography.label.size");
-        let gap_sm = resolve_px(theme, "space.inline.sm");
-        let menu_max_h = resolve_px(theme, "size.menu.maxHeight");
-
+        let gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        let row_gap = px(rem_to_px(0.125));
+        let pad_x = px(rem_to_px(0.75));
+        let pad_y = px(rem_to_px(0.5));
+        let border = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let border = resolve_color(theme, "color.border.subtle");
-        let bg = resolve_color(theme, "color.background.elevated");
+        let surface = resolve_color(theme, "color.background.surface");
+        let elevated = resolve_color(theme, "color.background.elevated");
         let accent = resolve_color(theme, "color.accent.base");
+        let radius = resolve_radius(theme, "radius.control");
 
-        let mut container = div()
-            .flex()
-            .flex_col()
-            .bg(bg)
-            .border_1()
-            .border_color(border)
-            .rounded(control_radius)
-            .overflow_hidden();
+        let mut search_col = div().flex().flex_col().gap(gap);
 
-        // Drill-down breadcrumb navigation — prefer the spec-backed
-        // path when drill-down config is present; otherwise fall back
-        // to the legacy component-local `drill_path` field.
-        let breadcrumb_segments: Vec<String> = if let Some(ref dd) = spec.drill_down {
-            spec.drill_down_path
-                .iter()
-                .enumerate()
-                .map(|(level_idx, item_id)| {
-                    let level = dd.levels.get(level_idx);
-                    level
-                        .and_then(|l| l.items.iter().find(|i| &i.id == item_id))
-                        .map(|i| i.label.clone())
-                        .unwrap_or_else(|| item_id.clone())
-                })
-                .collect()
-        } else {
-            self.drill_path.clone()
-        };
+        if let Some(ref drill_down) = spec.drill_down {
+            if !spec.drill_down_path.is_empty() {
+                let mut crumbs = div().flex().items_center().gap(px(rem_to_px(0.25)));
 
-        if !breadcrumb_segments.is_empty() {
-            let mut breadcrumb_row = div()
-                .w_full()
-                .flex()
-                .items_center()
-                .gap(gap_sm)
-                .px(inline_padding)
-                .py(px(6.0))
-                .border_b_1()
-                .border_color(border);
-
-            // Root label
-            {
-                let mut root_el = div()
-                    .id("relation-picker-breadcrumb-root")
-                    .text_size(label_size)
-                    .text_color(text_secondary)
-                    .cursor_pointer()
-                    .child("Root");
+                let mut back = Button::from_spec(
+                    poodle_specs::ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(ControlSize::Sm)
+                        .with_leading_icon("chevron-left")
+                        .with_label("Back"),
+                    theme,
+                );
                 if let Some(ref handler) = self.on_breadcrumb_click {
                     let handler = handler.clone();
-                    root_el = root_el.on_click(move |_ev, win, app| {
-                        handler(&0, win, app);
-                    });
+                    let depth = spec.drill_down_path.len().saturating_sub(1);
+                    back = back.on_click(move |_event, window, cx| handler(&depth, window, cx));
                 }
-                breadcrumb_row = breadcrumb_row.child(root_el);
-            }
+                crumbs = crumbs.child(back);
 
-            for (idx, segment) in breadcrumb_segments.iter().enumerate() {
-                // Chevron separator
-                breadcrumb_row = breadcrumb_row.child(
-                    Icon::from_spec(
-                        IconSpec::new("chevron-right").with_size(IconSize::Sm),
-                        &self.theme,
-                    )
-                    .with_color(text_secondary.opacity(0.6)),
-                );
+                for (idx, item_id) in spec.drill_down_path.iter().enumerate() {
+                    let label = drill_down
+                        .levels
+                        .get(idx)
+                        .and_then(|level| level.items.iter().find(|item| item.id == *item_id))
+                        .map(|item| item.label.clone())
+                        .unwrap_or_else(|| item_id.clone());
 
-                // Segment label
-                let seg_id = SharedString::from(format!("relation-picker-breadcrumb-{}", idx));
-                let mut seg_el = div()
-                    .id(seg_id)
-                    .text_size(label_size)
-                    .text_color(text_primary)
-                    .cursor_pointer()
-                    .child(segment.clone());
-                if let Some(ref handler) = self.on_breadcrumb_click {
-                    let handler = handler.clone();
-                    let depth = idx + 1;
-                    seg_el = seg_el.on_click(move |_ev, win, app| {
-                        handler(&depth, win, app);
-                    });
-                }
-                breadcrumb_row = breadcrumb_row.child(seg_el);
-            }
-
-            container = container.child(breadcrumb_row);
-        }
-
-        // Search area (if query exists)
-        if !spec.query.is_empty() {
-            container = container.child(
-                div()
-                    .w_full()
-                    .px(inline_padding)
-                    .py(px(8.0))
-                    .border_b_1()
-                    .border_color(border)
-                    .text_size(body_size)
-                    .text_color(text_primary)
-                    .child(format!("Search: {}", spec.query)),
-            );
-        }
-
-        // State-dependent content
-        match spec.state {
-            BrowseState::Loading => {
-                container = container.child(
-                    div()
-                        .w_full()
-                        .flex()
-                        .flex_col()
-                        .items_center()
-                        .justify_center()
-                        .gap(px(8.0))
-                        .py(px(24.0))
-                        .child(Spinner::from_spec(
-                            SpinnerSpec::new()
-                                .with_variant(SpinnerVariant::Grid)
-                                .with_size(SpinnerSize::Sm)
-                                .with_tone(SpinnerTone::Accent),
-                            theme,
-                        ))
+                    crumbs = crumbs
                         .child(
-                            div()
-                                .text_size(body_size)
-                                .text_color(text_secondary)
-                                .child("Loading\u{2026}"),
-                        ),
-                );
-            }
-            BrowseState::Error => {
-                container = container.child(
-                    div()
-                        .w_full()
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .py(px(24.0))
-                        .child(
-                            div()
-                                .text_size(body_size)
-                                .text_color(resolve_color(theme, "color.status.danger"))
-                                .child("Failed to load items."),
-                        ),
-                );
-            }
-            BrowseState::Empty | BrowseState::NoResults => {
-                container = container.child(
-                    div()
-                        .w_full()
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .py(px(24.0))
-                        .child(
-                            div()
-                                .text_size(body_size)
-                                .text_color(text_secondary)
-                                .child("No items found."),
-                        ),
-                );
-            }
-            BrowseState::Ready => {
-                // Drill-down mode: render either the next level's
-                // DrillDownItem rows or the current leaf PickerItemSpecs.
-                if let Some(ref dd) = spec.drill_down {
-                    if !dd.is_at_leaf(&spec.drill_down_path) {
-                        let level_idx = spec.drill_down_path.len();
-                        let level_items: &[DrillDownItem] = dd
-                            .next_level(&spec.drill_down_path)
-                            .map(|l| l.items.as_slice())
-                            .unwrap_or(&[]);
-
-                        let mut list = div()
-                            .id("relation-picker-drill-list")
-                            .w_full()
-                            .flex()
-                            .flex_col()
-                            .max_h(menu_max_h)
-                            .overflow_y_scroll();
-
-                        for item in level_items {
-                            let row_id = SharedString::from(format!(
-                                "relation-picker-drill-{}-{}",
-                                level_idx, item.id
-                            ));
-                            let mut row = div()
-                                .id(row_id)
-                                .w_full()
-                                .flex()
-                                .items_center()
-                                .gap(inline_gap)
-                                .px(inline_padding)
-                                .py(px(6.0))
-                                .cursor_pointer()
-                                .border_b_1()
-                                .border_color(border.opacity(0.3));
-
-                            let mut content = div().flex().flex_col().gap(px(1.0)).flex_grow();
-                            content = content.child(
-                                div()
-                                    .text_size(body_size)
-                                    .text_color(text_primary)
-                                    .child(item.label.clone()),
-                            );
-                            if let Some(ref desc) = item.description {
-                                content = content.child(
-                                    div()
-                                        .text_size(label_size)
-                                        .text_color(text_secondary)
-                                        .child(desc.clone()),
-                                );
-                            }
-                            row = row.child(content);
-
-                            if let Some(count) = item.count {
-                                row = row.child(
-                                    div()
-                                        .text_size(label_size)
-                                        .text_color(text_secondary.opacity(0.7))
-                                        .child(format!("{} items", count)),
-                                );
-                            }
-
-                            // Chevron pointing into the next level
-                            row = row.child(
-                                Icon::from_spec(
-                                    IconSpec::new("chevron-right").with_size(IconSize::Sm),
-                                    theme,
-                                )
-                                .with_color(text_secondary),
-                            );
-
-                            if let Some(ref handler) = self.on_drill_enter {
-                                let handler = handler.clone();
-                                let id = item.id.clone();
-                                let level_copy = level_idx;
-                                row = row.on_click(move |_ev, win, app| {
-                                    let args = DrillEnterArgs {
-                                        level_index: level_copy,
-                                        item_id: id.clone(),
-                                    };
-                                    handler(&args, win, app);
-                                });
-                            }
-
-                            list = list.child(row);
-                        }
-
-                        container = container.child(list);
-                        container = container.child(
-                            div()
-                                .w_full()
-                                .flex()
-                                .items_center()
-                                .px(inline_padding)
-                                .py(px(6.0))
-                                .border_t_1()
-                                .border_color(border)
-                                .child(
-                                    div()
-                                        .text_size(label_size)
-                                        .text_color(text_secondary)
-                                        .child(format!(
-                                            "{} {}",
-                                            level_items.len(),
-                                            dd.levels
-                                                .get(level_idx)
-                                                .map(|l| l.label.to_lowercase())
-                                                .unwrap_or_else(|| "items".to_string())
-                                        )),
-                                ),
-                        );
-                        return container.into_any_element();
-                    }
-                    // At a leaf: fall through to the regular item loop
-                    // below, but using the leaf group's items instead
-                    // of the top-level `spec.items`.
-                }
-
-                // Compute the source slice once: leaf items in drill-down
-                // mode, otherwise the top-level spec items.
-                let source_items: &[PickerItemSpec] = if let Some(ref dd) = spec.drill_down {
-                    dd.leaf_items_for(&spec.drill_down_path)
-                } else {
-                    spec.items.as_slice()
-                };
-
-                // Item list
-                let mut list = div()
-                    .id("relation-picker-list")
-                    .w_full()
-                    .flex()
-                    .flex_col()
-                    .max_h(menu_max_h)
-                    .overflow_y_scroll();
-
-                for item in source_items {
-                    let is_selected = spec.selected_ids.iter().any(|sid| sid == &item.id);
-
-                    let item_id = SharedString::from(format!("relation-picker-{}", item.id));
-
-                    let mut item_el = div()
-                        .id(item_id)
-                        .w_full()
-                        .flex()
-                        .items_center()
-                        .gap(inline_gap)
-                        .px(inline_padding)
-                        .py(px(6.0))
-                        .cursor_pointer()
-                        .border_b_1()
-                        .border_color(border.opacity(0.3))
-                        .when(is_selected, |el| el.bg(accent.opacity(0.08)));
-
-                    // Selection indicator
-                    let check = if is_selected { "\u{2713}" } else { "\u{25CB}" };
-                    item_el = item_el.child(
-                        div()
-                            .text_size(body_size)
-                            .text_color(if is_selected { accent } else { text_secondary })
-                            .child(check),
-                    );
-
-                    // Item content
-                    let mut item_content = div().flex().flex_col().gap(px(1.0)).flex_grow();
-
-                    item_content = item_content.child(
-                        div()
-                            .text_size(body_size)
-                            .text_color(text_primary)
-                            .child(item.label.clone()),
-                    );
-
-                    if let Some(ref desc) = item.description {
-                        item_content = item_content.child(
                             div()
                                 .text_size(label_size)
                                 .text_color(text_secondary)
-                                .child(desc.clone()),
-                        );
-                    }
-
-                    item_el = item_el.child(item_content);
-
-                    // Meta
-                    if let Some(ref meta) = item.meta {
-                        item_el = item_el.child(
-                            div()
-                                .text_size(label_size)
-                                .text_color(text_secondary.opacity(0.7))
-                                .child(meta.clone()),
-                        );
-                    }
-
-                    if let Some(ref handler) = self.on_select {
-                        let handler = handler.clone();
-                        let id = item.id.clone();
-                        item_el = item_el.on_click(move |ev, win, app| {
-                            handler(&id, ev, win, app);
-                        });
-                    }
-
-                    list = list.child(item_el);
+                                .child("/"),
+                        )
+                        .child(div().text_size(label_size).text_color(accent).child(label));
                 }
 
-                container = container.child(list);
+                search_col = search_col.child(crumbs);
+            }
+
+            if !drill_down.is_at_leaf(&spec.drill_down_path) {
+                if let Some(level) = drill_down.next_level(&spec.drill_down_path) {
+                    search_col = search_col.child(
+                        div()
+                            .text_size(label_size)
+                            .text_color(text_secondary)
+                            .child(level.label.to_uppercase()),
+                    );
+                }
             }
         }
 
-        // Footer with count — use leaf items when drilled all the
-        // way in, or the top-level items otherwise.
-        let count = spec.selected_item_count();
-        let total_for_footer = if let Some(ref dd) = spec.drill_down {
-            if dd.is_at_leaf(&spec.drill_down_path) {
-                dd.leaf_items_for(&spec.drill_down_path).len()
-            } else {
-                spec.items.len()
-            }
-        } else {
-            spec.items.len()
-        };
-        container = container.child(
+        search_col = search_col.child(
             div()
                 .w_full()
+                .px(pad_x)
+                .py(pad_y)
+                .rounded(radius)
+                .border_1()
+                .border_color(border)
+                .bg(surface)
                 .flex()
                 .items_center()
-                .px(inline_padding)
-                .py(px(6.0))
-                .border_t_1()
-                .border_color(border)
+                .gap(gap)
+                .child(
+                    Icon::from_spec(
+                        poodle_specs::IconSpec::new("search").with_size(poodle_specs::IconSize::Sm),
+                        theme,
+                    )
+                    .with_color(text_secondary),
+                )
                 .child(
                     div()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child(format!("{} of {} selected", count, total_for_footer)),
+                        .text_size(body_size)
+                        .text_color(if spec.query.is_empty() {
+                            text_secondary
+                        } else {
+                            text_primary
+                        })
+                        .child(if spec.query.is_empty() {
+                            "Search…".to_string()
+                        } else {
+                            spec.query.clone()
+                        }),
                 ),
         );
 
-        container.into_any_element()
+        let selection_items = spec.selection_summary_items();
+        let selection_el = if !selection_items.is_empty() {
+            Some(
+                SelectionSummary::from_spec(
+                    poodle_specs::SelectionSummarySpec::new(selection_items)
+                        .with_clear_action(poodle_specs::RemediationAction::new("clear", "Clear")),
+                    theme,
+                )
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density)
+                .into_any_element(),
+            )
+        } else {
+            None
+        };
+
+        let content = if spec.state != BrowseState::Ready {
+            None
+        } else if spec.drill_down.is_some()
+            && spec
+                .drill_down
+                .as_ref()
+                .map(|dd| !dd.is_at_leaf(&spec.drill_down_path))
+                .unwrap_or(false)
+        {
+            let drill_items = spec.drill_items();
+            let mut list = div().flex().flex_col().gap(row_gap);
+            for item in drill_items {
+                let mut row = drill_row(
+                    &item,
+                    theme,
+                    body_size,
+                    label_size,
+                    gap,
+                    pad_x,
+                    pad_y,
+                    border,
+                    text_primary,
+                    text_secondary,
+                    surface,
+                    elevated,
+                    radius,
+                );
+                if let Some(ref handler) = self.on_drill_enter {
+                    let handler = handler.clone();
+                    let args = DrillEnterArgs {
+                        level_index: spec.drill_down_path.len(),
+                        item_id: item.id.clone(),
+                    };
+                    row = row.on_click(move |_event, window, cx| handler(&args, window, cx));
+                }
+                list = list.child(row);
+            }
+            Some(list.into_any_element())
+        } else {
+            let mut list = div().flex().flex_col().gap(row_gap);
+            for item in spec.current_items() {
+                let is_selected = spec
+                    .selected_ids
+                    .iter()
+                    .any(|selected| selected == &item.id);
+                let mut row = candidate_row(
+                    &item,
+                    is_selected,
+                    spec.selection_mode,
+                    theme,
+                    body_size,
+                    label_size,
+                    gap,
+                    pad_x,
+                    pad_y,
+                    border,
+                    text_primary,
+                    text_secondary,
+                    surface,
+                    elevated,
+                    accent,
+                    radius,
+                    spec.size,
+                    spec.size_role,
+                    spec.density,
+                );
+                if let Some(ref handler) = self.on_select {
+                    let handler = handler.clone();
+                    let item_id = item.id.clone();
+                    row =
+                        row.on_click(move |event, window, cx| handler(&item_id, event, window, cx));
+                }
+                list = list.child(row);
+            }
+            Some(list.into_any_element())
+        };
+
+        let footer_actions = div()
+            .flex()
+            .items_center()
+            .gap(gap)
+            .child(Button::from_spec(
+                poodle_specs::ButtonSpec::new()
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_size(ControlSize::Sm)
+                    .with_label(spec.cancel_label.clone()),
+                theme,
+            ))
+            .child(Button::from_spec(
+                poodle_specs::ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_size(ControlSize::Sm)
+                    .with_label(spec.confirm_label.clone()),
+                theme,
+            ));
+
+        let mut shell = PickerShell::from_spec(spec.as_picker_shell(), theme)
+            .with_toolbar(search_col)
+            .with_footer(footer_actions);
+        if let Some(selection) = selection_el {
+            shell = shell.with_selection(selection);
+        }
+        if let Some(results) = content {
+            shell = shell.with_body(results);
+        }
+        shell.into_any_element()
     }
+}
+
+fn drill_row(
+    item: &DrillDownItem,
+    theme: &GpuiThemeProvider,
+    body_size: Pixels,
+    label_size: Pixels,
+    gap: Pixels,
+    pad_x: Pixels,
+    pad_y: Pixels,
+    border: Hsla,
+    text_primary: Hsla,
+    text_secondary: Hsla,
+    surface: Hsla,
+    elevated: Hsla,
+    radius: Pixels,
+) -> Stateful<Div> {
+    let meta = item
+        .count
+        .map(|count| format!("{count} items"))
+        .unwrap_or_default();
+
+    div()
+        .w_full()
+        .flex()
+        .items_center()
+        .justify_between()
+        .gap(gap)
+        .px(pad_x)
+        .py(pad_y)
+        .rounded(radius)
+        .border_1()
+        .border_color(border)
+        .bg(Hsla {
+            a: surface.a * 0.6 + elevated.a * 0.4,
+            ..elevated
+        })
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(rem_to_px(0.125)))
+                .child(
+                    div()
+                        .text_size(body_size)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_primary)
+                        .child(item.label.clone()),
+                )
+                .children(item.description.clone().map(|description| {
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(description)
+                })),
+        )
+        .child(
+            div()
+                .flex()
+                .items_center()
+                .gap(px(rem_to_px(0.5)))
+                .children((!meta.is_empty()).then(|| {
+                    div()
+                        .text_size(label_size)
+                        .text_color(text_secondary)
+                        .child(meta)
+                }))
+                .child(
+                    Icon::from_spec(
+                        poodle_specs::IconSpec::new("chevron-right")
+                            .with_size(poodle_specs::IconSize::Sm),
+                        theme,
+                    )
+                    .with_color(text_secondary),
+                ),
+        )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn candidate_row(
+    item: &PickerItemSpec,
+    is_selected: bool,
+    selection_mode: SelectionMode,
+    theme: &GpuiThemeProvider,
+    body_size: Pixels,
+    label_size: Pixels,
+    gap: Pixels,
+    pad_x: Pixels,
+    pad_y: Pixels,
+    border: Hsla,
+    text_primary: Hsla,
+    text_secondary: Hsla,
+    surface: Hsla,
+    elevated: Hsla,
+    accent: Hsla,
+    radius: Pixels,
+    size: ControlSize,
+    size_role: SemanticControlSizeRole,
+    density: ControlDensity,
+) -> Stateful<Div> {
+    let row_bg = if is_selected {
+        Hsla {
+            a: accent.a * 0.10 + surface.a * 0.90,
+            ..surface
+        }
+    } else {
+        Hsla {
+            a: surface.a * 0.6 + elevated.a * 0.4,
+            ..elevated
+        }
+    };
+    let row_border = if is_selected { accent } else { border };
+
+    let mut row = div()
+        .w_full()
+        .flex()
+        .items_center()
+        .gap(gap)
+        .px(pad_x)
+        .py(pad_y)
+        .rounded(radius)
+        .border_1()
+        .border_color(row_border)
+        .bg(row_bg);
+
+    if selection_mode == SelectionMode::Multiple {
+        row = row.child(Checkbox::from_spec(
+            CheckboxSpec::new()
+                .with_checked(is_selected)
+                .with_size(size)
+                .with_size_role(size_role)
+                .with_density(density),
+            theme,
+        ));
+    }
+
+    row.child(
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(rem_to_px(0.125)))
+            .child(
+                div()
+                    .text_size(body_size)
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_primary)
+                    .child(item.label.clone()),
+            )
+            .children(item.description.clone().map(|description| {
+                div()
+                    .text_size(label_size)
+                    .text_color(text_secondary)
+                    .child(description)
+            }))
+            .children(item.meta.clone().map(|meta| {
+                div()
+                    .text_size(label_size)
+                    .text_color(text_secondary)
+                    .child(meta)
+            })),
+    )
 }

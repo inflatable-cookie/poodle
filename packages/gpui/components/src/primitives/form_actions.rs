@@ -57,7 +57,11 @@ impl IntoElement for FormActions {
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
         let gap = theme.resolve_space(self.spec.action_gap_token());
-        let separation = theme.resolve_space(self.spec.stack_separation_token());
+        let separation = if self.spec.shows_top_separation() {
+            theme.resolve_space(self.spec.stack_separation_token())
+        } else {
+            0.0
+        };
 
         // Accessibility semantics (contract section 6):
         // Neutral structural container — no implicit ARIA role.

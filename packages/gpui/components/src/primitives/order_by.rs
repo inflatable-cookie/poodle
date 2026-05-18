@@ -1,32 +1,20 @@
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-    size_padding_x_offset_rem,
-};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, OrderBySpec, SemanticControlSizeRole, SortDirection,
+    ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, IconSize, IconSpec, OrderBySpec,
+    SemanticControlSizeRole, SortDirection,
 };
+
+use super::{Button, Icon, IconButton};
+use crate::presentation::{
+    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 pub struct OrderBy {
     spec: OrderBySpec,
-    label_color: Hsla,
-    field_fill: Hsla,
-    field_border: Hsla,
-    field_text: Hsla,
-    field_hover_fill: Hsla,
-    active_fill: Hsla,
-    active_border: Hsla,
-    active_text: Hsla,
-    radius: Pixels,
-    disabled_opacity: f32,
-    focus_ring_color: Hsla,
-    gap: Pixels,
-    reset_color: Hsla,
-    body_size: Pixels,
-    on_sort: Option<Box<dyn Fn(&str, &SortDirection, &mut Window, &mut App) + 'static>>,
-    on_reset: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    theme: GpuiThemeProvider,
+    on_reset: Option<Box<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for OrderBy {
@@ -42,66 +30,32 @@ impl OrderBy {
     }
 
     pub fn from_spec(spec: OrderBySpec, theme: &GpuiThemeProvider) -> Self {
-        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-
-        let label_color = resolve_color(theme, spec.label_color_token());
-        let field_fill = resolve_color(theme, spec.field_fill_token());
-        let field_border = resolve_color(theme, spec.field_border_token());
-        let field_text = resolve_color(theme, spec.field_text_token());
-        let field_hover_fill = resolve_color(theme, spec.field_hover_fill_token());
-        let active_fill = resolve_color(theme, spec.active_fill_token());
-        let active_border = resolve_color(theme, spec.active_border_token());
-        let active_text = resolve_color(theme, spec.active_text_token());
-        let radius = resolve_radius(theme, spec.radius_token());
-        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
-        let focus_ring_color = resolve_color(theme, spec.focus_ring_color_token());
-        let gap = px(rem_to_px(control_space_x_rem(spec.density)));
-        let reset_color = resolve_color(theme, spec.reset_color_token());
-
         Self {
             spec,
-            label_color,
-            field_fill,
-            field_border,
-            field_text,
-            field_hover_fill,
-            active_fill,
-            active_border,
-            active_text,
-            radius,
-            disabled_opacity,
-            focus_ring_color,
-            gap,
-            reset_color,
-            body_size: px(rem_to_px(size_font_rem(effective_size))),
-            on_sort: None,
+            theme: theme.clone(),
             on_reset: None,
         }
     }
 
-    // ── Forwarded spec builders ───────────────────────────────
     pub fn size(mut self, v: ControlSize) -> Self {
         self.spec.size = v;
         self
     }
+
     pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
         self.spec.size_role = v;
         self
     }
+
     pub fn with_density(mut self, v: ControlDensity) -> Self {
         self.spec.density = v;
         self
     }
 
-    pub fn on_sort(
+    pub fn on_reset(
         mut self,
-        handler: impl Fn(&str, &SortDirection, &mut Window, &mut App) + 'static,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
     ) -> Self {
-        self.on_sort = Some(Box::new(handler));
-        self
-    }
-
-    pub fn on_reset(mut self, handler: impl Fn(&mut Window, &mut App) + 'static) -> Self {
         self.on_reset = Some(Box::new(handler));
         self
     }
@@ -111,170 +65,266 @@ impl IntoElement for OrderBy {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let is_disabled = self.spec.is_disabled;
-        let has_active_sort = self.spec.active_sort.is_some();
-        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let field_height = px(rem_to_px(control_height_rem(effective_size))) - px(2.0);
-        let field_pad_x = px(rem_to_px(size_padding_x_offset_rem(effective_size))) + px(10.0);
+        let theme = &self.theme;
+        let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let text_primary = resolve_color(theme, spec.field_text_token());
+        let text_secondary = resolve_color(theme, spec.label_color_token());
+        let border = resolve_color(theme, spec.field_border_token());
+        let surface = resolve_color(theme, spec.field_fill_token());
+        let elevated = resolve_color(theme, spec.field_hover_fill_token());
+        let accent = resolve_color(theme, spec.active_border_token());
+        let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
+        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        let radius = resolve_radius(theme, spec.radius_token());
 
-        // "Sort by" label — use body_size - 1px chrome adjustment
-        let label = div()
-            .text_size(self.body_size)
-            .font_weight(FontWeight::MEDIUM)
-            .text_color(self.label_color)
-            .flex_shrink_0()
-            .child(self.spec.aria_label.to_uppercase());
+        let trigger_height = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 1.625,
+            ControlSize::Sm => 1.75,
+            ControlSize::Md => 2.0,
+            ControlSize::Lg => 2.25,
+            ControlSize::Xl => 2.5,
+        }));
+        let trigger_gap = px(rem_to_px(match spec.density {
+            ControlDensity::Compact => 0.375,
+            ControlDensity::Default => 0.5,
+            ControlDensity::Comfortable => 0.625,
+        }));
+        let trigger_pad_x = px(rem_to_px(match effective_size {
+            ControlSize::Xs => 0.5,
+            _ => 0.75 + size_padding_x_offset_rem(effective_size),
+        }));
+        let label_size = px(rem_to_px(if matches!(effective_size, ControlSize::Xs) {
+            0.625
+        } else {
+            0.75
+        }));
+        let summary_size = px(rem_to_px(0.875));
+        let panel_gap = px(rem_to_px(0.75));
+        let list_gap = px(rem_to_px(0.5));
+        let item_gap = px(rem_to_px(0.75));
+        let item_pad_x = px(rem_to_px(0.75));
+        let item_pad_y = px(rem_to_px(0.625));
+        let item_bg = Hsla {
+            a: surface.a * 0.88 + elevated.a * 0.12,
+            ..surface
+        };
 
-        // Field buttons
-        let on_sort = self.on_sort;
-        let mut fields_row = div().flex().flex_row().items_center().gap(self.gap);
+        let mut trigger = div()
+            .min_w(px(rem_to_px(12.0)))
+            .max_w(px(rem_to_px(28.0)))
+            .h(trigger_height)
+            .px(trigger_pad_x)
+            .rounded(radius)
+            .border_1()
+            .border_color(border)
+            .bg(surface)
+            .flex()
+            .items_center()
+            .gap(trigger_gap)
+            .text_color(text_primary);
 
-        for field in &self.spec.fields {
-            let is_active = self.spec.is_field_active(&field.value);
-            let field_disabled = field.is_disabled || is_disabled;
+        trigger = trigger
+            .child(
+                div()
+                    .text_size(label_size)
+                    .text_color(text_secondary)
+                    .child("SORT BY"),
+            )
+            .child(
+                div()
+                    .flex_grow()
+                    .text_size(summary_size)
+                    .child(spec.summary_text()),
+            )
+            .child(
+                Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
+                    .with_color(text_secondary),
+            );
 
-            let direction_indicator = if is_active {
-                let arrow = match self.spec.active_direction() {
-                    Some(SortDirection::Asc) => "\u{25B2}",
-                    Some(SortDirection::Desc) => "\u{25BC}",
-                    None => "\u{25B2}",
-                };
-                Some(
-                    div()
-                        .text_size(px(rem_to_px(0.5625))) // sort arrow glyph
-                        .ml(px(rem_to_px(0.25)))
-                        .child(arrow.to_string()),
-                )
-            } else {
-                None
-            };
-
-            let (btn_fill, btn_border, btn_text) = if is_active {
-                (
-                    self.active_fill.opacity(0.12),
-                    self.active_border,
-                    self.active_text,
-                )
-            } else {
-                (self.field_fill, self.field_border, self.field_text)
-            };
-
-            let field_value = field.value.clone();
-            let current_direction = if is_active {
-                self.spec
-                    .active_direction()
-                    .cloned()
-                    .unwrap_or(SortDirection::Asc)
-            } else {
-                SortDirection::Asc
-            };
-
-            let mut btn = div()
-                .id(ElementId::Name(
-                    format!("order-by-field-{}", field.value).into(),
-                ))
-                .flex()
-                .flex_row()
-                .items_center()
-                .h(field_height)
-                .px(field_pad_x)
-                .bg(btn_fill)
-                .border_1()
-                .border_color(btn_border)
-                .rounded(self.radius)
-                .text_size(self.body_size)
-                .font_weight(FontWeight::MEDIUM)
-                .text_color(btn_text)
-                .child(field.label.clone())
-                .children(direction_indicator);
-
-            {
-                let focus_ring_color = self.focus_ring_color;
-                btn = btn.focus(move |s| {
-                    s.border_color(focus_ring_color)
-                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
-                });
-            }
-
-            if field_disabled {
-                btn = btn
-                    .opacity(self.disabled_opacity)
-                    .cursor(CursorStyle::OperationNotAllowed);
-            } else {
-                let field_hover_fill = self.field_hover_fill;
-
-                btn = btn.cursor_pointer();
-
-                if !is_active {
-                    btn = btn.hover(|style| style.bg(field_hover_fill));
-                }
-
-                if let Some(ref on_sort) = on_sort {
-                    let on_sort_ptr =
-                        on_sort as *const Box<dyn Fn(&str, &SortDirection, &mut Window, &mut App)>;
-                    let field_value = field_value.clone();
-                    let next_direction = if is_active {
-                        match current_direction {
-                            SortDirection::Asc => SortDirection::Desc,
-                            SortDirection::Desc => SortDirection::Asc,
-                        }
-                    } else {
-                        SortDirection::Asc
-                    };
-                    btn = btn.on_click(move |_event, window, app| {
-                        // SAFETY: The callback lives as long as the element
-                        let on_sort = unsafe { &*on_sort_ptr };
-                        on_sort(&field_value, &next_direction, window, app);
-                    });
-                }
-            }
-
-            fields_row = fields_row.child(btn);
-        }
-
-        // Reset button (only shown when sort is active)
-        if has_active_sort {
-            let reset_color = self.reset_color;
-            let focus_ring_color = self.focus_ring_color;
-
-            let mut reset_btn = div()
-                .id("order-by-reset")
-                .flex()
-                .items_center()
-                .justify_center()
-                .w(field_height)
-                .h(field_height)
-                .rounded(self.radius)
-                .text_size(self.body_size)
-                .text_color(reset_color)
-                .cursor_pointer()
-                .hover(|style| style.bg(self.field_hover_fill))
-                .focus(move |s| s.border_color(focus_ring_color))
-                .child("\u{00D7}");
-
-            if let Some(on_reset) = self.on_reset {
-                reset_btn = reset_btn.on_click(move |_event, window, app| {
-                    on_reset(window, app);
-                });
-            }
-
-            fields_row = fields_row.child(reset_btn);
-        }
-
-        // Root
         let mut root = div()
             .id("order-by")
             .flex()
-            .flex_row()
-            .items_center()
-            .gap(px(rem_to_px(0.375))) // Svelte: .order-by gap 0.375rem
-            .child(label)
-            .child(fields_row);
+            .flex_col()
+            .gap(px(rem_to_px(0.375)));
 
-        if is_disabled {
-            root = root.opacity(self.disabled_opacity);
+        let mut trigger_row = div()
+            .flex()
+            .items_center()
+            .gap(px(rem_to_px(0.375)))
+            .child(trigger);
+
+        if spec.has_value() {
+            let mut reset = div()
+                .w(px(rem_to_px(1.75)))
+                .h(px(rem_to_px(1.75)))
+                .rounded(radius)
+                .flex()
+                .items_center()
+                .justify_center()
+                .text_color(text_secondary)
+                .child("×");
+
+            if let Some(handler) = self.on_reset {
+                reset = reset.on_click(move |event, window, cx| handler(event, window, cx));
+            }
+            trigger_row = trigger_row.child(reset);
         }
 
+        root = root.child(trigger_row);
+
+        if spec.is_open {
+            let current_value = spec.current_value();
+            let mut panel = div().flex().flex_col().gap(panel_gap);
+
+            if current_value.is_empty() {
+                panel = panel.child(
+                    div()
+                        .text_size(summary_size)
+                        .text_color(text_secondary)
+                        .child("No sort fields selected"),
+                );
+            } else {
+                let mut list = div().flex().flex_col().gap(list_gap);
+                for (index, item) in current_value.iter().enumerate() {
+                    let direction_label = match item.direction {
+                        SortDirection::Asc => "Ascending",
+                        SortDirection::Desc => "Descending",
+                    };
+
+                    let actions = div()
+                        .flex()
+                        .items_center()
+                        .gap(px(rem_to_px(0.25)))
+                        .child(IconButton::from_spec(
+                            IconButtonSpec::new()
+                                .with_icon(match item.direction {
+                                    SortDirection::Asc => "arrow-up",
+                                    SortDirection::Desc => "arrow-down",
+                                })
+                                .with_aria_label("Toggle direction")
+                                .with_size(ControlSize::Sm),
+                            theme,
+                        ))
+                        .child(IconButton::from_spec(
+                            IconButtonSpec::new()
+                                .with_icon("chevron-up")
+                                .with_aria_label("Move up")
+                                .with_size(ControlSize::Sm)
+                                .with_disabled(index == 0),
+                            theme,
+                        ))
+                        .child(IconButton::from_spec(
+                            IconButtonSpec::new()
+                                .with_icon("chevron-down")
+                                .with_aria_label("Move down")
+                                .with_size(ControlSize::Sm)
+                                .with_disabled(index + 1 == current_value.len()),
+                            theme,
+                        ))
+                        .child(IconButton::from_spec(
+                            IconButtonSpec::new()
+                                .with_icon("x")
+                                .with_aria_label("Remove field")
+                                .with_size(ControlSize::Sm)
+                                .with_tone(poodle_specs::ButtonTone::Danger),
+                            theme,
+                        ));
+
+                    list = list.child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .justify_between()
+                            .gap(item_gap)
+                            .px(item_pad_x)
+                            .py(item_pad_y)
+                            .rounded(resolve_radius(theme, "radius.surface"))
+                            .border_1()
+                            .border_color(border)
+                            .bg(item_bg)
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .gap(px(rem_to_px(0.125)))
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .items_center()
+                                            .gap(px(rem_to_px(0.375)))
+                                            .child(div().text_color(text_secondary).child("⠿"))
+                                            .child(
+                                                div()
+                                                    .font_weight(FontWeight::SEMIBOLD)
+                                                    .child(spec.active_label(&item.key)),
+                                            ),
+                                    )
+                                    .child(
+                                        div()
+                                            .text_size(summary_size)
+                                            .text_color(text_secondary)
+                                            .child(direction_label),
+                                    ),
+                            )
+                            .child(actions),
+                    );
+                }
+                panel = panel.child(list);
+            }
+
+            if !spec.available_fields().is_empty()
+                && spec
+                    .max_fields
+                    .map(|max| spec.active_count() < max)
+                    .unwrap_or(true)
+            {
+                panel = panel.child(
+                    div().flex().items_center().child(
+                        div()
+                            .min_w(px(rem_to_px(10.0)))
+                            .h(px(rem_to_px(control_height_rem(ControlSize::Sm))))
+                            .px(px(rem_to_px(0.75)))
+                            .rounded(radius)
+                            .border_1()
+                            .border_color(border)
+                            .bg(surface)
+                            .flex()
+                            .items_center()
+                            .text_color(text_secondary)
+                            .child("+ Add field"),
+                    ),
+                );
+            }
+
+            if spec.active_count() >= 2 {
+                panel = panel.child(
+                    div().child(Button::from_spec(
+                        poodle_specs::ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(ControlSize::Sm)
+                            .with_label("Clear all"),
+                        theme,
+                    )),
+                );
+            }
+
+            root = root.child(
+                div()
+                    .rounded(resolve_radius(theme, "radius.surface"))
+                    .border_1()
+                    .border_color(border)
+                    .bg(elevated)
+                    .p(px(rem_to_px(0.75)))
+                    .child(panel),
+            );
+        }
+
+        if spec.is_disabled {
+            root = root.opacity(disabled_opacity);
+        }
+
+        let _ = focus_ring;
         root.into_any_element()
     }
 }

@@ -1,8 +1,9 @@
 //! MarkdownEditor — Jetstream markdown editor backed by MarkdownEditorSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::MarkdownEditorSpec;
+use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
 
+use crate::icon_button::js_icon_button;
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_radius, tint};
 
@@ -17,14 +18,6 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
         poodle_specs::ControlSize::Lg => 2.25,
         poodle_specs::ControlSize::Xl => 2.5,
     });
-    let mode_px = rem_to_px(match effective_size {
-        poodle_specs::ControlSize::Xs => 0.375,
-        poodle_specs::ControlSize::Sm => 0.5,
-        poodle_specs::ControlSize::Md => 0.5,
-        poodle_specs::ControlSize::Lg => 0.625,
-        poodle_specs::ControlSize::Xl => 0.75,
-    });
-
     // Density-driven spacing from contract
     let (toolbar_y, toolbar_x, tool_gap, pane_pad) = match spec.density {
         poodle_specs::ControlDensity::Compact => (0.25, 0.375, 0.0625, 0.625),
@@ -51,7 +44,8 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
     // Root
     let mut el = ui_element::div()
         .bg(fill)
-        .border(1.0).border_color(border)
+        .border(1.0)
+        .border_color(border)
         .rounded(radius)
         .flex_col()
         .overflow_hidden();
@@ -63,11 +57,15 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
     // Toolbar
     let mut toolbar = ui_element::div()
         .bg(toolbar_bg)
-        .flex_row().items_center()
+        .flex_row()
+        .items_center()
         .gap(rem_to_px(0.5))
-        .pl(rem_to_px(toolbar_x)).pr(rem_to_px(toolbar_x))
-        .pt(rem_to_px(toolbar_y)).pb(rem_to_px(toolbar_y))
-        .border(1.0).border_color(border_subtle);
+        .pl(rem_to_px(toolbar_x))
+        .pr(rem_to_px(toolbar_x))
+        .pt(rem_to_px(toolbar_y))
+        .pb(rem_to_px(toolbar_y))
+        .border(1.0)
+        .border_color(border_subtle);
 
     // Tool buttons
     let tools = ["B", "I", "H", "#", "<>", "\u{201C}", "\u{2022}"];
@@ -75,7 +73,8 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
     for tool in &tools {
         let is_disabled_tool = spec.is_disabled || spec.mode == "preview";
         let mut btn = ui_element::button(*tool)
-            .w(tool_size).h(tool_size)
+            .w(tool_size)
+            .h(tool_size)
             .text_color(text_secondary)
             .text_size(rem_to_px(0.75))
             .text_weight(600)
@@ -90,26 +89,51 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
     toolbar = toolbar.child(ui_element::div().grow());
 
     // Mode switcher
-    let mut modes = ui_element::div()
-        .flex_row().gap(rem_to_px(tool_gap))
-        .border(1.0).border_color(border)
-        .rounded(ctrl_radius)
-        .overflow_hidden();
-
-    for mode_name in &["Edit", "Split", "Preview"] {
-        let is_active = (mode_name == &"Edit" && spec.mode == "edit")
-            || (mode_name == &"Split" && spec.mode == "split")
-            || (mode_name == &"Preview" && spec.mode == "preview");
-        let mut btn = ui_element::button(*mode_name)
-            .text_color(if is_active { text_primary } else { text_secondary })
-            .text_size(rem_to_px(0.8125))
-            .pl(mode_px).pr(mode_px)
-            .pt(rem_to_px(0.1875)).pb(rem_to_px(0.1875));
-        if is_active {
-            btn = btn.bg(tint(accent, 0.16));
-        }
-        modes = modes.child(btn);
-    }
+    let modes = ui_element::div()
+        .flex_row()
+        .gap(rem_to_px(tool_gap))
+        .child(js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("pencil")
+                .with_aria_label("Edit")
+                .with_variant(if spec.mode == "edit" {
+                    ButtonVariant::Secondary
+                } else {
+                    ButtonVariant::Ghost
+                })
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density),
+            theme,
+        ))
+        .child(js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("columns-2")
+                .with_aria_label("Split")
+                .with_variant(if spec.mode == "split" {
+                    ButtonVariant::Secondary
+                } else {
+                    ButtonVariant::Ghost
+                })
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density),
+            theme,
+        ))
+        .child(js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("eye")
+                .with_aria_label("Preview")
+                .with_variant(if spec.mode == "preview" {
+                    ButtonVariant::Secondary
+                } else {
+                    ButtonVariant::Ghost
+                })
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density),
+            theme,
+        ));
     toolbar = toolbar.child(modes);
     el = el.child(toolbar);
 
@@ -120,19 +144,23 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
         // Textarea area
         let mut textarea = ui_element::div()
             .grow()
-            .pl(rem_to_px(pane_pad)).pr(rem_to_px(pane_pad))
-            .pt(rem_to_px(pane_pad)).pb(rem_to_px(pane_pad));
+            .pl(rem_to_px(pane_pad))
+            .pr(rem_to_px(pane_pad))
+            .pt(rem_to_px(pane_pad))
+            .pb(rem_to_px(pane_pad));
 
         if spec.value.is_empty() {
             let placeholder_text = spec.placeholder.as_deref().unwrap_or("Write markdown...");
             textarea = textarea.child(
                 ui_element::label(placeholder_text)
-                    .text_color(text_secondary).text_size(rem_to_px(0.8125))
+                    .text_color(text_secondary)
+                    .text_size(rem_to_px(0.8125)),
             );
         } else {
             textarea = textarea.child(
                 ui_element::label(&spec.value)
-                    .text_color(text_primary).text_size(rem_to_px(0.8125))
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(0.8125)),
             );
         }
 
@@ -146,18 +174,22 @@ pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvi
         // Preview pane
         let mut preview = ui_element::div()
             .grow()
-            .pl(rem_to_px(pane_pad)).pr(rem_to_px(pane_pad))
-            .pt(rem_to_px(pane_pad)).pb(rem_to_px(pane_pad));
+            .pl(rem_to_px(pane_pad))
+            .pr(rem_to_px(pane_pad))
+            .pt(rem_to_px(pane_pad))
+            .pb(rem_to_px(pane_pad));
 
         if spec.value.is_empty() {
             preview = preview.child(
                 ui_element::label("Nothing to preview")
-                    .text_color(text_secondary).text_size(rem_to_px(0.875))
+                    .text_color(text_secondary)
+                    .text_size(rem_to_px(0.875)),
             );
         } else {
             preview = preview.child(
                 ui_element::label(&spec.value)
-                    .text_color(text_primary).text_size(rem_to_px(0.875))
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(0.875)),
             );
         }
         body = body.child(preview);

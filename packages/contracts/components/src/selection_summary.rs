@@ -22,7 +22,7 @@ impl Default for SelectionSummarySpec {
         Self {
             items: Vec::new(),
             clear_action: None,
-            max_visible_items: None,
+            max_visible_items: Some(4),
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,

@@ -2,7 +2,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{FieldSpec, ValidationState};
+use poodle_specs::{
+    ControlDensity, ControlSize, FieldSpec, SemanticControlSizeRole, ValidationState,
+};
 
 use crate::theme_ext::{resolve_color, resolve_px};
 
@@ -54,6 +56,10 @@ impl Field {
         self.spec.description = Some(v.into());
         self
     }
+    pub fn hint(mut self, v: impl Into<String>) -> Self {
+        self.spec.hint = Some(v.into());
+        self
+    }
     pub fn error(mut self, v: impl Into<String>) -> Self {
         self.spec.error = Some(v.into());
         self
@@ -72,6 +78,18 @@ impl Field {
     }
     pub fn optional_label(mut self, v: impl Into<String>) -> Self {
         self.spec.optional_label = Some(v.into());
+        self
+    }
+    pub fn with_size(mut self, v: ControlSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+    pub fn with_size_role(mut self, v: SemanticControlSizeRole) -> Self {
+        self.spec.size_role = v;
+        self
+    }
+    pub fn with_density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
         self
     }
 
@@ -97,6 +115,10 @@ impl IntoElement for Field {
         let root_gap = resolve_px(theme, spec.row_gap_token());
         let header_gap = resolve_px(theme, spec.header_gap_token());
         let label_row_gap = resolve_px(theme, spec.label_row_gap_token());
+        let label_color = Hsla {
+            a: text_primary.a * 0.82,
+            ..text_primary
+        };
 
         let mut col = div().flex().flex_col().gap(root_gap);
 
@@ -106,7 +128,7 @@ impl IntoElement for Field {
             div()
                 .text_size(label_size)
                 .font_weight(FontWeight::MEDIUM)
-                .text_color(text_primary)
+                .text_color(label_color)
                 .child(spec.label.clone()),
         );
         if spec.is_required {
@@ -141,12 +163,12 @@ impl IntoElement for Field {
         col = col.child(label_row);
 
         // Description
-        if let Some(ref description) = spec.description {
+        if let Some(description) = spec.info_text() {
             col = col.child(
                 div()
                     .text_size(supporting_size)
                     .text_color(description_color)
-                    .child(description.clone()),
+                    .child(description.to_string()),
             );
         }
 

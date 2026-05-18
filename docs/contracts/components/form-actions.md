@@ -1,7 +1,7 @@
 # Form Actions
 
 Status: detailed contract
-Updated: 2026-03-27
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -38,6 +38,7 @@ Updated: 2026-03-27
 |------|------|---------|----------|-------|
 | `align` | `"start" \| "end" \| "between"` | `"end"` | no | alignment rule for the action row |
 | `density` | `ControlDensity \| null` | `null` | no | explicit spacing-density override; otherwise inherits current presentation |
+| `showTopSeparation` | `boolean` | `true` | no | when false, removes the usual top padding used to separate the action row from the field stack above |
 | `dangerItems` | `FormActionDangerItem[]` | `[]` | no | menu items used when danger content collapses |
 
 ### Snippets
@@ -61,6 +62,7 @@ Updated: 2026-03-27
 | default | resting | actions aligned per `align` prop |
 | compact density | `density="compact"` | tighter top separation and tighter inline gaps |
 | comfortable density | `density="comfortable"` | looser top separation and looser inline gaps |
+| footer-embedded | `showTopSeparation=false` | action row sits flush inside parent footer chrome instead of adding stack separation |
 | wrapped | narrow container | actions wrap to multiple lines maintaining gap |
 | danger-inline | `danger` snippet present | danger content is rendered inline |
 | danger-collapsed | `danger` snippet and `dangerItems` present in a narrow container | danger content is hidden and overflow trigger is shown |
@@ -81,7 +83,8 @@ Updated: 2026-03-27
 
 - Root stretches to parent width
 - `flex-wrap: wrap` allows actions to wrap on narrow widths
-- `padding-top` separates the action row from the field stack above and scales with density
+- `padding-top` separates the action row from the field stack above and scales with density when `showTopSeparation=true`
+- when `showTopSeparation=false`, top padding is `0` so the row can sit directly on dialog, drawer, or shell footer rails
 - Root is a container-query boundary for responsive danger-action swapping
 
 ## 8. Token Usage
@@ -94,7 +97,7 @@ Updated: 2026-03-27
 | `flex-wrap` | `wrap` |
 | `gap` | `var(--poodle-form-actions-gap)` |
 | `align-items` | `center` |
-| `padding-top` | `var(--poodle-form-actions-padding-top)` |
+| `padding-top` | `var(--poodle-form-actions-padding-top)` or `0` when `showTopSeparation=false` |
 | `container-type` | `inline-size` |
 
 ### Root Alignment
@@ -161,6 +164,7 @@ Updated: 2026-03-27
 | Space between | `align="between"`, children: danger "Delete" + primary "Save" | Buttons spread to opposite ends |
 | Responsive danger actions | `align="end"`, `danger` snippet contains a destructive/cancel action, `dangerItems` contains matching overflow action | Danger action stays inline on wide containers and collapses to overflow on narrow containers |
 | Density ladder | `density="compact" \| "default" \| "comfortable"` | Action row spacing visibly tightens or loosens without changing child button size |
+| Footer-embedded | `showTopSeparation=false`, children: ghost "Cancel" + primary "Save changes" | Action row sits flush on the parent footer without extra top gap |
 
 ## 12. Approval And Adoption Notes
 

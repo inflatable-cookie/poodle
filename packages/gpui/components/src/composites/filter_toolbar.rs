@@ -151,7 +151,13 @@ impl IntoElement for FilterToolbar {
         // Svelte: header row and filter grid use space.inline.sm (8px) not inline.md (12px)
         let inline_sm = resolve_px(theme, "space.inline.sm");
         let _inline_md = resolve_px(theme, spec.controls_gap_token());
-        let body_size = resolve_px(theme, "typography.body.size");
+        let summary_size = px(rem_to_px(match spec.size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.71875,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }));
 
         let elevated_bg = resolve_color(theme, spec.background_token());
         let bg = Hsla {
@@ -232,7 +238,7 @@ impl IntoElement for FilterToolbar {
                 header_row = header_row.child(
                     div()
                         .flex_1()
-                        .text_size(body_size)
+                        .text_size(summary_size)
                         .text_color(summary_color)
                         .child(summary.clone()),
                 );

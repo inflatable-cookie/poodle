@@ -130,12 +130,17 @@ impl DrillDownConfig {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RelationPickerSpec {
+    pub title: String,
+    pub description: Option<String>,
     pub items: Vec<PickerItemSpec>,
     pub selected_ids: Vec<String>,
     pub query: String,
     pub selection_mode: SelectionMode,
     pub variant: PickerVariant,
     pub state: BrowseState,
+    pub aria_label: Option<String>,
+    pub confirm_label: String,
+    pub cancel_label: String,
     /// Optional drill-down configuration. When present the picker
     /// renders a breadcrumbed navigation instead of the flat `items`
     /// list and the caller owns `drill_down_path` as the current state.
@@ -151,18 +156,33 @@ pub struct RelationPickerSpec {
 impl RelationPickerSpec {
     pub fn new(items: Vec<PickerItemSpec>) -> Self {
         Self {
+            title: String::from("Select items"),
+            description: None,
             items,
             selected_ids: Vec::new(),
             query: String::new(),
             selection_mode: SelectionMode::Multiple,
             variant: PickerVariant::Inline,
             state: BrowseState::Ready,
+            aria_label: None,
+            confirm_label: String::from("Confirm selection"),
+            cancel_label: String::from("Cancel"),
             drill_down: None,
             drill_down_path: Vec::new(),
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
         }
+    }
+
+    pub fn with_title(mut self, title: impl Into<String>) -> Self {
+        self.title = title.into();
+        self
+    }
+
+    pub fn with_description(mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self
     }
 
     pub fn with_drill_down(mut self, config: DrillDownConfig) -> Self {
@@ -204,29 +224,107 @@ impl RelationPickerSpec {
         self
     }
 
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    pub fn with_confirm_label(mut self, confirm_label: impl Into<String>) -> Self {
+        self.confirm_label = confirm_label.into();
+        self
+    }
+
+    pub fn with_cancel_label(mut self, cancel_label: impl Into<String>) -> Self {
+        self.cancel_label = cancel_label.into();
+        self
+    }
+
     pub fn selected_item_count(&self) -> usize {
-        self.items
-            .iter()
-            .filter(|item| {
-                self.selected_ids
-                    .iter()
-                    .any(|selected| selected == &item.id)
-            })
-            .count()
+        self.selected_ids.len()
     }
 
     pub fn current_query(&self) -> &str {
         self.query.as_str()
     }
 
-    pub fn as_picker_shell(&self, title: impl Into<String>) -> PickerShellSpec {
-        PickerShellSpec::new(title)
+    pub fn current_items(&self) -> Vec<PickerItemSpec> {
+        if let Some(ref drill_down) = self.drill_down {
+            if drill_down.is_at_leaf(&self.drill_down_path) {
+                return drill_down.leaf_items_for(&self.drill_down_path).to_vec();
+            }
+        }
+
+        self.items.clone()
+    }
+
+    pub fn drill_items(&self) -> Vec<DrillDownItem> {
+        self.drill_down
+            .as_ref()
+            .and_then(|dd| dd.next_level(&self.drill_down_path))
+            .map(|level| level.items.clone())
+            .unwrap_or_default()
+    }
+
+    pub fn current_result_count(&self) -> usize {
+        if self.drill_down.is_some() && !self.drill_items().is_empty() {
+            return self.drill_items().len();
+        }
+
+        self.current_items().len()
+    }
+
+    pub fn selection_summary_items(&self) -> Vec<crate::composite_types::SelectionSummaryItem> {
+        let mut items = self
+            .items
+            .iter()
+            .map(|item| (item.id.clone(), item.label.clone(), item.meta.clone()))
+            .collect::<Vec<_>>();
+
+        if let Some(ref drill_down) = self.drill_down {
+            for group in &drill_down.leaf_groups {
+                for item in &group.items {
+                    items.push((item.id.clone(), item.label.clone(), item.meta.clone()));
+                }
+            }
+        }
+
+        self.selected_ids
+            .iter()
+            .filter_map(|selected_id| {
+                items
+                    .iter()
+                    .find(|(id, _, _)| id == selected_id)
+                    .map(|(_, label, meta)| {
+                        let mut item = crate::composite_types::SelectionSummaryItem::new(
+                            selected_id.clone(),
+                            label.clone(),
+                        );
+                        if let Some(meta) = meta {
+                            item = item.with_meta(meta.clone());
+                        }
+                        item
+                    })
+            })
+            .collect()
+    }
+
+    pub fn as_picker_shell(&self) -> PickerShellSpec {
+        let mut shell = PickerShellSpec::new(self.title.clone())
             .with_variant(self.variant)
             .with_selection_mode(self.selection_mode)
             .with_state(self.state)
             .with_query(self.query.clone())
-            .with_result_count(self.items.len())
-            .with_selected_count(self.selected_item_count())
+            .with_result_count(self.current_result_count())
+            .with_selected_count(self.selected_item_count());
+
+        if let Some(ref description) = self.description {
+            shell = shell.with_description(description.clone());
+        }
+        if let Some(ref aria_label) = self.aria_label {
+            shell = shell.with_aria_label(aria_label.clone());
+        }
+
+        shell
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {

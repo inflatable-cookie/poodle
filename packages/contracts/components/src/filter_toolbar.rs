@@ -121,7 +121,7 @@ impl FilterToolbarSpec {
     }
 
     pub fn controls_gap_token(&self) -> &'static str {
-        semantic::SPACE_INLINE_MD
+        semantic::SPACE_INLINE_SM
     }
 
     pub fn summary_color_token(&self) -> &'static str {

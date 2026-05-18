@@ -2,10 +2,12 @@
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
+use poodle_jetstream_components::button::js_button;
+use poodle_jetstream_components::form_actions::js_form_actions;
 use poodle_jetstream_components::form_dialog::js_form_dialog;
-use poodle_jetstream_components::presentation::{rem_to_px, size_font_rem};
+use poodle_jetstream_components::presentation::rem_to_px;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ControlSize, FormDialogSpec};
+use poodle_specs::{ButtonSpec, ButtonVariant, FormActionsSpec, FormDialogSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -68,8 +70,24 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
                 vec![field("Value")],
                 Some(
-                    div().flex_row().justify_end().gap(8.0)
-                        .child(button("Close").text_color(secondary).text_size(rem_to_px(size_font_rem(ControlSize::Md))))
+                    js_form_actions(
+                        &FormActionsSpec::new().with_top_separation(false),
+                        theme,
+                        vec![
+                            js_button(
+                                &ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_label("Cancel"),
+                                theme,
+                            ),
+                            js_button(
+                                &ButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_label("Save changes"),
+                                theme,
+                            ),
+                        ],
+                    )
                 ),
             )
         ))

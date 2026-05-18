@@ -24,14 +24,20 @@ pub fn js_filter_toolbar(
     secondary: Option<JsEl>,
 ) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let font_size = rem_to_px(size_font_rem(effective_size));
+    let font_size = rem_to_px(match effective_size {
+        poodle_specs::ControlSize::Xs => 0.6875,
+        poodle_specs::ControlSize::Sm => 0.71875,
+        poodle_specs::ControlSize::Md => size_font_rem(effective_size) - 0.0625,
+        poodle_specs::ControlSize::Lg => 0.8125,
+        poodle_specs::ControlSize::Xl => 0.875,
+    });
     let pad = rem_to_px(panel_space_x_rem(spec.density));
 
     let bg = resolve_color(theme, spec.background_token());
     let border = resolve_color(theme, spec.border_token());
     let radius = resolve_radius(theme, spec.radius_token());
     let stack_sm = resolve_px(theme, spec.gap_token());
-    let inline_md = resolve_px(theme, spec.controls_gap_token());
+    let inline_sm = resolve_px(theme, spec.controls_gap_token());
     let summary_color = resolve_color(theme, spec.summary_color_token());
 
     let is_expanded = spec.is_grid_visible();
@@ -49,7 +55,7 @@ pub fn js_filter_toolbar(
     // ── Header row ──
     let needs_header = spec.collapsible || spec.summary_text.is_some() || actions.is_some();
     if needs_header {
-        let mut header = ui_element::div().flex_row().items_center().gap(inline_md);
+        let mut header = ui_element::div().flex_row().items_center().gap(inline_sm);
 
         if let Some(ref summary) = spec.summary_text {
             header = header.child(
@@ -68,9 +74,14 @@ pub fn js_filter_toolbar(
 
     // ── Filter controls grid ──
     if is_expanded && had_children {
-        let mut grid = ui_element::div().flex_row().gap(inline_md);
+        let mut grid = ui_element::div().flex_row().flex_wrap().gap(inline_sm);
         for child in children {
-            grid = grid.child(child);
+            grid = grid.child(
+                ui_element::div()
+                    .flex_grow()
+                    .min_w(rem_to_px(spec.min_item_width_rem))
+                    .child(child),
+            );
         }
         toolbar = toolbar.child(grid);
     }

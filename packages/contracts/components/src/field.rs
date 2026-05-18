@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::ValidationState;
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FieldRelationships {
@@ -16,11 +16,17 @@ pub struct FieldSpec {
     pub id: String,
     pub label: String,
     pub description: Option<String>,
+    pub hint: Option<String>,
     pub error: Option<String>,
     pub pending_message: Option<String>,
     pub validation_state: ValidationState,
     pub is_required: bool,
     pub optional_label: Option<String>,
+    pub span: Option<String>,
+    pub grid_area: Option<String>,
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
+    pub density: ControlDensity,
 }
 
 impl FieldSpec {
@@ -29,16 +35,27 @@ impl FieldSpec {
             id: id.into(),
             label: label.into(),
             description: None,
+            hint: None,
             error: None,
             pending_message: None,
             validation_state: ValidationState::None,
             is_required: false,
-            optional_label: Some(String::from("Optional")),
+            optional_label: None,
+            span: None,
+            grid_area: None,
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
+            density: ControlDensity::Default,
         }
     }
 
     pub fn with_description(mut self, description: impl Into<String>) -> Self {
         self.description = Some(description.into());
+        self
+    }
+
+    pub fn with_hint(mut self, hint: impl Into<String>) -> Self {
+        self.hint = Some(hint.into());
         self
     }
 
@@ -67,10 +84,37 @@ impl FieldSpec {
         self
     }
 
+    pub fn with_span(mut self, span: impl Into<String>) -> Self {
+        self.span = Some(span.into());
+        self
+    }
+
+    pub fn with_grid_area(mut self, grid_area: impl Into<String>) -> Self {
+        self.grid_area = Some(grid_area.into());
+        self
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
+
+    pub fn info_text(&self) -> Option<&str> {
+        self.description.as_deref().or(self.hint.as_deref())
+    }
+
     pub fn description_id(&self) -> Option<String> {
-        self.description
-            .as_ref()
-            .map(|_| format!("{}-description", self.id))
+        None
     }
 
     pub fn error_id(&self) -> Option<String> {
@@ -92,7 +136,7 @@ impl FieldSpec {
     }
 
     pub fn described_by(&self) -> Option<String> {
-        let ids = [self.description_id(), self.message_id()]
+        let ids = [self.message_id()]
             .into_iter()
             .flatten()
             .collect::<Vec<_>>();
@@ -124,12 +168,24 @@ impl FieldSpec {
     }
 
     pub fn label_typography_token(&self) -> &'static str {
-        semantic::TYPOGRAPHY_LABEL_SIZE
+        match self.size {
+            ControlSize::Xs => semantic::TYPOGRAPHY_CAPTION_SIZE,
+            ControlSize::Sm => semantic::TYPOGRAPHY_COUNTER_SIZE,
+            ControlSize::Md => semantic::TYPOGRAPHY_LABEL_SIZE,
+            ControlSize::Lg => semantic::TYPOGRAPHY_BODY_SIZE,
+            ControlSize::Xl => semantic::TYPOGRAPHY_BODY_SIZE,
+        }
     }
 
     /// Helper/optional/error/pending copy at the `md` size stop (contract §7: `0.75rem`).
     pub fn supporting_text_typography_token(&self) -> &'static str {
-        semantic::TYPOGRAPHY_COUNTER_SIZE
+        match self.size {
+            ControlSize::Xs => semantic::TYPOGRAPHY_CAPTION_SIZE,
+            ControlSize::Sm => semantic::TYPOGRAPHY_CAPTION_SIZE,
+            ControlSize::Md => semantic::TYPOGRAPHY_COUNTER_SIZE,
+            ControlSize::Lg => semantic::TYPOGRAPHY_LABEL_SIZE,
+            ControlSize::Xl => semantic::TYPOGRAPHY_BODY_SIZE,
+        }
     }
 
     pub fn error_color_token(&self) -> &'static str {
@@ -141,15 +197,27 @@ impl FieldSpec {
     }
 
     pub fn row_gap_token(&self) -> &'static str {
-        semantic::SPACE_STACK_SM
+        match self.density {
+            ControlDensity::Compact => semantic::SPACE_BUTTON_GAP,
+            ControlDensity::Default => semantic::SPACE_STACK_SM,
+            ControlDensity::Comfortable => semantic::SPACE_STACK_MD,
+        }
     }
 
     pub fn header_gap_token(&self) -> &'static str {
-        semantic::SPACE_INLINE_MD
+        match self.density {
+            ControlDensity::Compact => semantic::SPACE_INLINE_SM,
+            ControlDensity::Default => semantic::SPACE_INLINE_MD,
+            ControlDensity::Comfortable => semantic::SPACE_INLINE_LG,
+        }
     }
 
     /// Inline gap inside the label row (contract §7: `0.375rem`).
     pub fn label_row_gap_token(&self) -> &'static str {
-        semantic::SPACE_BUTTON_GAP
+        match self.density {
+            ControlDensity::Compact => semantic::SPACE_INLINE_XS,
+            ControlDensity::Default => semantic::SPACE_BUTTON_GAP,
+            ControlDensity::Comfortable => semantic::SPACE_INLINE_SM,
+        }
     }
 }

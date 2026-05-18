@@ -1,190 +1,364 @@
 //! RelationPicker — Jetstream relation picker backed by RelationPickerSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{BrowseState, CheckboxSpec, RelationPickerSpec, SkeletonSpec};
-
-use crate::checkbox::js_checkbox;
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
+use poodle_specs::{
+    BrowseState, ButtonSpec, ButtonVariant, CheckboxSpec, PickerItemSpec, RelationPickerSpec,
+    SelectionMode,
 };
-use crate::skeleton::js_skeleton;
+
+use crate::button::js_button;
+use crate::checkbox::js_checkbox;
+use crate::picker_shell::js_picker_shell;
+use crate::selection_summary::js_selection_summary;
 use crate::theme_ext::{resolve_color, resolve_radius, tint};
 
-/// Default number of skeleton rows shown in the loading state.
-const DEFAULT_LOADING_ROW_COUNT: usize = 3;
-
 pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let font_size = rem_to_px(size_font_rem(effective_size));
-    let desc_font = rem_to_px(size_font_rem(effective_size) - 0.125);
-    let icon_size = rem_to_px(size_font_rem(effective_size));
-    let item_px = rem_to_px(control_space_x_rem(spec.density));
-    let item_py = rem_to_px(panel_space_y_rem(spec.density) - 0.375);
-    let item_gap = rem_to_px(0.5);
-    let row_gap = rem_to_px(0.125);
-    let row_h = rem_to_px(control_height_rem(effective_size));
-    let search_gap = rem_to_px(0.5);
-    let search_px = rem_to_px(0.625);
-    let search_py = rem_to_px(0.375);
-    let search_radius = resolve_radius(theme, "radius.control");
-
     let text_primary = resolve_color(theme, "color.text.primary");
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let border = resolve_color(theme, "color.border.subtle");
     let accent = resolve_color(theme, "color.accent.base");
     let surface = resolve_color(theme, "color.background.surface");
+    let elevated = resolve_color(theme, "color.background.elevated");
+    let radius = resolve_radius(theme, "radius.control");
 
-    let mut el = ui_element::div().flex_col().gap(row_gap);
+    let search = build_search(
+        spec,
+        theme,
+        text_primary,
+        text_secondary,
+        border,
+        surface,
+        radius,
+    );
 
-    // ── Search input ─────────────────────────────────────────────
-    // Show search bar whenever we have a query string or when state is
-    // not loading/error (i.e. the picker is usable). Mirrors Svelte which
-    // always renders the TextInput in the flat picker path.
-    let show_search = !matches!(spec.state, BrowseState::Loading | BrowseState::Error);
-    if show_search {
-        let query_text = if spec.query.is_empty() {
-            "Search…"
+    let selection_items = spec.selection_summary_items();
+    let selection = if !selection_items.is_empty() {
+        Some(js_selection_summary(
+            &poodle_specs::SelectionSummarySpec::new(selection_items)
+                .with_clear_action(poodle_specs::RemediationAction::new("clear", "Clear"))
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density),
+            theme,
+        ))
+    } else {
+        None
+    };
+
+    let mut body = None;
+    if spec.state == BrowseState::Ready {
+        if spec.drill_down.is_some()
+            && spec
+                .drill_down
+                .as_ref()
+                .map(|dd| !dd.is_at_leaf(&spec.drill_down_path))
+                .unwrap_or(false)
+        {
+            let mut list = ui_element::div().flex_col().gap(2.0);
+            for item in spec.drill_items() {
+                list = list.child(drill_row(
+                    &item,
+                    theme,
+                    text_primary,
+                    text_secondary,
+                    border,
+                    surface,
+                    elevated,
+                    radius,
+                ));
+            }
+            body = Some(list);
         } else {
-            spec.query.as_str()
-        };
-        let text_color = if spec.query.is_empty() {
-            text_secondary
-        } else {
-            text_primary
-        };
+            let mut list = ui_element::div().flex_col().gap(2.0);
+            for item in spec.current_items() {
+                let is_selected = spec
+                    .selected_ids
+                    .iter()
+                    .any(|selected| selected == &item.id);
+                list = list.child(candidate_row(
+                    &item,
+                    is_selected,
+                    spec.selection_mode,
+                    theme,
+                    text_primary,
+                    text_secondary,
+                    border,
+                    accent,
+                    surface,
+                    elevated,
+                    radius,
+                    spec.size,
+                    spec.size_role,
+                    spec.density,
+                ));
+            }
+            body = Some(list);
+        }
+    }
 
-        let search_row = ui_element::div()
-            .flex_row()
-            .items_center()
-            .gap(search_gap)
-            .pl(search_px).pr(search_px).pt(search_py).pb(search_py)
-            .border(1.0).border_color(border)
-            .rounded(search_radius)
-            .bg(tint(surface, 0.6))
-            .child(
-                ui_element::icon("search")
-                    .w(icon_size).h(icon_size)
+    let footer_actions = ui_element::div()
+        .flex_row()
+        .gap(8.0)
+        .child(js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_size(poodle_specs::ControlSize::Sm)
+                .with_label(&spec.cancel_label),
+            theme,
+        ))
+        .child(js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_size(poodle_specs::ControlSize::Sm)
+                .with_label(&spec.confirm_label),
+            theme,
+        ));
+
+    js_picker_shell(
+        &spec.as_picker_shell(),
+        theme,
+        Some(search),
+        selection,
+        body,
+        None,
+        Some(footer_actions),
+    )
+}
+
+fn build_search(
+    spec: &RelationPickerSpec,
+    _theme: &JetstreamThemeProvider,
+    text_primary: glam::Vec4,
+    text_secondary: glam::Vec4,
+    border: glam::Vec4,
+    surface: glam::Vec4,
+    radius: f32,
+) -> JsEl {
+    let mut col = ui_element::div().flex_col().gap(8.0);
+
+    if let Some(ref drill_down) = spec.drill_down {
+        if !spec.drill_down_path.is_empty() {
+            let mut crumbs = ui_element::div().flex_row().items_center().gap(4.0);
+            crumbs = crumbs.child(
+                ui_element::button("Back")
                     .text_color(text_secondary)
-            )
-            .child(
-                ui_element::label(query_text)
-                    .text_color(text_color)
-                    .text_size(font_size)
-                    .grow()
+                    .text_size(12.0)
+                    .focusable(),
             );
 
-        el = el.child(search_row);
-    }
-
-    // ── Loading state ────────────────────────────────────────────
-    if spec.state == BrowseState::Loading {
-        let skel_spec = SkeletonSpec::new();
-        for _ in 0..DEFAULT_LOADING_ROW_COUNT {
-            let row = ui_element::div()
-                .flex_row().items_center().gap(item_gap)
-                .pl(item_px).pr(item_px)
-                .min_h(row_h)
-                .child(js_skeleton(&skel_spec, theme).grow());
-            el = el.child(row);
-        }
-        return el;
-    }
-
-    // ── Filter items by query (case-insensitive substring on label) ──
-    let query_lower = spec.query.trim().to_lowercase();
-    let filtered: Vec<_> = spec
-        .items
-        .iter()
-        .filter(|item| {
-            if query_lower.is_empty() {
-                true
-            } else {
-                item.label.to_lowercase().contains(&query_lower)
-                    || item
-                        .description
-                        .as_deref()
-                        .map(|d| d.to_lowercase().contains(&query_lower))
-                        .unwrap_or(false)
-                    || item
-                        .meta
-                        .as_deref()
-                        .map(|m| m.to_lowercase().contains(&query_lower))
-                        .unwrap_or(false)
+            for (idx, item_id) in spec.drill_down_path.iter().enumerate() {
+                let label = drill_down
+                    .levels
+                    .get(idx)
+                    .and_then(|level| level.items.iter().find(|item| item.id == *item_id))
+                    .map(|item| item.label.clone())
+                    .unwrap_or_else(|| item_id.clone());
+                crumbs = crumbs
+                    .child(
+                        ui_element::label("/")
+                            .text_color(text_secondary)
+                            .text_size(11.0),
+                    )
+                    .child(
+                        ui_element::label(&label)
+                            .text_color(accent_or(text_primary, text_primary))
+                            .text_size(12.0),
+                    );
             }
-        })
-        .collect();
 
-    // ── Empty state ──────────────────────────────────────────────
-    if filtered.is_empty() {
-        el = el.child(
-            ui_element::div()
-                .flex_row().items_center().justify_center()
-                .pl(item_px).pr(item_px).pt(item_py).pb(item_py)
-                .child(
-                    ui_element::label("No results")
+            col = col.child(crumbs);
+        }
+
+        if !drill_down.is_at_leaf(&spec.drill_down_path) {
+            if let Some(level) = drill_down.next_level(&spec.drill_down_path) {
+                col = col.child(
+                    ui_element::label(&level.label.to_uppercase())
                         .text_color(text_secondary)
-                        .text_size(font_size)
-                )
-        );
-        return el;
+                        .text_size(12.0)
+                        .text_weight(600),
+                );
+            }
+        }
     }
 
-    // ── Item rows ────────────────────────────────────────────────
-    for item in &filtered {
-        let is_selected = spec.selected_ids.contains(&item.id);
+    col.child(
+        ui_element::div()
+            .flex_row()
+            .items_center()
+            .gap(8.0)
+            .pl(10.0)
+            .pr(10.0)
+            .pt(6.0)
+            .pb(6.0)
+            .border(1.0)
+            .border_color(border)
+            .rounded(radius)
+            .bg(surface)
+            .child(
+                ui_element::icon("search")
+                    .w(14.0)
+                    .h(14.0)
+                    .text_color(text_secondary),
+            )
+            .child(
+                ui_element::label(if spec.query.is_empty() {
+                    "Search…"
+                } else {
+                    spec.query.as_str()
+                })
+                .text_color(if spec.query.is_empty() {
+                    text_secondary
+                } else {
+                    text_primary
+                })
+                .text_size(13.0),
+            ),
+    )
+}
 
-        // Item row background: accent tint when selected
-        let row_bg = if is_selected {
-            tint(accent, 0.10)
-        } else {
-            tint(surface, 0.86)
-        };
-        let row_border = if is_selected {
-            tint(accent, 0.60)
-        } else {
-            border
-        };
+fn drill_row(
+    item: &poodle_specs::DrillDownItem,
+    theme: &JetstreamThemeProvider,
+    text_primary: glam::Vec4,
+    text_secondary: glam::Vec4,
+    border: glam::Vec4,
+    surface: glam::Vec4,
+    elevated: glam::Vec4,
+    radius: f32,
+) -> JsEl {
+    let meta = item
+        .count
+        .map(|count| format!("{count} items"))
+        .unwrap_or_default();
+    ui_element::button("")
+        .flex_row()
+        .items_center()
+        .justify_between()
+        .gap(12.0)
+        .pl(12.0)
+        .pr(12.0)
+        .pt(8.0)
+        .pb(8.0)
+        .rounded(radius)
+        .border(1.0)
+        .border_color(border)
+        .bg(tint(elevated, 0.88))
+        .focusable()
+        .child(
+            ui_element::div()
+                .flex_col()
+                .gap(2.0)
+                .child(
+                    ui_element::label(&item.label)
+                        .text_color(text_primary)
+                        .text_size(14.0)
+                        .text_weight(600),
+                )
+                .child(
+                    ui_element::label(item.description.as_deref().unwrap_or(""))
+                        .text_color(text_secondary)
+                        .text_size(12.0),
+                ),
+        )
+        .child(
+            ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(8.0)
+                .child(
+                    ui_element::label(&meta)
+                        .text_color(text_secondary)
+                        .text_size(12.0),
+                )
+                .child(
+                    ui_element::icon("chevron-right")
+                        .w(14.0)
+                        .h(14.0)
+                        .text_color(text_secondary),
+                ),
+        )
+}
 
-        // Checkbox via js_checkbox
-        let cb_spec = CheckboxSpec::new().with_checked(is_selected);
-        let checkbox = js_checkbox(&cb_spec, theme);
+#[allow(clippy::too_many_arguments)]
+fn candidate_row(
+    item: &PickerItemSpec,
+    is_selected: bool,
+    selection_mode: SelectionMode,
+    theme: &JetstreamThemeProvider,
+    text_primary: glam::Vec4,
+    text_secondary: glam::Vec4,
+    border: glam::Vec4,
+    accent: glam::Vec4,
+    surface: glam::Vec4,
+    elevated: glam::Vec4,
+    radius: f32,
+    size: poodle_specs::ControlSize,
+    size_role: poodle_specs::SemanticControlSizeRole,
+    density: poodle_specs::ControlDensity,
+) -> JsEl {
+    let row_bg = if is_selected {
+        tint(accent, 0.10)
+    } else {
+        tint(surface, 0.86)
+    };
+    let row_border = if is_selected {
+        tint(accent, 0.60)
+    } else {
+        border
+    };
 
-        // Label + optional description stacked vertically
-        let mut copy_col = ui_element::div()
-            .flex_col().gap(rem_to_px(0.25)).grow()
+    let mut row = ui_element::button("")
+        .flex_row()
+        .items_center()
+        .gap(8.0)
+        .pl(12.0)
+        .pr(12.0)
+        .pt(8.0)
+        .pb(8.0)
+        .border(1.0)
+        .border_color(row_border)
+        .rounded(radius)
+        .bg(row_bg)
+        .focusable();
+
+    if selection_mode == SelectionMode::Multiple {
+        row = row.child(js_checkbox(
+            &CheckboxSpec::new()
+                .with_checked(is_selected)
+                .with_size(size)
+                .with_size_role(size_role)
+                .with_density(density),
+            theme,
+        ));
+    }
+
+    row.child(
+        ui_element::div()
+            .flex_col()
+            .gap(2.0)
             .child(
                 ui_element::label(&item.label)
                     .text_color(text_primary)
-                    .text_size(font_size)
-            );
-
-        if let Some(ref desc) = item.description {
-            copy_col = copy_col.child(
-                ui_element::label(desc)
+                    .text_size(14.0)
+                    .text_weight(600),
+            )
+            .children(item.description.as_ref().map(|description| {
+                ui_element::label(description)
                     .text_color(text_secondary)
-                    .text_size(desc_font)
-            );
-        } else if let Some(ref meta) = item.meta {
-            copy_col = copy_col.child(
+                    .text_size(12.0)
+            }))
+            .children(item.meta.as_ref().map(|meta| {
                 ui_element::label(meta)
                     .text_color(text_secondary)
-                    .text_size(desc_font)
-            );
-        }
+                    .text_size(12.0)
+            })),
+    )
+}
 
-        let row = ui_element::div()
-            .flex_row().items_center().gap(item_gap)
-            .pl(item_px).pr(item_px).pt(item_py).pb(item_py)
-            .min_h(row_h)
-            .border(1.0).border_color(row_border)
-            .rounded(search_radius)
-            .bg(row_bg)
-            .child(checkbox)
-            .child(copy_col);
-
-        el = el.child(row);
+fn accent_or(accent: glam::Vec4, fallback: glam::Vec4) -> glam::Vec4 {
+    if accent == glam::Vec4::ZERO {
+        fallback
+    } else {
+        accent
     }
-
-    el
 }

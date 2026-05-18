@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::media_browse_panel::js_media_browse_panel;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{MediaBrowseItem, MediaBrowsePanelSpec};
+use poodle_specs::{ControlDensity, ControlSize, MediaBrowseItem, MediaBrowsePanelSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -20,8 +20,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("With items", secondary,
             js_media_browse_panel(
                 &MediaBrowsePanelSpec::new()
-                    .with_items(items)
+                    .with_items(items.clone())
                     .with_has_more(true),
+                theme,
+            )
+        ))
+        .child(group("Loading more", secondary,
+            js_media_browse_panel(
+                &MediaBrowsePanelSpec::new()
+                    .with_items(items.clone())
+                    .with_has_more(true)
+                    .with_loading(true),
                 theme,
             )
         ))
@@ -31,8 +40,47 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
             )
         ))
+        .child(group("Error", secondary,
+            js_media_browse_panel(
+                &MediaBrowsePanelSpec::new().with_error("Upload service is unavailable right now."),
+                theme,
+            )
+        ))
         .child(group("Empty", secondary,
-            js_media_browse_panel(&MediaBrowsePanelSpec::new(), theme)
+            js_media_browse_panel(
+                &MediaBrowsePanelSpec::new().with_empty_message("No media matched this filter."),
+                theme,
+            )
+        ))
+        .child(group("Sizes", secondary,
+            div().flex_col().gap(12.0)
+                .child(js_media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(items[..2].to_vec()).with_size(ControlSize::Sm),
+                    theme,
+                ))
+                .child(js_media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(items[..2].to_vec()).with_size(ControlSize::Md),
+                    theme,
+                ))
+                .child(js_media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(items[..2].to_vec()).with_size(ControlSize::Lg),
+                    theme,
+                ))
+        ))
+        .child(group("Densities", secondary,
+            div().flex_col().gap(12.0)
+                .child(js_media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(items[..2].to_vec()).with_density(ControlDensity::Compact),
+                    theme,
+                ))
+                .child(js_media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(items[..2].to_vec()).with_density(ControlDensity::Default),
+                    theme,
+                ))
+                .child(js_media_browse_panel(
+                    &MediaBrowsePanelSpec::new().with_items(items[..2].to_vec()).with_density(ControlDensity::Comfortable),
+                    theme,
+                ))
         ))
 }
 

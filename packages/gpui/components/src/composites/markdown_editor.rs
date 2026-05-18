@@ -4,12 +4,14 @@ use crate::presentation::{
     control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
 };
-use crate::primitives::Icon;
+use crate::primitives::{Icon, IconButton};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::MarkdownEditorSpec;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ControlDensity, ControlSize, IconButtonSpec, IconSize, IconSpec, SemanticControlSizeRole,
+};
 
 pub struct MarkdownEditor {
     spec: MarkdownEditorSpec,
@@ -90,7 +92,6 @@ impl IntoElement for MarkdownEditor {
         let text_color = resolve_color(&self.theme, "color.text.primary");
         let muted = resolve_color(&self.theme, "color.text.secondary");
         let hover_bg = resolve_color(&self.theme, "color.bg.hover");
-        let active_bg = resolve_color(&self.theme, "color.bg.active");
         let body_size = px(font_size);
 
         let display = if self.spec.value.is_empty() {
@@ -149,26 +150,29 @@ impl IntoElement for MarkdownEditor {
         // Toolbar separator
         let separator = || -> Div { div().w(px(1.0)).h(px(16.0)).bg(border).mx(gap_sm) };
 
-        // Helper: mode switcher button
-        let mode_btn = |label: &'static str,
+        let mode_btn = |icon: &'static str,
+                        tooltip: &'static str,
                         is_active: bool,
                         mode_val: &'static str,
                         handler: &Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>>|
-         -> Stateful<Div> {
-            let id = SharedString::from(format!("poodle-md-mode-{}", mode_val));
-            let mut btn = div()
-                .id(id)
-                .px(gap_sm)
-                .py(px(3.0))
-                .rounded(radius_control)
-                .text_size(label_size)
-                .cursor(CursorStyle::PointingHand)
-                .child(label.to_string());
-            if is_active {
-                btn = btn.bg(active_bg).text_color(text_color);
-            } else {
-                btn = btn.text_color(muted).hover(|s| s.bg(hover_bg));
-            }
+         -> AnyElement {
+            let mut btn = IconButton::from_spec(
+                IconButtonSpec::new()
+                    .with_icon(icon)
+                    .with_aria_label(tooltip)
+                    .with_tooltip(tooltip)
+                    .with_variant(if is_active {
+                        poodle_specs::ButtonVariant::Secondary
+                    } else {
+                        poodle_specs::ButtonVariant::Ghost
+                    })
+                    .with_size(spec.size)
+                    .with_size_role(spec.size_role)
+                    .with_density(spec.density),
+                theme,
+            )
+            .with_id(format!("md-mode-{mode_val}"));
+
             if !is_active {
                 if let Some(ref h) = handler {
                     let h = h.clone();
@@ -178,7 +182,8 @@ impl IntoElement for MarkdownEditor {
                     });
                 }
             }
-            btn
+
+            btn.into_any_element()
         };
 
         // Toolbar
@@ -212,12 +217,22 @@ impl IntoElement for MarkdownEditor {
                         .flex()
                         .flex_row()
                         .gap(px(2.0))
-                        .px(px(2.0))
-                        .py(px(2.0))
-                        .rounded(radius_control)
-                        .child(mode_btn("Edit", mode == "edit", "edit", &on_mode_rc))
-                        .child(mode_btn("Split", mode == "split", "split", &on_mode_rc))
                         .child(mode_btn(
+                            "pencil",
+                            "Edit",
+                            mode == "edit",
+                            "edit",
+                            &on_mode_rc,
+                        ))
+                        .child(mode_btn(
+                            "columns-2",
+                            "Split",
+                            mode == "split",
+                            "split",
+                            &on_mode_rc,
+                        ))
+                        .child(mode_btn(
+                            "eye",
                             "Preview",
                             mode == "preview",
                             "preview",

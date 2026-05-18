@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, OrderBy};
-use poodle_specs::{ActiveSort, EyebrowSpec, OrderBySpec, SortDirection, SortField};
+use poodle_specs::{EyebrowSpec, OrderByField, OrderBySpec, SortDirection, SortField};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -39,7 +39,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     SortField::new("size", "Size"),
                                     SortField::new("type", "Type").with_disabled(true),
                                 ])
-                                .with_active_sort(ActiveSort::new("name", SortDirection::Asc)),
+                                .with_value(vec![
+                                    OrderByField::new("name", SortDirection::Asc),
+                                    OrderByField::new("date", SortDirection::Desc),
+                                ])
+                                .with_open(true),
                             theme,
                         ))
                         .child(
@@ -66,7 +70,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             SortField::new("name", "Name"),
                             SortField::new("date", "Date"),
                         ])
-                        .with_disabled(true),
+                        .with_disabled(true)
+                        .with_open(true),
                     theme,
                 )),
         )
@@ -84,7 +89,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         SortField::new("name", "Name"),
                         SortField::new("date", "Date"),
                     ])
-                    .with_active_sort(ActiveSort::new("name", SortDirection::Asc)),
+                    .with_value(vec![OrderByField::new("name", SortDirection::Asc)])
+                    .with_open(true),
                 theme,
             )
             .size(size)
@@ -97,7 +103,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         SortField::new("name", "Name"),
                         SortField::new("date", "Date"),
                     ])
-                    .with_active_sort(ActiveSort::new("name", SortDirection::Asc)),
+                    .with_value(vec![OrderByField::new("name", SortDirection::Asc)])
+                    .with_open(true),
                 theme,
             )
             .with_density(density)

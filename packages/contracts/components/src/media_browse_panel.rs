@@ -8,6 +8,7 @@ pub struct MediaBrowseItem {
     pub label: String,
     pub kind: String,
     pub meta: Option<String>,
+    pub thumbnail_url: Option<String>,
 }
 
 impl MediaBrowseItem {
@@ -17,6 +18,7 @@ impl MediaBrowseItem {
             label: label.into(),
             kind: kind.into(),
             meta: None,
+            thumbnail_url: None,
         }
     }
 
@@ -24,17 +26,40 @@ impl MediaBrowseItem {
         self.meta = Some(meta.into());
         self
     }
+
+    pub fn with_thumbnail_url(mut self, thumbnail_url: impl Into<String>) -> Self {
+        self.thumbnail_url = Some(thumbnail_url.into());
+        self
+    }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct MediaBrowsePanelSpec {
     pub items: Vec<MediaBrowseItem>,
     pub loading: bool,
     pub error: Option<String>,
     pub has_more: bool,
+    pub empty_message: String,
+    pub load_more_label: String,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+}
+
+impl Default for MediaBrowsePanelSpec {
+    fn default() -> Self {
+        Self {
+            items: Vec::new(),
+            loading: false,
+            error: None,
+            has_more: false,
+            empty_message: String::from("No media found"),
+            load_more_label: String::from("Load more"),
+            size: ControlSize::default(),
+            size_role: SemanticControlSizeRole::default(),
+            density: ControlDensity::default(),
+        }
+    }
 }
 
 impl MediaBrowsePanelSpec {
@@ -56,6 +81,16 @@ impl MediaBrowsePanelSpec {
     }
     pub fn with_has_more(mut self, v: bool) -> Self {
         self.has_more = v;
+        self
+    }
+
+    pub fn with_empty_message(mut self, v: impl Into<String>) -> Self {
+        self.empty_message = v.into();
+        self
+    }
+
+    pub fn with_load_more_label(mut self, v: impl Into<String>) -> Self {
+        self.load_more_label = v.into();
         self
     }
 

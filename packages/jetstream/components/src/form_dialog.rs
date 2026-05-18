@@ -87,7 +87,7 @@ pub fn js_form_dialog(
 
     // ── Actions ──
     let actions: Option<JsEl> = if let Some(custom) = custom_actions {
-        Some(custom)
+        Some(ui_element::div().w_full().child(custom))
     } else if spec.show_default_actions {
         let submit_disabled = spec.is_submitting || spec.is_disabled;
         let control_radius = resolve_radius(theme, "radius.control");

@@ -14,6 +14,10 @@ pub struct PickerShellSpec {
     pub result_count: Option<usize>,
     pub selected_count: usize,
     pub aria_label: Option<String>,
+    pub state_title: Option<String>,
+    pub state_message: Option<String>,
+    pub status_text: Option<String>,
+    pub status_id: Option<String>,
 }
 
 impl PickerShellSpec {
@@ -28,6 +32,10 @@ impl PickerShellSpec {
             result_count: None,
             selected_count: 0,
             aria_label: None,
+            state_title: None,
+            state_message: None,
+            status_text: None,
+            status_id: None,
         }
     }
 
@@ -71,6 +79,26 @@ impl PickerShellSpec {
         self
     }
 
+    pub fn with_state_title(mut self, state_title: impl Into<String>) -> Self {
+        self.state_title = Some(state_title.into());
+        self
+    }
+
+    pub fn with_state_message(mut self, state_message: impl Into<String>) -> Self {
+        self.state_message = Some(state_message.into());
+        self
+    }
+
+    pub fn with_status_text(mut self, status_text: impl Into<String>) -> Self {
+        self.status_text = Some(status_text.into());
+        self
+    }
+
+    pub fn with_status_id(mut self, status_id: impl Into<String>) -> Self {
+        self.status_id = Some(status_id.into());
+        self
+    }
+
     pub fn is_modal_like(&self) -> bool {
         matches!(self.variant, PickerVariant::Modal | PickerVariant::Popover)
     }
@@ -87,5 +115,52 @@ impl PickerShellSpec {
 
     pub fn footer_gap_token(&self) -> &'static str {
         semantic::SPACE_INLINE_MD
+    }
+
+    pub fn selected_count_text(&self) -> String {
+        match self.selection_mode {
+            SelectionMode::Single => {
+                if self.selected_count == 1 {
+                    String::from("1 selected")
+                } else {
+                    String::from("0 selected")
+                }
+            }
+            SelectionMode::Multiple => format!("{} selected", self.selected_count),
+        }
+    }
+
+    pub fn result_count_text(&self) -> Option<String> {
+        self.result_count.map(|count| {
+            format!("{} result{}", count, if count == 1 { "" } else { "s" })
+        })
+    }
+
+    pub fn effective_state_title(&self) -> &str {
+        if let Some(ref title) = self.state_title {
+            return title;
+        }
+
+        match self.state {
+            BrowseState::Loading => "Loading results",
+            BrowseState::Error => "Something went wrong",
+            BrowseState::Empty => "Nothing here yet",
+            BrowseState::NoResults => "No results",
+            BrowseState::Ready => "Picker state",
+        }
+    }
+
+    pub fn effective_state_message(&self) -> Option<&str> {
+        if let Some(ref message) = self.state_message {
+            return Some(message.as_str());
+        }
+
+        match self.state {
+            BrowseState::Loading => Some("Searching…"),
+            BrowseState::Error => Some("Search failed."),
+            BrowseState::Empty => Some("No items are available yet."),
+            BrowseState::NoResults => Some("No results found."),
+            BrowseState::Ready => None,
+        }
     }
 }

@@ -1,7 +1,9 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, Field, FormDialog, TextInput};
-use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, TextInputSpec};
+use poodle_gpui_components::{Button, Eyebrow, Field, FormActions, FormDialog, TextInput};
+use poodle_specs::{
+    ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionsSpec, TextInputSpec,
+};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
@@ -130,38 +132,38 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             ),
                         )
                         .with_actions(
-                            div()
-                                .flex()
-                                .gap(px(8.0))
-                                .justify_end()
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Ghost)
-                                            .with_label("Cancel"),
-                                        theme,
-                                    )
-                                    .with_id("fd-shell-cancel"),
+                            FormActions::from_spec(
+                                FormActionsSpec::new().with_top_separation(false),
+                                theme,
+                            )
+                            .with_action(
+                                Button::from_spec(
+                                    ButtonSpec::new()
+                                        .with_variant(ButtonVariant::Ghost)
+                                        .with_label("Cancel"),
+                                    theme,
                                 )
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Secondary)
-                                            .with_tone(ButtonTone::Danger)
-                                            .with_label("Reset defaults"),
-                                        theme,
-                                    )
-                                    .with_id("fd-shell-reset"),
+                                .with_id("fd-shell-cancel"),
+                            )
+                            .with_action(
+                                Button::from_spec(
+                                    ButtonSpec::new()
+                                        .with_variant(ButtonVariant::Secondary)
+                                        .with_tone(ButtonTone::Danger)
+                                        .with_label("Reset defaults"),
+                                    theme,
                                 )
-                                .child(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Primary)
-                                            .with_label("Save changes"),
-                                        theme,
-                                    )
-                                    .with_id("fd-shell-save"),
-                                ),
+                                .with_id("fd-shell-reset"),
+                            )
+                            .with_action(
+                                Button::from_spec(
+                                    ButtonSpec::new()
+                                        .with_variant(ButtonVariant::Primary)
+                                        .with_label("Save changes"),
+                                    theme,
+                                )
+                                .with_id("fd-shell-save"),
+                            ),
                         ),
                 ),
         )
