@@ -162,22 +162,43 @@
 
 <style>
   .poodle-card-toggle-group {
+    --poodle-card-toggle-group-gap: 0.75rem;
+    --poodle-card-toggle-group-min-width: 12rem;
     display: grid;
-    grid-template-columns: repeat(var(--columns, 2), 1fr);
-    gap: 0.75rem;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        min(
+          100%,
+          max(
+            var(--poodle-card-toggle-group-min-width),
+            calc(
+              (100% - (var(--columns, 2) - 1) * var(--poodle-card-toggle-group-gap)) / var(--columns, 2)
+            )
+          )
+        ),
+        1fr
+      )
+    );
+    gap: var(--poodle-card-toggle-group-gap);
   }
 
   .poodle-card-toggle-group[data-density="compact"] {
-    gap: 0.5rem;
+    --poodle-card-toggle-group-gap: 0.5rem;
   }
 
   .poodle-card-toggle-group[data-density="comfortable"] {
-    gap: 1rem;
+    --poodle-card-toggle-group-gap: 1rem;
   }
 
   .poodle-card-toggle-group__option {
+    height: 100%;
     cursor: pointer;
     outline: none;
+  }
+
+  .poodle-card-toggle-group__option :global(.poodle-card) {
+    height: 100%;
   }
 
   .poodle-card-toggle-group__option:focus-visible :global(.poodle-card) {
