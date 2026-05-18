@@ -137,16 +137,6 @@
       <Card interactive={!isItemDisabled} selected={isSelected} density={resolvedDensity} ariaLabel={item.label}>
         {#snippet header()}
           <div class="poodle-card-toggle-group__header">
-            <span
-              class="poodle-card-toggle-group__indicator"
-              data-selected={isSelected}
-              data-disabled={isItemDisabled}
-              aria-hidden="true"
-            >
-              {#if isSelected}
-                <span class="poodle-card-toggle-group__check"></span>
-              {/if}
-            </span>
             <span class="poodle-card-toggle-group__title" data-disabled={isItemDisabled}>
               {item.label}
             </span>
@@ -203,36 +193,7 @@
   .poodle-card-toggle-group__header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-
-  .poodle-card-toggle-group__indicator {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.125rem;
-    height: 1.125rem;
-    flex-shrink: 0;
-    border: 0.125rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-xs, 0.25rem);
-    background: transparent;
-    transition:
-      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
-      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
-  }
-
-  .poodle-card-toggle-group__indicator[data-selected="true"] {
-    border-color: var(--poodle-color-accent-base);
-    background: var(--poodle-color-accent-base);
-  }
-
-  .poodle-card-toggle-group__check {
-    width: 0.5rem;
-    height: 0.3125rem;
-    border-bottom: 0.125rem solid var(--poodle-color-text-inverse);
-    border-left: 0.125rem solid var(--poodle-color-text-inverse);
-    transform: translateY(-0.0625rem) rotate(-45deg);
+    gap: 0.75rem;
   }
 
   .poodle-card-toggle-group__title {
@@ -261,27 +222,12 @@
     color: var(--poodle-color-text-secondary);
   }
 
-  .poodle-card-toggle-group[data-size="xs"] .poodle-card-toggle-group__indicator {
-    width: 0.875rem;
-    height: 0.875rem;
-  }
-
-  .poodle-card-toggle-group[data-size="xs"] .poodle-card-toggle-group__check {
-    width: 0.375rem;
-    height: 0.25rem;
-  }
-
   .poodle-card-toggle-group[data-size="xs"] .poodle-card-toggle-group__title {
     font-size: 0.75rem;
   }
 
   .poodle-card-toggle-group[data-size="xs"] .poodle-card-toggle-group__description {
     font-size: 0.6875rem;
-  }
-
-  .poodle-card-toggle-group[data-size="sm"] .poodle-card-toggle-group__indicator {
-    width: 1rem;
-    height: 1rem;
   }
 
   .poodle-card-toggle-group[data-size="sm"] .poodle-card-toggle-group__title {
@@ -292,32 +238,12 @@
     font-size: 0.75rem;
   }
 
-  .poodle-card-toggle-group[data-size="lg"] .poodle-card-toggle-group__indicator {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
-  .poodle-card-toggle-group[data-size="lg"] .poodle-card-toggle-group__check {
-    width: 0.5625rem;
-    height: 0.375rem;
-  }
-
   .poodle-card-toggle-group[data-size="lg"] .poodle-card-toggle-group__title {
     font-size: 1.0625rem;
   }
 
   .poodle-card-toggle-group[data-size="lg"] .poodle-card-toggle-group__description {
     font-size: 0.875rem;
-  }
-
-  .poodle-card-toggle-group[data-size="xl"] .poodle-card-toggle-group__indicator {
-    width: 1.375rem;
-    height: 1.375rem;
-  }
-
-  .poodle-card-toggle-group[data-size="xl"] .poodle-card-toggle-group__check {
-    width: 0.625rem;
-    height: 0.4375rem;
   }
 
   .poodle-card-toggle-group[data-size="xl"] .poodle-card-toggle-group__title {
