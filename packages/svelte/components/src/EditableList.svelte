@@ -2,6 +2,8 @@
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
+  import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -398,20 +400,21 @@
             {/if}
           </span>
           {#if showRemove}
-            <button
-              type="button"
-              class="poodle-editable-list__remove"
-              disabled={isUnavailable}
-              aria-label={`Remove ${reorderItem.label ?? reorderItem.id}`}
-              onclick={(event) => {
-                event.stopPropagation();
-                removeItem(reorderItem.id);
-              }}
-            >
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              </svg>
-            </button>
+            <div class="poodle-editable-list__remove poodle-editable-list__remove--danger-on-hover">
+              <IconButton
+                icon="x"
+                variant="ghost"
+                size={resolvedSize}
+                sizeRole="chrome"
+                density={resolvedDensity}
+                disabled={isUnavailable}
+                ariaLabel={`Remove ${reorderItem.label ?? reorderItem.id}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  removeItem(reorderItem.id);
+                }}
+              />
+            </div>
           {/if}
         </li>
       {/each}
@@ -419,22 +422,27 @@
 
     {#if canAdd}
       <div class="poodle-editable-list__add">
-        <input
-          type="text"
-          class="poodle-editable-list__add-input"
-          bind:value={newItemText}
-          placeholder={addPlaceholder}
-          disabled={isUnavailable}
-          onkeydown={handleAddKeydown}
-        />
-        <button
-          type="button"
-          class="poodle-editable-list__add-btn"
-          disabled={!newItemText.trim() || !canAdd}
-          onclick={addItem}
-        >
-          {addLabel}
-        </button>
+        <div class="poodle-editable-list__add-input">
+          <TextInput
+            bind:value={newItemText}
+            placeholder={addPlaceholder}
+            disabled={isUnavailable}
+            size={resolvedSize}
+            density={resolvedDensity}
+            onKeyDown={handleAddKeydown}
+          />
+        </div>
+        <div class="poodle-editable-list__add-btn">
+          <Button
+            type="button"
+            variant="primary"
+            size={resolvedSize}
+            disabled={!newItemText.trim() || !canAdd}
+            onClick={addItem}
+          >
+            {addLabel}
+          </Button>
+        </div>
       </div>
     {/if}
 
@@ -639,32 +647,18 @@
   }
 
   .poodle-editable-list__remove {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(var(--poodle-size-control-height) - 0.25rem);
-    height: calc(var(--poodle-size-control-height) - 0.25rem);
-    border: 0;
-    border-radius: var(--poodle-radius-control);
-    background: transparent;
-    color: var(--poodle-color-text-secondary);
-    cursor: pointer;
     flex-shrink: 0;
   }
 
-  .poodle-editable-list__remove:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
+  .poodle-editable-list__remove--danger-on-hover :global(.poodle-icon-button) {
+    color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-editable-list__remove--danger-on-hover :global(.poodle-icon-button:hover:not(:disabled)),
+  .poodle-editable-list__remove--danger-on-hover :global(.poodle-icon-button:focus-visible:not(:disabled)) {
     color: var(--poodle-color-status-danger);
-  }
-
-  .poodle-editable-list__remove:disabled {
-    cursor: not-allowed;
-    opacity: var(--poodle-state-opacity-disabled);
-  }
-
-  .poodle-editable-list__remove svg {
-    width: 0.75rem;
-    height: 0.75rem;
+    border-color: color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default));
+    background: color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent);
   }
 
   .poodle-editable-list__add {
@@ -676,35 +670,10 @@
   .poodle-editable-list__add-input {
     flex: 1 1 auto;
     min-width: 0;
-    height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid var(--poodle-color-border-default);
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-background-surface);
-    color: var(--poodle-color-text-primary);
-    font: inherit;
-  }
-
-  .poodle-editable-list__add-input:focus {
-    outline: none;
-    border-color: var(--poodle-color-accent-focusRing);
-    box-shadow: 0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing);
   }
 
   .poodle-editable-list__add-btn {
-    height: var(--poodle-size-control-height);
-    padding: 0 var(--poodle-space-control-x);
-    border: 0;
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-color-accent-base);
-    color: var(--poodle-color-text-onAccent);
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .poodle-editable-list__add-btn:disabled {
-    cursor: not-allowed;
-    opacity: var(--poodle-state-opacity-disabled);
+    flex-shrink: 0;
   }
 
   .poodle-editable-list__count {
