@@ -1,7 +1,7 @@
 # MediaBrowsePanel
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -34,7 +34,7 @@ Updated: 2026-03-30
 
 | Part | Element | Notes |
 |------|---------|-------|
-| root | `<div>` | Container with class `media-browse-panel`, `min-height: 18rem` |
+| root | `<div>` | Container with class `media-browse-panel`, full width, `box-sizing: border-box`, `min-height: 18rem` |
 | state | `<div>` | Centered state area for loading/empty postures |
 | error | `Callout` | Danger-tone callout for error state |
 | grid | `<div>` | CSS auto-fill grid of media items |
@@ -139,6 +139,7 @@ own.
 ### Sizing
 
 - Root: `min-height: 18rem`
+- Root: `width: 100%`, `box-sizing: border-box`
 - Grid: CSS `auto-fill` grid with semantic size-driven minimum column width, density-aware gap, `margin-top` equal to grid gap
 - Item: grid layout, density-aware gap and padding, border `0.0625rem solid border-subtle`, `radius-surface`
 - Image: `display: block`, `width: 100%`, `height: 100%`, `object-fit: cover`
@@ -165,6 +166,8 @@ own.
 
 | Property | Value |
 |----------|-------|
+| width | `100%` |
+| box-sizing | `border-box` |
 | min-height | `18rem` |
 
 ### Grid `.media-browse-panel__grid`
@@ -234,6 +237,8 @@ own.
 | Property | Value |
 |----------|-------|
 | display | `flex` |
+| width | `100%` |
+| align-items | `center` |
 | justify-content | `center` |
 | margin-top | same as grid gap |
 
@@ -271,6 +276,8 @@ own.
 - Load-more button label switches to `"Loading..."` when `loading` is true and `hasMore`
 - Wraps content in `UiPresentationProvider` with resolved size scale and density
 - Uses `resolveSemanticControlSize()` and `getUiPresentation()` for presentation context
+- Root and load-more action row both pin `width: 100%` so the panel and footer
+  align consistently inside broader specimen or shell layouts
 
 ## 10. GPUI Notes
 

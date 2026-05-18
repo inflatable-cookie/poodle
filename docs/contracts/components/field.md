@@ -1,7 +1,7 @@
 # Field
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -47,7 +47,7 @@ Updated: 2026-03-30
 | Info Icon | no | small icon button inside label row; scales with label font-size via em units | pill radius, secondary background |
 | Optional Marker | no | text marker when field is not required | body typography, secondary text color |
 | Required Marker | no | visual required indicator | status-danger color |
-| Control Content | yes | injected input/select/textarea control | inherited from child control |
+| Control Content | yes | injected input/select/textarea control | local presentation context passed through to the child control |
 | Validation Message | no | error or pending copy below the control | body typography, status color |
 
 ## 3. Props And Inputs
@@ -96,6 +96,9 @@ label and control.
 - `messageId`: id of the active validation message element
 - `validationState`: passed through so the child control can render its own
   validation border
+- Both `control(...)` and default `children()` render inside a local
+  `UiPresentationProvider`, so child controls inherit the field's resolved
+  `size` and `density`
 
 ### Controlled And Uncontrolled
 
@@ -166,6 +169,14 @@ embedded Popover component.
 - layout rule: Field owns vertical stacking and messaging; child control
   owns its own chrome
 
+### Density Adjustments
+
+| Density | Root gap | Header gap | Label-row gap |
+|---------|----------|------------|---------------|
+| `compact` | `0.375rem` | `0.5rem` | `0.3125rem` |
+| `default` | `var(--poodle-space-stack-sm)` | `var(--poodle-space-inline-md)` | `0.375rem` |
+| `comfortable` | `0.625rem` | `0.875rem` | `0.4375rem` |
+
 ## 8. Token Usage — Exact Values
 
 ### Root `.field`
@@ -197,7 +208,7 @@ embedded Popover component.
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-primary)` |
+| `color` | `color-mix(in srgb, var(--poodle-color-text-primary) 45%, var(--poodle-color-text-secondary))` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
@@ -245,6 +256,8 @@ embedded Popover component.
 - `hint` prop kept as deprecated alias for `description`
 - Size variants set font-size on `.field__label-row` (not `.field__label`)
   so both label text and em-based icon scale together
+- Child controls render inside a local `UiPresentationProvider` so field-level
+  `size` and `density` cascade into the control chrome
 
 ## 10. GPUI Notes
 

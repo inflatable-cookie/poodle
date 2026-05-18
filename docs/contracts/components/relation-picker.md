@@ -1,7 +1,7 @@
 # RelationPicker
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -23,7 +23,7 @@ Updated: 2026-03-30
         │     │     └── [BreadcrumbItem...]
         │     ├── [DrillLevelLabel]   (when drilling)
         │     ├── [TextInput type="search"]       (drill search or main search)
-        ├── [SelectionSummary]  (selection snippet, hidden while drilling)
+        ├── [SelectionSummary]  (selection snippet, visible whenever there is a selection)
         ├── [DrillList]         (when drilling, replaces candidate list)
         │     └── [DrillListItem...]
         │           └── [DrillButton]
@@ -62,7 +62,7 @@ Updated: 2026-03-30
 | drill-breadcrumb-item | `<button>` | Clickable breadcrumb, navigates to that level |
 | drill-level-label | `<div>` | Uppercase label for current drill level |
 | search-field | `TextInput type="search"` | Main or drill search, with clear and keydown handling |
-| selection-summary | `SelectionSummary` | Removable selection pills, hidden during drilling |
+| selection-summary | `SelectionSummary` | Removable selection pills; remains visible during drill navigation whenever there is at least one selection |
 | drill-list | `<ul>` | Grid list of drill-down items |
 | drill-button | `<button>` | Full-width button for each drill item |
 | drill-copy | `<span>` | Grid of label and description |
@@ -82,8 +82,8 @@ Updated: 2026-03-30
 | `title` | `string` | `"Select items"` | no | Picker heading text |
 | `description` | `string \| null` | `null` | no | Subheading below title |
 | `items` | `PickerItem[]` | `[]` | no | Flat candidate list |
-| `selectedIds` | `string[]` | `[]` | no | Controlled selection state |
-| `query` | `string` | `""` | no | Controlled search query |
+| `selectedIds` | `string[] \| undefined` | `undefined` | no | Controlled selection state when supplied; uncontrolled local state otherwise |
+| `query` | `string \| undefined` | `undefined` | no | Controlled search query when supplied; uncontrolled local state otherwise |
 | `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | Selection semantics |
 | `variant` | `"inline" \| "popover" \| "modal"` | `"inline"` | no | Workflow posture |
 | `state` | `"ready" \| "empty" \| "loading" \| "error" \| "no-results"` | `"ready"` | no | Candidate-set posture |
@@ -147,9 +147,10 @@ type SelectionMode = "single" | "multiple";
 
 ### Controlled / Uncontrolled
 
-- `selectedIds` and `query` are controlled props; host owns final state
+- `selectedIds` and `query` can run controlled or uncontrolled
 - Drill-down state (depth, selections, drill search query) is managed internally
-- `query` is also updated internally on search and passed back via `onQueryChange`
+- In uncontrolled mode, local state is still mirrored through
+  `onSelectionChange` and `onQueryChange`
 
 ## 4. States
 
@@ -161,6 +162,7 @@ type SelectionMode = "single" | "multiple";
 | drilling | `drillDown` configured, depth < levels.length | Drill list shown with level items, breadcrumbs, back button, drill search |
 | drill-complete | All drill levels selected | Final items loaded (via `finalItems` fn or flat `items`), candidate list shown with breadcrumbs |
 | drill-loading | Level items is async function, awaiting | PickerShell in loading state |
+| selection-visible-while-drilling | `selectedIds.length > 0` during drill navigation | SelectionSummary remains visible while changing branches or levels |
 | empty | `state="empty"` | State area with empty message |
 | loading | `state="loading"` | State area with spinner and loading message |
 | error | `state="error"` | State area with error message |
@@ -213,6 +215,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 - Candidate focus wraps (last to first, first to last)
 - Live-region behavior: status text updated on filter/selection changes
 - `candidateButtons` array provides programmatic focus management
+- In single-select mode the full candidate row is the active button hit area
 
 ## 7. Layout
 
@@ -228,6 +231,8 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 - Composes: `PickerShell`, `SelectionSummary`, `TextInput type="search"`, `Checkbox`, `Button`, `FormActions`, `Icon`
 - Parent expectations: inline containers, popovers, modal dialogs
 - Wraps children in `UiPresentationProvider` with resolved size and density
+- SelectionSummary item labels are cached from visited candidate and final-item
+  sets so drill navigation does not blank previously selected labels
 
 ## 8. Token Usage — Exact Values
 
@@ -380,7 +385,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| gap | `var(--poodle-space-stack-sm)` |
+| gap | `var(--poodle-relation-picker-list-gap)` |
 | margin | `0` |
 | padding | `0` |
 | list-style | `none` |
@@ -390,15 +395,14 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 | Property | Value |
 |----------|-------|
 | display | `grid` |
-| grid-template-columns | `auto minmax(0, 1fr) auto` |
+| grid-template-columns | `auto minmax(0, 1fr) auto` (`multiple`) / `minmax(0, 1fr)` (`single`) |
 | align-items | `center` |
-| gap | `var(--poodle-space-inline-md)` |
-| padding | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| gap | `var(--poodle-relation-picker-item-gap)` |
+| padding | `var(--poodle-relation-picker-item-y) var(--poodle-relation-picker-item-x)` |
 | border | `0.0625rem solid var(--poodle-color-border-subtle)` |
-| border-radius | `var(--poodle-radius-surface)` |
+| border-radius | `var(--poodle-radius-control)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-surface) 86%, transparent)` |
 | color | `var(--poodle-color-text-primary)` |
-| font-size | `var(--poodle-typography-label-size, 0.75rem)` |
 
 #### Candidate Item Selected `[data-selected="true"]`
 
@@ -434,16 +438,18 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 | gap | `0.25rem` |
 | `strong`, `small`, footer-note margin | `0` |
 | `small` color | `var(--poodle-color-text-secondary)` |
-| `small` font-size | `0.8125rem` |
-| `small` line-height | `1.5` |
+| `small` font-size | `var(--poodle-relation-picker-desc-size)` |
+| `small` line-height | `1.4` |
 
 ### Footer Note `.relation-picker__footer-note`
 
 | Property | Value |
 |----------|-------|
+| `flex` | `1 1 18rem` |
+| `min-width` | `0` |
 | margin | `0` |
 | color | `var(--poodle-color-text-secondary)` |
-| font-size | `0.8125rem` |
+| font-size | `var(--poodle-relation-picker-desc-size)` |
 | line-height | `1.5` |
 
 ### Footer Actions `.relation-picker__footer-actions`
@@ -453,6 +459,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 | display | `flex` |
 | flex-wrap | `wrap` |
 | gap | `var(--poodle-space-inline-sm)` |
+| `margin-left` | `auto` |
 | justify-content | `flex-end` |
 
 ### Size Adjustments
@@ -469,13 +476,12 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 
 | Density | List Y padding | List gap |
 |---------|---------------|----------|
-| `compact` | `0.375rem` | `0.0625rem` |
-| `default` | `0.5rem` | `0.125rem` |
-| `comfortable` | `0.625rem` | `0.1875rem` |
+| `compact` | `0.5rem` | `0.1875rem` |
+| `default` | `0.5rem` | `0.25rem` |
+| `comfortable` | `0.5rem` | `0.3125rem` |
 
 ## 9. Svelte Notes
 
-- Uses `createEventDispatcher` for all events
 - Internal `statusId` used for `aria-describedby` on search field
 - `candidateButtons` array for programmatic focus management
 - Drill-down state is reactive via runes-based derived and effect logic
@@ -491,6 +497,10 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 - `pickerStatusText` provides contextual status announcements
 - Footer note text changes based on `selectionMode`
 - Wraps content in `UiPresentationProvider` with resolved size and density
+- `selectedIds` and `query` each support uncontrolled fallback state when the
+  corresponding prop is omitted
+- Selection labels are cached across visited drill branches so the summary
+  stays stable while navigating away from the current branch
 
 ## 10. GPUI Notes
 

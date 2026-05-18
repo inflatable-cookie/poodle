@@ -1,7 +1,7 @@
 # SelectionSummary
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -24,7 +24,7 @@ Updated: 2026-03-30
         │     ├── [ChipLabel]
         │     └── [RemoveIcon]  Icon "x", aria-hidden
         ├── [Overflow <span>]                  (when items.length > maxVisibleItems)
-        └── [ClearLink .selection-summary__clear]  <button> (when items.length > 0, pushed right via margin-left: auto)
+        └── [ClearLink .selection-summary__clear]  TextLink (when items.length > 0, pushed right via margin-left: auto)
 ```
 
 ### Parts
@@ -37,7 +37,7 @@ Updated: 2026-03-30
 | Chip | `<button>` | Shows item label with remove (x) icon; `aria-label="Remove {item.label}"` |
 | RemoveIcon | `<span>` | Wraps `Icon` with `name="x"`, `aria-hidden="true"` |
 | Overflow | `<span>` | "+N more" text for truncated items |
-| ClearLink | `<button>` | Inline "Clear" link-style button; pushed right via `margin-left: auto` |
+| ClearLink | `TextLink` | Inline "Clear" link-style action; pushed right via `margin-left: auto` |
 
 ## 3. Props And Inputs
 
@@ -80,7 +80,7 @@ No internal component state.
 | Callback | When It Runs | Payload | Notes |
 |----------|--------------|---------|-------|
 | `onRemove` | chip remove button clicked | `string` | host removes the item from selection |
-| `onClear` | clear button clicked | none | host clears all selections |
+| `onClear` | clear link clicked | none | host clears all selections |
 
 ## 6. Accessibility
 
@@ -96,12 +96,11 @@ No internal component state.
 ### Sizing
 
 - Root fills available width
-- Chips container uses `flex-wrap` with `gap: var(--poodle-space-inline-sm)`
-- Chips container has `min-height: calc(var(--poodle-size-control-height) - 0.5rem)` for reserved space
-- Chip internal gap: `var(--poodle-space-inline-md)`
-- Chip min-height: `calc(var(--poodle-size-control-height) - 0.25rem)`
-- Chip inline padding: `0 0.75rem`
-- Overflow badge line-height: `2rem`, padding `0 0.625rem`
+- Chips container uses `flex-wrap` with density-aware gap
+- Chips container has a size-specific reserved `min-height`
+- Chip internal gap follows the same density-aware gap token
+- Chip min-height, inline padding, overflow badge line-height, and remove icon
+  size all scale with the component's explicit or inherited `size`
 
 ### Composition
 
@@ -132,8 +131,8 @@ No internal component state.
 | `display` | `flex` |
 | `flex-wrap` | `wrap` |
 | `align-items` | `center` |
-| `gap` | `var(--poodle-space-inline-sm)` |
-| `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
+| `gap` | `var(--poodle-selection-summary-gap)` |
+| `min-height` | `var(--poodle-selection-summary-chips-min-height)` |
 
 ### `.selection-summary__empty`
 
@@ -147,13 +146,14 @@ No internal component state.
 | Property | Value |
 |----------|-------|
 | `display` | `inline-flex` |
-| `gap` | `var(--poodle-space-inline-md)` |
+| `gap` | `var(--poodle-selection-summary-gap)` |
 | `align-items` | `center` |
-| `min-height` | `calc(var(--poodle-size-control-height) - 0.25rem)` |
-| `padding` | `0 0.75rem` |
+| `min-height` | `var(--poodle-selection-summary-chip-min-height)` |
+| `padding` | `0 var(--poodle-selection-summary-chip-padding-x)` |
 | `border` | `0.0625rem solid transparent` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 60%, var(--poodle-color-background-elevated))` |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 70%, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
@@ -163,13 +163,7 @@ No internal component state.
 | Property | Value |
 |----------|-------|
 | `margin-left` | `auto` |
-| `padding` | `0` |
-| `border` | `0` |
-| `background` | `transparent` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `cursor` | `pointer` |
-| `font` | `inherit` |
-| `font-size` | `var(--poodle-typography-label-size, 0.75rem)` |
+| `font-size` | `var(--poodle-selection-summary-clear-font-size)` |
 
 ### `.selection-summary__clear:hover`
 
@@ -182,11 +176,12 @@ No internal component state.
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `2rem` |
-| `padding` | `0 0.625rem` |
+| `font-size` | `var(--poodle-selection-summary-overflow-font-size)` |
+| `line-height` | `var(--poodle-selection-summary-overflow-line-height)` |
+| `padding` | `0 var(--poodle-selection-summary-overflow-padding-x)` |
 | `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 58%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 68%, var(--poodle-color-background-elevated))` |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 60%, transparent)` |
 
 ### Size Variants
 
@@ -207,6 +202,15 @@ No internal component state.
 | Chip | `min-height` | `1.125rem` |
 | Chip | `font-size` | `0.71875rem` |
 
+#### `[data-size="md"]`
+
+| Part | Property | Value |
+|------|----------|-------|
+| Root | `font-size` | `0.75rem` |
+| Chip | `min-height` | `1.5rem` |
+| Chip | `padding` | `0 0.75rem` |
+| Chip | `font-size` | `0.75rem` |
+
 #### `[data-size="lg"]`
 
 | Part | Property | Value |
@@ -225,7 +229,13 @@ No internal component state.
 | Chip | `padding` | `0 1rem` |
 | Chip | `font-size` | `0.875rem` |
 
-No density variants or light theme overrides in the current implementation.
+### Density Variants
+
+| Density | Gap | Bottom padding | Chip X padding | Overflow X padding |
+|---------|-----|----------------|----------------|--------------------|
+| `compact` | `0.375rem` | `0.5rem` | `0.625rem` | `0.5rem` |
+| `default` | `var(--poodle-space-inline-sm)` | `0.625rem` | `0.75rem` | `0.625rem` |
+| `comfortable` | `var(--poodle-space-inline-md)` | `0.75rem` | `0.875rem` | `0.75rem` |
 
 ## 9. Svelte Notes
 
@@ -234,6 +244,7 @@ No density variants or light theme overrides in the current implementation.
 - Uses callback props for remove and clear actions
 - `visibleItems` and `overflowCount` derived reactively from `items` and `maxVisibleItems`
 - Uses `Icon` primitive with `name="x"` for the remove icon
+- Uses `TextLink` for the trailing clear action
 - Imports `getUiPresentation` and `resolveSemanticControlSize` from `@poodle/svelte`
 
 ## 10. GPUI Notes

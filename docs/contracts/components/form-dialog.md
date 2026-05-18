@@ -1,7 +1,7 @@
 # FormDialog
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -30,7 +30,7 @@ Updated: 2026-04-09
   │     └── [FormContent]  (via `body` snippet or `children`)
   ├── [BareContent]  (via `body` snippet or `children`, rendered directly)  -- when bare=true
   └── [Actions]
-        ├── [Custom actions]  (`actions` snippet) — when provided
+        ├── [Custom actions wrapper .form-dialog__custom-actions]  (`actions` snippet) — when provided
         └── [Default actions]  when resolvedShowActions=true and no actions snippet
               ├── [CancelButton]  Button (variant="ghost")
               └── [SubmitButton]  Button (variant="primary")
@@ -154,6 +154,9 @@ uncontrolled path when the prop is omitted.
 - When `bare=true`: no FormLayout wrapper; snippet content rendered directly,
   allowing embedded components that own their own FormLayout
 - Actions: standard Dialog actions snippet layout (flex row, right-aligned)
+- Custom actions snippet is wrapped in a full-width container; nested
+  `FormActions` rows have their top padding removed so they sit correctly on
+  the Dialog footer rail
 
 ### Composition
 
@@ -186,6 +189,19 @@ uncontrolled path when the prop is omitted.
 | color | `var(--poodle-color-text-secondary)` |
 | font-size | `var(--poodle-typography-body-size, 0.875rem)` |
 | line-height | `var(--poodle-typography-body-lineHeight, 1.5)` |
+
+### Custom Actions Wrapper (`.form-dialog__custom-actions`)
+
+| Property | Value |
+|----------|-------|
+| width | `100%` |
+
+### Nested FormActions inside Custom Actions
+
+| Property | Value |
+|----------|-------|
+| width | `100%` |
+| `padding-top` | `0` |
 
 ### Composed Primitives
 
@@ -220,6 +236,8 @@ None.
 - custom width is applied through `contentStyle` and `contentClassName`
   props on Dialog; the global `.form-dialog__surface` class sets the width
 - Dialog receives `showCloseButton={true}` always
+- custom actions are rendered on the Dialog action rail inside a full-width
+  wrapper rather than replacing the footer surface entirely
 - `bare` mode: when true, snippet content is rendered directly without a
   FormLayout wrapper; `resolvedShowActions` is derived as
   `bare ? false : showDefaultActions`

@@ -1,7 +1,7 @@
 # FilterToolbar
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -15,7 +15,7 @@ Updated: 2026-03-30
 
 ```text
 [Root .filter-toolbar]  <div role="toolbar"> aria-label
-  ├── [Header .filter-toolbar__header]  (when collapsed: <button>, otherwise: <div>)
+  ├── [Header .filter-toolbar__header]  (when collapsible: <button>, otherwise: <div>)
   │     ├── [CollapseToggle]  (optional, when collapsible)
   │     ├── [Summary .filter-toolbar__summary]  <p>/<span> (optional, when summaryText or summary snippet)
   │     └── [Actions .filter-toolbar__actions]  <div>/<span> (optional, when actions snippet)
@@ -31,7 +31,7 @@ Updated: 2026-03-30
 | Part | Element | Required | Notes |
 |------|---------|----------|-------|
 | Root | `<div>` | yes | Grid container with `role="toolbar"` and `aria-label` |
-| Header | `<div>` or `<button>` | yes | Flex row; renders as `<button>` when collapsed (for clickable expand) |
+| Header | `<div>` or `<button>` | yes | Flex row; renders as `<button>` whenever `collapsible` is true so the whole summary row remains the toggle target |
 | CollapseToggle | `CollapseToggle` primitive | no | Present when `collapsible` is true |
 | Summary | `<p>` / `<span>` | no | Result count or active-filter summary text |
 | Actions | `<div>` / `<span>` | no | Icon buttons (refresh, etc.) aligned right via `margin-left: auto` |
@@ -46,9 +46,9 @@ Updated: 2026-03-30
 |------|------|---------|----------|-------|
 | `ariaLabel` | `string` | `"Filters"` | no | Toolbar/group label |
 | `summaryText` | `string \| null` | `null` | no | Visible summary copy in header |
-| `collapsible` | `boolean` | `false` | no | Whether controls can be collapsed |
+| `collapsible` | `boolean` | `true` | no | Whether controls can be collapsed |
 | `collapsed` | `boolean` | `false` | no | Current collapsed state (bindable) |
-| `columns` | `number` | `4` | no | Number of grid columns at full width |
+| `columns` | `number` | `4` | no | Legacy grid hint; still emitted as `--ft-columns`, but the current Svelte grid uses auto-fit rather than this count directly |
 | `minItemWidth` | `string` | `"10rem"` | no | Minimum width per grid item |
 | `sticky` | `boolean` | `false` | no | Sticky positioning when host supports it |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override |
@@ -68,6 +68,9 @@ Updated: 2026-03-30
 
 - `collapsed` is bindable for two-way control (`bind:collapsed`)
 - Filter state is fully host-owned
+- Children render inside a local `UiPresentationProvider`; explicit toolbar
+  `size` and `density` cascade into nested controls unless those controls
+  override presentation locally
 
 ## 4. States
 
@@ -95,7 +98,8 @@ No component-owned callbacks. Child controls keep their own callback contracts, 
 
 - Root: `role="toolbar"` with `aria-label` (default `"Filters"`)
 - Collapsed header: renders as `<button>` with `aria-expanded="false"` and descriptive `aria-label` including summary text
-- Expanded header: renders as `<div>`; when `collapsible` is true, gets `cursor: pointer` and a click handler that toggles `collapsed` (bidirectional toggle)
+- Expanded header: when `collapsible` is true, still renders as a `<button>`
+  with `aria-expanded="true"` so the full header row remains clickable
 - CollapseToggle: managed by CollapseToggle primitive accessibility
 
 ### Keyboard
@@ -103,7 +107,7 @@ No component-owned callbacks. Child controls keep their own callback contracts, 
 | Key | Behavior |
 |-----|----------|
 | `Tab` | Moves through contained controls in DOM order |
-| `Enter` / `Space` | Toggles collapse when CollapseToggle or collapsed header button is focused |
+| `Enter` / `Space` | Toggles collapse when CollapseToggle or the header button is focused |
 
 ### Focus And Announcement
 
@@ -116,9 +120,10 @@ No component-owned callbacks. Child controls keep their own callback contracts, 
 ### Sizing
 
 - Controls grid uses CSS grid with responsive breakpoints:
-  - Full width: `columns` columns (default 4)
-  - <=960px: 2 columns
+  - Full width: `repeat(auto-fit, minmax(min(minItemWidth, 100%), 1fr))`
   - <=640px: 1 column
+- `columns` is still emitted as `--ft-columns`, but the current Svelte
+  implementation does not consume it for the grid template
 - Each grid item has minimum width of `minItemWidth` (default `10rem`)
 - Summary and actions remain in the header row at all widths
 
@@ -199,7 +204,7 @@ No component-owned callbacks. Child controls keep their own callback contracts, 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `grid-template-columns` | `repeat(var(--ft-columns, 4), minmax(var(--ft-min-width, 10rem), 1fr))` |
+| `grid-template-columns` | `repeat(auto-fit, minmax(min(var(--ft-min-width, 10rem), 100%), 1fr))` |
 | `gap` | `var(--poodle-space-inline-sm)` |
 | `align-items` | `end` |
 
@@ -215,12 +220,6 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 | `align-items` | `center` |
 
 ### Responsive Breakpoints
-
-#### `@media (max-width: 960px)` -- `.filter-toolbar__controls`
-
-| Property | Value |
-|----------|-------|
-| `grid-template-columns` | `repeat(2, minmax(var(--ft-min-width, 10rem), 1fr))` |
 
 #### `@media (max-width: 640px)` -- `.filter-toolbar__controls`
 
@@ -242,9 +241,9 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 
 | Density | Root gap | Root padding | Controls gap |
 |---------|----------|-------------|-------------|
-| `compact` | `var(--poodle-space-inline-xs)` | `0.25rem` | `var(--poodle-space-inline-xs)` |
+| `compact` | `0.375rem` | `0.5rem 0.75rem` | `0.25rem` |
 | `default` | `var(--poodle-space-stack-sm)` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` | `var(--poodle-space-inline-sm)` |
-| `comfortable` | `var(--poodle-space-inline-md)` | `0.5rem` | `var(--poodle-space-inline-md)` |
+| `comfortable` | `var(--poodle-space-inline-md)` | `1rem 1.25rem` | `var(--poodle-space-inline-md)` |
 
 ### Data Attributes Used for CSS Selectors
 
@@ -258,11 +257,13 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 ## 9. Svelte Notes
 
 - Uses `CollapseToggle` primitive for collapse affordance
+- Child controls inherit toolbar presentation through a local
+  `UiPresentationProvider`
 - Controls grid uses CSS custom properties (`--ft-columns`, `--ft-min-width`) driven by props
 - `collapsed` prop supports `bind:collapsed` for two-way binding
 - Resolves size via `resolveSemanticControlSize` with `sizeRole="chrome"` (not `"control"`)
 - When collapsed, header renders as `<button>` for accessibility
-- When expanded and `collapsible` is true, header `<div>` gets a click handler and `cursor: pointer` class (`filter-toolbar__header--clickable`)
+- When `collapsible` is true, both collapsed and expanded header rows render as `<button>` elements
 - `handleHeaderClick` does `collapsed = !collapsed` (bidirectional toggle), filtering clicks on `.filter-toolbar__actions` and `.collapse-toggle` children
 
 ## 10. GPUI Notes

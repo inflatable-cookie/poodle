@@ -1,7 +1,7 @@
 # MarkdownEditor
 
 Status: detailed contract
-Updated: 2026-04-09
+Updated: 2026-05-18
 
 ## 1. Purpose
 
@@ -43,8 +43,8 @@ Updated: 2026-04-09
 | toolbar | `<div>` | Flex row, space-between, toolbar buttons and mode switcher |
 | tools | `<div>` | Flex row of formatting tool buttons |
 | tool-button | `<button>` | Icon button for each formatting action; disabled when `disabled` or in preview mode |
-| mode-switcher | `<div>` | Segmented group of mode toggle buttons, bordered container |
-| mode-button | `<button>` | Switches between edit, split, preview modes; active state highlighted |
+| mode-switcher | `<div>` | Plain flex row of mode icon buttons |
+| mode-button | `IconButton` | Switches between edit, split, preview modes; active posture uses `secondary`, inactive posture uses `ghost` |
 | body | `<div>` | Flex container holding textarea and/or preview pane |
 | textarea | `<textarea>` | Markdown input area; monospace font; resizable vertically |
 | preview | `<div>` | Rendered HTML preview of markdown content, `aria-label="Preview"` |
@@ -74,8 +74,10 @@ None.
 
 ### Controlled / Uncontrolled
 
-`value` is host-owned when supplied and should be updated through `onValueChange`.
-`mode` is internally managed but can be set from outside.
+`value` is host-owned when supplied and should be updated through
+`onValueChange`. When omitted, the editor uses uncontrolled local text state.
+`mode` seeds and updates the internal view posture, but mode changes triggered
+inside the component are not emitted through a callback.
 
 ## 4. States
 
@@ -88,8 +90,8 @@ None.
 | tool-hover | Mouse over tool button (not disabled) | Accent background at 12% opacity, text-primary color |
 | tool-focus | Focus-visible on tool button | Focus ring: `border-width-focus` solid `accent-focusRing`, offset `0.0625rem` |
 | tool-disabled | `disabled` or `mode="preview"` | 40% opacity on tool button, default cursor |
-| mode-active | Mode matches current mode | Accent background at 16% opacity, text-primary color |
-| mode-hover | Mouse over mode button | Elevated background at 72% blend |
+| mode-active | Mode matches current mode | `IconButton variant="secondary"` |
+| mode-inactive | Mode does not match current mode | `IconButton variant="ghost"` |
 
 ### Component States
 
@@ -114,13 +116,14 @@ None.
 - Tool buttons also have `title` matching their action label
 - Preview pane has `aria-label="Preview"`
 - Disabled tool buttons use native `disabled` attribute
+- Mode controls expose `ariaLabel` and tooltip text through `IconButton`
 
 ### Keyboard
 
 - Standard textarea keyboard behavior for editing
 - Tab navigation through toolbar buttons
 - Tool buttons disabled in preview mode are excluded from tab order (native `disabled`)
-- Mode buttons are always keyboard-accessible
+- Mode buttons are always keyboard-accessible through `IconButton`
 
 ### Focus
 
@@ -134,7 +137,7 @@ None.
 - Root: full width of container, border `0.0625rem solid border-default`, `radius-surface`, `overflow: hidden`
 - Toolbar: flex row, space-between, wraps on narrow widths, density-aware padding
 - Tool button: semantic control box tied to size scale
-- Mode button: semantic label sizing and density-aware horizontal padding
+- Mode button: `IconButton` chrome sized by inherited presentation
 - Body: flex row; in split mode, textarea and preview each `flex: 1`
 - Textarea: density-aware pane padding, min-height from prop, resize vertical
 - Preview: density-aware pane padding, overflow-y auto
@@ -227,32 +230,15 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 |----------|-------|
 | display | `flex` |
 | gap | `0.125rem` (default, same as tool gap) |
-| border | `0.0625rem solid var(--poodle-color-border-default)` |
-| border-radius | `var(--poodle-radius-control)` |
-| overflow | `hidden` |
+| padding | `0` |
 
-### Mode Button `.md-editor__mode-btn`
+Mode button chrome delegates to the `IconButton` contract:
 
-| Property | Value |
-|----------|-------|
-| min-height | `calc(tool-size - (toolbar-y * 0.5))` |
-| padding | `0.1875rem 0.5rem` (default) |
-| border | `0` |
-| background | `transparent` |
-| color | `var(--poodle-color-text-secondary)` |
-| cursor | `pointer` |
-| font | `inherit` |
-| font-size | `var(--poodle-typography-label-size)` |
-| line-height | `1` |
-| transition | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
-
-#### Mode Button States
-
-| State | Property | Value |
-|-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)` |
-| `.active` | background | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
-| `.active` | color | `var(--poodle-color-text-primary)` |
+| Posture | Value |
+|---------|-------|
+| active | `variant="secondary"` |
+| inactive | `variant="ghost"` |
+| icons | `pencil`, `columns-2`, `eye` |
 
 ### Body `.md-editor__body`
 
@@ -327,7 +313,7 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | `hr` | border | `0` |
 | `hr` | border-top | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `hr` | margin | `0.75rem 0` |
-| `a` | color | `var(--poodle-color-accent-default, #6366f1)` |
+| `a` | color | `var(--poodle-color-accent-base)` |
 | `a` | text-decoration | `underline` |
 
 ### Preview Empty `.md-editor__preview-empty`
@@ -340,13 +326,13 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 
 ### Size Adjustments
 
-| Size | Tool button size | Mode horizontal padding |
-|------|-----------------|------------------------|
-| `xs` | `1.5rem` | `0.375rem` |
-| `sm` | `1.75rem` | `0.5rem` (default) |
-| `md` | `2rem` | `0.5rem` |
-| `lg` | `2.25rem` | `0.625rem` |
-| `xl` | `2.5rem` | `0.75rem` |
+| Size | Tool button size | Mode controls |
+|------|-----------------|---------------|
+| `xs` | `1.5rem` | `IconButton` inherits `xs` presentation |
+| `sm` | `1.75rem` | `IconButton` inherits `sm` presentation |
+| `md` | `2rem` | `IconButton` inherits `md` presentation |
+| `lg` | `2.25rem` | `IconButton` inherits `lg` presentation |
+| `xl` | `2.5rem` | `IconButton` inherits `xl` presentation |
 
 ### Density Adjustments
 
@@ -361,6 +347,9 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 - Uses `Icon` primitive for toolbar button icons (bold, italic, heading, link, code, quote, list)
 - `insertMarkdown(before, after)` manipulates textarea selection to wrap or prepend markdown syntax
 - `insertLine(prefix)` prefixes the current line with markdown syntax (heading, quote, list)
+- Toolbar formatting actions edit through the native textarea undo stack
+  (`execCommand("insertText")` with `setRangeText()` fallback), so standard
+  browser undo/redo covers button-triggered markdown edits too
 - Built-in markdown rendering uses the `marked` library (`import { marked } from "marked"`)
   called with `marked.parse(value, { async: false })` — tree-shakes out when the
   component is not used in a bundle

@@ -1,16 +1,16 @@
 # OrderBy
 
 Status: detailed contract
-Updated: 2026-05-15
+Updated: 2026-05-18
 
 ## 1. Purpose
 
 - Component name: `OrderBy`
 - Layer: `foundation`
-- Summary: a popover-based multi-field sort builder that lets users compose an
+- Summary: an anchored dropdown multi-field sort builder that lets users compose an
   ordered list of sort fields with per-field direction toggles, drag reordering,
   move-up/move-down controls, field removal, and an add-field dropdown
-- In scope: popover trigger with summary text, panel with sort field list,
+- In scope: dropdown trigger with summary text, panel with sort field list,
   drag-and-drop reordering, move up/down buttons, direction toggle buttons,
   remove buttons, add-field Select dropdown, clear-all button, compact summary
   mode, maxFields cap, legacy `activeSort` compatibility
@@ -26,7 +26,7 @@ Updated: 2026-05-15
   │   ├── [Summary .order-by__summary] <span>
   │   └── [Chevron .order-by__chevron] <span aria-hidden="true">
   ├── [Reset .order-by__reset] <button> (conditional: visible when value non-empty)
-  └── [Panel .order-by__panel] <div> (rendered inside Popover)
+  └── [Panel .order-by__surface > .order-by__panel] <div> (rendered inline when open)
       ├── [List .order-by__list] <div role="list"> (conditional: visible when value non-empty)
       │   └── [Item .order-by__item] <div role="listitem" draggable> (repeated)
       │       ├── [Item Main .order-by__item-main] <div>
@@ -48,12 +48,12 @@ Updated: 2026-05-15
 | Part | Required | Description |
 |------|----------|-------------|
 | Root | yes | inline-flex container wrapping trigger and reset; carries `data-size`, `data-density`, `data-disabled` |
-| Trigger | yes | button that opens the popover; displays label, summary, and chevron |
+| Trigger | yes | button that opens the dropdown; displays label, summary, and chevron |
 | Label | yes | static "Sort by" uppercase text inside the trigger |
 | Summary | yes | dynamic text summarizing the active sort fields |
 | Chevron | yes | dropdown indicator arrow (`▾`) |
 | Reset | no | clear button (`×`) shown when at least one sort field is active |
-| Panel | yes | popover body containing the sort builder UI |
+| Panel | yes | anchored dropdown surface containing the sort builder UI |
 | List | no | vertical list of active sort items (shown when value is non-empty) |
 | Item | no | one active sort field row: label, direction text, and action buttons; supports drag reorder |
 | Item Main | no | left side of an item: field label with drag handle, and direction text |
@@ -72,8 +72,8 @@ Updated: 2026-05-15
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `fields` | `SortField[]` | `[]` | yes | available sort fields the user can choose from |
-| `value` | `OrderByValue` | `[]` | no | ordered array of active sort fields with directions |
-| `activeSort` | `ActiveSort \| null` | `null` | no | legacy single-field sort; converted to a one-element `value` when `value` is empty |
+| `value` | `OrderByValue \| undefined` | `undefined` | no | ordered array of active sort fields with directions; when supplied, acts as the controlled multi-field source of truth |
+| `activeSort` | `ActiveSort \| null \| undefined` | `undefined` | no | legacy single-field sort; used when `value` is omitted |
 | `ariaLabel` | `string` | `"Sort by"` | no | accessible name for root group and trigger |
 | `disabled` | `boolean` | `false` | no | disables all interactive controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role for inherited sizing |
@@ -157,7 +157,7 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 | populated | one or more sort fields active | trigger summary shows field labels with direction arrows; reset button visible |
 | compact populated | `compact=true` and 3+ fields | summary shows first two fields then `+N` count (e.g. "Title ↑, Updated ↓ +1") |
 | disabled | `disabled=true` | root reduced to disabled opacity; all buttons and controls disabled |
-| popover open | user clicks trigger | popover panel appears below trigger (placement `bottom-start`) |
+| dropdown open | user clicks trigger | anchored panel appears below the trigger |
 | item dragging | user drags a sort item | dragging item reduced to 0.65 opacity |
 | item drop target | dragging over a different item | target item gets accent border and glow shadow |
 | all fields used | every field in `fields` is active | add-field Select hidden |
@@ -187,7 +187,7 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 | Root | `data-disabled` | `"true"` when disabled |
 | Trigger | `aria-label` | from `ariaLabel` prop |
 | Trigger | `disabled` | native disabled attribute when `disabled=true` |
-| Popover | `ariaLabel` | from `ariaLabel` prop |
+| Panel surface | `aria-label` | from `ariaLabel` prop |
 | Reset button | `aria-label` | `"Clear sort"` |
 | Reset button | `disabled` | native disabled attribute when `disabled=true` |
 | List | `role` | `"list"` |
@@ -208,7 +208,11 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 
 ### Keyboard
 
-Keyboard behavior is inherited from the child components (Popover, Button, IconButton, Select). The popover opens on Enter/Space on the trigger. Within the panel, Tab moves between controls. Drag reordering is supplemented by the move-up/move-down icon buttons for keyboard users.
+Keyboard behavior is inherited from the child components (Button,
+IconButton, Select). The dropdown opens on Enter/Space on the trigger.
+Within the panel, Tab moves between controls. Escape closes the panel.
+Drag reordering is supplemented by the move-up/move-down icon buttons for
+keyboard users.
 
 ### Focus
 
@@ -233,8 +237,8 @@ Keyboard behavior is inherited from the child components (Popover, Button, IconB
 ### Composition
 
 - Parent expectations: toolbar areas, list headers, filter panels, data table toolbars
-- Child composition: uses Popover, Select, Button, and IconButton internally
-- The popover placement is `bottom-start`
+- Child composition: uses Select, Button, and IconButton internally
+- The dropdown surface is owned locally by `OrderBy`, not by `Popover`
 - The trigger width accommodates the summary text with ellipsis overflow
 
 ## 8. Token Usage -- Exact Values
@@ -498,7 +502,7 @@ The panel uses the following internal component instances:
 
 | Component | Usage | Props |
 |-----------|-------|-------|
-| `Popover` | wraps the entire trigger+panel | `placement="bottom-start"`, `ariaLabel` from prop |
+| local panel surface | wraps the sort-builder UI when open | `role="dialog"`, `aria-label` from prop |
 | `IconButton` (direction toggle) | toggles asc/desc per field | `icon="arrow-up"` or `"arrow-down"`, `size="sm"`, `variant="ghost"` |
 | `IconButton` (move up) | moves field one position earlier | `icon="chevron-up"`, `size="sm"`, `variant="ghost"`, disabled on first item |
 | `IconButton` (move down) | moves field one position later | `icon="chevron-down"`, `size="sm"`, `variant="ghost"`, disabled on last item |
@@ -508,20 +512,20 @@ The panel uses the following internal component instances:
 
 ## 12. Svelte Notes
 
-- The component wraps its trigger and panel in a `Popover` component with explicit open state wiring
+- The component owns its open state and anchored panel surface directly
 - Size resolves from `size` prop or from inherited presentation context via `resolveSemanticControlSize`
 - Density resolves from `density` prop or from inherited presentation context
 - The `activeSort` prop provides backward compatibility: when `value` is empty, `activeSort` is converted to a one-element value; on every mutation, `activeSort` is updated to reflect the first value element
 - CSS classes `order-by__item--dragging` and `order-by__item--drop-target` are toggled via Svelte's `class:` directive
 - The add-field Select uses its value-change callback to call `addField(key)`, then resets its own value to `""` to allow re-selection
 - The "Clear all" button and footer are only shown when 2 or more fields are active
-- The reset `×` button in the trigger area uses `stopPropagation` and `preventDefault` to avoid triggering the popover
+- The reset `×` button in the trigger area uses `stopPropagation` and `preventDefault` to avoid toggling the dropdown
 
 ## 13. Parity Checklist
 
 ### Tier 1: Strict Parity
 
-- [ ] popover opens on trigger click with `bottom-start` placement
+- [ ] dropdown opens on trigger click below the trigger
 - [ ] adding a field appends to value array with field's `defaultDirection` (or `"asc"`)
 - [ ] removing a field splices it from value array
 - [ ] direction toggle flips between `"asc"` and `"desc"`
@@ -562,7 +566,7 @@ The panel uses the following internal component instances:
 
 ### Tier 3: Implementation Freedom
 
-- [ ] popover implementation details (animation, portal behavior) are platform-owned
+- [ ] dropdown implementation details (animation, portal behavior) are platform-owned
 - [ ] drag-and-drop implementation mechanism is platform-owned
 - [ ] transition timing is platform-owned
 
@@ -572,7 +576,7 @@ The panel uses the following internal component instances:
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Multi-field sort builder | `fields`: Title, Kind, Updated (defaultDirection desc), Created (defaultDirection desc), Visibility (disabled); `value`: Updated desc + Title asc; `compact` | Trigger showing compact summary, popover panel with two sort items, add-field dropdown with remaining fields |
+| Multi-field sort builder | `fields`: Title, Kind, Updated (defaultDirection desc), Created (defaultDirection desc), Visibility (disabled); `value`: Updated desc + Title asc; `compact` | Trigger showing compact summary, dropdown panel with two sort items, add-field dropdown with remaining fields |
 
 ### Sizes
 
