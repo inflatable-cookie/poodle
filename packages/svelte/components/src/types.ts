@@ -175,8 +175,14 @@ export interface SelectEmptyRenderState {
   query: string;
 }
 
+export interface SelectLoadContext {
+  query?: string;
+  value?: string | null;
+  loadKey?: string | null;
+}
+
 /** Async option loader for Select. Returns flat or grouped options. */
-export type SelectLoadOptions = () => Promise<SelectItems>;
+export type SelectLoadOptions = (context?: SelectLoadContext) => Promise<SelectItems>;
 
 export interface MenuItem {
   value: string;

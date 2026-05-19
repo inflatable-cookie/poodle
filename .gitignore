@@ -67,8 +67,11 @@ Cargo.lock
 *.temp
 
 # Effigy
-.effigy/
 
 # Screenshots (Jetstream preview debug captures)
 docs/screenshots/
 .claude/settings.local.json
+
+# BEGIN EFFIGY LOCAL STATE
+.effigy/
+# END EFFIGY LOCAL STATE

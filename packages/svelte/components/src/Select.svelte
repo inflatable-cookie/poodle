@@ -96,6 +96,7 @@
   let loadState: "idle" | "loading" | "loaded" | "error" = $state("idle");
   let loadError: string | null = $state(null);
   let lastLoadKey: string | null = $state(null);
+  let activeLoadRequestId = 0;
   let uncontrolledValue = $state("");
   let uncontrolledValueSeeded = $state(false);
 
@@ -166,14 +167,23 @@
     return num;
   }
 
-  async function startLoad(): Promise<void> {
-    if (loadState === "loading") return;
+  async function startLoad(nextQuery = query): Promise<void> {
+    const requestId = ++activeLoadRequestId;
     loadState = "loading";
     loadError = null;
     try {
-      loadedOptions = loadOptions ? await loadOptions() : [];
+      const nextOptions = loadOptions
+        ? await loadOptions({
+            query: nextQuery.trim() || undefined,
+            value: currentValue || null,
+            loadKey
+          })
+        : [];
+      if (requestId !== activeLoadRequestId) return;
+      loadedOptions = nextOptions;
       loadState = "loaded";
     } catch (error) {
+      if (requestId !== activeLoadRequestId) return;
       loadState = "error";
       loadError = error instanceof Error ? error.message : "Failed to load options";
     }
@@ -248,6 +258,10 @@
     if (!open) setOpen(true);
     onQueryChange?.(query);
 
+    if (isLazy) {
+      void startLoad(query);
+    }
+
     if (freeform) {
       commitValue(query);
     }
@@ -291,6 +305,9 @@
     event.stopPropagation();
     query = "";
     commitValue(clearValue);
+    if (isLazy) {
+      void startLoad("");
+    }
   }
 
   $effect(() => {
@@ -314,6 +331,7 @@
 
   $effect(() => {
     if (loadKey !== lastLoadKey) {
+      activeLoadRequestId += 1;
       lastLoadKey = loadKey;
       loadedOptions = null;
       loadState = "idle";
