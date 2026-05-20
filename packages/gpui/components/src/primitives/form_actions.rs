@@ -5,6 +5,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{FormActionAlign, FormActionsSpec};
 
+use crate::theme_ext::resolve_color;
+
 /// A real GPUI form actions bar backed by `FormActionsSpec`.
 ///
 /// Lays out action buttons (submit, cancel, etc.) with configurable alignment.
@@ -62,6 +64,12 @@ impl IntoElement for FormActions {
         } else {
             0.0
         };
+        let border_gap = if self.spec.shows_top_border() {
+            separation.max(4.0) * 0.5
+        } else {
+            0.0
+        };
+        let border = resolve_color(theme, self.spec.border_token());
 
         // Accessibility semantics (contract section 6):
         // Neutral structural container — no implicit ARIA role.
@@ -74,7 +82,12 @@ impl IntoElement for FormActions {
             .flex_wrap() // contract: wraps on narrow widths
             .items_center()
             .gap(px(gap))
-            .pt(px(separation));
+            .pt(px(separation))
+            .mt(px(border_gap));
+
+        if self.spec.shows_top_border() {
+            row = row.border_t_1().border_color(border);
+        }
 
         // Alignment
         match self.spec.align {

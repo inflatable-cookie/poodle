@@ -46,6 +46,13 @@
           </FormActions>
         </div>
       </SpecimenGroup>
+
+      <SpecimenGroup label="Bordered separation">
+        <FormActions showTopBorder>
+          <Button variant="ghost">Cancel</Button>
+          <Button variant="primary">Save changes</Button>
+        </FormActions>
+      </SpecimenGroup>
     </div>
   {/snippet}
 

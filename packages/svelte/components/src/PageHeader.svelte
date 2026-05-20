@@ -25,7 +25,7 @@
     ariaLabel?: string | null;
     level?: 1 | 2 | 3 | 4 | 5 | 6;
     size?: ControlSize | null;
-    sizeRole?: SemanticControlSizeRole;
+    sizeRole?: SemanticControlSizeRole | null;
     density?: ControlDensity | null;
     children?: Snippet;
     breadcrumbs?: Snippet;
@@ -51,7 +51,7 @@
     ariaLabel = null,
     level = 2,
     size = null,
-    sizeRole = "prominent",
+    sizeRole = null,
     density = null,
     children,
     breadcrumbs,
@@ -84,7 +84,9 @@
   );
   const headingTag = $derived(`h${level}` as `h${1 | 2 | 3 | 4 | 5 | 6}`);
   const uiPresentation = getUiPresentation();
-  const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
+  const resolvedSize = $derived(
+    size ?? (sizeRole ? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole) : $uiPresentation.sizeScale)
+  );
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const countPillSize = $derived(resolveSupportingVisualSize(resolvedSize));
 </script>

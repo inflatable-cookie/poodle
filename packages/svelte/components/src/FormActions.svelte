@@ -10,12 +10,16 @@
   let {
     align = "end",
     density = null,
+    showTopSeparation = true,
+    showTopBorder = false,
     dangerItems = [],
     children = undefined,
     danger = undefined,
   }: {
     align?: FormActionAlign;
     density?: ControlDensity | null;
+    showTopSeparation?: boolean;
+    showTopBorder?: boolean;
     dangerItems?: FormActionDangerItem[];
     children?: Snippet;
     danger?: Snippet;
@@ -39,7 +43,13 @@
   }
 </script>
 
-<div class="poodle-form-actions" data-align={align} data-density={resolvedDensity}>
+<div
+  class="poodle-form-actions"
+  data-align={align}
+  data-density={resolvedDensity}
+  data-top-separation={showTopSeparation ? "true" : "false"}
+  data-top-border={showTopBorder ? "true" : "false"}
+>
   {#if hasDangerSlot}
     <div class="poodle-form-actions__danger" data-mode={showResponsiveDangerSwap ? "responsive" : "inline"}>
       {@render danger?.()}
@@ -67,12 +77,31 @@
   .poodle-form-actions {
     --poodle-form-actions-gap: var(--poodle-space-inline-md);
     --poodle-form-actions-padding-top: var(--poodle-space-stack-sm);
+    --poodle-form-actions-border-gap: 0.5rem;
+    --poodle-form-actions-border-color: color-mix(
+      in srgb,
+      var(--poodle-color-border-subtle) 72%,
+      transparent
+    );
     display: flex;
     flex-wrap: wrap;
     gap: var(--poodle-form-actions-gap);
     align-items: center;
     padding-top: var(--poodle-form-actions-padding-top);
+    margin-top: 0;
+    border-top: 0 solid transparent;
     container-type: inline-size;
+  }
+
+  .poodle-form-actions[data-top-separation="false"] {
+    padding-top: 0;
+  }
+
+  .poodle-form-actions[data-top-border="true"] {
+    margin-top: var(--poodle-form-actions-border-gap);
+    border-top-width: 0.0625rem;
+    border-top-style: solid;
+    border-top-color: var(--poodle-form-actions-border-color);
   }
 
   .poodle-form-actions[data-align="start"] {
@@ -101,16 +130,19 @@
   .poodle-form-actions[data-density="compact"] {
     --poodle-form-actions-gap: 0.5rem;
     --poodle-form-actions-padding-top: 0.375rem;
+    --poodle-form-actions-border-gap: 0.25rem;
   }
 
   .poodle-form-actions[data-density="default"] {
     --poodle-form-actions-gap: var(--poodle-space-inline-md);
     --poodle-form-actions-padding-top: var(--poodle-space-stack-sm);
+    --poodle-form-actions-border-gap: 0.5rem;
   }
 
   .poodle-form-actions[data-density="comfortable"] {
     --poodle-form-actions-gap: 0.875rem;
     --poodle-form-actions-padding-top: 0.75rem;
+    --poodle-form-actions-border-gap: 0.625rem;
   }
 
   .poodle-form-actions__danger-menu[data-visible="always"] {

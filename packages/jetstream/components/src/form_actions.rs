@@ -13,13 +13,24 @@ pub fn js_form_actions(spec: &FormActionsSpec, theme: &JetstreamThemeProvider, c
     } else {
         0.0
     };
+    let border_gap = if spec.shows_top_border() {
+        separation.max(4.0) * 0.5
+    } else {
+        0.0
+    };
 
     let mut el = ui_element::div()
         .flex_row()
         .items_center()
         .gap(gap)
         .flex_wrap()
-        .pt(separation);
+        .pt(separation)
+        .mt(border_gap);
+
+    if spec.shows_top_border() {
+        let border_color = crate::theme_ext::resolve_color(theme, spec.border_token());
+        el = el.border_t_1().border_color(border_color);
+    }
 
     match spec.align {
         FormActionAlign::Start => {}

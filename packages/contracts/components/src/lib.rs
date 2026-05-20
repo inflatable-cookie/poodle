@@ -551,12 +551,15 @@ mod tests {
     fn form_actions_default_to_end_alignment_with_wrap_behavior() {
         let spec = FormActionsSpec::new()
             .with_align(FormActionAlign::Between)
-            .with_top_separation(false);
+            .with_top_separation(false)
+            .with_top_border(true);
 
         assert_eq!(spec.align, FormActionAlign::Between);
         assert!(!spec.shows_top_separation());
+        assert!(spec.shows_top_border());
         assert_eq!(spec.action_gap_token(), semantic::SPACE_INLINE_MD);
         assert_eq!(spec.stack_separation_token(), semantic::SPACE_STACK_SM);
+        assert_eq!(spec.border_token(), semantic::COLOR_BORDER_SUBTLE);
         assert!(spec.wraps_on_narrow_widths());
     }
 

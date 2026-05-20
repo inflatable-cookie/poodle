@@ -1459,6 +1459,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "form-actions": {
     props: [
       { name: "align", type: "FormActionAlign", default: '"end"', description: "Horizontal alignment of the action buttons." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Optional density override for the action row spacing." },
+      { name: "showTopSeparation", type: "boolean", default: "true", description: "Whether to keep the usual top padding that separates the action row from fields above it." },
+      { name: "showTopBorder", type: "boolean", default: "false", description: "Whether to add a subtle top divider and a small top margin before the action row." },
       { name: "dangerItems", type: "FormActionDangerItem[]", default: "[]", description: "Optional overflow actions used when danger content collapses on narrow containers." },
     ],
     slots: [
@@ -1478,7 +1481,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   ];
 </script>
 
-<FormActions align="end" {dangerItems}>
+<FormActions align="end" showTopBorder {dangerItems}>
   <Button variant="secondary">Back</Button>
   <Button variant="primary">Save</Button>
   {#snippet danger()}
