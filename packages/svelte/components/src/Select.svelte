@@ -116,6 +116,7 @@
   const placeholderLabel = $derived(placeholder ?? (clearable ? valueLabel ?? "All" : null));
   const normalizedOptions = $derived(loadedOptions ?? options);
   const flatOptions = $derived(flattenOptions(normalizedOptions));
+  const hasPlaceholderOption = $derived(flatOptions.some((entry) => entry.value === placeholderValue));
   const hasCurrentOption = $derived(flatOptions.some((entry) => entry.value === currentValue));
   const hasSelection = $derived(currentValue !== "" && currentValue !== clearValue);
   const isGrouped = $derived(normalizedOptions.length > 0 && "options" in normalizedOptions[0]);
@@ -653,7 +654,7 @@
       aria-invalid={validationState === "invalid" ? "true" : undefined}
       onchange={handleNativeChange}
     >
-      {#if placeholderLabel}
+      {#if placeholderLabel && !hasPlaceholderOption}
         <option value={placeholderValue} disabled={!clearable && required}>{placeholderLabel}</option>
       {/if}
 
