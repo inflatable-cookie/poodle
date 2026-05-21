@@ -246,7 +246,11 @@
   });
 
   $effect(() => {
-    if (validate && currentValue !== lastValidatedValue) {
+    if (
+      validate &&
+      currentValue !== lastValidatedValue &&
+      activeValidationKey !== buildValidationKey(currentValue, effectiveValidationContext)
+    ) {
       triggerValidation(currentValue, false);
     }
   });
@@ -254,7 +258,10 @@
   $effect(() => {
     if (validate && contextKey !== previousContextKey) {
       previousContextKey = contextKey;
-      if (currentValue) {
+      if (
+        currentValue &&
+        activeValidationKey !== buildValidationKey(currentValue, effectiveValidationContext)
+      ) {
         triggerValidation(currentValue, false);
       }
     }
