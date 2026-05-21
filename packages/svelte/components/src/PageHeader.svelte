@@ -103,12 +103,6 @@
     aria-label={ariaLabel ?? undefined}
   >
     <div class="poodle-page-header__content">
-      {#if showTopBreadcrumbs && breadcrumbs}
-        <div class="poodle-page-header__breadcrumbs">
-          {@render breadcrumbs()}
-        </div>
-      {/if}
-
       <div class="poodle-page-header__title-block">
         {#if eyebrow}
           <p class="poodle-page-header__eyebrow">{eyebrow}</p>
@@ -130,11 +124,13 @@
             {/if}
           </svelte:element>
         {/if}
-        {#if hasSectionTitleSplit && !isEntityDetailPosture}
-          <p class="poodle-page-header__section-title">{title}</p>
-        {/if}
         {#if showSubtitleText}
           <p class="poodle-page-header__subtitle">{resolvedSubtitle}</p>
+        {/if}
+        {#if showTopBreadcrumbs && breadcrumbs}
+          <div class="poodle-page-header__breadcrumbs poodle-page-header__breadcrumbs--stacked">
+            {@render breadcrumbs()}
+          </div>
         {/if}
         {#if isEntityDetailPosture && breadcrumbs}
           <div class="poodle-page-header__breadcrumbs poodle-page-header__breadcrumbs--subtitle">
@@ -196,7 +192,7 @@
     --poodle-page-header-section-title-size: 1rem;
     --poodle-page-header-section-title-compact-size: 0.875rem;
     --poodle-page-header-eyebrow-size: 0.6875rem;
-    --poodle-page-header-subtitle-size: var(--poodle-typography-body-size);
+    --poodle-page-header-subtitle-size: 1rem;
     --poodle-page-header-subtitle-compact-size: 1rem;
     --poodle-page-header-body-size: var(--poodle-typography-body-size);
     --poodle-page-header-back-size: 0.8125rem;
@@ -280,8 +276,7 @@
   .poodle-page-header__subtitle,
   .poodle-page-header__body,
   .poodle-page-header__eyebrow,
-  .poodle-page-header__section,
-  .poodle-page-header__section-title {
+  .poodle-page-header__section {
     margin: 0;
   }
 
@@ -301,14 +296,6 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  .poodle-page-header__section-title {
-    color: var(--poodle-color-text-secondary);
-    font-family: var(--poodle-typography-heading-family);
-    font-size: var(--poodle-page-header-section-title-size);
-    line-height: 1.25;
-    font-weight: 600;
   }
 
   .poodle-page-header__count {
@@ -344,13 +331,6 @@
   .poodle-page-header[data-level="6"] .poodle-page-header__title {
     font-size: var(--poodle-page-header-title-compact-size);
     line-height: 1.15;
-  }
-
-  .poodle-page-header[data-level="3"] .poodle-page-header__section-title,
-  .poodle-page-header[data-level="4"] .poodle-page-header__section-title,
-  .poodle-page-header[data-level="5"] .poodle-page-header__section-title,
-  .poodle-page-header[data-level="6"] .poodle-page-header__section-title {
-    font-size: var(--poodle-page-header-section-title-compact-size);
   }
 
   .poodle-page-header[data-level="3"] .poodle-page-header__subtitle,
@@ -416,7 +396,7 @@
     --poodle-page-header-section-title-size: 0.875rem;
     --poodle-page-header-section-title-compact-size: 0.8125rem;
     --poodle-page-header-eyebrow-size: 0.625rem;
-    --poodle-page-header-subtitle-size: 0.8125rem;
+    --poodle-page-header-subtitle-size: 0.875rem;
     --poodle-page-header-subtitle-compact-size: 0.875rem;
     --poodle-page-header-body-size: 0.8125rem;
     --poodle-page-header-back-size: 0.75rem;
@@ -429,7 +409,7 @@
     --poodle-page-header-section-title-size: 0.9375rem;
     --poodle-page-header-section-title-compact-size: 0.84375rem;
     --poodle-page-header-eyebrow-size: 0.65625rem;
-    --poodle-page-header-subtitle-size: 0.875rem;
+    --poodle-page-header-subtitle-size: 0.9375rem;
     --poodle-page-header-subtitle-compact-size: 0.9375rem;
     --poodle-page-header-body-size: 0.875rem;
     --poodle-page-header-back-size: 0.78125rem;
@@ -442,7 +422,7 @@
     --poodle-page-header-section-title-size: 1rem;
     --poodle-page-header-section-title-compact-size: 0.875rem;
     --poodle-page-header-eyebrow-size: 0.6875rem;
-    --poodle-page-header-subtitle-size: var(--poodle-typography-body-size);
+    --poodle-page-header-subtitle-size: 1rem;
     --poodle-page-header-subtitle-compact-size: 1rem;
     --poodle-page-header-body-size: var(--poodle-typography-body-size);
     --poodle-page-header-back-size: 0.8125rem;
@@ -455,7 +435,7 @@
     --poodle-page-header-section-title-size: 1.125rem;
     --poodle-page-header-section-title-compact-size: 0.9375rem;
     --poodle-page-header-eyebrow-size: 0.75rem;
-    --poodle-page-header-subtitle-size: 0.9375rem;
+    --poodle-page-header-subtitle-size: 1.0625rem;
     --poodle-page-header-subtitle-compact-size: 1.0625rem;
     --poodle-page-header-body-size: 0.9375rem;
     --poodle-page-header-back-size: 0.875rem;
@@ -468,7 +448,7 @@
     --poodle-page-header-section-title-size: 1.25rem;
     --poodle-page-header-section-title-compact-size: 1rem;
     --poodle-page-header-eyebrow-size: 0.8125rem;
-    --poodle-page-header-subtitle-size: 1rem;
+    --poodle-page-header-subtitle-size: 1.125rem;
     --poodle-page-header-subtitle-compact-size: 1.125rem;
     --poodle-page-header-body-size: 1rem;
     --poodle-page-header-back-size: 0.9375rem;

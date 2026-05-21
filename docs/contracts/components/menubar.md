@@ -180,6 +180,12 @@ MenuItem: {
   docs or admin command bars
 - child expectations: top-level triggers own submenu item sets
 - resizing rules: trigger strip wraps or scrolls according to host constraints
+- hierarchy guidance: top-level trigger labels and submenu item labels should
+  stay as leaf command/menu names, not breadcrumb chains or path-like titles
+- use `shortcutLabel` in the meta column for command hints only; do not use the
+  meta column to fake ancestor trails or secondary navigation hierarchy
+- if the UI needs visible breadcrumb context, render that outside the menubar in
+  surrounding `PageHeader` or toolbar chrome
 
 ## 8. Token Usage — Exact Values
 

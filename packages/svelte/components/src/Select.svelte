@@ -119,6 +119,7 @@
   const hasPlaceholderOption = $derived(flatOptions.some((entry) => entry.value === placeholderValue));
   const hasCurrentOption = $derived(flatOptions.some((entry) => entry.value === currentValue));
   const hasSelection = $derived(currentValue !== "" && currentValue !== clearValue);
+  const showClear = $derived(clearable && hasSelection && !disabled);
   const isGrouped = $derived(normalizedOptions.length > 0 && "options" in normalizedOptions[0]);
   const normalizedGroups = $derived(isGrouped ? (normalizedOptions as SelectOptionGroup[]) : []);
   const selectedOption = $derived(flatOptions.find((entry) => entry.value === currentValue) ?? null);
@@ -320,7 +321,7 @@
 
   $effect(() => {
     if (!open && !freeform) {
-      query = selectedOption?.label ?? "";
+      query = hasSelection ? (selectedOption?.label ?? "") : "";
     }
   });
 
@@ -382,6 +383,7 @@
     data-size={resolvedSize}
     data-density={resolvedDensity}
     data-validation-state={validationState}
+    data-has-clear={showClear}
     aria-invalid={validationState === "invalid" ? "true" : undefined}
   >
     {#if searchable}
@@ -410,7 +412,7 @@
           oninput={handleInputInput}
           onkeydown={handleKeydown}
         />
-        {#if clearable && hasSelection && !disabled}
+        {#if showClear}
           <button
             type="button"
             class="poodle-select__clear"
@@ -450,12 +452,12 @@
               {@render triggerSnippet({ selectedOption, open, placeholder })}
             {:else}
               <span class="poodle-select__value" data-placeholder={!hasSelection}>
-                {selectedOption?.label ?? placeholder ?? ""}
+                {hasSelection ? (selectedOption?.label ?? "") : (placeholder ?? selectedOption?.label ?? "")}
               </span>
             {/if}
           </span>
         </button>
-        {#if clearable && hasSelection && !disabled}
+        {#if showClear}
           <button
             type="button"
             class="poodle-select__clear"
@@ -704,8 +706,15 @@
 
   .poodle-select {
     --poodle-select-control-height: var(--poodle-size-control-height);
+    --poodle-select-interior-height: calc(
+      var(--poodle-select-control-height) - (var(--poodle-border-width-default) * 2)
+    );
     --poodle-select-inline-padding-size-adjust: 0rem;
     --poodle-select-inline-padding-density-adjust: 0rem;
+    --poodle-select-indicator-width: 1rem;
+    --poodle-select-clear-width: 1.125rem;
+    --poodle-select-end-gap: 0.375rem;
+    --poodle-select-end-decoration-width: var(--poodle-select-indicator-width);
     --poodle-select-inline-padding: calc(
       var(--poodle-space-control-x)
       + var(--poodle-select-inline-padding-size-adjust)
@@ -728,6 +737,14 @@
       border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  .poodle-select[data-has-clear="true"] {
+    --poodle-select-end-decoration-width: calc(
+      var(--poodle-select-clear-width)
+      + var(--poodle-select-end-gap)
+      + var(--poodle-select-indicator-width)
+    );
   }
 
   .poodle-select[data-validation-state="invalid"] {
@@ -813,16 +830,19 @@
     align-items: center;
     gap: 0.375rem;
     padding: 0 var(--poodle-select-inline-padding);
-    min-height: var(--poodle-select-control-height);
+    min-height: var(--poodle-select-interior-height);
   }
 
   .poodle-select__input {
     flex: 1;
     min-width: 0;
     width: 100%;
-    height: var(--poodle-select-control-height);
+    height: var(--poodle-select-interior-height);
     padding: 0;
-    padding-right: 1.5rem;
+    padding-right: calc(
+      var(--poodle-select-end-decoration-width)
+      + var(--poodle-select-end-gap)
+    );
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -844,9 +864,12 @@
     flex: 1;
     width: 100%;
     min-width: 0;
-    min-height: var(--poodle-select-control-height);
+    min-height: var(--poodle-select-interior-height);
     padding: 0;
-    padding-right: 1.5rem;
+    padding-right: calc(
+      var(--poodle-select-end-decoration-width)
+      + var(--poodle-select-end-gap)
+    );
     border: 0;
     background: transparent;
     color: var(--poodle-color-text-primary);
@@ -888,8 +911,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1rem;
-    height: 1rem;
+    width: var(--poodle-select-indicator-width);
+    height: var(--poodle-select-indicator-width);
     padding: 0;
     border: 0;
     background: transparent;
@@ -903,17 +926,25 @@
   }
 
   .poodle-select__clear {
+    position: absolute;
+    right: calc(
+      var(--poodle-select-inline-padding)
+      + var(--poodle-select-indicator-width)
+      + var(--poodle-select-end-gap)
+    );
+    top: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: var(--poodle-select-clear-width);
+    height: var(--poodle-select-clear-width);
     padding: 0;
     border: 0;
     border-radius: var(--poodle-radius-pill);
     background: color-mix(in srgb, var(--poodle-color-text-secondary) 18%, transparent);
     color: var(--poodle-color-text-secondary);
+    transform: translateY(-50%);
     cursor: pointer;
   }
 

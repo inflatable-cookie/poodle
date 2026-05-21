@@ -1,4 +1,4 @@
-import type { SvelteComponent } from "svelte";
+import type { Component } from "svelte";
 
 import AccordionSpecimen from "./AccordionSpecimen.svelte";
 import AudioPlayerSpecimen from "./AudioPlayerSpecimen.svelte";
@@ -125,7 +125,7 @@ import SplitViewSpecimen from "./SplitViewSpecimen.svelte";
  * Maps component slugs to their specimen Svelte components.
  * Add entries here as specimens are created.
  */
-export const specimenMap: Record<string, typeof SvelteComponent<any>> = {
+export const specimenMap: Record<string, Component<Record<string, never>>> = {
   accordion: AccordionSpecimen,
   "audio-player": AudioPlayerSpecimen,
   "editable-list": EditableListSpecimen,

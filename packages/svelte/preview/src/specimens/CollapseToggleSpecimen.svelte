@@ -16,7 +16,7 @@
         <CollapseToggle
           direction="left"
           collapsed={collapsedLeft}
-          on:toggle={(e) => (collapsedLeft = e.detail.isCollapsed)}
+          onToggle={(isCollapsed) => (collapsedLeft = isCollapsed)}
         />
         <span>Left {collapsedLeft ? "(collapsed)" : "(expanded)"}</span>
       </div>
@@ -24,7 +24,7 @@
         <CollapseToggle
           direction="right"
           collapsed={collapsedRight}
-          on:toggle={(e) => (collapsedRight = e.detail.isCollapsed)}
+          onToggle={(isCollapsed) => (collapsedRight = isCollapsed)}
         />
         <span>Right {collapsedRight ? "(collapsed)" : "(expanded)"}</span>
       </div>
@@ -32,7 +32,7 @@
         <CollapseToggle
           direction="up"
           collapsed={collapsedUp}
-          on:toggle={(e) => (collapsedUp = e.detail.isCollapsed)}
+          onToggle={(isCollapsed) => (collapsedUp = isCollapsed)}
         />
         <span>Up {collapsedUp ? "(collapsed)" : "(expanded)"}</span>
       </div>
@@ -40,7 +40,7 @@
         <CollapseToggle
           direction="down"
           collapsed={collapsedDown}
-          on:toggle={(e) => (collapsedDown = e.detail.isCollapsed)}
+          onToggle={(isCollapsed) => (collapsedDown = isCollapsed)}
         />
         <span>Down {collapsedDown ? "(collapsed)" : "(expanded)"}</span>
       </div>

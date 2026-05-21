@@ -296,6 +296,12 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 - ActionDiscoveryPanel is bound with `activeId` for two-way active tracking
 - Loading treatment is delegated to `ActionDiscoveryPanel`, which remains
   Skeleton-based rather than Spinner-based because it is preserving result-row structure
+- hierarchy guidance: command labels should stay as leaf action names, not
+  breadcrumb chains or multi-segment navigation trails
+- use group labels for category context and the surrounding page/header for
+  broader location context rather than encoding ancestors into each command row
+- if a command must show extra scope, prefer concise supporting copy in the
+  discovery panel rather than breadcrumb-style label composition
 
 ## 11. Specimen Definitions
 

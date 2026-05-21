@@ -142,7 +142,7 @@
   }
 
   function handleDateChange(nextValue: string | string[] | { start: string | null; end: string | null }): void {
-    if (typeof nextValue === "string" || nextValue === null) {
+    if (typeof nextValue === "string") {
       commitValue({ ...currentValue, date: nextValue });
     }
   }

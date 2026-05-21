@@ -25,8 +25,8 @@ Updated: 2026-04-01
   │     │     │     ├── [Icon] (optional, Icon component using supporting semantic sizing)
   │     │     │     └── [Label .poodle-tabs__label]  <span>
   │     │     └── [Close .poodle-tabs__close] (optional, when closable)
-  │     └── [Actions .poodle-tabs__actions] (optional slot)
-  └── [Panel .poodle-tabs__panel]  role="tabpanel" (optional, when slot content exists)
+  │     └── [Actions .poodle-tabs__actions] (optional actions snippet)
+  └── [Panel .poodle-tabs__panel]  role="tabpanel" (optional, when `children(activeValue)` snippet exists)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -37,8 +37,8 @@ Updated: 2026-04-01
 | Tab | yes | selectable button | text, background, focus ring |
 | Label | yes | text content | whitespace, min-width |
 | Close | no | close button (when closable) | icon color, hover bg |
-| Actions | no | trailing slot | margin-left auto |
-| Panel | no | content region (when slot provided) | border, background, padding |
+| Actions | no | trailing actions snippet | margin-left auto |
+| Panel | no | content region (when `children(activeValue)` snippet provided) | border, background, padding |
 
 ## 3. Props And Inputs
 
@@ -153,8 +153,12 @@ Updated: 2026-04-01
 ### Composition
 
 - parent expectations: settings panels, inspectors, content areas
-- child expectations: panel receives arbitrary content via slot
+- child expectations: panel receives arbitrary content via `children(activeValue)` snippet
 - resizing: tab selection should not cause layout jump
+- hierarchy guidance: tab labels should stay as leaf surface names, not
+  breadcrumb chains or section trails
+- if ancestor context is needed, put it around the tabset in surrounding
+  `PageHeader`/breadcrumbs UI rather than encoding it into each tab label
 
 ## 8. Token Usage — Exact Values
 
@@ -497,7 +501,7 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
-### Actions slot
+### Actions snippet
 
 | Property | Value |
 |----------|-------|
@@ -533,7 +537,7 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 - Items list can be reordered via drag events or keyboard Alt+Arrow
 - Module-level `nextTabsId` counter for unique IDs across instances
 - Close button stops click propagation so the parent tab does not also activate
-- Panel slot receives `activeValue` as slot prop
+- `children(activeValue)` receives `activeValue` as snippet argument
 
 ## 10. GPUI Notes
 

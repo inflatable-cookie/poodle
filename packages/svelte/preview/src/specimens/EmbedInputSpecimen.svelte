@@ -111,7 +111,6 @@
     <EmbedInput
       id={"embed-size-" + size}
       {size}
-      ariaLabel={"Embed input at " + size}
       placeholder="Paste a URL or embed code..."
     />
   {/snippet}
@@ -120,7 +119,6 @@
     <EmbedInput
       id={"embed-density-" + density}
       {density}
-      ariaLabel={"Embed input at " + density + " density"}
       placeholder="Paste a URL or embed code..."
     />
   {/snippet}

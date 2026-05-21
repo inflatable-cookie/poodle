@@ -92,6 +92,8 @@ Updated: 2026-03-27
 |---------|---------|
 | `titleContent` | custom rich title content when plain string title is not enough |
 | `subtitleContent` | custom rich subtitle content when plain subtitle text is not enough |
+| `metaContent` | custom rich metadata content when plain meta text is not enough |
+| `sashContent` | custom ribbon content when plain sash text is not enough |
 | `leading` | avatar, icon, or media thumbnail |
 | `badges` | pills or badges displayed inline with the title |
 | `footer` | counter icons, links, or supplementary info below subtitle |
@@ -179,6 +181,20 @@ Updated: 2026-03-27
 - context menu: wrap ListCard in ContextMenu for right-click actions
 - explicit menu/action composition should use the `actions` snippet rather than
   coupling menu trigger ownership to the leading media area
+
+### Hierarchy Title Guidance
+
+- use `titleContent` when the visible title needs hierarchy rather than plain text
+- render parent segments in `var(--poodle-color-text-secondary)` so the final
+  leaf remains the primary focal point
+- use real chevron icons between segments; do not encode hierarchy with plain
+  text delimiters like `>` or `/`
+- keep hierarchy titles to one line in default/compact layouts; let the leaf
+  truncate first rather than wrapping the whole chain
+- prefer one or two ancestor segments; longer chains should collapse earlier
+  context into `metaContent` or the subtitle instead of making the title noisy
+- if the right edge also needs hierarchy context, use `metaContent` so the
+  dimmed/structured styling matches the title treatment
 
 ## 8. Token Usage — Exact Values
 
@@ -436,6 +452,13 @@ A small companion component for rendering icon + count pairs in the footer snipp
 | design-system-v2.figma | `title`, `subtitle`, `meta="14.2 MB"`, `interactive`, leading icon (folder) | Interactive card with circle leading icon, title, subtitle, and right-aligned meta |
 | component-specs.pdf | `title`, `subtitle`, `meta="2.8 MB"`, `interactive`, leading icon (file-text) | Interactive card with circle leading icon |
 | brand-assets.zip | `title`, `subtitle="Archived"`, `meta="48 MB"`, `disabled`, leading icon (layers) | Disabled card at reduced opacity with not-allowed cursor |
+
+### Hierarchy Titles
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Cash flow forecasts | `interactive`, `titleContent` snippet with dimmed ancestors and chevron icons, `metaContent` snippet with muted right-edge metadata | Hierarchy-style title with real icon separators instead of plain text delimiters |
+| Week 1: Cash Flow | `layout="compact"`, `showReorderHandle`, `titleContent` snippet with dimmed parent and chevron icon, info badge | Compact hierarchy row suitable for nested reorder/list contexts |
 
 ### Rounded-Square Leading (Thumbnails)
 

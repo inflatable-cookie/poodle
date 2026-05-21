@@ -36,8 +36,8 @@
 
   $: matchingTokenCount = filteredTokens.length;
 
-  function handleQueryChange(event: CustomEvent<{ value: string }>): void {
-    inspectorQuery = event.detail.value;
+  function handleQueryChange(value: string): void {
+    inspectorQuery = value;
   }
 
   function handleQueryClear(): void {

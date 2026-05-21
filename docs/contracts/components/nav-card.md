@@ -30,7 +30,7 @@ Updated: 2026-03-15
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | link or button container | padding, border, radius, background, cursor |
-| Icon | no | visual indicator slot | width, height, border-radius, background, color |
+| Icon | no | visual indicator snippet region | width, height, border-radius, background, color |
 | Content | yes | title, badge, and description column | flex, gap |
 | Title | yes | primary navigation label | font, color, weight |
 | Badge | no | inline status indicator | padding, border-radius, background, color, font-size |
@@ -116,6 +116,12 @@ Updated: 2026-03-15
 - parent expectations: NavCardGrid, navigation panels, settings pages
 - child expectations: icon via `icon()` snippet
 - resizing: fills parent width
+- hierarchy guidance: keep `title` as the leaf destination label; do not embed
+  breadcrumb chains or multi-segment hierarchy strings in the title
+- if parent context is needed, prefer `description` for one short supporting
+  line rather than breadcrumb-style title composition
+- if the UI needs true breadcrumb or hierarchy treatment with dimmed ancestors
+  and chevrons, use `PageHeader` or `ListCard`, not `NavCard`
 
 ## 8. Token Usage — Exact Values
 
@@ -277,7 +283,7 @@ Updated: 2026-03-15
 - [ ] border and border-radius match
 - [ ] hover border and background match
 - [ ] focus ring matches
-- [ ] icon slot default styling matches
+- [ ] icon snippet default styling matches
 - [ ] badge appearance matches (pill, accent colors)
 - [ ] description typography matches
 - [ ] arrow opacity transition on hover matches
@@ -300,10 +306,10 @@ Updated: 2026-03-15
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Getting Started | `title`, `description`, icon slot (home), click handler | NavCard with icon, title, description, arrow hidden until hover |
-| Components | `title`, `description`, `badge="New"`, icon slot (layers), click handler | NavCard with icon, title, inline badge, description |
-| Tokens | `title`, `description`, icon slot (sliders-horizontal), click handler | NavCard with icon, title, description |
-| API Reference | `title`, `description`, `disabled`, icon slot (file-text) | Disabled NavCard at reduced opacity with not-allowed cursor |
+| Getting Started | `title`, `description`, icon snippet (home), click handler | NavCard with icon, title, description, arrow hidden until hover |
+| Components | `title`, `description`, `badge="New"`, icon snippet (layers), click handler | NavCard with icon, title, inline badge, description |
+| Tokens | `title`, `description`, icon snippet (sliders-horizontal), click handler | NavCard with icon, title, description |
+| API Reference | `title`, `description`, `disabled`, icon snippet (file-text) | Disabled NavCard at reduced opacity with not-allowed cursor |
 
 Cards arranged in a 2-column NavCardGrid.
 

@@ -7,7 +7,7 @@
   export let matchingTokenCount = 0;
   export let inspectorQuery = "";
   export let onSelectPanel: (panelId: "token-summary-section" | "token-inspector") => void = () => {};
-  export let onQueryChange: (event: CustomEvent<{ value: string }>) => void = () => {};
+  export let onQueryChange: (value: string) => void = () => {};
   export let onQueryClear: () => void = () => {};
 
   const tabItems: TabItem[] = [

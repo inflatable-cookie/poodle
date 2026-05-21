@@ -36,6 +36,8 @@
     onContextAction?: ((value: string) => void) | null;
     titleContent?: Snippet<[]>;
     subtitleContent?: Snippet<[]>;
+    metaContent?: Snippet<[]>;
+    sashContent?: Snippet<[]>;
     leading?: Snippet<[]>;
     badges?: Snippet<[]>;
     footer?: Snippet<[]>;
@@ -74,6 +76,8 @@
     onContextAction = null,
     titleContent,
     subtitleContent,
+    metaContent,
+    sashContent,
     leading,
     badges,
     footer,
@@ -90,7 +94,7 @@
   const resolvedLeadingSize = $derived(offsetControlSize(resolvedSize, leadingSizeOffset));
   const isCompact = $derived(layout === "compact");
   const isStacked = $derived(layout === "stacked");
-  const showMeta = $derived(!trailing && meta && !isCompact);
+  const showMeta = $derived(!trailing && (meta || metaContent) && !isCompact);
   const showActions = $derived(!trailing && Boolean(actions));
   const showUtilityRail = $derived(
     isStacked && (Boolean(trailing) || showMeta || showActions)
@@ -299,8 +303,14 @@
     oncontextmenu={handleContextMenu}
     onkeydown={handleContextMenuKeydown}
   >
-    {#if sash}
-      <span class="poodle-list-card__sash" aria-label={sash}>{sash}</span>
+    {#if sashContent || sash}
+      <span class="poodle-list-card__sash" aria-label={sash ?? undefined}>
+        {#if sashContent}
+          {@render sashContent()}
+        {:else if sash}
+          {sash}
+        {/if}
+      </span>
     {/if}
 
     {#if showReorderHandle}
@@ -414,7 +424,13 @@
     {#if showUtilityRail}
       <div class="poodle-list-card__utility-rail">
         {#if showMeta}
-          <span class="poodle-list-card__meta">{meta}</span>
+          <span class="poodle-list-card__meta">
+            {#if metaContent}
+              {@render metaContent()}
+            {:else}
+              {meta}
+            {/if}
+          </span>
         {/if}
 
         {#if showActions}
@@ -433,7 +449,13 @@
       </div>
     {:else}
       {#if showMeta}
-        <span class="poodle-list-card__meta">{meta}</span>
+        <span class="poodle-list-card__meta">
+          {#if metaContent}
+            {@render metaContent()}
+          {:else}
+            {meta}
+          {/if}
+        </span>
       {/if}
 
       {#if showActions}
@@ -479,8 +501,14 @@
     onkeydown={handleRootKeydown}
     oncontextmenu={handleContextMenu}
   >
-    {#if sash}
-      <span class="poodle-list-card__sash" aria-label={sash}>{sash}</span>
+    {#if sashContent || sash}
+      <span class="poodle-list-card__sash" aria-label={sash ?? undefined}>
+        {#if sashContent}
+          {@render sashContent()}
+        {:else if sash}
+          {sash}
+        {/if}
+      </span>
     {/if}
 
     {#if showReorderHandle}
@@ -594,7 +622,13 @@
     {#if showUtilityRail}
       <div class="poodle-list-card__utility-rail">
         {#if showMeta}
-          <span class="poodle-list-card__meta">{meta}</span>
+          <span class="poodle-list-card__meta">
+            {#if metaContent}
+              {@render metaContent()}
+            {:else}
+              {meta}
+            {/if}
+          </span>
         {/if}
 
         {#if showActions}
@@ -613,7 +647,13 @@
       </div>
     {:else}
       {#if showMeta}
-        <span class="poodle-list-card__meta">{meta}</span>
+        <span class="poodle-list-card__meta">
+          {#if metaContent}
+            {@render metaContent()}
+          {:else}
+            {meta}
+          {/if}
+        </span>
       {/if}
 
       {#if showActions}

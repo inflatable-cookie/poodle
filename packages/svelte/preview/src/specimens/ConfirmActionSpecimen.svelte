@@ -13,7 +13,9 @@
       description="This record will be permanently removed."
       triggerLabel="Delete record"
       confirmLabel="Delete"
-      onConfirm={() => (lastAction = "Record deleted")}
+      onConfirm={() => {
+        lastAction = "Record deleted";
+      }}
     />
   </SpecimenGroup>
 
@@ -24,7 +26,9 @@
       tone="warning"
       triggerLabel="Archive project"
       confirmLabel="Archive"
-      onConfirm={() => (lastAction = "Project archived")}
+      onConfirm={() => {
+        lastAction = "Project archived";
+      }}
     />
   </SpecimenGroup>
 
@@ -34,7 +38,9 @@
       description="This will clear all active filters and show all items."
       tone="warning"
       confirmLabel="Clear all"
-      onConfirm={() => (lastAction = "Filters cleared")}
+      onConfirm={() => {
+        lastAction = "Filters cleared";
+      }}
     >
       {#snippet trigger()}
         <Button variant="ghost">Clear filters</Button>
@@ -47,7 +53,9 @@
       title="Revoke API key?"
       description="This key will immediately stop working."
       confirmLabel="Revoke"
-      onConfirm={() => (lastAction = "Key revoked")}
+      onConfirm={() => {
+        lastAction = "Key revoked";
+      }}
     >
       <div class="poodle-key-display">
         <code>pk_live_abc123...xyz789</code>

@@ -56,6 +56,30 @@
         </PageHeader>
       </SpecimenGroup>
 
+      <SpecimenGroup label="With breadcrumbs">
+        <PageHeader
+          title="Cash flow forecasts"
+          section="Module"
+          subtitle="Manage content and ordering for this module."
+          backHref="/learning/pathways"
+          backLabel="Pathways"
+        >
+          {#snippet breadcrumbs()}
+            <nav class="poodle-breadcrumbs" aria-label="Breadcrumb">
+              <a href="/learning/pathways">Pathways</a>
+              <span class="poodle-breadcrumbs__chevron" aria-hidden="true">›</span>
+              <a href="/learning/pathways/foundation">Foundation</a>
+              <span class="poodle-breadcrumbs__chevron" aria-hidden="true">›</span>
+              <span>Module</span>
+            </nav>
+          {/snippet}
+          {#snippet actions()}
+            <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
+            <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
+          {/snippet}
+        </PageHeader>
+      </SpecimenGroup>
+
       <SpecimenGroup label="With MetaBar">
         <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
           {#snippet meta()}
@@ -123,5 +147,27 @@
   .poodle-meta-text {
     color: var(--poodle-color-text-secondary);
     font-size: 0.8125rem;
+  }
+
+  .poodle-breadcrumbs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  .poodle-breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .poodle-breadcrumbs a:hover {
+    color: var(--poodle-color-text-primary);
+  }
+
+  .poodle-breadcrumbs__chevron {
+    opacity: 0.7;
   }
 </style>

@@ -121,6 +121,11 @@ through `onValueChange`.
 - Parent expectations: narrow sidebar columns, stacked verification/catalogue rails
 - Child expectations: none (self-contained)
 - Resizing rules: min-width 0, items stretch to fill available width
+- hierarchy guidance: item labels should stay as leaf navigation labels, not
+  breadcrumb chains or multi-segment trails
+- use group labels for section context; do not fake hierarchy inside item text
+- if the UI needs dimmed ancestors and chevrons, use `PageHeader` or
+  `ListCard`, not `SidebarNav`
 
 ## 8. Token Usage
 

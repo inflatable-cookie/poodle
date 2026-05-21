@@ -74,6 +74,46 @@
             <IconButton icon="ellipsis" ariaLabel="Project actions" variant="ghost" />
           {/snippet}
         </ListCard>
+    </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Hierarchy titles">
+      <div class="poodle-specimen__stack">
+        <ListCard
+          title="Cash flow forecasts"
+          subtitle="Module content"
+          interactive
+          onClick={() => (lastClick = "Cash flow forecasts")}
+        >
+          {#snippet leading()}
+            <Icon icon={grid2x2} />
+          {/snippet}
+          {#snippet titleContent()}
+            <span style="color: var(--poodle-color-text-secondary);">Pathway</span>
+            <Icon name="chevron-right" size="xs" />
+            <span style="color: var(--poodle-color-text-secondary);">Module</span>
+            <Icon name="chevron-right" size="xs" />
+            <span>Cash flow forecasts</span>
+          {/snippet}
+          {#snippet metaContent()}
+            <span style="color: var(--poodle-color-text-secondary);">Weight 3</span>
+          {/snippet}
+        </ListCard>
+        <ListCard
+          title="Week 1: Cash Flow"
+          subtitle="Move within section"
+          layout="compact"
+          showReorderHandle
+        >
+          {#snippet titleContent()}
+            <span style="color: var(--poodle-color-text-secondary);">Module</span>
+            <Icon name="chevron-right" size="xs" />
+            <span>Week 1: Cash Flow</span>
+          {/snippet}
+          {#snippet badges()}
+            <Pill tone="info">Move</Pill>
+          {/snippet}
+        </ListCard>
       </div>
     </SpecimenGroup>
 
@@ -112,8 +152,9 @@
         showReorderHandle
       >
         {#snippet titleContent()}
-          <span>Week 2</span>
-          <span style="color: var(--poodle-color-text-secondary);"> → Week 1: Cash Flow</span>
+          <span style="color: var(--poodle-color-text-secondary);">Module</span>
+          <Icon name="chevron-right" size="xs" />
+          <span>Week 1: Cash Flow</span>
         {/snippet}
         {#snippet badges()}
           <Pill tone="info">Move</Pill>

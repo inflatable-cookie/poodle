@@ -137,7 +137,7 @@ export const allComponents: ComponentEntry[] = [
   // Data
   entry("Table", "data", "Static data table with headers, rows, and alignment.", true),
   entry("DataTable", "data", "Feature-rich table with sorting, selection, and pagination.", true),
-  entry("ListCard", "data", "Structured list item card with leading/trailing slots.", true),
+  entry("ListCard", "data", "Structured list item card with snippet-based leading, footer, and trailing composition.", true),
   entry("ListContainer", "data", "List-page shell with header, filters, and pagination.", true),
   entry("EditableList", "data", "Editable/reorderable list with add, remove, and drag-and-drop.", true),
   entry("Card", "data", "Contained surface for grouped content.", true),

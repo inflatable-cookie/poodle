@@ -8,7 +8,7 @@ Updated: 2026-03-30
 - Component name: `ListCardCounter`
 - Layer: `foundation`
 - Summary: a compact inline counter with an icon and numeric value, used inside
-  the footer slot of ListCard to display item counts (e.g. "24 documents",
+  the `footer` snippet of ListCard to display item counts (e.g. "24 documents",
   "8 images")
 - In scope: icon + count display, optional tooltip wrapping, optional link
   rendering via href, hover color transition for linked counters, tabular-nums
@@ -84,7 +84,7 @@ No internal component state. All visual states are derived from props.
   `docs/contracts/001-working-rules.md` so text, icon, and gap scale together
 - `font-variant-numeric: tabular-nums` for consistent digit widths
 - Inline element, wraps with its parent container
-- Parent expectations: designed to be placed in the `footer` slot of ListCard
+- Parent expectations: designed to be placed in the `footer` snippet of ListCard
 
 ## 8. Token Usage
 
