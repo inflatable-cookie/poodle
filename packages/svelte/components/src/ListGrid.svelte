@@ -6,6 +6,7 @@
   let {
     variant = "default",
     minItemWidth = null,
+    maxColumns = 3,
     gap = null,
     class: className = "",
     actions = undefined,
@@ -13,6 +14,7 @@
   }: {
     variant?: ListGridVariant;
     minItemWidth?: number | string | null;
+    maxColumns?: number | null;
     gap?: number | string | null;
     class?: string;
     actions?: Snippet;
@@ -27,10 +29,13 @@
 
   const min = $derived(formatValue(minItemWidth, "em") ?? "360px");
   const gridGap = $derived(formatValue(gap, "px") ?? (variant === "compact" ? "0.5rem" : "1.25rem"));
+  const columnCap = $derived(maxColumns == null ? null : Math.max(1, Math.floor(maxColumns)));
   const columns = $derived(
     variant === "compact"
       ? "1fr"
-      : `repeat(auto-fill, minmax(min(${min}, 100%), 1fr))`,
+      : columnCap == null
+        ? `repeat(auto-fill, minmax(min(${min}, 100%), 1fr))`
+        : `repeat(auto-fill, minmax(min(100%, max(${min}, calc((100% - (${columnCap} - 1) * ${gridGap}) / ${columnCap}))), 1fr))`,
   );
 </script>
 

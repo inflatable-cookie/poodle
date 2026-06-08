@@ -16,6 +16,7 @@
     typography = "label",
     accent = null,
     muted = false,
+    adaptiveWidth = false,
     ariaLabel = null,
     children = undefined,
   }: {
@@ -28,6 +29,7 @@
     typography?: PillTypography;
     accent?: string | null;
     muted?: boolean;
+    adaptiveWidth?: boolean;
     ariaLabel?: string | null;
     children?: Snippet;
   } = $props();
@@ -51,6 +53,7 @@
   data-font={font}
   data-typography={resolvedTypography}
   data-muted={muted}
+  data-adaptive-width={adaptiveWidth || undefined}
   data-accent={accent ? "custom" : undefined}
   aria-label={ariaLabel ?? undefined}
   style:--poodle-pill-accent={accent ?? undefined}
@@ -246,6 +249,10 @@
 
   .poodle-pill[data-muted="true"] {
     opacity: 0.72;
+  }
+
+  .poodle-pill[data-adaptive-width="true"] {
+    min-width: 0;
   }
 
   /* Density variants */

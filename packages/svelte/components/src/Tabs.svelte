@@ -5,7 +5,9 @@
 <script lang="ts">
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
+  import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
+  import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { findNextEnabledIndex, firstEnabledIndex } from "./internal";
   import {
@@ -41,6 +43,8 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    collapseWhenOverflow?: boolean;
+    collapseLabel?: string | null;
     reorderable?: boolean;
     ariaLabel?: string | null;
     showTooltips?: boolean;
@@ -63,6 +67,8 @@
     size = null,
     sizeRole = "chrome",
     density = null,
+    collapseWhenOverflow = false,
+    collapseLabel = null,
     reorderable = false,
     ariaLabel = null,
     showTooltips = false,
@@ -78,6 +84,8 @@
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
   let tabElements = $state<Array<HTMLButtonElement | null>>([]);
+  let rootElement = $state<HTMLDivElement | null>(null);
+  let measureListElement = $state<HTMLDivElement | null>(null);
   let uncontrolledValue = $state<string | null>(null);
   let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
@@ -88,6 +96,8 @@
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let dragSourceIndex = $state<number | null>(null);
   let dropTargetIndex = $state<number | null>(null);
+  let collapsedByOverflow = $state(false);
+  let historyReady = $state(false);
 
   function getItemsSignature(nextItems: TabItem[]): string {
     return JSON.stringify(
@@ -130,16 +140,49 @@
   const hasPanel = $derived(children !== undefined);
   const isVertical = $derived(orientation === "vertical");
   const hasTooltips = $derived(isVertical || showTooltips);
+  const canCollapse = $derived(collapseWhenOverflow && !isVertical);
   const resolvedVariant = $derived(variant === "underline" ? "text" : variant);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const resolvedIconSize = $derived(resolveSupportingVisualSize(resolvedSize));
+  const selectedItem = $derived(renderedItems.find((item) => item.value === currentValue) ?? null);
+  const collapseTriggerLabel = $derived(collapseLabel ?? selectedItem?.label ?? "Sections");
+  const collapsedMenuItems = $derived(
+    renderedItems.map((item) => ({
+      value: item.value,
+      label: item.count === undefined ? item.label : `${item.label} (${item.count})`,
+      disabled: item.disabled,
+      kind: "radio" as const,
+      checked: item.value === currentValue,
+    })),
+  );
 
   $effect(() => {
     if (selectedIndex >= 0) {
       focusIndex = selectedIndex;
     }
   });
+
+  async function evaluateCollapsedOverflow(): Promise<void> {
+    if (!canCollapse) {
+      collapsedByOverflow = false;
+      return;
+    }
+
+    await tick();
+
+    if (!rootElement || !measureListElement) {
+      return;
+    }
+
+    const naturalWidth = measureListElement.getBoundingClientRect().width;
+    const availableWidth = rootElement.getBoundingClientRect().width;
+    collapsedByOverflow = naturalWidth > availableWidth + 1;
+  }
+
+  function handleViewportChange(): void {
+    void evaluateCollapsedOverflow();
+  }
 
   // ── Tooltip (vertical icon-only mode) ──
 
@@ -175,39 +218,93 @@
   function replaceUrlTabParam(nextValue: string): void {
     if (!isBrowser || !historyKey) return;
     const url = new URL(window.location.href);
-    url.searchParams.set(historyKey, nextValue);
+    const defaultValue = renderedItems[firstEnabledIndex(renderedItems)]?.value ?? null;
+    if (defaultValue && nextValue === defaultValue) {
+      url.searchParams.delete(historyKey);
+    } else {
+      url.searchParams.set(historyKey, nextValue);
+    }
     window.history.replaceState(window.history.state, "", url);
   }
 
   onMount(() => {
-    if (!isBrowser || !historyKey) return;
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            void evaluateCollapsedOverflow();
+          });
 
-    const urlValue = new URL(window.location.href).searchParams.get(historyKey);
-    if (urlValue) {
-      setValue(urlValue);
-      lastSyncedValue = urlValue;
-    } else if (currentValue) {
-      replaceUrlTabParam(currentValue);
-      lastSyncedValue = currentValue;
+    if (resizeObserver) {
+      if (rootElement) resizeObserver.observe(rootElement);
+      if (measureListElement) resizeObserver.observe(measureListElement);
     }
 
-    const handlePopState = () => {
-      const nextValue = new URL(window.location.href).searchParams.get(historyKey);
-      if (nextValue && nextValue !== currentValue) {
-        setValue(nextValue);
-        lastSyncedValue = nextValue;
+    let handlePopState: (() => void) | null = null;
+    if (isBrowser && historyKey) {
+      const urlValue = new URL(window.location.href).searchParams.get(historyKey);
+      if (urlValue) {
+        setValue(urlValue);
+        lastSyncedValue = urlValue;
+      } else if (currentValue) {
+        replaceUrlTabParam(currentValue);
+        lastSyncedValue = currentValue;
+      }
+
+      handlePopState = () => {
+        const nextValue = new URL(window.location.href).searchParams.get(historyKey);
+        if (nextValue && nextValue !== currentValue) {
+          setValue(nextValue);
+          lastSyncedValue = nextValue;
+          return;
+        }
+
+        if (!nextValue) {
+          const fallbackValue = renderedItems[firstEnabledIndex(renderedItems)]?.value ?? null;
+          if (fallbackValue && fallbackValue !== currentValue) {
+            setValue(fallbackValue);
+            lastSyncedValue = fallbackValue;
+          }
+        }
+      };
+
+      window.addEventListener("popstate", handlePopState);
+    }
+    
+    void tick().then(() => {
+      historyReady = true;
+    });
+
+    return () => {
+      resizeObserver?.disconnect();
+      if (handlePopState) {
+        window.removeEventListener("popstate", handlePopState);
       }
     };
+  });
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+  onMount(() => {
+    window.addEventListener("resize", handleViewportChange);
+    return () => window.removeEventListener("resize", handleViewportChange);
   });
 
   $effect(() => {
+    if (!historyReady) return;
     if (isBrowser && historyKey && currentValue && currentValue !== lastSyncedValue) {
       replaceUrlTabParam(currentValue);
       lastSyncedValue = currentValue;
     }
+  });
+
+  $effect(() => {
+    void currentValue;
+    void renderedItems;
+    void resolvedDensity;
+    void resolvedSize;
+    void resolvedVariant;
+    void canCollapse;
+    void actions;
+    void evaluateCollapsedOverflow();
   });
 
   function moveFocus(nextIndex: number): void {
@@ -336,106 +433,186 @@
 </script>
 
 <div
+  bind:this={rootElement}
   class="poodle-tabs"
   data-variant={resolvedVariant}
   data-bordered={bordered}
   data-orientation={orientation}
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  data-collapsed={collapsedByOverflow || undefined}
 >
-  <div
-    class="poodle-tabs__list"
-    role="tablist"
-    aria-label={ariaLabel ?? undefined}
-    aria-orientation={orientation}
-  >
-    {#each renderedItems as item, index (item.value)}
-      <div
-        class="poodle-tabs__item"
-        role="presentation"
-        data-selected={currentValue === item.value}
-        data-drag-source={dragSourceIndex === index || undefined}
-        data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
-        draggable={reorderable && !item.disabled}
-        ondragstart={(e) => handleDragStart(e, index)}
-        ondragover={(e) => handleDragOver(e, index)}
-        ondragleave={handleDragLeave}
-        ondrop={(e) => handleDrop(e, index)}
-        ondragend={handleDragEnd}
-        onmouseenter={() => hasTooltips && scheduleTooltip(index)}
-        onmouseleave={() => hasTooltips && dismissTooltip()}
-      >
-        <button
-          bind:this={tabElements[index]}
-          type="button"
-          class="poodle-tabs__tab"
-          disabled={item.disabled === true}
-          id={`poodle-tab-${tabsId}-${item.value}`}
-          role="tab"
-          tabindex={focusIndex === index ? 0 : -1}
-          aria-selected={currentValue === item.value ? "true" : "false"}
-          aria-controls={hasPanel ? `poodle-tabpanel-${tabsId}-${item.value}` : undefined}
-          onfocus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
-          onblur={() => hasTooltips && dismissTooltip()}
-          onpointerdown={(event) => {
-            if (
-              reorderable &&
-              event.button === 0 &&
-              item.disabled !== true &&
-              currentValue !== item.value
-            ) {
-              setValue(item.value);
-            }
-          }}
-          onclick={() => setValue(item.value)}
-          onkeydown={(event) => {
-            if (event.key === "Escape" && hasTooltips) dismissTooltip();
-            handleKeydown(event, index);
-          }}
-        >
-          {#if item.icon}
-            <Icon icon={item.icon} size={resolvedIconSize} />
-          {/if}
-          <span class="poodle-tabs__label">{item.label}</span>
-          {#if item.count !== undefined}
-            <Pill tone="neutral" appearance="badge" size={resolvedIconSize} muted ariaLabel={`${item.count}`}>
-              {item.count}
-            </Pill>
-          {/if}
-        </button>
+  {#if canCollapse}
+    <div class="poodle-tabs__measure-shell" aria-hidden="true">
+      <div bind:this={measureListElement} class="poodle-tabs__list poodle-tabs__list--measure">
+        {#each renderedItems as item (item.value)}
+          <div class="poodle-tabs__item" role="presentation" data-selected={currentValue === item.value}>
+            <span class="poodle-tabs__tab">
+              {#if item.icon}
+                <Icon icon={item.icon} size={resolvedIconSize} />
+              {/if}
+              <span class="poodle-tabs__label">{item.label}</span>
+              {#if item.count !== undefined}
+                <Pill
+                  tone="neutral"
+                  appearance="badge"
+                  size={resolvedIconSize}
+                  muted
+                  adaptiveWidth
+                  ariaLabel={`${item.count}`}
+                >
+                  {item.count}
+                </Pill>
+              {/if}
+            </span>
 
-        {#if item.closable}
-          <button
+            {#if item.closable}
+              <span class="poodle-tabs__close" aria-hidden="true">
+                <Icon name="x" size={resolvedIconSize} />
+              </span>
+            {/if}
+          </div>
+          {#if item.separator}
+            <span class="poodle-tabs__separator" aria-hidden="true"></span>
+          {/if}
+        {/each}
+      </div>
+    </div>
+  {/if}
+
+  {#if collapsedByOverflow}
+    <div class="poodle-tabs__collapsed">
+      <Menu
+        items={collapsedMenuItems}
+        ariaLabel={ariaLabel ?? "Sections"}
+        triggerAriaLabel={ariaLabel ?? "Sections"}
+        size={resolvedSize}
+        density={resolvedDensity}
+        onAction={(value) => setValue(value)}
+      >
+        {#snippet trigger()}
+          <Button
             type="button"
-            class="poodle-tabs__close"
-            aria-label={`Close ${item.label}`}
-            onclick={(event) => {
-              event.stopPropagation();
-              onClose?.(item.value);
+            variant="secondary"
+            size={resolvedSize}
+            density={resolvedDensity}
+            leadingIcon="menu"
+            chevron
+            ariaLabel={ariaLabel ?? collapseTriggerLabel}
+          >
+            {collapseTriggerLabel}
+          </Button>
+        {/snippet}
+      </Menu>
+
+      {#if actions}
+        <div class="poodle-tabs__actions">
+          {@render actions()}
+        </div>
+      {/if}
+    </div>
+  {:else}
+    <div
+      class="poodle-tabs__list"
+      role="tablist"
+      aria-label={ariaLabel ?? undefined}
+      aria-orientation={orientation}
+    >
+      {#each renderedItems as item, index (item.value)}
+        <div
+          class="poodle-tabs__item"
+          role="presentation"
+          data-selected={currentValue === item.value}
+          data-drag-source={dragSourceIndex === index || undefined}
+          data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
+          draggable={reorderable && !item.disabled}
+          ondragstart={(e) => handleDragStart(e, index)}
+          ondragover={(e) => handleDragOver(e, index)}
+          ondragleave={handleDragLeave}
+          ondrop={(e) => handleDrop(e, index)}
+          ondragend={handleDragEnd}
+          onmouseenter={() => hasTooltips && scheduleTooltip(index)}
+          onmouseleave={() => hasTooltips && dismissTooltip()}
+        >
+          <button
+            bind:this={tabElements[index]}
+            type="button"
+            class="poodle-tabs__tab"
+            disabled={item.disabled === true}
+            id={`poodle-tab-${tabsId}-${item.value}`}
+            role="tab"
+            tabindex={focusIndex === index ? 0 : -1}
+            aria-selected={currentValue === item.value ? "true" : "false"}
+            aria-controls={hasPanel ? `poodle-tabpanel-${tabsId}-${item.value}` : undefined}
+            onfocus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
+            onblur={() => hasTooltips && dismissTooltip()}
+            onpointerdown={(event) => {
+              if (
+                reorderable &&
+                event.button === 0 &&
+                item.disabled !== true &&
+                currentValue !== item.value
+              ) {
+                setValue(item.value);
+              }
+            }}
+            onclick={() => setValue(item.value)}
+            onkeydown={(event) => {
+              if (event.key === "Escape" && hasTooltips) dismissTooltip();
+              handleKeydown(event, index);
             }}
           >
-            <Icon name="x" size={resolvedIconSize} />
+            {#if item.icon}
+              <Icon icon={item.icon} size={resolvedIconSize} />
+            {/if}
+            <span class="poodle-tabs__label">{item.label}</span>
+            {#if item.count !== undefined}
+              <Pill
+                tone="neutral"
+                appearance="badge"
+                size={resolvedIconSize}
+                muted
+                adaptiveWidth
+                ariaLabel={`${item.count}`}
+              >
+                {item.count}
+              </Pill>
+            {/if}
           </button>
-        {/if}
 
-        {#if hasTooltips && tooltipIndex === index}
-          <span class="poodle-tabs__tooltip" data-placement={isVertical ? "right" : "bottom"} role="tooltip">
-            {item.label}
-          </span>
-        {/if}
+          {#if item.closable}
+            <button
+              type="button"
+              class="poodle-tabs__close"
+              aria-label={`Close ${item.label}`}
+              onclick={(event) => {
+                event.stopPropagation();
+                onClose?.(item.value);
+              }}
+            >
+              <Icon name="x" size={resolvedIconSize} />
+            </button>
+          {/if}
 
-      </div>
-      {#if item.separator}
-        <span class="poodle-tabs__separator" aria-hidden="true"></span>
+          {#if hasTooltips && tooltipIndex === index}
+            <span class="poodle-tabs__tooltip" data-placement={isVertical ? "right" : "bottom"} role="tooltip">
+              {item.label}
+            </span>
+          {/if}
+
+        </div>
+        {#if item.separator}
+          <span class="poodle-tabs__separator" aria-hidden="true"></span>
+        {/if}
+      {/each}
+
+      {#if actions}
+        <div class="poodle-tabs__actions">
+          {@render actions()}
+        </div>
       {/if}
-    {/each}
-
-    {#if actions}
-      <div class="poodle-tabs__actions">
-        {@render actions()}
-      </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
 
   {#if hasPanel && currentValue}
     <div
@@ -457,12 +634,62 @@
     --poodle-tabs-control-height: var(--poodle-size-control-height);
     --poodle-tabs-control-x: var(--poodle-space-control-x);
     --poodle-tabs-label-size: var(--poodle-typography-label-size);
+    --poodle-tabs-content-gap: var(--poodle-space-inline-sm);
+    --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
+    --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
     --poodle-tabs-strip-inline-padding: var(--poodle-tabs-control-x);
     --poodle-tabs-strip-tab-x: var(--poodle-tabs-control-x);
     --poodle-tabs-strip-close-margin-end: 0.25rem;
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
+    position: relative;
+  }
+
+  .poodle-tabs__measure-shell {
+    position: absolute;
+    inset: 0 auto auto 0;
+    visibility: hidden;
+    pointer-events: none;
+    min-width: 100%;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .poodle-tabs__collapsed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--poodle-tabs-list-gap);
+    min-width: 0;
+  }
+
+  .poodle-tabs__collapsed :global(.poodle-menu) {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .poodle-tabs__collapsed :global(.poodle-menu__trigger) {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .poodle-tabs__collapsed :global(.poodle-button) {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .poodle-tabs__collapsed :global(.poodle-button__label) {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .poodle-tabs__collapsed :global(.poodle-button__chevron) {
+    margin-left: auto;
   }
 
   .poodle-tabs[data-size="sm"] {
@@ -492,6 +719,9 @@
 
   .poodle-tabs[data-density="compact"] {
     --poodle-tabs-control-x: 0.5rem;
+    --poodle-tabs-content-gap: 0.375rem;
+    --poodle-tabs-list-gap: 0.25rem;
+    --poodle-tabs-separator-margin: 0.375rem;
     --poodle-tabs-strip-inline-padding: 0.5rem;
     --poodle-tabs-strip-tab-x: 0.5rem;
     --poodle-tabs-strip-close-margin-end: 0.25rem;
@@ -499,6 +729,9 @@
 
   .poodle-tabs[data-density="default"] {
     --poodle-tabs-control-x: 0.75rem;
+    --poodle-tabs-content-gap: var(--poodle-space-inline-sm);
+    --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
+    --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
     --poodle-tabs-strip-inline-padding: 0.75rem;
     --poodle-tabs-strip-tab-x: 0.75rem;
     --poodle-tabs-strip-close-margin-end: 0.375rem;
@@ -506,6 +739,9 @@
 
   .poodle-tabs[data-density="comfortable"] {
     --poodle-tabs-control-x: 1rem;
+    --poodle-tabs-content-gap: 0.625rem;
+    --poodle-tabs-list-gap: 0.625rem;
+    --poodle-tabs-separator-margin: 0.625rem;
     --poodle-tabs-strip-inline-padding: 0.75rem;
     --poodle-tabs-strip-tab-x: 0.75rem;
     --poodle-tabs-strip-close-margin-end: 0.375rem;
@@ -522,7 +758,13 @@
     display: inline-flex;
     flex-wrap: wrap;
     align-items: stretch;
-    gap: var(--poodle-space-inline-sm);
+    gap: var(--poodle-tabs-list-gap);
+  }
+
+  .poodle-tabs__list--measure {
+    flex-wrap: nowrap;
+    width: max-content;
+    max-width: none;
   }
 
   /* Underline: bottom border on list */
@@ -593,7 +835,7 @@
     width: 0.0625rem;
     align-self: stretch;
     flex-shrink: 0;
-    margin: 0 var(--poodle-space-inline-sm);
+    margin: 0 var(--poodle-tabs-separator-margin);
     background: var(--poodle-color-border-default);
   }
 
@@ -656,7 +898,7 @@
   .poodle-tabs__tab {
     display: inline-flex;
     align-items: center;
-    gap: var(--poodle-space-inline-sm);
+    gap: var(--poodle-tabs-content-gap);
     min-height: calc(var(--poodle-tabs-control-height) - 0.25rem);
     padding: 0 var(--poodle-tabs-control-x);
     border: 0;
@@ -718,7 +960,7 @@
 
   .poodle-tabs[data-variant="strip"] .poodle-tabs__separator {
     margin-right: 0;
-    margin-left: var(--poodle-space-inline-sm);
+    margin-left: var(--poodle-tabs-separator-margin);
     margin-block: 0.375rem;
   }
 
@@ -726,7 +968,7 @@
     width: auto;
     height: 0.0625rem;
     margin-right: 0;
-    margin-bottom: var(--poodle-space-inline-sm);
+    margin-bottom: var(--poodle-tabs-separator-margin);
     align-self: stretch;
   }
 
@@ -832,6 +1074,13 @@
   .poodle-tabs__label {
     min-width: 0;
     white-space: nowrap;
+  }
+
+  .poodle-tabs__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--poodle-tabs-list-gap);
+    flex-shrink: 0;
   }
 
   /* ── Close button ── */

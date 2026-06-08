@@ -74,6 +74,9 @@
     Boolean(resolvedSubtitle) &&
       (!isEntityDetailPosture || !breadcrumbs || showSubtitleWithBreadcrumbs)
   );
+  const hasSecondaryContent = $derived(
+    showSubtitleText || Boolean(breadcrumbs) || Boolean(meta) || Boolean(children)
+  );
   const isCompactSubtitleHeader = $derived(
     !hasPrimaryHeading &&
       Boolean(resolvedSubtitle) &&
@@ -84,11 +87,26 @@
   );
   const headingTag = $derived(`h${level}` as `h${1 | 2 | 3 | 4 | 5 | 6}`);
   const uiPresentation = getUiPresentation();
+  function resolveBackDisplayLabel(label: string | null): string {
+    const trimmed = label?.trim() ?? "";
+    if (!trimmed) return "Back";
+
+    const stripped = trimmed.replace(/^back(?:\s+to)?\s+/i, "").trim();
+    return stripped || "Back";
+  }
+
+  function resolveBackAriaLabel(label: string | null): string {
+    const displayLabel = resolveBackDisplayLabel(label);
+    return displayLabel === "Back" ? "Back" : `Back to ${displayLabel}`;
+  }
+
   const resolvedSize = $derived(
     size ?? (sizeRole ? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole) : $uiPresentation.sizeScale)
   );
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const countPillSize = $derived(resolveSupportingVisualSize(resolvedSize));
+  const resolvedBackDisplayLabel = $derived(resolveBackDisplayLabel(backLabel));
+  const resolvedBackAriaLabel = $derived(resolveBackAriaLabel(backLabel));
 </script>
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
@@ -102,8 +120,8 @@
     data-compact-subtitle-header={isCompactSubtitleHeader}
     aria-label={ariaLabel ?? undefined}
   >
-    <div class="poodle-page-header__content">
-      <div class="poodle-page-header__title-block">
+    <div class="poodle-page-header__top-row">
+      <div class="poodle-page-header__content poodle-page-header__content--top">
         {#if eyebrow}
           <p class="poodle-page-header__eyebrow">{eyebrow}</p>
         {/if}
@@ -124,6 +142,42 @@
             {/if}
           </svelte:element>
         {/if}
+      </div>
+
+      {#if backHref || actions}
+        <div class="poodle-page-header__actions-row">
+          {#if backHref}
+            <a class="poodle-page-header__back poodle-page-header__back--text" href={backHref}>
+              <Icon name="arrow-left" size={countPillSize} />
+              <span>{resolvedBackDisplayLabel}</span>
+              {#if backIsContextual}
+                <span class="poodle-page-header__context-dot" aria-hidden="true"></span>
+              {/if}
+            </a>
+            <a
+              class="poodle-page-header__back poodle-page-header__back--icon"
+              href={backHref}
+              aria-label={resolvedBackAriaLabel}
+              title={resolvedBackAriaLabel}
+              data-contextual={backIsContextual || undefined}
+            >
+              <Icon name="arrow-left" size={countPillSize} />
+              {#if backIsContextual}
+                <span class="poodle-page-header__context-dot poodle-page-header__context-dot--overlay" aria-hidden="true"></span>
+              {/if}
+            </a>
+          {/if}
+          {#if actions}
+            <div class="poodle-page-header__actions">
+              {@render actions()}
+            </div>
+          {/if}
+        </div>
+      {/if}
+    </div>
+
+    {#if hasSecondaryContent}
+      <div class="poodle-page-header__content poodle-page-header__content--secondary">
         {#if showSubtitleText}
           <p class="poodle-page-header__subtitle">{resolvedSubtitle}</p>
         {/if}
@@ -145,25 +199,6 @@
         {#if children}
           <div class="poodle-page-header__body">
             {@render children()}
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    {#if backHref || actions}
-      <div class="poodle-page-header__actions-row">
-        {#if backHref}
-          <a class="poodle-page-header__back" href={backHref}>
-            <Icon name="arrow-left" size={countPillSize} />
-            <span>{backLabel ?? "Back"}</span>
-            {#if backIsContextual}
-              <span class="poodle-page-header__context-dot" aria-hidden="true"></span>
-            {/if}
-          </a>
-        {/if}
-        {#if actions}
-          <div class="poodle-page-header__actions">
-            {@render actions()}
           </div>
         {/if}
       </div>
@@ -219,17 +254,23 @@
     box-shadow: var(--poodle-recipe-page-header-shadow);
   }
 
-  .poodle-page-header[data-align="between"] {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .poodle-page-header[data-compact-subtitle-header="true"][data-align="between"] {
-    align-items: center;
-  }
-
   .poodle-page-header__content {
     display: grid;
     gap: var(--poodle-page-header-content-gap);
+  }
+
+  .poodle-page-header__top-row {
+    display: grid;
+    gap: var(--poodle-page-header-gap);
+    align-items: start;
+  }
+
+  .poodle-page-header[data-align="between"] .poodle-page-header__top-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .poodle-page-header[data-compact-subtitle-header="true"][data-align="between"] .poodle-page-header__top-row {
+    align-items: center;
   }
 
   .poodle-page-header__breadcrumbs {
@@ -240,7 +281,7 @@
   }
 
   .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__content,
-  .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__title-block {
+  .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__content--top {
     gap: 0;
   }
 
@@ -259,6 +300,34 @@
     color: var(--poodle-color-text-primary);
   }
 
+  .poodle-page-header__back--icon {
+    display: none;
+    position: relative;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0.0625rem solid transparent;
+    border-radius: var(--poodle-treatment-interactive-radius, var(--poodle-radius-control));
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .poodle-page-header__back--icon:hover {
+    background: color-mix(in srgb, transparent 76%, var(--poodle-color-background-elevated));
+    border-color: color-mix(in srgb, var(--poodle-color-border-default) 74%, var(--poodle-color-text-primary));
+    box-shadow: var(--poodle-treatment-interactive-shadow-active, none);
+  }
+
+  .poodle-page-header__back--icon:active {
+    transform: translateY(0.03125rem);
+  }
+
+  .poodle-page-header__back--icon:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
   .poodle-page-header__context-dot {
     width: 0.375rem;
     height: 0.375rem;
@@ -267,9 +336,13 @@
     flex: none;
   }
 
-  .poodle-page-header__title-block {
-    display: grid;
-    gap: var(--poodle-page-header-title-gap);
+  .poodle-page-header__context-dot--overlay {
+    position: absolute;
+    right: 0.25rem;
+    bottom: 0.25rem;
+    width: 0.3125rem;
+    height: 0.3125rem;
+    box-shadow: 0 0 0 0.125rem var(--poodle-color-background-surface);
   }
 
   .poodle-page-header__title,
@@ -366,6 +439,7 @@
     display: flex;
     align-items: center;
     gap: var(--poodle-page-header-actions-row-gap);
+    justify-self: end;
   }
 
   .poodle-page-header[data-compact-subtitle-header="true"] .poodle-page-header__actions-row {
@@ -385,7 +459,6 @@
   }
 
   .poodle-page-header__banner {
-    grid-column: 1 / -1;
     margin-top: var(--poodle-page-header-banner-margin-top);
   }
 
@@ -482,16 +555,32 @@
   }
 
   @media (max-width: 45rem) {
-    .poodle-page-header[data-align="between"] {
-      grid-template-columns: 1fr;
+    .poodle-page-header[data-align="between"] .poodle-page-header__top-row {
+      grid-template-columns: minmax(0, 1fr) auto;
     }
 
     .poodle-page-header__actions-row {
-      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-self: start;
     }
 
     .poodle-page-header__actions {
       margin-left: 0;
+      gap: 0.25rem;
+    }
+
+    .poodle-page-header__back--text {
+      display: none;
+    }
+
+    .poodle-page-header__back--icon {
+      display: inline-flex;
+    }
+
+    .poodle-page-header__actions :global(.poodle-icon-button__glyph),
+    .poodle-page-header__actions :global(.poodle-icon-button__spinner) {
+      width: 40%;
+      height: 40%;
     }
   }
 </style>

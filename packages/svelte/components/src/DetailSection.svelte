@@ -65,12 +65,37 @@
     --poodle-detail-section-header-gap: var(--poodle-space-inline-md);
     --poodle-detail-section-title-gap: 0.375rem;
     --poodle-detail-section-body-gap: var(--poodle-space-stack-sm);
+    --poodle-detail-section-title-weight: 700;
+    --poodle-detail-section-title-size: 1.125rem;
+    --poodle-detail-section-title-line-height: 1.2;
+    --poodle-detail-section-separated-gap: 0;
+    --poodle-detail-section-separated-inset: 0;
     display: grid;
     gap: var(--poodle-detail-section-root-gap);
+    container-type: inline-size;
   }
 
   .poodle-detail-section[data-separated="true"] {
-    border-top: 0;
+    padding-top: var(--poodle-detail-section-separated-gap);
+    position: relative;
+  }
+
+  .poodle-detail-section[data-separated="true"]:first-child {
+    padding-top: 0;
+  }
+
+  .poodle-detail-section[data-separated="true"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--poodle-detail-section-separated-inset);
+    right: var(--poodle-detail-section-separated-inset);
+    height: 0.0625rem;
+    background: color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+  }
+
+  .poodle-detail-section[data-separated="true"]:first-child::before {
+    display: none;
   }
 
   .poodle-detail-section__header {
@@ -93,8 +118,9 @@
 
   .poodle-detail-section__title {
     font-family: var(--poodle-typography-heading-family);
-    font-size: 1.125rem;
-    line-height: 1.2;
+    font-weight: var(--poodle-detail-section-title-weight);
+    font-size: var(--poodle-detail-section-title-size);
+    line-height: var(--poodle-detail-section-title-line-height);
   }
 
   .poodle-detail-section__description {
@@ -113,6 +139,8 @@
     --poodle-detail-section-header-gap: 0.75rem;
     --poodle-detail-section-title-gap: 0.375rem;
     --poodle-detail-section-body-gap: 0.75rem;
+    --poodle-detail-section-separated-gap: 1rem;
+    --poodle-detail-section-separated-inset: 0;
   }
 
   .poodle-detail-section[data-density="compact"] {
@@ -120,6 +148,8 @@
     --poodle-detail-section-header-gap: var(--poodle-space-inline-sm);
     --poodle-detail-section-title-gap: 0.25rem;
     --poodle-detail-section-body-gap: 0.625rem;
+    --poodle-detail-section-separated-gap: 0.875rem;
+    --poodle-detail-section-separated-inset: 0;
   }
 
   .poodle-detail-section[data-density="comfortable"] {
@@ -127,6 +157,8 @@
     --poodle-detail-section-header-gap: 0.875rem;
     --poodle-detail-section-title-gap: 0.5rem;
     --poodle-detail-section-body-gap: 1rem;
+    --poodle-detail-section-separated-gap: 1.125rem;
+    --poodle-detail-section-separated-inset: 0;
   }
 
   .poodle-detail-section[data-columns="2"] .poodle-detail-section__body {
@@ -137,10 +169,54 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  @media (max-width: 60rem) {
+  @container (max-width: 44rem) {
+    .poodle-detail-section[data-columns="3"] .poodle-detail-section__body {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container (max-width: 32rem) {
     .poodle-detail-section[data-columns="2"] .poodle-detail-section__body,
     .poodle-detail-section[data-columns="3"] .poodle-detail-section__body {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @container (max-width: 28rem) {
+    .poodle-detail-section__header {
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .poodle-detail-section__title-block {
+      gap: 0.25rem;
+    }
+
+    .poodle-detail-section__title {
+      font-size: 0.8125rem;
+      line-height: 1.2;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--poodle-color-text-secondary);
+    }
+
+    .poodle-detail-section__description {
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .poodle-detail-section__body {
+      gap: 0.625rem;
+    }
+
+    .poodle-detail-section[data-separated="true"] {
+      padding-top: 0.9375rem;
+    }
+
+    .poodle-detail-section[data-separated="true"]::before {
+      left: 0.125rem;
+      right: 0.125rem;
     }
   }
 </style>

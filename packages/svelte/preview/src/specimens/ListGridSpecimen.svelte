@@ -4,7 +4,7 @@
 </script>
 
 <div class="poodle-specimen">
-  <SpecimenGroup label="Default — auto-fill by min item width (narrow tiles in preview)">
+  <SpecimenGroup label="Default — auto-fill up to three columns">
     <ListGrid minItemWidth={14}>
       {#snippet children()}
         {#each ["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot"] as title}

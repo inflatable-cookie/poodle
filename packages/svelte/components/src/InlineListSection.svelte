@@ -129,4 +129,10 @@
     font-style: italic;
     color: var(--poodle-color-text-secondary);
   }
+
+  @media (max-width: 45rem) {
+    .poodle-inline-list-section__header-actions {
+      gap: 0.25rem;
+    }
+  }
 </style>
