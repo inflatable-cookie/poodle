@@ -117,6 +117,7 @@ export { default as CardToggleGroup } from "./CardToggleGroup.svelte";
 export { default as CommandPalette } from "./CommandPalette.svelte";
 export { default as ConfirmAction } from "./ConfirmAction.svelte";
 export { default as DataTable } from "./DataTable.svelte";
+export { default as DetailSectionGroup } from "./DetailSectionGroup.svelte";
 export { default as DetailSection } from "./DetailSection.svelte";
 export { default as DockRegion } from "./DockRegion.svelte";
 export { default as DetailShell } from "./DetailShell.svelte";

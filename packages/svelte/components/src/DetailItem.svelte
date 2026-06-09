@@ -40,13 +40,14 @@
   const uiPresentation = getUiPresentation();
 
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const resolvedLayout = $derived(layout === "inline" ? "stacked" : layout);
   let renderedValue = $derived(value === null ? emptyText : String(value));
 </script>
 
 <div
   class="poodle-detail-item"
   data-density={resolvedDensity}
-  data-layout={layout}
+  data-layout={resolvedLayout}
   data-presentation={presentation}
   data-span={span ?? undefined}
   aria-label={ariaLabel ?? undefined}
