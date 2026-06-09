@@ -115,7 +115,7 @@ Updated: 2026-03-26
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `font-variant-numeric` | `tabular-nums` |
@@ -127,7 +127,7 @@ When `typography="inherit"`:
 |----------|-------|
 | `font` | `inherit` |
 | `font-variant-numeric` | `tabular-nums` |
-| `color` | `var(--poodle-color-text-secondary)` |
+| `color` | `var(--poodle-color-text-primary)` |
 
 ### HTML attributes
 
@@ -193,7 +193,7 @@ Values are computed using integer division (floor). Thresholds use seconds:
 
 ### Tier 2: Visual Parity
 
-- [ ] color uses `--poodle-color-text-secondary`
+- [ ] color uses `--poodle-color-text-primary`
 - [ ] font-family uses `--poodle-typography-body-family`
 - [ ] font-size uses `--poodle-typography-body-size`
 - [ ] font-variant-numeric tabular-nums matches
