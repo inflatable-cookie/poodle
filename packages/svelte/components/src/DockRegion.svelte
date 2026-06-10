@@ -568,6 +568,28 @@
     width: 100%;
   }
 
+  /* Right-edge docks face their content on the left, so the selected-tab
+     indicator and strip separator flip from the right edge to the left. */
+  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] {
+    border-right: 0;
+    border-left: 0.0625rem solid var(--poodle-color-border-subtle);
+  }
+
+  .poodle-dock-region[data-edge="right"]
+    .poodle-dock-region__strip[data-orientation="vertical"]
+    :global(.poodle-tabs[data-variant="strip"] .poodle-tabs__item) {
+    border-right: 0;
+    margin-right: 0;
+    border-left: 0.125rem solid transparent;
+    margin-left: -0.125rem;
+  }
+
+  .poodle-dock-region[data-edge="right"]
+    .poodle-dock-region__strip[data-orientation="vertical"]
+    :global(.poodle-tabs[data-variant="strip"] .poodle-tabs__item[data-selected="true"]) {
+    border-left-color: var(--poodle-color-accent-base);
+  }
+
   .poodle-dock-region__strip[data-orientation="vertical"] > :global(.collapse-toggle) {
     flex: 0 0 auto;
   }
