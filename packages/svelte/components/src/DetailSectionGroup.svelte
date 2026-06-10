@@ -5,6 +5,7 @@
 
   interface Props {
     density?: ControlDensity | null;
+    layout?: "grid" | "stack";
     minColumnWidth?: string;
     itemMinColumnWidth?: string;
     maxColumns?: 2 | 3 | 4 | 5;
@@ -14,6 +15,7 @@
 
   let {
     density = null,
+    layout = "grid",
     minColumnWidth = "14rem",
     itemMinColumnWidth = "12rem",
     maxColumns = 4,
@@ -31,6 +33,7 @@
 <div
   class="poodle-detail-section-group"
   data-density={resolvedDensity}
+  data-layout={layout}
   data-max-columns={maxColumns}
   aria-label={ariaLabel ?? undefined}
   style={style}
@@ -116,11 +119,12 @@
     );
   }
 
-  .poodle-detail-section-group :global(.poodle-detail-section__body) {
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(100%, var(--poodle-detail-section-group-item-min)), 1fr)
-    );
+  .poodle-detail-section-group[data-layout="stack"] {
+    grid-template-columns: 1fr;
+  }
+
+  .poodle-detail-section-group :global(.poodle-detail-section) {
+    --poodle-detail-section-item-min: var(--poodle-detail-section-group-item-min);
   }
 
   .poodle-detail-section-group[data-density="compact"] {

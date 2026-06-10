@@ -15,7 +15,7 @@
     ariaLabel?: string | null;
     layout?: "inline" | "stacked";
     presentation?: "simple" | "surface";
-    span?: "full" | "half" | null;
+    span?: "full" | "half" | 1 | 2 | 3 | 4 | null;
     valueContent?: Snippet;
     action?: Snippet;
     children?: Snippet;
@@ -30,7 +30,7 @@
     truncateValue = false,
     ariaLabel = null,
     layout = "inline",
-    presentation = "simple",
+    presentation = "surface",
     span = null,
     valueContent,
     action,
@@ -122,6 +122,19 @@
 
   .poodle-detail-item[data-span="full"] {
     grid-column: 1 / -1;
+  }
+
+  .poodle-detail-item[data-span="half"],
+  .poodle-detail-item[data-span="2"] {
+    grid-column: span 2;
+  }
+
+  .poodle-detail-item[data-span="3"] {
+    grid-column: span 3;
+  }
+
+  .poodle-detail-item[data-span="4"] {
+    grid-column: span 4;
   }
 
   .poodle-detail-item__label,
@@ -264,6 +277,10 @@
   }
 
   @container (max-width: 26rem) {
+    .poodle-detail-item[data-span] {
+      grid-column: 1 / -1;
+    }
+
     .poodle-detail-item[data-layout="inline"] {
       grid-template-columns: 1fr;
     }

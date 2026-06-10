@@ -33,6 +33,9 @@
           {#snippet leading()}
             <Icon name="file-text" />
           {/snippet}
+          {#snippet corner()}
+            <Icon name="lock" ariaLabel="Restricted" size="sm" />
+          {/snippet}
         </ListCard>
         <ListCard
           title="brand-assets.zip"

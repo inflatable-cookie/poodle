@@ -105,9 +105,13 @@
   }
 
   .poodle-form-layout__grid {
+    --poodle-form-layout-row-gap: calc(var(--poodle-space-stack-lg) + 0.625rem);
+    --poodle-form-layout-column-gap: var(--poodle-space-inline-md);
+
     display: grid;
     grid-template-columns: repeat(var(--fl-columns, 6), 1fr);
-    gap: var(--poodle-space-stack-lg) var(--poodle-space-inline-md);
+    row-gap: var(--poodle-form-layout-row-gap);
+    column-gap: var(--poodle-form-layout-column-gap);
   }
 
   @container (max-width: 600px) {

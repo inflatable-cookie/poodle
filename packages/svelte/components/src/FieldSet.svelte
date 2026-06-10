@@ -5,6 +5,7 @@
 
   interface Props {
     legend?: string | null;
+    description?: string | null;
     columns?: number;
     gap?: SpaceScale;
     span?: number | "full" | null;
@@ -13,6 +14,7 @@
 
   let {
     legend = null,
+    description = null,
     columns = 1,
     gap = "md",
     span = null,
@@ -21,7 +23,8 @@
 
   const gridStyle = $derived([
     `grid-template-columns: repeat(${columns}, minmax(0, 1fr))`,
-    `gap: ${scaleToSpace(gap)}`,
+    `row-gap: calc(${scaleToSpace(gap)} + 0.5rem)`,
+    `column-gap: ${scaleToSpace(gap)}`,
   ].join("; "));
 </script>
 
@@ -31,6 +34,9 @@
 >
   {#if legend}
     <legend class="poodle-fieldset__legend">{legend}</legend>
+  {/if}
+  {#if description}
+    <p class="poodle-fieldset__description">{description}</p>
   {/if}
   <div class="poodle-fieldset__fields" style={gridStyle}>
     {@render children?.()}
@@ -55,6 +61,13 @@
     text-transform: uppercase;
     padding: 0;
     margin-bottom: var(--poodle-space-stack-sm);
+  }
+
+  .poodle-fieldset__description {
+    margin: calc(var(--poodle-space-stack-sm) * -0.5) 0 var(--poodle-space-stack-md);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-body-size, 0.875rem);
+    line-height: var(--poodle-typography-body-lineHeight, 1.5);
   }
 
   .poodle-fieldset__fields {

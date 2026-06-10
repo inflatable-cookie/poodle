@@ -9,7 +9,9 @@
     description?: string | null;
     separated?: boolean;
     ariaLabel?: string | null;
-    columns?: 1 | 2 | 3;
+    columns?: "auto" | 1 | 2 | 3 | 4;
+    itemMinColumnWidth?: string | null;
+    maxAutoColumns?: 2 | 3 | 4 | 5;
     actions?: Snippet;
     children?: Snippet;
   }
@@ -20,7 +22,9 @@
     description = null,
     separated = true,
     ariaLabel = null,
-    columns = 1,
+    columns = "auto",
+    itemMinColumnWidth = null,
+    maxAutoColumns = 4,
     actions,
     children,
   }: Props = $props();
@@ -28,6 +32,9 @@
   const uiPresentation = getUiPresentation();
 
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const style = $derived(
+    itemMinColumnWidth ? `--poodle-detail-section-item-min: ${itemMinColumnWidth}` : undefined
+  );
 </script>
 
 <section
@@ -35,7 +42,9 @@
   data-density={resolvedDensity}
   data-separated={separated}
   data-columns={columns}
+  data-max-auto-columns={maxAutoColumns}
   aria-label={ariaLabel ?? undefined}
+  style={style}
 >
   {#if title || description || actions}
     <div class="poodle-detail-section__header">
@@ -65,6 +74,9 @@
     --poodle-detail-section-header-gap: var(--poodle-space-inline-md);
     --poodle-detail-section-title-gap: 0.375rem;
     --poodle-detail-section-body-gap: var(--poodle-space-stack-sm);
+    --poodle-detail-section-body-row-gap: var(--poodle-detail-section-body-gap);
+    --poodle-detail-section-body-column-gap: var(--poodle-detail-section-body-gap);
+    --poodle-detail-section-item-min: 12rem;
     --poodle-detail-section-title-weight: 700;
     --poodle-detail-section-title-size: 1.125rem;
     --poodle-detail-section-title-line-height: 1.2;
@@ -131,7 +143,79 @@
 
   .poodle-detail-section__body {
     display: grid;
-    gap: var(--poodle-detail-section-body-gap);
+    row-gap: var(--poodle-detail-section-body-row-gap);
+    column-gap: var(--poodle-detail-section-body-column-gap);
+  }
+
+  .poodle-detail-section[data-columns="auto"] .poodle-detail-section__body {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--poodle-detail-section-item-min)), 1fr)
+    );
+  }
+
+  .poodle-detail-section[data-columns="auto"][data-max-auto-columns="2"] .poodle-detail-section__body {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        min(
+          100%,
+          max(
+            var(--poodle-detail-section-item-min),
+            calc((100% - var(--poodle-detail-section-body-column-gap)) / 2)
+          )
+        ),
+        1fr
+      )
+    );
+  }
+
+  .poodle-detail-section[data-columns="auto"][data-max-auto-columns="3"] .poodle-detail-section__body {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        min(
+          100%,
+          max(
+            var(--poodle-detail-section-item-min),
+            calc((100% - (var(--poodle-detail-section-body-column-gap) * 2)) / 3)
+          )
+        ),
+        1fr
+      )
+    );
+  }
+
+  .poodle-detail-section[data-columns="auto"][data-max-auto-columns="4"] .poodle-detail-section__body {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        min(
+          100%,
+          max(
+            var(--poodle-detail-section-item-min),
+            calc((100% - (var(--poodle-detail-section-body-column-gap) * 3)) / 4)
+          )
+        ),
+        1fr
+      )
+    );
+  }
+
+  .poodle-detail-section[data-columns="auto"][data-max-auto-columns="5"] .poodle-detail-section__body {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        min(
+          100%,
+          max(
+            var(--poodle-detail-section-item-min),
+            calc((100% - (var(--poodle-detail-section-body-column-gap) * 4)) / 5)
+          )
+        ),
+        1fr
+      )
+    );
   }
 
   .poodle-detail-section[data-density="default"] {
@@ -139,6 +223,8 @@
     --poodle-detail-section-header-gap: 0.75rem;
     --poodle-detail-section-title-gap: 0.375rem;
     --poodle-detail-section-body-gap: 0.75rem;
+    --poodle-detail-section-body-row-gap: 0.75rem;
+    --poodle-detail-section-body-column-gap: 0.75rem;
     --poodle-detail-section-separated-gap: 1rem;
     --poodle-detail-section-separated-inset: 0;
   }
@@ -148,6 +234,8 @@
     --poodle-detail-section-header-gap: var(--poodle-space-inline-sm);
     --poodle-detail-section-title-gap: 0.25rem;
     --poodle-detail-section-body-gap: 0.625rem;
+    --poodle-detail-section-body-row-gap: 0.625rem;
+    --poodle-detail-section-body-column-gap: 0.625rem;
     --poodle-detail-section-separated-gap: 0.875rem;
     --poodle-detail-section-separated-inset: 0;
   }
@@ -157,6 +245,8 @@
     --poodle-detail-section-header-gap: 0.875rem;
     --poodle-detail-section-title-gap: 0.5rem;
     --poodle-detail-section-body-gap: 1rem;
+    --poodle-detail-section-body-row-gap: 1rem;
+    --poodle-detail-section-body-column-gap: 1rem;
     --poodle-detail-section-separated-gap: 1.125rem;
     --poodle-detail-section-separated-inset: 0;
   }
@@ -169,15 +259,22 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .poodle-detail-section[data-columns="4"] .poodle-detail-section__body {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   @container (max-width: 44rem) {
-    .poodle-detail-section[data-columns="3"] .poodle-detail-section__body {
+    .poodle-detail-section[data-columns="3"] .poodle-detail-section__body,
+    .poodle-detail-section[data-columns="4"] .poodle-detail-section__body {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   @container (max-width: 32rem) {
+    .poodle-detail-section[data-columns="auto"] .poodle-detail-section__body,
     .poodle-detail-section[data-columns="2"] .poodle-detail-section__body,
-    .poodle-detail-section[data-columns="3"] .poodle-detail-section__body {
+    .poodle-detail-section[data-columns="3"] .poodle-detail-section__body,
+    .poodle-detail-section[data-columns="4"] .poodle-detail-section__body {
       grid-template-columns: 1fr;
     }
   }
@@ -207,7 +304,8 @@
     }
 
     .poodle-detail-section__body {
-      gap: 0.625rem;
+      row-gap: 0.625rem;
+      column-gap: 0.625rem;
     }
 
     .poodle-detail-section[data-separated="true"] {

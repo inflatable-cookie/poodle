@@ -40,6 +40,7 @@
     sashContent?: Snippet<[]>;
     leading?: Snippet<[]>;
     badges?: Snippet<[]>;
+    corner?: Snippet<[]>;
     footer?: Snippet<[]>;
     actions?: Snippet<[]>;
     trailing?: Snippet<[]>;
@@ -80,6 +81,7 @@
     sashContent,
     leading,
     badges,
+    corner,
     footer,
     actions,
     trailing,
@@ -401,9 +403,18 @@
             {title}
           {/if}
         </span>
-        {#if badges}
-          <span class="poodle-list-card__badges">
-            {@render badges()}
+        {#if badges || corner}
+          <span class="poodle-list-card__header-accessories">
+            {#if badges}
+              <span class="poodle-list-card__badges">
+                {@render badges()}
+              </span>
+            {/if}
+            {#if corner}
+              <span class="poodle-list-card__corner">
+                {@render corner()}
+              </span>
+            {/if}
           </span>
         {/if}
       </div>
@@ -599,9 +610,18 @@
             {title}
           {/if}
         </span>
-        {#if badges}
-          <span class="poodle-list-card__badges">
-            {@render badges()}
+        {#if badges || corner}
+          <span class="poodle-list-card__header-accessories">
+            {#if badges}
+              <span class="poodle-list-card__badges">
+                {@render badges()}
+              </span>
+            {/if}
+            {#if corner}
+              <span class="poodle-list-card__corner">
+                {@render corner()}
+              </span>
+            {/if}
           </span>
         {/if}
       </div>
@@ -964,7 +984,7 @@
     -webkit-box-orient: vertical;
   }
 
-  .poodle-list-card[data-layout="stacked"] .poodle-list-card__badges,
+  .poodle-list-card[data-layout="stacked"] .poodle-list-card__header-accessories,
   .poodle-list-card[data-layout="stacked"] .poodle-list-card__footer {
     justify-content: center;
     flex-wrap: wrap;
@@ -1203,12 +1223,23 @@
     white-space: nowrap;
   }
 
-  .poodle-list-card__badges {
+  .poodle-list-card__header-accessories {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--poodle-space-inline-sm);
+  }
+
+  .poodle-list-card__badges,
+  .poodle-list-card__corner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--poodle-space-inline-xs);
+  }
+
+  .poodle-list-card__corner {
+    color: var(--poodle-color-text-tertiary);
   }
 
   .poodle-list-card__subtitle {
