@@ -487,6 +487,7 @@
     align-items: center;
     gap: var(--poodle-space-inline-sm);
     padding-right: 0.5rem;
+    min-height: 2.75rem;
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
@@ -541,6 +542,7 @@
     align-items: center;
     gap: var(--poodle-space-stack-sm);
     padding-block: 0.5rem;
+    min-width: 2.75rem;
     border-right: 0.0625rem solid var(--poodle-color-border-subtle);
   }
 
