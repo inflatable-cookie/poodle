@@ -1,7 +1,7 @@
 # SplitView
 
 Status: detailed contract
-Updated: 2026-03-30
+Updated: 2026-06-10
 
 ## 1. Purpose
 
@@ -9,10 +9,12 @@ Updated: 2026-03-30
 - Layer: `composites`
 - Summary: a resizable layout container that divides space between two pane
   regions with an interactive divider, optional collapse toggles, drag-to-collapse
-  behavior, fixed-size pane support, and keyboard-resizable separators
+  behavior, rail-collapse mode for dock-style panes, fixed-size pane support,
+  and keyboard-resizable separators
 - In scope: orientation (horizontal/vertical), divider semantics, ratio-based
   and fixed-size pane allocation, collapsible panes with toggle buttons,
-  drag-to-collapse thresholds, keyboard-resizable separators via ResizeHandle,
+  drag-to-collapse thresholds, rail-collapse (collapse to a pinned pixel size
+  with content mounted), keyboard-resizable separators via ResizeHandle,
   min-size constraints, size and density support
 - Out of scope: nested dock orchestration policy, persistence backend,
   app-specific pane content
@@ -57,6 +59,10 @@ Updated: 2026-03-30
 | `secondarySize` | `number \| null` | `null` | no | fixed secondary pane size in px; when set, secondary uses fixed flex and primary fills remaining space |
 | `primaryCollapsed` | `boolean` | `false` | no | collapse state for primary pane |
 | `secondaryCollapsed` | `boolean` | `false` | no | collapse state for secondary pane |
+| `primaryCollapsedSize` | `number \| null` | `null` | no | rail-collapse: when primary is collapsed, pin it to this pixel size with content mounted instead of hiding it |
+| `secondaryCollapsedSize` | `number \| null` | `null` | no | rail-collapse: when secondary is collapsed, pin it to this pixel size with content mounted instead of hiding it |
+| `collapsePrimaryBelowSize` | `number \| null` | `null` | no | during divider drag, request primary collapse when its pixel size would drop below this value |
+| `collapseSecondaryBelowSize` | `number \| null` | `null` | no | during divider drag, request secondary collapse when its pixel size would drop below this value |
 | `showCollapsePrimary` | `boolean` | `false` | no | show collapse toggle for primary pane |
 | `showCollapseSecondary` | `boolean` | `false` | no | show collapse toggle for secondary pane |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name (defaults to "Split view") |
@@ -88,8 +94,10 @@ Updated: 2026-03-30
 |-------|---------|-----------------|
 | steady | default | both panes visible with divider between |
 | resizing | pointer or keyboard resize active | divider focus/emphasis visible |
-| primary-collapsed | `primaryCollapsed=true` | primary pane hidden (`flex: 0 0 0`), secondary fills space |
-| secondary-collapsed | `secondaryCollapsed=true` | secondary pane hidden (`flex: 0 0 0`), primary fills space |
+| primary-collapsed | `primaryCollapsed=true`, no `primaryCollapsedSize` | primary pane hidden (`flex: 0 0 0`), secondary fills space |
+| secondary-collapsed | `secondaryCollapsed=true`, no `secondaryCollapsedSize` | secondary pane hidden (`flex: 0 0 0`), primary fills space |
+| primary-railed | `primaryCollapsed=true` AND `primaryCollapsedSize` set | primary pane pinned to `flex: 0 0 {primaryCollapsedSize}px`, content stays mounted, secondary fills space |
+| secondary-railed | `secondaryCollapsed=true` AND `secondaryCollapsedSize` set | secondary pane pinned to `flex: 0 0 {secondaryCollapsedSize}px`, content stays mounted, primary fills space |
 | fixed-primary | `primarySize` is set | primary pane uses fixed pixel flex, secondary fills remaining space |
 | fixed-secondary | `secondarySize` is set | secondary pane uses fixed pixel flex, primary fills remaining space |
 | disabled | `disabled=true` | resize handle and collapse toggles non-interactive |
@@ -206,8 +214,10 @@ Pane `flex` and `overflow` are applied via inline style:
 | Condition | Primary Flex | Secondary Flex |
 |-----------|-------------|---------------|
 | default (ratio-based) | `0 0 {ratio*100}%` | `1 1 0` |
-| primaryCollapsed | `0 0 0` | `1 1 0` |
-| secondaryCollapsed | `1 1 0` | `0 0 0` |
+| primaryCollapsed (no collapsed size) | `0 0 0` | `1 1 0` |
+| secondaryCollapsed (no collapsed size) | `1 1 0` | `0 0 0` |
+| primaryCollapsed + primaryCollapsedSize | `0 0 {primaryCollapsedSize}px` | `1 1 0` |
+| secondaryCollapsed + secondaryCollapsedSize | `1 1 0` | `0 0 {secondaryCollapsedSize}px` |
 | primarySize set | `0 0 {primarySize}px` | `1 1 0` |
 | secondarySize set | `1 1 0` | `0 0 {secondarySize}px` |
 
@@ -270,7 +280,7 @@ Pane `flex` and `overflow` are applied via inline style:
 Token usage for `ResizeHandle` and `CollapseToggle` is defined in their
 respective primitive contracts.
 
-### Drag-To-Collapse Behavior
+### Drag-To-Collapse Behavior (legacy, no collapsed size configured)
 
 | Threshold | Action |
 |-----------|--------|
@@ -279,6 +289,23 @@ respective primitive contracts.
 | drag starts while primary collapsed | uncollapses primary, sets ratio to 0.05 |
 | drag starts while secondary collapsed | uncollapses secondary, sets ratio to 0.95 |
 | ratio clamping | always clamped to [0.05, 0.95] range |
+
+### Rail-Collapse Drag Behavior (`collapse*BelowSize` configured)
+
+SplitView owns the drag lifecycle, so rail collapse and expand are resolved
+from drag intent rather than from ratio stream heuristics:
+
+| Condition | Action |
+|-----------|--------|
+| drag would size the pane below `collapse*BelowSize` px | requests collapse via the collapse callback; the last expanded ratio is preserved (no 0.5 reset) |
+| dragging while railed, away from the collapsed edge, past `collapse*BelowSize + 8` px | requests expand via the collapse callback and resumes ratio tracking from the pointer position |
+| dragging while railed, within the rail band | no ratio change is emitted |
+| drag release while railed | pane stays railed |
+| `onRatioChange` while railed | never emitted |
+
+Rail collapse and legacy edge collapse are mutually exclusive per pane: when
+`collapse*BelowSize` is set the 2% / 98% edge thresholds and their 0.5 ratio
+reset do not apply to that pane.
 
 ### Collapse Toggle Visibility Rules
 
@@ -307,7 +334,8 @@ None.
 - `rawRatio()` converts mouse position to ratio using container bounding rect
 - primary/secondary collapse toggles use `CollapseToggle` from `@poodle/svelte`
 - resize callbacks handled via `ResizeHandle` `onResizeStart` / `onResizeMove` / `onResizeStep`
-- pane content conditionally rendered: `{#if !primaryCollapsed}` / `{#if !secondaryCollapsed}`
+- pane content conditionally rendered: `{#if !primaryCollapsed}` / `{#if !secondaryCollapsed}`;
+  with a rail-collapse size configured the content stays mounted while railed
 - `SplitOrientation`, `CollapseDirection`, `ControlSize`, `SemanticControlSizeRole`,
   `ControlDensity` types imported from `@poodle/svelte`
 - `ResizeHandle` and `CollapseToggle` imported from `@poodle/svelte`
@@ -331,6 +359,8 @@ None.
 - [ ] orientation, ratio, and collapse semantics match
 - [ ] keyboard-resize behavior matches
 - [ ] drag-to-collapse thresholds match (2% / 98%)
+- [ ] rail-collapse semantics match (`*CollapsedSize`, `collapse*BelowSize`,
+      preserved ratio, mounted content, no ratio emission while railed)
 - [ ] collapse toggle visibility rules match
 - [ ] fixed-size pane allocation matches
 - [ ] ratio clamping to [0.05, 0.95] matches

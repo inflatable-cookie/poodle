@@ -22,6 +22,10 @@
     secondarySize?: number | null;
     primaryCollapsed?: boolean | undefined;
     secondaryCollapsed?: boolean | undefined;
+    primaryCollapsedSize?: number | null;
+    secondaryCollapsedSize?: number | null;
+    collapsePrimaryBelowSize?: number | null;
+    collapseSecondaryBelowSize?: number | null;
     showCollapsePrimary?: boolean;
     showCollapseSecondary?: boolean;
     ariaLabel?: string | null;
@@ -46,6 +50,10 @@
     secondarySize = null,
     primaryCollapsed = $bindable<boolean | undefined>(undefined),
     secondaryCollapsed = $bindable<boolean | undefined>(undefined),
+    primaryCollapsedSize = null,
+    secondaryCollapsedSize = null,
+    collapsePrimaryBelowSize = null,
+    collapseSecondaryBelowSize = null,
     showCollapsePrimary = false,
     showCollapseSecondary = false,
     ariaLabel = null,
@@ -91,25 +99,28 @@
     hasControlledSecondaryCollapsed ? secondaryCollapsed === true : uncontrolledSecondaryCollapsed,
   );
 
+  const isPrimaryRailed = $derived(isPrimaryCollapsed && primaryCollapsedSize != null);
+  const isSecondaryRailed = $derived(
+    isSecondaryCollapsed && secondaryCollapsedSize != null,
+  );
+
   const primaryFlex = $derived(
     isPrimaryCollapsed
-      ? "0 0 0"
+      ? primaryCollapsedSize != null
+        ? `0 0 ${primaryCollapsedSize}px`
+        : "0 0 0"
       : primarySize != null
         ? `0 0 ${primarySize}px`
-        : secondarySize != null
+        : secondarySize != null || isSecondaryCollapsed
           ? "1 1 0"
-          : isSecondaryCollapsed
-            ? "1 1 0"
-            : `0 0 ${currentRatio * 100}%`,
+          : `0 0 ${currentRatio * 100}%`,
   );
   const secondaryFlex = $derived(
     isSecondaryCollapsed
-      ? "0 0 0"
-      : secondarySize != null
-        ? `0 0 ${secondarySize}px`
-        : isPrimaryCollapsed || primarySize != null
-          ? "1 1 0"
-          : "1 1 0",
+      ? secondaryCollapsedSize != null
+        ? `0 0 ${secondaryCollapsedSize}px`
+        : "0 0 0"
+      : "1 1 0",
   );
   const primaryMinStyle = $derived(
     minPrimarySize != null && !isPrimaryCollapsed
@@ -165,14 +176,19 @@
     return (mousePos - start) / total;
   }
 
+  const RAIL_EXPAND_HYSTERESIS_PX = 8;
+
   function handleResizeStart(position: number): void {
     dragMousePos = position;
 
-    if (isPrimaryCollapsed) {
+    // Legacy hidden-collapse panes re-open on drag start. Railed panes
+    // (a collapsed size is configured) stay railed until the drag pulls
+    // them past their collapse threshold in handleResizeMove.
+    if (isPrimaryCollapsed && primaryCollapsedSize == null) {
       setRatio(0.05);
       setPrimaryCollapsed(false);
     }
-    if (isSecondaryCollapsed) {
+    if (isSecondaryCollapsed && secondaryCollapsedSize == null) {
       setRatio(0.95);
       setSecondaryCollapsed(false);
     }
@@ -181,9 +197,44 @@
   function handleResizeMove(delta: number): void {
     if (!container) return;
     dragMousePos += delta;
+    const rect = container.getBoundingClientRect();
+    const total = orientation === "horizontal" ? rect.width : rect.height;
+    if (total <= 0) return;
     const raw = rawRatio(dragMousePos);
 
-    if (raw <= 0.02) {
+    // Rail-collapse lanes resolve collapse/expand from drag intent here,
+    // preserve the last expanded ratio, and emit no ratio while railed.
+    if (collapsePrimaryBelowSize != null) {
+      const primaryPx = raw * total;
+      if (isPrimaryCollapsed) {
+        if (primaryPx > collapsePrimaryBelowSize + RAIL_EXPAND_HYSTERESIS_PX) {
+          setPrimaryCollapsed(false);
+          setRatio(raw);
+        }
+        return;
+      }
+      if (primaryPx < collapsePrimaryBelowSize) {
+        setPrimaryCollapsed(true);
+        return;
+      }
+    }
+
+    if (collapseSecondaryBelowSize != null) {
+      const secondaryPx = (1 - raw) * total;
+      if (isSecondaryCollapsed) {
+        if (secondaryPx > collapseSecondaryBelowSize + RAIL_EXPAND_HYSTERESIS_PX) {
+          setSecondaryCollapsed(false);
+          setRatio(raw);
+        }
+        return;
+      }
+      if (secondaryPx < collapseSecondaryBelowSize) {
+        setSecondaryCollapsed(true);
+        return;
+      }
+    }
+
+    if (raw <= 0.02 && collapsePrimaryBelowSize == null) {
       if (!isPrimaryCollapsed) {
         setPrimaryCollapsed(true);
         setRatio(0.5);
@@ -191,7 +242,7 @@
       return;
     }
 
-    if (raw >= 0.98) {
+    if (raw >= 0.98 && collapseSecondaryBelowSize == null) {
       if (!isSecondaryCollapsed) {
         setSecondaryCollapsed(true);
         setRatio(0.5);
@@ -199,10 +250,10 @@
       return;
     }
 
-    if (isPrimaryCollapsed) {
+    if (isPrimaryCollapsed && primaryCollapsedSize == null) {
       setPrimaryCollapsed(false);
     }
-    if (isSecondaryCollapsed) {
+    if (isSecondaryCollapsed && secondaryCollapsedSize == null) {
       setSecondaryCollapsed(false);
     }
     setRatio(raw);
@@ -239,7 +290,7 @@
     class="poodle-split-view__pane poodle-split-view__pane--primary"
     style="flex: {primaryFlex}; overflow: hidden; {primaryMinStyle}"
   >
-    {#if !isPrimaryCollapsed}
+    {#if !isPrimaryCollapsed || isPrimaryRailed}
       {@render primary?.()}
     {/if}
   </div>
@@ -287,7 +338,7 @@
     class="poodle-split-view__pane poodle-split-view__pane--secondary"
     style="flex: {secondaryFlex}; overflow: hidden; {secondaryMinStyle}"
   >
-    {#if !isSecondaryCollapsed}
+    {#if !isSecondaryCollapsed || isSecondaryRailed}
       {@render secondary?.()}
     {/if}
   </div>
