@@ -5,6 +5,7 @@
   import { default as Checkbox } from "./Checkbox.svelte";
   import { default as FormActions } from "./FormActions.svelte";
   import { default as Icon } from "./Icon.svelte";
+  import { default as Select } from "./Select.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -21,6 +22,7 @@
     DrillDownConfig,
     DrillDownContext,
     DrillDownItem,
+    PickerFilterConfig,
     PickerItem,
     PickerVariant,
     SelectionMode,
@@ -30,23 +32,34 @@
     title?: string;
     description?: string | null;
     items?: PickerItem[];
+    selectedItems?: PickerItem[];
     selectedIds?: string[];
     query?: string | undefined;
     selectionMode?: SelectionMode;
     variant?: PickerVariant;
     state?: BrowseState;
     ariaLabel?: string | null;
+    searchPlaceholder?: string;
+    filters?: PickerFilterConfig[];
+    filterValues?: Record<string, string | undefined>;
+    stateTitle?: string | null;
+    stateMessage?: string | null;
     confirmLabel?: string;
     cancelLabel?: string;
+    footerNote?: string | null;
+    showFooter?: boolean;
+    showSelectionSummary?: boolean;
     drillDown?: DrillDownConfig | null;
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     onQueryChange?: ((value: string) => void) | undefined;
     onSelectionChange?: ((selectedIds: string[]) => void) | undefined;
+    onFilterChange?: ((key: string, value: string | undefined) => void) | undefined;
     onConfirm?: ((selectedIds: string[]) => void) | undefined;
     onCancel?: (() => void) | undefined;
     onDrillContext?: ((context: DrillDownContext) => void) | undefined;
+    renderItem?: Snippet<[item: PickerItem, selected: boolean]>;
     stateContent?: Snippet<[]>;
   }
 
@@ -54,23 +67,34 @@
     title = "Select items",
     description = null,
     items = [],
+    selectedItems: providedSelectedItems = [],
     selectedIds = $bindable<string[] | undefined>(undefined),
     query = $bindable<string | undefined>(undefined),
     selectionMode = "multiple",
     variant = "inline",
     state: browseState = "ready",
     ariaLabel = null,
+    searchPlaceholder = "Search picker results",
+    filters = [],
+    filterValues = {},
+    stateTitle = null,
+    stateMessage = null,
     confirmLabel = "Confirm selection",
     cancelLabel = "Cancel",
+    footerNote = null,
+    showFooter = true,
+    showSelectionSummary = true,
     drillDown = null,
     size = null,
     sizeRole = "control",
     density = null,
     onQueryChange = undefined,
     onSelectionChange = undefined,
+    onFilterChange = undefined,
     onConfirm = undefined,
     onCancel = undefined,
     onDrillContext = undefined,
+    renderItem,
     stateContent,
   }: Props = $props();
 
@@ -119,6 +143,7 @@
   let drillLoading = $state(false);
   let finalItemsLoaded = $state<PickerItem[] | null>(null);
   let finalItemsLoading = $state(false);
+  let lastDrillContextKey = "";
 
   const isDrilling = $derived(drillDown !== null && drillDepth < (drillDown?.levels.length ?? 0));
   const hasDrillCompleted = $derived(drillDown !== null && drillDepth >= (drillDown?.levels.length ?? 0) && Object.keys(drillSelections).length > 0);
@@ -132,6 +157,16 @@
   });
 
   const drillContext = $derived(buildDrillContext());
+
+  $effect(() => {
+    const nextKey = JSON.stringify(drillContext);
+    if (nextKey === lastDrillContextKey) {
+      return;
+    }
+
+    lastDrillContextKey = nextKey;
+    onDrillContext?.(drillContext);
+  });
 
   const drillBreadcrumbs = $derived(drillDown
     ? drillDown.levels
@@ -205,8 +240,6 @@
     drillSelections = drillSelections;
     drillSearchQuery = "";
     drillDepth++;
-
-    onDrillContext?.(buildDrillContext());
   }
 
   function drillBack(): void {
@@ -244,14 +277,14 @@
   const activeItems = $derived((hasDrillCompleted && finalItemsLoaded !== null) ? finalItemsLoaded : items);
 
   $effect(() => {
-    if (activeItems.length === 0) {
+    if (activeItems.length === 0 && providedSelectedItems.length === 0) {
       return;
     }
 
     const nextLabels = { ...selectedItemLabels };
     let changed = false;
 
-    for (const item of activeItems) {
+    for (const item of [...activeItems, ...providedSelectedItems]) {
       if (nextLabels[item.id] !== item.label) {
         nextLabels[item.id] = item.label;
         changed = true;
@@ -274,14 +307,21 @@
     id,
     label: selectedItemLabels[id] ?? id,
   })));
+  const shellState = $derived(
+    isDrilling
+      ? drillLoading ? "loading" : "ready"
+      : finalItemsLoading
+        ? "loading"
+        : browseState,
+  );
   const pickerStatusText = $derived(
-    browseState === "loading"
+    shellState === "loading"
       ? "Picker results are loading."
-      : browseState === "error"
+      : shellState === "error"
         ? "Picker results are unavailable."
-        : browseState === "empty"
+        : shellState === "empty"
           ? "No candidates are available."
-          : browseState === "no-results"
+          : shellState === "no-results"
             ? `No candidates match "${currentQuery}".`
             : `${filteredItems.length} candidate${filteredItems.length === 1 ? "" : "s"} available, ${currentSelectedIds.length} selected.`
   );
@@ -307,6 +347,11 @@
   }
 
   function toggleItem(id: string): void {
+    const item = activeItems.find((candidate) => candidate.id === id);
+    if (item?.disabled) {
+      return;
+    }
+
     if (selectionMode === "single") {
       setSelection([id]);
       return;
@@ -348,6 +393,21 @@
       event.preventDefault();
       focusCandidate(filteredItems.length - 1);
     }
+  }
+
+  function getFilterOptions(filter: PickerFilterConfig) {
+    return [
+      ...(filter.includeAll === false
+        ? []
+        : [{
+            value: "__all__",
+            label: filter.allLabel ?? "All",
+          }]),
+      ...filter.options.map((option) => ({
+        value: option.id,
+        label: option.label,
+      })),
+    ];
   }
 </script>
 
@@ -418,15 +478,32 @@
       type="search"
       value={currentQuery}
       ariaLabel="Search picker results"
+      placeholder={searchPlaceholder}
       describedBy={statusId}
       onValueChange={setQuery}
       onClear={() => setQuery("")}
     />
+    {#if filters.length > 0}
+      <div class="poodle-relation-picker__filters">
+        {#each filters as filter (filter.key)}
+          <Select
+            value={filterValues[filter.key] ?? "__all__"}
+            options={getFilterOptions(filter)}
+            ariaLabel={`${filter.label} filter`}
+            size={resolvedSize}
+            density={resolvedDensity}
+            onValueChange={(value) => {
+              onFilterChange?.(filter.key, value === "__all__" ? undefined : value);
+            }}
+          />
+        {/each}
+      </div>
+    {/if}
   {/if}
 {/snippet}
 
 {#snippet selectionContent()}
-  {#if currentSelectedIds.length > 0}
+  {#if showSelectionSummary && currentSelectedIds.length > 0}
     <SelectionSummary
       items={selectedItems}
       onRemove={(id) => setSelection(currentSelectedIds.filter((selectedId) => selectedId !== id))}
@@ -436,10 +513,13 @@
 {/snippet}
 
 {#snippet footerContent()}
-  <FormActions align="start">
-    <p class="poodle-relation-picker__footer-note">
-      {selectionMode === "single" ? "Single-choice selection keeps the picker confirmable without inline radio-group chrome." : "Multi-selection stays explicit through selection summary and confirm/cancel actions."}
-    </p>
+  {#if showFooter}
+    <FormActions align="start">
+    {#if footerNote !== null}
+      <p class="poodle-relation-picker__footer-note">
+        {footerNote}
+      </p>
+    {/if}
     <div class="poodle-relation-picker__footer-actions">
       <Button variant="ghost" size={resolvedSize} onClick={() => onCancel?.()}>
         {cancelLabel}
@@ -449,26 +529,27 @@
       </Button>
     </div>
   </FormActions>
+  {/if}
 {/snippet}
 
 <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
-  <div class="poodle-relation-picker" data-size={resolvedSize} data-density={resolvedDensity}>
+  <div class="poodle-relation-picker" data-size={resolvedSize} data-density={resolvedDensity} data-variant={variant}>
     <PickerShell
       {title}
       {description}
       {variant}
-      state={isDrilling ? (drillLoading ? "loading" : "ready") : browseState}
+      state={shellState}
       {ariaLabel}
       resultCount={isDrilling ? drillItems.length : filteredItems.length}
       selectionCount={currentSelectedIds.length}
       statusText={isDrilling ? `${drillItems.length} item${drillItems.length === 1 ? "" : "s"}` : pickerStatusText}
       statusId={statusId}
-      stateTitle={isDrilling ? "Loading" : (browseState === "loading" ? "Loading candidates" : browseState === "error" ? "Picker unavailable" : browseState === "empty" ? "No candidates available" : "No matching candidates")}
-      stateMessage={isDrilling ? "Loading items..." : (browseState === "loading" ? "Picker results are loading while selection state stays host-owned." : browseState === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : browseState === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters.")}
+      stateTitle={stateTitle ?? (isDrilling ? "Loading" : (browseState === "loading" ? "Loading candidates" : browseState === "error" ? "Picker unavailable" : browseState === "empty" ? "No candidates available" : "No matching candidates"))}
+      stateMessage={stateMessage ?? (isDrilling ? "Loading items..." : (browseState === "loading" ? "Picker results are loading while selection state stays host-owned." : browseState === "error" ? "Error handling remains host-owned, but the picker preserves its structure." : browseState === "empty" ? "This relation has no available candidates yet." : "Try widening the search query or clearing selection filters."))}
       toolbar={toolbarSnippet}
       selection={selectionSnippet}
       stateContent={stateContent}
-      footer={footerSnippet}
+      footer={showFooter ? footerSnippet : undefined}
     >
       {#if isDrilling}
         <ul class="poodle-drill-list" aria-label={currentLevel?.label ?? "Items"}>
@@ -505,11 +586,13 @@
               class="poodle-relation-picker__item"
               data-selection-mode={selectionMode}
               data-selected={currentSelectedIds.includes(item.id)}
+              data-disabled={item.disabled}
             >
               {#if selectionMode === "multiple"}
                 <Checkbox
                   ariaLabel={`Select ${item.label}`}
                   checked={currentSelectedIds.includes(item.id)}
+                  disabled={item.disabled}
                   onCheckedChange={() => toggleItem(item.id)}
                 />
                 <button
@@ -517,22 +600,28 @@
                   type="button"
                   class="poodle-relation-picker__item-button"
                   aria-pressed={currentSelectedIds.includes(item.id)}
+                  aria-disabled={item.disabled}
                   aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
                   onclick={() => toggleItem(item.id)}
                   onkeydown={(event) => handleCandidateKeydown(event, index)}
+                  disabled={item.disabled}
                 >
-                  <span class="poodle-relation-picker__item-copy">
-                    <strong>{item.label}</strong>
-                    {#if item.description || item.meta}
-                      <small id={`relation-picker-item-${item.id}`}>
-                        {item.description ?? ""}
-                        {#if item.description && item.meta}
-                          {" · "}
-                        {/if}
-                        {item.meta ?? ""}
-                      </small>
-                    {/if}
-                  </span>
+                  {#if renderItem}
+                    {@render renderItem(item, currentSelectedIds.includes(item.id))}
+                  {:else}
+                    <span class="poodle-relation-picker__item-copy">
+                      <strong>{item.label}</strong>
+                      {#if item.description || item.meta}
+                        <small id={`relation-picker-item-${item.id}`}>
+                          {item.description ?? ""}
+                          {#if item.description && item.meta}
+                            {" · "}
+                          {/if}
+                          {item.meta ?? ""}
+                        </small>
+                      {/if}
+                    </span>
+                  {/if}
                 </button>
               {:else}
                 <button
@@ -540,22 +629,28 @@
                   type="button"
                   class="poodle-relation-picker__item-button"
                   aria-pressed={currentSelectedIds.includes(item.id)}
+                  aria-disabled={item.disabled}
                   aria-describedby={item.description || item.meta ? `relation-picker-item-${item.id}` : undefined}
                   onclick={() => toggleItem(item.id)}
                   onkeydown={(event) => handleCandidateKeydown(event, index)}
+                  disabled={item.disabled}
                 >
-                  <span class="poodle-relation-picker__item-copy">
-                    <strong>{item.label}</strong>
-                    {#if item.description || item.meta}
-                      <small id={`relation-picker-item-${item.id}`}>
-                        {item.description ?? ""}
-                        {#if item.description && item.meta}
-                          {" · "}
-                        {/if}
-                        {item.meta ?? ""}
-                      </small>
-                    {/if}
-                  </span>
+                  {#if renderItem}
+                    {@render renderItem(item, currentSelectedIds.includes(item.id))}
+                  {:else}
+                    <span class="poodle-relation-picker__item-copy">
+                      <strong>{item.label}</strong>
+                      {#if item.description || item.meta}
+                        <small id={`relation-picker-item-${item.id}`}>
+                          {item.description ?? ""}
+                          {#if item.description && item.meta}
+                            {" · "}
+                          {/if}
+                          {item.meta ?? ""}
+                        </small>
+                      {/if}
+                    </span>
+                  {/if}
                 </button>
               {/if}
             </li>
@@ -578,6 +673,14 @@
     --poodle-relation-picker-item-gap: 0.5rem;
     --poodle-relation-picker-title-size: 0.8125rem;
     --poodle-relation-picker-desc-size: 0.6875rem;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .poodle-relation-picker[data-variant="popover"] {
+    min-width: min(28rem, calc(100vw - 2rem));
+    max-width: min(32rem, calc(100vw - 2rem));
   }
 
   .poodle-relation-picker[data-size="xs"] {
@@ -803,6 +906,10 @@
     background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
   }
 
+  .poodle-relation-picker__item[data-disabled="true"] {
+    opacity: 0.55;
+  }
+
   .poodle-relation-picker__item-button {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -816,6 +923,10 @@
     cursor: pointer;
     text-align: left;
     font: inherit;
+  }
+
+  .poodle-relation-picker__item-button:disabled {
+    cursor: not-allowed;
   }
 
   .poodle-relation-picker__item-copy {
@@ -849,6 +960,12 @@
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
     border-radius: var(--poodle-radius-control);
+  }
+
+  .poodle-relation-picker__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--poodle-space-inline-sm);
   }
 
   .poodle-relation-picker__footer-actions {

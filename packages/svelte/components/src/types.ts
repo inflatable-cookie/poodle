@@ -31,7 +31,7 @@ export type ControlSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type ControlDensity = "compact" | "default" | "comfortable";
 export type SemanticControlSizeRole = "chrome" | "control" | "prominent";
 export type ButtonVariant = "primary" | "secondary" | "ghost";
-export type ButtonTone = "default" | "danger" | "success";
+export type ButtonTone = "default" | "danger" | "success" | "warning";
 export type LayoutAlign = "start" | "center" | "end" | "stretch";
 export type LayoutJustify = "start" | "center" | "end" | "between";
 export type OverflowMode = "visible" | "hidden" | "clip";
@@ -434,6 +434,20 @@ export type PickerItem = {
   label: string;
   description?: string | null;
   meta?: string | null;
+  disabled?: boolean;
+};
+
+export type PickerFilterOption = {
+  id: string;
+  label: string;
+};
+
+export type PickerFilterConfig = {
+  key: string;
+  label: string;
+  options: PickerFilterOption[];
+  includeAll?: boolean;
+  allLabel?: string;
 };
 
 export type DrillDownItem = PickerItem & {

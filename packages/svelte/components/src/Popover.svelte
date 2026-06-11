@@ -18,6 +18,10 @@
     initialFocus?: PopoverInitialFocus;
     ariaLabel?: string | null;
     block?: boolean;
+    disabled?: boolean;
+    surfaceWidth?: "content" | "trigger";
+    surfaceMinWidth?: string | null;
+    surfaceMaxWidth?: string | null;
     onOpenChange?: ((open: boolean) => void) | undefined;
     trigger?: Snippet<[]>;
     children?: Snippet<[]>;
@@ -32,6 +36,10 @@
     initialFocus = "first-focusable",
     ariaLabel = null,
     block = false,
+    disabled = false,
+    surfaceWidth = "content",
+    surfaceMinWidth = null,
+    surfaceMaxWidth = null,
     onOpenChange = undefined,
     trigger,
     children,
@@ -80,6 +88,10 @@
   });
 
   function setOpen(nextOpen: boolean): void {
+    if (disabled) {
+      return;
+    }
+
     if (isControlled) {
       open = nextOpen;
     } else {
@@ -126,12 +138,18 @@
     bind:this={triggerElement}
     class="poodle-popover__trigger"
     data-block={block}
+    data-disabled={disabled}
     role="button"
-    tabindex="0"
+    tabindex={disabled ? -1 : 0}
+    aria-disabled={disabled ? "true" : undefined}
     aria-expanded={isOpen ? "true" : "false"}
     aria-controls={isOpen ? popoverId : undefined}
     onclick={() => setOpen(!isOpen)}
     onkeydown={(event) => {
+      if (disabled) {
+        return;
+      }
+
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         setOpen(!isOpen);
@@ -147,7 +165,12 @@
       id={popoverId}
       class="poodle-popover__surface"
       data-placement={placement}
-      style={`--poodle-popover-offset: ${offset}px;`}
+      data-surface-width={surfaceWidth}
+      style={[
+        `--poodle-popover-offset: ${offset}px`,
+        surfaceMinWidth ? `--poodle-popover-surface-min-width: ${surfaceMinWidth}` : "",
+        surfaceMaxWidth ? `--poodle-popover-surface-max-width: ${surfaceMaxWidth}` : "",
+      ].filter(Boolean).join("; ")}
       tabindex={initialFocus === "content" ? 0 : -1}
       role="dialog"
       aria-label={ariaLabel ?? undefined}
@@ -164,6 +187,7 @@
   }
 
   .poodle-popover[data-block="true"] {
+    flex: 1 1 auto;
     display: flex;
     width: 100%;
     min-width: 0;
@@ -184,11 +208,15 @@
     outline-offset: 0.125rem;
   }
 
+  .poodle-popover__trigger[data-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   .poodle-popover__surface {
     position: absolute;
     z-index: var(--poodle-overlay-z-menu);
-    min-width: 14rem;
-    max-width: min(24rem, 90vw);
+    min-width: var(--poodle-popover-surface-min-width, 14rem);
+    max-width: var(--poodle-popover-surface-max-width, min(24rem, 90vw));
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(
       --poodle-treatment-surface-elevated-border,
@@ -201,6 +229,12 @@
       inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08),
       0 0.625rem 1.5rem rgba(9, 13, 18, 0.22),
       0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
+  }
+
+  .poodle-popover__surface[data-surface-width="trigger"] {
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
   }
 
   .poodle-popover__surface[data-placement^="bottom"] {

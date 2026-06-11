@@ -298,6 +298,8 @@ export type {
   PanelTabItem,
   PanelVariant,
   ParsedEmbed,
+  PickerFilterConfig,
+  PickerFilterOption,
   PickerItem,
   PickerVariant,
   EditableListItem,

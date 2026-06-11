@@ -114,6 +114,10 @@
     column-gap: var(--poodle-form-layout-column-gap);
   }
 
+  .poodle-form-layout__grid :global(.poodle-field:only-child) {
+    grid-column: 1 / -1;
+  }
+
   @container (max-width: 600px) {
     .poodle-form-layout__grid {
       grid-template-columns: repeat(2, 1fr);

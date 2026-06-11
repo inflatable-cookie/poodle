@@ -39,6 +39,9 @@
     leadingIcon?: IconProp | null;
     trailingIcon?: IconProp | null;
     chevron?: boolean;
+    truncate?: boolean;
+    fit?: "default" | "content";
+    maxWidth?: string | null;
     pressed?: boolean | null;
     defaultPressed?: boolean | null;
     ariaLabel?: string | null;
@@ -74,6 +77,9 @@
     leadingIcon = null,
     trailingIcon = null,
     chevron = false,
+    truncate = false,
+    fit = "default",
+    maxWidth = null,
     pressed = $bindable<boolean | null>(null),
     defaultPressed = null,
     ariaLabel = null,
@@ -113,6 +119,14 @@
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const resolvedIconSize = $derived(resolveSupportingVisualSize(resolvedSize));
+  const resolvedStyle = $derived(
+    [
+      style,
+      maxWidth ? `max-width: ${maxWidth}` : null,
+    ]
+      .filter(Boolean)
+      .join("; ")
+  );
 
   function handleClick(event: MouseEvent): void {
     if (isToggle) {
@@ -138,7 +152,7 @@
   formnovalidate={formnovalidate || undefined}
   formtarget={formtarget ?? undefined}
   class={`poodle-button ${className}`.trim()}
-  style={style ?? undefined}
+  style={resolvedStyle || undefined}
   data-variant={variant}
   data-tone={tone !== "default" ? tone : undefined}
   data-size={resolvedSize}
@@ -146,6 +160,8 @@
   data-icon-only={iconOnly || undefined}
   data-has-leading={hasLeading || undefined}
   data-has-trailing={hasTrailing || undefined}
+  data-truncate={truncate || undefined}
+  data-fit={fit !== "default" ? fit : undefined}
   data-loading={loading}
   data-pressed={isToggle ? currentPressed : undefined}
   disabled={isUnavailable}
@@ -332,6 +348,11 @@
     padding-right: calc(var(--poodle-space-control-x) + 0.0625rem);
   }
 
+  .poodle-button[data-fit="content"] {
+    min-width: 0;
+    padding-inline: 0.375rem;
+  }
+
   /* Icon-only: square, no min-width */
   .poodle-button[data-icon-only] {
     min-width: 0;
@@ -428,6 +449,37 @@
     --poodle-button-shadow: none;
   }
 
+  .poodle-button[data-tone="warning"] {
+    --poodle-button-fill: color-mix(in srgb, var(--poodle-color-status-warning) 16%, var(--poodle-surface, var(--poodle-color-background-surface)));
+    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-warning) 24%, var(--poodle-surface, var(--poodle-color-background-surface)));
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-warning) 32%, var(--poodle-surface, var(--poodle-color-background-surface)));
+    --poodle-button-border: var(--poodle-color-border-default);
+    --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-warning) 62%, var(--poodle-color-border-default));
+    --poodle-button-text: var(--poodle-color-text-primary);
+  }
+
+  .poodle-button[data-variant="primary"][data-tone="warning"] {
+    --poodle-button-fill: var(--poodle-color-status-warning);
+    --poodle-button-fill-hover: color-mix(in srgb, white 12%, var(--poodle-color-status-warning));
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-warning) 88%, black);
+    --poodle-button-border: color-mix(in srgb, var(--poodle-color-status-warning) 84%, black);
+    --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-warning) 72%, black);
+    --poodle-button-text: var(--poodle-color-text-inverse);
+    --poodle-button-shadow:
+      inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent);
+  }
+
+  .poodle-button[data-variant="ghost"][data-tone="warning"] {
+    --poodle-button-fill: transparent;
+    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-status-warning) 12%, transparent);
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-status-warning) 18%, transparent);
+    --poodle-button-border: transparent;
+    --poodle-button-border-hover: color-mix(in srgb, var(--poodle-color-status-warning) 28%, transparent);
+    --poodle-button-text: var(--poodle-color-status-warning);
+    --poodle-button-shadow: none;
+  }
+
   .poodle-button:hover:not(:disabled) {
     background: var(--poodle-button-fill-hover);
     border-color: var(--poodle-button-border-hover);
@@ -466,6 +518,15 @@
   .poodle-button__label {
     min-width: 0;
     white-space: nowrap;
+  }
+
+  .poodle-button[data-truncate] {
+    overflow: hidden;
+  }
+
+  .poodle-button[data-truncate] .poodle-button__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .poodle-button__icon,

@@ -144,6 +144,12 @@
     --poodle-field-label-gap: 0.375rem;
     display: grid;
     gap: var(--poodle-field-gap);
+    min-width: 0;
+  }
+
+  .poodle-field__control {
+    width: 100%;
+    min-width: 0;
   }
 
   .poodle-field__header {

@@ -118,6 +118,8 @@
     display: grid;
     grid-template-rows: auto;
     gap: var(--poodle-space-stack-md);
+    box-sizing: border-box;
+    min-width: 0;
     padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x);
     border: 0.0625rem solid var(--poodle-color-border-subtle);
     border-radius: var(--poodle-radius-surface);
@@ -125,7 +127,8 @@
   }
 
   .poodle-picker-shell[data-variant="popover"] {
-    max-width: 30rem;
+    width: 100%;
+    max-width: min(32rem, calc(100vw - 2rem));
     box-shadow: var(--poodle-elevation-overlay);
   }
 

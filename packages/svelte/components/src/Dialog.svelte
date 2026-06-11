@@ -20,6 +20,7 @@
     contentClassName?: string;
     contentStyle?: string;
     overlayClassName?: string;
+    overlayStyle?: string;
     showCloseButton?: boolean;
     closeLabel?: string;
     width?: "sm" | "md" | "lg" | "xl" | "full";
@@ -49,6 +50,7 @@
     contentClassName = "",
     contentStyle = "",
     overlayClassName = "",
+    overlayStyle = "",
     showCloseButton = false,
     closeLabel = "Close dialog",
     width = "md",
@@ -185,6 +187,7 @@
     <button
       type="button"
       class={`poodle-dialog__backdrop ${overlayClassName}`}
+      style={overlayStyle}
       aria-label="Dismiss dialog backdrop"
       onclick={() => {
         if (dismissOnBackdrop) {

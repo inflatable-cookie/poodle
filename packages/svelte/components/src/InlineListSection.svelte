@@ -9,6 +9,7 @@
     item: Snippet<[T]>;
     actions?: Snippet;
     emptyMessage?: string | null;
+    count?: number | string | null;
     framed?: boolean;
   }
 
@@ -18,6 +19,7 @@
     item,
     actions,
     emptyMessage = "No items yet.",
+    count = null,
     framed = true
   }: Props = $props();
 </script>
@@ -26,7 +28,12 @@
   <Card>
     <section class="poodle-inline-list-section" aria-label={title}>
       <div class="poodle-inline-list-section__header">
-        <h4 class="poodle-inline-list-section__title">{title}</h4>
+        <div class="poodle-inline-list-section__heading">
+          <h4 class="poodle-inline-list-section__title">{title}</h4>
+          {#if count !== null}
+            <span class="poodle-inline-list-section__count">{count}</span>
+          {/if}
+        </div>
         {#if actions}
           <div class="poodle-inline-list-section__header-actions">
             {@render actions()}
@@ -52,7 +59,12 @@
 {:else}
   <section class="poodle-inline-list-section" aria-label={title}>
     <div class="poodle-inline-list-section__header">
-      <h4 class="poodle-inline-list-section__title">{title}</h4>
+      <div class="poodle-inline-list-section__heading">
+        <h4 class="poodle-inline-list-section__title">{title}</h4>
+        {#if count !== null}
+          <span class="poodle-inline-list-section__count">{count}</span>
+        {/if}
+      </div>
       {#if actions}
         <div class="poodle-inline-list-section__header-actions">
           {@render actions()}
@@ -89,6 +101,13 @@
     gap: 0.75rem;
   }
 
+  .poodle-inline-list-section__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
   .poodle-inline-list-section__title {
     margin: 0;
     font-size: var(--poodle-typography-label-size);
@@ -96,6 +115,22 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--poodle-color-text-secondary);
+  }
+
+  .poodle-inline-list-section__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.875rem;
+    height: 1.375rem;
+    padding: 0 0.5rem;
+    border-radius: 999rem;
+    border: 1px solid var(--poodle-color-border);
+    background: var(--poodle-surface-elevated);
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-label-size);
+    font-weight: var(--poodle-typography-label-weight);
+    line-height: 1;
   }
 
   .poodle-inline-list-section__header-actions {

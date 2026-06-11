@@ -22,6 +22,7 @@
     disabled?: boolean;
     selectable?: boolean;
     selected?: boolean;
+    highlighted?: boolean;
     selectionIndicator?: "none" | "checkbox";
     showReorderHandle?: boolean;
     notLive?: boolean;
@@ -63,6 +64,7 @@
     disabled = false,
     selectable = false,
     selected = false,
+    highlighted = false,
     selectionIndicator = "none",
     showReorderHandle = false,
     notLive = false,
@@ -295,6 +297,7 @@
     data-leading-size={resolvedLeadingSize}
     data-layout={layout}
     data-selected={selected}
+    data-highlighted={highlighted}
     aria-label={ariaLabel ?? title}
     class:poodle-list-card--has-sash={!!sash}
     style={[
@@ -499,6 +502,7 @@
     data-leading-size={resolvedLeadingSize}
     data-layout={layout}
     data-selected={selected}
+    data-highlighted={highlighted}
     role={isInteractive ? (selectable ? "button" : "button") : undefined}
     aria-pressed={selectable ? selected : undefined}
     tabindex={isInteractive && !disabled ? 0 : -1}
@@ -798,7 +802,8 @@
     width: 100%;
     transition:
       background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
-      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   .poodle-list-card--has-sash {
@@ -829,6 +834,23 @@
 
   .poodle-list-card--interactive[data-selected="true"]:hover:not([data-disabled="true"]) {
     border-color: var(--poodle-color-accent-base);
+  }
+
+  .poodle-list-card[data-highlighted="true"] {
+    border-color: color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 34%, transparent);
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 10%, transparent),
+        transparent 24%
+      ),
+      var(--poodle-treatment-list-card-fill, var(--poodle-recipe-list-card-fill));
+    box-shadow:
+      inset 0 0 0 0.0625rem color-mix(
+        in srgb,
+        var(--list-card-accent, var(--poodle-color-accent-base)) 12%,
+        transparent
+      );
   }
 
   .poodle-list-card:focus-visible {
