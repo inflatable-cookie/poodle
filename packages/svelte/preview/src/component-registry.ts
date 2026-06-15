@@ -102,8 +102,10 @@ export const allComponents: ComponentEntry[] = [
   entry("Pill", "display", "Small inline label chip with tone and size variants.", true),
   entry("StatusIndicator", "display", "Colored dot or icon indicating status.", true),
   entry("Text", "display", "Small text primitive for body, caption, hint, and status copy.", true),
+  entry("TextLink", "display", "Inline text link or action for prose and metadata copy.", true),
   entry("Icon", "display", "SVG icon accepting direct node data or string names.", true),
   entry("IconProvider", "display", "Context provider for bulk icon set lookups.", true),
+  entry("UiPresentationProvider", "display", "Scoped provider for semantic density and size defaults.", true),
   entry("Skeleton", "display", "Placeholder loading shape for content.", true),
   entry("Spinner", "display", "Animated loading indicator with ring and grid variants.", true),
   entry("Code", "display", "Syntax-highlighted code display with copy button.", true),
@@ -141,6 +143,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Table", "data", "Static data table with headers, rows, and alignment.", true),
   entry("DataTable", "data", "Feature-rich table with sorting, selection, and pagination.", true),
   entry("ListCard", "data", "Structured list item card with snippet-based leading, footer, and trailing composition.", true),
+  entry("ListCardCounter", "data", "Compact icon-count item used in ListCard footer composition.", true),
   entry("ListContainer", "data", "List-page shell with header, filters, and pagination.", true),
   entry("EditableList", "data", "Editable/reorderable list with add, remove, and drag-and-drop.", true),
   entry("Card", "data", "Contained surface for grouped content.", true),
@@ -173,6 +176,7 @@ export const allComponents: ComponentEntry[] = [
   entry("ToastHost", "feedback", "Store-aware toast host with timer policy.", true),
   entry("BulkActionBar", "feedback", "Action bar for batch operations on selected items.", true),
   entry("PasswordRequirements", "feedback", "Password-policy checklist driven by caller rules.", true),
+  entry("ErrorBoundary", "feedback", "Svelte error boundary with retryable empty-state fallback.", true),
 
   // Form
   entry("Field", "form", "Form field wrapper with label, help text, and validation.", true),
@@ -181,6 +185,8 @@ export const allComponents: ComponentEntry[] = [
   entry("FormLayout", "form", "Responsive form grid with error messaging.", true),
   entry("BlockEditor", "form", "Block-based content editor shell with pluggable types.", true),
   entry("MarkdownEditor", "form", "Markdown authoring with formatting toolbar and preview.", true),
+  entry("InlineListSection", "form", "Compact related-list section for detail and metadata pages.", true),
+  entry("DebugDialog", "form", "Developer-facing JSON debug dialog hidden when no value is supplied.", true),
 
   // Workstation
   entry("AppHeader", "workstation", "Top-level application header with branding and actions.", true),
@@ -190,7 +196,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Toolbar", "workstation", "Horizontal action bar with grouped controls.", true),
   entry("ActionDiscoveryPanel", "workstation", "Grouped action list with keyboard navigation.", true),
   entry("DetailSection", "workstation", "Titled section for grouping detail content.", true),
-  entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", false),
+  entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", true),
   entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 

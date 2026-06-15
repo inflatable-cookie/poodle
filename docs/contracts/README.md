@@ -158,6 +158,7 @@ above it in downstream repos such as Loophole.
 - `components/table.md`
 - `components/tabs.md`
 - `components/text.md`
+- `components/text-link.md`
 - `components/text-input.md`
 - `components/token-input.md`
 - `components/time-ago.md`

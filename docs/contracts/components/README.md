@@ -131,6 +131,7 @@ primitives and layout surfaces through higher-order application components.
 - `tab-strip.md`
 - `table.md`
 - `text.md`
+- `text-link.md`
 - `tabs.md`
 - `text-input.md`
 - `token-input.md`

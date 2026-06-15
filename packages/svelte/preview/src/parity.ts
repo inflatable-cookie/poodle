@@ -593,9 +593,9 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
   {
     packageName: "@poodle/svelte",
     kind: "component",
-    status: "contract-only",
-    sectionIds: [],
-    note: "Responsive peer-detail grouping is documented as a layout contract but does not need standalone specimen coverage yet.",
+    status: "previewed",
+    sectionIds: ["catalog-hub"],
+    note: "Responsive peer-detail grouping is directly reviewable from the catalogue.",
     exportNames: ["DetailSectionGroup"],
   },
   {

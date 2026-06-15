@@ -101,6 +101,7 @@ import TabsSpecimen from "./TabsSpecimen.svelte";
 import TableSpecimen from "./TableSpecimen.svelte";
 import TimeAgoSpecimen from "./TimeAgoSpecimen.svelte";
 import TextInputSpecimen from "./TextInputSpecimen.svelte";
+import TextLinkSpecimen from "./TextLinkSpecimen.svelte";
 import TextSpecimen from "./TextSpecimen.svelte";
 import TokenInputSpecimen from "./TokenInputSpecimen.svelte";
 import TimeInputSpecimen from "./TimeInputSpecimen.svelte";
@@ -113,6 +114,11 @@ import TooltipSpecimen from "./TooltipSpecimen.svelte";
 import TriStateSwitchSpecimen from "./TriStateSwitchSpecimen.svelte";
 import VideoPlayerSpecimen from "./VideoPlayerSpecimen.svelte";
 import DateTimeZonePickerSpecimen from "./DateTimeZonePickerSpecimen.svelte";
+import DebugDialogSpecimen from "./DebugDialogSpecimen.svelte";
+import DetailSectionGroupSpecimen from "./DetailSectionGroupSpecimen.svelte";
+import ErrorBoundarySpecimen from "./ErrorBoundarySpecimen.svelte";
+import InlineListSectionSpecimen from "./InlineListSectionSpecimen.svelte";
+import UiPresentationProviderSpecimen from "./UiPresentationProviderSpecimen.svelte";
 
 // Composite specimens
 import ActionDiscoveryPanelSpecimen from "./ActionDiscoveryPanelSpecimen.svelte";
@@ -179,6 +185,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "icon-button": IconButtonSpecimen,
   "icon-provider": IconProviderSpecimen,
   "list-card": ListCardSpecimen,
+  "list-card-counter": ListCardSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
   "log-list": LogListSpecimen,
@@ -233,6 +240,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "time-ago": TimeAgoSpecimen,
   text: TextSpecimen,
   "text-input": TextInputSpecimen,
+  "text-link": TextLinkSpecimen,
   "token-input": TokenInputSpecimen,
   "time-input": TimeInputSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
@@ -245,12 +253,17 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "video-player": VideoPlayerSpecimen,
   "dock-region": DockRegionSpecimen,
   "date-time-zone-picker": DateTimeZonePickerSpecimen,
+  "detail-section-group": DetailSectionGroupSpecimen,
+  "error-boundary": ErrorBoundarySpecimen,
+  "inline-list-section": InlineListSectionSpecimen,
+  "ui-presentation-provider": UiPresentationProviderSpecimen,
 
   // Workstation
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,
   "app-header": AppHeaderSpecimen,
   "collapse-toggle": CollapseToggleSpecimen,
   "command-palette": CommandPaletteSpecimen,
+  "debug-dialog": DebugDialogSpecimen,
   "status-bar": StatusBarSpecimen,
   "split-view": SplitViewSpecimen,
 };

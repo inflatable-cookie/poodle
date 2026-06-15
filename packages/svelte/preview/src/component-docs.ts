@@ -3790,6 +3790,219 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  avatar: {
+    props: [
+      { name: "src", type: "string | null", default: "null", description: "Image URL for the avatar." },
+      { name: "alt", type: "string | null", default: "null", description: "Image alt text and fallback accessible label." },
+      { name: "initials", type: "string | null", default: "null", description: "Fallback initials, trimmed to three uppercase characters." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label override for initials fallback." },
+      { name: "decorative", type: "boolean", default: "false", description: "Hides the avatar from assistive technology when adjacent copy already names the subject." },
+      { name: "size", type: '"xs" | "sm" | "md" | "lg" | "xl"', default: '"md"', description: "Avatar square size." },
+      { name: "shape", type: '"circle" | "rounded"', default: '"circle"', description: "Avatar outline shape." },
+      { name: "tone", type: '"neutral" | "accent"', default: '"neutral"', description: "Fallback background tone." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { Avatar } from "@poodle/svelte";
+</script>
+
+<Avatar initials="TA" ariaLabel="Tom Adams" tone="accent" />`,
+  },
+
+  "debug-dialog": {
+    props: [
+      { name: "value", type: "unknown | null", default: "null", description: "Debug data to serialize. The component is hidden when value is null or undefined." },
+      { name: "title", type: "string", default: '"Debug data"', description: "Dialog title." },
+      { name: "triggerLabel", type: "string", default: '"View debug data"', description: "Trigger button label." },
+      { name: "maxHeight", type: "string", default: '"min(60vh, 32rem)"', description: "Maximum height for the JSON code block." },
+      { name: "triggerVariant", type: "ButtonVariant", default: '"ghost"', description: "Button variant for the trigger." },
+      { name: "triggerSize", type: "ControlSize | null", default: '"sm"', description: "Button size for the trigger." },
+      { name: "showCloseButton", type: "boolean", default: "true", description: "Whether the dialog shows a close button." },
+      { name: "closeLabel", type: "string", default: '"Close debug dialog"', description: "Accessible label for the close button." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { DebugDialog } from "@poodle/svelte";
+</script>
+
+<DebugDialog value={{ id: "asset_42", status: "ready" }} title="Asset payload" />`,
+  },
+
+  "detail-section-group": {
+    props: [
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Inherits presentation density when null." },
+      { name: "layout", type: '"grid" | "stack"', default: '"grid"', description: "Responsive grid or forced single-column stack." },
+      { name: "minColumnWidth", type: "string", default: '"14rem"', description: "Minimum width for each section column." },
+      { name: "itemMinColumnWidth", type: "string", default: '"12rem"', description: "Forwarded to descendant DetailSection item layout." },
+      { name: "maxColumns", type: "2 | 3 | 4 | 5", default: "4", description: "Maximum column cap for grid layout." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the grouping region." },
+    ],
+    slots: [
+      { name: "children", description: "DetailSection blocks or equivalent peer section content." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { DetailSectionGroup, DetailSection, DetailItem } from "@poodle/svelte";
+</script>
+
+<DetailSectionGroup ariaLabel="Project metadata">
+  <DetailSection title="General">
+    <DetailItem label="Owner" value="Platform" />
+  </DetailSection>
+</DetailSectionGroup>`,
+  },
+
+  "error-boundary": {
+    props: [
+      { name: "children", type: "Snippet", required: true, description: "Child content rendered inside the Svelte boundary." },
+      { name: "title", type: "string", default: '"Something went wrong"', description: "Fallback title shown after a child render error." },
+      { name: "retryLabel", type: "string", default: '"Try again"', description: "Label for the retry/reset button." },
+    ],
+    slots: [
+      { name: "children", description: "Content protected by the boundary." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { ErrorBoundary } from "@poodle/svelte";
+</script>
+
+<ErrorBoundary title="Panel failed">
+  <ExpensivePanel />
+</ErrorBoundary>`,
+  },
+
+  "inline-list-section": {
+    props: [
+      { name: "title", type: "string", required: true, description: "Visible compact section title." },
+      { name: "items", type: "T[]", required: true, description: "Items rendered into the list." },
+      { name: "item", type: "Snippet<[T]>", required: true, description: "Row renderer snippet for each item." },
+      { name: "actions", type: "Snippet | undefined", default: "undefined", description: "Optional header actions snippet." },
+      { name: "emptyMessage", type: "string | null", default: '"No items yet."', description: "Inline empty message. Hidden when null." },
+      { name: "count", type: "number | string | null", default: "null", description: "Optional compact count pill beside the title." },
+      { name: "framed", type: "boolean", default: "true", description: "Wraps the section in Card chrome when true." },
+    ],
+    slots: [
+      { name: "actions", description: "Optional header action controls." },
+      { name: "item", description: "Required item row renderer. Receives the current item." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { InlineListSection, Text } from "@poodle/svelte";
+
+  const versions = [{ name: "Version 1" }];
+</script>
+
+<InlineListSection title="Versions" items={versions}>
+  {#snippet item(version)}
+    <Text as="span">{version.name}</Text>
+  {/snippet}
+</InlineListSection>`,
+  },
+
+  "list-grid": {
+    props: [
+      { name: "variant", type: '"default" | "compact"', default: '"default"', description: "Compact forces a single-column stack with tighter gap." },
+      { name: "minItemWidth", type: "number | string | null", default: "null", description: "Minimum item width. Numbers are treated as em values." },
+      { name: "maxColumns", type: "number | null", default: "3", description: "Maximum column cap. Null removes the cap." },
+      { name: "gap", type: "number | string | null", default: "null", description: "Grid gap. Numbers are treated as px values." },
+      { name: "class", type: "string", default: '""', description: "Additional class names for the root element." },
+      { name: "actions", type: "Snippet | undefined", default: "undefined", description: "Optional header actions row." },
+      { name: "children", type: "Snippet | undefined", default: "undefined", description: "Grid item content." },
+    ],
+    slots: [
+      { name: "actions", description: "Optional header actions." },
+      { name: "children", description: "Grid items." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { ListGrid, Surface } from "@poodle/svelte";
+</script>
+
+<ListGrid minItemWidth={16}>
+  {#snippet children()}
+    <Surface padding="md">Item</Surface>
+  {/snippet}
+</ListGrid>`,
+  },
+
+  text: {
+    props: [
+      { name: "as", type: '"p" | "span" | "div"', default: '"p"', description: "Rendered element." },
+      { name: "tone", type: '"default" | "secondary" | "muted" | "success" | "danger" | "warning"', default: '"default"', description: "Text color role." },
+      { name: "size", type: '"xs" | "sm" | "md"', default: '"md"', description: "Text size." },
+      { name: "weight", type: '"normal" | "medium" | "semibold" | "bold"', default: '"normal"', description: "Font weight." },
+      { name: "leading", type: '"normal" | "relaxed"', default: '"normal"', description: "Line-height preset." },
+      { name: "spacing", type: '"none" | "compact"', default: '"none"', description: "Compact child spacing mode." },
+      { name: "clamp", type: '"none" | 1 | 2 | 3', default: '"none"', description: "Optional line clamp." },
+    ],
+    slots: [
+      { name: "children", description: "Text or inline content." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { Text } from "@poodle/svelte";
+</script>
+
+<Text tone="secondary" size="sm">Supporting copy.</Text>`,
+  },
+
+  "text-link": {
+    props: [
+      { name: "href", type: "string | null", default: "null", description: "Link destination. Renders an anchor when present and enabled." },
+      { name: "target", type: "string | null", default: "null", description: "Anchor target." },
+      { name: "rel", type: "string | null", default: "null", description: "Anchor rel attribute." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label override." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables activation and renders the button path." },
+      { name: "tone", type: '"accent" | "inherit" | "secondary"', default: '"accent"', description: "Inline link tone." },
+      { name: "className", type: "string", default: '""', description: "Additional class names appended to the root." },
+      { name: "onClick", type: "((event: MouseEvent) => void) | null", default: "null", description: "Called for enabled activation." },
+    ],
+    slots: [
+      { name: "children", description: "Inline link content." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { Text, TextLink } from "@poodle/svelte";
+</script>
+
+<Text>
+  Read the <TextLink href="/docs">docs</TextLink>.
+</Text>`,
+  },
+
+  "token-input": {
+    props: [
+      { name: "id", type: "string", default: '""', description: "Input id for label association." },
+      { name: "values", type: "string[]", default: "[]", description: "Bindable committed token values." },
+      { name: "name", type: "string | undefined", default: "undefined", description: "Emits one hidden input per token when set." },
+      { name: "placeholder", type: "string | null", default: "null", description: "Placeholder for the draft input." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables entry and token removal." },
+      { name: "readOnly", type: "boolean", default: "false", description: "Keeps values visible but blocks editing and removal." },
+      { name: "required", type: "boolean", default: "false", description: "Forwarded to the live text input." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the live input." },
+      { name: "describedBy", type: "string | null", default: "null", description: "aria-describedby value for the live input." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override." },
+      { name: "sizeRole", type: "SemanticControlSizeRole", default: '"control"', description: "Semantic size role used when size is inherited." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+      { name: "separators", type: "string[]", default: '[","]', description: "Characters that commit draft tokens." },
+      { name: "dedupe", type: "boolean", default: "true", description: "Prevents duplicate committed values." },
+      { name: "commitOnBlur", type: "boolean", default: "true", description: "Commits the current draft when focus leaves." },
+      { name: "maxLength", type: "number | null", default: "null", description: "Maximum draft input length." },
+      { name: "onValuesChange", type: "((values: string[]) => void) | undefined", default: "undefined", description: "Called whenever committed tokens change." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { TokenInput } from "@poodle/svelte";
+
+  let tags = ["draft"];
+</script>
+
+<TokenInput bind:values={tags} placeholder="Type a tag..." />`,
+  },
+
   "action-discovery-panel": {
     props: [
       { name: "items", type: "CommandActionItem[]", default: "[]", description: "Array of discoverable action items." },

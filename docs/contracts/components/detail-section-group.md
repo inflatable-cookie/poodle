@@ -74,4 +74,5 @@ Updated: 2026-06-11
   one responsive layout decision
 - use `DetailShell` when the page also needs header, state, or body-shell
   behavior
-- this surface is currently contract-only in preview coverage
+- `DetailSectionGroupSpecimen.svelte` covers grid, stack, density, max-column,
+  and descendant item-width behavior.
