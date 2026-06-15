@@ -57,6 +57,7 @@ export const allComponents: ComponentEntry[] = [
 
   // Input
   entry("TextInput", "input", "Single or multi-line text input with search, slug, and multiline modes.", true),
+  entry("TokenInput", "input", "Tokenizing text input for badge-like multi-value entry with separator-driven commit semantics.", true),
   entry("NumberInput", "input", "Numeric input with optional steppers.", true),
   entry("Select", "input", "Dropdown selection from a list of options.", true),
   entry("ColorPicker", "input", "Color selection with native picker, hex input, and swatches.", true),
@@ -96,9 +97,11 @@ export const allComponents: ComponentEntry[] = [
   entry("ResizeHandle", "layout", "Drag and keyboard resize handle for split layouts.", true),
 
   // Display
+  entry("Avatar", "display", "Image or initials avatar for user identity surfaces.", true),
   entry("Eyebrow", "display", "Small uppercase label used for section categorization.", true),
   entry("Pill", "display", "Small inline label chip with tone and size variants.", true),
   entry("StatusIndicator", "display", "Colored dot or icon indicating status.", true),
+  entry("Text", "display", "Small text primitive for body, caption, hint, and status copy.", true),
   entry("Icon", "display", "SVG icon accepting direct node data or string names.", true),
   entry("IconProvider", "display", "Context provider for bulk icon set lookups.", true),
   entry("Skeleton", "display", "Placeholder loading shape for content.", true),
@@ -187,6 +190,7 @@ export const allComponents: ComponentEntry[] = [
   entry("Toolbar", "workstation", "Horizontal action bar with grouped controls.", true),
   entry("ActionDiscoveryPanel", "workstation", "Grouped action list with keyboard navigation.", true),
   entry("DetailSection", "workstation", "Titled section for grouping detail content.", true),
+  entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", false),
   entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 

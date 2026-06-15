@@ -22,7 +22,10 @@
     stateTitle?: string | null;
     stateMessage?: string | null;
     presentation?: "default" | "compact";
+    fit?: "cover" | "contain";
     frameWidth?: "fill" | "xl" | number | string | null;
+    frameMinHeight?: number | string | null;
+    frameMaxHeight?: number | string | null;
     children?: Snippet;
   }
 
@@ -37,7 +40,10 @@
     stateTitle = null,
     stateMessage = null,
     presentation = "default",
+    fit = "cover",
     frameWidth = "fill",
+    frameMinHeight = null,
+    frameMaxHeight = null,
     children,
   }: Props = $props();
 
@@ -49,6 +55,18 @@
       : frameWidth === "xl"
         ? "inline-size: min(100%, 24rem);"
         : `inline-size: ${typeof frameWidth === "number" ? `${frameWidth}px` : frameWidth};`,
+  );
+  const frameStyle = $derived(
+    [
+      frameMinHeight === null || frameMinHeight === undefined
+        ? null
+        : `min-block-size: ${typeof frameMinHeight === "number" ? `${frameMinHeight}px` : frameMinHeight};`,
+      frameMaxHeight === null || frameMaxHeight === undefined
+        ? null
+        : `max-block-size: ${typeof frameMaxHeight === "number" ? `${frameMaxHeight}px` : frameMaxHeight};`,
+    ]
+      .filter(Boolean)
+      .join(" "),
   );
   const resolvedStateTitle = $derived(
     stateTitle ??
@@ -84,11 +102,12 @@
   data-state={state}
   data-aspect-ratio={aspectRatio}
   data-presentation={presentation}
+  data-fit={fit}
   aria-label={ariaLabel ?? title ?? undefined}
   aria-busy={state === "loading"}
   style={rootStyle}
 >
-  <div class="poodle-media-thumbnail__frame">
+  <div class="poodle-media-thumbnail__frame" style={frameStyle}>
     {#if state === "ready"}
       {#if children}
         {@render children()}
@@ -155,11 +174,19 @@
       color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent);
   }
 
-  .poodle-media-thumbnail__frame :global(img) {
+  .poodle-media-thumbnail__frame :global(img),
+  .poodle-media-thumbnail__frame :global(svg) {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+  }
+
+  .poodle-media-thumbnail__frame :global(img) {
+    object-fit: var(--poodle-media-thumbnail-object-fit, cover);
+  }
+
+  .poodle-media-thumbnail__frame :global(svg) {
+    object-fit: contain;
   }
 
   .poodle-media-thumbnail[data-aspect-ratio="square"] .poodle-media-thumbnail__frame {
@@ -176,6 +203,14 @@
 
   .poodle-media-thumbnail[data-aspect-ratio="video"] .poodle-media-thumbnail__frame {
     aspect-ratio: 16 / 9;
+  }
+
+  .poodle-media-thumbnail[data-aspect-ratio="auto"] .poodle-media-thumbnail__frame {
+    aspect-ratio: auto;
+  }
+
+  .poodle-media-thumbnail[data-fit="contain"] {
+    --poodle-media-thumbnail-object-fit: contain;
   }
 
   .poodle-media-thumbnail__placeholder,

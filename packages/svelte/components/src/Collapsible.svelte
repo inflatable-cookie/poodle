@@ -21,6 +21,7 @@
     title?: string | null;
     description?: string | null;
     disabled?: boolean;
+    highlighted?: boolean;
     ariaLabel?: string | null;
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
@@ -36,6 +37,7 @@
     title = null,
     description = null,
     disabled = false,
+    highlighted = false,
     ariaLabel = null,
     size = null,
     sizeRole = "control",
@@ -73,7 +75,14 @@
   }
 </script>
 
-<section class="poodle-collapsible" data-open={isOpen} data-disabled={disabled} data-size={resolvedSize} data-density={resolvedDensity}>
+<section
+  class="poodle-collapsible"
+  data-open={isOpen}
+  data-disabled={disabled}
+  data-highlighted={highlighted}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+>
   <button
     type="button"
     class="poodle-collapsible__trigger"
@@ -133,6 +142,11 @@
 
   .poodle-collapsible[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
+  }
+
+  .poodle-collapsible[data-highlighted="true"] {
+    border-color: color-mix(in srgb, var(--poodle-color-accent-base) 55%, transparent);
+    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent);
   }
 
   .poodle-collapsible__trigger {

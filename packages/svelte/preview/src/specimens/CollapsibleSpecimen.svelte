@@ -27,6 +27,12 @@
     </Collapsible>
   </SpecimenGroup>
 
+  <SpecimenGroup bare label="Highlighted">
+    <Collapsible title="Focused section" highlighted defaultOpen>
+      <p>Highlighted collapsibles can draw attention to a matched or focused section.</p>
+    </Collapsible>
+  </SpecimenGroup>
+
   <SpecimenGroup bare label="Custom trigger">
     <Collapsible defaultOpen ariaLabel="Toggle custom section">
       {#snippet trigger({ isOpen })}

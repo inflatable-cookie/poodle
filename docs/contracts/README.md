@@ -39,6 +39,7 @@ above it in downstream repos such as Loophole.
 - `components/alert-dialog.md`
 - `components/app-header.md`
 - `components/audio-player.md`
+- `components/avatar.md`
 - `components/block-editor.md`
 - `components/box.md`
 - `components/breadcrumbs.md`
@@ -67,6 +68,7 @@ above it in downstream repos such as Loophole.
 - `components/debug-dialog.md`
 - `components/detail-item.md`
 - `components/detail-section.md`
+- `components/detail-section-group.md`
 - `components/detail-shell.md`
 - `components/dialog.md`
 - `components/dock-region.md`
@@ -155,7 +157,9 @@ above it in downstream repos such as Loophole.
 - `components/tab-strip.md`
 - `components/table.md`
 - `components/tabs.md`
+- `components/text.md`
 - `components/text-input.md`
+- `components/token-input.md`
 - `components/time-ago.md`
 - `components/time-input.md`
 - `components/time-zone-select.md`

@@ -13,6 +13,7 @@ primitives and layout surfaces through higher-order application components.
 - `alert-dialog.md`
 - `app-header.md`
 - `audio-player.md`
+- `avatar.md`
 - `block-editor.md`
 - `box.md`
 - `breadcrumbs.md`
@@ -41,6 +42,7 @@ primitives and layout surfaces through higher-order application components.
 - `debug-dialog.md`
 - `detail-item.md`
 - `detail-section.md`
+- `detail-section-group.md`
 - `detail-shell.md`
 - `dialog.md`
 - `dock-region.md`
@@ -128,8 +130,10 @@ primitives and layout surfaces through higher-order application components.
 - `switch.md`
 - `tab-strip.md`
 - `table.md`
+- `text.md`
 - `tabs.md`
 - `text-input.md`
+- `token-input.md`
 - `time-ago.md`
 - `time-input.md`
 - `time-zone-select.md`
@@ -137,6 +141,7 @@ primitives and layout surfaces through higher-order application components.
 - `toast-stack.md`
 - `toggle-group.md`
 - `toolbar.md`
+- `token-input.md`
 - `tooltip.md`
 - `treatment-tokens.md`
 - `tri-state-switch.md`

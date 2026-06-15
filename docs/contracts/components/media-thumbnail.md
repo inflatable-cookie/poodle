@@ -11,7 +11,7 @@ Updated: 2026-05-15
   embed-oriented assets with aspect-ratio control and state posture
 - In scope: aspect-ratio framing, preview placeholder with fallback icon,
   loading/error/empty posture, badge overlay, play indicator, optional
-  title/meta caption, compact presentation mode
+  title/meta caption, compact presentation mode, contained or cropped image fit
 - Out of scope: real playback engines, zooming, annotation tools, file
   fetching, or app-specific asset actions
 
@@ -32,13 +32,13 @@ type MediaState = "ready" | "loading" | "error" | "empty";
 ### AspectRatio
 
 ```ts
-type AspectRatio = "square" | "landscape" | "portrait" | "video";
+type AspectRatio = "auto" | "square" | "landscape" | "portrait" | "video";
 ```
 
 ## 3. Anatomy
 
 ```text
-[Root]  <figure> data-kind, data-state, data-aspect-ratio, data-presentation
+[Root]  <figure> data-kind, data-state, data-aspect-ratio, data-presentation, data-fit
   ├── [Frame]
   │     ├── [Content]  (state="ready")
   │     │     ├── slot:default  OR  [Placeholder]  fallback icon
@@ -68,7 +68,7 @@ type AspectRatio = "square" | "landscape" | "portrait" | "video";
 |------|------|---------|----------|-------|
 | `kind` | `MediaKind` | `"image"` | no | media type; determines fallback icon and play indicator |
 | `state` | `MediaState` | `"ready"` | no | content posture |
-| `aspectRatio` | `AspectRatio` | `"landscape"` | no | frame aspect ratio |
+| `aspectRatio` | `AspectRatio` | `"landscape"` | no | frame aspect ratio; `"auto"` uses content/min-height rather than a fixed ratio |
 | `title` | `string \| null` | `null` | no | caption heading below frame |
 | `badge` | `string \| null` | `null` | no | overlay badge text |
 | `meta` | `string \| null` | `null` | no | caption secondary text below title |
@@ -76,13 +76,16 @@ type AspectRatio = "square" | "landscape" | "portrait" | "video";
 | `stateTitle` | `string \| null` | `null` | no | heading for non-ready states; auto-defaults per state |
 | `stateMessage` | `string \| null` | `null` | no | body text for non-ready states; hidden in compact mode |
 | `presentation` | `"default" \| "compact"` | `"default"` | no | compact hides caption and state message |
+| `fit` | `"cover" \| "contain"` | `"cover"` | no | object-fit mode applied to image content |
 | `frameWidth` | `"fill" \| "xl" \| number \| string \| null` | `"fill"` | no | explicit frame width; `"fill"` stretches to parent width, `"xl"` applies a preset wide size, number sets px width, string sets arbitrary CSS value, null removes inline width |
+| `frameMinHeight` | `number \| string \| null` | `null` | no | optional minimum frame height; numbers are treated as px |
+| `frameMaxHeight` | `number \| string \| null` | `null` | no | optional maximum frame height; numbers are treated as px |
 
 ## 5. Snippets
 
 | Snippet | Purpose | Fallback |
 |---------|---------|----------|
-| `children()` | media content inside the frame (image, video element, etc.) | placeholder icon based on `kind` |
+| `children()` | media content inside the frame (image, SVG, video element, etc.) | placeholder icon based on `kind` |
 
 ## 6. Events
 
@@ -121,8 +124,9 @@ When `stateTitle` is null, the component uses these defaults:
 |-----------|---------|--------|
 | `data-kind` | root `<figure>` | `"image"`, `"audio"`, `"video"`, `"document"`, `"embed"` |
 | `data-state` | root `<figure>` | `"ready"`, `"loading"`, `"error"`, `"empty"` |
-| `data-aspect-ratio` | root `<figure>` | `"square"`, `"landscape"`, `"portrait"`, `"video"` |
+| `data-aspect-ratio` | root `<figure>` | `"auto"`, `"square"`, `"landscape"`, `"portrait"`, `"video"` |
 | `data-presentation` | root `<figure>` | `"default"`, `"compact"` |
+| `data-fit` | root `<figure>` | `"cover"`, `"contain"` |
 
 ### Fallback Icons By Kind
 
@@ -158,6 +162,16 @@ When `stateTitle` is null, the component uses these defaults:
 | border-radius | `calc(var(--poodle-radius-surface) - 0.125rem)` |
 | background | `radial-gradient(circle at top left, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent), transparent 38%), color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 
+### Frame Media Children
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `img`, `svg` | display | `block` |
+| `img`, `svg` | width | `100%` |
+| `img`, `svg` | height | `100%` |
+| `img` | object-fit | `var(--poodle-media-thumbnail-object-fit, cover)` |
+| `svg` | object-fit | `contain` |
+
 ### Aspect Ratios
 
 | data-aspect-ratio | CSS aspect-ratio |
@@ -166,6 +180,14 @@ When `stateTitle` is null, the component uses these defaults:
 | `landscape` | `16 / 10` |
 | `portrait` | `3 / 4` |
 | `video` | `16 / 9` |
+| `auto` | `auto` |
+
+### Fit
+
+| data-fit | Effect |
+|----------|--------|
+| `cover` | images fill and crop to the frame |
+| `contain` | images remain fully visible within the frame |
 
 ### Placeholder
 

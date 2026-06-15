@@ -2,6 +2,7 @@ import type { Component } from "svelte";
 
 import AccordionSpecimen from "./AccordionSpecimen.svelte";
 import AudioPlayerSpecimen from "./AudioPlayerSpecimen.svelte";
+import AvatarSpecimen from "./AvatarSpecimen.svelte";
 import EditableListSpecimen from "./EditableListSpecimen.svelte";
 import AlertDialogSpecimen from "./AlertDialogSpecimen.svelte";
 import BlockEditorSpecimen from "./BlockEditorSpecimen.svelte";
@@ -100,6 +101,8 @@ import TabsSpecimen from "./TabsSpecimen.svelte";
 import TableSpecimen from "./TableSpecimen.svelte";
 import TimeAgoSpecimen from "./TimeAgoSpecimen.svelte";
 import TextInputSpecimen from "./TextInputSpecimen.svelte";
+import TextSpecimen from "./TextSpecimen.svelte";
+import TokenInputSpecimen from "./TokenInputSpecimen.svelte";
 import TimeInputSpecimen from "./TimeInputSpecimen.svelte";
 import TimeZoneSelectSpecimen from "./TimeZoneSelectSpecimen.svelte";
 import ToastHostSpecimen from "./ToastHostSpecimen.svelte";
@@ -128,6 +131,7 @@ import SplitViewSpecimen from "./SplitViewSpecimen.svelte";
 export const specimenMap: Record<string, Component<Record<string, never>>> = {
   accordion: AccordionSpecimen,
   "audio-player": AudioPlayerSpecimen,
+  avatar: AvatarSpecimen,
   "editable-list": EditableListSpecimen,
   "alert-dialog": AlertDialogSpecimen,
   "block-editor": BlockEditorSpecimen,
@@ -227,7 +231,9 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   table: TableSpecimen,
   tabs: TabsSpecimen,
   "time-ago": TimeAgoSpecimen,
+  text: TextSpecimen,
   "text-input": TextInputSpecimen,
+  "token-input": TokenInputSpecimen,
   "time-input": TimeInputSpecimen,
   "time-zone-select": TimeZoneSelectSpecimen,
   "toast-stack": ToastStackSpecimen,

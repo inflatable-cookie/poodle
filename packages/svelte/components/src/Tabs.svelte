@@ -44,6 +44,7 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     collapseWhenOverflow?: boolean;
+    fullWidth?: boolean;
     collapseLabel?: string | null;
     reorderable?: boolean;
     ariaLabel?: string | null;
@@ -68,6 +69,7 @@
     sizeRole = "chrome",
     density = null,
     collapseWhenOverflow = false,
+    fullWidth = false,
     collapseLabel = null,
     reorderable = false,
     ariaLabel = null,
@@ -441,6 +443,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-collapsed={collapsedByOverflow || undefined}
+  data-full-width={fullWidth || undefined}
 >
   {#if canCollapse}
     <div class="poodle-tabs__measure-shell" aria-hidden="true">
@@ -761,6 +764,11 @@
     gap: var(--poodle-tabs-list-gap);
   }
 
+  .poodle-tabs[data-full-width="true"]:not([data-orientation="vertical"]) .poodle-tabs__list {
+    display: flex;
+    width: 100%;
+  }
+
   .poodle-tabs__list--measure {
     flex-wrap: nowrap;
     width: max-content;
@@ -865,6 +873,10 @@
     min-width: 0;
   }
 
+  .poodle-tabs[data-full-width="true"]:not([data-orientation="vertical"]) .poodle-tabs__item {
+    flex: 1 1 0;
+  }
+
   .poodle-tabs[data-variant="block"] .poodle-tabs__close {
     margin-left: -0.25rem;
     margin-right: 0.25rem;
@@ -910,6 +922,11 @@
     font-weight: var(--poodle-typography-label-weight);
     line-height: 1;
     white-space: nowrap;
+  }
+
+  .poodle-tabs[data-full-width="true"]:not([data-orientation="vertical"]) .poodle-tabs__tab {
+    width: 100%;
+    justify-content: center;
   }
 
   /* Underline variant: pill-shaped highlight on selected */

@@ -50,6 +50,7 @@ Updated: 2026-03-30
 | `title` | `string \| null` | `null` | no | visible heading text |
 | `description` | `string \| null` | `null` | no | visible supporting description |
 | `disabled` | `boolean` | `false` | no | suppresses interaction |
+| `highlighted` | `boolean` | `false` | no | applies accent highlight to the container |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -76,12 +77,14 @@ Updated: 2026-03-30
 | closed | default | content hidden, indicator points down, gap collapses to 0 |
 | open | `open=true` or toggled | content visible, indicator rotated 180deg, gap active |
 | disabled | `disabled=true` | reduced opacity on root, cursor not-allowed on trigger |
+| highlighted | `highlighted=true` | accent border and halo on root |
 | focus | keyboard focus on trigger | focus ring visible |
 
 ### Component States
 
 - `data-open`: `"true"` or `"false"` on root `.collapsible`
 - `data-disabled`: `"true"` or `"false"` on root `.collapsible`
+- `data-highlighted`: `"true"` or `"false"` on root `.collapsible`
 
 ## 5. Callbacks
 

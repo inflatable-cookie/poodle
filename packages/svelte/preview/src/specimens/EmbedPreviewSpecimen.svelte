@@ -14,6 +14,8 @@
     id: "76979871",
     originalUrl: "https://vimeo.com/76979871",
   };
+
+  const trustedAudioHtml = '<iframe title="Audio embed" src="about:blank"></iframe>';
 </script>
 
 <div class="poodle-specimen">
@@ -23,6 +25,10 @@
 
   <SpecimenGroup label="Vimeo embed">
     <EmbedPreview parsed={vimeoParsed} />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Trusted raw embed">
+    <EmbedPreview trustedHtml={trustedAudioHtml} aspectRatio="auto" />
   </SpecimenGroup>
 
   <SpecimenGroup label="Loading state">

@@ -21,6 +21,11 @@
       <h3 class="poodle-demo-heading">Active deployment</h3>
       <p>Last deployed 3 minutes ago.</p>
     </div>
+
+    <div class="poodle-specimen__example">
+      <Eyebrow as="h3" size="md" spacing="bottom">Semantic section heading</Eyebrow>
+      <p>Eyebrow can render as a heading when it labels a real subsection.</p>
+    </div>
   </div>
 </Surface>
 

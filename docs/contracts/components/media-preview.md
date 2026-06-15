@@ -33,7 +33,7 @@ type MediaState = "ready" | "loading" | "error" | "empty";
 ### AspectRatio
 
 ```ts
-type AspectRatio = "square" | "landscape" | "portrait" | "video";
+type AspectRatio = "auto" | "square" | "landscape" | "portrait" | "video";
 ```
 
 ### CardVariant

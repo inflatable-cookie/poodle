@@ -2007,6 +2007,10 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "stateTitle", type: "string | null", default: "null", description: "Title shown during loading/error state." },
       { name: "stateMessage", type: "string | null", default: "null", description: "Message shown during loading/error state." },
       { name: "presentation", type: '"default" | "compact"', default: '"default"', description: "Visual presentation mode." },
+      { name: "fit", type: '"cover" | "contain"', default: '"cover"', description: "Object-fit mode for image content inside the frame." },
+      { name: "frameWidth", type: '"fill" | "xl" | number | string | null', default: '"fill"', description: "Explicit thumbnail width." },
+      { name: "frameMinHeight", type: "number | string | null", default: "null", description: "Optional minimum frame height for auto-ratio previews." },
+      { name: "frameMaxHeight", type: "number | string | null", default: "null", description: "Optional maximum frame height for auto-ratio previews." },
     ],
     slots: [
       { name: "default", description: "Media content inside the thumbnail." },

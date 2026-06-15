@@ -9,7 +9,8 @@ Updated: 2026-03-15
 - Layer: `foundation`
 - Summary: a small uppercase typographic label used to introduce or categorize
   a section, card, or content block
-- In scope: short category labels, section intros, metadata headers
+- In scope: short category labels, section intros, metadata headers, semantic
+  section headings using the same visual treatment
 - Out of scope: contained pill/badge styling, interactive labels
 
 ## 2. Anatomy
@@ -21,7 +22,7 @@ Updated: 2026-03-15
 
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
-| Root | `<span>` | yes | inline element with uppercase label styling |
+| Root | `<span>`, `<p>`, `<h2>`, `<h3>`, or `<h4>` | yes | text element with uppercase label styling |
 | Text content | snippet | yes | short label text via `children()` |
 
 ## 3. Props And Inputs
@@ -30,7 +31,10 @@ Updated: 2026-03-15
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
+| `as` | `"span" \| "p" \| "h2" \| "h3" \| "h4"` | `"span"` | no | rendered element |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
+| `size` | `"xs" \| "sm" \| "md"` | `"sm"` | no | visual size; `sm` preserves the historical default |
+| `spacing` | `"none" \| "bottom"` | `"none"` | no | optional bottom margin for heading-like use |
 
 ### Controlled And Uncontrolled
 
@@ -43,6 +47,7 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | render | small uppercase secondary-color label |
+| semantic heading | `as="h2"`, `as="h3"`, or `as="h4"` | same visual treatment on a heading element |
 
 ### Component States
 
@@ -58,7 +63,8 @@ No internal state.
 
 ### Semantics
 
-- Role: inline text (`<span>`)
+- Role: inline text by default (`<span>`); heading semantics when rendered as
+  `h2`, `h3`, or `h4`
 - Required attributes: none
 - Optional attributes: `aria-label` when visible text is abbreviated
 - Labeling rules: purely decorative typography; not focusable
@@ -81,6 +87,7 @@ No internal state.
 
 - Sizes to content width
 - Single-line by default, no wrapping expected
+- Heading elements may use `spacing="bottom"` when followed by related content
 
 ### Composition
 
@@ -102,9 +109,19 @@ No internal state.
 | `line-height` | `1.5` |
 | `text-transform` | `uppercase` |
 
+### Size and spacing variants
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `[data-size="xs"]` | `font-size` | `0.6875rem` |
+| `[data-size="md"]` | `font-size` | `0.85rem` |
+| `[data-size="md"]` | `letter-spacing` | `0.04em` |
+| `[data-spacing="bottom"]` | `margin-bottom` | `0.5rem` |
+| `[data-size="xs"][data-spacing="bottom"]` | `margin-bottom` | `0.35rem` |
+
 ## 9. Svelte Notes
 
-- Renders as a simple styled `<span>` element with `children()`
+- Renders as a simple styled element with `children()`
 - No wrapper overhead; the root element is the `<span>` itself
 - `margin: 0` resets browser default margins
 
@@ -120,7 +137,8 @@ No internal state.
 ### Tier 1: Strict Parity
 
 - [ ] non-interactive text semantics match
-- [ ] renders as inline-level element (`<span>`)
+- [ ] renders as inline-level element by default (`<span>`)
+- [ ] heading element semantics are preserved when `as` is a heading
 
 ### Tier 2: Visual Parity
 
@@ -160,6 +178,12 @@ No internal state.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Composite | text content: "Composite", followed by heading "DataTable" and description | Eyebrow categorizing a component as composite type |
+
+### Semantic Section Heading
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Semantic section heading | `as="h3"`, `size="md"`, `spacing="bottom"` | Heading element with uppercase muted label styling and bottom spacing |
 
 ## 14. Approval And Adoption Notes
 

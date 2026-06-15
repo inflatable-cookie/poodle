@@ -6,12 +6,14 @@
 
   let {
     parsed = null,
+    trustedHtml = null,
     aspectRatio = 16 / 9,
     loading = false,
     error = null,
     emptyMessage = "No embed to preview",
   }: {
     parsed?: ParsedEmbed | null;
+    trustedHtml?: string | null;
     aspectRatio?: number | "auto";
     loading?: boolean;
     error?: string | null;
@@ -21,6 +23,8 @@
   const embedUrl = $derived(parsed ? getEmbedUrl(parsed) : null);
   const isAudio = $derived(parsed?.provider === "audioboom");
   const effectiveAspectRatio = $derived(isAudio ? "auto" : aspectRatio);
+  const hasFixedAspectRatio = $derived(effectiveAspectRatio !== "auto");
+  const containerStyle = $derived(hasFixedAspectRatio ? `aspect-ratio: ${effectiveAspectRatio}` : "");
 
   function getEmbedUrl(embed: ParsedEmbed): string | null {
     switch (embed.provider) {
@@ -48,7 +52,7 @@
       </svg>
       <span>{error}</span>
     </div>
-  {:else if !parsed}
+  {:else if !parsed && !trustedHtml}
     <div class="poodle-embed-preview__empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -56,10 +60,11 @@
       </svg>
       <span>{emptyMessage}</span>
     </div>
-  {:else if embedUrl}
+  {:else if parsed && embedUrl}
     <div
       class="poodle-embed-preview__container"
-      style={effectiveAspectRatio !== "auto" ? `aspect-ratio: ${effectiveAspectRatio}` : ""}
+      data-fixed-aspect={hasFixedAspectRatio}
+      style={containerStyle}
     >
       <iframe
         src={embedUrl}
@@ -71,14 +76,23 @@
         class="poodle-embed-preview__iframe"
       ></iframe>
     </div>
-  {:else if parsed.originalEmbed}
+  {:else if parsed?.originalEmbed}
     <div
       class="poodle-embed-preview__container"
-      style={effectiveAspectRatio !== "auto" ? `aspect-ratio: ${effectiveAspectRatio}` : ""}
+      data-fixed-aspect={hasFixedAspectRatio}
+      style={containerStyle}
     >
       {@html parsed.originalEmbed}
     </div>
-  {:else}
+  {:else if trustedHtml}
+    <div
+      class="poodle-embed-preview__container"
+      data-fixed-aspect={hasFixedAspectRatio}
+      style={containerStyle}
+    >
+      {@html trustedHtml}
+    </div>
+  {:else if parsed}
     <div class="poodle-embed-preview__fallback">
       <TextLink href={parsed.originalUrl} target="_blank" rel="noopener noreferrer">
         {parsed.originalUrl ?? parsed.id}
@@ -101,16 +115,31 @@
 
   .poodle-embed-preview__iframe {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     border: 0;
   }
 
-  .poodle-embed-preview__container:not([style*="aspect-ratio"]) .poodle-embed-preview__iframe {
+  .poodle-embed-preview__container[data-fixed-aspect="true"] :global(iframe),
+  .poodle-embed-preview__container[data-fixed-aspect="true"] :global(video) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .poodle-embed-preview__container[data-fixed-aspect="false"] .poodle-embed-preview__iframe,
+  .poodle-embed-preview__container[data-fixed-aspect="false"] :global(iframe) {
     position: static;
+    width: 100%;
     height: 10rem;
+    border: 0;
+  }
+
+  .poodle-embed-preview__container :global(audio) {
+    width: 100%;
   }
 
   .poodle-embed-preview__loading,

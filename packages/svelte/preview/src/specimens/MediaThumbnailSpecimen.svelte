@@ -34,6 +34,21 @@
       <MediaThumbnail kind="image" state="loading" aspectRatio="square" />
     </div>
   </SpecimenGroup>
+
+  <SpecimenGroup label="Contained image">
+    <div class="poodle-thumb-wide">
+      <MediaThumbnail
+        kind="image"
+        aspectRatio="auto"
+        fit="contain"
+        frameMinHeight="10rem"
+        frameMaxHeight="14rem"
+        title="Question diagram"
+      >
+        <div class="poodle-contained-image">Image</div>
+      </MediaThumbnail>
+    </div>
+  </SpecimenGroup>
 </div>
 
 <style>
@@ -63,5 +78,20 @@
 
   .poodle-thumb-single {
     width: min(100%, 10rem);
+  }
+
+  .poodle-thumb-wide {
+    width: min(100%, 28rem);
+  }
+
+  .poodle-contained-image {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 10rem;
+    background: color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent);
+    color: var(--poodle-color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
   }
 </style>
