@@ -6,7 +6,7 @@ use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_specs::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
 
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::resolve_color;
 
 /// A real GPUI selection summary component backed by `SelectionSummarySpec`.
 ///

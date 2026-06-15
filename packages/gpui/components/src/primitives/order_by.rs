@@ -7,9 +7,9 @@ use poodle_specs::{
 
 use super::{Button, Icon, IconButton};
 use crate::presentation::{
-    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
+    control_height_rem, rem_to_px, resolve_semantic_size, size_padding_x_offset_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
 pub struct OrderBy {
     spec: OrderBySpec,
@@ -73,7 +73,6 @@ impl IntoElement for OrderBy {
         let border = resolve_color(theme, spec.field_border_token());
         let surface = resolve_color(theme, spec.field_fill_token());
         let elevated = resolve_color(theme, spec.field_hover_fill_token());
-        let accent = resolve_color(theme, spec.active_border_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let radius = resolve_radius(theme, spec.radius_token());
@@ -156,6 +155,7 @@ impl IntoElement for OrderBy {
 
         if spec.has_value() {
             let mut reset = div()
+                .id("order-by-reset")
                 .w(px(rem_to_px(1.75)))
                 .h(px(rem_to_px(1.75)))
                 .rounded(radius)

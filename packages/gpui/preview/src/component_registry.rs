@@ -68,6 +68,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Expandable disclosure panels with single or multiple selection.",
     },
     ComponentEntry {
+        slug: "avatar",
+        display_name: "Avatar",
+        description: "Image or initials avatar for user identity surfaces.",
+    },
+    ComponentEntry {
         slug: "alert-dialog",
         display_name: "AlertDialog",
         description: "Focused confirmation modal for destructive actions.",
@@ -228,9 +233,15 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Structured list item card with leading/trailing slots.",
     },
     ComponentEntry {
+        slug: "list-card-counter",
+        display_name: "ListCardCounter",
+        description: "Compact icon-count item used in ListCard footer composition.",
+    },
+    ComponentEntry {
         slug: "list-grid",
         display_name: "ListGrid",
-        description: "Responsive auto-fill grid for card or tile collections with optional header actions.",
+        description:
+            "Responsive auto-fill grid for card or tile collections with optional header actions.",
     },
     ComponentEntry {
         slug: "menu",
@@ -408,9 +419,19 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Tabbed interface with underline, card, pill, and strip variants.",
     },
     ComponentEntry {
+        slug: "text",
+        display_name: "Text",
+        description: "Small text primitive for body, caption, hint, and status copy.",
+    },
+    ComponentEntry {
         slug: "text-input",
         display_name: "TextInput",
         description: "Single or multi-line text input with search, slug, and multiline modes.",
+    },
+    ComponentEntry {
+        slug: "text-link",
+        display_name: "TextLink",
+        description: "Inline text link or action for prose and metadata copy.",
     },
     ComponentEntry {
         slug: "time-ago",
@@ -426,6 +447,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         slug: "time-zone-select",
         display_name: "TimeZoneSelect",
         description: "Timezone selection dropdown.",
+    },
+    ComponentEntry {
+        slug: "token-input",
+        display_name: "TokenInput",
+        description: "Tokenizing text input for badge-like multi-value entry.",
     },
     ComponentEntry {
         slug: "toggle-group",
@@ -446,6 +472,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         slug: "tri-state-switch",
         display_name: "TriStateSwitch",
         description: "Three-position switch for on/off/indeterminate.",
+    },
+    ComponentEntry {
+        slug: "ui-presentation-provider",
+        display_name: "UiPresentationProvider",
+        description: "Scoped provider for semantic density and size defaults.",
     },
     ComponentEntry {
         slug: "date-time-zone-picker",
@@ -481,6 +512,11 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         description: "Radio selection across rich card options.",
     },
     ComponentEntry {
+        slug: "card-toggle-group",
+        display_name: "CardToggleGroup",
+        description: "Toggleable selection across rich card options.",
+    },
+    ComponentEntry {
         slug: "confirm-action",
         display_name: "ConfirmAction",
         description: "Trigger with confirmation prompt before executing.",
@@ -489,6 +525,11 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         slug: "data-table",
         display_name: "DataTable",
         description: "Feature-rich table with sorting, selection, and pagination.",
+    },
+    ComponentEntry {
+        slug: "debug-dialog",
+        display_name: "DebugDialog",
+        description: "Developer-facing JSON debug dialog hidden when no value is supplied.",
     },
     ComponentEntry {
         slug: "embed-input",
@@ -506,6 +547,11 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         description: "Placeholder for empty data views with messaging.",
     },
     ComponentEntry {
+        slug: "error-boundary",
+        display_name: "ErrorBoundary",
+        description: "Svelte-style error boundary with retryable empty-state fallback.",
+    },
+    ComponentEntry {
         slug: "filter-toolbar",
         display_name: "FilterToolbar",
         description: "Toolbar with filter controls for data views.",
@@ -519,6 +565,11 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         slug: "form-layout",
         display_name: "FormLayout",
         description: "Responsive form grid with error messaging.",
+    },
+    ComponentEntry {
+        slug: "inline-list-section",
+        display_name: "InlineListSection",
+        description: "Compact related-list section for detail and metadata pages.",
     },
     ComponentEntry {
         slug: "list-container",
@@ -629,6 +680,11 @@ pub static SHELLS: &[ComponentEntry] = &[
         description: "Titled section for grouping detail content.",
     },
     ComponentEntry {
+        slug: "detail-section-group",
+        display_name: "DetailSectionGroup",
+        description: "Responsive layout group for multiple peer detail sections.",
+    },
+    ComponentEntry {
         slug: "detail-shell",
         display_name: "DetailShell",
         description: "Full detail page layout with header and sections.",
@@ -684,11 +740,27 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "rating"
         | "file-upload"
         | "embed-input" => ComponentTag::Input,
+        "token-input" => ComponentTag::Input,
         "box" | "grid" | "list-grid" | "stack" | "spacer" | "separator" | "surface"
         | "scroll-shell" | "region" | "split-view" | "resize-handle" => ComponentTag::Layout,
-        "eyebrow" | "pill" | "status-indicator" | "icon" | "icon-provider" | "skeleton"
-        | "spinner" | "code" | "time-ago" | "metric-tile" | "detail-item" | "meta-bar"
-        | "meta-item" | "embed-preview" => ComponentTag::Display,
+        "avatar"
+        | "eyebrow"
+        | "pill"
+        | "status-indicator"
+        | "text"
+        | "text-link"
+        | "icon"
+        | "icon-provider"
+        | "ui-presentation-provider"
+        | "skeleton"
+        | "spinner"
+        | "code"
+        | "time-ago"
+        | "metric-tile"
+        | "detail-item"
+        | "meta-bar"
+        | "meta-item"
+        | "embed-preview" => ComponentTag::Display,
         "dialog" | "alert-dialog" | "drawer" | "popover" | "hover-card" | "tooltip" | "menu"
         | "context-menu" | "menubar" | "confirm-action" | "form-dialog" | "command-palette" => {
             ComponentTag::Overlay
@@ -696,14 +768,11 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         "tabs" | "breadcrumbs" | "pagination" | "pagination-summary" | "navigation-menu"
         | "sidebar-nav" | "nav-card" => ComponentTag::Navigation,
         "table" | "data-table" | "list-card" | "list-container" | "editable-list" | "card"
-        | "card-radio-group" | "accordion" | "collapsible" | "order-by" | "selection-summary"
-        | "filter-toolbar" | "log-list" | "relation-picker" | "picker-shell" => ComponentTag::Data,
-        "audio-player"
-        | "video-player"
-        | "media-picker"
-        | "media-browse-panel"
-        | "media-preview"
-        | "media-thumbnail" => ComponentTag::Media,
+        | "list-card-counter" | "card-radio-group" | "card-toggle-group" | "accordion"
+        | "collapsible" | "order-by" | "selection-summary" | "filter-toolbar" | "log-list"
+        | "relation-picker" | "picker-shell" => ComponentTag::Data,
+        "audio-player" | "video-player" | "media-picker" | "media-browse-panel"
+        | "media-preview" | "media-thumbnail" => ComponentTag::Media,
         "callout"
         | "progress"
         | "meter"
@@ -712,9 +781,16 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "toast-stack"
         | "toast-host"
         | "bulk-action-bar"
-        | "password-requirements" => ComponentTag::Feedback,
-        "field" | "field-set" | "form-actions" | "form-layout" | "block-editor"
-        | "markdown-editor" => ComponentTag::Form,
+        | "password-requirements"
+        | "error-boundary" => ComponentTag::Feedback,
+        "field"
+        | "field-set"
+        | "form-actions"
+        | "form-layout"
+        | "block-editor"
+        | "markdown-editor"
+        | "inline-list-section"
+        | "debug-dialog" => ComponentTag::Form,
         "app-header"
         | "page-header"
         | "status-bar"
@@ -722,6 +798,7 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "toolbar"
         | "action-discovery-panel"
         | "detail-section"
+        | "detail-section-group"
         | "detail-shell" => ComponentTag::Workstation,
         _ => ComponentTag::Workstation,
     }

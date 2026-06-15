@@ -1,5 +1,6 @@
 mod accordion;
 mod alert_dialog;
+mod avatar;
 mod badge;
 mod banner;
 mod r#box;
@@ -9,6 +10,7 @@ mod button;
 mod calendar;
 mod call_out;
 mod card;
+mod card_toggle_group;
 mod checkbox;
 mod code;
 mod code_input;
@@ -37,6 +39,7 @@ mod grid;
 mod hover_card;
 mod icon;
 mod icon_button;
+mod icon_provider;
 mod list_card;
 mod list_card_counter;
 mod list_grid;
@@ -75,15 +78,19 @@ mod switch;
 mod tab_strip;
 mod table;
 mod tabs;
+mod text;
 mod text_input;
+mod text_link;
 mod time_ago;
 mod time_field;
 mod time_zone_select;
 mod toggle_group;
+mod token_input;
 mod toolbar;
 mod tooltip;
 mod tri_state_switch;
 mod types;
+mod ui_presentation_provider;
 
 // Composite modules
 mod action_discovery_panel;
@@ -95,15 +102,19 @@ mod command_palette;
 mod composite_types;
 mod confirm_action;
 mod data_table;
+mod debug_dialog;
 mod detail_section;
+mod detail_section_group;
 mod detail_shell;
 mod dock_region;
 mod editable_list;
 mod embed_input;
 mod embed_preview;
 mod empty_state;
+mod error_boundary;
 mod filter_toolbar;
 mod form_shell;
+mod inline_list_section;
 mod inline_remediation;
 mod list_container;
 mod log_list;
@@ -131,6 +142,7 @@ mod video_player;
 
 pub use accordion::AccordionSpec;
 pub use alert_dialog::{AlertDialogSpec, AlertDialogTone};
+pub use avatar::{AvatarShape, AvatarSize, AvatarSpec, AvatarTone};
 pub use badge::BadgeSpec;
 pub use banner::BannerSpec;
 pub use breadcrumbs::{BreadcrumbItem, BreadcrumbsSpec};
@@ -139,6 +151,7 @@ pub use button::ButtonSpec;
 pub use calendar::{CalendarMode, CalendarSpec};
 pub use call_out::CallOutSpec;
 pub use card::{CardLayout, CardSpec, CardVariant};
+pub use card_toggle_group::{CardToggleGroupSpec, CardToggleOption};
 pub use checkbox::CheckboxSpec;
 pub use code::CodeSpec;
 pub use code_input::CodeInputSpec;
@@ -166,6 +179,7 @@ pub use grid::GridSpec;
 pub use hover_card::HoverCardSpec;
 pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
+pub use icon_provider::IconProviderSpec;
 pub use list_card::{LeadingFill, LeadingShape, ListCardSpec};
 pub use list_card_counter::ListCardCounterSpec;
 pub use list_grid::{ListGridSpec, ListGridVariant};
@@ -177,7 +191,7 @@ pub use meter::MeterSpec;
 pub use nav_card::NavCardSpec;
 pub use navigation_menu::NavigationMenuSpec;
 pub use number_input::NumberInputSpec;
-pub use order_by::{ActiveSort, OrderBySpec, SortDirection, SortField};
+pub use order_by::{ActiveSort, OrderByField, OrderBySpec, SortDirection, SortField};
 pub use pagination::{PageItem, PaginationSpec, PaginationVariant};
 pub use password_requirements::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 pub use pill::{PillAppearance, PillFont, PillSize, PillSpec, PillTone};
@@ -211,12 +225,15 @@ pub use switch::{SwitchSpec, SwitchTone};
 pub use tab_strip::TabStripSpec;
 pub use table::{ColumnAlign, TableColumn, TableRow, TableSpec};
 pub use tabs::TabsSpec;
+pub use text::{TextElement, TextLeading, TextSize, TextSpec, TextTone, TextWeight};
 /// Deprecated: use `TextInputSpec` with `rows > 1` instead.
 pub type TextAreaSpec = TextInputSpec;
 pub use text_input::TextInputSpec;
+pub use text_link::{TextLinkSpec, TextLinkTone};
 pub use time_ago::TimeAgoSpec;
 pub use time_field::TimeFieldSpec;
 pub use time_zone_select::TimeZoneSelectSpec;
+pub use token_input::TokenInputSpec;
 pub use toolbar::ToolbarSpec;
 /// Deprecated: Toggle has been superseded by Button with `pressed` prop.
 pub type ToggleSpec = ButtonSpec;
@@ -224,16 +241,18 @@ pub use date_time_zone_picker::DateTimeZonePickerSpec;
 pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
+pub use ui_presentation_provider::UiPresentationProviderSpec;
 /// Deprecated: Use `DateTimeZonePickerSpec` instead.
 pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{
     AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlDensity, ControlSize, DateRangeValue,
     DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
-    FormActionAlign, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
-    Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus, RuleTone,
-    InlineTypographyMode, SemanticControlSizeRole, SeparatorOrientation, StatusTone, SurfaceBorder, SurfaceRole,
-    SurfaceTone, TabActivationMode, TabDefinition, TabStripItem, TabVariant, ValidationState,
+    FormActionAlign, InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry,
+    NavigationMenuEntry, Orientation, Overflow, OverlayPlacement, PaddingScale,
+    PopoverInitialFocus, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
+    SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
+    TabVariant, ValidationState,
 };
 
 // Composite exports
@@ -253,15 +272,19 @@ pub use composite_types::{
 };
 pub use confirm_action::ConfirmActionSpec;
 pub use data_table::DataTableSpec;
+pub use debug_dialog::DebugDialogSpec;
 pub use detail_section::DetailSectionSpec;
+pub use detail_section_group::{DetailSectionGroupLayout, DetailSectionGroupSpec};
 pub use detail_shell::{DetailShellSpec, DetailState};
 pub use dock_region::{DockRegionSpec, DockTabsPlacement};
 pub use editable_list::EditableListSpec;
 pub use embed_input::EmbedInputSpec;
 pub use embed_preview::EmbedPreviewSpec;
 pub use empty_state::EmptyStateSpec;
+pub use error_boundary::ErrorBoundarySpec;
 pub use filter_toolbar::FilterToolbarSpec;
 pub use form_shell::FormShellSpec;
+pub use inline_list_section::InlineListSectionSpec;
 pub use inline_remediation::InlineRemediationSpec;
 pub use list_container::{ListContainerSpec, ListContainerState};
 pub use log_list::LogListSpec;

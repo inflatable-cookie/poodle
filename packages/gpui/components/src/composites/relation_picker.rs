@@ -368,6 +368,7 @@ fn drill_row(
         .unwrap_or_default();
 
     div()
+        .id(SharedString::from(format!("poodle-drill-row-{}", item.id)))
         .w_full()
         .flex()
         .items_center()
@@ -459,6 +460,7 @@ fn candidate_row(
     let row_border = if is_selected { accent } else { border };
 
     let mut row = div()
+        .id(SharedString::from(format!("poodle-picker-row-{}", item.id)))
         .w_full()
         .flex()
         .items_center()

@@ -134,7 +134,7 @@ impl IntoElement for BlockEditor {
                             div()
                                 .text_size(body_size)
                                 .text_color(text_primary)
-                                .child(block.content.clone()),
+                                .child(block.content.clone().unwrap_or_default()),
                         )
                         .into_any_element()
                 })

@@ -87,7 +87,6 @@ impl IntoElement for MarkdownEditor {
         let toolbar_fill = resolve_color(&self.theme, self.spec.toolbar_fill_token());
         let radius = resolve_radius(&self.theme, "radius.surface");
         let radius_control = resolve_radius(&self.theme, "radius.control");
-        let label_size = resolve_px(&self.theme, "typography.label.size");
         let gap_sm = resolve_px(&self.theme, "space.inline.sm");
         let text_color = resolve_color(&self.theme, "color.text.primary");
         let muted = resolve_color(&self.theme, "color.text.secondary");
@@ -166,10 +165,10 @@ impl IntoElement for MarkdownEditor {
                     } else {
                         poodle_specs::ButtonVariant::Ghost
                     })
-                    .with_size(spec.size)
-                    .with_size_role(spec.size_role)
-                    .with_density(spec.density),
-                theme,
+                    .with_size(self.spec.size)
+                    .with_size_role(self.spec.size_role)
+                    .with_density(self.spec.density),
+                &self.theme,
             )
             .with_id(format!("md-mode-{mode_val}"));
 

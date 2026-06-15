@@ -16,8 +16,10 @@ mod stack;
 mod surface;
 
 // ── Foundation ────────────────────────────────────────────
+mod avatar;
 mod icon;
 mod icon_provider;
+mod ui_presentation_provider;
 
 // ── Action ────────────────────────────────────────────────
 mod button;
@@ -28,7 +30,10 @@ mod form_actions;
 mod icon_button;
 mod number_input;
 mod split_button;
+mod text;
 mod text_input;
+mod text_link;
+mod token_input;
 mod toolbar;
 
 // ── Selection ─────────────────────────────────────────────
@@ -88,9 +93,12 @@ mod breadcrumbs_specimen;
 mod bulk_action_bar_specimen;
 mod card_radio_group_specimen;
 mod card_specimen;
+mod card_toggle_group_specimen;
 mod confirm_action_specimen;
 mod data_table;
+mod debug_dialog_specimen;
 mod detail_item_specimen;
+mod detail_section_group_specimen;
 mod detail_section_specimen;
 mod detail_shell;
 mod duration_input_specimen;
@@ -98,13 +106,16 @@ mod editable_list_specimen;
 mod embed_input_specimen;
 mod embed_preview_specimen;
 mod empty_state_specimen;
+mod error_boundary_specimen;
 mod field_set_specimen;
 mod filter_toolbar_specimen;
 mod form_dialog_specimen;
 mod form_layout;
+mod inline_list_section_specimen;
 mod list_card;
-mod list_grid;
+mod list_card_counter;
 mod list_container_specimen;
+mod list_grid;
 mod log_list_specimen;
 mod markdown_editor_specimen;
 mod media_browse_panel_specimen;
@@ -247,14 +258,23 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
 
         // ── Foundation ──────────────────────────────────────────
+        "avatar" => specimen_card("Avatar", theme, avatar::render(theme)),
         "icon" => specimen_card("Icon", theme, icon::render(state, cx)),
         "icon-provider" => specimen_card("IconProvider", theme, icon_provider::render(theme)),
+        "ui-presentation-provider" => specimen_card(
+            "UiPresentationProvider",
+            theme,
+            ui_presentation_provider::render(theme),
+        ),
 
         // ── Action ──────────────────────────────────────────────
         "button" => specimen_card("Button", theme, button::render(state, cx)),
         "icon-button" => specimen_card("IconButton", theme, icon_button::render(state, cx)),
         "split-button" => specimen_card("SplitButton", theme, split_button::render(state, cx)),
+        "text" => specimen_card("Text", theme, text::render(theme)),
         "text-input" => specimen_card("TextInput", theme, text_input::render(state, cx)),
+        "text-link" => specimen_card("TextLink", theme, text_link::render(theme)),
+        "token-input" => specimen_card("TokenInput", theme, token_input::render(theme)),
         "field" => specimen_card("Field", theme, field::render(state, cx)),
         "field-set" => specimen_card("FieldSet", theme, field_set_specimen::render(theme)),
         "form-actions" => specimen_card("FormActions", theme, form_actions::render(state, cx)),
@@ -357,6 +377,9 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "table" => specimen_card("Table", theme, table::render(theme)),
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),
         "list-card" => specimen_card("ListCard", theme, list_card::render(state, cx)),
+        "list-card-counter" => {
+            specimen_card("ListCardCounter", theme, list_card_counter::render(theme))
+        }
         "list-grid" => specimen_card("ListGrid", theme, list_grid::render(state, cx)),
         "nav-card" => specimen_card("NavCard", theme, nav_card::render(theme)),
         "pagination" => specimen_card("Pagination", theme, pagination::render(state, cx)),
@@ -368,11 +391,21 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             detail_section_specimen::render(theme),
         ),
+        "detail-section-group" => specimen_card(
+            "DetailSectionGroup",
+            theme,
+            detail_section_group_specimen::render(theme),
+        ),
         "card" => specimen_card("Card", theme, card_specimen::render(theme)),
         "card-radio-group" => specimen_card(
             "CardRadioGroup",
             theme,
             card_radio_group_specimen::render(state, cx),
+        ),
+        "card-toggle-group" => specimen_card(
+            "CardToggleGroup",
+            theme,
+            card_toggle_group_specimen::render(theme),
         ),
         "picker-shell" => specimen_card("PickerShell", theme, picker_shell_specimen::render(theme)),
         "relation-picker" => specimen_card(
@@ -401,6 +434,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         ),
         "metric-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
         "empty-state" => specimen_card("EmptyState", theme, empty_state_specimen::render(theme)),
+        "error-boundary" => specimen_card(
+            "ErrorBoundary",
+            theme,
+            error_boundary_specimen::render(theme),
+        ),
         "toast-stack" => specimen_card("ToastStack", theme, toast_stack_specimen::render(theme)),
         "toast-host" => specimen_card("ToastHost", theme, toast_host::render(theme)),
         "confirm-action" => specimen_card(
@@ -409,6 +447,12 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             confirm_action_specimen::render(state, cx),
         ),
         "form-dialog" => specimen_card("FormDialog", theme, form_dialog_specimen::render(theme)),
+        "inline-list-section" => specimen_card(
+            "InlineListSection",
+            theme,
+            inline_list_section_specimen::render(theme),
+        ),
+        "debug-dialog" => specimen_card("DebugDialog", theme, debug_dialog_specimen::render(theme)),
         "filter-toolbar" => specimen_card(
             "FilterToolbar",
             theme,

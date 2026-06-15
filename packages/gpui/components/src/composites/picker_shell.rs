@@ -1,12 +1,13 @@
 //! PickerShell — real GPUI component backed by PickerShellSpec.
 
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{BrowseState, PickerShellSpec, PickerVariant, SpinnerSize, SpinnerSpec};
 use poodle_specs::{SpinnerTone, SpinnerVariant};
 
-use crate::primitives::Spinner;
 use crate::presentation::rem_to_px;
+use crate::primitives::Spinner;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI picker shell component backed by `PickerShellSpec`.
@@ -229,25 +230,31 @@ impl IntoElement for PickerShell {
         }
 
         if let Some(status_text) = spec.status_text.as_ref() {
-            let mut status = div()
+            let status_id = spec
+                .status_id
+                .clone()
+                .unwrap_or_else(|| "poodle-picker-shell-status".to_string());
+            let status = div()
+                .id(SharedString::from(status_id))
                 .w(px(1.0))
                 .h(px(1.0))
                 .overflow_hidden()
                 .child(
                     div()
-                        .role(AriaRole::Status)
                         .text_size(label_size)
                         .text_color(text_secondary)
                         .child(status_text.clone()),
                 );
-            if let Some(status_id) = spec.status_id.as_ref() {
-                status = status.id(SharedString::from(status_id.clone()));
-            }
             shell = shell.child(status);
         }
 
         if spec.state == BrowseState::Ready {
-            let mut body = div().w_full().min_h(px(0.0)).overflow_y_scroll().max_h(menu_max_h);
+            let mut body = div()
+                .id("poodle-picker-shell-body")
+                .w_full()
+                .min_h(px(0.0))
+                .overflow_y_scroll()
+                .max_h(menu_max_h);
             if let Some(content) = self.body_slot {
                 body = body.child(content);
             }
@@ -259,9 +266,9 @@ impl IntoElement for PickerShell {
                 .w_full()
                 .grid()
                 .gap(stack_sm)
-                .justify_items_start()
+                .justify_start()
                 .px(panel_x)
-                .py(px(panel_y * 1.5))
+                .py(panel_y * 1.5)
                 .border_1()
                 .border_color(border)
                 .rounded(surface_radius)
@@ -269,15 +276,13 @@ impl IntoElement for PickerShell {
 
             if spec.state == BrowseState::Loading {
                 state = state.child(
-                    div().child(
-                        Spinner::from_spec(
-                            SpinnerSpec::new()
-                                .with_variant(SpinnerVariant::Grid)
-                                .with_size(SpinnerSize::Md)
-                                .with_tone(SpinnerTone::Accent),
-                            theme,
-                        ),
-                    ),
+                    div().child(Spinner::from_spec(
+                        SpinnerSpec::new()
+                            .with_variant(SpinnerVariant::Grid)
+                            .with_size(SpinnerSize::Md)
+                            .with_tone(SpinnerTone::Accent),
+                        theme,
+                    )),
                 );
             }
 
