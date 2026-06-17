@@ -134,24 +134,7 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
-  const RESERVED_SLUGS = [
-    "new",
-    "edit",
-    "delete",
-    "create",
-    "update",
-    "list",
-    "admin",
-    "api",
-    "auth",
-    "login",
-    "logout",
-    "register",
-    "settings",
-    "profile",
-    "dashboard",
-    "search",
-  ] as const;
+  const generatedInputId = `poodle-text-input-${crypto.randomUUID()}`;
 
   let uncontrolledValue = $state("");
   let debounceTimer: ReturnType<typeof setTimeout> | null = $state(null);
@@ -180,6 +163,12 @@
   );
   const ariaInvalid = $derived(effectiveValidationState === "invalid" ? true : undefined);
   const ariaBusy = $derived(effectiveValidationState === "pending" ? true : undefined);
+  const validationMessageId = $derived(
+    internalValidationMessage ? `${id || name || generatedInputId}-validation-message` : null,
+  );
+  const effectiveDescribedBy = $derived(
+    [describedBy, validationMessageId].filter(Boolean).join(" ") || undefined,
+  );
   const charCount = $derived(currentValue.length);
   const charCountText = $derived(maxLength ? `${charCount}/${maxLength}` : `${charCount}`);
 
@@ -339,10 +328,6 @@
     return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && slug.length >= 2 && slug.length <= limit;
   }
 
-  function isReservedSlug(slug: string): boolean {
-    return (RESERVED_SLUGS as readonly string[]).includes(slug);
-  }
-
   function normalizeInputValue(input: string): string {
     return isSlug ? slugify(input) : input;
   }
@@ -493,10 +478,6 @@
       return { valid: false, message: "Use lowercase letters, numbers, and hyphens only." };
     }
 
-    if (isReservedSlug(candidate)) {
-      return { valid: false, message: "This slug is reserved." };
-    }
-
     if (!validate) {
       return { valid: true, message: "" };
     }
@@ -545,7 +526,7 @@
         disabled={disabled}
         readonly={readOnly}
         aria-label={ariaLabel ?? undefined}
-        aria-describedby={describedBy ?? undefined}
+        aria-describedby={effectiveDescribedBy}
         aria-invalid={ariaInvalid}
         aria-busy={ariaBusy}
         oninput={handleInput}
@@ -581,7 +562,7 @@
         disabled={disabled}
         readonly={readOnly}
         aria-label={ariaLabel ?? undefined}
-        aria-describedby={describedBy ?? undefined}
+        aria-describedby={effectiveDescribedBy}
         aria-invalid={ariaInvalid}
         aria-busy={ariaBusy}
         oninput={handleInput}
@@ -635,6 +616,12 @@
     </span>
   {/if}
 </div>
+
+{#if internalValidationMessage && effectiveValidationState === "invalid"}
+  <p class="poodle-text-input__validation-message" id={validationMessageId ?? undefined} aria-live="polite">
+    {internalValidationMessage}
+  </p>
+{/if}
 
 <style>
   .poodle-text-input {
@@ -874,6 +861,14 @@
     font: var(--poodle-typography-code-xs);
     color: var(--poodle-color-text-muted);
     pointer-events: none;
+  }
+
+  .poodle-text-input__validation-message {
+    margin: var(--poodle-space-stack-xs, 0.25rem) 0 0;
+    color: var(--poodle-color-status-danger);
+    font-family: var(--poodle-typography-body-family);
+    font-size: 0.75rem;
+    line-height: var(--poodle-typography-body-lineHeight);
   }
 
   .poodle-text-input__char-count--over {

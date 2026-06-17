@@ -298,6 +298,7 @@
     data-layout={layout}
     data-selected={selected}
     data-highlighted={highlighted}
+    data-reorder={showReorderHandle}
     aria-label={ariaLabel ?? title}
     class:poodle-list-card--has-sash={!!sash}
     style={[
@@ -503,6 +504,7 @@
     data-layout={layout}
     data-selected={selected}
     data-highlighted={highlighted}
+    data-reorder={showReorderHandle}
     role={isInteractive ? (selectable ? "button" : "button") : undefined}
     aria-pressed={selectable ? selected : undefined}
     tabindex={isInteractive && !disabled ? 0 : -1}
@@ -813,6 +815,14 @@
 
   .poodle-list-card--interactive {
     cursor: pointer;
+  }
+
+  .poodle-list-card[data-reorder="true"]:not([data-disabled="true"]) {
+    cursor: grab;
+  }
+
+  .poodle-list-card[data-reorder="true"]:not([data-disabled="true"]):active {
+    cursor: grabbing;
   }
 
   .poodle-list-card--interactive:hover:not([data-disabled="true"]) {

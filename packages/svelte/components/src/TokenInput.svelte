@@ -26,7 +26,9 @@
     dedupe?: boolean;
     commitOnBlur?: boolean;
     maxLength?: number | null;
+    resolveToken?: ((value: string, values: string[]) => string | null | undefined) | undefined;
     onValuesChange?: ((values: string[]) => void) | undefined;
+    onTokenReject?: ((value: string) => void) | undefined;
   }
 
   let {
@@ -49,7 +51,9 @@
     dedupe = true,
     commitOnBlur = true,
     maxLength = null,
+    resolveToken = undefined,
     onValuesChange = undefined,
+    onTokenReject = undefined,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
@@ -73,8 +77,23 @@
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
-  function normalizeToken(value: string): string {
-    return value.trim();
+  function normalizeToken(value: string, currentValues: string[]): string | null {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const resolved = resolveToken ? resolveToken(trimmed, currentValues) : trimmed;
+    if (typeof resolved !== "string") {
+      onTokenReject?.(trimmed);
+      return null;
+    }
+
+    const normalized = resolved.trim();
+    if (!normalized) {
+      onTokenReject?.(trimmed);
+      return null;
+    }
+
+    return normalized;
   }
 
   function applyValues(nextValues: string[]): void {
@@ -83,24 +102,24 @@
   }
 
   function addTokens(rawTokens: string[]): void {
+    const current = values ?? [];
     const nextTokens = rawTokens
-      .map(normalizeToken)
-      .filter((token) => token.length > 0);
+      .map((token) => normalizeToken(token, current))
+      .filter((token): token is string => Boolean(token));
 
     if (nextTokens.length === 0) {
       return;
     }
 
-    const current = values ?? [];
     const merged = dedupe
-      ? [...current, ...nextTokens.filter((token) => !current.includes(token))]
+      ? Array.from(new Set([...current, ...nextTokens]))
       : [...current, ...nextTokens];
 
     applyValues(merged);
   }
 
   function commitInput(): void {
-    const trimmed = normalizeToken(inputValue);
+    const trimmed = normalizeToken(inputValue, values ?? []);
     if (!trimmed) {
       inputValue = "";
       return;
@@ -225,7 +244,7 @@
       {autocomplete}
       aria-label={ariaLabel ?? undefined}
       aria-describedby={describedBy ?? undefined}
-      {placeholder}
+      placeholder={values.length === 0 ? (placeholder ?? undefined) : undefined}
       maxlength={maxLength ?? undefined}
       oninput={(event) => handleInput((event.currentTarget as HTMLInputElement).value)}
       onkeydown={handleKeyDown}

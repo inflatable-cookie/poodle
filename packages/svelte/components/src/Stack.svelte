@@ -5,10 +5,11 @@
     alignItemsValue,
     joinStyles,
     justifyContentValue,
+    overflowValue,
     scaleToSpace,
   } from "./internal";
 
-  import type { LayoutAlign, LayoutJustify, SpaceScale } from "./types";
+  import type { LayoutAlign, LayoutJustify, OverflowMode, SpaceScale } from "./types";
 
   let {
     direction = "column",
@@ -17,6 +18,11 @@
     justify = "start",
     wrap = false,
     padding = "none",
+    width = null,
+    height = null,
+    minWidth = null,
+    minHeight = null,
+    overflow = "visible",
     asRole = null,
     ariaLabel = null,
     class: className = "",
@@ -28,6 +34,11 @@
     justify?: LayoutJustify;
     wrap?: boolean;
     padding?: SpaceScale;
+    width?: string | null;
+    height?: string | null;
+    minWidth?: string | null;
+    minHeight?: string | null;
+    overflow?: OverflowMode;
     asRole?: string | null;
     ariaLabel?: string | null;
     class?: string;
@@ -42,6 +53,11 @@
     `align-items: ${alignItemsValue(resolvedAlign)}`,
     `justify-content: ${justifyContentValue(justify)}`,
     `flex-wrap: ${wrap ? "wrap" : "nowrap"}`,
+    width ? `width: ${width}` : null,
+    height ? `height: ${height}` : null,
+    minWidth ? `min-width: ${minWidth}` : null,
+    minHeight ? `min-height: ${minHeight}` : null,
+    `overflow: ${overflowValue(overflow)}`,
   ]));
 </script>
 
@@ -51,6 +67,7 @@
 
 <style>
   .poodle-stack {
+    box-sizing: border-box;
     display: flex;
     min-width: 0;
     min-height: 0;

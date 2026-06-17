@@ -43,6 +43,7 @@
 
 <style>
   .poodle-box {
+    box-sizing: border-box;
     min-width: 0;
     min-height: 0;
   }

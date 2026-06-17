@@ -448,7 +448,7 @@
   {#if canCollapse}
     <div class="poodle-tabs__measure-shell" aria-hidden="true">
       <div bind:this={measureListElement} class="poodle-tabs__list poodle-tabs__list--measure">
-        {#each renderedItems as item (item.value)}
+        {#each renderedItems as item, index (item.value)}
           <div class="poodle-tabs__item" role="presentation" data-selected={currentValue === item.value}>
             <span class="poodle-tabs__tab">
               {#if item.icon}
@@ -475,7 +475,7 @@
               </span>
             {/if}
           </div>
-          {#if item.separator}
+          {#if item.separator && index < renderedItems.length - 1}
             <span class="poodle-tabs__separator" aria-hidden="true"></span>
           {/if}
         {/each}
@@ -604,7 +604,7 @@
           {/if}
 
         </div>
-        {#if item.separator}
+        {#if item.separator && index < renderedItems.length - 1}
           <span class="poodle-tabs__separator" aria-hidden="true"></span>
         {/if}
       {/each}

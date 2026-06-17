@@ -622,7 +622,7 @@
   }
 
   .poodle-editable-list__item--embedded-handle {
-    padding-inline: 0;
+    padding: 0;
   }
 
   .poodle-editable-list__handle {
