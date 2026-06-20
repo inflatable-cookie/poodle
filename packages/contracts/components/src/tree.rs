@@ -79,6 +79,84 @@ pub struct TreeVisibleRow {
     pub is_expanded: bool,
 }
 
+/// How a click/keypress changes the multi-selection set.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TreeSelectionMode {
+    /// Plain click / Enter: select only this value.
+    Replace,
+    /// Ctrl/Cmd+click / Space: toggle this value in the set.
+    Toggle,
+    /// Shift+click / Shift+Arrow: select the contiguous range from the anchor.
+    Range,
+}
+
+/// The next selection set + range anchor computed by [`compute_selection`].
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TreeSelectionResult {
+    pub values: Vec<String>,
+    pub anchor: Option<String>,
+}
+
+/// The contiguous selectable range between `a` and `b` over `order`, skipping
+/// non-selectable (e.g. disabled) values. Falls back to `[b]` if either is absent.
+fn selection_range(order: &[String], selectable: &[String], a: &str, b: &str) -> Vec<String> {
+    match (
+        order.iter().position(|v| v == a),
+        order.iter().position(|v| v == b),
+    ) {
+        (Some(ia), Some(ib)) => {
+            let (lo, hi) = if ia <= ib { (ia, ib) } else { (ib, ia) };
+            order[lo..=hi]
+                .iter()
+                .filter(|v| selectable.iter().any(|s| s == *v))
+                .cloned()
+                .collect()
+        }
+        _ => vec![b.to_string()],
+    }
+}
+
+/// Compute the next multi-selection set for an interaction on `value`.
+///
+/// Shared, runtime-agnostic selection logic mirroring the Svelte reference:
+/// `Replace` → `[value]`; `Toggle` → add/remove `value`; `Range` → the
+/// contiguous selectable span from `anchor` (or `value`) to `value`. `order` is
+/// the visible values in render order, `selectable` the non-disabled subset.
+pub fn compute_selection(
+    order: &[String],
+    selectable: &[String],
+    selected: &[String],
+    anchor: Option<&str>,
+    value: &str,
+    mode: TreeSelectionMode,
+) -> TreeSelectionResult {
+    match mode {
+        TreeSelectionMode::Replace => TreeSelectionResult {
+            values: vec![value.to_string()],
+            anchor: Some(value.to_string()),
+        },
+        TreeSelectionMode::Toggle => {
+            let mut values = selected.to_vec();
+            if let Some(p) = values.iter().position(|v| v == value) {
+                values.remove(p);
+            } else {
+                values.push(value.to_string());
+            }
+            TreeSelectionResult {
+                values,
+                anchor: Some(value.to_string()),
+            }
+        }
+        TreeSelectionMode::Range => {
+            let a = anchor.unwrap_or(value);
+            TreeSelectionResult {
+                values: selection_range(order, selectable, a, value),
+                anchor: Some(a.to_string()),
+            }
+        }
+    }
+}
+
 /// Where a dragged node lands relative to the drop-target node.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum DropPosition {
@@ -773,6 +851,37 @@ mod tests {
         // self + missing are no-ops.
         assert_eq!(reorder_nodes(&t, "a", "a", DropPosition::After), t);
         assert_eq!(reorder_nodes(&t, "a", "zz", DropPosition::After), t);
+    }
+
+    #[test]
+    fn compute_selection_replace_toggle_range() {
+        let order: Vec<String> = ["a", "b", "c", "d", "e"].iter().map(|s| s.to_string()).collect();
+        // "c" is disabled (not selectable).
+        let selectable: Vec<String> = ["a", "b", "d", "e"].iter().map(|s| s.to_string()).collect();
+
+        // Replace -> just the value, anchor = value.
+        let r = compute_selection(&order, &selectable, &["a".into()], Some("a"), "d", TreeSelectionMode::Replace);
+        assert_eq!(r.values, vec!["d".to_string()]);
+        assert_eq!(r.anchor.as_deref(), Some("d"));
+
+        // Toggle add then remove.
+        let r = compute_selection(&order, &selectable, &["a".into()], Some("a"), "b", TreeSelectionMode::Toggle);
+        assert_eq!(r.values, vec!["a".to_string(), "b".to_string()]);
+        let r = compute_selection(&order, &selectable, &["a".into(), "b".into()], Some("b"), "a", TreeSelectionMode::Toggle);
+        assert_eq!(r.values, vec!["b".to_string()]);
+
+        // Range from anchor "a" to "e", skipping disabled "c"; anchor preserved.
+        let r = compute_selection(&order, &selectable, &[], Some("a"), "e", TreeSelectionMode::Range);
+        assert_eq!(r.values, vec!["a".to_string(), "b".to_string(), "d".to_string(), "e".to_string()]);
+        assert_eq!(r.anchor.as_deref(), Some("a"));
+
+        // Range is order-independent (b..a same as a..b).
+        let r = compute_selection(&order, &selectable, &[], Some("e"), "b", TreeSelectionMode::Range);
+        assert_eq!(r.values, vec!["b".to_string(), "d".to_string(), "e".to_string()]);
+
+        // Range with no anchor falls back to the single clicked value.
+        let r = compute_selection(&order, &selectable, &[], None, "d", TreeSelectionMode::Range);
+        assert_eq!(r.values, vec!["d".to_string()]);
     }
 
     #[test]

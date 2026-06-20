@@ -310,7 +310,10 @@ pub use split_view::SplitViewSpec;
 pub use state_tile::StateTileSpec;
 pub use toast_host::{ToastHostPlacement, ToastHostSpec};
 pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
-pub use tree::{reorder_nodes, DropPosition, TreeNode, TreeSpec, TreeVisibleRow};
+pub use tree::{
+    compute_selection, reorder_nodes, DropPosition, TreeNode, TreeSelectionMode,
+    TreeSelectionResult, TreeSpec, TreeVisibleRow,
+};
 pub use validation_summary::ValidationSummarySpec;
 pub use video_player::VideoPlayerSpec;
 

@@ -19,8 +19,8 @@ use std::collections::HashMap;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    CheckState, CheckboxSpec, ControlDensity, ControlSize, DropPosition, SemanticControlSizeRole,
-    SpinnerSpec, TreeNode, TreeSpec,
+    compute_selection, CheckState, CheckboxSpec, ControlDensity, ControlSize, DropPosition,
+    SemanticControlSizeRole, SpinnerSpec, TreeNode, TreeSelectionMode, TreeSpec,
 };
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -114,55 +114,36 @@ struct SelectionCtx {
 }
 
 impl SelectionCtx {
-    fn range(&self, a: &str, b: &str) -> Vec<String> {
-        match (
-            self.order.iter().position(|v| v == a),
-            self.order.iter().position(|v| v == b),
-        ) {
-            (Some(ia), Some(ib)) => {
-                let (lo, hi) = if ia <= ib { (ia, ib) } else { (ib, ia) };
-                self.order[lo..=hi]
-                    .iter()
-                    .filter(|v| self.selectable.contains(v))
-                    .cloned()
-                    .collect()
-            }
-            _ => vec![b.to_string()],
+    /// Compute the next selection via the shared, unit-tested `compute_selection`.
+    fn build(&self, value: &str, mode: TreeSelectionMode) -> TreeSelectionUpdate {
+        let r = compute_selection(
+            &self.order,
+            &self.selectable,
+            &self.selected,
+            self.anchor.as_deref(),
+            value,
+            mode,
+        );
+        TreeSelectionUpdate {
+            values: r.values,
+            anchor: r.anchor,
+            focused: value.to_string(),
         }
     }
 
     /// Replace selection with a single value (plain click / Enter).
     fn replace(&self, value: &str) -> TreeSelectionUpdate {
-        TreeSelectionUpdate {
-            values: vec![value.to_string()],
-            anchor: Some(value.to_string()),
-            focused: value.to_string(),
-        }
+        self.build(value, TreeSelectionMode::Replace)
     }
 
     /// Toggle a value in the selection set (Ctrl/Cmd+click, Space).
     fn toggle(&self, value: &str) -> TreeSelectionUpdate {
-        let mut values = self.selected.clone();
-        if let Some(p) = values.iter().position(|v| v == value) {
-            values.remove(p);
-        } else {
-            values.push(value.to_string());
-        }
-        TreeSelectionUpdate {
-            values,
-            anchor: Some(value.to_string()),
-            focused: value.to_string(),
-        }
+        self.build(value, TreeSelectionMode::Toggle)
     }
 
     /// Extend the selection range from the anchor to `value` (Shift+click/arrow).
     fn extend(&self, value: &str) -> TreeSelectionUpdate {
-        let anchor = self.anchor.clone().unwrap_or_else(|| value.to_string());
-        TreeSelectionUpdate {
-            values: self.range(&anchor, value),
-            anchor: Some(anchor),
-            focused: value.to_string(),
-        }
+        self.build(value, TreeSelectionMode::Range)
     }
 
     fn emit(&self, update: TreeSelectionUpdate, window: &mut Window, cx: &mut App) {
