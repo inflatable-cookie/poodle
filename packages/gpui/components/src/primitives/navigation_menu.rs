@@ -231,20 +231,7 @@ impl IntoElement for NavigationMenu {
                             .rounded(viewport_radius)
                             .bg(viewport_bg)
                             // Contract: elevation-popover shadow
-                            .shadow(vec![
-                                gpui::BoxShadow {
-                                    color: hsla(0.0, 0.0, 0.0, 0.10),
-                                    offset: point(px(0.0), px(4.0)),
-                                    blur_radius: px(16.0),
-                                    spread_radius: px(0.0),
-                                },
-                                gpui::BoxShadow {
-                                    color: hsla(0.0, 0.0, 0.0, 0.06),
-                                    offset: point(px(0.0), px(1.0)),
-                                    blur_radius: px(4.0),
-                                    spread_radius: px(0.0),
-                                },
-                            ])
+                            .shadow(crate::theme_ext::elevation_overlay_shadow())
                             .text_size(body_size)
                             .text_color(text_secondary)
                             .child(desc.clone()),

@@ -135,20 +135,7 @@ impl IntoElement for Surface {
         //   non-elevated: inset 0 0 0 1px border-subtle at 18%
         //   elevated: elevation-surface token shadow
         if is_elevated {
-            el = el.shadow(vec![
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.08),
-                    offset: point(px(0.0), px(2.0)),
-                    blur_radius: px(8.0),
-                    spread_radius: px(0.0),
-                },
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.04),
-                    offset: point(px(0.0), px(1.0)),
-                    blur_radius: px(2.0),
-                    spread_radius: px(0.0),
-                },
-            ]);
+            el = el.shadow(crate::theme_ext::elevation_surface_shadow());
         } else {
             // Inset shadow ring: 1px border-subtle at 18%
             el = el.shadow(vec![gpui::BoxShadow {

@@ -76,6 +76,49 @@ pub fn focus_ring_shadow(focus_ring_color: Hsla) -> Vec<gpui::BoxShadow> {
     }]
 }
 
+// ── Elevation shadows ─────────────────────────────────────────────
+//
+// Token-resolved drop shadows for elevated surfaces. These come from the
+// typed semantic token table (`poodle_tokens::typed::semantic`), so the
+// offset/blur/color are never hardcoded in component code.
+
+/// Convert a typed `ShadowValue` into a single `gpui::BoxShadow`.
+fn shadow_value_to_box(s: &poodle_tokens::typed::ShadowValue) -> gpui::BoxShadow {
+    let rgba = gpui::Rgba {
+        r: s.color.0,
+        g: s.color.1,
+        b: s.color.2,
+        a: s.color.3,
+    };
+    gpui::BoxShadow {
+        color: rgba.into(),
+        offset: gpui::point(gpui::px(s.offset_x), gpui::px(s.offset_y)),
+        blur_radius: gpui::px(s.blur),
+        spread_radius: gpui::px(0.0),
+    }
+}
+
+/// Token-resolved `elevation.surface` shadow — low-elevation cards/panels.
+pub fn elevation_surface_shadow() -> Vec<gpui::BoxShadow> {
+    vec![shadow_value_to_box(
+        &poodle_tokens::typed::semantic::ELEVATION_SURFACE,
+    )]
+}
+
+/// Token-resolved `elevation.overlay` shadow — popovers, menus, dropdowns.
+pub fn elevation_overlay_shadow() -> Vec<gpui::BoxShadow> {
+    vec![shadow_value_to_box(
+        &poodle_tokens::typed::semantic::ELEVATION_OVERLAY,
+    )]
+}
+
+/// Token-resolved `elevation.dialog` shadow — modal dialogs and drawers.
+pub fn elevation_dialog_shadow() -> Vec<gpui::BoxShadow> {
+    vec![shadow_value_to_box(
+        &poodle_tokens::typed::semantic::ELEVATION_DIALOG,
+    )]
+}
+
 /// Parse a CSS hex color string (#rrggbb or #rgb) to Hsla.
 pub fn parse_hex_color(hex: &str) -> Option<Hsla> {
     let hex = hex.strip_prefix('#').unwrap_or(hex);

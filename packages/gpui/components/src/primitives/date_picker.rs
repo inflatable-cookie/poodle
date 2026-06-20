@@ -248,20 +248,7 @@ impl IntoElement for DatePicker {
                 .border_1()
                 // Svelte: color-mix(border-default 72%, transparent)
                 .border_color(Hsla { a: panel_border.a * 0.72, ..panel_border })
-                .shadow(vec![
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.10),
-                        offset: point(px(0.0), px(4.0)),
-                        blur_radius: px(16.0),
-                        spread_radius: px(0.0),
-                    },
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.06),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(4.0),
-                        spread_radius: px(0.0),
-                    },
-                ])
+                .shadow(crate::theme_ext::elevation_overlay_shadow())
                 .p(resolve_px(theme, "space.inline.md"))
                 .child(Calendar::from_spec(cal_spec, theme));
             wrapper = wrapper.child(cal_surface);

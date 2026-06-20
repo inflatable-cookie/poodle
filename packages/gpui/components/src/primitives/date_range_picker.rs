@@ -242,20 +242,7 @@ impl IntoElement for DateRangePicker {
                 .border_1()
                 // Svelte: color-mix(border-default 72%, transparent)
                 .border_color(Hsla { a: border.a * 0.72, ..border })
-                .shadow(vec![
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.10),
-                        offset: point(px(0.0), px(4.0)),
-                        blur_radius: px(16.0),
-                        spread_radius: px(0.0),
-                    },
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.06),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(4.0),
-                        spread_radius: px(0.0),
-                    },
-                ])
+                .shadow(crate::theme_ext::elevation_overlay_shadow())
                 .overflow_hidden()
                 .child(calendar);
             wrapper = wrapper.child(overlay);

@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=4 specimen=gap -->
+<!-- pass 22: overlay shadow now elevation_overlay_shadow() (token). Remaining GPUI: route the 72% surface-border alpha through color_mix. -->
 <!-- pass 17: GPUI overlay rebuilt — fake range grid + fake time fields + invented
      Today/Done bar replaced with composed Calendar(range) + two TimeFields (START/END).
      Mock literals removed. Remaining GPUI: elevation-overlay shadow token

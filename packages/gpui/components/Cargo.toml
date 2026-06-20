@@ -12,6 +12,7 @@ gpui = "0.2.2"
 poodle-specs = { path = "../../contracts/components" }
 poodle-gpui = { path = "../adapter" }
 poodle-adapter = { path = "../../contracts/adapter" }
+poodle-tokens = { path = "../../contracts/tokens" }
 
 [package.metadata.poodle]
 public-intent = true

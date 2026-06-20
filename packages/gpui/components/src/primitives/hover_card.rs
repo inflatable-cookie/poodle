@@ -155,20 +155,7 @@ impl IntoElement for HoverCard {
                 .border_1()
                 .border_color(border)
                 // Contract: elevation-popover shadow
-                .shadow(vec![
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.10),
-                        offset: point(px(0.0), px(4.0)),
-                        blur_radius: px(16.0),
-                        spread_radius: px(0.0),
-                    },
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.06),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(4.0),
-                        spread_radius: px(0.0),
-                    },
-                ])
+                .shadow(crate::theme_ext::elevation_overlay_shadow())
                 // Contract: min-width 14rem, max-width min(22rem, 90vw)
                 .min_w(menu_min_w)
                 .max_w(hover_card_max_w);

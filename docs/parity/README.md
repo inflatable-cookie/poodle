@@ -76,13 +76,21 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
   status-indicator, toast-stack, pill, and callout across both Rust targets.
   (In dark theme `accent.base` is gold `#f0b24d`, so info was rendering gold —
   now correctly blue.)
+- **~~GPUI elevation shadows hardcoded as hsla.~~ RESOLVED (GPUI).** The typed
+  `ELEVATION_{SURFACE,OVERLAY,DIALOG}` constants are structured `ShadowValue`s, so
+  `theme_ext::elevation_{surface,overlay,dialog}_shadow()` convert them to
+  `gpui::BoxShadow`. **20 hardcoded-hsla overlay/dialog shadow sites re-wired**
+  (popover, menu, hover-card, navigation-menu, select, split-button, color-picker,
+  time-zone-select, all date pickers; dialog, drawer, command-palette,
+  media-picker, page-loading, picker-shell; surface). Left hardcoded (no matching
+  token — would need new schema tokens): card-elevated, tooltip, filter-toolbar
+  sticky. Jetstream has no box-shadow (JsEl gap) — N/A.
 - **Specs lacking token methods force literals.** Recurring root cause of the
   Rust hardcoded-px/color todos: the `poodle-specs` struct exposes no token
   method for a value (spinner border/gap/opacity, skeleton shimmer stops,
-  progress track-mix/gradient/height, surface elevation shadow), so both Rust
-  targets hand-assemble or hardcode. Fix at the source — add the token method to
-  the spec, then both targets resolve from it. Higher leverage than per-file
-  literal swaps.
+  progress track-mix/gradient/height), so both Rust targets hand-assemble or
+  hardcode. Fix at the source — add the token method to the spec, then both
+  targets resolve from it. Higher leverage than per-file literal swaps.
 - **Hand-rolled mockups instead of composing primitives** (CLAUDE.md "No Mockups"):
   GPUI date-time pickers fabricate calendar-grid overlays; media-browse-panel
   fakes MediaThumbnail/Callout/Button; confirm-action/alert-dialog hand-roll the
@@ -131,8 +139,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | data-table | fixed | 6 | 6 | gap |
 | date-picker | fixed | 4 | 6 | gap |
 | date-range-picker | fixed | 3 | 3 | gap |
-| date-time-picker | fixed | 2 | 4 | gap |
-| date-time-range-picker | fixed | 2 | 4 | gap |
+| date-time-picker | fixed | 1 | 4 | gap |
+| date-time-range-picker | fixed | 1 | 4 | gap |
 | date-time-zone-picker | fixed | 9 | 6 | gap |
 | debug-dialog | ok | 3 | 1 | gap |
 | detail-item | fixed | 3 | 5 | gap |

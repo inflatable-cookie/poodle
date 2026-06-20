@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=4 specimen=gap -->
+<!-- pass 22: overlay shadow now elevation_overlay_shadow() (token). Remaining GPUI: indicator glyph (calendar icon vs ▾, matches sibling pickers). -->
 <!-- pass 17: GPUI overlay rebuilt — fake 6×7 grid + "Today/Done" bar replaced with
      composed Calendar::from_spec + TimeField; mock px literals removed; time-label
      typography (0.6875rem/600/uppercase) + body/time gaps (0.875/0.375rem) applied.

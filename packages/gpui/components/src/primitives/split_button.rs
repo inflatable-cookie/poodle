@@ -335,20 +335,7 @@ impl IntoElement for SplitButton {
                 .border_1()
                 .border_color(menu_border)
                 .rounded(menu_radius)
-                .shadow(vec![
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.10),
-                        offset: point(px(0.0), px(4.0)),
-                        blur_radius: px(16.0),
-                        spread_radius: px(0.0),
-                    },
-                    gpui::BoxShadow {
-                        color: hsla(0.0, 0.0, 0.0, 0.06),
-                        offset: point(px(0.0), px(1.0)),
-                        blur_radius: px(4.0),
-                        spread_radius: px(0.0),
-                    },
-                ])
+                .shadow(crate::theme_ext::elevation_overlay_shadow())
                 .min_w(px(rem_to_px(12.0)))
                 .py(gap_sm)
                 .mt(gap_sm)

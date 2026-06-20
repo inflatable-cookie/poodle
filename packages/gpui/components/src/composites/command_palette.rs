@@ -166,20 +166,7 @@ impl IntoElement for CommandPalette {
             .bg(results_bg)
             .border_1()
             .border_color(border)
-            .shadow(vec![
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.12),
-                    offset: point(px(0.0), px(8.0)),
-                    blur_radius: px(24.0),
-                    spread_radius: px(0.0),
-                },
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.08),
-                    offset: point(px(0.0), px(2.0)),
-                    blur_radius: px(8.0),
-                    spread_radius: px(0.0),
-                },
-            ])
+            .shadow(crate::theme_ext::elevation_dialog_shadow())
             .overflow_hidden();
 
         // Optional header: title + description stacked above the
