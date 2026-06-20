@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=4 jetstream=2 specimen=gap -->
 # Parity: Text
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -42,11 +42,9 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 Component is entirely absent — dominant gap.
 
-- [ ] Create `packages/jetstream/components/src/text.rs` with `js_text(spec, theme)`; no Text impl exists today.
-- [ ] Register `pub mod text;` + export in `packages/jetstream/components/src/lib.rs` (currently only `text_input` at line 89).
-- [ ] Resolve color from `TextSpec::color_token()` via `JetstreamThemeProvider` (all six tones: default/secondary/muted/success/danger/warning).
-- [ ] Resolve `font_size_rem()` and `line_height()` to px through the theme/rem helper — no hardcoded sizes; map all four weights (normal/medium/semibold/bold).
-- [ ] Implement `spacing="compact"` (stack-sm gap grid) and `clamp` 1/2/3 line limiting — and add `spacing` to `TextSpec` first (missing from spec).
+- [x] DONE: created `packages/jetstream/components/src/text.rs` with `js_text(spec, theme)`, registered `pub mod text;` in lib.rs.
+- [x] DONE: resolves color from `TextSpec::color_token()` (all six tones) + `font_size_rem()`/`line_height()` via `rem_to_px`, weights mapped 400/500/600/700. Probe-tested.
+- [ ] Implement `spacing="compact"` (stack-sm gap grid) and `clamp` 1/2/3 line limiting — and add `spacing` to `TextSpec` first (missing from spec). `clamp` currently degrades to overflow-hidden (same as GPUI).
 - [ ] Add `packages/jetstream/preview/src/specimens/text.rs` covering tones, sizes, leading, weight, inline, clamp; none exists.
 - accepted: no ARIA channel — matches contract §4.
 

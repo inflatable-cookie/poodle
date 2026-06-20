@@ -222,9 +222,9 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tab-strip | gap | 4 | 8 | gap |
 | table | fixed | 4 | 5 | gap |
 | tabs | fixed | 11 | 12 | gap |
-| text | ok | 4 | 6 | gap |
+| text | ok | 4 | 2 | gap |
 | text-input | fixed | 8 | 9 | gap |
-| text-link | ok | 4 | 8 | gap |
+| text-link | ok | 4 | 4 | gap |
 | time-ago | fixed | 4 | 4 | gap |
 | time-input | fixed | 4 | 5 | gap |
 | time-zone-select | fixed | 6 | 6 | gap |

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=8 specimen=gap -->
+<!-- parity consv=ok gpui=4 jetstream=4 specimen=gap -->
 # Parity: TextLink
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -39,13 +39,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 Jetstream has no TextLink at all — the dominant gap. Confirmed: no `text_link.rs` in `packages/jetstream/components/src/`, no `js_text_link`/`TextLink` symbol in `lib.rs`, no specimen, no specimen `mod` entry.
 
-- [ ] Create `packages/jetstream/components/src/text_link.rs` with `js_text_link(spec, theme)`.
-- [ ] Export `js_text_link` from `packages/jetstream/components/src/lib.rs`.
-- [ ] Render anchor-vs-button branch per §3 (`href && !disabled` → anchor semantics, else button).
-- [ ] Resolve text color from `TextLinkSpec::color_token()` for all three tones; map `inherit` to currentColor, not primary.
-- [ ] Underline with rest 55%-currentColor mix + hover/focus strengthening to full currentColor (§4).
-- [ ] Focus-visible ring from `border.width.focus` + `color.accent.focusRing` (§4).
-- [ ] Disabled state: `state.opacity.disabled` + default cursor, `preventDefault`/skip `onClick` (§3-§4).
+- [x] DONE: created `packages/jetstream/components/src/text_link.rs` with `js_text_link(spec, theme)`, exported via lib.rs.
+- [x] DONE: resolves text color from `TextLinkSpec::color_token()` for all three tones (`inherit`→text-primary, the no-currentColor approximation GPUI also uses).
+- [x] DONE: disabled dims via `state.opacity.disabled`. (Anchor-vs-button + `onClick`/preventDefault are preview-event-loop concerns; the render is the same Label.)
+- [ ] Underline + focus-visible ring — JsEl has no underline or focus-ring affordance (runtime gap, like other Jetstream primitives).
 - [ ] Add `packages/jetstream/preview/src/specimens/text_link.rs` + register in `specimens/mod.rs` and the component registry.
 
 ## Specimen parity
