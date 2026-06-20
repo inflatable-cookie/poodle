@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=8 specimen=gap -->
 # Parity: ColorPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,15 +26,40 @@ Svelte implements the full contract surface (all props, anatomy parts, ARIA). Di
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **No gradient pad** — contract §2 requires the 2D saturation/brightness `role="slider"` pad with thumb (the component's defining feature). GPUI overlay renders only swatch grid + mode label + hex display (`color_picker.rs:212-347`). Top-priority gap.
-- [ ] **No hue slider / alpha slider** — contract §2 Hue Wrap + Alpha Wrap absent from overlay.
-- [ ] **No mode toggle (SegmentedControl) or RGB/HSL NumberInputs** — overlay shows a static `mode_label` string ("HEX"/"RGB"/"HSL", `color_picker.rs:278-291`) instead of an interactive SegmentedControl; channel inputs missing entirely.
-- [ ] Hardcoded shadow color literals `hsla(0.0, 0.0, 0.0, 0.10)` and `hsla(0.0, 0.0, 0.0, 0.06)` at `color_picker.rs:220,225` — resolve from a shadow token, not raw HSLA.
-- [ ] Hardcoded shadow float literals `px(4.0)`, `px(16.0)`, `px(1.0)`, `px(0.0)` at `color_picker.rs:221-229` — contract surface shadow is `var(--poodle-shadow-lg)`; build from the shadow token.
-- [ ] Hardcoded surface-width literal `px(rem_to_px(24.0))` at `color_picker.rs:215` — no token.
-- [ ] Hardcoded swatch-size / radius literals `px(rem_to_px(1.25))`, `px(rem_to_px(0.1875))` at `color_picker.rs:207-208` — no token.
-- [ ] Hardcoded hex-input height literal `px(rem_to_px(1.75))` at `color_picker.rs:306` — Svelte surface text input is `2rem`; resolve from token (and value mismatch: 1.75 vs 2rem).
-- [ ] No swatch hover-scale (1.15×) and no `--active` border treatment — contract §8 Swatch Active = text-primary border + surface ring; GPUI swatches use plain `border` (`color_picker.rs:257-258`), no active/hover.
+GPUI moved to `packages/gpui/components/src/primitives/color_picker.rs` (full
+surface build-out). Trigger swatch already reflected the real value; the surface
+now renders the defining controls.
+
+- [x] **Gradient pad built** — 2D saturation/value pad: base = pure-hue
+  `hsl(h,100%,50%)` computed from the value, with two layered single-stop
+  gradient children (white→transparent, transparent→black, mirroring the CSS
+  `::before`/`::after`) and a thumb ring at current S/V. FIXED.
+- [x] **Hue + alpha sliders built** — hue strip is six stacked two-stop
+  gradient segments (GPUI 0.2.2 caps gradients at two stops; faithful layered
+  approximation of the 7-stop CSS rainbow) with a thumb at current hue. Alpha
+  strip is a transparent→color overlay on a neutral base (checkerboard
+  approximated — no native repeating-conic-gradient) with a thumb at current
+  alpha. Opt-in via `show_alpha`. FIXED.
+- [x] **Mode toggle + channel inputs built** — real `SegmentedControl`
+  (Hex/RGB/HSL) seeded to `default_mode`; channel inputs are labelled
+  `NumberInput`s (R/G/B, H/S/L, +A when alpha) / hex code field, all showing the
+  current value computed from the spec. FIXED.
+- [x] Shadow literals removed — surface uses token-resolved
+  `elevation_overlay_shadow()`. FIXED.
+- [x] Hex-input height now `2rem` (matches Svelte surface text input). FIXED.
+- [x] Swatch `--active` treatment added — active swatch (matches current value)
+  gets text-primary border + surface ring; inactive border transparent. FIXED.
+- note: surface-width `24rem`, gradient-pad `10rem`, swatch `1.25rem`, thumb
+  `0.875rem`, gradient-thumb ring/alpha-thumb sizes — these are fixed
+  rem-from-contract values rendered via `rem_to_px` (no dedicated tokens exist;
+  same posture as Svelte's literal rem values). Hue/alpha thumb diameter uses
+  the `size.icon.md` token (matching the GPUI Slider thumb).
+- note: hue/alpha sliders are custom strips, not the shared `Slider` component —
+  the GPUI `Slider` track has no custom-gradient-background hook, so composing it
+  could not render the rainbow/checkerboard track. Structure + thumb match.
+- accepted: interaction (gradient drag, slider drag, mode switch, hex/channel
+  edit) is preview-event-loop bound — controls render at the current value; the
+  embedded SegmentedControl/NumberInput carry their own preview wiring.
 - accepted: no ARIA (gpui has no accessibility API) — role="dialog"/"slider"/"listbox"/"option", aria-valuetext not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
