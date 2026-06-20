@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=7 specimen=gap -->
 # Parity: CardToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -40,10 +40,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 **TOP PRIORITY: no Jetstream implementation exists at all.** `packages/jetstream/components/src/card_toggle_group.rs` is absent and there is no `pub mod card_toggle_group;` in `packages/jetstream/components/src/lib.rs` (radio is at line 133, toggle is missing). No specimen either. All work below is greenfield.
 
-- [ ] Create `packages/jetstream/components/src/card_toggle_group.rs` with `js_card_toggle_group(spec, theme)`.
-- [ ] Register `pub mod card_toggle_group;` in `packages/jetstream/components/src/lib.rs` (composites block).
-- [ ] Fix the shared spec first (see GPUI todo): single-value model + `label`/`count` fields; jetstream depends on the same `poodle_specs` types.
-- [ ] Compose the `Card` primitive (interactive/selected) per contract §2, not a raw div.
+- [x] DONE: `js_card_toggle_group(spec, theme)` created + registered, composing the `Card` primitive (interactive/selected) per option with title + optional description Text. Mirrors GPUI's scope. Probe-tested.
+- [ ] **Spec/contract question (shared with GPUI, unresolved):** `CardToggleGroupSpec` is multi-select (`values: Vec<String>`) — which is correct for a *toggle* group, contradicting the "single-value" analysis claim. It also lacks `label`/`count` header fields and a `columns` field. Needs a human call: is this single- or multi-select, and does it have a label/count header? GPUI also omits these, so it's a shared-spec gap, not a Jetstream-only one. Render left model-agnostic (renders whatever `is_selected` reports).
 - [ ] Render header = `label` + optional `count` pill; resolve count border/padding/font from the per-size token table.
 - [ ] Implement `columns` as an auto-fit grid with the size-driven `min-width` (Svelte `:167-212`).
 - [ ] Resolve all dims from tokens — title font, card gap/padding, description font, count sizing per the size matrix; root gap per density.

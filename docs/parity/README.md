@@ -118,7 +118,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | callout | fixed | 7 | 9 | gap |
 | card | fixed | 7 | 7 | gap |
 | card-radio-group | fixed | 8 | 9 | gap |
-| card-toggle-group | fixed | 9 | 11 | gap |
+| card-toggle-group | fixed | 9 | 7 | gap |
 | checkbox | ok | 4 | 5 | gap |
 | code | fixed | 8 | 9 | gap |
 | code-input | fixed | 5 | 7 | gap |

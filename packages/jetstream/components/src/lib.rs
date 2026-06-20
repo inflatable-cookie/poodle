@@ -135,6 +135,7 @@ pub mod app_header;
 pub mod audio_player;
 pub mod block_editor;
 pub mod card_radio_group;
+pub mod card_toggle_group;
 pub mod command_palette;
 pub mod confirm_action;
 pub mod data_table;
