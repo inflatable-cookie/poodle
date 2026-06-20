@@ -190,7 +190,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | meter | fixed | 3 | 6 | gap |
 | metric-tile | ok | 8 | 5 | gap |
 | nav-card | ok | 9 | 10 | gap |
-| navigation-menu | fixed | 5 | 6 | gap |
+| navigation-menu | fixed | 5 | 4 | gap |
 | number-input | gap | 5 | 6 | gap |
 | order-by | fixed | 10 | 11 | gap |
 | page-header | fixed | 8 | 8 | gap |
@@ -202,7 +202,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | pill | fixed | 3 | 5 | gap |
 | popover | fixed | 5 | 7 | gap |
 | progress | fixed | 3 | 4 | gap |
-| radio-group | ok | 4 | 6 | gap |
+| radio-group | ok | 4 | 4 | gap |
 | range-slider | gap | 6 | 8 | gap |
 | rating | ok | 8 | 7 | gap |
 | region | ok | 1 | 5 | gap |

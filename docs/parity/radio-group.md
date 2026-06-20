@@ -1,4 +1,8 @@
-<!-- parity consv=ok gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=4 jetstream=4 specimen=gap -->
+<!-- pass 30: selected_color now honored — custom hex parsed via theme_ext::hex_to_rgb255
+     → indicator ring + dot use it (else accent.base); ICON_DEFAULT hardcode replaced with
+     resolve_px(size.icon.md) base. Probe-tested (custom #ff0000 ≠ accent). Remaining
+     jetstream: focus ring (preview/runtime) + name/density/described-by wiring. -->
 # Parity: RadioGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

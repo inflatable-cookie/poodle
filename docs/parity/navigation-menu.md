@@ -1,4 +1,8 @@
-<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=4 specimen=gap -->
+<!-- pass 30: viewport panel added — renders on active item with §8 tokens (padding
+     space.panel.x/y, border 0.0625rem border-subtle@74%, radius.surface, bg panel@96%);
+     content = active item description. Probe-tested. Remaining jetstream: box-shadow
+     (elevation.overlay — JsEl has no shadow channel, accepted) + richer viewport content. -->
 <!-- pass 29: Jetstream items now render contract-faithful pill triggers — pill radius +
      border, idle fill surface@88%/border-subtle@72%, active fill accent@16% + border
      accent/border-default@42% (was the wrong hover accent@12% with no border); list gap

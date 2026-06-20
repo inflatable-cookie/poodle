@@ -6,6 +6,14 @@
 //! Triggers are pill-style buttons: idle = surface 88% bg + border-subtle 72%
 //! border; active (open) = accent 16% bg + (accent 42% blended with
 //! border-default) border. All metrics resolve from tokens.
+//!
+//! When an item is active, a viewport panel (contract §2/§8) renders below the
+//! trigger row: panel-96% bg, border-subtle 74% border, radius-surface, panel
+//! x/y padding. Its content is the active item's `description` (the Rust-only
+//! viewport content shortcut GPUI uses); when the active item carries no
+//! description, only the panel chrome renders. The contract's `box-shadow`
+//! (`elevation.overlay`) is NOT applied — JsEl has no box-shadow channel (only
+//! background gradients); this is an accepted runtime limit, noted here.
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
@@ -51,7 +59,13 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
 
     let current = spec.current_value();
 
-    let mut el = ui_element::div().flex_row().items_center().gap(list_gap);
+    // List `.navigation-menu__list`: inline-flex row, wrap, gap inline-sm,
+    // align center (contract §8 List).
+    let mut list = ui_element::div()
+        .flex_row()
+        .flex_wrap()
+        .items_center()
+        .gap(list_gap);
 
     for entry in &spec.items {
         let is_active = current == Some(entry.value.as_str());
@@ -81,10 +95,60 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
             btn = btn.opacity(disabled_opacity).disabled(true);
         }
 
-        el = el.child(btn);
+        list = list.child(btn);
     }
 
-    el
+    // Root `.navigation-menu`: grid container for list + viewport, gap
+    // stack-md, min-width 0 (contract §8 Root). Modeled as a column.
+    let root_gap = resolve_px(theme, spec.viewport_gap_token());
+    let mut root = ui_element::div()
+        .flex_col()
+        .min_w_0()
+        .gap(root_gap)
+        .child(list);
+
+    // Viewport `.navigation-menu__viewport` — rendered only when an item is
+    // active (contract §2 conditional / §4 "item active"). Contract §8 tokens:
+    //   padding      = space-panel-y / space-panel-x
+    //   border       = 0.0625rem solid color-mix(border-subtle 74%, transparent)
+    //   border-radius= radius-surface (spec.viewport_radius_token())
+    //   background   = color-mix(background-panel 96%, transparent)
+    //   box-shadow   = elevation-overlay — NOT applied (no JsEl box-shadow).
+    if let Some(active_item) = spec.current_item() {
+        let panel_x = resolve_px(theme, "space.panel.x");
+        let panel_y = resolve_px(theme, "space.panel.y");
+        let viewport_radius = resolve_radius(theme, spec.viewport_radius_token());
+        let panel_bg = tint(resolve_color(theme, "color.background.panel"), 0.96);
+        let viewport_border = tint(border_subtle, 0.74);
+
+        let mut viewport = ui_element::div()
+            .flex_col()
+            .min_w_0()
+            .pt(panel_y)
+            .pb(panel_y)
+            .pl(panel_x)
+            .pr(panel_x)
+            .rounded(viewport_radius)
+            .border(border_w)
+            .border_color(viewport_border)
+            .bg(panel_bg);
+
+        // Content slot: the host-provided viewport content for the active item.
+        // The Rust spec carries this as the entry's `description` (GPUI's
+        // viewport content shortcut). When absent, only the panel chrome
+        // renders — no fabricated content.
+        if let Some(description) = active_item.description.as_deref() {
+            viewport = viewport.child(
+                ui_element::label(description)
+                    .text_color(text_primary)
+                    .text_size(font_size),
+            );
+        }
+
+        root = root.child(viewport);
+    }
+
+    root
 }
 
 #[cfg(test)]
@@ -153,8 +217,11 @@ mod tests {
         let active_border = color_mix(accent, border_default, 0.42);
         let idle_border = tint(resolve_color(&th, "color.border.subtle"), 0.72);
 
-        let active_trigger = &el.children[1];
-        let inactive_trigger = &el.children[0];
+        // el is now the root column: children[0] is the list; triggers are the
+        // list's children.
+        let list = &el.children[0];
+        let active_trigger = &list.children[1];
+        let inactive_trigger = &list.children[0];
         let active_bc = active_trigger.style.border_color.expect("active border");
         let inactive_bc = inactive_trigger.style.border_color.expect("idle border");
 
@@ -178,7 +245,7 @@ mod tests {
         let el = js_navigation_menu(&spec(), &th);
         // The first child trigger should carry the control radius + 1px border.
         let expected_radius = resolve_radius(&th, "radius.control");
-        let trigger = &el.children[0];
+        let trigger = &el.children[0].children[0];
         assert!(
             (trigger.style.corner_radii[0] - expected_radius).abs() < 0.01,
             "trigger radius should resolve from radius.control"
@@ -186,6 +253,70 @@ mod tests {
         assert!(
             (trigger.style.border_width - rem_to_px(0.0625)).abs() < 0.01,
             "trigger border width should be 0.0625rem"
+        );
+    }
+
+    #[test]
+    fn viewport_panel_renders_with_panel_bg_and_border() {
+        let th = theme();
+        // Active item carries a description → viewport content slot populated.
+        let nav = NavigationMenuSpec::new(vec![
+            NavigationMenuEntry::new("home", "Home"),
+            NavigationMenuEntry::new("components", "Components")
+                .with_description("Active section"),
+        ])
+        .with_value("components");
+
+        let el = js_navigation_menu(&nav, &th);
+        let tree = probe(&el, 400.0, 160.0);
+
+        // The viewport panel renders with the panel-96% background...
+        let panel_bg = vec4_to_probe(tint(resolve_color(&th, "color.background.panel"), 0.96));
+        assert!(
+            tree.has_background(panel_bg, 0.01),
+            "viewport panel bg missing (expected background-panel 96%): {}",
+            tree.to_json()
+        );
+
+        // ...and its description content made it through layout.
+        assert!(
+            tree.has_text("Active section"),
+            "viewport content (active item description) missing: {:?}",
+            tree.texts()
+        );
+
+        // Assert the viewport node directly on the JsEl tree: root → [list,
+        // viewport]; the viewport carries radius-surface + border-subtle 74%.
+        assert_eq!(el.children.len(), 2, "root should hold list + viewport");
+        let viewport = &el.children[1];
+        let expected_radius = resolve_radius(&th, "radius.surface");
+        assert!(
+            (viewport.style.corner_radii[0] - expected_radius).abs() < 0.01,
+            "viewport radius should resolve from radius.surface"
+        );
+        let viewport_border = tint(resolve_color(&th, "color.border.subtle"), 0.74);
+        let bc = viewport.style.border_color.expect("viewport border");
+        assert!(
+            (bc.r - viewport_border.x).abs() < 0.01
+                && (bc.g - viewport_border.y).abs() < 0.01
+                && (bc.b - viewport_border.z).abs() < 0.01,
+            "viewport border should be border-subtle 74%"
+        );
+    }
+
+    #[test]
+    fn no_viewport_when_no_active_item() {
+        let th = theme();
+        // All items disabled → current_value()/current_item() resolve to None.
+        let nav = NavigationMenuSpec::new(vec![
+            NavigationMenuEntry::new("home", "Home").with_disabled(true),
+        ]);
+        let el = js_navigation_menu(&nav, &th);
+        // Root holds only the list, no viewport.
+        assert_eq!(
+            el.children.len(),
+            1,
+            "no viewport should render when no item is active"
         );
     }
 }
