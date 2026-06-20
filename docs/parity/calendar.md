@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=3 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- pass 37: Jetstream calendar rebuilt to match GPUI — outside-month opacity 0.4 →
+     state.opacity.muted (0.72, the core bug); static month label → Month + Year edit-affordance
+     triggers (dashed underline, current values); per-size cell/nav/day-font scales (calendar
+     table); selected/range/today/in-range/disabled day treatments; weekday header; exact week
+     count. 7 probe tests (outside ≈0.72 NOT 0.4, selected accent fill); suite 135. Remaining
+     jetstream: roving-tabindex keyboard + month-change = preview-loop; weekday height no-token. -->
 # Parity: Calendar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
