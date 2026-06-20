@@ -1,25 +1,41 @@
-//! AppHeader — real GPUI component backed by AppHeaderSpec.
+//! AppHeader — real GPUI composite backed by AppHeaderSpec.
+//!
+//! Contract: `docs/contracts/components/app-header.md`
+//! Reference: `packages/svelte/components/src/AppHeader.svelte`
+//!
+//! Renders the contract §2 three-region shell:
+//!   - Identity region (title group: title + optional subtitle, or a custom
+//!     `identity` slot via `with_identity`)
+//!   - Actions region (optional global-actions slot)
+//!   - Utility region (optional trailing utility slot, right-aligned)
+//!
+//! GPUI has no CSS grid; the contract `grid minmax(0,1fr) auto auto` is
+//! emulated with flex — identity grows (`flex_1` + `min_w_0` for truncation),
+//! actions/utility hold intrinsic width (`flex_shrink_0`), utility justifies
+//! to the end. All dimensions/colors resolve from tokens or contract-exact rem
+//! ladders carried on `AppHeaderSpec`; zero hardcoded hsla.
+//!
+//! `aria_label` is stored on the spec for cross-runtime parity but GPUI's
+//! fluent element API does not yet emit ARIA / header-landmark labels.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::AppHeaderSpec;
 
 use crate::presentation::rem_to_px;
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{color_mix, resolve_color};
 
 /// A real GPUI app header bar backed by `AppHeaderSpec`.
-///
-/// Renders a horizontal header with optional title, primary actions slot,
-/// and utility items slot. Supports drag-region for window dragging.
 pub struct AppHeader {
     spec: AppHeaderSpec,
     theme: GpuiThemeProvider,
-    /// Slot for primary action elements (e.g., buttons).
+    /// Custom identity content (contract `identity()` snippet). Replaces the
+    /// default title group when present.
+    identity: Option<AnyElement>,
+    /// Global-actions slot (contract `actions()` snippet).
     primary_actions: Option<AnyElement>,
-    /// Slot for utility items (e.g., user avatar, notifications).
+    /// Trailing utility slot (contract `utility()` snippet).
     utility_items: Option<AnyElement>,
-    /// Slot for navigation/leading content.
-    leading: Option<AnyElement>,
 }
 
 impl std::ops::Deref for AppHeader {
@@ -34,9 +50,9 @@ impl AppHeader {
         Self {
             spec: AppHeaderSpec::new(),
             theme: theme.clone(),
+            identity: None,
             primary_actions: None,
             utility_items: None,
-            leading: None,
         }
     }
 
@@ -44,9 +60,9 @@ impl AppHeader {
         Self {
             spec,
             theme: theme.clone(),
+            identity: None,
             primary_actions: None,
             utility_items: None,
-            leading: None,
         }
     }
 
@@ -86,9 +102,16 @@ impl AppHeader {
         self
     }
 
-    pub fn with_leading(mut self, leading: impl IntoElement) -> Self {
-        self.leading = Some(leading.into_any_element());
+    /// Custom identity slot (contract `identity()`). Replaces the default
+    /// title group.
+    pub fn with_identity(mut self, identity: impl IntoElement) -> Self {
+        self.identity = Some(identity.into_any_element());
         self
+    }
+
+    /// Back-compat alias for the contract `identity` slot.
+    pub fn with_leading(self, leading: impl IntoElement) -> Self {
+        self.with_identity(leading)
     }
 }
 
@@ -99,78 +122,124 @@ impl IntoElement for AppHeader {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // Svelte: header px = --poodle-space-panel-x = 1rem (16px at default density)
-        let inline_padding = px(rem_to_px(1.0));
-        let inline_gap = resolve_px(theme, "space.inline.sm");
-        let body_size = resolve_px(theme, "typography.body.size");
-        let header_height = resolve_px(theme, "size.panel.header");
+        // ── Token / contract-rem resolution ──────────────────────
+        // Background: contract §9 color-mix(background-panel 94%, transparent).
+        let panel = resolve_color(theme, spec.background_token());
+        let transparent = Hsla {
+            a: 0.0,
+            ..panel
+        };
+        let bg = color_mix(panel, transparent, 0.94);
+        let border = resolve_color(theme, spec.border_token());
+        let title_color = resolve_color(theme, spec.title_color_token());
+        let subtitle_color = resolve_color(theme, spec.subtitle_color_token());
 
-        let bg = resolve_color(theme, spec.background_token());
-        let border = resolve_color(theme, "color.border.default");
-        let text_primary = resolve_color(theme, "color.text.primary");
+        // Size ladder (height + title/subtitle font) and density ladder
+        // (region gaps + padding) all carried on the spec.
+        let min_height = px(rem_to_px(spec.min_height_rem()));
+        let title_size = px(rem_to_px(spec.title_size_rem()));
+        let subtitle_size = px(rem_to_px(spec.subtitle_size_rem()));
+        let grid_gap = px(rem_to_px(spec.gap_rem()));
+        let region_gap = px(rem_to_px(spec.region_gap_rem()));
+        let pad_y = px(rem_to_px(spec.pad_y_rem()));
+        let pad_x = px(rem_to_px(spec.pad_x_rem()));
 
+        // ── Root shell ───────────────────────────────────────────
         let mut header = div()
             .flex()
+            .flex_row()
             .items_center()
-            .justify_between()
+            .gap(grid_gap)
             .w_full()
-            .h(header_height)
-            .px(inline_padding)
+            .min_h(min_height)
+            .px(pad_x)
+            .py(pad_y)
             .bg(bg)
             .border_b_1()
             .border_color(border);
 
-        // Apply native window drag affordance when the contract
-        // flags the header as a drag region. This lets the user
-        // drag the window by the header on macOS / Windows / Linux.
+        // Native window-drag affordance (contract `dragRegion` → data-drag-region).
         if spec.is_drag_region {
             header = header.window_control_area(WindowControlArea::Drag);
         }
 
-        // Left section: leading + title
-        let mut left = div().flex().items_center().gap(inline_gap).flex_shrink_0();
+        // ── Identity region (grid column 1: minmax(0, 1fr)) ──────
+        // Grows to fill, min-width 0 so the subtitle can truncate.
+        let mut identity = div()
+            .flex()
+            .flex_row()
+            .items_center()
+            .gap(region_gap)
+            .flex_1()
+            .min_w_0();
 
-        if let Some(leading) = self.leading {
-            left = left.child(leading);
+        if let Some(custom) = self.identity {
+            identity = identity.child(custom);
+        } else if spec.title.is_some() {
+            // Default title group: title + optional subtitle, baseline-aligned.
+            let mut title_group = div()
+                .flex()
+                .flex_row()
+                .items_baseline()
+                .gap(region_gap)
+                .min_w_0();
+
+            if let Some(ref title) = spec.title {
+                title_group = title_group.child(
+                    div()
+                        .text_size(title_size)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(title_color)
+                        .line_height(relative(1.2))
+                        .whitespace_nowrap()
+                        .child(title.clone()),
+                );
+            }
+
+            if let Some(ref subtitle) = spec.subtitle {
+                title_group = title_group.child(
+                    div()
+                        .text_size(subtitle_size)
+                        .text_color(subtitle_color)
+                        .line_height(relative(1.2))
+                        .whitespace_nowrap()
+                        .overflow_hidden()
+                        .min_w_0()
+                        .child(subtitle.clone()),
+                );
+            }
+
+            identity = identity.child(title_group);
         }
 
-        if let Some(ref title) = spec.title {
-            left = left.child(
+        header = header.child(identity);
+
+        // ── Actions region (grid column 2: auto) ─────────────────
+        if let Some(actions) = self.primary_actions {
+            header = header.child(
                 div()
-                    .text_size(body_size)
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(text_primary)
-                    .child(title.clone()),
+                    .flex()
+                    .flex_row()
+                    .items_center()
+                    .gap(region_gap)
+                    .flex_shrink_0()
+                    .child(actions),
             );
         }
 
-        // Subtitle — rendered next to the title in muted text-secondary
-        // tone. Contract doc calls this "baseline alignment"; the flex
-        // row's align-items center already places them on the same line.
-        if let Some(ref subtitle) = spec.subtitle {
-            let text_secondary = resolve_color(theme, "color.text.secondary");
-            left = left.child(
+        // ── Utility region (grid column 3: auto, justify-end) ────
+        if let Some(utility) = self.utility_items {
+            header = header.child(
                 div()
-                    .text_size(body_size)
-                    .text_color(text_secondary)
-                    .child(subtitle.clone()),
+                    .flex()
+                    .flex_row()
+                    .items_center()
+                    .justify_end()
+                    .gap(region_gap)
+                    .flex_shrink_0()
+                    .child(utility),
             );
         }
-
-        header = header.child(left);
-
-        // Right section: actions + utility
-        let mut right = div().flex().items_center().gap(inline_gap).flex_shrink_0();
-
-        if let Some(primary_actions) = self.primary_actions {
-            right = right.child(primary_actions);
-        }
-
-        if let Some(utility_items) = self.utility_items {
-            right = right.child(utility_items);
-        }
-
-        header = header.child(right);
 
         header.into_any_element()
     }

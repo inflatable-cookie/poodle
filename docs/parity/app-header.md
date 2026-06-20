@@ -1,4 +1,12 @@
-<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 40: app-header rebuilt on BOTH targets to the contract 3-region anatomy. GPUI: flat
+     flex-justify-between → 3-col grid (identity 1fr / actions auto / utility auto), title→title-
+     size ladder + subtitle→subtitle-size (were body), panel@94% bg + border.subtle, composed
+     actions/utility. Jetstream: was title-only → js_app_header_with_slots (identity + actions
+     [js_button] + utility [js_icon_button]), size/density ladders, 3 probe tests (title+subtitle+
+     action, not title-only). Additive AppHeaderSpec: size/size_role/density + rem ladders +
+     token helpers (existing count fields kept for workstation, non-breaking). specs 61, jet 140,
+     gpui clean. Remaining: action clicks = preview-loop; size/density rems no dedicated token. -->
 # Parity: AppHeader
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
