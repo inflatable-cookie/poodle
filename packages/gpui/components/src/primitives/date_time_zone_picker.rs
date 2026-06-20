@@ -7,7 +7,10 @@ use poodle_specs::{
     SemanticControlSizeRole,
 };
 
+use super::calendar::Calendar;
 use super::icon::Icon;
+use super::time_field::TimeField;
+use super::time_zone_select::TimeZoneSelect;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
@@ -98,24 +101,33 @@ impl IntoElement for DateTimeZonePicker {
 
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, "color.background.surface");
-        let text_primary = resolve_color(theme, "color.text.primary");
-        let text_secondary = resolve_color(theme, "color.text.secondary");
         let elevated_bg = resolve_color(theme, spec.overlay_fill_token());
         let panel_bg = resolve_color(theme, "color.background.panel");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
         let icon_muted = resolve_color(theme, "color.icon.muted");
+        let accent = resolve_color(theme, "color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
-        let label_size = resolve_px(theme, "typography.label.size");
-        let caption_size = resolve_px(theme, "typography.caption.size");
-        let gap_md = resolve_px(theme, "space.inline.md");
+        let hover_bg = color_mix(surface_bg, elevated_bg, 0.86);
 
-        let display_value = spec.value.as_deref().unwrap_or("Select date & time...");
-        let tz_display = spec.time_zone.as_deref().unwrap_or("");
-        let is_placeholder = spec.value.is_none();
-        let text_col = if is_placeholder {
-            text_secondary
-        } else {
+        let is_open = spec.is_open;
+        let is_disabled = spec.is_disabled;
+
+        // Trigger value: contract anatomy is Value + Indicator only, so the
+        // timezone is folded into the formatted value string rather than shown
+        // as a separate inline segment.
+        let has_value = spec.value.is_some() || spec.time_zone.is_some();
+        let display_value = match (spec.value.as_deref(), spec.time_zone.as_deref()) {
+            (Some(v), Some(tz)) => format!("{} {}", v, tz),
+            (Some(v), None) => v.to_string(),
+            (None, Some(tz)) => tz.to_string(),
+            (None, None) => "Select date, time, and zone".to_string(),
+        };
+        let text_col = if has_value {
             text_primary
+        } else {
+            text_secondary
         };
 
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
@@ -128,47 +140,30 @@ impl IntoElement for DateTimeZonePicker {
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
-            .border_color(border)
+            .border_color(if is_open { accent } else { border })
             .flex()
             .items_center()
+            .justify_between()
             .gap(inline_gap)
             .text_size(body_size)
+            .child(div().flex_1().text_color(text_col).child(display_value))
             .child(
-                div()
-                    .flex_1()
-                    .text_color(text_col)
-                    .child(display_value.to_string()),
+                Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
+                    .with_color(icon_muted),
             );
-
-        if !tz_display.is_empty() {
-            trigger = trigger.child(
-                div()
-                    .text_size(label_size)
-                    .text_color(text_secondary)
-                    .child(tz_display.to_string()),
-            );
-        }
-
-        trigger = trigger.child(
-            Icon::from_spec(IconSpec::new("calendar").with_size(IconSize::Sm), theme)
-                .with_color(icon_muted),
-        );
 
         trigger = trigger.focus(move |s| {
             s.border_color(focus_ring)
                 .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
         });
 
-        if spec.is_disabled {
+        if is_disabled {
             trigger = trigger
                 .opacity(disabled_opacity)
                 .cursor(CursorStyle::OperationNotAllowed);
         } else {
-            trigger = trigger.cursor_pointer();
+            trigger = trigger.cursor_pointer().hover(|s| s.bg(hover_bg));
         }
-
-        let is_open = spec.is_open;
-        let is_disabled = spec.is_disabled;
 
         if let Some(handler) = self.on_toggle {
             if !is_disabled {
@@ -191,98 +186,97 @@ impl IntoElement for DateTimeZonePicker {
 
         let mut wrapper = div().flex().flex_col().gap(inline_gap).child(trigger);
 
-        if spec.is_open {
-            let time_display = spec.value.as_deref().unwrap_or("--:--");
+        if is_open {
+            // Contract §8 surface padding: space.panel-y / space.panel-x.
+            let surface_pad_x = resolve_px(theme, "space.panel.x");
+            let surface_pad_y = resolve_px(theme, "space.panel.y");
+            // Contract §8 gaps: Body (0.875rem), Fields (0.75rem), Field (0.375rem).
+            // Absolute-rem contract values resolved via rem_to_px (same pattern the
+            // sibling pickers use); no dedicated semantic tokens exist for these.
+            let body_gap = px(rem_to_px(0.875));
+            let fields_gap = px(rem_to_px(0.75));
+            let field_gap = px(rem_to_px(0.375));
+            // Contract §8 Field Label typography.
+            let field_label_size = px(rem_to_px(0.6875));
 
-            let tz_overlay_display = spec.time_zone.as_deref().unwrap_or("Select timezone...");
-            let tz_has_value = spec.time_zone.is_some();
+            // Field Label — contract: label-family, 0.6875rem, weight 600,
+            // 0.04em tracking, uppercase.
+            let field_label = |text: &str| {
+                div()
+                    .text_size(field_label_size)
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(text_secondary)
+                    .child(text.to_string())
+            };
 
-            let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-            let mut weekday_row = div().flex().gap(inline_gap);
-            for day in &weekdays {
-                weekday_row = weekday_row.child(
-                    div()
-                        .flex_1()
-                        .text_size(caption_size)
-                        .text_color(text_secondary)
-                        .child(day.to_string()),
-                );
+            // Composed Calendar (single mode), seeded from the picker's date value.
+            let mut cal_spec = poodle_specs::CalendarSpec::new();
+            if let Some(ref date) = spec.value {
+                cal_spec = cal_spec.with_value(date.clone());
+                cal_spec = cal_spec.with_visible_month(date.clone());
             }
+            cal_spec.is_disabled = is_disabled;
+            let calendar = Calendar::from_spec(cal_spec, theme);
 
-            // Calendar section
-            let calendar_section = div()
+            // Composed TimeInput (TimeField), seeded from the picker's time value.
+            let mut time_spec = poodle_specs::TimeFieldSpec::new();
+            time_spec.value = spec.value.clone();
+            time_spec.is_disabled = is_disabled;
+            let time_field = TimeField::from_spec(time_spec, theme);
+
+            // Time field — contract Field: label "Time" above composed TimeInput.
+            let time_field_group = div()
                 .flex()
                 .flex_col()
-                .gap(gap_md)
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(text_primary)
-                        .child("Select date"),
-                )
-                .child(weekday_row)
-                .child(div().min_h(px(rem_to_px(11.25)))); // 11.25rem placeholder height
+                .gap(field_gap)
+                .child(field_label("Time"))
+                .child(time_field);
 
-            // Time section
-            let time_section = div()
+            // Composed TimeZoneSelect, seeded from the picker's timezone value.
+            let mut tz_spec = poodle_specs::TimeZoneSelectSpec::new();
+            tz_spec.value = spec.time_zone.clone();
+            tz_spec.is_disabled = is_disabled;
+            let tz_select = TimeZoneSelect::from_spec(tz_spec, theme);
+
+            // Time zone field — contract Field: label "Time zone" above composed
+            // TimeZoneSelect.
+            let tz_field_group = div()
                 .flex()
                 .flex_col()
-                .gap(inline_gap)
-                .py(gap_md)
-                .child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child("Time"),
-                )
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .text_color(text_primary)
-                        .child(time_display.to_string()),
-                );
+                .gap(field_gap)
+                .child(field_label("Time zone"))
+                .child(tz_select);
 
-            // Timezone section
-            let timezone_section = div()
+            // Fields — vertical stack of Time + Time zone fields.
+            let fields = div()
                 .flex()
                 .flex_col()
-                .gap(inline_gap)
-                .py(gap_md)
-                .child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child("Time zone"),
-                )
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .text_color(if tz_has_value {
-                            text_primary
-                        } else {
-                            text_secondary
-                        })
-                        .child(tz_overlay_display.to_string()),
-                );
+                .gap(fields_gap)
+                .child(time_field_group)
+                .child(tz_field_group);
 
+            // Body — vertical stack of Calendar + Fields.
+            let body = div()
+                .flex()
+                .flex_col()
+                .gap(body_gap)
+                .child(calendar)
+                .child(fields);
+
+            // Surface — established sibling overlay treatment (date_time_picker.rs /
+            // date_time_range_picker.rs): elevated 98% over panel, border at 72%
+            // alpha, two-layer overlay shadow.
             let overlay = div()
-                .rounded(control_radius)
+                .px(surface_pad_x)
+                .py(surface_pad_y)
+                .rounded(resolve_radius(theme, "radius.surface"))
                 // Svelte: color-mix(elevated 98%, panel)
                 .bg(color_mix(elevated_bg, panel_bg, 0.98))
                 .border_1()
                 // Svelte: color-mix(border-default 72%, transparent)
                 .border_color(Hsla { a: border.a * 0.72, ..border })
                 .shadow(crate::theme_ext::elevation_overlay_shadow())
-                .p(resolve_px(theme, "space.inline.lg"))
-                .flex()
-                .flex_col()
-                .child(calendar_section)
-                .child(div().border_b_1().border_color(border))
-                .child(time_section)
-                .child(div().border_b_1().border_color(border))
-                .child(timezone_section);
+                .child(body);
 
             wrapper = wrapper.child(overlay);
         }

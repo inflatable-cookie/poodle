@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=9 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
+<!-- pass 23: GPUI overlay rebuilt — fake weekday row + blank calendar box + plain-text
+     time/tz lines + invented dividers replaced with composed Calendar + TimeField +
+     TimeZoneSelect in the contract Body→Fields stack; elevation_overlay_shadow; trigger
+     cleanup. Build clean. Remaining GPUI: flat value/time_zone strings → structured
+     ZonedDateTimeValue remodel (NON-ADDITIVE; affects both Rust targets + specimens + the
+     missing placeholder/defaultValue/open/locale/timeZoneOptions props — deferred, needs a
+     decision) + partial-value states that wait on it. -->
 # Parity: DateTimeZonePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
