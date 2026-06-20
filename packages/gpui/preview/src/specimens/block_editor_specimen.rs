@@ -4,7 +4,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{BlockEditor, Eyebrow};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
+use poodle_specs::{BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_primary = theme.resolve_color("color.text.primary");
@@ -95,11 +95,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 EditorBlock::new("b1", "heading")
                                     .with_content("Project Roadmap"),
                                 EditorBlock::new("b2", "paragraph")
-                                    .with_content("Each block knows its type. The editor shell displays the type label above the content."),
+                                    .with_content("Each block renders by type. The per-block toolbar carries a ghost TypeSelect plus add/move/remove controls."),
                                 EditorBlock::new("b3", "quote")
                                     .with_content("\"Pure shell components let consumers own the block vocabulary.\""),
                                 EditorBlock::new("b4", "code")
                                     .with_content("const blocks: EditorBlock[] = [];"),
+                                EditorBlock::new("b5", "list")
+                                    .with_content("First item\nSecond item\nThird item"),
+                            ]),
+                        theme,
+                    )
+                )
+        )
+        // --- Single posture (multi-block controls hidden) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Single posture"), theme))
+                .child(
+                    BlockEditor::from_spec(
+                        BlockEditorSpec::new()
+                            .with_mode(BlockEditorMode::Single)
+                            .with_block_types(vec![
+                                BlockTypeDefinition::new("heading", "Heading", "heading-1"),
+                                BlockTypeDefinition::new("paragraph", "Paragraph", "text"),
+                            ])
+                            .with_blocks(vec![
+                                EditorBlock::new("s1", "paragraph")
+                                    .with_content("Single posture hides reorder/add/remove; only the TypeSelect remains, inset to align with content."),
                             ]),
                         theme,
                     )

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=8 specimen=gap -->
 # Parity: BlockEditor
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,19 +26,21 @@ Contract §8 root table is stale — Svelte moved the border/padding/radius off 
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI uses a legacy `with_child` API plus a parallel spec-blocks path; the toolbar is a fabricated hover-reveal design that diverges from the contract anatomy.
+GPUI now renders the contract anatomy: per-block toolbar with drag grip + ghost TypeSelect (left) / move-up, move-down, plus-icon + ghost AddSelect, remove (right), and a type-aware content area. The fabricated hover-reveal strip and bottom add button are gone.
 
-- [ ] Anatomy mismatch — toolbar is wrong: contract §2 toolbar = drag-grip + TypeSelect (left) / move-up, move-down, AddSelect, RemoveBtn (right), one per block. GPUI builds a hover-revealed icon strip (`grip-vertical`, `square`, separator, `chevron-up/down` | `plus`, `trash-2`) wrapping each child (`block_editor.rs:161-243`). No TypeSelect, no AddSelect — type switching and add-block are absent. Rebuild toolbar to match.
-- [ ] Bottom "Add block" button (`:248-271`) is **not in the contract** — Svelte adds via the per-block AddSelect plus icon. Remove the fabricated bottom button.
-- [ ] Type label rendered as static caption text above content (`:123-138`) instead of a ghost Select bound to `block.block_type`. No type-change control.
-- [ ] Hardcoded toolbar-icon `.w(px(24.0)).h(px(24.0))` (`:72-73`) — contract `control-size` is size-driven (`1.25…2.25rem`); resolve from token, not fixed 24px (`_effective_size` computed then discarded at `:86`).
-- [ ] Hardcoded `.gap(px(2.0))` (`:126,:175,:230`), separator `.w(px(1.0)).h(px(14.0)).mx(px(2.0))` (`:195`), `.min_h(px(120.0))` root (`:156`) — float px literals; resolve from tokens or remove (separator + min_h have no Svelte analogue).
-- [ ] Hardcoded `.opacity(0.0)` hover-reveal (`:176,:231`) and `.opacity(0.35)` disabled-move (`:201,:216`) — the hover-reveal pattern itself is non-contract; disabled tool-btn opacity in Svelte is `0.3` (contract §8 `.block-editor__tool-btn:disabled`).
-- [ ] Root has `border_1` + `rounded(radius.surface)` + `px/py(pad)` (`:146-156`) — matches the STALE contract but NOT current Svelte (root has no border/radius/padding). Once contract §8 is fixed, drop these.
-- [ ] No remove-on-single-block guard surfaced visually: contract hides RemoveBtn when 1 block; GPUI always shows `trash-2` (`:236`).
-- [ ] No drag-over / dragging / active-block visual states (contract §4) — blocks have no `role="group"`, no active background bump, no drag ring.
+- [x] FIXED Anatomy/toolbar rebuilt to contract §2: drag-grip + TypeSelect (left) / move-up, move-down, AddSelect, RemoveBtn (right), one per block (`block_editor.rs`). Real GPUI `Select` (ghost, `menuMinWidth=10rem`) composed for both TypeSelect (value = `block.block_type`) and AddSelect (value-less picker).
+- [x] FIXED Removed the fabricated bottom "Add block" button — add is now per-block via AddSelect.
+- [x] FIXED Type is a ghost Select seeded from `block_types`, not static caption text.
+- [x] FIXED Toolbar control size resolves from the contract `control-size` table (`1.25…2.25rem` by size), not fixed 24px.
+- [x] FIXED All spacing resolves from the contract density recipe (`toolbar-y/x`, `content-x/y`, `stack-gap`, `toolbar-gap`) via `rem_to_px`. Non-contract separator + root `min_h(120)` dropped.
+- [x] FIXED Hover-reveal removed; disabled tool buttons use the contract `0.3` opacity. Move buttons disabled at first/last; remove hidden when 1 block.
+- [x] FIXED Root has no border/radius/padding (matches current Svelte §8) — flex column, surface bg, `stack-gap`.
+- [x] FIXED RemoveBtn hidden when `block_count <= 1` (and gated by `can_remove`); add/reorder/type-change gated by mode + allow_* overrides; single-posture TypeSelect inset (`content-x + input-x − toolbar-x`) applied.
+- [ ] No active / drag-over / dragging block states (contract §4) — these are interaction-driven (focus/drag), preview-event-loop bound; blocks render at static elevated-42% bg.
 - accepted: no ARIA (gpui has no accessibility API) — `role="group"`, aria-labels not emitted.
-- accepted: drag-and-drop reorder mechanics may use move buttons (contract §10 GPUI note).
+- accepted: per-option icons not rendered in the type/add menus — `ChoiceOption` carries no icon field (Select-primitive gap, not block-editor-specific).
+- accepted: AddSelect uses a plus tool button ahead of the ghost picker (Select has no trigger-slot override) — closest faithful subset of the contract's trigger-slot pattern.
+- accepted: editing / type-change / add / remove / reorder are preview-event-loop bound; controls render at current spec state, no callbacks wired.
 
 ## Jetstream gap (vs Svelte + contract)
 
@@ -58,7 +60,7 @@ GPUI uses a legacy `with_child` API plus a parallel spec-blocks path; the toolba
 ## Specimen parity
 
 - Svelte covers: Consumer-driven block types (with custom `block` slot per type: heading input, code/quote textareas, divider hr), Single posture with grouped type picker. Full add/remove/reorder/type-change interactive. — `BlockEditorSpecimen.svelte`.
-- GPUI covers: Default blocks (legacy `with_child`), Custom blocks (legacy `with_child` callout), Consumer-driven block types (spec `with_blocks` + `with_block_types`). — missing: single-posture demo; no interactive add/remove/type-change (no controls render); two of three groups use the legacy child API.
+- GPUI covers: Default blocks (legacy `with_child`), Custom blocks (legacy `with_child` callout), Consumer-driven block types (spec `with_blocks` + `with_block_types`, exercising heading/paragraph/quote/code/list rendering + the TypeSelect/AddSelect toolbar), Single posture (TypeSelect-only, inset). — interactive add/remove/type-change remain preview-loop bound (controls render, no mutation); two of four groups still use the legacy child API.
 - Jetstream covers: With blocks (4 placeholders), Empty (1 placeholder), Disabled. — missing: consumer block types / real content, single posture, sizes, densities; blocks are `"Block n"` placeholders.
 
 ## Notes
