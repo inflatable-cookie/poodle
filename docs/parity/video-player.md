@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=7 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=3 specimen=gap -->
 # Parity: VideoPlayer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -39,7 +39,7 @@ GPUI renders chrome only (no playback) — accepted per contract §10. Remaining
 
 Jetstream is the stronger Rust impl: size/density driven from contract tables, fixed-white colors correct. Remaining gaps:
 
-- [ ] Progress fill width bug — `.w((progress * 100.0) as f32)` at `video_player.rs:109` sets width to a raw number (0–100), not a percent/relative; should be a relative/fractional width. Renders wrong fill length.
+- [x] Progress fill width bug — FIXED: `.w((progress * 100.0))` rendered a fixed ≤100px sliver (progress is a 0..1 fraction). Now uses the runtime `ui_element::progress(frac)` ProgressBar widget for a proportional fill.
 - [ ] Volume slider is a static bar (`video_player.rs:134-139`) with no thumb and no `0.625rem` thumb styling from contract §8; acceptable as chrome but note the thumb is absent.
 - [ ] Big-play button radius `.rounded(999.0)` (`video_player.rs:91`) and progress `.rounded(999.0)` (`:104,:108`) use raw `999.0` literal — contract uses `999rem` pill; fine numerically but should be a named pill constant, not a magic float.
 - [ ] No real playback / fullscreen / auto-hide — interaction (play/seek/mute/fullscreen, Space/Enter) must live in preview `main.rs` event loop; currently buttons are `.focusable()` with no handlers. (accepted runtime limit, but note no event wiring exists.)

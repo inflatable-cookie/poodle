@@ -67,7 +67,6 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
     let white_90 = glam::Vec4::new(1.0, 1.0, 1.0, 0.9);
     let white_80 = glam::Vec4::new(1.0, 1.0, 1.0, 0.8);
     let white_20 = glam::Vec4::new(1.0, 1.0, 1.0, 0.2);
-    let accent = crate::theme_ext::resolve_color(theme, "color.accent.base");
 
     let track_height = rem_to_px(0.25);
 
@@ -97,17 +96,15 @@ pub fn js_video_player(spec: &VideoPlayerSpec, theme: &JetstreamThemeProvider) -
     // Controls overlay
     let mut controls = ui_element::div().flex_col();
 
-    // Progress bar
+    // Progress / seek bar. Use the runtime ProgressBar widget for a proportional
+    // fill — the previous `.w(progress * 100.0)` rendered a fixed ≤100px sliver
+    // (progress is a 0..1 fraction), not a fraction of the track width.
     let progress = spec.progress();
-    let progress_bar = ui_element::div()
-        .min_h(track_height).self_stretch().rounded(999.0)
-        .bg(white_20)
-        .child(
-            ui_element::div()
-                .min_h(track_height).rounded(999.0)
-                .bg(accent)
-                .w((progress * 100.0) as f32)
-        );
+    let progress_bar = ui_element::progress(progress as f32)
+        .min_h(track_height)
+        .self_stretch()
+        .rounded(999.0)
+        .bg(white_20);
     controls = controls.child(progress_bar);
 
     // Control bar

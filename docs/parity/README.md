@@ -65,6 +65,38 @@ to an existing contract under another name, are legacy to remove, or need a
 contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 `floating_overlay.rs` (also GPUI; infra), `iconregistry`/`icon_registry` (GPUI).
 
+## Cross-cutting findings (block multiple components)
+
+- **Missing `color.status.info` token.** Svelte uses `--poodle-color-status-info`
+  with a hardcoded `#3b82f6` fallback (Callout, ToastStack), but the Rust token
+  system has no such token, so `StatusTone`/`ToastTone`/`PillTone` `Info` maps to
+  `color.accent.base` as a workaround. The "info renders as accent, not
+  status-info" todos (status-indicator, toast-stack, callout info tone) can only
+  be closed by **adding `color.status.info` to every theme** (dark, light,
+  loophole-studio) — a design decision (which blue per theme). **Needs a human
+  call.** Until then the accent-base mapping is the honest behavior.
+- **Specs lacking token methods force literals.** Recurring root cause of the
+  Rust hardcoded-px/color todos: the `poodle-specs` struct exposes no token
+  method for a value (spinner border/gap/opacity, skeleton shimmer stops,
+  progress track-mix/gradient/height, surface elevation shadow), so both Rust
+  targets hand-assemble or hardcode. Fix at the source — add the token method to
+  the spec, then both targets resolve from it. Higher leverage than per-file
+  literal swaps.
+- **Hand-rolled mockups instead of composing primitives** (CLAUDE.md "No Mockups"):
+  GPUI date-time pickers fabricate calendar-grid overlays; media-browse-panel
+  fakes MediaThumbnail/Callout/Button; confirm-action/alert-dialog hand-roll the
+  dialog instead of composing Dialog/AlertDialog. These are rebuilds, not tweaks.
+- **Missing implementations.** Jetstream: avatar, card-toggle-group, debug-dialog,
+  detail-section-group, error-boundary, text, text-link, token-input,
+  icon-provider, inline-list-section (+ scroll-shell is a stub). GPUI:
+  validation-summary, form-shell. Svelte authority absent: form-shell,
+  validation-summary, remediation-banner, inline-remediation, state-tile,
+  tab-strip (need a Svelte reference written first, or the contract stands alone).
+- **Analysis is recall-biased.** Some todos are borderline-acceptable, e.g.
+  `rem_to_px(<exact contract rem>)` is NOT a hardcoded-px violation (it mirrors a
+  contract exact-value table). Treat each todo as a candidate to confirm, not a
+  guaranteed defect.
+
 ## Status matrix
 
 <!-- BEGIN MATRIX (compiled; do not hand-edit) -->
