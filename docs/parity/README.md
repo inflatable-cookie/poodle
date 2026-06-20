@@ -213,7 +213,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | spinner | fixed | 5 | 6 | gap |
 | split-button | fixed | 4 | 7 | gap |
 | split-view | fixed | 6 | 6 | gap |
-| stack | fixed | 3 | 6 | gap |
+| stack | fixed | 3 | 3 | gap |
 | state-tile | gap | 1 | 8 | gap |
 | status-bar | fixed | 6 | 8 | gap |
 | status-indicator | fixed | 4 | 5 | gap |

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
 # Parity: Stack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -42,10 +42,8 @@ Component code is token-clean — zero hardcoded px/color literals in `stack.rs`
 
 Component code is token-clean — zero hardcoded px/color literals in `stack.rs` (gap/padding via `resolve_px`).
 
-- [ ] No `direction` support — `js_stack` hardcodes `.flex_col()` (`stack.rs:13`); ignores `spec.direction`, so `direction="row"` never renders horizontally. Svelte switches on direction (`Stack.svelte:51`).
-- [ ] No `justify` support — `spec.justify` never read; Svelte always emits `justify-content` (`Stack.svelte:53`). Add justify mapping.
-- [ ] No `wrap` support — `spec.wrap` never read; Svelte emits `flex-wrap` (`Stack.svelte:55`). Add wrap.
-- [ ] No `overflow`/`width`/`height`/`minWidth`/`minHeight` sizing — none plumbed through `js_stack` (`stack.rs:9-40`); Svelte exposes all (`Stack.svelte:37-41`).
+- [x] DONE: `direction` (flex_col/flex_row), `justify` (Start/End/Center/SpaceBetween → justify_start/end/center/between), and `wrap` (flex_wrap) now wired. Probe-tested: row lays children horizontally, column vertically.
+- [ ] No `overflow`/`width`/`height`/`minWidth`/`minHeight` sizing — these are **not on `StackSpec`** (the contract sync added them to the contract, but the Rust spec lacks the fields). Add to `StackSpec` first, then both Rust targets can resolve.
 - [ ] Direction-aware align default not applied — defaults to spec `Alignment::Stretch` for all cases (`stack.rs:19-24`); Svelte rows default to `center`.
 - [ ] No `role`/`aria_label` channel — spec carries them; `js_stack` drops both.
 - accepted: interaction n/a — Stack is a non-interactive layout primitive (no event loop wiring needed).
