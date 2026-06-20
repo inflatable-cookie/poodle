@@ -16,7 +16,7 @@
 
 `consv=gap`. Svelte has a layout bug, two default mismatches, and an undocumented prop extension.
 
-- **Svelte layout-inversion bug.** `DetailItem.svelte:43` computes `resolvedLayout = layout === "inline" ? "stacked" : layout`. With default `layout="inline"` this emits `data-layout="stacked"`; `layout="stacked"` also resolves to `"stacked"`. **Inline is unreachable** and the `[data-layout="inline"]` CSS (lines 105-119, 284-290) is dead. Contract §7 makes inline the default side-by-side grid. **Fix Svelte: `layout === "stacked" ? "stacked" : "inline"`** (or just use `layout` directly).
+- [x] **Svelte layout-inversion bug — FIXED.** `DetailItem.svelte:43` now `layout === "stacked" ? "stacked" : "inline"`. Inline (the default) is reachable again; verified in preview (9 inline / 1 stacked render with `data-layout="inline"`). Remaining `consv=gap` drivers below are contract-default syncs only.
 - `presentation` default: contract §3 says `"simple"`; Svelte defaults to `"surface"` (`DetailItem.svelte:33`). Svelte is authoritative per repo policy. **Fix contract default to `"surface"`.**
 - `emptyText` default: contract says `"--"` (hyphen pair); Svelte uses `"—"` em-dash (`DetailItem.svelte:29`). **Fix contract default to em-dash `"—"`.**
 - `span` type: contract is `"full" | "half" | null`; Svelte extends to `"full" | "half" | 1 | 2 | 3 | 4 | null` (`DetailItem.svelte:18`). **Fix contract to document numeric spans.**

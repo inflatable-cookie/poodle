@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=5 specimen=gap -->
+<!-- parity consv=gap gpui=3 jetstream=4 specimen=gap -->
 # Parity: Progress
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -35,7 +35,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Determinate fill is broken — every value renders a full bar.** Indicator child is `.self_stretch()` with no width/scale applied (`progress.rs:53-64`); `normalized_progress()` is computed (`progress.rs:51`) but the fraction `_frac` is discarded. A 25% and a 100% bar render identically. **Fix: apply percentage width/scaleX once JsEl supports it; until then the determinate specimen is a fake per CLAUDE.md "No Mockups" rule.**
+- [x] **Determinate fill is broken — every value renders a full bar.** FIXED: determinate now renders the runtime `ui_element::progress(frac)` ProgressBar widget, which fills proportionally (JsEl has no percent sizing, so the hand-built child could only ever be 100%). Verified by `determinate_renders_progressbar_widget` via the render_probe harness.
 - [ ] **Track background is wrong color AND wrong mix.** Contract/Svelte: `color-mix(surface 96%, text-primary)`. Jetstream: `tint(surface, 0.80)` (`progress.rs:38`), which only multiplies surface alpha by 0.8 (`theme_ext.rs:29-31`) — it never mixes toward `text-primary`, producing a translucent surface instead of the contrast track. Header comment also mislabels it "color-mix(surface 80%, elevated)" (`progress.rs:27,37`). **Fix: resolve `text-primary` and color-mix at 96%, mirroring GPUI `color_mix`.**
 - [ ] **Indicator is solid accent, not the contract gradient** (`progress.rs:60-63,68-73`) — same gap as GPUI; needs an indicator-gradient token.
 - [ ] **Track height ignores effective size.** `track_height = rem_to_px(0.5)` hardcodes the `md` value (`progress.rs:41`); `_effective_size` is computed then discarded (`progress.rs:33`). xs/sm (0.375rem) and lg/xl (0.75rem) all render at 8px. **Fix: resolve height from effective size like GPUI's match.**

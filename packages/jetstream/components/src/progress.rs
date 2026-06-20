@@ -40,40 +40,35 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Contract: track min-height 0.5rem = 8px
     let track_height = rem_to_px(0.5);
 
-    // Contract: min-height 0.5rem = 8px, border-radius 999px
-    let mut track = ui_element::div()
-        .min_h(track_height)
-        .self_stretch()
-        .rounded(999.0) // pill
-        .bg(track_bg);
-
-    // Contract: indicator fills from left based on progress
-    let progress = spec.normalized_progress();
-
-    if let Some(_frac) = progress {
-        // Determinate: indicator fills proportionally
-        // Contract: scaleX(percentage) with transform-origin: left
-        // In the current JsEl model, we render a child with accent fill.
-        // Proper percentage-based width requires Widget::ProgressBar support.
-        track = track.child(
-            ui_element::div()
-                .min_h(track_height)  // match track height
-                .rounded(999.0)
-                .bg(accent)
+    // Contract: indicator fills from left based on progress.
+    match spec.normalized_progress() {
+        Some(frac) => {
+            // Determinate: the runtime ProgressBar widget fills `frac` of the
+            // track proportionally (JsEl has no percentage sizing, so a
+            // hand-built child div cannot do this — it would always fill 100%).
+            // Track bg is token-resolved; the proportional fill is engine-drawn.
+            ui_element::progress(frac as f32)
+                .min_h(track_height)
                 .self_stretch()
-        );
-    } else {
-        // Indeterminate: contract specifies width 40% with animation
-        // Animation is a runtime capability not yet in JsEl.
-        track = track.child(
+                .rounded(999.0) // pill
+                .bg(track_bg)
+        }
+        None => {
+            // Indeterminate: a 40%-width animated bar is a runtime capability
+            // not yet exposed to JsEl (accepted delta); render a full accent bar.
             ui_element::div()
                 .min_h(track_height)
+                .self_stretch()
                 .rounded(999.0)
-                .bg(accent)
-        );
+                .bg(track_bg)
+                .child(
+                    ui_element::div()
+                        .min_h(track_height)
+                        .rounded(999.0)
+                        .bg(accent),
+                )
+        }
     }
-
-    track
 }
 
 #[cfg(test)]
@@ -91,8 +86,17 @@ mod tests {
     }
 
     #[test]
-    fn determinate_has_indicator_child() {
+    fn determinate_renders_progressbar_widget() {
+        // The determinate bar must use the runtime ProgressBar widget so the
+        // fill is proportional to the value (regression: it used to render a
+        // stretched child, so every value looked full).
+        use crate::render_probe::probe;
         let el = js_progress(&ProgressSpec::new().with_value(0.5), &theme());
-        assert_eq!(el.children.len(), 1);
+        let tree = probe(&el, 200.0, 20.0);
+        assert!(
+            tree.nodes.iter().any(|n| n.kind == "ProgressBar"),
+            "determinate progress should render a ProgressBar widget; got {:?}",
+            tree.nodes.iter().map(|n| n.kind).collect::<Vec<_>>()
+        );
     }
 }

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=ok gpui=4 jetstream=3 specimen=gap -->
 # Parity: ResizeHandle
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -31,8 +31,8 @@ GPUI matches orientation, sizing, idle 82% line, focus ring, disabled opacity, c
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Orientation inverted vs contract/Svelte/GPUI** — `Orientation::Horizontal` renders `h(hit_target).grow()` with a *horizontal* line (`resize_handle.rs:18-24`), which is the contract's **vertical** behavior; `Orientation::Vertical` renders the *vertical* line. Both branches are swapped. Contract §7: horizontal = `width:0.5rem; height:100%` (vertical line). Swap the two match arms.
-- [ ] **Idle line not at 82% opacity** — line uses `spec.border_color_token()` at full alpha (`resize_handle.rs:11,23,30`); contract idle is `color-mix(border-default 82%, transparent)`. GPUI applies `* 0.82`; Jetstream omits it.
+- [x] **Orientation inverted vs contract/Svelte/GPUI** — FIXED: the two match arms were swapped; Horizontal now renders the vertical line (`w(0.5rem) height:100%`), Vertical the horizontal line.
+- [x] **Idle line not at 82% opacity** — FIXED: `handle_color` now `tint(border, 0.82)` matching the contract `color-mix(border-default 82%, transparent)`.
 - [ ] **No hover state** — contract/Svelte change the line to `accent-base` on hover/drag; `js_resize_handle` has no hover branch. (Interaction would live in preview event loop, but no hover-color path exists.)
 - [ ] **No keyboard / drag callbacks** — no `onResizeStep`/start/move/end wiring; component is purely visual.
 - [ ] **No focus ring** — contract §8 focus-visible outline (`accent.focusRing`); GPUI applies it, Jetstream does not.

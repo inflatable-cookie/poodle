@@ -40,7 +40,7 @@
   const uiPresentation = getUiPresentation();
 
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const resolvedLayout = $derived(layout === "inline" ? "stacked" : layout);
+  const resolvedLayout = $derived(layout === "stacked" ? "stacked" : "inline");
   let renderedValue = $derived(value === null ? emptyText : String(value));
 </script>
 
