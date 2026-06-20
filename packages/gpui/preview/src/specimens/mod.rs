@@ -140,6 +140,7 @@ mod table;
 mod time_ago_specimen;
 mod toast_host;
 mod toast_stack_specimen;
+mod tree;
 mod video_player_specimen;
 
 // ── Layout Helpers ───────────────────────────────────────
@@ -419,6 +420,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             selection_summary_specimen::render(state, cx),
         ),
         "sidebar-nav" => specimen_card("SidebarNav", theme, sidebar_nav::render(theme)),
+        "tree" => specimen_card("Tree", theme, tree::render(state, cx)),
         "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
         "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
         "breadcrumbs" => specimen_card(

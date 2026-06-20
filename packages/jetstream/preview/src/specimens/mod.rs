@@ -128,6 +128,7 @@ pub mod toast_stack;
 pub mod toggle_group;
 pub mod toolbar;
 pub mod tooltip;
+pub mod tree;
 pub mod tri_state_switch;
 pub mod validation_summary;
 pub mod video_player;
@@ -149,7 +150,7 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
             let components = component_registry::components_for_section(state.section);
             match state.active_component() {
                 Some(idx) if idx < components.len() => {
-                    build_specimen_page(&components[idx], theme)
+                    build_specimen_page(&components[idx], theme, state)
                 }
                 _ => build_catalogue_landing(state, theme),
             }
@@ -171,7 +172,11 @@ pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
 // ── Specimen page ──
 
 /// Build the full specimen page for a selected component.
-fn build_specimen_page(entry: &ComponentEntry, theme: &JetstreamThemeProvider) -> JsEl {
+fn build_specimen_page(
+    entry: &ComponentEntry,
+    theme: &JetstreamThemeProvider,
+    state: &AppState,
+) -> JsEl {
     let text_primary = resolve_color(theme, "color.text.primary");
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let bg_elevated = resolve_color(theme, "color.background.elevated");
@@ -204,7 +209,7 @@ fn build_specimen_page(entry: &ComponentEntry, theme: &JetstreamThemeProvider) -
     );
 
     // Specimen section
-    if let Some(specimen) = render_specimen(entry.slug, theme) {
+    if let Some(specimen) = render_specimen(entry.slug, theme, state) {
         page = page.child(
             div().flex_col().gap(8.0)
                 .child(
@@ -231,7 +236,11 @@ fn build_specimen_page(entry: &ComponentEntry, theme: &JetstreamThemeProvider) -
 }
 
 /// Route a component slug to its specimen renderer.
-fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
+fn render_specimen(
+    slug: &str,
+    theme: &JetstreamThemeProvider,
+    state: &AppState,
+) -> Option<JsEl> {
     match slug {
         "accordion" => Some(accordion::render(theme)),
         "action-discovery-panel" => Some(action_discovery_panel::render(theme)),
@@ -357,6 +366,7 @@ fn render_specimen(slug: &str, theme: &JetstreamThemeProvider) -> Option<JsEl> {
         "toggle-group" => Some(toggle_group::render(theme)),
         "toolbar" => Some(toolbar::render(theme)),
         "tooltip" => Some(tooltip::render(theme)),
+        "tree" => Some(tree::render(state, theme)),
         "tri-state-switch" => Some(tri_state_switch::render(theme)),
         "validation-summary" => Some(validation_summary::render(theme)),
         "video-player" => Some(video_player::render(theme)),

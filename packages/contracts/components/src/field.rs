@@ -114,7 +114,9 @@ impl FieldSpec {
     }
 
     pub fn description_id(&self) -> Option<String> {
-        None
+        self.description
+            .as_ref()
+            .map(|_| format!("{}-description", self.id))
     }
 
     pub fn error_id(&self) -> Option<String> {
@@ -136,7 +138,7 @@ impl FieldSpec {
     }
 
     pub fn described_by(&self) -> Option<String> {
-        let ids = [self.message_id()]
+        let ids = [self.description_id(), self.message_id()]
             .into_iter()
             .flatten()
             .collect::<Vec<_>>();

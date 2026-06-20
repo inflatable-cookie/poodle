@@ -157,6 +157,7 @@ pub static COMPOSITES: &[ComponentEntry] = &[
     ComponentEntry { slug: "selection-summary", display_name: "SelectionSummary", description: "Current selection state.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "shell-status-bar", display_name: "ShellStatusBar", description: "Status bar with left, center, and right slots.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "sidebar-nav", display_name: "SidebarNav", description: "Vertical navigation with groups.", tier: Tier::Composite, has_specimen: true },
+    ComponentEntry { slug: "tree", display_name: "Tree", description: "Hierarchical file-explorer tree with multi-select.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "split-view", display_name: "SplitView", description: "Horizontal and vertical split panes.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "surface-tabs", display_name: "SurfaceTabs", description: "Tab strip for major app surfaces.", tier: Tier::Composite, has_specimen: true },
     ComponentEntry { slug: "state-tile", display_name: "StateTile", description: "Compact label-value tile.", tier: Tier::Composite, has_specimen: true },

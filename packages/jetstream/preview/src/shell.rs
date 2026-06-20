@@ -273,6 +273,10 @@ pub enum ShellAction {
     SelectDensity(usize),
     SelectSize(usize),
     ToggleProbe(usize), // 0=disabled, 1=invalid, 2=busy
+    TreeSelect(String),
+    TreeToggle(String),
+    TreeCheck(String),
+    TreeMenu(String),
     None,
 }
 
@@ -307,6 +311,18 @@ pub fn parse_action(token_key: Option<&str>) -> ShellAction {
         if let Some(idx) = ControlSize::ALL.iter().position(|s| s.label() == name) {
             return ShellAction::SelectSize(idx);
         }
+    }
+    if let Some(action) = key.strip_prefix("tree-menu:") {
+        return ShellAction::TreeMenu(action.to_string());
+    }
+    if let Some(value) = key.strip_prefix("tree-check:") {
+        return ShellAction::TreeCheck(value.to_string());
+    }
+    if let Some(value) = key.strip_prefix("tree-twisty:") {
+        return ShellAction::TreeToggle(value.to_string());
+    }
+    if let Some(value) = key.strip_prefix("tree:") {
+        return ShellAction::TreeSelect(value.to_string());
     }
     if let Some(probe_name) = key.strip_prefix("probe:") {
         let idx = match probe_name {
