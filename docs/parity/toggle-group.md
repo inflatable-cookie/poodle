@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=6 specimen=gap -->
 # Parity: ToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -37,8 +37,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Item background wrong.** `js_toggle_group` uses `surface.mix(elevated, 0.72)` (`toggle_group.rs:54`) — the *stale contract* value. Svelte/GPUI use `surface 93%, text-primary`. **Match Svelte.**
-- [ ] **Selected fill wrong.** Builds `Color::new(accent.r, accent.g, accent.b, accent.a * 0.22)` (`:57`) — accent over transparent (stale contract), not the accent tint layered over the item fill. **Mix accent into `item_fill` at 0.22 like GPUI/Svelte.**
+- [x] **DONE: item background** — now `surface.mix(text_primary, 0.93)` (Svelte color-mix(surface 93%, text-primary)), was the stale surface/elevated 72%. Locked by `item_fill_uses_svelte_surface_text_mix` probe test.
+- [x] **DONE: selected fill** — now `accent.mix(item_fill, 0.22)` (accent tinted over the item fill), was accent-over-transparent.
 - [ ] Gap is the ad-hoc `control_space_x_rem(density) * 0.5` heuristic (`:38`). Contract/Svelte gap is density-driven (`0.1875 / 0.25 / 0.375 rem`); GPUI matches Svelte exactly. **Resolve from density directly, drop `* 0.5`.**
 - [ ] Hardcoded `rem_to_px(0.25)` item-height reduction (`:42`), `rem_to_px(0.75)` font-size (`:63`), `rem_to_px(0.0625)` border-width (`:64`) — font-size should resolve from the label-size token (Svelte uses `typography-label-size`); the 0.25/0.0625 literals belong in tokens.
 - [ ] No `font-family` token applied — contract §8 + Svelte set `typography-label-family`; Jetstream sets weight/size only.

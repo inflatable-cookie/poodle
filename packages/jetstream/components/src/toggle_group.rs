@@ -50,11 +50,13 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
         border_subtle.a * 0.82,
     );
 
-    // Contract: item background = color-mix(surface 72%, elevated)
-    let item_fill = surface.mix(elevated, 0.72);
+    // Svelte/contract: item background = color-mix(surface 93%, text-primary)
+    // (the previous surface/elevated 72% was the stale pre-Svelte contract value).
+    let item_fill = surface.mix(text_primary, 0.93);
 
-    // Contract: selected background = color-mix(accent-base 22%, transparent)
-    let selected_fill = Color::new(accent.r, accent.g, accent.b, accent.a * 0.22);
+    // Svelte/contract: selected = accent tinted at 22% *over the item fill*
+    // (not accent over transparent — the previous stale value).
+    let selected_fill = accent.mix(item_fill, 0.22);
 
     // Contract: selected border = color-mix(accent-base 42%, border-default)
     let selected_border = accent.mix(border_default, 0.42);
@@ -158,5 +160,25 @@ mod tests {
         let spec = ToggleGroupSpec::new(sample_options()).with_disabled(true);
         let el = js_toggle_group(&spec, &theme());
         assert!(el.style.opacity < 1.0);
+    }
+
+    #[test]
+    fn item_fill_uses_svelte_surface_text_mix() {
+        use jetstream_runtime::game_ui::Color;
+        let th = theme();
+        let surface: Color = resolve_color(&th, "color.background.surface").into();
+        let text_primary: Color = resolve_color(&th, "color.text.primary").into();
+        // Svelte: color-mix(surface 93%, text-primary). Was the stale surface/elevated 72%.
+        let expected = surface.mix(text_primary, 0.93);
+        let el = js_toggle_group(&ToggleGroupSpec::new(sample_options()), &th);
+        let bg = el.children[0].style.background.expect("item bg");
+        assert!(
+            (bg.r - expected.r).abs() < 0.01
+                && (bg.g - expected.g).abs() < 0.01
+                && (bg.b - expected.b).abs() < 0.01,
+            "item fill {:?} should match surface-93%/text-primary {:?}",
+            bg,
+            expected
+        );
     }
 }
