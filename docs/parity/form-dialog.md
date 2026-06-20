@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=9 jetstream=9 specimen=gap -->
+<!-- parity consv=ok gpui=3 jetstream=9 specimen=gap -->
+<!-- pass 20: GPUI action buttons now composed Button::from_spec (ghost cancel /
+     primary submit), submit label flips to "Submitting…" + both disabled while
+     submitting; dropped px(12/6)/white()/manual-disabled-fill/hand-rolled-spinner
+     literals; body gaps → space.stack.md. Build clean. Remaining GPUI: width/aria/
+     controlled-open. -->
 # Parity: FormDialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

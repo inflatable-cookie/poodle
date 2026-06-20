@@ -147,7 +147,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | editable-list | fixed | 11 | 11 | gap |
 | embed-input | fixed | 6 | 7 | gap |
 | embed-preview | fixed | 7 | 5 | gap |
-| empty-state | ok | 9 | 5 | ok |
+| empty-state | ok | 2 | 5 | ok |
 | error-boundary | ok | 2 | 1 | gap |
 | eyebrow | ok | 5 | 6 | gap |
 | field | ok | 6 | 6 | gap |
@@ -155,7 +155,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | file-upload | ok | 8 | 8 | gap |
 | filter-toolbar | fixed | 7 | 6 | gap |
 | form-actions | ok | 6 | 7 | gap |
-| form-dialog | ok | 9 | 9 | gap |
+| form-dialog | ok | 3 | 9 | gap |
 | form-layout | fixed | 8 | 8 | gap |
 | form-shell | gap | 10 | 12 | gap |
 | grid | fixed | 4 | 4 | gap |

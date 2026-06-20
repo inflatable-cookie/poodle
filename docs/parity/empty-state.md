@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=9 jetstream=5 specimen=ok -->
+<!-- parity consv=ok gpui=2 jetstream=5 specimen=ok -->
+<!-- pass 20: GPUI now honors variant (dashed border, root radius, per-variant bg
+     tint neutral/search/firstRun, default visual circle + icon inbox/search/plus),
+     composes Button::from_spec per RemediationAction, and wires the previously-dead
+     on_action callback. Dropped max_w(400)/px button literals. Build clean.
+     Remaining GPUI: ARIA (accepted no-a11y). -->
 # Parity: EmptyState
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

@@ -1,11 +1,13 @@
 //! EmptyState — real GPUI component backed by EmptyStateSpec.
 
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EmptyStateSpec, EmptyStateVariant, RemediationAction};
+use poodle_specs::{
+    ButtonSpec, EmptyStateSpec, EmptyStateVariant, IconSize, IconSpec, RemediationAction,
+};
 
 use crate::presentation::rem_to_px;
+use crate::primitives::{Button, Icon};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI empty state component backed by `EmptyStateSpec`.
@@ -93,11 +95,29 @@ impl IntoElement for EmptyState {
 
         let inline_gap = resolve_px(theme, "space.inline.sm");
         let body_size = resolve_px(theme, "typography.body.size");
-        let control_radius = resolve_radius(theme, "radius.control");
         let gap = resolve_px(theme, spec.layout_gap_token());
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let accent = resolve_color(theme, "color.accent.base");
+
+        // ── Root: dashed border, variant-driven background tint, radius ──
+        let border_default = resolve_color(theme, "color.border.default");
+        // Contract: radius.surface - 0.125rem.
+        let root_radius = resolve_radius(theme, "radius.surface") - px(rem_to_px(0.125));
+
+        // Variant background tint — color-mix(in srgb, BASE X%, transparent).
+        // Mixing toward transparent is alpha scaling: a' = base.a * ratio.
+        let (tint_base, tint_ratio) = match spec.variant {
+            // neutral: surface @ 76%
+            EmptyStateVariant::Neutral => (resolve_color(theme, "color.background.surface"), 0.76),
+            // search: accent-base @ 7%
+            EmptyStateVariant::Search => (resolve_color(theme, "color.accent.base"), 0.07),
+            // firstRun: status-success @ 7%
+            EmptyStateVariant::FirstRun => (resolve_color(theme, "color.status.success"), 0.07),
+        };
+        let root_bg = Hsla {
+            a: tint_base.a * tint_ratio,
+            ..tint_base
+        };
 
         // Svelte: title = 1.125rem default, 0.9375rem compact.
         // Svelte: padding = panel_y*1.5 vertical (default) / space.stack.lg (compact), panel_x horizontal.
@@ -105,10 +125,10 @@ impl IntoElement for EmptyState {
         let vertical_padding = if spec.compact {
             resolve_px(theme, "space.stack.lg")
         } else {
-            // panel_y (default) * 1.5 = 0.75rem * 1.5 = 1.125rem
-            px(rem_to_px(1.125))
+            // panel_y (default) * 1.5
+            resolve_px(theme, "space.panel.y") * 1.5
         };
-        let horiz_padding = px(rem_to_px(1.0)); // panel_x at default density
+        let horiz_padding = resolve_px(theme, "space.panel.x");
 
         let mut container = div()
             .w_full()
@@ -118,18 +138,44 @@ impl IntoElement for EmptyState {
             .justify_center()
             .py(vertical_padding)
             .px(horiz_padding)
-            .gap(gap);
+            .gap(gap)
+            .border_1()
+            .border_dashed()
+            .border_color(border_default)
+            .rounded(root_radius)
+            .bg(root_bg);
 
-        // Illustration slot
-        if let Some(illustration) = self.illustration {
-            container = container.child(
-                div()
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(illustration),
-            );
-        }
+        // ── Visual: custom illustration, else default variant icon circle ──
+        // Circle: 2.25rem (1.75rem compact), panel @ 90% background, decorative.
+        let circle_size = px(rem_to_px(if spec.compact { 1.75 } else { 2.25 }));
+        let panel = resolve_color(theme, "color.background.panel");
+        let circle_bg = Hsla {
+            a: panel.a * 0.90,
+            ..panel
+        };
+        let visual_inner: AnyElement = if let Some(illustration) = self.illustration {
+            illustration
+        } else {
+            let icon_name = match spec.variant {
+                EmptyStateVariant::Neutral => "inbox",
+                EmptyStateVariant::Search => "search",
+                EmptyStateVariant::FirstRun => "plus",
+            };
+            Icon::from_spec(IconSpec::new(icon_name).with_size(IconSize::Md), theme)
+                .with_color(text_secondary)
+                .into_any_element()
+        };
+        container = container.child(
+            div()
+                .flex()
+                .items_center()
+                .justify_center()
+                .w(circle_size)
+                .h(circle_size)
+                .rounded(circle_size) // full pill — contract 999rem
+                .bg(circle_bg)
+                .child(visual_inner),
+        );
 
         // Title
         container = container.child(
@@ -141,41 +187,40 @@ impl IntoElement for EmptyState {
                 .child(spec.title.clone()),
         );
 
-        // Message
+        // Message — copy max-width 24rem (contract §7).
         if let Some(ref message) = spec.message {
             container = container.child(
                 div()
                     .text_size(body_size)
                     .text_color(text_secondary)
                     .text_center()
-                    .max_w(px(400.0))
+                    .max_w(px(rem_to_px(24.0)))
                     .child(message.clone()),
             );
         }
 
-        // Actions
+        // ── Actions: composed Button per RemediationAction, wired to on_action ──
         if !spec.actions.is_empty() {
-            let mut actions_row = div().flex().gap(inline_gap).items_center();
+            let mut actions_row = div().flex().flex_wrap().gap(inline_gap).items_center();
+            let on_action = self.on_action.map(std::rc::Rc::new);
 
             for action in &spec.actions {
-                let is_primary = action.variant == poodle_specs::ButtonVariant::Primary;
-                let label = action.label.clone();
-                let action_id = SharedString::from(format!("empty-action-{}", action.id));
+                let action_id = action.id.clone();
+                let mut btn = Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(action.variant)
+                        .with_label(action.label.clone())
+                        .with_disabled(action.is_disabled),
+                    theme,
+                )
+                .with_id(format!("empty-action-{}", action.id));
 
-                let btn = div()
-                    .id(action_id)
-                    .cursor_pointer()
-                    .px(px(16.0))
-                    .py(px(8.0))
-                    .rounded(control_radius)
-                    .text_size(body_size)
-                    .font_weight(FontWeight::MEDIUM)
-                    .when(is_primary, |el| el.bg(accent).text_color(gpui::white()))
-                    .when(!is_primary, |el| {
-                        el.border_1().border_color(accent).text_color(accent)
-                    })
-                    .when(action.is_disabled, |el| el.opacity(0.5))
-                    .child(label);
+                if let Some(ref handler) = on_action {
+                    let handler = handler.clone();
+                    btn = btn.on_click(move |event, window, cx| {
+                        handler(&action_id, event, window, cx);
+                    });
+                }
 
                 actions_row = actions_row.child(btn);
             }

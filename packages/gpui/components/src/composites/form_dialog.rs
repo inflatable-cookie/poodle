@@ -3,10 +3,10 @@
 //! and FormLayout for structured form content.
 
 use crate::composites::FormLayout;
-use crate::primitives::Dialog;
-use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
-use gpui::prelude::FluentBuilder;
+use crate::primitives::{Button, Dialog};
+use crate::theme_ext::{resolve_color, resolve_px};
 use gpui::*;
+use poodle_specs::{ButtonSpec, ButtonVariant};
 use poodle_gpui::GpuiThemeProvider;
 
 pub struct FormDialog {
@@ -148,12 +148,7 @@ impl IntoElement for FormDialog {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
         let theme = &self.theme;
-        let title_color = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let _muted_color = resolve_color(theme, "color.text.muted");
-        let accent = resolve_color(theme, "color.accent.base");
-        let panel_bg = resolve_color(theme, "color.background.panel");
-        let control_radius = resolve_radius(theme, "radius.control");
         let body_size = resolve_px(theme, "typography.body.size");
 
         // Compose with Dialog primitive — title/description handled by Dialog
@@ -168,8 +163,9 @@ impl IntoElement for FormDialog {
 
         // Body: either a bare vertical stack of children or the
         // standard FormLayout wrapper (with error/success banners).
+        let stack_gap = resolve_px(theme, "space.stack.md");
         let content: AnyElement = if self.bare {
-            let mut col = div().flex().flex_col().gap(px(12.0));
+            let mut col = div().flex().flex_col().gap(stack_gap);
             // Optional subtitle block at the top of the body.
             if let Some(ref subtitle) = self.subtitle {
                 col = col.child(
@@ -192,7 +188,7 @@ impl IntoElement for FormDialog {
                 form_layout = form_layout.success(success.clone());
             }
             // Subtitle rendered above the form layout when present.
-            let mut wrapper = div().flex().flex_col().gap(px(12.0));
+            let mut wrapper = div().flex().flex_col().gap(stack_gap);
             if let Some(ref subtitle) = self.subtitle {
                 wrapper = wrapper.child(
                     div()
@@ -215,65 +211,41 @@ impl IntoElement for FormDialog {
         if let Some(custom) = self.custom_actions {
             dialog = dialog.with_footer(div().w_full().child(custom));
         } else if self.show_default_actions {
-            // Cancel button — text-style action
-            let mut cancel_btn = div()
-                .id("form-dialog-cancel")
-                .text_size(body_size)
-                .text_color(title_color)
-                .cursor_pointer()
-                .px(px(12.0))
-                .py(px(6.0))
-                .rounded(control_radius)
-                .hover(|s| s.bg(color_mix(title_color, panel_bg, 0.08)))
-                .when(self.submitting, |el| el.opacity(0.5))
-                .child(self.cancel_label);
-
+            // Cancel — ghost Button, disabled during submitting (Svelte parity).
+            let mut cancel_btn = Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Ghost)
+                    .with_label(self.cancel_label)
+                    .with_disabled(self.submitting),
+                theme,
+            )
+            .with_id("form-dialog-cancel");
             if let Some(handler) = self.on_cancel {
-                if !self.submitting {
-                    cancel_btn = cancel_btn.on_click(move |event, window, cx| {
-                        handler(event, window, cx);
-                    });
-                }
+                cancel_btn = cancel_btn.on_click(move |event, window, cx| {
+                    handler(event, window, cx);
+                });
             }
 
-            // Submit button — accent filled action
+            // Submit — primary Button. Label flips to "Submitting…" and the
+            // button is disabled while submitting or explicitly disabled.
             let submit_disabled = self.submitting || self.disabled;
-            let submit_bg = if submit_disabled {
-                color_mix(accent, panel_bg, 0.5)
+            let submit_label = if self.submitting {
+                "Submitting\u{2026}".to_string()
             } else {
-                accent
+                self.submit_label
             };
-
-            let mut submit_btn = div()
-                .id("form-dialog-submit")
-                .text_size(body_size)
-                .text_color(gpui::white())
-                .bg(submit_bg)
-                .rounded(control_radius)
-                .px(px(12.0))
-                .py(px(6.0))
-                .when(!submit_disabled, |el| el.cursor_pointer())
-                .when(submit_disabled, |el| el.cursor_default());
-
-            if self.submitting {
-                submit_btn = submit_btn.child(
-                    div().flex().flex_row().gap(px(6.0)).items_center().child(
-                        div()
-                            .text_size(body_size)
-                            .text_color(color_mix(gpui::white(), accent, 0.8))
-                            .child("Submitting\u{2026}"),
-                    ),
-                );
-            } else {
-                submit_btn = submit_btn.child(self.submit_label);
-            }
-
+            let mut submit_btn = Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_label(submit_label)
+                    .with_disabled(submit_disabled),
+                theme,
+            )
+            .with_id("form-dialog-submit");
             if let Some(handler) = self.on_submit {
-                if !submit_disabled {
-                    submit_btn = submit_btn.on_click(move |event, window, cx| {
-                        handler(event, window, cx);
-                    });
-                }
+                submit_btn = submit_btn.on_click(move |event, window, cx| {
+                    handler(event, window, cx);
+                });
             }
 
             let actions = div()
