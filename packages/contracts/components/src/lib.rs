@@ -154,7 +154,7 @@ pub use call_out::CallOutSpec;
 pub use card::{CardLayout, CardSpec, CardVariant};
 pub use card_toggle_group::{CardToggleGroupSpec, CardToggleOption};
 pub use checkbox::CheckboxSpec;
-pub use code::CodeSpec;
+pub use code::{CodeInlineVariant, CodeSpec, CodeTypography};
 pub use code_input::CodeInputSpec;
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;

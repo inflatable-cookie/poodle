@@ -1,6 +1,23 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
+/// Inline rendering variant. `Plain` drops the inline padding, radius, and
+/// background so the fragment reads as bare text (contract §3/§8).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CodeInlineVariant {
+    Default,
+    Plain,
+}
+
+/// Inline typography mode. `Inline` sets font-size `1em × adjustmentRatio` with
+/// inherited line-height so the fragment matches surrounding text; `Body` uses
+/// the `0.8125em × adjustmentRatio` body scale (contract §3/§8).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CodeTypography {
+    Body,
+    Inline,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct CodeSpec {
     pub content: String,
@@ -10,6 +27,10 @@ pub struct CodeSpec {
     pub highlight_lines: Vec<usize>,
     pub max_height: Option<f64>,
     pub is_inline: bool,
+    /// Inline-only variant; `Plain` drops inline chrome (contract §3).
+    pub inline_variant: CodeInlineVariant,
+    /// Inline-only typography mode (contract §3).
+    pub typography: CodeTypography,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -25,6 +46,8 @@ impl Default for CodeSpec {
             highlight_lines: Vec::new(),
             max_height: None,
             is_inline: false,
+            inline_variant: CodeInlineVariant::Default,
+            typography: CodeTypography::Body,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
@@ -70,6 +93,40 @@ impl CodeSpec {
     pub fn with_inline(mut self, is_inline: bool) -> Self {
         self.is_inline = is_inline;
         self
+    }
+
+    pub fn with_inline_variant(mut self, variant: CodeInlineVariant) -> Self {
+        self.inline_variant = variant;
+        self
+    }
+
+    pub fn with_typography(mut self, typography: CodeTypography) -> Self {
+        self.typography = typography;
+        self
+    }
+
+    pub fn text_secondary_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    pub fn accent_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    pub fn surface_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    pub fn canvas_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_CANVAS
+    }
+
+    pub fn panel_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    pub fn elevated_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_ELEVATED
     }
 
     pub fn fill_token(&self) -> &'static str {

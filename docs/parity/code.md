@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=9 specimen=gap -->
+<!-- pass 38: GPUI — block root now transparent (surface moved to pre/scroll at canvas@92%);
+     line-numbers gutter (2.5rem right-aligned); highlighted-line ±1rem bleed; copy button
+     rebuilt (1.5rem square composing Icon, hover); inline mode applies adjustmentRatio + new
+     inlineVariant=plain + typography=inline. Additive spec fields (greenlit): inline_variant,
+     typography (+ token accessors). Specimen gained Inline-variants group. Remaining GPUI:
+     font-family (no theme resolver) + clipboard copy/copied-swap (preview-loop). -->
 # Parity: Code
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

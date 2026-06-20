@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{DurationInput, Eyebrow};
-use poodle_specs::{DurationInputSpec, EyebrowSpec};
+use poodle_specs::{DurationInputSpec, EyebrowSpec, ValidationState};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -87,6 +87,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("duration-disabled"),
+                ),
+        )
+        // --- Invalid (out-of-bounds danger border) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Invalid (out of bounds)"),
+                    theme,
+                ))
+                .child(
+                    DurationInput::from_spec(
+                        DurationInputSpec::new()
+                            .with_value("00:00:05")
+                            .with_show_seconds(true)
+                            .with_min_total_seconds(60)
+                            .with_validation_state(ValidationState::Invalid),
+                        theme,
+                    )
+                    .with_id("duration-invalid"),
                 ),
         )
         .into_any_element();

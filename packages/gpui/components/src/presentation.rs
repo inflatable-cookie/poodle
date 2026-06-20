@@ -300,6 +300,91 @@ pub fn editable_list_item_gap_rem(density: ControlDensity) -> f32 {
     }
 }
 
+// ── DurationInput size scales ────────────────────────────────────
+//
+// Contract §8 "Size adjustments". These mirror the Svelte
+// `.poodle-duration-input[data-size]` custom-property overrides exactly so
+// the GPUI component drives field geometry from a single source of truth
+// instead of inline literals. Base (md path) values come from the contract
+// base column / size table.
+
+/// Field width in rem. Contract: xs 1.5, sm 1.625, md 1.875, lg 2, xl 2.25.
+/// (Base when no size is `1.75`, but the component always resolves a size; md
+/// in the size table is `1.875`.)
+pub fn duration_field_width_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.625,
+        ControlSize::Md => 1.875,
+        ControlSize::Lg => 2.0,
+        ControlSize::Xl => 2.25,
+    }
+}
+
+/// Root padding-block in rem. Contract: xs 0.125, sm 0.1875, md 0.25, lg 0.3125, xl 0.375.
+pub fn duration_pad_y_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.125,
+        ControlSize::Sm => 0.1875,
+        ControlSize::Md => 0.25,
+        ControlSize::Lg => 0.3125,
+        ControlSize::Xl => 0.375,
+    }
+}
+
+/// Root padding-inline size adjust in rem (added to `space.control.x`).
+/// Contract: xs -0.125, sm -0.0625, md 0, lg +0.125, xl +0.1875.
+pub fn duration_pad_x_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.125,
+        ControlSize::Sm => -0.0625,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.125,
+        ControlSize::Xl => 0.1875,
+    }
+}
+
+/// Field / separator-glyph (digit) font-size in rem. Contract size table:
+/// xs 0.75, sm base (body-size), md body-size, lg 0.9375, xl 1.
+/// Body-size resolves from the token; this returns the per-size override or
+/// `None` to signal "use the resolved body-size token".
+pub fn duration_digit_font_rem(size: ControlSize) -> Option<f32> {
+    match size {
+        ControlSize::Xs => Some(0.75),
+        ControlSize::Sm => None, // base = typography.body.size
+        ControlSize::Md => None, // typography.body.size
+        ControlSize::Lg => Some(0.9375),
+        ControlSize::Xl => Some(1.0),
+    }
+}
+
+/// Label font-size in rem. Contract size table: xs 0.5, others base 0.5625rem.
+pub fn duration_label_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5,
+        _ => 0.5625,
+    }
+}
+
+/// Inter-segment gap density adjust in rem. Contract: comfortable adds 0.25rem;
+/// compact/default add nothing.
+pub fn duration_gap_density_adjust_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Comfortable => 0.25,
+        _ => 0.0,
+    }
+}
+
+/// Root padding-inline density adjust in rem. Contract: compact -0.125,
+/// comfortable +0.125, default 0.
+pub fn duration_pad_x_density_adjust_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => -0.125,
+        ControlDensity::Comfortable => 0.125,
+        ControlDensity::Default => 0.0,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0
@@ -507,6 +592,76 @@ mod tests {
         assert_eq!(
             editable_list_item_gap_rem(ControlDensity::Comfortable),
             0.625
+        );
+    }
+
+    // ── duration_input scales ───────────────────────────────────
+
+    #[test]
+    fn duration_field_widths_match_contract() {
+        assert_eq!(duration_field_width_rem(ControlSize::Xs), 1.5);
+        assert_eq!(duration_field_width_rem(ControlSize::Sm), 1.625);
+        assert_eq!(duration_field_width_rem(ControlSize::Md), 1.875);
+        assert_eq!(duration_field_width_rem(ControlSize::Lg), 2.0);
+        assert_eq!(duration_field_width_rem(ControlSize::Xl), 2.25);
+    }
+
+    #[test]
+    fn duration_pad_y_matches_contract() {
+        assert_eq!(duration_pad_y_rem(ControlSize::Xs), 0.125);
+        assert_eq!(duration_pad_y_rem(ControlSize::Sm), 0.1875);
+        assert_eq!(duration_pad_y_rem(ControlSize::Md), 0.25);
+        assert_eq!(duration_pad_y_rem(ControlSize::Lg), 0.3125);
+        assert_eq!(duration_pad_y_rem(ControlSize::Xl), 0.375);
+    }
+
+    #[test]
+    fn duration_pad_x_offsets_match_contract() {
+        assert_eq!(duration_pad_x_offset_rem(ControlSize::Xs), -0.125);
+        assert_eq!(duration_pad_x_offset_rem(ControlSize::Sm), -0.0625);
+        assert_eq!(duration_pad_x_offset_rem(ControlSize::Md), 0.0);
+        assert_eq!(duration_pad_x_offset_rem(ControlSize::Lg), 0.125);
+        assert_eq!(duration_pad_x_offset_rem(ControlSize::Xl), 0.1875);
+    }
+
+    #[test]
+    fn duration_digit_font_overrides_match_contract() {
+        assert_eq!(duration_digit_font_rem(ControlSize::Xs), Some(0.75));
+        assert_eq!(duration_digit_font_rem(ControlSize::Sm), None);
+        assert_eq!(duration_digit_font_rem(ControlSize::Md), None);
+        assert_eq!(duration_digit_font_rem(ControlSize::Lg), Some(0.9375));
+        assert_eq!(duration_digit_font_rem(ControlSize::Xl), Some(1.0));
+    }
+
+    #[test]
+    fn duration_label_fonts_match_contract() {
+        assert_eq!(duration_label_font_rem(ControlSize::Xs), 0.5);
+        assert_eq!(duration_label_font_rem(ControlSize::Sm), 0.5625);
+        assert_eq!(duration_label_font_rem(ControlSize::Md), 0.5625);
+        assert_eq!(duration_label_font_rem(ControlSize::Xl), 0.5625);
+    }
+
+    #[test]
+    fn duration_density_adjusts_match_contract() {
+        assert_eq!(
+            duration_gap_density_adjust_rem(ControlDensity::Comfortable),
+            0.25
+        );
+        assert_eq!(
+            duration_gap_density_adjust_rem(ControlDensity::Default),
+            0.0
+        );
+        assert_eq!(
+            duration_pad_x_density_adjust_rem(ControlDensity::Compact),
+            -0.125
+        );
+        assert_eq!(
+            duration_pad_x_density_adjust_rem(ControlDensity::Comfortable),
+            0.125
+        );
+        assert_eq!(
+            duration_pad_x_density_adjust_rem(ControlDensity::Default),
+            0.0
         );
     }
 

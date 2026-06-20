@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=9 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=6 specimen=gap -->
+<!-- pass 38: GPUI — field width + vertical padding now size-driven from the contract table
+     (were fixed); invalid state border via spec.border_token (ValidationState::Invalid →
+     status.danger); segment-focus accent-12% highlight; line-height/label-font/separator-grid/
+     fit-content root fixes; presentation helpers added (unit-tested). Specimen gained Invalid
+     group. Remaining GPUI: keyboard increment/onChange = preview-loop; segments as text-elements
+     (contract Field is border:0/transparent — composing NumberInput would violate it, accepted). -->
 # Parity: DurationInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

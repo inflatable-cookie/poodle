@@ -9,7 +9,11 @@ use poodle_specs::{
     ControlDensity, ControlSize, DurationInputSpec, SemanticControlSizeRole, ValidationState,
 };
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offset_rem};
+use crate::presentation::{
+    duration_digit_font_rem, duration_field_width_rem, duration_gap_density_adjust_rem,
+    duration_label_font_rem, duration_pad_x_density_adjust_rem, duration_pad_x_offset_rem,
+    duration_pad_y_rem, rem_to_px, resolve_semantic_size,
+};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// A real GPUI duration input (HH:MM:SS) component backed by `DurationInputSpec`.
@@ -96,19 +100,43 @@ impl IntoElement for DurationInput {
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
+        // ── Size-driven geometry (contract §8 size table) ──────────
+        // Root padding-inline = space.control.x + size-adjust + density-adjust.
         let base_pad = resolve_px(theme, "space.control.x");
-        let control_padding_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
-        let control_radius = resolve_radius(theme, spec.radius_token());
-        let body_size = resolve_px(theme, spec.body_size_token());
-        let caption_size = resolve_px(theme, "typography.caption.size");
-        let radius_sm = resolve_radius(theme, "radius.control");
+        let control_padding_x = base_pad
+            + px(rem_to_px(duration_pad_x_offset_rem(effective_size)))
+            + px(rem_to_px(duration_pad_x_density_adjust_rem(spec.density)));
+        // Root padding-block varies by size (NOT density — vertical pad is a
+        // size axis per the contract's size/density split).
+        let control_padding_y = px(rem_to_px(duration_pad_y_rem(effective_size)));
+        // Inter-segment gap = 0.125rem base + density adjust.
+        let segment_gap =
+            px(rem_to_px(0.125 + duration_gap_density_adjust_rem(spec.density)));
 
+        let control_radius = resolve_radius(theme, spec.radius_token());
+        let segment_radius = px(rem_to_px(0.1875)); // contract: segment radius 0.1875rem
+
+        // Field / glyph digit font: per-size override or the body-size token.
+        let body_size = resolve_px(theme, spec.body_size_token());
+        let digit_size = match duration_digit_font_rem(effective_size) {
+            Some(rem) => px(rem_to_px(rem)),
+            None => body_size,
+        };
+        // Label font: per-size rem from the contract size table.
+        let label_size = px(rem_to_px(duration_label_font_rem(effective_size)));
+        let field_width = px(rem_to_px(duration_field_width_rem(effective_size)));
+
+        // Border resolves through the spec: ValidationState::Invalid →
+        // color.status.danger, otherwise color.border.default (contract §4/§8).
         let border = resolve_color(theme, spec.border_token());
         let surface_bg = resolve_color(theme, spec.fill_token());
         let text_primary = resolve_color(theme, spec.text_color_token());
         let text_secondary = resolve_color(theme, spec.text_secondary_token());
         let focus_ring = resolve_color(theme, spec.focus_ring_color_token());
         let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
+        // Segment-focus highlight: color-mix(accent-base 12%, transparent).
+        let accent = resolve_color(theme, "color.accent.base");
+        let segment_focus_bg = accent.opacity(accent.a * 0.12);
 
         let display = spec.value.as_deref().unwrap_or(if spec.show_seconds {
             "00:00:00"
@@ -116,56 +144,85 @@ impl IntoElement for DurationInput {
             "00:00"
         });
 
+        // Contract/Svelte source labels are lowercase h/m/s (CSS uppercases);
+        // GPUI has no text-transform, so emit the visual uppercase form.
         let labels = if spec.show_seconds {
-            vec!["HRS", "MIN", "SEC"]
+            vec!["H", "M", "S"]
         } else {
-            vec!["HRS", "MIN"]
+            vec!["H", "M"]
         };
 
-        // Contract: gap 0.125rem between segments
-        let mut segments = div().flex().items_end().gap(px(rem_to_px(0.125)));
+        // Contract: root align-items: stretch (flexbox default — no explicit
+        // alignment), gap base 0.125rem (+ density).
+        let mut segments = div().flex().gap(segment_gap);
 
         let parts: Vec<&str> = display.split(':').collect();
         for (i, part) in parts.iter().enumerate() {
             if i > 0 {
-                // Separator colon — contract: body-size, weight 600, line-height 1
+                // Separator: 2-row grid (spacer matched to label + glyph row)
+                // so the colon aligns with the field, not the labels.
+                // Contract: glyph font = digit-size, weight 600, line-height 1.
                 segments = segments.child(
                     div()
-                        .text_size(body_size)
-                        .line_height(px(rem_to_px(0.875)))
+                        .flex()
+                        .flex_col()
+                        .items_center()
                         .text_color(text_secondary)
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .child(":"),
+                        .child(
+                            // Spacer row: label height + label gap (0.125rem).
+                            div()
+                                .h(label_size)
+                                .mb(px(rem_to_px(0.125))),
+                        )
+                        .child(
+                            div()
+                                .flex_1()
+                                .flex()
+                                .items_center()
+                                .justify_center()
+                                .text_size(digit_size)
+                                .line_height(digit_size)
+                                .font_weight(FontWeight::SEMIBOLD)
+                                .child(":"),
+                        ),
                 );
             }
 
-            // Contract: segment = column with label + field
+            // Contract: segment = column with label + field; padding 0.125rem,
+            // radius 0.1875rem; focused segment gets the accent 12% highlight.
             let label = labels.get(i).unwrap_or(&"");
-            let segment = div()
+            let mut segment = div()
+                .id(SharedString::from(format!("poodle-duration-segment-{i}")))
                 .flex()
                 .flex_col()
                 .items_center()
                 .gap(px(rem_to_px(0.125)))
                 .p(px(rem_to_px(0.125)))
-                .rounded(radius_sm)
+                .rounded(segment_radius)
                 .child(
-                    // Label: caption-size (≈11px), uppercase, secondary, line-height 1
+                    // Label: per-size font, uppercase, secondary, line-height 1.
                     div()
-                        .text_size(caption_size)
-                        .line_height(caption_size)
+                        .text_size(label_size)
+                        .line_height(label_size)
                         .text_color(text_secondary)
                         .child(label.to_string()),
                 )
                 .child(
-                    // Field: 1.75rem wide, body size, centered, line-height 1
+                    // Field: per-size width, digit font, centered, line-height 1.
+                    // (Borderless text element — accepted Known Delta vs <input>.)
                     div()
-                        .w(px(rem_to_px(1.75)))
+                        .w(field_width)
                         .text_center()
-                        .text_size(body_size)
-                        .line_height(px(rem_to_px(0.875)))
+                        .text_size(digit_size)
+                        .line_height(digit_size)
                         .text_color(text_primary)
                         .child(part.to_string()),
                 );
+
+            // Segment-focus highlight covers label + field.
+            if !spec.is_disabled {
+                segment = segment.hover(move |s| s.bg(segment_focus_bg));
+            }
 
             segments = segments.child(segment);
         }
@@ -176,30 +233,26 @@ impl IntoElement for DurationInput {
             "poodle-duration-input".to_string()
         };
 
-        // Contract: padding 0.25rem control-x, border, radius, surface bg
+        // Contract: root inline-flex, width: fit-content, align-items: stretch,
+        // padding (size-driven block + size/density inline), border, radius,
+        // surface bg. Border is danger when invalid (resolved above).
         let mut wrapper = div()
             .id(SharedString::from(id_str))
             .focusable()
-            .w_full()
-            .py(px(rem_to_px(0.25))) // 0.25rem
+            .w_auto()
+            .py(control_padding_y)
             .px(control_padding_x)
             .rounded(control_radius)
             .bg(surface_bg)
             .border_1()
             .border_color(border)
             .flex()
-            .items_center()
-            // Contract: focus-within = border + shadow ring at 28% opacity
+            // align-items: stretch is the flexbox default (no explicit call).
+            // Contract: focus-within = border + shadow ring at 28% opacity.
+            // Invalid border persists until focus (matches Svelte).
             .focus(move |s| {
-                s.border_color(focus_ring).shadow(vec![gpui::BoxShadow {
-                    color: Hsla {
-                        a: focus_ring.a * 0.28,
-                        ..focus_ring
-                    },
-                    offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(2.0),
-                }])
+                s.border_color(focus_ring)
+                    .shadow(crate::theme_ext::focus_ring_shadow(focus_ring))
             })
             .child(segments);
 

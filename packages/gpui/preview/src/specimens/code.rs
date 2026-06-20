@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Code, Eyebrow};
-use poodle_specs::{CodeSpec, EyebrowSpec};
+use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -101,6 +101,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         ))
                         .child(" to install dependencies.".to_string()),
+                ),
+        )
+        // --- Inline plain + inline typography ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Inline variants"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_row()
+                        .flex_wrap()
+                        .gap(px(4.0))
+                        .items_center()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_primary))
+                        .child("Plain ".to_string())
+                        .child(Code::from_spec(
+                            CodeSpec::new()
+                                .with_content("git status")
+                                .with_inline(true)
+                                .with_inline_variant(CodeInlineVariant::Plain),
+                            theme,
+                        ))
+                        .child(" and inline-typography ".to_string())
+                        .child(Code::from_spec(
+                            CodeSpec::new()
+                                .with_content("git log")
+                                .with_inline(true)
+                                .with_typography(CodeTypography::Inline),
+                            theme,
+                        ))
+                        .child(" fragments.".to_string()),
                 ),
         )
         // --- No copy button ---
