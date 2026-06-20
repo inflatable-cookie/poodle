@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=2 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 39: Jetstream mirrors GPUI — invalid-state border via spec.border_token
+     (status.danger); separator 2-row spacer+glyph grid; segment-focus accent-12% highlight;
+     size-driven field width + padding (density on inline only); line-heights 1. 5 probe tests
+     (incl invalid-border ≈ status.danger ≠ default); suite 140. Remaining jetstream:
+     keyboard/onChange/focus-tracking = preview-loop. -->
 <!-- pass 38: GPUI — field width + vertical padding now size-driven from the contract table
      (were fixed); invalid state border via spec.border_token (ValidationState::Invalid →
      status.danger); segment-focus accent-12% highlight; line-height/label-font/separator-grid/

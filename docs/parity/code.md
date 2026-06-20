@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=2 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 39: Jetstream rebuilt from a bordered label to match GPUI — toolbar (language label +
+     copy button composing icon), line-numbers gutter (2.5rem), highlighted-line ±1rem bleed
+     accent-12%, inline variant (+ inline_variant/typography fields), maxHeight overflow_scroll,
+     block surface (transparent root, pre canvas@92%, toolbar elevated@60%). 4 probe tests; suite
+     140. Remaining jetstream: tabular-nums/monospace/italic/letter-spacing (no JsEl channel) +
+     clipboard copy (preview-loop). -->
 <!-- pass 38: GPUI — block root now transparent (surface moved to pre/scroll at canvas@92%);
      line-numbers gutter (2.5rem right-aligned); highlighted-line ±1rem bleed; copy button
      rebuilt (1.5rem square composing Icon, hover); inline mode applies adjustmentRatio + new

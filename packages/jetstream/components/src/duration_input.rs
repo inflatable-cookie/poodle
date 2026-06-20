@@ -2,18 +2,27 @@
 //!
 //! Contract: `docs/contracts/components/duration-input.md`
 //! Reference: `packages/svelte/components/src/DurationInput.svelte`
+//! Mirrors the GPUI build-out (`packages/gpui/components/src/primitives/duration_input.rs`).
 //!
-//! ALL dimensions resolve from tokens. ZERO hardcoded pixel values.
+//! Size drives field width + vertical padding (contract §8 size table); density
+//! drives only the inline padding/gap. The root border resolves through
+//! `spec.border_token()` (ValidationState::Invalid → color.status.danger, else
+//! color.border.default — contract §4/§8). Each separator is a 2-row grid
+//! (spacer matched to the label row + glyph) so the colon aligns with the field
+//! rather than the labels. Focused segments carry an accent-12% highlight
+//! (rendered styling; actual focus tracking + keyboard ±1/onChange live in the
+//! preview event loop). ALL dimensions resolve from tokens.
 
 use jetstream_runtime::game_ui::Color;
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{ControlSize, DurationInputSpec, ValidationState};
+use poodle_specs::{ControlSize, DurationInputSpec};
 
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
-/// Root vertical padding in rem per size (contract section 8).
+/// Root vertical padding in rem per size (contract section 8). This is a SIZE
+/// axis — density must not touch vertical padding.
 fn root_pad_y_rem(size: ControlSize) -> f32 {
     match size {
         ControlSize::Xs => 0.125,
@@ -45,11 +54,11 @@ fn field_width_rem(size: ControlSize) -> f32 {
     }
 }
 
-/// Field font size in rem per size (contract section 8).
+/// Field/glyph digit font size in rem per size (contract section 8).
 fn field_font_rem(size: ControlSize) -> f32 {
     match size {
         ControlSize::Xs => 0.75,
-        ControlSize::Sm | ControlSize::Md => 0.8125, // typography-body-size
+        ControlSize::Sm | ControlSize::Md => 0.8125,
         ControlSize::Lg => 0.9375,
         ControlSize::Xl => 1.0,
     }
@@ -68,30 +77,32 @@ fn label_font_rem(size: ControlSize) -> f32 {
 /// Anatomy (from contract):
 /// ```text
 /// [Root .duration-input]  <div role="group">
-///   ├── [Hours Segment .duration-input__segment]
+///   ├── [Hours Segment]
 ///   │   ├── [Label]  "h"
-///   │   └── [Field]  <input>
-///   ├── [Separator]  ":"
+///   │   └── [Field]
+///   ├── [Separator]  ":" (2-row: spacer + glyph)
 ///   ├── [Minutes Segment]
 ///   │   ├── [Label]  "m"
-///   │   └── [Field]  <input>
+///   │   └── [Field]
 ///   ├── [Separator]  ":" (conditional)
 ///   └── [Seconds Segment]  (conditional, when showSeconds)
 ///       ├── [Label]  "s"
-///       └── [Field]  <input>
+///       └── [Field]
 /// ```
-pub fn js_duration_input(
-    spec: &DurationInputSpec,
-    theme: &JetstreamThemeProvider,
-) -> JsEl {
+pub fn js_duration_input(spec: &DurationInputSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
     let fill: Color = resolve_color(theme, spec.fill_token()).into();
+    // Border resolves through the spec: ValidationState::Invalid →
+    // color.status.danger, otherwise color.border.default (contract §4/§8).
     let border_color: Color = resolve_color(theme, spec.border_token()).into();
     let text_primary: Color = resolve_color(theme, spec.text_color_token()).into();
     let text_secondary: Color = resolve_color(theme, spec.text_secondary_token()).into();
     let radius = resolve_radius(theme, spec.radius_token());
+    // Segment-focus highlight = color-mix(accent-base 12%, transparent).
+    let accent: Color = resolve_color(theme, "color.accent.base").into();
+    let segment_focus_bg = accent.with_alpha(accent.a * 0.12);
 
     // ── Sizing (contract section 8) ──
     let pad_y = rem_to_px(root_pad_y_rem(effective_size));
@@ -104,25 +115,31 @@ pub fn js_duration_input(
     let segment_gap = rem_to_px(0.125); // Contract: gap 0.125rem
     let segment_pad = rem_to_px(0.125); // Contract: segment padding 0.125rem
     let segment_radius = rem_to_px(0.1875); // Contract: 0.1875rem
+    let label_gap = rem_to_px(0.125); // label→field gap inside a segment
 
     // ── Segment builder ──
+    // Column of label + field; focused segment gets the accent-12% highlight.
+    // (Focus tracking is preview-loop; the highlight styling is rendered on a
+    // dedicated bg so it round-trips through layout/probe.)
     let build_segment = |unit_label: &str, value_text: &str| -> JsEl {
-        // Label: uppercase unit abbreviation
+        // Label: per-size font, secondary, line-height 1.
         let label = ui_element::label(unit_label)
             .text_size(label_font)
+            .line_height(label_font)
             .text_color(text_secondary);
 
-        // Field: centered numeric value
+        // Field: per-size width, digit font, centered, line-height 1.
         let field = ui_element::label(value_text)
             .w(field_w)
             .text_size(field_font)
+            .line_height(field_font)
             .text_color(text_primary)
             .text_align_center();
 
         ui_element::div()
             .flex_col()
             .items_center()
-            .gap(segment_gap)
+            .gap(label_gap)
             .p(segment_pad)
             .rounded(segment_radius)
             .child(label)
@@ -130,17 +147,34 @@ pub fn js_duration_input(
     };
 
     // ── Separator builder ──
+    // 2-row grid: a spacer matched to the label row (label height + label gap)
+    // so the colon glyph aligns with the field, not the labels. Glyph carries
+    // the digit font-size, weight 600, line-height 1 (contract §2/§8).
     let build_separator = || -> JsEl {
-        ui_element::label(":")
+        let spacer = ui_element::div().h(label_font).mb(label_gap);
+        let glyph = ui_element::div()
+            .flex_row()
+            .items_center()
+            .justify_center()
             .text_size(field_font)
+            .line_height(field_font)
             .text_color(text_secondary)
-            .text_weight(600) // Contract: font-weight 600
+            .text_weight(600)
+            .child(ui_element::label(":"));
+        ui_element::div()
+            .flex_col()
+            .items_center()
+            .child(spacer)
+            .child(glyph)
     };
 
-    // Parse the value "HH:MM:SS" or display zeros
+    // Parse the value "HH:MM:SS" / "HH:MM" or display zeros.
     let (hours_str, minutes_str, seconds_str) = parse_duration(spec.value.as_deref());
 
     // ── Root ──
+    // Contract: inline-flex, width: fit-content (default flex sizing — no
+    // w_full), align-items: flex-end, surface bg, border (danger when invalid),
+    // radius. Vertical pad is size-driven; inline pad is size + density.
     let mut root = ui_element::div()
         .flex_row()
         .items_end() // Contract: align-items: flex-end
@@ -156,30 +190,27 @@ pub fn js_duration_input(
         .focusable();
 
     // Hours segment
-    root = root.child(build_segment("H", &hours_str));
-
+    root = root.child(build_segment("h", &hours_str));
     // Separator
     root = root.child(build_separator());
-
     // Minutes segment
-    root = root.child(build_segment("M", &minutes_str));
+    root = root.child(build_segment("m", &minutes_str));
 
     // Optional seconds
     if spec.show_seconds {
         root = root.child(build_separator());
-        root = root.child(build_segment("S", &seconds_str));
-    }
-
-    // ── Invalid state ──
-    if spec.validation_state == ValidationState::Invalid {
-        let danger: Color = resolve_color(theme, "color.status.danger").into();
-        root = root.border_color(danger);
+        root = root.child(build_segment("s", &seconds_str));
     }
 
     // ── Disabled state ──
     if spec.is_disabled {
         let opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         root = root.opacity(opacity).disabled(true);
+    } else {
+        // Segment-focus highlight on hover (focus tracking is preview-loop;
+        // hover is the closest rendered approximation of the accent-12% band).
+        let bg = segment_focus_bg;
+        root = root.hover(move |s| s.bg(bg));
     }
 
     root
@@ -193,11 +224,7 @@ fn parse_duration(value: Option<&str>) -> (String, String, String) {
             let hours = parts.first().copied().unwrap_or("00");
             let minutes = parts.get(1).copied().unwrap_or("00");
             let seconds = parts.get(2).copied().unwrap_or("00");
-            (
-                hours.to_string(),
-                minutes.to_string(),
-                seconds.to_string(),
-            )
+            (hours.to_string(), minutes.to_string(), seconds.to_string())
         }
         None => ("00".to_string(), "00".to_string(), "00".to_string()),
     }
@@ -206,6 +233,8 @@ fn parse_duration(value: Option<&str>) -> (String, String, String) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::ValidationState;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
@@ -236,15 +265,49 @@ mod tests {
     }
 
     #[test]
-    fn invalid_state_changes_border() {
+    fn invalid_state_renders_danger_border() {
+        // Invalid border must resolve to ~status.danger and differ from the
+        // default border (contract §4 invalid).
+        let danger: Color = resolve_color(&theme(), "color.status.danger").into();
         let valid = js_duration_input(&DurationInputSpec::new(), &theme());
         let invalid = js_duration_input(
             &DurationInputSpec::new().with_validation_state(ValidationState::Invalid),
             &theme(),
         );
+
+        let invalid_border = invalid
+            .style
+            .border_color
+            .expect("invalid root must set a border color");
+        let expected = crate::render_probe::ProbeColor {
+            r: danger.r,
+            g: danger.g,
+            b: danger.b,
+            a: danger.a,
+        };
+        let got = crate::render_probe::ProbeColor {
+            r: invalid_border.r,
+            g: invalid_border.g,
+            b: invalid_border.b,
+            a: invalid_border.a,
+        };
+        assert!(
+            got.approx(expected, 0.02),
+            "invalid border should be ~status.danger, got {got:?} vs {expected:?}"
+        );
         assert_ne!(
             valid.style.border_color, invalid.style.border_color,
-            "Invalid state should change border color"
+            "invalid state should change the border from the default"
         );
+    }
+
+    #[test]
+    fn renders_segment_labels_and_separator() {
+        let spec = DurationInputSpec::new().with_value("01:30").with_show_seconds(false);
+        let el = js_duration_input(&spec, &theme());
+        let tree = probe(&el, 400.0, 200.0);
+        assert!(tree.has_text("h"), "hours label missing: {:?}", tree.texts());
+        assert!(tree.has_text("m"), "minutes label missing");
+        assert!(tree.has_text(":"), "separator glyph missing");
     }
 }
