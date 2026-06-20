@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=8 jetstream=11 specimen=gap -->
+<!-- parity consv=ok gpui=8 jetstream=7 specimen=gap -->
 # Parity: ToastStack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -37,10 +37,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No accent bar at all — `js_toast_stack` renders no left tone stripe (toast_stack.rs:27-33); contract §2 marks AccentBar **required**. `tone_color`/`tone` is never read, so tone is visually invisible.
-- [ ] No dismiss button — contract §2 marks DismissButton **required**; `js_toast_stack` emits no dismiss control or Icon (toast_stack.rs:27-33).
-- [ ] No title — only `toast.message` is rendered (toast_stack.rs:33); contract requires `<strong>` title (required) + optional message. Title (required field) is dropped entirely; message-only toasts show blank.
-- [ ] No action affordance — `action_label` never read; contract §2 Actions/ActionButton absent.
+- [x] DONE: built out the toast body — leading tone **accent bar** (`tone_color`, so Info now shows the status-info blue), required **title** (was message-only — message-only toasts rendered blank before), optional message, optional **action** label, and a **dismiss** `×` affordance. Probe-tested (title/message/action/dismiss present).
 - [ ] No `onDismiss`/`onAction` callbacks — function signature takes only `(spec, theme)` (toast_stack.rs:11); interaction would live in preview `main.rs` but no wiring exists.
 - [ ] No tone-based border/background/accent mixes — flat `fill`/`border` only (toast_stack.rs:28-29); contract §8 gradient + 34% border mix + accent mix dropped.
 - [ ] No box-shadow/elevation — contract §8 `box-shadow: var(--poodle-elevation-overlay)`; `shadow_token()` exists on spec (toast_stack.rs:109) but is never applied.

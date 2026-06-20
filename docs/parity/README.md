@@ -229,7 +229,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-input | fixed | 4 | 5 | gap |
 | time-zone-select | fixed | 6 | 6 | gap |
 | toast-host | fixed | 6 | 7 | gap |
-| toast-stack | ok | 8 | 11 | gap |
+| toast-stack | ok | 8 | 7 | gap |
 | toggle-group | fixed | 4 | 8 | gap |
 | token-input | fixed | 9 | 6 | gap |
 | toolbar | fixed | 4 | 5 | gap |
