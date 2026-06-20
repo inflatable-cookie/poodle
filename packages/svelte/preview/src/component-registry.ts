@@ -137,6 +137,7 @@ export const allComponents: ComponentEntry[] = [
   entry("PaginationSummary", "navigation", "Textual summary of pagination state.", true),
   entry("NavigationMenu", "navigation", "Horizontal navigation with dropdown sub-menus.", true),
   entry("SidebarNav", "navigation", "Grouped sidebar navigation list with active item state.", true),
+  entry("Tree", "navigation", "Hierarchical file-explorer tree with expand/collapse and multi-select.", true),
   entry("NavCard", "navigation", "Navigation-oriented card link with icon, badge, and arrow.", true),
 
   // Data

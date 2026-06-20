@@ -627,6 +627,16 @@ export type SidebarNavGroup = {
   items: SidebarNavItem[];
 };
 
+export type TreeNode = {
+  value: string;
+  label: string;
+  icon?: string | null;
+  children?: TreeNode[];
+  /** Force branch posture even when `children` is empty (empty / lazy folder). */
+  isBranch?: boolean;
+  isDisabled?: boolean;
+};
+
 export type ToastItem = {
   id: string;
   title: string;

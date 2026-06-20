@@ -37,6 +37,7 @@ mod selection_summary;
 mod sidebar_nav;
 mod split_view;
 mod toast_host;
+mod tree;
 mod toast_stack;
 mod video_player;
 
@@ -79,5 +80,6 @@ pub use selection_summary::SelectionSummary;
 pub use sidebar_nav::SidebarNav;
 pub use split_view::SplitView;
 pub use toast_host::ToastHost;
+pub use tree::{Tree, TreeContextRequest, TreeReorderRequest};
 pub use toast_stack::ToastStack;
 pub use video_player::VideoPlayer;

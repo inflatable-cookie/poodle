@@ -4,7 +4,45 @@
 //! appearance treatment, component search, active section, and component selection.
 
 use poodle_gpui::GpuiThemeProvider;
+use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
+
+/// Demo tree for the rename / context-menu / reorder specimen.
+pub fn docs_tree() -> Vec<TreeNode> {
+    vec![
+        TreeNode::branch(
+            "docs",
+            "docs",
+            vec![
+                TreeNode::new("docs/intro.md", "intro.md").with_icon("file"),
+                TreeNode::new("docs/guide.md", "guide.md").with_icon("file"),
+            ],
+        )
+        .with_icon("folder"),
+        TreeNode::new("notes.txt", "notes.txt").with_icon("file"),
+    ]
+}
+
+fn set_label(nodes: &mut [TreeNode], value: &str, label: &str) {
+    for n in nodes.iter_mut() {
+        if n.value == value {
+            n.label = label.to_string();
+            return;
+        }
+        set_label(&mut n.children, value, label);
+    }
+}
+
+fn remove_node(nodes: Vec<TreeNode>, value: &str) -> Vec<TreeNode> {
+    nodes
+        .into_iter()
+        .filter(|n| n.value != value)
+        .map(|mut n| {
+            n.children = remove_node(n.children, value);
+            n
+        })
+        .collect()
+}
 
 /// Which top-level section is active.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -244,6 +282,94 @@ impl SpecimenState {
     }
 }
 
+/// Interactive state for the Tree specimen (expansion, selection, keyboard focus).
+pub struct TreePreviewState {
+    pub expanded: Vec<String>,
+    pub selected: Vec<String>,
+    pub focused: Option<String>,
+    pub checked: Vec<String>,
+    pub editing_value: Option<String>,
+    pub editing_text: String,
+    /// Mutable demo tree for the rename / menu / reorder specimen.
+    pub rename_nodes: Vec<TreeNode>,
+    pub menu_value: Option<String>,
+    pub menu_pos: (i32, i32),
+}
+
+impl TreePreviewState {
+    pub fn new() -> Self {
+        Self {
+            expanded: vec!["src".to_string(), "src/components".to_string()],
+            selected: vec!["src/components/Tree.svelte".to_string()],
+            focused: Some("src/components/Tree.svelte".to_string()),
+            checked: vec!["src/components/Button.svelte".to_string()],
+            editing_value: None,
+            editing_text: String::new(),
+            rename_nodes: docs_tree(),
+            menu_value: None,
+            menu_pos: (0, 0),
+        }
+    }
+
+    pub fn start_rename(&mut self, value: &str, label: &str) {
+        self.editing_value = Some(value.to_string());
+        self.editing_text = label.to_string();
+    }
+    pub fn cancel_rename(&mut self) {
+        self.editing_value = None;
+    }
+    pub fn commit_rename(&mut self, text: &str) {
+        if let Some(value) = self.editing_value.take() {
+            set_label(&mut self.rename_nodes, &value, text);
+        }
+    }
+    pub fn delete_node(&mut self, value: &str) {
+        self.rename_nodes = remove_node(std::mem::take(&mut self.rename_nodes), value);
+    }
+    pub fn reorder(&mut self, from: &str, to: &str, position: DropPosition) {
+        self.rename_nodes = reorder_nodes(&self.rename_nodes, from, to, position);
+    }
+    pub fn open_menu(&mut self, value: &str, x: i32, y: i32) {
+        self.menu_value = Some(value.to_string());
+        self.menu_pos = (x, y);
+    }
+    pub fn close_menu(&mut self) {
+        self.menu_value = None;
+    }
+
+    /// Cascade-toggle a set of checkable leaf values: uncheck all when all are
+    /// checked, otherwise check all.
+    pub fn toggle_checked(&mut self, leaves: &[String]) {
+        let all_on = leaves.iter().all(|v| self.checked.contains(v));
+        if all_on {
+            self.checked.retain(|v| !leaves.contains(v));
+        } else {
+            for v in leaves {
+                if !self.checked.contains(v) {
+                    self.checked.push(v.clone());
+                }
+            }
+        }
+    }
+
+    pub fn toggle_expanded(&mut self, value: &str) {
+        if let Some(i) = self.expanded.iter().position(|v| v == value) {
+            self.expanded.remove(i);
+        } else {
+            self.expanded.push(value.to_string());
+        }
+    }
+
+    pub fn select_only(&mut self, value: &str) {
+        self.selected = vec![value.to_string()];
+        self.focused = Some(value.to_string());
+    }
+
+    pub fn set_focused(&mut self, value: &str) {
+        self.focused = Some(value.to_string());
+    }
+}
+
 /// Global application state.
 pub struct AppState {
     pub section: Section,
@@ -259,6 +385,7 @@ pub struct AppState {
     #[allow(dead_code)]
     pub debug_clicks: u32,
     pub specimens: SpecimenState,
+    pub tree: TreePreviewState,
 }
 
 impl AppState {
@@ -287,6 +414,7 @@ impl AppState {
             token_inspector_query: String::new(),
             debug_clicks: 0,
             specimens: SpecimenState::new(),
+            tree: TreePreviewState::new(),
         }
     }
 

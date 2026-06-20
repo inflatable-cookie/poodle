@@ -3047,6 +3047,52 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <SidebarNav {groups} value={active} ariaLabel="Main navigation" onValueChange={(value) => (active = value)} />`,
   },
 
+  tree: {
+    props: [
+      { name: "nodes", type: "TreeNode[]", default: "[]", description: "Root-level tree nodes. Each node may carry recursive children." },
+      { name: "selectedValues", type: "string[]", default: "[]", description: "Values of the selected nodes (multi-select)." },
+      { name: "expandedValues", type: "string[] | null", default: "null", description: "Controlled set of expanded branch values. When null, expansion is uncontrolled." },
+      { name: "defaultExpandedValues", type: "string[]", default: "[]", description: "Initial expanded branches when expansion is uncontrolled." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the tree region." },
+      { name: "showGuides", type: "boolean", default: "true", description: "Render vertical indentation guide lines." },
+      { name: "showIcons", type: "boolean", default: "true", description: "Reserve and render the leading icon slot." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
+      { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"chrome"', description: "Semantic size offset relative to the inherited presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
+      { name: "onSelectionChange", type: "((values: string[]) => void) | undefined", default: "undefined", description: "Called with the next selection set when selection changes." },
+      { name: "onExpandedChange", type: "((values: string[]) => void) | undefined", default: "undefined", description: "Called with the next expanded set when a branch toggles." },
+      { name: "onActivate", type: "((value: string) => void) | undefined", default: "undefined", description: "Called on double-click or Enter (open intent)." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { Tree } from "@poodle/svelte";
+  import type { TreeNode } from "@poodle/svelte";
+
+  const nodes: TreeNode[] = [
+    {
+      value: "src",
+      label: "src",
+      icon: "folder",
+      children: [
+        { value: "src/index.ts", label: "index.ts", icon: "file" },
+      ],
+    },
+    { value: "README.md", label: "README.md", icon: "file" },
+  ];
+
+  let selected = $state<string[]>([]);
+  let expanded = $state<string[]>(["src"]);
+</script>
+
+<Tree
+  {nodes}
+  ariaLabel="Project files"
+  bind:selectedValues={selected}
+  bind:expandedValues={expanded}
+/>`,
+  },
+
   skeleton: {
     props: [
       { name: "shape", type: "SkeletonShape", default: '"line"', description: "Shape of the skeleton placeholder." },

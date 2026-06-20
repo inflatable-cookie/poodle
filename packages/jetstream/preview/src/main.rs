@@ -116,6 +116,8 @@ struct PreviewState {
     mouse_y: f32,
     /// Whether the left mouse button is currently pressed.
     mouse_left_down: bool,
+    /// Whether an Alt key is currently held (for keyboard reorder).
+    alt_down: bool,
     /// Whether a screenshot was requested this frame.
     screenshot_requested: bool,
     /// Surface format for screenshot readback.
@@ -226,6 +228,7 @@ impl PreviewState {
             mouse_x: 0.0,
             mouse_y: 0.0,
             mouse_left_down: false,
+            alt_down: false,
             screenshot_requested: false,
             surface_format: gpu.surface_format,
             scroll_suppress_frames: 0,
@@ -402,12 +405,73 @@ impl PreviewState {
         let scale = frame.scale_factor as f32;
         for event in &frame.events {
             match event {
-                PlatformEvent::KeyPressed { key, .. } if *key == KeyCode::ESCAPE => {
+                // Escape exits — unless an inline tree rename is in progress
+                // (then Escape cancels the rename, handled in the tree arm).
+                PlatformEvent::KeyPressed { key, .. }
+                    if *key == KeyCode::ESCAPE
+                        && !(self.app.is_tree_active()
+                            && self.app.tree.editing_value.is_some()) =>
+                {
                     return ControlFlow::Exit;
                 }
                 PlatformEvent::KeyPressed { key, .. } if *key == KeyCode::F12 => {
                     self.screenshot_requested = true;
                     log::info!("Screenshot requested (F12)");
+                }
+                // Track Alt held state for keyboard reorder.
+                PlatformEvent::KeyPressed { key, .. }
+                    if matches!(*key, KeyCode::ALT_LEFT | KeyCode::ALT_RIGHT) =>
+                {
+                    self.alt_down = true;
+                }
+                PlatformEvent::KeyReleased { key }
+                    if matches!(*key, KeyCode::ALT_LEFT | KeyCode::ALT_RIGHT) =>
+                {
+                    self.alt_down = false;
+                }
+                // Tree specimen keyboard: rename editing, F2, or navigation.
+                PlatformEvent::KeyPressed { key, .. } if self.app.is_tree_active() => {
+                    use crate::app_state::TreeKey;
+                    if self.app.tree.editing_value.is_some() {
+                        match *key {
+                            KeyCode::ENTER => self.app.tree_commit_rename(),
+                            KeyCode::ESCAPE => {
+                                self.app.tree.cancel_rename();
+                                self.app.dirty = true;
+                            }
+                            KeyCode::BACKSPACE => {
+                                self.app.tree.backspace();
+                                self.app.dirty = true;
+                            }
+                            _ => {}
+                        }
+                    } else if *key == KeyCode::F2 {
+                        self.app.tree_start_rename();
+                    } else if self.alt_down && matches!(*key, KeyCode::UP | KeyCode::DOWN) {
+                        // Alt+Up/Down reorders the focused node among siblings.
+                        self.app.tree_move_sibling(*key == KeyCode::UP);
+                    } else {
+                        let tree_key = match *key {
+                            KeyCode::UP => Some(TreeKey::Up),
+                            KeyCode::DOWN => Some(TreeKey::Down),
+                            KeyCode::LEFT => Some(TreeKey::Left),
+                            KeyCode::RIGHT => Some(TreeKey::Right),
+                            KeyCode::HOME => Some(TreeKey::Home),
+                            KeyCode::END => Some(TreeKey::End),
+                            KeyCode::ENTER => Some(TreeKey::Enter),
+                            _ => None,
+                        };
+                        if let Some(tk) = tree_key {
+                            self.app.tree_key(tk);
+                        }
+                    }
+                }
+                // Character input feeds the active inline rename.
+                PlatformEvent::CharReceived(c)
+                    if self.app.is_tree_active() && self.app.tree.editing_value.is_some() =>
+                {
+                    self.app.tree.insert_char(*c);
+                    self.app.dirty = true;
                 }
                 PlatformEvent::MouseMoved { x, y } => {
                     // Winit 0.30 CursorMoved reports physical pixels.
@@ -419,20 +483,56 @@ impl PreviewState {
                         let was_down = self.mouse_left_down;
                         self.mouse_left_down = *pressed;
 
-                        // On mouse-up, activate the node under the cursor.
-                        if was_down && !pressed {
+                        if !was_down && *pressed {
+                            // Mouse-down: remember a potential drag source row.
+                            self.app.tree.drag_source =
+                                self.tree_node_at(self.mouse_x, self.mouse_y);
+                        } else if was_down && !pressed {
+                            let source = self.app.tree.drag_source.take();
+                            let target = self.tree_node_at(self.mouse_x, self.mouse_y);
+                            match (source, target) {
+                                // Drag-reorder when released over a different row.
+                                (Some(from), Some(to))
+                                    if from != to && self.app.is_tree_active() =>
+                                {
+                                    let pos = self.app.tree_drop_position(&to);
+                                    self.app.tree_reorder(&from, &to, pos);
+                                }
+                                // Otherwise treat as a click.
+                                _ => {
+                                    if let Some(hit_id) =
+                                        self.game_ui.tree.hit_test(self.mouse_x, self.mouse_y)
+                                    {
+                                        let is_focusable = self.game_ui.tree.get(hit_id)
+                                            .map_or(false, |n| n.style.focusable);
+                                        if is_focusable {
+                                            self.game_ui.focus.set_focus(Some(hit_id));
+                                        } else {
+                                            self.game_ui.focus.set_focus(None);
+                                        }
+                                        self.handle_activation(hit_id);
+                                    }
+                                }
+                            }
+                        }
+                    } else if matches!(button, PlatMouseButton::Right) && !pressed {
+                        // Right-click: open the tree context menu for the node
+                        // under the cursor.
+                        if self.app.is_tree_active() {
                             if let Some(hit_id) =
                                 self.game_ui.tree.hit_test(self.mouse_x, self.mouse_y)
                             {
-                                // Only focus nodes that are explicitly focusable.
-                                let is_focusable = self.game_ui.tree.get(hit_id)
-                                    .map_or(false, |n| n.style.focusable);
-                                if is_focusable {
-                                    self.game_ui.focus.set_focus(Some(hit_id));
-                                } else {
-                                    self.game_ui.focus.set_focus(None);
+                                let token = self
+                                    .game_ui
+                                    .tree
+                                    .get(hit_id)
+                                    .and_then(|n| n.style.token_key.clone());
+                                if let Some(value) =
+                                    token.as_deref().and_then(|k| k.strip_prefix("tree:"))
+                                {
+                                    let (mx, my) = (self.mouse_x, self.mouse_y);
+                                    self.app.tree_open_menu(value, mx, my);
                                 }
-                                self.handle_activation(hit_id);
                             }
                         }
                     }
@@ -603,9 +703,29 @@ impl PreviewState {
     }
 
     /// Handle activation of a UI node (from click or keyboard).
+    /// The tree node value under the cursor (parsed from its `tree:` token).
+    fn tree_node_at(&self, x: f32, y: f32) -> Option<String> {
+        let hit = self.game_ui.tree.hit_test(x, y)?;
+        let token = self
+            .game_ui
+            .tree
+            .get(hit)
+            .and_then(|n| n.style.token_key.clone())?;
+        token.strip_prefix("tree:").map(|s| s.to_string())
+    }
+
     fn handle_activation(&mut self, node_id: UiNodeId) {
         let token_key = self.game_ui.tree.get(node_id)
             .and_then(|n| n.style.token_key.clone());
+
+        // Any left-click outside the tree context menu dismisses it.
+        let is_menu_click = token_key
+            .as_deref()
+            .map_or(false, |k| k.starts_with("tree-menu:"));
+        if self.app.tree.menu_value.is_some() && !is_menu_click {
+            self.app.tree.close_menu();
+            self.app.dirty = true;
+        }
 
         match shell::parse_action(token_key.as_deref()) {
             shell::ShellAction::SelectTab(idx) => {
@@ -648,6 +768,22 @@ impl PreviewState {
                     _ => {}
                 }
             }
+            shell::ShellAction::TreeSelect(value) => {
+                self.app.tree.select_only(&value);
+                self.app.dirty = true;
+            }
+            shell::ShellAction::TreeToggle(value) => {
+                self.app.tree.toggle_expanded(&value);
+                self.app.dirty = true;
+            }
+            shell::ShellAction::TreeCheck(value) => {
+                self.app.tree_check(&value);
+            }
+            shell::ShellAction::TreeMenu(action) => match action.as_str() {
+                "rename" => self.app.tree_menu_rename(),
+                "delete" => self.app.tree_menu_delete(),
+                _ => {}
+            },
             shell::ShellAction::None => {}
         }
     }

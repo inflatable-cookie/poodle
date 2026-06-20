@@ -86,6 +86,7 @@ import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
 import SelectSpecimen from "./SelectSpecimen.svelte";
 import SelectionSummarySpecimen from "./SelectionSummarySpecimen.svelte";
 import SidebarNavSpecimen from "./SidebarNavSpecimen.svelte";
+import TreeSpecimen from "./TreeSpecimen.svelte";
 import SeparatorSpecimen from "./SeparatorSpecimen.svelte";
 import SkeletonSpecimen from "./SkeletonSpecimen.svelte";
 import SliderSpecimen from "./SliderSpecimen.svelte";
@@ -224,6 +225,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   select: SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,
   "sidebar-nav": SidebarNavSpecimen,
+  tree: TreeSpecimen,
   separator: SeparatorSpecimen,
   skeleton: SkeletonSpecimen,
   slider: SliderSpecimen,

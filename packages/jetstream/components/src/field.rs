@@ -4,14 +4,14 @@ use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{FieldSpec, ValidationState};
 
-use crate::theme_ext::{resolve_color, resolve_px};
+use crate::theme_ext::{resolve_color, resolve_px, tint};
 
 pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Option<JsEl>) -> JsEl {
     let label_size = resolve_px(theme, spec.label_typography_token());
     let desc_color = resolve_color(theme, spec.description_color_token());
     let error_color = resolve_color(theme, spec.error_color_token());
     let text_primary = resolve_color(theme, "color.text.primary");
-    let label_color = text_primary.opacity(0.82);
+    let label_color = tint(text_primary, 0.82);
     let row_gap = resolve_px(theme, spec.row_gap_token());
 
     let mut el = ui_element::div().flex_col().gap(row_gap);

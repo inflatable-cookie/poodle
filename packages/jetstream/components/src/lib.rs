@@ -174,5 +174,6 @@ pub mod split_view;
 pub mod state_tile;
 pub mod toast_host;
 pub mod toast_stack;
+pub mod tree;
 pub mod validation_summary;
 pub mod video_player;

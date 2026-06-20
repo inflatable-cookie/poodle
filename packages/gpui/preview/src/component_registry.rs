@@ -632,6 +632,11 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         description: "Grouped sidebar navigation list with active item state.",
     },
     ComponentEntry {
+        slug: "tree",
+        display_name: "Tree",
+        description: "Hierarchical file-explorer tree with expand/collapse and multi-select.",
+    },
+    ComponentEntry {
         slug: "metric-tile",
         display_name: "MetricTile",
         description: "Compact label-value tile for metrics and KPIs.",

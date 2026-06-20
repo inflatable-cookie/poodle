@@ -137,6 +137,7 @@ mod split_view;
 mod state_tile;
 mod toast_host;
 mod toast_stack;
+mod tree;
 mod validation_summary;
 mod video_player;
 
@@ -309,6 +310,7 @@ pub use split_view::SplitViewSpec;
 pub use state_tile::StateTileSpec;
 pub use toast_host::{ToastHostPlacement, ToastHostSpec};
 pub use toast_stack::{Toast, ToastPosition, ToastStackSpec, ToastTone};
+pub use tree::{reorder_nodes, DropPosition, TreeNode, TreeSpec, TreeVisibleRow};
 pub use validation_summary::ValidationSummarySpec;
 pub use video_player::VideoPlayerSpec;
 
@@ -1024,7 +1026,7 @@ mod tests {
         assert!(picker.is_modal_like());
         assert_eq!(picker.summary_tone(), StatusTone::Neutral);
         assert_eq!(relation.selected_item_count(), 1);
-        assert_eq!(relation.as_picker_shell("Attach").selected_count, 1);
+        assert_eq!(relation.as_picker_shell().selected_count, 1);
     }
 
     #[test]
