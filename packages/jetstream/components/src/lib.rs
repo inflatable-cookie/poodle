@@ -92,6 +92,7 @@ pub mod text_input;
 pub mod text_link;
 pub mod time_ago;
 pub mod toggle_group;
+pub mod token_input;
 pub mod tri_state_switch;
 
 // Complex primitives (g10.005)

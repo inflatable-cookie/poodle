@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=6 specimen=gap -->
 # Parity: TokenInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -41,11 +41,8 @@ GPUI is a static stub — it renders pills + a placeholder string, not a working
 
 **Entire target missing.** No component file, no builder, no specimen.
 
-- [ ] **Implement `js_token_input` from scratch — component absent** (`packages/jetstream/components/src/token_input.rs` does not exist; not registered in `lib.rs`). This is the single biggest gap across both audited components.
-- [ ] Root field chrome: border, radius, fill, focus ring resolved from `interactive-subtle` treatment tokens.
-- [ ] Token Row part: wrapping flex row with density-driven gap and size/density padding.
-- [ ] Render committed tokens via `js_pill` (neutral/subtle) with wrapping long-value labels.
-- [ ] Per-token remove button (`aria-label="Remove <token>"`), hidden in disabled/read-only.
+- [x] DONE: `js_token_input` created + registered. Field chrome (border `border.subtle`, `radius.control`, surface fill, disabled opacity), wrapping token row with density gap + control-height/control-space sizing, committed tokens rendered via `js_pill` (neutral/subtle), placeholder. Probe-tested.
+- [ ] Per-token remove button (`×`) + the live text-input draft — render affordance + interaction; entry/removal lives in the preview event loop.
 - [ ] Live text input control (or its Jetstream equivalent) with placeholder, `maxLength`, draft state.
 - [ ] Hidden form-input payload slots when `name` is set.
 - [ ] Commit semantics: separator split, Enter/Tab commit, Backspace-removes-last, blur commit, trim, dedupe.
