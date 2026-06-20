@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=9 jetstream=4 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=4 specimen=gap -->
+<!-- pass 18: GPUI rebuilt — composed real MediaThumbnail (square, compact) + Callout
+     (danger error) + Button (load-more) instead of fakes; grid min-columns corrected
+     (lg 12.5→12, xl 14→13); dropped ad-hoc alpha math (item bg now color-mix(panel 92%));
+     added hover/focus states + caption-size meta font; items focusable/clickable.
+     Build clean. Remaining GPUI: onSelect callback (preview-loop) + thumbnail image URL. -->
 # Parity: MediaBrowsePanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
