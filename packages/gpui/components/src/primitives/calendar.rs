@@ -8,7 +8,10 @@ use poodle_specs::{
 };
 
 use super::icon::Icon;
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{
+    calendar_cell_size_rem, calendar_day_font_rem, calendar_nav_size_rem, rem_to_px,
+    resolve_semantic_size, size_font_rem,
+};
 use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Weekday header labels (Sunday-first; rotated at render time based on spec).
@@ -221,8 +224,15 @@ impl IntoElement for Calendar {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let _cell_size = px(rem_to_px(control_height_rem(effective_size)));
-        let cal_font = px(rem_to_px(size_font_rem(effective_size)));
+        // Per-size calendar metrics, all from the contract size table:
+        //   cell-size (grid column + day min-height), nav button, day font,
+        //   month-label font. These are calendar-specific scales.
+        let cell_size = px(rem_to_px(calendar_cell_size_rem(effective_size)));
+        let nav_btn_size = px(rem_to_px(calendar_nav_size_rem(effective_size)));
+        let day_font = px(rem_to_px(calendar_day_font_rem(effective_size)));
+        // Month-label font scales per size (xs 0.6875 … xl 0.9375rem) and
+        // matches `size_font_rem`.
+        let month_label_font = px(rem_to_px(size_font_rem(effective_size)));
 
         let control_radius = resolve_radius(theme, "radius.control");
         let caption_size = resolve_px(theme, "typography.caption.size");
@@ -237,7 +247,11 @@ impl IntoElement for Calendar {
         let border = resolve_color(theme, "color.border.default");
         let icon_muted = resolve_color(theme, "color.icon.muted");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
-        let body_size = cal_font;
+        // Outside-month days dim to the muted opacity token (0.72), not a
+        // raw literal. Svelte: `.poodle-calendar__day[data-current-month=false] { opacity: 0.72 }`.
+        let outside_opacity = resolve_opacity(theme, "state.opacity.muted");
+        let body_size = day_font;
+        let white = Hsla { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };
 
         // Svelte: day hover bg = color-mix(accent 14%, transparent)
         let hover_bg = Hsla { a: accent.a * 0.14, ..accent };
@@ -245,6 +259,9 @@ impl IntoElement for Calendar {
         let hover_border = color_mix(accent, border, 0.46);
         // Svelte: today cell border = color-mix(accent 44%, border-default)
         let today_border = color_mix(accent, border, 0.44);
+        // Svelte: selected / range-endpoint hover = color-mix(accent 88%, white 8%).
+        // Closest faithful 2-color blend (matches button.rs danger-hover pattern).
+        let selected_hover_bg = color_mix(accent, white, 0.88);
 
         let selected_date = spec.current_value().map(|s| s.to_string());
         let selected_day = selected_date.as_deref().and_then(Self::parse_day);
@@ -313,19 +330,24 @@ impl IntoElement for Calendar {
             "November",
             "December",
         ];
-        let month_label = format!(
-            "{} {}",
-            month_names.get(month as usize - 1).unwrap_or(&""),
-            year
-        );
+        let month_name = month_names
+            .get(month as usize - 1)
+            .copied()
+            .unwrap_or("")
+            .to_string();
+        let year_label = format!("{}", year);
 
         let surface_radius = resolve_radius(theme, "radius.surface");
 
-        // Build the calendar container
-        // Layout: 7 cells × 2.25rem + 6 gaps × 0.125rem + 2 × 0.75rem padding = 18rem
-        let calendar_width = px(rem_to_px(18.0));
-        let cell_size = px(rem_to_px(2.25)); // Svelte default: 2.25rem
-        let nav_btn_size = px(rem_to_px(2.0)); // Svelte default: 2rem
+        // Build the calendar container.
+        // Svelte uses `width: fit-content`; we derive the equivalent from the
+        // grid: 7 columns of `cell_size`, 6 inter-column gaps (0.125rem), plus
+        // the root's 0.75rem padding on each side. Tracks cell size per size.
+        let grid_gap = px(rem_to_px(0.125));
+        let root_pad = px(rem_to_px(0.75));
+        let cell_size_rem = calendar_cell_size_rem(effective_size);
+        let calendar_width =
+            px(rem_to_px(cell_size_rem * 7.0 + 0.125 * 6.0 + 0.75 * 2.0));
 
         let mut cal = div()
             .id(SharedString::from(id_str))
@@ -333,7 +355,7 @@ impl IntoElement for Calendar {
             .flex()
             .flex_col()
             .gap(gap_sm)
-            .p(px(rem_to_px(0.75)))
+            .p(root_pad)
             .w(calendar_width)
             .rounded(surface_radius)
             .bg(surface_bg)
@@ -431,21 +453,54 @@ impl IntoElement for Calendar {
             });
         }
 
+        // Month Label = composed Month Trigger + Year Trigger (contract §2).
+        // Each is a button-like control with a dashed-underline edit
+        // affordance (Svelte `.poodle-calendar__month-button` /
+        // `.poodle-calendar__year-button`). Double-click-to-edit and the
+        // inline select/input editors are preview-loop interaction; here we
+        // render the editable controls at the current month/year.
+        let border_width = px(rem_to_px(0.0625));
+        // Svelte: underline = color-mix(text-secondary 72%, transparent)
+        let trigger_underline = Hsla { a: text_secondary.a * 0.72, ..text_secondary };
+        // Svelte hover: underline = color-mix(accent 72%, transparent), text-primary
+        let trigger_underline_hover = Hsla { a: accent.a * 0.72, ..accent };
+
+        let make_trigger = |id: &str, label: String, disabled: bool| {
+            let mut t = div()
+                .id(SharedString::from(format!("poodle-cal-{}", id)))
+                .text_size(month_label_font)
+                .font_weight(FontWeight::SEMIBOLD)
+                .text_color(text_primary)
+                .border_b(border_width)
+                .border_color(trigger_underline)
+                .child(label);
+            if disabled {
+                t = t.cursor(CursorStyle::OperationNotAllowed);
+            } else {
+                t = t.cursor(CursorStyle::IBeam).hover(move |s| {
+                    s.text_color(text_primary)
+                        .border_color(trigger_underline_hover)
+                });
+            }
+            t
+        };
+
+        let month_label_control = div()
+            .flex_1()
+            .flex()
+            .items_center()
+            .justify_center()
+            .gap(px(rem_to_px(0.375)))
+            .child(make_trigger("month-trigger", month_name, spec.is_disabled))
+            .child(make_trigger("year-trigger", year_label, spec.is_disabled));
+
         let nav_header = div()
             .flex()
             .items_center()
             .justify_between()
             .py(gap_sm)
             .child(prev_btn)
-            .child(
-                div()
-                    .flex_1()
-                    .text_center()
-                    .text_size(body_size)
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .text_color(text_primary)
-                    .child(month_label),
-            )
+            .child(month_label_control)
             .child(next_btn);
 
         cal = cal.child(nav_header);
@@ -525,14 +580,16 @@ impl IntoElement for Calendar {
         }
 
         // Weekday headers row
-        // Contract: weekday font 0.6875rem (11px), weight 600, uppercase
-        let mut header_row = div().flex().gap(px(rem_to_px(0.125)));
+        // Contract: weekday font 0.6875rem (11px), weight 600, uppercase.
+        // Row height is a fixed 1.5rem (no token; contract-exact rem).
+        let weekday_row_height = px(rem_to_px(1.5));
+        let mut header_row = div().flex().gap(grid_gap);
         for i in 0..7u32 {
             let idx = ((i + week_start_offset) % 7) as usize;
             header_row = header_row.child(
                 div()
                     .w(cell_size)
-                    .h(px(rem_to_px(1.5)))
+                    .h(weekday_row_height)
                     .flex()
                     .items_center()
                     .justify_center()
@@ -558,7 +615,7 @@ impl IntoElement for Calendar {
         let prev_month_days = Self::days_in_month(prev_year, prev_month);
 
         for row in 0..rows {
-            let mut day_row = div().flex().gap(px(rem_to_px(0.125)));
+            let mut day_row = div().flex().gap(grid_gap);
             for col in 0..7u32 {
                 let cell_idx = row * 7 + col;
                 if cell_idx < start_offset {
@@ -573,9 +630,9 @@ impl IntoElement for Calendar {
                             .justify_center()
                             .rounded(control_radius)
                             .text_size(body_size)
-                            // Svelte: color text-secondary with element opacity 0.72
+                            // Svelte: color text-secondary at muted opacity (0.72)
                             .text_color(text_secondary)
-                            .opacity(0.72)
+                            .opacity(outside_opacity)
                             .child(format!("{}", outside_day)),
                     );
                 } else if cell_idx >= start_offset + days_count {
@@ -590,9 +647,9 @@ impl IntoElement for Calendar {
                             .justify_center()
                             .rounded(control_radius)
                             .text_size(body_size)
-                            // Svelte: color text-secondary with element opacity 0.72
+                            // Svelte: color text-secondary at muted opacity (0.72)
                             .text_color(text_secondary)
-                            .opacity(0.72)
+                            .opacity(outside_opacity)
                             .child(format!("{}", outside_day)),
                     );
                 } else {
@@ -630,6 +687,11 @@ impl IntoElement for Calendar {
                             .bg(accent)
                             .text_color(text_inverse)
                             .font_weight(FontWeight::SEMIBOLD);
+                        // Svelte: selected / range-endpoint hover lightens the
+                        // accent (color-mix accent 88%, white 8%).
+                        if !spec.is_disabled {
+                            cell = cell.hover(move |s| s.bg(selected_hover_bg));
+                        }
                     } else if is_in_range {
                         // Svelte: in-range bg = color-mix(accent 16%, transparent)
                         let in_range_bg = Hsla { a: accent.a * 0.16, ..accent };

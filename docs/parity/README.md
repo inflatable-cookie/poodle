@@ -122,7 +122,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | breadcrumbs | fixed | 5 | 7 | gap |
 | bulk-action-bar | fixed | 2 | 9 | gap |
 | button | fixed | 4 | 7 | gap |
-| calendar | fixed | 9 | 10 | gap |
+| calendar | fixed | 3 | 10 | gap |
 | callout | fixed | 7 | 9 | gap |
 | card | fixed | 7 | 7 | gap |
 | card-radio-group | fixed | 2 | 9 | gap |

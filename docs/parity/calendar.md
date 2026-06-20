@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=10 specimen=gap -->
 # Parity: Calendar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,15 +25,16 @@ Mostly aligned (props, anatomy parts, states, ARIA all present in Svelte). Diver
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded width literal `px(rem_to_px(18.0))` at `calendar.rs:326` — Svelte uses `fit-content`; derive width from cell size × 7 + gaps, or drop fixed width. No token.
-- [ ] Hardcoded cell-size literal `px(rem_to_px(2.25))` at `calendar.rs:327` — should resolve per-size from `control_height_rem(effective_size)` (the `_cell_size` computed at line 224 is discarded with `_` prefix and the hardcoded 2.25 used instead).
-- [ ] Hardcoded nav-button-size literal `px(rem_to_px(2.0))` at `calendar.rs:328` — no size token; per contract nav scales per size (xs 1.5 … xl 2.5rem), GPUI is fixed.
-- [ ] Hardcoded outside-month opacity literal `.opacity(0.72)` at `calendar.rs:578,595` — resolve from a token, not raw `0.72`.
-- [ ] Hardcoded weekday-header height literal `.h(px(rem_to_px(1.5)))` at `calendar.rs:538` — no token.
-- [ ] No month/year inline editing — contract §2 anatomy requires Month Trigger / Month Select / Year Trigger / Year Input; GPUI renders a static month label only (`calendar.rs:441-447`). No double-click-to-edit.
-- [ ] No roving tabindex / Enter-Space day selection — keyboard handler lives on the container and derives the "current day" from the *selected* value not a focus cursor (`calendar.rs:464-524`); arrow keys move selection, not focus. Contract §6 requires roving focus with Enter/Space committing the focused day.
-- [ ] Missing Home/End keyboard handling — contract §6 lists Home/End (week boundaries); GPUI handles only left/right/up/down/pageup/pagedown (`calendar.rs:466-522`).
-- [ ] Per-size scaling absent — day min-height, font-size, nav size, month-label font do not vary by size (contract §8 size table); GPUI uses fixed 2.25/2.0 regardless of `effective_size`.
+- [x] FIXED Hardcoded width literal — root width now derived fit-content style from `cell_size_rem × 7 + 6 gaps(0.125) + 2 padding(0.75)`, tracking the per-size cell scale. No fixed `18.0`.
+- [x] FIXED Hardcoded cell-size literal — now `calendar_cell_size_rem(effective_size)` (xs 1.75 / sm 2 / md 2.25 / lg 2.5 / xl 2.75rem) per contract §8 size table. New helper in `presentation.rs`; this is the calendar-specific scale, NOT `control_height_rem` (which gives 1.5/1.75/2.25/2.75/3.25 — wrong for cells).
+- [x] FIXED Hardcoded nav-button-size literal — now `calendar_nav_size_rem(effective_size)` (xs 1.5 … xl 2.5rem) per contract size table. New helper.
+- [x] FIXED Hardcoded outside-month opacity literal — now `resolve_opacity(theme, "state.opacity.muted")` (= 0.72). The token exists; no longer a raw literal.
+- [ ] accepted: weekday-header row height `1.5rem` — no token exists; kept as a named contract-exact `rem_to_px(1.5)` (`weekday_row_height`). Acceptable per rules (contract-exact rem).
+- [x] FIXED Month/year header is now a composed editable control — Month Trigger + Year Trigger buttons with the dashed-underline edit affordance and hover treatment (Svelte `.month-button`/`.year-button`), rendered at the current month/year. Double-click-to-edit + inline Month Select / Year Input editors remain preview-loop interaction.
+- [ ] preview-loop: roving tabindex / Enter-Space focus-cursor selection — keyboard handler still derives the current day from the selected value, not a focus cursor; render-side controls present, interaction is preview event-loop.
+- [ ] preview-loop: Home/End keyboard handling — week-boundary keys are interaction; left untouched (container handler unchanged).
+- [x] FIXED Per-size scaling — cell size, nav button, day font (`calendar_day_font_rem`), and month-label font (`size_font_rem`) now all vary by `effective_size` per the contract size table.
+- [x] FIXED Added selected / range-endpoint hover treatment — `color-mix(accent 88%, white 8%)` via `color_mix(accent, white, 0.88)` (matches button.rs danger-hover pattern); was missing entirely.
 - accepted: no ARIA (gpui has no accessibility API) — grid/row/gridcell roles + aria-selected/aria-live not emitted.
 
 ## Jetstream gap (vs Svelte + contract)

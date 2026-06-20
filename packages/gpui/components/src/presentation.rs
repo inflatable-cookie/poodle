@@ -187,6 +187,49 @@ pub fn callout_dismiss_size_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// Calendar day-cell / grid-column size (`--calendar-cell-size`) in rem.
+///
+/// Matches the Svelte Calendar per-size `--calendar-cell-size` values
+/// (md `2.25rem`). This is a calendar-specific scale distinct from
+/// `control_height_rem`, and also drives the day button `min-height`.
+pub fn calendar_cell_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.75,
+        ControlSize::Sm => 2.0,
+        ControlSize::Md => 2.25,
+        ControlSize::Lg => 2.5,
+        ControlSize::Xl => 2.75,
+    }
+}
+
+/// Calendar nav button (prev/next month) width/height in rem.
+///
+/// Matches the Svelte Calendar per-size `.poodle-calendar__nav` sizes
+/// (md `2rem`).
+pub fn calendar_nav_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.5,
+        ControlSize::Sm => 1.75,
+        ControlSize::Md => 2.0,
+        ControlSize::Lg => 2.25,
+        ControlSize::Xl => 2.5,
+    }
+}
+
+/// Calendar day button font-size in rem.
+///
+/// Matches the Svelte Calendar per-size `.poodle-calendar__day` font-size
+/// (md `0.75rem`). Distinct from the month-label font (`size_font_rem`).
+pub fn calendar_day_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.6875,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0
