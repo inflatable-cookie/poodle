@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=2 specimen=gap -->
 # Parity: DetailSectionGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,10 +14,11 @@
 
 ## Contract ↔ Svelte
 
-`consv=gap`. Props align, but the contract spec lacks builder methods for three fields, so they can't be set on the Rust targets.
+`consv=fixed`. Contract text matches Svelte's prop surface exactly; the remaining gap is a spec-builder (code) gap on the Rust targets, not a contract↔Svelte divergence.
 
-- All props match in meaning/default: `density` (`null`→context), `layout` (`"grid"`/`"stack"`, default `"grid"`), `minColumnWidth` (`"14rem"`), `itemMinColumnWidth` (`"12rem"`), `maxColumns` (`2|3|4|5`, default `4`), `ariaLabel` (`null`).
-- Contract spec (`packages/contracts/components/src/detail_section_group.rs`) has `min_column_width`, `item_min_column_width`, `aria_label` fields but **no builder methods** (`with_min_column_width`, `with_item_min_column_width`, `with_aria_label`) — so consumers can't override them. **Fix spec: add the three builders.** (This is why `consv=gap`: spec surface lags Svelte's prop surface.)
+- [x] All props match in meaning/default: `density` (`null`→context), `layout` (`"grid"`/`"stack"`, default `"grid"`), `minColumnWidth` (`"14rem"`), `itemMinColumnWidth` (`"12rem"`), `maxColumns` (`2|3|4|5`, default `4`), `ariaLabel` (`null`). Verified against `DetailSectionGroup.svelte:6-24`.
+- [x] FIXED (contract enrichment) §7 now documents the density gap values, `--poodle-detail-section-group-min`/`-item-min` custom props, `data-max-columns` bound, and the `@container (max-width: 34rem)` single-column collapse.
+- Spec-builder gap (`packages/contracts/components/src/detail_section_group.rs` lacks `with_min_column_width`/`with_item_min_column_width`/`with_aria_label`) is a **code** fix tracked under the Rust targets — out of scope for contract↔Svelte reconciliation. Svelte itself is correct.
 
 ## GPUI gap (vs Svelte + contract)
 

@@ -19,15 +19,17 @@ Updated: 2026-03-26
 ```text
 [Root .spinner]
   └── [Visual]
-      ├── ring variant: single rotating ring
-      └── grid variant: 6 square cells in a 2x3 matrix
+      ├── ring variant: [Ring .spinner__ring]  single wrapper span (rotating ring)
+      └── grid variant: [Grid .spinner__grid]  single wrapper span
+                          └── 6 [Cell .spinner__cell] span children in a 2x3 matrix
 ```
 
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
 | Root | `span` | yes | inline-flex host carrying variant, size, and tone data |
-| Ring visual | `span`/`svg` | conditional | classic rotating circular loader |
-| Grid visual | 6 `span` children | conditional | CLI-like square loader with staggered fading |
+| Ring visual | `span` (`.spinner__ring`) | conditional | single wrapper span; classic rotating circular loader |
+| Grid visual | `span` (`.spinner__grid`) | conditional | single wrapper span containing the cells |
+| Grid cell | 6 `span` children (`.spinner__cell`) | conditional | CLI-like square loader cells with staggered fading; children of the grid wrapper |
 
 ## 3. Props And Inputs
 
@@ -159,12 +161,15 @@ No internal state. Animation is continuous while the component is mounted.
 | `gap` | size-dependent small fixed gap |
 | `cell border-radius` | `0.125rem` |
 | `cell background` | `currentColor` |
-| `cell animation` | `spinner-grid 1.12s linear infinite` with phase-specific opacity keyframes |
+| `cell idle opacity` | `0.2` (rest/baseline floor; `spinner-grid-idle` keyframe holds `0.2` for unphased cells) |
+| `cell animation` | `spinner-grid 1.24s linear infinite` with phase-specific opacity keyframes |
+| `cell opacity range` | `0.2` (idle floor) → `0.76` (phase peak); each cell ramps within this band |
 | `cell order` | top-left, top-right, middle-right, middle-left, bottom-left, bottom-right, middle-right, middle-left |
 
 ## 9. Svelte Notes
 
-- Decorative by default; `aria-hidden` should be set when no `ariaLabel` is provided
+- Decorative by default; `aria-hidden="true"` is set on the root when no `ariaLabel` is provided, and `role="status"` + `aria-live="polite"` are set only when `ariaLabel` is supplied
+- Accepts passthrough props: `class` (merged onto the root), `style`, and `...restProps` spread onto the root span
 - The ring variant may use borders or SVG internally as long as the public
   motion and sizing contract matches
 - The grid variant should use six cells in a two-column, three-row layout with

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=11 specimen=gap -->
 # Parity: CardToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,9 +16,9 @@
 
 Contract anatomy invents an indicator Svelte never renders; one class-prefix gap. Svelte authoritative.
 
-- Anatomy mismatch: contract §2 lists `[Indicator .card-toggle-group__indicator]` inside the header. Svelte's header has **no indicator** — only `Title` + optional `Count` (`CardToggleGroup.svelte:139-148`). Selection is shown via the `Card` selected state, not a radio dot. **Fix: remove the Indicator part from contract §2 anatomy.**
-- Class prefix: contract §2 uses bare `.card-toggle-group*`; Svelte emits `.poodle-card-toggle-group*` and targets `:global(.poodle-card)` (`:220`). **Fix: update contract anatomy to the `poodle-` prefix.**
-- Contract §3 lacks any token/sizing tables (unlike CardRadioGroup §8); Svelte carries a full per-size matrix for title font, card gap/padding, description font, and count padding/font (`:194-370`) plus a `min-width` auto-fit grid. **Fix: add a §7/§8 token table to the contract mirroring the Svelte size/density values.**
+- [x] FIXED Anatomy: removed the phantom `[Indicator]` part from contract §2; the header now lists only `Title` + optional `Count`, matching Svelte (selection shown via the `Card` selected state).
+- [x] FIXED Class prefix: contract §2 anatomy and the new §7 token tables use the `poodle-` prefix and target `:global(.poodle-card)`.
+- [x] FIXED Token/sizing tables: added §6 Layout (auto-fit grid model + min-width) and §7 Token Usage with per-part token tables, a full Size Adjustments matrix (min-width, card gap/padding, title/description/count font + count padding), a Density Adjustments table (gap only), and a data-attributes table — all mirroring Svelte (`:164-371`). The trailing "Use With CardRadioGroup" section is renumbered to §8.
 - Props otherwise match: `value`/`defaultValue`/`allowDeactivation`/`columns`/`onValueChange` all present in Svelte exactly as contract §3 documents. OK.
 
 ## GPUI gap (vs Svelte + contract)
@@ -62,5 +62,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - The GPUI `values: Vec<String>` multi-select model is the deepest defect: it makes the GPUI component a different control than the contract describes. The spec lives in `packages/contracts/components/src/card_toggle_group.rs` and is shared with Jetstream, so fixing it unblocks both Rust targets.
-- `consv=gap` driver: phantom Indicator part in §2 anatomy + `poodle-` class prefix + missing token/sizing table. None block Svelte, all are contract-doc fixes.
+- `consv=fixed`: phantom Indicator part removed, `poodle-` class prefix applied, and the missing token/sizing table added (§6 Layout + §7 Token Usage). All were contract-doc fixes; Svelte unchanged. Remaining gpui/jetstream work (incl. greenfield jetstream + shared-spec single-value fix) is code-side.
 - Jetstream count (12) reflects full greenfield build incl. spec fix, module wiring, component, and specimen + registry — this is the single biggest gap across both assigned components.

@@ -54,6 +54,7 @@ The root element doubles as the track. There is no separate track element.
 | `safeMax` | `max <= 0 ? 100 : max` |
 | `safeValue` | `clamp(value, 0, safeMax)` |
 | `percentage` | `safeValue / safeMax` |
+| `computedValueText` | `!indeterminate && safeValue !== null ? "{round(percentage * 100)}%" : null` — default `aria-valuetext` when `valueText` is not supplied |
 
 ## 4. States
 
@@ -83,7 +84,7 @@ internal state.
 - Role: `role="progressbar"` on root element
 - Required attributes (determinate): `aria-valuemin="0"`, `aria-valuemax={safeMax}`, `aria-valuenow={safeValue}`
 - Required attributes (indeterminate): no aria-valuemin, aria-valuemax, or aria-valuenow (omitted entirely)
-- Optional attributes: `aria-label={ariaLabel}` when provided, `aria-valuetext={valueText}` when provided
+- Optional attributes: `aria-label={ariaLabel}` when provided, `aria-valuetext={valueText ?? computedValueText}` — explicit `valueText` wins, else the computed `"{round(percentage * 100)}%"` fallback applies for determinate progress (omitted when indeterminate or value is null)
 - Data attribute: `data-indeterminate` present on root when `indeterminate=true`
 - Labeling rules: when progress meaning is unclear from surrounding text, an
   explicit `ariaLabel` is required
@@ -176,7 +177,7 @@ internal state.
 
 | Token | Role |
 |-------|------|
-| `--poodle-color-background-surface` | track background (mixed at 92% opacity) |
+| `--poodle-surface` | track background (mixed at 96% with `--poodle-color-text-primary`) |
 | `--poodle-color-accent-base` | indicator gradient endpoint and base |
 | `--poodle-motion-duration-standard` | determinate transition duration |
 | `--poodle-motion-easing-standard` | determinate transition easing |
@@ -205,7 +206,7 @@ internal state.
 
 ### Tier 2: Visual Parity
 
-- [ ] track background uses `--poodle-color-background-surface` at 92% mix
+- [ ] track background uses `--poodle-surface` at 96% mix with `--poodle-color-text-primary`
 - [ ] indicator gradient uses `--poodle-color-accent-base` at 88% mix with white
 - [ ] indicator border-radius inherits from track (999px pill)
 - [ ] min-height of 0.5rem matches

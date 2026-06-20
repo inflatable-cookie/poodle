@@ -22,6 +22,7 @@ Updated: 2026-04-09
 |------|------|---------|----------|-------|
 | `variant` | `"default" \| "compact"` | `"default"` | no | Compact uses single-column layout |
 | `minItemWidth` | `number \| string \| null` | `null` | no | Minimum column width; numbers treated as `em`, strings used as-is; defaults to `360px` |
+| `maxColumns` | `number \| null` | `3` | no | Upper bound on auto-fill columns (default variant only); `null` removes the cap. The value is floored and clamped to a minimum of `1` |
 | `gap` | `number \| string \| null` | `null` | no | Grid gap; numbers treated as `px`, strings used as-is; defaults to `1.25rem` (default) or `0.5rem` (compact) |
 | `class` | `string` | `""` | no | Additional CSS class |
 | `actions` | `Snippet` | -- | no | Optional header actions row |
@@ -36,6 +37,14 @@ Updated: 2026-04-09
   └── [Content .list-grid__content]  <div style="display: grid">
         └── (slot: children)
 ```
+
+## Layout Behavior
+
+- Default variant: `grid-template-columns` uses `repeat(auto-fill, minmax(…, 1fr))`.
+  - With `maxColumns = null`, the track floor is `min(minItemWidth, 100%)` — columns grow purely by available width.
+  - With a `maxColumns` cap (default `3`), the track floor becomes
+    `min(100%, max(minItemWidth, calc((100% - (maxColumns - 1) * gap) / maxColumns)))`, so the grid never exceeds `maxColumns` columns even on wide viewports while still collapsing on narrow ones.
+- Compact variant: single column (`1fr`); `maxColumns` does not apply.
 
 ## 2. Accessibility
 

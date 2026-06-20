@@ -54,7 +54,7 @@ Updated: 2026-05-18
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string` | `""` | no | Markdown content; when supplied, the host owns updates through `onValueChange` |
+| `value` | `string \| undefined` | `undefined` | no | Markdown content; `undefined` (omitted) runs the editor uncontrolled, any string value (incl. `""`) puts the host in control through `onValueChange`. Bindable |
 | `name` | `string \| null` | `null` | no | Optional textarea `name` for native form submission |
 | `placeholder` | `string` | `"Write markdown..."` | no | Placeholder text for the textarea |
 | `disabled` | `boolean` | `false` | no | Disables editing and toolbar actions |
@@ -74,8 +74,10 @@ None.
 
 ### Controlled / Uncontrolled
 
-`value` is host-owned when supplied and should be updated through
-`onValueChange`. When omitted, the editor uses uncontrolled local text state.
+`value` is host-owned when supplied (any string, including `""`) and should be
+updated through `onValueChange`; the controlled/uncontrolled switch is
+`value !== undefined`. When omitted (`undefined`), the editor uses uncontrolled
+local text state — defaulting `value` to `""` would force controlled mode.
 `mode` seeds and updates the internal view posture, but mode changes triggered
 inside the component are not emitted through a callback.
 
@@ -326,13 +328,15 @@ Mode button chrome delegates to the `IconButton` contract:
 
 ### Size Adjustments
 
-| Size | Tool button size | Mode controls |
-|------|-----------------|---------------|
-| `xs` | `1.5rem` | `IconButton` inherits `xs` presentation |
-| `sm` | `1.75rem` | `IconButton` inherits `sm` presentation |
-| `md` | `2rem` | `IconButton` inherits `md` presentation |
-| `lg` | `2.25rem` | `IconButton` inherits `lg` presentation |
-| `xl` | `2.5rem` | `IconButton` inherits `xl` presentation |
+| Size | Tool button size | Mode X | Mode controls |
+|------|-----------------|--------|---------------|
+| `xs` | `1.5rem` | `0.375rem` | `IconButton` inherits `xs` presentation |
+| `sm` | `1.75rem` | `0.5rem` | `IconButton` inherits `sm` presentation |
+| `md` | `2rem` | `0.5rem` | `IconButton` inherits `md` presentation |
+| `lg` | `2.25rem` | `0.625rem` | `IconButton` inherits `lg` presentation |
+| `xl` | `2.5rem` | `0.75rem` | `IconButton` inherits `xl` presentation |
+
+The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizontal padding by size (it is size-driven, not density-driven; `sm`/`md` reuse the `0.5rem` base).
 
 ### Density Adjustments
 

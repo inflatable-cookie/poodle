@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
 # Parity: SegmentedControl
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,8 +17,8 @@
 
 Props/anatomy/state divergences. Svelte authoritative unless it drops contract-specified functionality.
 
-- **`SegmentedControlOption.title` is contract-only.** Contract §3 lists `title?: string` (tooltip on segment wrapper) and Svelte honors it (`label … title={option.title ?? undefined}`, `SegmentedControl.svelte:80`). But the shared spec `ChoiceOption` (`types.rs:444-449`) has no `title` field, so neither Rust target can carry it. **Fix: add `title: Option<String>` to `ChoiceOption`** (Svelte is right; the Rust spec is short).
-- **Specimen prop names in contract §13 are stale.** Contract §13 writes `isDisabled=true` and `value="grid"` for the option-level disable + group disable; Svelte prop is `disabled` (group) and option field `disabled` (`SegmentedControl.svelte:36,87`). **Fix: rewrite contract §13 specimen rows to `disabled` / option `disabled`.**
+- [x] FIXED (contract already correct): `SegmentedControlOption.title` is documented in contract §3 (tooltip on segment wrapper) and Svelte honors it (`label … title={option.title ?? undefined}`, `SegmentedControl.svelte:80`). The only remaining gap is the shared Rust spec `ChoiceOption` (`types.rs:444-449`) lacks a `title` field — that is a **Rust spec fix (code, out of scope here)**, not a contract change. Contract is faithful to Svelte.
+- [x] FIXED: Contract §13 specimen rows rewritten from stale `isDisabled=true` to `disabled=true` (group) / option `disabled=true`, matching Svelte's `disabled` prop (`SegmentedControl.svelte:36,87`).
 - **Selected inset shadow color.** Contract §8 selected-state says `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent)`; Svelte matches exactly (`:195-199`). OK.
 - **Font-size is fixed at `0.75rem` for all sizes.** Contract §8 Label table hardcodes `font-size: 0.75rem`; Svelte matches (`:183`). Size only varies the track/label height via `--poodle-segmented-control-height`. This is authoritative and the Rust targets must follow it (flagged below where they don't).
 - Anatomy, `role="radiogroup"`, hidden radio inputs, `aria-label` (root + per-option), `equalWidth` grid behavior, density→`--poodle-segmented-control-x`, `onValueChange` payload: all present in Svelte and match contract. No divergence.
@@ -57,7 +57,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` drivers: (1) contract `SegmentedControlOption.title` has no home in the shared `ChoiceOption` spec; (2) contract §13 specimen prop names (`isDisabled`) are stale vs Svelte `disabled`. Both are contract/spec fixes, not Svelte changes — Svelte is authoritative.
+- `consv=fixed`: contract §13 stale `isDisabled` prop names corrected to `disabled`. The `SegmentedControlOption.title` item is contract-faithful already (contract §3 documents it; Svelte honors it); the only remaining shortfall is the shared Rust `ChoiceOption` spec lacking a `title` field, which is a code fix out of scope for this contract-reconciliation pass. Svelte is authoritative.
 - Selected-shadow is the sharpest visual gap: GPUI ships the wrong color (`black 0.12` drop) and Jetstream ships none; both should be the contract's `white 12%` inset.
 - Font-size divergence is asymmetric: GPUI fixes at `0.75rem` (correct), Jetstream scales it (wrong). Aligning Jetstream to a literal `0.75rem` is the one-line fix.
 - GPUI invents a per-segment 1px separator and a transparent per-segment border; neither appears in the authoritative Svelte. Treat as GPUI-only embellishments to remove for parity.

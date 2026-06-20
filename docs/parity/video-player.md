@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=4 specimen=gap -->
 # Parity: VideoPlayer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,7 +16,7 @@
 
 Svelte and contract are largely aligned (props, anatomy, ARIA, token tables all match). Remaining divergences:
 
-- **Layer mismatch.** Contract §1 declares layer `primitives` and §10 says GPUI surface is `primitives`; the GPUI impl lives in `composites/video_player.rs` (and `relation_picker` siblings). Svelte has no layer concept. **Fix: reconcile — either move GPUI file to `primitives/` or update contract §1/§10 to `composites`.** (Low-stakes; flag once.)
+- [x] FIXED **Layer mismatch.** Contract §1 declared layer `primitives`; the GPUI impl lives in `composites/video_player.rs` (alongside `relation_picker` siblings). Svelte has no layer concept, so it can't directly arbitrate — picked the layer the code actually uses. Updated contract §1 to `composites` and added the `poodle_gpui::composites::video_player` module-surface line to §10.
 - **TimeDisplay separator.** Contract §2 / §8 `.video-player__time` says `m:ss / m:ss`; Svelte renders `{formattedCurrent} / {formattedDuration}` = `m:ss / m:ss`. OK, matches.
 - **Big play visibility.** Contract §4 "paused at currentTime=0"; Svelte gate is `!isPlaying && currentTime === 0` (`VideoPlayer.svelte:189`). OK.
 - Otherwise contract↔Svelte is faithful; the `consv=gap` is driven solely by the layer/path mismatch above. Everything else (9 props, anatomy parts, all ARIA labels, size/density tables) matches Svelte exactly.

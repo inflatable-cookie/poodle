@@ -37,7 +37,7 @@ Updated: 2026-03-30
 | `value` | `string \| null \| undefined` | `undefined` | no | controlled selected timezone identifier; leave undefined for uncontrolled mode |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial timezone |
 | `placeholder` | `string \| null` | `"Search time zones..."` | no | shown when no value selected |
-| `options` | `TimeZoneOption[]` | `defaultTimeZoneOptions()` | no | timezone option list |
+| `options` | `TimeZoneOption[]` | `[]` | no | timezone option list; when empty, falls back to `defaultTimeZoneOptions()` |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -59,7 +59,7 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 
 - controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue`
-- when no options provided, component uses `defaultTimeZoneOptions()` fallback
+- `options` defaults to `[]`; when it is empty the component applies the `defaultTimeZoneOptions()` fallback (so the observable default option set is the timezone list)
 
 ## 4. States
 
@@ -135,9 +135,10 @@ TimeZoneOption: { value: string; label: string; disabled?: boolean }
 ## 9. Svelte Notes
 
 - Delegates rendering and interaction entirely to `Select`
-- `defaultTimeZoneOptions()` utility provides a reasonable IANA timezone list as fallback
+- `defaultTimeZoneOptions()` utility provides a reasonable IANA timezone list as fallback (prefers `Intl.supportedValuesOf("timeZone")`, falling back to a small hardcoded list); labels are `value.replaceAll("_", " ")`
 - Maps `TimeZoneOption[]` into `Select` options
 - searchable mode is always enabled
+- The empty-search message passed to `Select` is `"No matching time zones"`
 
 ## 10. GPUI Notes
 

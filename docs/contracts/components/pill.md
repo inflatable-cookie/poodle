@@ -15,12 +15,14 @@ Updated: 2026-03-26
 
 ```text
 [Root .pill]
+  ├── [Icon (optional, inline svg / .poodle-icon)]
   └── [Content (default slot)]
 ```
 
 | Part | Element | Required | Description |
 |------|---------|----------|-------------|
-| Root | `<span>` | yes | rounded metadata shell with inline-flex layout |
+| Root | `<span>` | yes | rounded metadata shell with inline-flex layout; children separated by `--poodle-pill-gap` |
+| Icon | `<svg>` / `.poodle-icon` | no | optional inline icon, sized `1em` square and `flex-shrink: 0` |
 | Content | slot | yes | short label text |
 
 ## 3. Props And Inputs
@@ -38,6 +40,7 @@ Updated: 2026-03-26
 | `typography` | `"label" \| "inherit"` | `"label"` | no | label typography by default; use `"inherit"` when parent inline text should own font size and line-height |
 | `accent` | `string \| null` | `null` | no | optional custom accent color overriding the semantic tone colors |
 | `muted` | `boolean` | `false` | no | visual de-emphasis via reduced opacity |
+| `adaptiveWidth` | `boolean` | `false` | no | when `true`, emits `data-adaptive-width` and sets `min-width: 0` so the pill collapses to its content instead of honoring the per-size `min-width` floor |
 | `ariaLabel` | `string \| null` | `null` | no | optional explicit accessible name |
 
 ### Controlled And Uncontrolled
@@ -121,8 +124,10 @@ No internal state.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
+| `gap` | `var(--poodle-pill-gap)` (md `0.25rem`) |
 | `min-height` | `1.25rem` |
-| `padding` | `0.1875rem 0.5rem` |
+| `min-width` | `calc(var(--poodle-pill-min-width-base) + var(--poodle-pill-min-width-adjust))` (md base `2.875rem`) |
+| `padding` | `0.1875rem 0.625rem` |
 | `border` | `0.0625rem solid var(--poodle-pill-border)` |
 | `border-radius` | `999px` |
 | `background` | `var(--poodle-pill-fill)` |
@@ -189,93 +194,122 @@ When `typography="inherit"`:
 
 ### Appearance: badge `.pill[data-appearance="badge"]`
 
+Base badge typography (all tones):
+
 | Custom Property / Property | Value |
 |----------------------------|-------|
-| `--poodle-pill-fill` | accent-tinted fill (tone-specific color at low opacity) |
-| `--poodle-pill-border` | `transparent` |
-| `--poodle-pill-text` | tone-specific accent color |
-| `text-transform` | `uppercase` |
 | `font-weight` | `700` |
+| `letter-spacing` | `0.04em` |
+| `text-transform` | `uppercase` |
+
+Neutral badge `.pill[data-appearance="badge"][data-tone="neutral"]`:
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))` |
+| `--poodle-pill-text` | `var(--poodle-color-text-secondary)` |
+
+Tone badges (`success` / `info` / `warning` / `danger`):
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-{tone}) 18%, transparent)` |
+| `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-{tone}) 42%, transparent)` |
 
 ### Size: sm `.pill[data-size="sm"]`
 
 | Property | Value |
 |----------|-------|
 | `min-height` | `1rem` |
-| `padding` | `0.125rem 0.375rem` |
+| `min-width` | `2.5rem` |
+| `padding` | `0.125rem 0.5rem` |
 | `font-size` | `0.625rem` |
-
-When `typography="inherit"`:
-
-| Property | Value |
-|----------|-------|
-| `font-size` | `0.7143em` |
-| `min-height` | `1.6em` |
-| `padding` | `0.2em 0.6em` |
-
-### Size: xs `.pill[data-size="xs"]`
-
-| Property | Value |
-|----------|-------|
-| `min-height` | `0.875rem` |
-| `padding` | `0.0625rem 0.3125rem` |
-| `font-size` | `0.5625rem` |
+| `gap` | `0.1875rem` |
 
 When `typography="inherit"`:
 
 | Property | Value |
 |----------|-------|
 | `font-size` | `0.6429em` |
+| `min-height` | `1.6em` |
+| `min-width` | `2.8571em` |
+| `padding` | `0.2em 0.8em` |
+
+### Size: xs `.pill[data-size="xs"]`
+
+| Property | Value |
+|----------|-------|
+| `min-height` | `0.875rem` |
+| `min-width` | `2.125rem` |
+| `padding` | `0.0625rem 0.4375rem` |
+| `font-size` | `0.5625rem` |
+| `gap` | `0.15625rem` |
+
+When `typography="inherit"`:
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `0.5786em` |
 | `min-height` | `1.5556em` |
-| `padding` | `0.1111em 0.5556em` |
+| `min-width` | `2.4444em` |
+| `padding` | `0.1111em 0.7778em` |
 
 ### Size: md `.pill[data-size="md"]`
 
 | Property | Value |
 |----------|-------|
 | `min-height` | `1.25rem` |
-| `padding` | `0.1875rem 0.5rem` |
+| `min-width` | `2.875rem` |
+| `padding` | `0.1875rem 0.625rem` |
 | `font-size` | `0.6875rem` |
+| `gap` | `0.25rem` |
 
 When `typography="inherit"`:
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.7857em` |
+| `font-size` | `0.7071em` |
 | `min-height` | `1.8182em` |
-| `padding` | `0.2727em 0.7273em` |
+| `min-width` | `3.2727em` |
+| `padding` | `0.2727em 0.9091em` |
 
 ### Size: lg `.pill[data-size="lg"]`
 
 | Property | Value |
 |----------|-------|
 | `min-height` | `1.375rem` |
-| `padding` | `0.25rem 0.625rem` |
+| `min-width` | `3.25rem` |
+| `padding` | `0.25rem 0.75rem` |
 | `font-size` | `0.75rem` |
+| `gap` | `0.25rem` |
 
 When `typography="inherit"`:
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.8571em` |
+| `font-size` | `0.7714em` |
 | `min-height` | `1.8333em` |
-| `padding` | `0.3333em 0.8333em` |
+| `min-width` | `3.5833em` |
+| `padding` | `0.3333em 1em` |
 
 ### Size: xl `.pill[data-size="xl"]`
 
 | Property | Value |
 |----------|-------|
 | `min-height` | `1.5rem` |
-| `padding` | `0.3125rem 0.75rem` |
+| `min-width` | `3.625rem` |
+| `padding` | `0.3125rem 0.9375rem` |
 | `font-size` | `0.8125rem` |
+| `gap` | `0.25rem` |
 
 When `typography="inherit"`:
 
 | Property | Value |
 |----------|-------|
-| `font-size` | `0.9286em` |
+| `font-size` | `0.8357em` |
 | `min-height` | `1.8462em` |
-| `padding` | `0.3846em 0.9231em` |
+| `min-width` | `3.9231em` |
+| `padding` | `0.3846em 1.1538em` |
 
 ### Font: mono `.pill[data-font="mono"]`
 
@@ -290,6 +324,32 @@ When `typography="inherit"`:
 |----------|-------|
 | `opacity` | `0.72` |
 
+### Adaptive width `.pill[data-adaptive-width="true"]`
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `0` (collapses the pill to its content, overriding the per-size `min-width` floor) |
+
+### Density
+
+Density adjusts pill spacing via the `--poodle-pill-*-adjust` custom properties.
+Unlike most components — where density must never touch vertical padding — the
+pill is a sub-text-line metadata chip, so its density variants deliberately
+nudge `padding-y` (along with `min-width`, `padding-x`, and `gap`) to keep the
+chip optically balanced at its tiny size. This vertical-padding override is the
+explicitly-justified exception permitted by the repo Size/Density contract.
+
+| Custom Property | `compact` | `comfortable` |
+|-----------------|-----------|---------------|
+| `--poodle-pill-min-width-adjust` | `-0.09375rem` | `0.1875rem` |
+| `--poodle-pill-padding-y-adjust` | `-0.0625rem` | `0.0625rem` |
+| `--poodle-pill-padding-x-adjust` | `-0.125rem` | `0.125rem` |
+| `--poodle-pill-gap` | `0.125rem` | `0.25rem` |
+
+(`typography="inherit"` expresses the same adjustments in `em`: compact
+`min-width -0.1364em` / `padding-y -0.0909em` / `padding-x -0.1818em`;
+comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
+
 ## 9. Svelte Notes
 
 - Renders as a styled inline `<span>` with a default slot
@@ -302,6 +362,13 @@ When `typography="inherit"`:
   `--poodle-pill-text`) are set on the root element and consumed by the same
   element's CSS, enabling tone overrides without class proliferation
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- **Pill context composition surface** (`pill-context.ts`): a parent may call
+  `setPillContext({ size?, typography? })` to force the `size` and `typography`
+  of descendant pills. When present, the context's `size`/`typography` win over
+  the pill's own `size`/`typography` props (`size` still falls back to the
+  semantic `sizeRole` resolution when the context omits it). This lets a host
+  (e.g. an inline run of text) drive a consistent pill scale without threading
+  props through every pill.
 
 ## 10. GPUI Notes
 

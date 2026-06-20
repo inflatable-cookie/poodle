@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
 # Parity: TimeInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -21,10 +21,10 @@ Svelte faithfully implements the contract's native-`<input type="time">` model: 
 
 Divergences:
 
-- **Rust spec adds `validation_state: ValidationState` (None/Invalid/Valid/Pending)** — `border_token()` swaps the border to danger/success/accent (time_field.rs:73-75, types.rs:297-304). Neither the contract props table (§3) nor Svelte has any `invalid`/validation concept. This is Rust-only surface with no authority. **Fix: either drop `validation_state` from `TimeFieldSpec`/builders, or — if invalid styling is wanted — add an `invalid?: boolean` prop to Svelte + contract §3/§4/§8 first (Svelte is authority).**
-- Contract size table (§8) gives explicit `font-size` only for xs/lg/xl and **omits `sm`**; Svelte sets `sm font-size: 0.8125rem` (TimeInput.svelte:110), which equals the md body-size baseline. Harmless but undocumented. **Fix: add `sm` font-size row to contract §8 (value `0.8125rem`) to match Svelte.**
-- Contract §8 size table lists xs/sm/lg/xl `min-height` as `calc(control-height ± offset)`; Svelte hardcodes the resolved rem values instead (`xs 1.5rem`, `sm 1.75rem`, `lg 2.75rem`, `xl 3.25rem`, TimeInput.svelte:109-118) rather than `calc()` on the token. Visually equivalent at md=2.25rem but breaks if the base token is re-themed. **Fix (Svelte): use `calc(var(--poodle-size-control-height) ± offset)` per contract, or document the literal-rem choice in §8.**
-- Density: Svelte only emits `compact`/`comfortable` padding overrides (TimeInput.svelte:121-122); contract §8 has no density rows at all (only §9 notes `data-density`). **Fix: add the density padding rows to contract §8.**
+- [x] FIXED Contract size table (§8) omitted `sm` font-size; Svelte sets `sm font-size: 0.8125rem` (TimeInput.svelte:110). Added the `sm` font-size row to §8 (noted it equals the md body-size baseline).
+- [x] FIXED Contract `min-height` as `calc()` vs Svelte literal rem (`xs 1.5rem`, `sm 1.75rem`, `lg 2.75rem`, `xl 3.25rem`, TimeInput.svelte:109-118). Documented the literal-rem choice in §8 (kept `calc()` as the intent; noted Svelte's literal resolution breaks token re-theming until it switches to `calc()`). Svelte-side cleanup left for code.
+- [x] FIXED Density padding rows: Svelte emits `compact`/`comfortable` padding overrides (TimeInput.svelte:121-122); §8 had no density rows. Added a density adjustment table (horizontal padding only, per orthogonality rule).
+- [ ] (spec, not contract↔Svelte) **Rust spec `validation_state: ValidationState`** swaps the border to danger/success/accent (time_field.rs:73-75). Neither contract §3 nor Svelte has any validation concept — this is unsourced Rust surface. Per "never invent contract surface Svelte lacks," the contract correctly omits it; resolve in code (drop the spec field, or add `invalid?` to Svelte + contract first). Left for Rust pass.
 
 ## GPUI gap (vs Svelte + contract)
 

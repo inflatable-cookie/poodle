@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=9 specimen=gap -->
 # Parity: IconButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,13 +15,13 @@
 
 ## Contract ↔ Svelte
 
-Svelte has surface the contract does not document, and its pressed treatment diverges. Svelte is authoritative — update the contract.
+Svelte has surface the contract does not document, and its pressed treatment diverged. Svelte is authoritative — contract reconciled.
 
-- Svelte adds a `success` tone: full CSS for `[data-tone="success"]`, primary×success, ghost×success, ghost×success:hover (`IconButton.svelte:326-363`). Contract §3 `ButtonTone = "default" | "danger"` only. **Fix: add `"success"` to contract tone union + token tables.**
-- `defaultPressed` type mismatch: contract §3 says `boolean` default `false`; Svelte is `boolean | null` default `null` (`IconButton.svelte:38,60`) and toggle mode derives from `pressed !== null || defaultPressed !== null`. **Fix: reconcile contract type to `boolean | null` default `null`.**
-- Pressed treatment diverges: contract §8 "Root — Pressed" specifies `background: color-mix(accent 20%, fill)`, `border-color: color-mix(accent 56%, border)`, double inset shadow. Svelte (`IconButton.svelte:365-371`) instead sets full `accent-base` fill, `accent-base 85% black` border, `text-inverse` color, `shadow: none` for non-primary. **Fix: rewrite contract §8 pressed table to match Svelte's solid-accent pressed style.**
-- Hover adds box-shadow: Svelte hover sets `box-shadow` (`IconButton.svelte:376`); contract §8 hover table lists only background + border-color. **Fix: add box-shadow row to contract hover.**
-- Tooltip radius unspecified: Svelte tooltip uses `border-radius: calc(radius-control - 0.125rem)` and `font-size: 0.6875rem` (`IconButton.svelte:449-463`); contract §2/§8 describe the tooltip part but give no token values. **Fix: add tooltip token table to contract §8.**
+- [x] FIXED `success` tone: added `"success"` to `ButtonTone` union (§3), §1 in-scope, §4 tone note, plus a Tone: success token table + Ghost success hover table in §8 mirroring Svelte (`IconButton.svelte:326-363`).
+- [x] FIXED `defaultPressed` type: contract §3 now `boolean | null` default `null`, with toggle-mode note (`pressed !== null || defaultPressed !== null`), matching Svelte (`IconButton.svelte:38,60`).
+- [x] FIXED Pressed treatment: §8 "Root — Pressed" rewritten to Svelte's solid-accent custom-property treatment for non-primary variants — fill `accent-base`, fill-hover `color-mix(white 12%, accent-base)`, border `color-mix(accent-base 85%, black)`, text `text-inverse`, shadow `none` (`IconButton.svelte:365-371`). §4 states row + §11 checklist updated.
+- [x] FIXED Hover box-shadow: added `box-shadow: var(--poodle-treatment-interactive-shadow-active, var(--poodle-icon-button-shadow))` row to §8 Hover (`IconButton.svelte:376`).
+- [x] FIXED Tooltip tokens: added full Tooltip token table to §8 (position/z-index/max-width/padding/border/radius `calc(radius-control - 0.125rem)`/background/box-shadow/color/font-size `0.6875rem`/line-height/white-space/pointer-events) from `IconButton.svelte:449-463`.
 
 ## GPUI gap (vs Svelte + contract)
 

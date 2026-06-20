@@ -79,7 +79,8 @@ No internal state. Animation is purely CSS-driven.
 
 - Role: none; decorative loading scaffold
 - Preset containers: `aria-hidden="true"`
-- Single skeletons: no semantic role
+- Single skeletons: no semantic role; the single-shape element also sets
+  `aria-hidden="true"` (matches Svelte's single-shape `<span>`)
 - Labeling rules: skeleton placeholders must not be exposed as real content;
   parent-owned loading state should provide `aria-busy` and status announcements
 

@@ -63,10 +63,19 @@ Updated: 2026-06-11
 
 ## 7. Layout
 
-- root uses CSS grid and container queries
+- root uses CSS grid (`auto-fit` columns, `align-items: start`) and
+  `container-type: inline-size`
+- `minColumnWidth` / `itemMinColumnWidth` are exposed as
+  `--poodle-detail-section-group-min` / `--poodle-detail-section-group-item-min`
+  on the root via inline style
+- `maxColumns` (`data-max-columns`) bounds the auto-fit column count (2–5)
+- inter-section gap by density: `compact` `var(--poodle-space-stack-md)`,
+  `default` `var(--poodle-space-stack-lg)`, `comfortable`
+  `calc(var(--poodle-space-stack-lg) + 0.25rem)`
 - grouped sections align to the start edge and preserve equal column widths
 - descendant `DetailSection` surfaces receive
   `--poodle-detail-section-item-min: itemMinColumnWidth`
+- at `@container (max-width: 34rem)` the group collapses to a single column
 
 ## 8. Usage Notes
 

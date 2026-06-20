@@ -34,18 +34,25 @@ Updated: 2026-03-15
 |------|------|---------|----------|-------|
 | `direction` | `"column" \| "row"` | `"column"` | no | flex direction (vertical or horizontal) |
 | `gap` | `SpaceScale` | `"md"` | no | spacing between children |
-| `align` | `LayoutAlign` | `"stretch"` | no | cross-axis alignment |
-| `justify` | `LayoutJustify` | — | no | main-axis justification |
+| `align` | `LayoutAlign` | direction-aware (`column` → `"stretch"`, `row` → `"center"`) | no | cross-axis alignment; when unset resolves from `direction` |
+| `justify` | `LayoutJustify` | `"start"` | no | main-axis justification (always emitted) |
 | `wrap` | `boolean` | `false` | no | whether children wrap to next line |
 | `padding` | `SpaceScale` | `"none"` | no | interior spacing |
+| `width` | `string \| null` | `null` | no | explicit inline width override |
+| `height` | `string \| null` | `null` | no | explicit block height override |
+| `minWidth` | `string \| null` | `null` | no | min-width override (replaces base `min-width: 0`) |
+| `minHeight` | `string \| null` | `null` | no | min-height override (replaces base `min-height: 0`) |
+| `overflow` | `OverflowMode` | `"visible"` | no | overflow behavior |
 | `asRole` | `string \| null` | `null` | no | explicit semantic role opt-in |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when role is set |
+| `class` | `string` | `""` | no | extra class names appended to `poodle-stack` |
 
 ### Shared Types
 
 - `SpaceScale`: `"none" \| "sm" \| "md" \| "lg"`
-- `LayoutAlign`: `"start" \| "end" \| "center" \| "stretch"`
-- `LayoutJustify`: `"start" \| "end" \| "center" \| "space-between"`
+- `LayoutAlign`: `"start" \| "center" \| "end" \| "stretch"`
+- `LayoutJustify`: `"start" \| "center" \| "end" \| "between"`
+- `OverflowMode`: `"visible" \| "hidden" \| "clip"`
 
 ### Controlled And Uncontrolled
 
@@ -109,10 +116,11 @@ No internal state.
 
 | Property | Value |
 |----------|-------|
+| `box-sizing` | `border-box` |
 | `display` | `flex` |
 | `flex-direction` | `column` (default; `row` when `direction="row"`) |
-| `min-width` | `0` |
-| `min-height` | `0` |
+| `min-width` | `0` (overridable by `minWidth` prop) |
+| `min-height` | `0` (overridable by `minHeight` prop) |
 
 ### Inline Styles (conditional)
 
@@ -133,9 +141,15 @@ No internal state.
 | `justify-content` | `justify="start"` | `flex-start` |
 | `justify-content` | `justify="end"` | `flex-end` |
 | `justify-content` | `justify="center"` | `center` |
-| `justify-content` | `justify="space-between"` | `space-between` |
+| `justify-content` | `justify="between"` | `space-between` |
 | `flex-wrap` | `wrap=true` | `wrap` |
+| `flex-wrap` | `wrap=false` | `nowrap` |
 | `flex-direction` | `direction="row"` | `row` |
+| `width` | `width` set | `{width}` |
+| `height` | `height` set | `{height}` |
+| `min-width` | `minWidth` set | `{minWidth}` |
+| `min-height` | `minHeight` set | `{minHeight}` |
+| `overflow` | always | `{overflow}` (`visible` default) |
 
 ### SpaceScale Token Map
 
@@ -157,10 +171,13 @@ No internal state.
 
 ## 9. Svelte Notes
 
-- Rendered as a `<div>` with class `stack`
+- Rendered as a `<div>` with class `poodle-stack` (plus any `class` prop appended)
 - All layout properties applied as inline styles
 - Gap and padding resolved via `scaleToSpace` helper
-- Alignment resolved via `alignItemsValue` helper
+- Alignment resolved via `alignItemsValue` helper; `align` defaults are direction-aware
+  (`column` → `stretch`, `row` → `center`) when the prop is unset
+- `justify-content` is always emitted (`start` default) via `justifyContentValue`
+- `overflow` always emitted; `width`/`height`/`minWidth`/`minHeight` emitted only when set
 - Slot-based content model
 - `role` and `aria-label` attributes set conditionally from props
 - No events, no state, no lifecycle hooks

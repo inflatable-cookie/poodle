@@ -46,6 +46,7 @@ Updated: 2026-03-30
 | `items` | `BreadcrumbItem[]` | `[]` | no | hierarchy items to display |
 | `ariaLabel` | `string` | `"Breadcrumb"` | no | accessible label for the `<nav>` element |
 | `maxVisibleItems` | `number \| null` | `null` | no | when set and items exceed threshold, collapses middle items to ellipsis |
+| `forceLastItemCurrent` | `boolean` | `true` | no | when true, the last visible item is treated as current (`aria-current="page"`) even without `current: true`; set false to opt out |
 | `size` | `ControlSize \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for gap spacing |
@@ -81,7 +82,7 @@ When `maxVisibleItems` is set and `items.length > maxVisibleItems`:
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | intermediate item without `current` | link-style item in secondary text color, clickable |
-| current | `current=true` or last item in the list | non-link `<span>` with `aria-current="page"`, primary text color |
+| current | `current=true`, or last visible item when `forceLastItemCurrent` is true (default) | non-link `<span>` with `aria-current="page"`, primary text color |
 | truncated | `items.length > maxVisibleItems` | first item, ellipsis, then last N-1 items shown |
 | hover (link/button) | pointer over interactive item | browser default link/button hover |
 
@@ -97,7 +98,7 @@ When `maxVisibleItems` is set and `items.length > maxVisibleItems`:
 
 - Root: `<nav>` element with `aria-label` (defaults to `"Breadcrumb"`)
 - List: `<ol>` providing ordered list semantics
-- Current item: `aria-current="page"` on the `<span>` for the current/last item
+- Current item: `aria-current="page"` on the `<span>` for the current item (or the last visible item when `forceLastItemCurrent` is true)
 - Ellipsis: `aria-hidden="true"` so screen readers skip the truncation indicator
 - Separator: `aria-hidden="true"` on all separator icons
 - Interactive items: rendered as `<a>` (when `href` provided) or `<button>` (callback-driven)

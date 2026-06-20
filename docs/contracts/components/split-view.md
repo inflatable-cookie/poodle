@@ -250,12 +250,14 @@ Pane `flex` and `overflow` are applied via inline style:
 | Property | Value |
 |----------|-------|
 | position | `absolute` |
-| z-index | `1` |
 | display | `flex` |
 | align-items | `center` |
-| gap | `0.25rem` |
-| pointer-events | `none` |
-| children `*` pointer-events | `auto` |
+| justify-content | `center` |
+| gap | `0.125rem` |
+| padding | `0.125rem` |
+| border-radius | `var(--poodle-radius-pill)` |
+| background | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, var(--poodle-color-background-elevated))` |
+| box-shadow | `0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-default) 70%, transparent)` |
 
 #### Toggles Horizontal
 

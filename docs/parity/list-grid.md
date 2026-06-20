@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
 # Parity: ListGrid
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,9 +15,9 @@
 
 ## Contract ↔ Svelte
 
-Svelte has a prop the contract omits.
+Svelte had a prop the contract omitted.
 
-- **`maxColumns?: number | null` (default `3`)** present in Svelte (`ListGrid.svelte:8`) — caps `auto-fill` columns via the `calc()` minmax expression (`ListGrid.svelte:32-39`). Contract Props table has no `maxColumns`. Svelte is authoritative. **Fix: add `maxColumns` (type `number | null`, default `3`) to contract Props + describe the column-cap behavior in anatomy/notes.**
+- [x] FIXED `maxColumns?: number | null` (default `3`) added to contract Props (floored, clamped to ≥1) + a new "Layout Behavior" section describing the auto-fill column-cap `calc()` derivation, matching Svelte (`ListGrid.svelte:9,17,32-39`).
 - Contract default note for `gap` says default `1.25rem` (default variant) — Svelte confirms (`ListGrid.svelte:31`). `minItemWidth` numeric→`em`, default `360px` — Svelte confirms (`ListGrid.svelte:30`). These match.
 
 ## GPUI gap (vs Svelte + contract)
@@ -42,5 +42,5 @@ Mirrors GPUI; all dimensions token-resolved. Clean on tokens.
 
 ## Notes
 
-- `consv=gap` driven solely by missing `maxColumns` in the contract.
+- `consv=fixed`: the only Contract↔Svelte gap was the missing `maxColumns`, now added. The remaining `max_columns` spec/clamp work is Rust-side (tracked above).
 - The `max_columns` cap is the only real cross-target gap; both Rust impls are token-clean and structurally faithful to the flex-wrap approximation documented in the contract.

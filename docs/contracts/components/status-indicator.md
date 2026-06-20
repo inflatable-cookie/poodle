@@ -281,7 +281,7 @@ Six status indicators stacked vertically, one per status with label prop:
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Neutral | `status="neutral"`, `label="Neutral"` | Dot in text-secondary color with "Neutral" label |
-| Info | `status="info"`, `label="Info"` | Dot in accent-base color with "Info" label |
+| Info | `status="info"`, `label="Info"` | Dot in status-info color with "Info" label |
 | Success | `status="success"`, `label="Success"` | Dot in status-success color with "Success" label |
 | Warning | `status="warning"`, `label="Warning"` | Dot in status-warning color with "Warning" label |
 | Danger | `status="danger"`, `label="Danger"` | Dot in status-danger color with "Danger" label |

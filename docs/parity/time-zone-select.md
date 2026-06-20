@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
 # Parity: TimeZoneSelect
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -18,8 +18,8 @@
 
 TimeZoneSelect is a thin wrapper: Svelte delegates rendering, interaction, searchable mode, and ARIA entirely to `Select` (`TimeZoneSelect.svelte:50-68`). The wrapper's only logic is mapping `TimeZoneOption[]` → `Select` options. Divergences are small but real.
 
-- `options` default: contract §3 says default `defaultTimeZoneOptions()`. Svelte default is `[]` (l.32); the fallback is applied via `$derived(options.length > 0 ? options : defaultTimeZoneOptions())` (l.42). Same observable behavior, different literal default. **Fix: contract should say default `[]` with `defaultTimeZoneOptions()` fallback when empty** (matches Svelte; the current contract default is technically wrong).
-- `emptyMessage`: Svelte hardcodes `emptyMessage="No matching time zones"` into `Select` (l.64). Contract never documents this string. **Fix: add a note to contract §9 that the empty-search message is `"No matching time zones"`.**
+- [x] FIXED `options` default: contract §3 said `defaultTimeZoneOptions()`; Svelte default is `[]` with the fallback applied via `$derived(options.length > 0 ? options : defaultTimeZoneOptions())` (l.42). Contract §3 default → `[]`, with the fallback clarified in §3 props + Controlled/Uncontrolled.
+- [x] FIXED `emptyMessage`: Svelte hardcodes `emptyMessage="No matching time zones"` (l.64). Added a §9 note documenting the empty-search string (plus the `Intl.supportedValuesOf` source + `_`→space label rule).
 - `placeholder` default: contract §3 default `"Search time zones..."`; Svelte matches (l.30). OK.
 - All callbacks (`onValueChange`, `onQueryChange`, `onOpenChange`) and a11y props (`ariaLabel`, `describedBy`) forwarded verbatim to `Select` (l.58-67). `searchable` is always-on (l.63), matching contract §7. OK.
 - Time-zone data: Svelte `defaultTimeZoneOptions()` prefers `Intl.supportedValuesOf("timeZone")` (full IANA set), falling back to a 9-entry hardcoded list (`date.ts:334-342`). Labels are `value.replaceAll("_", " ")` (`formatTimeZoneLabel`, l.318). No offset computation anywhere — contract §1 lists offset math as out of scope. Consistent.

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
 # Parity: PageHeader
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,18 +16,19 @@
 
 Svelte carries props + anatomy the contract does not document. Svelte is authoritative — update the contract.
 
-- Svelte adds `posture?: "default" | "entity-detail"` (default `"default"`, line 18) → when `entity-detail` + section/title split, swaps title/section roles (`primaryTitle = section`, subtitle = title) and moves breadcrumbs into the subtitle slot (lines 64–76). Not in contract §3. **Fix: add `posture` to contract props + a `with-posture` state.**
-- Svelte adds `showSubtitleWithBreadcrumbs?: boolean` (default `false`, line 15) gating subtitle visibility in entity-detail posture (line 75). Not in contract. **Fix: add to contract props.**
-- `sizeRole` type/default mismatch. Contract §3 says `SemanticControlSizeRole` non-null, default `"prominent"`. Svelte declares `sizeRole?: SemanticControlSizeRole | null` default `null` (lines 28, 54), falling back to `$uiPresentation.sizeScale`. **Fix: contract type → `… | null`, default `null`.**
-- Count anatomy mismatch. Contract §2 says Count is a bare `<span>` badge pill with its own background/padding/min-size token table (§8 `.page-header__count`). Svelte renders count via the `Pill` primitive (`tone="neutral" appearance="subtle"`, lines 137–141); the `.page-header__count` rule is just an `inline-flex` wrapper. **Fix: rewrite §2 + §8 count rows to "Pill primitive", drop the standalone pill token table.**
-- Back link is dual, not single. Svelte renders a `--text` variant and a `--icon` variant (lines 150–168); at `max-width:45rem` the text variant hides and the icon variant shows (lines 572–578). Contract §2 documents only one `<a>`. **Fix: document both back variants + the responsive swap.**
-- Back label is transformed, not raw. Svelte strips a leading `"Back"`/`"Back to "` prefix and rebuilds aria as `"Back to {label}"` (lines 90–101). Contract §2/§6 imply the literal `backLabel` is shown. **Fix: document the `resolveBackDisplayLabel`/`resolveBackAriaLabel` behavior.**
-- Context-dot color mismatch. Contract §8 `.page-header__context-dot` `background: var(--poodle-color-fill-info-strong, var(--poodle-color-border-info))`. Svelte uses `var(--poodle-color-status-success, #22c55e)` (line 335). **Fix: contract token → status-success (Svelte authoritative).**
-- Root `align-items` mismatch. Contract §8 root says `align-items: end`. Svelte root uses `align-items: start` (line 246). **Fix: contract → `start`.**
-- Banner placement mismatch. Contract §8 + anatomy say banner spans grid columns (`grid-column: 1 / -1`). Svelte is not a grid; banner is a flex child with `margin-top: var(--poodle-page-header-banner-margin-top)` (lines 461–463). **Fix: reconcile §7/§8 layout description to the flex/stacked model Svelte uses.**
-- `banner_tone` default mismatch (spec vs Svelte). Svelte default `bannerTone="warning"` (line 49) and contract §3 agrees (`"warning"`), but `PageHeaderSpec::new` defaults `banner_tone: StatusTone::Info` (`page_header.rs:57`). **Fix: spec default → `Warning` to match Svelte/contract.** (spec bug, not Svelte)
-- `level` default mismatch (spec vs contract/Svelte). Contract §3 + Svelte default `level = 2`. `PageHeaderSpec::new` defaults `level: 1` (`page_header.rs:60`, comment says "Defaults to 1"). **Fix: spec default → `2`.** (spec bug)
-- Svelte exposes `meta`/`breadcrumbs`/`banner`/`children` snippets (lines 31–34) — contract §3 lists them, OK. No divergence there.
+- [x] FIXED — `posture?: "default" | "entity-detail"` (default `"default"`) added to contract §3 props; entity-detail behavior (section↔title swap, breadcrumbs into subtitle slot) documented in §4 states + §4 derived component states (`isEntityDetailPosture`, `resolvedSubtitle`) + §9 notes.
+- [x] FIXED — `showSubtitleWithBreadcrumbs?: boolean` (default `false`) added to contract §3 props with its entity-detail gating note.
+- [x] FIXED — `sizeRole` type/default: contract §3 changed to `SemanticControlSizeRole | null`, default `null` (falls back to inherited `sizeScale`); §9 note added.
+- [x] FIXED — Count anatomy: §2 anatomy + parts + §8 `.page-header__count` rewritten to "Pill primitive (`tone="neutral"`, `appearance="subtle"`)"; the standalone pill token table (bg/radius/min-size) dropped — count wrapper is now just `inline-flex; align-items: center`.
+- [x] FIXED — Back link is dual: §2 anatomy + parts now document both `--text` and `--icon` variants and the `max-width: 45rem` swap; §8 adds the `.page-header__back--icon` table.
+- [x] FIXED — Back label transform: §6 adds a "Back-Link Label Resolution" subsection documenting `resolveBackDisplayLabel` (strips leading `Back`/`Back to`) and `resolveBackAriaLabel` (`"Back to {label}"`).
+- [x] FIXED — Context-dot color: §8 `.page-header__context-dot` background → `var(--poodle-color-status-success, #22c55e)`; the `--overlay` icon-variant dot table added.
+- [x] FIXED — Root `align-items`: §8 root → `start`.
+- [x] FIXED — Banner placement: §7 + §8 + §2 reconciled to the stacked/flex model — banner is a root grid child with `margin-top: var(--poodle-page-header-banner-margin-top)`, not a `grid-column: 1 / -1` span; the `data-align="between"` two-column split is documented on `__top-row`, not the root.
+- Spec-struct defaults below are Rust bugs (code edits out of scope here), NOT contract↔Svelte divergences — the contract already matches Svelte:
+  - `PageHeaderSpec::new` defaults `banner_tone: StatusTone::Info` (`page_header.rs:57`); contract + Svelte default `"warning"`. Spec bug → `Warning`.
+  - `PageHeaderSpec::new` defaults `level: 1` (`page_header.rs:60`); contract + Svelte default `2`. Spec bug → `2`.
+- `meta`/`breadcrumbs`/`banner`/`children` snippets already match (contract §3 lists them). No change.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -66,5 +67,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - Two spec-struct defaults disagree with Svelte/contract and should be fixed in `packages/contracts/components/src/page_header.rs`: `banner_tone` (`Info` → `Warning`) and `level` (`1` → `2`).
-- The `consv=gap` driver is undocumented Svelte surface (`posture`, `showSubtitleWithBreadcrumbs`, Pill-based count, dual back link, transformed back label) plus three contract token mismatches (context-dot color, root `align-items`, banner placement). All belong in the contract per "Svelte is parity authority".
+- `consv=fixed`: the undocumented Svelte surface (`posture`, `showSubtitleWithBreadcrumbs`, Pill-based count, dual back link, transformed back label) and the three token/layout mismatches (context-dot color, root `align-items`, banner placement) are all now in the contract. The two remaining items — `PageHeaderSpec` `banner_tone` (`Info`→`Warning`) and `level` (`1`→`2`) defaults — are Rust spec bugs where the contract already agrees with Svelte; code-side fixes, out of scope for contract reconciliation.
 - Jetstream is the furthest from parity overall: missing actions/breadcrumbs/meta slots entirely and a 2-group specimen.

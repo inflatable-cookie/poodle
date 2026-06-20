@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=4 specimen=gap -->
 # Parity: TimeAgo
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,18 +15,19 @@
 
 ## Contract ↔ Svelte
 
-Prop/anatomy/state divergences. For each: what differs, which side is right
-(Svelte unless it's missing contract-specified functionality), and the action.
+Prop/anatomy/state divergences. Contract-side mismatches are fixed below. The remaining items are spec/code defaults (not contract↔Svelte) and are left for the Rust-impl pass since this task edits docs only.
 
-- **Color token mismatch.** Contract §8 + Svelte `.poodle-time-ago` (`TimeAgo.svelte:154`) use `--poodle-color-text-primary`. `TimeAgoSpec::text_color_token()` returns `COLOR_TEXT_SECONDARY` (`time_ago.rs:58-60`), so BOTH Rust targets render secondary. **Fix: spec must return `COLOR_TEXT_PRIMARY`.** (Spec is wrong, not Svelte/contract.)
-- **Anatomy: Svelte is wrapped in `Tooltip`, not a native `title`.** Svelte renders `<Tooltip content={absoluteText}>` around the `<time>` (`TimeAgo.svelte:141-150`); there is no `title` attribute. Contract §2/§6/§8 specify a native `title` attribute. Svelte is authoritative. **Fix: update contract anatomy + §6/§8 to describe the `Tooltip` wrapper instead of a native `title`; note GPUI/Jetstream tooltip is a deferred delta.**
-- **`cursor` divergence.** Contract §7/§8 say `cursor: default`. Svelte sets `cursor: help` (`TimeAgo.svelte:164`). Svelte authoritative. **Fix: contract → `cursor: help`.**
-- **Dotted-underline affordance not in contract.** Svelte adds `text-decoration: dotted underline` with `--poodle-time-ago-underline{,-hover}` color-mix vars + a hover/focus-visible color transition (`TimeAgo.svelte:155-178`). Contract §8 root table omits all of it. Svelte authoritative. **Fix: add underline + hover treatment to contract §8.**
-- **`tooltipFormat` value semantics drift.** Contract §8 says `title` is always the `datetime` (`toLocaleString` y/mon-short/d/h/m). Svelte's `formatAbsolute` branches on `tooltipFormat`: `date` → `toLocaleDateString`, `full` → adds `second` + `timeZoneName: "short"`, `datetime` → long month + h/m (`TimeAgo.svelte:81-123`). Contract table is stale. **Fix: document the three-branch `formatAbsolute` in §8.**
-- **`short` default contradiction inside the contract.** Contract §3 props table says `short` default `true`; §4 "just-now" row and the formatting table both list `"now"`/`"just now"` as if both are reachable. Svelte: `short=true` → `"now"`, `short=false` → `"just now"` (`TimeAgo.svelte:43`). Consistent with Svelte; **contract §4 just-now row is fine but should clarify short=`"now"` / long=`"just now"`.**
-- **`yesterday` long-form special case missing from contract.** Svelte returns `"yesterday"` when `!short && !isFuture && days === 1` (`TimeAgo.svelte:64`); contract §4 mentions `"yesterday"` in passing (line 58) but the §8 formatting table has no row for it. Svelte authoritative. **Fix: add the long-form `days===1 → "yesterday"` rule to §8.**
-- **Spec missing contract props.** Contract §3 lists `interval` (30000), `tooltipFormat` (`"datetime"`), `timezone` (null). `TimeAgoSpec` (`time_ago.rs:6-14`) has none of them. **Fix: add `interval`, `tooltip_format`, `timezone` to the spec** (needed before Rust targets can reach parity).
-- **Spec `live` default wrong.** Contract §3 + Svelte (`TimeAgo.svelte:6`) default `live=true`. `TimeAgoSpec::default()` sets `live: false` (`time_ago.rs:20`). **Fix: spec default → `true`.**
+- [x] FIXED **Anatomy: `Tooltip`, not native `title`.** Svelte wraps the `<time>` in `<Tooltip content={absoluteText}>` (`TimeAgo.svelte:141-150`); no `title` attribute. Updated contract §2 anatomy, §6 semantics, §7, §8 HTML-attributes, §9, and Tier-1 checklist to describe the `Tooltip` wrapper; GPUI/Jetstream tooltip noted as a deferred delta.
+- [x] FIXED **`cursor` divergence.** Svelte sets `cursor: help` (`TimeAgo.svelte:164`). Contract §7 + §8 root table → `cursor: help`.
+- [x] FIXED **Dotted-underline affordance.** Svelte adds dotted underline with `--poodle-time-ago-underline{,-hover}` color-mix vars + hover/focus-visible transition (`TimeAgo.svelte:155-178`). Added to §8 root table + new hover/focus-visible table; Tier-2 checklist updated.
+- [x] FIXED **`tooltipFormat` semantics.** Svelte `formatAbsolute` branches `date`/`datetime`/`full` (`TimeAgo.svelte:81-123`). Replaced the stale single-`title` row with a three-branch format table in §8; GPUI notes updated.
+- [x] FIXED **`short` just-now clarification.** §4 just-now row + §8 table now explicitly label short=`"now"` / long=`"just now"`.
+- [x] FIXED **`yesterday` long-form special case.** Svelte returns `"yesterday"` for `!short && !isFuture && days === 1` (`TimeAgo.svelte:64`). Added the special-case note under the §8 formatting table.
+
+Spec/code-side (not contract↔Svelte; left for Rust pass — docs-only task):
+- [ ] (spec) `TimeAgoSpec::text_color_token()` returns `COLOR_TEXT_SECONDARY` (`time_ago.rs:58-60`); contract/Svelte want `text-primary`. Spec is wrong — fix in code.
+- [ ] (spec) `TimeAgoSpec` lacks `interval`/`tooltip_format`/`timezone` (`time_ago.rs:6-14`); contract §3 has them. Add fields in code.
+- [ ] (spec) `TimeAgoSpec::default()` sets `live: false` (`time_ago.rs:20`); contract/Svelte default `true`. Fix default in code.
 
 ## GPUI gap (vs Svelte + contract)
 

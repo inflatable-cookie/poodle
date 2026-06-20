@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=2 jetstream=5 specimen=ok -->
+<!-- parity consv=fixed gpui=2 jetstream=5 specimen=ok -->
 # Parity: Menu
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,7 +17,7 @@
 
 One default-value divergence.
 
-- **`sizeRole` default**: contract §3 says default `"control"`; Svelte default is `"chrome"` (`Menu.svelte:38`), and the Rust spec also defaults `Chrome` (`menu.rs:28`). Svelte is authoritative. **Fix: contract `sizeRole` default → `"chrome"`.**
+- [x] FIXED **`sizeRole` default**: contract §3 now defaults `"chrome"` (was `"control"`), matching Svelte (`Menu.svelte:38`) and the Rust spec (`menu.rs:28`).
 - Everything else (`items`, `open`, `defaultOpen`, `placement`, `size`, `density`, `ariaLabel`, `triggerAriaLabel`, `onOpenChange`, `onAction`, `trigger` snippet, item kinds, roles, placement tokens) matches `Menu.svelte:16-44`. The actual item rendering + roles live in `MenuSurface.svelte` (split out), which is a structural choice, not a divergence.
 
 ## GPUI gap (vs Svelte + contract)
@@ -47,5 +47,5 @@ Renders items but with hardcoded geometry and a wrong min-width.
 
 ## Notes
 
-- `consv=gap` driver: single `sizeRole` default mismatch (contract `control` vs Svelte/spec `chrome`).
+- `consv=fixed`: the single `sizeRole` default mismatch (contract `control` → Svelte/spec `chrome`) is resolved.
 - GPUI is the strong target here — close to parity, only the shadow literal + ARIA delta remain. Jetstream's 10rem min-width and ad-hoc font multipliers are the substantive fixes.

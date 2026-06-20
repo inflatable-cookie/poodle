@@ -142,11 +142,11 @@ Updated: 2026-03-30
 
 ### Sizing
 
-- Root: `display: grid`, `gap: 0.5rem`, `min-width: 0`
-- List: `display: inline-flex`, `flex-wrap: wrap`, `gap: 0.25rem`,
-  `align-items: center`
-- Trigger: inline-flex with gap for optional icon, min-height derived from
-  control-height minus 0.125rem, pill-style border
+- Root: `display: grid`, `gap: var(--poodle-space-stack-md)`, `min-width: 0`
+- List: `display: inline-flex`, `flex-wrap: wrap`,
+  `gap: var(--poodle-space-inline-sm)`, `align-items: center`
+- Trigger: inline-flex with gap for optional icon, min-height from
+  `var(--poodle-size-control-height)`, pill-style border
 - Viewport: block panel with surface-level padding, sizes to content within
   parent constraints
 
@@ -165,7 +165,7 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.5rem` |
+| `gap` | `var(--poodle-space-stack-md)` |
 | `min-width` | `0` |
 
 ### List `.navigation-menu__list`
@@ -175,7 +175,7 @@ Updated: 2026-03-30
 | element | `<nav>` |
 | `display` | `inline-flex` |
 | `flex-wrap` | `wrap` |
-| `gap` | `0.25rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `align-items` | `center` |
 
 ### Trigger `.navigation-menu__trigger`
@@ -184,9 +184,9 @@ Updated: 2026-03-30
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `0.375rem` |
-| `min-height` | `calc(var(--poodle-size-control-height) - 0.125rem)` |
-| `padding` | `0 0.875rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)` |
@@ -231,13 +231,30 @@ Updated: 2026-03-30
 
 ### Size adjustments
 
-| Size | trigger min-height | trigger padding | trigger font-size |
-|------|-------------------|----------------|-------------------|
-| `xs` | `calc(var(--poodle-size-control-height) - 0.625rem)` | `0 0.625rem` | `0.625rem` |
-| `sm` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `0 0.75rem` | `0.6875rem` |
-| `md` | `calc(var(--poodle-size-control-height) - 0.125rem)` | `0 0.875rem` | `0.75rem` |
-| `lg` | `calc(var(--poodle-size-control-height) + 0.125rem)` | `0 1rem` | `0.8125rem` |
-| `xl` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `0 1.125rem` | `0.875rem` |
+Size steps `font-size` only. Trigger `min-height` stays
+`var(--poodle-size-control-height)` and trigger `padding` stays
+`0 var(--poodle-space-control-x)` for every size — those tokens already scale per
+size, so no per-size min-height/padding override is applied. `—` means no
+override (inherits the base `0.75rem`).
+
+| Size | trigger font-size |
+|------|-------------------|
+| `xs` | `0.6875rem` |
+| `sm` | `—` |
+| `md` | `—` |
+| `lg` | `0.8125rem` |
+| `xl` | `0.875rem` |
+
+### Density adjustments
+
+Density overrides horizontal trigger padding only (size/density orthogonality —
+no height change):
+
+| Density | trigger `padding-inline` |
+|---------|--------------------------|
+| `compact` | `0.5rem` |
+| `default` | `var(--poodle-space-control-x)` (inherited) |
+| `comfortable` | `0.75rem` |
 
 ## 9. Svelte Notes
 
@@ -262,6 +279,12 @@ Updated: 2026-03-30
   used by Menu/ContextMenu/Menubar)
 - This component does not use menu roles (menuitem, etc.) since it is
   navigation disclosure, not command invocation
+- **Svelte gap**: the trigger currently renders only the `__label` span and
+  never reads `item.icon`, so the contract's per-item `icon` is not yet
+  displayed by the reference. The trigger gap token (`--poodle-space-inline-sm`)
+  exists for the icon; Svelte should render the icon ahead of the label. The
+  `icon` prop stays in the contract — this is a Svelte under-implementation, not
+  a contract removal.
 
 ## 10. GPUI Notes
 

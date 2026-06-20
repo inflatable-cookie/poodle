@@ -309,6 +309,22 @@ Updated: 2026-03-15
 | `lg` | _(base)_ | `1.125rem` | `-0.375rem` |
 | `xl` | _(base)_ | `1.25rem` | `-0.4375rem` |
 
+### Density adjustments
+
+| Density | Padding |
+|---------|---------|
+| `compact` | `0.25rem 0` |
+| `default` | _(none)_ |
+| `comfortable` | `0.75rem 0` |
+
+Density adds vertical (`padding-block`) padding to the root. This is an
+explicit, justified exception to the repo Size/Density rule ("density must
+never affect vertical padding"): the slider is a thin control whose hit area is
+a touch target, so density grows the surrounding vertical hit area without
+changing the track thickness, thumb size, or the visual `min-height` of the
+control itself. The padding sits outside the absolutely-positioned track/fill,
+so the control geometry is unchanged — only the grabbable margin grows.
+
 ## 9. Svelte Notes
 
 - Uses two overlapping native `<input type="range">` elements, both absolutely
@@ -329,6 +345,11 @@ Updated: 2026-03-15
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Per-thumb aria-label is constructed by appending "minimum"/"maximum" to the
   base ariaLabel prop, or defaults to "Minimum value"/"Maximum value"
+- **Known Svelte gap:** the current Svelte build sets `data-orientation` on the
+  root but does **not** emit `aria-orientation` on the two inputs. §6 requires
+  `aria-orientation` to match the orientation prop on both inputs; the contract
+  is authoritative and is left unweakened — Svelte must add
+  `aria-orientation={orientation}` to both `<input>` elements.
 
 ## 10. GPUI Notes
 

@@ -39,7 +39,7 @@ Updated: 2026-03-15
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | outer container with grid layout | gap, min-width |
+| Root | yes | outer container with grid layout | gap, cell-size |
 | Header | yes | month navigation row | grid columns, gap |
 | Previous Button | yes | navigates to previous month | border, radius, background, color, focus ring |
 | Month Label | yes | displays current visible month and year | label typography, text-align |
@@ -134,7 +134,8 @@ DateRangeValue: { start: string | null; end: string | null }
 - Row role: `role="row"` on each week
 - Cell role: `role="gridcell"` on each cell wrapper
 - Day buttons: native `<button>` elements within gridcells
-- `aria-selected`: set on the selected day button
+- `aria-selected`: set on the gridcell wrapper of the selected day (the day
+  button carries `data-selected`)
 - `aria-label`: each day button has a formatted date label (e.g. "March 15, 2026")
 - `aria-live="polite"` on the month label to announce month changes
 - Grid `aria-label`: from `ariaLabel` prop
@@ -180,7 +181,8 @@ Header editing:
 
 ### Sizing
 
-- minimum width: `16rem` on root
+- width: `fit-content` on root; the grid sizes from 7 columns of
+  `--calendar-cell-size` (md `2.25rem`), so total width tracks cell size × 7
 - calendar is self-sizing vertically based on number of weeks in the month
 - overflow behavior: none; calendar always shows a complete month grid
 
@@ -200,7 +202,7 @@ Header editing:
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `0.75rem` |
-| `width` | `18rem` (scales per size: xs=14.5rem, sm=16rem, lg=20.5rem, xl=23rem) |
+| `width` | `fit-content` (grid sizes from `--calendar-cell-size`, see size table) |
 
 ### Header `.calendar__header`
 
@@ -255,7 +257,7 @@ Header editing:
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `grid-template-columns` | `repeat(7, minmax(0, 1fr))` |
+| `grid-template-columns` | `repeat(7, var(--calendar-cell-size, 2.25rem))` |
 | `align-items` | `center` |
 | `gap` | `0.125rem` |
 
@@ -283,7 +285,7 @@ Header editing:
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `grid-template-columns` | `repeat(7, minmax(0, 1fr))` |
+| `grid-template-columns` | `repeat(7, var(--calendar-cell-size, 2.25rem))` |
 | `gap` | `0.125rem` |
 
 ### Cell `.calendar__cell`
@@ -379,20 +381,27 @@ Header editing:
 
 ### Size adjustments
 
+Cell size (`--calendar-cell-size`, drives grid column width) is `2.25rem` at
+md and scales per size: xs `1.75rem`, sm `2rem`, lg `2.5rem`, xl `2.75rem`.
+
 | Size | Part | Property | Value |
 |------|------|----------|-------|
+| `xs` (`[data-size="xs"]`) | Root | `--calendar-cell-size` | `1.75rem` |
 | `xs` (`[data-size="xs"]`) | Nav Button | `width` / `height` | `1.5rem` |
 | `xs` | Day Button | `min-height` | `1.75rem` |
 | `xs` | Day Button | `font-size` | `0.6875rem` |
 | `xs` | Month Label | `font-size` | `0.6875rem` |
+| `sm` (`[data-size="sm"]`) | Root | `--calendar-cell-size` | `2rem` |
 | `sm` (`[data-size="sm"]`) | Nav Button | `width` / `height` | `1.75rem` |
 | `sm` | Day Button | `min-height` | `2rem` |
 | `sm` | Day Button | `font-size` | `0.6875rem` |
 | `sm` | Month Label | `font-size` | `0.75rem` |
+| `lg` (`[data-size="lg"]`) | Root | `--calendar-cell-size` | `2.5rem` |
 | `lg` (`[data-size="lg"]`) | Nav Button | `width` / `height` | `2.25rem` |
 | `lg` | Day Button | `min-height` | `2.5rem` |
 | `lg` | Day Button | `font-size` | `0.8125rem` |
 | `lg` | Month Label | `font-size` | `0.875rem` |
+| `xl` (`[data-size="xl"]`) | Root | `--calendar-cell-size` | `2.75rem` |
 | `xl` (`[data-size="xl"]`) | Nav Button | `width` / `height` | `2.5rem` |
 | `xl` | Day Button | `min-height` | `2.75rem` |
 | `xl` | Day Button | `font-size` | `0.875rem` |
@@ -450,7 +459,7 @@ Header editing:
 
 ### Tier 2: Visual Parity
 
-- [ ] root gap (0.75rem) and fixed width (18rem at md) match
+- [ ] root gap (0.75rem) and fit-content width (cell-size 2.25rem at md) match
 - [ ] header grid layout (auto 1fr auto, 0.5rem gap) matches
 - [ ] month label typography (label-family, 0.8125rem, 600, 0.02em) matches
 - [ ] nav button sizing (2rem x 2rem) and chrome match

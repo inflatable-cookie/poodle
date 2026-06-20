@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=10 specimen=gap -->
 # Parity: ListCard
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,13 +15,13 @@
 
 ## Contract ↔ Svelte
 
-Svelte has several props/snippets the contract §3 does not document. Svelte is authoritative — update the contract.
+Svelte had several props/snippets the contract §3 did not document. Svelte is authoritative — contract updated.
 
-- Svelte adds `highlighted?: boolean` (default false) (`ListCard.svelte:25,67`). Not in contract §3. **Fix: add to contract props + a `highlighted` visual state to §4.**
-- Svelte adds `selectionIndicator?: "none" | "checkbox"` (default `"none"`) (`ListCard.svelte:26,68`) controlling whether selectable mode shows a checkbox overlay. Not in contract. **Fix: add prop + document the checkbox selection indicator anatomy.**
-- Svelte adds a context-menu cluster: `contextMenuItems?: MenuItem[] | null`, `contextMenuAriaLabel?: string | null`, `contextMenuTrigger?: "context" | "leading"`, `onContextAction?: (value) => void` (`ListCard.svelte:32-37`). Contract §10 only says "wrap ListCard in ContextMenu" — Svelte builds context-menu support directly into the card. **Fix: document the built-in context-menu props (or note the contract intentionally externalizes this and the Svelte additions are an accepted superset).**
-- Svelte adds a `corner?: Snippet` (`ListCard.svelte:44`). Contract §3 snippet list has `sashContent` but no `corner`. **Fix: add `corner` snippet to contract.**
-- All other props (title/subtitle/meta/href/leadingShape/leadingFill/leadingSizeOffset/accentColor/layout/interactive/disabled/selectable/selected/showReorderHandle/notLive/sash/sashColor/ariaLabel/size/sizeRole/density + callbacks) match contract §3 exactly.
+- [x] FIXED `highlighted?: boolean` (default false) added to contract §3 props, §4 states, §8 "Root highlighted" token block (border tint + accent gradient + inset accent ring), and §10 `data-highlighted` note (Svelte `:25,67,849-864`).
+- [x] FIXED `selectionIndicator?: "none" | "checkbox"` (default `"none"`) added to §3; selection-indicator anatomy (overlay-over-leading vs inline) + size token documented in §2/§8 (Svelte `:26,68,1082-1097`).
+- [x] FIXED Built-in context-menu cluster (`contextMenuItems`, `contextMenuAriaLabel`, `contextMenuTrigger`, `onContextAction`) added to §3 props/callbacks; §7 + §10 now describe the card-owned context menu (right-click / leading-trigger / keyboard) alongside the external-wrapper alternative (Svelte `:32-37,702-755`).
+- [x] FIXED `corner?: Snippet` added to §3 snippet list, §2 anatomy (header-accessories cluster), and §8 Badges-and-Corner token block (Svelte `:44,417-419,1266-1275`).
+- All other props match contract §3 exactly.
 
 ## GPUI gap (vs Svelte + contract)
 

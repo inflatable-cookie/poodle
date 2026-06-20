@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=7 specimen=gap -->
 # Parity: ToastHost
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,13 +14,13 @@
 
 ## Contract ↔ Svelte
 
-Props/defaults align (`autoDismissMs=6000`, `stickyTones=["danger"]`, `placement="bottom-end"`, `ariaLabel="Notifications"`, `sizeRole="chrome"`). Real divergences:
+Props/defaults align (`autoDismissMs=6000`, `stickyTones=["danger"]`, `placement="bottom-end"`, `ariaLabel="Notifications"`, `sizeRole="chrome"`). Real divergences — all fixed:
 
-- Host class name: contract §2/§8 says `.toast-host`; Svelte renders `.poodle-toast-host` (line 125). Svelte is authoritative (matches the `poodle-` prefix used repo-wide). **Fix: rename the class in contract §2 + all §8 selectors to `.poodle-toast-host`.**
-- `normalizeToast` title fallback: contract §9 says "if no explicit `title`, `message` becomes `title`". Svelte falls back to `toast.title?.trim() || toast.message || "Notification"` (line 50) — i.e. there's a third `"Notification"` literal fallback when both are empty. Not documented. **Fix: note the `"Notification"` final fallback in contract §9.**
-- Subscription lifecycle: contract §9 says subscription is in `onMount`/`onDestroy`; Svelte uses two `$effect` blocks (lines 105, 116) with teardown returns, not `onMount`/`onDestroy`. Behavior equivalent; **Fix: reword contract §9 to "store subscription + timer cleanup via `$effect` teardown".**
-- `resolveTone` covers `variant="error"→danger`, `warning→warning`, `success→success`, else `info` (lines 41–47). The store-item `variant` union in contract §3 also lists `"info"` and `"danger"` but `resolveTone` only branches on `error`/`warning`/`success`; `variant="info"`/`variant="danger"` both fall to the `info` default (danger variant does NOT map to danger tone — only the explicit `tone` field does). **Fix: document that `variant="danger"` is not normalized — only `tone` or `variant="error"` yield danger.**
-- `ToastItem` shape: contract §3 lists `tone?: ToastTone` on the normalized item but `normalizeToast` always sets a tone (never undefined). Cosmetic; leave.
+- [x] FIXED Host class name: contract §2/§8 said `.toast-host`; Svelte renders `.poodle-toast-host` (line 125). Renamed the class in §2 part table + all §8 selectors (base, four placements, narrow-viewport) to `.poodle-toast-host`.
+- [x] FIXED `normalizeToast` title fallback: Svelte falls back to `toast.title?.trim() || toast.message || "Notification"` (line 50). Documented the `"Notification"` final literal fallback + the message→null detail behavior in §9.
+- [x] FIXED Subscription lifecycle: Svelte uses two `$effect` blocks (lines 105,116) with teardown returns, not `onMount`/`onDestroy`. Reworded §9 to "store subscription + timer cleanup via `$effect` teardown."
+- [x] FIXED `resolveTone` danger normalization: `variant="danger"` (and `variant="info"`) fall to the `info` default; only explicit `tone` or `variant="error"` yields danger (lines 41-47). Documented in §9 that `variant="danger"` is NOT normalized to danger tone.
+- `ToastItem` shape: contract §3 lists `tone?: ToastTone` but `normalizeToast` always sets a tone. Cosmetic; left.
 
 ## GPUI gap (vs Svelte + contract)
 

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=5 specimen=gap -->
 # Parity: DetailItem
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,13 +14,14 @@
 
 ## Contract ↔ Svelte
 
-`consv=gap`. Svelte has a layout bug, two default mismatches, and an undocumented prop extension.
+`consv=fixed`. Svelte layout bug already fixed in code; contract defaults/types reconciled to Svelte.
 
-- [x] **Svelte layout-inversion bug — FIXED.** `DetailItem.svelte:43` now `layout === "stacked" ? "stacked" : "inline"`. Inline (the default) is reachable again; verified in preview (9 inline / 1 stacked render with `data-layout="inline"`). Remaining `consv=gap` drivers below are contract-default syncs only.
-- `presentation` default: contract §3 says `"simple"`; Svelte defaults to `"surface"` (`DetailItem.svelte:33`). Svelte is authoritative per repo policy. **Fix contract default to `"surface"`.**
-- `emptyText` default: contract says `"--"` (hyphen pair); Svelte uses `"—"` em-dash (`DetailItem.svelte:29`). **Fix contract default to em-dash `"—"`.**
-- `span` type: contract is `"full" | "half" | null`; Svelte extends to `"full" | "half" | 1 | 2 | 3 | 4 | null` (`DetailItem.svelte:18`). **Fix contract to document numeric spans.**
-- `valueContent` snippet present in Svelte, not named in contract §3 props. **Fix contract to list it** (contract anatomy implies value rendering but the slot is undocumented).
+- [x] **Svelte layout-inversion bug — FIXED.** `DetailItem.svelte:43` now `layout === "stacked" ? "stacked" : "inline"`. Inline (the default) is reachable again; verified in preview (9 inline / 1 stacked render with `data-layout="inline"`).
+- [x] FIXED `presentation` default → contract §3 now `"surface"` (matches `DetailItem.svelte:33`).
+- [x] FIXED `emptyText` default → contract now em-dash `"—"` (matches `DetailItem.svelte:29`).
+- [x] FIXED `span` type → contract now `"full" | "half" | 1 | 2 | 3 | 4 | null` with span-count notes (matches `DetailItem.svelte:18`).
+- [x] FIXED `valueContent`/`action`/`children` snippets now listed in contract §3 props.
+- [x] FIXED (extra) responsive collapse rewritten from `@media (max-width: 45rem)` to Svelte's `@container (max-width: 26rem)` + `21rem` steps; surface+stacked label treatment (text-tertiary, 0.75rem, lh 1.35) added to §7/§8.
 
 ## GPUI gap (vs Svelte + contract)
 

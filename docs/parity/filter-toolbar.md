@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=6 specimen=gap -->
 # Parity: FilterToolbar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,12 +15,12 @@
 
 ## Contract ↔ Svelte
 
-Divergences in the density token table — Svelte authoritative, contract is wrong.
+Divergences in the density token table — Svelte authoritative, contract is wrong. Reconciled.
 
-- **Density `default` root gap**: contract §8 density table says `var(--poodle-space-stack-sm)`; Svelte CSS (`FilterToolbar.svelte:273`) uses `var(--poodle-space-inline-sm)`. The base `.poodle-filter-toolbar` rule (line 168) uses `space-stack-sm`, but the `[data-density="default"]` rule overrides it to `space-inline-sm`. **Fix: contract default-density gap → `space-inline-sm`.**
-- **Density `compact` root gap**: contract says `0.375rem`; Svelte uses `0.25rem` (`FilterToolbar.svelte:264`). **Fix: contract compact gap → `0.25rem`.**
-- **Density padding-block**: contract default padding `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`; Svelte `[data-density="default"]` hardcodes `padding-block: 0.75rem; padding-inline: 1rem` (lines 274-275). Compact/comfortable likewise hardcode rems, not panel tokens. Density altering vertical padding is the documented compositional exception (panel internal padding), but the contract table and Svelte literals disagree on values. **Fix: align contract density padding rows with Svelte literals (compact `0.5rem`, default `0.75rem`, comfortable `1rem` block).**
-- **`data-collapsed` value**: contract §8 lists `data-collapsed` as a root attribute; Svelte sets it to `collapsible && collapsed` (line 62), i.e. only truthy when both hold. Contract §4 implies collapsed styling keys off it — consistent, no fix, noted for GPUI/Jetstream.
+- [x] FIXED **Density `default` root gap**: contract §8 density table said `var(--poodle-space-stack-sm)`; Svelte `[data-density="default"]` override (`FilterToolbar.svelte:273`) uses `var(--poodle-space-inline-sm)`. Contract density table now `space-inline-sm`. (Base un-scoped Root rule keeps `space-stack-sm`, matching Svelte base line 168.)
+- [x] FIXED **Density `compact` root gap**: contract said `0.375rem`; Svelte uses `0.25rem` (`FilterToolbar.svelte:264`). Contract compact gap → `0.25rem`.
+- [x] FIXED **Density padding-block**: default density padding now `0.75rem 1rem` (block inline) matching Svelte literals (lines 274-275); compact `0.5rem 0.75rem`, comfortable `1rem 1.25rem` already matched. Noted in §8 as the documented panel-internal-padding compositional exception.
+- **`data-collapsed` value**: contract §8 lists `data-collapsed`; Svelte sets it to `collapsible && collapsed` (line 62). Consistent, no fix, noted for GPUI/Jetstream.
 - Anatomy: expanded-collapsible header renders as `<button aria-expanded>` (Svelte lines 101-127). Contract §2/§6 already document this. OK.
 - `summary` flex: contract §8 summary `flex: 1`; Svelte matches (line 206). OK.
 

@@ -6,7 +6,9 @@ Updated: 2026-03-30
 ## 1. Purpose
 
 - Component name: `VideoPlayer`
-- Layer: `primitives`
+- Layer: `composites` (the GPUI implementation lives in
+  `gpui/components/src/composites/video_player.rs`, alongside its
+  `relation_picker` siblings; Svelte has no layer concept)
 - Summary: a video playback component with custom overlay controls, seek bar,
   volume, fullscreen, and optional captions
 - In scope: play/pause, seek slider, time display, volume slider, mute toggle,
@@ -432,7 +434,10 @@ None (video player uses hardcoded dark-on-black colors).
 
 ## 10. GPUI Notes
 
-- Not yet implemented
+- crate/module surface: `poodle_gpui::composites::video_player`
+  (`gpui/components/src/composites/video_player.rs`) — the player is treated as a
+  composite, not a primitive
+- Renders overlay chrome only; no real media playback (see below)
 - Video playback requires platform-specific media integration
 - Fullscreen API differs per platform
 - Controls overlay with auto-hide may need platform animation system

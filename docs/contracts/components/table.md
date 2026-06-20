@@ -1,6 +1,6 @@
 # Table
 
-> **Surface elevation**: Table header is a surface consumer (60% medium-strong contrast) — see [surface-elevation.md](./surface-elevation.md).
+> **Surface elevation**: Table header is a surface consumer (91% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
 Updated: 2026-04-01
@@ -100,6 +100,8 @@ TableRow: { id: string; cells: Record<string, string> }
 - `<caption>` for visible table label; `aria-label` on `<table>` when no caption
 - Empty row cell uses `colspan` spanning all columns
 
+> Svelte-side gap: the Svelte implementation currently applies `aria-label` to the `.poodle-table-shell` `<div>` rather than the `<table>` element. The contract keeps the stronger requirement (`aria-label` on `<table>`); Svelte should be moved to match.
+
 ### Keyboard
 
 | Key | Behavior |
@@ -147,14 +149,14 @@ TableRow: { id: string; cells: Record<string, string> }
 | `border-collapse` | `collapse` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-body-family)` |
-| `font-size` | `var(--poodle-typography-body-size)` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
+| `font-size` | `0.8125rem` |
+| `line-height` | `1.5` |
 
 ### Caption `.table__caption`
 
 | Property | Value |
 |----------|-------|
-| `padding` | `var(--poodle-space-panel-y)` |
+| `padding` | `0.625rem 0.75rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `0.8125rem` |
@@ -165,7 +167,7 @@ TableRow: { id: string; cells: Record<string, string> }
 
 | Property | Value |
 |----------|-------|
-| `padding` | `0.6875rem 0.875rem` |
+| `padding` | `0.5rem 0.75rem` |
 | `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
@@ -175,13 +177,13 @@ TableRow: { id: string; cells: Record<string, string> }
 | `font-weight` | `600` |
 | `letter-spacing` | `0.04em` |
 | `text-transform` | `uppercase` |
-| `background` | `color-mix(in srgb, var(--poodle-surface) 60%, var(--poodle-color-background-elevated))` |
+| `background` | `color-mix(in srgb, var(--poodle-surface) 91%, var(--poodle-color-text-primary))` |
 
 ### Cell `.table__cell`
 
 | Property | Value |
 |----------|-------|
-| `padding` | `0.6875rem 0.875rem` |
+| `padding` | `0.5rem 0.75rem` |
 | `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
@@ -208,10 +210,32 @@ TableRow: { id: string; cells: Record<string, string> }
 
 | Property | Value |
 |----------|-------|
-| `padding` | `0.6875rem 0.875rem` |
+| `padding` | `0.5rem 0.75rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `text-align` | `left` |
 | `vertical-align` | `middle` |
+
+### Size adjustments — `data-size`
+
+Size scales table font-size, header font-size, and vertical cell padding (`padding-block`). The `md` baseline uses the table/header/cell values above (no `padding-block` override). Size never changes horizontal padding (that is density's axis).
+
+| Size | Table `font-size` | Header `font-size` | Header/Cell `padding-block` |
+|------|-------------------|--------------------|-----------------------------|
+| `xs` | `0.6875rem` | `0.5625rem` | `0.3125rem` |
+| `sm` | `0.75rem` | `0.625rem` | `0.375rem` |
+| `md` | `0.8125rem` | `0.6875rem` | (baseline) |
+| `lg` | `0.875rem` | `0.75rem` | `0.625rem` |
+| `xl` | `0.9375rem` | `0.8125rem` | `0.75rem` |
+
+### Density adjustments — `data-density`
+
+Density scales horizontal cell padding (`padding-inline`) only; it never changes height or vertical padding. The `default` density uses the `0.75rem` horizontal padding from the header/cell values above.
+
+| Density | Header/Cell `padding-inline` |
+|---------|------------------------------|
+| `compact` | `0.5rem` |
+| `default` | `0.75rem` (baseline) |
+| `comfortable` | `1.125rem` |
 
 ## 9. Svelte Notes
 
@@ -244,7 +268,7 @@ TableRow: { id: string; cells: Record<string, string> }
 
 - [ ] shell border, radius, and background match
 - [ ] column header typography (uppercase, 0.6875rem, 600 weight, 0.04em spacing) matches
-- [ ] cell padding (0.6875rem 0.875rem) matches
+- [ ] cell padding (0.5rem 0.75rem) matches
 - [ ] border-bottom color-mix formula matches
 - [ ] header background color-mix formula matches
 - [ ] align="end" right-alignment matches

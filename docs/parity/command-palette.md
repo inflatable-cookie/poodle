@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=11 specimen=gap -->
 # Parity: CommandPalette
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,13 +14,13 @@
 
 ## Contract ↔ Svelte
 
-Several §9 token values in the contract no longer match Svelte. Svelte is authoritative — fix the contract:
+All five stale §9 token rows now match the authoritative Svelte CSS. FIXED.
 
-- **Close button background.** Contract §9 `.command-palette__close` `background: color-mix(... surface 62%, transparent)` plus a `:hover` rule (`84%` + text-primary). Svelte uses `background: transparent` (line 382) and has **no** `:hover` rule. **Fix: contract → transparent background, drop the hover row (or Svelte should add hover — Svelte wins per parity authority, so update contract).**
-- **Status font-size / line-height.** Contract §9 `.command-palette__status` = `font-size: 0.8125rem`, `line-height: 1.5`. Svelte = `0.75rem`, `1.4` (lines 399-400). **Fix: contract → 0.75rem / 1.4.**
-- **Hint font-size.** Contract §9 `.command-palette__hint` `font-size: 0.75rem`. Svelte = `var(--poodle-typography-label-size)` (line 368). **Fix: contract → token reference.**
-- **Responsive width / max-height.** Contract §9 breakpoint `width: min(100vw - 1.25rem, 45rem)`, `max-height: calc(100vh - 1.25rem)`, `padding: 1rem`. Svelte = `width: calc(100vw - 1rem)`, no max-height override, `padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x-sm, 0.75rem)` (lines 404-407). **Fix: reconcile contract responsive block to Svelte.**
-- **Responsive meta justification.** Contract §9 `.command-palette__meta` `justify-content: flex-start`. Svelte = `space-between` (line 414). **Fix: contract → space-between.**
+- [x] **Close button background** → `transparent`; dropped the `:hover` table (Svelte has no hover rule). FIXED.
+- [x] **Status font-size / line-height** → `0.75rem` / `1.4`. FIXED.
+- [x] **Hint font-size** → `var(--poodle-typography-label-size)` token. FIXED.
+- [x] **Responsive width / max-height** → `width: calc(100vw - 1rem)`, max-height override removed, `padding: var(--poodle-space-panel-y) var(--poodle-space-panel-x-sm, 0.75rem)`. FIXED.
+- [x] **Responsive meta justification** → `space-between`. FIXED.
 - Anatomy, props, callbacks, ARIA (role=dialog, aria-modal, aria-describedby, status role/live/atomic), keyboard (Esc/Arrows/Home/End/Enter/Tab-trap), focus management, scroll lock — all present in Svelte and match contract. Those are solid.
 
 ## GPUI gap (vs Svelte + contract)

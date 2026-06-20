@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=7 specimen=gap -->
 # Parity: Card
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,11 +16,11 @@
 
 Prop/anatomy/state divergences. For each: what differs, which side is right (Svelte unless missing contract-specified functionality), and the action.
 
-- **card-fill mix ratio differs.** Contract §8 (`card.md:125`) sets `--poodle-recipe-card-fill` = `color-mix(panel 98%, elevated)`; Svelte (`Card.svelte:75-79`) uses `color-mix(panel 10%, elevated)`. Svelte is authoritative. **Fix: update contract §8 to `panel 10%, elevated`.** (GPUI `card.rs:124-126` copied the contract's 98% — flagged below.)
+- [x] FIXED **card-fill mix ratio.** Contract §8 `--poodle-recipe-card-fill` now reads `color-mix(panel 10%, elevated)`, matching Svelte (`Card.svelte:75-79`). (GPUI `card.rs:124-126` still copies the old 98% — flagged in the gpui gap below.)
 - **No selected/media props in `CardSpec`.** Svelte exposes `selected` and `media` (`Card.svelte:11-12`); `CardSpec` (`packages/contracts/components/src/card.rs:20-26`) has `is_selected` but **no `media` field**, and **no `density` field** despite the contract listing `density` as a public prop (`card.md:44`). Svelte carries `density` (`Card.svelte:10,37`). **Fix: add `density` + `media` to `CardSpec` so the Rust targets can express them.**
 - **Density token methods absent.** Contract §8 density table (`card.md:215-219`) and Svelte (`Card.svelte:188-207`) drive gap/padding/footer-padding per density; `CardSpec` `gap_token`/`padding_x_token`/`padding_y_token` (`card.rs:122-135`) are density-blind (only branch on `Compact` layout). **Fix: make these token methods density-aware once `density` is added.**
 - **Interactive a11y is a documented known gap on BOTH sides** — contract §6/§12 say `role="button"`/`tabindex`/Enter-Space are NOT implemented in Svelte; Svelte only applies `cursor: pointer` (`Card.svelte:155-157`). No divergence here, but it is the contract's standing Known Delta.
-- consv=gap (driver: card-fill ratio mismatch + missing `density`/`media` on the spec struct).
+- consv=fixed: the one contract↔Svelte divergence (card-fill ratio) is reconciled. The contract already documents `density` and `media` as public props (§3) and the density table (§8) — those are present on the Svelte side and the contract; the missing `density`/`media` fields are on the Rust `CardSpec` struct (code-side), captured in the gpui/jetstream gaps below.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -57,4 +57,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - The GPUI specimen building on `Surface` instead of `Card` is the single biggest card finding: it hides that the `Card` component is under-exercised and lets hardcoded px values masquerade as parity.
 - `CardSpec` (`packages/contracts/components/src/card.rs`) is missing the `density` and `media` fields entirely; both block density/media parity on the two Rust targets and are the structural prerequisite for the GPUI/Jetstream todos above.
-- consv=gap is driven by the card-fill ratio mismatch (contract 98% vs Svelte 10%) and the absent `density`/`media` spec fields; correct the contract to Svelte and extend `CardSpec`.
+- consv=fixed: the card-fill ratio mismatch (contract 98% → Svelte 10%) is corrected in the contract. The absent `density`/`media` fields on `CardSpec` remain a code-side task (extend `CardSpec` + make the density token methods density-aware), not a contract↔Svelte divergence.

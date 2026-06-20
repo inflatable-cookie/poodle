@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
 # Parity: Status Indicator
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,7 +16,7 @@
 
 Contract and Svelte mostly agree on the prop surface. The live divergence is an internal contradiction in the contract over the `info` color, and the shared Rust spec encodes the wrong side of it.
 
-- **`info` color is contradictory.** Contract §4 (`status-indicator.md:59`) and §8 (`:132`, `:213`) map `info` → `--poodle-color-status-info` (fallback `#3b82f6`). Svelte agrees: `[data-status="info"]` sets `--poodle-status-color: var(--poodle-color-status-info, #3b82f6)` (`StatusIndicator.svelte:66-68`). But the contract specimen table §13 (`:284`) says "Info | Dot in **accent-base** color". Svelte is authoritative → **Fix: correct §13 specimen row to status-info.** The shared Rust spec `StatusTone::color_token` follows the wrong row (see GPUI/Jetstream todos).
+- [x] FIXED **`info` color contradiction.** Contract §4 + §8 already mapped `info` → `--poodle-color-status-info` (fallback `#3b82f6`), matching Svelte (`StatusIndicator.svelte:66-68`). Only the §13 specimen row said "Info | Dot in **accent-base** color" — corrected to "status-info color". The shared Rust spec `StatusTone::color_token` still follows the wrong row (`Info => COLOR_ACCENT_BASE`, `types.rs:280`) — code fix tracked in GPUI/Jetstream todos, out of scope for contract.
 - `size` / `sizeRole` / `density` props: contract §3 lists `size`, `sizeRole` (default `"control"`), `density`. Svelte implements all three and reflects `data-size` / `data-density` on the root (`StatusIndicator.svelte:31-39`), with full per-size and per-density CSS (`:107-196`). Aligned. **No fix.**
 - `typography` inherit-mode metrics: Svelte emits the per-size `em` table for `inherit` (`StatusIndicator.svelte:141-174`) matching contract §8 (`:199-205`). Aligned.
 - Anatomy: Svelte root `<span>` + dot `<span aria-hidden>` + optional label `<span>` (`StatusIndicator.svelte:35-49`) matches contract §2 exactly. Dot is correctly `aria-hidden` (not spelled out in contract but consistent with "color alone must never be the only signal"). Aligned.
@@ -50,7 +50,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done.
 
 ## Notes
 
-- The single `consv=gap` driver is the §13 specimen row claiming `info` = accent-base, which contradicts §4/§8 and authoritative Svelte. Fixing that contract row also exposes the shared-spec bug (`StatusTone::color_token` mapping `Info => COLOR_ACCENT_BASE`) that silently breaks both Rust targets — one fix in `packages/contracts/components/src/types.rs:280` clears the color todo on both.
+- `consv=fixed`: the §13 specimen row claiming `info` = accent-base (contradicting §4/§8 and authoritative Svelte) is corrected to status-info. The shared-spec bug (`StatusTone::color_token` mapping `Info => COLOR_ACCENT_BASE`, `packages/contracts/components/src/types.rs:280`) remains a code fix that clears the color todo on both Rust targets.
 - `pending` correctly maps to accent-base in all four surfaces; only `info` is mis-mapped.
 - Pending pulse and Jetstream dot glow are pre-approved Known Deltas (§12) but listed as open todos so they stay tracked until runtime support lands.
 - No token-literal violations found in either Rust impl: dot/gap/label dimensions all resolve via `rem_to_px(spec.*_rem())` and colors via `resolve_color(theme, spec.*_token())`. The `px(999.0)` / `rounded(999.0)` radius is a full-circle sentinel matching the contract's `border-radius: 999px`, not a hardcoded design value.

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
 # Parity: FieldSet
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,14 +15,14 @@
 
 ## Contract ↔ Svelte
 
-Svelte carries props + anatomy the contract and spec do not document. Svelte is authoritative — update contract + spec.
+Svelte carries props + anatomy the contract and spec do not document. Svelte is authoritative — contract reconciled; remaining `FieldSetSpec` code changes tracked below.
 
-- `description?: string | null` (default `null`) — Svelte renders a `<p class="poodle-fieldset__description">` between legend and fields (`FieldSet.svelte:8,18,38-40,66-71`). Contract §2 anatomy + §3 props omit it entirely; `FieldSetSpec` has no `description` field (`field_set.rs:12-17`). **Fix: add `description` to contract §2 anatomy + §3 props + §6 tokens, and to `FieldSetSpec`.**
-- `span?: number | "full" | null` (default `null`) — present in contract §3 props but **not in `FieldSetSpec`** (`field_set.rs:12-17`); Svelte composes it into `grid-column` on the root (`FieldSet.svelte:11,21,33`). **Fix: add `span` to `FieldSetSpec` so Rust targets can honor parent-grid spanning.**
-- Legend font-size: Svelte hardcodes `font-size: 0.6875rem` (`FieldSet.svelte:57`), but the spec exposes `legend_size_token()` → `TYPOGRAPHY_LABEL_SIZE` (`field_set.rs:65-67`), which is a different value. The two disagree on what drives legend size. **Fix: define a dedicated eyebrow/legend size token at `0.6875rem` and point both Svelte and spec at it (Svelte wins on value).**
-- Legend typography detail: Svelte legend also sets `font-weight: 600`, `letter-spacing: 0.12em`, `line-height: 1.5`, `text-transform: uppercase` (`FieldSet.svelte:58-61`). Contract §6 token table only lists color + family. `FieldSetSpec` exposes `legend_family_token()` but no weight / letter-spacing / transform tokens. **Fix: document legend weight/letter-spacing/transform in contract §6 and add token methods to the spec.**
-- Row-gap vs column-gap: Svelte uses `row-gap = scaleToSpace(gap) + 0.5rem` and `column-gap = scaleToSpace(gap)` (`FieldSet.svelte:24-28`) — asymmetric. Contract §6 describes a single "grid gap"; spec exposes one `gap_token()` (`field_set.rs:49-55`). **Fix: document the `+0.5rem` row-gap offset in contract and expose a row-gap token/derivation in the spec.**
-- `gap` type: contract §3 says `gap: SpaceScale` default `"md"` with values implied `sm|md|lg`; Svelte's `SpaceScale` type may carry more steps, but the Rust `SpaceScale` enum is `Sm|Md|Lg` only (`field_set.rs:5-10`). Confirm Svelte `SpaceScale` union matches; if Svelte allows `xs|xl`, contract+spec under-cover. **Fix: reconcile `SpaceScale` range across types.**
+- [x] FIXED `description?: string | null` (default `null`) — Svelte renders a `<p class="poodle-fieldset__description">` between legend and fields (`FieldSet.svelte:8,18,38-40,66-71`). Added to contract §2 anatomy + §3 props + §4 states + §6 tokens. Spec-side `description` field on `FieldSetSpec` remains (code track).
+- [x] FIXED `span?: number | "full" | null` (default `null`) — already in contract §3; added §4 `spanned` state documenting `grid-column: span <n>` / `1 / -1`. Spec-side `span` field on `FieldSetSpec` remains (code track).
+- [x] FIXED Legend font-size — contract §6 now documents legend font-size as fixed `0.6875rem` (eyebrow scale, not `typography-label-size`), Svelte wins on value. Spec-side `legend_size_token()` repoint remains (code track).
+- [x] FIXED Legend typography detail — contract §6 now documents legend `font-weight: 600`, `letter-spacing: 0.12em`, `line-height: 1.5`, `text-transform: uppercase`. Spec-side token methods remain (code track).
+- [x] FIXED Row-gap vs column-gap — contract §6 now documents asymmetric gap: `column-gap = scaleToSpace(gap)`, `row-gap = scaleToSpace(gap) + 0.5rem`. Spec-side row-gap derivation remains (code track).
+- [x] FIXED `gap` type — Svelte `SpaceScale = "none" | "sm" | "md" | "lg"` (`types.ts:29`). Contract §3 references `SpaceScale` abstractly (consistent); the Rust `SpaceScale` enum missing `none` is a spec-side under-coverage (code track), not a contract divergence.
 
 ## GPUI gap (vs Svelte + contract)
 

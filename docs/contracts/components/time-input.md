@@ -151,12 +151,25 @@ Updated: 2026-04-11
 | `xs` | `font-size` | `0.75rem` |
 | `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
 | `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.0625rem)` |
+| `sm` | `font-size` | `0.8125rem` (equals the md body-size baseline) |
 | `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
 | `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
 | `lg` | `font-size` | `0.9375rem` |
 | `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
 | `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
 | `xl` | `font-size` | `1rem` |
+
+The size `min-height` values above express the intended offsets from the control-height token. Svelte currently resolves these to literal rem values (`xs 1.5rem`, `sm 1.75rem`, `lg 2.75rem`, `xl 3.25rem`) rather than `calc()` on the token; visually equivalent at the default `md=2.25rem`, but re-theming the base token will not flow into Svelte until it switches to `calc()`.
+
+### Density adjustments
+
+Density adjusts horizontal padding only; it never changes height or vertical padding.
+
+| Density | Property | Value |
+|---------|----------|-------|
+| `compact` (`[data-density="compact"]`) | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `default` | `padding` | `0 var(--poodle-space-control-x)` (baseline) |
+| `comfortable` (`[data-density="comfortable"]`) | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
 
 ## 9. Svelte Notes
 

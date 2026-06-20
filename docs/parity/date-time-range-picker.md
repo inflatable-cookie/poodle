@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=4 specimen=gap -->
 # Parity: DateTimeRangePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,11 +15,11 @@
 
 ## Contract ↔ Svelte
 
-Props, anatomy, ARIA, and callbacks match (`value`, `defaultValue`, `open`, `defaultOpen`, `placeholder`, `weekStartsOn`, `locale`, `size`, `sizeRole`, `density`, `disabled`, `ariaLabel`; `onValueChange`, `onOpenChange`; trigger `aria-haspopup="dialog"` / `aria-expanded` / `aria-controls`; surface `role="dialog"`). The size table diverges:
+Props, anatomy, ARIA, and callbacks match (`value`, `defaultValue`, `open`, `defaultOpen`, `placeholder`, `weekStartsOn`, `locale`, `size`, `sizeRole`, `density`, `disabled`, `ariaLabel`; `onValueChange`, `onOpenChange`; trigger `aria-haspopup="dialog"` / `aria-expanded` / `aria-controls`; surface `role="dialog"`). Size table reconciled. FIXED.
 
-- **Size table mismatch.** Contract §8 specifies trigger `min-height` as `calc(var(--poodle-size-control-height) ± Nrem)` and per-size `padding` offsets (`xs`/`sm` shrink, `lg`/`xl` grow). Svelte instead sets **absolute** trigger heights (`xs:1.5rem`, `sm:1.75rem`, `lg:2.75rem`, `xl:3.25rem`; `DateTimeRangePicker.svelte:353-377`) and applies **no per-size padding** — only per-density padding (`:379-380`). Svelte is authoritative. **Fix: rewrite contract §8 size table to absolute heights + drop the per-size padding column (or move padding deltas to the density rows Svelte actually uses).**
-- **Indicator font-size per size not in contract.** Svelte scales the indicator (`xs:0.625rem … xl:0.875rem`, `:356,361,372,377`); contract §8 only fixes indicator at `0.75rem`. **Fix: add the per-size indicator font-size to the contract.**
-- Indicator glyph: Svelte renders `▾` (`:194`); contract anatomy calls it a "disclosure chevron." Cosmetic, Svelte authoritative.
+- [x] **Size table** rewritten to Svelte's absolute trigger heights (`xs:1.5rem`, `sm:1.75rem`, `md:control-height-md`, `lg:2.75rem`, `xl:3.25rem`) and the per-size `padding` column dropped; horizontal padding moved to a Density adjustments table (`0 calc(control-x ∓ 0.125rem)`). FIXED.
+- [x] **Per-size indicator font-size** added (`xs:0.625rem … xl:0.875rem`). FIXED.
+- Indicator glyph: Svelte renders `▾`; contract anatomy wording ("disclosure chevron") kept. Cosmetic, no contract change.
 
 ## GPUI gap (vs Svelte + contract)
 

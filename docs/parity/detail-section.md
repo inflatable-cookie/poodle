@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
 # Parity: DetailSection
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,12 +14,13 @@
 
 ## Contract ↔ Svelte
 
-`consv=gap`. Contract/spec under-specify `columns` and omit Svelte's auto-grid props.
+`consv=fixed`. Contract reconciled to Svelte's columns/auto-grid surface (contract-only edits; spec is code, out of scope here).
 
-- `columns` type: contract spec (`packages/contracts/components/src/detail_section.rs`) is `u8` (default `1`); Svelte is `"auto" | 1 | 2 | 3 | 4` (default `"auto"`) with responsive auto-fit. Svelte authoritative. **Fix contract + spec to `"auto" | 1..4` with default `"auto"`.**
-- `maxAutoColumns` (`2 | 3 | 4 | 5`, default `4`) present in Svelte, absent from contract/spec. **Fix: add to contract.**
-- `itemMinColumnWidth` (`string | null`, default `null`) present in Svelte, absent from contract/spec. **Fix: add to contract.**
-- `density` (`ControlDensity | null`, resolved from presentation context) present in Svelte, not in spec. **Fix: document inherited density in contract.**
+- [x] FIXED `columns` type in contract → `"auto" | 1 | 2 | 3 | 4` default `"auto"`, with auto-fit/maxAutoColumns notes (`DetailSection.svelte:12,25`). (Spec `.rs` `u8` change is code — tracked under targets, not edited here.)
+- [x] FIXED `maxAutoColumns` (`2|3|4|5`, default `4`) added to contract §3/§8 (`DetailSection.svelte:14,27`).
+- [x] FIXED `itemMinColumnWidth` (`string|null`, default `null`) added to contract §3, mapped to `--poodle-detail-section-item-min` (`DetailSection.svelte:13,36`).
+- [x] FIXED inherited `density` already documented in contract §3 ("resolves from inherited presentation"); density var table updated to Svelte's data-density values + separated-gap column.
+- [x] FIXED (extra, contract was stale) `separated` rule corrected from `border-top: 0` to the `::before` border-subtle 72% rule; title `font-weight: 700` added; responsive collapse rewritten from `max-width: 60rem` media query to container queries (`44rem`/`32rem`/`28rem`); `data-max-auto-columns` attribute documented.
 - `separated`/`ariaLabel` map cleanly to spec `is_separated`/`aria_label` (naming only).
 
 ## GPUI gap (vs Svelte + contract)

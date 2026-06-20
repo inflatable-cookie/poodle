@@ -176,7 +176,7 @@ fill color in the current implementation.
 
 | Token | Role |
 |-------|------|
-| `--poodle-color-background-surface` | track background (mixed at 88% opacity) |
+| `--poodle-surface` | track background base (mixed at 96% with `--poodle-color-text-primary`) |
 | `--poodle-color-status-success` | fill gradient endpoint and base |
 
 ## 9. Svelte Notes
@@ -204,7 +204,7 @@ fill color in the current implementation.
 
 ### Tier 2: Visual Parity
 
-- [ ] track background uses `--poodle-color-background-surface` at 88% mix
+- [ ] track background uses `--poodle-surface` at 96% mix with text-primary
 - [ ] fill gradient uses `--poodle-color-status-success` at 82% mix with white
 - [ ] border-radius 999px pill shape matches
 - [ ] track-thickness ladder matches across `xs`–`xl`

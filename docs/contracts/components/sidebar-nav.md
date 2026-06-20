@@ -19,25 +19,25 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root <nav>]
-  └── [Group <section>]*
-        ├── [GroupTitle <h2>]  (optional)
-        └── [ItemList <ul>]
+[Root <nav> .poodle-sidebar-nav]
+  └── [Group <section> .poodle-sidebar-nav__group]*
+        ├── [GroupTitle <h2> .poodle-sidebar-nav__group-title]  (optional)
+        └── [ItemList <ul> .poodle-sidebar-nav__list]
               └── [Item <li>]*
-                    └── [ItemLink <a>] or [ItemButton <button>]
+                    └── [ItemLink <a> .poodle-sidebar-nav__item] or [ItemButton <button> .poodle-sidebar-nav__item]
 ```
 
 ### Parts
 
 | Part | Element | Notes |
 |------|---------|-------|
-| Root | `<nav>` | Class `sidebar-nav`, `data-size`, `data-density`, `data-size-role`, optional `aria-label` |
-| Group | `<section>` | Class `sidebar-nav__group`, `data-separated` attribute, optional `aria-label` from group label |
-| GroupTitle | `<h2>` | Class `sidebar-nav__group-title`, uppercase label, accent color |
-| ItemList | `<ul>` | Class `sidebar-nav__list`, unstyled list container |
+| Root | `<nav>` | Class `poodle-sidebar-nav`, `data-size`, `data-density`, `data-size-role`, optional `aria-label` |
+| Group | `<section>` | Class `poodle-sidebar-nav__group`, `data-separated` attribute, optional `aria-label` from group label |
+| GroupTitle | `<h2>` | Class `poodle-sidebar-nav__group-title`, uppercase label, accent color |
+| ItemList | `<ul>` | Class `poodle-sidebar-nav__list`, unstyled list container |
 | Item | `<li>` | List item wrapper |
-| ItemLink | `<a>` | Class `sidebar-nav__item`, rendered when `item.href` is set and item is not disabled |
-| ItemButton | `<button>` | Class `sidebar-nav__item`, rendered when no href or when disabled |
+| ItemLink | `<a>` | Class `poodle-sidebar-nav__item`, rendered when `item.href` is set and item is not disabled |
+| ItemButton | `<button>` | Class `poodle-sidebar-nav__item`, rendered when no href or when disabled |
 
 ## 3. Props And Inputs
 
@@ -46,11 +46,12 @@ Updated: 2026-03-30
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `groups` | `SidebarNavGroup[]` | `[]` | yes | Each group contains zero or more nav items |
-| `value` | `string \| null` | `null` | no | Currently active item value |
+| `value` | `string \| null` | `null` | no | Currently active item value; two-way bindable (`$bindable`), mutated on activation |
 | `ariaLabel` | `string \| null` | `null` | no | Accessible label for the navigation region |
 | `size` | `ControlSize \| null` | `null` | no | Explicit absolute sizing override |
 | `sizeRole` | `SemanticControlSizeRole` | `"chrome"` | no | Semantic size intent |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override |
+| `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | Fires when a non-disabled item is activated; payload is the item `value` |
 
 ### Type: SidebarNavGroup
 
@@ -75,8 +76,10 @@ None.
 
 ### Controlled And Uncontrolled
 
-Active item is controlled via `value` prop. The component reports activation
-through `onValueChange`.
+Active item is driven by the `value` prop. In the Svelte target `value` is
+two-way bindable (`$bindable`): on activation the component both mutates `value`
+internally and fires `onValueChange`, so callers may bind `value` or treat it as
+controlled.
 
 ## 4. States
 
@@ -151,7 +154,7 @@ through `onValueChange`.
 | `--poodle-sidebar-nav-title-letter-spacing` | `0.18em` | Group title tracking |
 | `--poodle-sidebar-nav-title-gap` | `calc(var(--poodle-space-panel-y) * 0.375)` | Gap between title and list |
 
-### `.sidebar-nav` (Root)
+### `.poodle-sidebar-nav` (Root)
 
 | Property | Value |
 |----------|-------|
@@ -179,7 +182,7 @@ through `onValueChange`.
 | default | `0.75rem` | `0.75rem` | `0.375rem` | `0.18em` | `0.1875rem` |
 | comfortable | `0.875rem` | `0.875rem` | `0.4375rem` | `0.16em` | `0.25rem` |
 
-### `.sidebar-nav__group`
+### `.poodle-sidebar-nav__group`
 
 | Property | Value |
 |----------|-------|
@@ -187,7 +190,7 @@ through `onValueChange`.
 | `gap` | `0.3125rem` |
 | `min-width` | `0` |
 
-### Group separator (`[data-separated="true"] + .sidebar-nav__group`)
+### Group separator (`[data-separated="true"] + .poodle-sidebar-nav__group`)
 
 | Property | Value |
 |----------|-------|
@@ -195,7 +198,7 @@ through `onValueChange`.
 | `padding-top` | `calc(var(--poodle-sidebar-nav-group-gap) - 0.125rem)` |
 | `border-top` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 54%, transparent)` |
 
-### `.sidebar-nav__group-title`
+### `.poodle-sidebar-nav__group-title`
 
 | Property | Value |
 |----------|-------|
@@ -209,7 +212,7 @@ through `onValueChange`.
 | `line-height` | `1.2` |
 | `text-transform` | `uppercase` |
 
-### `.sidebar-nav__list`
+### `.poodle-sidebar-nav__list`
 
 | Property | Value |
 |----------|-------|
@@ -220,7 +223,7 @@ through `onValueChange`.
 | `margin` | `0` |
 | `padding` | `0` |
 
-### `.sidebar-nav__item`
+### `.poodle-sidebar-nav__item`
 
 | Property | Value |
 |----------|-------|
@@ -244,14 +247,14 @@ through `onValueChange`.
 | `cursor` | `pointer` |
 | `transition` | `color, background, box-shadow` via `--poodle-motion-duration-interaction` and `--poodle-motion-easing-standard` |
 
-### `.sidebar-nav__item:hover:not(:disabled)`
+### `.poodle-sidebar-nav__item:hover:not(:disabled)`
 
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 60%, transparent)` |
 
-### `.sidebar-nav__item--active`
+### `.poodle-sidebar-nav__item--active`
 
 | Property | Value |
 |----------|-------|
@@ -263,14 +266,14 @@ through `onValueChange`.
 
 The active indicator is implemented as a left border on the item element itself. When inactive, the left border is transparent. When active, it takes the accent color. This replaces the previous `::before` pseudo-element approach.
 
-### `.sidebar-nav__item:focus-visible`
+### `.poodle-sidebar-nav__item:focus-visible`
 
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
-### `.sidebar-nav__item:disabled`
+### `.poodle-sidebar-nav__item:disabled`
 
 | Property | Value |
 |----------|-------|

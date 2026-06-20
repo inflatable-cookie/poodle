@@ -17,18 +17,22 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .tooltip]  <span>  role="presentation"
-  ├── [Trigger .tooltip__trigger]  <span>  role="button" tabindex="0"
+[Root .tooltip]  <span>  role="presentation"  (display: contents)
+  ├── [Anchor]  (the trigger element passed as children; first child is the anchor)
   └── [Bubble .tooltip__bubble]  <span> (conditional, role="tooltip")
         └── [Content text]
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | relative positioning host and state owner | position context |
-| Trigger | yes | element that owns the tooltip | focus ring |
-| Bubble | conditional | floating descriptive shell | surface background, border, elevation, typography |
+| Root | yes | `display: contents` state owner; renders the trigger `children` inline with no positioning box of its own | — |
+| Anchor | yes | the caller-supplied trigger element; the root's first child element is used as the positioning/`aria-describedby` anchor. No wrapper span is injected; the anchor must be focusable on its own (e.g. a `Button`) | focus ring (owned by the anchor element, not the tooltip) |
+| Bubble | conditional | floating descriptive shell, positioned at viewport coordinates | surface background, border, elevation, typography |
 | Content | yes | short descriptive text | text color, font size |
+
+There is no `.tooltip__trigger` wrapper part and the tooltip does not inject
+`role="button"` or `tabindex` onto the trigger — the first child element is
+treated as the anchor and provides its own focusability.
 
 ## 3. Props And Inputs
 
@@ -89,9 +93,13 @@ Closed, pending-open, and open states are required.
 
 ### Semantics
 
-- Role: root has `role="presentation"`; trigger has `role="button"` and `tabindex="0"`; bubble has `role="tooltip"`
-- Required attributes: trigger has `aria-describedby` pointing to the tooltip
-  bubble's `id` (set when tooltip is open); tooltip content supplements a trigger's accessible name
+- Role: root has `role="presentation"`; bubble has `role="tooltip"`. The trigger
+  is the caller-supplied anchor element (no `role`/`tabindex` is injected by the
+  tooltip); callers must pass an already-focusable trigger
+- Required attributes: the anchor (root's first child element) receives
+  `aria-describedby` pointing to the tooltip bubble's `id` when open, and the
+  attribute is removed on close; tooltip content supplements a trigger's
+  accessible name
 - Optional attributes: none in the baseline contract
 - Labeling rules: tooltip content supplements a trigger; it does not replace a
   missing accessible name
@@ -134,54 +142,51 @@ Closed, pending-open, and open states are required.
 
 | Property | Value |
 |----------|-------|
-| `position` | `relative` |
-| `display` | `inline-flex` |
+| `display` | `contents` |
 
-### Trigger (.tooltip__trigger)
+The root carries no positioning box; it renders the trigger inline. The bubble is
+positioned at viewport coordinates (see Bubble below), not relative to the root.
 
-| Property | Value |
-|----------|-------|
-| `display` | `inline-flex` |
+### Trigger focus ring
 
-### Trigger focus-visible — .tooltip__trigger:focus-visible
-
-| Property | Value |
-|----------|-------|
-| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+The trigger is the caller-supplied anchor element and owns its own focus ring;
+the tooltip does not style it. Anchors built from `Button`/icon-button controls
+provide the standard control focus treatment
+(`var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)`,
+offset `0.125rem`).
 
 ### Bubble (.tooltip__bubble)
 
 | Property | Value |
 |----------|-------|
-| `position` | `absolute` |
+| `position` | `fixed` |
+| `top` / `left` | JS-computed viewport pixel coordinates (see Placement below) |
 | `z-index` | `var(--poodle-overlay-z-menu)` |
 | `max-width` | `16rem` |
 | `padding` | `0.375rem 0.5rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
-| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `border` | `var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent))` |
+| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, calc(var(--poodle-radius-control) - 0.125rem))` |
+| `background` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `box-shadow` | `0 0.5rem 1.25rem rgba(0, 0, 0, 0.3), 0 0.125rem 0.375rem rgba(0, 0, 0, 0.2)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-size` | `0.6875rem` |
 | `line-height` | `1.35` |
 | `white-space` | `nowrap` |
 
-### Placement rules — position offsets (0.5rem gap)
+Border, radius, and background resolve through the
+`--poodle-treatment-surface-elevated-*` custom properties when present, falling
+back to the color-mix forms above. The box-shadow is a literal two-layer drop
+shadow (not the `--poodle-elevation-overlay` token).
 
-| Placement | Properties |
-|-----------|------------|
-| `top` | `bottom: calc(100% + 0.5rem)`, `left: 50%`, `transform: translateX(-50%)` |
-| `bottom` | `top: calc(100% + 0.5rem)`, `left: 50%`, `transform: translateX(-50%)` |
-| `left` | `top: 50%`, `right: calc(100% + 0.5rem)`, `transform: translateY(-50%)` |
-| `right` | `top: 50%`, `left: calc(100% + 0.5rem)`, `transform: translateY(-50%)` |
+### Placement — JS-resolved viewport coordinates
 
-### Placement alignment modifiers
-
-| Modifier | Properties |
-|----------|------------|
-| `*-start` | `left: 0`, `right: auto`, `transform: none` |
-| `*-end` | `right: 0`, `left: auto`, `transform: none` |
+The bubble is `position: fixed` and its `top`/`left` are computed in pixels by
+`resolveOverlayPosition(triggerRect, bubbleRect, placement)`, which also returns
+the final resolved placement (it may flip to fit the viewport). There are no CSS
+`calc()`/`transform` offset rules; the requested `placement` and its `-start` /
+`-end` alignment modifiers are inputs to the resolver, which positions the bubble
+at a `0.5rem` gap from the trigger and exposes the resolved value via
+`data-placement`.
 
 ### Data Attributes
 
@@ -193,10 +198,17 @@ Closed, pending-open, and open states are required.
 
 - should use tooltip semantics (`role="tooltip"` and `aria-describedby` wiring)
   rather than inventing a menu-like overlay
+- root is `display: contents` (no positioning box); the trigger `children` render
+  inline and the root's first child element is used as the anchor. No
+  `.tooltip__trigger` wrapper is injected
+- the bubble is `position: fixed` and positioned at JS-computed viewport
+  coordinates via `resolveOverlayPosition`; the resolver may flip placement to fit
+  the viewport and writes the resolved value to `data-placement`
 - interactive content should escalate to `Popover`
 - bubble uses a fixed 0.5rem offset gap for all placements
-- border-radius is derived from control radius minus 0.125rem for a tighter
-  appearance than surfaces
+- border, radius, and background resolve through
+  `--poodle-treatment-surface-elevated-*` custom props, with control radius minus
+  0.125rem (and the color-mix forms) as fallbacks
 - font-size is 0.6875rem (11px) for compact descriptive text
 
 ## 10. GPUI Notes
@@ -225,8 +237,8 @@ Closed, pending-open, and open states are required.
 - [ ] bubble padding: 0.375rem 0.5rem
 - [ ] border: 0.0625rem solid with 72% opacity border color
 - [ ] border-radius: calc(control-radius - 0.125rem)
-- [ ] background: 98% elevated mixed with panel
-- [ ] box-shadow: elevation-overlay
+- [ ] background: 98% elevated mixed with panel (via `--poodle-treatment-surface-elevated-fill`, with the color-mix as fallback)
+- [ ] box-shadow: two-layer drop shadow (`0 0.5rem 1.25rem rgba(0,0,0,0.3), 0 0.125rem 0.375rem rgba(0,0,0,0.2)`)
 - [ ] font-size: 0.6875rem, line-height: 1.35
 - [ ] color: text-primary
 - [ ] white-space: nowrap

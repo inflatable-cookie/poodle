@@ -23,6 +23,7 @@ Updated: 2026-05-18
         │     │     └── [BreadcrumbItem...]
         │     ├── [DrillLevelLabel]   (when drilling)
         │     ├── [TextInput type="search"]       (drill search or main search)
+        │     ├── [FilterControls]    (one labeled Select per `filters` entry, when provided)
         ├── [SelectionSummary]  (selection snippet, visible whenever there is a selection)
         ├── [DrillList]         (when drilling, replaces candidate list)
         │     └── [DrillListItem...]
@@ -82,14 +83,23 @@ Updated: 2026-05-18
 | `title` | `string` | `"Select items"` | no | Picker heading text |
 | `description` | `string \| null` | `null` | no | Subheading below title |
 | `items` | `PickerItem[]` | `[]` | no | Flat candidate list |
+| `selectedItems` | `PickerItem[]` | `[]` | no | Pre-known full item records for the current selection; used to keep the selection summary labels stable even when the selected ids are not in the current `items` view |
 | `selectedIds` | `string[] \| undefined` | `undefined` | no | Controlled selection state when supplied; uncontrolled local state otherwise |
 | `query` | `string \| undefined` | `undefined` | no | Controlled search query when supplied; uncontrolled local state otherwise |
 | `selectionMode` | `"single" \| "multiple"` | `"multiple"` | no | Selection semantics |
 | `variant` | `"inline" \| "popover" \| "modal"` | `"inline"` | no | Workflow posture |
 | `state` | `"ready" \| "empty" \| "loading" \| "error" \| "no-results"` | `"ready"` | no | Candidate-set posture |
 | `ariaLabel` | `string \| null` | `null` | no | Accessible name override |
+| `searchPlaceholder` | `string` | `"Search picker results"` | no | Placeholder text for the search field |
+| `filters` | `PickerFilterConfig[]` | `[]` | no | Filter controls rendered in the toolbar; each is a labeled `Select` over its options |
+| `filterValues` | `Record<string, string \| undefined>` | `{}` | no | Current value for each filter, keyed by filter `key` |
+| `stateTitle` | `string \| null` | `null` | no | Passed through to PickerShell's `stateTitle` for the non-ready state area |
+| `stateMessage` | `string \| null` | `null` | no | Passed through to PickerShell's `stateMessage` for the non-ready state area |
 | `confirmLabel` | `string` | `"Confirm selection"` | no | Text for confirm button |
 | `cancelLabel` | `string` | `"Cancel"` | no | Text for cancel button |
+| `footerNote` | `string \| null` | `null` | no | Overrides the default selection-mode footer note text |
+| `showFooter` | `boolean` | `true` | no | When `false`, the confirm/cancel footer is not rendered |
+| `showSelectionSummary` | `boolean` | `true` | no | When `false`, the selection summary region is not rendered |
 | `drillDown` | `DrillDownConfig \| null` | `null` | no | Drill-down navigation config |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override for picker actions and drill-down controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
@@ -103,6 +113,20 @@ type PickerItem = {
   label: string;
   description?: string | null;
   meta?: string | null;
+  disabled?: boolean;
+};
+
+type PickerFilterOption = {
+  id: string;
+  label: string;
+};
+
+type PickerFilterConfig = {
+  key: string;
+  label: string;
+  options: PickerFilterOption[];
+  includeAll?: boolean;
+  allLabel?: string;
 };
 
 type DrillDownItem = PickerItem & {
@@ -143,6 +167,7 @@ type SelectionMode = "single" | "multiple";
 
 | Snippet | Signature | Notes |
 |---------|-----------|-------|
+| `renderItem` | `(item: PickerItem, selected: boolean)` | Custom candidate rendering; replaces the default label/detail copy for each candidate row |
 | `stateContent` | `()` | Custom state content, passed through to PickerShell's `stateContent` snippet |
 
 ### Controlled / Uncontrolled
@@ -179,6 +204,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 |----------|---------------|-----------|
 | `onQueryChange` | Search query changes (typing or clear) | `(value: string) => void` |
 | `onSelectionChange` | Selection toggled (single or multiple) | `(selectedIds: string[]) => void` |
+| `onFilterChange` | A toolbar filter value changes | `(key: string, value: string \| undefined) => void` |
 | `onConfirm` | Confirm button clicked | `(selectedIds: string[]) => void` |
 | `onCancel` | Cancel button clicked | `() => void` |
 | `onDrillContext` | Drill-down level selected | `(context: DrillDownContext) => void` |
@@ -189,6 +215,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 
 - Candidate list uses `<ul>` with `aria-label="Available candidates"`
 - Candidate buttons use `aria-pressed` for selection state
+- Disabled candidates (`item.disabled`) carry `aria-disabled` + the native `disabled` attribute and are not selectable
 - Candidate descriptions use `aria-describedby` linking (id: `relation-picker-item-{id}`)
 - Multiple mode shows `Checkbox` primitive alongside each candidate
 - Single mode uses button-press pattern (no radio group)
@@ -411,6 +438,13 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 | border-color | `color-mix(in srgb, var(--poodle-color-accent-base) 60%, transparent)` |
 | background | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
 
+#### Candidate Item Disabled (`item.disabled`)
+
+When a `PickerItem` has `disabled: true`, its row sets `data-disabled`, the
+candidate button gets `aria-disabled` and the native `disabled` attribute, the
+checkbox is disabled, the row renders at `opacity: 0.55`, and toggling is
+skipped (the item cannot be selected or deselected).
+
 ### Candidate Item Button `.relation-picker__item-button`
 
 | Property | Value |
@@ -437,6 +471,7 @@ Internal drill-down state includes: `drillDepth`, `drillSelections` (map of leve
 | display | `grid` |
 | gap | `0.25rem` |
 | `strong`, `small`, footer-note margin | `0` |
+| `strong` font-weight | `500` |
 | `small` color | `var(--poodle-color-text-secondary)` |
 | `small` font-size | `var(--poodle-relation-picker-desc-size)` |
 | `small` line-height | `1.4` |

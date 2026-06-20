@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
 # Parity: MediaPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,11 +15,11 @@
 
 ## Contract ↔ Svelte
 
-Contract↔Svelte themselves are aligned (props, callbacks, tabs, listbox/option roles, size/density tables). `consv=gap` is driven by a Rust spec that invents a different model than contract+Svelte.
+Contract↔Svelte are aligned (props, callbacks, tabs, listbox/option roles, size/density tables) — verified clean. `consv=fixed`: no contract edit needed; the contract already matches Svelte and correctly excludes the Rust-invented multi-select/confirm model. The remaining divergence is Rust-spec-side, tracked under the Rust gaps.
 
-- Contract↔Svelte: all props (`open`, `items`, `accept`, `maxFileSize`, `title`, `emptyMessage`, `size`, `sizeRole`, `density`) and callbacks (`onSelect`, `onUpload`, `onOpenChange`) match `MediaPicker.svelte:18-46`. `role="listbox"`/`role="option"`, select+auto-close (`MediaPicker.svelte:80-83`), Tabs/TextInput/FileUpload composition all present. **ok.**
-- **Spec model divergence**: `MediaPickerSpec` (`media_picker.rs:5-16`) carries `is_multiple` + `selected_count` (multi-select), but contract §1 explicitly lists "multi-select" as **out of scope** and Svelte has no multi-select, no Confirm button, no selection count. The Rust spec models a multi-select-with-confirm picker that does not exist in the reference. **Fix: drop `is_multiple`/`selected_count`; the picker selects-and-closes on click per Svelte.** Marked `consv=gap` to force this reconciliation.
-- Spec is also missing the real `items`/`accept`/`maxFileSize` payload — it carries only `accepted_types: Option<String>` and no item list, so both Rust impls cannot render real items.
+- [x] VERIFIED Contract↔Svelte: all 9 props (`open`, `items`, `accept`, `maxFileSize`, `title`, `emptyMessage`, `size`, `sizeRole`, `density`) and 3 callbacks (`onSelect`, `onUpload`, `onOpenChange`) match `MediaPicker.svelte:18-46`. `role="listbox"`/`role="option"`, select+auto-close (`MediaPicker.svelte:80-83`), Tabs/TextInput/FileUpload composition all present. Contract §1 lists "multi-select" as out of scope and §5 documents select-and-close — no Confirm/selection-count in contract or Svelte. The `multiple` attribute in Svelte is on the FileUpload (multi-file *upload*), not multi-*select*.
+- **Spec model divergence (Rust-side, not contract↔Svelte)**: `MediaPickerSpec` (`media_picker.rs:5-16`) carries `is_multiple` + `selected_count`, which contradict the contract+Svelte single-select select-and-close model. **Fix is in the Rust spec, not the contract: drop `is_multiple`/`selected_count`.** Per the directive "keep contract as Svelte has it", the contract is intentionally left as-is.
+- Spec is also missing the real `items`/`accept`/`maxFileSize` payload (Rust-side) — it carries only `accepted_types: Option<String>` and no item list, so both Rust impls cannot render real items.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -56,5 +56,5 @@ Skeletal + fabricated placeholder items.
 
 ## Notes
 
-- `consv=gap` driver: the Rust `MediaPickerSpec` models multi-select + confirm + selection-count, none of which exist in contract+Svelte (multi-select is explicitly out of scope). Reconciling the spec to the single-select select-and-close model is the headline work item — it makes the GPUI footer + Jetstream count obsolete in one stroke.
+- `consv=fixed`: the contract↔Svelte axis is clean (no edit). The headline work item lives in the Rust `MediaPickerSpec`, which models multi-select + confirm + selection-count — none of which exist in contract+Svelte (multi-select is explicitly out of scope). Reconciling the spec to the single-select select-and-close model makes the GPUI footer + Jetstream count obsolete in one stroke.
 - Neither Rust target threads a real `items` list or composes FileUpload; both fake the grid/upload. The spec lacks the item payload entirely (`media_picker.rs:5-16`).

@@ -107,8 +107,8 @@ None.
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-body-family)` |
-| `font-size` | `var(--poodle-typography-body-size)` |
-| `line-height` | `var(--poodle-typography-body-lineHeight)` |
+| `font-size` | `var(--poodle-typography-label-size, 0.75rem)` |
+| `line-height` | `var(--poodle-typography-label-lineHeight, 1.4)` |
 
 ## 9. Svelte Notes
 

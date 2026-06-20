@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=7 specimen=gap -->
 # Parity: SplitButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,12 +17,12 @@
 
 Svelte implements the full variant/tone/size/density system, menu with keyboard nav, click-outside, upward flipping, loading spinner, disabled. A few attribute/value mismatches make the contract wrong; Svelte is authoritative.
 
-- **`aria-haspopup` value mismatch** — contract §6 says toggle has `aria-haspopup="menu"`; Svelte emits `aria-haspopup="true"` (`SplitButton.svelte:216`). **Fix: change contract to `"true"`** (or change Svelte to `"menu"` — but Svelte is authority; update contract).
-- **Item padding** — contract §8 Item says `padding: 0.375rem 0.5rem`; Svelte uses `padding: var(--poodle-space-control-y) var(--poodle-space-control-x)` (`SplitButton.svelte:536`). **Fix: contract should reference the tokens, not literal rem.**
-- **Item `min-height`** — contract §8 says `2rem`; Svelte uses `var(--poodle-size-control-height)` (`:535`). **Fix: contract should name the token.**
-- **Item border-radius** — contract §8 says `calc(var(--poodle-radius-control) - 0.125rem)`; Svelte matches. OK.
-- **Size table incomplete** — contract §8 documents only `sm`/`md`/`lg`; Svelte defines all five (`xs`/`sm`/`md`/`lg`/`xl`) with distinct height/font/toggle-width/chevron per size (`:398-436`). **Fix: extend contract size table to xs and xl.**
-- **z-index token** — contract §8 menu `z-index: var(--poodle-z-index-overlay-menu)`; Svelte uses `var(--poodle-overlay-z-menu)` (`:510`). **Fix: reconcile token name in contract.**
+- [x] FIXED: contract §6 toggle `aria-haspopup` changed from `"menu"` to `"true"`, matching Svelte (`SplitButton.svelte:216`).
+- [x] FIXED: contract §8 Item `padding` now references `var(--poodle-space-control-y) var(--poodle-space-control-x)` tokens (was literal `0.375rem 0.5rem`), matching Svelte (`:536`).
+- [x] FIXED: contract §8 Item `min-height` now `var(--poodle-size-control-height)` (was `2rem`), matching Svelte (`:535`).
+- [x] (already correct) Item border-radius `calc(var(--poodle-radius-control) - 0.125rem)` matches Svelte.
+- [x] FIXED: contract §8 size table extended to all five sizes (`xs`/`sm`/`md`/`lg`/`xl`) with absolute height, font-size, toggle-width-base, and chevron-size columns per Svelte (`:398-436`). Replaced the old `calc()` height expressions with Svelte's absolute rem values.
+- [x] FIXED: contract §8 menu `z-index` token reconciled to `var(--poodle-overlay-z-menu)` (was `var(--poodle-z-index-overlay-menu)`), matching Svelte (`:510`).
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -54,6 +54,6 @@ GPUI renders both halves, divider (60% via `relative(0.6)`), variants incl. ghos
 
 ## Notes
 
-- The `consv=gap` driver is contract drift (literal rem/px values and a stale `aria-haspopup="menu"`/z-index token name where Svelte uses tokens / `"true"`). All are contract-side fixes per "Svelte is parity authority."
+- `consv=fixed`: all contract drift resolved — literal rem/px values now reference tokens, `aria-haspopup` is `"true"`, the z-index token name matches Svelte, and the size table covers all five sizes. All were contract-side fixes per "Svelte is parity authority."
 - GPUI's menu is the closest to Svelte; its main real gap is the hardcoded shadow + missing spinner. Jetstream needs the menu and loading spinner built before it can claim parity.
 - Specimen `group()` helper hardcodes `text_size(11.0)` (jetstream `specimens/split_button.rs:31`) — specimen chrome.

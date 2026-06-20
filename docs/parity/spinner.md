@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
 # Parity: Spinner
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,12 +17,12 @@
 
 Prop set matches (`variant`/`size`/`sizeRole`/`density`/`tone`/`ariaLabel`, all defaults agree). Divergences are in animation timing and anatomy detail. Svelte is authoritative — update the contract.
 
-- Grid animation duration: contract §8 grid table says `spinner-grid 1.12s linear infinite`. Svelte uses **`1.24s`** for every cell keyframe (`Spinner.svelte:147`). **Fix: change contract §8 to `1.24s`.**
-- Grid idle baseline: Svelte cells start at `opacity: 0.2` with a `poodle-spinner-grid-idle` keyframe holding `0.2` (`Spinner.svelte:146-148, 180-185`). Contract §8 lists only "phase-specific opacity keyframes" and never states the rest/baseline opacity. **Fix: document the `0.2` idle floor in contract §8.**
-- Grid keyframe peak opacity: Svelte phases peak at `0.76` (e.g. `tl` `Spinner.svelte:187-209`). Contract gives no opacity range. **Fix: record the `0.2 → 0.76` range in contract §8 so runtimes can match.**
-- Anatomy nesting: contract §2 lists "6 `span` children" directly under Visual, but Svelte wraps the six `__cell` spans in a `poodle-spinner__grid` container span (`Spinner.svelte:59-66`) and the ring in a single `poodle-spinner__ring` span (`Spinner.svelte:57`). Contract's `[Visual]` row covers this loosely. **Fix: clarify §2 that ring/grid each have a wrapper span, cells are its children.**
-- `aria-live`: contract §6 says "polite announcement behavior" in prose; Svelte emits `aria-live="polite"` only when `ariaLabel` is set (`Spinner.svelte:53`). Consistent — no change, noted for runtime reference.
-- Passthrough props: Svelte accepts `class`, `style`, `...restProps` (`Spinner.svelte:13-25`). Not in contract §3. Common passthrough surface — optional contract note, low priority.
+- [x] FIXED: contract §8 grid `cell animation` duration changed from `1.12s` to `1.24s`, matching Svelte (`Spinner.svelte:147`).
+- [x] FIXED: contract §8 now documents the `0.2` idle floor (`cell idle opacity` row + `spinner-grid-idle` keyframe note), matching Svelte (`Spinner.svelte:146-148,180-185`).
+- [x] FIXED: contract §8 records the `0.2 → 0.76` opacity range (`cell opacity range` row); Svelte phases peak at `0.76` (`Spinner.svelte:187-209`).
+- [x] FIXED: contract §2 clarified — ring and grid each render a single wrapper span (`.spinner__ring` / `.spinner__grid`); the six `.spinner__cell` spans are children of the grid wrapper (`Spinner.svelte:57,59-66`).
+- [x] (no contract change needed) `aria-live`: contract §6 prose matches Svelte, which emits `aria-live="polite"` only when `ariaLabel` is set; §9 Svelte Notes now states this explicitly for runtime reference.
+- [x] FIXED: §9 Svelte Notes now documents the `class` / `style` / `...restProps` passthrough surface (`Spinner.svelte:13-25`).
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -54,7 +54,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` driver: contract §8 grid duration (`1.12s`) is stale vs Svelte (`1.24s`), and the grid opacity range (`0.2`–`0.76` floor/peak) is undocumented. Both block runtimes from matching motion.
+- `consv=fixed`: contract §8 grid duration corrected to `1.24s` and the `0.2`–`0.76` opacity floor/peak now documented, unblocking runtimes from matching motion. Anatomy wrapper spans and passthrough props also reconciled to Svelte.
 - Spec struct (`packages/contracts/components/src/spinner.rs`) exposes only `size_px()` and `tone_color_token()`. It has **no** token methods for ring border width, cell radius, grid cell/gap sizes, or the opacity range — so every Rust runtime is forced into hardcoded literals. Adding those spec methods is the root fix for most GPUI/Jetstream todos above.
 - Jetstream ring + grid are structurally correct but motionless; GPUI animates both. The biggest single behavior gap is Jetstream having no spin/pulse at all.
 - GPUI grid is a hand-rolled 3-row × 2-col flex stack (`spinner.rs:107-156`) rather than a true grid, but visually matches the 2×3 contract layout.

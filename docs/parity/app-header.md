@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
 # Parity: AppHeader
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,11 +15,12 @@
 
 ## Contract ↔ Svelte
 
-Props in contract §3 (`title`, `subtitle`, `dragRegion`, `ariaLabel`, `size`, `sizeRole`, `density`) and snippets §4 (`identity`, `actions`, `utility`) all match Svelte exactly. The divergence is the **shared `AppHeaderSpec`**, which the contract is silent on but both Rust targets depend on — it omits contract props and invents non-contract ones.
+Props in contract §3 (`title`, `subtitle`, `dragRegion`, `ariaLabel`, `size`, `sizeRole`, `density`) and snippets §4 (`identity`, `actions`, `utility`) all match Svelte exactly. The §8/§9 token tables, three-column grid, size ladder, and density overrides also match the authoritative Svelte CSS verbatim. **No contract↔Svelte divergence — the contract is already in sync.** `consv=fixed`.
 
-- `AppHeaderSpec` lacks `size`/`sizeRole`/`density` (contract §3, Svelte lines 11-13,35-36). Spec has only `title`/`subtitle`/`is_drag_region`/`aria_label`/`primary_action_count`/`utility_item_count` (`app_header.rs:4-13`). **Fix: add `size`/`size_role`/`density` to the spec so Rust targets can honor the size/density ladder.**
-- `AppHeaderSpec` invents `primary_action_count`/`utility_item_count`/`is_utility_heavy()` (`app_header.rs:11-12,53-65`) with no contract or Svelte counterpart. Svelte models actions/utility as snippets, not counts. **Fix: drop the count fields or document them as a Rust-only slot-presence hint.**
-- No contract↔Svelte prop/anatomy/state mismatch otherwise. The `consv=gap` driver is spec drift, not Svelte. **Action: extend `AppHeaderSpec`, not the contract.**
+The remaining gap is the shared `AppHeaderSpec` (Rust), a code-side change outside the contract-reconciliation scope. Recorded as a Rust-side todo (Notes):
+
+- (Rust spec todo, not a contract edit) `AppHeaderSpec` lacks `size`/`sizeRole`/`density` (`app_header.rs:4-13`); add them so Rust targets honor the ladder.
+- (Rust spec todo, not a contract edit) `AppHeaderSpec` invents `primary_action_count`/`utility_item_count`/`is_utility_heavy()` (`app_header.rs:11-12,53-65`) with no contract/Svelte counterpart; drop or document as a Rust-only slot-presence hint.
 
 ## GPUI gap (vs Svelte + contract)
 

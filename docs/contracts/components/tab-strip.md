@@ -80,7 +80,7 @@ type TabStripItem = {
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | horizontal | `orientation="horizontal"` (default) | row layout with left/right arrow navigation |
-| vertical | `orientation="vertical"` | column layout with up/down arrow navigation |
+| vertical | `orientation="vertical"` | column layout with up/down arrow navigation; labels and close buttons stay visible (TabStrip does not adopt the `Tabs` `strip`-variant icon-only collapse) |
 | selected | `value` matches an item | active tab's indicator visible |
 | disabled item | `item.isDisabled=true` | item dimmed, not selectable, skipped by arrow keys |
 | closable item | `item.isClosable=true` | item renders a close button |
@@ -100,7 +100,7 @@ type TabStripItem = {
 
 | Part | Token | Purpose |
 |------|-------|---------|
-| Item gap | `space.inline.sm` | gap between tabs (from `item_gap_token()`) |
+| Item gap | `space.inline.sm` | gap between tabs (from `item_gap_token()`); TabStrip follows the text/card list spacing, **not** the `Tabs` `strip` variant's `gap: 0` butted treatment |
 | Focus ring | `color.accent.focusRing` | keyboard focus indicator (from `focus_ring_color_token()`) |
 | Disabled | `state.opacity.disabled` | disabled item dimming (from `disabled_opacity_token()`) |
 

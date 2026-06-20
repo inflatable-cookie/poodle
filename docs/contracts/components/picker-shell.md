@@ -133,7 +133,7 @@ No internal component state. PickerShell is a layout container.
 
 - Parent expectations: inline containers, popovers, modal dialogs
 - Child expectations: search fields, selection summaries, candidate lists, form action bars
-- Resizing rules: shell stretches to fill container; popover variant caps width at `30rem`
+- Resizing rules: shell stretches to fill container; popover variant takes `width: 100%` and caps width at `min(32rem, calc(100vw - 2rem))` (a viewport clamp keeps it inside narrow windows)
 
 ## 8. Token Usage
 
@@ -160,7 +160,8 @@ No internal component state. PickerShell is a layout container.
 
 | Property | Value |
 |----------|-------|
-| `max-width` | `30rem` |
+| `width` | `100%` |
+| `max-width` | `min(32rem, calc(100vw - 2rem))` |
 | `box-shadow` | `var(--poodle-elevation-overlay)` |
 
 ### Variant: Modal (`[data-variant="modal"]`)
@@ -272,7 +273,7 @@ None.
 - Status element is placed after toolbar and selection snippets in the DOM order
 - Body area is scrollable with `overflow-y: auto` and `min-height: 0`
 - Grid uses `grid-template-rows: auto` instead of explicit row template
-- State fallback shows `stateTitle` (or "Picker state") and optional `stateMessage` when no `stateContent` snippet is provided
+- State fallback shows `stateTitle` and optional `stateMessage` when no `stateContent` snippet is provided. **Known Svelte gap:** the current Svelte build falls back to a single flat `"Picker state"` literal and renders no message fallback, rather than the per-state fallback copy the contract requires in §3/§4 (`"Loading results"`/`"Something went wrong"`/`"Nothing here yet"`/`"No results"` + matching messages). The shared Rust `PickerShellSpec` (`effective_state_title()`/`effective_state_message()`) already implements the contract behavior; Svelte must be brought up to match — the contract is authoritative here and is intentionally left unweakened.
 - Loading state prepends shared `Spinner` primitive (`variant="grid"`, `tone="accent"`) before state title
 - Imports `Spinner` from `@poodle/svelte`
 

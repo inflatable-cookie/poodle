@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
 # Parity: Collapsible
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,16 +14,16 @@
 
 ## Contract ↔ Svelte
 
-Several exact-value rows in contract §8 disagree with the authoritative Svelte CSS. Svelte wins — update the contract.
+All exact-value rows in contract §8 now match the authoritative Svelte CSS. FIXED.
 
-- **Root background**: contract §8 says `color-mix(... surface 88%, text-primary)`; Svelte uses `--poodle-collapsible-fill = color-mix(background-elevated 40%, background-panel)` (lines 127, 134). **Fix contract to the elevated/panel 40% mix.**
-- **Root border**: contract says `border-subtle 42%`; Svelte uses `36%` (line 132). **Fix contract to 36%.**
-- **Root padding**: contract §8 says `0.875rem 1rem`; Svelte uses `0.625rem var(--poodle-space-panel-x)` with density `padding-inline` of 0.5rem/1rem (lines 131, 245–246). **Fix contract to 0.625rem vertical + density-driven inline.**
-- **Root gap (open)**: contract says `0.5rem`; Svelte uses `var(--poodle-space-stack-md)` (line 130) — GPUI comment confirms this is 12px, not 8px. **Fix contract to space.stack.md.**
-- **Trigger gap**: contract says `0.75rem`; Svelte uses `var(--poodle-space-inline-md)` (line 156). Likely equal, but contract should cite the token, not a literal.
-- **Heading gap**: contract says `0.3125rem`; Svelte uses `var(--poodle-space-inline-sm)` (line 178). **Fix contract to token.**
-- **Highlighted state**: Svelte ships full `[data-highlighted="true"]` styling — accent border `accent-base 55%` + halo `accent-base 12%` (lines 147–150) — and the `highlighted` prop. Contract §3 lists the prop and §4 lists the state but §8 has **no highlighted token row**. **Fix: add a highlighted token table to contract §8.**
-- **Indicator**: contract §2 anatomy + §8 describe a `<span>` with code-family font rendering chevron text; Svelte renders `<Icon name="chevron-down" />` rotated 180deg on open (lines 109, 204–206). Implementations swap icon name instead of rotating — note as Tier-3 freedom, but contract §8 indicator font rows are vestigial.
+- [x] **Root background** → `color-mix(background-elevated 40%, background-panel)` (Svelte line 134). FIXED.
+- [x] **Root border** → `border-subtle 36%` (Svelte line 132). FIXED.
+- [x] **Root padding** → `0.625rem var(--poodle-space-panel-x)` + density `padding-inline` rows (0.5rem/1rem). FIXED.
+- [x] **Root gap (open)** → `var(--poodle-space-stack-md)`. FIXED.
+- [x] **Trigger gap** → `var(--poodle-space-inline-md)` token. FIXED.
+- [x] **Heading gap** → `var(--poodle-space-inline-sm)` token. FIXED.
+- [x] **Highlighted state** → added Root-highlighted token table (accent-base 55% border + 12% halo) to §8. FIXED.
+- **Indicator**: Svelte renders `<Icon name="chevron-down" />` rotated 180deg on open; the §8 indicator span still carries code-family/0.75rem CSS (real Svelte values, kept). Rust targets swap icon name instead of rotating — Tier-3 freedom, no contract change.
 
 ## GPUI gap (vs Svelte + contract)
 

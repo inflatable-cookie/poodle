@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
 # Parity: MetaBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,10 +16,10 @@
 
 Both props match (`ariaLabel` default `null`, `showSeparators` default `true`). The divergence is undocumented Svelte behavior the contract does not describe, plus a per-child opt-out the contract is silent on.
 
-- Svelte calls `setPillContext({ size: "md", typography: "inherit" })` (`MetaBar.svelte:17-20`) so descendant `Pill`s inherit MetaBar typography. Not in contract §3/§4. **Fix: document the pill-context behavior in contract §4.**
-- Separator mechanism is per-child opt-in via `[data-separator="true"]`, not blanket "between adjacent items". Svelte only draws a dot before a child whose `data-separator` is true (set by `MetaItem`, default `true`), and explicitly suppresses the dot + leading padding for children containing a `.poodle-pill` (`MetaBar.svelte:45-68`). Contract §4 just says "inserts subtle separators between adjacent child items" — it omits the pill suppression and the per-child opt-out. **Fix: spell out the `data-separator` opt-out + pill suppression in contract §4, and add a `data-separator` anatomy note.**
-- Separator visuals are entirely undocumented. Svelte renders a `0.25rem` dot at 72%-mix `--poodle-color-text-secondary` with `1rem` leading padding (`0.75rem` under `40rem`) (`MetaBar.svelte:45-60,97-105`). Contract has no §7 token table. **Fix: add a token-usage section to the contract (gap `0.5rem`, dot size `0.25rem`, dot color, leading padding, responsive breakpoint).**
-- Svelte sets root `gap: 0.5rem` (`MetaBar.svelte:38`) and `line-height: 1.4`. Contract documents neither. **Fix: include in the new token-usage section.**
+- [x] FIXED — Svelte calls `setPillContext({ size: "md", typography: "inherit" })` (`MetaBar.svelte:17-20`); now documented in contract §4 (pill typography context injection).
+- [x] FIXED — Separator mechanism is per-child opt-in via `[data-separator="true"]`, not blanket "between adjacent items"; pill suppression (`:has(.poodle-pill)`) suppresses the dot + leading padding (`MetaBar.svelte:45-68`). Contract §4 now spells out the `data-separator` opt-out + pill suppression (gap collapse + label hide), and §6 semantics adds the `data-separator` attribute note.
+- [x] FIXED — Separator visuals (`0.25rem` dot, 72%-mix `--poodle-color-text-secondary`, `1rem`/`0.75rem` leading padding) now in a new contract §7 Token Usage section with root/separator-dot/pill-suppression/responsive tables.
+- [x] FIXED — Root `gap: 0.5rem` + `line-height: 1.4` (`MetaBar.svelte:38`) now in contract §7 root table.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -47,6 +47,6 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- The big `consv=gap` driver is undocumented separator mechanics: the contract treats separators as automatic between items, but Svelte makes them a per-`MetaItem` `data-separator` opt-out with explicit pill suppression and pill-context typography injection. Both Rust ports copied the simpler "dot before every non-first child" model, so they diverge from Svelte for any `Pill` child.
+- `consv=fixed`: contract now documents the per-`MetaItem` `data-separator` opt-out, pill suppression, pill-context typography injection, and the full separator/root token table (§4 + §7). Both Rust ports still copy the simpler "dot before every non-first child" model, so they remain a gap against Svelte for any `Pill` child — tracked in the Jetstream/GPUI sections, not contract↔Svelte.
 - `MetaBarSpec` has no field to carry per-child separator intent, so even fixing the Rust ports needs the child elements (not just the bar) to signal opt-out — a structural gap, not a one-line fix.
 - Neither Rust port injects pill typography context (no equivalent of `setPillContext`); pills inside the bar will not pick up MetaBar's inherit sizing.

@@ -20,8 +20,11 @@ Updated: 2026-03-15
 ### Inline mode
 
 ```text
-[Root .code.code--inline]  <code>
-  └── [Source text]
+[Inline wrap .code.code--inline-wrap]  <span>
+  ├── [Root .code.code--inline]  <code>
+  │     └── [Source text]
+  └── [Copy button .code__copy.code__copy--inline]  <button> (when showCopyButton)
+        └── [Icon SVG]  (copy or check)
 ```
 
 ### Block mode
@@ -43,8 +46,10 @@ Updated: 2026-03-15
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
+| Inline wrap | yes (inline) | inline-flex wrapper around the code fragment and optional copy button | display, gap |
 | Root (inline) | yes | inline code fragment | background, padding, radius, typography |
-| Root (block) | yes | block code container | border, radius, background |
+| Copy button (inline) | no | compact adjacent copy button (`.code__copy--inline`) | size, icon size |
+| Root (block) | yes | block code container | border, radius |
 | Toolbar | no | header with language label and actions | border-bottom, padding |
 | Language label | no | uppercase language identifier | typography, color |
 | Copy button | no | clipboard copy trigger | color, radius, transition |
@@ -68,6 +73,8 @@ Updated: 2026-03-15
 | `showCopyButton` | `boolean` | `true` | no | show copy-to-clipboard button; when `inline`, renders a compact adjacent copy button |
 | `maxHeight` | `string \| null` | `null` | no | max-height for block container (inline style) |
 | `inline` | `boolean` | `false` | no | render as inline `<code>` element |
+| `inlineVariant` | `"default" \| "plain"` | `"default"` | no | inline only; `"plain"` drops inline padding, radius, and background |
+| `typography` | `"body" \| "inline"` | `"body"` | no | inline only; `"inline"` sets font-size `1em × adjustmentRatio` and `line-height: inherit` so the fragment matches surrounding text |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -84,6 +91,8 @@ Updated: 2026-03-15
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | inline | `inline=true` | compact inline code fragment |
+| inline plain | `inline=true`, `inlineVariant="plain"` | inline fragment with no padding, radius, or background |
+| inline typography | `inline=true`, `typography="inline"` | inline fragment at `1em × adjustmentRatio` with inherited line-height |
 | block | `inline=false` (default) | full block with optional toolbar |
 | copied | user clicks copy button | icon changes to check mark for 2 seconds |
 | line-highlighted | line index in `highlightLines` | accent background on that line |
@@ -137,6 +146,14 @@ Updated: 2026-03-15
 
 ## 8. Token Usage — Exact Values
 
+### Inline wrap `.code.code--inline-wrap`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `0.25rem` |
+
 ### Inline mode `.code.code--inline`
 
 | Property | Value |
@@ -147,18 +164,35 @@ Updated: 2026-03-15
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 72%, var(--poodle-color-background-elevated))` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.8125em` |
+| `font-size` | `calc(0.8125em × var(--poodle-typography-code-adjustmentRatio))` |
 | `line-height` | `1.5` |
 
+### Inline mode — `inlineVariant="plain"` (`[data-inline-variant="plain"]`)
+
+| Property | Value |
+|----------|-------|
+| `padding` | `0` |
+| `border-radius` | `0` |
+| `background` | `transparent` |
+
+### Inline mode — `typography="inline"` (`[data-typography="inline"]`)
+
+| Property | Value |
+|----------|-------|
+| `font-size` | `calc(1em × var(--poodle-typography-code-adjustmentRatio))` |
+| `line-height` | `inherit` |
+
 ### Block mode `.code.code--block`
+
+The block root carries no background; the visible code surface background lives
+on `.code__pre`.
 
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
 | `flex-direction` | `column` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 92%, var(--poodle-color-background-elevated))` |
 | `overflow` | `hidden` |
 
 `maxHeight` applied as inline style on root when prop is provided.
@@ -171,7 +205,8 @@ Updated: 2026-03-15
 | `align-items` | `center` |
 | `justify-content` | `space-between` |
 | `padding` | `0.375rem 0.625rem` |
-| `border-bottom` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 32%, transparent)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 60%, var(--poodle-color-background-panel))` |
+| `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 
 ### Language label `.code__language`
 
@@ -189,6 +224,7 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
+| `margin-left` | `auto` |
 | `gap` | `0.25rem` |
 
 ### Copy button `.code__copy`
@@ -229,6 +265,20 @@ Updated: 2026-03-15
 
 Displays check icon when `copied` is true, copy icon otherwise.
 
+### Inline copy button `.code__copy--inline`
+
+| Property | Value |
+|----------|-------|
+| `width` | `1.25rem` |
+| `height` | `1.25rem` |
+
+### Inline copy button SVG icon `.code__copy--inline svg`
+
+| Property | Value |
+|----------|-------|
+| `width` | `0.75rem` |
+| `height` | `0.75rem` |
+
 ### Scroll container `.code__scroll`
 
 | Property | Value |
@@ -240,7 +290,8 @@ Displays check icon when `copied` is true, copy icon otherwise.
 | Property | Value |
 |----------|-------|
 | `margin` | `0` |
-| `padding` | `0.75rem 1rem` |
+| `padding` | `0.75rem 1rem` (density-adjusted: compact `0.5rem 0.75rem`, comfortable `1rem 1.25rem`) |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-canvas) 92%, black)` |
 
 ### Source `.code__source`
 
@@ -313,11 +364,11 @@ face reads larger or smaller than the default sans family.
 - Block mode: GPUI uses a scrollable container with monospace text rendering
 - Copy button: GPUI must use platform clipboard API
 - color-mix mappings:
-  - `color-mix(in srgb, X 72%, Y)` maps to `X.blend(Y, 0.72)`
-  - `color-mix(in srgb, X 92%, Y)` maps to `X.blend(Y, 0.92)`
-  - `color-mix(in srgb, X 42%, transparent)` maps to `X.opacity(X.a * 0.42)`
-  - `color-mix(in srgb, X 12%, transparent)` maps to `X.opacity(X.a * 0.12)`
-  - `color-mix(in srgb, X 32%, transparent)` maps to `X.opacity(X.a * 0.32)`
+  - inline background `color-mix(in srgb, panel 72%, elevated)` maps to `panel.blend(elevated, 0.72)`
+  - pre background `color-mix(in srgb, canvas 92%, black)` maps to `canvas.blend(black, 0.92)`
+  - toolbar background `color-mix(in srgb, elevated 60%, panel)` maps to `elevated.blend(panel, 0.60)`
+  - line highlight `color-mix(in srgb, accent-base 12%, transparent)` maps to `accent.opacity(accent.a * 0.12)`
+  - block border / toolbar border-bottom use the plain `border-subtle` token (no mix)
 - Line highlighting: GPUI must extend background highlight by 1rem on each side
 - text-transform uppercase: GPUI must uppercase language label programmatically
 
@@ -337,14 +388,15 @@ face reads larger or smaller than the default sans family.
 - [ ] inline border-radius 0.25rem matches
 - [ ] inline background color-mix (panel 72%, elevated) matches
 - [ ] inline font-size 0.8125em matches
-- [ ] block border 0.0625rem color-mix (border-subtle 42%) matches
+- [ ] block border 0.0625rem solid border-subtle (plain token) matches
 - [ ] block border-radius uses `--poodle-radius-surface`
-- [ ] block background color-mix (panel 92%, elevated) matches
+- [ ] pre background color-mix (canvas 92%, black) matches
 - [ ] toolbar padding 0.375rem 0.625rem matches
-- [ ] toolbar border-bottom 0.0625rem color-mix (border-subtle 32%) matches
+- [ ] toolbar background color-mix (elevated 60%, panel) matches
+- [ ] toolbar border-bottom 0.0625rem solid border-subtle (plain token) matches
 - [ ] language label font-size 0.6875rem, uppercase, letter-spacing 0.05em
-- [ ] copy button 1.5rem square, icon 0.875rem square
-- [ ] source font-size 0.8125rem, line-height 1.625, tab-size 2
+- [ ] copy button 1.5rem square, icon 0.875rem square; inline copy 1.25rem square, icon 0.75rem square
+- [ ] source font-size 0.8125rem, line-height 1.4, tab-size 2
 - [ ] line highlight background accent-base 12%, margin/padding +/-1rem
 - [ ] line number width 2.5rem, tabular-nums, right-aligned
 

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
 # Parity: SplitView
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -18,10 +18,10 @@
 
 Svelte implements the full prop surface (orientation, ratio/defaultRatio, min/fixed sizes, collapse states, rail-collapse `*CollapsedSize`, drag-collapse `collapse*BelowSize`, toggles, size/density), flex computation table, drag-to-collapse + rail thresholds, and composes `ResizeHandle` + `CollapseToggle`. Divergences are contract-side staleness in the Toggles styling.
 
-- **Toggles `gap`** — contract §8 says `gap: 0.25rem`; Svelte uses `gap: 0.125rem` (`SplitView.svelte:388`). **Fix: contract → 0.125rem.**
-- **Toggles surface styling missing from contract** — Svelte gives the toggle cluster `padding: 0.125rem`, `border-radius: var(--poodle-radius-pill)`, a `background` color-mix (panel 92% / elevated), and a `box-shadow` ring (`:389-396`). Contract §8 documents none of these (lists only position/z-index/display/align/gap/pointer-events). **Fix: add the toggle-cluster surface tokens to the contract.**
-- **`pointer-events` rule** — contract §8 Toggles specifies `pointer-events: none` with children `auto`; Svelte's `.toggles` has **no** pointer-events rule (`:383-397`). **Fix: drop the pointer-events rows from contract (Svelte is authority).**
-- **`z-index: 1`** — contract §8 lists `z-index: 1` on Toggles; Svelte omits it. Minor; **reconcile.**
+- [x] FIXED **Toggles `gap`** — contract §8 said `gap: 0.25rem`; Svelte uses `gap: 0.125rem` (`SplitView.svelte:388`). Contract → 0.125rem.
+- [x] FIXED **Toggles surface styling** — added the toggle cluster `padding: 0.125rem`, `border-radius: var(--poodle-radius-pill)`, `background` color-mix (panel 92% / elevated), and `box-shadow` ring (`:389-396`) to contract §8.
+- [x] FIXED **`pointer-events` rule** — Svelte's `.toggles` has **no** pointer-events rule (`:383-397`); dropped the phantom rows from contract.
+- [x] FIXED **`z-index: 1`** — Svelte omits it; dropped from contract. Added `justify-content: center` to match Svelte (`:387`).
 - Flex table, drag thresholds (2%/98%), rail hysteresis (+8px), clamping [0.05, 0.95], toggle visibility rules, toggle direction by orientation — all match. No behavioral divergence.
 
 ## GPUI gap (vs Svelte + contract)
@@ -57,5 +57,5 @@ Jetstream composes the real `js_resize_handle` and maps orientation correctly (`
 ## Notes
 
 - The biggest cross-target theme: GPUI and Jetstream both treat collapse as render-state without the rail/drag-collapse lifecycle and (GPUI) one-way toggles. Reaching Tier-1 parity requires composing the real `CollapseToggle` + `ResizeHandle` primitives and porting the rail/threshold logic from Svelte (`SplitView.svelte:179-260`).
-- `consv=gap` is contract drift on the Toggles cluster only (stale gap value + undocumented surface styling + phantom pointer-events rule). Behavioral contract↔Svelte parity is otherwise clean.
+- `consv=fixed`: Toggles-cluster contract drift resolved (gap → 0.125rem, surface styling added, phantom pointer-events + z-index dropped, justify-content added). Behavioral contract↔Svelte parity was otherwise already clean.
 - GPUI specimen `region`/`frame` helpers hand-compute HSLA swatches and px (`split_view_specimen.rs:16-51`) — specimen stand-ins for `<Region>`, not component code. Jetstream specimen `group()` hardcodes `text_size(11.0)` — specimen chrome.

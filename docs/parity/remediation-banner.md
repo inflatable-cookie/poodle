@@ -45,5 +45,6 @@
 
 ## Notes
 
+- **Svelte authority missing** (contract-reconciliation pass, 2026-06-20): no `packages/svelte/components/src/RemediationBanner.svelte` exists, so there is no parity authority to reconcile the contract against. Per the reconciliation rule, the contract was left unchanged and is the sole authority for this component until Svelte ships. `consv=gap` retained for this reason — not a contract defect.
 - This component is the least-complete of the assigned set: 1 of 3 targets implemented, and that target lacks real action buttons. The contract is solid; the work is to build Svelte (reference) + GPUI, then upgrade Jetstream actions to real buttons.
 - Specimen `group()` helper hardcodes `text_size(11.0)` (jetstream `specimens/remediation_banner.rs:53`) — specimen chrome.

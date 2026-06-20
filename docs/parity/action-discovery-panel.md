@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=9 specimen=gap -->
 # Parity: ActionDiscoveryPanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,12 +17,12 @@
 
 Several token-table values in contract §9 do not match the Svelte CSS. Svelte is authoritative — update the contract.
 
-- Badge background/color: contract §9 (shared badge+kbd table) shows `background: background-surface 76%` + `color: text-secondary` for both chips. Svelte gives the **badge** its own accent treatment (`background: accent-base 16%`, `color: accent-base`, `ActionDiscoveryPanel.svelte:285-288`). **Fix: split the contract badge table from kbd; document accent badge styling.**
-- Chip `min-height`: contract §9 says `1.5rem`; Svelte default is `1.375rem` (`--poodle-action-discovery-chip-height`, line 172) and varies per size (1.125/1.25/1.5/1.75rem). **Fix: contract value is wrong; document the per-size chip-height table.**
-- Chip `padding` / `font-size`: contract §9 says `0 0.5rem` and `0.75rem` flat; Svelte resolves both from per-size custom props (`chip-x`, `chip-font-size`, lines 190-219). **Fix: document size-driven chip padding + font-size.**
-- Chip typography: contract omits it; Svelte adds `font-family: label-family`, `font-weight: 600`, `letter-spacing: 0.03em`, `text-transform: uppercase` (kbd resets letter-spacing/transform, lines 277-294). **Fix: add to contract.**
-- Skeleton row layout: contract §9 says `grid` with `grid-template-columns: minmax(0,1fr) auto`, `gap: space.inline.md`, `padding: 0.875rem`, `border-radius`, tinted `background`. Svelte skeleton-row is a plain `flex` `justify-content: space-between` with `gap` only and NO padding/background/radius — the pad/tint moved to the `__skeletons` wrapper (`0.875rem` pad, lines 302-313). **Fix: rewrite contract skeleton tables to match Svelte.**
-- State region: contract §3 shows skeleton/EmptyState directly under root; Svelte wraps loading in `__state` (`min-height: 10rem`, `place-items: center`, lines 296-300) but renders error/empty/no-results EmptyState WITHOUT the `__state` wrapper (lines 110-125). **Fix: document the `__state` wrapper only for loading.**
+- [x] FIXED Badge background/color: split the shared badge+kbd table; added a `__badge` accent override (`accent-base 16%` bg, `accent-base` color, `ActionDiscoveryPanel.svelte:285-288`) and a `__kbd` override (code-family, letter-spacing 0, text-transform none).
+- [x] FIXED Chip `min-height`: contract said `1.5rem`; updated to `var(--poodle-action-discovery-chip-height)` (`1.375rem` md default) and added the per-size chip table (1.125/1.25/1.375/1.5/1.75rem).
+- [x] FIXED Chip `padding` / `font-size`: now resolve from `chip-x` / `chip-font-size` custom props with the per-size table (lines 190-219).
+- [x] FIXED Chip typography: added `font-family: label-family`, `font-weight: 600`, `letter-spacing: 0.03em`, `text-transform: uppercase`, `white-space: nowrap` to the shared table; kbd override resets letter-spacing/transform.
+- [x] FIXED Skeleton row layout: rewrote `__skeleton-row` to `flex` + `justify-content: space-between` + `gap: chip-gap` (no padding/bg/radius); moved pad/width to `__skeletons` (`display:grid`, `gap: list-gap`, `width:100%`, `padding: skeleton-pad` `0.875rem`).
+- [x] FIXED State region: §3 anatomy + §9 now document `__state` (`min-height: 10rem`, `place-items: center`) wrapping loading only; error/empty/no-results EmptyState renders directly under root with no `__state` wrapper.
 - Eyebrow heading: contract anatomy §3 names `[Eyebrow]`; Svelte uses the `Eyebrow` component (line 129). Matches — no fix.
 
 ## GPUI gap (vs Svelte + contract)

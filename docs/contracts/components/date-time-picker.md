@@ -82,7 +82,7 @@ DateTimeValue: { date: string | null; time: string | null }
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | placeholder | no value selected | placeholder text in secondary color |
-| partial value | date or time chosen but not both | partial value displayed, overlay remains open |
+| partial value | date or time chosen but not both | trigger shows the prompt for the missing part: `"Select time"` when date is set but time is not, `"Select date"` when time is set but date is not; overlay remains open |
 | complete value | both date and time committed | formatted date-time displayed |
 | open | trigger clicked or keyboard activated | surface appears below trigger |
 | disabled | `disabled=true` | reduced opacity, non-interactive, cursor: not-allowed |
@@ -247,19 +247,28 @@ DateTimeValue: { date: string | null; time: string | null }
 
 ### Size adjustments
 
-| Size | Property | Value |
-|------|----------|-------|
-| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
-| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
-| `xs` | `font-size` | `0.75rem` |
-| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
-| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.0625rem)` |
-| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
-| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
-| `lg` | `font-size` | `0.9375rem` |
-| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
-| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
-| `xl` | `font-size` | `1rem` |
+Size sets trigger `min-height`, trigger `font-size`, and indicator `font-size`.
+Svelte ships absolute trigger heights; the `md` base resolves from
+`var(--poodle-size-control-height-md, var(--poodle-size-control-height))`. Size
+does **not** alter horizontal padding — density owns that (see below).
+
+| Size | trigger `min-height` | trigger `font-size` | indicator `font-size` |
+|------|----------------------|---------------------|-----------------------|
+| `xs` | `1.5rem` | `0.75rem` | `0.625rem` |
+| `sm` | `1.75rem` | `0.8125rem` | `0.6875rem` |
+| `md` | `var(--poodle-size-control-height-md, var(--poodle-size-control-height))` | `var(--poodle-typography-body-size)` | `0.75rem` |
+| `lg` | `2.75rem` | `0.9375rem` | `0.8125rem` |
+| `xl` | `3.25rem` | `1rem` | `0.875rem` |
+
+### Density adjustments
+
+Density owns trigger horizontal padding only (no height/font change).
+
+| Density | trigger `padding` |
+|---------|-------------------|
+| `compact` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `default` | `0 var(--poodle-space-control-x)` |
+| `comfortable` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
 
 ## 9. Svelte Notes
 

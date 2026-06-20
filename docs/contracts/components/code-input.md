@@ -27,6 +27,8 @@ Updated: 2026-03-30
         ├── [Hidden submission input] <input type="hidden">
         ├── [Real input .code-input__control] <input type="text">
         └── [Visual slot .code-input__slot]... (repeated `length`)
+              (slot at index 2 carries `--split-after` for 6-digit codes →
+               3+3 grouping gap)
 ```
 
 ## 3. Public Props
@@ -37,7 +39,7 @@ Updated: 2026-03-30
 | `value` | `string \| null \| undefined` | `undefined` |
 | `defaultValue` | `string` | `""` |
 | `name` | `string` | `"code"` |
-| `label` | `string` | `"Verification code"` |
+| `label` | `string` | `"Authenticator code"` |
 | `hint` | `string \| null` | `null` |
 | `error` | `string \| null` | `null` |
 | `mask` | `boolean` | `false` |
@@ -76,6 +78,9 @@ Updated: 2026-03-30
 - Clicking a filled slot selects that character so typing replaces it in place
 - The component composes its own `Field` wrapper so callers can use `label`,
   `hint`, and `error` directly
+- `validationState` accepts the full `ValidationState` union, but only the
+  `invalid` case (or a non-null `error`) changes slot visuals; other states
+  render with the default slot colors. An `error` string forces invalid styling
 
 ## 6. Accessibility
 
@@ -96,46 +101,70 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `inline-flex` |
-| `gap` | `0.375rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `width` | `max-content` |
 
-### Slot `.code-input__slot`
+Slots are square. The border color is `--code-slot-border`, derived from
+`validationState` (see Validation state rows below).
 
 | Property | Value |
 |----------|-------|
 | `width` | `2.25rem` |
-| `height` | `2.5rem` |
+| `height` | `2.25rem` |
 | `padding` | `0` |
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border` | `0.0625rem solid var(--code-slot-border, var(--poodle-color-border-default))` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-color-background-surface)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
 | `font-size` | `1rem` |
+| `font-weight` | `600` |
 | `line-height` | `1` |
 | `text-align` | `center` |
 
-### Slot -- focus-visible
+### Slot — split-after (`.code-input__slot--split-after`, index 2 when `length === 6`)
 
 | Property | Value |
 |----------|-------|
-| `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `outline-offset` | `0.125rem` |
+| `margin-right` | `var(--poodle-space-inline-md)` |
+
+This produces the 3+3 visual grouping for six-digit codes.
+
+### Slot -- active (`.code-input__slot--active`, the slot at the caret position while focused)
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `var(--code-slot-focus, var(--poodle-color-accent-border))` |
+| `box-shadow` | `0 0 0 var(--poodle-border-width-focus) var(--code-slot-focus-ring)` |
+
+### Slot -- validation state (drives `--code-slot-border` / `--code-slot-focus` / `--code-slot-focus-ring`)
+
+| validationState | `--code-slot-border` | `--code-slot-focus` | `--code-slot-focus-ring` |
+|-----------------|----------------------|---------------------|---------------------------|
+| not invalid (default) | `var(--poodle-color-border-default)` | `var(--poodle-color-accent-border)` | `color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
+| `"invalid"` (or `error` set) | `var(--poodle-color-status-danger)` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 24%, transparent)` |
 
 ### Slot -- disabled
 
 | Property | Value |
 |----------|-------|
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
+| `cursor` | `not-allowed` |
 
 ### Size adjustments
 
-| Size | slot width | slot height | slot font-size |
-|------|------------|-------------|----------------|
-| `xs` | `calc(control-height - 0.5rem)` | `calc(control-height - 0.25rem)` | `0.8125rem` |
-| `sm` | `calc(control-height - 0.25rem)` | `control-height` | `0.875rem` |
-| `md` | `2.25rem` | `2.5rem` | `1rem` |
-| `lg` | `calc(control-height + 0.25rem)` | `calc(control-height + 0.5rem)` | `1.125rem` |
-| `xl` | `calc(control-height + 0.5rem)` | `calc(control-height + 0.75rem)` | `1.25rem` |
+Slots are square (width == height) at every size.
+
+| Size | slot width / height | slot font-size |
+|------|---------------------|----------------|
+| `xs` | `1.5rem` | `0.8125rem` |
+| `sm` | `1.75rem` | `0.875rem` |
+| `md` | `2.25rem` | `1rem` |
+| `lg` | `2.75rem` | `1.125rem` |
+| `xl` | `3.25rem` | `1.25rem` |
+
+Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
+`var(--poodle-space-inline-sm)`, `comfortable` `var(--poodle-space-inline-md)`.
 
 ## 8. Specimen Definitions
 
@@ -183,8 +212,8 @@ Updated: 2026-03-30
 ### Tier 2: Visual Parity
 
 - [ ] all five sizes visually match (height, padding, font-size per size table)
-- [ ] slot width (2.25rem) and height (2.5rem) match
-- [ ] gap between slots (0.375rem) matches
+- [ ] slot is square (2.25rem x 2.25rem at md) match
+- [ ] gap between slots (space-inline-sm) matches
 - [ ] code-family font on slots matches
 - [ ] focus ring (outline with focusRing color) matches
 - [ ] disabled opacity matches

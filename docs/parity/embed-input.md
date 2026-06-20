@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=7 specimen=gap -->
 # Parity: EmbedInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,11 +14,11 @@
 
 ## Contract ↔ Svelte
 
-Svelte and its `.ts` engine carry surface the contract does not document. Svelte authoritative.
+`consv=fixed`. Undocumented Svelte/`.ts` surface and class-prefix drift reconciled.
 
-- `embed-input.ts` supports an `audioboom` provider (`embed-input.ts:52-60`) and an `embedType` field (`"video"|"audio"|"generic"`) on `ParsedEmbed` — neither in contract `ParsedEmbed` type §3 nor the detection-rules table. **Fix: add `audioboom` + `embedType` to contract.**
-- Svelte component adds `size`/`sizeRole`/`density` props (`EmbedInput.svelte:18-20`) — not in contract prop table §3. **Fix: add to contract.**
-- Class prefix drift: implementation uses `.poodle-embed-input*` (`EmbedInput.svelte:72,86`); contract anatomy table uses `.embed-input*`. **Fix: reconcile contract to `.poodle-` prefix (matches other components).**
+- [x] FIXED `audioboom` provider (`embed-input.ts:52-60`) + `embedType` field (`"video"|"audio"|"generic"`) added to contract `ParsedEmbed` type §3 and the detection-rules table (with detection order + recursive-iframe + `"Could not parse embed source"`/`"Generic embeds are not allowed"` error strings).
+- [x] FIXED `size`/`sizeRole`/`density` props (`EmbedInput.svelte:18-20`) added to contract §3 + §9 forwarding note.
+- [x] FIXED Class prefix reconciled to `.poodle-embed-input*` throughout anatomy + §8 token tables + §9 note (`EmbedInput.svelte:72,86`).
 - All 11 contract props (id/value/parsed/placeholder/parseDebounce/providers/disabled/error/onParse/onValueChange/resolveParseState), anatomy (TextInput rows=3 + status + error + ProviderPill + success text), states (empty/parsing-silent/success/error/disabled), callbacks, and the no-aria-live a11y rule all match.
 
 ## GPUI gap (vs Svelte + contract)

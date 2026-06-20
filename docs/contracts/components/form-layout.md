@@ -21,17 +21,17 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .form-layout]  <div>
-  ├── [Description .form-layout__description]  <p> (optional)
+[Root .poodle-form-layout]  <div>
+  ├── [Description .poodle-form-layout__description]  <p> (optional)
   ├── [ErrorCallout]  Callout (tone="danger") (optional)
   ├── [SuccessCallout]  Callout (tone="success") (optional)
-  ├── [FieldErrors .form-layout__field-errors]  <div> (optional)
+  ├── [FieldErrors .poodle-form-layout__field-errors]  <div> (optional)
   │     ├── [ErrorHeading]  <p> "Please fix the following errors:"
   │     └── [ErrorList]  <ul>
   │           └── [ErrorItem]  <li> per field error
-  ├── [Grid .form-layout__grid]  <div>
+  ├── [Grid .poodle-form-layout__grid]  <div>
   │     └── (snippet: children() — form fields)
-  └── [Actions .form-layout__actions]  <div> (optional)
+  └── [Actions .poodle-form-layout__actions]  <div> (optional)
         └── [FormActions]  FormActions primitive
               └── (snippet: actions())
 ```
@@ -43,7 +43,7 @@ Updated: 2026-03-30
 | ErrorCallout | no | form-level error message via Callout | delegates to Callout contract (tone="danger") |
 | SuccessCallout | no | form-level success message via Callout | delegates to Callout contract (tone="success") |
 | FieldErrors | no | accessible error summary list | status-danger background/border, label typography |
-| Grid | yes | responsive CSS grid for form fields | grid columns, gap (stack-lg vertical, inline-md horizontal) |
+| Grid | yes | responsive CSS grid for form fields | grid columns, row-gap (`stack-lg + 0.625rem`), column-gap (`inline-md`) |
 | Actions | no | action buttons via FormActions | delegates to FormActions contract |
 
 ## 3. Props And Inputs
@@ -133,7 +133,8 @@ None. FormLayout is a structural composite with no component-owned events.
 ### Sizing
 
 - Root: flex column with `gap: var(--poodle-space-stack-lg)`
-- Fields grid: `repeat(columns, 1fr)` with `gap: stack-lg inline-md`
+- Fields grid: `repeat(columns, 1fr)` with `row-gap: calc(stack-lg + 0.625rem)`, `column-gap: inline-md`
+- A `Field` that is the grid's only child spans the full row (`grid-column: 1 / -1`)
 - Grid columns driven by CSS custom property `--fl-columns` (set inline from
   `columns` prop)
 - Uses container queries (not viewport media queries) for responsive behavior
@@ -155,7 +156,7 @@ None. FormLayout is a structural composite with no component-owned events.
 
 ## 8. Token Usage — Exact Values
 
-### Root `.form-layout`
+### Root `.poodle-form-layout`
 
 | Property | Value |
 |----------|-------|
@@ -164,7 +165,7 @@ None. FormLayout is a structural composite with no component-owned events.
 | gap | `var(--poodle-space-stack-lg)` |
 | container-type | `inline-size` |
 
-### Description `.form-layout__description`
+### Description `.poodle-form-layout__description`
 
 | Property | Value |
 |----------|-------|
@@ -173,7 +174,7 @@ None. FormLayout is a structural composite with no component-owned events.
 | font-size | `var(--poodle-typography-body-size, 0.875rem)` |
 | line-height | `var(--poodle-typography-body-lineHeight, 1.5)` |
 
-### Field Errors `.form-layout__field-errors`
+### Field Errors `.poodle-form-layout__field-errors`
 
 | Property | Value |
 |----------|-------|
@@ -183,35 +184,51 @@ None. FormLayout is a structural composite with no component-owned events.
 | border | `0.0625rem solid color-mix(in srgb, var(--poodle-color-status-danger) 40%, transparent)` |
 | font-size | `var(--poodle-typography-label-size, 0.75rem)` |
 
-### Field Errors Heading `.form-layout__field-errors p`
+### Field Errors Heading `.poodle-form-layout__field-errors p`
 
 | Property | Value |
 |----------|-------|
 | margin | `0 0 0.25rem` |
 | font-weight | `600` |
 
-### Field Errors List `.form-layout__field-errors ul`
+### Field Errors List `.poodle-form-layout__field-errors ul`
 
 | Property | Value |
 |----------|-------|
 | margin | `0` |
 | padding-left | `1.25rem` |
 
-### Field Errors Item `.form-layout__field-errors li`
+### Field Errors Item `.poodle-form-layout__field-errors li`
 
 | Property | Value |
 |----------|-------|
 | margin-bottom | `0.125rem` |
 
-### Grid `.form-layout__grid`
+### Grid `.poodle-form-layout__grid`
+
+The grid declares two local custom properties on itself, then consumes them for the two gap axes:
+
+| Custom Property | Value |
+|-----------------|-------|
+| `--poodle-form-layout-row-gap` | `calc(var(--poodle-space-stack-lg) + 0.625rem)` |
+| `--poodle-form-layout-column-gap` | `var(--poodle-space-inline-md)` |
 
 | Property | Value |
 |----------|-------|
 | display | `grid` |
 | grid-template-columns | `repeat(var(--fl-columns, 6), 1fr)` |
-| gap | `var(--poodle-space-stack-lg) var(--poodle-space-inline-md)` |
+| row-gap | `var(--poodle-form-layout-row-gap)` (= `space-stack-lg + 0.625rem`) |
+| column-gap | `var(--poodle-form-layout-column-gap)` (= `space-inline-md`) |
 
 The `--fl-columns` CSS variable is set inline from the `columns` prop.
+
+### Grid Lone-Field Full-Span `.poodle-form-layout__grid .poodle-field:only-child`
+
+| Property | Value |
+|----------|-------|
+| grid-column | `1 / -1` |
+
+A `Field` that is the only child of the grid spans the full row width.
 
 ### Container Query Breakpoints
 
@@ -221,16 +238,16 @@ Uses `container-type: inline-size` on the root element.
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.form-layout__grid` | grid-template-columns | `repeat(2, 1fr)` |
-| `.form-layout__grid :global([style*="grid-column"])` | grid-column | `span 1 !important` |
-| `.form-layout__grid :global([style*="span 6"])` | grid-column | `1 / -1 !important` |
-| `.form-layout__grid :global([style*="span -1"])` | grid-column | `1 / -1 !important` |
+| `.poodle-form-layout__grid` | grid-template-columns | `repeat(2, 1fr)` |
+| `.poodle-form-layout__grid :global([style*="grid-column"])` | grid-column | `span 1 !important` |
+| `.poodle-form-layout__grid :global([style*="span 6"])` | grid-column | `1 / -1 !important` |
+| `.poodle-form-layout__grid :global([style*="span -1"])` | grid-column | `1 / -1 !important` |
 
 #### `@container (max-width: 480px)`
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.form-layout__grid` | grid-template-columns | `1fr` |
+| `.poodle-form-layout__grid` | grid-template-columns | `1fr` |
 
 ### Composed Primitives
 
@@ -251,6 +268,11 @@ None.
 - Root element uses `container-type: inline-size` for container queries
 - Grid columns driven by CSS custom property `--fl-columns` set via
   `style:--fl-columns={columns}`
+- Grid declares two local custom props `--poodle-form-layout-row-gap`
+  (`calc(space-stack-lg + 0.625rem)`) and `--poodle-form-layout-column-gap`
+  (`space-inline-md`), consumed by `row-gap`/`column-gap` (asymmetric: row gap
+  is larger than column gap)
+- A lone `.poodle-field:only-child` in the grid spans `grid-column: 1 / -1`
 - Field `span` prop maps to `grid-column: span N` naturally
 - At 2-col breakpoint, `span 6` fields use `grid-column: 1 / -1` to stay
   full width; all other spans reset to `span 1`

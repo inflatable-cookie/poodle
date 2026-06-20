@@ -156,7 +156,7 @@ Updated: 2026-03-16
 
 - Root: `display: inline-flex` (no max-width — popover is absolutely positioned)
 - Trigger: `2.25rem` square
-- Text input height: `2.25rem`
+- Inline hex text input: `6.5rem` wide, `2.25rem` tall
 - Surface width: `24rem`, positioned absolutely below trigger
 - Picker area: flex row — gradient pad left, controls panel right
 - Gradient pad: `10rem` wide, `aspect-ratio: 1` (square)
@@ -199,6 +199,21 @@ Updated: 2026-03-16
 | `background` | `transparent` |
 | `cursor` | `pointer` |
 | `overflow` | `hidden` |
+
+### Inline Text Input `.color-picker__input` (conditional: showInput)
+
+| Property | Value |
+|----------|-------|
+| `width` | `6.5rem` |
+| `height` | `2.25rem` |
+| `min-height` | `0` |
+| `padding` | `0 var(--poodle-space-control-x)` |
+| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-family` | `var(--poodle-typography-code-family)` |
+| `font-size` | `0.8125rem` |
 
 ### Surface `.color-picker__surface`
 

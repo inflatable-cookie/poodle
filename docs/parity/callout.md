@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=9 specimen=gap -->
 # Parity: Callout
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,8 +16,9 @@
 
 Mostly aligned. One geometry literal and the spec struct lagging the contract props.
 
-- Root padding: contract §8 says `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`; Svelte hardcodes block padding `0.625rem var(--poodle-space-panel-x)` (`Callout.svelte:129`). **Fix: contract should state `0.625rem` block (or add the literal to the panel-y note) to match Svelte.**
-- Content gap: contract §8 Content table says `gap: 0.25rem`; Svelte `.callout__content` uses `var(--poodle-space-inline-sm)` (`Callout.svelte:186`). **Fix: reconcile contract content gap to the inline-sm token.**
+- [x] FIXED Root padding: contract §8 Root now reads `0.625rem var(--poodle-space-panel-x)`, matching Svelte (`Callout.svelte:129`).
+- [x] FIXED Content gap: contract §8 Content table now reads `var(--poodle-space-inline-sm)` (and the Tier 2 checklist line updated), matching Svelte (`Callout.svelte:186`).
+- [x] FIXED Size table: contract §8 size adjustments were stale (icon `1rem`/`1.1875rem`/`1.5625rem`/`1.75rem`, message `0.6875rem`/`0.75rem`/`0.875rem`/`0.9375rem`). Reconciled to Svelte's actual per-size values (icon `0.875`/`1.125`/`1.375`/`1.75`/`2rem`, added an icon font-size column and a per-size root-gap note). This divergence was not in the original task list but is a clear stale-value mismatch Svelte superseded.
 - `CalloutTone` includes `pending` (contract §3) and Svelte handles it (`:85-87`, spinner badge) — present and correct in Svelte.
 - All public props (`tone`, `title`, `message`, `ariaLabel`, `announceMode`, `dismissible`, `dismissLabel`, `size`, `sizeRole`, `density`) are present in Svelte (`:10-25`). Contract↔Svelte prop surface matches. **The divergence is the Rust SPEC, not Svelte** — see below.
 - Icon mapping: contract §6 maps danger→`circle-x`, warning→`triangle-alert`, success→`check`. Svelte maps success→`check`, warning→`triangle-alert`, danger→`circle-x` (`Callout.svelte:29-35`). Matches. Both Rust targets use DIFFERENT icon names (see gaps).
@@ -60,4 +61,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - `CallOutSpec` (`packages/contracts/components/src/call_out.rs`) lacks fields the contract §3 requires: `dismissible`, `announce_mode`, `dismiss_label`, `aria_label`. GPUI stuffs `is_dismissible`/`on_dismiss` onto the wrapper struct outside the spec (`callout.rs:21-22`); Jetstream has no dismiss path. **Add these to the spec so both Rust targets resolve from one source.**
 - `fill_token()`/`border_token()` (`call_out.rs:53-73`) return a single color per tone (accent-base for info/neutral/pending). The contract distinguishes neutral (`panel 94%` / `border-subtle 88%`) and pending (`accent 8%` / `26%`) from info (`status-info 10%` / `34%`). Spec token methods cannot express neutral or pending correctly — both Rust impls then approximate or fall through. **Add explicit neutral + pending token paths.**
 - Contract §4 lists `info` as using a dedicated `--poodle-color-status-info` blue token; `fill_token()` returns `COLOR_ACCENT_BASE` for info, so GPUI/Jetstream tint info with accent, not the status-info blue. Visual mismatch vs Svelte (`Callout.svelte:138`).
-- `consv=gap` driver is two stale §8 literals (block padding, content gap); the heavier work is the Rust spec/token surface, captured in the gap sections.
+- `consv=fixed`: the two stale §8 literals (block padding, content gap) plus the stale per-size table are reconciled to Svelte. The remaining heavy work is the Rust spec/token surface (`CallOutSpec` missing `dismissible`/`announce_mode`/`dismiss_label`/`aria_label`, neutral/pending token paths), captured in the gap sections — that is code-side, not contract↔Svelte.

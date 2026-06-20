@@ -10,8 +10,9 @@ Updated: 2026-03-26
 - Summary: a compact square action trigger whose accessible name comes from a
   label prop rather than visible text content, with variant, size, pressed,
   loading, and disabled states
-- In scope: icon-only command triggers, ghost/primary/secondary/danger
-  variants, semantic size roles, xs/sm/md/lg/xl sizes, pressed/selected state when explicitly configured,
+- In scope: icon-only command triggers, ghost/primary/secondary variants,
+  default/danger/success tones, semantic size roles, xs/sm/md/lg/xl sizes,
+  pressed/selected state when explicitly configured,
   disabled/loading behavior with shared spinner usage, CSS custom property theming
 - Out of scope: toolbar roving-focus behavior, menu-button or toggle-button
   composite semantics beyond explicit opt-in, text-bearing buttons (see Button)
@@ -41,7 +42,7 @@ Updated: 2026-03-26
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `variant` | `ButtonVariant` | `"ghost"` | no | semantic appearance |
-| `tone` | `ButtonTone` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
+| `tone` | `ButtonTone` | `"default"` | no | intent modifier; composes with variant for danger/success × primary, secondary, ghost |
 | `size` | `ControlSize` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -50,7 +51,7 @@ Updated: 2026-03-26
 | `disabled` | `boolean` | `false` | no | suppresses activation |
 | `loading` | `boolean` | `false` | no | shows spinner and suppresses activation |
 | `pressed` | `boolean \| null` | `null` | no | optional pressed/toggled state; null omits aria-pressed |
-| `defaultPressed` | `boolean` | `false` | no | uncontrolled initial pressed state; enables toggle mode when true even if `pressed` is null |
+| `defaultPressed` | `boolean \| null` | `null` | no | uncontrolled initial pressed state; toggle mode is enabled when `pressed !== null` or `defaultPressed !== null` |
 | `tooltip` | `string \| null` | `null` | no | override text for the built-in tooltip; defaults to `ariaLabel` when null |
 | `tooltipPlacement` | `OverlayPlacement` | `"top"` | no | positioning of the tooltip relative to the button |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby reference |
@@ -65,7 +66,7 @@ type ButtonVariant = "ghost" | "primary" | "secondary"
 ### ButtonTone
 
 ```
-type ButtonTone = "default" | "danger"
+type ButtonTone = "default" | "danger" | "success"
 ```
 
 ### ControlSize
@@ -99,7 +100,7 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | hover | pointer enters (when available) | elevated background, darkened border; tooltip appears after 300ms delay |
 | active | pointer or keyboard activation | further elevated background, slight downward translate |
 | focus | keyboard focus | focus ring; tooltip appears after 300ms delay |
-| pressed | `pressed=true` | accent-tinted background and border, inset shadow |
+| pressed | `pressed=true` | non-primary variants: solid accent-base fill, accent-85%-black border, inverse text, no shadow |
 | disabled | `disabled=true` | muted opacity, not-allowed cursor |
 | loading | `loading=true` | spinner replaces glyph, activation suppressed, aria-busy |
 
@@ -254,9 +255,17 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 
 | Selector | `--poodle-icon-button-fill` | `--poodle-icon-button-border` | `--poodle-icon-button-text` |
 |----------|--------------------------|----------------------------|--------------------------|
-| `[data-tone="danger"]` (ghost base) | `color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` | `var(--poodle-color-text-primary)` |
+| `[data-tone="danger"]` (base) | `color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` | (inherits) |
 | `[data-variant="primary"][data-tone="danger"]` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 84%, black)` | `var(--poodle-color-text-inverse)` |
 | `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--poodle-color-status-danger)` |
+
+### Tone: success
+
+| Selector | `--poodle-icon-button-fill` | `--poodle-icon-button-border` | `--poodle-icon-button-text` |
+|----------|--------------------------|----------------------------|--------------------------|
+| `[data-tone="success"]` (base) | `color-mix(in srgb, var(--poodle-color-status-success) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default))` | (inherits) |
+| `[data-variant="primary"][data-tone="success"]` | `var(--poodle-color-status-success)` | `color-mix(in srgb, var(--poodle-color-status-success) 84%, black)` | `var(--poodle-color-text-inverse)` |
+| `[data-variant="ghost"][data-tone="success"]` | `transparent` | `transparent` | `var(--poodle-color-status-success)` |
 
 ### Ghost danger hover
 
@@ -265,20 +274,35 @@ type OverlayPlacement = "top" | "bottom" | "left" | "right"
 | `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` |
 | `.icon-button[data-variant="ghost"][data-tone="danger"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent)` |
 
+### Ghost success hover
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled)` | `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default))` |
+| `.icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--poodle-color-status-success) 10%, transparent)` |
+
 ### Root — Pressed (`pressed=true`)
+
+Selector: `.icon-button[data-pressed="true"]:not([data-variant="primary"])` — a
+solid-accent treatment applied via custom-property overrides for all non-primary
+variants (ghost/secondary). Primary variant keeps its own variant styling when
+pressed.
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 20%, var(--poodle-icon-button-fill))` |
-| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 56%, var(--poodle-icon-button-border))` |
-| `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 12%, transparent), inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
+| `--poodle-icon-button-fill` | `var(--poodle-color-accent-base)` |
+| `--poodle-icon-button-fill-hover` | `color-mix(in srgb, white 12%, var(--poodle-color-accent-base))` |
+| `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-accent-base) 85%, black)` |
+| `--poodle-icon-button-text` | `var(--poodle-color-text-inverse)` |
+| `--poodle-icon-button-shadow` | `none` |
 
-### Root — Hover (`:hover`)
+### Root — Hover (`:hover:not(:disabled)`)
 
 | Property | Value |
 |----------|-------|
 | `background` | `var(--poodle-icon-button-fill-hover)` |
 | `border-color` | `color-mix(in srgb, var(--poodle-icon-button-border) 74%, var(--poodle-color-text-primary))` |
+| `box-shadow` | `var(--poodle-treatment-interactive-shadow-active, var(--poodle-icon-button-shadow))` |
 
 ### Root — Active (`:active`)
 
@@ -322,6 +346,24 @@ with the button surface across all sizes.
 The loading indicator is the shared [`Spinner`](./spinner.md) primitive with
 `variant="ring"`, `size="sm"`, and `tone="current"`, centered inside the
 button-owned wrapper.
+
+### Tooltip `.icon-button__tooltip`
+
+| Property | Value |
+|----------|-------|
+| `position` | `fixed` |
+| `z-index` | `var(--poodle-overlay-z-menu)` |
+| `max-width` | `16rem` |
+| `padding` | `0.375rem 0.5rem` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
+| `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font-size` | `0.6875rem` |
+| `line-height` | `1.35` |
+| `white-space` | `nowrap` |
+| `pointer-events` | `none` |
 
 ## 9. Svelte Notes
 
@@ -389,7 +431,8 @@ button-owned wrapper.
 - [ ] primary variant fill/border/text match (accent-base, 84% darkened border, inverse text)
 - [ ] secondary variant fill/border match (surface, border-default)
 - [ ] danger tone color-mix values match (16% danger fill, 46% danger border for secondary base; solid danger for primary; transparent for ghost)
-- [ ] pressed state accent-tinted background and double inset shadow match
+- [ ] success tone color-mix values match (16% success fill, 46% success border for secondary base; solid success for primary; transparent for ghost)
+- [ ] pressed state (non-primary) solid accent-base fill, accent-85%-black border, inverse text, no shadow match
 - [ ] hover state fill-hover and darkened border (74% mix) match
 - [ ] active state fill-active and translateY(0.03125rem) match
 - [ ] size sm/md/lg width/height adjustments match (0.375rem delta)

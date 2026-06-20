@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=8 specimen=gap -->
 # Parity: ColorPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,8 +16,8 @@
 
 Svelte implements the full contract surface (all props, anatomy parts, ARIA). Divergences:
 
-- **Inline trigger hex input height.** Contract §7 says text input height `2.25rem` and §8 has no inline-input spec; Svelte `.poodle-color-picker__input` is `2.25rem` (line 705) — OK — but font-size is `0.8125rem` (line 713), not documented in the §8 size table (which only covers surface text input at `0.75rem`). Minor. **Fix: document the inline trigger input typography in §8.**
-- **Inline input width.** Svelte inline input is `width: 6.5rem` (line 704); contract §7 doesn't state it. **Fix: add to contract §7/§8.**
+- [x] **Inline trigger hex input typography.** Added an "Inline Text Input `.color-picker__input`" table to §8 documenting width `6.5rem`, height `2.25rem`, padding `0 space-control-x`, border `border-default`, radius `radius-control`, background `background-surface`, code-family `0.8125rem`. FIXED.
+- [x] **Inline input width.** `6.5rem` now documented in §7 and the new §8 table. FIXED.
 - **Density override touches trigger horizontal padding only** (lines 1021-1022) — compliant with the size/density rule (horizontal padding, not height). OK; note for completeness.
 - `defaultMode` / mode toggle / NumberInput channel inputs / HSV model — all present in Svelte (lines 240-626), all in contract §2. OK.
 - Net: contract is essentially complete; `consv=gap` is driven only by the two undocumented inline-input dimensions. Low-severity.

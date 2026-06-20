@@ -19,6 +19,7 @@ Updated: 2026-03-30
 | `label` | `string \| null` | `null` |
 | `ariaLabel` | `string \| null` | `null` |
 | `typography` | `"body" \| "inherit"` | `"body"` |
+| `separator` | `boolean` | `true` |
 
 ## 3. Composition
 
@@ -47,6 +48,9 @@ Updated: 2026-03-30
 ### Semantics
 
 - root may be given `ariaLabel` when label text alone is not sufficient
+- root emits `data-separator={separator}` (presentational, default `true`) — the
+  signal a parent `MetaBar` reads to decide whether to draw a leading separator
+  dot before this item. Pass `separator={false}` to opt out of the dot.
 - if the value content is interactive, the interactive child remains the focus
   target and owns its own semantics
 
@@ -89,8 +93,8 @@ When `typography="inherit"`:
 
 | Property | Value |
 |----------|-------|
-| `gap` | `0.4286em` |
-| label `font-size` | `0.7857em` |
+| `gap` | `0.375em` |
+| label `font-size` | `0.6875em` |
 | value `font-size` | `1em` |
 | behavior | proportional-inherit rule from `docs/contracts/001-working-rules.md` |
 

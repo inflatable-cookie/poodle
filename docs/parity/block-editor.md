@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=8 specimen=gap -->
 # Parity: BlockEditor
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,12 +17,12 @@
 
 Contract §8 root table is stale — Svelte moved the border/padding/radius off the root onto each block. Svelte is authoritative — update the contract.
 
-- Root border/padding/radius: contract §8 `.block-editor` table says `border: 0.0625rem solid border-default`, `border-radius: radius-surface`, `padding: shell-y shell-x`, `background: background-surface`. Svelte root has only `background: background-surface; padding: 0; display:flex; gap` — **no border, no radius, no padding** (`BlockEditor.svelte:438-443`). The `shell-x/y` custom props are declared but unused on the root. **Fix: contract §8 root table is wrong; remove border/radius/padding from root.**
+- [x] FIXED Root border/padding/radius: §8 `.block-editor` root table dropped `border`, `border-radius`, and the `shell-y shell-x` padding; now `background`, `padding: 0`, `display:flex`, `flex-direction:column`, `gap` — matching Svelte (`BlockEditor.svelte:438-443`). Added a note that shell-x/y custom props are declared-but-unused on the root. §7 sizing line updated (no root padding/border/radius).
 - Block background: contract §8 `.block-editor__block` and Svelte match (`elevated 42%`, active `72%`, drag-over ring `0 0 0 0.125rem accent`, dragging `opacity 0.4`). No fix.
-- `data-size`/`data-density` size table: contract §8 says xs `1.25` / sm `1.5` / md `1.75` / lg `2` / xl `2.25rem`; Svelte matches (lines 445-463). No fix.
-- `blockTypeItems` (flat or grouped `BlockTypeGroup[]`): present in both contract §3 and Svelte (lines 51, 95). No fix.
+- `data-size`/`data-density` size table: contract §8 matches Svelte (lines 445-463). No fix.
+- `blockTypeItems` (flat or grouped `BlockTypeGroup[]`): present in both. No fix.
 - Snippets (`block`, `typePicker`, `addPicker`): contract §3 and Svelte match. No fix.
-- Type-select inset: Svelte adds `.block-editor__type-select--inset` margin when `!canReorder` (lines 328, 562-568) — minor, contract §2 doesn't mention it. **Fix: note the inset behaviour in contract §2/§8 (low priority).**
+- [x] FIXED Type-select inset: documented `.block-editor__type-select--inset` (margin-left `calc(content-x + input-x − toolbar-x)` when `!canReorder`) in §8 + noted it on the TypeSelect part in §2 (`BlockEditor.svelte:328,562-568`).
 
 ## GPUI gap (vs Svelte + contract)
 

@@ -24,15 +24,19 @@ Updated: 2026-03-30
   │           ├── [Title .page-header__title]  <h2..h6> (configurable level)
   │           │     ├── [TitleText]  <span>
   │           │     └── [Count .page-header__count]  <span> (optional, when count !== null)
+  │           │           └── Pill primitive (tone="neutral", appearance="subtle")
   │           ├── [Subtitle .page-header__subtitle]  <p> (optional)
   │           ├── [Breadcrumbs .page-header__breadcrumbs]  <div> (optional, breadcrumbs snippet)
   │           ├── [Meta .page-header__meta]  <div> (optional, meta snippet)
   │           └── [Body .page-header__body]  <div> (optional, children snippet)
   ├── [ActionsRow .page-header__actions-row]  <div> (optional, when backHref or actions)
-  │     ├── [BackLink .page-header__back]  <a> (optional, when backHref)
+  │     ├── [BackLink — text .page-header__back--text]  <a> (optional, when backHref; hidden under 45rem)
   │     │     ├── [BackIcon]  Icon "arrow-left"
-  │     │     ├── [BackLabel]  <span> visible label text (defaults to "Back")
+  │     │     ├── [BackLabel]  <span> resolved display label (defaults to "Back")
   │     │     └── [ContextDot .page-header__context-dot]  <span> (optional, when backIsContextual)
+  │     ├── [BackLink — icon .page-header__back--icon]  <a> (optional, when backHref; shown under 45rem)
+  │     │     ├── [BackIcon]  Icon "arrow-left"
+  │     │     └── [ContextDot --overlay]  <span> (optional, when backIsContextual)
   │     └── [Actions .page-header__actions]  <div> (optional, actions snippet; pushed right via margin-left: auto)
   └── [Banner .page-header__banner]  <div> (optional, banner snippet or bannerMessage prop)
         └── [Callout]  Callout primitive (when bannerMessage shortcut used)
@@ -49,17 +53,18 @@ Updated: 2026-03-30
 | Eyebrow | `<p>` | no | Small meta label above title |
 | Section | `<p>` | no | Section label when two-level header (section + title both set) |
 | Title | `<h2..h6>` | yes | Primary heading, level set via `level` prop |
-| Count | `<span>` | no | Badge inline with title, shown when `count !== null` |
+| Count | `<span>` | no | `inline-flex` wrapper inline with the title, shown when `count !== null`; renders the count via the `Pill` primitive (`tone="neutral"`, `appearance="subtle"`, size from `resolveSupportingVisualSize`) |
 | Subtitle | `<p>` | no | Supporting copy below title |
 | Meta | `<div>` | no | Snippet region for metadata content below subtitle |
 | Body | `<div>` | no | `children` snippet content below meta |
 | ActionsRow | `<div>` | no | Flex row containing back link and actions; rendered when `backHref` or actions snippet present |
-| BackLink | `<a>` | no | Shown when `backHref` is set; renders arrow-left Icon + label text |
-| BackIcon | `Icon` | no | Arrow-left icon inside the back link |
-| BackLabel | `<span>` | no | Visible text next to the arrow icon (defaults to `"Back"`) |
-| ContextDot | `<span>` | no | Shown when `backIsContextual` is true; `aria-hidden="true"` |
+| BackLink (text) | `<a>` | no | Default back link (`--text` variant); arrow-left Icon + label span; hidden at `max-width: 45rem` |
+| BackLink (icon) | `<a>` | no | Compact back link (`--icon` variant); arrow-left Icon only, `aria-label` from the resolved back aria label; hidden by default, shown at `max-width: 45rem` |
+| BackIcon | `Icon` | no | Arrow-left icon inside each back-link variant |
+| BackLabel | `<span>` | no | Visible text next to the arrow icon in the text variant; the raw `backLabel` is transformed (see label resolution below), defaulting to `"Back"` |
+| ContextDot | `<span>` | no | Shown when `backIsContextual` is true; `aria-hidden="true"`. The icon variant uses an absolutely-positioned `--overlay` dot |
 | Actions | `<div>` | no | Page-level action group via snippet; pushed right via `margin-left: auto` |
-| Banner | `<div>` | no | Full-width banner spanning all grid columns |
+| Banner | `<div>` | no | Stacked banner row below the secondary content, separated by a top margin |
 
 ## 3. Props And Inputs
 
@@ -69,9 +74,11 @@ Updated: 2026-03-30
 |------|------|---------|----------|-------|
 | `title` | `string \| null` | `null` | no | Primary heading text |
 | `section` | `string \| null` | `null` | no | Optional section label; when both `section` and `title` are set, creates a two-level header |
-| `count` | `number \| null` | `null` | no | Optional count badge rendered inline with the title |
+| `count` | `number \| null` | `null` | no | Optional count badge rendered inline with the title via the `Pill` primitive |
 | `subtitle` | `string \| null` | `null` | no | Supporting copy |
+| `showSubtitleWithBreadcrumbs` | `boolean` | `false` | no | In `entity-detail` posture with breadcrumbs present, gates whether the subtitle still renders |
 | `eyebrow` | `string \| null` | `null` | no | Small meta label |
+| `posture` | `"default" \| "entity-detail"` | `"default"` | no | When `entity-detail` and a section+title split exists, swaps title/section roles (section becomes the primary heading, title becomes the subtitle) and moves breadcrumbs into the subtitle slot |
 | `backHref` | `string \| null` | `null` | no | Optional back-link target |
 | `backLabel` | `string \| null` | `null` | no | Visible text label next to the arrow-left icon in the back link; defaults to `"Back"` when `backHref` is set |
 | `backIsContextual` | `boolean` | `false` | no | Adds the contextual indicator dot on the back link |
@@ -81,7 +88,7 @@ Updated: 2026-03-30
 | `ariaLabel` | `string \| null` | `null` | no | Optional region label |
 | `level` | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | `2` | no | Heading level for the title element |
 | `size` | `ControlSize \| null` | `null` | no | Optional presentation size override for header typography and snippet-rendered actions |
-| `sizeRole` | `SemanticControlSizeRole` | `"prominent"` | no | Semantic role used when inheriting size from UI presentation |
+| `sizeRole` | `SemanticControlSizeRole \| null` | `null` | no | Semantic role used when inheriting size from UI presentation; when `null`, falls back to the inherited `sizeScale` directly |
 | `density` | `ControlDensity \| null` | `null` | no | Optional presentation density override for spacing and action rhythm |
 
 ### Snippets
@@ -107,6 +114,7 @@ Updated: 2026-03-30
 |-------|---------|-----------------|
 | simple | title only | Compact title row |
 | sectional | `section` and `title` both set | Two-level header hierarchy: section label above the primary title |
+| entity-detail posture | `posture="entity-detail"` with section+title split | Section becomes the primary heading; title drops to the subtitle slot; breadcrumbs render in the subtitle region. Subtitle text gated by `showSubtitleWithBreadcrumbs` |
 | descriptive | subtitle or eyebrow present | Expanded title block |
 | with-count | `count` is not null | Count badge pill inline with title |
 | actionable | actions snippet present | Title and actions share row (between alignment) or stack |
@@ -119,8 +127,10 @@ Updated: 2026-03-30
 
 | State | Description |
 |-------|-------------|
-| `primaryTitle` (derived) | `title ?? section ?? ""` |
 | `hasSectionTitleSplit` (derived) | `Boolean(section && title)` |
+| `isEntityDetailPosture` (derived) | `posture === "entity-detail" && hasSectionTitleSplit` |
+| `primaryTitle` (derived) | `isEntityDetailPosture ? (section ?? title ?? "") : (title ?? section ?? "")` |
+| `resolvedSubtitle` (derived) | `isEntityDetailPosture ? (title ?? subtitle ?? null) : subtitle` |
 | `headingTag` (derived) | `h${level}` |
 
 ## 5. Events
@@ -133,10 +143,21 @@ No component-owned events beyond child action behavior.
 
 - Root: `<header>` element with optional `aria-label`
 - Title: rendered as `<h2>` by default (configurable via `level` prop)
-- Count badge: `aria-label` with the count value
-- Back link: `<a>` element containing arrow-left `Icon` and label `<span>`
+- Count badge: rendered via the `Pill` primitive, which carries `aria-label` with the count value
+- Back link: two `<a>` variants (text + icon) both targeting `backHref`; the icon
+  variant carries the resolved back `aria-label` and `title`
 - Context dot: `aria-hidden="true"`
 - Banner via shortcut: Callout with `announceMode="polite"`
+
+### Back-Link Label Resolution
+
+- `resolveBackDisplayLabel(backLabel)`: trims the label, strips a leading
+  `"Back"` / `"Back to "` prefix (case-insensitive), and returns the remainder;
+  falls back to `"Back"` when empty
+- `resolveBackAriaLabel(backLabel)`: returns `"Back"` when the display label is
+  `"Back"`, otherwise `"Back to {displayLabel}"`
+- The text variant shows the display label; the icon variant uses the aria label
+  for its `aria-label` / `title`
 
 ### Hierarchy Guidance
 
@@ -167,12 +188,14 @@ No component-owned events beyond child action behavior.
 
 ### Sizing
 
-- Root: CSS grid with `gap: var(--poodle-space-stack-md)`
-- `align="between"`: `grid-template-columns: minmax(0, 1fr) auto`
-- `align="start"`: single-column grid
-- Responsive: at `max-width: 45rem`, between alignment collapses to single column
+- Root: a single-column CSS grid (`gap: var(--poodle-space-stack-md)`) stacking
+  the top row, the secondary content, and the banner vertically
+- The `align="between"` two-column split lives on the inner `__top-row` grid
+  (`grid-template-columns: minmax(0, 1fr) auto`), not on the root; the actions
+  row is placed via `justify-self: end`
 - Title block: internal grid with `gap: var(--poodle-space-inline-sm)`
-- Banner: `grid-column: 1 / -1` (spans full width)
+- Banner: a stacked root child separated by `margin-top:
+  var(--poodle-page-header-banner-margin-top)` (it is not a grid-column span)
 
 ### Composition
 
@@ -201,14 +224,16 @@ No component-owned events beyond child action behavior.
 |----------|-------|
 | `display` | `grid` |
 | `gap` | `var(--poodle-space-stack-md)` |
-| `align-items` | `end` |
+| `align-items` | `start` |
 | `padding` | `var(--poodle-recipe-page-header-padding-block-start) var(--poodle-recipe-page-header-padding-inline) var(--poodle-recipe-page-header-padding-block-end)` |
 | `border` | `0.0625rem solid var(--poodle-recipe-page-header-border)` |
 | `border-radius` | `var(--poodle-recipe-page-header-radius)` |
 | `background` | `var(--poodle-recipe-page-header-fill)` |
 | `box-shadow` | `var(--poodle-recipe-page-header-shadow)` |
 
-#### `.page-header[data-align="between"]`
+#### `.page-header[data-align="between"] .page-header__top-row`
+
+The two-column split applies to the inner top row, not the root.
 
 | Property | Value |
 |----------|-------|
@@ -250,6 +275,22 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 |----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
 
+#### `.page-header__back--icon` (compact variant)
+
+Hidden by default (`display: none`); shown at `max-width: 45rem`. A `2rem` square
+icon-only link.
+
+| Property | Value |
+|----------|-------|
+| `display` | `none` (→ `inline-flex` under 45rem) |
+| `position` | `relative` |
+| `justify-content` | `center` |
+| `width` | `2rem` |
+| `height` | `2rem` |
+| `border` | `0.0625rem solid transparent` |
+| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `background` | `transparent` |
+
 #### `.page-header__context-dot`
 
 | Property | Value |
@@ -257,8 +298,19 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 | `width` | `0.375rem` |
 | `height` | `0.375rem` |
 | `border-radius` | `999px` |
-| `background` | `var(--poodle-color-fill-info-strong, var(--poodle-color-border-info))` |
+| `background` | `var(--poodle-color-status-success, #22c55e)` |
 | `flex` | `none` |
+
+#### `.page-header__context-dot--overlay` (icon-variant dot)
+
+| Property | Value |
+|----------|-------|
+| `position` | `absolute` |
+| `right` | `0.25rem` |
+| `bottom` | `0.25rem` |
+| `width` | `0.3125rem` |
+| `height` | `0.3125rem` |
+| `box-shadow` | `0 0 0 0.125rem var(--poodle-color-background-surface)` |
 
 #### `.page-header__title-block`
 
@@ -293,20 +345,14 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 
 #### `.page-header__count`
 
+The count wrapper is a layout shell only; the badge chrome (background, radius,
+padding, min-size, typography) is owned by the `Pill` primitive it contains
+(`tone="neutral"`, `appearance="subtle"`, size from `resolveSupportingVisualSize`).
+
 | Property | Value |
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `justify-content` | `center` |
-| `min-width` | `1.75rem` |
-| `min-height` | `1.75rem` |
-| `padding` | `0 0.5rem` |
-| `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--poodle-color-fill-secondary) 72%, transparent)` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.875rem` |
-| `font-weight` | `600` |
-| `line-height` | `1` |
 
 #### `.page-header__eyebrow`
 
@@ -355,9 +401,12 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 
 #### `.page-header__banner`
 
+Stacked as a root grid child (full row); spacing comes from its top margin, not a
+grid-column span.
+
 | Property | Value |
 |----------|-------|
-| `grid-column` | `1 / -1` |
+| `margin-top` | `var(--poodle-page-header-banner-margin-top)` (`0.75rem` default; density-stepped) |
 
 ### Responsive Breakpoints
 
@@ -394,7 +443,10 @@ The back link renders an `Icon` with `name="arrow-left"` followed by a `<span>` 
 - Heading tag is dynamic via `<svelte:element this={headingTag}>`
 - Banner snippet takes priority over `bannerMessage` prop (if both provided, snippet wins)
 - Back link and actions are grouped in a shared actions-row; back link sits left, actions push right via `margin-left: auto`
-- At tablet breakpoint (max-width: 45rem), actions-row wraps and actions lose their auto margin
+- At tablet breakpoint (max-width: 45rem), the text back-link variant hides and the icon variant shows; actions lose their auto margin
+- `posture="entity-detail"` (with a section+title split) swaps the heading hierarchy: `section` becomes the primary heading, `title` becomes the subtitle, and breadcrumbs render in the subtitle region
+- Count renders through the `Pill` primitive (`tone="neutral"`, `appearance="subtle"`), not a hand-built badge span
+- `sizeRole` defaults to `null`; when null the header inherits the presentation `sizeScale` directly rather than resolving a semantic role offset
 
 ## 10. GPUI Notes
 

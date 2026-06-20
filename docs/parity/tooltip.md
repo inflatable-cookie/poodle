@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
 # Parity: Tooltip
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,11 +16,11 @@
 
 Anatomy §2 and token §8 describe a trigger-wrapper + positioning model Svelte does not implement. Svelte is authoritative — update the contract.
 
-- Trigger anatomy: contract §2/§6 specify a `[Trigger .tooltip__trigger]` `<span role="button" tabindex="0">` wrapper. Svelte renders `children` directly with no trigger span and treats `rootElement.firstElementChild` as the anchor (`Tooltip.svelte:87-95,225`). No `.tooltip__trigger`, no `role="button"`, no `tabindex` injected. **Fix: contract §2/§6 — drop the trigger-wrapper part; describe the "first child is the anchor" model.**
-- Root display: contract §8 says root `display: inline-flex`, `position: relative`. Svelte root is `display: contents` (`Tooltip.svelte:242-244`) and the bubble is `position: fixed` (not `absolute`). **Fix: contract §8 root + bubble position values.**
-- Bubble position: contract §8 says bubble `position: absolute` with per-placement `top/left/right/transform` CSS offsets. Svelte uses `position: fixed` + JS-computed `top/left` px from `resolveOverlayPosition(...)` (`Tooltip.svelte:178-185,247`); no CSS transform offsets. **Fix: contract §8 placement section — positions are JS-resolved viewport coords, not CSS calc offsets.**
-- Box-shadow: contract §8 says `var(--poodle-elevation-overlay)`. Svelte hardcodes a two-layer `rgba(0,0,0,0.3)` + `rgba(0,0,0,0.2)` shadow (`Tooltip.svelte:263-265`). **Fix: reconcile — either Svelte should consume the elevation token or the contract should document the literal shadow.**
-- Surface fill/border/radius: Svelte resolves through `--poodle-treatment-surface-elevated-*` custom props with the contract color-mix formulas only as fallback (`Tooltip.svelte:251-262`). Contract §8 lists only the color-mix forms. **Fix: document the treatment-token indirection.**
+- [x] FIXED Trigger anatomy: contract §2/§6 specified a `[Trigger .tooltip__trigger]` `<span role="button" tabindex="0">` wrapper. Svelte renders `children` directly and treats `rootElement.firstElementChild` as the anchor (`Tooltip.svelte:87-95,225`). Contract §2/§6 rewritten: dropped the trigger-wrapper part, documented the "first child is the anchor (caller supplies a focusable trigger)" model; no `role`/`tabindex` injected.
+- [x] FIXED Root display: contract §8 said root `display: inline-flex`, `position: relative`. Updated to `display: contents` (`Tooltip.svelte:242-244`); root carries no positioning box.
+- [x] FIXED Bubble position: contract §8 said `position: absolute` with per-placement CSS `top/left/right/transform` offsets. Updated to `position: fixed` with JS-computed `top/left` px from `resolveOverlayPosition` (`Tooltip.svelte:178-185,247`); placement section now describes JS-resolved viewport coords (resolver may flip; `data-placement` exposes result).
+- [x] FIXED Box-shadow: contract §8 said `var(--poodle-elevation-overlay)`. Per Svelte-is-authority, documented Svelte's literal two-layer shadow `0 0.5rem 1.25rem rgba(0,0,0,0.3), 0 0.125rem 0.375rem rgba(0,0,0,0.2)` (`Tooltip.svelte:263-265`) in §8 + Tier-2.
+- [x] FIXED Surface fill/border/radius: documented the `--poodle-treatment-surface-elevated-*` custom-prop indirection (color-mix forms as fallback) in §8 + §9 (`Tooltip.svelte:251-262`).
 - `aria-describedby`: matches — Svelte sets it on the anchor when open and removes on close (`Tooltip.svelte:186,59-61`). `role="presentation"` on root and `role="tooltip"` on bubble match §6.
 
 ## GPUI gap (vs Svelte + contract)

@@ -122,7 +122,7 @@ Updated: 2026-05-18
 | Var | Value |
 |-----|-------|
 | `--poodle-recipe-card-radius` | `var(--poodle-treatment-surface-radius, var(--poodle-radius-surface))` |
-| `--poodle-recipe-card-fill` | `color-mix(in srgb, var(--poodle-color-background-panel) 98%, var(--poodle-color-background-elevated))` |
+| `--poodle-recipe-card-fill` | `color-mix(in srgb, var(--poodle-color-background-panel) 10%, var(--poodle-color-background-elevated))` |
 | `--poodle-recipe-card-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent)` |
 | `--poodle-recipe-card-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent)` |
 | `--poodle-recipe-card-divider` | `color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent)` |

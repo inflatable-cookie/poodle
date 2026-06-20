@@ -121,11 +121,34 @@ Updated: 2026-03-30
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `0.25rem` |
-| `padding` | `0.25rem` |
+| `gap` | `0.375rem` |
+| `padding` | `0.25rem 0.375rem` (block 0.25, inline 0.375) |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 78%, transparent)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
+
+### Size Variants
+
+Size scales both block/inline padding and gap. Base (`md`) values are above.
+
+| Size | `padding` | `gap` |
+|------|-----------|-------|
+| xs | `0.125rem 0.25rem` | `0.25rem` |
+| sm | `0.1875rem 0.3125rem` | `0.3125rem` |
+| md | `0.25rem 0.375rem` | `0.375rem` |
+| lg | `0.3125rem 0.5rem` | `0.5rem` |
+| xl | `0.375rem 0.625rem` | `0.625rem` |
+
+### Density Variants
+
+Density overrides only inline padding and gap; block padding (toolbar height) is
+never touched by density.
+
+| Density | `padding-inline` | `gap` |
+|---------|------------------|-------|
+| compact | `0.25rem` | `0.25rem` |
+| default | `0.375rem` (base) | `0.375rem` (base) |
+| comfortable | `0.5rem` | `0.5rem` |
 
 ### Root — vertical orientation
 
@@ -137,8 +160,12 @@ Updated: 2026-03-30
 ## 9. Svelte Notes
 
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
-- Root rendered as `<div role="toolbar">` with `tabindex="0"`
-- `aria-orientation` attribute set from `orientation` prop
+- `data-size` — resolved control size used to drive size-variant padding/gap
+- Root rendered as `<div role="toolbar">` with `tabindex="0"` and `aria-label`
+  from the `ariaLabel` prop
+- `aria-orientation` is **not currently set** by Svelte; orientation is exposed
+  through the `data-orientation` data attribute only. The contract still requires
+  `aria-orientation` for accessibility (see §6) — Svelte has not yet shipped it
 - Roving focus implemented via `getFocusableElements()` utility to discover
   slotted focusable children dynamically
 - Arrow key handlers on root intercept directional keys and move focus
@@ -168,7 +195,7 @@ Updated: 2026-03-30
 
 ### Tier 2: Visual Parity
 
-- [ ] gap (0.25rem) and padding (0.25rem) match
+- [ ] gap (0.375rem base) and padding (0.25rem block / 0.375rem inline base) match, plus the size and density variant tables
 - [ ] border color-mix formula (border-subtle 78%) matches
 - [ ] border-radius (radius-surface) matches
 - [ ] background color-mix formula (background-panel 94%) matches

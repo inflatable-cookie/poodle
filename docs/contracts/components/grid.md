@@ -16,7 +16,7 @@ Updated: 2026-03-15
 ## 2. Anatomy
 
 ```text
-[Root .grid]  <div>
+[Root .poodle-grid]  <div>
   └── [Content] (children snippet)
 ```
 
@@ -135,7 +135,7 @@ No internal state.
 
 ## 9. Svelte Notes
 
-- Rendered as a `<div>` with class `grid`
+- Rendered as a `<div>` with class `poodle-grid`
 - All layout properties applied as inline styles
 - Gap and padding resolved via `scaleToSpace` helper
 - `grid-template-columns` always set from `columns` prop

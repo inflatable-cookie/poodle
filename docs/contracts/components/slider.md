@@ -53,11 +53,15 @@ Updated: 2026-03-15
 
 - bindable value plus callbacks: `value`, `onValueChange`, `onValueCommit`
 
+### Bounds Guard
+
+- When `max <= min`, the effective maximum is clamped to `min + 1` (`safeMax = max <= min ? min + 1 : max`). `safeMax` is used for percentage, the input `max`, and clamping, so a degenerate or inverted range never produces a divide-by-zero or negative span.
+
 ### CSS Custom Properties
 
 | Var | Description |
 |-----|-------------|
-| `--poodle-slider-percent` | computed as `((value - min) / (max - min)) * 100%`; drives fill width/height |
+| `--poodle-slider-percent` | computed as `((value - min) / (safeMax - min)) * 100%` (using the bounds-guarded `safeMax`); drives fill width/height |
 
 ## 4. States
 
@@ -79,8 +83,8 @@ Updated: 2026-03-15
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
-| `onValueChange` | value changes during interaction (input event) | `number` | live updates during drag or keyboard |
-| `onValueCommit` | interaction finishes (change event) | `number` | fires on mouseup/touchend/keyup commit |
+| `onValueChange` | value changes during interaction (input event) | `number` | live updates during drag or keyboard; payload is the clamped, step-snapped value (`clamp(snapToStep(raw, min, step), min, safeMax)`), not the raw input value |
+| `onValueCommit` | interaction finishes (change event) | `number` | fires on mouseup/touchend/keyup commit; payload is likewise the clamped, step-snapped value |
 
 ## 6. Accessibility
 
@@ -290,6 +294,11 @@ Updated: 2026-03-15
 | `md` | `1.5rem` | `1rem` | `-0.3125rem` |
 | `lg` | _(base)_ | `1.125rem` | `-0.375rem` |
 | `xl` | _(base)_ | `1.25rem` | `-0.4375rem` |
+
+### Density And Vertical Padding
+
+- Density must not alter the slider's vertical padding, `min-height`, or thumb position — those are size-axis properties. Density on a single-thumb slider has no compositional vertical effect; it carries no contract-mandated padding change.
+- Known Svelte deviation: the Svelte target writes `padding: 0.25rem 0` (compact) and `padding: 0.75rem 0` (comfortable) on the root, i.e. density-driven vertical padding. This violates size/density orthogonality and is a Svelte bug, not the contract rule. Rust targets must follow this contract (no density vertical padding), not replicate the Svelte deviation.
 
 ## 9. Svelte Notes
 

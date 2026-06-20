@@ -15,7 +15,7 @@
 
 ## Contract ↔ Svelte
 
-**No authoritative Svelte reference exists** — this is the top contract-level gap. The contract (`docs/contracts/components/state-tile.md:3`) even self-declares "Svelte component not yet built." The only Svelte markup matching the contract anatomy is embedded in `MetricTile.svelte`, which is a *different* component (the contract §8 explicitly distinguishes the lightweight `StateTile` from the heavier `MetricTile`). Treat the embedded markup as a visual hint only, not a contract reference.
+**Svelte authority missing** — no `StateTile.svelte` exists and nothing is exported from `index.ts`. Per the parity rule ("If NO Svelte file: STOP, contract is sole authority, do NOT change it"), the contract is left unchanged and `consv` stays `gap`. This is the top contract-level gap. The contract (`docs/contracts/components/state-tile.md:3`) even self-declares "Svelte component not yet built." The only Svelte markup matching the contract anatomy is embedded in `MetricTile.svelte`, which is a *different* component (the contract §8 explicitly distinguishes the lightweight `StateTile` from the heavier `MetricTile`). Treat the embedded markup as a visual hint only, not a contract reference — it is NOT an authority for editing the StateTile contract.
 
 Divergences between the contract and the MetricTile-embedded `.poodle-state-tile`:
 

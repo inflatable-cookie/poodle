@@ -14,7 +14,7 @@ Updated: 2026-03-30
   rendering via href, hover color transition for linked counters, tabular-nums
   formatting, click stopPropagation for linked counters
 - Out of scope: standalone usage outside ListCard, editable counts, interactive
-  states beyond link hover, custom click handlers
+  states beyond link hover
 
 ## 2. Anatomy
 
@@ -40,6 +40,7 @@ Updated: 2026-03-30
 | `count` | `number` | -- | yes | Numeric value to display |
 | `tooltip` | `string \| null` | `null` | no | Tooltip text; when provided, Root is wrapped in a Tooltip |
 | `href` | `string \| null` | `null` | no | When provided, Root renders as an `<a>` element with this href |
+| `onClick` | `((event: MouseEvent) => void) \| null` | `null` | no | Optional click handler; invoked after `stopPropagation` runs for linked counters |
 | `typography` | `"label" \| "inherit"` | `"label"` | no | label-sized by default; use `"inherit"` to apply proportional-inherit scaling for text, icon, and gap |
 
 ### Slots
@@ -54,9 +55,9 @@ Fully uncontrolled display component. No internal state.
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| default | no href | Icon and count in secondary text color |
+| default | no href | Icon and count tinted via `color-mix(currentColor 36%, transparent)`; icon at `opacity: 0.82` |
 | linked | `href` provided | Renders as `<a>` element with `text-decoration: none` |
-| hover (linked) | Mouse over linked counter | Text color transitions from secondary to primary |
+| hover (linked) | Mouse over linked counter | Text color transitions to the stronger `color-mix(currentColor 58%, transparent)` tint |
 
 No internal component state. All visual states are derived from props.
 
@@ -64,7 +65,7 @@ No internal component state. All visual states are derived from props.
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| (native click) | Linked counter clicked | -- | `e.stopPropagation()` is called to prevent parent ListCard click from firing |
+| (native click) | Counter clicked | `MouseEvent` | For linked counters `e.stopPropagation()` is called to prevent parent ListCard click from firing; the `onClick` prop (if provided) is then invoked |
 
 ## 6. Accessibility
 
@@ -79,7 +80,7 @@ No internal component state. All visual states are derived from props.
 
 - `display: inline-flex` with `align-items: center`
 - `gap: 0.25rem`
-- `font-size: 0.75rem`
+- `font-size: 0.6875rem`
 - `typography="inherit"` uses the proportional-inherit rule from
   `docs/contracts/001-working-rules.md` so text, icon, and gap scale together
 - `font-variant-numeric: tabular-nums` for consistent digit widths
@@ -95,9 +96,10 @@ No internal component state. All visual states are derived from props.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `gap` | `0.25rem` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
-| `icon size` | `1rem` |
+| `color` | `color-mix(in srgb, currentColor 36%, transparent)` |
+| `font-size` | `0.6875rem` |
+| `icon size` | `0.75rem` |
+| `icon opacity` | `0.82` |
 | `font-variant-numeric` | `tabular-nums` |
 | `text-decoration` | `none` |
 
@@ -107,13 +109,13 @@ When `typography="inherit"`:
 |----------|-------|
 | `font-size` | `0.8571em` |
 | `gap` | `0.3333em` |
-| `icon size` | `1.3333em` |
+| `icon size` | `1em` |
 
 ### `a.list-card-counter:hover`
 
 | Property | Value |
 |----------|-------|
-| `color` | `var(--poodle-color-text-primary)` |
+| `color` | `color-mix(in srgb, currentColor 58%, transparent)` |
 
 ### Light Theme Overrides
 
@@ -124,7 +126,7 @@ None.
 - Uses `Icon` primitive for the icon (prop name `icon` of type `IconProp`)
 - Uses `Tooltip` primitive wrapper when `tooltip` prop is provided
 - Click handler calls `e.stopPropagation()` on linked counters to prevent
-  bubbling to the parent ListCard
+  bubbling to the parent ListCard, then invokes the optional `onClick` prop
 - Conditional root element: `<a>` when href is set, `<span>` otherwise
 - `typography="inherit"` applies proportional-inherit scaling to the text,
   icon, and gap metrics as one inline unit

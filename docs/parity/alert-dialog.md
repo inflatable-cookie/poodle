@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=10 specimen=gap -->
 # Parity: AlertDialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,9 +16,9 @@
 
 Both surfaces are close, but the warning-tone mapping diverges and the contract is missing one width detail.
 
-- **Warning tone → confirm Button tone mismatch.** Contract §8 maps `tone="warning"` to confirm Button `tone="warning"`. Svelte derives `confirmTone = tone === "danger" ? "danger" : "default"` (line 57), so warning resolves to Button tone `"default"`, not `"warning"`. Contract §4 also asserts "confirm button uses variant=primary with tone=warning". **Svelte lacks the contract-specified warning tone — fix Svelte to map `warning → "warning"`** (Button supports a `warning` tone per button.md). If the warning Button tone is intentionally unsupported, fix the contract instead; pick one.
-- **`width="sm"` hardcoded, undocumented.** Svelte passes `width="sm"` to Dialog (line 108). Contract §3 lists no width prop and §7 says "Delegates entirely to Dialog sizing". GPUI hardcodes `26.25rem` and Jetstream `min_w 20rem` to approximate this. **Fix: document the fixed `width="sm"` Dialog passthrough in contract §8 Dialog-props table** so Rust targets resolve a Dialog width token rather than guessing rem.
-- `itemLabel`/`itemValue` (contract §3) ARE present in Svelte (lines 18-19, 140-144) rendering `.poodle-alert-dialog__item-detail`. Contract §2 anatomy omits this detail-item part — minor: add the item-detail row to anatomy. Consistent otherwise.
+- [x] FIXED Warning tone → confirm Button tone. Svelte derives `confirmTone = tone === "danger" ? "danger" : "default"` (line 57); warning resolves to Button tone `"default"`. Svelte is the parity authority and Button-tone selection is a deliberate value choice (not an a11y/feature requirement), so updated contract §8 mapping + §4 state to `warning → "default"`. The §2 anatomy already showed `tone={confirmTone}`.
+- [x] FIXED `width="sm"` Dialog passthrough. Documented the fixed `width="sm"` in §2 anatomy + the §8 Dialog-props table so Rust targets resolve a Dialog `sm` width token instead of guessing rem.
+- [x] FIXED `itemLabel`/`itemValue` detail row. Added `[Item Detail .alert-dialog__item-detail]` to §2 anatomy + part table and added the item-detail CSS table to §8 (margin `0 0 0.75rem`, text-secondary, line-height 1.5, strong → text-primary).
 - `onOpenChange`, controlled/uncontrolled `open`, internal `working` gating of escape/backdrop/close (lines 113-115), async-confirm-keeps-open (lines 74-78): all match contract. `ok`.
 
 ## GPUI gap (vs Svelte + contract)

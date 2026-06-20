@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
 # Parity: Table
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,14 +14,14 @@
 
 ## Contract ↔ Svelte
 
-Contract §8 hardcodes resolved values that Svelte renders differently. Svelte is authoritative — fix the contract. The Rust impls followed the contract numbers, so they inherit the wrong values.
+Contract §8 hardcoded resolved values that Svelte renders differently. Svelte is authoritative — contract fixed. The Rust impls followed the old contract numbers, so they inherit the wrong values until re-derived.
 
-- **Cell/header padding.** Contract §8 says `padding: 0.6875rem 0.875rem`; Svelte uses `0.5rem 0.75rem` (`Table.svelte:113`). **Fix: contract padding → `0.5rem 0.75rem`.**
-- **Header background formula.** Contract §8 says `color-mix(in srgb, var(--poodle-surface) 60%, var(--poodle-color-background-elevated))`; Svelte uses `color-mix(in srgb, var(--poodle-surface) 91%, var(--poodle-color-text-primary))` (`Table.svelte:126`). **Fix: contract header bg → 91% surface / text-primary.**
-- **Table font-size / line-height.** Contract §8 `font-size: var(--poodle-typography-body-size)`, `line-height: var(--poodle-typography-body-lineHeight)`; Svelte hardcodes `font-size: 0.8125rem`, `line-height: 1.5` (`Table.svelte:97`). **Fix: contract table type → `0.8125rem` / `1.5` (or document the token resolves to these).**
-- **Caption padding.** Contract §8 `padding: var(--poodle-space-panel-y)`; Svelte `0.625rem 0.75rem` (`Table.svelte:102`). **Fix: contract caption padding → `0.625rem 0.75rem`.**
-- **Shell `aria-label`.** Contract §6 says `aria-label` goes on `<table>` when no caption; Svelte puts it on the `.poodle-table-shell` `<div>` (`Table.svelte:34`), not the `<table>`. **Fix: either move aria-label to `<table>` in Svelte (better a11y) or update contract §6 to say shell carries it.** (Svelte placement is weaker — flag, lean toward fixing Svelte.)
-- **Size/density variants.** Svelte ships `data-size` (xs/sm/lg/xl) font + padding-block scaling and `data-density` padding-inline scaling (`Table.svelte:148-174`); contract §3 lists the props but §8 has no size/density token table. **Fix: add size/density adjustment tables to contract §8.**
+- [x] FIXED **Cell/header padding.** Contract §8 said `0.6875rem 0.875rem`; Svelte uses `0.5rem 0.75rem` (`Table.svelte:113`). Contract padding → `0.5rem 0.75rem` (cell, header, empty cell).
+- [x] FIXED **Header background formula.** Contract §8 said `surface 60% / background-elevated`; Svelte uses `surface 91% / text-primary` (`Table.svelte:126`). Contract header bg → 91% surface / text-primary (header note + §8 updated).
+- [x] FIXED **Table font-size / line-height.** Contract §8 cited body-size/body-lineHeight tokens; Svelte hardcodes `0.8125rem` / `1.5` (`Table.svelte:97`). Contract table type → `0.8125rem` / `1.5`.
+- [x] FIXED **Caption padding.** Contract §8 said `var(--poodle-space-panel-y)`; Svelte `0.625rem 0.75rem` (`Table.svelte:102`). Contract caption padding → `0.625rem 0.75rem`.
+- [x] FIXED **Shell `aria-label`.** Contract keeps the stronger a11y requirement (`aria-label` on `<table>`); added a §6 note flagging that Svelte currently puts it on the shell `<div>` and should be moved. Svelte-side gap, contract not weakened.
+- [x] FIXED **Size/density variants.** Added §8 size adjustment table (xs–xl font + padding-block) and density adjustment table (compact/default/comfortable padding-inline) matching `Table.svelte:148-174`.
 
 ## GPUI gap (vs Svelte + contract)
 

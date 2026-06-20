@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
 # Parity: Menubar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,8 +17,8 @@
 
 Props/roles/keyboard align; the size table is where contract and Svelte diverge.
 
-- **Size table mismatch**: contract §8 specifies concrete per-size trigger/item `min-height` and `padding` (e.g. xs trigger `1.5rem`/`0 0.5rem`, lg `2.25rem`/`0 0.875rem`). Svelte's size variants (`Menubar.svelte:412-452`) only override `font-size` and leave `min-height`/`padding` pinned to the `--poodle-size-control-height` / `--poodle-space-control-x` tokens for every size. Svelte is authoritative. **Fix: reconcile contract §8 size table to "min-height/padding resolve from control-height/control-x tokens; only font-size steps per size" — or, if the stepped dimensions are intended, fix Svelte. Given "Svelte is parity authority", update the contract.**
-- Contract trigger `font-size: 0.75rem` / item `font-size: 0.875rem` are expressed in Svelte as `--poodle-typography-label-size` / `--poodle-typography-body-size` tokens (`Menubar.svelte:338,382`). Token-vs-literal; assume equal, but contract should cite the token.
+- [x] FIXED — **Size table mismatch**: contract §8 specified concrete per-size trigger/item `min-height` and `padding`. Svelte's size variants (`Menubar.svelte:412-452`) only override `font-size` and leave `min-height`/`padding` pinned to the `--poodle-size-control-height` / `--poodle-space-control-x` tokens for every size. Reconciled contract §8 size table to font-size-only stepping (trigger xs `0.6875`, lg `0.875`, xl `0.9375`; item xs `0.75`, lg `0.9375`, xl `1`; sm/md inherit base); min-height/padding rows now documented as pinned to control-height/control-x.
+- [x] FIXED — Contract trigger `font-size: 0.75rem` / item `font-size: 0.875rem` now cite `--poodle-typography-label-size` / `--poodle-typography-body-size` tokens (`Menubar.svelte:338,382`); trigger `font-weight` cites `--poodle-typography-label-weight`; trigger base min-height/padding and item base min-height/padding cite the control tokens.
 - All props (`value`, `defaultValue`, `items`, `size`, `sizeRole`=`chrome`, `density`, `ariaLabel`), callbacks, roles (`menubar`/`menuitem`/`menuitemcheckbox`/`menuitemradio`/`separator`), `aria-haspopup`/`aria-expanded`/`aria-controls`, and the full keyboard map match. `sizeRole` default `chrome` matches contract (unlike Menu).
 
 ## GPUI gap (vs Svelte + contract)
@@ -50,5 +50,5 @@ Renders only the trigger strip — no list chrome, no dropdown overlay at all.
 
 ## Notes
 
-- `consv=gap` driver: the contract §8 size table prescribes stepped min-height/padding that Svelte does not implement (Svelte steps font-size only). Reconcile to Svelte.
+- `consv=fixed`: contract §8 size table reconciled to Svelte (font-size-only stepping; min-height/padding pinned to control tokens); base trigger/item font/weight/dimension rows now cite tokens instead of resolved literals.
 - Jetstream is the weakest target: trigger strip only, no list chrome, no dropdown — roughly half the contract unimplemented. GPUI is close to parity (chrome + delegated Menu dropdown); its main debt is the inherited shadow literal and overlay-anchoring delta.

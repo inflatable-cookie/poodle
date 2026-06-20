@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=11 specimen=gap -->
 # Parity: SidebarNav
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -19,9 +19,9 @@ SidebarNav is a self-contained composite. It does NOT reference a separate nav-i
 
 Class-name prefix divergence + one callback-naming divergence. Svelte is authoritative.
 
-- **Class names**: Svelte uses `poodle-sidebar-nav`, `poodle-sidebar-nav__group`, `poodle-sidebar-nav__group-title`, `poodle-sidebar-nav__list`, `poodle-sidebar-nav__item`, `poodle-sidebar-nav__item--active` (lines 40,48,53,56,61,72). Contract §2/§8 omit the `poodle-` prefix everywhere (e.g. `sidebar-nav`, `sidebar-nav__item`). **Fix: prefix every class name in contract §2 (Parts table) and §8 (all CSS selector headings) with `poodle-`.**
-- **Callback name**: contract §3 "Controlled And Uncontrolled" + §5 callbacks table name the event `onValueChange` — Svelte matches (`onValueChange`, lines 17,35). But §5 prose and §9 are consistent; the only naming wart is contract §1 nowhere documents `onValueChange` as a prop in §3 Public Props table (it's listed only under "Controlled And Uncontrolled" + §5). Svelte declares `onValueChange` in `Props` (line 17). **Fix: add `onValueChange` row to §3 Public Props table for completeness.**
-- **`value` binding**: Svelte makes `value` `$bindable` (line 22) and mutates it internally on activation (line 34) in addition to firing `onValueChange`. Contract §3 says "Active item is controlled via `value`" implying pure-controlled. Svelte is effectively two-way bindable. **Fix: note in contract §3 that `value` is bindable (two-way) in the Svelte target, mutated on activation.**
+- [x] FIXED: prefixed every class name in contract §2 (anatomy tree + Parts table) and §8 (all CSS selector headings) with `poodle-` to match Svelte (`poodle-sidebar-nav`, `poodle-sidebar-nav__group`, `poodle-sidebar-nav__group-title`, `poodle-sidebar-nav__list`, `poodle-sidebar-nav__item`, `poodle-sidebar-nav__item--active`). CSS custom properties already carried the prefix.
+- [x] FIXED: added `onValueChange` row to §3 Public Props table (payload = item `value`, fires on activation of a non-disabled item) — Svelte declares it in `Props` (line 17).
+- [x] FIXED: §3 "Controlled And Uncontrolled" now states `value` is two-way bindable (`$bindable`) in the Svelte target, mutated internally on activation alongside firing `onValueChange` (Svelte lines 22,34).
 - **No anatomy/state divergence otherwise**: all parts (root nav, group section, group title h2, list ul, item a/button), all states (active accent fill + left border + inset shadow, hover, disabled, focus-visible), and all ARIA (`aria-current="page"`, group `aria-label`, native `disabled`) are present in Svelte exactly per contract §2/§4/§6. Size/density token tables (§8) match Svelte CSS line-for-line.
 
 ## GPUI gap (vs Svelte + contract)
@@ -64,4 +64,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - `specimen=gap`: GPUI and Jetstream both under-cover Svelte (no size/density grids); Svelte itself omits the contract's disabled-item specimen (only Jetstream demonstrates disabled). All three diverge from the contract's §12 specimen set in different directions.
 - No component references icons, badges, or counts — the prompt's "may compose sub-parts (icons/badges/counts)" does not apply; SidebarNav anatomy is label-only per contract §2.
 - Biggest single Jetstream bug: item height pulled from `control_height_rem` instead of the contract's sidebar-specific height table — every size is too tall (Md 2.25rem vs 1.875rem).
-- The `consv=gap` driver is cosmetic/documentation only (`poodle-` class prefix + missing `onValueChange`/bindable-`value` rows in contract §3). Anatomy, states, ARIA, and token tables all match Svelte. Lower-severity than the Button audit's missing-surface gaps.
+- `consv=fixed`: the cosmetic/documentation drivers are resolved (`poodle-` class prefix added throughout §2/§8; `onValueChange` and bindable-`value` documented in §3). Anatomy, states, ARIA, and token tables all match Svelte.

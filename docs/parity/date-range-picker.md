@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
 # Parity: DateRangePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,11 +14,11 @@
 
 ## Contract ↔ Svelte
 
-Props, callbacks, ARIA, anatomy align. Size-table is wrong vs Svelte.
+Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
-- Size table (§8) lists per-size `padding` overrides for every size (`xs`…`xl`, e.g. `0 calc(var(--poodle-space-control-x) - 0.125rem)`). Svelte applies **no** per-size padding — only per-size `font-size` and trigger-height (`DateRangePicker.svelte:263-287`). Density owns horizontal padding (lines 289-290), not size. The contract's per-size padding overrides violate the size/density orthogonality rule in CLAUDE.md. **Fix: delete the `padding` rows from the contract §8 size table; keep them under density.**
-- Size table specifies `min-height` as `calc(control-height ± Xrem)`; Svelte hardcodes absolute rems (`1.5rem`/`1.75rem`/`2.75rem`/`3.25rem`). Same resolved values; **Fix: reconcile token-form in contract to match Svelte.**
-- Mid-selection display: Svelte shows `"<start> – End date"` when only start is chosen (`DateRangePicker.svelte:63`). Contract §4 describes "start displayed, overlay remains open" but does not specify the "– End date" suffix string. **Fix: document the partial-range display string in contract §4.**
+- [x] Deleted the per-size `padding` overrides from §8 (orthogonality violation, not in Svelte); moved horizontal padding to a Density adjustments table (`0 calc(control-x ∓ 0.125rem)`). FIXED.
+- [x] Size table `min-height` rewritten to Svelte's absolute rems (`1.5/1.75/control-height-md/2.75/3.25rem`) + added per-size indicator font-size. FIXED.
+- [x] Documented the partial-range display string in §4: `"<start> – End date"` (formatted start, en-dash, literal `End date`) while only start is chosen. FIXED.
 
 ## GPUI gap (vs Svelte + contract)
 

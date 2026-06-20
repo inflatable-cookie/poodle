@@ -129,9 +129,12 @@ Updated: 2026-04-01
 
 ### Sizing
 
-- track is fixed at 2.125rem wide by 1.25rem tall
-- thumb is fixed at 0.875rem diameter
-- thumb travels 0.875rem horizontally between off and on positions
+- the base `.switch__track` uses a `--switch-unit: var(--poodle-size-icon-md)`
+  `calc` chain (`2.25rem × 1.375rem` track at md), but every rendered switch
+  carries a `data-size` class that overrides track/thumb/travel with flat rem
+  literals — see the Size adjustments table in §8 for the authoritative values
+- at the default `md` size: track is `2.25rem` wide by `1.375rem` tall, thumb is
+  `1.125rem` diameter, thumb travels `0.875rem` horizontally between off/on
 - label spacing remains stable regardless of state
 
 ### Composition
@@ -188,8 +191,8 @@ Updated: 2026-04-01
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `width` | `2.125rem` |
-| `height` | `1.25rem` |
+| `width` | `2.25rem` (md; per-size override — see Size adjustments) |
+| `height` | `1.375rem` (md; per-size override) |
 | `padding` | `0.125rem` |
 | `border` | `0.0625rem solid var(--poodle-switch-off-border)` |
 | `border-radius` | `999px` |
@@ -215,8 +218,8 @@ Updated: 2026-04-01
 
 | Property | Value |
 |----------|-------|
-| `width` | `0.875rem` |
-| `height` | `0.875rem` |
+| `width` | `1.125rem` (md; per-size override — see Size adjustments) |
+| `height` | `1.125rem` (md; per-size override) |
 | `border-radius` | `999px` |
 | `background` | `var(--poodle-switch-off-thumb)` |
 | `box-shadow` | `0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
@@ -239,25 +242,53 @@ Updated: 2026-04-01
 | `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `var(--poodle-typography-label-lineHeight)` |
 
+### Label color rules
+
+| Selector | `color` |
+|----------|---------|
+| single label (not `[data-dual-label]`) `.switch__label` | `var(--poodle-color-text-primary)` |
+| dual-label `.switch__label--left`, `.switch__label--right` (inactive) | `var(--poodle-color-text-muted)` |
+| `:not(:checked) ~ .switch__label--left` (active off side) | `var(--poodle-switch-off-color)` |
+| `:checked ~ .switch__label--right` (active on side) | `var(--poodle-switch-on-color)` |
+
+In dual-label mode both side labels rest at `text-muted`; the active side
+(left when off, right when on) re-tints to the off/on color. The left/right
+labels also carry a `color` transition (`motion-duration-interaction`,
+`motion-easing-standard`).
+
+### Density variants
+
+| Selector | `gap` |
+|----------|-------|
+| `[data-density="compact"]` | `0.25rem` |
+| `[data-density="default"]` (base) | `var(--poodle-space-inline-sm)` |
+| `[data-density="comfortable"]` | `var(--poodle-space-inline-md)` |
+
 ### Label size variants
 
 | Size | Label font-size |
 |------|----------------|
-| `xs` | `0.6875rem` |
+| `xs` | `0.75rem` |
 | `sm` | `0.75rem` |
-| `md` | `var(--poodle-typography-label-size)` |
+| `md` | `0.8125rem` |
 | `lg` | `0.875rem` |
-| `xl` | `0.9375rem` |
+| `xl` | `0.875rem` |
+
+Base `.switch__label` font-size (pre-size-class) is
+`var(--poodle-typography-label-size)`; the md class resolves it to `0.8125rem`.
 
 ### Size adjustments
 
+Per-size classes override the base track/thumb/travel with flat rem literals.
+Track padding is `0.125rem` at every size.
+
 | Size | track width | track height | track padding | thumb size | thumb travel |
 |------|-------------|--------------|---------------|------------|--------------|
-| `xs` | `calc(icon-default * 1.75)` | `calc(icon-default * 0.875)` | `0.0625rem` | `calc(icon-default * 0.75 - 0.125rem)` | `calc(icon-default * 0.875)` |
-| `sm` | `calc(icon-default * 1.875)` | `calc(icon-default + 0.125rem)` | `0.09375rem` | `calc(icon-default - 0.1875rem)` | `calc(icon-default - 0.0625rem)` |
-| `md` | `2.125rem` | `1.25rem` | `0.125rem` | `0.875rem` | `0.875rem` |
-| `lg` | `calc(icon-default * 2.25 + 0.25rem)` | `calc(icon-default + 0.5rem)` | `0.1875rem` | `icon-default` | `calc(icon-default + 0.0625rem)` |
-| `xl` | `calc(icon-default * 2.5 + 0.375rem)` | `calc(icon-default + 0.75rem)` | `0.25rem` | `calc(icon-default + 0.125rem)` | `calc(icon-default + 0.125rem)` |
+| `xs` | `1.75rem` | `1rem` | `0.125rem` | `0.75rem` | `0.75rem` |
+| `sm` | `2rem` | `1.125rem` | `0.125rem` | `0.875rem` | `0.875rem` |
+| `md` | `2.25rem` | `1.375rem` | `0.125rem` | `1.125rem` | `0.875rem` |
+| `lg` | `2.75rem` | `1.625rem` | `0.125rem` | `1.375rem` | `1.125rem` |
+| `xl` | `3rem` | `1.75rem` | `0.125rem` | `1.5rem` | `1.25rem` |
 
 ## 9. Svelte Notes
 
@@ -304,9 +335,9 @@ Updated: 2026-04-01
 
 ### Tier 2: Visual Parity
 
-- [ ] track sizing (2.125rem x 1.25rem) matches
-- [ ] thumb sizing (0.875rem diameter) matches
-- [ ] thumb travel distance (0.875rem translateX) matches
+- [ ] track sizing (md `2.25rem x 1.375rem`; per-size table) matches
+- [ ] thumb sizing (md `1.125rem` diameter; per-size table) matches
+- [ ] thumb travel distance (md `0.875rem` translateX; per-size table) matches
 - [ ] unchecked track uses border-default and semi-transparent background
 - [ ] checked track uses accent-base tinted border and background
 - [ ] thumb color transitions from text-primary to accent-base on check

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=7 specimen=gap -->
 # Parity: Switch
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,19 +22,10 @@ via native `checked`, `aria-readonly`, `aria-label` fallback composed from left/
 and readOnly-revert all match contract. Divergences are in the **size table** — Svelte is
 authoritative, contract §7/§8 is stale:
 
-- **md track size mismatch.** Contract §8 says md track `2.125rem × 1.25rem`, thumb `0.875rem`,
-  travel `0.875rem`. Svelte md is `2.25rem × 1.375rem` track, `1.125rem` thumb (`Switch.svelte:299-312`).
-  The fixed dimensions in §7 ("2.125rem wide by 1.25rem tall", "0.875rem diameter") describe the
-  *base unit pre-size-class*, not the md size class. **Fix: reconcile contract md row to the Svelte values, or clarify §7 refers to the base track before per-size override.**
-- **Size formulas vs literals.** Contract §8 size table is written in `calc(icon-default * …)`
-  formulas; Svelte uses flat rem literals per size (`Switch.svelte:269-342`): xs `1.75×1rem`/thumb`0.75`/travel`0.75`;
-  sm `2×1.125`/thumb`0.875`/travel`0.875`; lg `2.75×1.625`/thumb`1.375`/travel`1.125`; xl `3×1.75`/thumb`1.5`/travel`1.25`.
-  The base CSS uses `--switch-unit: var(--poodle-size-icon-md)` with `calc` (`Switch.svelte:153,194-227`), but per-size classes override with literals. **Fix: rewrite contract size table with the literal Svelte rem values.**
-- **Label font-size mismatch.** Contract §8 label table: xs `0.6875rem`, md `var(--poodle-typography-label-size)`, xl `0.9375rem`.
-  Svelte (`Switch.svelte:345-349`): xs `0.75rem`, md `0.8125rem`, xl `0.875rem`. **Fix: align contract label-size table to Svelte.**
-- **Inactive dual-label color.** Contract §8 has no muted/active rule for left/right labels.
-  Svelte mutes both to `text-muted`, then re-tints the active side to the off/on color
-  (`Switch.svelte:241-257`). **Fix: document dual-label active/inactive label coloring in contract §8.**
+- [x] FIXED **md track size mismatch.** Contract §7/§8 md track was `2.125rem × 1.25rem`, thumb `0.875rem`. Updated to Svelte md `2.25rem × 1.375rem` / `1.125rem` thumb / `0.875rem` travel (`Switch.svelte:299-312`); §7 now clarifies the `--switch-unit` base vs the per-size override.
+- [x] FIXED **Size formulas vs literals.** Rewrote §8 Size adjustments table with Svelte's flat rem literals (`Switch.svelte:269-342`): xs `1.75×1`/0.75/0.75; sm `2×1.125`/0.875/0.875; md `2.25×1.375`/1.125/0.875; lg `2.75×1.625`/1.375/1.125; xl `3×1.75`/1.5/1.25. Track padding `0.125rem` at every size.
+- [x] FIXED **Label font-size mismatch.** §8 label-size table aligned to Svelte (`Switch.svelte:345-349`): xs `0.75`, sm `0.75`, md `0.8125`, lg `0.875`, xl `0.875rem`.
+- [x] FIXED **Inactive dual-label color.** Added a "Label color rules" subsection to §8: single label → text-primary; dual left/right rest at text-muted; active side re-tints to off/on color (`Switch.svelte:241-257`). Also added a Density variants gap table (compact `0.25rem` / default `space-inline-sm` / comfortable `space-inline-md`, `Switch.svelte:259-266`).
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -90,9 +81,9 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` driver is entirely the **size/label tables** in contract §7/§8 being stale vs Svelte's
-  per-size literals (md track, thumb, travel, and label font-sizes all differ). Props/anatomy/ARIA/readOnly
-  are clean. Per "Svelte is parity authority", update the contract tables — do not change Svelte.
+- `consv=fixed`: the stale **size/label tables** in contract §7/§8 are now the Svelte per-size literals
+  (md track/thumb/travel + label font-sizes), and §8 gained the dual-label color rules + density gap table.
+  Props/anatomy/ARIA/readOnly were already clean.
 - Jetstream is the weakest target: fixed-md geometry, no tones/custom-colors/dual-labels/focus-ring/readonly/toggle.
   It renders a correct *single md off/on switch* and nothing else.
 - GPUI is near-complete behaviorally (size table, tones, custom colors, dual labels, toggle, keyboard)

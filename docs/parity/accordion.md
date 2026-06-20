@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
 # Parity: Accordion
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,12 +16,12 @@
 
 Svelte and contract diverge on item geometry and tokens. Svelte is authoritative for resolved values; contract values are stale.
 
-- Item padding: contract §8 says `0.875rem 1rem`; Svelte uses `0.625rem var(--poodle-space-panel-x)` (`Accordion.svelte:144`). **Fix: update contract item padding to `0.625rem` block + `space-panel-x` inline.**
-- Item background: contract §8 says `color-mix(surface 93%, text-primary)`; Svelte uses `color-mix(background-elevated 40%, background-panel)` (`Accordion.svelte:147`). Contract §8 checklist line 317 also says "84% elevated" — three different formulas. **Fix: reconcile contract to Svelte's `elevated 40%, panel`.**
-- Item gap: contract §8 says `0.75rem`; Svelte item internal gap is `--poodle-accordion-item-gap: 0.625rem` (`Accordion.svelte:140`), and outer root gap is `space-stack-md` (`:135`). **Fix: document the 0.625rem item gap distinct from the 0.75rem root gap.**
-- Summary gap: contract §8 says `0.3125rem`; Svelte uses `space-inline-sm` token (`Accordion.svelte:183`). **Fix: contract should name the token, not a literal.**
-- Trigger gap: contract §8 says `0.75rem`; Svelte uses `space-inline-md` token (`Accordion.svelte:159`). **Fix: name token.**
-- Indicator: contract §8 styles a glyph indicator (code-family, 0.75rem, rotate 180deg). Svelte renders `<Icon name="chevron-down" />` (`Accordion.svelte:112`) with no `size="sm"` prop despite anatomy §2 specifying `size="sm"`. Rotation styling at `:208` still applies. **Fix: either pass `size="sm"` to Icon or drop it from anatomy; reconcile glyph-vs-Icon font rules.**
+- [x] FIXED Item padding: contract §8 said `0.875rem 1rem`; updated to Svelte's `0.625rem var(--poodle-space-panel-x)` (`Accordion.svelte:144`). §7 sizing + Tier-2 checklist line also updated.
+- [x] FIXED Item background: contract §8 said `color-mix(surface 93%, text-primary)`; updated to Svelte's `color-mix(background-elevated 40%, background-panel)` (`Accordion.svelte:147`). Tier-2 checklist "84% elevated" line corrected to "40% background-elevated, background-panel".
+- [x] FIXED Item gap: contract §8 item `gap` was `0.75rem`; updated to `var(--poodle-accordion-item-gap)` (`0.625rem` default, `Accordion.svelte:140`). Root gap corrected to `space-stack-md` (`:135`); §7 sizing notes both.
+- [x] FIXED Summary gap: contract §8 said `0.3125rem`; updated to `var(--poodle-space-inline-sm)` token (`Accordion.svelte:183`).
+- [x] FIXED Trigger gap: contract §8 said `0.75rem`; updated to `var(--poodle-space-inline-md)` token (`Accordion.svelte:159`).
+- [x] FIXED Indicator: Svelte renders `<Icon name="chevron-down" />` with no `size` prop (`Accordion.svelte:112`); dropped `size="sm"` from anatomy §2 and §9. Indicator wrapper-span glyph rules (code-family, 0.75rem, rotate 180deg) retained — they style the span, not the Icon.
 - Panel content placement: anatomy §2 + §4 say the description lives inside the panel/summary and panel renders `children(item, isOpen)`. Svelte description renders **inside the trigger summary** (`:108-110`) and the panel renders only the `children` snippet (`:124`). Matches anatomy. GPUI/Jetstream diverge (see below).
 - Density: contract §8 size table covers size only; Svelte density overrides `padding-inline` (`:284`, `:288`) and `--accordion-item-gap`, never vertical padding — compliant with the size/density orthogonality rule. **No fix; note Svelte is the density reference.**
 

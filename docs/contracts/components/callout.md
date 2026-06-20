@@ -169,7 +169,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | `grid-template-columns` | `minmax(0, 1fr) auto auto` |
 | `align-items` | `center` |
 | `gap` | `var(--poodle-space-inline-md)` |
-| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
+| `padding` | `0.625rem var(--poodle-space-panel-x)` |
 | `border` | `0.0625rem solid var(--poodle-callout-border)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `var(--poodle-callout-fill)` |
@@ -249,7 +249,7 @@ no icon slot override is provided.
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.25rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `min-width` | `0` |
 
 ### Content — `p` (global within content)
@@ -304,13 +304,18 @@ no icon slot override is provided.
 
 ### Size adjustments
 
-| Size | icon badge size | title font-size | message font-size | dismiss button size |
-|------|----------------|----------------|-------------------|-------------------|
-| `xs` | `1rem` | `0.6875rem` | `0.6875rem` | `1.25rem` |
-| `sm` | `1.1875rem` | `0.75rem` | `0.75rem` | `1.5rem` |
-| `md` | `1.375rem` | `typography-label-size` | `0.8125rem` | `1.75rem` |
-| `lg` | `1.5625rem` | `0.9375rem` | `0.875rem` | `2rem` |
-| `xl` | `1.75rem` | `1rem` | `0.9375rem` | `2.25rem` |
+Per-size icon font-size and the root gap (`--poodle-space-inline-md` at md)
+also scale; the gap is `0.375rem` (xs), `0.5rem` (sm), `0.875rem` (lg),
+`1.0625rem`-equivalent (xl). Title font-size is the `strong` size, message
+font-size is the `.callout__content` size.
+
+| Size | icon badge size | icon font-size | title font-size | message font-size | dismiss button size |
+|------|----------------|----------------|-----------------|-------------------|---------------------|
+| `xs` | `0.875rem` | `0.5rem` | `0.6875rem` | `0.625rem` | `1.25rem` |
+| `sm` | `1.125rem` | `0.5625rem` | `0.75rem` | `0.6875rem` | `1.5rem` |
+| `md` | `1.375rem` | `0.75rem` | `typography-label-size` | `0.8125rem` | `1.75rem` |
+| `lg` | `1.75rem` | `0.9375rem` | `1rem` | `0.9375rem` | `2rem` |
+| `xl` | `2rem` | `1.0625rem` | `1.125rem` | `1.0625rem` | `2.25rem` |
 
 ## 9. Svelte Notes
 
@@ -363,7 +368,7 @@ no icon slot override is provided.
 - [ ] pending tone uses 8%/26% color-mix pattern (distinct from others)
 - [ ] icon badge size (1.375rem), circular radius (999px), and background match
 - [ ] icon typography matches (code-family, 0.75rem, weight 700)
-- [ ] content gap (0.25rem) matches
+- [ ] content gap (space-inline-sm) matches
 - [ ] title typography uses label token family/size/lineHeight
 - [ ] paragraph color uses text-secondary
 - [ ] responsive collapse at 45rem breakpoint

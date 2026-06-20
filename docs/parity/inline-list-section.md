@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=1 specimen=gap -->
 # Parity: InlineListSection
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,11 +15,11 @@
 
 ## Contract ↔ Svelte
 
-Svelte has two props the contract Props section does not list. Svelte is authoritative — update the contract.
+Svelte has two props the contract Props section did not list, plus no Token Usage section. Svelte is authoritative — contract reconciled.
 
-- Svelte adds `count?: number | string | null` (default `null`) → renders a pill-style count badge next to the title (`InlineListSection.svelte:13,33-35,120-134`). Not in contract Props. **Fix: add `count` to contract Props + document the count-badge anatomy + its tokens (min-width 1.875rem, height 1.375rem, pill radius, border, elevated bg).**
-- Svelte adds `framed?: boolean` (default `true`) → when false, drops the outer `Card` wrapper and renders the bare section (`InlineListSection.svelte:14,27-89`). Not in contract Props. **Fix: add `framed` to contract Props + describe the unframed posture.**
-- Anatomy/tokens absent from contract: the contract has no Token Usage section, but Svelte defines concrete tokens — item-row chrome `background: color-mix(surface 93%, text-primary)`, padding `0.5rem 0.625rem`, radius `calc(radius-surface - 0.1875rem)`; title `typography-label-size/weight`, uppercase, `letter-spacing 0.05em`, `color text-secondary`; section gap `space-stack-md`; items gap `space-stack-sm`. **Fix: add a Token Usage section to the contract capturing these (currently the contract only has Props/Rules/Accessibility, so Rust targets have nothing authoritative to resolve against).**
+- [x] FIXED `count?: number | string | null` (default `null`) — added to contract Props, Anatomy (Count `<span>`), and a full Count token table in Token Usage (min-width `1.875rem`, height `1.375rem`, padding `0 0.5rem`, pill radius `999rem`, `1px solid border`, `surface-elevated` bg, label typography). Source `InlineListSection.svelte:13,33-35,120-134`.
+- [x] FIXED `framed?: boolean` (default `true`) — added to contract Props + Anatomy note (Card only when `framed=true`) + Accessibility note. Source `InlineListSection.svelte:14,27-89`.
+- [x] FIXED Token Usage section backfilled from Svelte CSS: Root (`grid`, `space-stack-md`), Header, Heading, Title (`label-size/weight`, uppercase, `letter-spacing 0.05em`, `text-secondary`), Count, Header Actions (`0.375rem`, `0.25rem` at `45rem`), Items (`space-stack-sm`), Item chrome (`color-mix(surface 93%, text-primary)`, padding `0.5rem 0.625rem`, radius `calc(radius-surface - 0.1875rem)`), Empty (italic, `body-size`, `text-secondary`). Also added a full Anatomy block (was absent).
 
 ## GPUI gap (vs Svelte + contract)
 

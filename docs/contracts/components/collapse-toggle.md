@@ -168,11 +168,14 @@ padding value (`0.125rem`).
 
 ### Density adjustments
 
-Density controls button padding only.
+Density controls `padding-inline` only (it does not touch vertical padding or
+button height, per the size/density orthogonality rule). `compact` and
+`default` both equal the base `0.125rem`, so only `comfortable` widens the
+button.
 
-| Density | padding |
-|---------|---------|
-| `compact` | `0.125rem` |
+| Density | padding-inline |
+|---------|----------------|
+| `compact` | `0.125rem` (= base, no change) |
 | `default` | `0.125rem` (base) |
 | `comfortable` | `0.375rem` |
 
@@ -207,7 +210,7 @@ Density controls button padding only.
 ### Tier 2: Visual Parity
 
 - [ ] all five sizes visually match per size table (padding)
-- [ ] all three densities match per density table (padding)
+- [ ] all three densities match per density table (padding-inline)
 - [ ] idle: transparent background, muted text color
 - [ ] hover: surface-hover background, default text color
 - [ ] disabled: 0.4 opacity

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=6 specimen=gap -->
 # Parity: CollapseToggle
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,9 +16,9 @@
 
 Mostly aligned; the divergences are in the size/density padding model — contract over-specifies vs what Svelte applies.
 
-- Contract §8 size table gives per-size **full `padding`** (`xs` 0.0625rem … `xl` 0.25rem). Svelte applies these as full `padding` for `xs`/`lg`/`xl` (lines 95–105) — OK. But the contract `md` row (`0.125rem`) has **no Svelte rule**; `md` falls through to base `0.125rem`. Match, but contract should note `sm`/`md` share base (it does say so in prose — fine).
-- Contract §8 density table gives full `padding` (`comfortable` 0.375rem). Svelte density rules set only **`padding-inline`** (lines 108–109), not full padding. Per the density-orthogonality rule, density must not touch vertical padding — **Svelte is right; fix contract §8 density table to read `padding-inline`, not `padding`.**
-- Contract §8 density `compact` row says `0.125rem`; Svelte emits a redundant `padding-inline: 0.125rem` for compact (equals base). Harmless. **Fix: drop the compact density row or mark it as base.**
+- Contract §8 size table gives per-size **full `padding`** (`xs` 0.0625rem … `xl` 0.25rem). Svelte applies these as full `padding` for `xs`/`lg`/`xl` (lines 95–105) — OK. The `md` row falls through to base `0.125rem`; prose already notes `sm`/`md` share base. Fine, no change.
+- [x] FIXED Contract §8 density table now reads `padding-inline` (not full `padding`), matching Svelte (lines 108-109) and the density-orthogonality rule; added a note that density does not touch vertical padding/height. Tier 2 checklist line updated to `padding-inline`.
+- [x] FIXED Compact density row now marked `0.125rem (= base, no change)`, reflecting Svelte's redundant `padding-inline: 0.125rem` for compact.
 - Otherwise props, anatomy (`<button>` + Icon), icon-direction logic, `aria-expanded`/`aria-label` defaults, `data-collapsed`/`data-direction`/`data-size`/`data-density` all match contract exactly.
 
 ## GPUI gap (vs Svelte + contract)
@@ -49,5 +49,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- The `consv=gap` driver is the contract density table claiming full `padding` when Svelte only varies `padding-inline` — a density-orthogonality contract bug, not a Svelte bug.
+- `consv=fixed`: the contract density table now correctly reads `padding-inline` (was claiming full `padding`); this was a density-orthogonality contract bug, not a Svelte bug. Remaining gpui/jetstream todos are code-side.
 - GPUI/Jetstream both collapse size and density into a fixed square; neither reproduces the icon+padding intrinsic sizing. This is the root cause behind their missing size/density visual differentiation.

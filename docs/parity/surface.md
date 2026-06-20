@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=5 specimen=gap -->
 # Parity: Surface
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,10 +17,10 @@
 
 Svelte adds treatment-override layers the contract §8 token tables do not document. Svelte is authoritative — update the contract.
 
-- Svelte wraps every surface CSS var in a `--poodle-treatment-*` override fallback: `--poodle-treatment-surface-fill` (line 53), `--poodle-treatment-surface-border` (58), `--poodle-treatment-surface-shadow` (61), `--poodle-treatment-surface-elevated-fill` (77), `--poodle-treatment-surface-elevated-border` (81), `--poodle-treatment-surface-elevated-shadow` (85). Contract §8 only documents the radius treatment token (`--poodle-treatment-surface-radius`). **Fix: add the five missing treatment override tokens to contract §8 + §9 Svelte Notes.**
-- Svelte's elevated selector (lines 74–88) explicitly re-sets `--poodle-surface-border` to `color-mix(border-subtle 74%, transparent)`. Contract §8 "Tone: elevated" / "elevated override" tables only list fill + shadow, omitting the border var. **Fix: add the border var row to both elevated tables (Svelte authoritative).**
-- Contract §8 base table shows `--poodle-surface-shadow: none` as a flat value; Svelte uses `var(--poodle-treatment-surface-shadow, none)`. Same default, but the override channel is undocumented. **Fix: reflect the treatment wrapper in the contract base-styles table.**
-- Spec parity (`packages/contracts/components/src/surface.rs`): `resolved_shadow_token()` returns `ELEVATION_OVERLAY` when elevated (line 77), but contract §8 elevated tables target `--poodle-elevation-surface`. Naming mismatch between spec token and contract token. **Fix: reconcile spec to `ELEVATION_SURFACE` or document the overlay/surface mapping in §8.**
+- [x] FIXED Svelte wraps every surface CSS var in a `--poodle-treatment-*` override fallback: `--poodle-treatment-surface-fill` (line 53), `-border` (58), `-shadow` (61), `-elevated-fill` (77), `-elevated-border` (81), `-elevated-shadow` (85). Added the six missing treatment override tokens to contract §8 (new treatment-token table + wrapped var defaults) and §9 Svelte Notes (full seven-token list incl. existing radius token).
+- [x] FIXED Svelte's elevated selector (lines 74–88) re-sets `--poodle-surface-border` to `color-mix(border-subtle 74%, transparent)`. Added the `--poodle-surface-border` row to both §8 elevated tables (tone + elevated override).
+- [x] FIXED Contract §8 base table showed `--poodle-surface-shadow: none` flat; now `var(--poodle-treatment-surface-shadow, none)`. Fill + border defaults likewise wrapped in their treatment fallbacks.
+- **CODE (Rust spec, out of scope for contract):** `surface.rs::resolved_shadow_token()` returns `ELEVATION_OVERLAY` when elevated (line 77); contract §8 elevated tables correctly target `--poodle-elevation-surface` per Svelte. Reconcile the spec to `ELEVATION_SURFACE` in code. Contract is correct (no edit).
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -56,4 +56,4 @@ Note: `surface.rs` itself is clean of `.h([0-9]`, `.w([0-9]`, `text_size([0-9]`,
 - `surface-elevation.md` is the cross-cutting elevation contract, not a second component. It mandates: creators set `--poodle-surface` (Svelte does, line 56), consumers derive contrast from a **tokenised mix ratio** (§3, §6). The GPUI `0.96`/`0.74`/`0.18` literals and Jetstream's absent blending both violate this "mix ratio = tokenised constant" requirement — that contract is the authority for tokenising those magic numbers.
 - Svelte propagates `--poodle-surface: var(--poodle-surface-fill)` (line 56) so nested surfaces self-contrast. Neither Rust target propagates a surface-context value to descendants — the surface-elevation creator contract (§4 nested creator) is unimplemented in GPUI and Jetstream. Out of scope for this audit's todo count but flagged for elevation hardening.
 - Contract §12 Known Deltas already permits color-mix→direct-alpha and treatment-radius fallback divergence. The hardcoded *ratios* are not covered by that delta — only the blending *mechanism* is.
-- The biggest `consv=gap` driver is undocumented Svelte treatment-override tokens (six of them); the biggest implementation gap is elevation shadow + color-mix blending missing or hardcoded in both Rust targets.
+- `consv=fixed`: the undocumented Svelte treatment-override tokens (six) are now in contract §8 + §9, both elevated tables carry the border var, and base vars show their treatment wrappers. Also corrected a stale §9 note (padding uses Surface-local `surfacePadding`, not shared `scaleToSpace`). The remaining implementation gap is elevation shadow + color-mix blending missing or hardcoded in both Rust targets — code, out of scope.

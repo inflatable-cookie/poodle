@@ -112,7 +112,7 @@ type MenuItem = {
 
 - Root: no semantic role (presentational container)
 - Primary button: native `<button>`, `type` from prop, `aria-label` from prop
-- Toggle button: native `<button>`, `aria-label` from menuAriaLabel, `aria-haspopup="menu"`, `aria-expanded`
+- Toggle button: native `<button>`, `aria-label` from menuAriaLabel, `aria-haspopup="true"`, `aria-expanded`
 - Menu: `role="menu"`
 - Items: `role="menuitem"`, `aria-disabled` when item disabled
 - Separators: `role="separator"`
@@ -202,11 +202,17 @@ type MenuItem = {
 
 ### Size adjustments
 
-| Size | height | font-size |
-|------|--------|-----------|
-| `sm` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `0.75rem` |
-| `md` | `var(--poodle-size-control-height)` | `var(--poodle-typography-label-size)` |
-| `lg` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `0.875rem` |
+Per-size values drive `--poodle-split-button-height`, `--poodle-split-button-font-size`, `--poodle-split-button-toggle-width-base`, and `--poodle-split-button-chevron-size`. The base (unscoped) values equal the `md` row.
+
+| Size | height | font-size | toggle-width-base | chevron-size |
+|------|--------|-----------|-------------------|--------------|
+| `xs` | `1.5rem` | `0.6875rem` | `1.75rem` | `0.625rem` |
+| `sm` | `1.75rem` | `0.75rem` | `1.875rem` | `0.6875rem` |
+| `md` | `2.25rem` | `0.8125rem` | `2rem` | `0.75rem` |
+| `lg` | `2.75rem` | `0.875rem` | `2.25rem` | `0.8125rem` |
+| `xl` | `3.25rem` | `0.9375rem` | `2.5rem` | `0.875rem` |
+
+The base shared rule sets `height: var(--poodle-size-control-height)`, `font-size: var(--poodle-typography-label-size)`, `toggle-width-base: 2rem`, and `chevron-size: 0.75rem`; the per-size rows above override these.
 
 ### Density variants
 
@@ -286,7 +292,7 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 | `top` | `calc(100% + 0.375rem)` by default |
 | `bottom` | `calc(100% + 0.375rem)` when flipped upward |
 | `left` | `0` |
-| `z-index` | `var(--poodle-z-index-overlay-menu)` |
+| `z-index` | `var(--poodle-overlay-z-menu)` |
 | `min-width` | `12rem` |
 | `padding` | `0.25rem` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
@@ -303,8 +309,8 @@ Primary-half loading uses the shared [`Spinner`](./spinner.md) primitive with
 | `display` | `flex` |
 | `align-items` | `center` |
 | `width` | `100%` |
-| `min-height` | `2rem` |
-| `padding` | `0.375rem 0.5rem` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `var(--poodle-space-control-y) var(--poodle-space-control-x)` |
 | `border` | `0` |
 | `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `background` | `transparent` |

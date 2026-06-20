@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=10 specimen=gap -->
 # Parity: Calendar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,9 +16,9 @@
 
 Mostly aligned (props, anatomy parts, states, ARIA all present in Svelte). Divergences:
 
-- **Root width.** Contract §7/§8 mandate a fixed `width: 18rem` at md, scaling per size (xs=14.5rem … xl=23rem) plus `min-width: 16rem`. Svelte sets `width: fit-content` (line 544) and sizes columns via `--calendar-cell-size` per `data-size` (lines 750-753) — no fixed root width, no min-width. Svelte's actual widths differ from the contract table. **Fix: update contract §7/§8 to describe the `fit-content` + per-size `--calendar-cell-size` model (xs 1.75 / sm 2 / md 2.25 / lg 2.5 / xl 2.75 rem), drop the fixed-rem width column.**
+- [x] FIXED **Root width.** Contract §7/§8 mandated a fixed `width: 18rem` at md plus `min-width: 16rem`. Svelte uses `width: fit-content` + per-size `--calendar-cell-size`. Contract §7 Sizing, §8 Root/Weekday/Week grid-columns, the size table (cell-size rows added), the Root token-target, and the Tier 2 checklist line are now reconciled to the `fit-content` + cell-size model (xs 1.75 / sm 2 / md 2.25 / lg 2.5 / xl 2.75 rem).
 - **Header layout.** Contract §8 Header gap is `0.5rem` with `grid-template-columns: auto minmax(0,1fr) auto`. Svelte `.poodle-calendar__header` matches (lines 555-558). OK.
-- **aria-selected placement.** Contract §6 says `aria-selected` on the selected day *button*; Svelte sets it on the *cell* (`role="gridcell"`, line 512) and `data-selected` on the button. Minor. **Fix: contract should say aria-selected on the gridcell wrapper (matches ARIA grid pattern).**
+- [x] FIXED **aria-selected placement.** Contract §6 now states `aria-selected` is on the gridcell wrapper of the selected day, with `data-selected` on the button — matches Svelte (line 512) and the ARIA grid pattern.
 - Month/year inline editing (triggers, select, year input) — contract anatomy lists all parts; Svelte implements all (lines 416-485). OK.
 
 ## GPUI gap (vs Svelte + contract)
@@ -61,4 +61,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - GPUI keyboard model is selection-driven, not focus-driven — it mutates the selected value on arrow keys rather than moving a roving focus cursor. This diverges from the contract's roving-tabindex requirement and means arrowing changes the committed value, not just focus. Flagged as a behavior todo above.
 - Jetstream's `0.4` outside-month opacity is the single clearest value bug in this component (everywhere else it mirrors the Svelte color-mix formulas faithfully via `color_mix`).
-- `consv=gap` driver is the root-width model (contract describes a fixed-rem width Svelte does not implement) plus the aria-selected element placement.
+- `consv=fixed`: the root-width model and the aria-selected element placement are now reconciled to Svelte. Remaining gpui/jetstream todos are code-side, not contract↔Svelte.

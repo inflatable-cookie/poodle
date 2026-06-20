@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=8 specimen=gap -->
 # Parity: ToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,14 +15,14 @@
 
 ## Contract ↔ Svelte
 
-Multiple §8 token values are stale vs Svelte; Svelte is authoritative — update the contract.
+Multiple §8 token values were stale vs Svelte; Svelte is authoritative — contract fixed.
 
-- **Item background mismatch.** Contract §8 item `background` = `color-mix(in srgb, surface 72%, background-elevated)`. Svelte (`ToggleGroup.svelte:165-168`) resolves `color-mix(in srgb, surface 93%, color-text-primary)` (via `--poodle-treatment-interactive-fill`). **Fix: contract §8 item background → `surface 93%, text-primary`.**
-- **Selected background mismatch.** Contract §8 selected `background` = flat `color-mix(accent-base 22%, transparent)`. Svelte (`:183-197`) layers a `linear-gradient(accent 22% → accent 22%)` *over* the unselected fill, so the selected pill keeps the surface base. **Fix: contract should describe the accent tint layered over the item fill, not over transparent.**
-- **`allowDeactivation` absent from Rust spec.** Contract §3 + §5 document `allowDeactivation` (default `false`) and `null`-emitting single-mode deactivation; Svelte implements it (`:71-73`). `ToggleGroupSpec` (`toggle_group.rs:34-45`) has **no** `allow_deactivation` field, so neither Rust target can honor it. **Fix: add `allow_deactivation` to the spec.** Contract side is correct.
-- **Font-size source.** Contract §8 hardcodes item `font-size: 0.75rem`; Svelte uses `var(--poodle-typography-label-size)` (`:173`). **Fix: contract should cite the label-size token, not a literal rem.**
-- Svelte adds `--poodle-treatment-interactive-*` treatment-variable indirection (brand-raised hook) for border/fill/radius/shadow not mentioned in contract. Accepted as platform treatment layer; note only.
-- `value` default: contract §3 says `undefined`; Svelte default is `undefined` (`:26`) — matches. `defaultValue` default `null` matches.
+- [x] FIXED **Item background mismatch.** §8 said `surface 72% / background-elevated`; Svelte resolves `surface 93% / text-primary` (`ToggleGroup.svelte:165-168`). Contract §8 item background → `surface 93%, text-primary` (with treatment-var fallback). Surface-elevation note + Tier-2 updated.
+- [x] FIXED **Selected background mismatch.** §8 said flat `accent-base 22% / transparent`; Svelte layers a `linear-gradient(accent 22% → accent 22%)` over the unselected fill (`:183-197`), keeping the surface base. Contract selected background → gradient tint layered over the item fill. GPUI notes + Tier-2 updated.
+- [x] FIXED **Font-size source.** §8 hardcoded `0.75rem`; Svelte uses `var(--poodle-typography-label-size)` (`:173`). Contract → label-size token. Tier-2 updated.
+- [x] FIXED **Treatment-variable indirection.** Documented `--poodle-treatment-interactive-*` (border/fill/radius/shadow/border-active) as the brand-raised theming layer with color-mix fallbacks in §8 tables + §9 Svelte Notes.
+- `value` default: contract §3 `undefined`; Svelte `undefined` (`:26`) — matches. `defaultValue` `null` matches. No change.
+- [ ] (spec, not contract↔Svelte) **`allowDeactivation` absent from Rust spec.** Contract §3/§5 document it and Svelte implements it (`:71-73`); `ToggleGroupSpec` (`toggle_group.rs:34-45`) lacks the `allow_deactivation` field. Contract side is correct — add the spec field in code (left for Rust pass).
 
 ## GPUI gap (vs Svelte + contract)
 

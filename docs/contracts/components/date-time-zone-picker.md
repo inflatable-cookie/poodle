@@ -274,19 +274,23 @@ TimeZoneOption: {
 
 ### Size adjustments
 
-| Size | Property | Value |
-|------|----------|-------|
-| `xs` (`[data-size="xs"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.5rem)` |
-| `xs` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
-| `xs` | `font-size` | `0.75rem` |
-| `sm` (`[data-size="sm"]`) | `min-height` | `calc(var(--poodle-size-control-height) - 0.375rem)` |
-| `sm` | `padding` | `0 calc(var(--poodle-space-control-x) - 0.0625rem)` |
-| `lg` (`[data-size="lg"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.375rem)` |
-| `lg` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
-| `lg` | `font-size` | `0.9375rem` |
-| `xl` (`[data-size="xl"]`) | `min-height` | `calc(var(--poodle-size-control-height) + 0.5rem)` |
-| `xl` | `padding` | `0 calc(var(--poodle-space-control-x) + 0.1875rem)` |
-| `xl` | `font-size` | `1rem` |
+Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-trigger-height`), the trigger `font-size`, and the indicator `font-size`. Size does **not** set per-size padding — horizontal padding is density-driven (see below).
+
+| Size | Trigger height | Trigger `font-size` | Indicator `font-size` |
+|------|----------------|---------------------|-----------------------|
+| `xs` (`[data-size="xs"]`) | `1.5rem` | `0.75rem` | `0.625rem` |
+| `sm` (`[data-size="sm"]`) | `1.75rem` | `0.8125rem` | `0.6875rem` |
+| `md` (`[data-size="md"]`) | `var(--poodle-size-control-height-md, var(--poodle-size-control-height))` | `var(--poodle-typography-body-size)` (base) | `0.75rem` (base) |
+| `lg` (`[data-size="lg"]`) | `2.75rem` | `0.9375rem` | `0.8125rem` |
+| `xl` (`[data-size="xl"]`) | `3.25rem` | `1rem` | `0.875rem` |
+
+### Density adjustments (trigger horizontal padding)
+
+| Density | `padding` |
+|---------|-----------|
+| `compact` (`[data-density="compact"]`) | `0 calc(var(--poodle-space-control-x) - 0.125rem)` |
+| `default` | `0 var(--poodle-space-control-x)` (base) |
+| `comfortable` (`[data-density="comfortable"]`) | `0 calc(var(--poodle-space-control-x) + 0.125rem)` |
 
 ## 9. Svelte Notes
 
@@ -304,8 +308,8 @@ TimeZoneOption: {
 - Hosts may provide curated `timeZoneOptions` when product policy requires them;
   if empty, implementation may source a default timezone list internally
 - Partial values are allowed during editing
-- `data-size` data attribute on root reflects the resolved size
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- `data-size` data attribute on root reflects the resolved size; it sets an absolute trigger height (`xs:1.5rem` … `xl:3.25rem`, `md` via `--poodle-size-control-height-md`) plus per-size trigger and indicator font-sizes — it does **not** set per-size padding
+- `data-density` — resolved density value (`compact`, `default`, or `comfortable`); density alone drives trigger horizontal padding (`compact` −0.125rem, `comfortable` +0.125rem from `--poodle-space-control-x`)
 
 ## 10. GPUI Notes
 
@@ -341,7 +345,7 @@ TimeZoneOption: {
 - [ ] trigger focus ring matches (outline with focusRing color, 0.125rem offset)
 - [ ] trigger hover background color-mix (86% surface, elevated) matches
 - [ ] placeholder color (text-secondary) matches
-- [ ] indicator color (text-secondary) and font-size (0.75rem) match
+- [ ] indicator color (text-secondary) and font-size match (base `0.75rem`, scaling `xs:0.625rem` … `xl:0.875rem`)
 - [ ] surface overlay: absolute positioning, 0.375rem gap below trigger
 - [ ] surface border color-mix (72% border-default) matches
 - [ ] surface background color-mix (98% elevated, panel) matches

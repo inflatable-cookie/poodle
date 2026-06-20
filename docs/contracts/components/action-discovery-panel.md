@@ -41,9 +41,10 @@ type DiscoveryState = "ready" | "loading" | "error" | "empty" | "no-results";
 
 ```text
 [Root]  role="listbox"
-  ├── [State Region]  (loading / error / empty / no-results)
-  │     ├── [Skeleton Rows]  (loading)
-  │     └── [EmptyState]     (error / empty / no-results)
+  ├── [State Region .__state]  (loading only)
+  │     └── [Skeletons .__skeletons]
+  │           └── [Skeleton Rows]
+  ├── [EmptyState]  (error / empty / no-results — rendered directly, no __state wrapper)
   └── [Group...]  (ready)
         ├── [Eyebrow]  group heading
         └── [List]  <ul>
@@ -132,7 +133,7 @@ response to keyboard events.
 - Items grouped by `item.group` field; default group name is `"Commands"`
 - Active item receives accent-tinted background with inset box-shadow
 - Badge and shortcut (kbd) rendered in trailing snippet content with semantic chip sizing
-- Shortcut uses monospace (`code-family`) typography
+- Chips use uppercase `label-family` typography (weight 600, `letter-spacing: 0.03em`); the badge takes an accent treatment (`accent-base 16%` background, `accent-base` color), the kbd resets letter-spacing/transform and uses monospace (`code-family`) typography
 - Skeleton rows during loading: two Skeleton elements per row (48% and 20% width), with density-aware padding
 - Loading remains a Skeleton-based placeholder treatment rather than Spinner, because the panel is reserving result-list layout rather than indicating compact inline activity
 
@@ -189,43 +190,70 @@ response to keyboard events.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `min-height` | `1.5rem` |
-| `padding` | `0 0.5rem` |
+| `min-height` | `var(--poodle-action-discovery-chip-height)` (`1.375rem` md default; per-size below) |
+| `padding` | `0 var(--poodle-action-discovery-chip-x)` (`0.5rem` md default; per-size below) |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent)` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.75rem` |
+| `font-family` | `var(--poodle-typography-label-family)` |
+| `font-size` | `var(--poodle-action-discovery-chip-font-size)` (`0.6875rem` md default; per-size below) |
+| `font-weight` | `600` |
+| `letter-spacing` | `0.03em` |
+| `text-transform` | `uppercase` |
+| `white-space` | `nowrap` |
 
-#### `.action-discovery-panel__kbd` (Additional)
+#### `.action-discovery-panel__badge` (Accent override)
+
+| Property | Value |
+|----------|-------|
+| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)` |
+| `color` | `var(--poodle-color-accent-base)` |
+
+#### `.action-discovery-panel__kbd` (Override)
 
 | Property | Value |
 |----------|-------|
 | `font-family` | `var(--poodle-typography-code-family)` |
+| `letter-spacing` | `0` |
+| `text-transform` | `none` |
 
-#### `.action-discovery-panel__state`
+#### Chip size table (`chip-height` / `chip-x` / `chip-font-size`)
+
+| Size | `chip-height` | `chip-x` | `chip-font-size` |
+|------|---------------|----------|------------------|
+| `xs` | `1.125rem` | `0.375rem` | `0.5625rem` |
+| `sm` | `1.25rem` | `0.5rem` (default) | `0.625rem` |
+| `md` | `1.375rem` | `0.5rem` | `0.6875rem` |
+| `lg` | `1.5rem` | `0.625rem` | `0.75rem` |
+| `xl` | `1.75rem` | `0.75rem` | `0.8125rem` |
+
+#### `.action-discovery-panel__state` (loading wrapper only)
 
 | Property | Value |
 |----------|-------|
+| `min-height` | `10rem` |
 | `display` | `grid` |
-| `gap` | `var(--poodle-space-stack-sm)` |
+| `place-items` | `center` |
+
+Only the loading region is wrapped in `__state`. Error / empty / no-results render
+their `EmptyState` directly under the root with no `__state` wrapper.
 
 #### `.action-discovery-panel__skeletons`
 
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `var(--poodle-space-stack-sm)` |
+| `gap` | `var(--poodle-action-discovery-list-gap)` |
+| `width` | `100%` |
+| `padding` | `var(--poodle-action-discovery-skeleton-pad)` (`0.875rem` md default) |
 
 #### `.action-discovery-panel__skeleton-row`
 
 | Property | Value |
 |----------|-------|
-| `display` | `grid` |
-| `grid-template-columns` | `minmax(0, 1fr) auto` |
-| `gap` | `var(--poodle-space-inline-md)` |
-| `padding` | `0.875rem` |
-| `border-radius` | `calc(var(--poodle-radius-surface) - 0.125rem)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)` |
+| `display` | `flex` |
+| `justify-content` | `space-between` |
+| `gap` | `var(--poodle-action-discovery-chip-gap)` |
 
 ### Data Attributes Used for CSS Selectors
 

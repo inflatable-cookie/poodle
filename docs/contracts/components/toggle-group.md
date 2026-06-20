@@ -1,6 +1,6 @@
 # Toggle Group
 
-> **Surface elevation**: ToggleGroup is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
+> **Surface elevation**: ToggleGroup is a surface consumer (93% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
 Updated: 2026-03-15
@@ -153,23 +153,26 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 |----------|-------|
 | `min-height` | `calc(var(--poodle-toggle-group-height) - 0.25rem)` |
 | `padding` | `0 var(--poodle-toggle-group-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `color-mix(in srgb, var(--poodle-surface) 72%, var(--poodle-color-background-elevated))` |
+| `border` | `0.0625rem solid var(--poodle-treatment-interactive-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent))` |
+| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `background` | `var(--poodle-treatment-interactive-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
+| `box-shadow` | `var(--poodle-treatment-interactive-shadow, none)` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
+| `font-size` | `var(--poodle-typography-label-size)` |
 | `font-weight` | `600` |
 | `line-height` | `1` |
-| `transition` | `border-color 180ms ease, background 180ms ease, color 180ms ease` |
+| `transition` | `border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease` |
 
-### Item — selected (`.toggle-group__item.selected`)
+### Item — selected (`.toggle-group__item.poodle-selected`)
+
+The selected fill layers a flat accent tint **over** the unselected item fill (the surface base stays beneath), via a `linear-gradient` stacked on the fill:
 
 | Property | Value |
 |----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)` |
-| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default))` |
+| `background` | `linear-gradient(color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent), color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)), var(--poodle-treatment-interactive-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
+| `border-color` | `var(--poodle-treatment-interactive-border-active, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)))` |
 
 ### Item — focus visible (`:focus-visible`)
 
@@ -192,8 +195,9 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 - Multiple mode: buttons use `role="button"` and `aria-pressed`
 - Root container role switches between `radiogroup` and `group` based on
   `selectionMode`
-- `data-selected` attribute drives selected styling
-- Selection state managed internally when `value` is `null` (uncontrolled mode)
+- Selected items carry both the `poodle-selected` class (drives the selected fill/border) and `data-selected="true|false"`
+- Item border/fill/radius/shadow read from `--poodle-treatment-interactive-*` treatment variables (a brand-raised theming hook) with the color-mix formulas as fallbacks; the selected border reads `--poodle-treatment-interactive-border-active`
+- Selection state managed internally when `value` is `undefined` (uncontrolled mode); single mode seeds `null`, multiple mode seeds `[]`
 - Transition uses explicit `180ms ease` timing
 
 ## 10. GPUI Notes
@@ -201,8 +205,9 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 - expected crate/module surface: `poodle_gpui::primitives::toggle_group`
 - GPUI must switch between radiogroup and group semantics based on selectionMode
 - Per-item checked/pressed state must be exposed in the accessibility tree
-- The accent-tinted selected state uses color-mix; GPUI must replicate the
-  blending formula
+- The accent-tinted selected state layers a flat `accent-base 22%` tint over the
+  unselected item fill (`surface 93% / text-primary`); GPUI must replicate both
+  the base fill mix and the accent tint over it, not accent over transparent
 - Flex-wrap layout requires GPUI equivalent for multi-row wrapping
 
 ## 11. Parity Checklist
@@ -218,12 +223,12 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 
 ### Tier 2: Visual Parity
 
-- [ ] item border, radius, and background match
-- [ ] selected accent-tinted background matches (22% accent-base mix)
+- [ ] item border, radius, and background match (fill `surface 93% / text-primary`)
+- [ ] selected fill matches: `accent-base 22%` tint layered over the item fill (not over transparent)
 - [ ] selected accent-tinted border matches (42% accent-base mix)
 - [ ] focus ring appearance matches
 - [ ] disabled opacity matches
-- [ ] typography matches (family, size, weight)
+- [ ] typography matches (label-family, label-size token, weight 600)
 - [ ] flex-wrap gap matches
 
 ### Tier 3: Implementation Freedom

@@ -20,13 +20,13 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .embed-input]  <div>
+[Root .poodle-embed-input]  <div>
   ├── [TextInput]  TextInput primitive (rows=3)
-  └── [Status .embed-input__status]  <div>
-        ├── [Error .embed-input__error]  <span> (when error)
+  └── [Status .poodle-embed-input__status]  <div>
+        ├── [Error .poodle-embed-input__error]  <span> (when error)
         └── [Success]  (when parsed)
               ├── [ProviderPill]  Pill (tone="success", sizeRole="chrome")
-              └── [SuccessText .embed-input__success]  <span>
+              └── [SuccessText .poodle-embed-input__success]  <span>
 ```
 
 | Part | Required | Description | Token Targets |
@@ -51,6 +51,9 @@ Updated: 2026-03-30
 | `parseDebounce` | `number` | `300` | no | debounce delay in milliseconds before parsing |
 | `providers` | `string[]` | `[]` | no | allowed provider names; empty array means all providers allowed |
 | `disabled` | `boolean` | `false` | no | disables the TextInput input |
+| `size` | `ControlSize \| null` | `null` | no | explicit control size override forwarded to the TextInput; when null, resolves from inherited presentation |
+| `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role forwarded to the TextInput |
+| `density` | `ControlDensity \| null` | `null` | no | explicit density override forwarded to the TextInput |
 | `error` | `string \| null` | `null` | no | external error message |
 | `onParse` | `((parsed: ParsedEmbed \| null, error: string \| null) => void) \| null` | `null` | no | called after debounced parsing completes |
 | `onValueChange` | `((value: string) => void) \| null` | `null` | no | called immediately when the input value changes |
@@ -72,12 +75,13 @@ Poodle also exports generic embed helpers from the same composite package:
 
 ```ts
 type ParsedEmbed = {
-  provider: string;      // "youtube" | "vimeo" | "generic"
+  provider: string;      // "youtube" | "vimeo" | "audioboom" | "generic"
   id: string;            // provider-specific ID or URL
   originalUrl?: string;  // the original URL if applicable
   originalEmbed?: string; // the original iframe embed code if applicable
   width?: number;        // extracted width (if present in embed code)
   height?: number;       // extracted height (if present in embed code)
+  embedType?: "video" | "audio" | "generic"; // media kind of the detected embed
 };
 
 type EmbedParseState = {
@@ -90,20 +94,24 @@ type EmbedParseState = {
 
 Both runtimes are expected to resolve `parsed` using the same pattern set:
 
+Detection order matters: YouTube short, YouTube watch, YouTube embed, Vimeo, Audioboom, iframe embed code, then generic URL.
+
 | Input Pattern | Result |
 |---------------|--------|
-| `https://youtu.be/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
-| `https://youtube.com/watch?v={id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
-| `https://youtube.com/embed/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
-| `https://vimeo.com/{digits}` | `provider="vimeo"`, `id={digits}`, `originalUrl=input` |
-| valid `http://` or `https://` URL (no whitespace) | `provider="generic"`, `id=input`, `originalUrl=input` |
-| `<iframe ... src="...">` embed code | `provider="generic"`, `id=src or raw input`, `originalUrl=src when present`, `originalEmbed=input`, `width`/`height` parsed when numeric |
-| empty or whitespace only | `parsed=null` |
-| non-matching text | `parsed=null` |
+| `youtu.be/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
+| `youtube.com/watch?v={id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
+| `youtube.com/embed/{id}` | `provider="youtube"`, `id={id}`, `originalUrl=input` |
+| `vimeo.com/{digits}` | `provider="vimeo"`, `id={digits}`, `originalUrl=input`, `embedType="video"` |
+| `audioboom.com/posts/{digits}` | `provider="audioboom"`, `id={digits}`, `originalUrl=input`, `embedType="audio"` |
+| valid `http://` or `https://` URL (no whitespace) | `provider="generic"`, `id=input`, `originalUrl=input`, `embedType="generic"` |
+| `<iframe ... src="...">` embed code | provider/`id`/`embedType` resolved by recursively detecting the `src`; falls back to `provider="generic"`, `id=src or raw input`, `embedType="generic"`. `originalUrl=src when present`, `originalEmbed=input`, `width`/`height` parsed when numeric |
+| empty or whitespace only | `parsed=null` (success, no error) |
+| non-matching text | `parsed=null`, `error="Could not parse embed source"` |
 
 Provider restriction runs after detection. If `providers` is non-empty and the
 detected provider is not listed, `parsed` resolves to `null` and `error`
-becomes `Provider "{provider}" is not allowed`.
+becomes `Provider "{provider}" is not allowed`. When the resolver disallows
+generic embeds, the error is `Generic embeds are not allowed`.
 
 ### Slots
 
@@ -178,7 +186,7 @@ None.
 
 ## 8. Token Usage — Exact Values
 
-### Root `.embed-input`
+### Root `.poodle-embed-input`
 
 | Property | Value |
 |----------|-------|
@@ -186,7 +194,7 @@ None.
 | flex-direction | `column` |
 | gap | `0.25rem` |
 
-### Status `.embed-input__status`
+### Status `.poodle-embed-input__status`
 
 | Property | Value |
 |----------|-------|
@@ -196,13 +204,13 @@ None.
 | min-height | `1.25rem` |
 | font-size | `0.75rem` |
 
-### Error `.embed-input__error`
+### Error `.poodle-embed-input__error`
 
 | Property | Value |
 |----------|-------|
 | color | `var(--poodle-color-text-danger, #ef4444)` |
 
-### SuccessText `.embed-input__success`
+### SuccessText `.poodle-embed-input__success`
 
 | Property | Value |
 |----------|-------|
@@ -229,10 +237,11 @@ None.
   `detectParsedEmbed` for pattern matching, then applies provider restriction
 - callers can override parsing with `resolveParseState` when they need a richer
   provider/parser contract while keeping the same Poodle UI shell
-- TextInput receives the `id` prop directly
+- TextInput receives the `id` prop directly, plus `size`/`sizeRole`/`density` forwarded from the composite
 - TextInput `onValueChange` callback drives input handling directly with the
   next string value
 - Pill uses `sizeRole="chrome"` (not `size="xs"`)
+- Scoped CSS classes use the `.poodle-embed-input*` prefix
 
 ## 10. GPUI Notes
 

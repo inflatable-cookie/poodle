@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
 # Parity: CardRadioGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,10 +16,11 @@
 
 Class names and a couple of prop defaults diverge. Svelte authoritative.
 
-- Class prefix mismatch: contract §2/§8 use bare `.card-radio-group*` and `:global(.card)`; Svelte emits `.poodle-card-radio-group*` and targets `:global(.poodle-card)`. **Fix: update contract anatomy + token tables to the `poodle-` prefix.**
-- `value` default: contract §3 says `string | null`, default `null`; Svelte declares `string | null | undefined`, default `undefined` (line 31) and derives `isControlled = value !== undefined` (line 47). Uncontrolled mode is a real Svelte feature absent from contract. **Fix: document `undefined` default + controlled/uncontrolled split in contract §3.**
-- `onValueChange` is a real prop in Svelte (line 25, type `(value: string) => void`) but contract §3 props table omits it — it only appears in §5 Callbacks. **Fix: add `onValueChange` to the §3 props table.**
-- Contract §9 claims `createEventDispatcher` + `change` event; Svelte uses neither — selection flows only through the `onValueChange` callback and `bind:value`. **Fix: drop the `createEventDispatcher`/`change` note from §9.**
+- [x] FIXED Class prefix: contract §2 anatomy, all §8 token-table headers, the §8 data-attributes table, and the focus-visible/density `:global` selectors now use the `poodle-` prefix (`.poodle-card-radio-group*`, `:global(.poodle-card)`).
+- [x] FIXED `value` default: contract §3 props table now lists `string | null | undefined`, default `undefined`, and §3 Controlled And Uncontrolled documents the `undefined` = uncontrolled / defined = controlled split.
+- [x] FIXED `onValueChange` added to the §3 props table (and the Tier 1 checklist line reworded from "event name" to "onValueChange callback name").
+- [x] FIXED §9 Svelte Notes: dropped the `createEventDispatcher`/`change` note; now states selection flows through `onValueChange` + `bind:value`.
+- [x] FIXED (extra) Density table: comfortable gap was `1rem`, Svelte is `0.875rem`; compact card padding was full `0.5rem`, Svelte sets only `padding-inline: 0.5rem`; comfortable had a phantom `1rem` card-padding override Svelte does not emit. Reconciled to Svelte.
 - Snippet type name: contract §3 calls the item type `CardRadioItem` and that matches Svelte's TS type, OK. No divergence there.
 
 ## GPUI gap (vs Svelte + contract)
@@ -60,4 +61,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - GPUI/Jetstream `ChoiceOption` carries `label` (matches Svelte `CardRadioItem.label`); no `title` mismatch here (contrast with CardToggleGroup).
 - Selected-fill modeling differs three ways: Svelte/contract lean on `Card`'s selected token + accent indicator; GPUI invents a 12% accent `color_mix`; Jetstream uses `selected_fill_token()` (elevated surface). Reconcile all three onto the Card-selected token path.
-- `consv=gap` driver is bookkeeping: `poodle-` class prefix, `value` default `undefined`, missing `onValueChange` in props table, and the stale `createEventDispatcher`/`change` note in §9.
+- `consv=fixed`: all contract↔Svelte bookkeeping resolved (`poodle-` class prefix, `value` default `undefined`, `onValueChange` in props table, dropped `createEventDispatcher`/`change` note, density-table values). Remaining gpui/jetstream todos are code-side.

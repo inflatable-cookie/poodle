@@ -27,7 +27,7 @@ Updated: 2026-03-30
   │   │       │   ├── [Title .accordion__title]  <span>
   │   │       │   └── [Description .accordion__description]  <span> (optional)
   │   │       └── [Indicator .accordion__indicator]  <span aria-hidden>
-  │   │           └── [Icon name="chevron-down" size="sm"]
+  │   │           └── [Icon name="chevron-down"]
   │   └── [Panel .accordion__panel]  <div role="region" aria-labelledby> (conditional)
   │       └── [Snippet: children(item, isOpen)]
   └── [...]
@@ -138,8 +138,8 @@ Updated: 2026-03-30
 
 ### Sizing
 
-- Root: vertical grid with 0.75rem gap between items
-- Items: self-contained bordered sections with internal grid layout
+- Root: vertical grid with `space-stack-md` gap between items
+- Items: self-contained bordered sections with internal grid layout (internal `accordion-item-gap`, `0.625rem` default)
 - Panels: expand inline below their trigger within the item container
 - All grid containers use `min-width: 0` for overflow safety
 
@@ -157,7 +157,7 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.75rem` |
+| `gap` | `var(--poodle-space-stack-md)` |
 | `min-width` | `0` |
 
 ### Item `.accordion__item`
@@ -165,12 +165,12 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.75rem` |
+| `gap` | `var(--poodle-accordion-item-gap)` (`0.625rem` default) |
 | `min-width` | `0` |
-| `padding` | `0.875rem 1rem` |
+| `padding` | `0.625rem var(--poodle-space-panel-x)` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel))` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent)` |
 
 ### Heading `.accordion__heading`
@@ -186,7 +186,7 @@ Updated: 2026-03-30
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `center` |
-| `gap` | `0.75rem` |
+| `gap` | `var(--poodle-space-inline-md)` |
 | `width` | `100%` |
 | `padding` | `0` |
 | `border` | `0` |
@@ -216,7 +216,7 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.3125rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `min-width` | `0` |
 
 ### Title `.accordion__title`
@@ -273,7 +273,7 @@ Updated: 2026-03-30
 
 - `data-size` attribute on root reflects the resolved size
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
-- Uses `<Icon name="chevron-down" size="sm" />` for the indicator
+- Uses `<Icon name="chevron-down" />` for the indicator (no explicit `size`)
 - Module-level `nextAccordionId` counter (incremented per instance) generates
   unique ARIA id pairs for trigger/panel association
 - Items rendered via keyed `{#each}` block on `item.value`
@@ -314,10 +314,10 @@ Updated: 2026-03-30
 
 - [ ] all five sizes visually match per size table
 - [ ] item border color-mix (36% border-subtle) matches
-- [ ] item background color-mix (84% elevated, surface) matches
+- [ ] item background color-mix (40% background-elevated, background-panel) matches
 - [ ] item inset box-shadow (8% text-inverse) matches
 - [ ] item border-radius uses radius-surface
-- [ ] item padding (0.875rem 1rem) matches
+- [ ] item padding (`0.625rem` block, `space-panel-x` inline) matches
 - [ ] trigger grid layout (1fr auto) matches
 - [ ] title typography (heading-family, 1rem, 700, 1.2) matches
 - [ ] description typography (0.8125rem, 1.45, secondary) matches

@@ -62,7 +62,9 @@ Updated: 2026-06-11
 | `dedupe` | `boolean` | `true` | no | prevents duplicate committed values when true |
 | `commitOnBlur` | `boolean` | `true` | no | commits the current draft token on blur |
 | `maxLength` | `number \| null` | `null` | no | forwarded to the live text input |
+| `resolveToken` | `(value: string, values: string[]) => string \| null \| undefined` | `undefined` | no | per-token validation/transform hook run on commit; receives the trimmed draft and current committed values; return a non-empty string to accept (optionally transformed), or any non-string (`null`/`undefined`) to reject the draft |
 | `onValuesChange` | `(values: string[]) => void` | `undefined` | no | fires whenever committed token values change |
+| `onTokenReject` | `(value: string) => void` | `undefined` | no | fires with the trimmed draft when `resolveToken` rejects it (returns a non-string or an empty string after trim) |
 
 ## 4. Behavior Rules
 
@@ -75,6 +77,10 @@ Updated: 2026-06-11
 - blur commits the draft token when `commitOnBlur=true`
 - empty tokens are discarded after trimming
 - whitespace around tokens is trimmed before commit
+- when `resolveToken` is supplied, the trimmed draft is passed through it before
+  commit; a returned non-empty string (trimmed again) becomes the committed
+  value, while a non-string return or an empty result rejects the draft, drops
+  it, and fires `onTokenReject` with the trimmed draft
 
 ### Removal Semantics
 
@@ -114,6 +120,7 @@ Updated: 2026-06-11
 | Callback | When It Fires | Payload |
 |----------|---------------|---------|
 | `onValuesChange` | committed token list changes | `string[]` |
+| `onTokenReject` | `resolveToken` rejects a draft (non-string or empty result) | `string` (trimmed draft) |
 
 ## 7. Accessibility
 

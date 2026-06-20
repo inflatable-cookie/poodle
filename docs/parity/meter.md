@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
 # Parity: Meter
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,11 +17,12 @@
 
 Contract and Svelte are nearly aligned on props/anatomy. Divergences are internal contradictions and one Rust-spec drift.
 
-- **Track background mix percentage contradicts itself.** Svelte CSS (`Meter.svelte:69`) and contract §8 Track table both say `color-mix(... surface 96%, text-primary)`. But contract §8 Token Reference (line 179) and §11 Tier-2 (line 207) say "88% mix". Svelte is authoritative → **Fix: contract §8 Token Reference + §11 should say 96%, not 88%.**
-- **Track-mix base token name.** Svelte mixes against `var(--poodle-surface)` (line 69); contract §8 Token Reference cites `--poodle-color-background-surface`. Same conceptual surface token, different name spelling. **Fix: reconcile token name in contract to match Svelte's `--poodle-surface`.**
-- **`size` / `sizeRole` props absent from the Rust `MeterSpec`.** Contract §3 + Svelte (`size`, `sizeRole`) drive the xs–xl track-thickness ladder (§8 size variants). `MeterSpec` (`meter.rs:3-12`) has no `size`/`size_role` field and only a flat `track_height_rem()` returning `0.5` (`meter.rs:86-88`). This is a spec gap, not a Svelte gap. **Fix: add `size`/`size_role` to `MeterSpec` + a size-driven `track_height_rem()` ladder.**
-- **`MeterSpec` default `max = 1.0`** (`meter.rs:24`) contradicts contract/Svelte default `max = 100`. **Fix: change spec default to `100.0`** (or document the 0–1 normalization convention the Jetstream specimen relies on).
-- **`MeterSpec::fill_token()` returns `COLOR_ACCENT_BASE`** (`meter.rs:77-79`), i.e. accent blue. Contract §8 fill + §11 Tier-2 and Svelte (`Meter.svelte:78`) require `color.status.success` (green). Confirmed distinct tokens. **Fix: `fill_token()` must return `COLOR_STATUS_SUCCESS`.**
+- [x] FIXED — **Track background mix percentage contradicted itself.** §8 Token Reference + §11 Tier-2 said "88% mix"; Svelte (`Meter.svelte:69`) and the §8 Track table say `96%, text-primary`. Both stale spots updated to `96%` mix with text-primary.
+- [x] FIXED — **Track-mix base token name.** §8 Token Reference cited `--poodle-color-background-surface`; updated to Svelte's `--poodle-surface` (mixed at 96% with `--poodle-color-text-primary`).
+- Rust-spec gaps below are NOT contract↔Svelte divergences — they are `MeterSpec` defects (code edits out of scope here), tracked for the Rust ports:
+  - **`size`/`sizeRole` absent from `MeterSpec`** (`meter.rs:3-12`) — flat `track_height_rem()` returning `0.5`; needs a size-driven ladder. Spec gap.
+  - **`MeterSpec` default `max = 1.0`** (`meter.rs:24`) vs contract/Svelte `max = 100`. Spec bug.
+  - **`MeterSpec::fill_token()` returns `COLOR_ACCENT_BASE`** (`meter.rs:77-79`) instead of `COLOR_STATUS_SUCCESS`. Spec bug — Jetstream inherits the wrong (blue) fill; GPUI sidesteps by hardcoding the correct token string.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -52,5 +53,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - The single biggest defect is `MeterSpec::fill_token()` returning accent blue instead of success green — it makes the meter the wrong color in any target that trusts the spec (Jetstream does; GPUI sidesteps it by hardcoding the correct token string).
-- Contract self-conflict (96% vs 88% track mix) must be resolved in the contract file, not in code — Svelte's 96% wins.
+- `consv=fixed`: the only contract↔Svelte divergences were the self-conflicting 88%-vs-96% track mix and the `--poodle-color-background-surface` token-name spelling; both resolved in the contract to Svelte's 96% / `--poodle-surface`. The remaining items (`MeterSpec` size/max/fill_token) are Rust-spec bugs, not contract issues.
 - low/high/optimum are display-inert in all targets (contract §4 confirms they only feed native `<meter>` semantics); no zone-based color shift is expected yet (contract §14 future follow-up).

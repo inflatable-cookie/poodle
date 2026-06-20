@@ -17,14 +17,18 @@ Updated: 2026-03-26
 ## 2. Anatomy
 
 ```text
-[Root .time-ago]  <time>
-  └── [Relative text]
+[Tooltip]  (Tooltip component, content = absolute time)
+  └── [Root .time-ago]  <time>
+        └── [Relative text]
 ```
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | semantic `<time>` element | color, typography |
+| Tooltip | yes | `Tooltip` wrapper carrying the absolute time as `content` | Tooltip component tokens |
+| Root | yes | semantic `<time>` element | color, typography, underline |
 | Relative text | yes | human-readable relative string | text content |
+
+The absolute time is surfaced by wrapping the `<time>` in the shared `Tooltip` component (`content={absoluteText}`), not via a native `title` attribute. Non-CSS runtimes without a Tooltip primitive may defer the tooltip as a Known Delta.
 
 ## 3. Props And Inputs
 
@@ -76,7 +80,7 @@ Updated: 2026-03-26
 ### Semantics
 
 - Element: `<time>` with `datetime` attribute set to ISO 8601 string
-- `title` attribute: absolute formatted date via `tooltipFormat` and optional `timezone`
+- Absolute time is surfaced through the `Tooltip` wrapper (`content={absoluteText}`), formatted via `tooltipFormat` and optional `timezone` — not a native `title` attribute
 - `aria-label`: `ariaLabel` prop if provided, otherwise
   `"{relativeText} ({absoluteText})"`
 
@@ -91,7 +95,7 @@ Updated: 2026-03-26
 - Not focusable by default
 - No live-region behavior (updates are visual-only; parent should manage
   announcements if needed)
-- Tooltip via native `title` attribute provides absolute time on hover
+- The `Tooltip` wrapper provides the absolute time on hover/focus-visible
 
 ## 7. Layout
 
@@ -99,7 +103,7 @@ Updated: 2026-03-26
 
 - Inline text element, sizes to content
 - Default typography uses body tokens; `typography="inherit"` lets parent text size and line-height flow through
-- `cursor: default` prevents text cursor on hover
+- `cursor: help` signals the hoverable absolute-time tooltip
 - `font-variant-numeric: tabular-nums` ensures stable width as numbers change
 
 ### Composition
@@ -119,7 +123,19 @@ Updated: 2026-03-26
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `font-variant-numeric` | `tabular-nums` |
-| `cursor` | `default` |
+| `text-decoration-line` | `underline` |
+| `text-decoration-style` | `dotted` |
+| `text-decoration-color` | `var(--poodle-time-ago-underline)` (= `color-mix(in srgb, currentColor 32%, transparent)`) |
+| `text-underline-offset` | `0.14em` |
+| `cursor` | `help` |
+| `transition` | `color 120ms ease, text-decoration-color 120ms ease` |
+
+### Root hover / focus-visible `.time-ago:hover, .time-ago:focus-visible`
+
+| Property | Value |
+|----------|-------|
+| `color` | `var(--poodle-color-text-primary)` |
+| `text-decoration-color` | `var(--poodle-time-ago-underline-hover)` (= `color-mix(in srgb, currentColor 48%, transparent)`) |
 
 When `typography="inherit"`:
 
@@ -134,14 +150,25 @@ When `typography="inherit"`:
 | Attribute | Value |
 |-----------|-------|
 | `datetime` | ISO 8601 string of the timestamp |
-| `title` | absolute date via `toLocaleString({ year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })` |
 | `aria-label` | `ariaLabel ?? "{relativeText} ({absoluteText})"` |
+
+The absolute time (`absoluteText`) is passed to the `Tooltip` wrapper's `content`, not a native `title` attribute.
+
+### Absolute-time format (`formatAbsolute`, by `tooltipFormat`)
+
+`absoluteText` branches on `tooltipFormat` (an optional `timezone` is applied via `{ timeZone }`; on a thrown error it retries without the timezone):
+
+| `tooltipFormat` | Format |
+|-----------------|--------|
+| `date` | `toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })` |
+| `datetime` (default) | `toLocaleString(undefined, { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })` |
+| `full` | `toLocaleString(undefined, { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short" })` |
 
 ### Relative text formatting rules
 
 | Condition | Past format | Future format |
 |-----------|-------------|---------------|
-| diff < 5s | `"now"` or `"just now"` | `"now"` or `"just now"` |
+| diff < 5s | `"now"` (short) / `"just now"` (long) | `"now"` (short) / `"just now"` (long) |
 | diff < 60s | `"{seconds}s ago"` / `"{seconds} seconds ago"` | `"in {seconds}s"` / `"in {seconds} seconds"` |
 | diff < 1h | `"{minutes}m ago"` / `"{minutes} minutes ago"` | `"in {minutes}m"` / `"in {minutes} minutes"` |
 | diff < 24h | `"{hours}h ago"` / `"{hours} hours ago"` | `"in {hours}h"` / `"in {hours} hours"` |
@@ -149,17 +176,19 @@ When `typography="inherit"`:
 | diff < 365d | `"{months}mo ago"` / `"{months} months ago"` | `"in {months}mo"` / `"in {months} months"` |
 | diff >= 365d | `"{years}y ago"` / `"{years} years ago"` | `"in {years}y"` / `"in {years} years"` |
 
+Special case: in long form (`short=false`), a past difference of exactly one day (`days === 1`, not future) renders `"yesterday"` instead of `"1 day ago"`. Short form always uses `"1d ago"`.
+
 Values are computed using integer division (floor). Thresholds use seconds:
 60s, 3600s, 86400s, 2592000s (30d), 31536000s (365d).
 
 ## 9. Svelte Notes
 
-- Renders a `<time>` element with class `time-ago`
+- Renders a `<time>` element with class `time-ago`, wrapped in the `Tooltip` component
 - `typography="inherit"` uses the text-only-inherit rule from
   `docs/contracts/001-working-rules.md`: font metrics inherit directly because
   the primitive has no shell geometry to scale
-- Live updates via `setInterval` with `interval` prop as delay; cleared on
-  component destroy via `onDestroy`
+- Live updates via `setInterval` with `interval` prop as delay, run inside a
+  reactive `$effect`; the interval is cleared on the effect's teardown return
 - `datetime` prop accepts `Date`, ISO string, or Unix timestamp (number);
   internally normalized to a `Date` object
 - No slots, no child components, no dispatched events
@@ -172,8 +201,9 @@ Values are computed using integer division (floor). Thresholds use seconds:
 - `typography="inherit"` is text-only here, so non-CSS runtimes should
   implement it literally by omitting explicit font sizing rather than
   approximating from a baseline
-- `toLocaleString` for title: GPUI should use platform locale formatting or
-  `chrono` crate equivalent
+- `toLocaleString`/`toLocaleDateString` for the tooltip's absolute time: GPUI
+  should use platform locale formatting or `chrono` crate equivalent, branching
+  on `tooltipFormat` (`date`/`datetime`/`full`)
 - `font-variant-numeric: tabular-nums`: GPUI must use a font feature setting
   for tabular figures to prevent layout jitter
 - Relative text formatting: GPUI must replicate the exact threshold table and
@@ -185,7 +215,7 @@ Values are computed using integer division (floor). Thresholds use seconds:
 
 - [ ] renders `<time>` element (or semantic equivalent)
 - [ ] `datetime` attribute contains ISO 8601 string
-- [ ] `title` attribute shows absolute formatted date
+- [ ] absolute formatted date is surfaced via the `Tooltip` wrapper (where a Tooltip primitive exists)
 - [ ] `aria-label` combines relative and absolute text
 - [ ] relative text thresholds and abbreviations match exactly
 - [ ] live update interval defaults to 30000ms
@@ -197,7 +227,8 @@ Values are computed using integer division (floor). Thresholds use seconds:
 - [ ] font-family uses `--poodle-typography-body-family`
 - [ ] font-size uses `--poodle-typography-body-size`
 - [ ] font-variant-numeric tabular-nums matches
-- [ ] cursor default matches
+- [ ] dotted underline + hover/focus-visible decoration treatment matches
+- [ ] cursor `help` matches
 
 ### Tier 3: Implementation Freedom
 

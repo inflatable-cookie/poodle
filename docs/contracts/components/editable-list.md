@@ -28,14 +28,13 @@ Updated: 2026-04-09
   │     └── [Next Button]
   ├── [List .editable-list]  <ul> role="listbox"
   │     └── [Item .editable-list__item]  <li> role="option" (repeated)
-  │           ├── [Handle .editable-list__handle]  6-dot grip SVG, aria-hidden (when reorderable)
+  │           ├── [Handle .editable-list__handle]  6-dot grip SVG, aria-hidden (when reorderable and not embeddedHandle)
   │           ├── [Content .editable-list__content]  slot or default label text
-  │           └── [Remove .editable-list__remove]  <button> (when editable or removable)
-  │                 └── [RemoveIcon]  <svg> x icon, aria-hidden
+  │           └── [Remove .editable-list__remove]  <div> wrapping ghost IconButton (icon="x", sizeRole="chrome") (when editable or removable)
   ├── [Add Row .editable-list__add]  (when canAdd)
-  │     ├── [Input .editable-list__add-input]  <input type="text">
-  │     └── [Add Button .editable-list__add-btn]  <button>
-  └── [Counter .editable-list__count]  <span> (when editable and maxItems is set)
+  │     ├── [Input .editable-list__add-input]  <div> wrapping TextInput primitive
+  │     └── [Add Button .editable-list__add-btn]  <div> wrapping primary Button primitive
+  └── [Counter .editable-list__count]  <span> "N/M" (when editable and maxItems is set)
 ```
 
 ### Parts
@@ -52,13 +51,12 @@ Updated: 2026-04-09
 | Window Label | `<span>` | conditional | "Page X of Y · Items A-B of N" text |
 | List | `<ul>` | yes | `role="listbox"`, `aria-label`, flex column with gap |
 | Item | `<li>` | yes (per item) | `role="option"`, `tabindex="0"`, `draggable`, `aria-selected="false"`, `data-reorder-index` |
-| Handle | `<span>` | conditional | 6-dot grip icon, `aria-hidden="true"`, cursor grab; shown when `reorderable` |
+| Handle | `<span>` | conditional | 6-dot grip icon, `aria-hidden="true"`, cursor grab; shown when `reorderable` and not `embeddedHandle` |
 | Content | `<span>` | yes (per item) | Flex-grow content area, renders slot or `item.label` fallback to `item.id` |
-| Remove | `<button>` | conditional | Icon-only button to remove item; shown when `editable` or `removable` |
-| RemoveIcon | `<svg>` | conditional | X icon, `aria-hidden="true"` |
+| Remove | `<div>` + IconButton | conditional | Wrapper div (`--danger-on-hover`) around a ghost `IconButton` (icon `x`, `sizeRole="chrome"`); shown when `editable` or `removable`. The X icon is `aria-hidden`; the button carries `aria-label="Remove {label}"` |
 | Add Row | `<div>` | conditional | Input + add button row; shown when `canAdd` (editable, not disabled, under max limit) |
-| Input | `<input>` | conditional | Text input for new item entry |
-| Add Button | `<button>` | conditional | Button to confirm adding the new item |
+| Input | `<div>` + TextInput | conditional | Wrapper div around the `TextInput` primitive for new item entry |
+| Add Button | `<div>` + Button | conditional | Wrapper div around a primary `Button` primitive that confirms the add |
 | Counter | `<span>` | conditional | "N/M" count display; shown when `editable` and `maxItems` is set |
 
 ## 3. Props And Inputs
@@ -76,6 +74,7 @@ Updated: 2026-04-09
 | `addPlaceholder` | `string` | `"New item"` | no | Placeholder text for the input |
 | `maxItems` | `number \| null` | `null` | no | Maximum number of items; null means unlimited |
 | `removable` | `boolean` | `false` | no | Show remove buttons without enabling add input |
+| `embeddedHandle` | `boolean` | `false` | no | When true, the item drops its own padding and omits the standalone handle (host renders the grip inside its `item` slot); sets `--embedded-handle` modifiers |
 | `dirty` | `boolean` | `false` | no | Enables submit button when true |
 | `submitting` | `boolean` | `false` | no | Disables interaction and shows "Saving..." state on submit button |
 | `errorMessage` | `string \| null` | `null` | no | Optional workflow error, rendered as alert |
@@ -85,6 +84,7 @@ Updated: 2026-04-09
 | `windowSize` | `number \| null` | `null` | no | Optional page window size for very large reorder sessions |
 | `submitLabel` | `string` | `"Save Order"` | no | Submit button label when workflow chrome is shown |
 | `cancelLabel` | `string` | `"Cancel"` | no | Cancel button label when workflow chrome is shown |
+| `showWorkflowChrome` | `boolean` | `true` | no | Gate for the workflow header; chrome shows only when this is true **and** `onSubmit` or `onCancel` is non-null |
 | `onSubmit` | `(() => void \| Promise<void>) \| null` | `null` | no | Optional submit callback; when non-null enables workflow chrome |
 | `onCancel` | `(() => void) \| null` | `null` | no | Optional cancel callback; when non-null enables workflow chrome |
 | `onReorder` | `((items: T[]) => void) \| null` | `null` | no | Callback fired when items are reordered |
@@ -131,12 +131,12 @@ view uses `windowStart` offset for correct global indexing.
 | empty | `items` is empty | No list items shown; only add row (if canAdd) |
 | populated | `items` has entries | List shown with items, add row below if canAdd |
 | at-max | `items.length >= maxItems` | Add row hidden; counter shows "N/N" |
-| default | -- | Surface background, transparent border |
-| hover | Mouse over item | Elevated background blend |
-| focus | Focus-visible on item | Focus ring: `border-width-focus` solid `accent-focusRing`, offset `-0.0625rem` |
+| default | -- | Transparent background, transparent border |
+| hover | Mouse over item | `elevated 82%` over transparent background blend |
+| focus | Focus-visible on item | `accent-focusRing` border-color + `box-shadow` ring (`border-width-focus`) |
 | dragging | Item being dragged (HTML5 DnD) | 40% opacity on the dragged item |
-| drop-target | Dragging over another item | `accent-base` border color, accent-tinted background |
-| grabbed | Item grabbed via keyboard (Space/Enter) | Same visual as drop-target (accent border + tinted background) |
+| drop-target | Dragging over another item | `accent-base 56%` border, `accent-base 10%` tinted background |
+| grabbed | Item grabbed via keyboard (Space/Enter) | Same visual as drop-target (`--grabbed`/`--last-moved` share it) |
 | disabled | `disabled=true` or `submitting=true` | `state-opacity-disabled` on list, `pointer-events: none` via `tabindex="-1"` |
 | add-disabled | input is empty or whitespace | Add button is disabled (cursor: not-allowed, reduced opacity) |
 
@@ -196,7 +196,7 @@ When `windowSize` is enabled, `ensureIndexVisible()` adjusts the page window so 
 ### Focus
 
 - Items have `tabindex="0"` (or `-1` when disabled/submitting)
-- Focus ring: `border-width-focus` solid `accent-focusRing`, offset `-0.0625rem`
+- Focus ring: `accent-focusRing` border-color plus a `box-shadow` ring at `border-width-focus`
 - After adding an item, input is cleared but retains focus
 
 ## 7. Layout
@@ -214,10 +214,10 @@ When `windowSize` is enabled, `ensureIndexVisible()` adjusts the page window so 
 - Content: flex 1, min-width 0
 - Remove button: semantic size-driven square control
 - Remove icon SVG: `0.75rem` square
-- Add row: flex with density-aware gap
-- Input: `flex: 1`, height from control-height token, horizontal padding from control-x token
-- Add button: height from control-height token, semantic horizontal padding
-- Counter: semantic label size, aligned to flex-end
+- Add row: flex, `align-items: center`, gap `0.5rem`
+- Input: wrapper is `flex: 1 1 auto`, min-width 0; the composed `TextInput` owns its control-height/padding/border/focus
+- Add button: wrapper is `flex-shrink: 0`; the composed primary `Button` owns geometry/typography/states
+- Counter: label-size, secondary color, aligned to flex-end
 
 ### Composition
 
@@ -345,22 +345,21 @@ Standalone component. Uses `Button` for workflow chrome (header and window nav).
 | padding | `var(--poodle-editable-list-item-y) var(--poodle-editable-list-item-x)` |
 | border | `0.0625rem solid transparent` |
 | border-radius | `var(--poodle-radius-control)` |
-| background | `var(--poodle-color-background-surface)` |
-| cursor | `grab` |
-| transition | `background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard), border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
+| background | `transparent` |
+| outline | `none` |
+| transition | `background-color, border-color, box-shadow, opacity` at `120ms ease` |
 
 #### Item States
 
 | State | Property | Value |
 |-------|----------|-------|
-| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 52%, var(--poodle-color-background-surface))` |
-| `:focus-visible` | outline | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
-| `:focus-visible` | outline-offset | `-0.0625rem` |
+| `:hover` | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 82%, transparent)` |
+| `:focus-visible` | border-color | `var(--poodle-color-accent-focusRing)` |
+| `:focus-visible` | box-shadow | `0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing)` |
 | `--dragging` | opacity | `0.4` |
-| `--drop-target` | border-color | `var(--poodle-color-accent-base)` |
-| `--drop-target` | background | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-surface))` |
-| `--grabbed` | border-color | `var(--poodle-color-accent-base)` |
-| `--grabbed` | background | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-surface))` |
+| `--drop-target` / `--grabbed` / `--last-moved` | border-color | `color-mix(in srgb, var(--poodle-color-accent-base) 56%, transparent)` |
+| `--drop-target` / `--grabbed` / `--last-moved` | background | `color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)` |
+| `--embedded-handle` | padding | `0` |
 
 ### Handle `.editable-list__handle`
 
@@ -387,101 +386,47 @@ Standalone component. Uses `Button` for workflow chrome (header and window nav).
 | font-size | `var(--poodle-editable-list-font-size)` |
 | color | `var(--poodle-color-text-primary)` |
 
-### Remove `.editable-list__remove`
+### Remove `.editable-list__remove` (wrapper around ghost `IconButton`)
+
+The wrapper is layout-only; geometry/typography come from the composed `IconButton` primitive (`icon="x"`, `variant="ghost"`, `sizeRole="chrome"`). The wrapper carries `--danger-on-hover` styling overrides.
 
 | Property | Value |
 |----------|-------|
-| display | `inline-flex` |
-| align-items | `center` |
-| justify-content | `center` |
 | flex-shrink | `0` |
-| width | `var(--poodle-editable-list-handle-size)` |
-| height | `var(--poodle-editable-list-handle-size)` |
-| padding | `0` |
-| border | `0` |
-| border-radius | `0.25rem` |
-| background | `transparent` |
-| color | `var(--poodle-color-text-secondary)` |
-| cursor | `pointer` |
+| inner `.poodle-icon-button` color | `var(--poodle-color-text-secondary)` |
 
-#### `.editable-list__remove:hover:not(:disabled)`
+#### `--danger-on-hover` hover/focus-visible (`:not(:disabled)`)
 
 | Property | Value |
 |----------|-------|
 | color | `var(--poodle-color-status-danger)` |
-
-#### `.editable-list__remove svg`
-
-| Property | Value |
-|----------|-------|
-| width | `0.75rem` |
-| height | `0.75rem` |
+| border-color | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` |
+| background | `color-mix(in srgb, var(--poodle-color-status-danger) 10%, transparent)` |
 
 ### Add Row `.editable-list__add`
 
 | Property | Value |
 |----------|-------|
 | display | `flex` |
-| gap | `0.375rem` |
-
-### Add Input `.editable-list__add-input`
-
-| Property | Value |
-|----------|-------|
-| flex | `1` |
-| min-width | `0` |
-| height | `var(--poodle-size-control-height)` |
-| padding | `0 var(--poodle-space-control-x)` |
-| border | `0.0625rem solid var(--poodle-color-border-default)` |
-| border-radius | `var(--poodle-radius-control)` |
-| background | `var(--poodle-color-background-surface)` |
-| color | `var(--poodle-color-text-primary)` |
-| font-family | `var(--poodle-typography-body-family)` |
-| font-size | `var(--poodle-editable-list-font-size)` |
-| outline | `none` |
-
-#### `.editable-list__add-input:focus`
-
-| Property | Value |
-|----------|-------|
-| border-color | `var(--poodle-color-accent-focusRing)` |
-| box-shadow | `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
-
-#### `.editable-list__add-input::placeholder`
-
-| Property | Value |
-|----------|-------|
-| color | `var(--poodle-color-text-secondary)` |
-
-### Add Button `.editable-list__add-btn`
-
-| Property | Value |
-|----------|-------|
-| display | `inline-flex` |
 | align-items | `center` |
-| height | `var(--poodle-size-control-height)` |
-| padding | `0 var(--poodle-space-control-x)` |
-| border | `0.0625rem solid var(--poodle-color-border-default)` |
-| border-radius | `var(--poodle-radius-control)` |
-| background | `var(--poodle-color-background-surface)` |
-| color | `var(--poodle-color-text-primary)` |
-| cursor | `pointer` |
-| font-family | `var(--poodle-typography-label-family)` |
-| font-size | `var(--poodle-typography-label-size)` |
-| font-weight | `var(--poodle-typography-label-weight)` |
+| gap | `0.5rem` |
 
-#### `.editable-list__add-btn:hover:not(:disabled)`
+### Add Input `.editable-list__add-input` (wrapper around `TextInput`)
+
+Layout-only wrapper; input geometry/typography/focus styling come from the composed `TextInput` primitive (which carries its own control-height, control-x padding, border, radius, and focus ring).
 
 | Property | Value |
 |----------|-------|
-| background | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, var(--poodle-color-background-elevated))` |
+| flex | `1 1 auto` |
+| min-width | `0` |
 
-#### `.editable-list__add-btn:disabled`
+### Add Button `.editable-list__add-btn` (wrapper around primary `Button`)
+
+Layout-only wrapper; the composed primary `Button` (disabled when the input is empty/whitespace or `!canAdd`) owns geometry, typography, hover, and disabled styling.
 
 | Property | Value |
 |----------|-------|
-| cursor | `not-allowed` |
-| opacity | `var(--poodle-state-opacity-disabled)` |
+| flex-shrink | `0` |
 
 ### Counter `.editable-list__count`
 
@@ -533,7 +478,7 @@ Standalone component. Uses `Button` for workflow chrome (header and window nav).
 
 ## 10. GPUI Notes
 
-Not yet implemented. Reordering behavior may need a simplified drag-and-drop or move-up/move-down button approach. Text input and add button compose from primitives.
+A GPUI composite exists (`poodle_gpui::composites::editable_list`). It is currently presentational: it renders rows, handle, remove, add row, and workflow chrome, but does not yet implement callbacks, drag-and-drop, keyboard grab/move, the live region, or `<ul>`/`role` semantics. Reordering may use a simplified drag or move-up/move-down approach. Text input and add button compose from primitives.
 
 ## 11. Parity Checklist
 

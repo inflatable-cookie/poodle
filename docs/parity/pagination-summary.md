@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
 # Parity: PaginationSummary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,7 +14,7 @@
 
 ## Contract ↔ Svelte
 
-- Copy `font-size`: contract §8 says `var(--poodle-typography-body-size)`; Svelte uses `var(--poodle-typography-label-size, 0.75rem)` (line 41) and `line-height: var(--poodle-typography-label-lineHeight, 1.4)` (line 42). **Two mismatches — body vs label typography.** Svelte authoritative → **fix contract §8 Copy table to label-size / label-lineHeight.**
+- FIXED — Copy `font-size`: contract §8 said `var(--poodle-typography-body-size)`; Svelte uses `var(--poodle-typography-label-size, 0.75rem)` (line 41) and `line-height: var(--poodle-typography-label-lineHeight, 1.4)` (line 42). Contract §8 Copy table updated to label-size / label-lineHeight to match Svelte.
 - Empty-state text: contract §4 says `totalItems=0` shows `0-0 of 0`. Svelte computes `from=0, to=0` and renders "Showing 0-0 of 0" (lines 14–15, 24). OK — matches.
 - ARIA label phrasing: contract §9 says `"Showing X-Y of Z across N pages"`; Svelte renders exactly `Showing ${fromItem}-${toItem} of ${totalItems} across ${totalPages} pages` (line 21). OK — matches.
 - Props (`currentPage=1`, `totalPages=1`, `totalItems=0`, `pageSize=5`): contract §3 defaults match Svelte defaults (lines 3–6). OK.
@@ -40,5 +40,5 @@
 ## Notes
 
 - `PaginationSummarySpec` (`packages/contracts/components/src/pagination_summary.rs`) has no `total_pages` field — only `page`, `page_size`, `total_items`. So the Rust impls structurally **cannot** produce the contract/Svelte ARIA copy "…across N pages". Low impact (no ARIA channel anyway) but worth a spec field if accessibility is ever wired. Not counted as a todo since ARIA is an accepted platform delta.
-- `consv=gap` driver: contract §8 Copy typography (body-size/body-lineHeight) is stale; Svelte uses label-size/label-lineHeight. Single clean fix to the contract.
+- `consv=fixed`: contract §8 Copy typography (was body-size/body-lineHeight) now matches Svelte's label-size/label-lineHeight. Single clean fix applied to the contract.
 - Range math (`start_index`/`end_index`) in the spec matches Svelte's `from`/`to` formulas exactly. Pure logic is correct in both Rust targets.

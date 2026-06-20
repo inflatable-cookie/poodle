@@ -22,24 +22,24 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .embed-preview]  <div>
-  ├── [Loading .embed-preview__loading]  (when loading)
+[Root .poodle-embed-preview]  <div>
+  ├── [Loading .poodle-embed-preview__loading]  (when loading)
   │     ├── [Skeleton]  Skeleton primitive (shape="block")
-  │     └── [LoadingText .embed-preview__loading-text]  <span>
-  ├── [Error .embed-preview__error]  (when error)
+  │     └── [LoadingText .poodle-embed-preview__loading-text]  <span>
+  ├── [Error .poodle-embed-preview__error]  (when error)
   │     ├── [ErrorIcon]  <svg> (alert circle)
   │     └── [ErrorText]  <span>
-  ├── [Empty .embed-preview__empty]  (when no parsed/trusted HTML and !loading && !error)
+  ├── [Empty .poodle-embed-preview__empty]  (when no parsed/trusted HTML and !loading && !error)
   │     ├── [EmptyIcon]  <svg> (play rectangle)
   │     └── [EmptyText]  <span>
-  ├── [Container .embed-preview__container]  (when parsed && embedUrl)
-  │     └── [Iframe .embed-preview__iframe]  <iframe>
-  ├── [Container .embed-preview__container]  (when parsed && originalEmbed, no embedUrl)
+  ├── [Container .poodle-embed-preview__container]  (when parsed && embedUrl)
+  │     └── [Iframe .poodle-embed-preview__iframe]  <iframe>
+  ├── [Container .poodle-embed-preview__container]  (when parsed && originalEmbed, no embedUrl)
   │     └── [RawEmbed]  {@html parsed.originalEmbed}
-  ├── [Container .embed-preview__container]  (when trustedHtml, no parsed render)
+  ├── [Container .poodle-embed-preview__container]  (when trustedHtml, no parsed render)
   │     └── [TrustedHtml]  {@html trustedHtml}
-  └── [Fallback .embed-preview__fallback]  (when parsed && no embedUrl && no originalEmbed)
-        └── [FallbackLink]  <a>
+  └── [Fallback .poodle-embed-preview__fallback]  (when parsed && no embedUrl && no originalEmbed)
+        └── [FallbackLink]  TextLink primitive (renders <a>, target="_blank" rel="noopener noreferrer")
 ```
 
 | Part | Required | Description | Token Targets |
@@ -58,7 +58,7 @@ Updated: 2026-03-30
 | Iframe | conditional | sandboxed iframe loading the embed URL | full-size absolute positioning |
 | RawEmbed | conditional | raw HTML from `parsed.originalEmbed` | contained within Container |
 | TrustedHtml | conditional | caller-sanitized HTML from `trustedHtml` | contained within Container |
-| Fallback | conditional | link to the original URL | background-panel, radius-surface, accent color |
+| Fallback | conditional | `TextLink` primitive to the original URL | background-panel, radius-surface; link delegates to TextLink contract |
 
 ## 3. Props And Inputs
 
@@ -83,6 +83,7 @@ type ParsedEmbed = {
   originalEmbed?: string;
   width?: number;
   height?: number;
+  embedType?: "video" | "audio" | "generic";
 };
 ```
 
@@ -168,7 +169,7 @@ None. EmbedPreview is a pure display component.
 
 ### Composition
 
-- Composes: `Skeleton` from `@poodle/svelte`
+- Composes: `Skeleton` and `TextLink` from `@poodle/svelte`
 - Parent expectations: media embed forms, content editors, paired with
   EmbedInput
 - Child expectations: none (self-contained display)
@@ -177,14 +178,14 @@ None. EmbedPreview is a pure display component.
 
 ## 8. Token Usage — Exact Values
 
-### Root `.embed-preview`
+### Root `.poodle-embed-preview`
 
 | Property | Value |
 |----------|-------|
 | border-radius | `var(--poodle-radius-surface, 0.5rem)` |
 | overflow | `hidden` |
 
-### Container `.embed-preview__container`
+### Container `.poodle-embed-preview__container`
 
 | Property | Value |
 |----------|-------|
@@ -195,7 +196,7 @@ None. EmbedPreview is a pure display component.
 Aspect ratio is applied via inline `style` attribute when
 `effectiveAspectRatio !== "auto"`.
 
-### Iframe `.embed-preview__iframe`
+### Iframe `.poodle-embed-preview__iframe`
 
 | Property | Value |
 |----------|-------|
@@ -206,7 +207,7 @@ Aspect ratio is applied via inline `style` attribute when
 | height | `100%` |
 | border | `0` |
 
-### Media With Fixed Aspect (`.embed-preview__container[data-fixed-aspect="true"] iframe/video`)
+### Media With Fixed Aspect (`.poodle-embed-preview__container[data-fixed-aspect="true"] iframe/video`)
 
 | Property | Value |
 |----------|-------|
@@ -216,7 +217,7 @@ Aspect ratio is applied via inline `style` attribute when
 | height | `100%` |
 | border | `0` |
 
-### Iframe Without Fixed Aspect (`.embed-preview__container[data-fixed-aspect="false"] iframe`)
+### Iframe Without Fixed Aspect (`.poodle-embed-preview__container[data-fixed-aspect="false"] iframe`)
 
 | Property | Value |
 |----------|-------|
@@ -225,13 +226,13 @@ Aspect ratio is applied via inline `style` attribute when
 | height | `10rem` |
 | border | `0` |
 
-### Audio Elements (`.embed-preview__container audio`)
+### Audio Elements (`.poodle-embed-preview__container audio`)
 
 | Property | Value |
 |----------|-------|
 | width | `100%` |
 
-### Loading/Error/Empty `.embed-preview__loading`, `.embed-preview__error`, `.embed-preview__empty`
+### Loading/Error/Empty `.poodle-embed-preview__loading`, `.poodle-embed-preview__error`, `.poodle-embed-preview__empty`
 
 | Property | Value |
 |----------|-------|
@@ -245,7 +246,7 @@ Aspect ratio is applied via inline `style` attribute when
 | background | `var(--poodle-color-background-panel, #1a1a1a)` |
 | border-radius | `var(--poodle-radius-surface, 0.5rem)` |
 
-### Error/Empty Icons `.embed-preview__error svg`, `.embed-preview__empty svg`
+### Error/Empty Icons `.poodle-embed-preview__error svg`, `.poodle-embed-preview__empty svg`
 
 | Property | Value |
 |----------|-------|
@@ -253,27 +254,27 @@ Aspect ratio is applied via inline `style` attribute when
 | height | `2rem` |
 | color | `var(--poodle-color-text-tertiary, #666)` |
 
-### Error Icon Override `.embed-preview__error svg`
+### Error Icon Override `.poodle-embed-preview__error svg`
 
 | Property | Value |
 |----------|-------|
 | color | `var(--poodle-color-text-danger, #ef4444)` |
 
-### Loading Text `.embed-preview__loading-text`
+### Loading Text `.poodle-embed-preview__loading-text`
 
 | Property | Value |
 |----------|-------|
 | font-size | `0.8125rem` |
 | color | `var(--poodle-color-text-secondary, #999)` |
 
-### Error/Empty Text `.embed-preview__error span`, `.embed-preview__empty span`
+### Error/Empty Text `.poodle-embed-preview__error span`, `.poodle-embed-preview__empty span`
 
 | Property | Value |
 |----------|-------|
 | font-size | `0.8125rem` |
 | color | `var(--poodle-color-text-secondary, #999)` |
 
-### Fallback `.embed-preview__fallback`
+### Fallback `.poodle-embed-preview__fallback`
 
 | Property | Value |
 |----------|-------|
@@ -281,11 +282,12 @@ Aspect ratio is applied via inline `style` attribute when
 | background | `var(--poodle-color-background-panel, #1a1a1a)` |
 | border-radius | `var(--poodle-radius-surface, 0.5rem)` |
 
-### Fallback Link `.embed-preview__fallback a`
+### Fallback Link `.poodle-embed-preview__fallback :global(.poodle-text-link)`
+
+Composed `TextLink` primitive; the composite overrides only sizing/wrapping (link color comes from TextLink's accent token).
 
 | Property | Value |
 |----------|-------|
-| color | `var(--poodle-color-accent-default, #6366f1)` |
 | font-size | `0.8125rem` |
 | word-break | `break-all` |
 
@@ -294,6 +296,7 @@ Aspect ratio is applied via inline `style` attribute when
 | Part | Delegates To |
 |------|-------------|
 | Skeleton | Skeleton contract (foundation), `shape="block"` |
+| FallbackLink | TextLink contract (foundation), `target="_blank"`, `rel="noopener noreferrer"` |
 
 ### Embed URL Derivation
 
@@ -309,7 +312,8 @@ None.
 
 ## 9. Svelte Notes
 
-- Uses `Skeleton` from `@poodle/svelte` for the loading state
+- Scoped CSS classes use the `.poodle-embed-preview*` prefix
+- Uses `Skeleton` from `@poodle/svelte` for the loading state; the fallback link is the `TextLink` primitive (`.poodle-text-link`), not a bare `<a>`
 - Raw embed code rendered via `{@html parsed.originalEmbed}`; `trustedHtml`
   renders the caller-provided sanitized HTML in the same container
 - Aspect ratio applied via inline `style` attribute on the container

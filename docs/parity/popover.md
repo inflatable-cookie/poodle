@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=7 specimen=gap -->
 # Parity: Popover
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,14 +16,14 @@
 
 Svelte exposes props the contract omits, and the contract's surface token table (border/background/shadow) disagrees with what Svelte ships. Svelte is authoritative — update the contract.
 
-- Svelte adds `disabled?: boolean` (default `false`, lines 39, 91–93, 143–145) → `data-disabled`, `aria-disabled`, `tabindex=-1`, blocks `setOpen`, `cursor: not-allowed`. Not in contract §3 props or §6 ARIA. **Fix: add `disabled` prop + disabled trigger semantics to contract.**
-- Svelte adds `surfaceWidth?: "content" | "trigger"` (default `"content"`, lines 38, 165, 234–238) → `data-surface-width`; `"trigger"` makes surface `width:100%`/`min-width:100%`. Contract §7 only mentions "anchored width may optionally match the trigger" prose. **Fix: promote to a documented `surfaceWidth` prop.**
-- Svelte adds `surfaceMinWidth?: string | null` and `surfaceMaxWidth?: string | null` (lines 40–41, 170–172, 218–219) → override `--poodle-popover-surface-min-width`/`-max-width`. Not in contract. **Fix: add both props.**
-- Contract §8 surface **border** says `0.0625rem solid color-mix(border-default 72%, transparent)`. Svelte uses `border-subtle` at **74%** (line 222–224), falling back from a `--poodle-treatment-surface-elevated-border` token. Contract names wrong token + wrong %. **Fix: contract → border-subtle 74% (treatment-elevated override).**
-- Contract §8 **background** says `color-mix(elevated 98%, panel)`. Svelte uses plain `var(--poodle-color-background-elevated)` (line 226). Contract names a mix Svelte does not do. **Fix: contract → plain background-elevated.**
-- Contract §8 **box-shadow** says `var(--poodle-elevation-overlay)`. Svelte hardcodes a 3-layer shadow (inset highlight + two drops, lines 228–231). **Fix: reconcile — either Svelte should consume `--poodle-elevation-overlay` or contract should document the literal 3-layer stack.**
-- Contract §8 **radius** says `var(--poodle-radius-surface)`. Svelte uses `--poodle-treatment-surface-elevated-radius` falling back to `radius-surface` (line 225). Minor — note the treatment override.
-- `block` prop: present in both (contract §3, Svelte line 38) — OK.
+- FIXED — `disabled?: boolean` (default `false`) added to contract §3 props, §6 disabled-trigger semantics (`data-disabled`/`aria-disabled`/`tabindex=-1`/blocks open), and a §8 `.popover__trigger[data-disabled]` `cursor: not-allowed` table.
+- FIXED — `surfaceWidth?: "content" | "trigger"` (default `"content"`) promoted to a documented §3 prop, §7 sizing prose, a §8 `data-surface-width="trigger"` table (`width:100%`/`min-width:100%`/`box-sizing:border-box`), and a `data-surface-width` data-attr.
+- FIXED — `surfaceMinWidth` / `surfaceMaxWidth` (`string | null`, default `null`) added to §3 props and the §8 CSS Custom Properties table; surface min/max-width now expressed as `var(--poodle-popover-surface-min-width, 14rem)` / `var(--poodle-popover-surface-max-width, min(24rem, 90vw))`.
+- FIXED — surface **border**: §8 now `0.0625rem solid var(--poodle-treatment-surface-elevated-border, color-mix(border-subtle 74%, transparent))` (was wrong token `border-default` at 72%).
+- FIXED — surface **background**: §8 now plain `var(--poodle-color-background-elevated)` (was the `elevated 98%, panel` mix Svelte does not do); `--poodle-surface` matched.
+- FIXED — surface **box-shadow**: §8 now documents Svelte's literal 3-layer stack (inset highlight + two drop shadows); §11 Tier-2 line updated. Svelte authoritative.
+- FIXED — surface **radius**: §8 now `var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface))` (treatment-elevated override noted).
+- `block` prop already present in both — OK.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -57,6 +57,6 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` drivers: undocumented `disabled`/`surfaceWidth`/`surfaceMinWidth`/`surfaceMaxWidth` props, plus contract §8 surface tokens (border token+%, background mix, shadow) that disagree with shipped Svelte. All belong in the contract per "Svelte is parity authority".
+- `consv=fixed`: former drivers (undocumented `disabled`/`surfaceWidth`/`surfaceMinWidth`/`surfaceMaxWidth` props, plus §8 surface tokens — border token+%, background mix, shadow, radius) reconciled into the contract per "Svelte is parity authority".
 - GPUI is the only target with a working trigger→surface→dismiss flow. Jetstream `js_popover` is a passive surface shell; the anchored-overlay contract (placement, offset, outside-dismiss) is effectively unimplemented there.
 - Both Rust shadow treatments (GPUI hardcoded HSLA stack, Jetstream `shadow_md()`) bypass token resolution — once an `elevation-overlay`/`elevation-popover` token exists, both should consume it.

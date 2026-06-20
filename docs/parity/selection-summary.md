@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
 # Parity: SelectionSummary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,10 +17,10 @@
 
 Svelte matches the contract on the public surface (props, anatomy, empty/populated/truncated states, ARIA). The divergences are between the **Rust spec** and Svelte+contract, and one contract gap.
 
-- **Rust spec adds an item `meta` field** absent from Svelte. Svelte `SelectionItem` is `{ id, label }` (lines 7–10) and contract §2/§3 anatomy is `ChipLabel + RemoveIcon` only. `SelectionSummaryItem` (`composite_types.rs:564`) and both Rust components render a second `meta` label inside each chip (gpui `selection_summary.rs:204-211`, jetstream `selection_summary.rs:93-99`). **Fix: drop `meta` from the chip render path in both Rust targets, or — if `meta` is intended — add it to Svelte + contract §2/§3. Svelte is authoritative; default to removing it from Rust.**
-- **Rust models clear as a `RemediationAction` struct** (`id`, `label`, `variant`, `is_disabled`); Svelte uses a fixed `TextLink` labelled "Clear" driven by the `onClear` callback (lines 59–61). Contract §2 names the part `ClearLink` (a `TextLink`) and §5 specifies an `onClear` callback with no payload. The struct's `variant`/`is_disabled` have no Svelte/contract counterpart. **Fix: keep the callback model; treat `clear_action.label` as cosmetic only. Note the spec models more surface than the contract authorizes — not a Svelte change.**
-- **Clear link is unconditional in Svelte, optional in Rust.** Svelte always renders the clear `TextLink` whenever `items.length > 0` (line 59). Rust renders it only when `clear_action`/`on_clear` is set (gpui `selection_summary.rs:254`, jetstream `selection_summary.rs:125`). Contract §4 (populated state) and §2 anatomy say the clear link appears whenever items exist. **Fix: render clear whenever populated; do not gate on an optional action being supplied.**
-- **Contract gap (not Svelte):** contract §8 does not document the `--poodle-selection-summary-chips-min-height` per-size table that Svelte sets (lines 173,185,196,208,219) — only `chip` min-height is tabulated in §8 Size Variants. **Fix: add the chips-container `min-height` per size to contract §8.**
+- **Rust spec adds an item `meta` field** absent from Svelte. Svelte `SelectionItem` is `{ id, label }` (lines 7–10) and contract §2/§3 anatomy is `ChipLabel + RemoveIcon` only. `SelectionSummaryItem` (`composite_types.rs:564`) and both Rust components render a second `meta` label inside each chip (gpui `selection_summary.rs:204-211`, jetstream `selection_summary.rs:93-99`). **Rust-side (code) fix — out of scope for the contract pass.** Contract is correct: anatomy is `ChipLabel + RemoveIcon` only, matching Svelte. Default to removing `meta` from Rust.
+- **Rust models clear as a `RemediationAction` struct** (`id`, `label`, `variant`, `is_disabled`); Svelte uses a fixed `TextLink` labelled "Clear" driven by the `onClear` callback (lines 59–61). Contract §2 names the part `ClearLink` (a `TextLink`) and §5 specifies an `onClear` callback with no payload. The struct's `variant`/`is_disabled` have no Svelte/contract counterpart. **Rust-side (code) fix — out of scope.** Contract is correct (callback model, `ClearLink` is a `TextLink`); the spec models more surface than the contract authorizes.
+- **Clear link is unconditional in Svelte, optional in Rust.** Svelte always renders the clear `TextLink` whenever `items.length > 0` (line 59). Rust renders it only when `clear_action`/`on_clear` is set (gpui `selection_summary.rs:254`, jetstream `selection_summary.rs:125`). Contract §4 (populated state) and §2 anatomy say the clear link appears whenever items exist. **Rust-side (code) fix — out of scope.** Contract already states clear appears whenever populated, matching Svelte.
+- [x] FIXED: contract §8 now documents the `chips-min-height` per-size values that Svelte sets (`Skeleton`-equivalent at SelectionSummary lines 173,185,196,208,219). Added a `Chips min-height` row to each size variant table: xs `0.875rem`, sm `1rem`, md `1.25rem`, lg `1.5rem`, xl `1.75rem`.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -53,7 +53,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - No target renders a count string ("N selected") — neither Svelte, contract, nor Rust. There is no count text / pluralization surface to audit; the "summary" is the chip row itself.
-- `consv=gap` driver: Rust spec carries surface (`item.meta`, `RemediationAction.variant`/`is_disabled`) that authoritative Svelte and the contract do not, and Rust gates the clear link on an optional action where Svelte renders it unconditionally. Per "Svelte is parity authority", reconcile Rust down to the Svelte surface (or, only for `meta`, promote into Svelte+contract if the product genuinely wants per-chip metadata).
+- `consv=fixed`: the only contract-side fix (missing `chips-min-height` per-size table) is applied. The remaining three Contract↔Svelte bullets are Rust-spec/code divergences (`item.meta`, `RemediationAction.variant`/`is_disabled`, clear-link gating) where the contract already matches authoritative Svelte — those are code fixes out of scope for this contract-reconciliation pass. Per "Svelte is parity authority", reconcile Rust down to the Svelte surface.
 - `clear_font` in GPUI uses root `font_size` (`selection_summary.rs:131`); Svelte uses a dedicated `--poodle-selection-summary-clear-font-size` that happens to equal root size per breakpoint — equivalent in value, divergent in token source. Low priority.
 - Jetstream clear uses root `font_size` (`selection_summary.rs:130`) — same equivalence note as GPUI.
 - ARIA absence is accepted once per target (gpui/jetstream have no accessibility API). Contract §6 ARIA (`role`/`aria-label`/`aria-hidden`) is satisfied only by Svelte.

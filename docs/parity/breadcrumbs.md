@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=7 specimen=gap -->
 # Parity: Breadcrumbs
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,8 +17,8 @@
 
 Most props match (contract §3 `items`/`ariaLabel`/`maxVisibleItems`/`size`/`sizeRole`/`density`, callback `onNavigate`, anatomy §2). One Svelte prop is undocumented; Svelte is authoritative.
 
-- Svelte adds `forceLastItemCurrent?: boolean` (default `true`) at `Breadcrumbs.svelte:11`, driving the "last item is current even without `current:true`" rule (line 50). Contract §4 only implies this via "or last item in the list" and never lists the prop. **Fix: add `forceLastItemCurrent` (default true) to contract §3 props.**
-- `BreadcrumbsSpec` (Rust) hardcodes the equivalent of `forceLastItemCurrent=true` — both Rust impls treat `i == last_idx` as current with no opt-out (`breadcrumbs.rs:148`, `breadcrumbs_comp.rs:23`). **Fix: add `force_last_item_current` to the spec to match Svelte.**
+- [x] FIXED Svelte `forceLastItemCurrent?: boolean` (default `true`, `Breadcrumbs.svelte:11`) added to contract §3 props; §4 current state + §6 aria-current note updated to reference the prop instead of "or last item in the list".
+- (Rust spec todo, not a contract edit) `BreadcrumbsSpec` hardcodes the equivalent of `forceLastItemCurrent=true` — both Rust impls treat `i == last_idx` as current with no opt-out (`breadcrumbs.rs:148`, `breadcrumbs_comp.rs:23`). Add `force_last_item_current` to the spec to match Svelte.
 - Svelte separator uses the `Icon` component `name="chevron-right"` (line 60), contract §2/§9 confirm. No divergence — flagged for Rust parity below.
 - Otherwise contract↔Svelte align (nav/ol/li anatomy, aria-current, aria-hidden separators+ellipsis, size/density tables). **Action: extend contract + spec for `forceLastItemCurrent`; no Svelte change.**
 

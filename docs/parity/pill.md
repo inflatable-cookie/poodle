@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=5 specimen=gap -->
 # Parity: Pill
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,13 +16,14 @@
 
 Svelte has props/behavior the contract does not document, and the contract's padding token table disagrees with what Svelte actually renders. Svelte is authoritative — update the contract.
 
-- Svelte adds `adaptiveWidth?: boolean` (default `false`) → emits `data-adaptive-width`, sets `min-width: 0` (lines 19, 56, 254–256). Not in contract §3 props. **Fix: add `adaptiveWidth` to contract props + a `data-adaptive-width` data-attr note.**
-- Svelte gives every size a `min-width` base (`sm 2.5rem`, `xs 2.125rem`, `md 2.875rem`, `lg 3.25rem`, `xl 3.625rem`, lines 132–168) plus per-typography `em` min-widths. Contract §8 size tables list only `min-height`/`padding`/`font-size` — no `min-width` row anywhere. **Fix: add `min-width` rows to each contract size table.**
-- Svelte md `padding-x` = `0.625rem` (base `--poodle-pill-padding-x-base`, md only overrides min-width, lines 73, 150–152). Contract §8 md row says `padding 0.1875rem 0.5rem`. The pad-x values diverge for every size (Svelte base 0.625 vs contract 0.5; sm 0.5 vs 0.375; xs 0.4375 vs 0.3125; lg 0.75 vs 0.625; xl 0.9375 vs 0.75 — Svelte is ~0.125rem wider each). **Fix: rewrite contract §8 padding-x to match Svelte (the +0.125rem-wider scale).**
-- Svelte adds a content `gap` (`--poodle-pill-gap`: md `0.25rem`, sm `0.1875rem`, xs `0.15625rem`, compact `0.125rem`, lines 77, 138, 147, 263) and an icon sizing rule (`svg`/`.poodle-icon` → `1em` square, lines 285–290). Contract anatomy §2 only lists Root + Content slot — no icon/gap. **Fix: document gap token + optional inline-icon child in contract.**
-- Svelte badge adds `letter-spacing: 0.04em` (line 222); contract §8 badge table lists only `font-weight 700` + `text-transform uppercase`, no letter-spacing. Neutral badge fill uses `--poodle-surface` mix (line 226), not the generic "accent-tinted" wording in contract §8. **Fix: add badge `letter-spacing` + neutral-badge fill formula to contract.**
-- Svelte density variants override `padding-y` (`--poodle-pill-padding-y-adjust`: compact `-0.0625rem`, comfortable `+0.0625rem`, lines 261, 269) — a vertical-padding density override, which the CLAUDE.md size/density rule forbids except by explicit justification. Contract §8 has no density padding-y table. **Fix: either drop padding-y from density (preferred per density rule) or explicitly justify it in contract; document the resolved table either way.**
-- `pill-context.ts` exposes a `PillContext` (`size`, `typography`) that lets a parent force child pill size/typography (consumed at `Pill.svelte:38,41,44`). Not mentioned in contract §3/§9. **Fix: document the pill-context composition surface in contract §9.**
+- FIXED — `adaptiveWidth?: boolean` (default `false`) added to contract §3 props with a §8 `data-adaptive-width` → `min-width: 0` table.
+- FIXED — per-size `min-width` base (`sm 2.5rem`, `xs 2.125rem`, `md 2.875rem`, `lg 3.25rem`, `xl 3.625rem`) added as `min-width` rows to every §8 size table (rem and `em`-inherit), plus the Root `min-width` calc.
+- FIXED — `padding-x` rewritten to Svelte's +0.125rem-wider scale across all sizes (md `0.625`, sm `0.5`, xs `0.4375`, lg `0.75`, xl `0.9375`); the Root/md `padding` now reads `0.1875rem 0.625rem`.
+- FIXED — content `gap` (`--poodle-pill-gap`: md `0.25rem`, sm `0.1875rem`, xs `0.15625rem`, compact `0.125rem`) documented in Root + per-size tables; optional inline-icon child (`svg`/`.poodle-icon` → `1em` square, `flex-shrink:0`) added to anatomy §2.
+- FIXED — badge `letter-spacing: 0.04em` added; §8 badge table rewritten with the neutral-badge fill (`color-mix(--poodle-surface 96%, text-primary)`, text-secondary) and the tone-badge 18%/42%-toward-transparent mixes.
+- FIXED (justified) — density `padding-y-adjust` (compact `-0.0625rem`, comfortable `+0.0625rem`) documented in a new §8 Density table with explicit justification under the Size/Density exception (pill is a sub-text-line chip), alongside the min-width/padding-x/gap adjusts.
+- FIXED — pill-context composition surface (`setPillContext({ size?, typography? })`, context wins over props) documented in contract §9 (Svelte Notes).
+- Also fixed in passing: the stale `typography="inherit"` `em` size tables were superseded by Svelte (e.g. md font `0.7071em` not `0.7857em`); all five inherit tables updated to Svelte's exact `em` values + `min-width` rows.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -53,6 +54,6 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` drivers: undocumented `adaptiveWidth`, missing `min-width`/`gap`/badge-letter-spacing in contract, and a real pad-x mismatch (contract 0.5rem md vs Svelte 0.625rem). All belong in the contract per "Svelte is parity authority".
+- `consv=fixed`: former drivers (undocumented `adaptiveWidth`, missing `min-width`/`gap`/badge-letter-spacing, pad-x mismatch contract 0.5rem md vs Svelte 0.625rem, pill-context, density padding-y, stale inherit `em` tables) are all reconciled into the contract per "Svelte is parity authority".
 - Both Rust impls hardcode the contract pad-x (`0.5rem` md) rather than the Svelte-rendered `0.625rem`. Once the contract is corrected to Svelte's scale, both Rust metric tables must follow — that is why each has a pad-x todo.
 - `PillSpec` carries `is_selected`/`is_removable`/`on_remove`/`is_disabled` (interactive-chip surface) that exist in neither Svelte nor the contract. Per the contract's "out of scope: removable chips" line this is intentional future work; reconcile by either contracting these or removing from `PillSpec`. Plus the legacy `BadgeSpec` noted in contract §"Rust Spec Note" pending removal.

@@ -149,18 +149,33 @@ required. Exactly one of three states is always selected.
 | `padding` | `var(--poodle-tri-state-track-inset)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `999px` |
-| `background` | `color-mix(in srgb, var(--poodle-color-text-primary) 18%, var(--poodle-color-background-surface))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-canvas) 75%, black)` |
 | `isolation` | `isolate` |
 | `--poodle-tri-state-excluded-color` | `var(--poodle-color-status-danger)` |
 | `--poodle-tri-state-default-color` | `var(--poodle-color-text-primary)` |
 | `--poodle-tri-state-included-color` | `var(--poodle-color-status-success)` |
-| `--poodle-tri-state-excluded-track` | `color-mix(in srgb, var(--poodle-tri-state-excluded-color) 18%, var(--poodle-color-background-surface))` |
-| `--poodle-tri-state-default-track` | `color-mix(in srgb, var(--poodle-tri-state-default-color) 10%, var(--poodle-color-background-surface))` |
-| `--poodle-tri-state-included-track` | `color-mix(in srgb, var(--poodle-tri-state-included-color) 18%, var(--poodle-color-background-surface))` |
-| `--poodle-tri-state-height` | resolved from semantic size |
-| `--poodle-tri-state-x` | resolved from density |
-| `--poodle-tri-state-track-inset` | resolved from density |
-| `--poodle-tri-state-min-width` | resolved from semantic size |
+| `--poodle-tri-state-excluded-track` | `color-mix(in srgb, var(--poodle-tri-state-excluded-color) 14%, color-mix(in srgb, var(--poodle-color-background-canvas) 70%, black))` |
+| `--poodle-tri-state-default-track` | `color-mix(in srgb, var(--poodle-tri-state-default-color) 8%, color-mix(in srgb, var(--poodle-color-background-canvas) 70%, black))` |
+| `--poodle-tri-state-included-track` | `color-mix(in srgb, var(--poodle-tri-state-included-color) 14%, color-mix(in srgb, var(--poodle-color-background-canvas) 70%, black))` |
+| `--poodle-tri-state-height` | resolved from semantic size (see Size scale below) |
+| `--poodle-tri-state-x` | resolved from density (compact `0.5rem` / default `0.75rem` / comfortable `1rem`) |
+| `--poodle-tri-state-track-inset` | resolved from density (compact `0.0625rem` / default `0.125rem` / comfortable `0.1875rem`) |
+| `--poodle-tri-state-min-content-width` | resolved from semantic size (see Size scale below) |
+
+### Size scale (per `data-size`)
+
+| Size | `--poodle-tri-state-height` | `--poodle-tri-state-min-content-width` |
+|------|-----------------------------|----------------------------------------|
+| xs | `1.5rem` | `2.5rem` |
+| sm | `1.75rem` | `2.625rem` |
+| md | `2.25rem` | `3rem` |
+| lg | `2.75rem` | `3.375rem` |
+| xl | `3.25rem` | `3.75rem` |
+
+Base (unspecified size) defaults are `--poodle-tri-state-height:
+var(--poodle-size-control-height)`, `--poodle-tri-state-x:
+var(--poodle-space-control-x)`, `--poodle-tri-state-track-inset: 0.125rem`, and
+`--poodle-tri-state-min-content-width: 3rem`.
 
 ### Selection `.tri-state-switch__selection`
 
@@ -174,8 +189,16 @@ required. Exactly one of three states is always selected.
 | `border` | `0.0625rem solid transparent` |
 | `border-radius` | `999px` |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent), 0 0.125rem 0.5rem color-mix(in srgb, black 18%, transparent)` |
-| `transform` | `translateX(calc(var(--poodle-tri-state-active-index) * 100%))` |
+| `transform` | `translateX(calc(var(--poodle-tri-state-active-index, 1) * 100%))` |
 | `transition` | `transform, background, border-color, box-shadow` at `var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
+
+### Selection — per-state fill and border (by `data-state`)
+
+| State | `background` | `border-color` |
+|-------|--------------|----------------|
+| excluded | `var(--poodle-tri-state-excluded-track)` | `color-mix(in srgb, var(--poodle-tri-state-excluded-color) 58%, var(--poodle-color-border-default))` |
+| default | `var(--poodle-tri-state-default-track)` | `var(--poodle-color-border-default)` |
+| included | `var(--poodle-tri-state-included-track)` | `color-mix(in srgb, var(--poodle-tri-state-included-color) 58%, var(--poodle-color-border-default))` |
 
 ### Option `.tri-state-switch__option`
 
@@ -200,7 +223,7 @@ required. Exactly one of three states is always selected.
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `min-height` | `calc(var(--poodle-tri-state-height) - (var(--poodle-tri-state-track-inset) * 2))` |
-| `min-width` | `var(--poodle-tri-state-min-width)` |
+| `min-width` | `calc(var(--poodle-tri-state-min-content-width) + (var(--poodle-tri-state-x) * 2))` |
 | `padding` | `0 var(--poodle-tri-state-x)` |
 | `border-radius` | `999px` |
 | `color` | `var(--poodle-color-text-secondary)` |
@@ -273,10 +296,11 @@ required. Exactly one of three states is always selected.
 
 ### Tier 2: Visual Parity
 
-- [ ] root border, radius, and background match
-- [ ] excluded selected background matches (18% status-danger mix)
-- [ ] default selected background matches (88% background-elevated mix)
-- [ ] included selected background matches (18% status-success mix)
+- [ ] root border, radius, and background match (`canvas 75%, black`)
+- [ ] excluded selected background matches (14% status-danger over `canvas 70%, black`)
+- [ ] default selected background matches (8% text-primary over `canvas 70%, black`)
+- [ ] included selected background matches (14% status-success over `canvas 70%, black`)
+- [ ] selected capsule border-color matches (excluded/included 58% state-color mixed with border-default; default = border-default)
 - [ ] selected text color matches (text-primary)
 - [ ] selected inset shadow matches
 - [ ] unselected text color matches (text-secondary)

@@ -119,10 +119,23 @@ No internal state.
 
 | Var | Default Value |
 |-----|---------------|
-| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent)` |
+| `--poodle-surface-fill` | `var(--poodle-treatment-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent))` |
 | `--poodle-surface` | `var(--poodle-surface-fill)` — propagates surface context to descendants (see [surface-elevation](./surface-elevation.md)) |
-| `--poodle-surface-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)` |
-| `--poodle-surface-shadow` | `none` |
+| `--poodle-surface-border` | `var(--poodle-treatment-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `--poodle-surface-shadow` | `var(--poodle-treatment-surface-shadow, none)` |
+
+Each surface var resolves a `--poodle-treatment-*` override first and falls
+back to the computed default. The full set of treatment override tokens:
+
+| Treatment Token | Overrides | Fallback |
+|-----------------|-----------|----------|
+| `--poodle-treatment-surface-fill` | base fill | `color-mix(... background-surface 96%, transparent)` |
+| `--poodle-treatment-surface-border` | base + elevated border | `color-mix(... border-subtle 74%, transparent)` |
+| `--poodle-treatment-surface-shadow` | base shadow | `none` |
+| `--poodle-treatment-surface-elevated-fill` | elevated fill | `color-mix(... background-elevated 96%, background-panel)` |
+| `--poodle-treatment-surface-elevated-border` | elevated border | `color-mix(... border-subtle 74%, transparent)` |
+| `--poodle-treatment-surface-elevated-shadow` | elevated shadow | `var(--poodle-elevation-surface)` |
+| `--poodle-treatment-surface-radius` | border-radius | `var(--poodle-radius-surface)` |
 
 ### Root (.surface) — base styles
 
@@ -143,17 +156,21 @@ No internal state.
 
 ### Tone: elevated — .surface[data-tone="elevated"]
 
+(Same selector block also matches `.surface[data-elevated="true"]`.)
+
 | Var | Value |
 |-----|-------|
-| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))` |
-| `--poodle-surface-shadow` | `var(--poodle-elevation-surface)` |
+| `--poodle-surface-fill` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` |
+| `--poodle-surface-border` | `var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `--poodle-surface-shadow` | `var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-surface))` |
 
 ### elevated override — .surface[data-elevated="true"]
 
 | Var | Value |
 |-----|-------|
-| `--poodle-surface-fill` | `color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel))` |
-| `--poodle-surface-shadow` | `var(--poodle-elevation-surface)` |
+| `--poodle-surface-fill` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` |
+| `--poodle-surface-border` | `var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `--poodle-surface-shadow` | `var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-surface))` |
 
 ### Border: none — .surface[data-border="none"]
 
@@ -190,11 +207,20 @@ utility, providing roomier defaults suited to container-level spacing.
 ## 9. Svelte Notes
 
 - rendered as a `<div>` with data attributes driving CSS selector overrides
-- padding applied as inline style via shared `scaleToSpace` utility
+- padding applied as inline style via a Surface-local `surfacePadding` mapping
+  (roomier than the shared `scaleToSpace`; see §8 Padding table)
 - when `asRole` is set, the `role` attribute is applied to the root element
 - when `label` is set, `aria-label` is applied to the root element
-- treatment token `--poodle-treatment-surface-radius` allows theme-level radius
-  overrides with fallback to `--poodle-radius-surface`
+- every surface CSS var wraps a `--poodle-treatment-*` override before its
+  computed default, giving themes per-property override hooks. The seven
+  treatment tokens: `--poodle-treatment-surface-fill`,
+  `--poodle-treatment-surface-border`, `--poodle-treatment-surface-shadow`,
+  `--poodle-treatment-surface-elevated-fill`,
+  `--poodle-treatment-surface-elevated-border`,
+  `--poodle-treatment-surface-elevated-shadow`, and
+  `--poodle-treatment-surface-radius` (fallback `--poodle-radius-surface`)
+- the elevated selector re-sets `--poodle-surface-border` in addition to fill
+  and shadow (via `--poodle-treatment-surface-elevated-border`)
 - CSS custom properties (`--poodle-surface-fill`, `--poodle-surface-border`,
   `--poodle-surface-shadow`) are set on the root and overridden by data-attribute
   selectors for tone, border, and elevation variants

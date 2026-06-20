@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
 # Parity: DataTable
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,13 +14,15 @@
 
 ## Contract ↔ Svelte
 
-Svelte is authoritative. A few contract values are stale vs Svelte:
+Svelte is authoritative. All stale contract values reconciled. FIXED.
 
-- Actions column width: contract §11 `.data-table__actions-header`/`.data-table__actions` = `width: 7.5rem`; Svelte uses `width: 3.5rem` (line 813). **Fix: update contract to 3.5rem.**
-- Toolbar/menu/cell paddings: contract §11 lists literal rem values (toolbar `0.5rem 0.75rem`, col-menu-item `0.375rem 0.5rem`, toolbar-btn `0.25rem 0.625rem`); Svelte resolves these from tokens (`space-control-y`/`space-panel-x`/`space-control-x`, lines 645,654,689). Same intent, but **contract should cite the tokens, not frozen rem values.**
-- `th`/`td` padding: contract says `space-panel-y space-panel-x`; Svelte matches (line 719). OK.
-- Svelte adds size matrix (`data-size` xs/sm/lg/xl) and density (`data-density` compact/comfortable) blocks (lines 942-1099) — contract §4 lists `size`/`sizeRole`/`density` props but §11 has no per-size token table. **Fix: document size/density spacing in contract.**
+- [x] Actions column width → `3.5rem` (also added `white-space: nowrap`). FIXED.
+- [x] Toolbar/menu/cell paddings → now cite tokens: toolbar `space-control-y space-panel-x` + gap `space-inline-md`; toolbar-btn `space-control-y space-control-x` + gap `space-inline-sm`; col-menu-item `space-control-y space-control-x` + gap `space-inline-md`. FIXED.
+- `th`/`td` padding: already `space-panel-y space-panel-x`. OK, no change.
+- [x] Size matrix + density blocks → added "Size Variants" and "Density Variants" tables to §11 (per-size cell typography, cell `padding-inline`, selection width, sort/action min-height, toolbar-btn typography/padding/icon; density row `padding-block` + footer `padding-inline`). FIXED.
 - `rowActions` rich model + `Menu`/`IconButton` ellipsis trigger, `onRowActionSelect`, `expandedRow`, `cell`, `empty` snippets, CSV export, column-visibility `Popover`, pagination footer with `Select` limit picker — all present in Svelte and contract. OK.
+
+Note: DataTable density legitimately owns row `padding-block` (compact `0.25rem`, comfortable `panel-y × 1.25`) — Svelte ships this and it is the canonical row-density axis for a tabular surface, so it is documented as the CLAUDE.md case-by-case exception, not stripped.
 
 ## GPUI gap (vs Svelte + contract)
 

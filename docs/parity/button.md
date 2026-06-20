@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=7 specimen=gap -->
 # Parity: Button
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,12 +16,12 @@
 
 Svelte has props/behavior the contract does not document. Svelte is authoritative — update the contract.
 
-- Svelte adds `truncate?: boolean` (default false) → emits `data-truncate`, sets `overflow:hidden` + ellipsis on label. Not in contract §3. **Fix: add to contract props + anatomy.**
-- Svelte adds `fit?: "default" | "content"` (default `"default"`) → `data-fit="content"` drops `min-width` and sets `padding-inline: 0.375rem`. Not in contract. **Fix: add to contract.**
-- Svelte adds `maxWidth?: string | null` → composes into inline `style` (`max-width`). Not in contract. **Fix: add to contract.**
-- Svelte adds a `warning` tone (full idle/hover/active CSS for secondary/primary/ghost × warning, lines 452–481). Contract §3 only lists `tone: "default" | "danger"`. **Fix: add `"warning"` to contract `tone` union + token tables.**
-- `defaultPressed` default: contract says `false`; Svelte default is `null` (line 84) and `isToggle` derives from `pressed !== null || defaultPressed !== null`. Contract §3/§8 say `defaultPressed` default `false` and "toggle mode when defaultPressed is set". Minor divergence in default value. **Fix: reconcile contract default to `null`.**
-- Icon-padding xs/sm/lg/xl adjustments in Svelte (lines 319–349) use different per-size offsets than the contract's flat "−0.125rem each side" rule (§8 says reduce by 0.125rem; Svelte xs reduces by 0.1875rem, sm by 0.25rem, lg by 0, xl by +0.0625rem). **Fix: document the per-size icon-inset table in contract §8.**
+- [x] FIXED `truncate?: boolean` (default false): added to §3 props; added `[data-truncate]` overflow/ellipsis CSS to §8; noted `data-truncate` presence-only emit in §9.
+- [x] FIXED `fit?: "default" | "content"` (default `"default"`): added to §3 props; added `[data-fit="content"]` (`min-width:0`, `padding-inline:0.375rem`) CSS to §8 + §7 sizing; noted `data-fit` emit in §9.
+- [x] FIXED `maxWidth?: string | null`: added to §3 props; §9 documents composition into inline `style` as `max-width`.
+- [x] FIXED `warning` tone: added `"warning"` to the §3 `tone` union; added full secondary/primary/ghost × warning idle/hover/active token tables to §8 (mirrors danger with `status-warning`); §1 in-scope updated.
+- [x] FIXED `defaultPressed` default: changed contract §3 default `false` → `null`; toggle-activation notes in §3/§8/§9 reconciled to `pressed !== null || defaultPressed !== null`.
+- [x] FIXED Icon-padding per-size offsets: replaced the flat "−0.125rem each side" rule in §8 with the per-size icon-inset table (xs −0.1875, sm −0.25, md −0.125, lg 0, xl +0.0625) and documented `data-has-leading`/`data-has-trailing` (loading counts as leading, chevron as trailing). Also corrected the §7/§8 size-table padding (flat `0 space-control-x` across sizes, fixed-rem heights) and icon-only widths (explicit `1.5/1.75/2.25/2.75/3.25rem`) to Svelte's actual values.
 
 ## GPUI gap (vs Svelte + contract)
 

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
 # Parity: IconProvider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,10 +14,10 @@
 
 ## Contract ↔ Svelte
 
-IconProvider is a pure context boundary with no DOM output, no tokens, no states. Props and anatomy match. One documentation divergence:
+IconProvider is a pure context boundary with no DOM output, no tokens, no states. Props and anatomy match. The one documentation divergence is reconciled:
 
-- Contract §9 states "Uses `setIconRegistry(registry)`" and "Import `setIconRegistry`". Svelte actually uses `setIconSet` (`IconProvider.svelte:5,22`; defined in `icon-registry.ts:32`). The function name in the contract is wrong. **Fix: update contract §9 to `setIconSet` (and reference `icon-registry.ts`).**
-- Svelte prop is `icons: IconSet` (matches contract §3). Svelte additionally seeds an empty set via `setIconSet({})` then syncs the prop in an `$effect`, and notes string-based lazy auto-import from `@poodle/icons-lucide` — an implementation detail beyond the contract, acceptable but worth a one-line mention in §9.
+- [x] FIXED Contract §9 said "Uses `setIconRegistry(registry)`" / "Import `setIconRegistry`". Svelte actually uses `setIconSet` (`IconProvider.svelte:5,22`; defined in `icon-registry.ts`). Contract §9 repointed to `setIconSet` (and `import { setIconSet } from './icon-registry'`).
+- [x] FIXED Svelte prop is `icons: IconSet` (already matched contract §3). Added §9 notes for the empty-set seed + `$effect` sync and the string-based lazy auto-import from `@poodle/icons-lucide`.
 
 ## GPUI gap (vs Svelte + contract)
 

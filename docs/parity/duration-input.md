@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=6 specimen=gap -->
 # Parity: DurationInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,11 +14,12 @@
 
 ## Contract ↔ Svelte
 
-Svelte is authoritative; two contract-table size values are stale vs Svelte.
+`consv=fixed`. Stale contract size/anatomy values reconciled to Svelte.
 
-- Field width per size: contract §8 md = `1.75rem`; Svelte md = `1.875rem` (`DurationInput.svelte:335`) and sm = `1.625rem` (line 331). Contract has no distinct sm/md widths. **Fix: update contract §8 size table to Svelte's md `1.875rem`, sm `1.625rem`.**
-- Contract Svelte note §9 says fields carry `pattern="[0-9]*"`; Svelte sets only `inputmode="numeric"` (`DurationInput.svelte:155,176,197`), no `pattern`. **Fix: drop `pattern` from contract §9 (or add it to Svelte — Svelte authoritative, so drop from contract).**
-- Separator has extra internal `__separator-spacer`/`__separator-glyph` grid structure (`DurationInput.svelte:166-169`) beyond the contract's flat `<span>`. Minor; **Fix: note the spacer/glyph split in contract anatomy.**
+- [x] FIXED Field width per size: contract §8 size table now md `1.875rem`, sm `1.625rem` (`DurationInput.svelte:335,331`); base `1.75rem` documented explicitly.
+- [x] FIXED Dropped `pattern="[0-9]*"` from contract §9 — Svelte sets only `inputmode="numeric"` (`DurationInput.svelte:155,176,197`). Added the on-focus `select()` note.
+- [x] FIXED Separator spacer/glyph split documented in §2 anatomy + §8 token tables (`DurationInput.svelte:166-169`): separator is a 2-row grid (spacer sized to label, glyph carries font-size/weight).
+- [x] FIXED (extra, contract was stale) Root `align-items` corrected `flex-end` → `stretch` (`DurationInput.svelte:223`) in §7/§8; density padding/gap adjusts noted.
 - All props (hours/minutes/seconds/showSeconds/maxHours/min+maxTotalSeconds/disabled/ariaLabel/size/sizeRole/density), states (focus-within, segment-focus, disabled, invalid), ARIA (`role="group"`, per-field `aria-label`, `<label for>`, separators `aria-hidden`), and keyboard (Arrow±1 with carry) match.
 
 ## GPUI gap (vs Svelte + contract)
@@ -56,4 +57,4 @@ Svelte is authoritative; two contract-table size values are stale vs Svelte.
 
 - No target's specimen demonstrates the **invalid** (out-of-bounds danger border) state — Svelte included.
 - GPUI is the weakest on sizing: field width and root pad-y are fixed regardless of `size`, so the GPUI size-sweep specimen visually under-differentiates. Jetstream is fully size-responsive but lacks all interaction.
-- consv=gap driven by stale contract size-table values (md/sm field width) and the `pattern` note that Svelte does not honor.
+- consv=fixed: stale contract size-table values (md/sm field width), the `pattern` note Svelte does not honor, and the separator spacer/glyph split are now reconciled to Svelte.

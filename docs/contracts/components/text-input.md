@@ -196,6 +196,8 @@ Updated: 2026-04-17
 | invalid-indicator | `validationState="invalid"` | trailing cross icon shows in danger color |
 | char-over | character count exceeds maxLength | char count text color switches to `status-danger` |
 
+The built-in trailing indicators (`pending-indicator`, `valid-indicator`, `invalid-indicator`) only render when `showValidationStatus` is `true` **and** the effective validation state is not `none`; when `showValidationStatus` is `false` the validation border-color states still apply but no indicator icon/spinner is shown.
+
 ## 5. Callbacks
 
 | Callback | When It Fires | Payload | Notes |
@@ -354,6 +356,7 @@ Updated: 2026-04-17
 | Property | Value |
 |----------|-------|
 | `color` | `var(--poodle-color-text-secondary)` |
+| `opacity` | `var(--poodle-state-opacity-muted)` |
 
 ### Affordance `.text-input__affordance`
 
@@ -394,7 +397,7 @@ Updated: 2026-04-17
 ### Spinner
 
 Pending validation uses the shared [`Spinner`](./spinner.md) primitive with
-`variant="ring"`, `size="sm"`, and `tone="current"` inside the validation
+`variant="ring"`, `sizeRole="chrome"`, and `tone="current"` inside the validation
 indicator slot.
 
 ### Affix `.text-input__affix`
@@ -403,38 +406,38 @@ indicator slot.
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
+| `align-self` | `stretch` |
+| `padding-inline` | `0.625rem` |
 | `color` | `var(--poodle-color-text-secondary)` |
+| `opacity` | `var(--poodle-state-opacity-muted)` |
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `white-space` | `nowrap` |
 | `user-select` | `none` |
 
+Affixes use a single flat `padding-inline: 0.625rem` (no separate margin); horizontal separation from the input comes from the separator border below.
+
 ### Prefix `.text-input__affix--prefix`
 
 | Property | Value |
 |----------|-------|
-| `padding-right` | `var(--poodle-space-inline-sm)` |
-| `border-right` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent)` |
-| `margin-right` | `var(--poodle-space-inline-sm)` |
+| `border-right` | `0.0625rem solid var(--poodle-color-border-default)` |
 
 ### Suffix `.text-input__affix--suffix`
 
 | Property | Value |
 |----------|-------|
-| `padding-left` | `var(--poodle-space-inline-sm)` |
-| `border-left` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent)` |
-| `margin-left` | `var(--poodle-space-inline-sm)` |
+| `border-left` | `0.0625rem solid var(--poodle-color-border-default)` |
 
 ### Character Count `.text-input__char-count`
 
 | Property | Value |
 |----------|-------|
-| `display` | `inline-flex` |
-| `align-items` | `center` |
-| `color` | `var(--poodle-color-text-secondary)` |
-| `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.6875rem` |
-| `white-space` | `nowrap` |
+| `color` | `var(--poodle-color-text-muted)` |
+| `font` | `var(--poodle-typography-code-xs)` (shorthand: family/size/line-height — resolves to `0.6875rem` code) |
+| `pointer-events` | `none` |
+
+In single-line mode the counter sits inline; in multiline mode it is absolutely positioned (`inset-inline-end: 0.5rem`, `inset-block-end: 0.375rem`) over the bottom-right of the textarea.
 
 ### Character Count over limit `.text-input__char-count--over`
 
@@ -452,6 +455,23 @@ indicator slot.
 | `lg` | `calc(control-height + 0.375rem)` | `0 calc(space-control-x + 0.125rem)` | `0.9375rem` |
 | `xl` | `calc(control-height + 0.5rem)` | `0 calc(space-control-x + 0.1875rem)` | `1rem` |
 
+### Density adjustments
+
+Density shifts the control's inline and block padding via adjustment vars (`default` adds zero). The block adjustment changes the effective vertical text inset on the control (`padding-block: calc(text-input-padding-block + density-block-adjust)`), which is an intentional exception to the size/density orthogonality rule for this control.
+
+| Density | `--poodle-text-input-density-inline-adjust` | `--poodle-text-input-density-block-adjust` |
+|---------|---------------------------------------------|--------------------------------------------|
+| `compact` | `-0.125rem` | `-0.0625rem` |
+| `default` | `0` | `0` |
+| `comfortable` | `0.125rem` | `0.0625rem` |
+
+### Adornment padding reservation
+
+The input control reserves inline padding for leading/trailing adornments so text never runs under overlaid chrome. The reserved padding is computed from the adornment counts, not fixed:
+
+- **Start padding** (`--poodle-text-input-control-padding-start`): when a leading affordance is present, `calc(padding-inline + icon-size-default + adornment-gap * 1.5)`; otherwise `padding-inline`.
+- **End padding** (`--poodle-text-input-control-padding-end`): with `n` trailing adornments (trailing affordance + clear button + validation indicator), `calc(padding-inline + n * icon-size-default + n * adornment-gap)`; `padding-inline` when `n` is `0`.
+
 ## 9. Svelte Notes
 
 - Uses native `<input>` element inside a styled `<div>` wrapper
@@ -461,7 +481,7 @@ indicator slot.
 - `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
 - non-`none` validation states also render a built-in trailing indicator:
-  shared spinner for `pending`, `circle-check` for `valid`, `circle-x` for `invalid`
+  shared spinner for `pending`, `check` for `valid`, `x` for `invalid`
 - Controlled mode: when `value` is host-owned, `onValueChange` must update it
 - Uncontrolled mode: internal state initialized from `defaultValue`
 - Browser autofill, IME, selection, and undo behavior remain native
@@ -504,8 +524,8 @@ indicator slot.
 - [ ] validation emphasis uses the same semantic color roles (danger, success, accent)
 - [ ] built-in validation indicator semantics match (spinner, success icon, danger icon)
 - [ ] focus treatment matches (border, background, box-shadow transitions)
-- [ ] affix separator border uses the same color-mix formula (border-subtle 52%)
-- [ ] character count typography matches (code family, 0.6875rem)
+- [ ] affix separator border uses the same color (`border-default` solid, `0.0625rem`)
+- [ ] character count typography matches (`typography-code-xs` shorthand, color `text-muted`)
 - [ ] character count over-limit color matches (status-danger)
 - [ ] disabled opacity matches (state-opacity-disabled)
 - [ ] all five sizes visually match (height, padding, font-size per size table)
@@ -523,7 +543,7 @@ indicator slot.
 | native text-caret visuals may differ | platform-native text rendering is acceptable | allowed | keep editing semantics strict |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
 | treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |
-| color-mix formulas for affix separators | GPUI must achieve same visual result by any means | allowed | verify visual parity |
+| affix separator border color | GPUI must achieve same visual result by any means | allowed | verify visual parity (separator is `border-default` solid) |
 
 ## 13. Specimen Definitions
 

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=6 specimen=gap -->
 # Parity: DatePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,11 +14,12 @@
 
 ## Contract ↔ Svelte
 
-Props, callbacks, ARIA, and anatomy all align. Divergences are in the size token-form.
+Props, callbacks, ARIA, and anatomy all align. Size token-form reconciled. FIXED.
 
-- Size table (§8) specifies `xs/sm/lg/xl` `min-height` as `calc(var(--poodle-size-control-height) ± Xrem)`. Svelte hardcodes absolute rem heights instead (`1.5rem`, `1.75rem`, `2.75rem`, `3.25rem` at `DatePicker.svelte:239,242,251,254`). Same resolved values for the default control-height, but Svelte's form ignores the token. **Fix: reconcile — either contract documents absolute rems or Svelte uses the calc form. Svelte authoritative → update contract size table to the absolute-rem values Svelte ships.**
-- Indicator: contract §2 calls it a "decorative disclosure icon"; Svelte renders the `▾` chevron glyph (`DatePicker.svelte:149`) at `font-size: 0.75rem` per size. Consistent. Note both Rust targets deviate from this glyph (see gaps below).
-- Svelte adds per-size indicator font-size steps (`0.625rem` xs … `0.875rem` xl, lines 241–256) not enumerated in the contract size table. **Fix: add indicator font-size column to contract §8 size table.**
+- [x] Size table (§8) rewritten to Svelte's absolute trigger heights (`xs:1.5rem`, `sm:1.75rem`, `md:control-height-md`, `lg:2.75rem`, `xl:3.25rem`) instead of `calc(±Xrem)`. FIXED.
+- [x] Added per-size indicator font-size column (`0.625rem` xs … `0.875rem` xl). FIXED.
+- [x] Added a Density adjustments table (trigger horizontal padding `0 calc(control-x ∓ 0.125rem)`); confirms no per-size padding. FIXED.
+- Indicator: Svelte renders the `▾` chevron glyph at `font-size: 0.75rem` (md). Contract §2 wording kept. Rust-target glyph divergence is an implementation gap (see below), not a contract change.
 
 ## GPUI gap (vs Svelte + contract)
 

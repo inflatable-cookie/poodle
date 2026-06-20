@@ -28,11 +28,14 @@ Updated: 2026-03-27
 [Root .list-card]  <div> | <a>
   ├── [Sash .list-card__sash]  <span> (optional, diagonal corner ribbon)
   ├── [Handle .list-card__handle]  <span> (optional, reorder affordance only)
+  ├── [SelectionIndicator .list-card__selection-indicator]  <span> (optional, when selectionIndicator="checkbox"; overlays leading or renders inline)
   ├── [Leading .list-card__leading]  (optional, via leading snippet)
   ├── [Body .list-card__body]  <div>
   │   ├── [Header .list-card__header]  <div>
   │   │   ├── [Title .list-card__title]  <span> (text prop or titleContent snippet)
-  │   │   └── [Badges .list-card__badges]  (optional, via badges snippet)
+  │   │   └── [HeaderAccessories .list-card__header-accessories]  (optional)
+  │   │         ├── [Badges .list-card__badges]  (optional, via badges snippet)
+  │   │         └── [Corner .list-card__corner]  (optional, via corner snippet)
   │   ├── [Subtitle .list-card__subtitle]  <span> (optional)
   │   └── [Footer .list-card__footer]  (optional, via footer snippet)
   ├── [Meta .list-card__meta]  <span> (optional)
@@ -45,11 +48,14 @@ Updated: 2026-03-27
 | Root | yes | flex row container; `position: relative; overflow: hidden` when sash present | padding, border, radius, background, gap |
 | Sash | no | diagonal ribbon in top-left corner | position, background, color, font, transform |
 | Handle | no | compact reorder affordance; visual only | size, color, spacing |
+| SelectionIndicator | no | checkbox selection indicator shown when `selectionIndicator="checkbox"` and selectable; overlays the leading area when leading is present, otherwise inline | size |
 | Leading | no | avatar, icon, or thumbnail snippet | width, height, border-radius, background, color |
 | Body | yes | title/subtitle/footer column | flex, gap |
-| Header | yes | title + badges row | flex, gap, alignment |
+| Header | yes | title + accessories row | flex, gap, alignment |
 | Title | yes | primary text, truncated | font, color, overflow |
+| HeaderAccessories | no | shrink-proof cluster holding badges and corner next to the title | flex, gap |
 | Badges | no | inline pills/badges next to title | flex, gap |
+| Corner | no | supplementary header-corner content (tertiary color) | flex, gap, color |
 | Subtitle | no | secondary text, truncated | font-size, color, overflow |
 | Footer | no | counter icons or links row | flex, gap |
 | Meta | no | right-aligned metadata | font-size, color, font-variant-numeric |
@@ -75,16 +81,22 @@ Updated: 2026-03-27
 | `disabled` | `boolean` | `false` | no | disables interaction |
 | `selectable` | `boolean` | `false` | no | toggles selected state through the root interaction contract |
 | `selected` | `boolean` | `false` | no | selected visual state |
+| `highlighted` | `boolean` | `false` | no | accent emphasis state; tints border, paints an accent-to-transparent gradient over the fill, and adds an inset accent ring (independent of selection) |
+| `selectionIndicator` | `"none" \| "checkbox"` | `"none"` | no | when `"checkbox"` and the card is selectable, renders a checkbox selection indicator; overlays the leading area when a leading snippet is present, otherwise renders inline |
 | `showReorderHandle` | `boolean` | `false` | no | visual reorder affordance; does not implement drag/drop behavior |
 | `notLive` | `boolean` | `false` | no | dashed border, reduced opacity; still interactive unlike disabled |
 | `sash` | `string \| null` | `null` | no | short label for a diagonal corner ribbon (top-left); keep to ~4 chars |
 | `sashColor` | `string \| null` | `null` | no | custom CSS color for the sash ribbon background; defaults to positive/green |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name |
+| `contextMenuItems` | `MenuItem[] \| null` | `null` | no | built-in context menu items; when non-empty, the card opens a menu on right-click (or keyboard `ContextMenu`/`Shift+F10`) without needing an external ContextMenu wrapper |
+| `contextMenuAriaLabel` | `string \| null` | `null` | no | accessible name for the context menu overlay and (for `contextMenuTrigger="leading"`) the leading trigger button |
+| `contextMenuTrigger` | `"context" \| "leading"` | `"context"` | no | `context` opens via right-click/keyboard; `leading` turns the leading area into a click/Enter/Space menu trigger (ignored while selectable) |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
 | `onClick` | `((event: MouseEvent) => void) \| null` | `null` | no | called when an interactive card is activated; suppressed while disabled |
 | `onSelectedChange` | `((selected: boolean) => void) \| null` | `null` | no | called when a selectable card toggles; suppressed while disabled |
+| `onContextAction` | `((value: string) => void) \| null` | `null` | no | called with the activated context-menu item's `value` when a built-in context-menu item is selected |
 
 ### Snippets
 
@@ -96,6 +108,7 @@ Updated: 2026-03-27
 | `sashContent` | custom ribbon content when plain sash text is not enough |
 | `leading` | avatar, icon, or media thumbnail |
 | `badges` | pills or badges displayed inline with the title |
+| `corner` | supplementary header-corner content rendered alongside badges in the header accessories cluster (tertiary text color) |
 | `footer` | counter icons, links, or supplementary info below subtitle |
 | `actions` | explicit action trigger composition |
 | `trailing` | exclusive right-edge content; when present, replaces `meta` and `actions` |
@@ -117,6 +130,7 @@ Updated: 2026-03-27
 | focus | keyboard focus (when interactive) | accent focus ring |
 | disabled | `disabled=true` | reduced opacity, not-allowed cursor |
 | selected | `selected=true` | accent border and focus-style outline |
+| highlighted | `highlighted=true` | accent-tinted border, accent-to-transparent fill gradient, and inset accent ring; orthogonal to selection |
 | compact | `layout="compact"` | denser spacing, smaller leading area, single-line emphasis |
 | stacked | `layout="stacked"` | vertical layout with top leading area, body column, and bottom utility rail |
 | not-live | `notLive=true` | dashed border (2px), transparent background, greyscale filter, reduced opacity (0.72); still interactive, greyscale and opacity restore on hover |
@@ -178,7 +192,10 @@ Updated: 2026-03-27
 - stacked layout: leading sits on top, subtitle may wrap to two lines, and
   trailing/meta/actions move into a full-width bottom utility rail
 - resizing: fills parent width, height auto-fits content
-- context menu: wrap ListCard in ContextMenu for right-click actions
+- context menu: pass `contextMenuItems` to use the built-in context menu
+  (right-click, or `contextMenuTrigger="leading"` to open from the leading area);
+  alternatively wrap ListCard in a standalone ContextMenu for fully external
+  ownership
 - explicit menu/action composition should use the `actions` snippet rather than
   coupling menu trigger ownership to the leading media area
 
@@ -241,6 +258,14 @@ Updated: 2026-03-27
 | `background` | `color-mix(in srgb, var(--poodle-surface) 32%, transparent)` |
 | `filter` | `grayscale(1)` (restores to `grayscale(0)` on hover) |
 | `opacity` | `0.72` (restores to `1` on hover) |
+
+### Root highlighted
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 34%, transparent)` |
+| `background` | `linear-gradient(90deg, color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 10%, transparent), transparent 24%)` over the base fill |
+| `box-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--list-card-accent, var(--poodle-color-accent-base)) 12%, transparent)` |
 
 ### Sash
 
@@ -312,14 +337,37 @@ Updated: 2026-03-27
 | `text-overflow` | `ellipsis` |
 | `white-space` | `nowrap` |
 
-### Badges
+### Header Accessories
 
 | Property | Value |
 |----------|-------|
 | `flex-shrink` | `0` |
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `0.25rem` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+
+### Badges and Corner
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `gap` | `var(--poodle-space-inline-xs)` |
+
+Corner additionally sets `color: var(--poodle-color-text-tertiary)`.
+
+### Selection Indicator
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `flex-shrink` | `0` |
+| `width` / `height` | `var(--poodle-list-card-selection-indicator-size)` (size-scaled) |
+
+The overlay variant (when a leading snippet is present) is `position: absolute; inset: 0` over the leading area.
 
 ### Subtitle
 
@@ -393,9 +441,10 @@ A small companion component for rendering icon + count pairs in the footer snipp
 - Title text always truncated with ellipsis
 - Leading snippet provides default container styling (circle or rounded-square)
 - Trailing snippet is unstyled pass-through
-- Badges snippet renders inline with title in the header row
+- Badges and corner snippets render inside the `header-accessories` cluster inline with the title
 - Footer snippet renders below subtitle for counter icons
-- Context menu composition: wrap ListCard in ContextMenu for right-click actions — no direct coupling
+- Built-in context menu: when `contextMenuItems` is non-empty the card owns a context-menu overlay (right-click, or leading-trigger via `contextMenuTrigger="leading"`), with `ContextMenu`/`Shift+F10` keyboard support and `onContextAction(value)`; a standalone ContextMenu wrapper remains an alternative for fully external ownership
+- `data-highlighted` reflects the `highlighted` prop on root
 
 ## 11. GPUI Notes
 

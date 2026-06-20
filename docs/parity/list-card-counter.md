@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=2 jetstream=2 specimen=ok -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
 # Parity: ListCardCounter
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,13 +15,13 @@
 
 ## Contract ↔ Svelte
 
-The contract's token table has drifted from the Svelte CSS. Svelte is authoritative — update the contract (and the Rust spec, which follows the stale contract).
+The contract's token table had drifted from the Svelte CSS. Svelte is authoritative — contract updated to match (the Rust spec still follows the old values; tracked under the Rust gaps).
 
-- Font size: contract §8 says `font-size: 0.75rem`; Svelte CSS is `0.6875rem` (`ListCardCounter.svelte:61`). **Fix: contract → 0.6875rem.**
-- Icon size: contract §8 says `icon size: 1rem`; Svelte is `0.75rem` (`ListCardCounter.svelte:62`) plus `opacity: 0.82` on the icon (`:75`). **Fix: contract → 0.75rem icon + document the 0.82 icon opacity.**
-- Color: contract §8 says `color: var(--poodle-color-text-secondary)` and hover `text-primary`; Svelte uses `color-mix(currentColor 36%, transparent)` default and `color-mix(currentColor 58%, transparent)` on linked hover (`:66,86`) — a currentColor-relative tint, not the secondary/primary tokens. **Fix: contract → currentColor-based color-mix (this also explains why GPUI/Jetstream look different — they resolve the token instead).**
-- `typography="inherit"` icon size: contract §8 says `1.3333em`; Svelte CSS sets `--icon-size: 1em` for inherit (`:81`). The Rust spec uses `1.3333` (matching the contract, not Svelte). **Fix: reconcile inherit icon scale — Svelte says 1em.**
-- `onClick` prop: contract §3 omits it; Svelte has `onClick?: (event) => void` (`ListCardCounter.svelte:13`). **Fix: add `onClick` to contract props.**
+- [x] FIXED Font size: contract §8 now `0.6875rem` (was `0.75rem`), matching Svelte (`ListCardCounter.svelte:61`).
+- [x] FIXED Icon size: contract §8 now `0.75rem` icon + documented `0.82` icon opacity, matching Svelte (`:62,75`).
+- [x] FIXED Color: contract §8/§4 now `color-mix(currentColor 36%, transparent)` default and `color-mix(currentColor 58%, transparent)` on linked hover (Svelte `:66,86`).
+- [x] FIXED `typography="inherit"` icon size: contract §8 now `1em` (was `1.3333em`), matching Svelte (`:81`).
+- [x] FIXED `onClick` prop added to contract §3/§5/§9; runs after `stopPropagation` for linked counters, matching Svelte (`:13,26-29`).
 
 ## GPUI gap (vs Svelte + contract)
 

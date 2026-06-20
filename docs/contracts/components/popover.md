@@ -44,6 +44,10 @@ Updated: 2026-03-15
 | `initialFocus` | `"first-focusable" \| "content" \| "none"` | `"first-focusable"` | no | initial focus strategy |
 | `ariaLabel` | `string \| null` | `null` | no | optional label when no internal heading exists |
 | `block` | `boolean` | `false` | no | makes the trigger and root expand to available width |
+| `disabled` | `boolean` | `false` | no | disables the trigger — blocks `setOpen`, sets `data-disabled`/`aria-disabled="true"`, `tabindex=-1`, and `cursor: not-allowed` |
+| `surfaceWidth` | `"content" \| "trigger"` | `"content"` | no | surface width strategy; `"trigger"` makes the surface `width: 100%` / `min-width: 100%` of the trigger (emits `data-surface-width`) |
+| `surfaceMinWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-min-width` (default `14rem`) |
+| `surfaceMaxWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-max-width` (default `min(24rem, 90vw)`) |
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the open state changes |
 
 ### Type Definitions
@@ -93,7 +97,8 @@ Open/closed state and placement state are required.
 
 ### Semantics
 
-- Trigger: `role="button"`, `tabindex="0"`, `aria-expanded` (true/false), `aria-controls` (surface id when open)
+- Trigger: `role="button"`, `tabindex="0"` (`-1` when `disabled`), `aria-expanded` (true/false), `aria-controls` (surface id when open)
+- Disabled trigger: `data-disabled="true"`, `aria-disabled="true"`, `tabindex=-1`; click/keydown are ignored and the popover cannot open
 - Surface: `role="dialog"`, `tabindex` set to `0` when `initialFocus="content"` or `-1` otherwise
 - Required attributes: trigger-to-content relationship via `aria-controls` and accessible naming
   when the content acts as a meaningful region
@@ -126,9 +131,9 @@ Open/closed state and placement state are required.
 
 ### Sizing
 
-- surface min-width: 14rem, max-width: min(24rem, 90vw)
+- surface min-width: `var(--poodle-popover-surface-min-width, 14rem)`, max-width: `var(--poodle-popover-surface-max-width, min(24rem, 90vw))` — both overridable via the `surfaceMinWidth` / `surfaceMaxWidth` props
 - content sizes to intrinsic needs within these constraints
-- anchored width may optionally match the trigger when the use case requires it
+- anchored width matches the trigger when `surfaceWidth="trigger"` (`width: 100%` / `min-width: 100%`); otherwise it is content-driven (`surfaceWidth="content"`, the default)
 
 ### Composition
 
@@ -143,6 +148,8 @@ Open/closed state and placement state are required.
 | Var | Purpose |
 |-----|---------|
 | `--poodle-popover-offset` | set from `offset` prop (default produces `0.5rem` equivalent at 8px) |
+| `--poodle-popover-surface-min-width` | set from `surfaceMinWidth` prop when provided; defaults to `14rem` |
+| `--poodle-popover-surface-max-width` | set from `surfaceMaxWidth` prop when provided; defaults to `min(24rem, 90vw)` |
 
 ### Root (.popover) — base styles
 
@@ -164,20 +171,34 @@ Open/closed state and placement state are required.
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
+### Trigger disabled — .popover__trigger[data-disabled="true"]
+
+| Property | Value |
+|----------|-------|
+| `cursor` | `not-allowed` |
+
 ### Surface (.popover__surface)
 
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
 | `z-index` | `var(--poodle-overlay-z-menu)` |
-| `min-width` | `14rem` |
-| `max-width` | `min(24rem, 90vw)` |
+| `min-width` | `var(--poodle-popover-surface-min-width, 14rem)` |
+| `max-width` | `var(--poodle-popover-surface-max-width, min(24rem, 90vw))` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
-| `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `--poodle-surface` | `color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel))` |
-| `box-shadow` | `var(--poodle-elevation-overlay)` |
+| `border` | `0.0625rem solid var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface))` |
+| `background` | `var(--poodle-color-background-elevated)` |
+| `--poodle-surface` | `var(--poodle-color-background-elevated)` |
+| `box-shadow` | `inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08), 0 0.625rem 1.5rem rgba(9, 13, 18, 0.22), 0 0.125rem 0.375rem rgba(0, 0, 0, 0.15)` (3-layer: inset highlight + two drop shadows) |
+
+### Surface — trigger width `.popover__surface[data-surface-width="trigger"]`
+
+| Property | Value |
+|----------|-------|
+| `width` | `100%` |
+| `min-width` | `100%` |
+| `box-sizing` | `border-box` |
 
 ### Placement rules — position offsets by placement value
 
@@ -199,6 +220,9 @@ Open/closed state and placement state are required.
 | Attribute | Source |
 |-----------|--------|
 | `data-placement` | resolved placement value |
+| `data-surface-width` | resolved `surfaceWidth` value (`content` / `trigger`) |
+| `data-disabled` | `true` when `disabled` (on trigger) |
+| `data-block` | `true` when `block` (on root and trigger) |
 
 ## 9. Svelte Notes
 
@@ -217,8 +241,8 @@ Open/closed state and placement state are required.
   outside-dismiss rules, and non-modal focus flow through native window or view
   constructs
 - surface sizing constraints must match: min-width 14rem, max-width
-  min(24rem, 90vw)
-- border uses 72% opacity color-mix for border-default
+  min(24rem, 90vw) (both overridable via `surfaceMinWidth`/`surfaceMaxWidth`)
+- border uses 74% opacity color-mix for `border-subtle` (treatment-elevated override when present)
 
 ## 11. Parity Checklist
 
@@ -232,10 +256,10 @@ Open/closed state and placement state are required.
 ### Tier 2: Visual Parity
 
 - [ ] surface min-width 14rem, max-width min(24rem, 90vw)
-- [ ] border: 0.0625rem solid with 72% opacity border color
-- [ ] background: 98% elevated mixed with panel
-- [ ] border-radius: radius-surface token
-- [ ] box-shadow: elevation-overlay
+- [ ] border: 0.0625rem solid with `border-subtle` at 74% (treatment-elevated override when present)
+- [ ] background: plain `background-elevated`
+- [ ] border-radius: `radius-surface` (treatment-elevated-radius override when present)
+- [ ] box-shadow: 3-layer stack (inset highlight + two drop shadows)
 - [ ] padding: panel-y / panel-x
 - [ ] trigger focus ring matches (focus width, focusRing color, 0.125rem offset)
 - [ ] placement offset uses --poodle-popover-offset custom property

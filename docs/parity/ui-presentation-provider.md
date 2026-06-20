@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=2 specimen=gap -->
 # Parity: UiPresentationProvider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,26 +26,19 @@ This is a context/provider component with no visual render. Parity axes are the
 context values (props/defaults), the propagation mechanism, and the resolver
 functions. Token-target and ARIA checks are N/A (see Notes). Divergences found:
 
-- **`resolveSupportingVisualSize` is undocumented.** `presentation.ts:70-75`
-  exports a second resolver (`xl→lg, lg→md, md→sm, else identity`) that
-  descendant primitives use to size icons inside controls. The contract §3
-  documents only `resolveSemanticControlSize`. Svelte is authoritative.
-  **Fix: add a `resolveSupportingVisualSize` table to contract §3.**
-- **Root class name mismatch.** Contract §2/§9 name the root
-  `.ui-presentation-provider`; Svelte renders `.poodle-ui-presentation-provider`
-  (`UiPresentationProvider.svelte:44,49`). Svelte is authoritative.
-  **Fix: rename in contract anatomy + §9.**
-- **Nesting mechanism mis-described.** Contract §9 says the provider "updates
-  the existing store rather than creating a new one" when an outer provider is
-  present. Svelte does **not** do this: `setUiPresentation` unconditionally calls
-  `writable(value)` + `setContext` (`presentation.ts:20-24`), and the component
-  seeds it with a literal `{density:"default", sizeScale:"md"}`
-  (`UiPresentationProvider.svelte:24-27`) then syncs props via `$effect`. Nesting
-  works through Svelte's own context scoping (inner `setContext` shadows the
-  outer for the subtree), not store mutation. The observable behavior (inner
-  overrides outer) is correct, but the contract's stated mechanism is wrong.
-  **Fix: reword §9 to "creates a fresh scoped context store per provider; inner
-  shadows outer via context scope."**
+- [x] FIXED **`resolveSupportingVisualSize` is undocumented.** `presentation.ts:70-75`
+  exports a second resolver (`xl→lg, lg→md, md→sm, else identity`). Added a
+  `resolveSupportingVisualSize` table to contract §3 (xs→xs, sm→sm, md→sm, lg→md,
+  xl→lg).
+- [x] FIXED **Root class name mismatch.** Svelte renders
+  `.poodle-ui-presentation-provider` (`UiPresentationProvider.svelte:44,49`).
+  Renamed in contract anatomy §2, §8 root selector, and §9.
+- [x] FIXED **Nesting mechanism mis-described.** Contract §9 said the provider
+  "updates the existing store rather than creating a new one." Svelte
+  unconditionally calls `writable(value)` + `setContext` (`presentation.ts:20-24`),
+  seeds with a literal `{density:"default", sizeScale:"md"}` then syncs via
+  `$effect`. Reworded §9: each provider creates a fresh scoped context store;
+  inner shadows outer via Svelte context scope (no store mutation).
 - **Seed value is a hardcoded literal, not props.** `UiPresentationProvider.svelte:24`
   seeds the store with `default`/`md` regardless of props, relying on the
   `$effect` (line 29) to immediately overwrite with real prop values. Cosmetic /

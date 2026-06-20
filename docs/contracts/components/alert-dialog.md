@@ -18,9 +18,10 @@ Updated: 2026-03-26
 ## 2. Anatomy
 
 ```text
-[Root]  <Dialog role="alertdialog">
+[Root]  <Dialog role="alertdialog" width="sm">
   ├── [Title]  via Dialog title prop
   ├── [Description]  via Dialog description prop
+  ├── [Item Detail .alert-dialog__item-detail]  <p> (optional, when itemLabel && itemValue)
   ├── [Body]  (`children` snippet, optional)
   └── [Actions snippet]
       ├── [Cancel Button]  <Button variant="ghost">
@@ -29,7 +30,8 @@ Updated: 2026-03-26
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root (Dialog) | yes | composed Dialog with role="alertdialog" | delegates to Dialog |
+| Root (Dialog) | yes | composed Dialog with role="alertdialog", width="sm" | delegates to Dialog |
+| Item Detail | no | highlighted label:value row ahead of body (when itemLabel && itemValue) | text-secondary, text-primary (strong), line-height |
 | Cancel Button | yes | ghost Button for cancel action | delegates to Button |
 | Confirm Button | yes | primary Button with tone from confirmTone | delegates to Button |
 
@@ -78,7 +80,7 @@ Updated: 2026-03-26
 | open | `open=true` or triggered | dialog visible with cancel and confirm buttons |
 | working | confirm activated | dismiss on escape and backdrop disabled, buttons remain visible |
 | danger tone | `tone="danger"` (default) | confirm button uses variant="primary" with tone="danger" |
-| warning tone | `tone="warning"` | confirm button uses variant="primary" with tone="warning" |
+| warning tone | `tone="warning"` | confirm button uses variant="primary" with tone="default" (warning maps to default) |
 
 ## 5. Callbacks
 
@@ -131,15 +133,29 @@ Updated: 2026-03-26
 
 ## 8. Token Usage — Exact Values
 
-AlertDialog has no unique CSS of its own. All visual presentation is delegated
-to the composed Dialog and Button components.
+AlertDialog has almost no unique CSS of its own — visual presentation is
+delegated to the composed Dialog and Button components. The one exception is the
+optional item-detail row (below).
+
+### Item Detail `.alert-dialog__item-detail`
+
+| Property | Value |
+|----------|-------|
+| `margin` | `0 0 0.75rem` |
+| `color` | `var(--poodle-color-text-secondary)` |
+| `line-height` | `1.5` |
+| `strong` color | `var(--poodle-color-text-primary)` |
 
 ### Confirm Button mapping
 
 | Tone | Button variant | Button tone |
 |------|---------------|-------------|
 | `"danger"` | `"primary"` | `"danger"` |
-| `"warning"` | `"primary"` | `"warning"` |
+| `"warning"` | `"primary"` | `"default"` |
+
+The confirm tone derives as `tone === "danger" ? "danger" : "default"`, so the
+warning tone resolves to a primary Button with the default tone (no warning
+accent on the confirm button).
 
 ### Cancel Button
 
@@ -152,6 +168,7 @@ to the composed Dialog and Button components.
 | Dialog Prop | Value |
 |-------------|-------|
 | `role` | `"alertdialog"` |
+| `width` | `"sm"` (fixed) |
 | `open` | from AlertDialog `open` prop |
 | `title` | from AlertDialog `title` prop |
 | `description` | from AlertDialog `description` prop |

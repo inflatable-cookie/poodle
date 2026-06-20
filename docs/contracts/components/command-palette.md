@@ -211,7 +211,7 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 76%, transparent)` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
-| `font-size` | `0.75rem` |
+| `font-size` | `var(--poodle-typography-label-size)` |
 
 #### `.command-palette__close`
 
@@ -225,17 +225,10 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 | `padding` | `0` |
 | `border` | `0` |
 | `border-radius` | `calc(var(--poodle-radius-control) - 0.0625rem)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 62%, transparent)` |
+| `background` | `transparent` |
 | `color` | `var(--poodle-color-text-secondary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
-
-#### `.command-palette__close:hover`
-
-| Property | Value |
-|----------|-------|
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 84%, transparent)` |
-| `color` | `var(--poodle-color-text-primary)` |
 
 #### `.command-palette__close:focus-visible`
 
@@ -250,8 +243,8 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 |----------|-------|
 | `margin` | `0` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `0.8125rem` |
-| `line-height` | `1.5` |
+| `font-size` | `0.75rem` |
+| `line-height` | `1.4` |
 
 ### Light Theme Override: `:global([data-theme="light"]) .command-palette`
 
@@ -266,9 +259,8 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 
 | Property | Value |
 |----------|-------|
-| `width` | `min(100vw - 1.25rem, 45rem)` |
-| `max-height` | `calc(100vh - 1.25rem)` |
-| `padding` | `1rem` |
+| `width` | `calc(100vw - 1rem)` |
+| `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x-sm, 0.75rem)` |
 
 #### `.command-palette__header`
 
@@ -280,7 +272,7 @@ through `onOpenChange` and `onQueryChange` rather than mutating those props.
 
 | Property | Value |
 |----------|-------|
-| `justify-content` | `flex-start` |
+| `justify-content` | `space-between` |
 
 ### Data Attributes Used for CSS Selectors
 

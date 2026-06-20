@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=11 jetstream=12 specimen=gap -->
+<!-- parity consv=fixed gpui=11 jetstream=12 specimen=gap -->
 # Parity: Tabs
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,14 +14,14 @@
 
 ## Contract ↔ Svelte
 
-Svelte carries props the contract omits, and the contract `variant` union deviates from Svelte's enum naming. Svelte authoritative.
+Svelte carries props the contract omits. Svelte authoritative — contract fixed.
 
-- Svelte adds `collapseWhenOverflow?: boolean` (`Tabs.svelte:46`) → collapses the tablist into a `Menu` when it overflows. Not in contract §3. **Fix: add to contract props + anatomy (collapsed-menu affordance).**
-- Svelte adds `fullWidth?: boolean` (`Tabs.svelte:47`) → tabs flex to fill the row (`data-full-width`). Not in contract. **Fix: add to contract.**
-- Svelte adds `collapseLabel?: string | null` (`Tabs.svelte:48`) — label for the collapsed trigger. Not in contract. **Fix: add to contract.**
-- Variant naming: contract §3 lists `"text"` as canonical with `"underline"` a deprecated alias. Svelte's `TabVariant` type / Rust `TabVariant` enum use `Underline` as the canonical name (no `Text`/`Block` mismatch in Rust — Rust enum is `Underline | Card | Pill | Block`, no `Strip`). Contract names the default `"text"`; Svelte default is `"text"` but renders identical to underline. **Fix: reconcile contract canonical name with the Rust `TabVariant::Underline` used by both Rust targets.**
+- [x] FIXED Svelte adds `collapseWhenOverflow?: boolean` (`Tabs.svelte:46`) → collapses the tablist into a `Menu` when it overflows. Added to contract §3 props, §2 anatomy (Collapsed Menu part), §1 in-scope (removed "overflow menus" from out-of-scope), and Svelte Notes.
+- [x] FIXED Svelte adds `fullWidth?: boolean` (`Tabs.svelte:47`) → tabs flex to fill the row (`data-full-width`). Added to contract §3 + §8 full-width token table + Svelte Notes.
+- [x] FIXED Svelte adds `collapseLabel?: string | null` (`Tabs.svelte:48`). Added to contract §3 (falls back to active tab label).
+- [x] FIXED Variant naming: Svelte normalizes `variant="underline"` → `"text"` (`resolvedVariant`, `Tabs.svelte:146`); rendered `data-variant="text"`; default `"text"`. Contract §3 already matches Svelte exactly. Added a GPUI-notes clarification that the Rust `TabVariant::Underline` enum member is the same variant (implementation-side naming only). No §3 change needed — Svelte side already authoritative.
 - Contract §3 omits `block` from prop default examples but documents it in token tables; Svelte/Rust both implement `block`. Consistent — no fix.
-- Tooltip behavior (`showTooltips`, vertical icon-only tooltips, `Tabs.svelte:189-206,600-604`) is documented in contract §3 (`showTooltips`) but the tooltip anatomy part is not in §2. **Fix: add tooltip to contract anatomy.**
+- [x] FIXED Tooltip behavior (`showTooltips`) documented in §3 but missing from §2 anatomy. Added Tooltip anatomy part + Svelte Notes describing tooltip wrapping and vertical/icon-only label surfacing.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -65,5 +65,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - Strip variant is split into a dedicated `tab_strip.rs` component in both Rust targets, diverging from Svelte where strip is a `Tabs` variant. This is an architecture delta worth a contract note; treat Strip parity under a separate `tab-strip` audit if one exists.
-- The `consv=gap` driver is undocumented Svelte surface (`collapseWhenOverflow`/`fullWidth`/`collapseLabel`) plus tooltip anatomy missing from contract §2.
+- The former `consv=gap` driver (undocumented Svelte surface `collapseWhenOverflow`/`fullWidth`/`collapseLabel` plus tooltip anatomy missing from §2) is now resolved in the contract — `consv=fixed`. Remaining items are all Rust-impl gaps, not contract↔Svelte.
 - Biggest single gap: neither Rust target wires close/reorder/vertical, and both contradict the contract `font-weight: 600` (Jetstream) / no-tab-bottom-border (both) rules.

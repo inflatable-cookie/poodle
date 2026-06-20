@@ -14,15 +14,15 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .card-radio-group]  <div role="radiogroup">
-  └── [Option .card-radio-group__option]  <div role="radio"> (repeated)
+[Root .poodle-card-radio-group]  <div role="radiogroup">
+  └── [Option .poodle-card-radio-group__option]  <div role="radio"> (repeated)
         └── [Card]  Card primitive (interactive, selected)
               ├── [Header slot]
-              │     └── [HeaderRow .card-radio-group__header]
-              │           ├── [Indicator .card-radio-group__indicator]
-              │           │     └── [Dot .card-radio-group__dot]  (when checked)
-              │           └── [Title .card-radio-group__title]
-              ├── [Description .card-radio-group__description]  <p> (optional)
+              │     └── [HeaderRow .poodle-card-radio-group__header]
+              │           ├── [Indicator .poodle-card-radio-group__indicator]
+              │           │     └── [Dot .poodle-card-radio-group__dot]  (when checked)
+              │           └── [Title .poodle-card-radio-group__title]
+              ├── [Description .poodle-card-radio-group__description]  <p> (optional)
               └── [CardContent]  (optional, via `card(...)` snippet)
 ```
 
@@ -47,13 +47,14 @@ Updated: 2026-03-30
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `items` | `CardRadioItem[]` | `[]` | no | Array of options |
-| `value` | `string \| null` | `null` | no | Currently selected value; bind for two-way |
+| `value` | `string \| null \| undefined` | `undefined` | no | Currently selected value; bind for two-way. `undefined` = uncontrolled (component owns state); any defined value (including `null`) = controlled |
 | `columns` | `1 \| 2 \| 3 \| 4` | `2` | no | Number of grid columns |
 | `ariaLabel` | `string \| null` | `null` | no | Accessible label for the radiogroup |
 | `disabled` | `boolean` | `false` | no | Disables the entire group |
 | `size` | `ControlSize \| null` | `null` | no | Explicit semantic size override |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | Semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | Explicit density override for spacing |
+| `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | Fires after value update; does not fire for disabled items |
 
 ### Types
 
@@ -74,7 +75,11 @@ type CardRadioItem = {
 
 ### Controlled And Uncontrolled
 
-- `value` supports two-way binding (`bind:value`)
+- `value` defaults to `undefined`. While `undefined`, the component is
+  uncontrolled and owns its own selection state internally
+- Supplying any defined `value` (including `null` for an explicit empty
+  selection) makes it controlled; the host owns updates via `bind:value` or
+  `onValueChange`
 - Selection state is also surfaced via `onValueChange`
 
 ## 4. States
@@ -145,7 +150,7 @@ type CardRadioItem = {
 
 ## 8. Token Usage -- Exact Values
 
-#### `.card-radio-group` (Root)
+#### `.poodle-card-radio-group` (Root)
 
 | Property | Value |
 |----------|-------|
@@ -155,28 +160,28 @@ type CardRadioItem = {
 
 The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 4).
 
-#### `.card-radio-group__option`
+#### `.poodle-card-radio-group__option`
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `pointer` |
 | `outline` | `none` |
 
-#### `.card-radio-group__option:focus-visible :global(.card)`
+#### `.poodle-card-radio-group__option:focus-visible :global(.poodle-card)`
 
 | Property | Value |
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
-#### `.card-radio-group__option[aria-disabled="true"]`
+#### `.poodle-card-radio-group__option[aria-disabled="true"]`
 
 | Property | Value |
 |----------|-------|
 | `cursor` | `not-allowed` |
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
-#### `.card-radio-group__header`
+#### `.poodle-card-radio-group__header`
 
 | Property | Value |
 |----------|-------|
@@ -184,7 +189,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `align-items` | `center` |
 | `gap` | `0.5rem` |
 
-#### `.card-radio-group__indicator` (Unchecked)
+#### `.poodle-card-radio-group__indicator` (Unchecked)
 
 | Property | Value |
 |----------|-------|
@@ -199,14 +204,14 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `background` | `transparent` |
 | `transition` | `border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard), background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard)` |
 
-#### `.card-radio-group__indicator[data-checked="true"]` (Checked)
+#### `.poodle-card-radio-group__indicator[data-checked="true"]` (Checked)
 
 | Property | Value |
 |----------|-------|
 | `border-color` | `var(--poodle-color-accent-base)` |
 | `background` | `var(--poodle-color-accent-base)` |
 
-#### `.card-radio-group__dot`
+#### `.poodle-card-radio-group__dot`
 
 | Property | Value |
 |----------|-------|
@@ -215,7 +220,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `border-radius` | `999px` |
 | `background` | `var(--poodle-color-text-inverse)` |
 
-#### `.card-radio-group__title`
+#### `.poodle-card-radio-group__title`
 
 | Property | Value |
 |----------|-------|
@@ -223,7 +228,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 | `font-weight` | `600` |
 | `color` | `var(--poodle-color-text-primary)` |
 
-#### `.card-radio-group__description`
+#### `.poodle-card-radio-group__description`
 
 | Property | Value |
 |----------|-------|
@@ -246,24 +251,25 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 
 | Density | Root gap | Card padding |
 |---------|----------|-------------|
-| `compact` | `0.5rem` | `0.5rem` (via `:global(.card)`) |
+| `compact` | `0.5rem` | `padding-inline: 0.5rem` (via `:global(.poodle-card)`) |
 | `default` | `0.75rem` | (Card default) |
-| `comfortable` | `1rem` | `1rem` (via `:global(.card)`) |
+| `comfortable` | `0.875rem` | (Card default) |
 
 ### Data Attributes Used for CSS Selectors
 
 | Attribute | Element | Purpose |
 |-----------|---------|---------|
-| `data-checked` | `.card-radio-group__indicator` | Targets checked indicator styling |
-| `data-disabled` | `.card-radio-group__indicator`, `.card-radio-group__title`, `.card-radio-group__description` | Marks disabled items (present in markup) |
-| `data-card-radio-index` | `.card-radio-group__option` | Used for DOM focus management via `querySelector` |
-| `aria-disabled` | `.card-radio-group__option` | Targets disabled option styling |
-| `data-size` | `.card-radio-group` root | Drives size variant CSS |
-| `data-density` | `.card-radio-group` root | Drives density variant CSS |
+| `data-checked` | `.poodle-card-radio-group__indicator` | Targets checked indicator styling |
+| `data-disabled` | `.poodle-card-radio-group__indicator`, `.poodle-card-radio-group__title`, `.poodle-card-radio-group__description` | Marks disabled items (present in markup) |
+| `data-card-radio-index` | `.poodle-card-radio-group__option` | Used for DOM focus management via `querySelector` |
+| `aria-disabled` | `.poodle-card-radio-group__option` | Targets disabled option styling |
+| `data-size` | `.poodle-card-radio-group` root | Drives size variant CSS |
+| `data-density` | `.poodle-card-radio-group` root | Drives density variant CSS |
 
 ## 9. Svelte Notes
 
-- Uses `createEventDispatcher` for `change` event
+- Selection flows through the `onValueChange` callback and `bind:value`; no
+  `createEventDispatcher` / `change` event
 - Composes `Card` primitive from `@poodle/svelte` with `interactive` and `selected` props
 - Arrow key navigation uses `data-card-radio-index` attributes and `document.querySelector` for DOM focus management
 - Disabled items are filtered out of the enabled navigation list
@@ -280,7 +286,7 @@ The `--columns` CSS variable is set inline from the `columns` prop (1, 2, 3, or 
 ### Tier 1: Strict Parity
 
 - [ ] all props have the same meaning and defaults
-- [ ] event name and payload matches
+- [ ] `onValueChange` callback name and payload matches
 - [ ] roving tabindex behavior matches
 - [ ] arrow key navigation skips disabled items and wraps
 - [ ] CardRadioItem type is identical

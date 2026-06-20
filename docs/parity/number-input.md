@@ -17,13 +17,17 @@
 
 Contract over-specifies accessibility the authoritative Svelte does not implement, and the two disagree on stepper anatomy. Svelte wins on behavior; contract a11y items are aspirational. Resolve each explicitly.
 
-- **`role="spinbutton"` + `aria-valuenow`/`aria-valuemin`/`aria-valuemax`**: contract §2 requires these on the root input. Svelte renders `<input type="text" inputmode="decimal">` with NO `role` and NO `aria-value*` (lines 282–318). Divergence. **Fix: either add spinbutton role + value ARIA to Svelte (it is genuine contract-specified a11y functionality the reference lacks), or downgrade the contract. Per "Svelte is parity authority", prefer adding to Svelte since this is missing contract functionality, not invented surface.**
-- **`aria-disabled="true"` on root**: contract §2. Svelte uses the native `disabled` attribute only (line 290), no `aria-disabled`. **Fix: contract should accept native `disabled` as equivalent, or Svelte adds `aria-disabled`.**
-- **Stepper `aria-label="Increment"`/`"Decrement"`**: contract §2. Svelte stepper `<button>`s (lines 322–327) have no `aria-label` — only an `Icon`, so they are unlabeled to AT. **Fix: add `aria-label` to Svelte steppers (contract-specified, reference lacks it).**
-- **`Home`/`End` → min/max**: contract §2 keyboard list. Svelte `onkeydown` handles only `Enter`, `ArrowUp`, `ArrowDown` (lines 303–317); no `Home`/`End`. **Fix: add `Home`/`End` to Svelte, or mark "when supported" in contract as not-yet-implemented.**
-- **Stepper glyph**: contract calls them "stepper buttons" (icon unspecified). Svelte uses `plus`/`minus` icons (lines 323/326). Not a contract conflict, but the cross-target reference point for Rust impls. **Note: Svelte = plus/minus, not chevrons.**
-- **`aria-describedby` link to validation message**: contract §2 wires `aria-describedby` to a validation message element. Svelte exposes `describedBy` prop (passed through, line 294) but renders NO validation-message element to point at and does not auto-generate one. **Fix: document that the message element is consumer-supplied, or add an internal message region to Svelte.**
-- Props/callbacks otherwise match contract Core Props + Callbacks lists exactly (value/min/max/step/precision/prefix/suffix/validate/validationState/showSteppers/standard control props; onValueChange/onValidationChange/onSubmit/onIncrement/onDecrement/onFocus/onBlur). No undocumented Svelte surface here.
+CONTRACT LEFT INTACT (per task rule: these are contract-specified a11y the
+reference lacks — Svelte-side gaps, fix direction is "add to Svelte", never
+weaken the contract). Each below is a Svelte TODO, not a contract edit:
+
+- [ ] SVELTE GAP — **`role="spinbutton"` + `aria-valuenow`/`aria-valuemin`/`aria-valuemax`**: contract §2 requires these on the root input. Svelte renders `<input type="text" inputmode="decimal">` with NO `role` and NO `aria-value*` (lines 282–318). Contract kept; Svelte must add spinbutton role + value ARIA.
+- [ ] SVELTE GAP — **`aria-disabled="true"` on root**: contract §2. Svelte uses the native `disabled` attribute only (line 290), no `aria-disabled`. Contract kept; native `disabled` is *close* but the contract's explicit `aria-disabled` requirement stands as a Svelte TODO.
+- [ ] SVELTE GAP — **Stepper `aria-label="Increment"`/`"Decrement"`**: contract §2. Svelte stepper `<button>`s (lines 322–327) have no `aria-label` — only an `Icon`, so they are unlabeled to AT. Contract kept; Svelte must add `aria-label`.
+- [ ] SVELTE GAP — **`Home`/`End` → min/max**: contract §2 keyboard list. Svelte `onkeydown` handles only `Enter`, `ArrowUp`, `ArrowDown` (lines 303–317); no `Home`/`End`. Contract already hedges "when supported"; Svelte must add `Home`/`End`.
+- [ ] SVELTE GAP — **`aria-describedby` link to validation message**: contract §2 wires `aria-describedby` to a validation message element. Svelte exposes `describedBy` (passed through, line 294) but renders NO validation-message element and does not auto-generate one. Contract kept; either Svelte supplies an internal message region or documents the element as consumer-supplied.
+- Note (no action): **Stepper glyph** — Svelte uses `plus`/`minus` icons (lines 323/326). Contract leaves the glyph unspecified; this is the cross-target reference point (GPUI uses chevrons — GPUI-side delta, tracked below). No contract change.
+- Props/callbacks otherwise match contract Core Props + Callbacks lists exactly. No undocumented Svelte surface, no stale contract numeric/token value Svelte superseded → no contract edits warranted.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -61,5 +65,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - `NumberInputSpec` (`packages/contracts/components/src/number_input.rs`) has `is_read_only`, `is_required`, `placeholder` fields and `formatted_value()`/`clamped_value()` helpers, but **no `show_steppers` field** — both Rust targets render steppers unconditionally as a result. Adding `show_steppers` to the spec is the cleanest fix for the always-on stepper gap in both targets.
 - Spec lacks a `validate`/validation-callback surface entirely (it is a render-only spec); async validation, `onValidationChange`, and `onSubmit` are Svelte-only and out of scope for the Rust targets by design — not counted as gaps.
-- The big `consv=gap` driver is the contract's accessibility section (spinbutton role, `aria-value*`, stepper `aria-label`, `Home`/`End`, `aria-describedby` message wiring) that the authoritative Svelte does not implement. These are contract-specified functionality the reference lacks, so the fix direction is "add to Svelte", not "delete from contract".
+- `consv=gap` (intentionally held): the contract's accessibility section (spinbutton role, `aria-value*`, stepper `aria-label`, `Home`/`End`, `aria-describedby` message wiring) is contract-specified functionality the authoritative Svelte does not implement. Per the no-weakening rule the contract was LEFT INTACT — the fix direction is "add to Svelte" (code), so the divergence cannot be closed by a contract edit. `consv` stays `gap` until Svelte ships the a11y, NOT because the contract is wrong. No contract file changes were made for number-input.
 - Stepper glyph divergence: GPUI uses chevrons, Svelte + Jetstream use plus/minus. GPUI is the odd one out vs the reference.

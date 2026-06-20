@@ -276,13 +276,13 @@ are required.
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| With disabled option | `defaultValue="all"`, `ariaLabel="Status filter"`, options: All, Active, Archived, Draft (`isDisabled=true`) | Four segments; All shows selected state; Draft segment at reduced opacity with not-allowed cursor |
+| With disabled option | `defaultValue="all"`, `ariaLabel="Status filter"`, options: All, Active, Archived, Draft (option `disabled=true`) | Four segments; All shows selected state; Draft segment at reduced opacity with not-allowed cursor |
 
 ### Fully Disabled
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Fully disabled | `isDisabled=true`, `defaultValue="list"`, `ariaLabel="Disabled control"`, options: Grid, List, Table | All three segments at reduced opacity, not-allowed cursor; List shows selected styling but entire control is non-interactive |
+| Fully disabled | `disabled=true`, `defaultValue="list"`, `ariaLabel="Disabled control"`, options: Grid, List, Table | All three segments at reduced opacity, not-allowed cursor; List shows selected styling but entire control is non-interactive |
 
 ## 14. Approval And Adoption Notes
 

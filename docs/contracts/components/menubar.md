@@ -170,7 +170,7 @@ MenuItem: {
 - List provides the visual chrome (border, background, padding) for the
   trigger strip
 - Group: `position: relative`, `display: inline-flex`
-- Trigger: inline-flex, min-height 2rem
+- Trigger: inline-flex, min-height `var(--poodle-size-control-height)`
 - Overlays anchor below their owning trigger group with a 0.25rem gap
 - Overlay min-width: 12rem
 
@@ -220,16 +220,16 @@ MenuItem: {
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `min-height` | `2rem` |
-| `padding` | `0 0.75rem` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `0 var(--poodle-space-control-x)` |
 | `border` | `0` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
-| `font-size` | `0.75rem` |
-| `font-weight` | `600` |
+| `font-size` | `var(--poodle-typography-label-size)` |
+| `font-weight` | `var(--poodle-typography-label-weight)` |
 | `line-height` | `1` |
 
 ### Trigger — Open / Hover / Focus
@@ -269,15 +269,15 @@ MenuItem: {
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `center` |
 | `width` | `100%` |
-| `min-height` | `2rem` |
-| `padding` | `0.375rem 0.5rem` |
+| `min-height` | `var(--poodle-size-control-height)` |
+| `padding` | `var(--poodle-space-control-y) var(--poodle-space-control-x)` |
 | `border` | `0` |
 | `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `background` | `transparent` |
 | `color` | `var(--poodle-color-text-primary)` |
 | `cursor` | `pointer` |
 | `font` | `inherit` |
-| `font-size` | `0.875rem` |
+| `font-size` | `var(--poodle-typography-body-size)` |
 | `text-align` | `left` |
 
 ### Item — Hover / Focus
@@ -313,13 +313,20 @@ MenuItem: {
 
 ### Size adjustments
 
-| Size | trigger min-height | trigger padding | trigger font-size | item min-height | item padding | item font-size |
-|------|-------------------|----------------|-------------------|----------------|--------------|----------------|
-| `xs` | `1.5rem` | `0 0.5rem` | `0.625rem` | `1.5rem` | `0.25rem 0.375rem` | `0.75rem` |
-| `sm` | `1.75rem` | `0 0.625rem` | `0.6875rem` | `1.75rem` | `0.3125rem 0.4375rem` | `0.8125rem` |
-| `md` | `2rem` | `0 0.75rem` | `0.75rem` | `2rem` | `0.375rem 0.5rem` | `0.875rem` |
-| `lg` | `2.25rem` | `0 0.875rem` | `0.8125rem` | `2.25rem` | `0.4375rem 0.5625rem` | `0.9375rem` |
-| `xl` | `2.5rem` | `0 1rem` | `0.875rem` | `2.5rem` | `0.5rem 0.625rem` | `1rem` |
+Size steps `font-size` only. Trigger/item `min-height` and `padding` stay pinned
+to `var(--poodle-size-control-height)` and `var(--poodle-space-control-x)` /
+`var(--poodle-space-control-y)` for every size — the control-height and control-x
+tokens already scale per size, so no per-size min-height/padding override is
+applied. `—` in the font column means no override (inherits the base value:
+trigger `var(--poodle-typography-label-size)`, item `var(--poodle-typography-body-size)`).
+
+| Size | trigger font-size | item font-size |
+|------|-------------------|----------------|
+| `xs` | `0.6875rem` | `0.75rem` |
+| `sm` | `—` | `—` |
+| `md` | `—` | `—` |
+| `lg` | `0.875rem` | `0.9375rem` |
+| `xl` | `0.9375rem` | `1rem` |
 
 ## 9. Svelte Notes
 

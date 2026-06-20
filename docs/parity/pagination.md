@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=10 specimen=gap -->
 # Parity: Pagination
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,15 +16,16 @@
 
 Divergences in both directions. Svelte is authoritative except where it drops contract-specified functionality.
 
-- `chrome` vs `standalone` semantics inverted. Contract §3 lists `chrome` (default `false`, opt-in panel chrome) and `standalone` as a **deprecated inverse alias**. Svelte applies chrome class as `standalone !== undefined ? !standalone : chrome` (line 232) — chrome OFF by default, matching contract. But the contract's token table §8 names the modifier `.pagination--standalone` for the *strip-chrome* case and `.pagination` (base) as having border/background. The Svelte base `.poodle-pagination` has **no** chrome (lines 346–354, `padding:0`); chrome lives in `.poodle-pagination--chrome` (356–360). **Fix: contract §8 token tables describe the OLD standalone model; rewrite §8 root tables to match Svelte's `--chrome` opt-in.**
-- Button `height`: contract §8 says `calc(control-height − 0.125rem)`; Svelte base button uses `height: var(--poodle-size-control-height)` (line 427) with **no** −0.125rem. **Fix: reconcile — either contract drops the −0.125rem or Svelte adds it. Svelte is authoritative → drop −0.125rem from contract §8.**
-- Button `min-width`: contract §8 / §7 says `var(--poodle-size-control-height)`; Svelte uses the same (line 426). OK. But the GPUI/Jetstream impls hardcode `2.25rem` — noted below, not a contract↔Svelte issue.
-- Density gap values: contract §8 density table says `compact=0.0625rem`, `comfortable=0.25rem`. Svelte uses `compact gap:3px` (line 483), `default gap:0.25rem` (488), `comfortable gap:0.375rem` (499). **Three mismatches.** Svelte authoritative → **fix contract density table to 3px / 0.25rem / 0.375rem.**
-- Size table: contract §8 lists `md` min-width `control-height`, `sm` min-width `control-height − 0.375rem` etc. Svelte hardcodes `xs=1.5rem`, `sm=1.75rem`, `lg=2.75rem`, `xl=3.25rem` (lines 476–479) and omits an `md` override (inherits base). **Fix: contract size table is expressed as calc-offsets; Svelte uses flat rem. Reconcile to Svelte's literal values.**
-- First/last button glyph: contract §8 variant table says `"<<"` / `">>"`; Svelte renders `««` / `»»` (double guillemets, lines 275/336). **Fix: contract glyph column to `««`/`»»`.**
-- First/last buttons gate on `variant === "full" && supportsGoToPage` (lines 267, 328). `supportsGoToPage` requires `controller.goToPage` (line 108) — so first/last NEVER appear from plain props, only with a controller. Contract §2/§3 agree. OK, but note: the specimen "Full variant" passes no controller, so first/last are never demonstrated.
-- `compact` padding: contract §8 compact table says `padding: 0.5rem 0.75rem`, `gap: 0.75rem`. Svelte `--compact` sets `padding:0; gap:0.75rem` (lines 362–365). **Padding mismatch (0 vs 0.5rem 0.75rem).** Svelte authoritative → **fix contract compact padding to `0`.**
-- `limitOptions` default: contract §3 default `[30, 50, 100]`; Svelte default `[30, 50, 100]` (line 62). OK.
+- FIXED — chrome/standalone model. Contract §8 root tables described the OLD standalone model (base `.pagination` carrying border/background + a `.pagination--standalone` strip-chrome variant). Svelte base `.poodle-pagination` is chrome-free (`padding:0`) and chrome is opt-in via `.poodle-pagination--chrome`. §8 rewritten: base root = chrome-free (`padding:0`, no border/bg/margin), new `Root chrome .pagination--chrome` table carries the padding/border-top/elevated-bg. The stale `standalone` strip-chrome table removed.
+- FIXED — Button `height`: dropped the `−0.125rem`; §8 button height now `var(--poodle-size-control-height)` to match Svelte (line 427).
+- Button `min-width` (`var(--poodle-size-control-height)`) already matched Svelte (line 426). The GPUI/Jetstream `2.25rem` hardcodes are code gaps, not contract↔Svelte.
+- FIXED — Density gaps: §8 density table updated to Svelte's `compact 3px` / `default 0.25rem` / `comfortable 0.375rem` (lines 483/488/499); noted the base `space-inline-sm` and the compact-mode `0.25rem` collapse.
+- FIXED — Size table: rewritten from calc-offsets to Svelte's flat rem (`xs 1.5rem`, `sm 1.75rem`, `md` no-override/inherits-base, `lg 2.75rem`, `xl 3.25rem`; fonts 0.6875/0.75/0.75/0.875/0.9375).
+- FIXED — First/last glyph: §8 variant table + §9 notes now `««`/`»»` (double guillemets, lines 275/336), was `<<`/`>>`.
+- First/last buttons gate on `variant === "full" && supportsGoToPage` (controller required) — contract §2/§3 already agree. No contract change; the specimen demo note is a code/specimen concern.
+- FIXED — `compact` padding: §8 compact table now `padding: 0` (was `0.5rem 0.75rem`) to match Svelte `--compact` (lines 362–365); gap `0.75rem` unchanged.
+- `limitOptions` default `[30, 50, 100]` already matched Svelte (line 62). OK.
+- Also fixed in passing: `standalone` prop default corrected to `undefined` (was `false`) with the `chrome = !standalone` resolution note; §9/§6 limit-selector id corrected from the static `pagination-limit` to the per-instance `poodle-pagination-limit-{n}`; stale `margin-top` removed from the base root. (No contract change needed for the Rust-invented "Go to page" field — it never existed in the contract.)
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -67,4 +68,4 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - Biggest structural divergence: both Rust impls invented a "Go to page" input/box for the Full variant that does **not** exist in Svelte. The Svelte full variant is prev / "Page X of Y" / next / (first/last when controller has goToPage). Both Rust impls also mis-assign which variant shows the "Page X of Y" summary vs the item-range summary.
 - GPUI `rem_to_px(2.25)` for min-width is a hardcode of an outdated contract value (`2.25rem`); current contract/Svelte min-width is `control-height`. Route through `size.control.height`.
 - Color-mix tints (current fill 18%, hover 12%, current border 42%) are correctly replicated in both impls via `tint()` / `color_mix()` / alpha-scaling — no color literals found. Good.
-- `consv=gap` driver: stale §8 token tables (chrome/standalone model, button height −0.125rem, density gaps, compact padding, size min-widths, first/last glyphs) all describe an earlier Svelte revision. All belong updated to current Svelte per "Svelte is parity authority".
+- `consv=fixed`: the stale §8 token tables (chrome/standalone model, button height −0.125rem, density gaps, compact padding, size min-widths, first/last glyphs) described an earlier Svelte revision and are now reconciled to current Svelte per "Svelte is parity authority". The Rust-invented "Go to page" field is a code gap (GPUI/Jetstream), not a contract divergence — the contract never specified it.

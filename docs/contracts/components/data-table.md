@@ -269,8 +269,8 @@ the table:
 | `display` | `flex` |
 | `align-items` | `center` |
 | `justify-content` | `flex-end` |
-| `gap` | `0.5rem` |
-| `padding` | `0.5rem 0.75rem` |
+| `gap` | `var(--poodle-space-inline-md)` |
+| `padding` | `var(--poodle-space-control-y) var(--poodle-space-panel-x)` |
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)` |
 
@@ -280,8 +280,8 @@ the table:
 |----------|-------|
 | `display` | `inline-flex` |
 | `align-items` | `center` |
-| `gap` | `0.375rem` |
-| `padding` | `0.25rem 0.625rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
+| `padding` | `var(--poodle-space-control-y) var(--poodle-space-control-x)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-color-background-surface)` |
@@ -325,8 +325,8 @@ the table:
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
-| `gap` | `0.5rem` |
-| `padding` | `0.375rem 0.5rem` |
+| `gap` | `var(--poodle-space-inline-md)` |
+| `padding` | `var(--poodle-space-control-y) var(--poodle-space-control-x)` |
 | `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
 | `cursor` | `pointer` |
 | `font-size` | `var(--poodle-typography-label-size)` |
@@ -447,8 +447,9 @@ the table:
 
 | Property | Value |
 |----------|-------|
-| `width` | `7.5rem` |
+| `width` | `3.5rem` |
 | `text-align` | `right` |
+| `white-space` | `nowrap` |
 
 #### `.data-table__empty`
 
@@ -458,6 +459,32 @@ the table:
 | `font-family` | `var(--poodle-typography-body-family)` |
 | `font-size` | `var(--poodle-typography-body-size)` |
 | `line-height` | `var(--poodle-typography-body-lineHeight)` |
+
+### Size Variants (`[data-size]`)
+
+Size scales cell typography, horizontal cell padding, the selection column
+width, the toolbar button typography/padding, and the interactive control
+`min-height`. The `md` base resolves from the default tokens.
+
+| Size | th/td font-size & footer font-size | th/td `padding-inline` | selection `width` | sort/action `min-height` | toolbar-btn font-size | toolbar-btn `padding` | toolbar-btn icon |
+|------|------------------------------------|------------------------|-------------------|--------------------------|-----------------------|-----------------------|------------------|
+| `xs` | `0.6875rem` | `0.5rem` | `2.5rem` | `1.25rem` | `0.6875rem` | `0.1875rem 0.375rem` | `0.75rem` |
+| `sm` | `0.71875rem` | `0.625rem` | `2.75rem` | `1.375rem` | `0.71875rem` | `0.25rem 0.4375rem` | _(base `0.875rem`)_ |
+| `md` | _(base)_ | _(base `var(--poodle-space-panel-x)`)_ | `3.25rem` | `var(--poodle-size-control-height)` | `var(--poodle-typography-label-size)` | `var(--poodle-space-control-y) var(--poodle-space-control-x)` | `0.875rem` |
+| `lg` | `0.8125rem` | `0.875rem` | `3.625rem` | `2.125rem` | `0.8125rem` | `0.375rem 0.625rem` | `1rem` |
+| `xl` | `0.875rem` | `1rem` | `4rem` | `2.25rem` | `0.875rem` | `0.4375rem 0.75rem` | `1.125rem` |
+
+### Density Variants (`[data-density]`)
+
+Density adjusts table-row vertical padding and footer horizontal padding. Row
+vertical padding is the canonical density axis for a tabular surface (row
+density), so density owns `th`/`td` `padding-block` here by design.
+
+| Density | th/td `padding-block` | footer `padding-inline` |
+|---------|-----------------------|-------------------------|
+| `compact` | `0.25rem` | `var(--poodle-space-control-x)` |
+| `default` | _(base `var(--poodle-space-panel-y)`)_ | _(base)_ |
+| `comfortable` | `calc(var(--poodle-space-panel-y) * 1.25)` | `calc(var(--poodle-space-panel-x) * 1.25)` |
 
 ### CSS Classes Used for State Selectors
 

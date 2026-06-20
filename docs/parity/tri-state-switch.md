@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
 # Parity: TriStateSwitch
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,11 +16,11 @@
 
 Svelte and the contract's exact-value table (§8) disagree on the track/fill recipe, and Svelte adds a min-width var the contract omits. Svelte is authoritative — update the contract.
 
-- **Track background mismatch.** Contract §8 root `background` = `color-mix(text-primary 18%, background-surface)`. Svelte uses `color-mix(canvas 75%, black)` (line 125), and its CSS-var defaults blend toward `color-mix(canvas 70%, black)` for the per-state tracks (lines 110–112). **Fix: rewrite §8 root `background` + the three `--poodle-tri-state-*-track` rows to the canvas/black recipe Svelte ships.**
-- **Track-fill ratios mismatch.** Contract §8 + Tier-2 checklist say excluded/default/included = 18% / (88% elevated) / 18%. Svelte uses 14% / 8% / 14% over the canvas-black base (lines 110–112). **Fix: reconcile §8 mix percentages (and the "88% background-elevated" Tier-2 line) to 14/8/14.**
-- **Selected border ratio mismatch.** Contract §8 selection prose implies the default-border; Svelte tints the excluded/included border `58%` toward the per-state color (lines 196, 206) and keeps default at `border-default` (line 201). Contract §8 selection table omits these border-color rows entirely. **Fix: add the selection border-color rows (58% mix for excluded/included) to §8.**
-- **`min-width` var.** Svelte introduces `--poodle-tri-state-min-content-width` per size (lines 116, 130–153) and computes segment `min-width` as `min-content-width + x*2` (line 236). Contract §8 names `--poodle-tri-state-min-width` "resolved from semantic size" but never tables the per-size values. **Fix: document the per-size min-content-width table (2.5 / 2.625 / 3 / 3.375 / 3.75 rem).**
-- **Size scale.** Contract §8 leaves `--poodle-tri-state-height` "resolved from semantic size"; Svelte tables it per size (xs 1.5 → xl 3.25 rem, lines 130–153). **Fix: add the per-size height table to the contract.**
+- [x] FIXED **Track background mismatch.** Contract §8 root `background` was `color-mix(text-primary 18%, background-surface)`. Svelte uses `color-mix(canvas 75%, black)` (line 125), per-state tracks blend over `color-mix(canvas 70%, black)` (lines 110–112). Rewrote §8 root `background` + the three `--poodle-tri-state-*-track` rows to the canvas/black recipe.
+- [x] FIXED **Track-fill ratios mismatch.** Contract §8 + Tier-2 said 18% / 88%-elevated / 18%. Svelte uses 14% / 8% / 14% over the canvas-black base (lines 110–112). Updated §8 mix percentages and the Tier-2 lines to 14/8/14.
+- [x] FIXED **Selected border ratio mismatch.** Svelte tints excluded/included selection border `58%` toward the per-state color (lines 196, 206) and keeps default at `border-default` (line 201). Added a "Selection — per-state fill and border" subsection to §8 + a Tier-2 line.
+- [x] FIXED **`min-width` var.** Svelte uses `--poodle-tri-state-min-content-width` per size (lines 116, 130–153) and segment `min-width = min-content-width + x*2` (line 236). Renamed the root var, added the per-size table (2.5 / 2.625 / 3 / 3.375 / 3.75 rem), and updated the segment `min-width` formula.
+- [x] FIXED **Size scale.** Added the per-size `--poodle-tri-state-height` table (xs 1.5 / sm 1.75 / md 2.25 / lg 2.75 / xl 3.25 rem, lines 130–153) plus the density `x`/track-inset values to §8.
 - Aligned: props (`value` default `"default"`, `options` record + defaults, `size`/`sizeRole` default `"control"`/`density`/`disabled`, `ariaLabel` required, per-state color overrides), anatomy (`radiogroup` → selection capsule + option/label → hidden radio + segment), `onValueChange` payload, focus ring (`border-width-focus` + accent-focusRing, offset `0.125rem`), disabled opacity, fixed excluded/default/included order. These all match.
 
 ## GPUI gap (vs Svelte + contract)

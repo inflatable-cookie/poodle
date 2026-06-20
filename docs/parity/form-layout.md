@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
 # Parity: FormLayout
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,13 +14,13 @@
 
 ## Contract ↔ Svelte
 
-Props/anatomy/class-name/grid divergences between the contract and the authoritative Svelte source. Svelte is right unless it's missing contract-specified functionality.
+Props/anatomy/class-name/grid divergences between the contract and the authoritative Svelte source. Svelte is right unless it's missing contract-specified functionality. Contract reconciled; remaining Rust-spec change tracked below.
 
-- **Class-name namespace differs.** Contract §2/§8 use `.form-layout`, `.form-layout__description`, `.form-layout__grid`, etc. Svelte emits `.poodle-form-layout*` (`FormLayout.svelte:30,32,44,54,59`). Svelte is authoritative. **Fix: update contract §2/§8 selectors to the `poodle-` prefix.**
-- **Grid row-gap differs from contract.** Contract §8 grid `gap: var(--poodle-space-stack-lg) var(--poodle-space-inline-md)`. Svelte uses `row-gap: calc(var(--poodle-space-stack-lg) + 0.625rem)` and `column-gap: var(--poodle-space-inline-md)` via locally-declared `--poodle-form-layout-row-gap`/`-column-gap` custom props (`FormLayout.svelte:108-114`). Svelte authoritative. **Fix: document the `+ 0.625rem` row-gap and the two local custom props in contract §8.**
-- **`:only-child` full-span rule undocumented.** Svelte adds `.poodle-form-layout__grid :global(.poodle-field:only-child){grid-column:1 / -1}` (`FormLayout.svelte:117-119`) so a lone field spans full width. Not in contract §8. **Fix: add this rule to contract §8 grid section.**
-- **`role="alert"` placement matches but Rust spec omits the data.** Contract §6 + Svelte both render the field-error summary with `role="alert" aria-live="polite"` and the `<strong>{field}</strong>: {message}` list (`FormLayout.svelte:44-52`). Svelte is correct. The divergence is downstream: `FormLayoutSpec` (`packages/contracts/components/src/form_layout.rs:6-16`) has **no `fieldErrors` field at all**, so neither Rust target can build the summary. **Fix: add `field_errors: Option<Vec<(String,String)>>` (or map) to `FormLayoutSpec`.**
-- **`columns` default mismatch contract vs Rust spec is consistent; Svelte/contract agree on `6`** (`FormLayout.svelte:18`, contract §3). No fix on Svelte side — flagged for Rust below.
+- [x] FIXED **Class-name namespace differs.** Contract §2/§8 used `.form-layout*`; Svelte emits `.poodle-form-layout*` (`FormLayout.svelte:30,32,44,54`). Contract §2 anatomy + §8 selector headings (Root/Description/FieldErrors/Grid/container-query) repointed to the `poodle-` prefix.
+- [x] FIXED **Grid row-gap differs from contract.** Contract §8 grid said `gap: stack-lg inline-md`; Svelte uses `row-gap: calc(space-stack-lg + 0.625rem)` and `column-gap: space-inline-md` via the two local `--poodle-form-layout-row-gap`/`-column-gap` custom props (`FormLayout.svelte:108-114`). Documented in §8 (custom-prop table + asymmetric row/column gap), §7, §2, §9.
+- [x] FIXED **`:only-child` full-span rule.** Added `.poodle-form-layout__grid .poodle-field:only-child { grid-column: 1 / -1 }` (`FormLayout.svelte:117-119`) to contract §8 + §7 + §9.
+- **`role="alert"` placement matches; Rust spec omits the data (code track).** Contract §6 + Svelte both render the field-error summary with `role="alert" aria-live="polite"` and the `<strong>{field}</strong>: {message}` list (`FormLayout.svelte:44-52`). Contract is already correct. Downstream `FormLayoutSpec` lacks a `field_errors` field — a spec-side code change, not a contract divergence.
+- **`columns` default** — Svelte/contract agree on `6` (`FormLayout.svelte:18`, contract §3). No contract change; GPUI default-of-`1` is a code-track fix.
 
 ## GPUI gap (vs Svelte + contract)
 

@@ -21,11 +21,13 @@ Updated: 2026-03-15
   ├── [Hours Segment .duration-input__segment]
   │   ├── [Label .duration-input__label]  <label for="dur-hours"> "h"
   │   └── [Field .duration-input__field]  <input type="text" id="dur-hours">
-  ├── [Separator .duration-input__separator]  <span> ":"
+  ├── [Separator .duration-input__separator]  <span aria-hidden>
+  │   ├── [Spacer .duration-input__separator-spacer]  <span> (aligns glyph under labels)
+  │   └── [Glyph .duration-input__separator-glyph]  <span> ":"
   ├── [Minutes Segment .duration-input__segment]
   │   ├── [Label .duration-input__label]  <label for="dur-minutes"> "m"
   │   └── [Field .duration-input__field]  <input type="text" id="dur-minutes">
-  ├── [Separator .duration-input__separator]  <span> ":" (conditional)
+  ├── [Separator .duration-input__separator]  <span aria-hidden> (conditional; same spacer/glyph split)
   └── [Seconds Segment .duration-input__segment]  (conditional, when showSeconds)
       ├── [Label .duration-input__label]  <label for="dur-seconds"> "s"
       └── [Field .duration-input__field]  <input type="text" id="dur-seconds">
@@ -37,7 +39,7 @@ Updated: 2026-03-15
 | Segment | yes | column container for label + field | flex layout, gap |
 | Label | yes | unit indicator above field | font-size, color, letter-spacing |
 | Field | yes | numeric text input | width, font, color, text-align |
-| Separator | yes | colon between segments | color, font-size, font-weight |
+| Separator | yes | colon between segments; 2-row grid of spacer + glyph so the colon aligns with the field row | color; glyph font-size, font-weight |
 
 ## 3. Props And Inputs
 
@@ -111,9 +113,10 @@ Updated: 2026-03-15
 
 ### Sizing
 
-- Root: inline-flex, width: fit-content, padding-based height
-- Fields: fixed width (1.75rem), centered text
-- Separators: aligned to flex-end with fields
+- Root: inline-flex, `align-items: stretch`, width: fit-content, padding-based height
+- Fields: fixed width (base `1.75rem`, per-size 1.5–2.25rem), centered text
+- Separators: a 2-row grid (spacer matched to label height + colon glyph) so the
+  colon aligns with the field row, not the labels
 
 ### Composition
 
@@ -128,10 +131,10 @@ Updated: 2026-03-15
 | Property | Value |
 |----------|-------|
 | `display` | `inline-flex` |
-| `align-items` | `flex-end` |
-| `gap` | `0.125rem` |
+| `align-items` | `stretch` |
+| `gap` | `0.125rem` (base; `comfortable` density adds `0.25rem`) |
 | `width` | `fit-content` |
-| `padding` | `0.25rem var(--poodle-space-control-x)` |
+| `padding` | `0.25rem var(--poodle-space-control-x)` (block per size, inline per size + density) |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
 | `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-color-background-surface)` |
@@ -202,29 +205,52 @@ Updated: 2026-03-15
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
 
-### Separator
+### Separator `.duration-input__separator`
 
 | Property | Value |
 |----------|-------|
+| `display` | `grid` |
+| `grid-template-rows` | `<label-size> 1fr` (spacer row sized to the label, glyph row fills) |
+| `align-items` | `stretch` |
 | `color` | `var(--poodle-color-text-secondary)` |
-| `font-size` | `var(--poodle-typography-body-size)` |
-| `font-weight` | `600` |
-| `line-height` | `1` |
 | `user-select` | `none` |
 
+### Separator spacer `.duration-input__separator-spacer`
+
+| Property | Value |
+|----------|-------|
+| `display` | `block` |
+| `min-height` | `0` |
+| `margin-bottom` | `<label-gap>` (`0.125rem`) |
+
+### Separator glyph `.duration-input__separator-glyph`
+
+| Property | Value |
+|----------|-------|
+| `display` | `inline-flex` |
+| `align-items` / `justify-content` | `center` |
+| `font-size` | `<digit-size>` (`var(--poodle-typography-body-size)`, scales with size) |
+| `font-weight` | `600` |
+| `line-height` | `1` |
+
 ### Size adjustments
+
+Base (no `data-size`): field width `1.75rem`, field font-size `var(--poodle-typography-body-size)`, label font-size `0.5625rem`, root padding-block `0.25rem`.
 
 | Size | root padding | field width | field font-size | label font-size |
 |------|-------------|-------------|-----------------|-----------------|
 | `xs` | `0.125rem calc(space-control-x - 0.125rem)` | `1.5rem` | `0.75rem` | `0.5rem` |
-| `sm` | `0.1875rem calc(space-control-x - 0.0625rem)` | _(base)_ | _(base)_ | _(base)_ |
-| `md` | `0.25rem space-control-x` | `1.75rem` | `typography-body-size` | `0.5625rem` |
+| `sm` | `0.1875rem calc(space-control-x - 0.0625rem)` | `1.625rem` | _(base)_ | _(base)_ |
+| `md` | `0.25rem space-control-x` | `1.875rem` | `typography-body-size` | `0.5625rem` |
 | `lg` | `0.3125rem calc(space-control-x + 0.125rem)` | `2rem` | `0.9375rem` | _(base)_ |
 | `xl` | `0.375rem calc(space-control-x + 0.1875rem)` | `2.25rem` | `1rem` | _(base)_ |
 
+Horizontal padding combines a size adjust (per table) with a density adjust (`compact` −0.125rem, `comfortable` +0.125rem); `comfortable` also adds `0.25rem` to the inter-segment gap.
+
 ## 9. Svelte Notes
 
-- Each field uses `inputmode="numeric"` and `pattern="[0-9]*"` for mobile keyboards
+- Each field uses `inputmode="numeric"` for mobile numeric keyboards (no `pattern` attribute)
+- On focus, a field selects its full text (`select()`)
 - Carry logic: when seconds reach 60, increment minutes and reset seconds;
   when minutes reach 60, increment hours and reset minutes
 - Values clamped to `maxHours` for hours, 0-59 for minutes/seconds

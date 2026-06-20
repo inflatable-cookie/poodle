@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
 # Parity: StatusBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,11 +17,11 @@
 
 The contract and Svelte agree on anatomy, ARIA resolution, the chrome modifier, and the size/density token tables. The Rust `ShellStatusBarSpec` is the divergent surface — it never modelled the Svelte prop set.
 
-- Class prefix: Svelte emits `poodle-status-bar` / `poodle-status-bar__leading` / `poodle-status-bar__trailing` (`StatusBar.svelte:35,41,50`); contract §2 anatomy uses unprefixed `.status-bar*`. Cosmetic, but **fix: align contract class names to the `poodle-` prefix** for traceability.
-- Spec mismatch (drives `consv=gap`): contract §3 props are `summary`, `ariaLabel`, `chrome`, `size`, `sizeRole`, `density` (Svelte `StatusBar.svelte:6-15`). `ShellStatusBarSpec` (`shell_status_bar.rs:8-13`) instead exposes `summary`, `leading_item_count`, `trailing_item_count` — none of `ariaLabel`/`chrome`/`size`/`sizeRole`/`density` exist, and `*_item_count` is a Rust-only invention with no contract or Svelte counterpart. **Fix: rework the Rust spec to the contract prop set; drop or document `*_item_count`.**
-- `chrome` prop has no Rust representation, so the chrome border-top + 94% panel `color-mix` (`StatusBar.svelte:69-72`) cannot be toggled from the spec. **Fix: add `chrome` to the spec + a `chrome_*` token surface.**
-- `background_token()` returns `COLOR_BACKGROUND_SURFACE` (`shell_status_bar.rs:49-51`), but Svelte's non-chrome bar has **no** background (transparent, blends into container) and the chrome bar uses `background-panel` at 94% (`StatusBar.svelte:71`). The spec's single surface token matches neither mode. **Fix: model both modes; chrome → panel `color-mix`, default → transparent.**
-- Both Rust impls hardcode `1.5rem` height (`status_bar.rs:90`, `shell_status_bar.rs:20`). Contract §7 and Svelte specify **no explicit height** — height is content + padding driven (`padding: 0.375rem 0.75rem`). The fixed height is a Rust-only invention. Noted per-impl below.
+- [x] FIXED Class prefix: Svelte emits `poodle-status-bar` / `__leading` / `__trailing` (`StatusBar.svelte:35,41,50`); contract §2 anatomy + §8 selectors were unprefixed `.status-bar*`. Aligned all contract class names (anatomy, root/leading/trailing tables, chrome modifier, size + density selectors) to the `poodle-` prefix.
+- **CODE (Rust spec, out of scope for contract):** contract §3 props (`summary`, `ariaLabel`, `chrome`, `size`, `sizeRole`, `density`) already match Svelte (`StatusBar.svelte:6-15`). The divergence is entirely Rust-side: `ShellStatusBarSpec` (`shell_status_bar.rs:8-13`) exposes `summary`, `leading_item_count`, `trailing_item_count` — none of `ariaLabel`/`chrome`/`size`/`sizeRole`/`density`, plus a Rust-only `*_item_count`. Rework the Rust spec to the contract prop set; drop/document `*_item_count`. Contract is already correct (no edit needed).
+- **CODE:** `chrome` has no Rust representation, so the chrome border-top + 94% panel `color-mix` (`StatusBar.svelte:69-72`) cannot be toggled from the spec. Add `chrome` + `chrome_*` tokens to the spec. Contract §8 already documents both modes.
+- **CODE:** `background_token()` returns `COLOR_BACKGROUND_SURFACE` (`shell_status_bar.rs:49-51`); Svelte non-chrome bar is transparent and chrome bar uses `background-panel` at 94% (`StatusBar.svelte:71`). Model both modes spec-side. Contract is already correct.
+- **CODE:** Both Rust impls hardcode `1.5rem` height (`status_bar.rs:90`, `shell_status_bar.rs:20`); contract §7 + Svelte specify **no explicit height** (content + padding driven). Drop the fixed height in code. Contract is already correct.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -56,7 +56,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` driver is the Rust spec, not Svelte: `ShellStatusBarSpec` models a different component (item-count-driven shell bar) than the contract's slot-driven `StatusBar`. Per "Svelte is parity authority" the Rust spec must be reshaped to `summary`/`ariaLabel`/`chrome`/`size`/`sizeRole`/`density`, not the contract bent to match the spec.
+- `consv=fixed`: the only contract↔Svelte drift was the unprefixed class names, now aligned to `poodle-`. The remaining drift is entirely Rust-spec, not contract: `ShellStatusBarSpec` models a different component (item-count-driven shell bar) than the contract's slot-driven `StatusBar`. Per "Svelte is parity authority" the Rust spec must be reshaped to `summary`/`ariaLabel`/`chrome`/`size`/`sizeRole`/`density` — a code change, out of scope here. The contract already matches Svelte.
 - The Rust spec note (contract §"Rust Spec Note", `shell_status_bar.rs:1-4`) already flags the `ShellStatusBar` → `StatusBar` rename and the item-count divergence as accepted-for-now; treat the spec rework as the headline follow-up.
 - Both Rust impls invent a fixed `1.5rem` height absent from contract/Svelte — likely cargo-culted from a real IDE status bar. Should be content-driven.
 - Jetstream summary-as-grow-child layout (vs Svelte summary-as-leading-fallback) is the most visible behavioral divergence: in Jetstream a bar can show leading items AND summary simultaneously, which Svelte never does.

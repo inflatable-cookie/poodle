@@ -17,11 +17,11 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .status-bar]  <footer aria-label="...">
-  ├── [Leading .status-bar__leading]  <div>
+[Root .poodle-status-bar]  <footer aria-label="...">
+  ├── [Leading .poodle-status-bar__leading]  <div>
   │   ├── [leading()] (snippet content when provided)
   │   └── [Summary fallback]  <span> (when no leading snippet, and summary is set)
-  └── [Trailing .status-bar__trailing]  <div> (only rendered when trailing snippet has content)
+  └── [Trailing .poodle-status-bar__trailing]  <div> (only rendered when trailing snippet has content)
         └── [trailing()]
 ```
 
@@ -112,7 +112,7 @@ snippets dispatch their own events.
 
 ## 8. Token Usage -- Exact Values
 
-### Root `.status-bar`
+### Root `.poodle-status-bar`
 
 | Property | Value |
 |----------|-------|
@@ -126,7 +126,7 @@ snippets dispatch their own events.
 | `font-size` | `0.8125rem` |
 | `line-height` | `1.5` |
 
-### Leading `.status-bar__leading`
+### Leading `.poodle-status-bar__leading`
 
 | Property | Value |
 |----------|-------|
@@ -135,7 +135,7 @@ snippets dispatch their own events.
 | `align-items` | `center` |
 | `gap` | `var(--poodle-space-inline-sm)` |
 
-### Trailing `.status-bar__trailing`
+### Trailing `.poodle-status-bar__trailing`
 
 | Property | Value |
 |----------|-------|
@@ -151,7 +151,7 @@ The `aria-label` on the `<footer>` is resolved as:
 2. `summary` prop if provided
 3. `"Status"` as final fallback
 
-### Chrome modifier `.status-bar--chrome`
+### Chrome modifier `.poodle-status-bar--chrome`
 
 | Property | Value |
 |----------|-------|
@@ -162,23 +162,23 @@ The `aria-label` on the `<footer>` is resolved as:
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.status-bar[data-size="xs"]` | `font-size` | `0.6875rem` |
-| `.status-bar[data-size="xs"]` | `padding-block` | `0.25rem` |
-| `.status-bar[data-size="sm"]` | `font-size` | `0.75rem` |
-| `.status-bar[data-size="sm"]` | `padding-block` | `0.3125rem` |
-| `.status-bar[data-size="lg"]` | `font-size` | `0.875rem` |
-| `.status-bar[data-size="lg"]` | `padding-block` | `0.4375rem` |
-| `.status-bar[data-size="xl"]` | `font-size` | `0.9375rem` |
-| `.status-bar[data-size="xl"]` | `padding-block` | `0.5rem` |
+| `.poodle-status-bar[data-size="xs"]` | `font-size` | `0.6875rem` |
+| `.poodle-status-bar[data-size="xs"]` | `padding-block` | `0.25rem` |
+| `.poodle-status-bar[data-size="sm"]` | `font-size` | `0.75rem` |
+| `.poodle-status-bar[data-size="sm"]` | `padding-block` | `0.3125rem` |
+| `.poodle-status-bar[data-size="lg"]` | `font-size` | `0.875rem` |
+| `.poodle-status-bar[data-size="lg"]` | `padding-block` | `0.4375rem` |
+| `.poodle-status-bar[data-size="xl"]` | `font-size` | `0.9375rem` |
+| `.poodle-status-bar[data-size="xl"]` | `padding-block` | `0.5rem` |
 
 ### Density modifiers
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `.status-bar[data-density="compact"]` | `padding-inline` | `0.5rem` |
-| `.status-bar[data-density="compact"]` | `gap` | `0.375rem` |
-| `.status-bar[data-density="comfortable"]` | `padding-inline` | `1.125rem` |
-| `.status-bar[data-density="comfortable"]` | `gap` | `1rem` |
+| `.poodle-status-bar[data-density="compact"]` | `padding-inline` | `0.5rem` |
+| `.poodle-status-bar[data-density="compact"]` | `gap` | `0.375rem` |
+| `.poodle-status-bar[data-density="comfortable"]` | `padding-inline` | `1.125rem` |
+| `.poodle-status-bar[data-density="comfortable"]` | `gap` | `1rem` |
 
 ## 9. Svelte Notes
 

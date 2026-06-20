@@ -125,7 +125,7 @@ Updated: 2026-03-30
 
 ### Sizing
 
-- Root: vertical grid with 0.5rem gap when open, 0 gap when closed
+- Root: vertical grid with `space.stack.md` gap when open, 0 gap when closed
 - Content appears inline below the trigger
 - All grid containers use `min-width: 0` for overflow safety
 
@@ -143,12 +143,12 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.5rem` |
+| `gap` | `var(--poodle-space-stack-md)` |
 | `min-width` | `0` |
-| `padding` | `0.875rem 1rem` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 42%, transparent)` |
+| `padding` | `0.625rem var(--poodle-space-panel-x)` (inline padding overridden by density) |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 36%, transparent)` |
 | `border-radius` | `var(--poodle-radius-surface)` |
-| `background` | `color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary))` |
+| `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 40%, var(--poodle-color-background-panel))` (also sets `--poodle-surface`) |
 | `box-shadow` | `inset 0 0.0625rem 0 color-mix(in srgb, var(--poodle-color-text-inverse) 8%, transparent)` |
 
 ### Root closed (`.collapsible[data-open="false"]`)
@@ -163,6 +163,21 @@ Updated: 2026-03-30
 |----------|-------|
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 
+### Root highlighted (`.collapsible[data-highlighted="true"]`)
+
+| Property | Value |
+|----------|-------|
+| `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 55%, transparent)` |
+| `box-shadow` | `0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)` |
+
+### Root density (`.collapsible[data-density]`)
+
+| Density | `padding-inline` |
+|---------|------------------|
+| `compact` | `0.5rem` |
+| `default` | `var(--poodle-space-panel-x)` |
+| `comfortable` | `1rem` |
+
 ### Trigger `.collapsible__trigger`
 
 | Property | Value |
@@ -170,7 +185,7 @@ Updated: 2026-03-30
 | `display` | `grid` |
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `center` |
-| `gap` | `0.75rem` |
+| `gap` | `var(--poodle-space-inline-md)` |
 | `width` | `100%` |
 | `padding` | `0` |
 | `border` | `0` |
@@ -199,7 +214,7 @@ Updated: 2026-03-30
 | Property | Value |
 |----------|-------|
 | `display` | `grid` |
-| `gap` | `0.3125rem` |
+| `gap` | `var(--poodle-space-inline-sm)` |
 | `min-width` | `0` |
 
 ### Title `.collapsible__title`
@@ -299,12 +314,13 @@ Updated: 2026-03-30
 ### Tier 2: Visual Parity
 
 - [ ] all five sizes visually match per size table
-- [ ] root border color-mix (42% border-subtle) matches
-- [ ] root background color-mix (88% elevated, surface) matches
+- [ ] root border color-mix (36% border-subtle) matches
+- [ ] root background color-mix (40% background-elevated, background-panel) matches
 - [ ] root inset box-shadow (8% text-inverse) matches
 - [ ] root border-radius uses radius-surface
-- [ ] root padding (0.875rem 1rem) matches
-- [ ] gap collapse (0.5rem open, 0 closed) matches
+- [ ] root padding (0.625rem vertical + density-driven inline) matches
+- [ ] gap collapse (space.stack.md open, 0 closed) matches
+- [ ] highlighted state (accent-base 55% border + 12% halo) matches
 - [ ] trigger grid layout (1fr auto) matches
 - [ ] title typography (heading-family, 1rem, 700, 1.2) matches
 - [ ] description typography (0.8125rem, 1.45, secondary) matches

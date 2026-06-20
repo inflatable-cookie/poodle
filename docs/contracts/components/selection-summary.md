@@ -190,6 +190,7 @@ No internal component state.
 | Part | Property | Value |
 |------|----------|-------|
 | Root | `font-size` | `0.6875rem` |
+| Chips | `min-height` | `0.875rem` |
 | Chip | `min-height` | `1rem` |
 | Chip | `padding` | `0 0.5rem` |
 | Chip | `font-size` | `0.6875rem` |
@@ -199,6 +200,7 @@ No internal component state.
 | Part | Property | Value |
 |------|----------|-------|
 | Root | `font-size` | `0.71875rem` |
+| Chips | `min-height` | `1rem` |
 | Chip | `min-height` | `1.125rem` |
 | Chip | `font-size` | `0.71875rem` |
 
@@ -207,6 +209,7 @@ No internal component state.
 | Part | Property | Value |
 |------|----------|-------|
 | Root | `font-size` | `0.75rem` |
+| Chips | `min-height` | `1.25rem` |
 | Chip | `min-height` | `1.5rem` |
 | Chip | `padding` | `0 0.75rem` |
 | Chip | `font-size` | `0.75rem` |
@@ -216,6 +219,7 @@ No internal component state.
 | Part | Property | Value |
 |------|----------|-------|
 | Root | `font-size` | `0.8125rem` |
+| Chips | `min-height` | `1.5rem` |
 | Chip | `min-height` | `1.75rem` |
 | Chip | `padding` | `0 0.875rem` |
 | Chip | `font-size` | `0.8125rem` |
@@ -225,6 +229,7 @@ No internal component state.
 | Part | Property | Value |
 |------|----------|-------|
 | Root | `font-size` | `0.875rem` |
+| Chips | `min-height` | `1.75rem` |
 | Chip | `min-height` | `2rem` |
 | Chip | `padding` | `0 1rem` |
 | Chip | `font-size` | `0.875rem` |

@@ -239,10 +239,12 @@ The `--ft-columns` and `--ft-min-width` CSS variables are set inline from the `c
 
 ### Density Adjustments
 
-| Density | Root gap | Root padding | Controls gap |
+Padding values are `padding-block padding-inline`. Density altering vertical padding here is the documented compositional exception (panel internal padding).
+
+| Density | Root gap | Root padding (block inline) | Controls gap |
 |---------|----------|-------------|-------------|
-| `compact` | `0.375rem` | `0.5rem 0.75rem` | `0.25rem` |
-| `default` | `var(--poodle-space-stack-sm)` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` | `var(--poodle-space-inline-sm)` |
+| `compact` | `0.25rem` | `0.5rem 0.75rem` | `0.25rem` |
+| `default` | `var(--poodle-space-inline-sm)` | `0.75rem 1rem` | `var(--poodle-space-inline-sm)` |
 | `comfortable` | `var(--poodle-space-inline-md)` | `1rem 1.25rem` | `var(--poodle-space-inline-md)` |
 
 ### Data Attributes Used for CSS Selectors

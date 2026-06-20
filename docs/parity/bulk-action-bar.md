@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
 # Parity: BulkActionBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,14 +16,14 @@
 
 Several documented behaviors diverge from the Svelte implementation. Svelte is authoritative — update the contract — except where noted.
 
-- **Total text differs.** Contract §2/§4/§8 say total renders as `"of {totalCount} visible rows"`. Svelte renders only `of {totalCount}` (line 70) — no "visible rows" suffix. **Fix: contract — change to `of {totalCount}`** (Svelte authoritative).
-- **Select-all is an IconButton, not a text button.** Contract §2 + §8 + §6 describe a `.bulk-action-bar__button` text `<button>` with min-height/padding/border tokens and a `selectAllLabel`. Svelte renders an `IconButton icon="check-check"` inside the summary (lines 72-82), labelled via `ariaLabel`/`tooltip`, no visible text, no `.bulk-action-bar__button` element. **Fix: contract — replace the select-all text-button section (§2, §8 select-all table, §6) with the IconButton form.**
-- **`selectAllLabel` prop dropped from Svelte's `Props`.** Contract §3 lists `selectAllLabel` (default `"Select all"`). Svelte still accepts it via `selectAllLabel` (line 75) using it for aria/tooltip — present. `ok`, but it is now an a11y label only, not a visible label; note in contract.
-- **Select-all lives in Summary, not Actions.** Contract §2 anatomy places select-all inside `[Actions]` ahead of action icons. Svelte places it inside `__summary` (line 72). **Fix: contract anatomy — move select-all under Summary.**
-- **Root is `position: fixed` floating bar.** Svelte root is a fixed bottom-docked bar with safe-area insets, z-index, and a heavy shadow (lines 134-155). Contract §7 says "fills parent width" / "above or below list" with no fixed positioning, and §8 root padding is `panel-y panel-x` whereas Svelte hardcodes `0.5rem var(--poodle-space-panel-x)` (line 146). **Fix: contract — document fixed positioning + the `0.5rem` vertical padding (it is intentionally not `panel-y`).**
-- **Background border token differs.** Contract §8 root `border` uses `--poodle-color-border-subtle` ✓ (line 147 matches). Shadow (`box-shadow`, lines 152-154) is undocumented. **Fix: add root shadow to contract §8.**
-- Danger fallback icon: Svelte uses `trash-2` for danger, `circle` otherwise (line 88); contract §8 says fallback `"circle"` only. **Fix: document the danger `trash-2` fallback.**
-- Warning tone via `:global()` color override (lines 183-190) including hover/focus mix — matches contract intent. `ok`.
+- [x] FIXED Total text: contract §2/§4/§8/specimen changed from `"of {totalCount} visible rows"` to `of {totalCount}` (Svelte line 70).
+- [x] FIXED Select-all is an IconButton, not a text button: replaced the §2 text-button anatomy part + §8 select-all-button CSS table + §6 a11y line with the ghost `IconButton icon="check-check"` (`sizeRole="chrome"`) form (Svelte lines 72-82). §1 in-scope line and §9 Svelte notes updated.
+- [x] FIXED `selectAllLabel` note: §3 prop note now says it is the IconButton's accessible label/tooltip (not a visible text label), suffixed with `(totalCount)`.
+- [x] FIXED Select-all in Summary, not Actions: §2 anatomy moves select-all under `[Summary]` after count/total (Svelte line 72).
+- [x] FIXED Root `position: fixed` floating bar: §7 sizing + §8 root table document fixed positioning, safe-area insets, sticky z-index, max-width, and the flat `0.5rem` vertical padding (`var(--poodle-space-panel-x)` inline). Density table corrected to change padding-inline + gap only (vertical pad stays `0.5rem`), fixing the prior orthogonality violation.
+- [x] FIXED Root shadow: added the two-layer `box-shadow` (drop + hairline ring, Svelte lines 152-154) to §8 root table.
+- [x] FIXED Danger fallback icon: §8 action-rendering now documents `trash-2` (danger) / `circle` (otherwise) fallback (Svelte line 88).
+- Warning tone via `:global()` color override (lines 183-190) including hover/focus mix — matches contract intent; §8 note expanded to mention the 82% text-primary hover blend. `ok`.
 
 ## GPUI gap (vs Svelte + contract)
 

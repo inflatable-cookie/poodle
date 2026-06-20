@@ -10,7 +10,8 @@ Updated: 2026-04-13
 - Summary: a general action trigger for commands, confirmations, and view-level
   affordances
 - In scope: text buttons, icon-leading buttons, icon-only buttons, loading and
-  disabled states, three visual variants, semantic size roles, and five explicit
+  disabled states, three visual variants, default/danger/warning tones, truncate
+  and fit-content layout modes, semantic size roles, and five explicit
   control sizes
 - Out of scope: transport controls, DAW-specific command widgets
 - Toggle behavior: Button supports `pressed`/`defaultPressed` props and `onPressedChange` for toggle-button use cases
@@ -42,7 +43,7 @@ Updated: 2026-04-13
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | visual treatment |
-| `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
+| `tone` | `"default" \| "danger" \| "warning"` | `"default"` | no | intent modifier; composes with variant for danger×{primary,secondary,ghost} and warning×{primary,secondary,ghost} |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -58,8 +59,11 @@ Updated: 2026-04-13
 | `leadingIcon` | `string \| null` | `null` | no | icon registry identifier |
 | `trailingIcon` | `string \| null` | `null` | no | icon registry identifier |
 | `chevron` | `boolean` | `false` | no | renders trailing disclosure chevron indicator |
+| `truncate` | `boolean` | `false` | no | emits `data-truncate`; clips an overflowing label with `overflow: hidden` + ellipsis |
+| `fit` | `"default" \| "content"` | `"default"` | no | `"content"` emits `data-fit="content"`, dropping `min-width` and setting `padding-inline: 0.375rem` to shrink-wrap the content |
+| `maxWidth` | `string \| null` | `null` | no | composed into the inline `style` as `max-width` when provided |
 | `pressed` | `boolean \| null` | `null` | no | controlled toggle state; when non-null, button acts as a toggle with `aria-pressed` |
-| `defaultPressed` | `boolean` | `false` | no | initial pressed state for uncontrolled toggle mode |
+| `defaultPressed` | `boolean \| null` | `null` | no | initial pressed state for uncontrolled toggle mode; toggle mode activates when `pressed` or `defaultPressed` is non-null |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label |
 | `ariaExpanded` | `boolean \| null` | `null` | no | disclosure-state hint for menu and accordion triggers |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
@@ -85,7 +89,7 @@ Updated: 2026-04-13
 
 - Command actions: no persistent value model for click behavior
 - Toggle mode (controlled): set `pressed`; either bind it directly or listen to `onPressedChange` and update in host code
-- Toggle mode (uncontrolled): set `defaultPressed`; component manages internal state; `onPressedChange` fires on each toggle
+- Toggle mode (uncontrolled): set `defaultPressed` to a non-null boolean; component manages internal state; `onPressedChange` fires on each toggle
 
 ## 4. States
 
@@ -147,13 +151,14 @@ Updated: 2026-04-13
 
 ### Sizing
 
-- Extra-small: `height: control-height - 0.5rem`, `min-width: 3.75rem`, `padding: 0 (space-control-x - 0.125rem)`, `font-size: 0.6875rem`
-- Small: `height: control-height - 0.375rem`, `min-width: 4.25rem`, `padding: 0 (space-control-x - 0.125rem)`, `font-size: 0.75rem`
-- Default: `height: control-height`, `min-width: 5rem`, `padding: 0 space-control-x`
-- Large: `height: control-height + 0.375rem`, `min-width: 5.75rem`, `padding: 0 (space-control-x + 0.125rem)`, `font-size: 0.875rem`
-- Extra-large: `height: control-height + 0.5rem`, `min-width: 6.5rem`, `padding: 0 (space-control-x + 0.1875rem)`, `font-size: 0.9375rem`
-- Icon-only: `min-width: 0`, `padding: 0`, `width: control-height` (adjusted for size)
-- Icon padding adjustment: when a leading or trailing icon is present, the padding on that icon's side is reduced by `0.125rem` (2px). This subtly tightens the icon side to balance visual weight against the label side. Applies independently to each side.
+- Extra-small: `height: 1.5rem`, `min-width: 3.75rem`, `padding: 0 space-control-x`, `font-size: 0.6875rem`
+- Small: `height: 1.75rem`, `min-width: 4.25rem`, `padding: 0 space-control-x`, `font-size: 0.75rem`
+- Default: `height: 2.25rem`, `min-width: 5rem`, `padding: 0 space-control-x`, `font-size: 0.8125rem`
+- Large: `height: 2.75rem`, `min-width: 5.75rem`, `padding: 0 space-control-x`, `font-size: 0.875rem`
+- Extra-large: `height: 3.25rem`, `min-width: 6.5rem`, `padding: 0 space-control-x`, `font-size: 0.9375rem`
+- Icon-only: `min-width: 0`, `padding: 0`, `width` = the per-size square width
+- `fit="content"`: `min-width: 0`, `padding-inline: 0.375rem` (shrink-wraps content)
+- Icon padding adjustment: when a leading or trailing icon is present, the padding on that icon's side is reduced — by a size-specific amount (see Icon padding adjustments table), not a flat `0.125rem`. Applies independently to each side.
 
 ### Composition
 
@@ -234,38 +239,83 @@ Note: The secondary danger idle border uses `border-default` (matching normal se
 | `--poodle-button-text` | `status-danger` | (inherits) | (inherits) |
 | `--poodle-button-shadow` | `none` | (inherits) | (inherits) |
 
+### Tone: warning
+
+Warning tone mirrors the danger tone structure with `status-warning` substituted
+for `status-danger`. Each variant × warning combination defines its own fill,
+border, and text across idle, hover, and active, staying within the warning color
+family rather than using the generic hover variable system.
+
+#### Secondary warning `[data-tone="warning"]`
+
+| Var | Idle | Hover | Active |
+|-----|------|-------|--------|
+| `--poodle-button-fill` | `color-mix(in srgb, status-warning 16%, surface)` | `color-mix(in srgb, status-warning 24%, surface)` | `color-mix(in srgb, status-warning 32%, surface)` |
+| `--poodle-button-border` | `border-default` | `color-mix(in srgb, status-warning 62%, border-default)` | (inherits hover) |
+| `--poodle-button-text` | `text-primary` | (inherits) | (inherits) |
+
+#### Primary warning `[data-variant="primary"][data-tone="warning"]`
+
+| Var | Idle | Hover | Active |
+|-----|------|-------|--------|
+| `--poodle-button-fill` | `status-warning` | `color-mix(in srgb, white 12%, status-warning)` | `color-mix(in srgb, status-warning 88%, black)` |
+| `--poodle-button-border` | `color-mix(in srgb, status-warning 84%, black)` | `color-mix(in srgb, status-warning 72%, black)` | (inherits hover) |
+| `--poodle-button-text` | `text-inverse` | (inherits) | (inherits) |
+| `--poodle-button-shadow` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | (inherits) | (inherits) |
+
+#### Ghost warning `[data-variant="ghost"][data-tone="warning"]`
+
+| Var | Idle | Hover | Active |
+|-----|------|-------|--------|
+| `--poodle-button-fill` | `transparent` | `color-mix(in srgb, status-warning 12%, transparent)` | `color-mix(in srgb, status-warning 18%, transparent)` |
+| `--poodle-button-border` | `transparent` | `color-mix(in srgb, status-warning 28%, transparent)` | (inherits hover) |
+| `--poodle-button-text` | `status-warning` | (inherits) | (inherits) |
+| `--poodle-button-shadow` | `none` | (inherits) | (inherits) |
+
 ### Size adjustments
+
+All sizes use `padding: 0 var(--poodle-space-control-x)` (flat across the size
+ladder; the icon-inset and density adjustments below modify it). Heights use
+fixed rem values rather than `calc()` from `control-height`.
 
 | Size | height | min-width | padding | font-size |
 |------|--------|-----------|---------|-----------|
-| `xs` | `calc(control-height - 0.5rem)` | `3.75rem` | `0 calc(space-control-x - 0.125rem)` | `0.6875rem` |
-| `sm` | `calc(control-height - 0.375rem)` | `4.25rem` | `0 calc(space-control-x - 0.125rem)` | `0.75rem` |
-| `md` | `control-height` | `5rem` | `0 space-control-x` | `typography-label-size` |
-| `lg` | `calc(control-height + 0.375rem)` | `5.75rem` | `0 calc(space-control-x + 0.125rem)` | `0.875rem` |
-| `xl` | `calc(control-height + 0.5rem)` | `6.5rem` | `0 calc(space-control-x + 0.1875rem)` | `0.9375rem` |
+| `xs` | `1.5rem` | `3.75rem` | `0 space-control-x` | `0.6875rem` |
+| `sm` | `1.75rem` | `4.25rem` | `0 space-control-x` | `0.75rem` |
+| `md` | `2.25rem` | `5rem` | `0 space-control-x` | `0.8125rem` |
+| `lg` | `2.75rem` | `5.75rem` | `0 space-control-x` | `0.875rem` |
+| `xl` | `3.25rem` | `6.5rem` | `0 space-control-x` | `0.9375rem` |
 
 ### Icon padding adjustments
 
-When a leading icon is present, reduce `padding-left` by `0.125rem` (2px).
-When a trailing icon or chevron is present, reduce `padding-right` by `0.125rem` (2px).
-Both adjustments apply independently.
+When a leading icon is present, the `padding-left` on the leading side is adjusted;
+when a trailing icon or chevron is present, the `padding-right` is adjusted. Both
+apply independently. The adjustment amount is **size-specific** — the base
+(`md`) reduces by `0.125rem`, but each other size overrides it (xs and sm reduce
+more, lg does not reduce, xl adds slightly).
 
-| Condition | `padding-left` | `padding-right` |
-|-----------|----------------|-----------------|
-| No icons | `space-control-x` | `space-control-x` |
-| Leading icon only | `space-control-x - 0.125rem` | `space-control-x` |
-| Trailing icon only | `space-control-x` | `space-control-x - 0.125rem` |
-| Both icons | `space-control-x - 0.125rem` | `space-control-x - 0.125rem` |
+| Size | icon-side padding (each affected side) |
+|------|----------------------------------------|
+| `xs` | `calc(space-control-x - 0.1875rem)` |
+| `sm` | `calc(space-control-x - 0.25rem)` |
+| `md` | `calc(space-control-x - 0.125rem)` |
+| `lg` | `space-control-x` (no reduction) |
+| `xl` | `calc(space-control-x + 0.0625rem)` |
+
+`data-has-leading` controls `padding-left`, `data-has-trailing` controls
+`padding-right`. `has-leading` is true when a leading snippet/icon is present
+**or** the button is loading; `has-trailing` is true when a trailing snippet/icon
+**or** the chevron is present.
 
 ### Icon-only adjustments
 
 | Size | width | min-width | padding |
 |------|-------|-----------|---------|
-| `xs` | `calc(control-height - 0.5rem)` | `0` | `0` |
-| `md` | `control-height` | `0` | `0` |
-| `sm` | `calc(control-height - 0.375rem)` | `0` | `0` |
-| `lg` | `calc(control-height + 0.375rem)` | `0` | `0` |
-| `xl` | `calc(control-height + 0.5rem)` | `0` | `0` |
+| `xs` | `1.5rem` | `0` | `0` |
+| `sm` | `1.75rem` | `0` | `0` |
+| `md` | `2.25rem` | `0` | `0` |
+| `lg` | `2.75rem` | `0` | `0` |
+| `xl` | `3.25rem` | `0` | `0` |
 
 ### Hover (not disabled)
 
@@ -302,6 +352,21 @@ Both adjustments apply independently.
 |----------|-------|
 | `min-width` | `0` |
 | `white-space` | `nowrap` |
+
+### Truncate `[data-truncate]`
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.button[data-truncate]` | `overflow` | `hidden` |
+| `.button[data-truncate] .button__label` | `overflow` | `hidden` |
+| `.button[data-truncate] .button__label` | `text-overflow` | `ellipsis` |
+
+### Fit content `[data-fit="content"]`
+
+| Property | Value |
+|----------|-------|
+| `min-width` | `0` |
+| `padding-inline` | `0.375rem` |
 
 ### Icon wrapper
 
@@ -345,12 +410,14 @@ When a button is in toggle mode and pressed, non-primary variants receive accent
 | `--poodle-button-text` | `var(--poodle-color-text-inverse)` |
 | `--poodle-button-shadow` | `none` |
 
-Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is set. The `data-pressed` attribute reflects the current pressed state. `aria-pressed` is set to `"true"` or `"false"` accordingly. The `onPressedChange` callback fires on every toggle.
+Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-null. The `data-pressed` attribute reflects the current pressed state. `aria-pressed` is set to `"true"` or `"false"` accordingly. The `onPressedChange` callback fires on every toggle.
 
 ## 9. Svelte Notes
 
 - Uses CSS custom properties (`--poodle-button-fill`, etc.) for the variant system
-- `data-variant`, `data-tone`, `data-size`, `data-density`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing`, `data-pressed` data attributes
+- `data-variant`, `data-tone`, `data-size`, `data-density`, `data-icon-only`, `data-loading`, `data-has-leading`, `data-has-trailing`, `data-truncate`, `data-fit`, `data-pressed` data attributes
+- `data-truncate` emits presence-only when `truncate` is true; `data-fit` emits `"content"` only when `fit !== "default"`
+- `maxWidth` is composed into the inline `style` attribute as `max-width: {maxWidth}` (alongside any passthrough `style`)
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - `data-tone` only emits when tone is not `"default"` (omitted otherwise)
 - `data-loading` always emits (even as `"false"`)
@@ -362,7 +429,7 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is set. 
 - Secondary variant uses elevation stacking: `color-mix` toward `var(--poodle-color-text-primary)` rather than toward a separate elevated background token; the surface color (`--poodle-surface` with fallback to `--poodle-color-background-surface`) is mixed at 88% idle / 80% hover / 84% active with text-primary
 - Danger tone defines all three interaction states (idle, hover, active) for fill and border inline in the danger CSS custom properties, keeping hover/active within the red family rather than deferring to generic `--poodle-button-fill-hover`/`--poodle-button-border-hover`
 - `data-pressed` emits the current pressed boolean when button is in toggle mode; omitted entirely for non-toggle buttons
-- `isToggle` derived from `pressed !== null || defaultPressed`; controlled mode when `pressed !== null`, uncontrolled otherwise
+- `isToggle` derived from `pressed !== null || defaultPressed !== null`; controlled mode when `pressed !== null`, uncontrolled otherwise
 - `onPressedChange` fires on every toggle activation, before the `onClick` callback
 - Chevron renders `chevron-down` icon from registry at size `sm`, positioned after all other content
 

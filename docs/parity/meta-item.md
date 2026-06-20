@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=2 specimen=gap -->
 # Parity: MetaItem
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,9 +16,9 @@
 
 Props mostly match (`label` default `null`, `ariaLabel` default `null`, `typography` default `"body"`). Two divergences: an undocumented prop and a wrong inherit ratio.
 
-- Svelte adds `separator?: boolean` (default `true`) → emits `data-separator` on the root span (`MetaItem.svelte:8,16,24`). This is the signal MetaBar reads to decide whether to draw a leading separator dot. Not in contract §2 props or anatomy. **Fix: add `separator` (default `true`) to contract §2 + document the `data-separator` attribute in anatomy/accessibility.**
-- Inherit-mode label font-size mismatch. Contract §7 ("When `typography=inherit`") says label `font-size: 0.7857em`, and `MetaItemSpec::label_font_size_rem()` returns `0.7857` for `Inherit` (`packages/contracts/components/src/meta_item.rs:54-58`). But Svelte (authoritative) sets `--poodle-meta-item-label-font-size: 0.6875em` in inherit mode (`MetaItem.svelte:71`). **Fix: contract §7 and the Rust spec are both wrong — change inherit label size to `0.6875em` / `0.6875` to match Svelte.**
-- Inherit gap: Svelte uses `0.375em` (`MetaItem.svelte:70`); contract §7 says `0.4286em` and spec `gap_rem()` returns `0.4286` for `Inherit`. **Fix: reconcile — Svelte authoritative, change contract + spec inherit gap to `0.375em` / `0.375`.** (Value font-size `1em` matches across all three.)
+- [x] FIXED (contract) — Svelte adds `separator?: boolean` (default `true`) → emits `data-separator` on the root span (`MetaItem.svelte:8,16,24`). Added `separator` (default `true`) to contract §2 and documented the `data-separator` attribute in §6 accessibility semantics. (`MetaItemSpec` still lacks the field — Rust-side gap, tracked below.)
+- [x] FIXED (contract) — inherit label font-size: contract §7 changed `0.7857em` → `0.6875em` to match Svelte `--poodle-meta-item-label-font-size: 0.6875em` (`MetaItem.svelte:71`). **Note: `MetaItemSpec::label_font_size_rem()` still returns `0.7857` for `Inherit` (`meta_item.rs:54-58`) — Rust spec is now stale vs the corrected contract; code fix out of scope here.**
+- [x] FIXED (contract) — inherit gap: contract §7 changed `0.4286em` → `0.375em` to match Svelte (`MetaItem.svelte:70`). **Note: spec `gap_rem()` still returns `0.4286` for `Inherit` — same Rust-side staleness.**
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -48,5 +48,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - `specimen=gap`: Svelte has no standalone MetaItem specimen at all, and GPUI's lives inside `meta_bar.rs`; only Jetstream has a dedicated file. Jetstream's specimen is the broadest (5 groups) but skips rich-value children.
-- The inherit label-size bug (`0.6875em` Svelte vs `0.7857` contract+spec) propagates into both Rust ports via `label_font_size_rem()` — fixing the one spec method fixes GPUI and Jetstream simultaneously. Same applies to the inherit gap (`0.375` vs `0.4286`).
+- `consv=fixed`: contract §7 inherit label-size + gap corrected to Svelte (`0.6875em` / `0.375em`), and §2/§6 gained the `separator` prop + `data-separator` attribute. Remaining work is Rust-only: `MetaItemSpec` lacks the `separator` field and `label_font_size_rem()`/`gap_rem()` still return the old `0.7857`/`0.4286` for `Inherit` — fixing the one spec method realigns GPUI and Jetstream simultaneously. Out of scope for contract reconciliation (code edits prohibited here).
 - The `separator` prop is the cross-cutting gap: it is the contract↔Svelte miss AND the reason both Rust MetaBars cannot replicate Svelte's per-child separator suppression. The field belongs on `MetaItemSpec`, then surfaced through both builders.

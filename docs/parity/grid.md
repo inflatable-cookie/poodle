@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=4 specimen=gap -->
 # Parity: Grid
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,12 +14,12 @@
 
 ## Contract ↔ Svelte
 
-Prop surface matches the contract closely; the live divergence is in token resolution on the Rust spec, not in Svelte. Svelte is authoritative and agrees with the contract.
+Prop surface matches the contract closely; the live divergence is in token resolution on the Rust spec, not in the contract. The contract §8 token map already matches Svelte's `scaleToSpace` exactly. Only the class name was a contract divergence — reconciled. Remaining items are Rust-spec code changes.
 
-- **Class name divergence.** Contract §2/§9 names the root class `.grid`; Svelte uses `class="poodle-grid"` (`Grid.svelte:34`, `.poodle-grid` block `:39`). Svelte authoritative — **Fix: update contract §2 anatomy + §9 to `.poodle-grid`.**
-- **`ariaLabel` not modeled in the Rust spec.** Contract §3 + Svelte both expose `ariaLabel` (`Grid.svelte:14,34` → `aria-label`). `GridSpec` (`packages/contracts/components/src/grid.rs:4-10`) has `role: Option<String>` but **no `aria_label` field**. Contract-specified prop missing from the shared spec. **Fix: add `aria_label: Option<String>` to `GridSpec` + a `with_aria_label` builder.** (Rust has no ARIA channel to emit it, but the spec must carry it for parity — see GPUI/Jetstream todos.)
-- **`gap`/`padding` token map disagrees between contract and the Rust spec.** Contract §8 / §3 `SpaceScale` map (and Svelte `scaleToSpace`, `internal.ts:14-21`): `sm`→`space-inline-sm`, `md`→`space-panel-y`, `lg`→`space-panel-x`, both for gap and padding. `GridSpec` resolves **gap** via `inline_gap()`/`stack_gap()` (`grid.rs:54-60`) → `md`=`space-inline-md`/`space-stack-md`, and **padding** via `layout_inset()` (`grid.rs:62-64` → `types.rs:52-68`) → `md`=`space-inline-md`/`space-stack-md`. Neither path uses `space-panel-*`. So Rust gap/padding tokens resolve to the **wrong scale** vs Svelte/contract. Svelte authoritative. **Fix: re-point `GridSpec::resolved_column_gap/_row_gap/_padding` at the contract map (`panel_inset` covers md→panel-x/panel-y; sm/lg need the inline-sm / panel-x mapping), or add a Grid-specific resolver matching `scaleToSpace`.** This is the root token-violation driving both Rust gap todos below.
-- **Single gap → two-axis gap.** Svelte/CSS `gap` is one value on both axes. Rust splits it into `resolved_column_gap` (`inline_gap`) and `resolved_row_gap` (`stack_gap`), which resolve to *different* tokens (`space-inline-md` vs `space-stack-md`). CSS `gap: <one value>` is symmetric. **Fix: resolve row and column gap from the same token so both axes match Svelte.**
+- [x] FIXED **Class name divergence.** Contract §2/§9 named the root class `.grid`; Svelte uses `class="poodle-grid"` (`Grid.svelte:34,39`). Contract §2 anatomy + §9 repointed to `.poodle-grid`.
+- **`ariaLabel` not modeled in the Rust spec (code track).** Contract §3 + Svelte both expose `ariaLabel` (`Grid.svelte:14,34`). Contract is correct; `GridSpec` lacks an `aria_label` field — a spec-side code change, not a contract divergence.
+- **`gap`/`padding` token map: contract already matches Svelte.** Verified contract §8 / §3 `SpaceScale` map equals Svelte `scaleToSpace` (`internal.ts:14-25`): `none`→`0`, `sm`→`space-inline-sm`, `md`→`space-panel-y`, `lg`→`space-panel-x`. No contract change needed. The Rust `GridSpec` resolving via `inline_gap`/`layout_inset` (wrong scale) is a code-track fix.
+- **Single gap → two-axis gap (code track).** Svelte/CSS `gap` is one value on both axes; the contract documents one `gap` map. The Rust split into `resolved_column_gap`/`resolved_row_gap` resolving to different tokens is a code-track fix, not a contract divergence.
 
 ## GPUI gap (vs Svelte + contract)
 

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=5 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=7 specimen=gap -->
 # Parity: CodeInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,14 +16,14 @@
 
 Svelte slot geometry and the default label disagree with the contract. Svelte is authoritative — update the contract.
 
-- Default `label`: Svelte `"Authenticator code"` (line 40); contract §3 says `"Verification code"`. **Fix: reconcile contract default to `"Authenticator code"`.**
-- Slot height: Svelte slots are **square** — md is `2.25rem × 2.25rem` (lines 315-316); contract §7/§8 says `2.25rem` wide × **`2.5rem`** high. **Fix: contract height wrong, set to 2.25rem (square).**
-- Size table mismatch: Svelte md `2.25` square, xs `1.5`, sm `1.75`, lg `2.75`, xl `3.25rem` (square, lines 346-368); contract §8 expresses widths/heights as `control-height ± …` asymmetric pairs that don't match. **Fix: replace contract size table with Svelte's square per-size values.**
-- Root gap: Svelte `var(--poodle-space-inline-sm)` (line 296); contract §7 root says literal `0.375rem`. These differ unless the token equals 0.375rem. **Fix: state token, not literal.**
-- Slot `font-weight: 600`: Svelte sets it (line 324); contract §7 slot table omits weight. **Fix: add weight row.**
-- Split-after gap: Svelte adds `margin-right: space-inline-md` after slot index 2 for 6-digit codes (`--split-after`, lines 279/337-339); contract anatomy/§7 never mention the 3+3 split. **Fix: document split-after behavior + token.**
-- Validation focus colors: Svelte derives slot border/focus/ring from `validationState` (danger vs accent, lines 69-83); contract §8 lists only default border + focusRing. **Fix: add invalid-state border/ring rows.**
-- `validationState` valid/pending: contract §3 lists the prop as `ValidationState`; Svelte only branches invalid vs non-invalid for color. Accepted — note that only `invalid` changes visuals in Svelte.
+- [x] FIXED Default `label`: contract §3 default reconciled to `"Authenticator code"`, matching Svelte (line 37).
+- [x] FIXED Slot height: contract §7 Slot height set to `2.25rem` (square) and the Slot table now notes slots are square; matches Svelte (lines 315-316).
+- [x] FIXED Size table: contract §7 size table replaced with Svelte's square per-size values (xs `1.5`, sm `1.75`, md `2.25`, lg `2.75`, xl `3.25rem`, single width/height column) plus a density-gap note.
+- [x] FIXED Root gap: contract §7 Root gap now reads `var(--poodle-space-inline-sm)` (and `width: max-content` added); Tier 2 checklist line updated.
+- [x] FIXED Slot `font-weight`: added a `font-weight: 600` row to the §7 Slot table, matching Svelte (line 324).
+- [x] FIXED Split-after gap: contract §2 anatomy now notes the index-2 `--split-after` marker, and §7 adds a "Slot — split-after" table (`margin-right: var(--poodle-space-inline-md)`) documenting the 3+3 grouping for 6-digit codes.
+- [x] FIXED Validation focus colors: §7 now has a "Slot — active" table (`--code-slot-focus` border + `--code-slot-focus-ring` box-shadow) and a "Slot — validation state" table mapping default vs `invalid` to the border/focus/ring custom properties, matching Svelte (lines 69-83).
+- [x] FIXED `validationState` valid/pending: §5 Behavior now notes only the `invalid` case (or a non-null `error`) changes slot visuals; other states render default colors.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -55,6 +55,6 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=gap` driver: contract slot geometry is stale — Svelte slots are square (`2.25rem` md) and the per-size table is square, but the contract specifies asymmetric `2.25 × 2.5rem` and `control-height ± …` pairs. The default label and the 3+3 split-after behavior are also undocumented.
+- `consv=fixed`: the stale slot geometry (now square `2.25rem` md + square per-size table), default label (`Authenticator code`), root-gap token, slot font-weight, 3+3 split-after, and validation-derived slot colors are all reconciled to Svelte. Remaining gpui/jetstream todos are code-side.
 - Both Rust targets render visual slot grids only; real-input ownership (paste, autofill, one-time-code, slot-click caret placement) is a documented runtime concern but means Tier-1 auto-advance/backspace/onComplete parity is only partially met (GPUI via key events, Jetstream not at all).
 - `numbersOnly={false}` (alphanumeric) is unsupported on both Rust targets — the spec lacks the flag and both hardcode digit filtering.

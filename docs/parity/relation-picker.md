@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=10 specimen=gap -->
 # Parity: RelationPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,13 +16,13 @@
 
 Svelte carries a large undocumented prop/snippet/callback surface. Svelte is authoritative — add all of it to the contract §3/§5.
 
-- Svelte adds props not in contract §3: `selectedItems` (`PickerItem[]`, default `[]`), `searchPlaceholder` (`"Search picker results"`), `filters` (`PickerFilterConfig[]`), `filterValues` (`Record<string,string|undefined>`), `stateTitle`, `stateMessage`, `footerNote`, `showFooter` (default `true`), `showSelectionSummary` (default `true`) — `RelationPicker.svelte:36-86`. **Fix: add all to contract §3.**
-- Svelte adds snippet `renderItem: Snippet<[item, selected]>` (custom candidate rendering, `RelationPicker.svelte:62,609`). Contract §3 Snippets only lists `stateContent`. **Fix: add `renderItem` to contract.**
-- Svelte adds callback `onFilterChange: (key, value) => void` (`RelationPicker.svelte:58,495`). Contract §5 omits it. **Fix: add to contract §5.**
-- Svelte supports `item.disabled` on candidates → `data-disabled`, `aria-disabled`, `disabled` attr, opacity 0.55, skip-toggle (`RelationPicker.svelte:351,590,909`). Contract `PickerItem` type (§3) has no `disabled`. **Fix: add `disabled?: boolean` to `PickerItem`.**
-- Svelte `selectedIds` / `query` defaults are `$bindable(undefined)`, matching contract's `undefined`. OK.
-- Contract anatomy §2 lists `[DrillEmpty]` "No items found" and a `[FormActions]` footer wrapper — Svelte renders both (`RelationPicker.svelte:579,517`). OK.
-- Candidate label weight: Svelte `.item-copy strong { font-weight: 500 }` (`RelationPicker.svelte:941`); contract §8 candidate-copy table omits the weight. Minor — **note `500` in contract.**
+- FIXED — Svelte props not in contract §3 (`selectedItems`, `searchPlaceholder` `"Search picker results"`, `filters` `PickerFilterConfig[]`, `filterValues`, `stateTitle`, `stateMessage`, `footerNote`, `showFooter` default `true`, `showSelectionSummary` default `true`) all added to contract §3 props; `PickerFilterConfig`/`PickerFilterOption` types added to §3 Types; filter controls added to the §2 Toolbar anatomy.
+- FIXED — snippet `renderItem: Snippet<[item, selected]>` added to contract §3 Snippets table.
+- FIXED — callback `onFilterChange: (key, value) => void` added to contract §5.
+- FIXED — `item.disabled` support: `disabled?: boolean` added to the §3 `PickerItem` type, a §8 "Candidate Item Disabled" subsection (`data-disabled`/`aria-disabled`/`disabled` attr, `opacity 0.55`, skip-toggle), and a §6 a11y note.
+- `selectedIds` / `query` defaults (`undefined`) already match. OK.
+- Anatomy `[DrillEmpty]` + `[FormActions]` already present. OK.
+- FIXED — candidate label weight `500` added to the §8 Candidate Copy table (`strong font-weight: 500`).
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -61,4 +61,4 @@ Svelte carries a large undocumented prop/snippet/callback surface. Svelte is aut
 
 - Both Rust targets reuse the real `PickerShell`, `SelectionSummary`, `Checkbox`, `Button` composites, so shell/summary/footer structure is broadly faithful — the gaps are concentrated in the search field (faked), candidate styling (token violations + wrong weight/mix), and interactivity (no keyboard, no live search).
 - `PickerItemSpec` (`packages/contracts/components/src/composite_types.rs:535`) has no `disabled` field, so neither Rust target can express Svelte's disabled-candidate state until the spec gains it.
-- The big `consv=gap` driver is the undocumented Svelte surface (`filters`, `selectedItems`, `searchPlaceholder`, `stateTitle/Message`, `footerNote`, `showFooter`, `showSelectionSummary`, `renderItem`, `onFilterChange`, `item.disabled`). All belong in the contract per "Svelte is parity authority".
+- `consv=fixed`: the undocumented Svelte surface (`filters`, `selectedItems`, `searchPlaceholder`, `stateTitle/Message`, `footerNote`, `showFooter`, `showSelectionSummary`, `renderItem`, `onFilterChange`, `item.disabled`) is now fully reconciled into the contract (§2/§3/§5/§6/§8) per "Svelte is parity authority".

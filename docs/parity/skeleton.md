@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
 # Parity: Skeleton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,8 +17,8 @@
 
 Contract and Svelte agree on the public prop surface (`shape`/`preset`/`width`/`height`/`lines`/`animated`), all six render branches, and the `aria-hidden="true"` + `data-animated` attributes. Svelte is faithful. The divergences are between the **contract/Svelte vocabulary** and the **Rust `SkeletonSpec`** — those are spec bugs, listed in the target sections. Two contract-side items:
 
-- Contract §3 names the shape union `"line" | "block" | "circle"` and Svelte matches it (`SkeletonShape`, `data-shape={shape}`). The Rust `SkeletonSpec.shape` instead uses `"rectangle"` (default) / `"text"` / `"circle"` (`packages/contracts/components/src/skeleton.rs:35,86-89`). **Fix the Rust side: rename to `line`/`block`/`circle` to match the authoritative contract+Svelte; do not change the contract.**
-- Contract §6 / Tier-1 says single skeletons carry *no* role and "no semantic role", but Svelte's single-shape branch emits `aria-hidden="true"` on the `<span>` (`Skeleton.svelte:77`). Svelte is authoritative and the stricter behavior is correct. **Fix: contract §6 should state single shapes also set `aria-hidden="true"`, not just preset containers.**
+- [x] FIXED (contract already correct): Contract §3 names the shape union `"line" | "block" | "circle"` and Svelte matches it (`SkeletonShape`, `data-shape={shape}`). The divergence is the Rust `SkeletonSpec.shape` (`"rectangle"`/`"text"`/`"circle"`, `skeleton.rs:35,86-89`) — a **Rust spec rename (code, out of scope here)**. The contract needs no change; do NOT change the contract.
+- [x] FIXED: Contract §6 now states the single-shape element also sets `aria-hidden="true"` (matching Svelte's single-shape `<span>`, `Skeleton.svelte:78`), not just preset containers.
 - Animation is fully specified (contract §8 keyframes `200% 0` → `-20% 0`, `1.6s linear infinite`, `background-size: 220% 100%`, 3-stop `color-mix` gradient) and Svelte implements it verbatim (`Skeleton.svelte:87-118`). This is a real shimmer (background-position sweep), not a pulse — relevant to the Rust gaps below.
 
 ## GPUI gap (vs Svelte + contract)
@@ -53,7 +53,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- Root cause of `consv=gap`: the contract+Svelte shape vocabulary (`line`/`block`/`circle`) and the Rust `SkeletonSpec` vocabulary (`rectangle`/`text`/`circle`) have diverged. Per "Svelte is parity authority," rename the Rust spec to match — this is the single fix that unblocks both Rust targets' shape handling.
+- `consv=fixed`: the contract is faithful to Svelte (shape vocab `line`/`block`/`circle` already correct; §6 `aria-hidden` on single shapes now documented). The remaining shape-vocab divergence lives in the Rust `SkeletonSpec` (`rectangle`/`text`/`circle`) — a code rename, out of scope for this contract-reconciliation pass. Per "Svelte is parity authority," rename the Rust spec to match; that single fix unblocks both Rust targets' shape handling.
 - GPUI is the worst offender on the no-hardcoded-literals rule: nearly every preset dimension is a raw `px(...)` float and the animation is a pulse, not the contract shimmer. The GPUI *specimen* additionally fakes presets rather than calling the component's preset builder, hiding that gap.
 - Jetstream is honest about lacking animation (header comment) and does exercise the real preset builder, but its preset internals (avatar sizes, line counts, label/value rows, footer pills, cell widths) drift materially from the contract.
 - Contract §11 Tier-2 visual checks (shimmer 3-stop color-mix, 220% bg-size, 1.6s linear, keyframes 200%→-20%) are unmet in both Rust targets — neither renders the gradient at all (flat `bg(fill)`).

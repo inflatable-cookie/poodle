@@ -20,7 +20,7 @@ Updated: 2026-03-30
 ## 2. Anatomy
 
 ```text
-[Root .ui-presentation-provider]  <div style="--poodle-size-control-height: ...; ...">
+[Root .poodle-ui-presentation-provider]  <div style="--poodle-size-control-height: ...; ...">
   └── [Children] (all descendant content)
 ```
 
@@ -87,6 +87,21 @@ size against the provider's `sizeScale`:
 | `lg` | `md` | `lg` | `xl` |
 | `xl` | `lg` | `xl` | `xl` |
 
+### Supporting Visual Size Resolution (`resolveSupportingVisualSize`)
+
+A second resolver sizes supporting visuals (e.g. icons rendered inside a
+control) one step below the control's resolved size, so glyphs stay
+proportionate. It maps `xl → lg`, `lg → md`, `md → sm`, and is identity for `sm`
+and `xs`.
+
+| input size | supporting visual size |
+|------------|------------------------|
+| `xs` | `xs` |
+| `sm` | `sm` |
+| `md` | `sm` |
+| `lg` | `md` |
+| `xl` | `lg` |
+
 ### Controlled And Uncontrolled
 
 - Both `density` and `sizeScale` are externally controlled props
@@ -146,7 +161,7 @@ any key events.
 
 ## 8. Token Usage -- Exact Values
 
-### Root `.ui-presentation-provider`
+### Root `.poodle-ui-presentation-provider`
 
 | Property | Value |
 |----------|-------|
@@ -168,12 +183,17 @@ Example for `density="default"`, `sizeScale="md"`:
 
 ## 9. Svelte Notes
 
-- Implemented as a `<div class="ui-presentation-provider">` with
+- Implemented as a `<div class="poodle-ui-presentation-provider">` with
   `display: contents` and inline `style` for CSS custom properties
-- Creates or updates a Svelte context store via `setUiPresentation()`
-- If a store already exists in context (from an outer provider), it updates
-  the existing store rather than creating a new one
-- An effect keeps the context store in sync when props change
+- Each provider creates a fresh scoped context store via `setUiPresentation()`
+  (which unconditionally calls `writable(value)` + `setContext`); it does not
+  reuse or mutate an outer provider's store
+- The store is seeded with a literal `{ density: "default", sizeScale: "md" }`
+  and an effect immediately syncs it to the real prop values (and keeps it in
+  sync on prop changes)
+- Nesting works through Svelte's own context scoping: an inner provider's
+  `setContext` shadows the outer store for its subtree, so inner overrides outer
+  without touching the outer store
 - Helper functions from `presentation.ts`:
   - `controlHeightRem(sizeScale)` computes the control height value
   - `controlSpaceXRem(density)` computes horizontal control spacing

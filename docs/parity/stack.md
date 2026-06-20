@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
 # Parity: Stack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,14 +17,14 @@
 
 Svelte carries sizing props and default behaviors the contract does not document. Svelte is authoritative — update the contract.
 
-- Svelte adds `width?: string | null` and `height?: string | null` (defaults `null`) → composed into inline `width`/`height` (`Stack.svelte:37-38,56-57`). Not in contract §3. **Fix: add to contract props.**
-- Svelte adds `minWidth?: string | null` and `minHeight?: string | null` (defaults `null`) → inline `min-width`/`min-height` overrides (`Stack.svelte:39-40,58-59`). Contract §8 only specifies static `min-width:0`/`min-height:0`. **Fix: add the overridable props to contract.**
-- Svelte adds `overflow?: OverflowMode` (default `"visible"`, values `visible|hidden|clip`) → inline `overflow` (`Stack.svelte:41,60`). Not in contract. **Fix: add `overflow` prop + `OverflowMode` to §3 shared types.**
-- Svelte adds `class?: string` passthrough merged into `poodle-stack ${className}` (`Stack.svelte:28,64`). Not in contract anatomy. **Fix: note class passthrough in contract.**
-- `align` default: contract §3 says `"stretch"`; Svelte default is `undefined` resolving to direction-dependent `direction === "column" ? "stretch" : "center"` (`Stack.svelte:48`). Contract is wrong for `direction="row"`. **Fix: document direction-aware align default.**
-- `justify` default: contract §3 leaves it blank (`—`); Svelte default is `"start"` (`Stack.svelte:18`) and always emits `justify-content` (`Stack.svelte:53`). **Fix: set contract `justify` default to `"start"`.**
-- `LayoutJustify` value: contract §3/§8 spell the wrap value `"space-between"`; Svelte type + helper use `"between"` (`types.ts:36`, `internal.ts:46`). **Fix: change contract `LayoutJustify` union to `start|end|center|between`.**
-- `gap`/`padding` token map (contract §8 + SpaceScale map): contract maps `md → space-panel-y` and `lg → space-panel-x`. Svelte `scaleToSpace` agrees (`internal.ts:14-25`), but the Rust `StackSpec.resolved_gap` resolves column gap via `PaddingScale::stack_gap` → `space-stack-{sm,md,lg}` and row gap via `inline_gap` → `space-inline-{sm,md,lg}` (`types.rs:88-104`), and padding via `layout_inset` → `space-inline-*`/`space-stack-*` (`types.rs:52-68`). Svelte uses neither the stack/inline split nor direction-aware gap. **Three-way token divergence — Svelte (`panel-y`/`panel-x`) vs Rust (`stack`/`inline`). Reconcile in contract §8; pick Svelte tokens as authority.**
+- [x] FIXED Svelte `width`/`height` (defaults `null`) → inline `width`/`height` (`Stack.svelte:37-38,56-57`). Added to contract §3 props + §8 inline table.
+- [x] FIXED Svelte `minWidth`/`minHeight` (defaults `null`) → overridable `min-width`/`min-height` (`Stack.svelte:39-40,58-59`). Added to contract §3 props + §8 (base min-* now noted overridable).
+- [x] FIXED Svelte `overflow?: OverflowMode` (default `"visible"`) → inline `overflow` (`Stack.svelte:41,60`). Added `overflow` prop + `OverflowMode` shared type + §8 inline row.
+- [x] FIXED Svelte `class?: string` passthrough merged into `poodle-stack ${className}` (`Stack.svelte:28,64`). Added `class` prop + §9 note; §9 root class corrected to `poodle-stack`.
+- [x] FIXED `align` default — now documented direction-aware (`column` → `stretch`, `row` → `center`, `Stack.svelte:48`) in §3 + §9.
+- [x] FIXED `justify` default — set to `"start"` (`Stack.svelte:18`), always emitted (§3 + §8 + §9).
+- [x] FIXED `LayoutJustify` union — changed `"space-between"` → `"between"` (`types.ts:36`, `internal.ts:46`) in §3 shared types + §8 inline table.
+- [x] CONTRACT-OK `gap`/`padding` token map — contract §8 already maps `md → space-panel-y`, `lg → space-panel-x`, matching Svelte `scaleToSpace` (`internal.ts:14-25`). The `stack`/`inline` split lives only in the Rust `StackSpec` (`types.rs:88-104`); that is a code-side spec realignment, not a contract drift. Contract is correct per Svelte. (See Notes — Rust spec follow-up.)
 - `wrap` default: contract `false`, Svelte `false` (`Stack.svelte:24`) — matches.
 - `asRole`/`ariaLabel`: contract default `null`; Svelte `null`, emitted as `role`/`aria-label` only when set (`Stack.svelte:64`) — matches.
 
@@ -60,4 +60,5 @@ Component code is token-clean — zero hardcoded px/color literals in `stack.rs`
 
 - Both Rust **component** files are clean: no `.h(<n>)`, `.w(<n>)`, `text_size(<n>)`, `px(<float>)`, `hsla(`/`rgb(` literals. All Stack spacing resolves from tokens. Hardcoded literals appear only in **specimen harness** code (eyebrow/label chrome), which is out of scope for the component token contract.
 - Biggest structural gap is Jetstream: `js_stack` is column-only and ignores direction, justify, wrap, and sizing — roughly half the Svelte surface. GPUI is near-complete (sizing + overflow + align-default the only holes).
-- The `consv=gap` driver splits into two buckets: (1) undocumented Svelte sizing surface (`width`/`height`/`minWidth`/`minHeight`/`overflow`/`class`), and (2) a genuine three-way token-map disagreement on gap/padding (Svelte `panel-*` vs Rust `stack-*`/`inline-*`). The token map needs a single authority — pick Svelte per "Svelte is parity authority" and realign `PaddingScale::stack_gap`/`inline_gap`/`layout_inset` or the contract §8 table.
+- `consv=fixed`: the undocumented Svelte sizing surface (`width`/`height`/`minWidth`/`minHeight`/`overflow`/`class`), direction-aware align default, `justify` default, and the `between` rename are all now in the contract. The contract §8 token map already matched Svelte (`panel-*`), so no contract change was needed there.
+- **Code-side follow-up (not contract):** the Rust `StackSpec` resolves gap/padding via `PaddingScale::stack_gap`/`inline_gap`/`layout_inset` → `space-stack-*`/`space-inline-*` (`types.rs:52-104`), diverging from Svelte's `panel-y`/`panel-x`. Per "Svelte is parity authority" the Rust spec should be realigned to the `panel-*` tokens. This is a code change, out of scope for the contract reconciliation.

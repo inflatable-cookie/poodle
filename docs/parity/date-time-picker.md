@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=4 specimen=gap -->
 # Parity: DateTimePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,11 +14,11 @@
 
 ## Contract ↔ Svelte
 
-Props, callbacks, ARIA, anatomy align. Size-table is wrong vs Svelte (same issue as range).
+Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
-- Size table (§8) lists per-size `padding` overrides (`xs`…`xl`). Svelte applies **no** per-size padding — only per-size `font-size` and trigger-height (`DateTimePicker.svelte:304-329`); density owns horizontal padding (lines 330-331). Contract violates size/density orthogonality. **Fix: delete `padding` rows from contract §8 size table.**
-- Size table `min-height` is `calc(control-height ± Xrem)`; Svelte hardcodes absolute rems. Same resolved values; **Fix: reconcile token-form to match Svelte.**
-- Partial-value trigger text: Svelte shows `"Select time"` (date set, no time) / `"Select date"` (time set, no date) / placeholder (`DateTimePicker.svelte:66-69`). Contract §4 says "partial value displayed" but does not document these exact prompt strings. **Fix: document partial-value prompt strings in contract §4.**
+- [x] Deleted the per-size `padding` overrides from §8; moved horizontal padding to a Density adjustments table (`0 calc(control-x ∓ 0.125rem)`). FIXED.
+- [x] Size table `min-height` rewritten to Svelte's absolute rems + added per-size indicator font-size. FIXED.
+- [x] Documented partial-value prompt strings in §4: `"Select time"` (date set, no time) / `"Select date"` (time set, no date). FIXED.
 
 ## GPUI gap (vs Svelte + contract)
 

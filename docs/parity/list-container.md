@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
 # Parity: ListContainer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,8 +17,8 @@
 
 One real divergence, plus a class-name namespacing note.
 
-- **Pagination alignment**: contract §8 "Pagination Composition" says `.pagination { justify-self: start }`; Svelte sets `justify-self: end` (`ListContainer.svelte:212`). Svelte is the reference. **Fix: contract → `end`.**
-- Class prefix: contract anatomy uses bare `.list-container*`; Svelte emits `.poodle-list-container*`. Cosmetic namespacing, contract uses the unprefixed convention throughout — accepted, note once.
+- [x] FIXED Pagination alignment: contract §8 "Pagination Composition" now `.pagination { justify-self: end }`, matching Svelte (`ListContainer.svelte:212`).
+- Class prefix: contract anatomy uses bare `.list-container*`; Svelte emits `.poodle-list-container*`. Cosmetic namespacing, contract uses the unprefixed convention throughout — accepted (noted), not a contract fix.
 - Everything else (24 props, all snippets, all 4 states, derived `shouldShowPagination*`, `aria-label ?? title`, `data-state`, error Callout `announceMode="assertive"`) matches contract exactly.
 
 ## GPUI gap (vs Svelte + contract)
@@ -51,5 +51,5 @@ GPUI hand-rolls header + state text instead of delegating to PageHeader/Callout/
 
 ## Notes
 
-- `consv=gap` driven solely by the pagination `justify-self` value (contract says `start`, Svelte says `end`).
+- `consv=fixed`: the only Contract↔Svelte divergence was the pagination `justify-self` value (now `end` to match Svelte). The remaining work is Rust-side spec/composition (filters/batch/pagination wiring), tracked below.
 - Root structural gap across both Rust targets: `ListContainerSpec` (`list_container.rs:21-`) has no filter/batch/breadcrumbs/actions slot surface and no pagination wiring, so neither Rust target can reach contract parity without spec expansion. This is the dominant work item — flag spec-level before component-level.

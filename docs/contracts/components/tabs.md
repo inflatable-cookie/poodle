@@ -12,8 +12,9 @@ Updated: 2026-04-01
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, visual variants
   (text/card/pill/strip/block), reorderable tabs, closable tabs, tab counts,
-  optional visual separators, trailing actions snippet, lightweight URL query sync
-- Out of scope: docking, overflow menus
+  optional visual separators, trailing actions snippet, lightweight URL query sync,
+  full-width flex layout, overflow collapse into a menu
+- Out of scope: docking
 
 ## 2. Anatomy
 
@@ -24,7 +25,9 @@ Updated: 2026-04-01
   │     │     ├── [Tab .poodle-tabs__tab]  role="tab"  <button>
   │     │     │     ├── [Icon] (optional, Icon component using supporting semantic sizing)
   │     │     │     └── [Label .poodle-tabs__label]  <span>
-  │     │     └── [Close .poodle-tabs__close] (optional, when closable)
+  │     │     ├── [Close .poodle-tabs__close] (optional, when closable)
+  │     │     └── [Tooltip] (optional, when `showTooltips`; wraps the tab)
+  │     ├── [Collapsed Menu] (optional, when `collapseWhenOverflow` and the list overflows; Menu replacing the tablist)
   │     └── [Actions .poodle-tabs__actions] (optional actions snippet)
   └── [Panel .poodle-tabs__panel]  role="tabpanel" (optional, when `children(activeValue)` snippet exists)
 ```
@@ -37,6 +40,8 @@ Updated: 2026-04-01
 | Tab | yes | selectable button | text, background, focus ring |
 | Label | yes | text content | whitespace, min-width |
 | Close | no | close button (when closable) | icon color, hover bg |
+| Tooltip | no | hover tooltip over a tab (when `showTooltips`) | Tooltip component tokens |
+| Collapsed Menu | no | overflow affordance: collapses the tablist into a `Menu` (when `collapseWhenOverflow` and the list overflows) | Menu component tokens |
 | Actions | no | trailing actions snippet | margin-left auto |
 | Panel | no | content region (when `children(activeValue)` snippet provided) | border, background, padding |
 
@@ -56,6 +61,9 @@ Updated: 2026-04-01
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
+| `collapseWhenOverflow` | `boolean` | `false` | no | when the tablist overflows its container, collapse the tabs into a `Menu` affordance |
+| `fullWidth` | `boolean` | `false` | no | tabs flex to fill the row (sets `data-full-width`) |
+| `collapseLabel` | `string \| null` | `null` | no | label for the collapsed-overflow trigger; falls back to the active tab label when null |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the tablist |
 | `showTooltips` | `boolean` | `false` | no | shows tooltips on tab hover |
 | `historyKey` | `string \| null` | `null` | no | syncs the active tab to a URL query param with replaceState |
@@ -501,6 +509,18 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
 
+### Full-width (`data-full-width="true"`, non-vertical)
+
+Applies when `fullWidth` is set and orientation is horizontal.
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| List | `display` | `flex` |
+| List | `width` | `100%` |
+| Item | `flex` | `1 1 0` |
+| Tab | `width` | `100%` |
+| Tab | `justify-content` | `center` |
+
 ### Actions snippet
 
 | Property | Value |
@@ -538,6 +558,10 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 - Module-level `nextTabsId` counter for unique IDs across instances
 - Close button stops click propagation so the parent tab does not also activate
 - `children(activeValue)` receives `activeValue` as snippet argument
+- `data-full-width` — set when `fullWidth` is true; drives the full-width flex layout (non-vertical only)
+- `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
+- `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
+- Variant resolution: `variant="underline"` is normalized to `"text"` (`resolvedVariant`); the rendered `data-variant` is `"text"`. `"text"` is the canonical Svelte name and the default
 
 ## 10. GPUI Notes
 
@@ -545,7 +569,7 @@ Note: In the block variant, the hover background is applied on the **item wrappe
 - Spec struct: `TabsSpec` in primitives crate holds tab definitions + variant
 - Component struct: `PoodleTabs` in components crate renders via `IntoElement`
 - Opacity multipliers centralized in spec: `pill_border_opacity() -> 0.68`, `pill_active_bg_opacity() -> 0.18`
-- Note: `"underline"` is accepted as a deprecated alias for `"text"` in the variant prop
+- Note: `"underline"` is accepted as a deprecated alias for `"text"` in the variant prop. The Rust `TabVariant` enum names this canonical member `Underline` (enum: `Underline | Card | Pill | Block`); it is the same variant Svelte renders as `data-variant="text"`. The naming difference is implementation-side only — both target Svelte's text/underline variant.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Text variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Card item border opacity: 68% → `0.68` multiplier on border-subtle

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=11 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=11 jetstream=11 specimen=gap -->
 # Parity: EditableList
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,13 +14,14 @@
 
 ## Contract ↔ Svelte
 
-Svelte has props the contract does not document, and the contract size/state tables are stale. Svelte authoritative.
+`consv=fixed`. Undocumented Svelte props, stale token values, composed-primitive anatomy, and stale §10 all reconciled.
 
-- Svelte adds `embeddedHandle?: boolean` (default false, `EditableList.svelte:21`) — not in contract §3. **Fix: add to contract.**
-- Svelte adds `showWorkflowChrome?: boolean` (default true, `EditableList.svelte:34`) — not in contract §3. **Fix: add to contract.**
-- Item background is `transparent` (`EditableList.svelte:593`); contract token table says `background-surface`. Hover is `background-elevated 82%` (line 605) vs contract 52%. Drop-target tint `accent-base 56% border / 10% bg` (lines 620-621) vs contract 8%. **Fix: update contract §8 values to Svelte.**
-- Contract §10 "GPUI Notes: Not yet implemented" is stale — GPUI now has a real composite. **Fix: rewrite §10.**
-- All 27 contract props + 6 callbacks (onReorder/onAdd/onRemove/onChange/onSubmit/onCancel), full anatomy (live region, header, error/info, window-nav, `<ul role=listbox>`/`<li role=option>`, 6-dot handle, remove, add row, counter), keyboard grab/move/drop/cancel, and ARIA all present.
+- [x] FIXED `embeddedHandle?: boolean` (default false, `EditableList.svelte:21,54`) added to contract §3 + anatomy (`--embedded-handle` padding 0, handle omitted).
+- [x] FIXED `showWorkflowChrome?: boolean` (default true, `EditableList.svelte:34,67`) added to contract §3; chrome gate documented as `showWorkflowChrome && (onSubmit||onCancel)`.
+- [x] FIXED Item token values updated to Svelte: background `transparent` (`:593`), hover `elevated 82% / transparent` (`:605`), focus-visible `accent-focusRing` border + box-shadow (`:608-611`), drop-target/grabbed/last-moved `accent-base 56%` border + `accent-base 10%` bg (`:620-621`); transition `120ms ease`. §4 states table synced.
+- [x] FIXED (extra) Anatomy/§8 reconciled to composed primitives: Remove = ghost `IconButton` (`--danger-on-hover`), Add Input = `TextInput` wrapper, Add Button = primary `Button` wrapper; add-row gap `0.375rem` → `0.5rem`; raw-element token tables replaced with delegation + wrapper styling.
+- [x] FIXED Contract §10 rewritten — GPUI composite exists but is presentational (no callbacks/DnD/keyboard/live-region/`<ul>` semantics).
+- All 27+ contract props + 6 callbacks (onReorder/onAdd/onRemove/onChange/onSubmit/onCancel), full anatomy (live region, header, error/info, window-nav, `<ul role=listbox>`/`<li role=option>`, 6-dot handle, remove, add row, counter), keyboard grab/move/drop/cancel, and ARIA all present.
 
 ## GPUI gap (vs Svelte + contract)
 

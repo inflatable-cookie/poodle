@@ -221,7 +221,7 @@ type EmptyStateVariant = "neutral" | "search" | "firstRun";
 | Selector | Property | Value |
 |----------|----------|-------|
 | `.list-container__pagination :global(.pagination-summary)` | width | `100%` |
-| `.list-container__pagination :global(.pagination)` | justify-self | `start` |
+| `.list-container__pagination :global(.pagination)` | justify-self | `end` |
 
 ### Composed Primitives
 

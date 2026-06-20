@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=3 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=4 specimen=gap -->
 # Parity: Progress
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,9 +17,9 @@
 
 Props/anatomy/ARIA largely agree. Divergences are in token mix ratios and one internal contradiction in the contract.
 
-- **Track background mix is a three-way mismatch.** Contract §8 Root table: `color-mix(in srgb, var(--poodle-surface) 96%, var(--poodle-color-text-primary))`. Contract §8 Token Reference table + §11 Tier 2: `--poodle-color-background-surface` at **92%** mix. Svelte (`Progress.svelte:60`): `--poodle-surface` **96%** with `--poodle-color-text-primary`. Svelte is authoritative. **Fix: correct contract Token Reference (line 179) and Tier-2 line (line 208) to `--poodle-surface` 96% with `text-primary`, not `background-surface` 92%.**
+- FIXED — **Track background mix three-way mismatch.** Contract §8 Root table already had `color-mix(--poodle-surface 96%, --poodle-color-text-primary)`; the §8 Token Reference and §11 Tier-2 lines said `--poodle-color-background-surface` at 92%. Svelte (`Progress.svelte:60`) is `--poodle-surface` 96% with `--poodle-color-text-primary`. Contract Token Reference and Tier-2 lines corrected to `--poodle-surface` 96% with `text-primary`.
 - **Contract §6/§8 contradicts itself on `aria-valuemax` when indeterminate.** §6 says all three aria-value attrs omitted when indeterminate — Svelte matches (`Progress.svelte:43-44` gate every attr on `!indeterminate`). No fix needed; just flagging the §6 line "no aria-valuemin/valuemax/valuenow" is correct and Svelte-aligned.
-- **`computedValueText` is a Svelte behavior absent from contract.** Svelte derives a fallback `aria-valuetext` of `"{round(pct*100)}%"` when determinate and no explicit `valueText` (`Progress.svelte:30-32,45`). Contract §3 lists `valueText` but never documents the computed `%` fallback. **Fix: document the computed `valueText` fallback in contract §3 Computed Values + §6 Optional attributes.**
+- FIXED — **`computedValueText` Svelte behavior absent from contract.** Svelte derives a fallback `aria-valuetext` of `"{round(pct*100)}%"` when determinate and no explicit `valueText` (`Progress.svelte:30-32,45`). Documented as `computedValueText` in contract §3 Computed Values and folded into the §6 Optional-attributes `aria-valuetext` rule.
 - **Indicator is `<span>` in contract anatomy (§2) and Svelte (`Progress.svelte:47`)** — agree. Note: both Rust impls render the indicator as a `div`, not a span (no semantic impact in Rust, but anatomy-label drift).
 - `value` clamp / `safeMax` / `percentage` formulas (§3) match Svelte (`Progress.svelte:27-29`) and the spec's `normalized_progress()` (`progress.rs:46-58`). OK.
 
@@ -52,5 +52,5 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Notes
 
 - Spec gaps driving multiple todos: `ProgressSpec` (`packages/contracts/components/src/progress.rs`) exposes only `indicator_fill_token()` (solid accent). It lacks (a) a `track_fill_token()` / track-mix method — both impls hand-assemble the mix from raw `"color.background.surface"` + `"color.text.primary"` string lookups; (b) an indicator-gradient method — so neither impl can render the contract gradient; (c) a size→min-height method — so height is inlined in GPUI and hardcoded in Jetstream. Add all three to the spec to close the GPUI and most Jetstream todos at the source.
-- `consv=gap` driver: the contract's own §8 Token Reference + §11 Tier-2 say track bg = `background-surface` at 92%, contradicting the §8 Root table and Svelte (`surface` at 96% with `text-primary`). Internal contract contradiction, fixable without touching Svelte.
+- `consv=fixed`: the §8 Token Reference + §11 Tier-2 track-bg contradiction (`background-surface` 92% vs the §8 Root table / Svelte `surface` 96% with `text-primary`) is resolved in favour of Svelte; `computedValueText` fallback now documented. No Svelte change needed.
 - The `rounded(px(999.0))` / `rounded(999.0)` literals in both impls are the contract's literal pill radius (§8 `border-radius: 999px`), not token violations — left as-is.

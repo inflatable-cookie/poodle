@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=7 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=7 jetstream=5 specimen=gap -->
 # Parity: EmbedPreview
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,10 +14,11 @@
 
 ## Contract ↔ Svelte
 
-Svelte matches the contract props/anatomy/states; one class-prefix drift.
+`consv=fixed`. Svelte matches contract props/anatomy/states; class-prefix drift + fallback-link composition reconciled.
 
-- Class prefix drift: implementation uses `.poodle-embed-preview*`; contract anatomy/CSS uses `.embed-preview*`. **Fix: reconcile contract to `.poodle-` prefix.**
-- All 6 props (parsed/trustedHtml/aspectRatio/loading/error/emptyMessage) with matching defaults (`EmbedPreview.svelte:7-21`), all 7 states in priority order (loading > error > empty > iframe > raw embed > trusted HTML > fallback), derived `embedUrl`/`isAudio`/`effectiveAspectRatio`, and ARIA (iframe `title`/`sandbox`/`loading=lazy`/`allowfullscreen`/`frameborder=0`, fallback `target=_blank rel=noopener noreferrer`) all match. consv otherwise ok — gap is the prefix only.
+- [x] FIXED Class prefix reconciled to `.poodle-embed-preview*` throughout anatomy + §8 token tables + §9 note.
+- [x] FIXED (extra) Fallback link is the `TextLink` primitive (`.poodle-text-link`, `EmbedPreview.svelte:96-100,187`), not a bare `<a>` — anatomy, parts table, §7/§8/§10 + §9 notes updated; `embedType?` added to the shared `ParsedEmbed` type for cross-contract consistency.
+- All 6 props (parsed/trustedHtml/aspectRatio/loading/error/emptyMessage) with matching defaults (`EmbedPreview.svelte:7-21`), all 7 states in priority order (loading > error > empty > iframe > raw embed > trusted HTML > fallback), derived `embedUrl`/`isAudio`/`effectiveAspectRatio`, and ARIA (iframe `title`/`sandbox`/`loading=lazy`/`allowfullscreen`/`frameborder=0`, fallback `target=_blank rel=noopener noreferrer`) all match.
 
 ## GPUI gap (vs Svelte + contract)
 

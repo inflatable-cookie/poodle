@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=11 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=11 jetstream=8 specimen=gap -->
 # Parity: MarkdownEditor
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,9 +15,9 @@
 
 ## Contract ↔ Svelte
 
-- **`value` default**: contract §3 says `""`; Svelte default is `undefined` (`MarkdownEditor.svelte:32`), and `hasControlledValue = value !== undefined` is the controlled/uncontrolled switch. Defaulting to `""` would break the uncontrolled path. **Fix: contract `value` default → `undefined` (or document that `""` ≠ omitted).**
+- [x] FIXED **`value` default**: contract §3 now `value: string | undefined` default `undefined` (bindable), with the `value !== undefined` controlled/uncontrolled switch documented in §3; defaulting to `""` would force controlled mode (Svelte `:32,57`).
 - **`placeholder` default**: contract §3 says `"Write markdown..."`; Svelte matches (`line 35`). OK.
-- **Mode-x density**: Svelte exposes `--poodle-md-editor-mode-x` varying by size (`lines 259/272/277`) and by density implicitly; contract §8 density table omits a Mode-X column (only Mode-Y). Minor — Svelte authoritative; **add Mode-X to contract size/density tables.**
+- [x] FIXED **Mode-X**: contract §8 Size table gains a Mode-X column (`xs 0.375 / sm,md 0.5 / lg 0.625 / xl 0.75 rem`). Corrected the parity note's claim — `--poodle-md-editor-mode-x` is *size*-driven only (not density), and is currently declared-but-unconsumed in Svelte CSS, so it lives in the size table, not the density table (Svelte `:248,259,272,277`).
 - **Toolbar separator**: GPUI/Jetstream invent a vertical separator between tool groups; Svelte has none and contract §2 anatomy lists no separator. Not a contract gap — flagged under Rust gaps as an invented part.
 - Tool icons: contract §8 mode icons `pencil`, `columns-2`, `eye` and tool icons bold/italic/heading/link/code/quote/list match Svelte `toolbarActions` (`lines 150-158`). OK.
 - Preview-empty copy "Nothing to preview" matches across contract §2, Svelte (`line 233`). OK.

@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=11 specimen=gap -->
 # Parity: TokenInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,8 +17,8 @@
 
 Svelte exposes props the contract does not document. Svelte is authoritative — update the contract.
 
-- Svelte adds `resolveToken?: (value, values) => string | null | undefined` (`TokenInput.svelte:29`) — a per-token validation/transform hook; returning non-string rejects the draft. Not in contract §3. **Fix: add to contract props + Behavior Rules.**
-- Svelte adds `onTokenReject?: (value: string) => void` (`:31`) — fires when `resolveToken` rejects a draft. Not in contract §6 callbacks. **Fix: add to contract callbacks.**
+- [x] FIXED Svelte adds `resolveToken?: (value, values) => string | null | undefined` (`TokenInput.svelte:29`) — a per-token validation/transform hook; returning non-string rejects the draft. Added to contract §3 props + §4 Commit Semantics.
+- [x] FIXED Svelte adds `onTokenReject?: (value: string) => void` (`:31`) — fires when `resolveToken` rejects a draft. Added to contract §3 props + §6 callbacks.
 - Everything else aligns: props (`id`/`values`/`name`/`placeholder`/`disabled`/`readOnly`/`required`/`spellcheck`/`autocapitalize`/`autocomplete`/`ariaLabel`/`describedBy`/`size`/`sizeRole`/`density`/`separators`/`dedupe`/`commitOnBlur`/`maxLength`/`onValuesChange`) match contract §3 names, types, and defaults. Anatomy parts (root, hidden inputs, token row, token, label, remove button, input control), commit/removal/dedupe/form semantics, and ARIA all match.
 - Rust `TokenInputSpec` (`token_input.rs`) is **missing** `separators` usage, `dedupe`, `commit_on_blur`, `max_length`, `spellcheck`/`autocapitalize`/`autocomplete` as live fields — it has `separators`/`dedupe`/`commit_on_blur`/`max_length` in the struct but no `resolveToken`/`onTokenReject` analog and no interaction surface. Spec is structurally close; the contract-vs-Svelte divergence is the two undocumented Svelte props above.
 

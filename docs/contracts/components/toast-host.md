@@ -29,7 +29,7 @@ Updated: 2026-03-30
 
 | Part | Element | Notes |
 |------|---------|-------|
-| Host | `<div>` | Class `toast-host`, `data-placement` attribute, `position: fixed`, `z-index: 80` |
+| Host | `<div>` | Class `poodle-toast-host`, `data-placement` attribute, `position: fixed`, `z-index: 80` |
 | ToastStack | `ToastStack` | Receives normalized items, ariaLabel, size, sizeRole, density props |
 
 ## 3. Props And Inputs
@@ -157,7 +157,7 @@ For top placements: `left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto`
 |-----------|---------|--------|
 | `data-placement` | Host `<div>` | `"bottom-end"`, `"bottom-start"`, `"top-end"`, `"top-start"` |
 
-### `.toast-host`
+### `.poodle-toast-host`
 
 | Property | Value |
 |----------|-------|
@@ -165,28 +165,28 @@ For top placements: `left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto`
 | `z-index` | `80` |
 | `width` | `min(28rem, calc(100vw - 2rem))` |
 
-### `.toast-host[data-placement="bottom-end"]`
+### `.poodle-toast-host[data-placement="bottom-end"]`
 
 | Property | Value |
 |----------|-------|
 | `right` | `1rem` |
 | `bottom` | `1rem` |
 
-### `.toast-host[data-placement="bottom-start"]`
+### `.poodle-toast-host[data-placement="bottom-start"]`
 
 | Property | Value |
 |----------|-------|
 | `left` | `1rem` |
 | `bottom` | `1rem` |
 
-### `.toast-host[data-placement="top-end"]`
+### `.poodle-toast-host[data-placement="top-end"]`
 
 | Property | Value |
 |----------|-------|
 | `right` | `1rem` |
 | `top` | `1rem` |
 
-### `.toast-host[data-placement="top-start"]`
+### `.poodle-toast-host[data-placement="top-start"]`
 
 | Property | Value |
 |----------|-------|
@@ -195,7 +195,7 @@ For top placements: `left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto`
 
 ### Narrow Viewport Override (`@media (max-width: 40rem)`)
 
-#### `.toast-host`
+#### `.poodle-toast-host`
 
 | Property | Value |
 |----------|-------|
@@ -226,19 +226,20 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 ## 9. Svelte Notes
 
 - Host `<div>` is conditionally rendered only when `items.length > 0`
-- Store subscription established in `onMount`, unsubscribed on return
-- Timer cleanup in `onDestroy` clears all active auto-dismiss timers
-- `resolveTone` normalizes legacy `variant` field to `tone`:
+- Store subscription + timer cleanup run via two `$effect` blocks: one subscribes to `store.toasts` and unsubscribes on its teardown return; the other clears all active timers on teardown (no `onMount`/`onDestroy`)
+- `resolveTone` normalizes the legacy `variant` field to `tone`, but only `error`/`warning`/`success` are branched:
+  - explicit `tone` always wins
   - `variant="error"` maps to `tone="danger"`
   - `variant="warning"` maps to `tone="warning"`
   - `variant="success"` maps to `tone="success"`
-  - Others default to `"info"`
+  - all others (including `variant="info"` and `variant="danger"`) default to `"info"` — note `variant="danger"` is NOT normalized to danger tone; only an explicit `tone` or `variant="error"` yields danger
 - `normalizeToast` maps store items to ToastStack items:
-  - If no explicit `title`, `message` becomes `title` and detail message is omitted
+  - `title` falls back to `toast.title?.trim() || toast.message || "Notification"` — when both title and message are empty, the literal `"Notification"` is used
+  - when there is no explicit trimmed `title`, `message` becomes the `title` and the detail message is set to `null`
   - `actionLabel` passed through (defaults to `null`)
 - `isSticky` checks `toast.sticky === true` or tone membership in `stickyTones`
 - `reconcileTimers` adds timers for new non-sticky toasts and clears timers for removed toasts
-- Uses `createEventDispatcher` for `dismiss` and `action` events
+- `handleDismiss`/`handleAction` forward into `ToastStack` and invoke the optional `onDismiss`/`onAction` callbacks
 - Forwards `size`, `sizeRole`, `density`, `ariaLabel` to `ToastStack`
 
 ## 10. GPUI Notes

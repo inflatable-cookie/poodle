@@ -62,12 +62,15 @@ Updated: 2026-05-17
 | `label` | `string` | -- | yes | visible detail label |
 | `description` | `string \| null` | `null` | no | when set, renders an info icon Popover next to the label (matches Field pattern) |
 | `value` | `string \| number \| null` | `null` | no | simple text value fallback |
-| `emptyText` | `string` | `"--"` | no | display text when value is null and no slot content provided |
+| `emptyText` | `string` | `"—"` | no | display text when value is null and no slot content provided (em-dash) |
 | `truncateValue` | `boolean` | `false` | no | truncates value with ellipsis overflow |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the root element |
 | `layout` | `"inline" \| "stacked"` | `"inline"` | no | inline renders label and value side-by-side; stacked renders them vertically |
-| `presentation` | `"simple" \| "surface"` | `"simple"` | no | surface adds elevated card-like styling with background and padding |
-| `span` | `"full" \| "half" \| null` | `null` | no | `"full"` spans all columns in parent grid via `grid-column: 1 / -1` |
+| `presentation` | `"simple" \| "surface"` | `"surface"` | no | surface adds elevated card-like styling with background and padding |
+| `span` | `"full" \| "half" \| 1 \| 2 \| 3 \| 4 \| null` | `null` | no | `"full"` spans all columns via `grid-column: 1 / -1`; `"half"`/`2` span 2 columns; `3`/`4` span the named column count |
+| `valueContent` | `Snippet` | -- | no | custom value content; replaces text value rendering (see Snippets table) |
+| `action` | `Snippet` | -- | no | trailing action content rendered in the action column |
+| `children` | `Snippet` | -- | no | fallback custom value content when `valueContent` is not used |
 
 ## 4. Behavior
 
@@ -83,16 +86,21 @@ Updated: 2026-05-17
 
 ### Responsive Behavior
 
-At viewport widths at or below `45rem`, the inline layout collapses to a single column:
+The root establishes `container-type: inline-size`; collapse is driven by container queries, not viewport media queries.
+
+At container widths at or below `26rem`, the inline layout collapses to a single column:
 - `grid-template-columns` becomes `1fr`
 - All children (label-block, value, action) return to auto grid-row placement
-- Surface presentation also collapses to single column
+- Surface presentation (and surface + stacked) also collapses to single column
+- Any `data-span` value collapses to `1 / -1`
+
+At container widths at or below `21rem`, spacing tightens further (inline/surface column gap `0.5rem`, surface padding-x `0.75rem`) and label/value font-size step down (label `0.75rem`/lh `1.35`, value `0.9375rem`/lh `1.4`).
 
 ## 5. States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| empty value | `value` is null and no slot content | `emptyText` displayed (default `"--"`) |
+| empty value | `value` is null and no slot content | `emptyText` displayed (default `"—"` em-dash) |
 | truncated | `truncateValue=true` | value overflow hidden with ellipsis |
 | info hover | pointer enters info icon | icon background darkens, icon color shifts to text-primary |
 | info focus | keyboard focus on info trigger | focus ring around info icon |
@@ -153,11 +161,12 @@ At viewport widths at or below `45rem`, the inline layout collapses to a single 
   - `default`: `0.1875rem`
   - `comfortable`: `0.25rem`
 - Label block spans all columns (`grid-column: 1 / -1`)
+- Label color shifts to `var(--poodle-color-text-tertiary)`, font-size `0.75rem`, line-height `1.35`
 - Value font-size increases to `1rem`, font-weight to `600`
 
-### Responsive (max-width: 45rem)
+### Responsive (container queries)
 
-All layout modes collapse to `grid-template-columns: 1fr` with auto row placement.
+At `@container (max-width: 26rem)` all layout modes collapse to `grid-template-columns: 1fr` with auto row placement and any span collapses to `1 / -1`. At `@container (max-width: 21rem)` column gaps and surface padding-x tighten and label/value font-sizes step down.
 
 ### Composition
 
@@ -302,6 +311,9 @@ All layout modes collapse to `grid-template-columns: 1fr` with auto row placemen
 | `grid-template-columns` | `minmax(0, 1fr) auto` |
 | `align-items` | `start` |
 | label-block `grid-column` | `1 / -1` |
+| label `color` | `var(--poodle-color-text-tertiary)` |
+| label `font-size` | `0.75rem` |
+| label `line-height` | `1.35` |
 | value `font-size` | `1rem` |
 | value `font-weight` | `600` |
 
@@ -310,8 +322,8 @@ All layout modes collapse to `grid-template-columns: 1fr` with auto row placemen
 - Uses `data-layout`, `data-presentation`, and `data-span` attributes on the root element
 - Description info icon follows the same Popover + Icon pattern used in `Field`
 - The Popover uses `placement="top"` and `offset={6}`
-- Value rendering priority: `value` slot > `default` slot > `value` prop text > `emptyText`
-- Responsive breakpoint at `@media (max-width: 45rem)` collapses all layouts to single column
+- Value rendering priority: `valueContent` snippet > `children` snippet > `value` prop text > `emptyText`
+- Root sets `container-type: inline-size`; responsive collapse uses `@container (max-width: 26rem)` and a tighter `@container (max-width: 21rem)` step, not viewport media queries
 
 ## 10. Parity Checklist
 

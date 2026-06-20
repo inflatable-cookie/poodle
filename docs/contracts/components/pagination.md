@@ -111,7 +111,7 @@ jumps it calls `goToPage()` if available, otherwise falls back to the
 | `className` | `string` | `""` | no | additional CSS class on root element |
 | `loading` | `boolean` | `false` | no | loading state; overridden by controller.loading |
 | `chrome` | `boolean` | `false` | no | when true, renders with container padding, border-top, and background |
-| `standalone` | `boolean` | `false` | no | **deprecated** — inverse alias for `chrome`; use `chrome` instead |
+| `standalone` | `boolean \| undefined` | `undefined` | no | **deprecated** — inverse alias for `chrome` (when defined, `chrome` resolves to `!standalone`); use `chrome` instead |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the nav element; defaults to "Pagination" |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl" \| null` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -219,7 +219,7 @@ After any page or limit change, scroll targeting executes if configured.
 - Last button: `aria-label="Last page"` (full variant only)
 - Disabled buttons: `disabled` attribute set (disables interaction and announces as disabled)
 - Ellipsis spans: `aria-hidden="true"` (decorative)
-- Limit selector label: `<label for="pagination-limit">` associated with the `<select>` element
+- Limit selector label: `<label for=…>` associated with the `<select>` element via a per-instance generated id (`poodle-pagination-limit-{n}`)
 
 ### Keyboard
 
@@ -270,7 +270,7 @@ component scrolls the target into view after any page or limit change:
 
 ## 8. Token Usage — Exact Values
 
-### Root `.pagination`
+### Root `.pagination` (base — no chrome by default)
 
 | Property | Value |
 |----------|-------|
@@ -279,7 +279,16 @@ component scrolls the target into view after any page or limit change:
 | `align-items` | `center` |
 | `justify-content` | `space-between` |
 | `gap` | `1rem` |
-| `margin-top` | `var(--poodle-space-panel-y)` |
+| `padding` | `0` |
+
+The base root carries no border, background, or margin — it is chrome-free by
+default. Container chrome is opt-in via the `chrome` prop (the deprecated
+`standalone` prop is its inverse alias).
+
+### Root chrome `.pagination--chrome` (when `chrome=true` / `standalone=false`)
+
+| Property | Value |
+|----------|-------|
 | `padding` | `var(--poodle-space-control-y) var(--poodle-space-panel-x)` |
 | `border-top` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-elevated) 92%, transparent)` |
@@ -288,17 +297,8 @@ component scrolls the target into view after any page or limit change:
 
 | Property | Value |
 |----------|-------|
-| `padding` | `0.5rem 0.75rem` |
-| `gap` | `0.75rem` |
-
-### Root standalone `.pagination--standalone`
-
-| Property | Value |
-|----------|-------|
-| `margin-top` | `0` |
 | `padding` | `0` |
-| `border-top` | `none` |
-| `background` | `transparent` |
+| `gap` | `0.75rem` |
 
 ### Root loading `.pagination--loading`
 
@@ -379,7 +379,7 @@ component scrolls the target into view after any page or limit change:
 | `align-items` | `center` |
 | `justify-content` | `center` |
 | `min-width` | `var(--poodle-size-control-height)` |
-| `height` | `calc(var(--poodle-size-control-height) - 0.125rem)` |
+| `height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
 | `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
 | `border-radius` | `var(--poodle-radius-control)` |
@@ -440,26 +440,30 @@ component scrolls the target into view after any page or limit change:
 
 | Size | Button Height | Button Min-Width | Button Font-Size |
 |------|--------------|-----------------|-----------------|
-| `xs` | `calc(var(--poodle-size-control-height) - 0.625rem)` | `calc(var(--poodle-size-control-height) - 0.625rem)` | `0.6875rem` |
-| `sm` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `calc(var(--poodle-size-control-height) - 0.375rem)` | `0.75rem` (default) |
-| `md` | `calc(var(--poodle-size-control-height) - 0.125rem)` | `var(--poodle-size-control-height)` | `0.75rem` |
-| `lg` | `calc(var(--poodle-size-control-height) + 0.125rem)` | `calc(var(--poodle-size-control-height) + 0.125rem)` | `0.875rem` |
-| `xl` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `calc(var(--poodle-size-control-height) + 0.375rem)` | `0.9375rem` |
+| `xs` | `1.5rem` | `1.5rem` | `0.6875rem` |
+| `sm` | `1.75rem` | `1.75rem` | `0.75rem` (inherits base) |
+| `md` | `var(--poodle-size-control-height)` | `var(--poodle-size-control-height)` | `0.75rem` (no override — inherits base) |
+| `lg` | `2.75rem` | `2.75rem` | `0.875rem` |
+| `xl` | `3.25rem` | `3.25rem` | `0.9375rem` |
 
 ### Density Adjustments
 
 | Density | Controls Gap | Pages Gap |
 |---------|-------------|-----------|
-| `compact` | `0.0625rem` | `0.0625rem` |
-| `default` | `var(--poodle-space-inline-sm)` (inherited) | `var(--poodle-space-inline-sm)` (inherited) |
-| `comfortable` | `0.25rem` | `0.25rem` |
+| `compact` | `3px` | `3px` |
+| `default` | `0.25rem` | `0.25rem` |
+| `comfortable` | `0.375rem` | `0.375rem` |
+
+(The `.pagination__controls` / `.pagination__pages` base gap is
+`var(--poodle-space-inline-sm)`; the density rules above override it. In
+`compact` mode the wrapper/controls/pages gap collapses to `0.25rem`.)
 
 ### Variant-Specific Content
 
 | Variant | Center Content | Previous Label | Next Label | First/Last Buttons |
 |---------|---------------|----------------|------------|-------------------|
 | `numbered` | Page number buttons with ellipsis | "Previous" | "Next" | none |
-| `full` | "Page X of Y" summary | "Previous" | "Next" | "<<" and ">>" (when goToPage available) |
+| `full` | "Page X of Y" summary | "Previous" | "Next" | `««` and `»»` (when goToPage available) |
 | `simple` | "X-Y of Z" item-range summary | "Prev" | "Next" | none |
 
 ## 9. Svelte Notes
@@ -468,10 +472,10 @@ component scrolls the target into view after any page or limit change:
 - `data-density` attribute on root reflects the resolved density (`compact`, `default`, `comfortable`)
 - Root is a `<nav>` element; all buttons are native `<button type="button">` elements
 - Ellipsis rendered as `<span>` with `aria-hidden="true"` containing the `...` character
-- First/last button text uses `<<` and `>>` Unicode characters
+- First/last button text uses `««` and `»»` (double guillemet) Unicode characters
 - Previous button text is "Prev" in simple variant, "Previous" in numbered and full variants
 - Current page button uses `data-current="true"` attribute alongside `aria-current="page"`
-- The limit selector select element has `id="pagination-limit"` paired with a `<label for="pagination-limit">`
+- The limit selector select element has a per-instance generated id (`poodle-pagination-limit-{n}`) paired with a matching `<label for=…>`
 - Page window computation uses `siblingCount` to determine the visible range; always includes page 1 and the last page; inserts ellipsis between non-adjacent visible pages
 - Component auto-hides entirely when `totalPages <= 1` and `showLimitSelector` is false
 - Info row shows "Showing X to Y of Z" when total is known, or "Showing X to Y" when total is null

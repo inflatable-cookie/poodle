@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=5 specimen=gap -->
 # Parity: Toolbar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -16,12 +16,12 @@
 
 Contract §8 token values and §6/§9 ARIA notes drift from the authoritative Svelte source. Svelte is authoritative — update the contract.
 
-- `gap`: contract §8 says `0.25rem`; Svelte base is `0.375rem` (`Toolbar.svelte:86`). **Fix: contract §8 + Tier-2 checklist to `0.375rem`.**
-- `padding`: contract §8 says `0.25rem` (uniform); Svelte base is `0.25rem 0.375rem` (`Toolbar.svelte:87`). **Fix: contract §8 to `0.25rem 0.375rem` (block 0.25, inline 0.375).**
-- Size variants: Svelte defines per-size padding/gap for xs/sm/lg/xl (`Toolbar.svelte:94-97`) — contract §8 only documents the base. **Fix: add the size table to contract §8 (`size` prop is in §3 but its visual effect is undocumented).**
-- Density variants: Svelte overrides only `padding-inline` + `gap` for compact/comfortable (`Toolbar.svelte:100-101`) — density never touches block padding (matches density contract). Contract §8 omits the density table. **Fix: document compact/comfortable inline-padding + gap in contract §8.**
-- `aria-orientation`: contract §6 says it is NOT set (only `data-orientation`); contract §9 contradicts and claims it IS set from `orientation`. Svelte sets neither `aria-orientation` nor `aria-label` is unconditional — it sets `data-orientation` only (`Toolbar.svelte:54`), no `aria-orientation` anywhere. **Fix: reconcile §6/§9 — `aria-orientation` is unimplemented in Svelte; pick one statement.**
-- `alignment` prop: contract §3 has no `alignment` prop, but all three Rust specs expose `ToolbarSpec.alignment` (`Start|Center|End|Stretch`). Svelte has no alignment prop either. **Fix: either add `alignment` to contract §3 or drop it from `ToolbarSpec` — currently a Rust-only invention.**
+- [x] FIXED `gap`: contract §8 said `0.25rem`; Svelte base is `0.375rem` (`Toolbar.svelte:86`). Updated §8 + Tier-2 checklist to `0.375rem`.
+- [x] FIXED `padding`: contract §8 said `0.25rem` (uniform); Svelte base is `0.25rem 0.375rem` (`Toolbar.svelte:87`). Updated §8 to `0.25rem 0.375rem` (block 0.25, inline 0.375).
+- [x] FIXED Size variants: Svelte defines per-size padding/gap for xs/sm/lg/xl (`Toolbar.svelte:94-97`). Added the full size table to contract §8.
+- [x] FIXED Density variants: Svelte overrides only `padding-inline` + `gap` for compact/comfortable (`Toolbar.svelte:100-101`). Added the density table to contract §8 (block padding untouched, per density contract).
+- [x] FIXED `aria-orientation`: §6 vs §9 contradiction reconciled — Svelte sets only `data-orientation`/`data-size`/`data-density` + `aria-label` (`Toolbar.svelte:54-60`), never `aria-orientation`. §9 now states `aria-orientation` is not currently set by Svelte; the contract still requires it for a11y (§6, not weakened — Svelte-side gap).
+- [x] FIXED `alignment` prop: Svelte has no `alignment` prop and the contract §3 correctly omits it. No contract change — `ToolbarSpec.alignment` is a Rust-only invention to be dropped/landed in code (out of contract scope).
 
 ## GPUI gap (vs Svelte + contract)
 

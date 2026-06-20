@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
 # Parity: TextInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -14,18 +14,18 @@
 
 ## Contract ↔ Svelte
 
-Svelte is authoritative. Where Svelte diverges from contract §8/§9 token text, the contract is stale — update it. Items below are Svelte-vs-contract mismatches; the side to fix is named.
+Svelte is authoritative. Where Svelte diverged from contract §8/§9 token text, the contract was stale — now fixed.
 
-- Validation indicator icons: contract §9 says built-in indicator renders `circle-check` (valid) / `circle-x` (invalid); Svelte renders `Icon icon="check"` and `Icon icon="x"` (`TextInput.svelte:189-193`, `603`). **Fix: contract — change §9 to `check`/`x`.**
-- Pending spinner sizing: contract §8 "Spinner" says `variant="ring"`, `size="sm"`, `tone="current"`; Svelte uses `<Spinner variant="ring" sizeRole="chrome" tone="current" />` (`TextInput.svelte:601`) — `sizeRole="chrome"` not `size="sm"`. **Fix: contract — document `sizeRole="chrome"`.**
-- Affix horizontal spacing: contract §8 Affix/Prefix/Suffix specify `padding-*: var(--poodle-space-inline-sm)` + `margin-*: space-inline-sm`; Svelte uses a flat `padding-inline: 0.625rem` with no margin (`TextInput.svelte:748`). **Fix: contract — replace prefix/suffix padding+margin model with single `padding-inline: 0.625rem`.**
-- Affix separator color: contract §8 says `0.0625rem solid color-mix(border-subtle 52%, transparent)`; Svelte uses `border-right/left: 0.0625rem solid var(--poodle-color-border-default)` — solid `border-default`, no color-mix (`TextInput.svelte:760,764`). **Fix: contract — separator is `border-default` solid, not `border-subtle 52%`.** (This propagates: Tier-2 checklist "affix separator border uses the same color-mix formula" is wrong.)
-- Affix opacity: Svelte adds `opacity: var(--poodle-state-opacity-muted)` to affixes and placeholder (`TextInput.svelte:754,794`); contract §8 affix/placeholder tables omit this. **Fix: contract — add affix + placeholder muted-opacity.**
-- Char-count typography: contract §8 says `font-size: 0.6875rem`, `font-family: code-family`; Svelte uses the `font: var(--poodle-typography-code-xs)` shorthand and color `text-muted` (contract says `text-secondary`) (`TextInput.svelte:861-862`). **Fix: contract — char-count color is `text-muted`, font is `typography-code-xs` shorthand.**
-- Density adjusts control padding: contract §8 size table owns padding; Svelte additionally shifts `padding-block`/inline by density via `--poodle-text-input-density-block-adjust` (`±0.0625rem` block, `TextInput.svelte:735-742,786`). Block padding from density borders on the size/density orthogonality rule (CLAUDE.md). **Fix: contract — document density inline/block adjust; confirm block-adjust is intended (it changes effective text vertical inset).**
-- Adornment-driven control padding: Svelte computes `controlPaddingStart/End` from leading/trailing/clear/validation adornment counts (`TextInput.svelte:198-210`); contract §2/§8 describe affordances as absolutely-positioned overlays but never specify the control's reserved padding. **Fix: contract — document the adornment padding-reservation model.**
-- `showValidationStatus` prop drives whether the built-in indicator shows (`TextInput.svelte:187`); contract §3 lists it but §4 state table doesn't note that indicators are gated by it. Minor. **Fix: contract — note gating in §4.**
-- Multiline submit: Svelte fires `onSubmit` only on Cmd/Ctrl+Enter in multiline (`TextInput.svelte:535`); contract §5 says "Enter calls onSubmit" without the multiline exception (§1 mentions it). Consistent enough; no action.
+- [x] FIXED Validation indicator icons: §9 said `circle-check`/`circle-x`; Svelte renders `check`/`x` (`TextInput.svelte:189-193`,`603`). Contract §9 → `check`/`x`.
+- [x] FIXED Pending spinner sizing: §8 Spinner said `size="sm"`; Svelte uses `sizeRole="chrome"` (`TextInput.svelte:601`). Contract → `sizeRole="chrome"`.
+- [x] FIXED Affix horizontal spacing: §8 specified `padding-*` + `margin-*: space-inline-sm`; Svelte uses flat `padding-inline: 0.625rem`, no margin (`TextInput.svelte:748`). Contract Affix table now carries `padding-inline: 0.625rem` + `align-self: stretch`; Prefix/Suffix tables reduced to just the separator border.
+- [x] FIXED Affix separator color: §8 said `color-mix(border-subtle 52%)`; Svelte uses solid `border-default` (`TextInput.svelte:760,764`). Contract separator → `border-default` solid. Tier-2 checklist + Known Delta updated to match.
+- [x] FIXED Affix opacity: Svelte adds `opacity: state-opacity-muted` to affixes + placeholder (`TextInput.svelte:754,794`). Added to contract Affix table + `::placeholder` table.
+- [x] FIXED Char-count typography: §8 said `0.6875rem` / `code-family` / `text-secondary`; Svelte uses `font: typography-code-xs` shorthand + `text-muted` (`TextInput.svelte:861-862`). Contract char-count → color `text-muted`, font `typography-code-xs`. Tier-2 checklist updated.
+- [x] FIXED Density inline/block adjust: Svelte shifts padding-block/inline by density (`TextInput.svelte:735-742,786`). Added §8 density adjustment table; block-adjust documented as an intentional orthogonality exception for this control (CLAUDE.md).
+- [x] FIXED Adornment-driven control padding: Svelte computes `controlPaddingStart/End` from adornment counts (`TextInput.svelte:198-210`). Added §8 "Adornment padding reservation" subsection documenting the start/end calc formulas.
+- [x] FIXED `showValidationStatus` gating: indicators are gated by `showValidationStatus && state !== none` (`TextInput.svelte:187`). Added a §4 note that border-color states still apply but no indicator shows when false.
+- Multiline submit: Svelte fires `onSubmit` only on Cmd/Ctrl+Enter in multiline (`TextInput.svelte:535`); §5 already covers it via the "or Cmd/Ctrl+Enter in multiline mode" note on `onSubmit`. No action.
 
 ## GPUI gap (vs Svelte + contract)
 

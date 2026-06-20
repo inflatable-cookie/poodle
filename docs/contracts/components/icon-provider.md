@@ -96,10 +96,15 @@ visual output.
 
 ## 9. Svelte Notes
 
-- Uses `setIconRegistry(registry)` to provide context via Svelte's `setContext`
+- Uses `setIconSet(icons)` to provide context via Svelte's `setContext`
+- Seeds an empty set with `setIconSet({})`, then syncs the `icons` prop into
+  the stored set via an `$effect`
 - Renders only `children()` with no wrapper element
-- Registry prop is reactive; context updates if registry changes
-- Import: `import { setIconRegistry } from './icon-registry'`
+- `icons` prop is reactive; the icon set updates if the prop changes
+- Import: `import { setIconSet } from './icon-registry'`
+- String-based icon lookups resolve from this set first; if not found and
+  `@poodle/icons-lucide` is installed, icons are lazily auto-imported
+  (implementation detail beyond the contract surface)
 
 ## 10. GPUI Notes
 

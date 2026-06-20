@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=6 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=9 specimen=gap -->
 # Parity: Slider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -17,12 +17,13 @@
 
 Single-thumb slider. Svelte and contract agree on props, anatomy, token targets, and CSS values; the divergences are narrow.
 
-- `onValueChange` payload type: contract §5 says payload is `number`; Svelte clamps + snaps before emitting (`Slider.svelte:48-52` `handleInput`), so the emitted value is always the clamped/stepped value, not the raw input value. Behaviorally correct and stricter than the contract text. **Fix: contract §5 should note the payload is the clamped, step-snapped value, not the raw event value.**
-- `max <= min` guard: Svelte derives `safeMax = max <= min ? min + 1 : max` (`Slider.svelte:43`) and uses `safeMax` for percentage, input `max`, and clamping. Contract §3/§9 do not document this clamp-to-`min+1` behavior. **Fix: document the `safeMax` guard in contract §3 notes (Svelte authoritative).**
+- [x] FIXED: contract §5 now states the `onValueChange`/`onValueCommit` payload is the clamped, step-snapped value (`clamp(snapToStep(raw, min, step), min, safeMax)`), not the raw event value, matching Svelte's `handleInput`/`handleChange` (`Slider.svelte:48-58`).
+- [x] FIXED: contract §3 now documents the `safeMax = max <= min ? min + 1 : max` bounds guard (new "Bounds Guard" subsection) and the `--poodle-slider-percent` formula uses `safeMax`, matching Svelte (`Slider.svelte:43,45`).
+- [x] FIXED (orthogonality): contract §8 now adds a "Density And Vertical Padding" note stating density must not alter vertical padding / min-height (orthogonality-correct rule), and flags the Svelte `padding: 0.25rem 0` / `0.75rem 0` density rules (`Slider.svelte:207-208`) as a Svelte bug that Rust targets must NOT replicate.
 - `aria-orientation`: contract §6 explicitly states it is NOT set on the input and orientation rides only on `data-orientation`. Svelte matches (no `aria-orientation` on the `<input>`, `Slider.svelte:65-77`). Aligned — noted so the GPUI/Jetstream sections don't flag its absence as a contract miss.
 - No divergence found on: `value`/`min`/`max`/`step`/`orientation`/`disabled`/`ariaLabel`/`valueText`/`size`/`sizeRole`/`density` defaults, anatomy parts (root/track/fill/control), `--poodle-slider-percent` formula, all size-table thumb dimensions, focus-ring compound box-shadow, and disabled opacity token. These match exactly.
 
-`consv=gap` is driven only by the two undocumented Svelte behaviors above (clamp-snap payload + `safeMax` guard); the visual/token contract is otherwise faithful.
+`consv=fixed`: the two undocumented Svelte behaviors (clamp-snap payload + `safeMax` guard) are now in the contract, plus an explicit density-orthogonality note flagging the Svelte vertical-padding bug. The visual/token contract is otherwise faithful.
 
 ## GPUI gap (vs Svelte + contract)
 

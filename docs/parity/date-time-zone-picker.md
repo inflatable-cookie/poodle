@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=9 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=9 jetstream=6 specimen=gap -->
 # Parity: DateTimeZonePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -15,10 +15,10 @@
 
 ## Contract ↔ Svelte
 
-Svelte matches the contract on props (`value`, `defaultValue`, `open`, `defaultOpen`, `placeholder`, `weekStartsOn`, `locale`, `timeZoneOptions`, `size`, `sizeRole`, `density`, `disabled`, `ariaLabel`), the `ZonedDateTimeValue`/`TimeZoneOption` types, anatomy (Calendar + Fields → Time field + Time-zone field), ARIA, and callbacks. The size table diverges (same pattern as the range picker):
+`consv=fixed`. Svelte matches the contract on props (`value`, `defaultValue`, `open`, `defaultOpen`, `placeholder`, `weekStartsOn`, `locale`, `timeZoneOptions`, `size`, `sizeRole`, `density`, `disabled`, `ariaLabel`), the `ZonedDateTimeValue`/`TimeZoneOption` types, anatomy (Calendar + Fields → Time field + Time-zone field), ARIA, and callbacks. The size table diverged (same pattern as the range picker) — now reconciled:
 
-- **Size table mismatch.** Contract §8 specifies `min-height: calc(var(--poodle-size-control-height) ± Nrem)` plus per-size `padding` offsets; Svelte sets **absolute** heights (`xs:1.5rem`, `sm:1.75rem`, `lg:2.75rem`, `xl:3.25rem`; `DateTimeZonePicker.svelte:334-358`) and **no per-size padding** — only per-density padding (`:360-361`). Svelte authoritative. **Fix: rewrite contract §8 to absolute heights + remove the per-size padding column.**
-- **Per-size indicator font-size absent from contract.** Svelte scales the indicator (`xs:0.625rem … xl:0.875rem`, `:337,342,353,358`); contract §8 fixes it at `0.75rem`. **Fix: add per-size indicator scale to contract.**
+- [x] FIXED **Size table mismatch.** Contract §8 rewritten to Svelte's **absolute** heights (`xs:1.5rem`, `sm:1.75rem`, `md` via `--poodle-size-control-height-md`, `lg:2.75rem`, `xl:3.25rem`; `DateTimeZonePicker.svelte:334-358`); per-size padding column removed and replaced with a density-driven padding table (`:360-361`). Per-size trigger font-size (`sm:0.8125rem` added).
+- [x] FIXED **Per-size indicator font-size.** Contract §8 now scales the indicator (`xs:0.625rem` … `xl:0.875rem`, base `0.75rem`; `:337,342,353,358`); Tier-2 checklist + §9 notes updated to match.
 
 ## GPUI gap (vs Svelte + contract)
 

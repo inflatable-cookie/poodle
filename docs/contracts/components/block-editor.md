@@ -43,7 +43,7 @@ Updated: 2026-04-09
 | Block | `<div>` | yes (repeated) | `role="group"`, `aria-label="{type} block"`, drag-and-drop target |
 | Toolbar | `<div>` | yes (per block) | Flex row, space-between, transparent background |
 | DragGrip | `<span>` | yes (per block) | `draggable="true"`, `aria-hidden="true"`, `grab` cursor |
-| TypeSelect | Select | yes (per block) | Poodle Select component, `variant="ghost"`, `menuMinWidth="10rem"`, `ariaLabel="Block type"` |
+| TypeSelect | Select | yes (per block) | Poodle Select component, `variant="ghost"`, `menuMinWidth="10rem"`, `ariaLabel="Block type"`; gains `--inset` margin-left when reordering is disabled (drag grip hidden) to keep alignment with block content |
 | MoveUpBtn | `<button>` | yes (per block) | Disabled when first block or editor disabled |
 | MoveDownBtn | `<button>` | yes (per block) | Disabled when last block or editor disabled |
 | AddSelect | Select | yes (per block) | Poodle Select with `variant="ghost"`, `menuMinWidth="10rem"`, custom trigger slot showing a plus icon; selecting a type inserts a new block after the current one |
@@ -169,7 +169,7 @@ When the `block` snippet is not provided, the only fallback is a minimal `<texta
 
 ### Sizing
 
-- Root: flex column with density-aware gap and padding
+- Root: flex column with density-aware gap; no padding, border, or radius on the root
 - Blocks: flex column, no explicit border (differentiation via background)
 - Toolbar: flex row, space-between
 - Content: padded area with min-height `1.5rem`
@@ -208,13 +208,16 @@ When the `block` snippet is not provided, the only fallback is a minimal `<texta
 
 | Property | Value |
 |----------|-------|
-| `border` | `0.0625rem solid var(--poodle-color-border-default)` |
-| `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `var(--poodle-color-background-surface)` |
-| `padding` | `var(--poodle-block-editor-shell-y) var(--poodle-block-editor-shell-x)` |
+| `padding` | `0` |
 | `display` | `flex` |
 | `flex-direction` | `column` |
 | `gap` | `var(--poodle-block-editor-stack-gap)` |
+
+The root carries no border, no border-radius, and no shell padding — block
+differentiation is via per-block background only. The `--poodle-block-editor-shell-x`
+/ `--poodle-block-editor-shell-y` custom properties are declared on the root but
+are currently unused by the root itself.
 
 #### `.block-editor--disabled`
 
@@ -351,6 +354,12 @@ When the `block` snippet is not provided, the only fallback is a minimal `<texta
 | Property | Value |
 |----------|-------|
 | `flex-shrink` | `0` |
+
+#### `.block-editor__type-select--inset` (applied when `!canReorder`)
+
+| Property | Value |
+|----------|-------|
+| `margin-left` | `calc(content-x + input-x − toolbar-x)` (aligns the type select with the block content when the drag grip is hidden) |
 
 #### `.block-editor__add-select`
 
