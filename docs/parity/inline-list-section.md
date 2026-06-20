@@ -1,4 +1,5 @@
 <!-- parity consv=fixed gpui=6 jetstream=1 specimen=gap -->
+<!-- jetstream impl built (pass 8); the remaining jetstream todo is the specimen -->
 # Parity: InlineListSection
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -35,7 +36,8 @@ The compact muted **row chrome is entirely missing** and most dimensions are har
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No implementation.** No `inline_list_section.rs` in `packages/jetstream/components/src/`, no specimen, no `InlineListSection` reference in Jetstream source. Top-priority gap: implement `js_inline_list_section(spec, theme, items, actions)` mirroring Svelte — Card wrapper (when `framed`), uppercase label-token title, optional count badge, muted item-row chrome, empty-message posture — resolving every dimension from tokens.
+- [x] DONE: `js_inline_list_section(spec, theme, items, action)` created — Card wrapper when `framed` (composes `js_card`), uppercase title, optional count pill, empty-message posture, item list; gap from `space.stack.md`, other dims from contract exact-rem. Registered in lib.rs, probe-tested.
+- [ ] Add the Jetstream specimen (framed/unframed, with count, empty, with items + action).
 - accepted: interaction (none required; rows are host-owned) — N/A.
 
 ## Specimen parity

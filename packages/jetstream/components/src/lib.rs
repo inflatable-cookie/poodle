@@ -151,6 +151,7 @@ pub mod filter_toolbar;
 pub mod form_dialog;
 pub mod form_layout;
 pub mod form_shell;
+pub mod inline_list_section;
 pub mod inline_remediation;
 pub mod list_card;
 pub mod list_card_counter;
