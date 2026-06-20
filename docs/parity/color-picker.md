@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=0 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=2 specimen=gap -->
+<!-- pass 28: Jetstream color-picker built out (parallel to GPUI pass 27). Real trigger
+     swatch from spec.current_value() (not accent-base); surface with gradient sat-value pad
+     (JsEl gradients work — 7-stop hue in one gradient), hue/alpha sliders, js_segmented_control
+     mode toggle, js_number_input channels, active swatch grid. Color-math helpers ported to
+     theme_ext. 7 probe tests pass (incl trigger-uses-parsed-value-not-accent-base); suite 110.
+     Remaining jetstream: specimen coverage + drag/edit interaction (preview event loop). -->
 # Parity: ColorPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
