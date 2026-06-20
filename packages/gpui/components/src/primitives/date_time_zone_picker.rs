@@ -4,7 +4,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ControlDensity, ControlSize, DateTimeZonePickerSpec, IconSize, IconSpec,
-    SemanticControlSizeRole,
+    SemanticControlSizeRole, ZonedDateTimeValue,
 };
 
 use super::calendar::Calendar;
@@ -49,16 +49,16 @@ impl DateTimeZonePicker {
     }
 
     // ── Forwarded spec builders ───────────────────────────────
-    pub fn value(mut self, v: impl Into<String>) -> Self {
-        self.spec.value = Some(v.into());
+    pub fn value(mut self, v: ZonedDateTimeValue) -> Self {
+        self.spec.value = Some(v);
         self
     }
-    pub fn time_zone(mut self, v: impl Into<String>) -> Self {
-        self.spec.time_zone = Some(v.into());
+    pub fn default_value(mut self, v: ZonedDateTimeValue) -> Self {
+        self.spec.default_value = v;
         self
     }
     pub fn open(mut self, v: bool) -> Self {
-        self.spec.is_open = v;
+        self.spec.open = Some(v);
         self
     }
     pub fn disabled(mut self, v: bool) -> Self {
@@ -111,18 +111,29 @@ impl IntoElement for DateTimeZonePicker {
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.86);
 
-        let is_open = spec.is_open;
+        let is_open = spec.current_open();
         let is_disabled = spec.is_disabled;
 
         // Trigger value: contract anatomy is Value + Indicator only, so the
-        // timezone is folded into the formatted value string rather than shown
-        // as a separate inline segment.
-        let has_value = spec.value.is_some() || spec.time_zone.is_some();
-        let display_value = match (spec.value.as_deref(), spec.time_zone.as_deref()) {
-            (Some(v), Some(tz)) => format!("{} {}", v, tz),
-            (Some(v), None) => v.to_string(),
-            (None, Some(tz)) => tz.to_string(),
-            (None, None) => "Select date, time, and zone".to_string(),
+        // structured value's committed fields are folded into one formatted
+        // string rather than shown as separate inline segments. Partial values
+        // (date but no time/zone, etc.) display the fields present.
+        let value = spec.current_value();
+        let has_value = !value.is_empty();
+        let display_value = if has_value {
+            let mut parts: Vec<&str> = Vec::new();
+            if let Some(date) = value.date.as_deref() {
+                parts.push(date);
+            }
+            if let Some(time) = value.time.as_deref() {
+                parts.push(time);
+            }
+            if let Some(tz) = value.time_zone.as_deref() {
+                parts.push(tz);
+            }
+            parts.join(" ")
+        } else {
+            spec.placeholder.clone()
         };
         let text_col = if has_value {
             text_primary
@@ -209,18 +220,20 @@ impl IntoElement for DateTimeZonePicker {
                     .child(text.to_string())
             };
 
-            // Composed Calendar (single mode), seeded from the picker's date value.
+            // Composed Calendar (single mode), seeded from the structured
+            // value's `date` field (not the combined value string).
             let mut cal_spec = poodle_specs::CalendarSpec::new();
-            if let Some(ref date) = spec.value {
+            if let Some(ref date) = value.date {
                 cal_spec = cal_spec.with_value(date.clone());
                 cal_spec = cal_spec.with_visible_month(date.clone());
             }
             cal_spec.is_disabled = is_disabled;
             let calendar = Calendar::from_spec(cal_spec, theme);
 
-            // Composed TimeInput (TimeField), seeded from the picker's time value.
+            // Composed TimeInput (TimeField), seeded from the structured value's
+            // `time` field.
             let mut time_spec = poodle_specs::TimeFieldSpec::new();
-            time_spec.value = spec.value.clone();
+            time_spec.value = value.time.clone();
             time_spec.is_disabled = is_disabled;
             let time_field = TimeField::from_spec(time_spec, theme);
 
@@ -232,9 +245,10 @@ impl IntoElement for DateTimeZonePicker {
                 .child(field_label("Time"))
                 .child(time_field);
 
-            // Composed TimeZoneSelect, seeded from the picker's timezone value.
+            // Composed TimeZoneSelect, seeded from the structured value's
+            // `time_zone` field.
             let mut tz_spec = poodle_specs::TimeZoneSelectSpec::new();
-            tz_spec.value = spec.time_zone.clone();
+            tz_spec.value = value.time_zone.clone();
             tz_spec.is_disabled = is_disabled;
             let tz_select = TimeZoneSelect::from_spec(tz_spec, theme);
 

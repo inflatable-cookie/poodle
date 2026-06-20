@@ -528,6 +528,49 @@ impl DateTimeRangeValue {
     }
 }
 
+/// Structured value for a `DateTimeZonePicker`: a local date, a local time, and
+/// a timezone identifier. Each field is independently optional so partial values
+/// (e.g. date committed but time/zone still empty) are representable, matching
+/// the Svelte `ZonedDateTimeValue` shape.
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
+pub struct ZonedDateTimeValue {
+    pub date: Option<String>,
+    pub time: Option<String>,
+    pub time_zone: Option<String>,
+}
+
+impl ZonedDateTimeValue {
+    pub fn new(date: Option<String>, time: Option<String>, time_zone: Option<String>) -> Self {
+        Self {
+            date,
+            time,
+            time_zone,
+        }
+    }
+
+    /// True when no constituent field has been committed yet.
+    pub fn is_empty(&self) -> bool {
+        self.date.is_none() && self.time.is_none() && self.time_zone.is_none()
+    }
+}
+
+/// A curated timezone option for a `DateTimeZonePicker` / `TimeZoneSelect`,
+/// matching the Svelte `TimeZoneOption` shape (`value` + display `label`).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TimeZoneOption {
+    pub value: String,
+    pub label: String,
+}
+
+impl TimeZoneOption {
+    pub fn new(value: impl Into<String>, label: impl Into<String>) -> Self {
+        Self {
+            value: value.into(),
+            label: label.into(),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum OverlayPlacement {
     Top,

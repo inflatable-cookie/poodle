@@ -4,7 +4,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{DateTimeZonePicker, Eyebrow};
-use poodle_specs::{DateTimeZonePickerSpec, EyebrowSpec};
+use poodle_specs::{DateTimeZonePickerSpec, EyebrowSpec, ZonedDateTimeValue};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -29,8 +29,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     DateTimeZonePicker::from_spec(
                         DateTimeZonePickerSpec::new()
-                            .with_value("2026-03-23T14:30:00")
-                            .with_time_zone("America/New_York")
+                            .with_value(ZonedDateTimeValue::new(
+                                Some("2026-03-23".into()),
+                                Some("14:30".into()),
+                                Some("America/New_York".into()),
+                            ))
                             .with_open(is_open),
                         theme,
                     )
@@ -51,9 +54,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(DateTimeZonePicker::from_spec(
-                    DateTimeZonePickerSpec::new()
-                        .with_value("2026-03-23T19:30:00")
-                        .with_time_zone("Europe/London"),
+                    DateTimeZonePickerSpec::new().with_default_value(ZonedDateTimeValue::new(
+                        Some("2026-03-14".into()),
+                        Some("10:00".into()),
+                        Some("America/Los_Angeles".into()),
+                    )),
                     theme,
                 )),
         )
@@ -68,10 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(DateTimeZonePicker::from_spec(
-                    DateTimeZonePickerSpec::new()
-                        .with_value("2026-01-01T00:00:00")
-                        .with_time_zone("UTC")
-                        .with_disabled(true),
+                    DateTimeZonePickerSpec::new().with_disabled(true),
                     theme,
                 )),
         )
@@ -84,9 +86,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         |size, theme: &GpuiThemeProvider| {
             DateTimeZonePicker::from_spec(
-                DateTimeZonePickerSpec::new()
-                    .with_value("2026-03-23T14:30:00")
-                    .with_time_zone("America/New_York"),
+                DateTimeZonePickerSpec::new().with_value(ZonedDateTimeValue::new(
+                    Some("2026-03-23".into()),
+                    Some("14:30".into()),
+                    Some("America/New_York".into()),
+                )),
                 theme,
             )
             .size(size)
@@ -94,9 +98,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         },
         |density, theme: &GpuiThemeProvider| {
             DateTimeZonePicker::from_spec(
-                DateTimeZonePickerSpec::new()
-                    .with_value("2026-03-23T14:30:00")
-                    .with_time_zone("America/New_York"),
+                DateTimeZonePickerSpec::new().with_value(ZonedDateTimeValue::new(
+                    Some("2026-03-23".into()),
+                    Some("14:30".into()),
+                    Some("America/New_York".into()),
+                )),
                 theme,
             )
             .with_density(density)

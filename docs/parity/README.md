@@ -141,7 +141,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | date-range-picker | fixed | 3 | 3 | gap |
 | date-time-picker | fixed | 1 | 4 | gap |
 | date-time-range-picker | fixed | 1 | 4 | gap |
-| date-time-zone-picker | fixed | 3 | 6 | gap |
+| date-time-zone-picker | fixed | 2 | 3 | gap |
 | debug-dialog | ok | 3 | 1 | gap |
 | detail-item | fixed | 3 | 5 | gap |
 | detail-section | fixed | 3 | 3 | gap |

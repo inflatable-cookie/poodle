@@ -41,19 +41,26 @@ pub fn js_date_time_zone_picker(
     let elevated_c: Color = elevated.into();
     let hover_bg = fill_c.mix(elevated_c, 0.14);
 
-    // Determine display text
-    let has_value = spec.value.is_some() || spec.time_zone.is_some();
+    // Determine display text from the structured value. Contract trigger
+    // anatomy is Value + Indicator only, so the committed constituent fields
+    // (date / time / zone) are folded into one formatted string. Partial values
+    // display whichever fields are present.
+    let value = spec.current_value();
+    let has_value = !value.is_empty();
     let display = if has_value {
-        let mut parts = Vec::new();
-        if let Some(ref v) = spec.value {
-            parts.push(v.as_str());
+        let mut parts: Vec<&str> = Vec::new();
+        if let Some(ref date) = value.date {
+            parts.push(date.as_str());
         }
-        if let Some(ref tz) = spec.time_zone {
+        if let Some(ref time) = value.time {
+            parts.push(time.as_str());
+        }
+        if let Some(ref tz) = value.time_zone {
             parts.push(tz.as_str());
         }
         parts.join(" ")
     } else {
-        "Select date, time, and zone".to_string()
+        spec.placeholder.clone()
     };
     let display_color = if has_value { text_color } else { muted };
 

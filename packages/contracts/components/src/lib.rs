@@ -253,7 +253,7 @@ pub use types::{
     NavigationMenuEntry, Orientation, Overflow, OverlayPlacement, PaddingScale,
     PopoverInitialFocus, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
     SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
-    TabVariant, ValidationState,
+    TabVariant, TimeZoneOption, ValidationState, ZonedDateTimeValue,
 };
 
 // Composite exports

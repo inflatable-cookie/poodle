@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::date_time_zone_picker::js_date_time_zone_picker;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::DateTimeZonePickerSpec;
+use poodle_specs::{DateTimeZonePickerSpec, ZonedDateTimeValue};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -14,9 +14,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         .child(group("With value", secondary,
             div().w(360.0)
                 .child(js_date_time_zone_picker(
-                    &DateTimeZonePickerSpec::new()
-                        .with_value("2026-03-30T14:30")
-                        .with_time_zone("America/New_York"),
+                    &DateTimeZonePickerSpec::new().with_value(ZonedDateTimeValue::new(
+                        Some("2026-03-30".into()),
+                        Some("14:30".into()),
+                        Some("America/New_York".into()),
+                    )),
                     theme,
                 ))
         ))
@@ -30,8 +32,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
             div().w(360.0)
                 .child(js_date_time_zone_picker(
                     &DateTimeZonePickerSpec::new()
-                        .with_value("2026-06-15T09:00")
-                        .with_time_zone("Europe/London")
+                        .with_value(ZonedDateTimeValue::new(
+                            Some("2026-06-15".into()),
+                            Some("09:00".into()),
+                            Some("Europe/London".into()),
+                        ))
                         .with_disabled(true),
                     theme,
                 ))
