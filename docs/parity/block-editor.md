@@ -1,4 +1,12 @@
-<!-- parity consv=fixed gpui=1 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=2 specimen=gap -->
+<!-- pass 36: Jetstream block-editor rebuilt to match GPUI — placeholder "Block N" content +
+     static type label + unicode glyphs removed; composed js_select TypeSelect (block_type +
+     block_types options) + AddSelect (value-less + plus tool button); move/remove tool buttons
+     with real icons (grip-vertical/arrow-up/arrow-down/plus/x), first/last + single-block
+     gating, posture via mode/allow_*; per-type content (heading/quote/code/list/paragraph);
+     opacity 0.48 → state.opacity.disabled; root border/radius/padding dropped per §8. 6 probe
+     tests (incl no-unicode-glyphs); suite 128. Remaining jetstream: italic/monospace (JsEl gaps,
+     approximated) + specimen. -->
 # Parity: BlockEditor
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
