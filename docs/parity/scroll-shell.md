@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=3 jetstream=6 specimen=gap -->
+<!-- parity consv=ok gpui=3 jetstream=1 specimen=gap -->
 # Parity: ScrollShell
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -31,12 +31,8 @@ GPUI does real scrolling: `overflow_y_scroll`/`overflow_x_scroll`/`overflow_scro
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Stub implementation — ignores spec and theme** — signature is `js_scroll_shell(_spec, _theme, children)` (`scroll_shell.rs:7`); nothing is resolved. Wire `spec.direction`, `spec.padding`, label/role, focusable.
-- [ ] **No actual scrolling** — only `overflow_hidden()` is applied (`scroll_shell.rs:10`); content beyond the box is clipped, not scrollable. Needs a scroll-capable viewport (per-axis overflow). Contract §4 "overflowed" state.
-- [ ] **No direction handling** — always `flex_col()`; `Direction::Horizontal`/`Both` produce identical output. Map direction to axis like GPUI.
-- [ ] **No padding** — `spec.padding` / `resolved_padding()` unused; contract §8 padding scale (none/sm/md).
-- [ ] **No border-radius** — root should apply `radius.surface` (contract §8); absent.
-- [ ] **No focus ring / focusable / horizontal min-width** — none of the focusable, focus-ring, or content `max-content` behaviors present.
+- [x] DONE: no longer a stub — `js_scroll_shell` now wires `spec.direction` (axis + scroll), `overflow_scroll` (per-axis), `resolved_padding()` (token-resolved inset, probe-verified to offset children), and `radius.surface`.
+- [ ] No focus ring / focusable / horizontal content `max-content` — focus/focusable live in the preview event loop; `max-content` for horizontal scroll needs non-shrinking children. Accepted/preview-side.
 - accepted: interaction (keyboard scroll) lives in preview `main.rs` event loop; no ARIA channel; scrollbar visuals platform-native.
 
 ## Specimen parity

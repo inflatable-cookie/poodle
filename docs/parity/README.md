@@ -201,7 +201,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | relation-picker | fixed | 9 | 10 | gap |
 | remediation-banner | gap | 1 | 8 | gap |
 | resize-handle | ok | 4 | 3 | gap |
-| scroll-shell | ok | 3 | 6 | gap |
+| scroll-shell | ok | 3 | 1 | gap |
 | segmented-control | fixed | 6 | 8 | gap |
 | select | ok | 4 | 6 | gap |
 | selection-summary | fixed | 5 | 6 | gap |
