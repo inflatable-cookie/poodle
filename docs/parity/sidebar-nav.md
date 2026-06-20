@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=10 specimen=gap -->
 # Parity: SidebarNav
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -39,7 +39,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Item height wrong across all 5 sizes** — `sidebar_nav.rs:15` uses `control_height_rem(effective_size)` (Md=2.25rem, xs=1.5, sm=1.75, lg=2.75, xl=3.25) but contract §8 Size Variants item-height is Md=1.875, xs=1.375, sm=1.625, lg=2.125, xl=2.375. Add a `sidebar_nav_item_height_rem(size)` helper (or inline match) using the contract values; do NOT reuse `control_height_rem`.
+- [x] **DONE: item height across all 5 sizes** — added `sidebar_item_height_rem(size)` (xs 1.375 / sm 1.625 / md 1.875 / lg 2.125 / xl 2.375) and use it instead of `control_height_rem`. Probe-verified the rendered item height matches the sidebar table. (GPUI has the same bug — should adopt the same values, ideally via a shared `poodle-specs` helper.)
 - [ ] **Group gap wrong / not density-scaled** — `sidebar_nav.rs:24` uses `resolve_px(theme, "space.stack.md")` (single fixed token) but contract §8 Density table requires group-gap = 0.625/0.75/0.875rem per compact/default/comfortable. Resolve per-density from the density value, not a fixed stack token.
 - [ ] **Missing horizontal nav padding** — `sidebar_nav.rs:42-46` root sets only `pt/pb(pad_y)`, no horizontal padding. Contract §8 root `padding: var(--space-panel-y) 0.375rem`. Add `pl/pr(rem_to_px(0.375))`.
 - [ ] **Group internal gap wrong** — `sidebar_nav.rs:49` uses `gap(rem_to_px(0.3125))` (correct value) but item-list gap at `:73` uses `item_gap = rem_to_px(0.125)` (correct). OK — but title→list gap is collapsed: title uses `mb(title_mb=0.1875)` (`:26,68`) which is hardcoded for default density only; contract title-gap is density-scaled (0.125/0.1875/0.25rem). Scale `title_mb` by density.

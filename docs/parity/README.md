@@ -206,7 +206,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | select | ok | 4 | 6 | gap |
 | selection-summary | fixed | 5 | 6 | gap |
 | separator | ok | 3 | 2 | gap |
-| sidebar-nav | fixed | 6 | 11 | gap |
+| sidebar-nav | fixed | 6 | 10 | gap |
 | skeleton | fixed | 6 | 8 | gap |
 | slider | fixed | 6 | 9 | gap |
 | spacer | ok | 2 | 2 | gap |

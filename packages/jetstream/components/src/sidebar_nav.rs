@@ -1,18 +1,31 @@
 //! SidebarNav — Jetstream sidebar navigation backed by SidebarNavSpec.
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::SidebarNavSpec;
+use poodle_specs::{ControlSize, SidebarNavSpec};
 
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
 };
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+
+/// Contract §8 sidebar item heights (rem) — distinct from `control_height_rem`,
+/// which is taller. (Same values GPUI should use; sidebar rows are denser.)
+fn sidebar_item_height_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.375,
+        ControlSize::Sm => 1.625,
+        ControlSize::Md => 1.875,
+        ControlSize::Lg => 2.125,
+        ControlSize::Xl => 2.375,
+    }
+}
 
 pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-    // Size-driven dimensions from token helpers
-    let item_height = rem_to_px(control_height_rem(effective_size));
+    // Size-driven dimensions. Item height uses the contract sidebar table, not
+    // the taller control-height.
+    let item_height = rem_to_px(sidebar_item_height_rem(effective_size));
     let item_font = rem_to_px(size_font_rem(effective_size));
     // Group title: caption-sized (0.75× item font, uppercase)
     let title_font = rem_to_px(size_font_rem(effective_size) * 0.75);
@@ -113,4 +126,38 @@ pub fn js_sidebar_nav(spec: &SidebarNavSpec, theme: &JetstreamThemeProvider) -> 
     }
 
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::{SidebarNavGroup, SidebarNavItem};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    #[test]
+    fn item_height_uses_sidebar_table_not_control_height() {
+        let spec = SidebarNavSpec::new(vec![SidebarNavGroup::new(
+            "g",
+            vec![SidebarNavItem::new("home", "Home")],
+        )]);
+        let eff = resolve_semantic_size(spec.size, spec.size_role);
+        // Sidebar item heights are denser than control-height at every size.
+        let expected = rem_to_px(sidebar_item_height_rem(eff));
+        let tree = probe(&js_sidebar_nav(&spec, &theme()), 240.0, 200.0);
+        let item = tree
+            .nodes
+            .iter()
+            .find(|n| n.text.as_deref() == Some("Home"))
+            .expect("item node");
+        assert!(
+            (item.h - expected).abs() < 1.0,
+            "item height {} should match the sidebar table height {}",
+            item.h,
+            expected
+        );
+    }
 }
