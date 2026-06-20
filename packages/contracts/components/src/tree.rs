@@ -643,13 +643,9 @@ impl TreeSpec {
         semantic::COLOR_TEXT_PRIMARY
     }
 
-    /// Accent base, tinted to 10% for the selected row fill.
+    /// Accent base, tinted to 10% for the selected row fill (and the Svelte-only
+    /// inset ring at 20%).
     pub fn selected_fill_token(&self) -> &'static str {
-        semantic::COLOR_ACCENT_BASE
-    }
-
-    /// Accent base, tinted to 20% for the selected row inset ring.
-    pub fn selected_ring_token(&self) -> &'static str {
         semantic::COLOR_ACCENT_BASE
     }
 

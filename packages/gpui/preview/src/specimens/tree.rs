@@ -223,7 +223,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     cx.notify();
                 }))
                 .on_reorder(cx.listener(|this, req: &TreeReorderRequest, _w, cx| {
-                    this.state.tree.reorder(&req.from, &req.to, req.position);
+                    // Use the live hover state (set by on_drag_over) rather than the
+                    // request's render-time snapshot, so the drop lands where the
+                    // last drag-over computed.
+                    let to = this.state.tree.drop_target.clone().unwrap_or_else(|| req.to.clone());
+                    let pos = this.state.tree.drop_position;
+                    this.state.tree.reorder(&req.from, &to, pos);
                     this.state.tree.clear_drop();
                     cx.notify();
                 }));

@@ -410,7 +410,8 @@ impl PreviewState {
                 PlatformEvent::KeyPressed { key, .. }
                     if *key == KeyCode::ESCAPE
                         && !(self.app.is_tree_active()
-                            && self.app.tree.editing_value.is_some()) =>
+                            && (self.app.tree.editing_value.is_some()
+                                || self.app.tree.menu_value.is_some())) =>
                 {
                     return ControlFlow::Exit;
                 }
@@ -445,6 +446,10 @@ impl PreviewState {
                             }
                             _ => {}
                         }
+                    } else if *key == KeyCode::ESCAPE && self.app.tree.menu_value.is_some() {
+                        // Escape dismisses an open context menu (instead of exiting).
+                        self.app.tree.close_menu();
+                        self.app.dirty = true;
                     } else if *key == KeyCode::F2 {
                         self.app.tree_start_rename();
                     } else if self.alt_down && matches!(*key, KeyCode::UP | KeyCode::DOWN) {

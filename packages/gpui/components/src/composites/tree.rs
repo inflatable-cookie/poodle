@@ -455,9 +455,12 @@ impl IntoElement for Tree {
         // Keyboard: only the interactive tree (with callbacks) becomes a single
         // focusable key-owner, so the static size/density trees don't collide on
         // a shared element id.
+        // Any keyboard-served behavior must make the tree a focusable key-owner.
         let interactive = self.on_focus_change.is_some()
             || self.on_toggle_expand.is_some()
-            || self.on_activate.is_some();
+            || self.on_activate.is_some()
+            || self.on_selection_change.is_some()
+            || self.on_reorder.is_some();
         if interactive {
             root.id("poodle-tree")
                 .focusable()
