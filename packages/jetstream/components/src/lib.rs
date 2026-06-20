@@ -35,6 +35,7 @@
 //! ```
 
 pub mod presentation;
+pub mod render_probe;
 pub mod theme_ext;
 
 // Existing components
