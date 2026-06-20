@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=2 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 35: Jetstream command-palette built to match GPUI — overlay backdrop scrim, centered
+     modal surface (45rem cap, dialog border mix, radius.surface), header (title/description +
+     hint pill + close), composed js_text_input (type=search + leading icon), grouped results
+     (group headers, badges, shortcuts, active-id accent, disabled dim), status region (matches
+     Svelte paletteStatus). 4 probe tests pass; suite 122. Remaining jetstream: scrim is
+     color.background.overlay not the contract literal (no token) + no box-shadow (JsEl gap,
+     shadow_lg approx); query/nav = preview-loop. -->
 <!-- pass 33: GPUI full anatomy built — overlay backdrop scrim (color.background.overlay),
      centered modal surface (elevation_dialog_shadow, 45rem cap, dialog border mix), header
      (title/description + invocation-hint pill + close button), composed search TextInput
