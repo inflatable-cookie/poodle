@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=1 specimen=gap -->
 # Parity: DetailSectionGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -32,7 +32,7 @@ Renders grid as flex-row / stack as flex-col, but ignores most sizing props.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Entire component missing.** Implement `js_detail_section_group()` in `packages/jetstream/components/src/detail_section_group.rs` per contract: grid/stack layout, `minColumnWidth`/`itemMinColumnWidth`/`maxColumns`/`density`/`ariaLabel`, all token-resolved. Single biggest gap for this component.
+- [x] DONE: `js_detail_section_group(spec, theme, children)` created — grid/stack layout, density gap, item min-width parsed from the spec rem string (not a hardcoded px). Registered in lib.rs, probe-tested.
 - [ ] Add the Jetstream specimen `packages/jetstream/preview/src/specimens/detail_section_group.rs` covering grid, stack, column-cap, and density variants.
 
 ## Specimen parity

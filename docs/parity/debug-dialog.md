@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=3 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=3 jetstream=1 specimen=gap -->
 # Parity: DebugDialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,7 +27,7 @@ Renders Button + Code side-by-side; does **not** wrap them in a Dialog.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **Entire component missing.** Implement `js_debug_dialog()` in `packages/jetstream/components/src/debug_dialog.rs` per contract: trigger Button (`triggerVariant`/`triggerSize`) opening a Dialog containing a Code block of the serialized `value`, all values token-resolved. This is the single biggest gap for this component.
+- [x] DONE: `js_debug_dialog(spec, theme)` created — trigger Button (`triggerVariant`/`triggerSize`) + JSON Code block of `value`; renders nothing without a value. Registered in lib.rs, probe-tested. (Open/close dialog behavior lives in the preview event loop, like other Jetstream interactions.)
 - [ ] Add the Jetstream specimen `packages/jetstream/preview/src/specimens/debug_dialog.rs` covering the Svelte states (with value, custom trigger, hidden when null).
 
 ## Specimen parity

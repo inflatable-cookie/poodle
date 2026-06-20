@@ -25,7 +25,8 @@ Svelte implements the full contract — props `children` (required Snippet), `ti
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No Jetstream implementation** — `error_boundary.rs` does not exist in `packages/jetstream/components/src/`, and no specimen exists. Top-priority gap: add `js_error_boundary(spec, theme, child)` composing `js_empty_state` (title + message + retry action), mirroring the GPUI presentational shell. Note the contract does not explicitly mandate a Jetstream target, but parity policy expects all three.
+- [x] DONE: `js_error_boundary(spec, theme, child)` created (`error_boundary.rs`), composing `js_empty_state` (title + message + retry action) on error, else the child. Registered in lib.rs, probe-tested.
+- [ ] Add the Jetstream specimen (error + non-error states).
 
 ## Specimen parity
 

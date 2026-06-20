@@ -134,10 +134,10 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | date-time-picker | fixed | 6 | 4 | gap |
 | date-time-range-picker | fixed | 7 | 4 | gap |
 | date-time-zone-picker | fixed | 9 | 6 | gap |
-| debug-dialog | ok | 3 | 2 | gap |
+| debug-dialog | ok | 3 | 1 | gap |
 | detail-item | fixed | 3 | 5 | gap |
 | detail-section | fixed | 3 | 3 | gap |
-| detail-section-group | fixed | 4 | 2 | gap |
+| detail-section-group | fixed | 4 | 1 | gap |
 | detail-shell | ok | 4 | 6 | gap |
 | dialog | ok | 2 | 3 | gap |
 | dock-region | ok | 7 | 10 | gap |
