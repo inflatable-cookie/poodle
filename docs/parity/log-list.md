@@ -1,4 +1,10 @@
-<!-- parity consv=ok gpui=9 jetstream=8 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=8 specimen=gap -->
+<!-- pass 24: GPUI rebuilt — stream/audit variants split (auto-detected); AUDIT variant
+     newly implemented (status-tinted action icon, actor/action-badge/resource, timestamp,
+     dividers, empty state); all hsla()/px() literals token-resolved (toolbar bg elevated@92%,
+     chip/badge accent-alpha, level colors color_mix status@84%; spacing/radii/border via
+     tokens; remaining px are rem_to_px of contract-exact rem). Build clean. Remaining: audit
+     toolbar/pagination/loading-error need LogListSpec audit fields (shared upstream blocker). -->
 # Parity: LogList
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

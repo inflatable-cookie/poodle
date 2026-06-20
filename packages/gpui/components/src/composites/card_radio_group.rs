@@ -1,14 +1,18 @@
-//! CardRadioGroup — selectable card group backed by CardRadioGroupSpec.
+//! CardRadioGroup — single-select card group backed by CardRadioGroupSpec.
+//!
+//! Each option composes the `Card` primitive (interactive, and selected when
+//! chosen) so the selected fill/border/focus ring all come from Card's own
+//! token-resolved treatment — never a hand-rolled accent tint. The Card body
+//! carries a header row (radio indicator + title) and an optional description.
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use crate::Card;
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::CardRadioGroupSpec;
-use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{CardSpec, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 pub struct CardRadioGroup {
     spec: CardRadioGroupSpec,
@@ -63,124 +67,136 @@ impl IntoElement for CardRadioGroup {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let pad_x = rem_to_px(panel_space_x_rem(spec.density));
-        let pad_y = rem_to_px(panel_space_y_rem(spec.density));
-        let gap = rem_to_px(control_space_x_rem(spec.density));
 
-        let unselected_fill = resolve_color(theme, spec.unselected_fill_token());
-        let border = resolve_color(theme, spec.border_token());
-        let radius = resolve_radius(theme, "radius.surface");
-        let text_color = resolve_color(theme, "color.text.primary");
-        let text_secondary = resolve_color(theme, "color.text.secondary");
+        // Contract §7/§8 size scale — resolved through the spec, not literals.
+        let indicator_size = px(rem_to_px(CardRadioGroupSpec::indicator_size_rem(
+            effective_size,
+        )));
+        let dot_size = px(rem_to_px(CardRadioGroupSpec::dot_size_rem(effective_size)));
+        let indicator_border = px(rem_to_px(spec.indicator_border_rem()));
+        let title_font = px(rem_to_px(CardRadioGroupSpec::title_font_rem(effective_size)));
+        let description_font = px(rem_to_px(CardRadioGroupSpec::description_font_rem(
+            effective_size,
+        )));
+
+        // Density-driven grid gap (contract §8: compact 0.5 · default 0.75 · comfortable 0.875).
+        let grid_gap = px(rem_to_px(control_space_x_rem(spec.density)));
+        // Header row gap is density-fixed 0.5rem per contract (§8); inline.sm = 0.5rem.
+        let header_gap = resolve_px(theme, "space.inline.sm");
+        // Body column rhythm between header and description (Card stack rhythm).
+        let body_gap = resolve_px(theme, "space.stack.sm");
+
+        let indicator_border_color = resolve_color(theme, spec.border_token());
         let accent = resolve_color(theme, "color.accent.base");
-        let focus_ring = resolve_color(theme, "color.accent.focusRing");
-        let body_size = px(font_size);
-        let label_size = resolve_px(theme, "typography.label.size");
+        let dot_color = resolve_color(theme, "color.text.inverse");
+        let pill_radius = resolve_radius(theme, "radius.pill");
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+
         let selected = spec.value.as_deref().or(spec.default_value.as_deref());
 
-        // Selected card: accent-tinted background (color-mix accent 12%)
-        let selected_fill = color_mix(accent, unselected_fill, 0.12);
+        let mut el = div().flex().flex_row().flex_wrap().gap(grid_gap);
 
-        // Grid-like layout: flex-wrap with gap
-        let mut el = div().flex().flex_row().flex_wrap().gap(px(gap));
-
-        for (idx, option) in spec.options.iter().enumerate() {
+        for option in spec.options.iter() {
             let is_selected = selected == Some(option.value.as_str());
             let is_option_disabled = spec.is_disabled || option.is_disabled;
-            let fill = if is_selected {
-                selected_fill
-            } else {
-                unselected_fill
-            };
-            let border_c = if is_selected { accent } else { border };
-            let bw = if is_selected { 2.0 } else { 1.0 };
 
-            // Radio indicator: 18px outer circle with border, 6px inner dot when selected
-            // Svelte: outer=1.125rem(18px), inner dot=0.375rem(6px)
+            // Radio indicator: border-only unchecked; accent fill + inner dot checked.
             let indicator = div()
-                .w(px(18.0))
-                .h(px(18.0))
-                .rounded(px(999.0))
-                .bg(unselected_fill)
-                .border_1()
-                .border_color(if is_selected { accent } else { border })
+                .w(indicator_size)
+                .h(indicator_size)
+                .rounded(pill_radius)
+                .border(indicator_border)
+                .border_color(if is_selected {
+                    accent
+                } else {
+                    indicator_border_color
+                })
+                .when(is_selected, |s| s.bg(accent))
                 .flex()
                 .items_center()
                 .justify_center()
                 .flex_shrink_0()
-                .child(
-                    div()
-                        .w(px(rem_to_px(0.375)))
-                        .h(px(rem_to_px(0.375)))
-                        .rounded(px(999.0))
-                        .bg(if is_selected {
-                            accent
-                        } else {
-                            gpui::transparent_black()
-                        }),
-                );
+                .when(is_selected, |s| {
+                    s.child(div().w(dot_size).h(dot_size).rounded(pill_radius).bg(dot_color))
+                });
 
-            // Content: label + optional description
-            // Svelte: content gap = 0.5rem (8px)
-            let mut content = div().flex().flex_col().gap(px(rem_to_px(0.5))).child(
-                div()
-                    .text_size(body_size)
-                    .text_color(text_color)
-                    .child(option.label.clone()),
-            );
-
-            // Show description below label if present
-            if let Some(ref description) = option.description {
-                content = content.child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child(description.clone()),
-                );
-            }
-
-            let card_id = SharedString::from(format!("poodle-card-radio-{}", idx));
-            let mut card = div()
-                .id(card_id)
-                .focusable()
-                // Grid-like sizing: flex-1 with min-width for wrapping
-                .flex_1()
-                .min_w(px(200.0))
-                .bg(fill)
-                .rounded(radius)
-                .border(px(bw))
-                .border_color(border_c)
-                .px(px(pad_x))
-                .py(px(pad_y))
+            // Header row: indicator + title. Title font-size comes from the
+            // contract per-size scale; color/weight from tokens.
+            let header = div()
                 .flex()
                 .items_center()
-                // Svelte: header gap = 0.5rem (8px), hardcoded regardless of density
-                .gap(px(rem_to_px(0.5)))
-                // Focus ring
-                .focus(move |s| s.border_color(focus_ring))
+                .gap(header_gap)
                 .child(indicator)
-                .child(content);
+                .child(
+                    div()
+                        .text_size(title_font)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(text_primary)
+                        .child(option.label.clone()),
+                );
+
+            // Card body: header row + optional description.
+            let body = div()
+                .flex()
+                .flex_col()
+                .gap(body_gap)
+                .child(header)
+                .when_some(option.description.as_ref(), |el, description| {
+                    el.child(
+                        div()
+                            .text_size(description_font)
+                            .text_color(text_secondary)
+                            .child(description.clone()),
+                    )
+                });
+
+            // Compose the Card primitive — selected state owns the fill/border.
+            let mut card_spec = CardSpec::new().interactive();
+            if is_selected {
+                card_spec = card_spec.selected();
+            }
+            let aria = option
+                .aria_label
+                .clone()
+                .unwrap_or_else(|| option.label.clone());
+            card_spec = card_spec.with_aria_label(aria);
+
+            let card_id = format!("poodle-card-radio-{}", option.value);
+            let card = Card::from_spec(card_spec, theme)
+                .with_id(card_id.clone())
+                .with_body(body);
+
+            // Wrap each Card in the option container, carrying interaction +
+            // per-item disabled styling (contract §8 option selectors).
+            // The wrapper id makes the option focusable/clickable (role="radio").
+            let option_id = SharedString::from(format!("poodle-card-radio-option-{}", option.value));
+            let mut option_el = div()
+                .id(option_id)
+                .focusable()
+                .flex_1()
+                .min_w(px(0.0))
+                .child(card);
 
             if is_option_disabled {
                 let opacity = resolve_opacity(theme, "state.opacity.disabled");
-                card = card
+                option_el = option_el
                     .opacity(opacity)
                     .cursor(CursorStyle::OperationNotAllowed);
             } else {
-                card = card.cursor_pointer();
-
+                option_el = option_el.cursor_pointer();
                 if let Some(ref handler) = self.on_change {
                     let handler = handler.clone();
                     let val = option.value.clone();
-                    card = card.on_click(move |_event, window, cx| {
+                    option_el = option_el.on_click(move |_event, window, cx| {
                         handler(&val, window, cx);
                     });
                 }
             }
 
-            el = el.child(card);
+            el = el.child(option_el);
         }
+
         if spec.is_disabled {
             let opacity = resolve_opacity(theme, "state.opacity.disabled");
             el = el.opacity(opacity);

@@ -125,7 +125,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | calendar | fixed | 9 | 10 | gap |
 | callout | fixed | 7 | 9 | gap |
 | card | fixed | 7 | 7 | gap |
-| card-radio-group | fixed | 8 | 9 | gap |
+| card-radio-group | fixed | 2 | 9 | gap |
 | card-toggle-group | fixed | 9 | 7 | gap |
 | checkbox | ok | 4 | 5 | gap |
 | code | fixed | 8 | 9 | gap |
@@ -177,7 +177,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | list-card-counter | fixed | 2 | 2 | ok |
 | list-container | fixed | 6 | 6 | gap |
 | list-grid | fixed | 1 | 1 | gap |
-| log-list | ok | 9 | 8 | gap |
+| log-list | ok | 2 | 8 | gap |
 | markdown-editor | fixed | 11 | 8 | gap |
 | media-browse-panel | ok | 2 | 4 | gap |
 | media-picker | fixed | 8 | 8 | gap |

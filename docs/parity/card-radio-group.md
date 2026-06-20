@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=9 specimen=gap -->
+<!-- pass 24: GPUI rebuilt — options compose Card::from_spec(interactive/selected)
+     (mirrors card_toggle_group); dropped invented 12%-accent fill (Card owns it);
+     indicator/dot/font dims from additive spec helpers (indicator_size_rem/dot_size_rem/
+     title_font_rem/description_font_rem/indicator_border_rem) not px literals; radius.pill,
+     header gap space.inline.sm. Build clean, specs 53 pass. -->
 # Parity: CardRadioGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
