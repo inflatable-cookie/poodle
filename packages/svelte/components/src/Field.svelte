@@ -8,7 +8,7 @@
 
   interface FieldControlProps {
     describedBy: string | null;
-    descriptionId: null;
+    descriptionId: string | null;
     errorId: string | null;
     messageId: string | null;
     validationState: ValidationState;
@@ -57,6 +57,7 @@
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const infoText = $derived(description ?? hint);
+  const descriptionId = $derived(description ? `${id}-description` : null);
   const errorId = $derived(error ? `${id}-error` : null);
   const pendingId = $derived(pendingMessage ? `${id}-pending` : null);
   const messageId = $derived(
@@ -66,7 +67,11 @@
         ? pendingId
         : null,
   );
-  const describedBy = $derived(messageId ?? null);
+  // aria-describedby = description first, then the active validation message
+  // (mirrors the Rust FieldSpec.described_by).
+  const describedBy = $derived(
+    [descriptionId, messageId].filter(Boolean).join(" ") || null,
+  );
   const fieldStyle = $derived(
     [
       span ? (span === "full" ? "grid-column: 1 / -1" : `grid-column: span ${span}`) : "",
@@ -115,7 +120,7 @@
       {#if control}
         {@render control({
           describedBy,
-          descriptionId: null,
+          descriptionId,
           errorId,
           messageId,
           validationState,
@@ -125,6 +130,10 @@
       {/if}
     </UiPresentationProvider>
   </div>
+
+  {#if description}
+    <span id={descriptionId} class="poodle-field__sr-description">{description}</span>
+  {/if}
 
   {#if validationState === "invalid" && error}
     <p class="poodle-field__message poodle-field__message--error" id={errorId} aria-live="polite">
@@ -150,6 +159,20 @@
   .poodle-field__control {
     width: 100%;
     min-width: 0;
+  }
+
+  /* Programmatic description target for aria-describedby; the visual affordance
+     is the info-icon popover. */
+  .poodle-field__sr-description {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .poodle-field__header {

@@ -87,11 +87,12 @@ label and control.
 | Snippet | Purpose | Props Passed |
 |---------|---------|-------------|
 | `children()` | default field content for simple controls | none |
-| `control(...)` | advanced control content needing field-owned accessibility wiring | `describedBy`, `descriptionId` (always null), `errorId`, `messageId`, `validationState` |
+| `control(...)` | advanced control content needing field-owned accessibility wiring | `describedBy`, `descriptionId`, `errorId`, `messageId`, `validationState` |
 
-- `describedBy`: computed string for the child control's `aria-describedby`,
-  containing the error or pending message id as appropriate
-- `descriptionId`: always `null` (description is in a popover, not inline)
+- `describedBy`: computed string for the child control's `aria-describedby` —
+  the description id (when a `description` is set) followed by the active
+  validation message id, space-joined (mirrors the Rust `FieldSpec.described_by`)
+- `descriptionId`: `{id}-description` when a `description` is set, else `null`
 - `errorId`: id of the error message element
 - `messageId`: id of the active validation message element
 - `validationState`: passed through so the child control can render its own
@@ -133,8 +134,10 @@ embedded Popover component.
 - Info popover: `role="dialog"` with `aria-label="Field description"`
 - Required marker: decorative (`aria-hidden`); child should set `aria-required`
 - Error/pending: `aria-live="polite"` for dynamic announcements
-- `describedBy` includes error or pending message id (not description,
-  since description is in a popover)
+- `describedBy` = description id (when present) + active error/pending message
+  id. The description is exposed as a visually-hidden element
+  (`.poodle-field__sr-description`, `id={id}-description`) so `aria-describedby`
+  resolves; the info-icon popover is the visual affordance for the same text.
 
 ### Keyboard
 
@@ -252,7 +255,9 @@ embedded Popover component.
   `:global(.popover__surface)` scoped selector
 - Info icon uses `em` units so it scales with the label row font-size
 - `data-size` and `data-density` attributes emitted on root
-- `descriptionId` slot prop is always `null` (description is in popover)
+- `descriptionId` slot prop is `{id}-description` when `description` is set
+  (a visually-hidden `.poodle-field__sr-description` element carries that id),
+  else `null`
 - `hint` prop kept as deprecated alias for `description`
 - Size variants set font-size on `.field__label-row` (not `.field__label`)
   so both label text and em-based icon scale together
@@ -274,7 +279,7 @@ embedded Popover component.
 ### Tier 1: Strict Parity
 
 - [ ] label-to-control accessible name relationship matches
-- [ ] error/pending `aria-describedby` relationships match
+- [ ] description + error/pending `aria-describedby` relationships match
 - [ ] invalid and pending message precedence matches
 - [ ] required/optional marker visibility rules match
 - [ ] description renders in info popover, not inline

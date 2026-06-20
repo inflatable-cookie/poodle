@@ -9,7 +9,14 @@
     <div class="poodle-specimen">
       <SpecimenGroup label="Default with description">
         <Field label="Display name" description="This is how your name appears to other users." id="field-name">
-          <TextInput id="field-name" placeholder="Enter your name" ariaLabel="Display name" />
+          {#snippet control({ describedBy })}
+            <TextInput
+              id="field-name"
+              placeholder="Enter your name"
+              ariaLabel="Display name"
+              {describedBy}
+            />
+          {/snippet}
         </Field>
       </SpecimenGroup>
 
@@ -21,7 +28,15 @@
 
       <SpecimenGroup label="With error">
         <Field label="Username" error="This username is already taken." validationState="invalid" id="field-user">
-          <TextInput id="field-user" value="admin" ariaLabel="Username" />
+          {#snippet control({ describedBy, validationState })}
+            <TextInput
+              id="field-user"
+              value="admin"
+              ariaLabel="Username"
+              {describedBy}
+              {validationState}
+            />
+          {/snippet}
         </Field>
       </SpecimenGroup>
 
