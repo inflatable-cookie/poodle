@@ -288,12 +288,16 @@ pub struct TreePreviewState {
     pub selected: Vec<String>,
     pub focused: Option<String>,
     pub checked: Vec<String>,
+    pub selection_anchor: Option<String>,
     pub editing_value: Option<String>,
     pub editing_text: String,
     /// Mutable demo tree for the rename / menu / reorder specimen.
     pub rename_nodes: Vec<TreeNode>,
     pub menu_value: Option<String>,
     pub menu_pos: (i32, i32),
+    /// Live drag drop-target indicator state (rename/reorder tree).
+    pub drop_target: Option<String>,
+    pub drop_position: DropPosition,
 }
 
 impl TreePreviewState {
@@ -303,12 +307,29 @@ impl TreePreviewState {
             selected: vec!["src/components/Tree.svelte".to_string()],
             focused: Some("src/components/Tree.svelte".to_string()),
             checked: vec!["src/components/Button.svelte".to_string()],
+            selection_anchor: Some("src/components/Tree.svelte".to_string()),
             editing_value: None,
             editing_text: String::new(),
             rename_nodes: docs_tree(),
             menu_value: None,
             menu_pos: (0, 0),
+            drop_target: None,
+            drop_position: DropPosition::After,
         }
+    }
+
+    /// Apply a multi-select update (replace / toggle / range) from the Tree.
+    pub fn apply_selection(&mut self, values: Vec<String>, anchor: Option<String>, focused: &str) {
+        self.selected = values;
+        self.selection_anchor = anchor;
+        self.focused = Some(focused.to_string());
+    }
+    pub fn set_drop(&mut self, target: &str, position: DropPosition) {
+        self.drop_target = Some(target.to_string());
+        self.drop_position = position;
+    }
+    pub fn clear_drop(&mut self) {
+        self.drop_target = None;
     }
 
     pub fn start_rename(&mut self, value: &str, label: &str) {
@@ -358,11 +379,6 @@ impl TreePreviewState {
         } else {
             self.expanded.push(value.to_string());
         }
-    }
-
-    pub fn select_only(&mut self, value: &str) {
-        self.selected = vec![value.to_string()];
-        self.focused = Some(value.to_string());
     }
 
     pub fn set_focused(&mut self, value: &str) {

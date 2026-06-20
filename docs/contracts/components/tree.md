@@ -212,9 +212,10 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
 - focus entry: the first selected item, else the first item
 - focus exit: native; roving tabindex preserves the last focused item
 - live-region or announcement behavior: none; state is conveyed by ARIA on items
-- GPUI-native accessibility mapping notes: GPUI exposes the same role/level/
-  selected/expanded semantics through its focus + element identity model;
-  the rail and chevron are presentational
+- GPUI-native accessibility mapping notes: **not exposed.** gpui 0.2.2 ships no
+  public accessibility API (no role/level/selected/checked tree), so the GPUI
+  Tree conveys state visually only. This is a runtime limitation, not a design
+  choice — see Known Deltas. Svelte emits the full ARIA tree.
 
 ## 7. Layout
 
@@ -398,6 +399,38 @@ Focus lives on the `treeitem`; the ring is painted on its presentational row chi
 | `opacity` | `var(--poodle-state-opacity-disabled)` |
 | `cursor` | `not-allowed` |
 
+### `.tree__checkbox` / `.tree__spinner`
+
+| Part | Property | Value |
+|------|----------|-------|
+| `.tree__checkbox` | `flex` | `0 0 auto` — hosts a size-`xs` `Checkbox`, before the icon |
+| `.tree__spinner` | `flex` / `width` | `0 0 auto` / `var(--poodle-tree-twisty-size)` — spinner in the LoadingRow |
+| `.tree__label--muted` | `color` / `font-style` | `var(--poodle-color-text-secondary)` / `italic` — "Loading…" |
+
+### `.tree__rename` (inline rename input)
+
+| Property | Value |
+|----------|-------|
+| `flex` | `1 1 auto` |
+| `padding` | `0 0.25rem` |
+| `border` | `0.0625rem solid var(--poodle-color-accent-base)` |
+| `border-radius` | `0.1875rem` |
+| `background` | `var(--poodle-color-background-surface)` |
+| `color` | `var(--poodle-color-text-primary)` |
+| `font` | `inherit` (matches row) |
+| `:focus-visible box-shadow` | `0 0 0 0.125rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 50%, transparent)` |
+
+### Drop indicator (`.tree__item[data-drop]`)
+
+| Value | Rendering |
+|-------|-----------|
+| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top |
+| `after` | accent line at the row bottom |
+| `inside` | inset accent ring + `color-mix(... accent-base 12%, transparent)` fill |
+
+GPUI draws the equivalent (top/bottom accent line or inside fill) via an absolute
+child; the position comes from pointer Y within the row during `on_drag_move`.
+
 ### Light Theme Overrides
 
 None.
@@ -419,11 +452,27 @@ None.
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::composites::tree` → `Tree`
+  (+ `TreeSelectionUpdate`, `TreeReorderRequest`, `TreeContextRequest`,
+  `TreeDragOver`)
 - theme access strategy: `GpuiThemeProvider`, resolving the same semantic tokens
   as the Svelte CSS variable defaults
-- implementation-only details: recursive `render_node` flattens visible rows;
-  chevron uses `▸` / `▾` glyphs; guides drawn as left-bordered indent cells
-- known GPUI-native deltas: transition timing is platform-owned
+- interaction model: the component is a stateless `IntoElement`; the owning view
+  holds tree state (selection/expansion/focus/anchor/editing/drop) and mutates it
+  via `cx.listener` callbacks, then `cx.notify`. Mirrors `Tabs`/`Checkbox`.
+- selection: multi-select is **component-owned** — `on_selection_change` emits
+  the next `{values, anchor, focused}` from click (Ctrl/Cmd toggle, Shift range),
+  Space (toggle), and Shift+Arrow (extend). Host round-trips `selection_anchor`.
+- rename: reuses the `EditableLabel` primitive (controlled via `on_rename_change`
+  → `editing_text`); F2 starts, Enter commits, Escape cancels
+- context menu: right-click via `on_mouse_down(MouseButton::Right)` →
+  `on_context_menu`; host renders `ContextMenu` at `anchor_point`
+- reorder: `on_drag` (typed payload + preview view) + `on_drag_move` (computes
+  before/after/inside from pointer Y within row bounds → `on_drag_over`) +
+  `on_drop` (applies via `reorder_nodes`); `drag_over` indicator is a top/bottom
+  accent line or inside fill. Alt+Up/Down moves among siblings.
+- chevron uses `▸` / `▾` glyphs; guides are left-bordered indent cells
+- known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
+  no virtual scrolling; transition timing is platform-owned
 
 ## 11. Parity Checklist
 
@@ -431,7 +480,9 @@ None.
 
 - [ ] all props have the same meaning and defaults
 - [ ] branch rule (`isBranch || children`) matches
-- [ ] selection set semantics match (replace / toggle / range)
+- [x] selection set semantics match (replace / toggle / range) — Svelte in-component,
+      GPUI via `on_selection_change`; Jetstream click-select only (no modifiers in
+      its `ClickEvent` — known runtime gap)
 - [ ] expansion controlled + uncontrolled resolution matches
 - [ ] `aria-level`, `aria-selected`, `aria-expanded`, `aria-disabled` exposure match
 - [x] keyboard model matches (arrows, Home/End, Enter/Space) in all 3 targets;
@@ -459,6 +510,8 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
+| GPUI exposes no accessibility | gpui 0.2.2 has no public a11y API (no role/level/selected tree) | accepted (forced) | revisit when gpui ships accesskit support |
+| Jetstream exposes no ARIA | immediate-mode runtime has no a11y tree | accepted (forced) | — |
 | Virtual scroll is Svelte-only | GPUI/Jetstream have no row-windowing primitive; they render all visible rows | accepted | revisit if a Rust runtime gains windowing |
 | Rust interaction is host-driven | GPUI is stateless + driven by the owning view; Jetstream renders from spec with the app loop owning state/events | accepted | inherent to the runtimes |
 | Selected inset ring is Svelte-only | A layout-affecting border would jitter rows in the immediate/retained runtimes | accepted | — |

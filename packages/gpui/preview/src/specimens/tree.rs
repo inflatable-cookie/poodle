@@ -3,7 +3,10 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{ContextMenu, Eyebrow, Tree, TreeContextRequest, TreeReorderRequest};
+use poodle_gpui_components::{
+    ContextMenu, Eyebrow, Tree, TreeContextRequest, TreeDragOver, TreeReorderRequest,
+    TreeSelectionUpdate,
+};
 use poodle_specs::{
     ContextMenuSpec, ControlDensity, ControlSize, EyebrowSpec, MenuEntry, TreeNode, TreeSpec,
 };
@@ -92,6 +95,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         interactive = interactive.focused_value(focused.clone());
     }
     interactive = interactive
+        .selection_anchor(state.tree.selection_anchor.clone())
         .on_focus_change(cx.listener(|this, v: &str, _w, cx| {
             this.state.tree.set_focused(v);
             cx.notify();
@@ -100,8 +104,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             this.state.tree.toggle_expanded(v);
             cx.notify();
         }))
-        .on_select(cx.listener(|this, v: &str, _w, cx| {
-            this.state.tree.select_only(v);
+        .on_selection_change(cx.listener(|this, u: &TreeSelectionUpdate, _w, cx| {
+            this.state
+                .tree
+                .apply_selection(u.values.clone(), u.anchor.clone(), &u.focused);
             cx.notify();
         }));
 
@@ -149,7 +155,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .gap(px(24.0))
         .child(labelled(
             theme,
-            "File explorer (click a row, then ↑/↓ ←/→ Enter)",
+            "File explorer — click · Ctrl/Cmd+click · Shift+click · ↑/↓ ←/→ Space",
             framed(theme, interactive),
         ))
         .child(labelled(
@@ -179,6 +185,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             let mut rt_spec = TreeSpec::new(state.tree.rename_nodes.clone())
                 .with_expanded_values(vec!["docs".into()])
                 .with_reorderable(true)
+                .with_drag(None, state.tree.drop_target.clone(), state.tree.drop_position)
                 .with_aria_label("Rename tree");
             if let Some(ev) = &state.tree.editing_value {
                 rt_spec = rt_spec.with_editing(ev.clone(), state.tree.editing_text.clone());
@@ -211,8 +218,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     );
                     cx.notify();
                 }))
+                .on_drag_over(cx.listener(|this, o: &TreeDragOver, _w, cx| {
+                    this.state.tree.set_drop(&o.value, o.position);
+                    cx.notify();
+                }))
                 .on_reorder(cx.listener(|this, req: &TreeReorderRequest, _w, cx| {
                     this.state.tree.reorder(&req.from, &req.to, req.position);
+                    this.state.tree.clear_drop();
                     cx.notify();
                 }));
 

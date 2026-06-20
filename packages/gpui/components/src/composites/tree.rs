@@ -32,6 +32,36 @@ type ContextFn = Rc<dyn Fn(&TreeContextRequest, &mut Window, &mut App) + 'static
 
 type ReorderFn = Rc<dyn Fn(&TreeReorderRequest, &mut Window, &mut App) + 'static>;
 
+/// Whether the node with `value` is disabled (searched across the whole tree).
+fn find_disabled(nodes: &[TreeNode], value: &str) -> Option<bool> {
+    for n in nodes {
+        if n.value == value {
+            return Some(n.is_disabled);
+        }
+        if let Some(d) = find_disabled(&n.children, value) {
+            return Some(d);
+        }
+    }
+    None
+}
+type SelectionFn = Rc<dyn Fn(&TreeSelectionUpdate, &mut Window, &mut App) + 'static>;
+type DragOverFn = Rc<dyn Fn(&TreeDragOver, &mut Window, &mut App) + 'static>;
+
+/// The next selection state computed by the component (multi-select aware).
+pub struct TreeSelectionUpdate {
+    pub values: Vec<String>,
+    /// New range anchor (the host must round-trip this back via `selection_anchor`).
+    pub anchor: Option<String>,
+    /// The node that should hold keyboard focus after the update.
+    pub focused: String,
+}
+
+/// A drag hovering over a row: the target value and where it would land.
+pub struct TreeDragOver {
+    pub value: String,
+    pub position: DropPosition,
+}
+
 /// A right-click on a tree row: the node value and the pointer position.
 pub struct TreeContextRequest {
     pub value: String,
@@ -71,6 +101,77 @@ impl Render for TreeDragPreview {
     }
 }
 
+/// Shared selection context for computing the next selection set on click /
+/// Space / Shift+Arrow, mirroring the Svelte reference (replace / toggle / range).
+struct SelectionCtx {
+    /// All visible values, in render order.
+    order: Vec<String>,
+    /// Visible, non-disabled values (range selection skips disabled).
+    selectable: Vec<String>,
+    selected: Vec<String>,
+    anchor: Option<String>,
+    handler: Option<SelectionFn>,
+}
+
+impl SelectionCtx {
+    fn range(&self, a: &str, b: &str) -> Vec<String> {
+        match (
+            self.order.iter().position(|v| v == a),
+            self.order.iter().position(|v| v == b),
+        ) {
+            (Some(ia), Some(ib)) => {
+                let (lo, hi) = if ia <= ib { (ia, ib) } else { (ib, ia) };
+                self.order[lo..=hi]
+                    .iter()
+                    .filter(|v| self.selectable.contains(v))
+                    .cloned()
+                    .collect()
+            }
+            _ => vec![b.to_string()],
+        }
+    }
+
+    /// Replace selection with a single value (plain click / Enter).
+    fn replace(&self, value: &str) -> TreeSelectionUpdate {
+        TreeSelectionUpdate {
+            values: vec![value.to_string()],
+            anchor: Some(value.to_string()),
+            focused: value.to_string(),
+        }
+    }
+
+    /// Toggle a value in the selection set (Ctrl/Cmd+click, Space).
+    fn toggle(&self, value: &str) -> TreeSelectionUpdate {
+        let mut values = self.selected.clone();
+        if let Some(p) = values.iter().position(|v| v == value) {
+            values.remove(p);
+        } else {
+            values.push(value.to_string());
+        }
+        TreeSelectionUpdate {
+            values,
+            anchor: Some(value.to_string()),
+            focused: value.to_string(),
+        }
+    }
+
+    /// Extend the selection range from the anchor to `value` (Shift+click/arrow).
+    fn extend(&self, value: &str) -> TreeSelectionUpdate {
+        let anchor = self.anchor.clone().unwrap_or_else(|| value.to_string());
+        TreeSelectionUpdate {
+            values: self.range(&anchor, value),
+            anchor: Some(anchor),
+            focused: value.to_string(),
+        }
+    }
+
+    fn emit(&self, update: TreeSelectionUpdate, window: &mut Window, cx: &mut App) {
+        if let Some(h) = &self.handler {
+            h(&update, window, cx);
+        }
+    }
+}
+
 /// A real GPUI tree component backed by `TreeSpec`.
 pub struct Tree {
     spec: TreeSpec,
@@ -86,6 +187,9 @@ pub struct Tree {
     on_rename_cancel: Option<Handler>,
     on_context_menu: Option<ContextFn>,
     on_reorder: Option<ReorderFn>,
+    on_selection_change: Option<SelectionFn>,
+    on_drag_over: Option<DragOverFn>,
+    selection_anchor: Option<String>,
 }
 
 impl std::ops::Deref for Tree {
@@ -115,6 +219,9 @@ impl Tree {
             on_rename_cancel: None,
             on_context_menu: None,
             on_reorder: None,
+            on_selection_change: None,
+            on_drag_over: None,
+            selection_anchor: None,
         }
     }
 
@@ -219,6 +326,29 @@ impl Tree {
         self.on_reorder = Some(Rc::new(handler));
         self
     }
+    /// Range anchor for Shift selection (host round-trips it from updates).
+    pub fn selection_anchor(mut self, v: Option<String>) -> Self {
+        self.selection_anchor = v;
+        self
+    }
+    /// Multi-select aware selection change (replace / toggle / range). When set,
+    /// click + Space + Shift+Arrow compute the next set; prefer this over
+    /// `on_select` for multi-selectable trees.
+    pub fn on_selection_change(
+        mut self,
+        handler: impl Fn(&TreeSelectionUpdate, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_selection_change = Some(Rc::new(handler));
+        self
+    }
+    /// Called while a drag hovers a row, with the computed drop position.
+    pub fn on_drag_over(
+        mut self,
+        handler: impl Fn(&TreeDragOver, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_drag_over = Some(Rc::new(handler));
+        self
+    }
 }
 
 /// Resolved metrics + colors shared across the recursion.
@@ -244,6 +374,10 @@ struct TreeMetrics {
     focus_ring: Hsla,
     disabled_opacity: f32,
     focused: Option<String>,
+    drag_accent: Hsla,
+    drop_target: Option<String>,
+    drop_position: DropPosition,
+    sel: Rc<SelectionCtx>,
 }
 
 impl IntoElement for Tree {
@@ -275,6 +409,22 @@ impl IntoElement for Tree {
         let guide_base = resolve_color(theme, spec.guide_color_token());
         let elevated_bg = resolve_color(theme, "color.background.elevated");
 
+        // Multi-select context: visible order + selectable (non-disabled) values.
+        let visible = spec.visible_rows();
+        let order: Vec<String> = visible.iter().map(|r| r.value.clone()).collect();
+        let selectable: Vec<String> = order
+            .iter()
+            .filter(|v| !find_disabled(&spec.nodes, v).unwrap_or(false))
+            .cloned()
+            .collect();
+        let sel = Rc::new(SelectionCtx {
+            order,
+            selectable,
+            selected: spec.selected_values.clone(),
+            anchor: self.selection_anchor.clone(),
+            handler: self.on_selection_change.clone(),
+        });
+
         let m = TreeMetrics {
             row_height: px(row_height),
             row_font: px(row_font),
@@ -298,6 +448,10 @@ impl IntoElement for Tree {
             focus_ring: resolve_color(theme, spec.focus_ring_color_token()),
             disabled_opacity: resolve_opacity(theme, spec.disabled_opacity_token()),
             focused: spec.focused_value.clone(),
+            drag_accent: resolve_color(theme, spec.selected_fill_token()),
+            drop_target: spec.drop_target_value.clone(),
+            drop_position: spec.drop_position,
+            sel: sel.clone(),
         };
 
         let panel_y = rem_to_px(match spec.density {
@@ -326,7 +480,7 @@ impl IntoElement for Tree {
         if interactive {
             root.id("poodle-tree")
                 .focusable()
-                .on_key_down(self.key_handler())
+                .on_key_down(self.key_handler(sel))
                 .into_any_element()
         } else {
             root.into_any_element()
@@ -336,7 +490,10 @@ impl IntoElement for Tree {
 
 impl Tree {
     /// Build the root key handler from the current visible rows + callbacks.
-    fn key_handler(&self) -> impl Fn(&KeyDownEvent, &mut Window, &mut App) + 'static {
+    fn key_handler(
+        &self,
+        sel: Rc<SelectionCtx>,
+    ) -> impl Fn(&KeyDownEvent, &mut Window, &mut App) + 'static {
         let nav = self.spec.visible_rows();
         let focused = self.spec.focused_value.clone();
         let on_focus = self.on_focus_change.clone();
@@ -394,7 +551,11 @@ impl Tree {
                             None => nav.first(),
                         };
                         if let Some(r) = target {
-                            focus(&r.value, window, cx);
+                            if event.keystroke.modifiers.shift && sel.handler.is_some() {
+                                sel.emit(sel.extend(&r.value), window, cx);
+                            } else {
+                                focus(&r.value, window, cx);
+                            }
                         }
                     }
                 }
@@ -420,7 +581,11 @@ impl Tree {
                             None => nav.last(),
                         };
                         if let Some(r) = target {
-                            focus(&r.value, window, cx);
+                            if event.keystroke.modifiers.shift && sel.handler.is_some() {
+                                sel.emit(sel.extend(&r.value), window, cx);
+                            } else {
+                                focus(&r.value, window, cx);
+                            }
                         }
                     }
                 }
@@ -462,18 +627,24 @@ impl Tree {
                 }
                 "enter" => {
                     if let Some(i) = idx {
-                        if let Some(h) = &on_select {
-                            h(&nav[i].value, window, cx);
+                        let value = &nav[i].value;
+                        if sel.handler.is_some() {
+                            sel.emit(sel.replace(value), window, cx);
+                        } else if let Some(h) = &on_select {
+                            h(value, window, cx);
                         }
                         if let Some(h) = &on_activate {
-                            h(&nav[i].value, window, cx);
+                            h(value, window, cx);
                         }
                     }
                 }
                 "space" | " " => {
                     if let Some(i) = idx {
-                        if let Some(h) = &on_select {
-                            h(&nav[i].value, window, cx);
+                        let value = &nav[i].value;
+                        if sel.handler.is_some() {
+                            sel.emit(sel.toggle(value), window, cx);
+                        } else if let Some(h) = &on_select {
+                            h(value, window, cx);
                         }
                     }
                 }
@@ -695,17 +866,30 @@ impl Tree {
             let hover_text = m.selected_color;
             row = row.cursor_pointer().hover(move |s| s.text_color(hover_text).bg(hover_bg));
 
-            // Clicking a row focuses + selects it.
+            // Click selects — multi-select aware (Ctrl/Cmd toggle, Shift range).
             let on_focus = self.on_focus_change.clone();
             let on_select = self.on_select.clone();
-            if on_focus.is_some() || on_select.is_some() {
+            let sel = m.sel.clone();
+            if sel.handler.is_some() || on_focus.is_some() || on_select.is_some() {
                 let val = node.value.clone();
-                row = row.on_click(move |_event, window, cx| {
-                    if let Some(h) = &on_focus {
-                        h(&val, window, cx);
-                    }
-                    if let Some(h) = &on_select {
-                        h(&val, window, cx);
+                row = row.on_click(move |event, window, cx| {
+                    if sel.handler.is_some() {
+                        let mods = event.modifiers();
+                        let update = if mods.shift {
+                            sel.extend(&val)
+                        } else if mods.control || mods.platform {
+                            sel.toggle(&val)
+                        } else {
+                            sel.replace(&val)
+                        };
+                        sel.emit(update, window, cx);
+                    } else {
+                        if let Some(h) = &on_focus {
+                            h(&val, window, cx);
+                        }
+                        if let Some(h) = &on_select {
+                            h(&val, window, cx);
+                        }
                     }
                 });
             }
@@ -743,28 +927,79 @@ impl Tree {
                         })
                     },
                 );
-                let hl = m.selected_fill;
-                row = row.drag_over::<NodeDragPayload>(move |style, _payload, _w, _cx| style.bg(hl));
-                if let Some(ref reorder) = self.on_reorder {
-                    let reorder = Rc::clone(reorder);
+
+                // While hovering, compute before/after/inside from the pointer Y
+                // within the row's bounds and report it for the indicator.
+                if let Some(ref over) = self.on_drag_over {
+                    let over = Rc::clone(over);
                     let to = node.value.clone();
                     let to_branch = is_branch;
-                    row = row.on_drop::<NodeDragPayload>(move |payload, window, cx| {
+                    row = row.on_drag_move::<NodeDragPayload>(move |ev, window, cx| {
+                        let height = f32::from(ev.bounds.size.height).max(1.0);
+                        let rel = f32::from(ev.event.position.y - ev.bounds.origin.y) / height;
                         let position = if to_branch {
-                            DropPosition::Inside
+                            if rel < 0.25 {
+                                DropPosition::Before
+                            } else if rel > 0.75 {
+                                DropPosition::After
+                            } else {
+                                DropPosition::Inside
+                            }
+                        } else if rel < 0.5 {
+                            DropPosition::Before
                         } else {
                             DropPosition::After
                         };
-                        reorder(
-                            &TreeReorderRequest {
-                                from: payload.value.clone(),
-                                to: to.clone(),
+                        over(
+                            &TreeDragOver {
+                                value: to.clone(),
                                 position,
                             },
                             window,
                             cx,
                         );
                     });
+                }
+
+                // Drop applies the move using the last computed drop position.
+                if let Some(ref reorder) = self.on_reorder {
+                    let reorder = Rc::clone(reorder);
+                    let to = node.value.clone();
+                    let pos = m.drop_position;
+                    row = row.on_drop::<NodeDragPayload>(move |payload, window, cx| {
+                        reorder(
+                            &TreeReorderRequest {
+                                from: payload.value.clone(),
+                                to: to.clone(),
+                                position: pos,
+                            },
+                            window,
+                            cx,
+                        );
+                    });
+                }
+            }
+
+            // Drop indicator: before/after line or inside highlight.
+            if m.drop_target.as_deref() == Some(node.value.as_str()) {
+                match m.drop_position {
+                    DropPosition::Inside => {
+                        row = row.bg(Hsla { a: m.drag_accent.a * 0.15, ..m.drag_accent });
+                    }
+                    DropPosition::Before | DropPosition::After => {
+                        let mut line = div()
+                            .absolute()
+                            .left(px(0.0))
+                            .right(px(0.0))
+                            .h(px(2.0))
+                            .bg(m.drag_accent);
+                        line = if matches!(m.drop_position, DropPosition::Before) {
+                            line.top(px(-1.0))
+                        } else {
+                            line.bottom(px(-1.0))
+                        };
+                        row = row.relative().child(line);
+                    }
                 }
             }
         }

@@ -80,6 +80,8 @@ pub use selection_summary::SelectionSummary;
 pub use sidebar_nav::SidebarNav;
 pub use split_view::SplitView;
 pub use toast_host::ToastHost;
-pub use tree::{Tree, TreeContextRequest, TreeReorderRequest};
+pub use tree::{
+    Tree, TreeContextRequest, TreeDragOver, TreeReorderRequest, TreeSelectionUpdate,
+};
 pub use toast_stack::ToastStack;
 pub use video_player::VideoPlayer;
