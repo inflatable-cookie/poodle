@@ -118,21 +118,35 @@ pub fn js_switch(spec: &SwitchSpec, theme: &JetstreamThemeProvider) -> JsEl {
         .pl(thumb_offset)
         .child(thumb);
 
-    // ── Root: track + optional label ──
+    // ── Root: dual labels flank the track, or a single trailing label ──
     let mut root = ui_element::div()
         .flex_row()
         .gap(gap) // from SPACE_INLINE_SM token
         .items_center()
-        .focusable()
-        .child(track);
+        .focusable();
 
-    if let Some(ref label) = spec.label {
-        let label_color = resolve_color(theme, "color.text.primary");
-        root = root.child(
-            ui_element::label(label)
-                .text_color(label_color)
-                .text_size(label_size) // from TYPOGRAPHY_LABEL_SIZE token
-        );
+    if spec.is_dual_label() {
+        // Active side uses the thumb (tone) color; the inactive side is muted.
+        let secondary: Color = resolve_color(theme, "color.text.secondary").into();
+        if let Some(ref left) = spec.left_label {
+            let c: Color = if is_checked { secondary } else { thumb_color };
+            root = root.child(ui_element::label(left).text_color(c).text_size(label_size));
+        }
+        root = root.child(track);
+        if let Some(ref right) = spec.right_label {
+            let c: Color = if is_checked { thumb_color } else { secondary };
+            root = root.child(ui_element::label(right).text_color(c).text_size(label_size));
+        }
+    } else {
+        root = root.child(track);
+        if let Some(ref label) = spec.label {
+            let label_color = resolve_color(theme, "color.text.primary");
+            root = root.child(
+                ui_element::label(label)
+                    .text_color(label_color)
+                    .text_size(label_size), // from TYPOGRAPHY_LABEL_SIZE token
+            );
+        }
     }
 
     // Contract: disabled → opacity from state-opacity-disabled token, cursor not-allowed
@@ -184,5 +198,15 @@ mod tests {
             &theme(),
         );
         assert!(!el.style.disabled);
+    }
+
+    #[test]
+    fn dual_labels_flank_the_track() {
+        let el = js_switch(
+            &SwitchSpec::new().with_left_label("Off").with_right_label("On"),
+            &theme(),
+        );
+        let tree = crate::render_probe::probe(&el, 220.0, 40.0);
+        assert!(tree.has_text("Off") && tree.has_text("On"), "dual labels missing: {:?}", tree.texts());
     }
 }

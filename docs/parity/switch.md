@@ -1,4 +1,8 @@
-<!-- parity consv=fixed gpui=3 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=3 jetstream=6 specimen=gap -->
+<!-- note: the "no tones" todo was a recall-biased over-flag — left_tone/right_tone
+     ARE resolved (switch.rs); only custom on_color/off_color string overrides are
+     unapplied. Several remaining items are preview-loop (toggle, readOnly cursor)
+     or render-runtime (focus ring) deltas, not pure render gaps. -->
 # Parity: Switch
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -60,7 +64,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [ ] **No tones / custom colors.** `left_tone`/`right_tone` are read (`switch.rs:64-71`) but
   `off_color`/`on_color` hex overrides (contract §3, used in Svelte `toneToColor`/`switchStyles`) are
   ignored — no `spec.on_color`/`spec.off_color` branch. GPUI handles both (`gpui switch.rs:178-196`).
-- [ ] **No dual-label mode.** `leftLabel`/`rightLabel` (`is_dual_label`) unsupported — only the single
+- [x] **DONE: dual-label mode.** `leftLabel`/`rightLabel` now flank the track (active side tone-colored, inactive muted) via `is_dual_label`. Probe-tested. — was: only the single
   trailing `spec.label` renders (`switch.rs:129-136`). GPUI implements left|track|right with active-side
   tinting (`gpui switch.rs:280-316`).
 - [ ] **No readOnly handling.** `is_read_only` is never read in `js_switch`; no cursor/non-interactive

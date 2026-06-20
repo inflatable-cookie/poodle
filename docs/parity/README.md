@@ -218,7 +218,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | status-bar | fixed | 6 | 8 | gap |
 | status-indicator | fixed | 4 | 5 | gap |
 | surface | fixed | 6 | 5 | gap |
-| switch | fixed | 3 | 7 | gap |
+| switch | fixed | 3 | 6 | gap |
 | tab-strip | gap | 4 | 8 | gap |
 | table | fixed | 4 | 5 | gap |
 | tabs | fixed | 11 | 12 | gap |
