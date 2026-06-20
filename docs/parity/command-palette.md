@@ -1,4 +1,13 @@
-<!-- parity consv=fixed gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=11 specimen=gap -->
+<!-- pass 33: GPUI full anatomy built — overlay backdrop scrim (color.background.overlay),
+     centered modal surface (elevation_dialog_shadow, 45rem cap, dialog border mix), header
+     (title/description + invocation-hint pill + close button), composed search TextInput
+     (type=search, leading search icon), grouped results panel (kept), status region (matches
+     Svelte paletteStatus). Specimen reworked to mount open palettes on the page region so the
+     backdrop fills. on_open_change builder (no spec change). Both crates clean. Remaining GPUI:
+     scrim is color.background.overlay not the contract's literal color-mix(black 44%,
+     transparent) (no matching token) + surface-mix nuance; typing/arrow-nav = preview-loop;
+     ARIA accepted. -->
 # Parity: CommandPalette
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

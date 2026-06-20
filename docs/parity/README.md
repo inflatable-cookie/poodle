@@ -133,7 +133,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | collapse-toggle | fixed | 4 | 6 | gap |
 | collapsible | fixed | 6 | 8 | gap |
 | color-picker | fixed | 0 | 2 | gap |
-| command-palette | fixed | 9 | 11 | gap |
+| command-palette | fixed | 2 | 11 | gap |
 | confirm-action | ok | 2 | 7 | gap |
 | context-menu | ok | 2 | 5 | gap |
 | data-table | fixed | 6 | 6 | gap |
