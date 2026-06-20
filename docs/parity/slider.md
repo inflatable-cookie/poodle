@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=6 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=6 jetstream=7 specimen=gap -->
+<!-- pass 29: Jetstream track-color bug fixed — was surface.mix(accent, 0.88) (toward
+     accent); now tint(surface, 0.88) = color-mix(surface 88%, transparent) per contract/
+     Svelte (filled portion stays opaque accent). Invented size ratios → contract §8 size
+     table (thumb xs0.75…xl1.25rem, track 0.375rem, min-height table); radius.pill; thumb
+     border 0.0625rem. Probe-tested. Remaining jetstream: thumb drop-shadow (no shadow token)
+     + drag/keyboard (preview loop). -->
 # Parity: Slider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

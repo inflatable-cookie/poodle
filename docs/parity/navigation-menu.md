@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=5 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
+<!-- pass 29: Jetstream items now render contract-faithful pill triggers — pill radius +
+     border, idle fill surface@88%/border-subtle@72%, active fill accent@16% + border
+     accent/border-default@42% (was the wrong hover accent@12% with no border); list gap
+     space.inline.sm. Probe-tested. Remaining jetstream: the viewport panel part
+     (border/radius/bg/elevation/padding) is still absent. -->
 # Parity: NavigationMenu
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
