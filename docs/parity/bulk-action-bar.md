@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=9 specimen=gap -->
+<!-- pass 21: GPUI rebuilt — actions now composed ghost IconButtons (danger tone for
+     destructive), select-all + the missing clear-"×" control added (ghost IconButtons),
+     total text "of {N}". Additive spec fields: BulkAction.icon (+resolved_icon fallback
+     trash-2/circle), BulkActionBarSpec.disabled (+is_unavailable/actions_disabled).
+     Build clean (gpui components+preview, specs 53 tests). Warning tone renders Default
+     (no ButtonTone::Warning in GPUI) — noted. -->
 # Parity: BulkActionBar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

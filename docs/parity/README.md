@@ -112,7 +112,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | block-editor | fixed | 9 | 8 | gap |
 | box | ok | 2 | 3 | gap |
 | breadcrumbs | fixed | 5 | 7 | gap |
-| bulk-action-bar | fixed | 8 | 9 | gap |
+| bulk-action-bar | fixed | 2 | 9 | gap |
 | button | fixed | 4 | 7 | gap |
 | calendar | fixed | 9 | 10 | gap |
 | callout | fixed | 7 | 9 | gap |

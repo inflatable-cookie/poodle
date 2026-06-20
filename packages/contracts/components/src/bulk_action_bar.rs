@@ -19,6 +19,11 @@ pub struct BulkAction {
     pub id: String,
     pub label: String,
     pub tone: BulkActionTone,
+    /// Named icon for the action's ghost IconButton. The label is used
+    /// only as the accessible name / tooltip (Svelte parity). When None,
+    /// `resolved_icon()` derives the contract fallback (`trash-2` for
+    /// danger, `circle` otherwise).
+    pub icon: Option<String>,
     /// When true, the action renders in a disabled state and does not
     /// fire on click. Useful for gating destructive operations until
     /// the selection meets some precondition.
@@ -31,6 +36,7 @@ impl BulkAction {
             id: id.into(),
             label: label.into(),
             tone: BulkActionTone::Default,
+            icon: None,
             is_disabled: false,
         }
     }
@@ -40,9 +46,27 @@ impl BulkAction {
         self
     }
 
+    pub fn with_icon(mut self, icon: impl Into<String>) -> Self {
+        self.icon = Some(icon.into());
+        self
+    }
+
     pub fn with_disabled(mut self, is_disabled: bool) -> Self {
         self.is_disabled = is_disabled;
         self
+    }
+
+    /// Icon name to render, falling back to the contract default when no
+    /// explicit icon is set: `trash-2` for the danger tone, `circle`
+    /// otherwise (Svelte `BulkActionBar.svelte` line 88).
+    pub fn resolved_icon(&self) -> &str {
+        match &self.icon {
+            Some(name) => name.as_str(),
+            None => match self.tone {
+                BulkActionTone::Danger => "trash-2",
+                _ => "circle",
+            },
+        }
     }
 }
 
@@ -61,6 +85,9 @@ pub struct BulkActionBarSpec {
     /// When true, the bar renders in a loading state — action buttons
     /// are dimmed and interactive handlers are suppressed.
     pub loading: bool,
+    /// When true, the whole bar is disabled — action and clear/select-all
+    /// controls are dimmed and non-interactive. Mirrors Svelte `disabled`.
+    pub disabled: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -75,6 +102,7 @@ impl Default for BulkActionBarSpec {
             show_select_all: false,
             all_selected: false,
             loading: false,
+            disabled: false,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -120,6 +148,23 @@ impl BulkActionBarSpec {
     pub fn with_loading(mut self, loading: bool) -> Self {
         self.loading = loading;
         self
+    }
+
+    pub fn with_disabled(mut self, disabled: bool) -> Self {
+        self.disabled = disabled;
+        self
+    }
+
+    /// The bar is unavailable when loading or disabled (Svelte
+    /// `isUnavailable`). Clear / select-all controls gate on this.
+    pub fn is_unavailable(&self) -> bool {
+        self.loading || self.disabled
+    }
+
+    /// Per-action availability (Svelte `actionsDisabled`): unavailable, or
+    /// nothing selected.
+    pub fn actions_disabled(&self) -> bool {
+        self.is_unavailable() || self.selection_count == 0
     }
 
     pub fn select_all_label(&self) -> &'static str {

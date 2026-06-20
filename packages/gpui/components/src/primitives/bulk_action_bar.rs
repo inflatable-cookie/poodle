@@ -3,16 +3,14 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize,
-    SemanticControlSizeRole,
+    BulkAction, BulkActionBarSpec, BulkActionTone, ButtonTone, ButtonVariant, ControlDensity,
+    ControlSize, SemanticControlSizeRole,
 };
 use std::rc::Rc;
 
-use crate::presentation::{
-    panel_space_x_rem, rem_to_px, resolve_semantic_size,
-    size_height_offset_rem, size_padding_x_offset_rem,
-};
-use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use super::icon_button::IconButton;
+use crate::presentation::{panel_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI bulk-action bar component backed by `BulkActionBarSpec`.
 pub struct BulkActionBar {
@@ -20,6 +18,7 @@ pub struct BulkActionBar {
     theme: GpuiThemeProvider,
     on_action: Option<Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     on_select_all: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_clear: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for BulkActionBar {
@@ -36,6 +35,7 @@ impl BulkActionBar {
             theme: theme.clone(),
             on_action: None,
             on_select_all: None,
+            on_clear: None,
         }
     }
 
@@ -45,6 +45,7 @@ impl BulkActionBar {
             theme: theme.clone(),
             on_action: None,
             on_select_all: None,
+            on_clear: None,
         }
     }
 
@@ -85,6 +86,10 @@ impl BulkActionBar {
         self.spec.loading = v;
         self
     }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.disabled = v;
+        self
+    }
 
     pub fn on_action(mut self, handler: impl Fn(&str, &mut Window, &mut App) + 'static) -> Self {
         self.on_action = Some(Rc::new(handler));
@@ -98,6 +103,15 @@ impl BulkActionBar {
         handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_select_all = Some(Rc::new(handler));
+        self
+    }
+
+    /// Click handler for the clear-selection (`x`) IconButton.
+    pub fn on_clear(
+        mut self,
+        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_clear = Some(Rc::new(handler));
         self
     }
 }
@@ -120,7 +134,7 @@ impl IntoElement for BulkActionBar {
             ControlSize::Xl => 1.0,
         }));
         let density_pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
-        // Svelte: Y padding hardcoded 0.5rem (not density-based)
+        // Svelte: Y padding flat 0.5rem (not density-based)
         let density_pad_y = px(rem_to_px(0.5));
         // Svelte: summary/actions rows use space.inline.sm (8px) for default/compact
         // Actions density: compact=0.125rem, default=space.inline.sm, comfortable=0.5rem
@@ -130,10 +144,6 @@ impl IntoElement for BulkActionBar {
             ControlDensity::Default => resolve_px(theme, "space.inline.sm"),
             ControlDensity::Comfortable => px(rem_to_px(0.5)),
         };
-        let base_height = resolve_px(theme, "size.control.height");
-        let btn_height = base_height + px(rem_to_px(size_height_offset_rem(effective_size)));
-        let base_pad = resolve_px(theme, "space.control.x");
-        let btn_pad_x = base_pad + px(rem_to_px(size_padding_x_offset_rem(effective_size)));
 
         // ── Resolve tokens ──────────────────────────────────────────
         let panel_bg = resolve_color(theme, "color.background.panel");
@@ -144,78 +154,63 @@ impl IntoElement for BulkActionBar {
         let radius = resolve_radius(theme, spec.radius_token());
         let text_color = resolve_color(theme, spec.text_token());
         let total_text_color = resolve_color(theme, spec.total_text_token());
-        let button_fill = resolve_color(theme, spec.button_fill_token());
-        let button_border = resolve_color(theme, spec.button_border_token());
-        let button_radius = resolve_radius(theme, spec.button_radius_token());
-        let danger_border_raw = resolve_color(theme, spec.danger_border_token());
-        let danger_text = resolve_color(theme, spec.danger_text_token());
-        let warning_border_raw = resolve_color(theme, spec.warning_border_token());
-        let warning_text = resolve_color(theme, spec.warning_text_token());
-        let disabled_opacity = resolve_opacity(theme, spec.disabled_opacity_token());
         let pad_x = density_pad_x;
         let pad_y = density_pad_y;
-        let control_height = btn_height;
-        let control_pad_x = btn_pad_x;
-        let elevated = resolve_color(theme, "color.background.elevated");
         let body_size = body_font;
-        let label_size = body_font;
 
-        // Danger button border: 65% danger mixed with default border
-        let danger_border = color_mix(danger_border_raw, button_border, 0.65);
-        let warning_border = color_mix(warning_border_raw, button_border, 0.65);
+        // Shared availability gates (Svelte isUnavailable / actionsDisabled).
+        let is_unavailable = spec.is_unavailable();
+        let actions_disabled = spec.actions_disabled();
 
         // ── Summary section (left) ──────────────────────────────────
         let summary = {
             let mut row = div().flex().flex_row().items_center().gap(summary_gap);
 
             // Count + label block — Svelte: gap = space.inline.sm (8px)
-            let mut count_block = div().flex().flex_row().items_center().gap(resolve_px(theme, "space.inline.sm"));
-            let count_text = format!("{}", spec.selection_count);
+            let mut count_block = div()
+                .flex()
+                .flex_row()
+                .items_center()
+                .gap(resolve_px(theme, "space.inline.sm"));
             count_block = count_block.child(
                 div()
                     .text_size(body_size)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(text_color)
-                    .child(count_text),
+                    .child(format!("{} selected", spec.selection_count)),
             );
-            match spec.total_count {
-                Some(total) => {
-                    count_block = count_block.child(
-                        div()
-                            .text_size(body_size)
-                            .text_color(total_text_color)
-                            .child(format!("of {} selected", total)),
-                    );
-                }
-                None => {
-                    count_block = count_block.child(
-                        div()
-                            .text_size(body_size)
-                            .text_color(text_color)
-                            .child("selected".to_string()),
-                    );
-                }
+            // Svelte: total reads "of {totalCount}" (no trailing word).
+            if let Some(total) = spec.total_count {
+                count_block = count_block.child(
+                    div()
+                        .text_size(body_size)
+                        .text_color(total_text_color)
+                        .child(format!("of {}", total)),
+                );
             }
             row = row.child(count_block);
 
-            // Select-all affordance (link-style text button)
-            if spec.show_select_all {
-                let accent_color = resolve_color(theme, "color.accent.base");
-                let mut select_all_btn = div()
-                    .id("poodle-bulk-select-all")
-                    .text_size(body_size)
-                    .font_weight(FontWeight::MEDIUM)
-                    .text_color(accent_color)
-                    .cursor_pointer()
-                    .child(spec.select_all_label());
+            // Select-all: ghost `check` IconButton (Svelte uses `check-check`;
+            // that asset is absent in GPUI, so `check` is the faithful
+            // substitute). Shown only while not all-selected, per Svelte.
+            if spec.show_select_all && !spec.all_selected {
+                let label = match spec.total_count {
+                    Some(total) => format!("{} ({})", spec.select_all_label(), total),
+                    None => spec.select_all_label().to_string(),
+                };
+                let mut select_all_btn = IconButton::new(theme)
+                    .variant(ButtonVariant::Ghost)
+                    .size_role(SemanticControlSizeRole::Chrome)
+                    .icon("check")
+                    .aria_label(label.clone())
+                    .tooltip(label)
+                    .disabled(is_unavailable)
+                    .with_id("bulk-select-all");
 
                 if let Some(ref handler) = self.on_select_all {
-                    if !spec.loading {
-                        let handler = handler.clone();
-                        select_all_btn = select_all_btn.on_click(move |event, window, cx| {
-                            handler(event, window, cx);
-                        });
-                    }
+                    let handler = handler.clone();
+                    select_all_btn =
+                        select_all_btn.on_click(move |event, window, cx| handler(event, window, cx));
                 }
 
                 row = row.child(select_all_btn);
@@ -224,56 +219,53 @@ impl IntoElement for BulkActionBar {
             row
         };
 
-        // ── Actions section (right) ─────────────────────────────────
+        // ── Actions section (right) — ghost IconButtons + clear ──────
         let actions = {
             let mut row = div().flex().flex_row().items_center().gap(actions_gap);
+
             for action in &spec.actions {
-                let (btn_border, btn_text) = match action.tone {
-                    BulkActionTone::Danger => (danger_border, danger_text),
-                    BulkActionTone::Warning => (warning_border, warning_text),
-                    BulkActionTone::Default => (button_border, text_color),
+                // GPUI ButtonTone has no Warning; danger → Danger, warning &
+                // default → Default (warning has no icon-tint hook here).
+                let tone = match action.tone {
+                    BulkActionTone::Danger => ButtonTone::Danger,
+                    _ => ButtonTone::Default,
                 };
-                let btn_id = SharedString::from(format!("bulk-action-{}", action.id));
+                // Svelte: icon shows; label is the accessible name / tooltip.
+                let mut btn = IconButton::new(theme)
+                    .variant(ButtonVariant::Ghost)
+                    .tone(tone)
+                    .size(effective_size)
+                    .icon(action.resolved_icon().to_string())
+                    .aria_label(action.label.clone())
+                    .tooltip(action.label.clone())
+                    .disabled(actions_disabled || action.is_disabled)
+                    .with_id(format!("bulk-action-{}", action.id));
 
-                // An action is interactive only if neither it nor the bar
-                // is in a disabled/loading state.
-                let is_action_disabled = action.is_disabled || spec.loading;
-                let hover_fill = color_mix(button_fill, elevated, 0.84);
-
-                let mut btn = div()
-                    .id(btn_id)
-                    .h(control_height)
-                    .px(control_pad_x)
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .rounded(button_radius)
-                    .bg(button_fill)
-                    .border_1()
-                    .border_color(btn_border)
-                    .text_size(label_size)
-                    .font_weight(FontWeight::MEDIUM)
-                    .text_color(btn_text)
-                    .child(action.label.clone());
-
-                if is_action_disabled {
-                    btn = btn
-                        .opacity(disabled_opacity)
-                        .cursor(CursorStyle::OperationNotAllowed);
-                } else {
-                    btn = btn.cursor_pointer().hover(move |s| s.bg(hover_fill));
-
-                    if let Some(ref handler) = self.on_action {
-                        let handler = handler.clone();
-                        let action_id = action.id.clone();
-                        btn = btn.on_click(move |_event, window, cx| {
-                            handler(&action_id, window, cx);
-                        });
-                    }
+                if let Some(ref handler) = self.on_action {
+                    let handler = handler.clone();
+                    let action_id = action.id.clone();
+                    btn = btn.on_click(move |_event, window, cx| handler(&action_id, window, cx));
                 }
 
                 row = row.child(btn);
             }
+
+            // Clear-selection (`x`) ghost IconButton — contract §2.
+            let mut clear_btn = IconButton::new(theme)
+                .variant(ButtonVariant::Ghost)
+                .size(effective_size)
+                .icon("x")
+                .aria_label("Clear selection")
+                .tooltip("Clear selection")
+                .disabled(is_unavailable)
+                .with_id("bulk-clear");
+
+            if let Some(ref handler) = self.on_clear {
+                let handler = handler.clone();
+                clear_btn = clear_btn.on_click(move |event, window, cx| handler(event, window, cx));
+            }
+
+            row = row.child(clear_btn);
             row
         };
 
