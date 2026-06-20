@@ -1,0 +1,66 @@
+<!-- parity consv=gap gpui=9 jetstream=11 specimen=gap -->
+# Parity: CardToggleGroup
+
+> Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
+> `gpui`/`jetstream` = open-todo counts; `specimen` = `ok`/`gap`.
+
+## Sources
+
+- Contract: `docs/contracts/components/card-toggle-group.md`
+- Svelte (authoritative): `packages/svelte/components/src/CardToggleGroup.svelte`
+- GPUI: `packages/gpui/components/src/composites/card_toggle_group.rs`
+- Jetstream: `packages/jetstream/components/src/card_toggle_group.rs` **(ABSENT — not in `lib.rs`)**
+- Specimens: svelte `packages/svelte/preview/src/specimens/CardToggleGroupSpecimen.svelte` · gpui `packages/gpui/preview/src/specimens/card_toggle_group_specimen.rs` · jetstream **ABSENT**
+
+## Contract ↔ Svelte
+
+Contract anatomy invents an indicator Svelte never renders; one class-prefix gap. Svelte authoritative.
+
+- Anatomy mismatch: contract §2 lists `[Indicator .card-toggle-group__indicator]` inside the header. Svelte's header has **no indicator** — only `Title` + optional `Count` (`CardToggleGroup.svelte:139-148`). Selection is shown via the `Card` selected state, not a radio dot. **Fix: remove the Indicator part from contract §2 anatomy.**
+- Class prefix: contract §2 uses bare `.card-toggle-group*`; Svelte emits `.poodle-card-toggle-group*` and targets `:global(.poodle-card)` (`:220`). **Fix: update contract anatomy to the `poodle-` prefix.**
+- Contract §3 lacks any token/sizing tables (unlike CardRadioGroup §8); Svelte carries a full per-size matrix for title font, card gap/padding, description font, and count padding/font (`:194-370`) plus a `min-width` auto-fit grid. **Fix: add a §7/§8 token table to the contract mirroring the Svelte size/density values.**
+- Props otherwise match: `value`/`defaultValue`/`allowDeactivation`/`columns`/`onValueChange` all present in Svelte exactly as contract §3 documents. OK.
+
+## GPUI gap (vs Svelte + contract)
+
+Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
+
+- [ ] **Spec uses the wrong selection model.** `CardToggleGroupSpec` has `values: Vec<String>` + `is_selected()` (multi-select) (`packages/contracts/components/src/card_toggle_group.rs:34,73`); contract/Svelte are single-value (`value`/`defaultValue`/`allowDeactivation`). **Replace `values: Vec<String>` with single `value`/`default_value` + `allow_deactivation`.**
+- [ ] Wrong field name: `CardToggleOption` uses `title` (`card_toggle_group.rs spec:6`); contract/Svelte item type uses `label`. GPUI reads `option.title` (`card_toggle_group.rs:39`). Rename to `label` for parity with `CardToggleItem`.
+- [ ] No `count` support — `CardToggleOption` has no count field and the header never renders the count pill (contract §2 `[Count]`, Svelte `:143-147`).
+- [ ] No `columns` / grid — renders a vertical `flex_col` (`card_toggle_group.rs:26`) instead of the auto-fit N-column grid; `columns` prop absent entirely.
+- [ ] Hardcoded gaps `.gap(px(8.0))` (`card_toggle_group.rs:26`) and `.gap(px(4.0))` (`:36`) — raw literals; resolve root gap + card body gap from density/size tokens.
+- [ ] No `disabled` handling — neither group `disabled` nor per-item `disabled` dims or blocks the card (`is_disabled`/opacity never applied).
+- [ ] No `allowDeactivation` behavior, no `onValueChange` callback, no selection interaction — render-only.
+- [ ] No keyboard navigation (arrow roving tabindex + Space/Enter toggle, contract §5).
+- [ ] No size/density variant resolution — `size`/`size_role`/`density` spec fields exist but are unused; title font, padding, count sizing all fixed.
+- accepted: no ARIA (gpui has no accessibility API) — `role="group"`/`role="button"`/`aria-pressed` not expressible.
+
+## Jetstream gap (vs Svelte + contract)
+
+**TOP PRIORITY: no Jetstream implementation exists at all.** `packages/jetstream/components/src/card_toggle_group.rs` is absent and there is no `pub mod card_toggle_group;` in `packages/jetstream/components/src/lib.rs` (radio is at line 133, toggle is missing). No specimen either. All work below is greenfield.
+
+- [ ] Create `packages/jetstream/components/src/card_toggle_group.rs` with `js_card_toggle_group(spec, theme)`.
+- [ ] Register `pub mod card_toggle_group;` in `packages/jetstream/components/src/lib.rs` (composites block).
+- [ ] Fix the shared spec first (see GPUI todo): single-value model + `label`/`count` fields; jetstream depends on the same `poodle_specs` types.
+- [ ] Compose the `Card` primitive (interactive/selected) per contract §2, not a raw div.
+- [ ] Render header = `label` + optional `count` pill; resolve count border/padding/font from the per-size token table.
+- [ ] Implement `columns` as an auto-fit grid with the size-driven `min-width` (Svelte `:167-212`).
+- [ ] Resolve all dims from tokens — title font, card gap/padding, description font, count sizing per the size matrix; root gap per density.
+- [ ] Disabled group + per-item disabled → `resolve_opacity(theme, "state.opacity.disabled")`, block selection.
+- [ ] `allowDeactivation` toggle-clear semantics + selection state (interaction wired through preview `main.rs` event loop).
+- [ ] Add specimen `packages/jetstream/preview/src/specimens/card_toggle_group.rs` mirroring Svelte (query variants, deactivation, disabled, sizes, densities).
+- [ ] Register the specimen in the jetstream preview `specimens/mod.rs` + component registry.
+- accepted: no ARIA channel; interaction in preview event loop, not the component.
+
+## Specimen parity
+
+- Svelte covers: Query variants (4col, counts), Deactivation allowed (3col, `allowDeactivation`), Disabled group (3col), `sizes` + `densities` snippets, live "Selected:" readout (`CardToggleGroupSpecimen.svelte`).
+- GPUI covers: a single static group (grid/list/audit view) with two pre-selected values (`card_toggle_group_specimen.rs`). — missing: **counts**, **deactivation**, **disabled group**, **columns**, **sizes**, **densities**, live readout; and it demonstrates multi-select which contradicts the contract.
+- Jetstream covers: **nothing — no specimen file**. — missing: entire specimen set.
+
+## Notes
+
+- The GPUI `values: Vec<String>` multi-select model is the deepest defect: it makes the GPUI component a different control than the contract describes. The spec lives in `packages/contracts/components/src/card_toggle_group.rs` and is shared with Jetstream, so fixing it unblocks both Rust targets.
+- `consv=gap` driver: phantom Indicator part in §2 anatomy + `poodle-` class prefix + missing token/sizing table. None block Svelte, all are contract-doc fixes.
+- Jetstream count (12) reflects full greenfield build incl. spec fix, module wiring, component, and specimen + registry — this is the single biggest gap across both assigned components.
