@@ -7,7 +7,9 @@ use poodle_specs::{
     IconSize, IconSpec, SemanticControlSizeRole,
 };
 
+use super::calendar::Calendar;
 use super::icon::Icon;
+use super::time_field::TimeField;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
     size_padding_x_offset_rem,
@@ -148,7 +150,6 @@ impl IntoElement for DateTimeRangePicker {
         let accent = resolve_color(theme, "color.accent.base");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let body_size = px(rem_to_px(size_font_rem(effective_size)));
-        let label_size = resolve_px(theme, "typography.label.size");
         let hover_bg = color_mix(surface_bg, elevated_bg, 0.86);
 
         let value = spec.current_value();
@@ -244,137 +245,77 @@ impl IntoElement for DateTimeRangePicker {
             .child(trigger);
 
         if is_open {
-            let section_padding = resolve_px(theme, "space.stack.md");
-            let inner_gap = resolve_px(theme, "space.stack.sm");
+            // Contract §8 surface padding: space.panel-y / space.panel-x.
+            let surface_pad_x = resolve_px(theme, "space.panel.x");
+            let surface_pad_y = resolve_px(theme, "space.panel.y");
+            // Contract §8 Body gap (0.875rem) and Time Section gap (0.375rem).
+            // Absolute-rem contract values resolved via rem_to_px (same pattern
+            // the Calendar primitive uses for its absolute cell sizes); no
+            // dedicated semantic tokens exist for these two gaps.
+            let body_gap = px(rem_to_px(0.875));
+            let time_section_gap = px(rem_to_px(0.375));
+            // Contract §8 Time Label typography.
+            let time_label_size = px(rem_to_px(0.6875));
 
-            let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-            // Weekday header row
-            let mut weekday_row = div().flex().items_center().gap(px(rem_to_px(0.125)));
-            for day in &weekdays {
-                weekday_row = weekday_row.child(
-                    div()
-                        .flex_1()
-                        .flex()
-                        .justify_center()
-                        .text_size(label_size)
-                        .text_color(text_secondary)
-                        .child(*day),
-                );
+            // Composed Calendar in range mode, seeded from the start/end dates.
+            let mut cal_spec = poodle_specs::CalendarSpec::new()
+                .with_mode(poodle_specs::CalendarMode::Range)
+                .with_week_start(spec.week_starts_on.clone());
+            cal_spec.range_value = Some(poodle_specs::DateRangeValue::new(
+                value.start.date.clone(),
+                value.end.date.clone(),
+            ));
+            if let Some(ref start_date) = value.start.date {
+                cal_spec.visible_month = Some(start_date.clone());
             }
+            cal_spec.is_disabled = is_disabled;
+            let calendar = Calendar::from_spec(cal_spec, theme);
 
-            // Placeholder grid rows (6 rows x 7 cols)
-            let mut grid = div().flex().flex_col().gap(px(rem_to_px(0.125)));
-            for _row in 0..6 {
-                let mut row = div().flex().items_center().gap(px(rem_to_px(0.125)));
-                for _col in 0..7 {
-                    row = row.child(
-                        div()
-                            .flex_1()
-                            .h(px(rem_to_px(1.75)))
-                            .flex()
-                            .items_center()
-                            .justify_center()
-                            .rounded(control_radius)
-                            .text_size(label_size)
-                            .text_color(text_secondary)
-                            .child("—"),
-                    );
-                }
-                grid = grid.child(row);
-            }
-
-            // Calendar (range mode) section
-            let calendar_section = div()
-                .p(section_padding)
-                .flex()
-                .flex_col()
-                .gap(inner_gap)
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(text_primary)
-                        .child("Select date range"),
-                )
-                .child(weekday_row)
-                .child(grid);
-
-            // Separator
-            let separator = div().w_full().h(px(1.0)).bg(border);
-
-            // Time fields row — two TimeField sections side by side
-            let start_time_display = value.start.time.as_deref().unwrap_or("--:--");
-            let end_time_display = value.end.time.as_deref().unwrap_or("--:--");
-
-            let time_field = |label: &str, time_val: &str| {
+            // A composed Time Section: contract Time Label + real TimeInput.
+            let time_section = |label: &str, time_val: Option<String>| {
+                let mut time_spec = poodle_specs::TimeFieldSpec::new();
+                time_spec.value = time_val;
+                time_spec.is_disabled = is_disabled;
                 div()
                     .flex_1()
                     .flex()
                     .flex_col()
-                    .gap(gap_inline_xs)
+                    .gap(time_section_gap)
                     .child(
+                        // Contract: label-family, 0.6875rem, weight 600,
+                        // 0.04em tracking, uppercase.
                         div()
-                            .text_size(label_size)
+                            .text_size(time_label_size)
+                            .font_weight(FontWeight::SEMIBOLD)
                             .text_color(text_secondary)
                             .child(label.to_string()),
                     )
-                    .child(
-                        div()
-                            .px(inline_padding)
-                            .h(px(rem_to_px(1.75)))
-                            .rounded(control_radius)
-                            .bg(surface_bg)
-                            .border_1()
-                            .border_color(border)
-                            .flex()
-                            .items_center()
-                            .text_size(label_size)
-                            .text_color(text_primary)
-                            .child(time_val.to_string()),
-                    )
+                    .child(TimeField::from_spec(time_spec, theme))
             };
 
-            let time_section = div()
-                .p(section_padding)
+            // Paired start/end time inputs.
+            let time_row = div()
                 .flex()
-                .items_center()
+                .items_start()
                 .gap(inline_gap)
-                .child(time_field("Start time", start_time_display))
-                .child(time_field("End time", end_time_display));
+                .child(time_section("START TIME", value.start.time.clone()))
+                .child(time_section("END TIME", value.end.time.clone()));
 
-            // Bottom action bar
-            let action_bar = div()
-                .p(section_padding)
-                .border_t_1()
-                .border_color(border)
+            // Body — vertical stack of range Calendar + paired Time Sections.
+            let body = div()
                 .flex()
-                .items_center()
-                .justify_between()
-                .child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(accent)
-                        .cursor_pointer()
-                        .child("Today"),
-                )
-                .child(
-                    div()
-                        .px(inline_padding)
-                        .h(px(rem_to_px(1.75)))
-                        .rounded(control_radius)
-                        .bg(accent)
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .text_size(label_size)
-                        .text_color(elevated_bg)
-                        .cursor_pointer()
-                        .child("Done"),
-                );
+                .flex_col()
+                .gap(body_gap)
+                .child(calendar)
+                .child(time_row);
 
+            // Surface — established sibling overlay treatment (date_picker.rs /
+            // date_range_picker.rs): elevated 98% over panel, border at 72%
+            // alpha, two-layer overlay shadow.
             let overlay = div()
-                .rounded(control_radius)
+                .px(surface_pad_x)
+                .py(surface_pad_y)
+                .rounded(resolve_radius(theme, "radius.surface"))
                 // Svelte: color-mix(elevated 98%, panel)
                 .bg(color_mix(elevated_bg, panel_bg, 0.98))
                 .border_1()
@@ -394,11 +335,7 @@ impl IntoElement for DateTimeRangePicker {
                         spread_radius: px(0.0),
                     },
                 ])
-                .overflow_hidden()
-                .child(calendar_section)
-                .child(separator)
-                .child(time_section)
-                .child(action_bar);
+                .child(body);
 
             container = container.child(overlay);
         }

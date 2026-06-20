@@ -1,4 +1,8 @@
-<!-- parity consv=fixed gpui=7 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=4 specimen=gap -->
+<!-- pass 17: GPUI overlay rebuilt — fake range grid + fake time fields + invented
+     Today/Done bar replaced with composed Calendar(range) + two TimeFields (START/END).
+     Mock literals removed. Remaining GPUI: elevation-overlay shadow token
+     (cross-cutting) + route the 72% surface-border alpha through color_mix. -->
 # Parity: DateTimeRangePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,8 +29,8 @@ Props, anatomy, ARIA, and callbacks match (`value`, `defaultValue`, `open`, `def
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] **Overlay is a hand-coded mockup, not composed primitives.** Contract §2 requires the surface to compose `Calendar mode="range"` + two `TimeInput`s. GPUI hand-builds a fake 6×7 dash grid (`date_time_range_picker.rs:266-285`), fake bordered time fields (`:310-336`), and an invented "Today"/"Done" action bar (`:347-374`) that is not in the contract or Svelte. This violates "No Mockups" — replace with real `Calendar` (range) + `TimeInput` GPUI primitives.
-- [ ] **Invented action bar.** The Today link + Done button (`:347-374`) have no contract or Svelte counterpart. Remove.
+- [x] **DONE: overlay rebuilt to composed primitives.** Fake range grid + fake time fields + invented Today/Done bar deleted; now `Calendar::from_spec(...)` in `CalendarMode::Range` (seeded from start/end) + two composed `TimeField`s (START/END TIME). Build clean.
+- [x] **DONE: invented action bar removed.**
 - [ ] Hardcoded grid/cell literals: `gap(px(rem_to_px(0.125)))` (`:253,267,269`), cell/time/done `h(px(rem_to_px(1.75)))` (`:274,325,364`) — resolve from tokens once real primitives replace the mockup.
 - [ ] Separator `h(px(1.0))` raw pixel (`:304`) — use a border-width token.
 - [ ] Shadow uses raw `hsla(0.0, 0.0, 0.0, 0.10/0.06)` + `px(4.0)/px(16.0)/px(1.0)` literals (`:385-394`). Contract maps box-shadow to `elevation.overlay`; resolve the elevation token instead of an inline two-layer shadow.

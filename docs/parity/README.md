@@ -131,8 +131,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | data-table | fixed | 6 | 6 | gap |
 | date-picker | fixed | 4 | 6 | gap |
 | date-range-picker | fixed | 3 | 3 | gap |
-| date-time-picker | fixed | 6 | 4 | gap |
-| date-time-range-picker | fixed | 7 | 4 | gap |
+| date-time-picker | fixed | 2 | 4 | gap |
+| date-time-range-picker | fixed | 2 | 4 | gap |
 | date-time-zone-picker | fixed | 9 | 6 | gap |
 | debug-dialog | ok | 3 | 1 | gap |
 | detail-item | fixed | 3 | 5 | gap |

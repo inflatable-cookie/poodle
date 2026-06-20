@@ -1,4 +1,8 @@
-<!-- parity consv=fixed gpui=6 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=4 specimen=gap -->
+<!-- pass 17: GPUI overlay rebuilt — fake 6×7 grid + "Today/Done" bar replaced with
+     composed Calendar::from_spec + TimeField; mock px literals removed; time-label
+     typography (0.6875rem/600/uppercase) + body/time gaps (0.875/0.375rem) applied.
+     Remaining GPUI: elevation-overlay shadow token (cross-cutting), indicator glyph. -->
 # Parity: DateTimePicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,7 +26,7 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] **Overlay is a hand-coded mockup, not composed primitives.** `date_time_picker.rs:232-371` builds a fake calendar (6×7 grid of `"—"` cells, hardcoded `["Mon".."Sun"]` weekday header) plus a fake "Time" box and a "Today"/"Done" action bar that **do not exist in the contract anatomy or Svelte**. Contract §2 requires composing the real `Calendar` and `TimeInput` primitives. This violates CLAUDE.md "No Mockups, No Fakes". **Replace the entire open-state block with `Calendar::from_spec(...)` + the TimeInput primitive + the Time label.**
+- [x] **DONE: overlay rebuilt to composed primitives.** Fake 6×7 grid + weekday header + fake Time box + invented Today/Done bar deleted; now `Calendar::from_spec(...)` (seeded from value.date/visible_month) + composed `TimeField` + contract Time label. Mock px literals removed; time-label typography + body/time gaps applied. Build clean.
 - [ ] Hardcoded pixel literals in the mock overlay: `px(rem_to_px(1.75))` cell heights (`date_time_picker.rs:256,304,334`), `gap(px(rem_to_px(0.125)))` (lines 235,249,251), `h(px(1.0))` separator (line 286). None resolve from size/space tokens.
 - [ ] Hardcoded shadow literals `hsla(0.0,0.0,0.0,0.10)`/`0.06` + `px(16.0)`/`px(4.0)` at `date_time_picker.rs:355-365`. Contract surface shadow = `var(--poodle-elevation-overlay)`; resolve from elevation token.
 - [ ] Indicator renders `calendar` Icon (`date_time_picker.rs:203`) not the `▾` chevron Svelte/contract use. Align glyph.
