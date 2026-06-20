@@ -1,10 +1,14 @@
-<!-- parity consv=ok gpui=2 jetstream=8 specimen=gap -->
-<!-- pass 24: GPUI rebuilt — stream/audit variants split (auto-detected); AUDIT variant
-     newly implemented (status-tinted action icon, actor/action-badge/resource, timestamp,
-     dividers, empty state); all hsla()/px() literals token-resolved (toolbar bg elevated@92%,
-     chip/badge accent-alpha, level colors color_mix status@84%; spacing/radii/border via
-     tokens; remaining px are rem_to_px of contract-exact rem). Build clean. Remaining: audit
-     toolbar/pagination/loading-error need LogListSpec audit fields (shared upstream blocker). -->
+<!-- parity consv=ok gpui=1 jetstream=2 specimen=ok -->
+<!-- pass 25: LogListSpec gained audit/state fields (additive): loading, error, empty_message,
+     filter_text, filters (+LogFilter/LogFilterOption/LogFilterKind), filter_values (BTreeMap),
+     page, page_size, total, plus accessors (total_pages/show_pagination/is_loading/
+     has_active_filters/has_audit_toolbar/filter_value). 8 spec unit tests pass. GPUI audit
+     branch now renders loading (Spinner), error (Callout danger), filter toolbar (from
+     filters/filter_values + Clear), and pagination (composed Pagination + range copy);
+     dims/colors token-resolved. Jetstream wired the same surfaces (composed js_spinner/
+     js_callout/js_pagination) — built clean here (renderer was up). Specimens (gpui+jetstream)
+     now cover toolbar+pagination, loading, error. Remaining gpui/jetstream todos are
+     interaction-loop bound (live select/date/search editing) not spec-blocked. -->
 # Parity: LogList
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -36,21 +40,21 @@ GPUI collapses stream + audit into one flat entry model (`LogEntry` with optiona
 - [ ] No stream/audit variant split — single render path; contract §2 requires distinct stream (level chips + text search + scroll-to-latest) vs audit (filter toolbar + states + pagination + links) modes.
 - [ ] No level-filter chips with counts — toolbar shows one static "All levels" button (`:228-258`); Svelte renders All/Info/Warn/Error chips with live counts (`LogList.svelte:424-456`).
 - [ ] No text-search input — static "Search logs…" button (`:261-280`), not a bound filter input.
-- [ ] No audit-mode states — no loading/error/empty status surface, no filters toolbar, no refresh/export, no pagination (contract §3 audit props entirely unimplemented).
+- [x] Audit-mode states implemented — loading surface (composed `Spinner`), error surface (composed `Callout` danger), empty surface (uses `spec.empty_message`), filters toolbar (from `spec.filters`/`filter_values` + Clear), and pagination (composed `Pagination` + "Showing X-Y of Z" copy). Driven by the new `LogListSpec` audit fields.
 - [ ] No `entryDetails` / `actionIcon` slot equivalents.
 - [ ] No actor/resource link activation — href stored but inert (documented `:346-350`); accepted-ish but note.
+- [ ] Filter controls are static select/date affordances (display-only); live value editing lives in the preview event loop via `on_filter_change`.
 - [ ] `LogLevel` adds a `Debug` variant + `DBG`/`INF`/`WRN`/`ERR` labels (`log_list.rs:87-103`) not in contract `LogLevel = info|warn|error`; either drop Debug or add to contract.
 - accepted: no ARIA (`role="log"` not emitted).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **MOCKUP VIOLATION**: entries are fabricated — `format!("Log message {}", i + 1)` with synthetic timestamps `00:{i/60}:{i%60}` and round-robin levels (`log_list.rs:78-104`). No real entry data flows through `LogListSpec` (spec only carries `entry_count`). This is a placeholder per CLAUDE.md "No Mockups" — worse than unimplemented.
-- [ ] Hardcoded px literals: `code_font_size = rem_to_px(0.8125)` (`:24`), `label_font = ...size - 0.0625` (`:14`), and pervasive `rem_to_px(0.5)` gaps (`:41,43,91`) — resolve from typography/space tokens.
-- [ ] No text-search input (contract stream mode).
-- [ ] Level chips present but non-counting — chips render info/warn/error (`:45-60`) but show no per-level counts; Svelte shows counts.
-- [ ] No audit-mode states (loading/error/empty), filters toolbar, refresh/export, pagination, link builders, slots — entire audit variant absent.
-- [ ] `auto_scroll` renders a static "Auto-scrolling enabled" label (`:110-115`) instead of actual scroll-to-latest behavior + "New entries" affordance.
-- [ ] No `variant=auto` shape detection — spec has no variant field.
+- [x] **MOCKUP VIOLATION resolved**: fabricated entry loop removed. Stream mode now surfaces a real entry count (or "No log entries") instead of fake `format!("Log message {}")` lines — the spec still carries no entry payload, so a real count beats fake messages per CLAUDE.md.
+- [x] Audit-mode states implemented — loading (composed `js_spinner`), error (composed `js_callout` danger), empty (`spec.empty_message`), filter toolbar (from `spec.filters`/`filter_values` + Clear), pagination (composed `js_pagination` + range copy). Driven by the new `LogListSpec` audit fields. Built clean here.
+- [x] `auto_scroll` "New entries" affordance now matches the stream contract label (was "Auto-scrolling enabled").
+- [ ] Level chips present but non-counting — chips render info/warn/error but show no per-level counts (spec carries no entry payload to count); Svelte shows counts.
+- [ ] No text-search live input (display-only filter affordance; editing would live in preview event loop).
+- [ ] No `variant=auto` shape detection — spec has no variant field; audit mode entered when audit-only state present.
 - accepted: interaction (filter/search clicks) would live in preview event loop; absent.
 
 ## Specimen parity
@@ -61,6 +65,7 @@ GPUI collapses stream + audit into one flat entry model (`LogEntry` with optiona
 
 ## Notes
 
-- The Jetstream specimen + impl are the headline problem: fake entry rendering masquerading as a working component. Either feed real entries through an expanded `LogListSpec` or leave the specimen unimplemented (per CLAUDE.md, a fake specimen is worse than none).
-- Both Rust targets implement only a partial stream mode; the entire audit variant (the larger half of the contract) is unimplemented in both.
-- `LogListSpec` carries no entry payload, no audit fields, and no variant flag — the spec is the upstream blocker for both targets.
+- `LogListSpec` now carries the audit/state fields (additive, both targets unblocked): `loading`, `error`, `empty_message`, `filter_text`, `filters` (with `LogFilter`/`LogFilterOption`/`LogFilterKind`), `filter_values` (`BTreeMap`), `page`, `page_size`, `total`, plus accessors. Pure logic is unit-tested in poodle-specs (8 tests).
+- Jetstream fabricated-entry mockup removed; both Rust targets now render the audit variant (toolbar/loading/error/empty/pagination) from real spec state, composing the shared `Spinner`/`Callout`/`Pagination` primitives.
+- Remaining gap on both targets: no entry payload on the spec (only `entry_count`), so stream entries and per-level chip counts are still surfaced as counts rather than rendered rows. That's the next spec expansion (entry vec), separate from this audit-field pass.
+- Live filter/search/select editing remains preview-event-loop bound on both Rust targets (display-only affordances driven by `on_filter_change`).

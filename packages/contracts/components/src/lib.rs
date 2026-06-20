@@ -288,7 +288,7 @@ pub use form_shell::FormShellSpec;
 pub use inline_list_section::InlineListSectionSpec;
 pub use inline_remediation::InlineRemediationSpec;
 pub use list_container::{ListContainerSpec, ListContainerState};
-pub use log_list::LogListSpec;
+pub use log_list::{LogFilter, LogFilterKind, LogFilterOption, LogListSpec};
 pub use markdown_editor::MarkdownEditorSpec;
 pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::MediaPickerSpec;

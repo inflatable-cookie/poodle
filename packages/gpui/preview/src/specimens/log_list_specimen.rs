@@ -2,7 +2,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, LogEntry, LogLevel, LogList};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::LogListSpec;
+use poodle_specs::{LogFilter, LogListSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let sample_entries = || {
@@ -118,5 +118,66 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_entries(audit_entries()),
                 ),
+        )
+        // -- Audit log with filter toolbar + pagination --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Audit log (toolbar + pagination)"),
+                    theme,
+                ))
+                .child(
+                    LogList::from_spec(
+                        LogListSpec::new()
+                            .with_entry_count(4)
+                            .with_filter(
+                                LogFilter::select("action", "Action")
+                                    .with_placeholder("All actions")
+                                    .with_option("create", "Create")
+                                    .with_option("update", "Update")
+                                    .with_option("delete", "Delete"),
+                            )
+                            .with_filter(LogFilter::date("from", "From"))
+                            .with_filter_value("action", "update")
+                            .with_page(2)
+                            .with_page_size(4)
+                            .with_total(18),
+                        theme,
+                    )
+                    .with_entries(audit_entries()),
+                ),
+        )
+        // -- Audit log loading state --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Audit log (loading)"),
+                    theme,
+                ))
+                .child(LogList::from_spec(
+                    LogListSpec::new().with_loading(true),
+                    theme,
+                )),
+        )
+        // -- Audit log error state --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Audit log (error)"),
+                    theme,
+                ))
+                .child(LogList::from_spec(
+                    LogListSpec::new().with_error("Failed to load audit entries: request timed out"),
+                    theme,
+                )),
         )
 }

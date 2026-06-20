@@ -177,7 +177,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | list-card-counter | fixed | 2 | 2 | ok |
 | list-container | fixed | 6 | 6 | gap |
 | list-grid | fixed | 1 | 1 | gap |
-| log-list | ok | 2 | 8 | gap |
+| log-list | ok | 1 | 2 | ok |
 | markdown-editor | fixed | 11 | 8 | gap |
 | media-browse-panel | ok | 2 | 4 | gap |
 | media-picker | fixed | 8 | 8 | gap |

@@ -4,7 +4,7 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::log_list::js_log_list;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::LogListSpec;
+use poodle_specs::{LogFilter, LogListSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -23,6 +23,32 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 &LogListSpec::new()
                     .with_entry_count(12)
                     .with_filter_level("error"),
+                theme,
+            )
+        ))
+        .child(group("Audit toolbar + pagination", secondary,
+            js_log_list(
+                &LogListSpec::new()
+                    .with_filter(
+                        LogFilter::select("action", "Action")
+                            .with_placeholder("All actions")
+                            .with_option("create", "Create")
+                            .with_option("delete", "Delete"),
+                    )
+                    .with_filter(LogFilter::date("from", "From"))
+                    .with_filter_value("action", "delete")
+                    .with_page(2)
+                    .with_page_size(20)
+                    .with_total(85),
+                theme,
+            )
+        ))
+        .child(group("Loading", secondary,
+            js_log_list(&LogListSpec::new().with_loading(true), theme)
+        ))
+        .child(group("Error", secondary,
+            js_log_list(
+                &LogListSpec::new().with_error("Failed to load audit entries"),
                 theme,
             )
         ))
