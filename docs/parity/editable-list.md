@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=11 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=11 specimen=gap -->
 # Parity: EditableList
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,17 +25,28 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Static render — NO callbacks (onReorder/onAdd/onRemove/onChange/onSubmit/onCancel all absent). No add/remove/reorder interaction.
-- [ ] No drag-and-drop or keyboard grab/move — `reorderable` shows a `grip-vertical` icon only (`editable_list.rs:204-219`); no drop-target/grabbed/dragging states.
-- [ ] No live region / sr announcer; no `<ul role=listbox>` / `<li role=option>` semantics (plain divs); no ARIA at all.
-- [ ] Handle uses `grip-vertical` icon; contract specifies a 6-dot grip SVG.
-- [ ] No window-nav (Previous/label/Next), no long-list warning, no `windowSize`/`longListThreshold`/`longListWarningText`.
-- [ ] No `editable`/`removable`/`addPlaceholder`/`submitLabel`/`cancelLabel` builders; workflow chrome gated on `dirty||submitting` (`editable_list.rs:411`) instead of contract's onSubmit/onCancel presence.
-- [ ] Counter shows non-contract `"N item(s)"` when no max (`editable_list.rs:373`); contract counter shows only when `maxItems` set.
-- [ ] Hardcoded size/density rem scales inline `rem_to_px(0.875|0.5|0.625|1.0|1.125|0.75|1.25)` at `editable_list.rs:131-156` — resolve from tokens, not literal scale. Note Sm handle = `0.875` (line 132) vs contract sm = `1.0`.
-- [ ] Hardcoded dirty-dot `.w(px(6.0)).h(px(6.0)).rounded(px(3.0))` at `editable_list.rs:355`; control-height multiplied by literal `0.92` at line 177.
-- [ ] Hardcoded color `gpui::white()` for submit button text at `editable_list.rs:437` — resolve from a token.
-- accepted: no ARIA (gpui has no accessibility API) — listbox/option roles, live region, aria-labels.
+Buildout pass (2026-06-20): row anatomy now composes the real primitives, all
+geometry resolves from token-exact size/density scales, and the workflow header
++ add row use the real `Button`/`TextInput`/`IconButton` primitives. Remaining
+open items are interaction/a11y/feature-scope, not renderable-anatomy gaps.
+
+- [ ] Static render — NO callbacks (onReorder/onAdd/onRemove/onChange/onSubmit/onCancel all absent). No add/remove/reorder interaction. (preview-event-loop bound)
+- [ ] No drag-and-drop or keyboard grab/move; no drop-target/grabbed/dragging visual states. The `grip-vertical` handle renders at rest. (preview-event-loop bound)
+- [ ] No window-nav (Previous/label/Next), no long-list warning, no `windowSize`/`longListThreshold`/`longListWarningText`. (feature scope — not yet built)
+- [ ] Workflow chrome gated on `dirty||submitting` rather than contract's onSubmit/onCancel presence (no callbacks in GPUI to gate on). (accepted divergence)
+- accepted: no ARIA (gpui has no accessibility API) — `<ul role=listbox>`/`<li role=option>`, live region, aria-labels.
+- accepted: remove `--danger-on-hover` wrapper recolor — GPUI's ghost IconButton owns its own hover; wrapper-level override not expressible via spec. Real ghost IconButton (icon `x`, chrome role) is composed.
+
+### Resolved in buildout pass
+
+- [x] FIXED Row anatomy composes real primitives: handle = `grip-vertical` 6-dot grip `Icon` sized to the contract handle-size square; content = label text (ellipsis); remove = ghost `IconButton` (icon `x`, `Chrome` size role), shown only when `is_editable || is_removable`.
+- [x] FIXED Add row composes the real `TextInput` (placeholder, size/density, disabled) + primary `Button` (`add_label`), not hand-rolled input/button divs.
+- [x] FIXED Workflow header composes real secondary/primary `Button` primitives (own their geometry/typography/fill/foreground) — removed hardcoded `gpui::white()` submit text and the hand-rolled action row.
+- [x] FIXED Size/density geometry resolves from token-exact scales `presentation::editable_list_{handle_size,item_x,item_y,font,list_gap,item_gap}_rem` (contract §8) — no inline `rem_to_px(...)` scale. Sm handle corrected `0.875` → `1.0`.
+- [x] FIXED Removed hardcoded dirty-dot `px(6.0)` cluster and `label_size * 0.92` literal; container gaps use contract-exact rem (`0.75`/`0.5`), panels use `radius.surface` + `0.875rem` font.
+- [x] FIXED Counter shows only when `maxItems` set, rendering `"N/M"` (dropped non-contract `"N item(s)"`).
+- [x] FIXED Item border `0.0625rem solid transparent`, `radius.control`, transparent background per contract.
+- New: `editable(bool)` / `removable(bool)` builders added so the remove control and add row can render per contract.
 
 ## Jetstream gap (vs Svelte + contract)
 

@@ -1,17 +1,43 @@
-//! EditableList — real GPUI component backed by EditableListSpec.
+//! EditableList — real GPUI composite backed by EditableListSpec.
 //!
-//! Renders a list of items with remove buttons, an add row with text input
-//! and add button, and an optional counter showing "N/max" or "N items".
-//! Supports disabled state, reorderable mode, and size/density responsiveness.
+//! Renders the contract anatomy (§2): an optional workflow header (cancel /
+//! submit `Button` primitives), optional error / info banners, the item list,
+//! and an add row. Each item row composes the real row primitives —
+//! a drag **handle** (`grip-vertical` 6-dot grip Icon), the item **content**
+//! (label text), and a ghost **remove** `IconButton` — and the add row composes
+//! the real `TextInput` and primary `Button` primitives.
+//!
+//! All geometry resolves from token-exact size/density scales
+//! (`crate::presentation::editable_list_*`) and theme tokens — no hardcoded
+//! pixel or color literals.
+//!
+//! ## Accepted limits (build-verified only)
+//! - **No interactivity**: drag-and-drop reorder, keyboard grab/move, add /
+//!   remove / submit callbacks, and the dirty/dragging/drop-target/grabbed
+//!   visual states are preview-event-loop bound and intentionally absent here.
+//!   Controls render at their current static state.
+//! - **No ARIA / listbox semantics**: GPUI has no accessibility API, so the
+//!   `<ul role="listbox">` / `<li role="option">` structure, the live region,
+//!   and `aria-label`s are accepted omissions. Plain `div`s stand in.
+//! - **Remove `--danger-on-hover`**: the Svelte wrapper recolors the ghost
+//!   IconButton to danger on hover; GPUI's IconButton owns its own hover, so
+//!   the wrapper-level override is an accepted limit. The real ghost
+//!   IconButton (icon `x`, chrome size role) is composed.
 
-use gpui::{prelude::FluentBuilder, *};
+use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::EditableListSpec;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, IconButtonSpec, IconSize, IconSpec,
+    SemanticControlSizeRole, TextInputSpec,
+};
 
-use super::super::primitives::Icon;
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
+use super::super::primitives::{Button, Icon, IconButton, TextInput};
+use crate::presentation::{
+    editable_list_font_rem, editable_list_handle_size_rem, editable_list_item_gap_rem,
+    editable_list_item_x_rem, editable_list_item_y_rem, editable_list_list_gap_rem, rem_to_px,
+    resolve_semantic_size,
+};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius, resolve_px};
 
 /// A real GPUI editable list component backed by `EditableListSpec`.
 pub struct EditableList {
@@ -20,6 +46,8 @@ pub struct EditableList {
     items: Vec<String>,
     children: Vec<AnyElement>,
 }
+
+use poodle_specs::EditableListSpec;
 
 impl std::ops::Deref for EditableList {
     type Target = EditableListSpec;
@@ -64,6 +92,14 @@ impl EditableList {
         self.spec.is_disabled = v;
         self
     }
+    pub fn editable(mut self, v: bool) -> Self {
+        self.spec.is_editable = v;
+        self
+    }
+    pub fn removable(mut self, v: bool) -> Self {
+        self.spec.is_removable = v;
+        self
+    }
     pub fn reorderable(mut self, v: bool) -> Self {
         self.spec.is_reorderable = v;
         self
@@ -86,6 +122,14 @@ impl EditableList {
     }
     pub fn info_message(mut self, v: impl Into<String>) -> Self {
         self.spec.info_message = Some(v.into());
+        self
+    }
+    pub fn submit_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.submit_label = v.into();
+        self
+    }
+    pub fn cancel_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.cancel_label = v.into();
         self
     }
     pub fn with_size(mut self, v: ControlSize) -> Self {
@@ -123,58 +167,36 @@ impl IntoElement for EditableList {
         let spec = &self.spec;
 
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let density = spec.density;
+        let is_unavailable = spec.is_disabled || spec.is_submitting;
+        let show_remove = spec.is_editable || spec.is_removable;
 
-        // ── Size-dependent layout (from Svelte CSS) ───────────────
-        // Handle size scale matches Svelte --poodle-editable-list-handle-size:
-        // xs→0.875rem, sm→0.875rem, md→1rem, lg→1.125rem, xl→1.25rem
-        let (remove_size, item_pad_x, add_pad_x) = match effective_size {
-            ControlSize::Xs => (rem_to_px(0.875), rem_to_px(0.5), rem_to_px(0.625)),
-            ControlSize::Sm => (rem_to_px(0.875), rem_to_px(0.625), rem_to_px(0.75)),
-            ControlSize::Md => (rem_to_px(1.0), rem_to_px(0.625), rem_to_px(0.75)),
-            ControlSize::Lg => (rem_to_px(1.125), rem_to_px(0.75), rem_to_px(0.875)),
-            ControlSize::Xl => (rem_to_px(1.25), rem_to_px(0.875), rem_to_px(1.0)),
-        };
+        // ── Token-exact size / density geometry (contract §8) ─────
+        let handle_size = px(rem_to_px(editable_list_handle_size_rem(effective_size)));
+        let item_pad_x = px(rem_to_px(editable_list_item_x_rem(effective_size)));
+        let item_pad_y = px(rem_to_px(editable_list_item_y_rem(effective_size)));
+        let item_font = px(rem_to_px(editable_list_font_rem(effective_size)));
+        let list_gap = px(rem_to_px(editable_list_list_gap_rem(density)));
+        let item_gap = px(rem_to_px(editable_list_item_gap_rem(density)));
 
-        // ── Density-dependent spacing (from Svelte CSS) ───────────
-        let (root_gap, static_gap, item_pad_y, add_gap) = match spec.density {
-            ControlDensity::Compact => (
-                rem_to_px(0.375),
-                rem_to_px(0.0625),
-                rem_to_px(0.375),
-                rem_to_px(0.25),
-            ),
-            ControlDensity::Default => (
-                rem_to_px(0.5),
-                rem_to_px(0.125),
-                rem_to_px(0.5),
-                rem_to_px(0.375),
-            ),
-            ControlDensity::Comfortable => (
-                rem_to_px(0.625),
-                rem_to_px(0.1875),
-                rem_to_px(0.625),
-                rem_to_px(0.5),
-            ),
-        };
+        // ── Container gaps (contract §7/§8 fixed rem) ─────────────
+        // These are fixed in the contract (not density-keyed): session root
+        // gap `0.75rem`; header / add-row gap `0.5rem`; error/info padding
+        // `0.75rem`. Per CLAUDE.md, rem_to_px of contract-exact rem is the
+        // correct form when the value is a literal contract dimension.
+        let root_gap = px(rem_to_px(0.75));
+        let row_gap = px(rem_to_px(0.5));
+        let panel_pad = px(rem_to_px(0.75));
 
-        // ── Token resolution ──────────────────────────────────────
-        let text_color = resolve_color(theme, "color.text.primary");
-        let secondary_color = resolve_color(theme, "color.text.secondary");
-        let muted_color = resolve_color(theme, "color.text.muted");
-        let input_border = resolve_color(theme, spec.input_border_token());
-        let input_fill = resolve_color(theme, spec.input_fill_token());
-        let _focus_ring = resolve_color(theme, spec.input_focus_ring_token());
-        let remove_color = resolve_color(theme, spec.remove_color_token());
-        let remove_hover_color = resolve_color(theme, spec.remove_hover_color_token());
+        // ── Token-resolved colors ─────────────────────────────────
+        let text_primary = resolve_color(theme, "color.text.primary");
+        let handle_color = resolve_color(theme, spec.remove_color_token());
         let counter_color = resolve_color(theme, spec.counter_color_token());
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
-        let hover_bg = resolve_color(theme, "color.surface.raised");
-        let control_height = px(rem_to_px(control_height_rem(effective_size)));
         let control_radius = resolve_radius(theme, "radius.control");
-        let gap_sm = resolve_px(theme, "space.inline.sm");
-        let gap_md = resolve_px(theme, "space.inline.md");
-        let body_size = px(rem_to_px(size_font_rem(effective_size)));
-        let label_size = px(rem_to_px(size_font_rem(effective_size) * 0.92));
+        let surface_radius = resolve_radius(theme, "radius.surface");
+        let label_size = resolve_px(theme, "typography.label.size");
+        let panel_font = px(rem_to_px(0.875)); // contract: error/info font-size 0.875rem
 
         let total = if !self.items.is_empty() {
             self.items.len()
@@ -182,43 +204,117 @@ impl IntoElement for EditableList {
             self.children.len()
         };
 
-        // ── Root container ────────────────────────────────────────
-        let mut root = div().flex().flex_col().gap(px(root_gap)).w_full();
+        // ── Root container (session) ──────────────────────────────
+        let mut root = div().flex().flex_col().gap(root_gap).w_full();
+
+        // ── Workflow header (cancel / submit Button primitives) ───
+        //
+        // Svelte gates this on `onSubmit || onCancel`; GPUI has no callbacks,
+        // so we surface the chrome when the list advertises pending work
+        // (dirty or submitting). Buttons are the real primitives, which own
+        // their own geometry, typography, fill, and foreground tokens.
+        if spec.is_dirty || spec.is_submitting {
+            let cancel_btn = Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_size(effective_size)
+                    .with_density(density)
+                    .with_label(spec.cancel_label.clone())
+                    .with_disabled(is_unavailable),
+                theme,
+            );
+
+            let submit_label = if spec.is_submitting {
+                String::from("Saving\u{2026}")
+            } else {
+                spec.submit_label.clone()
+            };
+            let submit_btn = Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_size(effective_size)
+                    .with_density(density)
+                    .with_label(submit_label)
+                    // Svelte: disabled unless dirty (or while submitting).
+                    .with_disabled(is_unavailable || !spec.is_dirty),
+                theme,
+            );
+
+            let header = div()
+                .flex()
+                .flex_row()
+                .items_center()
+                .justify_end()
+                .gap(row_gap)
+                .w_full()
+                .child(cancel_btn)
+                .child(submit_btn);
+            root = root.child(header);
+        }
+
+        // ── Error / info banners (contract §8) ────────────────────
+        if let Some(ref error) = spec.error_message {
+            let danger = resolve_color(theme, spec.error_color_token());
+            root = root.child(
+                div()
+                    .p(panel_pad)
+                    .rounded(surface_radius)
+                    .text_size(panel_font)
+                    .text_color(danger)
+                    .child(error.clone()),
+            );
+        } else if let Some(ref info) = spec.info_message {
+            let info_color = resolve_color(theme, spec.info_color_token());
+            root = root.child(
+                div()
+                    .p(panel_pad)
+                    .rounded(surface_radius)
+                    .text_size(panel_font)
+                    .text_color(info_color)
+                    .child(info.clone()),
+            );
+        }
 
         // ── Item rows ─────────────────────────────────────────────
-        let mut items_container = div().flex().flex_col().gap(px(static_gap));
+        let mut items_container = div().flex().flex_col().gap(list_gap);
 
-        let build_item_row = |content: AnyElement, is_reorderable: bool| -> Div {
+        // Each row: handle (when reorderable) · content · remove (when
+        // editable || removable). All from real primitives / token geometry.
+        let build_item_row = |content: AnyElement| -> Div {
             let mut row = div()
                 .flex()
                 .flex_row()
                 .items_center()
-                .gap(gap_md)
-                .px(px(item_pad_x))
-                .py(px(item_pad_y))
+                .gap(item_gap)
+                .px(item_pad_x)
+                .py(item_pad_y)
                 .rounded(control_radius)
-                .bg(input_fill)
-                .hover(|s| s.bg(hover_bg));
+                .bg(gpui::transparent_black())
+                // contract item border: 0.0625rem solid transparent.
+                .border(px(rem_to_px(0.0625)))
+                .border_color(gpui::transparent_black());
 
-            // Drag handle (only when reorderable)
-            if is_reorderable {
-                let grip_icon = Icon::from_spec(
+            // Drag handle: 6-dot grip (`grip-vertical`), sized to the
+            // contract handle-size square. Decorative; cursor: grab.
+            if spec.is_reorderable {
+                let grip = Icon::from_spec(
                     IconSpec::new("grip-vertical").with_size(IconSize::Sm),
                     theme,
                 )
-                .with_color(muted_color);
+                .with_color(handle_color);
 
                 let handle = div()
                     .flex()
                     .items_center()
                     .justify_center()
-                    .cursor(CursorStyle::ClosedHand)
                     .flex_shrink_0()
-                    .child(grip_icon);
+                    .size(handle_size)
+                    .cursor(CursorStyle::OpenHand)
+                    .child(grip);
                 row = row.child(handle);
             }
 
-            // Content (fills remaining space)
+            // Content area: flex-grow, min-width 0, ellipsis overflow.
             row = row.child(
                 div()
                     .flex_grow()
@@ -227,224 +323,101 @@ impl IntoElement for EditableList {
                     .child(content),
             );
 
-            // Remove button — only when is_editable or is_removable
-            if spec.is_editable || spec.is_removable {
-                let remove_icon =
-                    Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
-                        .with_color(remove_color);
-
-                let rh = remove_hover_color;
-                let remove_btn = div()
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .flex_shrink_0()
-                    .size(px(remove_size))
-                    .rounded(control_radius)
-                    .cursor_pointer()
-                    .text_color(remove_color)
-                    .hover(move |s| s.text_color(rh).bg(hover_bg))
-                    .child(remove_icon);
-
-                row = row.child(remove_btn);
+            // Remove control: real ghost IconButton (icon `x`, chrome size
+            // role). Shown only when editable || removable.
+            if show_remove {
+                let remove_btn = IconButton::from_spec(
+                    IconButtonSpec::new()
+                        .with_icon("x")
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_size(effective_size)
+                        .with_size_role(SemanticControlSizeRole::Chrome)
+                        .with_density(density)
+                        .with_disabled(is_unavailable)
+                        .with_aria_label("Remove item"),
+                    theme,
+                );
+                row = row.child(div().flex_shrink_0().child(remove_btn));
             }
             row
         };
 
-        // String items
         for item_text in &self.items {
             let label = div()
-                .text_size(body_size)
-                .text_color(text_color)
+                .text_size(item_font)
+                .text_color(text_primary)
                 .overflow_hidden()
                 .text_ellipsis()
                 .whitespace_nowrap()
                 .child(item_text.clone());
-            items_container = items_container.child(build_item_row(
-                label.into_any_element(),
-                spec.is_reorderable,
-            ));
+            items_container = items_container.child(build_item_row(label.into_any_element()));
         }
-
-        // Custom child elements
         for child in self.children {
-            items_container = items_container.child(build_item_row(child, spec.is_reorderable));
+            items_container = items_container.child(build_item_row(child));
         }
 
         if total > 0 {
             root = root.child(items_container);
         }
 
-        // ── Add-item input row (only when editable) ─────────────
+        // ── Add row (real TextInput + primary Button primitives) ──
         let can_add =
-            spec.is_editable && !spec.is_disabled && spec.max_items.map_or(true, |max| total < max);
+            spec.is_editable && !is_unavailable && spec.max_items.map_or(true, |max| total < max);
 
         if can_add {
-            // Text input field
-            let input_field = div()
-                .flex_grow()
-                .min_w(px(0.0))
-                .h(control_height)
-                .px(px(item_pad_x))
-                .flex()
-                .items_center()
-                .border_1()
-                .border_color(input_border)
-                .rounded(control_radius)
-                .bg(input_fill)
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .text_color(secondary_color)
-                        .child(spec.placeholder.clone()),
-                );
+            let input = TextInput::from_spec(
+                TextInputSpec::new()
+                    .with_placeholder(spec.placeholder.clone())
+                    .with_size(effective_size)
+                    .with_density(density)
+                    .with_disabled(is_unavailable),
+                theme,
+            );
 
-            // Add button
-            let plus_icon = Icon::from_spec(IconSpec::new("plus").with_size(IconSize::Sm), theme)
-                .with_color(text_color);
-
-            let add_btn = div()
-                .flex()
-                .flex_row()
-                .items_center()
-                .gap(gap_sm)
-                .h(control_height)
-                .px(px(add_pad_x))
-                .border_1()
-                .border_color(input_border)
-                .rounded(control_radius)
-                .bg(input_fill)
-                .cursor_pointer()
-                .flex_shrink_0()
-                .hover(|s| s.bg(hover_bg))
-                .child(plus_icon)
-                .child(
-                    div()
-                        .text_size(label_size)
-                        .font_weight(FontWeight::MEDIUM)
-                        .text_color(text_color)
-                        .child(spec.add_label.clone()),
-                );
+            let add_btn = Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Primary)
+                    .with_size(effective_size)
+                    .with_density(density)
+                    .with_label(spec.add_label.clone())
+                    // Svelte: add button disabled when input empty/whitespace
+                    // or !canAdd. No live input here → disabled (empty value).
+                    .with_disabled(true),
+                theme,
+            );
 
             let add_row = div()
                 .flex()
                 .flex_row()
-                .gap(px(add_gap))
+                .items_center()
+                .gap(row_gap)
                 .w_full()
-                .child(input_field)
-                .child(add_btn);
-
+                .child(div().flex_grow().min_w(px(0.0)).child(input))
+                .child(div().flex_shrink_0().child(add_btn));
             root = root.child(add_row);
         }
 
-        // ── Counter + dirty/submitting row ────────────────────────
-        //
-        // The counter row carries three pieces of meta: an optional
-        // dirty dot on the left (warning-tone), an optional "Saving…"
-        // status on the left (during submit), and the item-count
-        // summary on the right. Any combination may be visible.
-        let needs_counter = spec.shows_counter() || spec.is_dirty || spec.is_submitting;
-        if needs_counter {
-            let mut row = div().flex().items_center().w_full();
-
-            // Left cluster: dirty dot + submitting text.
-            let mut left = div().flex().items_center().gap(gap_sm).flex_grow();
-
-            if spec.is_dirty {
-                let warning = resolve_color(theme, spec.dirty_indicator_color_token());
-                left = left.child(div().w(px(6.0)).h(px(6.0)).rounded(px(3.0)).bg(warning));
-            }
-
-            if spec.is_submitting {
-                left = left.child(
+        // ── Counter (contract: shown only when maxItems is set) ───
+        if spec.shows_counter() {
+            if let Some(max) = spec.max_items {
+                let counter_text = format!("{}/{}", total, max);
+                root = root.child(
                     div()
-                        .text_size(label_size)
-                        .text_color(counter_color)
-                        .child("Saving\u{2026}"),
+                        .flex()
+                        .justify_end()
+                        .w_full()
+                        .child(
+                            div()
+                                .text_size(label_size)
+                                .text_color(counter_color)
+                                .child(counter_text),
+                        ),
                 );
             }
-
-            row = row.child(left);
-
-            if spec.shows_counter() {
-                let counter_text = if let Some(max) = spec.max_items {
-                    format!("{}/{}", total, max)
-                } else {
-                    format!("{} item{}", total, if total == 1 { "" } else { "s" })
-                };
-                row = row.child(
-                    div()
-                        .text_size(label_size)
-                        .text_color(counter_color)
-                        .child(counter_text),
-                );
-            }
-
-            root = root.child(row);
         }
 
-        // ── Error / Info banners ──────────────────────────────────
-        //
-        // Rendered below the list. Error wins if both are set.
-        if let Some(ref error) = spec.error_message {
-            let danger = resolve_color(theme, spec.error_color_token());
-            root = root.child(
-                div()
-                    .text_size(label_size)
-                    .text_color(danger)
-                    .child(error.clone()),
-            );
-        } else if let Some(ref info) = spec.info_message {
-            let info_color = resolve_color(theme, spec.info_color_token());
-            root = root.child(
-                div()
-                    .text_size(label_size)
-                    .text_color(info_color)
-                    .child(info.clone()),
-            );
-        }
-
-        // ── Workflow action buttons (submit / cancel) ────────────
-        // Rendered when the list has pending changes (dirty) or is
-        // in a submitting state. Labels come from spec.submit_label
-        // and spec.cancel_label.
-        if spec.is_dirty || spec.is_submitting {
-            let accent = resolve_color(theme, "color.accent.base");
-            let actions_row = div()
-                .flex()
-                .flex_row()
-                .justify_end()
-                .gap(gap_sm)
-                .w_full()
-                .child(
-                    div()
-                        .px(gap_md)
-                        .py(gap_sm)
-                        .rounded(control_radius)
-                        .text_size(label_size)
-                        .text_color(text_color)
-                        .cursor_pointer()
-                        .hover(|s| s.bg(hover_bg))
-                        .child(spec.cancel_label.clone()),
-                )
-                .child(
-                    div()
-                        .px(gap_md)
-                        .py(gap_sm)
-                        .rounded(control_radius)
-                        .bg(accent)
-                        .text_size(label_size)
-                        .text_color(gpui::white())
-                        .font_weight(FontWeight::MEDIUM)
-                        .cursor_pointer()
-                        .when(spec.is_submitting, |el| el.opacity(disabled_opacity))
-                        .child(spec.submit_label.clone()),
-                );
-            root = root.child(actions_row);
-        }
-
-        // ── Disabled state ────────────────────────────────────────
-        if spec.is_disabled {
+        // ── Disabled state: list opacity via token ────────────────
+        if is_unavailable {
             root = root.opacity(disabled_opacity);
         }
 

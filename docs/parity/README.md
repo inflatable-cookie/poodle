@@ -152,7 +152,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | drawer | ok | 6 | 6 | gap |
 | duration-input | fixed | 9 | 6 | gap |
 | editable-label | ok | 8 | 11 | gap |
-| editable-list | fixed | 11 | 11 | gap |
+| editable-list | fixed | 4 | 11 | gap |
 | embed-input | fixed | 6 | 7 | gap |
 | embed-preview | fixed | 7 | 5 | gap |
 | empty-state | ok | 2 | 5 | ok |
