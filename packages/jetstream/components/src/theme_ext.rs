@@ -29,3 +29,10 @@ pub fn resolve_opacity(theme: &JetstreamThemeProvider, token: &str) -> f32 {
 pub fn tint(color: Vec4, opacity_fraction: f32) -> Vec4 {
     Vec4::new(color.x, color.y, color.z, color.w * opacity_fraction)
 }
+
+/// Blend two colors: `a * ratio + b * (1 - ratio)` (emulates CSS
+/// `color-mix(a ratio%, b)`). Mixed in the linear space the Jetstream pipeline
+/// uses; GPUI mixes in sRGB, a minor cross-target color delta.
+pub fn color_mix(a: Vec4, b: Vec4, ratio: f32) -> Vec4 {
+    a * ratio + b * (1.0 - ratio)
+}

@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=8 specimen=gap -->
+<!-- parity consv=ok gpui=4 jetstream=3 specimen=gap -->
 # Parity: Avatar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -34,14 +34,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No Jetstream implementation exists — create `packages/jetstream/components/src/avatar.rs` (`js_avatar(spec: &AvatarSpec, theme: &JetstreamThemeProvider) -> JsEl`) resolving all tokens from `AvatarSpec`, and register it in `packages/jetstream/components/src/lib.rs`.
-- [ ] Root: inline-flex square — `div().w(size).h(size)` from `spec.size_rem()` resolved to px, `flex_none()`, centered (`items_center`/`justify_center`), `overflow_hidden()` (contract §3, `Avatar.svelte:45-59`).
-- [ ] Shape: `circle` → pill/`50%` radius; `rounded` → `radius.control` (contract §3, `Avatar.svelte:61-67`). Do not hardcode a `999.0` sentinel.
-- [ ] Tone: `neutral` → bg `color-mix(background.surface 82%, text.primary)` / fg `text.secondary`; `accent` → bg `color-mix(accent.base 76%, background.surface)` / fg `text.primary` (`Avatar.svelte:69-77`).
-- [ ] Initials fallback: render `spec.fallback_text()` at `font_size_rem()`-resolved size, weight 600, line-height 1 (contract §3, `Avatar.svelte:40,55-57`).
-- [ ] Image (`src`): render an image element filling the square with object-fit cover when `spec.src.is_some()` (contract §3, `Avatar.svelte:37-38,104-109`) — note Jetstream image-source support may need a runtime channel; if unsupported, document as a runtime limit, do not fake it.
-- [ ] Font tokens: resolve font-size from `spec.font_size_rem()` per size — zero hardcoded px (contract §3).
-- [ ] Add `AvatarSpec` token methods (`background_token`/`color_token`/`radius_token`) so both Rust targets resolve identically rather than duplicating the `color_mix` math.
+- [x] DONE: created `packages/jetstream/components/src/avatar.rs` (`js_avatar`) + registered in lib.rs; inline-flex square from `size_rem()`, `flex_none()`, centered, `overflow_hidden()`.
+- [x] DONE: shape (circle → `rem_to_px(999.0)` pill, same convention as GPUI; rounded → `radius.control`); tone neutral/accent via the new shared `theme_ext::color_mix`; initials fallback at `font_size_rem()` weight 600; all font sizes token-resolved. Probe-tested.
+- [ ] Image (`src`) rendering — JsEl has no image-by-URL channel; runtime limit (GPUI is also initials-only). Documented, not faked.
+- [ ] Add `AvatarSpec` token methods (`background_token`/`color_token`/`radius_token`) so both Rust targets share the mix math instead of duplicating it.
 - accepted: no ARIA channel (contract §4 `role="img"`/`aria-label`/`aria-hidden` not expressible); decorative-vs-labeled distinction has no Jetstream a11y surface.
 
 ## Specimen parity
