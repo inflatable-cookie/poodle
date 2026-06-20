@@ -20,6 +20,7 @@ pub const COLOR_ACCENT_FOCUS_RING: &str = "color.accent.focusRing";
 pub const COLOR_STATUS_SUCCESS: &str = "color.status.success";
 pub const COLOR_STATUS_WARNING: &str = "color.status.warning";
 pub const COLOR_STATUS_DANGER: &str = "color.status.danger";
+pub const COLOR_STATUS_INFO: &str = "color.status.info";
 pub const COLOR_ICON_PRIMARY: &str = "color.icon.primary";
 pub const COLOR_ICON_MUTED: &str = "color.icon.muted";
 pub const ELEVATION_SURFACE: &str = "elevation.surface";

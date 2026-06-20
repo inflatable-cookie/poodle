@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=9 jetstream=11 specimen=gap -->
+<!-- parity consv=ok gpui=8 jetstream=11 specimen=gap -->
 # Parity: ToastStack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -24,7 +24,7 @@ Props, anatomy, tone set, ARIA, size/density tables all match Svelte. Minor note
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Info tone uses wrong token — `spec.tone_color(Info)` returns `COLOR_ACCENT_BASE` (spec toast_stack.rs:135) and accent fallback is read as `color.accent.base` (toast_stack.rs:100). Contract §8 maps info → `var(--poodle-color-status-info, #3b82f6)`. **Fix: info tone must resolve `color.status.info`, not `color.accent.base`.**
+- [x] Info tone uses wrong token — FIXED: `ToastTone::Info` now maps to `COLOR_STATUS_INFO` (new `color.status.info` token), not `COLOR_ACCENT_BASE`. (The accent *fallback* read at toast_stack.rs:100 is a separate concern only hit for unknown tones.)
 - [ ] No accent-bar tone-mix — contract §8 accent is `color-mix(toast-tone 82%, white 6%)`; GPUI fills the bar with the raw tone color (toast_stack.rs:198). Border (34% mix) and gradient background (12% tint) mixes are also dropped — toast uses flat `fill`/`border_color` (toast_stack.rs:191-194).
 - [ ] No dismiss `aria-label` and dismiss is a raw `×` glyph div, not an Icon(name="x") (toast_stack.rs:170-176); contract §2 requires the Icon primitive + `aria-label="Dismiss {title}"`.
 - [ ] Action affordance is a bare text div, not a `Button variant="secondary"` (toast_stack.rs:149-156); contract §2 anatomy + Svelte (line 55) require the Button primitive.

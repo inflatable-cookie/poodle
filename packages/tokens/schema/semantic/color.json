@@ -85,6 +85,10 @@
       "danger": {
         "$type": "color",
         "$value": "{primitives.color.red.500}"
+      },
+      "info": {
+        "$type": "color",
+        "$value": "{primitives.color.blue.500}"
       }
     },
     "icon": {

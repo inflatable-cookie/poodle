@@ -68,6 +68,7 @@ pub const LOOPHOLE_STUDIO: ThemeDefinition = ThemeDefinition {
     ("color.status.success", "#97d14d"),
     ("color.status.warning", "#f0ba55"),
     ("color.status.danger", "#ef7c72"),
+    ("color.status.info", "#6ea9d4"),
     ("color.icon.primary", "#efefef"),
     ("color.icon.muted", "#a6a6a6"),
     ],

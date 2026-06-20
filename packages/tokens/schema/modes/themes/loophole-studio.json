@@ -76,6 +76,10 @@
       "danger": {
         "$type": "color",
         "$value": "#ef7c72"
+      },
+      "info": {
+        "$type": "color",
+        "$value": "#6ea9d4"
       }
     },
     "icon": {

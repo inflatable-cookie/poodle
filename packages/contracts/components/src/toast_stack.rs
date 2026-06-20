@@ -132,7 +132,7 @@ impl ToastStackSpec {
 
     pub fn tone_color(&self, tone: &ToastTone) -> &'static str {
         match tone {
-            ToastTone::Info => semantic::COLOR_ACCENT_BASE,
+            ToastTone::Info => semantic::COLOR_STATUS_INFO,
             ToastTone::Success => semantic::COLOR_STATUS_SUCCESS,
             ToastTone::Warning => semantic::COLOR_STATUS_WARNING,
             ToastTone::Danger => semantic::COLOR_STATUS_DANGER,

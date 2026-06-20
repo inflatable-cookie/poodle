@@ -67,14 +67,15 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 
 ## Cross-cutting findings (block multiple components)
 
-- **Missing `color.status.info` token.** Svelte uses `--poodle-color-status-info`
-  with a hardcoded `#3b82f6` fallback (Callout, ToastStack), but the Rust token
-  system has no such token, so `StatusTone`/`ToastTone`/`PillTone` `Info` maps to
-  `color.accent.base` as a workaround. The "info renders as accent, not
-  status-info" todos (status-indicator, toast-stack, callout info tone) can only
-  be closed by **adding `color.status.info` to every theme** (dark, light,
-  loophole-studio) — a design decision (which blue per theme). **Needs a human
-  call.** Until then the accent-base mapping is the honest behavior.
+- **~~Missing `color.status.info` token.~~ RESOLVED.** Added `color.status.info`
+  to the token schema (`semantic/color.json` → `primitives.color.blue.500` =
+  `#2d86f3` for dark/light; `modes/themes/loophole-studio.json` → `#6ea9d4`),
+  regenerated all artifacts (Rust + TS + CSS), and pointed `StatusTone`,
+  `ToastTone`, and `PillTone` `Info` at `COLOR_STATUS_INFO` instead of the
+  accent-base workaround. This closes the info-tone color todos in
+  status-indicator, toast-stack, pill, and callout across both Rust targets.
+  (In dark theme `accent.base` is gold `#f0b24d`, so info was rendering gold —
+  now correctly blue.)
 - **Specs lacking token methods force literals.** Recurring root cause of the
   Rust hardcoded-px/color todos: the `poodle-specs` struct exposes no token
   method for a value (spinner border/gap/opacity, skeleton shimmer stops,
@@ -228,7 +229,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-input | fixed | 4 | 5 | gap |
 | time-zone-select | fixed | 6 | 6 | gap |
 | toast-host | fixed | 6 | 7 | gap |
-| toast-stack | ok | 9 | 11 | gap |
+| toast-stack | ok | 8 | 11 | gap |
 | toggle-group | fixed | 4 | 8 | gap |
 | token-input | fixed | 9 | 11 | gap |
 | toolbar | fixed | 4 | 5 | gap |
@@ -237,7 +238,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tri-state-switch | fixed | 5 | 6 | gap |
 | ui-presentation-provider | fixed | 3 | 2 | gap |
 | validation-summary | gap | 8 | 9 | gap |
-| video-player | fixed | 7 | 4 | gap |
+| video-player | fixed | 7 | 3 | gap |
 <!-- END MATRIX -->
 
 ## Status compiler

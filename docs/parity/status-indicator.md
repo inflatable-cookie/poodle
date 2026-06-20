@@ -26,7 +26,7 @@ Contract and Svelte mostly agree on the prop surface. The live divergence is an 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done.
 
-- [ ] `info` resolves to **accent-base**, not `status-info`. `spec.status_color_token()` (`status_indicator.rs:64`) delegates to `StatusTone::color_token`, which maps `Info | Pending => COLOR_ACCENT_BASE` (`packages/contracts/components/src/types.rs:280`). Contract §4/§8 + Svelte require `--poodle-color-status-info`. **Fix in the shared spec; affects both Rust targets.**
+- [x] `info` resolves to **accent-base**, not `status-info` — FIXED at the source: added the `color.status.info` token (dark/light blue.500 `#2d86f3`, loophole `#6ea9d4`); `StatusTone::color_token` now maps `Info => COLOR_STATUS_INFO`. Both Rust targets + Svelte resolve the status-info blue (it was the gold accent in dark theme).
 - [ ] No `size` / `sizeRole` / `density` support. Builder only forwards `status`/`label`/`aria_label`/`typography` (`status_indicator.rs:39-54`); spec struct has no size/density fields (`packages/contracts/components/src/status_indicator.rs:5-10`). Dot/gap/label metrics are fixed at the `md` preset regardless of requested size — contract §8 size table (`:189-195`) unimplemented.
 - [ ] No pending pulse animation. Contract §4 (`:63`) + §8 (`:152-167`) specify `status-pulse` on `status="pending"`; GPUI renders the pending dot statically (`status_indicator.rs:75-92`, no animation branch). Accepted-but-track per Known Delta §12 — motion internals are runtime-specific, so this is a soft gap.
 - [ ] `aria-label` not emitted. `aria_label` is stored on the spec and settable (`status_indicator.rs:47-50`) but never applied to the element (`into_element` ignores it, `:60-107`), so dot-only indicators have no accessible name — violates contract §6 "not color-only". Distinct from the blanket no-ARIA delta because the contract explicitly requires a text/label path (§6, §10) and the data exists.
@@ -34,7 +34,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] `info` resolves to **accent-base**, not `status-info` — same shared-spec root cause (`status_indicator.rs:30` → `StatusTone::color_token`, `packages/contracts/components/src/types.rs:280`).
+- [x] `info` resolves to **accent-base**, not `status-info` — FIXED via the shared `StatusTone::color_token` → `COLOR_STATUS_INFO` change + new token (see GPUI item above).
 - [ ] No `size` / `sizeRole` / `density` support — spec lacks the fields; `js_status_indicator` uses only `dot_size_rem`/`gap_rem`/`label_font_size_rem` md presets (`status_indicator.rs:34-36`). Contract §8 size/density tables unimplemented.
 - [ ] No dot box-shadow glow. Contract §8 (`:150`) + Svelte (`StatusIndicator.svelte:92`) require `0 0 0 0.125rem` ring at 18% — `js_status_indicator` builds the dot with no shadow (`status_indicator.rs:39-43`). Documented runtime delta (§12, `JsEl` lacks box-shadow), so soft gap — track until shadow support lands.
 - [ ] No pending pulse animation (`status="pending"` renders static; no animation branch in `status_indicator.rs`). Soft gap per §12.

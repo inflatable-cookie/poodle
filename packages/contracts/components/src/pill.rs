@@ -166,7 +166,7 @@ impl PillSpec {
     pub fn tone_color_token(&self) -> &'static str {
         match self.tone {
             PillTone::Neutral => semantic::COLOR_TEXT_SECONDARY,
-            PillTone::Info => semantic::COLOR_ACCENT_BASE,
+            PillTone::Info => semantic::COLOR_STATUS_INFO,
             PillTone::Success => semantic::COLOR_STATUS_SUCCESS,
             PillTone::Warning => semantic::COLOR_STATUS_WARNING,
             PillTone::Danger => semantic::COLOR_STATUS_DANGER,

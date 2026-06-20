@@ -189,7 +189,8 @@ export const tokens = {
       "status": {
         "success": "#7fd24d",
         "warning": "#f0b24d",
-        "danger": "#e06a5f"
+        "danger": "#e06a5f",
+        "info": "#2d86f3"
       },
       "icon": {
         "primary": "#131a22",
@@ -445,6 +446,7 @@ export const tokenPaths = [
   "color.status.success",
   "color.status.warning",
   "color.status.danger",
+  "color.status.info",
   "color.icon.primary",
   "color.icon.muted",
   "elevation.surface",
@@ -539,6 +541,7 @@ export const cssVars = {
   "color.status.success": "--poodle-color-status-success",
   "color.status.warning": "--poodle-color-status-warning",
   "color.status.danger": "--poodle-color-status-danger",
+  "color.status.info": "--poodle-color-status-info",
   "color.icon.primary": "--poodle-color-icon-primary",
   "color.icon.muted": "--poodle-color-icon-muted",
   "elevation.surface": "--poodle-elevation-surface",
