@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=9 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=10 specimen=gap -->
+<!-- pass 19: GPUI rebuilt — was a hand-rolled card with hsla/px literals; now composes
+     the real Dialog (role=AlertDialog, width=Sm) + two composed Buttons (ghost cancel /
+     primary confirm). Tone-driven confirm (danger→Danger), working state (label swap +
+     buttons disabled + dismissal suppressed), item_detail row. No literals remain.
+     Build clean. Remaining GPUI: ARIA (accepted, no a11y channel). -->
 # Parity: AlertDialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

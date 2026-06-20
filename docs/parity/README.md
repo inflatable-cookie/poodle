@@ -105,7 +105,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 |---|---|---|---|---|
 | accordion | fixed | 6 | 8 | gap |
 | action-discovery-panel | fixed | 6 | 9 | gap |
-| alert-dialog | fixed | 9 | 10 | gap |
+| alert-dialog | fixed | 2 | 10 | gap |
 | app-header | fixed | 8 | 8 | gap |
 | audio-player | ok | 8 | 7 | gap |
 | avatar | ok | 4 | 3 | gap |
@@ -126,7 +126,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | collapsible | fixed | 6 | 8 | gap |
 | color-picker | fixed | 9 | 8 | gap |
 | command-palette | fixed | 9 | 11 | gap |
-| confirm-action | ok | 7 | 7 | gap |
+| confirm-action | ok | 2 | 7 | gap |
 | context-menu | ok | 2 | 5 | gap |
 | data-table | fixed | 6 | 6 | gap |
 | date-picker | fixed | 4 | 6 | gap |

@@ -1,22 +1,30 @@
-//! ConfirmAction — confirmation dialog backed by ConfirmActionSpec.
+//! ConfirmAction — composes the `AlertDialog` primitive (which itself composes
+//! `Dialog` + `Button`) with a trigger that is, by default, a composed
+//! secondary `Button`. Mirrors the Svelte reference (`ConfirmAction.svelte`):
+//! the component owns the open/trigger wiring and tone derivation, and
+//! delegates every dialog/button visual to the composed primitives so it never
+//! re-implements (and never drifts from) the AlertDialog/Button contracts.
 //!
-//! Renders an AlertDialog-style overlay with backdrop, trigger button,
-//! and confirm/cancel actions.
+//! Svelte parity notes:
+//! - Default trigger: `Button variant="secondary"` with derived tone
+//!   (`ConfirmAction.svelte:86`); custom trigger replaces it (lines 69-84).
+//! - Trigger tone: `tone === "danger" ? "danger" : "default"` (line 48).
+//! - Dialog: delegates to `AlertDialog` with the same tone/labels/size/density
+//!   and the `children` body slot (lines 91-105).
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::primitives::{AlertDialog, Button};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::ConfirmActionSpec;
-use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use poodle_specs::{
+    AlertDialogSpec, AlertDialogTone, ButtonTone, ButtonVariant, ControlDensity, ControlSize,
+    ConfirmActionSpec, SemanticControlSizeRole, StatusTone,
+};
 
 pub struct ConfirmAction {
     spec: ConfirmActionSpec,
     theme: GpuiThemeProvider,
-    /// Optional trigger element that opens the confirmation dialog.
+    /// Optional trigger element that opens the confirmation dialog. When
+    /// absent, a composed secondary Button (with derived tone) is rendered.
     trigger: Option<AnyElement>,
     /// Optional body content rendered between the description and the
     /// action row (matches the Svelte default slot).
@@ -104,179 +112,93 @@ impl ConfirmAction {
         self.spec.density = v;
         self
     }
+
+    /// Svelte: `triggerTone = tone === "danger" ? "danger" : "default"`.
+    fn trigger_button_tone(&self) -> ButtonTone {
+        if self.spec.is_destructive() {
+            ButtonTone::Danger
+        } else {
+            ButtonTone::Default
+        }
+    }
+
+    /// Map the ConfirmAction `StatusTone` onto the `AlertDialogTone` the
+    /// composed AlertDialog accepts. Only danger vs. non-danger is meaningful
+    /// (AlertDialog has just `Danger | Warning`); non-danger → `Warning`, which
+    /// resolves to the default (accent) confirm Button — matching Svelte where
+    /// non-danger tones map the confirm Button to `default`.
+    fn alert_tone(&self) -> AlertDialogTone {
+        match self.spec.tone {
+            StatusTone::Danger => AlertDialogTone::Danger,
+            _ => AlertDialogTone::Warning,
+        }
+    }
 }
 
 impl IntoElement for ConfirmAction {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
-        // When closed, render the trigger. Prefer the caller-provided
-        // trigger element; fall back to a default secondary button
-        // using spec.trigger_label so the component behaves usefully
-        // when consumers don't plumb a custom trigger — matches the
-        // Svelte reference which renders a Button when no trigger
-        // slot is present.
+        let theme = &self.theme;
+
+        // When closed, render the trigger. Prefer a caller-provided trigger;
+        // otherwise compose a secondary Button with derived tone — matching the
+        // Svelte reference (`ConfirmAction.svelte:85-89`).
         if !self.spec.is_open {
             return if let Some(trigger) = self.trigger {
                 div().child(trigger).into_any_element()
             } else {
-                let theme = &self.theme;
-                let surface_bg = resolve_color(theme, "color.background.elevated");
-                let text_color = resolve_color(theme, "color.text.primary");
-                let border_color = resolve_color(theme, "color.border.default");
-                let control_radius = resolve_radius(theme, "radius.control");
-                let body_size = resolve_px(theme, "typography.body.size");
-                let inline_md = resolve_px(theme, "space.inline.md");
-                let inline_sm = resolve_px(theme, "space.inline.sm");
-                div()
-                    .child(
-                        div()
-                            .id("poodle-confirm-trigger")
-                            .cursor_pointer()
-                            .bg(surface_bg)
-                            .text_color(text_color)
-                            .text_size(body_size)
-                            .border_1()
-                            .border_color(border_color)
-                            .rounded(control_radius)
-                            .px(inline_md)
-                            .py(inline_sm)
-                            .child(self.spec.trigger_label.clone()),
-                    )
+                Button::new(theme)
+                    .with_id("confirm-action-trigger")
+                    .variant(ButtonVariant::Secondary)
+                    .tone(self.trigger_button_tone())
+                    .size(self.spec.size)
+                    .size_role(self.spec.size_role)
+                    .density(self.spec.density)
+                    .label(self.spec.trigger_label.clone())
                     .into_any_element()
             };
         }
 
-        let theme = &self.theme;
-        let spec = &self.spec;
-        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let pad_x = rem_to_px(panel_space_x_rem(spec.density));
-        let pad_y = rem_to_px(panel_space_y_rem(spec.density));
-        let gap = rem_to_px(control_space_x_rem(spec.density));
+        // Open: delegate to the AlertDialog primitive (Dialog + Buttons).
+        let alert_spec = AlertDialogSpec::new(self.spec.title.clone())
+            .with_tone(self.alert_tone())
+            .with_confirm_label(self.spec.confirm_label.clone())
+            .with_cancel_label(self.spec.cancel_label.clone())
+            .with_open(true)
+            .with_size(self.spec.size)
+            .with_size_role(self.spec.size_role)
+            .with_density(self.spec.density);
 
-        let fill = resolve_color(theme, "color.background.elevated");
-        let border = resolve_color(theme, "color.border.default");
-        let radius = resolve_radius(theme, "radius.surface");
-        let title_color = resolve_color(theme, "color.text.primary");
-        let msg_color = resolve_color(theme, "color.text.secondary");
-        let confirm_fill = resolve_color(theme, spec.confirm_fill_token());
-        let body_size = px(font_size);
+        let mut alert = AlertDialog::from_spec(alert_spec, theme)
+            .description(self.spec.description.clone());
 
-        let mut dialog = div()
-            .bg(fill)
-            .border_1()
-            .border_color(border)
-            .rounded(radius)
-            .px(px(pad_x))
-            .py(px(pad_y))
-            .flex()
-            .flex_col()
-            .gap(px(gap * 2.0))
-            .min_w(px(360.0))
-            .shadow(vec![
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.12),
-                    offset: point(px(0.0), px(8.0)),
-                    blur_radius: px(24.0),
-                    spread_radius: px(0.0),
-                },
-                gpui::BoxShadow {
-                    color: hsla(0.0, 0.0, 0.0, 0.08),
-                    offset: point(px(0.0), px(2.0)),
-                    blur_radius: px(8.0),
-                    spread_radius: px(0.0),
-                },
-            ]);
-
-        let heading_size = resolve_px(theme, "typography.heading.size");
-        dialog = dialog.child(
-            div()
-                .text_size(heading_size)
-                .text_color(title_color)
-                .font_weight(FontWeight::SEMIBOLD)
-                .child(spec.title.clone()),
-        );
-        dialog = dialog.child(
-            div()
-                .text_size(body_size)
-                .text_color(msg_color)
-                .child(spec.description.clone()),
-        );
-
-        // Optional body content slot (matches Svelte default slot)
         if let Some(content) = self.content {
-            dialog = dialog.child(content);
+            alert = alert.with_content(content);
         }
 
-        let control_radius = resolve_radius(theme, "radius.control");
-        let hover_fill = resolve_color(theme, "color.background.elevated");
-        let btn_gap_lg = resolve_px(theme, "space.inline.lg");
-        let btn_gap_sm = resolve_px(theme, "space.inline.sm");
-
-        let mut cancel_btn = div()
-            .id("poodle-confirm-cancel")
-            .text_size(body_size)
-            .text_color(title_color)
-            .cursor_pointer()
-            .px(btn_gap_lg)
-            .py(btn_gap_sm)
-            .rounded(control_radius)
-            .hover(move |s| s.bg(hover_fill))
-            .child(spec.cancel_label.clone());
-
-        if let Some(handler) = self.on_cancel {
-            cancel_btn = cancel_btn.on_click(move |event, window, cx| {
-                handler(event, window, cx);
-            });
-        }
-
-        let mut confirm_btn = div()
-            .id("poodle-confirm-ok")
-            .text_size(body_size)
-            .text_color(gpui::white())
-            .bg(confirm_fill)
-            .rounded(control_radius)
-            .px(btn_gap_lg)
-            .py(btn_gap_sm)
-            .cursor_pointer()
-            .font_weight(FontWeight::MEDIUM)
-            .child(spec.confirm_label.clone());
-
+        // Adapt the AlertDialog `Fn(&mut Window, &mut App)` callbacks to the
+        // `Fn(&ClickEvent, ...)` handlers this composite exposes.
         if let Some(handler) = self.on_confirm {
-            confirm_btn = confirm_btn.on_click(move |event, window, cx| {
-                handler(event, window, cx);
+            alert = alert.on_confirm(move |window, cx| {
+                handler(&ClickEvent::default(), window, cx);
+            });
+        }
+        if let Some(handler) = self.on_cancel {
+            alert = alert.on_cancel(move |window, cx| {
+                handler(&ClickEvent::default(), window, cx);
             });
         }
 
-        let actions = div()
-            .flex()
-            .flex_row()
-            .flex_wrap()
-            .gap(px(gap))
-            .justify_end()
-            .child(cancel_btn)
-            .child(confirm_btn);
-        dialog = dialog.child(actions);
-
-        // Backdrop overlay — full-viewport scrim with centered dialog
-        let backdrop_fill = resolve_color(theme, spec.backdrop_fill_token());
-        let backdrop = div()
-            .id("poodle-confirm-backdrop")
-            .absolute()
-            .inset_0()
-            .bg(backdrop_fill)
-            .flex()
-            .items_center()
-            .justify_center()
-            .occlude()
-            .child(dialog);
-
-        // If a trigger is provided, render it alongside the backdrop.
-        // The trigger is what the user clicks to open the confirmation.
+        // Render the trigger alongside the open dialog when one is provided,
+        // so the trigger remains visible behind the overlay (matches Svelte
+        // where the trigger and AlertDialog are siblings).
         if let Some(trigger) = self.trigger {
-            div().child(trigger).child(backdrop).into_any_element()
+            div()
+                .child(trigger)
+                .child(alert)
+                .into_any_element()
         } else {
-            backdrop.into_any_element()
+            alert.into_any_element()
         }
     }
 }

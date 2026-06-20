@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=7 jetstream=7 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=7 specimen=gap -->
+<!-- pass 19: GPUI rebuilt — was hand-rolled trigger div + hand-rolled dialog (literal
+     shadows, min_w(360), white() text). Now composes a real Button trigger + delegates
+     the open state entirely to the AlertDialog primitive (tone/labels/size/density/body),
+     so backdrop/escape dismiss + Button states work. No literals remain. Build clean.
+     Jetstream still hand-rolls (same pass could apply js_alert_dialog there). -->
 # Parity: ConfirmAction
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
