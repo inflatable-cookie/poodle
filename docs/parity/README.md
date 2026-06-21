@@ -143,8 +143,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | date-time-range-picker | fixed | 1 | 4 | gap |
 | date-time-zone-picker | fixed | 2 | 3 | gap |
 | debug-dialog | ok | 3 | 1 | gap |
-| detail-item | fixed | 3 | 5 | gap |
-| detail-section | fixed | 3 | 3 | gap |
+| detail-item | fixed | 0 | 0 | gap |
+| detail-section | fixed | 0 | 0 | gap |
 | detail-section-group | fixed | 4 | 1 | gap |
 | detail-shell | ok | 0 | 1 | ok |
 | dialog | ok | 2 | 3 | gap |
@@ -172,7 +172,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | icon-button | fixed | 0 | 0 | gap |
 | icon-provider | fixed | 1 | 1 | gap |
 | inline-list-section | fixed | 0 | 1 | gap |
-| inline-remediation | ok | 1 | 6 | gap |
+| inline-remediation | ok | 1 | 0 | gap |
 | list-card | fixed | 2 | 4 | gap |
 | list-card-counter | fixed | 2 | 2 | ok |
 | list-container | fixed | 0 | 0 | ok |
@@ -183,7 +183,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | media-picker | fixed | 0 | 0 | ok |
 | media-preview | fixed | 1 | 1 | gap |
 | media-thumbnail | ok | 1 | 1 | gap |
-| menu | fixed | 2 | 5 | ok |
+| menu | fixed | 0 | 0 | ok |
 | menubar | fixed | 2 | 1 | gap |
 | meta-bar | fixed | 3 | 3 | gap |
 | meta-item | fixed | 4 | 2 | gap |

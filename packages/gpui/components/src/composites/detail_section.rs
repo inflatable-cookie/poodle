@@ -1,16 +1,20 @@
 //! DetailSection — real GPUI component backed by DetailSectionSpec.
+//!
+//! Contract: `docs/contracts/components/detail-section.md`
+//! Reference: `packages/svelte/components/src/DetailSection.svelte`
+//!
+//! A titled grouping of detail rows with an optional separator rule, a header
+//! (title + description + actions), a body slot, density-driven spacing, and a
+//! multi-column body (flex-wrap approximation of the Svelte grid). All geometry
+//! and colour resolve from tokens / the density-aware spec helpers.
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::DetailSectionSpec;
+use poodle_specs::{ControlDensity, DetailSectionSpec};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px};
 
-/// A real GPUI detail section component backed by `DetailSectionSpec`.
-///
-/// Renders a titled grouping of related detail rows with an optional separator,
-/// header (title + description + actions), and body slot for content.
 pub struct DetailSection {
     spec: DetailSectionSpec,
     theme: GpuiThemeProvider,
@@ -61,6 +65,14 @@ impl DetailSection {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn columns(mut self, v: u8) -> Self {
+        self.spec.columns = v;
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
+        self
+    }
 
     pub fn with_actions(mut self, actions: impl IntoElement) -> Self {
         self.actions_slot = Some(actions.into_any_element());
@@ -80,11 +92,16 @@ impl IntoElement for DetailSection {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        let section_gap = resolve_px(theme, spec.section_gap_token());
         let body_size = resolve_px(theme, "typography.body.size");
-        let body_gap = resolve_px(theme, spec.body_gap_token());
-        let header_gap = resolve_px(theme, spec.header_gap_token());
-        let title_body_gap = resolve_px(theme, spec.title_body_gap_token());
+
+        // Density-aware spacing resolved from the spec (contract §8).
+        let root_gap = px(rem_to_px(spec.root_gap_rem()));
+        let header_gap = px(rem_to_px(spec.header_gap_rem()));
+        let title_gap = px(rem_to_px(spec.title_gap_rem()));
+        let body_gap = px(rem_to_px(spec.body_gap_rem()));
+        let separated_gap = px(rem_to_px(spec.separated_gap_rem()));
+        // Contract: separator rule height 0.0625rem (1px @16).
+        let separator_h = px(rem_to_px(0.0625));
 
         let title_color = resolve_color(theme, spec.title_color_token());
         let description_color = resolve_color(theme, spec.description_color_token());
@@ -92,32 +109,31 @@ impl IntoElement for DetailSection {
 
         let mut section = div().w_full().flex().flex_col();
 
-        // Top separator when is_separated
+        // Top separator rule when is_separated (density-driven top spacing).
         if spec.is_separated {
             section = section.child(
                 div()
                     .w_full()
-                    .h(px(1.0))
+                    .h(separator_h)
                     .bg(separator_color)
-                    .mb(section_gap),
+                    .mb(separated_gap),
             );
         }
 
-        // Header row: title block on left, actions on right
+        // Header row: title block on start, actions on end.
         let has_header =
             spec.title.is_some() || spec.description.is_some() || self.actions_slot.is_some();
         if has_header {
             let mut header = div()
                 .w_full()
                 .flex()
-                .items_center()
+                .items_start()
                 .justify_between()
                 .gap(header_gap)
-                .mb(title_body_gap);
+                .mb(root_gap);
 
-            // Title block: title + description stacked
-            // Svelte: title=1.125rem (18px) heading, description=body_size (14px), gap=0.375rem
-            let mut title_block = div().flex().flex_col().gap(px(rem_to_px(0.375)));
+            // Title block: title + description stacked (title-gap between).
+            let mut title_block = div().flex().flex_col().gap(title_gap);
 
             if let Some(ref title) = spec.title {
                 title_block = title_block.child(
@@ -147,8 +163,8 @@ impl IntoElement for DetailSection {
             section = section.child(header);
         }
 
-        // Body: children slot for detail rows
-        // When columns > 1, use flex-wrap layout for grid approximation
+        // Body: children slot for detail rows.
+        // columns > 1 → flex-wrap multi-column approximation of the Svelte grid.
         if let Some(body) = self.body_slot {
             if self.spec.columns > 1 {
                 section =

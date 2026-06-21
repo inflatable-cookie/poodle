@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=5 specimen=ok -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok pass=menu-both-targets-token-resolved -->
 # Parity: Menu
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,30 +22,37 @@ One default-value divergence.
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI menu is well-built: token-resolved sizes, color-mix via opacity, real keyboard nav (Enter/Space/Esc/arrows), hover/active/disabled/checked, destructive tone. Few gaps.
+GPUI menu is well-built: token-resolved sizes, color-mix via opacity, real keyboard nav (Enter/Space/Esc/arrows), hover/active/disabled/checked, destructive tone. Gaps closed.
 
-- [ ] Hardcoded HSLA shadow literals: `hsla(0.0, 0.0, 0.0, 0.10)` and `hsla(0.0, 0.0, 0.0, 0.06)` (`menu.rs:201,207`) — contract overlay shadow is `elevation-overlay`; resolve from an elevation token, not raw HSLA.
-- [ ] Item check indicator renders a leading `check` icon (`menu.rs:347-351`); contract/Svelte put the meta (shortcut) in column 2 and use no leading-check for `action` kind — checkbox/radio semantics are flattened to "is_checked → leading check" regardless of kind. Verify checkbox vs radio role distinction (spec carries kind; render does not branch role visually beyond the check). Minor.
+- [x] FIXED **shadow literal**: the overlay shadow already resolves via `crate::theme_ext::elevation_overlay_shadow()` (`menu.rs:199`); there are no remaining `hsla(...)`/raw color literals in the file (the parity flag's line refs `201,207` were stale). Build-verified.
+- accepted: item check indicator renders a leading `check` icon rather than placing the ✓ in the meta column as Svelte does — a minor visual-placement delta, not a token/anatomy violation. Checkbox/radio kind is carried by the spec; GPUI branches the leading check but does not emit distinct ARIA roles (no GPUI accessibility API).
 - accepted: no ARIA (`role=menu`/`menuitem*`, `aria-expanded`, `aria-checked` not emitted) — GPUI has no accessibility API.
 
 ## Jetstream gap (vs Svelte + contract)
 
-Renders items but with hardcoded geometry and a wrong min-width.
+Rebuilt: token-resolved geometry, correct min-width, contract-only separators.
 
-- [ ] Wrong overlay min-width: `min_w(rem_to_px(10.0))` (`menu.rs:47`) — contract §7 + token is `14rem` (`size.menu.minWidth`). GPUI uses the token; Jetstream hardcodes 10rem. **Fix: resolve from `size.menu.minWidth`.**
-- [ ] Hardcoded font multipliers: `meta_font_size = size_font_rem * 0.85` (`menu.rs:18`), `section_label_font = size_font_rem * 0.75` (`:24`) — contract meta is a fixed `0.6875rem` code-font; these ad-hoc multipliers drift from the token. Resolve meta from `typography.caption.size` / code-family.
-- [ ] Hardcoded px: `item_py = panel_space_y_rem − 0.375` (`:20`), `menu_py = rem_to_px(0.25)` (`:21`), `item_gap = rem_to_px(0.5)` (`:22`), `separator_my = rem_to_px(0.25)` (`:23`) — magic offsets; resolve from spacing tokens (contract item padding `0.375rem 0.5rem`, separator margin `0.25rem`).
-- [ ] No code-family on meta — shortcut label uses default font, not `typography.code-family` (contract §8 Meta).
-- [ ] "Section header" rendering for non-empty separators (`menu.rs:62-78`) is an invention — contract separators are always plain dividers; a labeled separator is not in the model. Either drop or contractualize.
-- accepted: interaction (click/keyboard) lives in the preview event loop; component is render-only.
+- [x] FIXED **overlay min-width**: now `min_w(rem_to_px(14.0))` (contract §7 / `size.menu.minWidth` = 224px). The Jetstream adapter has no `size.menu.minWidth` mapping, so the contract-exact rem is used directly (see token-gap note).
+- [x] FIXED **meta font**: shortcut/meta now uses `rem_to_px(0.6875)` (contract §8 Meta fixed `0.6875rem`, == `typography.caption.size`) — the ad-hoc `* 0.85` multiplier is gone. Resolved as contract-exact rem because the adapter has no `typography.caption.size` mapping (token-gap note).
+- [x] FIXED **item geometry**: item vertical padding = `0.375rem`, horizontal = density `control.x`, separator margin = `0.25rem`, separator height `0.0625rem`, item radius = `radius.control − 0.125rem`, inner gap = `space.inline.sm` (token). No magic offsets remain; the prior `panel_space_y − 0.375` derivation is removed.
+- [x] FIXED **hover/disabled/destructive**: hover = `tint(accent, 0.16)`; destructive hover = `tint(danger, 0.14)`; disabled = `state.opacity.disabled`; destructive foreground = `color.status.danger` (all contract §8).
+- [x] FIXED **section-header invention removed**: non-empty separators no longer render an uppercase label band — separators are always plain `0.0625rem` dividers per contract.
+- accepted: **code-family on meta** not applied — the Jetstream `JsEl` builder has no font-family setter, so the shortcut renders in the default font at the contract meta size/color (JsEl gap).
+- accepted: **shadow** uses `shadow_md()` (approximates `elevation-overlay`; runtime has no token-driven box-shadow setter).
+- accepted: interaction (click/keyboard) lives in the preview event loop; component is render-only. Items now carry `menu-item:<value>` interaction ids for host-loop hit-testing.
+
+### Token gaps (Jetstream adapter)
+
+- `size.menu.minWidth` and `typography.caption.size` have no mapping in `packages/jetstream/adapter/src/theme.rs::match_semantic_space` (both resolve to `0.0`). Menu uses the contract-exact rems (`14rem`, `0.6875rem`) instead. Adding these adapter mappings is a separate, shared-infra change (out of scope for this menu-only pass).
 
 ## Specimen parity
 
 - Svelte covers: With shortcuts (5 items + separator + disabled), With checkboxes (checked/unchecked + separator + action) (`MenuSpecimen.svelte`).
 - GPUI covers: With shortcuts, With checkboxes (toggleable `dark_mode`/`notifications` state) (`menu.rs`). — matches Svelte; arguably richer (interactive toggles).
 - Jetstream covers: Basic, Extended items (`menu.rs:26-31`). — covers shortcuts + checkboxes-equivalent via extended set. `specimen=ok` (both states represented across the three).
+- Jetstream probe tests (`menu.rs` `#[cfg(test)]`): items + shortcut meta + separator + interaction ids; checkbox check-indicator + danger tone; overlay min-width 14rem. All pass.
 
 ## Notes
 
 - `consv=fixed`: the single `sizeRole` default mismatch (contract `control` → Svelte/spec `chrome`) is resolved.
-- GPUI is the strong target here — close to parity, only the shadow literal + ARIA delta remain. Jetstream's 10rem min-width and ad-hoc font multipliers are the substantive fixes.
+- Both targets are now token-resolved and at parity. GPUI's shadow already used `elevation_overlay_shadow()` (the flagged literal was stale). Jetstream was rebuilt: 14rem min-width, contract meta font, contract-only separators, token-resolved geometry, real hover/disabled/destructive. Remaining deltas are accepted JsEl/adapter limitations (font-family, box-shadow, two unmapped tokens) noted above.

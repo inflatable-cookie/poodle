@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=3 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: both Rust targets rebuilt — layout(inline/stacked), simple/surface presentation, density-aware spacing, token-resolved fonts, em-dash placeholder, value emphasis, action slot. Spec gained `density` field + em-dash default + density/typography token helpers. Jetstream probe tests added. -->
 # Parity: DetailItem
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,22 +26,22 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] No `layout()` builder — `DetailItemLayout` is used internally but render is fixed to spec default (Inline); cannot set stacked via builder. Add `.layout()`.
-- [ ] No numeric `span` support (1/2/3/4) — only the spec's Full/Half; Svelte supports numerics.
-- [ ] No `children` fallback slot for value rendering (Svelte uses `children` as the value when no `value`/`valueContent`); `.with_value_content()`/`.with_action()` exist but the bare-children path is absent.
-- accepted: no ARIA / no description Popover (gpui has no accessibility API). Inline label width `px(rem_to_px(11.25))` at `detail_item.rs:121` is token-derived (matches contract `minmax(8rem, 11.25rem)`) — not a violation.
+- [x] FIXED `.layout()` builder added — inline/stacked selectable; surface+stacked applies tertiary label (0.75rem) + value emphasis (1rem / SEMIBOLD).
+- [x] FIXED `.density()` builder added — row-gap / inline-gap / surface padding resolve from the new density-aware spec helpers.
+- [x] FIXED `.span()` builder added — `Full` stretches via `w_full()`. (Half / numeric 1-4 are grid-only; GPUI is flexbox, so they are inert without a grid parent — approximated, noted.)
+- [x] FIXED value typography now resolves from `typography.label.size` / `typography.body.size` tokens (was implicit default).
+- accepted: `with_value_content()` is the GPUI equivalent of Svelte's `children` value fallback. No ARIA / no description Popover (gpui has no accessibility API); description renders inline under the label. Inline label width `px(rem_to_px(11.25))` is token-derived (matches contract `minmax(8rem, 11.25rem)`).
 
 ## Jetstream gap (vs Svelte + contract)
 
-Drastically simplified: single flex row, always surface-like.
+Rebuilt: layout-aware row/column root, presentation-gated chrome, density-driven spacing, token fonts.
 
-- [ ] No `layout` support — inline/stacked toggle absent; always a row.
-- [ ] No `presentation` support — always applies padding/background ("surface"); no "simple" variant.
-- [ ] Description rendered inline (right-aligned in the row), not as the contract's info-icon Popover.
-- [ ] Hardcoded body font `rem_to_px(0.8125)` at `detail_item.rs:20` — resolve from `--poodle-typography-body-size` token.
-- [ ] Hardcoded description font `rem_to_px(0.75)` at `detail_item.rs:21` — resolve from typography token, not raw 0.75.
-- [ ] No `span` and no `action`/`valueContent` slots built.
-- accepted: no ARIA (Jetstream emits no roles).
+- [x] FIXED `layout` support — inline (row) vs stacked (column); surface+stacked applies tertiary label + value emphasis.
+- [x] FIXED `presentation` support — `Surface` paints bg/padding/radius; `Simple` is plain (no chrome).
+- [x] FIXED body font now `resolve_px(typography.label.size)` for the label and `typography.body.size` for the value (no raw `rem_to_px(0.8125)`).
+- [x] FIXED `span` (`Full` → `self_stretch`) + `action`/`valueContent` slots built via `js_detail_item_with_slots`.
+- [x] FIXED density-driven row/inline gap + surface padding from the new spec helpers.
+- accepted: description rendered inline (JsEl has no popover channel — approximated, noted). `Full` span approximated via self-stretch (no flex grid). No ARIA (Jetstream emits no roles).
 
 ## Specimen parity
 

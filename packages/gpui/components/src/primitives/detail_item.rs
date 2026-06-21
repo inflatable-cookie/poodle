@@ -1,7 +1,19 @@
+//! DetailItem — real GPUI component backed by DetailItemSpec.
+//!
+//! Contract: `docs/contracts/components/detail-item.md`
+//! Reference: `packages/svelte/components/src/DetailItem.svelte`
+//!
+//! A label/value pair with inline (default) or stacked layout, simple/surface
+//! presentation, density-driven spacing, an optional trailing action slot, an
+//! optional info description, and an em-dash empty placeholder. All geometry
+//! and colour resolve from tokens / the density-aware spec helpers.
+
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{DetailItemLayout, DetailItemPresentation, DetailItemSpec};
+use poodle_specs::{
+    ControlDensity, DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec,
+};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -11,11 +23,11 @@ pub struct DetailItem {
     label_color: Hsla,
     value_color: Hsla,
     description_color: Hsla,
+    tertiary_color: Hsla,
     background: Hsla,
     radius: Pixels,
-    padding_x: Pixels,
-    padding_y: Pixels,
-    gap: Pixels,
+    label_size: Pixels,
+    value_size: Pixels,
     action: Option<AnyElement>,
     value_content: Option<AnyElement>,
 }
@@ -36,22 +48,22 @@ impl DetailItem {
         let label_color = resolve_color(theme, spec.label_color_token());
         let value_color = resolve_color(theme, spec.value_color_token());
         let description_color = resolve_color(theme, spec.description_color_token());
+        let tertiary_color = resolve_color(theme, spec.stacked_label_color_token());
         let background = resolve_color(theme, spec.background_token());
         let radius = resolve_radius(theme, spec.radius_token());
-        let padding_x = resolve_px(theme, spec.padding_x_token());
-        let padding_y = resolve_px(theme, spec.padding_y_token());
-        let gap = resolve_px(theme, spec.gap_token());
+        let label_size = resolve_px(theme, spec.label_size_token());
+        let value_size = resolve_px(theme, spec.value_size_token());
 
         Self {
             spec,
             label_color,
             value_color,
             description_color,
+            tertiary_color,
             background,
             radius,
-            padding_x,
-            padding_y,
-            gap,
+            label_size,
+            value_size,
             action: None,
             value_content: None,
         }
@@ -82,8 +94,20 @@ impl DetailItem {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn layout(mut self, v: DetailItemLayout) -> Self {
+        self.spec.layout = v;
+        self
+    }
     pub fn presentation(mut self, v: DetailItemPresentation) -> Self {
         self.spec.presentation = v;
+        self
+    }
+    pub fn span(mut self, v: DetailItemSpan) -> Self {
+        self.spec.span = Some(v);
+        self
+    }
+    pub fn density(mut self, v: ControlDensity) -> Self {
+        self.spec.density = v;
         self
     }
 
@@ -103,57 +127,101 @@ impl IntoElement for DetailItem {
 
     fn into_element(self) -> Self::Element {
         let is_stacked = self.spec.layout == DetailItemLayout::Stacked;
+        let is_surface = self.spec.presentation == DetailItemPresentation::Surface;
+        let is_surface_stacked = is_surface && is_stacked;
+
+        // Density-aware spacing resolved from the spec (contract §7/§8).
+        let row_gap = px(rem_to_px(self.spec.row_gap_rem()));
+        let inline_gap = px(rem_to_px(self.spec.inline_gap_rem()));
+        let padding_x = px(rem_to_px(self.spec.surface_padding_x_rem()));
+        let padding_y = px(rem_to_px(self.spec.surface_padding_y_rem()));
+
+        // Surface+stacked: label shifts to tertiary, 0.75rem / lh 1.35.
+        let label_color = if is_surface_stacked {
+            self.tertiary_color
+        } else {
+            self.label_color
+        };
+        let label_size = if is_surface_stacked {
+            px(rem_to_px(0.75))
+        } else {
+            self.label_size
+        };
 
         let mut label_el = div()
             .flex()
             .flex_col()
+            .gap(row_gap)
             .child(
                 div()
-                    .text_color(self.label_color)
+                    .text_size(label_size)
+                    .text_color(label_color)
                     .child(self.spec.label.clone()),
             )
             .when_some(self.spec.description.as_ref(), |el, desc| {
-                el.child(div().text_color(self.description_color).child(desc.clone()))
+                el.child(
+                    div()
+                        .text_size(px(rem_to_px(0.75)))
+                        .text_color(self.description_color)
+                        .child(desc.clone()),
+                )
             });
 
-        // Inline layout: fixed label width; stacked: full width
+        // Inline layout: fixed label column (contract: minmax(8rem, 11.25rem)).
         if !is_stacked {
-            label_el = label_el.w(px(rem_to_px(11.25))).flex_shrink_0(); // Svelte: 11.25rem
+            label_el = label_el.w(px(rem_to_px(11.25))).flex_shrink_0();
         }
+
+        // Surface+stacked: value emphasis — 1rem / weight 600.
+        let value_size = if is_surface_stacked {
+            px(rem_to_px(1.0))
+        } else {
+            self.value_size
+        };
 
         let value_block = if let Some(content) = self.value_content {
             div().flex_1().child(content)
         } else if let Some(ref value) = self.spec.value {
             div()
                 .flex_1()
+                .text_size(value_size)
                 .text_color(self.value_color)
+                .when(is_surface_stacked, |el| el.font_weight(FontWeight::SEMIBOLD))
                 .when(self.spec.truncate_value, |el| {
                     el.overflow_x_hidden().text_ellipsis()
                 })
                 .child(value.clone())
         } else {
-            // Empty state: show empty_text (default "--") in muted color
+            // Empty state: em-dash placeholder in muted colour.
             div()
                 .flex_1()
+                .text_size(value_size)
                 .text_color(self.description_color)
                 .child(self.spec.empty_text.clone())
         };
 
-        // Surface presentation adds background, padding, and radius; Simple is plain
-        let is_surface = self.spec.presentation == DetailItemPresentation::Surface;
+        let mut row = div().flex().gap(if is_stacked { row_gap } else { inline_gap });
 
-        let mut row = div().flex().gap(self.gap);
+        // Span="full" stretches across the parent grid; on a flex parent we
+        // approximate by filling available width. Half is inert without a grid
+        // parent (noted in parity doc).
+        if matches!(self.spec.span, Some(DetailItemSpan::Full)) {
+            row = row.w_full();
+        }
 
         if is_surface {
             row = row
                 .bg(self.background)
                 .rounded(self.radius)
-                .px(self.padding_x)
-                .py(self.padding_y);
+                .px(padding_x)
+                .py(padding_y);
         }
 
         if is_stacked {
             row = row.flex_col();
+            if is_surface_stacked {
+                row = row.items_start();
+            }
         } else {
             row = row.flex_row().items_center();
         }

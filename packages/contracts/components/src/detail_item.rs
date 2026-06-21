@@ -1,3 +1,4 @@
+use crate::types::ControlDensity;
 use poodle_tokens::semantic;
 
 /// Layout direction for the label-value pair.
@@ -43,6 +44,8 @@ pub struct DetailItemSpec {
     pub presentation: DetailItemPresentation,
     /// Optional column span in a parent grid.
     pub span: Option<DetailItemSpan>,
+    /// Density override for layout spacing (gaps, surface padding).
+    pub density: ControlDensity,
 }
 
 impl DetailItemSpec {
@@ -51,12 +54,14 @@ impl DetailItemSpec {
             label: label.into(),
             description: None,
             value: None,
-            empty_text: String::from("--"),
+            // Contract §3: em-dash placeholder (matches Svelte `emptyText = "—"`).
+            empty_text: String::from("—"),
             truncate_value: false,
             aria_label: None,
             layout: DetailItemLayout::default(),
             presentation: DetailItemPresentation::default(),
             span: None,
+            density: ControlDensity::Default,
         }
     }
 
@@ -105,6 +110,58 @@ impl DetailItemSpec {
         self
     }
 
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
+        self
+    }
+
+    // ── Density-driven spacing (contract §7/§8, rem) ──────────────
+    // These are component-specific literals mirroring the Svelte
+    // `[data-density]` custom-property tables. Vertical surface padding is
+    // density-meaningful here (a surface card's internal padding), matching the
+    // Svelte `--surface-padding-y` table.
+
+    /// Root row-gap in rem. Contract §7: compact 0.1875, default 0.25,
+    /// comfortable 0.3125.
+    pub fn row_gap_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.1875,
+            ControlDensity::Default => 0.25,
+            ControlDensity::Comfortable => 0.3125,
+        }
+    }
+
+    /// Inline column-gap / surface gap in rem. Contract §7: compact
+    /// `space.inline.sm` (0.5), default `space.inline.md` (0.75),
+    /// comfortable 0.875.
+    pub fn inline_gap_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.75,
+            ControlDensity::Comfortable => 0.875,
+        }
+    }
+
+    /// Surface horizontal padding in rem. Contract §7: compact 0.75,
+    /// default `space.panel.x` (1.0), comfortable 1.0.
+    pub fn surface_padding_x_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.75,
+            ControlDensity::Default => 1.0,
+            ControlDensity::Comfortable => 1.0,
+        }
+    }
+
+    /// Surface vertical padding in rem. Contract §7: compact 0.5, default
+    /// 0.625, comfortable 0.75.
+    pub fn surface_padding_y_rem(&self) -> f32 {
+        match self.density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 0.625,
+            ControlDensity::Comfortable => 0.75,
+        }
+    }
+
     /// Returns the effective display value: the value if set, otherwise empty_text.
     pub fn effective_value(&self) -> &str {
         self.value.as_deref().unwrap_or(&self.empty_text)
@@ -125,6 +182,19 @@ impl DetailItemSpec {
 
     pub fn description_color_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY
+    }
+
+    /// Surface+stacked label color (contract §8: label shifts to tertiary).
+    pub fn stacked_label_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_TERTIARY
+    }
+
+    pub fn label_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    pub fn value_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
     }
 
     pub fn radius_token(&self) -> &'static str {

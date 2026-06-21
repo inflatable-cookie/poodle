@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: both Rust targets rebuilt — columns() + density() builders, density-aware root/header/title/body gaps + separated top-padding, separator rule = 0.0625rem, title-block gap from spec. Spec gained `density` field + density gap helpers. Jetstream probe tests added. -->
 # Parity: DetailSection
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,17 +26,17 @@
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] No `columns()` builder — `spec.columns > 1` is checked at `detail_section.rs:153` but only the spec default (1) is reachable; no way to set multi-column. Add builder; honor `"auto"` once contract lands.
-- [ ] No `density` builder/awareness — section gaps fixed; Svelte varies gaps by density.
-- [ ] No responsive collapse — Svelte uses container queries (44rem/32rem); GPUI flex-wrap is unconditional. (Acceptable as host-driven, but note the delta.)
-- accepted: no ARIA (gpui has no accessibility API). Title-block gap `px(rem_to_px(0.375))` (`:120`), title size `px(rem_to_px(1.125))` (`:125`), separator `px(1.0)` (`:100`) are token/contract-derived rem conversions — not raw-px violations, though separator `1.0` and the rem literals would ideally come from spec methods.
+- [x] FIXED `.columns()` builder added — `columns > 1` renders the body as a flex-wrap multi-column grid approximation.
+- [x] FIXED `.density()` builder added — root / header / title-block / body gaps + separated top-padding resolve from the new density-aware spec helpers.
+- [x] FIXED separator rule now `px(rem_to_px(0.0625))` (contract §8 0.0625rem), no longer raw `px(1.0)`; title-block gap now `title_gap_rem()`.
+- accepted: no responsive collapse — Svelte uses container queries (44/32/28rem); GPUI flex-wrap is host-driven (Tier-3 implementation freedom, noted). No ARIA (gpui has no accessibility API).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No `columns` rendering — `spec.columns` ignored; content always flex-column. Add multi-column layout when `columns > 1` / `"auto"`.
-- [ ] No `density` support — no density-aware spacing.
-- [ ] Hardcoded title-block gap `rem_to_px(0.375)` at `detail_section.rs:59` and separator `h(1.0)` at `:39` — resolve from spec/tokens (separator height especially should be a token, not raw 1.0).
-- accepted: interaction n/a; Jetstream emits no ARIA.
+- [x] FIXED `columns` rendering — `columns > 1` lays the body out as a wrapping row (flex grid approximation); single-column otherwise.
+- [x] FIXED `density` support — all section gaps + separated top-padding resolve from the new spec density helpers.
+- [x] FIXED title-block gap now `title_gap_rem()` and separator height `rem_to_px(0.0625)` (no raw `0.375` / `1.0`).
+- accepted: container-query responsive collapse is host-driven (Tier-3, noted). Jetstream emits no ARIA.
 
 ## Specimen parity
 
