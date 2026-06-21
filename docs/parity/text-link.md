@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=4 jetstream=4 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap — pass: GPUI now sets rest underline at 55% tone color + strengthens to full on hover/focus-visible; inherit→currentColor / anchor-vs-button reclassed accepted (no currentColor / no DOM anchors in GPUI/JsEl). Jetstream component done; only the preview specimen (+registry) remains open (preview-app task, not build-verified here). -->
 # Parity: TextLink
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,10 +28,10 @@ Svelte matches the contract on every prop, anatomy part, state, and ARIA rule. N
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] `tone="inherit"` resolves to `color.text.primary` instead of `currentColor`/`inherit` — `TextLinkSpec::color_token()` maps `Inherit => "color.text.primary"` (`text_link.rs` spec at `packages/contracts/components/src/text_link.rs:55`), but Svelte/contract §4 use `inherit`/currentColor. Picks up primary text color rather than inheriting the surrounding run.
-- [ ] No underline strengthening on hover/focus — Svelte mixes underline to 55% currentColor at rest and to full currentColor on hover/focus-visible (`TextLink.svelte:77,90-93`); GPUI calls bare `.underline()` (`text_link.rs:51`) with no rest-vs-hover decoration-color distinction.
-- [ ] No anchor semantics / `href`/`target`/`rel`/`ariaLabel` rendering — builder always emits a `div` with a click handler (`text_link.rs:44-64`); spec carries `href`/`target`/`rel`/`aria_label` but none are read. Render-as-anchor (§3) is not represented.
-- [ ] Disabled does not gate to a button-only path or block `onClick` wiring beyond the `!disabled` guard — guard exists (`text_link.rs:58-62`) but there is no anchor-vs-button distinction to gate in the first place (consequence of the div-only render above).
+- [x] DONE: underline strengthening on hover/focus — rest decoration color is the tone color at 0.55 alpha (`color-mix(currentColor 55%, transparent)`); `.hover(...)` and `.focus(...)` raise it to the full tone color (`text_link.rs`). Matches Svelte 77,90-93 (using the resolved tone color as the no-currentColor stand-in).
+- accepted: `tone="inherit"` resolves to `color.text.primary` instead of `currentColor` — GPUI has no `currentColor` affordance; the resolved tone is the faithful approximation (shared `TextLinkSpec::color_token()`, same as the Jetstream target). Closeable only if a currentColor/inherit primitive lands.
+- accepted: no anchor semantics / `href`/`target`/`rel` rendering — GPUI is not HTML; the builder emits a focusable `div` with a click handler. Render-as-anchor (§3) has no GPUI equivalent. `aria_label` stored on spec but not emitted (no ARIA API).
+- accepted: disabled does not gate to a button-only path — consequence of the div-only render (no anchor-vs-button distinction in GPUI); the `!disabled` guard still blocks `onClick`, matching the contract's disabled-activation rule.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored on spec but not emitted.
 - accepted: focus ring uses shared `focus_ring_shadow` helper whose `spread_radius: px(2.0)` and `* 0.28` alpha are literals (`theme_ext.rs:70,75`); shared across all primitives, not a text-link-local violation. `text_link.rs` itself has zero hardcoded px/color/opacity literals (color, opacity, focus-ring color all resolved via `resolve_color`/`resolve_opacity`, `text_link.rs:40-42`).
 
@@ -42,8 +42,8 @@ Jetstream has no TextLink at all — the dominant gap. Confirmed: no `text_link.
 - [x] DONE: created `packages/jetstream/components/src/text_link.rs` with `js_text_link(spec, theme)`, exported via lib.rs.
 - [x] DONE: resolves text color from `TextLinkSpec::color_token()` for all three tones (`inherit`→text-primary, the no-currentColor approximation GPUI also uses).
 - [x] DONE: disabled dims via `state.opacity.disabled`. (Anchor-vs-button + `onClick`/preventDefault are preview-event-loop concerns; the render is the same Label.)
-- [ ] Underline + focus-visible ring — JsEl has no underline or focus-ring affordance (runtime gap, like other Jetstream primitives).
-- [ ] Add `packages/jetstream/preview/src/specimens/text_link.rs` + register in `specimens/mod.rs` and the component registry.
+- accepted: Underline + focus-visible ring — JsEl exposes no underline/decoration or focus-ring affordance (runtime gap, like other Jetstream primitives). Color tone + disabled opacity are the representable surface; covered by probe tests (`accent_tone_is_default_color`, `secondary_tone_resolves_secondary`, `disabled_dims_opacity`).
+- [ ] Add `packages/jetstream/preview/src/specimens/text_link.rs` + register in `specimens/mod.rs` and the component registry. Deferred: preview-app task touching the shared specimen registry; not build-verified in this pass (shared target lock).
 
 ## Specimen parity
 

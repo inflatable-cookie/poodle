@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=3 jetstream=5 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap — pass: both targets ported Svelte pad-x scale + per-size min-width floor + custom-accent color-mix; Jetstream content-gap/badge-tracking reclassed accepted (label-only render, no icon prop in PillSpec/Svelte slot; JsEl no tracking). -->
 # Parity: Pill
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -29,20 +29,20 @@ Svelte has props/behavior the contract does not document, and the contract's pad
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded hover/elevation-free pad-x: md `px(rem_to_px(0.5))` at `pill.rs:113` (and every size row 106–115) uses contract's `0.5rem`, but Svelte renders `0.625rem` md pad-x — port the +0.125rem-wider Svelte pad-x scale (all 10 rows).
-- [ ] No `accent` (custom color) support — `PillSpec` builder has no `accent`/`with_accent_color` path in this file; custom-accent fill/border/text (Svelte lines 122–126) never rendered. Specimen passes accent via `with_accent_color` but the `into_element` color match (`pill.rs:132–188`) ignores it.
-- [ ] No `min-width` floor — Svelte sets per-size `min-width` (e.g. md `2.875rem`); `pill.rs:202–218` sets `min_h`/`px`/`py` but never `min_w`. Pills shrink narrower than Svelte. Add `min_w` from the per-size base.
+- [x] DONE: ported the +0.125rem-wider Svelte pad-x scale (md `0.625rem`) across all 10 metric rows, and corrected the stale inherit `em` font/pad-x table to the contract values (md font `0.7071em`). The `(min_w, min_h, pad_x, pad_y, font)` tuple now matches contract §8.
+- [x] DONE: `accent` custom-color path — when `accent_color` is a parseable hex, `into_element` overrides fill/border/text via `color_mix` (fill `accent 18%` over `rgba(148,163,184,0.08)`; border `accent 30%` over `…0.12)`; text `accent 88%` over white), matching Svelte 122–126. Slate base is a Svelte literal with no token (noted below).
+- [x] DONE: per-size `min-width` floor applied via `.min_w(min_w)` from the per-size base (md `2.875rem`).
 - accepted: no ARIA (gpui has no accessibility API) — pill is non-interactive text-like metadata per contract §6.
 - accepted: `font="mono"` code-family + letter-spacing not applied — GPUI text surface delta (contract §12 Known Delta covers Jetstream; same limit here).
 - accepted: extra spec surface (`is_selected`/`is_removable`/`on_remove`, `pill.rs:71–90,244–263`) is non-contract chip behavior carried by `PillSpec`; render-gated, not a Svelte regression. Flag for contract reconciliation (see Notes).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded pad-x scale matches contract `0.5rem` md not Svelte `0.625rem` — `pill_metrics` rows at `pill.rs:11–24` need the +0.125rem-wider Svelte pad-x for all 10 rows.
-- [ ] No `accent` custom-color path — `pill_colors` (`pill.rs:26–72`) only branches on tone/appearance; `accent`-tinted fill/border/text (Svelte 122–126) absent.
-- [ ] No `min-width` floor — `js_pill` (`pill.rs:87–97`) sets `min_h` but no `min_w`; Svelte per-size min-width unmet.
-- [ ] No content `gap` between label and any inline child — `js_pill` renders a single `label()` (`pill.rs:87`); Svelte gap token (lines 77,138,147) unused. Acceptable only while pill stays label-only; note if icon children land.
-- [ ] No badge `letter-spacing` (`0.04em`, Svelte line 222) — Jetstream text API lacks tracking; same class of delta as `font="mono"`.
+- [x] DONE: ported the +0.125rem-wider Svelte pad-x scale (md `0.625rem`) and corrected inherit `em` font/pad-x to contract values across all 10 `pill_metrics` rows; tuple is now `(min_w, min_h, pad_x, pad_y, font)`. Probe test `md_pill_uses_svelte_padding_x` asserts `padding.left == 0.625rem`.
+- [x] DONE: `accent` custom-color path — `pill_colors` now returns the `color-mix` accent fill/border/text (Color::mix, slate-literal base) when `accent_color` parses. Probe tests `accent_overrides_tone_fill`/`accent_overrides_tone_text` cover it.
+- [x] DONE: per-size `min-width` floor via `.min_w(rem_to_px(min_w))`. Probe test `md_pill_applies_min_width_floor` asserts `min_size.width == 2.875rem`.
+- accepted: no content `gap` between label and an inline child — `js_pill` renders a single `label()`; `PillSpec` models no icon prop (Svelte composes the optional icon via a slot, not a prop), so the label-only render is faithful. Reclass to row-with-gap if/when an icon prop lands on `PillSpec`.
+- accepted: no badge `letter-spacing` (`0.04em`, Svelte line 222) — Jetstream text API lacks tracking; same class of delta as `font="mono"` (contract §12 Known Delta).
 - accepted: `font="mono"` code-family + letter-spacing — contract §12 Known Delta (Jetstream `JsEl` text surface exposes no font-family/letter-spacing).
 - accepted: interaction n/a — pill is non-interactive per contract §5.
 

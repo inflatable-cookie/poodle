@@ -268,9 +268,11 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         // Size tokens
         t if t.contains("size.control.height") => Some(typed::semantic::SIZE_CONTROL_HEIGHT.0),
         t if t.contains("size.control.minWidth") => Some(typed::semantic::SIZE_CONTROL_MIN_WIDTH.0),
+        t if t.contains("size.icon.xs") => Some(typed::semantic::SIZE_ICON_XS.0),
         t if t.contains("size.icon.sm") => Some(typed::semantic::SIZE_ICON_SM.0),
         t if t.contains("size.icon.md") => Some(typed::semantic::SIZE_ICON_MD.0),
         t if t.contains("size.icon.lg") => Some(typed::semantic::SIZE_ICON_LG.0),
+        t if t.contains("size.icon.xl") => Some(typed::semantic::SIZE_ICON_XL.0),
         t if t.contains("size.panel.header") => Some(typed::semantic::SIZE_PANEL_HEADER.0),
         t if t.contains("size.list.grid.minItemWidth") => {
             Some(typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.0)

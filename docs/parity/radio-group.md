@@ -1,8 +1,14 @@
-<!-- parity consv=ok gpui=4 jetstream=4 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
 <!-- pass 30: selected_color now honored — custom hex parsed via theme_ext::hex_to_rgb255
      → indicator ring + dot use it (else accent.base); ICON_DEFAULT hardcode replaced with
-     resolve_px(size.icon.md) base. Probe-tested (custom #ff0000 ≠ accent). Remaining
-     jetstream: focus ring (preview/runtime) + name/density/described-by wiring. -->
+     resolve_px(size.icon.md) base. Probe-tested (custom #ff0000 ≠ accent). -->
+<!-- pass 41: density now drives the group gap on BOTH targets — Svelte cascade where a
+     compact/comfortable override wins over the orientation gap (compact→space-stack-sm,
+     comfortable→space-stack-lg, default→orientation gap). Jetstream: disabled options now
+     use default cursor (not pointer) + enabled rows .focusable() for the preview focus
+     loop. Probe-tested (labels, selected dot, vertical/horizontal/density gap, per-size
+     indicator, per-option + group disabled opacity). Remaining each target: focus ring
+     (preview/runtime); name/described-by are a11y-tree only (no Rust a11y surface). -->
 # Parity: RadioGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -32,25 +38,27 @@ the documented ARIA surface. No divergence.
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No `name` builder/prop wiring — `RadioGroupSpec.name` is never read; no shared form-name grouping (Svelte `name ?? generatedName`, `RadioGroup.svelte:86`). `radio_group.rs:44-94`.
-- [ ] No `density` visual effect — `density()` builder stores the value (`radio_group.rs:81-84`) but the group gap only branches on orientation (`:160-163`); Svelte adjusts vertical gap for `compact`/`comfortable` (`RadioGroup.svelte:186-192`).
-- [ ] No `description_id` → no `aria-describedby` channel (stored at `radio_group.rs:69-72`, never emitted). Distinct from the blanket ARIA delta.
-- [ ] Indicator border has no transition/motion-token treatment — contract §8 specifies `border-color`/`box-shadow` transition via motion tokens; GPUI renders static border (`radio_group.rs:174-184`). Accept only if confirmed a runtime limit.
+- [x] `density` now drives the group gap — `group_gap` folds in a compact/comfortable override (compact→space-stack-sm, comfortable→space-stack-lg) that wins over the orientation gap, matching the Svelte cascade (`RadioGroup.svelte:107/186-192`). Both orientations now use `group_gap`.
+- accepted: no `name` wiring — `name` is a native-`<input>` form-grouping attribute (Svelte `name ?? generatedName`); GPUI has no native inputs and no a11y tree, so it has no visual or accessible effect here (rolls into the ARIA limit below).
+- accepted: no `description_id` → no `aria-describedby` channel — non-visual; GPUI emits no ARIA (rolls into the ARIA limit below).
+- accepted: indicator border has no transition/motion-token treatment — contract §12 known delta marks "transition timing is platform-owned"; GPUI has no CSS transition primitive. Static border, runtime limit.
 - accepted: no ARIA (gpui has no accessibility API) — `role="radiogroup"`, `aria-checked`, `aria-orientation` not emitted.
 - accepted: `px(999.0)` pill radius (`radio_group.rs:177,187`) and `rem_to_px(0.25/0.125/0.4/0.45/0.55/0.6)` size offsets (`:117-130`) are contract-§8 literals via the sanctioned rem helper, not arbitrary hardcodes.
 - accepted: roving-focus, arrow-key nav, space-to-select, and click selection are implemented (`radio_group.rs:202-244`) — keyboard parity present.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] `ICON_DEFAULT: f32 = 1.0` is hardcoded in `indicator_size_rem`/`dot_size_rem` (`radio_group.rs:25,44`) instead of resolving `size.icon.md` from the theme (GPUI does: `resolve_px(theme, "size.icon.md")`). Token-resolution gap — md/xs/sm/lg/xl all derive from this literal.
-- [ ] No `selected_color` support — `spec.selected_color` is never read; selected indicator/dot always use `color.accent.base` (`radio_group.rs:67,81,97`). Svelte maps `selectedColor` to the local selected color (`RadioGroup.svelte:57,164-170`); GPUI honors it (`radio_group.rs:138-143`).
-- [ ] No focus ring — contract §8 focus state (`accent.focusRing`, `outline-offset 0.125rem`) absent; no focus styling on the option row.
-- [ ] No `name`/`density`/`description_id` wiring — none of these spec fields are read.
-- [ ] No indicator border motion/transition treatment (contract §8 motion tokens) — static render (`radio_group.rs:85-90`).
-- [ ] Group-level disabled applies opacity but does NOT block selection/interaction in the component; per-option `is_disabled` only dims, no `not-allowed` cursor or nav-skip (`radio_group.rs:113-124`). Svelte sets `disabled` on the input and `cursor: not-allowed` (`RadioGroup.svelte:89,125-128`).
+- [x] `ICON_DEFAULT` literal removed (pass 30) — `indicator_size_px`/`dot_size_px` now derive from `resolve_px(theme, "size.icon.md")`, matching GPUI.
+- [x] `selected_color` honored (pass 30) — custom hex parsed via `hex_to_rgb255` drives the selected indicator ring + dot, else `color.accent.base`.
+- [x] `density` now drives the group gap — same Svelte cascade as GPUI (compact→space-stack-sm, comfortable→space-stack-lg, default→orientation gap).
+- [x] Per-option / group disabled now also revert the cursor to default (no `not-allowed` cursor in JsEl — Svelte uses it; noted runtime limit) and enabled rows are `.focusable()` so the preview loop can drive the focus ring.
+- accepted: no focus ring outline — JsEl has no CSS `outline` primitive; focus state (`accent.focusRing`, offset 0.125rem) is driven by the preview/runtime, not the pure-render component.
+- accepted: no `name`/`description_id` wiring — non-visual form/a11y attributes; Jetstream has no native inputs or accessibility surface.
+- accepted: no indicator border motion/transition treatment (contract §8 motion tokens) — JsEl has no CSS transition; contract §12 marks timing platform-owned.
+- accepted: group-level disabled blocking selection + nav-skip lives in the preview event loop (component is pure render); the component dims correctly (group + per-option opacity).
 - accepted: no ARIA channel (`role`/`aria-checked`/`aria-orientation`) — Jetstream has no accessibility surface.
 - accepted: selection/click + keyboard interaction lives in the preview event loop, not `js_radio_group` (component is pure render).
-- accepted: `rem_to_px(0.0625)` border width (`radio_group.rs:60`) is the contract §8 literal via the rem helper.
+- accepted: `rem_to_px(0.0625)` border width (`radio_group.rs:66`) is the contract §8 literal via the rem helper.
 
 ## Specimen parity
 

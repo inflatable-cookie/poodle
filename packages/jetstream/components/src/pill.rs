@@ -8,18 +8,22 @@ use poodle_specs::{InlineTypographyMode, PillAppearance, PillSize, PillSpec, Pil
 use crate::presentation::rem_to_px;
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
 
-fn pill_metrics(size: PillSize, typography: InlineTypographyMode) -> (f32, f32, f32, f32) {
+/// Per-size metrics in rem: `(min_w, min_h, pad_x, pad_y, font)`. Matches contract §8 /
+/// Svelte `Pill.svelte`: pad-x uses the Svelte-rendered scale (md `0.625rem`, +0.125rem
+/// wider than the old contract `0.5rem`); `min_w` is the per-size floor; inherit font
+/// uses the corrected `em` table.
+fn pill_metrics(size: PillSize, typography: InlineTypographyMode) -> (f32, f32, f32, f32, f32) {
     match (typography, size) {
-        (InlineTypographyMode::Inherit, PillSize::Xs) => (1.5556, 0.5556, 0.1111, 0.6429),
-        (InlineTypographyMode::Inherit, PillSize::Sm) => (1.6, 0.6, 0.2, 0.7143),
-        (InlineTypographyMode::Inherit, PillSize::Md) => (1.8182, 0.7273, 0.2727, 0.7857),
-        (InlineTypographyMode::Inherit, PillSize::Lg) => (1.8333, 0.8333, 0.3333, 0.8571),
-        (InlineTypographyMode::Inherit, PillSize::Xl) => (1.8462, 0.9231, 0.3846, 0.9286),
-        (InlineTypographyMode::Default, PillSize::Xs) => (0.875, 0.3125, 0.0625, 0.5625),
-        (InlineTypographyMode::Default, PillSize::Sm) => (1.0, 0.375, 0.125, 0.625),
-        (InlineTypographyMode::Default, PillSize::Md) => (1.25, 0.5, 0.1875, 0.6875),
-        (InlineTypographyMode::Default, PillSize::Lg) => (1.375, 0.625, 0.25, 0.75),
-        (InlineTypographyMode::Default, PillSize::Xl) => (1.5, 0.75, 0.3125, 0.8125),
+        (InlineTypographyMode::Inherit, PillSize::Xs) => (2.4444, 1.5556, 0.7778, 0.1111, 0.5786),
+        (InlineTypographyMode::Inherit, PillSize::Sm) => (2.8571, 1.6, 0.8, 0.2, 0.6429),
+        (InlineTypographyMode::Inherit, PillSize::Md) => (3.2727, 1.8182, 0.9091, 0.2727, 0.7071),
+        (InlineTypographyMode::Inherit, PillSize::Lg) => (3.5833, 1.8333, 1.0, 0.3333, 0.7714),
+        (InlineTypographyMode::Inherit, PillSize::Xl) => (3.9231, 1.8462, 1.1538, 0.3846, 0.8357),
+        (InlineTypographyMode::Default, PillSize::Xs) => (2.125, 0.875, 0.4375, 0.0625, 0.5625),
+        (InlineTypographyMode::Default, PillSize::Sm) => (2.5, 1.0, 0.5, 0.125, 0.625),
+        (InlineTypographyMode::Default, PillSize::Md) => (2.875, 1.25, 0.625, 0.1875, 0.6875),
+        (InlineTypographyMode::Default, PillSize::Lg) => (3.25, 1.375, 0.75, 0.25, 0.75),
+        (InlineTypographyMode::Default, PillSize::Xl) => (3.625, 1.5, 0.9375, 0.3125, 0.8125),
     }
 }
 
@@ -68,14 +72,47 @@ fn pill_colors(spec: &PillSpec, theme: &JetstreamThemeProvider) -> (Color, Color
         _ => resolve_color(theme, spec.text_color_token()).into(),
     };
 
+    // Custom accent (contract §8 "Custom accent"): a parseable hex `accent_color`
+    // overrides the tone fill/border/text via color-mix.
+    //   fill   = color-mix(accent 18%, rgba(148,163,184,0.08))
+    //   border = color-mix(accent 30%, rgba(148,163,184,0.12))
+    //   text   = color-mix(accent 88%, white)
+    // The slate base rgba(148,163,184,…) is a Svelte literal with no semantic token;
+    // replicated literally (token gap noted in the parity doc).
+    if let Some(rgb) = spec
+        .accent_color
+        .as_deref()
+        .and_then(crate::theme_ext::hex_to_rgb255)
+    {
+        let accent = Color::new(
+            rgb.r as f32 / 255.0,
+            rgb.g as f32 / 255.0,
+            rgb.b as f32 / 255.0,
+            1.0,
+        );
+        let slate = Color::new(148.0 / 255.0, 163.0 / 255.0, 184.0 / 255.0, 1.0);
+        let slate_08 = slate.with_alpha(0.08);
+        let slate_12 = slate.with_alpha(0.12);
+        let white = Color::WHITE;
+        return (
+            accent.mix(slate_08, 0.18),
+            accent.mix(slate_12, 0.30),
+            accent.mix(white, 0.88),
+        );
+    }
+
     (fill, border, text)
 }
 
 pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let (min_h, pad_x, pad_y, font_size) = pill_metrics(spec.size, spec.typography);
+    let (min_w, min_h, pad_x, pad_y, font_size) = pill_metrics(spec.size, spec.typography);
     let (fill, border, text_color) = pill_colors(spec, theme);
     // Jetstream's current text API does not expose font-family or letter-spacing,
-    // so `font="mono"` remains a documented runtime delta for now.
+    // so `font="mono"` and the badge `letter-spacing: 0.04em` remain documented
+    // runtime deltas for now. The pill renders as a single Label, so the
+    // `--poodle-pill-gap` content gap has no inline child to separate yet; PillSpec
+    // models no icon prop (Svelte composes the optional icon via a slot), so the
+    // label-only render is faithful until an icon prop lands.
     let label = if spec.appearance == PillAppearance::Badge {
         spec.label.to_uppercase()
     } else {
@@ -85,6 +122,7 @@ pub fn js_pill(spec: &PillSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let radius = resolve_radius(theme, "radius.pill");
 
     let mut el = ui_element::label(&label)
+        .min_w(rem_to_px(min_w))
         .min_h(rem_to_px(min_h))
         .bg(fill)
         .text_color(text_color)
@@ -155,6 +193,58 @@ mod tests {
             &theme,
         );
         let expected: Color = resolve_color(&theme, "color.text.secondary").into();
+        assert_eq!(el.style.text_color, Some(expected));
+    }
+
+    #[test]
+    fn md_pill_uses_svelte_padding_x() {
+        // Contract §8 / Svelte md pad-x = 0.625rem (not the old contract 0.5rem).
+        let el = js_pill(&PillSpec::new().with_size(PillSize::Md), &theme());
+        let expected = taffy::LengthPercentage::length(rem_to_px(0.625));
+        assert_eq!(el.layout.padding.left, expected);
+        assert_eq!(el.layout.padding.right, expected);
+    }
+
+    #[test]
+    fn md_pill_applies_min_width_floor() {
+        // Contract §8: md min-width base = 2.875rem.
+        let el = js_pill(&PillSpec::new().with_size(PillSize::Md), &theme());
+        assert_eq!(
+            el.layout.min_size.width,
+            taffy::Dimension::length(rem_to_px(2.875))
+        );
+    }
+
+    #[test]
+    fn accent_overrides_tone_fill() {
+        // Contract §8 "Custom accent": fill = color-mix(accent 18%, rgba(148,163,184,0.08)).
+        let th = theme();
+        let el = js_pill(&PillSpec::new().with_accent_color("#14b8a6"), &th);
+        let rgb = crate::theme_ext::hex_to_rgb255("#14b8a6").unwrap();
+        let accent = Color::new(
+            rgb.r as f32 / 255.0,
+            rgb.g as f32 / 255.0,
+            rgb.b as f32 / 255.0,
+            1.0,
+        );
+        let slate_08 = Color::new(148.0 / 255.0, 163.0 / 255.0, 184.0 / 255.0, 0.08);
+        let expected = accent.mix(slate_08, 0.18);
+        assert_eq!(el.style.background, Some(expected));
+    }
+
+    #[test]
+    fn accent_overrides_tone_text() {
+        // Contract §8 "Custom accent": text = color-mix(accent 88%, white).
+        let th = theme();
+        let el = js_pill(&PillSpec::new().with_accent_color("#a855f7"), &th);
+        let rgb = crate::theme_ext::hex_to_rgb255("#a855f7").unwrap();
+        let accent = Color::new(
+            rgb.r as f32 / 255.0,
+            rgb.g as f32 / 255.0,
+            rgb.b as f32 / 255.0,
+            1.0,
+        );
+        let expected = accent.mix(Color::WHITE, 0.88);
         assert_eq!(el.style.text_color, Some(expected));
     }
 }

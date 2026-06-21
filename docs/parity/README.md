@@ -127,7 +127,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | card | fixed | 2 | 2 | gap |
 | card-radio-group | fixed | 2 | 2 | gap |
 | card-toggle-group | fixed | 2 | 2 | gap |
-| checkbox | ok | 4 | 5 | gap |
+| checkbox | ok | 1 | 1 | gap |
 | code | fixed | 2 | 2 | gap |
 | code-input | fixed | 0 | 0 | gap |
 | collapse-toggle | fixed | 0 | 1 | gap |
@@ -199,10 +199,10 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | pagination-summary | fixed | 2 | 2 | gap |
 | password-requirements | ok | 0 | 0 | gap |
 | picker-shell | gap | 4 | 4 | gap |
-| pill | fixed | 3 | 5 | gap |
+| pill | fixed | 0 | 0 | gap |
 | popover | fixed | 0 | 0 | gap |
 | progress | fixed | 3 | 4 | gap |
-| radio-group | ok | 4 | 4 | gap |
+| radio-group | ok | 1 | 1 | gap |
 | range-slider | gap | 3 | 3 | gap |
 | rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 5 | gap |
@@ -232,7 +232,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tabs | fixed | 4 | 4 | gap |
 | text | ok | 4 | 2 | gap |
 | text-input | fixed | 2 | 2 | gap |
-| text-link | ok | 4 | 4 | gap |
+| text-link | ok | 0 | 1 | gap |
 | time-ago | fixed | 4 | 4 | gap |
 | time-input | fixed | 0 | 0 | ok |
 | time-zone-select | fixed | 0 | 0 | gap |

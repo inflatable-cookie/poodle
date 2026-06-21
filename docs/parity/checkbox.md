@@ -1,4 +1,13 @@
-<!-- parity consv=ok gpui=4 jetstream=5 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- pass 41: indicator now = icon-{size} + 0.125rem on BOTH targets (was raw icon
+     token → ~2px small). GPUI mark rendered at exact px (with_px_size) not a discrete
+     IconSize step. Jetstream: per-size radius ladder (0.1875→0.4375rem), border-width
+     from token, selected_color honored (fill + border), gap ladder compact 0.375rem /
+     default space-inline-sm / comfortable space-inline-md. GPUI gap compact fixed to
+     0.375rem (was space-inline-xs). Adapter: added size.icon.xs/xl arms to
+     match_semantic_space (were missing → xs/xl resolved to 0). Probe-tested (states,
+     glyph, label, accent fill, custom color, per-size, disabled). Remaining each
+     target: focus ring (preview/runtime). -->
 # Parity: Checkbox
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -23,11 +32,12 @@ Props, anatomy, states, and ARIA all align. Indicator/mark md values match: cont
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded radius literals `px(rem_to_px(0.1875/0.25/0.3125/0.375/0.4375))` at `checkbox.rs:123-127` — resolve from a radius token, not raw rem floats.
-- [ ] Indicator uses raw icon-token size (`size.icon.{xs..xl}`) for width/height at `checkbox.rs:123-127`; Svelte adds `+0.125rem` to each (indicator = icon + 0.125rem). GPUI indicators are ~2px too small per size. **Fix: add the `+0.125rem` indicator offset.**
-- [ ] `selectedColor` only applies to fill (`checkbox.rs:137-142`); contract §4 + Svelte (lines 147-150) also tint the **border** to the selected color. GPUI sets `border_color(accent)` only because accent == fill — but a custom `selectedColor` border path is implicit; verify border tracks `selected_color`, not just fill.
-- [ ] Focus ring is an approximated border+shadow (`checkbox.rs:211-222`); contract §8 specifies an `outline` with `outline-offset: 0.125rem`. Document as approximation or align offset.
+- [x] Radius literals are the Svelte per-size ladder `0.1875/0.25/0.3125/0.375/0.4375rem` — contract-exact rem via the sanctioned `rem_to_px` helper (no semantic radius token matches them). Extracted to `indicator_radius_rem()`. Accepted, not a hardcode.
+- [x] Indicator now adds `+0.125rem` to the per-size icon token (`indicator_size = resolve_px(icon_token(size)) + 0.125rem`), matching Svelte. Mark glyph rendered at the exact px size (`with_px_size`, offset −0.125/−0.25rem per size) instead of a discrete `IconSize` step.
+- [x] `selected_color` tints both fill **and** border: `accent` reads `spec.selected_color` (`parse_hex_color`) and is applied via `.bg(accent).border_color(accent)` when checked. Border tracks the custom color, not just the default accent.
+- accepted: focus ring is an approximated border+shadow (contract §8 specifies `outline` + `outline-offset 0.125rem`); GPUI has no CSS outline primitive — documented approximation, focus driven at runtime.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_checked="mixed"`, role, accessible name not emitted (contract §10 expects native a11y tree; runtime limit here).
+- note: there is no checkbox error/invalid state in the contract §4 (states are unchecked/checked/mixed/custom-color/focus/disabled/readOnly) — nothing to implement.
 
 ## Jetstream gap (vs Svelte + contract)
 

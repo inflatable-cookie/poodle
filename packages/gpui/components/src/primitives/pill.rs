@@ -97,22 +97,21 @@ impl IntoElement for Pill {
         let theme = &self.theme;
         let spec = &self.spec;
 
-        // ── Size-dependent values (Svelte reference: Pill.svelte per-size overrides) ─
-        // min-h: xs→0.875 sm→1.0 md→1.25 lg→1.375 xl→1.5 rem
-        // pad-x: xs→0.3125 sm→0.375 md→0.5 lg→0.625 xl→0.75 rem
-        // pad-y: xs→0.0625 sm→0.125 md→0.1875 lg→0.25 xl→0.3125 rem
-        // font:  xs→0.5625 sm→0.625 md→0.6875 lg→0.75 xl→0.8125 rem
-        let (min_h, pad_x, pad_y, font_size) = match (spec.typography, spec.size) {
-            (InlineTypographyMode::Inherit, PillSize::Xs) => (px(rem_to_px(1.5556)), px(rem_to_px(0.5556)), px(rem_to_px(0.1111)), px(rem_to_px(0.6429))),
-            (InlineTypographyMode::Inherit, PillSize::Sm) => (px(rem_to_px(1.6)), px(rem_to_px(0.6)), px(rem_to_px(0.2)), px(rem_to_px(0.7143))),
-            (InlineTypographyMode::Inherit, PillSize::Md) => (px(rem_to_px(1.8182)), px(rem_to_px(0.7273)), px(rem_to_px(0.2727)), px(rem_to_px(0.7857))),
-            (InlineTypographyMode::Inherit, PillSize::Lg) => (px(rem_to_px(1.8333)), px(rem_to_px(0.8333)), px(rem_to_px(0.3333)), px(rem_to_px(0.8571))),
-            (InlineTypographyMode::Inherit, PillSize::Xl) => (px(rem_to_px(1.8462)), px(rem_to_px(0.9231)), px(rem_to_px(0.3846)), px(rem_to_px(0.9286))),
-            (InlineTypographyMode::Default, PillSize::Xs) => (px(rem_to_px(0.875)),  px(rem_to_px(0.3125)), px(rem_to_px(0.0625)),  px(rem_to_px(0.5625))),
-            (InlineTypographyMode::Default, PillSize::Sm) => (px(rem_to_px(1.0)),    px(rem_to_px(0.375)),  px(rem_to_px(0.125)),   px(rem_to_px(0.625))),
-            (InlineTypographyMode::Default, PillSize::Md) => (px(rem_to_px(1.25)),   px(rem_to_px(0.5)),    px(rem_to_px(0.1875)),  px(rem_to_px(0.6875))),
-            (InlineTypographyMode::Default, PillSize::Lg) => (px(rem_to_px(1.375)),  px(rem_to_px(0.625)),  px(rem_to_px(0.25)),    px(rem_to_px(0.75))),
-            (InlineTypographyMode::Default, PillSize::Xl) => (px(rem_to_px(1.5)),    px(rem_to_px(0.75)),   px(rem_to_px(0.3125)),  px(rem_to_px(0.8125))),
+        // ── Size-dependent values (contract §8 / Svelte Pill.svelte per-size overrides) ─
+        // Tuple: (min_w, min_h, pad_x, pad_y, font) in rem. pad-x matches the
+        // Svelte-rendered scale (md 0.625rem, +0.125rem wider than the old contract
+        // 0.5rem); min-w is the per-size floor; inherit font uses the corrected em table.
+        let (min_w, min_h, pad_x, pad_y, font_size) = match (spec.typography, spec.size) {
+            (InlineTypographyMode::Inherit, PillSize::Xs) => (px(rem_to_px(2.4444)), px(rem_to_px(1.5556)), px(rem_to_px(0.7778)), px(rem_to_px(0.1111)), px(rem_to_px(0.5786))),
+            (InlineTypographyMode::Inherit, PillSize::Sm) => (px(rem_to_px(2.8571)), px(rem_to_px(1.6)),    px(rem_to_px(0.8)),    px(rem_to_px(0.2)),    px(rem_to_px(0.6429))),
+            (InlineTypographyMode::Inherit, PillSize::Md) => (px(rem_to_px(3.2727)), px(rem_to_px(1.8182)), px(rem_to_px(0.9091)), px(rem_to_px(0.2727)), px(rem_to_px(0.7071))),
+            (InlineTypographyMode::Inherit, PillSize::Lg) => (px(rem_to_px(3.5833)), px(rem_to_px(1.8333)), px(rem_to_px(1.0)),    px(rem_to_px(0.3333)), px(rem_to_px(0.7714))),
+            (InlineTypographyMode::Inherit, PillSize::Xl) => (px(rem_to_px(3.9231)), px(rem_to_px(1.8462)), px(rem_to_px(1.1538)), px(rem_to_px(0.3846)), px(rem_to_px(0.8357))),
+            (InlineTypographyMode::Default, PillSize::Xs) => (px(rem_to_px(2.125)),  px(rem_to_px(0.875)),  px(rem_to_px(0.4375)), px(rem_to_px(0.0625)), px(rem_to_px(0.5625))),
+            (InlineTypographyMode::Default, PillSize::Sm) => (px(rem_to_px(2.5)),    px(rem_to_px(1.0)),    px(rem_to_px(0.5)),    px(rem_to_px(0.125)),  px(rem_to_px(0.625))),
+            (InlineTypographyMode::Default, PillSize::Md) => (px(rem_to_px(2.875)),  px(rem_to_px(1.25)),   px(rem_to_px(0.625)),  px(rem_to_px(0.1875)), px(rem_to_px(0.6875))),
+            (InlineTypographyMode::Default, PillSize::Lg) => (px(rem_to_px(3.25)),   px(rem_to_px(1.375)),  px(rem_to_px(0.75)),   px(rem_to_px(0.25)),   px(rem_to_px(0.75))),
+            (InlineTypographyMode::Default, PillSize::Xl) => (px(rem_to_px(3.625)),  px(rem_to_px(1.5)),    px(rem_to_px(0.9375)), px(rem_to_px(0.3125)), px(rem_to_px(0.8125))),
         };
 
         // ── Colors ───────────────────────────────────────────────
@@ -187,6 +186,38 @@ impl IntoElement for Pill {
             _ => text_color,
         };
 
+        // Custom accent (contract §8 "Custom accent"): when `accent_color` is a
+        // parseable hex, it overrides the tone fill/border/text via color-mix.
+        //   fill   = color-mix(accent 18%, rgba(148,163,184,0.08))
+        //   border = color-mix(accent 30%, rgba(148,163,184,0.12))
+        //   text   = color-mix(accent 88%, white)
+        // The slate base rgba(148,163,184,…) is a Svelte literal with no semantic
+        // token; replicated literally (token gap noted in parity doc).
+        let (bg, border, text_color) = match spec
+            .accent_color
+            .as_deref()
+            .and_then(crate::theme_ext::hex_to_rgb255)
+        {
+            Some(rgb) => {
+                let accent = crate::theme_ext::rgb255_to_hsla(rgb, 1.0);
+                let slate = Hsla::from(gpui::Rgba {
+                    r: 148.0 / 255.0,
+                    g: 163.0 / 255.0,
+                    b: 184.0 / 255.0,
+                    a: 1.0,
+                });
+                let slate_08 = Hsla { a: 0.08, ..slate };
+                let slate_12 = Hsla { a: 0.12, ..slate };
+                let white = gpui::white();
+                (
+                    crate::theme_ext::color_mix(accent, slate_08, 0.18),
+                    crate::theme_ext::color_mix(accent, slate_12, 0.30),
+                    crate::theme_ext::color_mix(accent, white, 0.88),
+                )
+            }
+            None => (bg, border, text_color),
+        };
+
         let radius = resolve_radius(theme, "radius.pill");
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
         let inline_gap = resolve_px(theme, "space.inline.sm");
@@ -203,6 +234,7 @@ impl IntoElement for Pill {
             .id(SharedString::from("poodle-pill"))
             .focusable()
             .min_h(min_h)
+            .min_w(min_w)
             .px(pad_x)
             .py(pad_y)
             .rounded(radius)

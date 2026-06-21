@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ChoiceOption, ControlSize, Orientation, RadioGroupSpec};
+use poodle_specs::{ChoiceOption, ControlDensity, ControlSize, Orientation, RadioGroupSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
@@ -130,8 +130,17 @@ impl IntoElement for RadioGroup {
             ControlSize::Xl => px(rem_to_px(0.6)),
         };
 
-        // Contract: gap per orientation
-        let group_gap = resolve_px(theme, spec.option_gap_token());
+        // Group gap. Svelte cascade: orientation sets the base gap (vertical
+        // space-stack-sm, horizontal space-inline-md); a density override of
+        // compact/comfortable then wins over both (`RadioGroup.svelte` 107/186-192):
+        //   compact     → space-stack-sm
+        //   comfortable → space-stack-lg
+        //   default     → orientation gap (no [data-density="default"] rule)
+        let group_gap = match spec.density {
+            ControlDensity::Compact => resolve_px(theme, "space.stack.sm"),
+            ControlDensity::Comfortable => resolve_px(theme, "space.stack.lg"),
+            ControlDensity::Default => resolve_px(theme, spec.option_gap_token()),
+        };
         let option_gap = resolve_px(theme, "space.inline.sm");
 
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
@@ -154,11 +163,10 @@ impl IntoElement for RadioGroup {
         let on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App)>> =
             self.on_change.map(|h| std::rc::Rc::from(h));
 
-        // Contract: grid layout, orientation drives flow
-        // Svelte: horizontal gap = space.inline.md (larger than vertical space.stack.sm)
-        let horizontal_gap = resolve_px(theme, "space.inline.md");
+        // Contract: grid layout, orientation drives flow. `group_gap` already
+        // folds in the density override above (orientation gap when density=default).
         let mut group = match spec.orientation {
-            Orientation::Horizontal => div().flex().flex_row().items_center().gap(horizontal_gap),
+            Orientation::Horizontal => div().flex().flex_row().items_center().gap(group_gap),
             Orientation::Vertical => div().flex().flex_col().gap(group_gap),
         };
 

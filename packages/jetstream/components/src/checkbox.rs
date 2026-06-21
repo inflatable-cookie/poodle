@@ -7,49 +7,67 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{CheckState, CheckboxSpec, ControlSize};
+use poodle_specs::{CheckState, CheckboxSpec, ControlDensity, ControlSize};
 
-use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
-use crate::theme_ext::{resolve_color, resolve_opacity};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::theme_ext::{hex_to_rgb255, resolve_color, resolve_opacity, resolve_px, rgb255_to_vec4};
 
-/// Indicator size in rem by size variant.
-///
-/// Contract size table (section 8):
-/// - xs: icon-default − 0.125rem  = 1.0 − 0.125 = 0.875rem
-/// - sm: icon-default             = 1.0rem
-/// - md: 1.125rem (explicit)
-/// - lg: icon-default + 0.375rem  = 1.375rem
-/// - xl: icon-default + 0.625rem  = 1.625rem
-fn indicator_size_rem(size: ControlSize) -> f32 {
-    // icon-default = size.icon.md = 1.0rem (16px)
-    const ICON_DEFAULT: f32 = 1.0;
+/// Per-size icon token (Svelte resolves `--poodle-size-icon-{size}`).
+fn icon_token(size: ControlSize) -> &'static str {
     match size {
-        ControlSize::Xs => ICON_DEFAULT - 0.125,
-        ControlSize::Sm => ICON_DEFAULT,
-        ControlSize::Md => 1.125,
-        ControlSize::Lg => ICON_DEFAULT + 0.375,
-        ControlSize::Xl => ICON_DEFAULT + 0.625,
+        ControlSize::Xs => "size.icon.xs",
+        ControlSize::Sm => "size.icon.sm",
+        ControlSize::Md => "size.icon.md",
+        ControlSize::Lg => "size.icon.lg",
+        ControlSize::Xl => "size.icon.xl",
     }
 }
 
-/// Mark (glyph) size in rem by size variant.
+/// Indicator size in px = per-size icon token + 0.125rem.
 ///
-/// Contract size table (section 8):
-/// - xs: icon-default − 0.375rem  = 0.625rem
-/// - sm: icon-default − 0.25rem   = 0.75rem
-/// - md: 0.875rem (explicit)
-/// - lg: icon-default             = 1.0rem
-/// - xl: icon-default + 0.125rem  = 1.125rem
-fn mark_size_rem(size: ControlSize) -> f32 {
-    const ICON_DEFAULT: f32 = 1.0;
+/// Svelte adds `+0.125rem` to the per-size icon token at every size
+/// (`Checkbox.svelte` lines 139/191/202/214/225), e.g. md = icon-md + 0.125rem
+/// = 1.125rem. `icon_px` is the resolved `size.icon.{size}` token.
+fn indicator_size_px(icon_px: f32) -> f32 {
+    icon_px + rem_to_px(0.125)
+}
+
+/// Mark (glyph) size in px = per-size icon token + offset.
+///
+/// Svelte: xs/sm/md mark = `icon-{size} − 0.125rem`; lg/xl mark =
+/// `icon-{size} − 0.25rem` (`Checkbox.svelte` lines 162/197/208/219/230).
+fn mark_size_px(size: ControlSize, icon_px: f32) -> f32 {
+    let offset = match size {
+        ControlSize::Xs | ControlSize::Sm | ControlSize::Md => -0.125,
+        ControlSize::Lg | ControlSize::Xl => -0.25,
+    };
+    icon_px + rem_to_px(offset)
+}
+
+/// Indicator border-radius in rem per size.
+///
+/// Svelte ladder (`Checkbox.svelte` lines 193/204/216/227): xs `0.1875`, sm
+/// `0.25`, md `0.3125`, lg `0.375`, xl `0.4375rem`. Contract-exact rem literals
+/// (no semantic radius token matches them) applied via `rem_to_px`.
+fn indicator_radius_rem(size: ControlSize) -> f32 {
     match size {
-        ControlSize::Xs => ICON_DEFAULT - 0.375,
-        ControlSize::Sm => ICON_DEFAULT - 0.25,
-        ControlSize::Md => 0.875,
-        ControlSize::Lg => ICON_DEFAULT,
-        ControlSize::Xl => ICON_DEFAULT + 0.125,
+        ControlSize::Xs => 0.1875,
+        ControlSize::Sm => 0.25,
+        ControlSize::Md => 0.3125,
+        ControlSize::Lg => 0.375,
+        ControlSize::Xl => 0.4375,
+    }
+}
+
+/// Root gap in px by density.
+///
+/// Svelte ladder: compact `0.375rem` (literal), default `space-inline-sm`,
+/// comfortable `space-inline-md` (`Checkbox.svelte` lines 113/176/179).
+fn root_gap_px(density: ControlDensity, theme: &JetstreamThemeProvider) -> f32 {
+    match density {
+        ControlDensity::Compact => rem_to_px(0.375),
+        ControlDensity::Default => resolve_px(theme, "space.inline.sm"),
+        ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
     }
 }
 
@@ -59,27 +77,34 @@ fn mark_size_rem(size: ControlSize) -> f32 {
 /// ```text
 /// [Root .checkbox] — <label>
 ///   ├── [Control]   — <input type="checkbox"> (visually hidden — not rendered in Jetstream)
-///   ├── [Indicator] — <span>, size-dependent square, border-radius 0.3125rem
+///   ├── [Indicator] — <span>, size-dependent square, per-size border-radius
 ///   │   └── [Mark]  — <span>, size-dependent square (conditional: checked/mixed)
 ///   └── [Label]     — <span> (optional)
 /// ```
 ///
 /// Contract dimensions (md defaults):
-/// - Indicator: 1.125rem (18px) square
-/// - Indicator border: 0.0625rem (1px) solid
-/// - Indicator border-radius: 0.3125rem (5px)
-/// - Mark: 0.875rem (14px) square
-/// - Gap (root): var(--poodle-space-inline-sm) = 8px
+/// - Indicator: 1.125rem (18px) square (icon-md + 0.125rem)
+/// - Indicator border: 0.0625rem (1px) solid (border-width.default token)
+/// - Indicator border-radius: 0.3125rem (5px) at md; scales 0.1875→0.4375rem per size
+/// - Mark: 0.875rem (14px) square at md (icon-md − 0.125rem)
+/// - Gap (root): space-inline-sm at default density (compact 0.375rem, comfortable space-inline-md)
 /// - Label typography: label-family, label-size (13px), label-weight (500), label-lineHeight (16px)
 pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     // ── Token resolution ──
-    let indicator_fill = resolve_color(theme, spec.indicator_fill_token());
+    // Selected fill/border: custom `spec.selected_color` (a hex string) wins when
+    // present, else the spec's accent token. Mirrors GPUI + Svelte `selectedColor`.
+    let selected_fill = spec
+        .selected_color
+        .as_deref()
+        .and_then(hex_to_rgb255)
+        .map(|rgb| rgb255_to_vec4(rgb, rgb.a))
+        .unwrap_or_else(|| resolve_color(theme, spec.indicator_fill_token()));
     let border_default = resolve_color(theme, "color.border.default");
     let text_primary = resolve_color(theme, "color.text.primary");
     let text_inverse = resolve_color(theme, "color.text.inverse");
-    let gap = rem_to_px(control_space_x_rem(spec.density));
+    let gap = root_gap_px(spec.density, theme);
     let label_size = rem_to_px(size_font_rem(effective_size));
 
     let state = spec.current_state();
@@ -88,19 +113,19 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Contract: mark icon per state (Svelte uses Icon name="check"/"minus")
     let mark_color = if is_checked { text_inverse } else { text_primary };
 
-    // Contract: indicator border = accent-base when checked, border-default when unchecked
-    let indicator_border = if is_checked { indicator_fill } else { border_default };
-    // Contract: indicator bg = accent-base when checked, background-surface when unchecked
+    // Contract: indicator border = selected color when checked, border-default when unchecked
+    let indicator_border = if is_checked { selected_fill } else { border_default };
+    // Contract: indicator bg = selected color when checked, background-surface when unchecked
     let surface = resolve_color(theme, "color.background.surface");
-    let indicator_bg = if is_checked { indicator_fill } else { surface };
+    let indicator_bg = if is_checked { selected_fill } else { surface };
 
-    // ── Indicator — size from contract size table ──
-    let indicator_size = rem_to_px(indicator_size_rem(effective_size));
-    // Contract: border-radius 0.3125rem (fixed, does not scale with size)
-    let indicator_radius = rem_to_px(0.3125);
-    // Contract: border 0.0625rem solid
-    let border_width = rem_to_px(0.0625);
-    let mark_size = rem_to_px(mark_size_rem(effective_size));
+    // ── Indicator — icon token + 0.125rem; radius scales per size (Svelte) ──
+    let icon_px = resolve_px(theme, icon_token(effective_size));
+    let indicator_size = indicator_size_px(icon_px);
+    let indicator_radius = rem_to_px(indicator_radius_rem(effective_size));
+    // Contract: border 0.0625rem solid → border-width.default token (= 0.0625rem)
+    let border_width = resolve_px(theme, "border.width.default");
+    let mark_size = mark_size_px(effective_size, icon_px);
 
     let mut indicator = ui_element::div()
         .w(indicator_size)
@@ -162,50 +187,114 @@ pub fn js_checkbox(spec: &CheckboxSpec, theme: &JetstreamThemeProvider) -> JsEl 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::render_probe::{probe, ProbeColor};
+    use poodle_specs::ControlSize;
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
+    fn vec4_to_probe(c: glam::Vec4) -> ProbeColor {
+        ProbeColor { r: c.x, g: c.y, b: c.z, a: c.w }
+    }
+
     #[test]
-    fn checked_checkbox_has_children() {
-        let el = js_checkbox(
-            &CheckboxSpec::new().with_checked(true),
-            &theme(),
-        );
-        assert!(!el.children.is_empty());
+    fn checked_checkbox_renders_check_glyph() {
+        let el = js_checkbox(&CheckboxSpec::new().with_checked(true), &theme());
+        let tree = probe(&el, 200.0, 60.0);
+        assert!(tree.has_text("check"), "checked → check icon: {}", tree.to_json());
+    }
+
+    #[test]
+    fn mixed_checkbox_renders_minus_glyph() {
+        let el = js_checkbox(&CheckboxSpec::new().with_mixed(true), &theme());
+        let tree = probe(&el, 200.0, 60.0);
+        assert!(tree.has_text("minus"), "mixed → minus icon: {}", tree.to_json());
+    }
+
+    #[test]
+    fn unchecked_checkbox_renders_no_glyph() {
+        let el = js_checkbox(&CheckboxSpec::new(), &theme());
+        let tree = probe(&el, 200.0, 60.0);
+        assert!(!tree.has_text("check") && !tree.has_text("minus"));
+    }
+
+    #[test]
+    fn label_is_rendered() {
+        let el = js_checkbox(&CheckboxSpec::new().with_label("Accept terms"), &theme());
+        let tree = probe(&el, 200.0, 60.0);
+        assert!(tree.has_text("Accept terms"), "{}", tree.to_json());
     }
 
     #[test]
     fn indicator_is_18px_at_md() {
+        // md indicator = icon-md (1.0rem) + 0.125rem = 1.125rem = 18px.
         let el = js_checkbox(&CheckboxSpec::new(), &theme());
-        // First child is the indicator
         let indicator = &el.children[0];
         assert_eq!(indicator.layout.size.width, taffy::Dimension::length(18.0));
         assert_eq!(indicator.layout.size.height, taffy::Dimension::length(18.0));
     }
 
     #[test]
-    fn indicator_scales_by_size() {
+    fn indicator_includes_plus_offset_per_size() {
         let theme = theme();
-        // xs: 0.875rem = 14px
-        let el_xs = js_checkbox(&CheckboxSpec::new().with_size(poodle_specs::ControlSize::Xs), &theme);
-        let ind_xs = &el_xs.children[0];
-        assert_eq!(ind_xs.layout.size.width, taffy::Dimension::length(14.0));
+        // Svelte: indicator = icon-{size} + 0.125rem.
+        // xs: 0.625 + 0.125 = 0.75rem = 12px
+        let ind_xs = &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Xs), &theme).children[0];
+        assert_eq!(ind_xs.layout.size.width, taffy::Dimension::length(12.0));
+        // sm: 0.75 + 0.125 = 0.875rem = 14px
+        let ind_sm = &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Sm), &theme).children[0];
+        assert_eq!(ind_sm.layout.size.width, taffy::Dimension::length(14.0));
+        // xl: 1.5 + 0.125 = 1.625rem = 26px
+        let ind_xl = &js_checkbox(&CheckboxSpec::new().with_size(ControlSize::Xl), &theme).children[0];
+        assert_eq!(ind_xl.layout.size.width, taffy::Dimension::length(26.0));
+    }
 
-        // sm: 1.0rem = 16px
-        let el_sm = js_checkbox(&CheckboxSpec::new().with_size(poodle_specs::ControlSize::Sm), &theme);
-        let ind_sm = &el_sm.children[0];
-        assert_eq!(ind_sm.layout.size.width, taffy::Dimension::length(16.0));
+    #[test]
+    fn checked_indicator_uses_accent_fill() {
+        let th = theme();
+        let el = js_checkbox(&CheckboxSpec::new().with_checked(true), &th);
+        let tree = probe(&el, 200.0, 60.0);
+        let accent = vec4_to_probe(resolve_color(&th, "color.accent.base"));
+        assert!(tree.has_background(accent, 0.01), "checked fill = accent: {}", tree.to_json());
+    }
+
+    #[test]
+    fn custom_selected_color_drives_indicator_fill_and_border() {
+        let th = theme();
+        let mut spec = CheckboxSpec::new().with_checked(true);
+        spec.selected_color = Some("#ff0000".to_string());
+        let el = js_checkbox(&spec, &th);
+        let tree = probe(&el, 200.0, 60.0);
+
+        let custom = rgb255_to_vec4(hex_to_rgb255("#ff0000").unwrap(), 1.0);
+        let custom_probe = vec4_to_probe(custom);
+        let accent = vec4_to_probe(resolve_color(&th, "color.accent.base"));
+        assert!(!custom_probe.approx(accent, 0.01), "precondition: custom != accent");
+        // Fill (background) uses the custom color.
+        assert!(tree.has_background(custom_probe, 0.01), "custom fill: {}", tree.to_json());
+        // Border tracks selected_color too (not surfaced via probe → check JsEl tree).
+        let indicator = &el.children[0];
+        let bc = indicator.style.border_color.expect("indicator border");
+        assert!(
+            (bc.r - custom.x).abs() < 0.01 && (bc.g - custom.y).abs() < 0.01 && (bc.b - custom.z).abs() < 0.01,
+            "checked indicator border should use selected_color"
+        );
+    }
+
+    #[test]
+    fn disabled_checkbox_reduces_opacity() {
+        let th = theme();
+        let el = js_checkbox(&CheckboxSpec::new().with_disabled(true), &th);
+        let expected = resolve_opacity(&th, "state.opacity.disabled");
+        assert!(el.style.disabled);
+        assert!((el.style.opacity - expected).abs() < 0.001, "opacity {} != {}", el.style.opacity, expected);
     }
 
     #[test]
     fn read_only_checkbox_is_not_disabled() {
-        let el = js_checkbox(
-            &CheckboxSpec::new().with_read_only(true),
-            &theme(),
-        );
-        // read_only should not set disabled(true) or reduce opacity
+        let el = js_checkbox(&CheckboxSpec::new().with_read_only(true), &theme());
+        // read_only must not set disabled(true) or reduce opacity.
         assert!(!el.style.disabled);
     }
 }

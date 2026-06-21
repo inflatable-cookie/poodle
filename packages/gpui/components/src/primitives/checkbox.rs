@@ -2,11 +2,48 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CheckState, CheckboxSpec, ControlDensity, ControlSize, IconSize, IconSpec};
+use poodle_specs::{CheckState, CheckboxSpec, ControlDensity, ControlSize, IconSpec};
 
 use super::icon::Icon;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px};
+
+/// Per-size icon token (Svelte resolves `--poodle-size-icon-{size}`).
+fn icon_token(size: ControlSize) -> &'static str {
+    match size {
+        ControlSize::Xs => "size.icon.xs",
+        ControlSize::Sm => "size.icon.sm",
+        ControlSize::Md => "size.icon.md",
+        ControlSize::Lg => "size.icon.lg",
+        ControlSize::Xl => "size.icon.xl",
+    }
+}
+
+/// Indicator border-radius in rem per size.
+///
+/// Svelte ladder (`Checkbox.svelte` lines 193/204/216/227): xs `0.1875`, sm
+/// `0.25`, md `0.3125`, lg `0.375`, xl `0.4375rem`. These are contract-exact rem
+/// literals (no semantic radius token matches them) applied via `rem_to_px`.
+fn indicator_radius_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.1875,
+        ControlSize::Sm => 0.25,
+        ControlSize::Md => 0.3125,
+        ControlSize::Lg => 0.375,
+        ControlSize::Xl => 0.4375,
+    }
+}
+
+/// Mark glyph offset from the per-size icon token, in rem.
+///
+/// Svelte: xs/sm/md mark = `icon-{size} − 0.125rem`; lg/xl mark =
+/// `icon-{size} − 0.25rem` (`Checkbox.svelte` lines 197/208/162/219/230).
+fn mark_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs | ControlSize::Sm | ControlSize::Md => -0.125,
+        ControlSize::Lg | ControlSize::Xl => -0.25,
+    }
+}
 
 /// A real GPUI checkbox component backed by `CheckboxSpec`.
 pub struct Checkbox {
@@ -110,27 +147,23 @@ impl IntoElement for Checkbox {
         // ── Resolve effective size from size + size_role ────────
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        // Svelte: compact=0.25rem, default=space-inline-sm, comfortable=space-inline-md
+        // Svelte gap ladder: compact=0.375rem (literal), default=space-inline-sm,
+        // comfortable=space-inline-md (`Checkbox.svelte` lines 113/176/179).
         let inline_gap = match spec.density {
-            ControlDensity::Compact    => resolve_px(theme, "space.inline.xs"),
+            ControlDensity::Compact    => px(rem_to_px(0.375)),
             ControlDensity::Default    => resolve_px(theme, "space.inline.sm"),
             ControlDensity::Comfortable => resolve_px(theme, "space.inline.md"),
         };
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
-        // Per-size indicator dimensions from the contract size table (icon tokens)
-        // Radius: 0.0625rem × {3,4,5,6,7} — Svelte: 0.1875/0.25/0.3125/0.375/0.4375rem
-        let (indicator_size, indicator_radius) = match effective_size {
-            ControlSize::Xs => (resolve_px(theme, "size.icon.xs"), px(rem_to_px(0.1875))),
-            ControlSize::Sm => (resolve_px(theme, "size.icon.sm"), px(rem_to_px(0.25))),
-            ControlSize::Md => (resolve_px(theme, "size.icon.md"), px(rem_to_px(0.3125))),
-            ControlSize::Lg => (resolve_px(theme, "size.icon.lg"), px(rem_to_px(0.375))),
-            ControlSize::Xl => (resolve_px(theme, "size.icon.xl"), px(rem_to_px(0.4375))),
-        };
-        // Mark icon: one step smaller than the indicator (IconSize only has Sm/Md/Lg)
-        let mark_icon_size = match effective_size {
-            ControlSize::Xs | ControlSize::Sm | ControlSize::Md | ControlSize::Lg => IconSize::Sm,
-            ControlSize::Xl => IconSize::Md,
-        };
+        // Indicator size = per-size icon token + 0.125rem (Svelte adds this offset
+        // at every size, e.g. md = icon-md + 0.125rem = 1.125rem). Resolving the
+        // raw icon token without the offset undersizes the box ~2px per size.
+        let indicator_size = resolve_px(theme, icon_token(effective_size)) + px(rem_to_px(0.125));
+        let indicator_radius = px(rem_to_px(indicator_radius_rem(effective_size)));
+        // Mark glyph = per-size icon token + offset (xs/sm/md −0.125, lg/xl −0.25).
+        // Rendered at the exact px size, not a discrete IconSize step.
+        let mark_size_px =
+            f32::from(resolve_px(theme, icon_token(effective_size))) + rem_to_px(mark_offset_rem(effective_size));
         let focus_ring_color = resolve_color(theme, "color.accent.focusRing");
 
         let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
@@ -175,20 +208,16 @@ impl IntoElement for Checkbox {
                 match state {
                     CheckState::Checked => {
                         ind = ind.child(
-                            Icon::from_spec(
-                                IconSpec::new("check").with_size(mark_icon_size),
-                                theme,
-                            )
-                            .with_color(text_inverse),
+                            Icon::from_spec(IconSpec::new("check"), theme)
+                                .with_px_size(mark_size_px)
+                                .with_color(text_inverse),
                         );
                     }
                     CheckState::Mixed => {
                         ind = ind.child(
-                            Icon::from_spec(
-                                IconSpec::new("minus").with_size(mark_icon_size),
-                                theme,
-                            )
-                            .with_color(text_inverse),
+                            Icon::from_spec(IconSpec::new("minus"), theme)
+                                .with_px_size(mark_size_px)
+                                .with_color(text_inverse),
                         );
                     }
                     _ => {}

@@ -7,7 +7,7 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{ControlSize, Orientation, RadioGroupSpec};
+use poodle_specs::{ControlDensity, ControlSize, Orientation, RadioGroupSpec};
 
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
 use crate::theme_ext::{hex_to_rgb255, resolve_color, resolve_opacity, resolve_px, rgb255_to_vec4};
@@ -65,8 +65,17 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
     // Contract: border 0.0625rem (1px) solid
     let border_width = rem_to_px(0.0625);
 
-    // Contract: group gap driven by spec.option_gap_token() (space-stack-sm vertical, space-inline-md horizontal)
-    let group_gap = resolve_px(theme, spec.option_gap_token());
+    // Group gap. Svelte cascade: orientation sets the base gap (vertical
+    // space-stack-sm, horizontal space-inline-md); a density override of
+    // compact/comfortable then wins over both (`RadioGroup.svelte` 107/186-192):
+    //   compact     → space-stack-sm
+    //   comfortable → space-stack-lg
+    //   default     → orientation gap (no [data-density="default"] rule)
+    let group_gap = match spec.density {
+        ControlDensity::Compact => resolve_px(theme, "space.stack.sm"),
+        ControlDensity::Comfortable => resolve_px(theme, "space.stack.lg"),
+        ControlDensity::Default => resolve_px(theme, spec.option_gap_token()),
+    };
     // Contract: option item gap = space-inline-sm (between indicator and label)
     let item_gap = resolve_px(theme, "space.inline.sm");
 
@@ -114,11 +123,20 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
             );
         }
 
+        let option_disabled = spec.is_disabled || option.is_disabled;
+
         let mut row = ui_element::div()
             .flex_row()
             .items_center()
-            .gap(item_gap)
-            .cursor_pointer();
+            .gap(item_gap);
+        // Contract: enabled options are pointer + focusable (focus ring is driven
+        // by the preview loop); disabled options revert to the default cursor —
+        // JsEl has no `not-allowed` cursor (Svelte uses it; noted runtime limit).
+        if option_disabled {
+            row = row.cursor_default();
+        } else {
+            row = row.cursor_pointer().focusable();
+        }
         row = row.child(indicator);
         row = row.child(
             ui_element::label(&option.label)
@@ -126,7 +144,9 @@ pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> 
                 .text_size(font_size)
         );
 
-        // Contract: per-option disabled applies opacity to that option row only
+        // Contract: per-option disabled applies opacity to that option row only.
+        // Group-level disabled also dims each row (so the opacity reads correctly
+        // even though the group-level pass below dims the container too).
         if option.is_disabled {
             row = row.opacity(disabled_opacity);
         }
@@ -224,5 +244,120 @@ mod tests {
             "selected dot should fall back to accent-base when selected_color is None: {}",
             tree.to_json()
         );
+    }
+
+    fn three_opt_spec() -> RadioGroupSpec {
+        RadioGroupSpec::new(vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro"),
+            ChoiceOption::new("ent", "Enterprise"),
+        ])
+        .with_value("pro")
+    }
+
+    #[test]
+    fn renders_all_option_labels() {
+        let el = js_radio_group(&three_opt_spec(), &theme());
+        let tree = probe(&el, 400.0, 160.0);
+        assert!(tree.has_text("Free") && tree.has_text("Pro") && tree.has_text("Enterprise"));
+        // 3 option rows under the group root.
+        assert_eq!(el.children.len(), 3);
+    }
+
+    #[test]
+    fn selected_option_has_dot_unselected_does_not() {
+        let el = js_radio_group(&three_opt_spec(), &theme());
+        // "free" (idx 0) unselected → indicator has no dot child.
+        let free_indicator = &el.children[0].children[0];
+        assert!(free_indicator.children.is_empty(), "unselected indicator has no dot");
+        // "pro" (idx 1) selected → indicator has a dot child.
+        let pro_indicator = &el.children[1].children[0];
+        assert_eq!(pro_indicator.children.len(), 1, "selected indicator renders dot");
+    }
+
+    fn gap_px(el: &JsEl) -> taffy::LengthPercentage {
+        el.layout.gap.width
+    }
+
+    #[test]
+    fn vertical_default_gap_is_space_stack_sm() {
+        let th = theme();
+        let el = js_radio_group(&three_opt_spec(), &th);
+        let expected = taffy::LengthPercentage::length(resolve_px(&th, "space.stack.sm"));
+        assert_eq!(gap_px(&el), expected, "vertical default gap = space-stack-sm");
+    }
+
+    #[test]
+    fn horizontal_default_gap_is_space_inline_md() {
+        let th = theme();
+        let el = js_radio_group(
+            &three_opt_spec().with_orientation(Orientation::Horizontal),
+            &th,
+        );
+        let expected = taffy::LengthPercentage::length(resolve_px(&th, "space.inline.md"));
+        assert_eq!(gap_px(&el), expected, "horizontal default gap = space-inline-md");
+    }
+
+    #[test]
+    fn comfortable_density_overrides_gap_to_space_stack_lg() {
+        let th = theme();
+        let el = js_radio_group(
+            &three_opt_spec().with_density(ControlDensity::Comfortable),
+            &th,
+        );
+        let expected = taffy::LengthPercentage::length(resolve_px(&th, "space.stack.lg"));
+        assert_eq!(gap_px(&el), expected, "comfortable density gap = space-stack-lg");
+        // And it must differ from the default vertical gap, proving density took effect.
+        assert_ne!(
+            resolve_px(&th, "space.stack.lg"),
+            resolve_px(&th, "space.stack.sm")
+        );
+    }
+
+    #[test]
+    fn indicator_scales_per_size() {
+        let th = theme();
+        // Radio indicator follows contract §8 (icon-md ± offset), matching Svelte's
+        // resolved per-size values.
+        // md = 1.125rem = 18px (icon-md + 0.125rem).
+        let md = &js_radio_group(&three_opt_spec(), &th).children[0].children[0];
+        assert_eq!(md.layout.size.width, taffy::Dimension::length(18.0));
+        // xs = icon-md − 0.125rem = 0.875rem = 14px (== Svelte icon-xs + 0.25rem).
+        let xs = &js_radio_group(&three_opt_spec().with_size(ControlSize::Xs), &th)
+            .children[0]
+            .children[0];
+        assert_eq!(xs.layout.size.width, taffy::Dimension::length(14.0));
+        // xl = icon-md + 0.625rem = 1.625rem = 26px (== Svelte icon-xl + 0.125rem).
+        let xl = &js_radio_group(&three_opt_spec().with_size(ControlSize::Xl), &th)
+            .children[0]
+            .children[0];
+        assert_eq!(xl.layout.size.width, taffy::Dimension::length(26.0));
+    }
+
+    #[test]
+    fn per_option_disabled_dims_only_that_row() {
+        let th = theme();
+        let spec = RadioGroupSpec::new(vec![
+            ChoiceOption::new("a", "Enabled"),
+            ChoiceOption::new("b", "Disabled").with_disabled(true),
+        ])
+        .with_value("a");
+        let el = js_radio_group(&spec, &th);
+        let dim = resolve_opacity(&th, "state.opacity.disabled");
+        assert_eq!(el.children[0].style.opacity, 1.0, "enabled row full opacity");
+        assert!(
+            (el.children[1].style.opacity - dim).abs() < 0.001,
+            "disabled row dimmed to state-opacity-disabled"
+        );
+    }
+
+    #[test]
+    fn group_disabled_dims_container() {
+        let th = theme();
+        let mut spec = three_opt_spec();
+        spec.is_disabled = true;
+        let el = js_radio_group(&spec, &th);
+        let dim = resolve_opacity(&th, "state.opacity.disabled");
+        assert!((el.style.opacity - dim).abs() < 0.001, "group-disabled dims container");
     }
 }
