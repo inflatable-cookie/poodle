@@ -10,11 +10,8 @@ use poodle_specs::ControlSize;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity};
 
-use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
-};
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
+use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::theme_ext::{color_mix, resolve_color, resolve_opacity, resolve_px, resolve_radius, tint};
 
 /// Build an accordion element from an AccordionSpec.
 ///
@@ -39,24 +36,27 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 /// - box-shadow: inset 0 0.0625rem 0 color-mix(text-inverse 8%, transparent)
 pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let item_gap = resolve_px(theme, spec.item_gap_token());
+    // Contract §8 Root gap between items = space.stack.md.
+    let root_gap = resolve_px(theme, spec.root_gap_token());
     let expanded = spec.expanded_values();
 
-    // Contract: root is display grid with gap
+    // Contract §8 Root: display grid with gap.
     let mut root = ui_element::div()
         .flex_col()
-        .gap(item_gap) // from item_gap_token
+        .gap(root_gap)
+        .min_w_0()
         .self_stretch();
 
     for item in &spec.items {
         let is_expanded = expanded.iter().any(|v| *v == item.value);
-        root = root.child(render_item(item, is_expanded, effective_size, spec.density, theme));
+        root = root.child(render_item(spec, item, is_expanded, effective_size, spec.density, theme));
     }
 
     root
 }
 
 fn render_item(
+    spec: &AccordionSpec,
     item: &AccordionItemSpec,
     is_expanded: bool,
     effective_size: ControlSize,
@@ -65,78 +65,107 @@ fn render_item(
 ) -> JsEl {
     // ── Token resolution ──
     let border_subtle = resolve_color(theme, "color.border.subtle");
-    let surface = resolve_color(theme, "color.background.surface");
-    let elevated = resolve_color(theme, "color.background.elevated");
+    let elevated = resolve_color(theme, spec.item_bg_elevated_token());
+    let panel = resolve_color(theme, spec.item_bg_panel_token());
     let text_primary = resolve_color(theme, "color.text.primary");
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let radius = resolve_radius(theme, "radius.surface");
 
-    // Contract: item border = color-mix(border-subtle 36%, transparent)
-    let item_border = tint(border_subtle, 0.36);
-    // Contract: item background = color-mix(surface 50%, elevated)
-    // Approximate as blend of surface and elevated
-    let item_bg = glam::Vec4::new(
-        surface.x * 0.5 + elevated.x * 0.5,
-        surface.y * 0.5 + elevated.y * 0.5,
-        surface.z * 0.5 + elevated.z * 0.5,
-        1.0,
-    );
+    // Contract §8 Item border = color-mix(border-subtle 36%, transparent).
+    let item_border = tint(border_subtle, spec.border_subtle_alpha());
+    // Contract §8 Item background = color-mix(elevated 40%, panel).
+    let item_bg = color_mix(elevated, panel, spec.item_bg_elevated_ratio());
 
-    // Contract: chevron indicator, rotates 180deg when open
-    let chevron = if is_expanded { "▾" } else { "▸" };
+    // Contract §8 Item padding: block (Y) 0.625rem, inline (X) density-driven.
+    let pad_x = rem_to_px(spec.inline_padding_rem(density));
+    let pad_y = rem_to_px(spec.block_padding_rem());
+    // Contract §8 Item internal gap (trigger ↔ panel).
+    let item_gap = rem_to_px(spec.item_internal_gap_rem());
+    // Contract §8 Summary gap (title ↔ description) = space.inline.sm.
+    let summary_gap = resolve_px(theme, spec.summary_gap_token());
+    // Contract §8 Trigger grid gap (summary ↔ indicator) = space.inline.md.
+    let trigger_gap = resolve_px(theme, spec.trigger_grid_gap_token());
 
-    // Density-driven padding for trigger and panel
-    let pad_x = rem_to_px(panel_space_x_rem(density));
-    let pad_y = rem_to_px(panel_space_y_rem(density));
-    let title_font_size = rem_to_px(size_font_rem(effective_size));
-    let chevron_font_size = title_font_size * 0.85; // slightly smaller than title
+    // Contract §8 Title font-size scales per-size (xs 0.8125 … xl 1.125rem).
+    let title_font_size = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.8125,
+        ControlSize::Sm => 0.875,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.0625,
+        ControlSize::Xl => 1.125,
+    });
+    // Contract §8 Description font-size scales per-size (xs 0.6875 … xl 0.9375rem).
+    let description_font_size = rem_to_px(size_font_rem(effective_size));
+    // Contract §8 Indicator font-size = 0.75rem.
+    let indicator_size = rem_to_px(0.75);
 
-    // Contract: trigger is full-width button with grid layout 1fr auto
-    let trigger = ui_element::div()
-        .flex_row()
-        .self_stretch()
-        .px(pad_x)
-        .py(pad_y)
-        .items_center()
-        .justify_between()
-        .focusable()
+    // ── Summary: title over optional description, stacked (space-inline-sm gap) ──
+    // Contract: description renders inside the trigger summary always-visible —
+    // collapsed items keep their description, matching Svelte.
+    let mut summary = ui_element::div()
+        .flex_col()
+        .gap(summary_gap)
+        .min_w_0()
+        .flex_1()
         .child(
             ui_element::label(&item.label)
                 .text_color(text_primary)
                 .text_size(title_font_size)
-        )
-        .child(
-            ui_element::label(chevron)
-                .text_color(text_secondary)
-                .text_size(chevron_font_size)
+                .text_weight(700) // Contract §8 title weight 700
+                .line_height(1.2),
         );
+    if let Some(ref desc) = item.description {
+        summary = summary.child(
+            ui_element::label(desc)
+                .text_color(text_secondary)
+                .text_size(description_font_size)
+                .line_height(1.45),
+        );
+    }
 
-    // Contract: item is a section with border, radius, background
+    // Contract §8 Indicator: chevron-down icon (rotated 180deg when open).
+    // JsEl has no rotation, so the chevron swaps icon name (Tier-3).
+    let chevron_icon = if is_expanded { "chevron-down" } else { "chevron-right" };
+    let indicator = ui_element::icon(chevron_icon)
+        .w(indicator_size)
+        .h(indicator_size)
+        .flex_shrink_0()
+        .text_color(text_secondary);
+
+    // Contract §8 Trigger: full-width 1fr-auto grid (summary grows, indicator trailing).
+    let trigger = ui_element::div()
+        .flex_row()
+        .self_stretch()
+        .gap(trigger_gap)
+        .items_center()
+        .focusable()
+        .child(summary)
+        .child(indicator);
+
+    // Contract §8 Item: section with border, radius, background, internal gap.
     let mut el = ui_element::div()
         .flex_col()
         .self_stretch()
+        .gap(item_gap)
+        .px(pad_x)
+        .py(pad_y)
         .rounded(radius)
         .bg(item_bg)
-        .border_1().border_color(item_border)
+        .border_1()
+        .border_color(item_border)
         .child(trigger);
 
-    // Contract: panel is role="region" with aria-labelledby, conditional render
+    // Contract §8 Panel: role="region", conditional render, carries the children
+    // snippet (the per-item description lives in the trigger summary, not here).
     if is_expanded {
-        if let Some(ref desc) = item.description {
-            let content_font_size = rem_to_px(size_font_rem(effective_size));
-            let panel = ui_element::div()
-                .px(pad_x)   // matches trigger padding
-                .py(pad_y * 0.85) // slightly less than trigger
-                .child(
-                    ui_element::label(desc)
-                        .text_color(text_secondary)
-                        .text_size(content_font_size)
-                );
-            el = el.child(panel);
-        }
+        let panel = ui_element::div()
+            .flex_col()
+            .min_w_0()
+            .self_stretch();
+        el = el.child(panel);
     }
 
-    // Contract: disabled items reduce opacity
+    // Contract §8 Item disabled: reduce opacity.
     if item.is_disabled {
         let opacity = resolve_opacity(theme, "state.opacity.disabled");
         el = el.opacity(opacity).disabled(true);
@@ -148,6 +177,7 @@ fn render_item(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::render_probe::{probe, ProbeColor};
     use poodle_specs::AccordionSelectionValue;
 
     fn theme() -> JetstreamThemeProvider {
@@ -171,21 +201,92 @@ mod tests {
         ]
     }
 
+    /// All items render their title, and collapsed items keep their description.
     #[test]
     fn accordion_renders_items() {
         let spec = AccordionSpec::new(sample_items())
             .with_default_value(AccordionSelectionValue::Single("a".into()));
         let el = js_accordion(&spec, &theme());
-        assert_eq!(el.children.len(), 2);
+        assert_eq!(el.children.len(), 2, "two item cards expected");
+
+        let tree = probe(&el, 480.0, 320.0);
+        assert!(tree.has_text("Section A"), "title A missing: {:?}", tree.texts());
+        assert!(tree.has_text("Section B"), "title B missing: {:?}", tree.texts());
+        // Item B is collapsed but its description must still render (in the trigger).
+        assert!(
+            tree.has_text("Content for B"),
+            "collapsed item description missing (must render in trigger): {:?}",
+            tree.texts()
+        );
+        // Chevron indicators come from the icon registry, one per item.
+        assert!(tree.count_kind("Icon") >= 2, "chevron icons missing");
     }
 
+    /// An expanded item renders its panel body region; a fully-collapsed
+    /// accordion does not.
     #[test]
-    fn items_have_background() {
+    fn expanded_item_shows_body() {
+        let collapsed = AccordionSpec::new(sample_items());
+        let collapsed_nodes = probe(&js_accordion(&collapsed, &theme()), 480.0, 320.0).len();
+
+        let expanded = AccordionSpec::new(sample_items())
+            .with_default_value(AccordionSelectionValue::Single("a".into()));
+        let expanded_nodes = probe(&js_accordion(&expanded, &theme()), 480.0, 320.0).len();
+
+        assert!(
+            expanded_nodes > collapsed_nodes,
+            "expanded accordion must add a panel body region ({} vs {})",
+            expanded_nodes,
+            collapsed_nodes
+        );
+    }
+
+    /// Item background is the elevated/panel token mix — not the old
+    /// hand-blended surface*0.5 + elevated*0.5 average.
+    #[test]
+    fn item_bg_from_token_mix() {
+        let th = theme();
         let spec = AccordionSpec::new(sample_items());
-        let el = js_accordion(&spec, &theme());
-        // Each item should have its own background
+        let el = js_accordion(&spec, &th);
+
+        let elevated = resolve_color(&th, spec.item_bg_elevated_token());
+        let panel = resolve_color(&th, spec.item_bg_panel_token());
+        let expected = color_mix(elevated, panel, spec.item_bg_elevated_ratio());
+
+        // Each item card carries the token-mixed background.
         for item_el in &el.children {
-            assert!(item_el.style.background.is_some());
+            let bg = item_el.style.background.expect("item background set");
+            assert!(
+                (bg.r - expected.x).abs() < 1e-4
+                    && (bg.g - expected.y).abs() < 1e-4
+                    && (bg.b - expected.z).abs() < 1e-4,
+                "item bg must be color-mix(elevated 40%, panel): {:?} vs {:?}",
+                bg,
+                expected
+            );
+        }
+
+        // The old hand-blend (surface 50% + elevated 50%) must NOT be present.
+        let surface = resolve_color(&th, "color.background.surface");
+        let old_blend = ProbeColor {
+            r: surface.x * 0.5 + elevated.x * 0.5,
+            g: surface.y * 0.5 + elevated.y * 0.5,
+            b: surface.z * 0.5 + elevated.z * 0.5,
+            a: 1.0,
+        };
+        let new_mix = ProbeColor {
+            r: expected.x,
+            g: expected.y,
+            b: expected.z,
+            a: expected.w,
+        };
+        // Only assert distinctness when the two formulas actually differ.
+        if !old_blend.approx(new_mix, 1e-4) {
+            let tree = probe(&el, 480.0, 320.0);
+            assert!(
+                !tree.has_background(old_blend, 1e-4),
+                "old hand-blended item background must not appear"
+            );
         }
     }
 }

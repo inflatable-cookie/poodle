@@ -8,6 +8,7 @@ pub struct CollapsibleSpec {
     pub title: Option<String>,
     pub description: Option<String>,
     pub is_disabled: bool,
+    pub highlighted: bool,
     pub aria_label: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
@@ -22,6 +23,7 @@ impl Default for CollapsibleSpec {
             title: None,
             description: None,
             is_disabled: false,
+            highlighted: false,
             aria_label: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
@@ -60,6 +62,11 @@ impl CollapsibleSpec {
         self
     }
 
+    pub fn with_highlighted(mut self, highlighted: bool) -> Self {
+        self.highlighted = highlighted;
+        self
+    }
+
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
         self
@@ -87,6 +94,29 @@ impl CollapsibleSpec {
 
     pub fn content_gap_token(&self) -> &'static str {
         semantic::SPACE_STACK_SM
+    }
+
+    /// Accent token sourcing the highlighted Root border + halo (contract §8).
+    pub fn highlight_accent_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    /// Alpha fraction applied to the accent for the highlighted border-color
+    /// (`accent-base 55%`, contract §8 Root highlighted).
+    pub fn highlight_border_alpha(&self) -> f32 {
+        0.55
+    }
+
+    /// Alpha fraction applied to the accent for the highlighted halo
+    /// (`accent-base 12%`, contract §8 Root highlighted).
+    pub fn highlight_halo_alpha(&self) -> f32 {
+        0.12
+    }
+
+    /// Border-subtle alpha fraction for the Root border
+    /// (`border-subtle 36%`, contract §8 Root).
+    pub fn border_subtle_alpha(&self) -> f32 {
+        0.36
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {

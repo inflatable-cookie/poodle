@@ -111,7 +111,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 <!-- BEGIN MATRIX (compiled; do not hand-edit) -->
 | component | consv | gpui | jet | spec |
 |---|---|---|---|---|
-| accordion | fixed | 6 | 8 | gap |
+| accordion | fixed | 2 | 2 | gap |
 | action-discovery-panel | fixed | 2 | 2 | gap |
 | alert-dialog | fixed | 2 | 2 | gap |
 | app-header | fixed | 2 | 2 | gap |
@@ -131,7 +131,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | code | fixed | 2 | 2 | gap |
 | code-input | fixed | 5 | 7 | gap |
 | collapse-toggle | fixed | 4 | 6 | gap |
-| collapsible | fixed | 6 | 8 | gap |
+| collapsible | fixed | 2 | 2 | gap |
 | color-picker | fixed | 0 | 2 | gap |
 | command-palette | fixed | 2 | 2 | gap |
 | confirm-action | ok | 2 | 7 | gap |

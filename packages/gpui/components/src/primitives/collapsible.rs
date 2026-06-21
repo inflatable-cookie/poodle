@@ -69,6 +69,10 @@ impl Collapsible {
         self.spec.is_disabled = v;
         self
     }
+    pub fn highlighted(mut self, v: bool) -> Self {
+        self.spec.highlighted = v;
+        self
+    }
     pub fn aria_label(mut self, v: impl Into<String>) -> Self {
         self.spec.aria_label = Some(v.into());
         self
@@ -129,7 +133,8 @@ impl IntoElement for Collapsible {
         }));
 
         let heading_size = title_font;
-        let label_size = resolve_px(theme, "typography.label.size");
+        // Description scales per-size (contract §8 size table: xs=0.6875 … xl=0.9375rem)
+        let description_font = px(rem_to_px(crate::presentation::size_font_rem(effective_size)));
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let border_color = resolve_color(theme, "color.border.subtle");
@@ -137,14 +142,24 @@ impl IntoElement for Collapsible {
         let elevated_bg = resolve_color(theme, "color.background.elevated");
         let radius = resolve_radius(theme, "radius.surface");
         let focus_ring = resolve_color(theme, "color.accent.focusRing");
+        let accent_base = resolve_color(theme, spec.highlight_accent_token());
 
-        // Svelte: border = color-mix(border-subtle 42%, transparent)
+        // Contract §8: border = color-mix(border-subtle 36%, transparent)
         let root_border = Hsla {
-            a: border_color.a * 0.42,
+            a: border_color.a * spec.border_subtle_alpha(),
             ..border_color
         };
-        // Svelte: bg = color-mix(surface/panel 82%, background-elevated)
-        let root_bg = color_mix(panel_bg, elevated_bg, 0.82);
+        // Contract §8: bg = color-mix(background-elevated 40%, background-panel)
+        let root_bg = color_mix(elevated_bg, panel_bg, 0.40);
+        // Contract §8 highlighted: border accent-base 55%, halo accent-base 12%
+        let highlight_border = Hsla {
+            a: accent_base.a * spec.highlight_border_alpha(),
+            ..accent_base
+        };
+        let highlight_halo = Hsla {
+            a: accent_base.a * spec.highlight_halo_alpha(),
+            ..accent_base
+        };
 
         let id_str = if let Some(ref suffix) = self.id_suffix {
             format!("poodle-collapsible-{}", suffix)
@@ -164,9 +179,23 @@ impl IntoElement for Collapsible {
             .px(density_pad_x)
             .py(density_pad_y)
             .border_1()
-            .border_color(root_border)
+            .border_color(if spec.highlighted {
+                highlight_border
+            } else {
+                root_border
+            })
             .rounded(radius)
             .bg(root_bg);
+
+        // Contract §8 highlighted: 0 0 0 0.125rem accent-base 12% halo
+        if spec.highlighted {
+            root = root.shadow(vec![gpui::BoxShadow {
+                color: highlight_halo,
+                offset: point(px(0.0), px(0.0)),
+                blur_radius: px(0.0),
+                spread_radius: px(rem_to_px(0.125)),
+            }]);
+        }
 
         // ── Trigger (contract: grid 1fr auto, gap 0.75rem) ──
         let mut trigger = div()
@@ -197,7 +226,8 @@ impl IntoElement for Collapsible {
             title_block = title_block.child(
                 div()
                     .text_color(text_secondary)
-                    .text_size(label_size)
+                    .text_size(description_font)
+                    .line_height(relative(1.45))
                     .child(desc.clone()),
             );
         }
@@ -241,9 +271,15 @@ impl IntoElement for Collapsible {
         root = root.child(trigger);
 
         // ── Content region (only when open) ──
+        // Contract §8 Content: min-width 0, padding-top 0.125rem
         if is_open {
             if let Some(content) = self.content {
-                root = root.child(content);
+                root = root.child(
+                    div()
+                        .min_w(px(0.0))
+                        .pt(px(rem_to_px(0.125)))
+                        .child(content),
+                );
             }
         }
 

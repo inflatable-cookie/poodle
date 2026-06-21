@@ -127,42 +127,40 @@ impl IntoElement for Accordion {
         }));
         // Description scales with size like control fonts (Svelte: accordion__description)
         let description_font = px(rem_to_px(size_font_rem(effective_size)));
-        // Svelte: compact=0.5rem, default=panel-x token (1rem), comfortable=1rem (hardcoded)
-        let density_pad_x = px(rem_to_px(match self.spec.density {
-            ControlDensity::Compact     => 0.5,
-            ControlDensity::Default     => 1.0,
-            ControlDensity::Comfortable => 1.0,
-        }));
-        // Svelte: accordion item vertical padding is fixed 0.625rem (not panel-y token)
-        let density_pad_y = px(rem_to_px(0.625));
-        // Svelte: both outer gap and item internal gap = space.stack.md (density-aware)
-        let density_gap = resolve_px(theme, "space.stack.md");
+        // Contract §8 Item inline padding (density-overridden): compact 0.5rem, default/comfortable 1rem
+        let density_pad_x = px(rem_to_px(self.spec.inline_padding_rem(self.spec.density)));
+        // Contract §8 Item block padding: fixed 0.625rem
+        let density_pad_y = px(rem_to_px(self.spec.block_padding_rem()));
+        // Contract §8 Root gap between items = space.stack.md
+        let root_gap = resolve_px(theme, self.spec.root_gap_token());
+        // Contract §8 Item internal gap (trigger ↔ panel) = 0.625rem
+        let item_gap = px(rem_to_px(self.spec.item_internal_gap_rem()));
 
         let disabled_opacity = resolve_opacity(theme, self.spec.disabled_opacity_token());
         let border_subtle = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let text_inverse = resolve_color(theme, "color.text.inverse");
-        let surface_bg = resolve_color(theme, "color.background.surface");
+        let text_inverse = resolve_color(theme, self.spec.inset_highlight_color_token());
+        let elevated_bg = resolve_color(theme, self.spec.item_bg_elevated_token());
+        let panel_bg = resolve_color(theme, self.spec.item_bg_panel_token());
         let focus_ring = resolve_color(theme, self.spec.focus_ring_color_token());
         let surface_radius = resolve_radius(theme, "radius.surface");
         let panel_pad_x = density_pad_x;
         let panel_pad_y = density_pad_y;
-        let stack_md = density_gap;
         let heading_size = title_font;
-        let gap_inline_sm = resolve_px(theme, "space.inline.sm");
-        let gap_inline_md = resolve_px(theme, "space.inline.md");
+        let gap_inline_sm = resolve_px(theme, self.spec.summary_gap_token());
+        let gap_inline_md = resolve_px(theme, self.spec.trigger_grid_gap_token());
 
-        // Item background: color-mix(surface 93%, text-primary)
-        let item_bg = color_mix(surface_bg, text_primary, 0.93);
-        // Item border: border-subtle at 36% opacity
+        // Contract §8 Item background: color-mix(elevated 40%, panel)
+        let item_bg = color_mix(elevated_bg, panel_bg, self.spec.item_bg_elevated_ratio());
+        // Contract §8 Item border: border-subtle at 36% opacity
         let item_border = Hsla {
-            a: border_subtle.a * 0.36,
+            a: border_subtle.a * self.spec.border_subtle_alpha(),
             ..border_subtle
         };
-        // Svelte: inset 0 0.0625rem 0 text-inverse 8% — top highlight
+        // Contract §8 Item box-shadow: inset 0 0.0625rem 0 text-inverse 8% — top highlight
         let inset_highlight = Hsla {
-            a: text_inverse.a * 0.08,
+            a: text_inverse.a * self.spec.inset_highlight_alpha(),
             ..text_inverse
         };
 
@@ -176,7 +174,7 @@ impl IntoElement for Accordion {
         }
 
         // Outer container: grid with gap between items
-        let mut col = div().flex().flex_col().gap(stack_md);
+        let mut col = div().flex().flex_col().gap(root_gap);
 
         for item in &self.spec.items {
             let is_open = expanded.contains(&item.value.as_str());
@@ -274,16 +272,16 @@ impl IntoElement for Accordion {
             let mut item_card = div()
                 .flex()
                 .flex_col()
-                .gap(stack_md)
+                .gap(item_gap)
                 .px(panel_pad_x)
                 .py(panel_pad_y)
                 .border_1()
                 .border_color(item_border)
                 .rounded(surface_radius)
-                // Svelte: inset 0 0.0625rem 0 text-inverse 8%
+                // Contract §8 Item box-shadow: inset 0 0.0625rem 0 text-inverse 8%
                 .shadow(vec![gpui::BoxShadow {
                     color: inset_highlight,
-                    offset: point(px(0.0), px(rem_to_px(0.0625))),
+                    offset: point(px(0.0), px(rem_to_px(self.spec.inset_highlight_offset_rem()))),
                     blur_radius: px(0.0),
                     spread_radius: px(0.0),
                 }]);

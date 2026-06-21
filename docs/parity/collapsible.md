@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 48: both targets. Additive CollapsibleSpec.highlighted (+ token methods). Jetstream:
+     flat row → 1fr-auto grid (heading grows, chevron trailing), description stacks under title,
+     bg color_mix(elevated, panel, 0.40) + border tint(subtle, 0.36), density padding, highlighted
+     accent@55% border. GPUI: bg/border-alpha fixed, highlighted accent border + 12% halo, per-size
+     description font. 3 probe tests; specs 61, gpui clean. Toggle = preview-loop; JsEl halo no
+     box-shadow. -->
 # Parity: Collapsible
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

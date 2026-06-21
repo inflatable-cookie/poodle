@@ -93,6 +93,75 @@ impl AccordionSpec {
         semantic::SPACE_STACK_SM
     }
 
+    /// Root gap between items (contract §8 Root `gap` = `space.stack.md`).
+    pub fn root_gap_token(&self) -> &'static str {
+        semantic::SPACE_STACK_MD
+    }
+
+    /// Summary gap, title ↔ description (contract §8 Summary `gap` = `space.inline.sm`).
+    pub fn summary_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_SM
+    }
+
+    /// Trigger grid gap, summary ↔ indicator (contract §8 Trigger `gap` = `space.inline.md`).
+    pub fn trigger_grid_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_MD
+    }
+
+    /// Item internal gap, trigger ↔ panel (contract §8 Item `gap`, `0.625rem`).
+    pub fn item_internal_gap_rem(&self) -> f32 {
+        0.625
+    }
+
+    /// Item block (vertical) padding (contract §8 Item `padding` block = `0.625rem`).
+    pub fn block_padding_rem(&self) -> f32 {
+        0.625
+    }
+
+    /// Item inline (horizontal) padding for the resolved density
+    /// (contract §8 Item `padding` inline = `space-panel-x`, density-overridden:
+    /// compact `0.5rem`, default/comfortable `1rem`).
+    pub fn inline_padding_rem(&self, density: ControlDensity) -> f32 {
+        match density {
+            ControlDensity::Compact => 0.5,
+            ControlDensity::Default => 1.0,
+            ControlDensity::Comfortable => 1.0,
+        }
+    }
+
+    /// Item background source tokens + mix ratio
+    /// (contract §8 Item `background` = `color-mix(elevated 40%, panel)`).
+    pub fn item_bg_elevated_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_ELEVATED
+    }
+
+    pub fn item_bg_panel_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    pub fn item_bg_elevated_ratio(&self) -> f32 {
+        0.40
+    }
+
+    /// Item border alpha fraction (contract §8 Item `border` = `border-subtle 36%`).
+    pub fn border_subtle_alpha(&self) -> f32 {
+        0.36
+    }
+
+    /// Inset top-highlight alpha + offset (contract §8 Item `box-shadow`
+    /// = `inset 0 0.0625rem 0 text-inverse 8%`).
+    pub fn inset_highlight_color_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_INVERSE
+    }
+
+    pub fn inset_highlight_alpha(&self) -> f32 {
+        0.08
+    }
+
+    pub fn inset_highlight_offset_rem(&self) -> f32 {
+        0.0625
+    }
+
     pub fn border_color_token(&self) -> &'static str {
         semantic::COLOR_BORDER_DEFAULT
     }

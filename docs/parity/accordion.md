@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=6 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 48: both targets. Additive AccordionSpec token methods (gaps/bg/border/inset). GPUI:
+     item bg color_mix(elevated, panel, 0.40) (was wrong surface/text mix), all raw float literals
+     → spec token methods. Jetstream: item bg from token (was hand-blended Vec4 average), chevron
+     from icon registry (was unicode ▾/▸), description renders in collapsed summary (was hidden),
+     title weight 700, density padding, expanded panel region. 3 probe tests; specs 61, gpui clean.
+     Toggle = preview-loop; JsEl inset-highlight no box-shadow. -->
 # Parity: Accordion
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

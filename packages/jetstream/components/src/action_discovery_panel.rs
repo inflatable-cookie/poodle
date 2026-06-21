@@ -341,9 +341,9 @@ mod tests {
         let spec = ActionDiscoveryPanelSpec::new(sample_sections());
         let tree = probe(&js_action_discovery_panel(&spec, &th), 480.0, 320.0);
 
-        // Section titles present (js_eyebrow renders content verbatim).
+        // Section titles present (js_eyebrow uppercases — `File` → `FILE`).
         assert!(
-            tree.has_text("File"),
+            tree.has_text("FILE"),
             "section title missing: {:?}",
             tree.texts()
         );
