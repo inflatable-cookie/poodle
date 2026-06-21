@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 49: specimens. Both Rust previews build clean. GPUI collapsible.rs: added
+     Highlighted group (real .with_highlighted, interactive toggle); Sizes/Densities already
+     via specimen_layout. Jetstream collapsible.rs: added Highlighted (with_highlighted),
+     Sizes (with_size xs–xl), Densities (with_density) groups via js_collapsible. Custom-trigger
+     snippet group SKIPPED on both Rust targets — neither Collapsible builder nor js_collapsible
+     exposes a trigger-content override (Tier-3 composition freedom / Known Delta). No fakes. -->
+
 <!-- pass 48: both targets. Additive CollapsibleSpec.highlighted (+ token methods). Jetstream:
      flat row → 1fr-auto grid (heading grows, chevron trailing), description stacks under title,
      bg color_mix(elevated, panel, 0.40) + border tint(subtle, 0.36), density padding, highlighted
@@ -59,8 +66,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default (closed, interactive), Default open, Disabled, **Highlighted**, **Custom trigger** (snippet), Sizes (xs–xl), Densities (compact/default/comfortable).
-- GPUI covers: Default (closed, interactive), Default open (interactive), Disabled, Sizes + Densities via `specimen_layout`. — missing: **Highlighted** group, **Custom trigger** snippet group.
-- Jetstream covers: Open, Closed, Disabled (all static). — missing: **Highlighted**, **Custom trigger**, **Sizes**, **Densities** groups; no interactive toggle.
+- GPUI covers: Default (closed, interactive), Default open (interactive), Disabled, Highlighted (interactive, real `.with_highlighted`), Sizes + Densities via `specimen_layout`. — **Custom trigger** snippet group SKIPPED: GPUI `Collapsible` has no trigger-content override (title/description-driven only); Tier-3 composition freedom per Known Deltas.
+- Jetstream covers: Open, Closed, Disabled, Highlighted (`with_highlighted`), Sizes (xs–xl via `with_size`), Densities (via `with_density`) — all static (toggle lives in the preview loop). — **Custom trigger** snippet group SKIPPED: `js_collapsible` takes title/description + a body element, no trigger-content override; Tier-3 composition freedom.
 
 ## Notes
 

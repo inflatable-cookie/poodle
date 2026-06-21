@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 49: specimens. Both Rust previews build clean. GPUI accordion.rs: added
+     Descriptions+disabled-item (real AccordionItemSpec::with_disabled), Sizes (xs–xl,
+     .size()), Densities (.with_density()) groups — all via real Accordion/with_content.
+     Jetstream accordion.rs: added Disabled-item, Sizes, Densities groups via js_accordion
+     + AccordionSpec::with_size/with_density. No fakes found (group() is an eyebrow label
+     wrapper, not a faked component). -->
+
 <!-- pass 48: both targets. Additive AccordionSpec token methods (gaps/bg/border/inset). GPUI:
      item bg color_mix(elevated, panel, 0.40) (was wrong surface/text mix), all raw float literals
      → spec token methods. Jetstream: item bg from token (was hand-blended Vec4 average), chevron
@@ -60,8 +67,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Single selection (3 items, first open), Multiple selection (2 of 3 open), Sizes (xs–xl via `sizes` snippet), Densities (via `densities` snippet), panel `children` slot content (`AccordionSpecimen.svelte`).
-- GPUI covers: Single selection (interactive toggle), Multiple selection (interactive toggle), panel content via `with_content`. — missing: **Sizes group**, **Densities group**, **disabled item** state.
-- Jetstream covers: Single selection, Multiple selection, "All collapsed" group. — missing: **Sizes group**, **Densities group**, **disabled item** state; also items carry descriptions Svelte items do not, so visual content diverges.
+- GPUI covers: Single selection (interactive toggle), Multiple selection (interactive toggle), Descriptions + disabled item (static, real `AccordionItemSpec::with_disabled`), Sizes (xs–xl via `.size()`), Densities (via `.with_density()`) — all panel content via `with_content`. **All contract specimen states covered.**
+- Jetstream covers: Single selection, Multiple selection, "All collapsed", Disabled item (`is_disabled` item via `js_accordion`), Sizes (xs–xl via `AccordionSpec::with_size`), Densities (via `with_density`). **All contract specimen states covered.** Items carry descriptions Svelte's omit (a valid contract feature; descriptions render in the trigger summary).
 
 ## Notes
 

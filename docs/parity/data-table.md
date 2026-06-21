@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=1 jetstream=0 specimen=gap | pass 41: GPUI px literals → contract-rem (selection 3.25/actions 3.5/expand icon+pad); Jetstream gained toolbar+filter chips+pagination footer+row-actions column+real sort icon (⇅ removed); probe tests added -->
+<!-- parity consv=fixed gpui=1 jetstream=0 specimen=ok | specimen pass: both Rust previews backfilled to full state coverage — sorting+colvis+export+selection, sorted-desc indicator, filters+pagination(compact/striped), custom status-pill cells+expanded rows, empty, sizes, densities; Jetstream adds real loading skeleton (js_data_table_loading). GPUI loading skipped (no spec/component support). Both previews build clean. -->
 # Parity: DataTable
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

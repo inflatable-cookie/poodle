@@ -111,7 +111,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 <!-- BEGIN MATRIX (compiled; do not hand-edit) -->
 | component | consv | gpui | jet | spec |
 |---|---|---|---|---|
-| accordion | fixed | 2 | 2 | gap |
+| accordion | fixed | 2 | 2 | ok |
 | action-discovery-panel | fixed | 2 | 2 | gap |
 | alert-dialog | fixed | 2 | 2 | ok |
 | app-header | fixed | 2 | 2 | gap |
@@ -119,7 +119,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | avatar | ok | 0 | 0 | gap |
 | block-editor | fixed | 1 | 2 | gap |
 | box | ok | 0 | 0 | fixed |
-| breadcrumbs | fixed | 0 | 0 | gap |
+| breadcrumbs | fixed | 0 | 0 | ok |
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 2 | 2 | ok |
 | calendar | fixed | 2 | 2 | ok |
@@ -131,12 +131,12 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | code | fixed | 2 | 2 | gap |
 | code-input | fixed | 0 | 0 | ok |
 | collapse-toggle | fixed | 0 | 1 | gap |
-| collapsible | fixed | 2 | 2 | gap |
+| collapsible | fixed | 2 | 2 | ok |
 | color-picker | fixed | 0 | 2 | gap |
 | command-palette | fixed | 2 | 2 | gap |
 | confirm-action | ok | 0 | 0 | ok |
 | context-menu | ok | 0 | 0 | gap |
-| data-table | fixed | 1 | 0 | gap |
+| data-table | fixed | 1 | 0 | ok |
 | date-picker | fixed | 0 | 0 | ok |
 | date-range-picker | fixed | 0 | 0 | gap |
 | date-time-picker | fixed | 0 | 0 | gap |
@@ -195,8 +195,8 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | order-by | fixed | 2 | 2 | ok |
 | page-header | fixed | 1 | 1 | ok |
 | page-loading | ok | 0 | 0 | gap |
-| pagination | fixed | 0 | 1 | gap |
-| pagination-summary | fixed | 2 | 2 | gap |
+| pagination | fixed | 0 | 1 | ok |
+| pagination-summary | fixed | 2 | 2 | ok |
 | password-requirements | ok | 0 | 0 | gap |
 | picker-shell | gap | 0 | 0 | gap |
 | pill | fixed | 0 | 0 | ok |
@@ -228,7 +228,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | surface | fixed | 1 | 1 | gap |
 | switch | fixed | 0 | 0 | ok |
 | tab-strip | gap | 0 | 0 | gap |
-| table | fixed | 0 | 0 | gap |
+| table | fixed | 0 | 0 | ok |
 | tabs | fixed | 2 | 2 | ok |
 | text | ok | 0 | 1 | gap |
 | text-input | fixed | 2 | 2 | ok |

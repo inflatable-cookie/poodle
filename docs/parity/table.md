@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: both targets size/density + header surface-mix + padding/type tokens + uppercase headers + 1.5 line-height; letter-spacing accepted-approx -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | specimen pass: both Rust previews backfilled to contract §13 coverage — standard (row-header bold + end-aligned Hours), with-caption, minimal key-value, empty state, plus sizes + densities groups; GPUI labels de-scrambled. Both previews build clean. -->
 # Parity: Table
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

@@ -1,4 +1,7 @@
-//! PaginationSummary specimen — page range display text.
+//! PaginationSummary specimen — contract §13 groups: Default, Single page,
+//! Large dataset. Read-only "Showing X-Y of Z" range text; no interaction.
+//!
+//! `PaginationSummarySpec::new(page, page_size, total_items)`.
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
@@ -10,11 +13,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     div().flex_col().gap(24.0)
-        .child(group("Page 1", secondary,
-            js_pagination_summary(&PaginationSummarySpec::new(1, 25, 67), theme)
+        // Contract §13 Default — "Showing 1-20 of 156".
+        .child(group("Default", secondary,
+            js_pagination_summary(&PaginationSummarySpec::new(1, 20, 156), theme)
         ))
-        .child(group("Page 3", secondary,
-            js_pagination_summary(&PaginationSummarySpec::new(3, 25, 67), theme)
+        // Contract §13 Single page — "Showing 1-12 of 12".
+        .child(group("Single page", secondary,
+            js_pagination_summary(&PaginationSummarySpec::new(1, 20, 12), theme)
+        ))
+        // Contract §13 Large dataset — mid-range "Showing 81-100 of 1000".
+        .child(group("Large dataset", secondary,
+            js_pagination_summary(&PaginationSummarySpec::new(5, 20, 1000), theme)
         ))
 }
 

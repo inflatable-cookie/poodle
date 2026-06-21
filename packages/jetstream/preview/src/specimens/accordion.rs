@@ -4,7 +4,9 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::accordion::js_accordion;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec};
+use poodle_specs::{
+    AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -80,6 +82,66 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 },
             ]).with_collapsible(true), theme)
         ))
+        // Disabled item — js_accordion reduces opacity on the disabled item.
+        .child(group("Disabled item", secondary,
+            js_accordion(&AccordionSpec::new(vec![
+                AccordionItemSpec {
+                    value: "open".into(),
+                    label: "Available".into(),
+                    description: Some("This item is interactive and expanded.".into()),
+                    is_disabled: false,
+                },
+                AccordionItemSpec {
+                    value: "locked".into(),
+                    label: "Locked section".into(),
+                    description: Some("Requires admin access.".into()),
+                    is_disabled: true,
+                },
+            ]).with_default_value(AccordionSelectionValue::Single("open".into())), theme)
+        ))
+        // Sizes (xs–xl) — intrinsic dimensions resolve from the size token.
+        .child(group("Sizes", secondary,
+            div().flex_col().gap(12.0)
+                .child(size_variant(theme, ControlSize::Xs, "xs"))
+                .child(size_variant(theme, ControlSize::Sm, "sm"))
+                .child(size_variant(theme, ControlSize::Md, "md"))
+                .child(size_variant(theme, ControlSize::Lg, "lg"))
+                .child(size_variant(theme, ControlSize::Xl, "xl"))
+        ))
+        // Densities — inline spacing only; height unchanged.
+        .child(group("Densities", secondary,
+            div().flex_col().gap(12.0)
+                .child(density_variant(theme, ControlDensity::Compact, "compact"))
+                .child(density_variant(theme, ControlDensity::Default, "default"))
+                .child(density_variant(theme, ControlDensity::Comfortable, "comfortable"))
+        ))
+}
+
+fn variant_items(label: &str) -> Vec<AccordionItemSpec> {
+    vec![AccordionItemSpec {
+        value: "section".into(),
+        label: format!("Section ({label})"),
+        description: Some("Resolves all dimensions from the size/density tokens.".into()),
+        is_disabled: false,
+    }]
+}
+
+fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) -> JsEl {
+    js_accordion(
+        &AccordionSpec::new(variant_items(label))
+            .with_size(size)
+            .with_default_value(AccordionSelectionValue::Single("section".into())),
+        theme,
+    )
+}
+
+fn density_variant(theme: &JetstreamThemeProvider, density: ControlDensity, label: &str) -> JsEl {
+    js_accordion(
+        &AccordionSpec::new(variant_items(label))
+            .with_density(density)
+            .with_default_value(AccordionSelectionValue::Single("section".into())),
+        theme,
+    )
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

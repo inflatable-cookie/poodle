@@ -3,7 +3,10 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{Accordion, Eyebrow};
-use poodle_specs::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, EyebrowSpec};
+use poodle_specs::{
+    AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
+    EyebrowSpec,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -146,30 +149,125 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
     }
 
+    // --- Descriptions + disabled item (static) ---
+    // Real items carrying descriptions and a disabled item; resolves all
+    // visuals from the spec/token system. Static (no toggle) so it always
+    // shows the open/disabled states it is meant to demonstrate.
+    let described_items = vec![
+        AccordionItemSpec::new("plan", "Plan")
+            .with_description("Outline the work before you start building."),
+        AccordionItemSpec::new("build", "Build")
+            .with_description("Implement against the contract, resolving every value from tokens."),
+        AccordionItemSpec::new("locked", "Locked section")
+            .with_description("Requires admin access.")
+            .with_disabled(true),
+    ];
+
+    let mut described_accordion = Accordion::from_spec(
+        AccordionSpec::new(described_items)
+            .with_allow_multiple(false)
+            .with_collapsible(true)
+            .with_value(AccordionSelectionValue::Single("plan".to_string())),
+        theme,
+    )
+    .with_id("specimen-accordion-described");
+
+    for (value, text) in [
+        ("plan", "Group related changes together and keep the scope tight."),
+        (
+            "build",
+            "Each dimension and color must trace back to a semantic token.",
+        ),
+        ("locked", "This panel cannot be opened while the item is disabled."),
+    ] {
+        described_accordion = described_accordion.with_content(
+            value,
+            div()
+                .text_size(px(14.0))
+                .line_height(relative(1.5))
+                .text_color(ts)
+                .child(text.to_string()),
+        );
+    }
+
+    // --- Sizes (xs–xl, static) ---
+    let size_variants: Vec<(ControlSize, &str)> = vec![
+        (ControlSize::Xs, "xs"),
+        (ControlSize::Sm, "sm"),
+        (ControlSize::Md, "md"),
+        (ControlSize::Lg, "lg"),
+        (ControlSize::Xl, "xl"),
+    ];
+    let mut sizes_row = div().flex().flex_col().gap(px(12.0));
+    for (size, label) in size_variants {
+        let acc = Accordion::from_spec(
+            AccordionSpec::new(vec![AccordionItemSpec::new("section", "Section")
+                .with_description("Resolves dimensions from the size token.")])
+                .with_value(AccordionSelectionValue::Single("section".to_string())),
+            theme,
+        )
+        .with_id(format!("specimen-accordion-size-{label}"))
+        .size(size)
+        .with_content(
+            "section",
+            div()
+                .text_size(px(14.0))
+                .line_height(relative(1.5))
+                .text_color(ts)
+                .child(format!("Accordion panel content at {label} size.")),
+        );
+        sizes_row = sizes_row.child(acc);
+    }
+
+    // --- Densities (compact/default/comfortable, static) ---
+    let density_variants: Vec<(ControlDensity, &str)> = vec![
+        (ControlDensity::Compact, "compact"),
+        (ControlDensity::Default, "default"),
+        (ControlDensity::Comfortable, "comfortable"),
+    ];
+    let mut densities_row = div().flex().flex_col().gap(px(12.0));
+    for (density, label) in density_variants {
+        let acc = Accordion::from_spec(
+            AccordionSpec::new(vec![AccordionItemSpec::new("section", "Section")
+                .with_description("Density only changes inline spacing, not height.")])
+                .with_value(AccordionSelectionValue::Single("section".to_string())),
+            theme,
+        )
+        .with_id(format!("specimen-accordion-density-{label}"))
+        .with_density(density)
+        .with_content(
+            "section",
+            div()
+                .text_size(px(14.0))
+                .line_height(relative(1.5))
+                .text_color(ts)
+                .child(format!("Accordion panel content at {label} density.")),
+        );
+        densities_row = densities_row.child(acc);
+    }
+
+    let group = |title: &str, body: AnyElement| {
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .child(Eyebrow::from_spec(
+                EyebrowSpec::new().with_content(title.to_string()),
+                theme,
+            ))
+            .child(body)
+    };
+
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Single selection"),
-                    theme,
-                ))
-                .child(single_accordion),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Multiple selection"),
-                    theme,
-                ))
-                .child(multi_accordion),
-        )
+        .child(group("Single selection", single_accordion.into_any_element()))
+        .child(group("Multiple selection", multi_accordion.into_any_element()))
+        .child(group(
+            "Descriptions + disabled item",
+            described_accordion.into_any_element(),
+        ))
+        .child(group("Sizes", sizes_row.into_any_element()))
+        .child(group("Densities", densities_row.into_any_element()))
 }

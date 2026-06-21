@@ -5,7 +5,7 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{DataTable, Eyebrow};
-use poodle_specs::{ControlSize, EyebrowSpec, StatusTone};
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, StatusTone};
 use poodle_specs::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
 };
@@ -264,6 +264,41 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 DataTableSpec::new(make_columns(), make_rows())
                                     .with_aria_label(format!("Data table at {}", key))
                                     .with_size(size),
+                                theme,
+                            ));
+                    }
+                    col
+                }),
+        )
+        // --- Densities ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Densities"),
+                    theme,
+                ))
+                .child({
+                    let densities: &[(&str, ControlDensity)] = &[
+                        ("compact", ControlDensity::Compact),
+                        ("default", ControlDensity::Default),
+                        ("comfortable", ControlDensity::Comfortable),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(16.0));
+                    for &(key, density) in densities {
+                        col = col
+                            .child(
+                                div()
+                                    .text_size(px(11.0))
+                                    .text_color(color_to_hsla(text_secondary))
+                                    .child(format!("density = {}", key)),
+                            )
+                            .child(DataTable::from_spec(
+                                DataTableSpec::new(make_columns(), make_rows())
+                                    .with_aria_label(format!("Data table at {} density", key))
+                                    .with_density(density),
                                 theme,
                             ));
                     }

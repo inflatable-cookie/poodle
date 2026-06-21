@@ -107,6 +107,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child("This content is hidden behind a disabled collapsible.".to_string()),
         );
 
+    // ── Group: Highlighted ───────────────────────────────────────────
+    // highlighted=true applies the accent border + halo from the spec's
+    // highlight tokens. Open by default so the highlighted container reads.
+    let highlighted_toggled = state.specimens.is_on("collapsible-highlighted-toggled");
+    let highlighted_spec = CollapsibleSpec::new()
+        .with_title("Focused section")
+        .with_highlighted(true)
+        .with_open(!highlighted_toggled);
+
+    let highlighted_collapsible = Collapsible::from_spec(highlighted_spec, theme)
+        .with_id("specimen-highlighted")
+        .on_toggle(cx.listener(|this, _open: &bool, _w, cx| {
+            this.state.specimens.toggle("collapsible-highlighted-toggled");
+            cx.notify();
+        }))
+        .with_content(
+            div()
+                .text_xs()
+                .text_color(color_to_hsla(text_secondary))
+                .child(
+                    "Highlighted collapsibles draw attention to a matched or focused section."
+                        .to_string(),
+                ),
+        );
+
     let examples = div()
         .flex()
         .flex_col()
@@ -146,6 +171,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(disabled_collapsible),
+        )
+        // --- Highlighted ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Highlighted"),
+                    theme,
+                ))
+                .child(highlighted_collapsible),
         )
         .into_any_element();
 

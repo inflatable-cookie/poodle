@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=0 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=1 specimen=ok -->
+<!-- pass 42: Jetstream specimen backfilled to full contract §13 + state coverage — Default, Middle of range, Few pages, first/last boundary-disabled, Simple+info+limit selector, Full variant, chrome, standalone, compact, loading, Size ladder, Density ladder — via real js_pagination + PaginationSpec builders. GPUI gained "With container chrome" + "Last page (next disabled)" groups. Both previews build clean. -->
 # Parity: Pagination
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -60,8 +61,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default, Middle of range, Few pages, Simple+info+pageSize, Full variant, With container chrome, Sizes (snippet), Densities (snippet) — `PaginationSpecimen.svelte`.
-- GPUI covers: Default, Middle of range, Few pages, Simple+info+pageSize, Full+limit (interactive), Standalone, Sizes + Densities (via `specimen_layout`). — missing: a plain **chrome** demo (only standalone shown); first/last buttons never visible (no controller). Broader than Svelte on interactivity.
-- Jetstream covers: First page, Middle page, Last page only (`jetstream/.../pagination.rs`). — missing: **Simple variant**, **Full variant**, **limit selector**, **info row**, **sizes**, **densities**, **compact**, **loading**, **chrome/standalone**. Heavily under-covers.
+- GPUI covers: Default, Middle of range, Few pages, Simple+info+pageSize, Full+limit (interactive), Standalone, With container chrome, Last page (next disabled), Sizes + Densities (via `specimen_layout`). Added the plain chrome demo + an explicit last-page boundary group this pass. Broader than Svelte on interactivity. `specimen=ok`.
+- Jetstream now covers: Default, Middle of range, Few pages, First-page (prev disabled), Last-page (next disabled), Simple+info+limit selector, Full variant, With container chrome, Standalone, Compact, Loading, Size ladder (xs..xl), Density ladder (`jetstream/.../pagination.rs`) — all via real `js_pagination` + `PaginationSpec` builders. No fakes. `specimen=ok`. (First/last guillemet buttons render in the Full variant; navigation itself is a preview-loop concern.)
 
 ## Notes
 

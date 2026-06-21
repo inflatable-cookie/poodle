@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 42: Jetstream specimen backfilled to full contract §13 coverage — Default (1/20/156), Single page (1/20/12), Large dataset (5/20/1000) — via real js_pagination_summary + PaginationSummarySpec, matching Svelte/GPUI data exactly. GPUI already full. Both previews build clean. (gpui/jetstream component todos unchanged — text-format/empty-state, not specimen.) -->
 # Parity: PaginationSummary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -35,7 +36,7 @@
 
 - Svelte covers: Default (1/8/156/20), Single page (1/1/12/20), Large dataset (5/50/1000/20) — matches contract §13 exactly.
 - GPUI covers: Default (1/20/156), Single page (1/20/12), Large dataset (5/20/1000). — matches Svelte's three cases. OK (note Single-page uses pageSize 20 not the contract's implied range; visually equivalent).
-- Jetstream covers: Page 1 (1/25/67), Page 3 (3/25/67) only. — missing: **Single page** and **Large dataset** cases; uses different data (67 vs 156/1000). Under-covers vs Svelte.
+- Jetstream now covers: Default (1/20/156), Single page (1/20/12), Large dataset (5/20/1000) — matches the Svelte/GPUI three-case set and contract §13 data exactly, via real `js_pagination_summary` + `PaginationSummarySpec`. `specimen=ok`. (Open component todos — spaced en-dash vs tight hyphen — are a `js_pagination_summary` text-format gap, not a specimen gap.)
 
 ## Notes
 

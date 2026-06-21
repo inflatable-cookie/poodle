@@ -231,6 +231,43 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- With container chrome (padding + top border + elevated bg) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With container chrome"),
+                    theme,
+                ))
+                .child(Pagination::from_spec(
+                    PaginationSpec::new()
+                        .with_current_page(1)
+                        .with_total_pages(10)
+                        .with_aria_label("Pagination with chrome"),
+                    theme,
+                )),
+        )
+        // --- Last page (next button disabled at boundary) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Last page (next disabled)"),
+                    theme,
+                ))
+                .child(Pagination::from_spec(
+                    PaginationSpec::new()
+                        .with_current_page(8)
+                        .with_total_pages(8)
+                        .with_standalone(true)
+                        .with_aria_label("Last page pagination"),
+                    theme,
+                )),
+        )
         .into_any_element();
 
     specimen_layout(
