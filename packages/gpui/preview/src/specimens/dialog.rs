@@ -6,8 +6,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{Button, Dialog, Eyebrow, Pill};
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, DialogSpec, DialogWidth, EyebrowSpec, PillAppearance, PillSpec,
-    PillTone,
+    ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec,
+    PillAppearance, PillSpec, PillTone,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -138,8 +138,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "xl",
             cx,
         ))
+        .child(open_button(
+            "dialog-width-full-trigger",
+            "dialog-width-full-open",
+            "full",
+            cx,
+        ))
         .into_any_element();
     content = content.child(button_row("Width presets", width_buttons));
+
+    content = content.child(button_row(
+        "Alert",
+        open_button(
+            "dialog-alert-trigger",
+            "dialog-alert-open",
+            "Delete item",
+            cx,
+        ),
+    ));
 
     content = content.child(button_row(
         "Non-dismissible",
@@ -652,6 +668,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ("md", DialogWidth::Md, "dialog-width-md-open"),
         ("lg", DialogWidth::Lg, "dialog-width-lg-open"),
         ("xl", DialogWidth::Xl, "dialog-width-xl-open"),
+        ("full", DialogWidth::Full, "dialog-width-full-open"),
     ] {
         if state.specimens.is_on(key) {
             root = root.child(
@@ -714,6 +731,61 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
                         overlay_state::set_toggle(this, "dialog-persistent-open", false, cx);
                     })),
+            ),
+        );
+    }
+
+    if state.specimens.is_on("dialog-alert-open") {
+        root = root.child(
+            Dialog::from_spec(
+                DialogSpec::new()
+                    .with_role(DialogKind::AlertDialog)
+                    .with_title("Delete item?")
+                    .with_description(
+                        "This will permanently remove the item and all associated data.",
+                    ),
+                theme,
+            )
+            .on_open_change({
+                let root = root_handle.clone();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "dialog-alert-open", open, cx);
+                }
+            })
+            .with_content(
+                div()
+                    .text_size(px(13.0))
+                    .text_color(color_to_hsla(text_secondary))
+                    .child("This action cannot be undone."),
+            )
+            .with_actions(
+                div()
+                    .flex()
+                    .gap(px(8.0))
+                    .child(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Cancel"),
+                            theme,
+                        )
+                        .with_id("dialog-alert-cancel")
+                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                            overlay_state::set_toggle(this, "dialog-alert-open", false, cx);
+                        })),
+                    )
+                    .child(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_tone(ButtonTone::Danger)
+                                .with_label("Delete"),
+                            theme,
+                        )
+                        .with_id("dialog-alert-delete")
+                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                            overlay_state::set_toggle(this, "dialog-alert-open", false, cx);
+                        })),
+                    ),
             ),
         );
     }

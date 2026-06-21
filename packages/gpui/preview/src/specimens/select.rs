@@ -5,7 +5,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{Eyebrow, Select};
-use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec, ValidationState};
+use poodle_specs::{
+    ChoiceOption, ControlSize, EyebrowSpec, SelectMode, SelectSpec, ValidationState,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -380,7 +382,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )
                         .child(
                             Select::from_spec(
-                                SelectSpec::new(fruit_options)
+                                SelectSpec::new(fruit_options.clone())
                                     .with_placeholder("Pick one")
                                     .with_value("cherry")
                                     .with_validation_state(ValidationState::Pending),
@@ -389,5 +391,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_id("select-pending"),
                         ),
                 ),
+        )
+        // --- Sizes (xs → xl) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Sizes (xs → xl)"),
+                    theme,
+                ))
+                .child({
+                    let sizes = [
+                        ("xs", ControlSize::Xs),
+                        ("sm", ControlSize::Sm),
+                        ("md", ControlSize::Md),
+                        ("lg", ControlSize::Lg),
+                        ("xl", ControlSize::Xl),
+                    ];
+                    let mut col = div().flex().flex_col().gap(px(12.0)).max_w(px(320.0));
+                    for (label, size) in sizes {
+                        col = col.child(
+                            Select::from_spec(
+                                SelectSpec::new(fruit_options.clone())
+                                    .with_placeholder("Select...")
+                                    .with_size(size),
+                                theme,
+                            )
+                            .with_id(format!("select-size-{label}")),
+                        );
+                    }
+                    col
+                }),
         )
 }

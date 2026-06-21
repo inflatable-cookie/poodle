@@ -4,7 +4,9 @@ use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_jetstream_components::tabs::js_tabs;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{TabDefinition, TabVariant, TabsSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, Orientation, TabDefinition, TabVariant, TabsSpec,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -35,6 +37,29 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
         TabDefinition::new("active", "Active"),
         TabDefinition::new("review", "Under Review").with_disabled(true),
         TabDefinition::new("archived", "Archived"),
+    ];
+
+    // Closable card tabs (file-tab style with close x).
+    let items_closable = vec![
+        TabDefinition::new("index.ts", "index.ts"),
+        TabDefinition::new("App.svelte", "App.svelte").with_closable(true),
+        TabDefinition::new("utils.ts", "utils.ts").with_closable(true),
+        TabDefinition::new("types.ts", "types.ts").with_closable(true),
+    ];
+
+    // Icon-only tabs for vertical orientation (label hidden in vertical mode).
+    let items_vertical = vec![
+        TabDefinition::new("files", "Explorer").with_icon("folder"),
+        TabDefinition::new("search", "Search").with_icon("search"),
+        TabDefinition::new("git", "Source Control").with_icon("git-branch"),
+        TabDefinition::new("debug", "Debug").with_icon("terminal"),
+    ];
+
+    // Count-bearing tabs reused across full-width / size / density groups.
+    let items_detail = vec![
+        TabDefinition::new("details", "Details"),
+        TabDefinition::new("usage", "Usage").with_count(12),
+        TabDefinition::new("versions", "Versions").with_count(3),
     ];
 
     div().flex_col().gap(32.0)
@@ -142,6 +167,79 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 theme,
             )
         ))
+
+        // ── Closable card tabs ───────────────────────────────────────────
+        .child(group("Card — closable (file tabs with close x)", secondary,
+            js_tabs(
+                &TabsSpec::new(items_closable)
+                    .with_variant(TabVariant::Card)
+                    .with_value("App.svelte"),
+                theme,
+            )
+        ))
+
+        // ── Full-width ───────────────────────────────────────────────────
+        .child(group("Full-width (tabs flex to fill the row)", secondary,
+            div().w(360.0).child(js_tabs(
+                &TabsSpec::new(items_detail.clone())
+                    .with_variant(TabVariant::Card)
+                    .with_full_width(true)
+                    .with_value("details"),
+                theme,
+            ))
+        ))
+
+        // ── Vertical orientation (icon-only) ─────────────────────────────
+        .child(group("Vertical orientation (icon-only)", secondary,
+            js_tabs(
+                &TabsSpec::new(items_vertical.clone())
+                    .with_variant(TabVariant::Underline)
+                    .with_orientation(Orientation::Vertical)
+                    .with_value("files"),
+                theme,
+            )
+        ))
+        .child(group("Vertical orientation (Block, icon-only)", secondary,
+            js_tabs(
+                &TabsSpec::new(items_vertical)
+                    .with_variant(TabVariant::Block)
+                    .with_orientation(Orientation::Vertical)
+                    .with_value("files"),
+                theme,
+            )
+        ))
+
+        // ── Sizes (xs → xl) ──────────────────────────────────────────────
+        .child(group("Sizes (xs → xl)", secondary,
+            div().flex_col().gap(12.0)
+                .child(js_tabs(&size_spec(&items_detail, ControlSize::Xs), theme))
+                .child(js_tabs(&size_spec(&items_detail, ControlSize::Sm), theme))
+                .child(js_tabs(&size_spec(&items_detail, ControlSize::Md), theme))
+                .child(js_tabs(&size_spec(&items_detail, ControlSize::Lg), theme))
+                .child(js_tabs(&size_spec(&items_detail, ControlSize::Xl), theme))
+        ))
+
+        // ── Densities (compact / default / comfortable) ──────────────────
+        .child(group("Densities (compact / default / comfortable)", secondary,
+            div().flex_col().gap(12.0)
+                .child(js_tabs(&density_spec(&items_detail, ControlDensity::Compact), theme))
+                .child(js_tabs(&density_spec(&items_detail, ControlDensity::Default), theme))
+                .child(js_tabs(&density_spec(&items_detail, ControlDensity::Comfortable), theme))
+        ))
+}
+
+fn size_spec(items: &[TabDefinition], size: ControlSize) -> TabsSpec {
+    TabsSpec::new(items.to_vec())
+        .with_variant(TabVariant::Card)
+        .with_size(size)
+        .with_value("details")
+}
+
+fn density_spec(items: &[TabDefinition], density: ControlDensity) -> TabsSpec {
+    TabsSpec::new(items.to_vec())
+        .with_variant(TabVariant::Card)
+        .with_density(density)
+        .with_value("details")
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

@@ -66,6 +66,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "Open left drawer",
                     cx,
                 )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_wrap()
+                .items_center()
+                .gap(px(12.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Top edge"),
+                    theme,
+                ))
+                .child(trigger(
+                    "drawer-top-trigger",
+                    "drawer-top-open",
+                    "Open top drawer",
+                    cx,
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_wrap()
+                .items_center()
+                .gap(px(12.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Bottom edge"),
+                    theme,
+                ))
+                .child(trigger(
+                    "drawer-bottom-trigger",
+                    "drawer-bottom-open",
+                    "Open bottom drawer",
+                    cx,
+                )),
         );
 
     if state.specimens.is_on("drawer-right-open") {
@@ -137,6 +171,92 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .text_size(px(14.0))
                     .text_color(color_to_hsla(text_secondary))
                     .child("Side navigation or filters can live in a left-edge drawer."),
+            ),
+        );
+    }
+
+    if state.specimens.is_on("drawer-top-open") {
+        root = root.child(
+            Drawer::from_spec(
+                DrawerSpec::new()
+                    .with_edge(DrawerEdge::Top)
+                    .with_title("Notifications")
+                    .with_description("Recent activity slides down from the top edge."),
+                theme,
+            )
+            .on_open_change({
+                let root = root_handle.clone();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "drawer-top-open", open, cx);
+                }
+            })
+            .with_content(
+                div()
+                    .text_size(px(14.0))
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(
+                        "Top-anchored drawers span the full width and are useful for banners or alerts.",
+                    ),
+            )
+            .with_main_content(
+                div().flex().justify_end().child(
+                    Button::from_spec(ButtonSpec::new().with_label("Dismiss"), theme)
+                        .with_id("drawer-top-dismiss")
+                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                            overlay_state::set_toggle(this, "drawer-top-open", false, cx);
+                        })),
+                ),
+            ),
+        );
+    }
+
+    if state.specimens.is_on("drawer-bottom-open") {
+        root = root.child(
+            Drawer::from_spec(
+                DrawerSpec::new()
+                    .with_edge(DrawerEdge::Bottom)
+                    .with_title("Quick actions")
+                    .with_description("A bottom sheet anchored to the lower edge."),
+                theme,
+            )
+            .on_open_change({
+                let root = root_handle.clone();
+                move |open, _window, cx| {
+                    overlay_state::set_toggle_via_entity(&root, "drawer-bottom-open", open, cx);
+                }
+            })
+            .with_content(
+                div()
+                    .text_size(px(14.0))
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(
+                        "Bottom-anchored drawers span the full width and rise from the lower edge.",
+                    ),
+            )
+            .with_main_content(
+                div()
+                    .flex()
+                    .gap(px(6.0))
+                    .justify_end()
+                    .child(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Cancel"),
+                            theme,
+                        )
+                        .with_id("drawer-bottom-cancel")
+                        .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                            overlay_state::set_toggle(this, "drawer-bottom-open", false, cx);
+                        })),
+                    )
+                    .child(
+                        Button::from_spec(ButtonSpec::new().with_label("Apply"), theme)
+                            .with_id("drawer-bottom-apply")
+                            .on_click(cx.listener(|this, _e: &ClickEvent, _w, cx| {
+                                overlay_state::set_toggle(this, "drawer-bottom-open", false, cx);
+                            })),
+                    ),
             ),
         );
     }

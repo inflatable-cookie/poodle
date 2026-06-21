@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok | specimen backfill: GPUI added alert role (danger Delete) + Full width preset; Jetstream replaced fake label() footer with real js_button, added alert role, Xl/Full widths, scrollable body — both previews build clean with real Dialog + Button -->
 <!-- pass: backdrop→overlay token (gpui); jet per-section gaps (header mb=stack.md, actions mt=stack.lg, gap=inline.sm), chrome-sized close button, removed non-contract 1px divider, max-height 42rem cap + body min-width-0; +7 jet probe tests -->
 # Parity: Dialog
 

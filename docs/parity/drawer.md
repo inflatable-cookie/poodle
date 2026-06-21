@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap | pass 41: both targets gained size-table title font + header margin-bottom + actions footer row; GPUI backdrop/fallback-text token-resolved + edge sizing for top/bottom; Jetstream dropped close-x, edge-anchored 28/24rem sizing, probe tests added -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok | specimen backfill: both targets now cover all four edge anchors (left/right/top/bottom) with header+description+body + real Button footer actions — previews build clean -->
 # Parity: Drawer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

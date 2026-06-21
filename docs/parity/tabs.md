@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 53: specimen backfill on BOTH Rust targets via real js_tabs/Tabs builders.
+     GPUI tabs.rs +fullWidth (card, w_full), +size matrix (xs→xl, with_size), +density
+     matrix (compact/default/comfortable, with_density). Jetstream tabs.rs +closable card
+     (close x), +vertical orientation (underline + block, icon-only), +fullWidth, +size
+     matrix, +density matrix. All token-resolved via spec — zero hand-rolled tab strips.
+     Both previews build clean. -->
+
 <!-- pass 52: fullWidth + vertical orientation built on BOTH targets. Added
      TabsSpec.is_full_width (+ with_full_width, uses_full_width(), is_vertical()).
      fullWidth (horizontal): list flex w_full, tabs flex_grow + w_full + justify_center
@@ -79,8 +86,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Text+panel, Card (closable+reorderable), Block (full-width+separators), Pill (icons), Underline (icons, no panel), Strip (horizontal full-width closable reorderable), Strip vertical (icon-only), Strip collapse-toggle, Card with counts+separators+URL sync (`TabsSpecimen.svelte`).
-- GPUI covers: Underline, Card, Card+counts(icons), Pill, Block, Underline+icons, Strip (via TabStrip), Strip vertical, collapse-toggle. — missing: reorder demo parity in Tabs proper, separator demo, fullWidth, historyKey.
-- Jetstream covers: Underline, Card, Pill, Block, icons (Underline/Pill), count badges, disabled. — missing: **closable/close button**, **reorder**, **strip variant** (in this specimen), **vertical orientation**, **panel content**, **separators**, **counts+URL sync**.
+- GPUI covers: Underline, Card, Card+counts(icons), Pill, Block, Underline+icons, Strip (via TabStrip), Strip vertical, collapse-toggle, **fullWidth**, **sizes (xs→xl)**, **densities**. — remaining (preview-loop/host-owned): reorder demo parity in Tabs proper, separator demo (no `separator` field on Rust `TabDefinition`), historyKey.
+- Jetstream covers: Underline, Card, Pill, Block, icons (Underline/Pill), count badges, disabled, **closable card (close x)**, **vertical orientation (underline + block, icon-only)**, **fullWidth**, **sizes (xs→xl)**, **densities**. — remaining: reorder/close interaction (**preview-loop**), strip variant (separate `tab_strip.rs` — architecture delta), panel content (host-owned), separators (no Rust field), counts+URL sync (host-owned).
 
 ## Notes
 

@@ -1,4 +1,10 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- pass: specimen backfill via real js_select/Select builders. Jetstream select.rs
+     +Grouped (open: Fruits/Vegetables/Grains section headers + disabled Spinach option,
+     contract-mandated), +Clearable (value → clear x), +Selected+open (checkmark indicator),
+     +size matrix (xs→xl, with_size). GPUI select.rs +size matrix. Both token-resolved via
+     spec — no hand-rolled dropdown boxes. Both previews build clean. -->
+
 <!-- pass: gpui hover-shadow literal dropped (no Svelte basis) + option description + clearable clear button; jetstream panel-offset/dims tokens + menu_min_width + hover bg + clearable + description + validation wiring; both probe/build-verified -->
 # Parity: Select
 
@@ -49,8 +55,8 @@ All real gaps closed:
 ## Specimen parity
 
 - Svelte covers: flat default, native, grouped, searchable, freeform, custom-trigger snippet, clearable, disabled, size matrix, density matrix (`SelectSpecimen.svelte`). Contract mandates 3 (flat / grouped / disabled) — Svelte exceeds.
-- GPUI covers: Native (default), Custom non-searchable, Searchable, Searchable-with-groups, Freeform, Rich option rendering, Clearable, Native grouped, Disabled, Validation states, Sizes (11 groups). — missing: nothing material vs contract; broadest coverage of the three.
-- Jetstream covers: Default(placeholder), With value, Disabled, Open state, Searchable, Invalid validation, Ghost variant. — missing: **Grouped options** (contract-mandated specimen), and the **Invalid validation** group renders without effect because `js_select` ignores validation state (see Jetstream gap).
+- GPUI covers: Native (default), Custom non-searchable, Searchable, Searchable-with-groups, Freeform, Rich option rendering, Clearable, Native grouped, Disabled, Validation states, **Sizes (xs→xl)**. — missing: nothing material vs contract; broadest coverage of the three.
+- Jetstream covers: Default(placeholder), With value, Disabled, Open state, Searchable, Invalid validation, Ghost variant, **Grouped (open: section headers + disabled option)**, **Clearable (clear x)**, **Selected+open (checkmark)**, **Sizes (xs→xl)**. — all three contract-mandated specimens (flat / grouped / disabled) now covered; validation now wired (see Jetstream gap — fixed).
 
 ## Notes
 

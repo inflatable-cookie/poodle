@@ -147,9 +147,9 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | detail-section | fixed | 0 | 0 | gap |
 | detail-section-group | fixed | 0 | 0 | gap |
 | detail-shell | ok | 0 | 1 | ok |
-| dialog | ok | 0 | 0 | gap |
+| dialog | ok | 0 | 0 | ok |
 | dock-region | ok | 2 | 2 | gap |
-| drawer | ok | 0 | 0 | gap |
+| drawer | ok | 0 | 0 | ok |
 | duration-input | fixed | 2 | 2 | gap |
 | editable-label | ok | 2 | 2 | gap |
 | editable-list | fixed | 4 | 3 | gap |
@@ -211,7 +211,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | resize-handle | ok | 1 | 1 | gap |
 | scroll-shell | ok | 1 | 0 | gap |
 | segmented-control | fixed | 0 | 0 | ok |
-| select | ok | 0 | 0 | gap |
+| select | ok | 0 | 0 | ok |
 | selection-summary | fixed | 0 | 0 | gap |
 | separator | ok | 0 | 0 | gap |
 | sidebar-nav | fixed | 0 | 1 | ok |
@@ -229,7 +229,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | switch | fixed | 0 | 0 | ok |
 | tab-strip | gap | 0 | 0 | gap |
 | table | fixed | 0 | 0 | gap |
-| tabs | fixed | 2 | 2 | gap |
+| tabs | fixed | 2 | 2 | ok |
 | text | ok | 0 | 1 | gap |
 | text-input | fixed | 2 | 2 | gap |
 | text-link | ok | 0 | 1 | gap |

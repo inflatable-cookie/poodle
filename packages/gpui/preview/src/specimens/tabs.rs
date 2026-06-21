@@ -6,7 +6,8 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{Eyebrow, TabStrip, Tabs};
 use poodle_specs::{
-    EyebrowSpec, Orientation, TabDefinition, TabStripItem, TabStripSpec, TabVariant, TabsSpec,
+    ControlDensity, ControlSize, EyebrowSpec, Orientation, TabDefinition, TabStripItem,
+    TabStripSpec, TabVariant, TabsSpec,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -356,6 +357,80 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             cx.notify();
         }));
 
+    // 8. FULL-WIDTH (tabs flex to fill the row)
+    let full_width_tabs = vec![
+        TabDefinition::new("details", "Details"),
+        TabDefinition::new("usage", "Usage").with_count(12),
+        TabDefinition::new("versions", "Versions").with_count(3),
+    ];
+    let full_width_value = state
+        .specimens
+        .text
+        .get("tabs-fullwidth-value")
+        .map(|s| s.as_str())
+        .unwrap_or("details")
+        .to_string();
+    let full_width_spec = TabsSpec::new(full_width_tabs)
+        .with_variant(TabVariant::Card)
+        .with_full_width(true)
+        .with_value(&full_width_value)
+        .with_aria_label("Full-width sections");
+    let full_width_component = Tabs::from_spec(full_width_spec, theme)
+        .with_id("specimen-fullwidth")
+        .on_change(cx.listener(|this, val: &str, _w, cx| {
+            this.state
+                .specimens
+                .text
+                .insert("tabs-fullwidth-value".to_string(), val.to_string());
+            cx.notify();
+        }));
+
+    // 9. SIZE MATRIX (xs → xl, card variant)
+    let size_specs = [
+        ("xs", ControlSize::Xs),
+        ("sm", ControlSize::Sm),
+        ("md", ControlSize::Md),
+        ("lg", ControlSize::Lg),
+        ("xl", ControlSize::Xl),
+    ];
+    let mut size_row = div().flex().flex_col().gap(px(12.0)).max_w(px(360.0));
+    for (label, size) in size_specs {
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("details", "Details"),
+            TabDefinition::new("usage", "Usage").with_count(12),
+            TabDefinition::new("versions", "Versions").with_count(3),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_size(size)
+        .with_value("details")
+        .with_aria_label(format!("{label} tabs"));
+        size_row = size_row.child(
+            Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{label}")),
+        );
+    }
+
+    // 10. DENSITY MATRIX (compact / default / comfortable, card variant)
+    let density_specs = [
+        ("compact", ControlDensity::Compact),
+        ("default", ControlDensity::Default),
+        ("comfortable", ControlDensity::Comfortable),
+    ];
+    let mut density_row = div().flex().flex_col().gap(px(12.0)).max_w(px(360.0));
+    for (label, density) in density_specs {
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("details", "Details"),
+            TabDefinition::new("usage", "Usage").with_count(12),
+            TabDefinition::new("versions", "Versions").with_count(3),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_density(density)
+        .with_value("details")
+        .with_aria_label(format!("{label} tabs"));
+        density_row = density_row.child(
+            Tabs::from_spec(spec, theme).with_id(format!("specimen-density-{label}")),
+        );
+    }
+
     // ASSEMBLE
     div()
         .flex()
@@ -596,5 +671,41 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 }),
                         ),
                 ),
+        )
+        // 8. Full-width
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Full-width (tabs flex to fill the row)"),
+                    theme,
+                ))
+                .child(div().w_full().child(full_width_component)),
+        )
+        // 9. Sizes
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Sizes (xs → xl)"),
+                    theme,
+                ))
+                .child(size_row),
+        )
+        // 10. Densities
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Densities (compact / default / comfortable)"),
+                    theme,
+                ))
+                .child(density_row),
         )
 }

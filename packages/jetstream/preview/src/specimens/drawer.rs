@@ -73,6 +73,50 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 ),
             )
         ))
+        // Top edge (full-width banner), dismiss action
+        .child(group("Top edge", secondary,
+            js_drawer_with_actions(
+                &DrawerSpec::new()
+                    .with_edge(DrawerEdge::Top)
+                    .with_title("Notifications")
+                    .with_description("Recent activity slides down from the top edge."),
+                theme,
+                Some(
+                    label("Top-anchored drawers span the full width.").text_color(text_primary).text_size(body_font)
+                ),
+                Some(
+                    div().flex_row().justify_end().gap(8.0)
+                        .child(js_button(
+                            &ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Dismiss"),
+                            theme,
+                        ))
+                ),
+            )
+        ))
+        // Bottom edge (bottom sheet) with Cancel / Apply actions
+        .child(group("Bottom edge", secondary,
+            js_drawer_with_actions(
+                &DrawerSpec::new()
+                    .with_edge(DrawerEdge::Bottom)
+                    .with_title("Quick actions")
+                    .with_description("A bottom sheet anchored to the lower edge."),
+                theme,
+                Some(
+                    label("Bottom-anchored drawers rise from the lower edge.").text_color(text_primary).text_size(body_font)
+                ),
+                Some(
+                    div().flex_row().justify_end().gap(8.0)
+                        .child(js_button(
+                            &ButtonSpec::new().with_variant(ButtonVariant::Secondary).with_label("Cancel"),
+                            theme,
+                        ))
+                        .child(js_button(
+                            &ButtonSpec::new().with_variant(ButtonVariant::Primary).with_label("Apply"),
+                            theme,
+                        ))
+                ),
+            )
+        ))
         // Empty content
         .child(group("Empty content", secondary,
             js_drawer(
