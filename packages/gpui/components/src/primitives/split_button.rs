@@ -5,13 +5,15 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ButtonTone, ButtonVariant, ControlSize, IconSize, IconSpec, SplitButtonSpec, SplitMenuItem,
+    ButtonTone, ButtonVariant, ControlSize, IconSpec, SplitButtonSpec, SplitMenuItem, SpinnerSize,
+    SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
 
 use super::icon::Icon;
+use super::spinner::Spinner;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem,
-    size_padding_x_offset_rem,
+    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem, split_button_chevron_size_rem, split_button_toggle_width_rem,
 };
 use crate::theme_ext::{
     color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius,
@@ -184,11 +186,13 @@ impl IntoElement for SplitButton {
 
         let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
 
+        // Contract §7 Primary half: `min-width: 4rem` flat (not the per-size
+        // Button min-width scale).
         let mut primary = div()
             .id("poodle-split-primary")
             .focusable()
             .h(height)
-            .min_w(px(rem_to_px(size_min_width_rem(effective_size)) * 0.75))
+            .min_w(px(rem_to_px(4.0)))
             .px(pad_x);
 
         // Brand-raised treatment for primary half
@@ -213,6 +217,7 @@ impl IntoElement for SplitButton {
             primary = primary.bg(fill);
         }
 
+        let primary_gap = resolve_px(theme, "space.inline.sm");
         primary = primary
             .border_1()
             .border_color(border_color)
@@ -222,6 +227,7 @@ impl IntoElement for SplitButton {
             .font_weight(FontWeight::MEDIUM)
             .line_height(relative(1.0))
             .flex()
+            .gap(primary_gap)
             .items_center()
             .justify_center();
 
@@ -236,6 +242,21 @@ impl IntoElement for SplitButton {
                 });
         }
 
+        // Contract §4/§8: loading shows the shared Spinner (ring/sm/current) in
+        // the primary half, before the label.
+        if spec.is_loading {
+            primary = primary.child(
+                Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Ring)
+                        .with_size(SpinnerSize::Sm)
+                        .with_tone(SpinnerTone::Current),
+                    theme,
+                )
+                .with_color(text_color),
+            );
+        }
+
         if !label_text.is_empty() {
             primary = primary.child(div().whitespace_nowrap().min_w(px(0.0)).child(label_text));
         }
@@ -248,11 +269,12 @@ impl IntoElement for SplitButton {
             .bg(separator_color);
 
         // ── Toggle half ───────────────────────────────────────────
+        // Contract §8 toggle-width-base scales per size (1.75–2.5rem); `md` = 2rem.
         let mut toggle = div()
             .id("poodle-split-toggle")
             .focusable()
             .h(height)
-            .w(px(rem_to_px(2.0))); // Svelte: 2rem toggle width
+            .w(px(rem_to_px(split_button_toggle_width_rem(effective_size))));
 
         // Brand-raised treatment for toggle half
         if theme.brand_raised && !is_ghost && !is_unavailable {
@@ -295,8 +317,11 @@ impl IntoElement for SplitButton {
                 });
         }
 
+        // Contract §8 Chevron: per-size icon dimension (0.625–0.875rem).
+        let chevron_px = rem_to_px(split_button_chevron_size_rem(effective_size));
         toggle = toggle.child(
-            Icon::from_spec(IconSpec::new("chevron-down").with_size(IconSize::Sm), theme)
+            Icon::from_spec(IconSpec::new("chevron-down"), theme)
+                .with_px_size(chevron_px)
                 .with_color(text_color),
         );
 

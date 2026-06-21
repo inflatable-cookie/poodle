@@ -116,8 +116,20 @@ impl IntoElement for HoverCard {
         let mut wrapper = div().flex().flex_col().gap(trigger_gap);
 
         // Trigger (always rendered)
+        // Contract §8 Trigger Focus: outline border-width-focus solid
+        // accent.focusRing, outline-offset 0.125rem. GPUI has no CSS outline;
+        // approximate via a focus border-color + ring shadow (same convention
+        // as Button). Known delta: no outline-offset separation.
         if let Some(trigger) = self.trigger {
-            let mut trigger_wrapper = div().id(("poodle-hover-card-trigger", placement_id));
+            let focus_ring_color = resolve_color(theme, "color.accent.focusRing");
+            let mut trigger_wrapper = div()
+                .id(("poodle-hover-card-trigger", placement_id))
+                .focusable()
+                .rounded(radius)
+                .focus(move |s| {
+                    s.border_color(focus_ring_color)
+                        .shadow(crate::theme_ext::focus_ring_shadow(focus_ring_color))
+                });
             trigger_wrapper = trigger_wrapper.child(trigger);
             if let Some(ref handler) = self.on_open_change {
                 let hover_handler = handler.clone();

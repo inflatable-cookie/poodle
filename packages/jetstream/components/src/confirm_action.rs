@@ -1,105 +1,193 @@
 //! ConfirmAction — Jetstream confirm action backed by ConfirmActionSpec.
-use jetstream_runtime::ui_element::{self, JsEl};
-use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::ConfirmActionSpec;
+//!
+//! Contract: `docs/contracts/components/confirm-action.md`
+//!
+//! Mirrors the Svelte reference (`ConfirmAction.svelte`) and the GPUI composite
+//! (`packages/gpui/components/src/composites/confirm_action.rs`): the component
+//! owns only the trigger/tone wiring and delegates every dialog and button
+//! visual to the composed primitives, so it never re-implements (and never
+//! drifts from) the AlertDialog/Button contracts.
+//!
+//! - Default trigger: a composed secondary `js_button` with derived tone
+//!   (`tone === "danger" ? "danger" : "default"`, Svelte line 48).
+//! - Open dialog: delegates entirely to `js_alert_dialog`, which composes the
+//!   real Dialog primitive (surface/overlay/backdrop) + cancel/confirm Buttons.
+//!
+//! Preview-loop / accepted limits:
+//! - Trigger activation, confirm/cancel clicks and backdrop/escape dismiss live
+//!   in the preview event loop, not the component (the composed Button exposes
+//!   `.focusable()` here; the composed Dialog gates dismiss internally).
+//! - The contract §3 `children` body slot maps to the AlertDialog item-detail
+//!   row; an arbitrary body element is an AlertDialog-side capability and is
+//!   noted as a remaining limit rather than hand-rolled here.
 
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px,
-    resolve_semantic_size, size_font_rem,
+use jetstream_runtime::ui_element::JsEl;
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_specs::{
+    AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, ConfirmActionSpec,
+    StatusTone,
 };
-use crate::theme_ext::{resolve_color, resolve_radius, resolve_px};
+
+use crate::alert_dialog::js_alert_dialog;
+use crate::button::js_button;
+
+/// Svelte: `triggerTone = tone === "danger" ? "danger" : "default"`.
+fn trigger_button_tone(spec: &ConfirmActionSpec) -> ButtonTone {
+    if spec.is_destructive() {
+        ButtonTone::Danger
+    } else {
+        ButtonTone::Default
+    }
+}
+
+/// Map the ConfirmAction `StatusTone` onto the `AlertDialogTone` the composed
+/// AlertDialog accepts. AlertDialog has only `Danger | Warning`; non-danger →
+/// `Warning`, which resolves the confirm Button to the default (accent) tone —
+/// matching Svelte/GPUI where non-danger tones map the confirm Button to
+/// `default`.
+fn alert_tone(spec: &ConfirmActionSpec) -> AlertDialogTone {
+    match spec.tone {
+        StatusTone::Danger => AlertDialogTone::Danger,
+        _ => AlertDialogTone::Warning,
+    }
+}
 
 pub fn js_confirm_action(spec: &ConfirmActionSpec, theme: &JetstreamThemeProvider) -> JsEl {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let font_size = rem_to_px(size_font_rem(effective_size));
-    let title_size = rem_to_px(size_font_rem(effective_size) + 0.1875);
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let gap = resolve_px(theme, "space.stack.md");
-    let action_gap = resolve_px(theme, "space.inline.sm");
-
-    let text_primary = resolve_color(theme, "color.text.primary");
-    let text_secondary = resolve_color(theme, "color.text.secondary");
-    let confirm_fill = resolve_color(theme, spec.confirm_fill_token());
-    let text_inverse = resolve_color(theme, "color.text.inverse");
-    let border = resolve_color(theme, "color.border.default");
-    let surface = resolve_color(theme, "color.background.surface");
-    let radius = resolve_radius(theme, "radius.surface");
-    let ctrl_radius = resolve_radius(theme, "radius.control");
-    let btn_height = rem_to_px(control_height_rem(effective_size));
-
     if !spec.is_open {
-        // Closed state: show only trigger button
-        let trigger_tone = if spec.is_destructive() {
-            resolve_color(theme, "color.status.danger")
-        } else {
-            text_primary
-        };
-
-        return ui_element::button(&spec.title)
-            .text_color(trigger_tone)
-            .text_size(font_size)
-            .h(btn_height)
-            .pl(pad_x).pr(pad_x)
-            .border(1.0).border_color(border)
-            .rounded(ctrl_radius)
-            .bg(surface)
-            .focusable();
+        // Closed: render the default trigger — a composed secondary Button with
+        // the derived tone (contract §2 DefaultTrigger). All Button visuals
+        // (height, padding, fill, border, radius, focus) resolve via js_button.
+        let trigger_spec = ButtonSpec::new()
+            .with_variant(ButtonVariant::Secondary)
+            .with_tone(trigger_button_tone(spec))
+            .with_size(spec.size)
+            .with_size_role(spec.size_role)
+            .with_density(spec.density)
+            .with_label(spec.trigger_label.clone());
+        return js_button(&trigger_spec, theme);
     }
 
-    // Open state: render the alert dialog
-    let backdrop = resolve_color(theme, spec.backdrop_fill_token());
+    // Open: delegate to the composed AlertDialog primitive (Dialog + Buttons).
+    let alert_spec = AlertDialogSpec::new(spec.title.clone())
+        .with_description(spec.description.clone())
+        .with_tone(alert_tone(spec))
+        .with_confirm_label(spec.confirm_label.clone())
+        .with_cancel_label(spec.cancel_label.clone())
+        .with_open(true)
+        .with_size(spec.size)
+        .with_size_role(spec.size_role)
+        .with_density(spec.density);
 
-    let mut dialog = ui_element::div()
-        .bg(backdrop)
-        .flex_col().items_center().justify_center()
-        .grow();
+    js_alert_dialog(&alert_spec, theme)
+}
 
-    let mut card = ui_element::div()
-        .bg(surface)
-        .border(1.0).border_color(border)
-        .rounded(radius)
-        .flex_col().gap(gap)
-        .pl(rem_to_px(1.5)).pr(rem_to_px(1.5))
-        .pt(rem_to_px(1.25)).pb(rem_to_px(1.25))
-        .max_w(rem_to_px(28.0));
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::{ControlSize, SemanticControlSizeRole, StatusTone};
 
-    // Title
-    card = card.child(
-        ui_element::label(&spec.title)
-            .text_color(text_primary).text_size(title_size).text_weight(600)
-    );
-
-    // Description
-    if !spec.description.is_empty() {
-        card = card.child(
-            ui_element::label(&spec.description)
-                .text_color(text_secondary).text_size(font_size)
-        );
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
     }
 
-    // Action buttons
-    let actions = ui_element::div()
-        .flex_row().gap(action_gap).justify_end()
-        .child(
-            ui_element::button(&spec.cancel_label)
-                .text_color(text_primary).text_size(font_size)
-                .h(btn_height).pl(pad_x).pr(pad_x)
-                .border(1.0).border_color(border)
-                .rounded(ctrl_radius)
-                .bg(surface)
-                .focusable()
+    fn base_spec() -> ConfirmActionSpec {
+        ConfirmActionSpec::new(
+            "Delete this record?",
+            "This record will be permanently removed.",
+            "Delete",
+            "Cancel",
         )
-        .child(
-            ui_element::button(&spec.confirm_label)
-                .text_color(text_inverse).text_size(font_size)
-                .h(btn_height).pl(pad_x).pr(pad_x)
-                .rounded(ctrl_radius)
-                .bg(confirm_fill)
-                .focusable()
+        .with_trigger_label("Delete record")
+    }
+
+    #[test]
+    fn closed_renders_trigger_label_only() {
+        let th = theme();
+        let spec = base_spec().with_tone(StatusTone::Danger);
+        let el = js_confirm_action(&spec, &th);
+        let tree = probe(&el, 480.0, 320.0);
+
+        assert!(!tree.is_empty(), "probe produced no nodes");
+        assert!(
+            tree.has_text("Delete record"),
+            "trigger label missing: {:?}",
+            tree.texts()
         );
-    card = card.child(actions);
+        // Closed state shows no dialog title / action labels.
+        assert!(
+            !tree.has_text("Delete this record?"),
+            "dialog title leaked into closed state: {:?}",
+            tree.texts()
+        );
+    }
 
-    dialog = dialog.child(card);
+    #[test]
+    fn open_renders_dialog_title_description_and_actions() {
+        let th = theme();
+        let spec = base_spec().with_tone(StatusTone::Danger).with_open(true);
+        let el = js_confirm_action(&spec, &th);
+        let tree = probe(&el, 640.0, 480.0);
 
-    dialog
+        assert!(
+            tree.has_text("Delete this record?"),
+            "dialog title missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("This record will be permanently removed."),
+            "dialog description missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Delete"),
+            "confirm label missing: {:?}",
+            tree.texts()
+        );
+        assert!(
+            tree.has_text("Cancel"),
+            "cancel label missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn warning_tone_routes_through_alert_dialog() {
+        // Warning tone: trigger is a default-toned secondary Button; the dialog
+        // opens with the (non-danger) AlertDialog tone. Both paths must compose.
+        let th = theme();
+        let closed = ConfirmActionSpec::new("Archive this project?", "It will be archived.", "Archive", "Cancel")
+            .with_tone(StatusTone::Warning)
+            .with_trigger_label("Archive project");
+        let closed_tree = probe(&js_confirm_action(&closed, &th), 480.0, 320.0);
+        assert!(
+            closed_tree.has_text("Archive project"),
+            "warning trigger label missing: {:?}",
+            closed_tree.texts()
+        );
+
+        let open = closed.with_open(true);
+        let open_tree = probe(&js_confirm_action(&open, &th), 640.0, 480.0);
+        assert!(
+            open_tree.has_text("Archive this project?"),
+            "warning dialog title missing: {:?}",
+            open_tree.texts()
+        );
+        assert!(
+            open_tree.has_text("Archive"),
+            "warning confirm label missing: {:?}",
+            open_tree.texts()
+        );
+    }
+
+    #[test]
+    fn size_and_density_propagate_without_panic() {
+        let th = theme();
+        let spec = base_spec()
+            .with_size(ControlSize::Lg)
+            .with_size_role(SemanticControlSizeRole::Prominent)
+            .with_open(true);
+        let tree = probe(&js_confirm_action(&spec, &th), 720.0, 540.0);
+        assert!(tree.has_text("Delete this record?"));
+    }
 }

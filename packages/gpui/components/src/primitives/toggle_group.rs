@@ -54,6 +54,10 @@ impl ToggleGroup {
         self.spec.selection_mode = v;
         self
     }
+    pub fn allow_deactivation(mut self, v: bool) -> Self {
+        self.spec.allow_deactivation = v;
+        self
+    }
     pub fn disabled(mut self, v: bool) -> Self {
         self.spec.is_disabled = v;
         self
@@ -123,9 +127,7 @@ impl IntoElement for ToggleGroup {
 
         let mut el = div().flex().flex_row().flex_wrap().gap(gap);
 
-        let option_values: Vec<String> = spec.options.iter().map(|o| o.value.clone()).collect();
-
-        for (idx, option) in spec.options.iter().enumerate() {
+        for option in spec.options.iter() {
             let is_selected = spec.is_selected(&option.value);
             let item_disabled = option.is_disabled || spec.is_disabled;
 
@@ -190,25 +192,16 @@ impl IntoElement for ToggleGroup {
                         click_handler(&val, window, cx);
                     });
 
-                    // Space/Enter to toggle + arrow keys to navigate
+                    // Contract §6 / Svelte: Space/Enter toggle selection on the
+                    // focused item. Arrow keys move roving focus WITHOUT committing
+                    // selection — Svelte's `moveHighlight` only shifts focus, it
+                    // never calls `onValueChange`. Focus traversal is platform-owned
+                    // (Tier 3), so arrows are a no-op here rather than mutating value.
                     let key_handler = handler.clone();
-                    let arrow_handler = handler.clone();
                     let val2 = option.value.clone();
-                    let ovs = option_values.clone();
-                    let current_idx = idx;
                     item = item.on_key_down(move |event: &KeyDownEvent, window, cx| {
                         if event.keystroke.key == "space" || event.keystroke.key == "enter" {
                             key_handler(&val2, window, cx);
-                        } else if event.keystroke.key == "right" || event.keystroke.key == "down" {
-                            let next = (current_idx + 1) % ovs.len();
-                            arrow_handler(&ovs[next], window, cx);
-                        } else if event.keystroke.key == "left" || event.keystroke.key == "up" {
-                            let prev = if current_idx == 0 {
-                                ovs.len() - 1
-                            } else {
-                                current_idx - 1
-                            };
-                            arrow_handler(&ovs[prev], window, cx);
                         }
                     });
                 }

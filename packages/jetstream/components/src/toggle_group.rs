@@ -12,8 +12,9 @@ use poodle_specs::ToggleGroupSpec;
 
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    toggle_group_gap_rem,
 };
-use crate::theme_ext::{resolve_color, resolve_opacity, resolve_radius};
+use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radius};
 
 /// Build a Jetstream toggle group element from a ToggleGroupSpec.
 ///
@@ -34,12 +35,15 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
     let elevated: Color = resolve_color(theme, "color.background.elevated").into();
     let radius = resolve_radius(theme, "radius.control");
 
-    // Contract: gap resolved from density
-    let gap = rem_to_px(control_space_x_rem(spec.density)) * 0.5;
+    // Contract §8 Root: gap is density-driven (compact 0.1875 / default 0.25 /
+    // comfortable 0.375 rem). Matches Svelte + GPUI exactly.
+    let gap = rem_to_px(toggle_group_gap_rem(spec.density));
 
     // Item sizing
-    // Contract: min-height = calc(control-height - 0.25rem)
+    // Contract: min-height = calc(control-height - 0.25rem) (0.25rem is a
+    // contract-exact rem reduction applied uniformly across sizes).
     let item_height = rem_to_px(control_height_rem(effective_size)) - rem_to_px(0.25);
+    // Contract §8 Item: padding `0 var(--poodle-toggle-group-x)` (density-driven).
     let item_pad_x = rem_to_px(control_space_x_rem(spec.density));
 
     // Contract: item border 0.0625rem, border-color = color-mix(border-subtle 82%, transparent)
@@ -61,8 +65,10 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
     // Contract: selected border = color-mix(accent-base 42%, border-default)
     let selected_border = accent.mix(border_default, 0.42);
 
-    // Contract: font-size 0.75rem, font-weight 600
-    let font_size = rem_to_px(0.75);
+    // Contract §8 Item: font-size = var(--poodle-typography-label-size) (flat
+    // across sizes — data-size only changes height, not font-size), font-weight 600.
+    let font_size = resolve_px(theme, "typography.label.size");
+    // Contract §8 Item: border 0.0625rem (contract-exact rem).
     let border_width = rem_to_px(0.0625);
 
     // ── Root container ──
@@ -124,7 +130,8 @@ pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::ToggleGroupOption;
+    use crate::render_probe::{probe, ProbeColor};
+    use poodle_specs::{ControlDensity, ControlSize, ToggleGroupOption, ToggleGroupSelectionMode};
 
     fn theme() -> JetstreamThemeProvider {
         JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
@@ -180,5 +187,94 @@ mod tests {
             bg,
             expected
         );
+    }
+
+    // ── Probe: one button per option, labels laid out ──
+    #[test]
+    fn renders_a_button_per_option_with_labels() {
+        let th = theme();
+        let tree = probe(&js_toggle_group(&ToggleGroupSpec::new(sample_options()), &th), 400.0, 80.0);
+        assert!(tree.has_text("Grid") && tree.has_text("List") && tree.has_text("Board"));
+        assert_eq!(tree.count_kind("Button"), 3, "expected one button per option");
+        let root = &tree.nodes[0];
+        assert!(root.w > 0.0 && root.h > 0.0, "root laid out");
+    }
+
+    // ── Probe: selected item paints the accent-tinted fill ──
+    #[test]
+    fn selected_item_paints_accent_tint() {
+        use jetstream_runtime::game_ui::Color;
+        let th = theme();
+        let accent: Color = resolve_color(&th, "color.accent.base").into();
+        let surface: Color = resolve_color(&th, "color.background.surface").into();
+        let text_primary: Color = resolve_color(&th, "color.text.primary").into();
+        // Selected fill = accent 22% over the surface-93%/text-primary item fill.
+        let item_fill = surface.mix(text_primary, 0.93);
+        let selected = accent.mix(item_fill, 0.22);
+        let tree = probe(
+            &js_toggle_group(
+                &ToggleGroupSpec::new(sample_options()).with_value(vec!["grid".into()]),
+                &th,
+            ),
+            400.0,
+            80.0,
+        );
+        assert!(
+            tree.has_background(ProbeColor { r: selected.r, g: selected.g, b: selected.b, a: selected.a }, 0.02),
+            "selected item should paint the accent-tinted fill"
+        );
+    }
+
+    // ── Multi-select: two selected items both differ from the unselected one ──
+    #[test]
+    fn multi_select_marks_multiple_items_selected() {
+        let th = theme();
+        let opts = vec![
+            ToggleGroupOption::new("design", "Design"),
+            ToggleGroupOption::new("eng", "Engineering"),
+            ToggleGroupOption::new("docs", "Docs"),
+        ];
+        let spec = ToggleGroupSpec::new(opts)
+            .with_selection_mode(ToggleGroupSelectionMode::Multiple)
+            .with_value(vec!["design".into(), "docs".into()]);
+        let el = js_toggle_group(&spec, &th);
+        let design_bg = el.children[0].style.background.expect("design bg");
+        let eng_bg = el.children[1].style.background.expect("eng bg");
+        let docs_bg = el.children[2].style.background.expect("docs bg");
+        assert_eq!(design_bg, docs_bg, "both selected items share the selected fill");
+        assert_ne!(design_bg, eng_bg, "selected and unselected fills differ");
+    }
+
+    // ── Density drives gap, not item height ──
+    #[test]
+    fn density_changes_gap_not_item_height() {
+        let th = theme();
+        let item_h = |d: ControlDensity| {
+            let spec = ToggleGroupSpec::new(sample_options()).with_density(d);
+            let tree = probe(&js_toggle_group(&spec, &th), 400.0, 80.0);
+            tree.nodes.iter().find(|n| n.kind == "Button").map(|n| n.h).unwrap_or(0.0)
+        };
+        assert_eq!(
+            item_h(ControlDensity::Compact),
+            item_h(ControlDensity::Comfortable),
+            "density must not change item height"
+        );
+    }
+
+    // ── Font-size resolves from the label-size token (flat across sizes) ──
+    #[test]
+    fn font_size_is_label_size_token_for_all_sizes() {
+        let th = theme();
+        let expected = resolve_px(&th, "typography.label.size");
+        for size in [ControlSize::Xs, ControlSize::Md, ControlSize::Xl] {
+            let spec = ToggleGroupSpec::new(sample_options()).with_size(size);
+            let tree = probe(&js_toggle_group(&spec, &th), 400.0, 120.0);
+            let btn = tree
+                .nodes
+                .iter()
+                .find(|n| n.kind == "Button" && n.text_size.is_some())
+                .expect("a sized button");
+            assert_eq!(btn.text_size, Some(expected), "size {size:?} font drifted from label-size");
+        }
     }
 }

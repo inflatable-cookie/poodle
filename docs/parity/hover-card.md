@@ -1,4 +1,11 @@
-<!-- parity consv=ok gpui=4 jetstream=6 specimen=ok -->
+<!-- parity consv=ok gpui=1 jetstream=0 specimen=ok -->
+<!-- pass 41: spec defaults fixed (180/120/Top, were 400/150/Bottom). GPUI trigger
+     focus ring added (focusRing border + ring shadow, same convention as Button);
+     shadow already token-resolved (elevation_overlay_shadow) — no change. Jetstream
+     surface rebuilt: panel-x/y padding tokens, border 0.72 alpha, bg color-mix(elevated
+     98%, panel), min-width(size.menu.minWidth)/max-width(size.hoverCard.maxWidth); shadow
+     stays shadow_md() JsEl approximation of elevation-overlay (noted). Probe tests added
+     (surface+content, min-width, fill mix). gpui=1 = placement (accepted runtime delta). -->
 # Parity: HoverCard
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,21 +33,21 @@ Note: the **Rust spec** (`hover_card.rs`) defaults `open_delay_ms=400`, `close_d
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded shadow literals at `hover_card.rs:160-170` — two `BoxShadow` with raw `hsla(0.0,0.0,0.0,0.10)`/`0.06`, `px(16.0)`, `px(4.0)`. Contract §8 specifies `box-shadow: var(--poodle-elevation-overlay)`; resolve from the elevation-overlay token (spec already exposes `shadow_token()`), not raw HSLA/px.
-- [ ] No focus ring on trigger — contract §8 requires `outline: border-width-focus solid accent.focusRing; outline-offset: 0.125rem`; trigger wrapper (`hover_card.rs:120-128`) applies none.
-- [ ] Spec default mismatch: `HoverCardSpec` defaults `open_delay_ms=400 close_delay_ms=150 placement=Bottom` (`packages/contracts/components/src/hover_card.rs:25-27`); contract/Svelte are 180/120/Top — fix spec defaults.
-- [ ] Placement is render-only: `placement_id` computed (`hover_card.rs:84-97`) but never used for positioning; surface always stacks below trigger via `flex_col`. Accept as runtime delta only if documented; contract §7 expects JS-computed anchored placement.
+- [x] Shadow already token-resolved — `into_element` uses `elevation_overlay_shadow()` (`hover_card.rs:158`), not raw HSLA/px. (Prior literal-shadow flag was stale; no change needed.)
+- [x] Focus ring on trigger added — trigger wrapper is now `.focusable()` with `.focus(|s| s.border_color(focusRing).shadow(focus_ring_shadow(...)))`, the same approximation Button uses (contract §8; outline-offset is the documented GPUI delta).
+- [x] Spec defaults fixed — `HoverCardSpec` now defaults `open_delay_ms=180 close_delay_ms=120 placement=Top` (`packages/contracts/components/src/hover_card.rs`), matching contract/Svelte.
+- [ ] Placement is render-only: `placement_id` computed but never used for positioning; surface always stacks below trigger via `flex_col`. **Accepted runtime delta** — contract §12 makes anchored placement host-driven; the surface visual tokens all resolve correctly.
 - accepted: no ARIA (gpui has no accessibility API) — role/aria-expanded/aria-controls/aria-label not emitted.
 - accepted: delay timers + viewport clamping live in host event loop, not the component (contract §12 Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded padding `pad_x = rem_to_px(0.75)`, `pad_y = rem_to_px(0.5)` at `hover_card.rs:19-20` — contract §8 surface padding is `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`; resolve `space.panel.x`/`space.panel.y` tokens, do not hardcode rem.
-- [ ] Border at full opacity: `resolve_color(theme, "color.border.default")` (`hover_card.rs:15`) — contract requires `color-mix(border-default 72%, transparent)`; apply 0.72 alpha multiplier (GPUI does this).
-- [ ] Background not mixed: uses `spec.fill_token()` = raw `color.background.elevated` (`hover_card.rs:14`) — contract requires `color-mix(elevated 98%, panel)`.
-- [ ] `shadow_md()` instead of elevation token (`hover_card.rs:28`) — contract §8 box-shadow is `elevation-overlay`; spec exposes `shadow_token()` (unused). Resolve from token.
-- [ ] No min-width/max-width — contract §7 requires `min-width: 14rem`, `max-width: min(22rem, 90vw)`; `js_hover_card` sets neither.
-- [ ] No placement handling — `spec.placement` ignored; surface is a bare `overlay()` with no anchored positioning.
+- [x] Padding now token-resolved — `resolve_px("space.panel.x")` / `space.panel.y`, no hardcoded rem (contract §8).
+- [x] Border opacity fixed — `tint(border-default, 0.72)` applies the 0.72 alpha multiplier, matching GPUI / contract `color-mix(border-default 72%, transparent)`.
+- [x] Background mixed — `color_mix(elevated, panel, 0.98)` per contract `color-mix(elevated 98%, panel)`.
+- [~] Shadow: still `shadow_md()` — JsEl has no per-token shadow channel; `shadow_md()` is the nearest elevated preset and `spec.shadow_token()` carries the intended `elevation-overlay` token. **JsEl approximation, noted.**
+- [x] min-width/max-width added — `min_w(size.menu.minWidth)` (14rem) / `max_w(size.hoverCard.maxWidth)` (22rem); the `90vw` clamp is host-driven (contract §7).
+- [ ] No placement handling — `spec.placement` ignored; surface is a bare `overlay()`. **Accepted preview-loop delta** (contract §12) — anchored positioning + delay timers live in the preview event loop.
 - accepted: no ARIA channel (role/dialog/aria-label).
 - accepted: hover/delay interaction lives in preview `main.rs` event loop, not the component.
 

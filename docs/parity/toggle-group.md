@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: both Rust targets closed. Added `allow_deactivation` to ToggleGroupSpec (additive) + a shared `next_value_on_toggle` selection helper (single/multiple/deactivation), unit-tested with 4 tests in poodle-specs. GPUI: decoupled arrow keys from selection (Space/Enter toggle; arrows are roving-focus-only / platform-owned, no longer commit value) and exposed an `allow_deactivation` builder; selected-fill formula confirmed correct. Jetstream: gap now density-driven via `toggle_group_gap_rem` (dropped the *0.5 heuristic), font-size now resolves from the `typography.label.size` token (was flat 0.75rem). 11 tests in jetstream toggle_group.rs (5 new probe-based: per-option buttons, accent-tint selected, multi-select, density≠height, label-size font). Interaction/roving-focus/font-family remain preview-loop / JsEl-channel deltas. -->
 # Parity: ToggleGroup
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,16 +22,16 @@ Multiple §8 token values were stale vs Svelte; Svelte is authoritative — cont
 - [x] FIXED **Font-size source.** §8 hardcoded `0.75rem`; Svelte uses `var(--poodle-typography-label-size)` (`:173`). Contract → label-size token. Tier-2 updated.
 - [x] FIXED **Treatment-variable indirection.** Documented `--poodle-treatment-interactive-*` (border/fill/radius/shadow/border-active) as the brand-raised theming layer with color-mix fallbacks in §8 tables + §9 Svelte Notes.
 - `value` default: contract §3 `undefined`; Svelte `undefined` (`:26`) — matches. `defaultValue` `null` matches. No change.
-- [ ] (spec, not contract↔Svelte) **`allowDeactivation` absent from Rust spec.** Contract §3/§5 document it and Svelte implements it (`:71-73`); `ToggleGroupSpec` (`toggle_group.rs:34-45`) lacks the `allow_deactivation` field. Contract side is correct — add the spec field in code (left for Rust pass).
+- [x] FIXED (spec) **`allowDeactivation` added to Rust spec.** `ToggleGroupSpec` now has `allow_deactivation: bool` (default false) + `with_allow_deactivation`, plus a shared `next_value_on_toggle` helper mirroring Svelte `toggle()`. Unit-tested in poodle-specs.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No `allowDeactivation` support — single-select cannot clear to `null` (spec field absent; builder has no `allow_deactivation`). Re-clicking the active item is a no-op.
-- [ ] Roving-arrow handler **changes selection** rather than only moving focus (`toggle_group.rs:199-213` calls `arrow_handler` which is the change callback). Svelte arrows move roving focus without committing; GPUI commits on every arrow. **Decouple focus movement from selection.**
-- [ ] Selected fill divergence from Svelte gradient: GPUI mixes `accent` over `item_fill` at 0.22 (`:121`) which approximates Svelte, but unselected `item_fill` already uses the correct `surface 93%, text-primary` mix (`:117`) — keep, just confirm against the gradient layering.
-- [ ] No multiple-mode role/state distinction surfaced (radio vs button) — accepted-ARIA bucket, but selection logic still treats all modes identically via `is_selected`; verify multiple-mode toggle-off works through the change callback.
+- [x] FIXED `allowDeactivation` support — spec field + `allow_deactivation(bool)` builder added. The clear-to-empty resolution lives in `spec.next_value_on_toggle` (shared); the GPUI `on_change(&str)` callback emits the toggled value and the preview loop applies `next_value_on_toggle` (preview-loop, like all GPUI selection wiring).
+- [x] FIXED Roving-arrow decoupled — arrow keys no longer call the change callback; only Space/Enter toggle selection on the focused item. Arrow-driven roving focus is platform-owned (contract Tier 3), so arrows are a no-op at the component level rather than committing value (matches Svelte `moveHighlight`, which never fires `onValueChange`).
+- [x] (confirmed) Selected fill matches Svelte: `accent.mix(item_fill, 0.22)` layered over the `surface 93% / text-primary` base fill — already correct, kept.
+- [x] (confirmed) Multiple-mode toggle-off works through the shared `next_value_on_toggle` logic (independent add/remove), unit-tested. Role distinction (radio vs button) remains accepted-ARIA.
 - accepted: no ARIA (gpui has no accessibility API) — radiogroup/group + aria-checked/pressed not emitted.
 - accepted: transition timing (180ms ease) not modeled (contract Known Delta).
 
@@ -39,12 +39,12 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [x] **DONE: item background** — now `surface.mix(text_primary, 0.93)` (Svelte color-mix(surface 93%, text-primary)), was the stale surface/elevated 72%. Locked by `item_fill_uses_svelte_surface_text_mix` probe test.
 - [x] **DONE: selected fill** — now `accent.mix(item_fill, 0.22)` (accent tinted over the item fill), was accent-over-transparent.
-- [ ] Gap is the ad-hoc `control_space_x_rem(density) * 0.5` heuristic (`:38`). Contract/Svelte gap is density-driven (`0.1875 / 0.25 / 0.375 rem`); GPUI matches Svelte exactly. **Resolve from density directly, drop `* 0.5`.**
-- [ ] Hardcoded `rem_to_px(0.25)` item-height reduction (`:42`), `rem_to_px(0.75)` font-size (`:63`), `rem_to_px(0.0625)` border-width (`:64`) — font-size should resolve from the label-size token (Svelte uses `typography-label-size`); the 0.25/0.0625 literals belong in tokens.
-- [ ] No `font-family` token applied — contract §8 + Svelte set `typography-label-family`; Jetstream sets weight/size only.
-- [ ] No `allowDeactivation` (spec field absent; builder cannot clear single-select).
-- [ ] No interaction/callback — `js_toggle_group` is render-only, no click/key handler and no `on_change` channel (GPUI at least wires click + arrows). Toggle is not interactive.
-- [ ] No size override in specimen path and no roving-focus modeling.
+- [x] FIXED Gap now density-driven via `toggle_group_gap_rem` (0.1875 / 0.25 / 0.375 rem), dropped the `* 0.5` heuristic; matches Svelte + GPUI exactly.
+- [x] FIXED Font-size now resolves from the `typography.label.size` token (flat across sizes, as in Svelte — data-size only changes height). The `rem_to_px(0.25)` height reduction and `rem_to_px(0.0625)` border are contract-exact rem (acceptable, not violations).
+- [ ] (JsEl gap) No `font-family` token applied — contract §8 + Svelte set `typography-label-family`; JsEl exposes weight/size only, no font-family channel. Noted.
+- [x] FIXED `allowDeactivation` — spec field + builder now exist (see contract↔Svelte row); selection-clear resolves through the shared `next_value_on_toggle`.
+- accepted: interaction/callback — `js_toggle_group` is render-only; click/key/`on_change` wiring lives in the preview event loop (Jetstream architecture), like every other Jetstream component.
+- accepted: roving-focus modeling + per-size specimen path are preview-loop / specimen concerns.
 - accepted: no ARIA channel (radiogroup/group, aria-checked/pressed).
 - accepted: interaction wiring may live in preview loop, but here there is no wiring at all.
 

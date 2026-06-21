@@ -10,21 +10,23 @@ pub struct HoverCardSpec {
     pub default_open: bool,
     pub placement: OverlayPlacement,
     /// Hover-in delay in milliseconds before the card appears.
-    /// Matches Svelte `openDelayMs` (default 400).
+    /// Matches Svelte/contract `openDelayMs` (default 180).
     pub open_delay_ms: u32,
     /// Hover-out delay in milliseconds before the card dismisses.
-    /// Matches Svelte `closeDelayMs` (default 150).
+    /// Matches Svelte/contract `closeDelayMs` (default 120).
     pub close_delay_ms: u32,
 }
 
 impl Default for HoverCardSpec {
     fn default() -> Self {
+        // Contract/Svelte defaults: placement="top", openDelayMs=180,
+        // closeDelayMs=120 (HoverCard.svelte:26-27, contract §3).
         Self {
             is_open: false,
             default_open: false,
-            placement: OverlayPlacement::Bottom,
-            open_delay_ms: 400,
-            close_delay_ms: 150,
+            placement: OverlayPlacement::Top,
+            open_delay_ms: 180,
+            close_delay_ms: 120,
         }
     }
 }

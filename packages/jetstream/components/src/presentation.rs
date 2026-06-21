@@ -102,6 +102,33 @@ pub fn size_min_width_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// SplitButton toggle-half base width in rem for a given size.
+///
+/// Matches the Svelte `--poodle-split-button-toggle-width-base` per-size table
+/// (`SplitButton.svelte`). The `md` row (`2rem`) is the unscoped base.
+pub fn split_button_toggle_width_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.75,
+        ControlSize::Sm => 1.875,
+        ControlSize::Md => 2.0,
+        ControlSize::Lg => 2.25,
+        ControlSize::Xl => 2.5,
+    }
+}
+
+/// SplitButton chevron icon size in rem for a given size.
+///
+/// Matches the Svelte `--poodle-split-button-chevron-size` per-size table.
+pub fn split_button_chevron_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.625,
+        ControlSize::Sm => 0.6875,
+        ControlSize::Md => 0.75,
+        ControlSize::Lg => 0.8125,
+        ControlSize::Xl => 0.875,
+    }
+}
+
 /// Resolve a supporting visual size (icons inside controls).
 ///
 /// Supporting visuals render one stop smaller than the control, clamped
@@ -125,6 +152,19 @@ pub fn control_space_x_rem(density: ControlDensity) -> f32 {
         ControlDensity::Compact => 0.5,
         ControlDensity::Default => 0.75,
         ControlDensity::Comfortable => 1.0,
+    }
+}
+
+/// ToggleGroup inter-item gap in rem for a given density.
+///
+/// Matches the Svelte `.poodle-toggle-group[data-density]` `--poodle-toggle-group-gap`
+/// table (compact 0.1875 / default 0.25 / comfortable 0.375 rem). GPUI uses the
+/// same values inline.
+pub fn toggle_group_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.1875,
+        ControlDensity::Default => 0.25,
+        ControlDensity::Comfortable => 0.375,
     }
 }
 

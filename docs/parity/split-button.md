@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=7 specimen=gap | pass: ButtonTone::Success now renders correctly via SplitButtonSpec's shared fill/border/text_token path (probe round-trip verified, 2 tests in jetstream split_button.rs). Listed gaps below (menu/loading/hover/divider/padding) unchanged — out of scope for this success-tone pass. -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: both Rust targets fully built out. GPUI added the loading Spinner in the primary half, dropped the min-w *0.75 fudge (now flat 4rem), and scaled toggle-width + chevron per size (new presentation helpers); the menu already used elevation_overlay_shadow. Jetstream rebuilt js_split_button end-to-end: full variant×tone matrix (ghost transparent, primary/secondary danger+success mixes mirroring js_button), per-segment hover/active, loading spinner + is_unavailable, divider at 0.6·height, per-size toggle width + zero padding, and the dropdown menu (items + separators + hover) rendered at is_open. 9 probe tests in jetstream split_button.rs. Open/select interaction stays preview-loop; GPUI ARIA accepted. -->
 # Parity: SplitButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,23 +28,23 @@ Svelte implements the full variant/tone/size/density system, menu with keyboard 
 
 GPUI renders both halves, divider (60% via `relative(0.6)`), variants incl. ghost, danger via tokens, hover/active/focus, disabled/loading opacity, menu overlay when `is_open`, items + separators, brand-raised treatment. Solid coverage.
 
-- [ ] **Hardcoded shadow color literals** — menu uses `hsla(0.0, 0.0, 0.0, 0.10)` and `hsla(0.0, 0.0, 0.0, 0.06)` with `px(4.0)`/`px(16.0)`/`px(1.0)` dims (`split_button.rs:340-350`); contract §8 menu shadow is `var(--poodle-elevation-overlay)` (spec exposes `shadow_token()`). Resolve from the elevation token, not raw HSLA.
-- [ ] **No loading spinner** — `is_loading` only triggers disabled opacity (`split_button.rs:170,304`); contract §4/§8 require the shared `Spinner` (ring/sm/current) in the primary half. Not rendered.
-- [ ] **`min_w` fudge factor** — primary `min_w(... * 0.75)` (`split_button.rs:191`); contract primary `min-width: 4rem` flat. Drop the `* 0.75`.
-- [ ] **Toggle width hardcodes `rem_to_px(2.0)`** (`split_button.rs:255`) ignoring the per-size toggle-width scale Svelte applies (`toggle-width-base` 1.75–2.5rem across sizes). Resolve per effective size.
+- [x] **Hardcoded shadow color literals** — already resolved in code: the menu uses `crate::theme_ext::elevation_overlay_shadow()` (the `elevation.overlay` token), not raw HSLA. Doc was stale on this point.
+- [x] FIXED **Loading spinner** — `is_loading` now renders the shared `Spinner` (ring/sm/current, `with_color(text_color)`) in the primary half before the label, alongside the disabled opacity (contract §4/§8).
+- [x] FIXED **`min_w` fudge factor** — primary now `min_w(rem_to_px(4.0))` flat (contract §7), dropped the `* 0.75`.
+- [x] FIXED **Toggle width** — now `split_button_toggle_width_rem(effective_size)` (new presentation helper, 1.75–2.5rem per size); chevron now sized via `split_button_chevron_size_rem` + `Icon::with_px_size`.
 - accepted: no ARIA (gpui has no accessibility API) — menu/menuitem/separator roles, aria-haspopup/expanded not emitted.
 - accepted: menu open/close + click-outside are platform-owned (contract §12); menu positioning/flip not replicated (render-only `is_open`).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No menu at all** — `js_split_button` never reads `spec.items` or `spec.is_open` (`split_button.rs`); the entire dropdown panel (contract §2 Menu/Item/Separator) is absent. Render the menu like GPUI.
-- [ ] **No loading state** — `spec.is_loading` ignored; no spinner, and `is_unavailable()` (disabled||loading) not used (only `is_disabled` checked, `split_button.rs:56`). Loading neither disables nor shows a spinner.
-- [ ] **No hover / active / focus visual states** — contract §4 hover (`split-fill-hover`), active (darkened), focus ring; none applied.
-- [ ] **No tone/variant differentiation beyond token lookup** — relies solely on `fill_token()`/`border_token()`/`text_token()`; primary/ghost/danger color-mix nuances (e.g. ghost transparent fill, primary danger inverse text) not verified against Svelte. Cross-check resolved tokens cover all combos.
-- [ ] **Separator height `* 0.56`** (`split_button.rs:19`) — contract divider is `60%` of control height; GPUI uses `relative(0.6)`. Use 0.6.
-- [ ] **Toggle padding `rem_to_px(0.375)`** ad-hoc (`split_button.rs:20,52`) — contract toggle is `width: 2rem; padding: 0`. Use fixed 2rem width, zero padding.
-- [ ] **Primary padding from density** — `control_space_x_rem(spec.density)` (`split_button.rs:17`) folds density into padding; verify against Svelte where density adjusts via `padding-inline-density-adjust` (compact −0.25rem, comfortable +0.25rem) on top of `space.control.x`.
-- accepted: interaction (menu open, click-outside, keyboard) lives in preview `main.rs` event loop; no ARIA channel.
+- [x] FIXED **Menu** — `js_split_button` now reads `spec.items` + `spec.is_open` and renders the dropdown panel (contract §2 Menu/Item/Separator): min-width 12rem, 0.25rem padding, surface-elevated fill/border/radius, per-item control padding + radius (control − 0.125rem) + accent-16% hover, and 0.0625rem separators. Wrapped row+menu in a column when open.
+- [x] FIXED **Loading state** — uses `is_unavailable()` (disabled||loading) to dim + disable, and renders the ring spinner glyph in the primary half.
+- [x] FIXED **Hover / active visual states** — per-segment `hover` (`color-mix(split-fill 84%, elevated)`) + `active` (72% mix) on both halves when available. (Focus ring: JsEl has no focus-style channel — accepted, same as other Jetstream controls.)
+- [x] FIXED **Tone/variant differentiation** — new `resolve_split_colors` reproduces the full Svelte `--poodle-split-*` matrix: ghost = surface-42% fill / border-subtle-72% border (fully transparent for danger/success ghost, status text); primary = accent/status fill, mix(…84%, black) border, inverse text; secondary danger/success = mix(status 16%, surface) fill, mix(status 46%, border-default) border. Mirrors `js_button`.
+- [x] FIXED **Divider height** — now `height * 0.6` (was `* 0.56`), centered by the row.
+- [x] FIXED **Toggle padding/width** — fixed per-size width (`split_button_toggle_width_rem`), zero inline padding; the ad-hoc `rem_to_px(0.375)` trigger padding is gone.
+- [x] (acceptable) **Primary padding from density** — `control_space_x_rem(spec.density)` returns compact 0.5 / default 0.75 / comfortable 1.0 rem, which equals Svelte's base `space.control.x` (0.75) plus the per-density ±0.25rem adjust. Already correct.
+- accepted: interaction (menu open, click-outside, keyboard) lives in preview event loop; no ARIA channel.
 
 ## Specimen parity
 

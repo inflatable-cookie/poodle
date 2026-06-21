@@ -134,7 +134,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | collapsible | fixed | 2 | 2 | gap |
 | color-picker | fixed | 0 | 2 | gap |
 | command-palette | fixed | 2 | 2 | gap |
-| confirm-action | ok | 2 | 7 | gap |
+| confirm-action | ok | 0 | 0 | gap |
 | context-menu | ok | 2 | 5 | gap |
 | data-table | fixed | 1 | 0 | gap |
 | date-picker | fixed | 4 | 6 | gap |
@@ -167,7 +167,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | form-layout | fixed | 2 | 2 | gap |
 | form-shell | gap | 0 | 0 | gap |
 | grid | fixed | 4 | 4 | gap |
-| hover-card | ok | 4 | 6 | ok |
+| hover-card | ok | 1 | 0 | ok |
 | icon | ok | 2 | 1 | gap |
 | icon-button | fixed | 0 | 0 | gap |
 | icon-provider | fixed | 1 | 1 | gap |
@@ -219,7 +219,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | slider | fixed | 3 | 3 | gap |
 | spacer | ok | 2 | 2 | gap |
 | spinner | fixed | 2 | 2 | gap |
-| split-button | fixed | 4 | 7 | gap |
+| split-button | fixed | 0 | 0 | gap |
 | split-view | fixed | 2 | 2 | ok |
 | stack | fixed | 3 | 3 | gap |
 | state-tile | gap | 0 | 0 | ok |
@@ -238,7 +238,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-zone-select | fixed | 0 | 0 | gap |
 | toast-host | fixed | 3 | 4 | gap |
 | toast-stack | ok | 1 | 3 | gap |
-| toggle-group | fixed | 4 | 6 | gap |
+| toggle-group | fixed | 0 | 0 | gap |
 | token-input | fixed | 2 | 3 | gap |
 | toolbar | fixed | 4 | 5 | gap |
 | tooltip | fixed | 3 | 6 | gap |
