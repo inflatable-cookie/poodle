@@ -1,8 +1,8 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
-<!-- pass 83: Jetstream specimen de-faked — the field() closure (hardcoded text_size(11)/
-     h(2rem)/raw border) → real js_field + js_text_input. Closes the last jet todo. specimen
-     stays gap pending a clean preview build (external jetstream-renderer engine repo broke the
-     preview link again mid-edit); zero Poodle-side errors, edit mirrors the proven form_layout fix. -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- pass 83: Jetstream specimen de-faked + verified — the field() closure (hardcoded
+     text_size(11)/h(2rem)/raw border) → real js_field + js_text_input. jetstream/preview builds
+     clean. Closes the last jet todo + flips specimen=ok (groups: default / subtitle+error /
+     submitting / success / custom-actions slot — full contract state coverage with real fields). -->
 <!-- pass 20: GPUI action buttons now composed Button::from_spec (ghost cancel /
      primary submit), submit label flips to "Submitting…" + both disabled while
      submitting; dropped px(12/6)/white()/manual-disabled-fill/hand-rolled-spinner
