@@ -197,7 +197,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | page-loading | ok | 0 | 0 | gap |
 | pagination | fixed | 0 | 1 | gap |
 | pagination-summary | fixed | 2 | 2 | gap |
-| password-requirements | ok | 5 | 6 | gap |
+| password-requirements | ok | 0 | 0 | gap |
 | picker-shell | gap | 4 | 4 | gap |
 | pill | fixed | 3 | 5 | gap |
 | popover | fixed | 0 | 0 | gap |
@@ -212,7 +212,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | scroll-shell | ok | 3 | 1 | gap |
 | segmented-control | fixed | 0 | 0 | gap |
 | select | ok | 0 | 0 | gap |
-| selection-summary | fixed | 5 | 6 | gap |
+| selection-summary | fixed | 0 | 0 | gap |
 | separator | ok | 3 | 2 | gap |
 | sidebar-nav | fixed | 0 | 1 | ok |
 | skeleton | fixed | 0 | 0 | gap |
@@ -227,7 +227,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | status-indicator | fixed | 4 | 5 | gap |
 | surface | fixed | 1 | 1 | gap |
 | switch | fixed | 3 | 6 | gap |
-| tab-strip | gap | 4 | 8 | gap |
+| tab-strip | gap | 0 | 0 | gap |
 | table | fixed | 4 | 5 | gap |
 | tabs | fixed | 4 | 4 | gap |
 | text | ok | 4 | 2 | gap |
@@ -246,7 +246,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tri-state-switch | fixed | 1 | 2 | ok |
 | ui-presentation-provider | fixed | 3 | 2 | gap |
 | validation-summary | gap | 0 | 0 | gap |
-| video-player | fixed | 7 | 3 | gap |
+| video-player | fixed | 0 | 0 | gap |
 <!-- END MATRIX -->
 
 ## Status compiler

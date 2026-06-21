@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=4 jetstream=8 specimen=gap -->
+<!-- parity consv=gap gpui=0 jetstream=0 specimen=gap | pass: GPUI close-button + vertical-active opacity now token/spec-resolved, Enter/Space activation + Alt+Arrow reorder wired; Jetstream built out from placeholder to contract-faithful (size/density tokens, close button, disabled, vertical, accent indicator, current_value fallback) + 6 render-probe tests. No Svelte authority — built to contract; no add-tab/overflow/reorder-handle invented (not in contract anatomy). -->
 # Parity: TabStrip
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,25 +28,26 @@ TabStrip has **no standalone Svelte component** — the contract itself document
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded close-button dimensions: `.w(px(rem_to_px(1.25)))`, `.h(px(rem_to_px(1.25)))`, `.rounded(px(rem_to_px(0.25)))` at `tab_strip.rs:286-288` — raw rem literals, not token-resolved. Contract close-button is `1.25rem`/`radius-control − 0.125rem`; resolve via a close-button size token + `resolve_radius`, not float constants.
-- [ ] Hardcoded vertical-active bg opacity `accent.opacity(0.08)` at `tab_strip.rs:182` — magic multiplier, no token/spec method. Centralize like Tabs' opacity multipliers (`tabs.md:546-554`).
-- [ ] No `Enter`/`Space` activation in `manual` mode and no roving `tabindex` model — key handler covers arrows/Home/End/Delete only (`tab_strip.rs:216-268`); contract §5 lists Enter/Space activation. (TabStrip has no activationMode prop, so automatic-only is defensible — but Enter/Space confirm is still contract-listed.)
-- [ ] No reorder implementation — `is_reorderable` is a spec field and a builder (`reorderable()`, `tab_strip.rs:77`) but nothing reads it; no drag, no `Alt+Arrow`. Contract §4 reorderable state + §3 `isReorderable` unhonored.
+- [x] FIXED Close-button dimensions now resolve from spec: `close_button_size_rem()` (1.25rem) via `rem_to_px`, radius from `close_button_radius_token()` − `close_button_radius_inset_rem()` via `resolve_px`, gap from `close_button_gap_token()`. No bare rem float literals.
+- [x] FIXED Vertical-active bg opacity uses the named `vertical_active_fill_opacity()` spec method (0.08) instead of the magic `accent.opacity(0.08)` literal.
+- [x] FIXED `Enter`/`Space` activation wired into the key handler (calls `nav_handler` on the focused tab's value), alongside the existing arrows/Home/End/Delete.
+- [x] FIXED Reorder wired: `Alt+Arrow` fires the host-owned `on_reorder(value, direction)` callback when `is_reorderable` (checked before plain arrow nav so the modifier wins). Drag reordering stays host/preview-loop owned.
 - accepted: no ARIA — `role="tablist"`/`role="tab"`/`aria-selected`/`aria-disabled` not expressible on GPUI native elements (documented in file header, `tab_strip.rs:6-8`).
 - accepted: horizontal active treatment uses a bottom-border accent edge (strip-style, `tab_strip.rs:184`) rather than the text-variant pill fill — contract permits "one default treatment" (Known Delta §8).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded font-size `rem_to_px(0.8125)` at `tab_strip.rs:19` — must resolve from size token (`size_font_rem(effective_size)` like GPUI `tab_strip.rs:121`); the `size` spec field is ignored entirely.
-- [ ] Hardcoded tab padding `rem_to_px(0.25)` / `rem_to_px(0.5)` at `tab_strip.rs:20-21` — must resolve from control-y + density-aware control-x tokens; the `density` spec field is ignored.
-- [ ] No close button — `is_closable` items render no close affordance; contract §2 CloseButton + §4 closable state unimplemented (`closable_item_count()` unused).
-- [ ] No disabled state — `is_disabled` never read; no opacity dim, no `not-allowed` cursor, not skipped by nav. Contract §4 disabled-item + `disabled_opacity_token()` unused.
-- [ ] No focus ring — `focus_ring_color_token()` unused; tabs are `.focusable()` (`tab_strip.rs:38`) but draw no focus outline. Contract §6 focus ring.
-- [ ] No vertical orientation — always `flex_row()` (`tab_strip.rs:23`); `orientation` spec field ignored. Contract §4 vertical state + up/down nav.
-- [ ] No reorder — `is_reorderable` spec field ignored. Contract §4 reorderable.
-- [ ] `current_value()` fallback not used — selection is `value.or(default_value)` only (`tab_strip.rs:16`), missing the "first non-disabled item" fallback the spec helper provides (`tab_strip.rs:77`). Empty/unset selection renders nothing active.
+- [x] FIXED Font-size resolves from `size_font_rem(effective_size)` (after `resolve_semantic_size`), matching GPUI/Tabs. The `size` field is honored.
+- [x] FIXED Tab padding resolves from `control_space_x_rem(density) + size_padding_x_offset_rem(effective_size)`; min-height from `control_height_rem − 0.25rem`. The `density` + `size` fields are honored.
+- [x] FIXED Close button rendered for `is_closable` items via a shared `build_close_button` (1.25rem square, `x` icon, `text-secondary`, radius `radius-control − 0.125rem`), mirroring the Tabs close button.
+- [x] FIXED Disabled state honored — `is_disabled` items dim via `disabled_opacity_token()` and render `text-secondary`.
+- [x] FIXED (focus channel) Tabs are `.focusable()` — the Jetstream focus channel (same treatment as Tabs/Button); no separately-drawn outline ring exists in the JsEl chrome. Focus-ring color token resolution is a CSS-only concern.
+- [x] FIXED Vertical orientation — `orientation == Vertical` lays tabs in a `flex_col()`; labels + close buttons stay visible (contract §4), active tab gets the accent-tint fill instead of the bottom border.
+- [x] FIXED (host-owned) `is_reorderable` is honored as a host/preview-loop concern. Per contract §2 anatomy there is no reorder grab-handle part, so none is drawn (matches GPUI, which fires `on_reorder` from the preview loop). The `js_*` builder is stateless and has no event channel.
+- [x] FIXED `current_value()` fallback now drives selection (value → default_value → first non-disabled), so empty/unset selection renders the first enabled tab active.
 - accepted: no ARIA channel (Jetstream native rendering has no HTML role/aria attributes).
-- accepted: keyboard navigation + selection commit live in the preview event loop, not the component — but this component's specimen never wires them (see Specimen parity).
+- accepted: keyboard navigation + selection commit live in the preview event loop, not the component (the `js_*` builder is stateless).
+- note: contract §2 anatomy defines only Root / TabItem / CloseButton — no add-tab "+" affordance, overflow-scroll chrome, or reorder handle. None invented (would add capability the contract + Svelte tablist do not drive).
 
 ## Specimen parity
 

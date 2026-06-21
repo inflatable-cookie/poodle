@@ -1,15 +1,29 @@
 //! VideoPlayer — video playback controls backed by VideoPlayerSpec.
 //! GPUI cannot play video — this renders the UI chrome only.
+//!
+//! Per contract §8 the player is black-background chrome with fixed
+//! `rgba(255,255,255,…)` colors regardless of theme; only the surface radius
+//! and control radius come from tokens. All geometry resolves from the
+//! `VideoPlayerSpec` size/density rem ladders via `rem_to_px`.
+//!
+//! # Known GPUI deltas
+//! - No real `<video>` playback, fullscreen, or auto-hide controls (contract §10).
+//! - No ARIA (GPUI has no accessibility API). Playback/seek/volume interaction
+//!   lives in the preview event loop.
 
-use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-};
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::primitives::Icon;
-use crate::theme_ext::{resolve_color, resolve_radius};
+use crate::theme_ext::resolve_radius;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::VideoPlayerSpec;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
+
+/// Format seconds as `m:ss` (contract `.video-player__time`).
+fn format_time(seconds: f64) -> String {
+    let total = seconds.max(0.0) as u64;
+    format!("{}:{:02}", total / 60, total % 60)
+}
 
 pub struct VideoPlayer {
     spec: VideoPlayerSpec,
@@ -60,195 +74,214 @@ impl VideoPlayer {
 impl IntoElement for VideoPlayer {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
-        let _effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
-        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
-        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+        let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let fill = resolve_color(&self.theme, self.spec.fill_token());
-        let overlay = resolve_color(&self.theme, self.spec.overlay_fill_token());
+        // ── Token-resolved chrome radii (the only theme-driven values) ───
         let radius = resolve_radius(&self.theme, "radius.surface");
         let radius_control = resolve_radius(&self.theme, "radius.control");
-        let border_color = resolve_color(&self.theme, "color.border.default");
-        let text_color = resolve_color(&self.theme, "color.text.inverse");
-        let label_size = crate::theme_ext::resolve_px(&self.theme, "typography.label.size");
 
-        // ── Big centered play/pause overlay button ──────────────────────
-        let big_play_icon_name = if self.spec.is_playing {
-            "pause"
-        } else {
-            "play"
-        };
-        let big_play_icon = Icon::from_spec(
-            IconSpec::new(big_play_icon_name).with_size(IconSize::Lg),
-            &self.theme,
-        )
-        .with_color(text_color);
+        // ── Fixed colors (contract §8: white-on-black regardless of theme) ─
+        let black = gpui::black();
+        let white_90 = gpui::white().opacity(0.9); // text / icons
+        let white_80 = gpui::white().opacity(0.8); // time display
+        let white_20 = gpui::white().opacity(0.2); // progress track
+        let white_50 = gpui::white().opacity(0.5); // volume track
+        let white_15 = gpui::white().opacity(0.15); // button hover
+        // Controls overlay gradient bottom — emulate `rgba(0,0,0,0.7)`.
+        let overlay = gpui::black().opacity(0.7);
+        let accent = crate::theme_ext::resolve_color(&self.theme, "color.accent.base");
 
-        let big_play_button = div()
-            .flex()
-            .items_center()
-            .justify_center()
-            .size(px(64.0))
-            .rounded_full()
-            .bg(overlay)
-            .cursor_pointer()
-            .child(big_play_icon);
+        // ── Size/density geometry (contract §7/§8 rem ladders) ───────────
+        let btn_size = px(rem_to_px(VideoPlayerSpec::button_size_rem(effective_size)));
+        let icon_px = rem_to_px(VideoPlayerSpec::icon_size_rem(effective_size));
+        let volume_w = px(rem_to_px(VideoPlayerSpec::volume_width_rem(effective_size)));
+        let time_font = px(rem_to_px(VideoPlayerSpec::time_font_rem(effective_size)));
+        let big_play_size = px(rem_to_px(VideoPlayerSpec::big_play_size_rem(effective_size)));
+        let track_h = px(rem_to_px(VideoPlayerSpec::track_height_rem()));
+        let volume_thumb = px(rem_to_px(VideoPlayerSpec::volume_thumb_rem()));
+        let bar_gap = px(rem_to_px(VideoPlayerSpec::bar_gap_rem(spec.density)));
+        // Controls padding `1.5rem 0.5rem 0.375rem` (contract `.video-player__controls`).
+        let controls_pt = px(rem_to_px(1.5));
+        let controls_px = px(rem_to_px(0.5));
+        let controls_pb = px(rem_to_px(0.375));
+        let progress_mb = px(rem_to_px(0.375)); // `.progress-bar` margin-bottom
 
-        // ── Video viewport area ─────────────────────────────────────────
-        let viewport = div()
-            .w_full()
-            .flex_grow()
-            .min_h(px(160.0))
-            .flex()
-            .items_center()
-            .justify_center()
-            .child(big_play_button);
-
-        // ── Bottom control bar icons ────────────────────────────────────
-
-        // Play / Pause small icon
-        let play_icon_name = if self.spec.is_playing {
-            "pause"
-        } else {
-            "play"
-        };
-        let play_icon = Icon::from_spec(
-            IconSpec::new(play_icon_name).with_size(IconSize::Sm),
-            &self.theme,
-        )
-        .with_color(text_color);
-
-        // Progress / seek bar (same pattern as audio_player track_bar)
-        let progress_pct = (self.spec.progress() * 100.0).clamp(0.0, 100.0);
-        let track_bar = div()
-            .h(px(4.0))
-            .flex_grow()
-            .rounded_full()
-            .bg(text_color.opacity(0.3))
-            .child(
-                div()
-                    .h_full()
-                    .rounded_full()
-                    .bg(text_color)
-                    .w(relative(progress_pct as f32 / 100.0)),
-            );
-
-        // Time label
-        let time = format!(
-            "{:.0}s / {:.0}s",
-            self.spec.current_time, self.spec.duration
-        );
-
-        // Mute / unmute icon (volume == 0 treated as muted)
-        let mute_icon_name = if self.spec.volume <= 0.0 {
-            "volume-x"
-        } else {
-            "volume-2"
-        };
-        let mute_icon = Icon::from_spec(
-            IconSpec::new(mute_icon_name).with_size(IconSize::Sm),
-            &self.theme,
-        )
-        .with_color(text_color);
-
-        // Fullscreen icon
-        let fullscreen_icon_name = if self.spec.is_fullscreen {
-            "minimize-2"
-        } else {
-            "maximize-2"
-        };
-        let fullscreen_icon = Icon::from_spec(
-            IconSpec::new(fullscreen_icon_name).with_size(IconSize::Sm),
-            &self.theme,
-        )
-        .with_color(text_color);
-
-        // Captions icon (only shown when captions are available)
-        let captions_icon = if self.has_captions {
+        // ── Big center play button — transparent ring, only when paused at 0 ─
+        // Contract §4: shown only when paused at currentTime=0. Transparent bg.
+        let show_big_play = !spec.is_playing && spec.current_time <= 0.0;
+        let big_play = if show_big_play {
+            let play_glyph = Icon::from_spec(
+                poodle_specs::IconSpec::new("play"),
+                &self.theme,
+            )
+            .with_color(white_90)
+            .with_px_size(f32::from(big_play_size) * 0.5);
             Some(
-                div().cursor_pointer().child(
-                    Icon::from_spec(
-                        IconSpec::new("subtitles").with_size(IconSize::Sm),
-                        &self.theme,
-                    )
-                    .with_color(text_color),
-                ),
+                div()
+                    .absolute()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .size(big_play_size)
+                    .rounded_full()
+                    .border_2()
+                    .border_color(white_90)
+                    .cursor_pointer()
+                    .child(play_glyph),
             )
         } else {
             None
         };
 
-        // ── Control bar ─────────────────────────────────────────────────
+        // ── Video viewport ───────────────────────────────────────────────
+        let mut viewport = div()
+            .relative()
+            .w_full()
+            .flex_grow()
+            .flex()
+            .items_center()
+            .justify_center();
+        if let Some(bp) = big_play {
+            viewport = viewport.child(bp);
+        }
 
-        // Helper: control button wrapper 28x28
-        let ctrl_btn = |child: AnyElement| -> Div {
+        // ── Transport icons (real Icons, sized from contract SVG ladder) ──
+        let icon = |name: &'static str| {
+            Icon::from_spec(poodle_specs::IconSpec::new(name), &self.theme)
+                .with_color(white_90)
+                .with_px_size(icon_px)
+        };
+        let play_icon = icon(if spec.is_playing { "pause" } else { "play" });
+        let mute_icon = icon(if spec.volume <= 0.0 { "volume-x" } else { "volume-2" });
+        let fullscreen_icon = icon(if spec.is_fullscreen {
+            "minimize-2"
+        } else {
+            "maximize-2"
+        });
+
+        // ── Control button wrapper (square, hover bg) ────────────────────
+        let ctrl_btn = move |child: AnyElement| -> Div {
             div()
                 .cursor_pointer()
-                .w(px(28.0))
-                .h(px(28.0))
+                .w(btn_size)
+                .h(btn_size)
                 .rounded(radius_control)
                 .flex()
                 .items_center()
                 .justify_center()
-                .hover(|s| s.bg(text_color.opacity(0.15)))
+                .hover(move |s| s.bg(white_15))
                 .child(child)
         };
 
-        // Left group: play + seek + time
+        // ── Progress / seek bar — proportional fill via relative(frac) ────
+        let frac = (spec.progress() as f32).clamp(0.0, 1.0);
+        let progress_bar = div()
+            .relative()
+            .h(track_h)
+            .w_full()
+            .rounded(px(VideoPlayerSpec::pill_radius_rem()))
+            .overflow_hidden()
+            .bg(white_20)
+            .child(
+                div()
+                    .h_full()
+                    .rounded(px(VideoPlayerSpec::pill_radius_rem()))
+                    .bg(accent)
+                    .w(relative(frac)),
+            );
+
+        // ── Time display (m:ss / m:ss, monospace) ────────────────────────
+        let time_text = format!(
+            "{} / {}",
+            format_time(spec.current_time),
+            format_time(spec.duration)
+        );
+        let time_display = div()
+            .font_family("monospace")
+            .text_size(time_font)
+            .text_color(white_80)
+            .child(time_text);
+
+        // ── Volume slider chrome (track + thumb at current volume) ───────
+        let vol_frac = (spec.volume as f32).clamp(0.0, 1.0);
+        let volume_slider = div()
+            .relative()
+            .flex()
+            .items_center()
+            .w(volume_w)
+            .h(px(rem_to_px(1.0)))
+            .child(
+                // Track
+                div()
+                    .w_full()
+                    .h(track_h)
+                    .rounded(px(rem_to_px(0.125)))
+                    .bg(white_50),
+            )
+            .child(
+                // Thumb positioned by volume fraction
+                div()
+                    .absolute()
+                    .left(relative(vol_frac))
+                    .size(volume_thumb)
+                    .rounded_full()
+                    .bg(gpui::white()),
+            );
+
+        // ── Bar groups ───────────────────────────────────────────────────
+        // Left: play + mute + volume + time.
         let left_group = div()
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(6.0))
-            .flex_grow()
+            .gap(bar_gap)
             .child(ctrl_btn(play_icon.into_any_element()))
-            .child(track_bar)
-            .child(
-                div()
-                    .text_size(label_size)
-                    .text_color(text_color)
-                    .child(time),
-            );
-
-        // Right group: mute + fullscreen + captions
-        let mut right_group = div()
-            .flex()
-            .flex_row()
-            .items_center()
-            .gap(px(6.0))
             .child(ctrl_btn(mute_icon.into_any_element()))
-            .child(ctrl_btn(fullscreen_icon.into_any_element()));
+            .child(volume_slider)
+            .child(time_display);
 
-        if let Some(cap_el) = captions_icon {
-            right_group = right_group.child(cap_el);
+        // Right: captions (optional) + fullscreen.
+        let mut right_group = div().flex().flex_row().items_center().gap(bar_gap);
+        if self.has_captions {
+            let cap_icon = icon("subtitles");
+            right_group = right_group.child(ctrl_btn(cap_icon.into_any_element()));
         }
+        right_group = right_group.child(ctrl_btn(fullscreen_icon.into_any_element()));
 
-        let control_bar = div()
-            .bg(overlay)
-            .px(px(pad_x))
-            .py(px(pad_y))
+        let bar = div()
             .flex()
             .flex_row()
             .items_center()
-            .gap(px(item_gap))
+            .justify_between()
+            .w_full()
             .child(left_group)
             .child(right_group);
 
-        // ── Outer container ─────────────────────────────────────────────
-        div()
-            .bg(fill)
-            .rounded(radius)
-            .border_1()
-            .border_color(border_color)
+        // ── Controls overlay (gradient-ish dark fill, bottom-anchored) ───
+        let controls = div()
             .w_full()
-            .min_h(px(220.0))
+            .bg(overlay)
+            .pt(controls_pt)
+            .px(controls_px)
+            .pb(controls_pb)
+            .flex()
+            .flex_col()
+            .child(progress_bar.mb(progress_mb))
+            .child(bar);
+
+        // ── Outer container — black surface, token radius ────────────────
+        div()
+            .bg(black)
+            .rounded(radius)
+            .w_full()
+            .min_h(px(rem_to_px(13.75))) // 220px @ 16px base, contract chrome min
             .overflow_hidden()
             .flex()
             .flex_col()
             .justify_end()
             .child(viewport)
-            .child(control_bar)
+            .child(controls)
             .into_any_element()
     }
 }

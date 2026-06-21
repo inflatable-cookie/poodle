@@ -1,5 +1,7 @@
 use poodle_tokens::semantic;
 
+use crate::{ControlSize, SemanticControlSizeRole};
+
 /// Policy describing the password strength constraints to display.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PasswordRequirementsPolicy {
@@ -59,6 +61,11 @@ pub struct PasswordRequirementsSpec {
     pub title: String,
     pub hint: Option<String>,
     pub loading_label: String,
+    /// Absolute size override. Combined with `size_role` to resolve the
+    /// effective size that drives panel padding, title/body typography,
+    /// list indent, and vertical rhythm (contract §7 ladder).
+    pub size: ControlSize,
+    pub size_role: SemanticControlSizeRole,
 }
 
 impl Default for PasswordRequirementsSpec {
@@ -73,6 +80,8 @@ impl Default for PasswordRequirementsSpec {
                 "Avoid common words, patterns, and personal information.",
             )),
             loading_label: String::from("Loading requirements..."),
+            size: ControlSize::Md,
+            size_role: SemanticControlSizeRole::Control,
         }
     }
 }
@@ -114,6 +123,16 @@ impl PasswordRequirementsSpec {
 
     pub fn with_loading_label(mut self, label: impl Into<String>) -> Self {
         self.loading_label = label.into();
+        self
+    }
+
+    pub fn with_size(mut self, size: ControlSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
+        self.size_role = size_role;
         self
     }
 
@@ -208,5 +227,95 @@ impl PasswordRequirementsSpec {
 
     pub fn error_color_token(&self) -> &'static str {
         semantic::COLOR_STATUS_DANGER
+    }
+
+    /// Panel corner radius token. Svelte uses `--poodle-radius-panel`
+    /// (fallback `0.75rem`); the closest existing semantic token is
+    /// `radius.surface`. NOTE: no dedicated `radius.panel` token exists.
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    /// Panel border width token (`0.0625rem`).
+    pub fn border_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_DEFAULT
+    }
+
+    // ── Size ladder (contract §7 + Svelte per-size custom properties) ──
+    //
+    // These return contract-exact rem values for the *effective* size the
+    // caller has resolved (size + size_role). Both Rust targets resolve the
+    // effective size via the shared presentation helper, then read these.
+
+    /// Panel padding in rem for the given effective size. Contract §7:
+    /// xs 0.75, sm 0.875, md 1, lg 1.125, xl 1.25.
+    pub fn padding_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.75,
+            ControlSize::Sm => 0.875,
+            ControlSize::Md => 1.0,
+            ControlSize::Lg => 1.125,
+            ControlSize::Xl => 1.25,
+        }
+    }
+
+    /// Title font-size in rem. Contract §7: xs 0.875, sm 0.9375, md 1,
+    /// lg 1.0625, xl 1.125.
+    pub fn title_size_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.875,
+            ControlSize::Sm => 0.9375,
+            ControlSize::Md => 1.0,
+            ControlSize::Lg => 1.0625,
+            ControlSize::Xl => 1.125,
+        }
+    }
+
+    /// Checklist / description / hint body font-size in rem. Contract §7:
+    /// xs 0.75, sm 0.8125, md 0.875, lg 0.9375, xl 1.
+    pub fn body_size_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.75,
+            ControlSize::Sm => 0.8125,
+            ControlSize::Md => 0.875,
+            ControlSize::Lg => 0.9375,
+            ControlSize::Xl => 1.0,
+        }
+    }
+
+    /// List indent in rem (Svelte `--list-indent`): xs 1, sm 1.125,
+    /// md 1.25, lg 1.375, xl 1.5.
+    pub fn list_indent_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 1.0,
+            ControlSize::Sm => 1.125,
+            ControlSize::Md => 1.25,
+            ControlSize::Lg => 1.375,
+            ControlSize::Xl => 1.5,
+        }
+    }
+
+    /// Vertical rhythm before the description block, in rem (Svelte
+    /// `--description-gap`): xs 0.625, sm 0.6875, md 0.75, lg 0.8125, xl 0.875.
+    pub fn description_gap_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.625,
+            ControlSize::Sm => 0.6875,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }
+    }
+
+    /// Vertical rhythm before the hint block, in rem (Svelte `--hint-gap`):
+    /// xs 0.375, sm 0.4375, md 0.5, lg 0.5625, xl 0.625.
+    pub fn hint_gap_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.375,
+            ControlSize::Sm => 0.4375,
+            ControlSize::Md => 0.5,
+            ControlSize::Lg => 0.5625,
+            ControlSize::Xl => 0.625,
+        }
     }
 }

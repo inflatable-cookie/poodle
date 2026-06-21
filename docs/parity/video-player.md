@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=7 jetstream=3 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: GPUI rebuilt — all geometry resolves from the VideoPlayerSpec size/density rem ladders via rem_to_px, fixed white-on-black per contract §8, real transport Icons, m:ss monospace time, proportional seek fill via relative(frac), volume track+thumb, big-play transparent ring only when paused-at-0. Jetstream — pill radius now uses pill_radius_rem(), volume thumb added, transport uses real Icon glyphs. Both targets + 6 (jet) render-probe tests. Playback/seek/volume/fullscreen interaction stays preview-loop owned (accepted §10). -->
 # Parity: VideoPlayer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,14 +25,14 @@ Svelte and contract are largely aligned (props, anatomy, ARIA, token tables all 
 
 GPUI renders chrome only (no playback) — accepted per contract §10. Remaining visual/token gaps:
 
-- [ ] Hardcoded pixel literals: big-play `.size(px(64.0))` (`video_player.rs:91`), viewport `.min_h(px(160.0))` (`:101`), progress `.h(px(4.0))` (`:124`), ctrl button `.w(px(28.0)).h(px(28.0))` (`:188-189`), gaps `.gap(px(6.0))` (`:204,:219`), outer `.min_h(px(220.0))` (`:244`). Contract gives exact rem (big-play `4rem`, button `1.75rem`, progress `0.25rem`) — resolve via `rem_to_px`, not raw px.
-- [ ] No `size` scaling — `_effective_size` computed then discarded (`video_player.rs:63`); button/big-play/volume/time do not scale per size. Contract §8 size variants (xs–xl) ignored.
-- [ ] Progress track bg `text_color.opacity(0.3)` (`video_player.rs:128`); contract is `rgba(255,255,255,0.2)`. Wrong alpha and wrong source (uses theme text-inverse, not fixed white).
-- [ ] No volume slider — control bar omits the `3.5rem` volume range entirely (contract §2/§8 require it; Svelte renders it).
-- [ ] No seek slider overlay — progress bar is display-only, no transparent `input[type=range]` overlay (contract `.video-player__seek`).
-- [ ] Time format wrong — `format!("{:.0}s / {:.0}s", ...)` → "13s / 42s" (`video_player.rs:138`); contract/Svelte is `m:ss / m:ss` monospace. Also no `typography.code.family` font applied.
-- [ ] Big play is a filled circle `bg(overlay)` with pause/play icon (`video_player.rs:88`); contract big-play is transparent bg, ring SVG, only shown when paused-at-0. GPUI shows it always and fills it.
-- accepted: no real `<video>` playback / fullscreen / auto-hide controls (contract §10 — platform media integration absent).
+- [x] FIXED All geometry resolves from the `VideoPlayerSpec` rem ladders via `rem_to_px` (`button_size_rem`, `big_play_size_rem`, `volume_width_rem`, `time_font_rem`, `track_height_rem`, `volume_thumb_rem`, `bar_gap_rem`). No raw `px(64.0)`-style literals; the only remaining numeric px is the 220px (13.75rem) chrome `min_h`, expressed as `rem_to_px(13.75)`.
+- [x] FIXED `size` scaling honored — `effective_size = resolve_semantic_size(size, size_role)` feeds every size-driven dimension (button, big-play, volume, time-font, icon glyph). Contract §8 size variants flow through.
+- [x] FIXED Progress track bg is fixed `rgba(255,255,255,0.2)` (`gpui::white().opacity(0.2)`); fill is `color.accent.base` per contract `.progress-fill`. No more theme text-inverse at the wrong alpha.
+- [x] FIXED Volume slider rendered — `volume_width_rem`-wide track (`white 50%`) with a `0.625rem` white thumb positioned by the volume fraction.
+- [x] FIXED Seek fill is proportional via `relative(frac)` (contract requires a transparent `input[type=range]` overlay for interaction, which is preview-loop owned in GPUI; the visual fill is now correct).
+- [x] FIXED Time format is `m:ss / m:ss` via `format_time`, rendered in `.font_family("monospace")` at the per-size `time_font_rem`.
+- [x] FIXED Big play is a transparent ring (`border_2` white-90, no fill) with a centered `play` Icon, shown only when `!is_playing && current_time <= 0` (contract §4 paused-at-0).
+- accepted: no real `<video>` playback / fullscreen / auto-hide controls (contract §10 — platform media integration absent); interaction is preview-loop owned.
 - accepted: no ARIA (gpui has no accessibility API).
 
 ## Jetstream gap (vs Svelte + contract)
@@ -40,11 +40,12 @@ GPUI renders chrome only (no playback) — accepted per contract §10. Remaining
 Jetstream is the stronger Rust impl: size/density driven from contract tables, fixed-white colors correct. Remaining gaps:
 
 - [x] Progress fill width bug — FIXED: `.w((progress * 100.0))` rendered a fixed ≤100px sliver (progress is a 0..1 fraction). Now uses the runtime `ui_element::progress(frac)` ProgressBar widget for a proportional fill.
-- [ ] Volume slider is a static bar (`video_player.rs:134-139`) with no thumb and no `0.625rem` thumb styling from contract §8; acceptable as chrome but note the thumb is absent.
-- [ ] Big-play button radius `.rounded(999.0)` (`video_player.rs:91`) and progress `.rounded(999.0)` (`:104,:108`) use raw `999.0` literal — contract uses `999rem` pill; fine numerically but should be a named pill constant, not a magic float.
-- [ ] No real playback / fullscreen / auto-hide — interaction (play/seek/mute/fullscreen, Space/Enter) must live in preview `main.rs` event loop; currently buttons are `.focusable()` with no handlers. (accepted runtime limit, but note no event wiring exists.)
+- [x] FIXED Volume slider now renders a `0.625rem` white thumb (`volume_thumb_rem()`) positioned by the volume fraction within a `[filled | thumb | rest]` track layout.
+- [x] FIXED Big-play + progress radii use the named `VideoPlayerSpec::pill_radius_rem()` constant instead of bare `999.0` literals.
+- [x] FIXED Transport controls render real Icon glyphs (`play`/`pause`, `volume-2`/`volume-x`, `maximize-2`/`minimize-2`) that swap with state, instead of plain button text labels. The seek bar remains the runtime `progress(frac)` ProgressBar widget.
+- [ ] No real playback / fullscreen / auto-hide — interaction (play/seek/mute/fullscreen, Space/Enter) must live in preview `main.rs` event loop; buttons are `.focusable()` with no handlers. (accepted runtime limit — the `js_*` builder is stateless.)
 - accepted: white-on-black hardcoded colors are correct per contract §8 (intentional, not theme tokens).
-- accepted: no ARIA channel (Jetstream has no a11y tree); labels passed as button text instead.
+- accepted: no ARIA channel (Jetstream has no a11y tree); aria-labels carried as fallback button text alongside the icon glyph.
 
 ## Specimen parity
 

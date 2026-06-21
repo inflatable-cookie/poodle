@@ -106,4 +106,37 @@ impl TabStripSpec {
     pub fn disabled_opacity_token(&self) -> &'static str {
         semantic::STATE_OPACITY_DISABLED
     }
+
+    /// Per-item close-button square size, in rem (contract §2 CloseButton:
+    /// `1.25rem`). Centralizes the literal so impls feed it through `rem_to_px`
+    /// instead of carrying a bare float.
+    pub fn close_button_size_rem(&self) -> f32 {
+        1.25
+    }
+
+    /// Base radius token for the close button; impls subtract
+    /// `close_button_radius_inset_rem()` from the resolved value
+    /// (contract: `radius-control − 0.125rem`).
+    pub fn close_button_radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    /// Radius inset (in rem) applied to the close button vs `radius-control`
+    /// (contract §2: `radius-control − 0.125rem`).
+    pub fn close_button_radius_inset_rem(&self) -> f32 {
+        0.125
+    }
+
+    /// Inter-affordance gap token used between the label and the close button
+    /// inside a tab (contract §6 follows the inline spacing scale).
+    pub fn close_button_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_XS
+    }
+
+    /// Opacity multiplier for the vertical-orientation active tab fill tint
+    /// (accent over surface). Names the previously-magic `0.08` multiplier so
+    /// both targets share one source of truth.
+    pub fn vertical_active_fill_opacity(&self) -> f32 {
+        0.08
+    }
 }

@@ -27,6 +27,10 @@ pub struct TabStrip {
     id_prefix: String,
     on_change: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
     on_close: Option<std::rc::Rc<dyn Fn(&str, &mut Window, &mut App) + 'static>>,
+    /// Host-owned reorder commit. Args: `(value, direction)` where `direction`
+    /// is `-1` (toward start) or `+1` (toward end). Fired on `Alt+Arrow` when
+    /// `is_reorderable`. Drag reordering is host/preview-loop owned.
+    on_reorder: Option<std::rc::Rc<dyn Fn(&str, i32, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for TabStrip {
@@ -44,6 +48,7 @@ impl TabStrip {
             id_prefix: String::new(),
             on_change: None,
             on_close: None,
+            on_reorder: None,
         }
     }
 
@@ -54,6 +59,7 @@ impl TabStrip {
             id_prefix: "poodle-tabstrip".to_string(),
             on_change: None,
             on_close: None,
+            on_reorder: None,
         }
     }
 
@@ -105,6 +111,14 @@ impl TabStrip {
         self.on_close = Some(std::rc::Rc::new(handler));
         self
     }
+
+    pub fn on_reorder(
+        mut self,
+        handler: impl Fn(&str, i32, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.on_reorder = Some(std::rc::Rc::new(handler));
+        self
+    }
 }
 
 impl IntoElement for TabStrip {
@@ -136,8 +150,22 @@ impl IntoElement for TabStrip {
         let hover_bg = resolve_color(theme, "color.background.elevated");
         let strip_gap = theme.resolve_space(self.spec.item_gap_token());
 
+        // Close-button geometry, resolved from spec (contract §2: 1.25rem square,
+        // radius = radius-control − 0.125rem). No bare float literals.
+        let close_btn_size = px(rem_to_px(self.spec.close_button_size_rem()));
+        let close_btn_radius = px((f32::from(resolve_px(
+            theme,
+            self.spec.close_button_radius_token(),
+        ))
+            - rem_to_px(self.spec.close_button_radius_inset_rem()))
+        .max(0.0));
+        let close_btn_gap = resolve_px(theme, self.spec.close_button_gap_token());
+        // Named multiplier for the vertical active-tab fill tint (was magic 0.08).
+        let vertical_active_opacity = self.spec.vertical_active_fill_opacity();
+
         let current_value = self.spec.current_value().map(|s| s.to_string());
         let is_vertical = self.spec.orientation == Orientation::Vertical;
+        let is_reorderable = self.spec.is_reorderable;
 
         // ARIA delta: role="tablist" not expressible on GPUI native elements.
         let mut strip = div().gap(px(strip_gap));
@@ -179,7 +207,7 @@ impl IntoElement for TabStrip {
 
             if is_active {
                 if is_vertical {
-                    tab = tab.text_color(accent).bg(accent.opacity(0.08));
+                    tab = tab.text_color(accent).bg(accent.opacity(vertical_active_opacity));
                 } else {
                     tab = tab.text_color(accent).border_b_1().border_color(accent);
                 }
@@ -207,15 +235,39 @@ impl IntoElement for TabStrip {
                     // Delete closes a closable tab (fires on_close).
                     let nav_handler = self.on_change.as_ref().unwrap().clone();
                     let close_handler = self.on_close.clone();
+                    let reorder_handler = self.on_reorder.clone();
                     let tvs = tab_values.clone();
                     let td = tab_disabled.clone();
                     let current_idx = idx;
                     let item_closable = item.is_closable;
                     let item_val = item.value.clone();
+                    let item_reorderable = is_reorderable;
 
                     tab = tab.on_key_down(move |event: &KeyDownEvent, window, cx| {
                         let n = tvs.len();
+                        // Alt+Arrow reorders (host-owned commit) when reorderable —
+                        // checked before plain arrow navigation so the modifier wins.
+                        if item_reorderable
+                            && event.keystroke.modifiers.alt
+                            && matches!(
+                                event.keystroke.key.as_str(),
+                                "left" | "right" | "up" | "down"
+                            )
+                        {
+                            if let Some(ref handler) = reorder_handler {
+                                let dir = match event.keystroke.key.as_str() {
+                                    "left" | "up" => -1,
+                                    _ => 1,
+                                };
+                                handler(&item_val, dir, window, cx);
+                            }
+                            return;
+                        }
                         match event.keystroke.key.as_str() {
+                            "enter" | "space" => {
+                                // Enter/Space confirms/activates the focused tab.
+                                nav_handler(&item_val, window, cx);
+                            }
                             "right" | "down" => {
                                 // Advance to next enabled tab, wrapping
                                 let mut i = (current_idx + 1) % n;
@@ -281,11 +333,11 @@ impl IntoElement for TabStrip {
                         "{}-close-{}",
                         self.id_prefix, item.value
                     )))
-                    .ml(resolve_px(theme, "space.inline.xs"))
+                    .ml(close_btn_gap)
                     .cursor_pointer()
-                    .w(px(rem_to_px(1.25)))
-                    .h(px(rem_to_px(1.25)))
-                    .rounded(px(rem_to_px(0.25)))
+                    .w(close_btn_size)
+                    .h(close_btn_size)
+                    .rounded(close_btn_radius)
                     .flex()
                     .items_center()
                     .justify_center()

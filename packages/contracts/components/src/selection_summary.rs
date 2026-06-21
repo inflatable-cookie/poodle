@@ -73,6 +73,73 @@ impl SelectionSummarySpec {
         semantic::SPACE_INLINE_SM
     }
 
+    /// Chip / overflow corner radius token. Svelte/contract use
+    /// `var(--poodle-radius-control)`.
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_CONTROL
+    }
+
+    /// Chip / overflow border width token (`0.0625rem`).
+    pub fn border_width_token(&self) -> &'static str {
+        semantic::BORDER_WIDTH_DEFAULT
+    }
+
+    // ── Size ladder (contract §8 size variants + Svelte custom props) ──
+    //
+    // Contract-exact rem values keyed by effective size; both Rust targets
+    // resolve the effective size via the shared presentation helper then read
+    // these, instead of hardcoding per-size literals inline.
+
+    /// Chip font-size in rem. Contract §8: xs 0.6875, sm 0.71875, md 0.75,
+    /// lg 0.8125, xl 0.875.
+    pub fn chip_font_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.71875,
+            ControlSize::Md => 0.75,
+            ControlSize::Lg => 0.8125,
+            ControlSize::Xl => 0.875,
+        }
+    }
+
+    /// Chip min-height in rem. Contract §8: xs 1, sm 1.125, md 1.5, lg 1.75,
+    /// xl 2.
+    pub fn chip_min_height_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 1.0,
+            ControlSize::Sm => 1.125,
+            ControlSize::Md => 1.5,
+            ControlSize::Lg => 1.75,
+            ControlSize::Xl => 2.0,
+        }
+    }
+
+    /// Overflow-badge font-size in rem. Svelte
+    /// `--poodle-selection-summary-overflow-font-size`: xs 0.6875, sm 0.75,
+    /// md 0.8125, lg 0.875, xl 0.9375.
+    pub fn overflow_font_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 0.6875,
+            ControlSize::Sm => 0.75,
+            ControlSize::Md => 0.8125,
+            ControlSize::Lg => 0.875,
+            ControlSize::Xl => 0.9375,
+        }
+    }
+
+    /// Overflow-badge line-height in rem. Svelte
+    /// `--poodle-selection-summary-overflow-line-height`: xs 1.5, sm 1.625,
+    /// md 2, lg 2.125, xl 2.25.
+    pub fn overflow_line_height_rem(size: ControlSize) -> f32 {
+        match size {
+            ControlSize::Xs => 1.5,
+            ControlSize::Sm => 1.625,
+            ControlSize::Md => 2.0,
+            ControlSize::Lg => 2.125,
+            ControlSize::Xl => 2.25,
+        }
+    }
+
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = size;
         self

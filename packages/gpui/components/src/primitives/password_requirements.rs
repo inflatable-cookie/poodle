@@ -7,7 +7,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{PasswordRequirementsPolicy, PasswordRequirementsSpec};
 
-use crate::presentation::rem_to_px;
+use crate::presentation::{rem_to_px, resolve_semantic_size};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI password requirements checklist backed by `PasswordRequirementsSpec`.
@@ -83,17 +83,35 @@ impl IntoElement for PasswordRequirements {
         let text_color = resolve_color(theme, spec.text_color_token());
         let met_color = resolve_color(theme, spec.met_color_token());
         let error_color = resolve_color(theme, spec.error_color_token());
-        let radius = resolve_radius(theme, "radius.panel");
+        let radius = resolve_radius(theme, spec.radius_token());
+        let border_width = resolve_px(theme, spec.border_width_token());
 
-        let body_font = px(rem_to_px(0.875)); // 14px — matches Svelte 0.875rem
-        let title_font = px(rem_to_px(0.875)); // same base
+        // ── Size ladder (contract §7) ─────────────────────────────
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+        let body_font = px(rem_to_px(PasswordRequirementsSpec::body_size_rem(
+            effective_size,
+        )));
+        let title_font = px(rem_to_px(PasswordRequirementsSpec::title_size_rem(
+            effective_size,
+        )));
         let line_height = relative(1.5);
-        let padding = px(rem_to_px(1.0)); // 16px
+        let padding = px(rem_to_px(PasswordRequirementsSpec::padding_rem(
+            effective_size,
+        )));
+        let title_mb = px(rem_to_px(PasswordRequirementsSpec::hint_gap_rem(
+            effective_size,
+        )));
+        let description_gap = px(rem_to_px(PasswordRequirementsSpec::description_gap_rem(
+            effective_size,
+        )));
+        let hint_gap = px(rem_to_px(PasswordRequirementsSpec::hint_gap_rem(
+            effective_size,
+        )));
 
         // ── Outer container ───────────────────────────────────────
         let mut container = div()
             .bg(fill)
-            .border_1()
+            .border(border_width)
             .border_color(border)
             .rounded(radius)
             .p(padding)
@@ -120,7 +138,7 @@ impl IntoElement for PasswordRequirements {
                     .text_size(title_font)
                     .font_weight(FontWeight::SEMIBOLD)
                     .text_color(title_color)
-                    .mb(px(rem_to_px(0.5))) // Svelte: margin-bottom 0.5rem
+                    .mb(title_mb) // Svelte: margin-bottom (0.5rem at md, size-scaled)
                     .child(format!("{}:", spec.title)),
             );
 
@@ -183,7 +201,7 @@ impl IntoElement for PasswordRequirements {
             if let Some(ref description) = policy.description {
                 container = container.child(
                     div()
-                        .mt(resolve_px(theme, "space.inline.md"))
+                        .mt(description_gap)
                         .text_size(body_font)
                         .line_height(line_height)
                         .text_color(text_color)
@@ -195,7 +213,7 @@ impl IntoElement for PasswordRequirements {
             if let Some(ref hint) = spec.hint {
                 container = container.child(
                     div()
-                        .mt(resolve_px(theme, "space.inline.sm"))
+                        .mt(hint_gap)
                         .text_size(body_font)
                         .line_height(line_height)
                         .text_color(text_color)
@@ -226,7 +244,9 @@ fn build_rule_row(
     font_size: Pixels,
     line_height: DefiniteLength,
 ) -> Div {
-    let indicator = if is_met { "\u{2713}" } else { "\u{2022}" }; // checkmark or bullet
+    // Contract §6: non-color indicator must supplement the color change —
+    // checkmark for met, cross for not-met (mirrors Jetstream `check`/`x`).
+    let indicator = if is_met { "\u{2713}" } else { "\u{2717}" }; // ✓ / ✗
     let color = if is_met { met_color } else { unmet_color };
 
     div()

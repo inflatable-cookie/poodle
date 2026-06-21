@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=5 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass 41: both Rust targets built out. Chip/overflow radius now resolve from `radius.control`, border-width from `border.width.default` (no px literals). Overflow badge gets its own per-size font-size (+ GPUI line-height) via spec `overflow_font_rem`/`overflow_line_height_rem`. Item `meta` no longer rendered (anatomy is ChipLabel+RemoveIcon per contract §2). Clear link now renders unconditionally whenever populated (default "Clear", overridable via clear_action), matching Svelte. Additive spec methods: radius_token/border_width_token/chip_font_rem/chip_min_height_rem/overflow_font_rem/overflow_line_height_rem. Jetstream render_probe tests cover placeholder, chips+clear, overflow count, custom label, token-resolved chip bg (5/5 pass). GPUI builds. No count string in any target (chips row IS the summary — Svelte authority). Remove/clear interaction is preview-loop owned. -->
 # Parity: SelectionSummary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,22 +27,22 @@ Svelte matches the contract on the public surface (props, anatomy, empty/populat
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded chip radius literal `rounded(px(12.0))` at `selection_summary.rs:191` — Svelte/contract use `var(--poodle-radius-control)`; resolve from `radius.control` token, not raw `12.0`.
-- [ ] Hardcoded overflow-badge radius literal `rounded(px(12.0))` at `selection_summary.rs:243` — same `radius.control` token, not raw `12.0`.
-- [ ] Overflow badge reuses `chip_font` and omits its own font-size + line-height. Svelte gives overflow distinct `--poodle-selection-summary-overflow-font-size` and `--poodle-selection-summary-overflow-line-height` per size (lines 176-225). `selection_summary.rs:247` uses `chip_font` and sets no line-height — resolve overflow font-size/line-height per size.
-- [ ] Renders item `meta` inside chips (`selection_summary.rs:204-211`) — not in Svelte/contract anatomy; remove (see Contract↔Svelte).
-- [ ] Clear link gated on `clear_action` (`selection_summary.rs:254`); Svelte renders it whenever populated. Render unconditionally when `items` non-empty.
+- [x] Chip radius resolves from `radius.control` via `resolve_radius(theme, spec.radius_token())` — no `px(12.0)` literal.
+- [x] Overflow-badge radius resolves from the same `radius.control` token — no `px(12.0)` literal.
+- [x] Overflow badge has its own font-size (`overflow_font_rem`) and line-height (`overflow_line_height_rem`, applied as a `relative` ratio), distinct from `chip_font`.
+- [x] Item `meta` no longer rendered — anatomy is ChipLabel + RemoveIcon only (contract §2).
+- [x] Clear link renders unconditionally whenever populated (default "Clear", `clear_action.label` overrides) — matches Svelte; gated only by the empty early-return.
 - accepted: no ARIA (gpui has no accessibility API) — no `aria-label="Current selection"` on root, no per-chip `aria-label="Remove {label}"`.
 - accepted: chip bg/overflow bg/border are computed via alpha-lerp (`selection_summary.rs:145-156`) rather than `color-mix`; resolves from real tokens, matches Svelte intent.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded chip radius literal `let chip_radius = rem_to_px(0.5)` at `selection_summary.rs:24` — Svelte/contract use `var(--poodle-radius-control)`; resolve from `radius.control` token, not magic `0.5`.
-- [ ] Hardcoded border-width literal `.border(1.0)` at `selection_summary.rs:85` (chip) and `:120` (overflow) — contract chip border is `0.0625rem`; resolve a border-width token, not raw `1.0`.
-- [ ] Overflow badge reuses `chip_font`, no distinct overflow font-size / line-height (`selection_summary.rs:111-122`) — add per-size overflow font-size + line-height like Svelte.
-- [ ] Renders item `meta` inside chips (`selection_summary.rs:93-99`) — not in Svelte/contract anatomy; remove (see Contract↔Svelte).
-- [ ] Clear link gated on `spec.clear_action` (`selection_summary.rs:125`); Svelte renders it whenever populated. Render unconditionally when `items` non-empty.
-- [ ] Clear/remove are not wired: chips are `button("")` and the clear is `button(...).focusable()` with no click handler (`selection_summary.rs:75,128-132`) — component only renders; remove/clear interaction must live in the preview event loop. Confirm `main.rs` dispatches `onRemove`/`onClear`, or flag wiring as absent.
+- [x] Chip radius resolves from `radius.control` via `resolve_radius(theme, spec.radius_token())` — no `rem_to_px(0.5)` literal.
+- [x] Border-width resolves from `border.width.default` via `resolve_px(theme, spec.border_width_token())` on both chip and overflow — no `.border(1.0)` literal.
+- [x] Overflow badge uses its own per-size font-size (`overflow_font_rem`), distinct from `chip_font`. (Line-height is a CSS box concern with no direct JsEl analogue; font-size carries the distinction — noted.)
+- [x] Item `meta` no longer rendered — anatomy is ChipLabel + RemoveIcon only (contract §2).
+- [x] Clear link renders unconditionally whenever populated (default "Clear", `clear_action.label` overrides) — matches Svelte.
+- accepted: clear/remove interaction is preview-loop owned — chips/clear are display-only `button`/`label` elements with no JsEl click handler; remove/clear dispatch must live in the preview event loop (`main.rs`). Wiring flagged as preview-side, not component-side.
 - accepted: no ARIA channel (no root `aria-label`, no per-chip remove label).
 
 ## Specimen parity

@@ -6,7 +6,7 @@ use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_specs::{RemediationAction, SelectionSummaryItem, SelectionSummarySpec};
 
 use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
 
 /// A real GPUI selection summary component backed by `SelectionSummarySpec`.
 ///
@@ -111,13 +111,23 @@ impl IntoElement for SelectionSummary {
         let surface = resolve_color(theme, "color.background.surface");
         let elevated = resolve_color(theme, "color.background.elevated");
 
-        let chip_font = px(rem_to_px(match effective_size {
-            ControlSize::Xs => 0.6875,
-            ControlSize::Sm => 0.71875,
-            ControlSize::Md => 0.75,
-            ControlSize::Lg => 0.8125,
-            ControlSize::Xl => 0.875,
-        }));
+        let chip_font = px(rem_to_px(SelectionSummarySpec::chip_font_rem(
+            effective_size,
+        )));
+        // Overflow badge has its own font-size + line-height per size
+        // (Svelte `--poodle-selection-summary-overflow-font-size` /
+        // `--overflow-line-height`), distinct from the chip font.
+        let overflow_font = px(rem_to_px(SelectionSummarySpec::overflow_font_rem(
+            effective_size,
+        )));
+        let overflow_line_height = relative(
+            SelectionSummarySpec::overflow_line_height_rem(effective_size)
+                / SelectionSummarySpec::overflow_font_rem(effective_size),
+        );
+        // Chip / overflow radius + border width resolve from tokens
+        // (`radius.control`, `border.width.default`) — no hardcoded literals.
+        let chip_radius = resolve_radius(theme, spec.radius_token());
+        let chip_border_width = resolve_px(theme, spec.border_width_token());
         let chip_pad_x = px(rem_to_px(match spec.density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 0.75,
@@ -188,9 +198,9 @@ impl IntoElement for SelectionSummary {
                 .gap(chip_internal_gap)
                 .px(chip_pad_x)
                 .min_h(chip_min_h)
-                .rounded(px(12.0))
+                .rounded(chip_radius)
                 .bg(chip_bg)
-                .border_1()
+                .border(chip_border_width)
                 .border_color(stacked_border)
                 .cursor_pointer();
 
@@ -201,14 +211,8 @@ impl IntoElement for SelectionSummary {
                     .child(item.label.clone()),
             );
 
-            if let Some(ref meta) = item.meta {
-                pill = pill.child(
-                    div()
-                        .text_size(chip_font)
-                        .text_color(text_secondary)
-                        .child(meta.clone()),
-                );
-            }
+            // Anatomy is ChipLabel + RemoveIcon only (contract §2); `meta` is
+            // not part of the Svelte/contract surface — not rendered.
 
             // Remove button on pill
             pill = pill.child(
@@ -240,36 +244,42 @@ impl IntoElement for SelectionSummary {
                     .items_center()
                     .px(overflow_pad_x)
                     .min_h(chip_min_h)
-                    .rounded(px(12.0))
+                    .rounded(chip_radius)
                     .bg(overflow_bg)
-                    .border_1()
+                    .border(chip_border_width)
                     .border_color(stacked_border)
-                    .text_size(chip_font)
+                    .text_size(overflow_font)
+                    .line_height(overflow_line_height)
                     .text_color(text_secondary)
                     .child(format!("+{overflow} more")),
             );
         }
 
-        // Clear all action
-        if spec.has_clear_action() {
-            if let Some(ref clear_action) = spec.clear_action {
-                let clear_id = SharedString::from("selection-summary-clear");
-                let mut clear_btn = div().id(clear_id).flex().flex_grow().child(
-                    div()
-                        .cursor_pointer()
-                        .text_size(clear_font)
-                        .font_weight(FontWeight::MEDIUM)
-                        .text_color(accent)
-                        .child(clear_action.label.clone()),
-                );
+        // Clear link — Svelte renders the inline "Clear" TextLink whenever the
+        // selection is populated (contract §4), not only when a clear action is
+        // configured. Label defaults to "Clear", overridable via clear_action.
+        {
+            let clear_label = spec
+                .clear_action
+                .as_ref()
+                .map(|a| a.label.clone())
+                .unwrap_or_else(|| "Clear".to_string());
+            let clear_id = SharedString::from("selection-summary-clear");
+            let mut clear_btn = div().id(clear_id).flex().flex_grow().child(
+                div()
+                    .cursor_pointer()
+                    .text_size(clear_font)
+                    .font_weight(FontWeight::MEDIUM)
+                    .text_color(accent)
+                    .child(clear_label),
+            );
 
-                if let Some(handler) = on_clear {
-                    clear_btn =
-                        clear_btn.on_click(move |event, window, cx| handler(event, window, cx));
-                }
-
-                container = container.child(clear_btn);
+            if let Some(handler) = on_clear {
+                clear_btn =
+                    clear_btn.on_click(move |event, window, cx| handler(event, window, cx));
             }
+
+            container = container.child(clear_btn);
         }
 
         container.into_any_element()
