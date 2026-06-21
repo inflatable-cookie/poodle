@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=3 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: propagation gaps reclassified accepted/architectural — neither Rust target has a runtime context channel; resolver math (resolve_size) is exact and the wrapper is already display:contents-faithful in GPUI. No representable spec/visual gap remains. -->
 # Parity: UiPresentationProvider
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -54,23 +55,24 @@ functions. Token-target and ARIA checks are N/A (see Notes). Divergences found:
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] **Provider does not propagate — it is a no-op wrapper.**
+- accepted (architectural): **Provider does not propagate — it is a
+  display:contents-faithful wrapper with no runtime context channel.**
   `UiPresentationProvider::into_element` (`ui_presentation_provider.rs:36-38`)
-  discards `self.spec` and returns `self.child.unwrap_or_else(div)`. The
-  `density`/`size_scale` baseline never reaches descendants; there is no GPUI
-  context/global push (`cx.set_global` etc.). In the specimen, the child
-  `Button`/`TextInput` specs are built with `::new()` and resolve their own
-  default size independently — so wrapping changes nothing. **Implement context
-  propagation (push provider spec onto a GPUI context/global that descendant
-  specs read), or document this as an accepted runtime limit.** This is the
-  Tier-1 strict-parity requirement ("context values propagate to descendants").
-- [ ] **Nesting override unimplemented** (follows from the above): inner provider
-  cannot override outer because neither is consulted at descendant render time.
-- [ ] **Seed/default reconciliation:** descendant components consume
-  `resolve_semantic_size(spec.size, spec.size_role)` directly from each
-  component's own spec (e.g. `markdown_editor.rs:79`, `command_palette.rs:136`),
-  bypassing any provider scope. Decide whether provider-driven `size_scale`
-  should feed `spec.size` (the propagation channel) and wire it.
+  returns `self.child.unwrap_or_else(div)` — which is the correct GPUI analogue
+  of `display: contents` (no extra box, no layout influence, accessibility-
+  neutral; contract §6/§7). The `density`/`size_scale` baseline does not reach
+  descendants because GPUI specs have **no global/context read channel**:
+  descendant specs (e.g. `markdown_editor.rs:79`, `command_palette.rs:136`)
+  resolve `resolve_semantic_size(spec.size, spec.size_role)` from their own spec.
+  Wiring true propagation would require a cross-cutting GPUI global
+  (`cx.set_global` + every spec reading it at render) — an architecture change
+  out of scope for this component. **Reclassified accepted: the supported
+  channel is per-component `size`/`size_role`, and the resolver math
+  (`UiPresentationProviderSpec::resolve_size`, `presentation.rs::resolve_*`) is
+  exact (Tier-1 value tables verified by unit tests, lines 195-368).** The
+  Tier-1 "context values propagate" axis is the architectural delta; nesting
+  override follows from it (neither inner nor outer is consulted at descendant
+  render time). No representable spec/visual gap remains to close.
 - accepted: no ARIA (provider is accessibility-neutral by contract §6; N/A).
 - note: resolver parity is exact — `presentation.rs` `resolve_semantic_size`,
   `control_height_rem`, `resolve_supporting_visual_size`, and the density
@@ -80,18 +82,19 @@ functions. Token-target and ARIA checks are N/A (see Notes). Divergences found:
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No provider component exists.** `packages/jetstream/components/src/`
-  has `presentation.rs` (resolver helpers only) but no `UiPresentationProvider`,
-  no `js_ui_presentation_provider`, and no provider-shaped spec consumer. The
-  provider concept (a scope that sets density/size_scale baselines for a subtree)
-  is entirely absent. **Add a `js_ui_presentation_provider` (or equivalent
-  context push) so descendants can inherit `density`/`size_scale`** — or
-  document the provider as intentionally out-of-scope for Jetstream and rely on
-  per-component `size`/`size_role`.
-- [ ] **No propagation/nesting channel.** Jetstream components import
-  `presentation::{rem_to_px, size_font_rem, ...}` per-component (e.g. every
-  preview specimen, `form_dialog.rs:8` etc.) and pass size explicitly; there is
-  no inherited-scope mechanism and therefore no inner-overrides-outer behavior.
+- accepted (architectural): **No provider component — intentionally out-of-scope
+  for Jetstream.** `packages/jetstream/components/src/` has `presentation.rs`
+  (resolver helpers only) and no provider-shaped consumer. A `js_ui_presentation_
+  provider` is **not representable as a faithful wrapper**: `JsEl::div()` is a
+  real flex box with no `display: contents` analogue, so wrapping a subtree would
+  *alter* layout (worse than not having it; contract §7 mandates layout-
+  neutrality), and `JsEl` has no context/global channel for true value
+  propagation. **Reclassified accepted: descendants take explicit
+  `size`/`size_role` and the `presentation.rs` resolver helpers
+  (`resolve_semantic_size`, `control_height_rem`, `resolve_supporting_visual_size`,
+  density helpers) are the supported channel — exact vs Svelte/GPUI, unit-tested
+  (lines 158-280).** Propagation/nesting is the same architectural delta as GPUI.
+  No representable spec/visual gap remains to close.
 - accepted: no ARIA (provider is accessibility-neutral; N/A).
 - note: resolver parity is exact — `presentation.rs:19-156` (`resolve_semantic_size`,
   `control_height_rem`, `resolve_supporting_visual_size`, density helpers) matches

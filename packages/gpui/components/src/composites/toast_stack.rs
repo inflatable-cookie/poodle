@@ -185,10 +185,19 @@ impl IntoElement for ToastStack {
             // Contract §8 tone treatments:
             //   accent bar  = color-mix(tone 82%, white 6%)
             //   border      = color-mix(tone 34%, border-default)
-            //   background  = color-mix(tone 12%, elevated) tint over elevated
+            //   background  = linear-gradient(90deg, color-mix(tone 12%, elevated),
+            //                 elevated 18%) — tone tint fading into elevated.
             let accent_bar_color = color_mix(tone_color, white, 0.94); // 94% tone + 6% white ≈ 82/6 mix intent
             let toast_border = color_mix(tone_color, border_default, 0.34);
-            let toast_bg = color_mix(tone_color, elevated, 0.12);
+            // 90deg gradient: tone-tinted leading edge → flat elevated by 18%.
+            // The contract's two transparent-composited layers collapse to this on
+            // GPUI (no multi-layer alpha background channel) — matches Jetstream.
+            let toast_bg_lead = color_mix(tone_color, elevated, 0.12);
+            let toast_bg = gpui::linear_gradient(
+                90.0,
+                gpui::linear_color_stop(toast_bg_lead, 0.0),
+                gpui::linear_color_stop(elevated, 0.18),
+            );
 
             // Build the content column: title + optional message + optional action.
             let mut content_col = div()

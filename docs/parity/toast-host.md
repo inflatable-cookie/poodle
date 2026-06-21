@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=3 jetstream=4 specimen=gap pass=fixed-pass-41 -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap pass=fixed-pass-42 -->
+<!-- pass-42: audited all open host todos against contract — every one is runtime/web-only/platform-owned, NOT a representable gap. Reclassified accepted: store-subscription+normalization (Tier 3 app-side), auto-dismiss timers+sticky (Tier 3 event-loop), narrow-viewport media override (web-only, no media-query channel), z-index (no GPUI/JsEl channel), onDismiss/onAction wiring (preview event loop). All placement/anchor regions, the 28rem width cap, and 1rem inset are already token/spec-resolved on both targets. No `max-visible` concept exists in contract or Svelte (recall artifact). No code change needed; counts zeroed to representable-open. -->
 # Parity: ToastHost
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,24 +27,26 @@ Props/defaults align (`autoDismissMs=6000`, `stickyTones=["danger"]`, `placement
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] No store subscription / item normalization — `ToastHost` takes a pre-built `Vec<Toast>` via `.toasts()`; `resolveTone`/`normalizeToast`/`variant`-to-tone mapping absent. **Platform-owned** per contract §10 + Tier 3 (store ownership is app-side); left for the app/preview layer.
-- [ ] No auto-dismiss timers / `sticky_tones` enforcement — `auto_dismiss_ms`/`sticky_tones`/`is_sticky_tone()`/`auto_dismiss_enabled()` are exposed on the spec but a real timer loop belongs to the app/preview event loop (Tier 3). Still a no-op in the component.
+- [x] accepted (pass 42, Tier 3): No store subscription / item normalization — `ToastHost` takes a pre-built `Vec<Toast>` via `.toasts()`; `resolveTone`/`normalizeToast`/`variant`-to-tone mapping absent. **Platform-owned** per contract §10 + Tier 3 (store ownership is app-side); left for the app/preview layer. Not representable in the component.
+- [x] accepted (pass 42, Tier 3): No auto-dismiss timers / `sticky_tones` enforcement — `auto_dismiss_ms`/`sticky_tones`/`is_sticky_tone()`/`auto_dismiss_enabled()` are exposed on the spec but a real timer loop belongs to the app/preview event loop. No-op in the component by design.
 - [x] FIXED `z-index: 80` now carried on the spec via `z_index()` (additive accessor). GPUI exposes no z-index style channel, so the host relies on overlay render order (mounted last) to stack above chrome — documented in the impl. (note)
 - [x] FIXED Hardcoded width `px(448.0)` → `px(rem_to_px(spec.width_rem()))` (28rem) with `.max_w(width)` cap. The `calc(100vw - 2rem)` viewport clamp is web-only (no viewport-relative unit on GPUI) — documented. (note)
 - [x] FIXED Hardcoded inset `px(16.0)` → `px(rem_to_px(spec.inset_rem()))` (1rem placement inset).
-- [ ] No narrow-viewport (`max-width: 40rem`) responsive treatment — **web-only**; GPUI has no media-query channel. Breakpoint/inset exposed via `narrow_breakpoint_rem()`/`narrow_inset_rem()` for parity, not applied.
+- [x] accepted (pass 42, web-only): No narrow-viewport (`max-width: 40rem`) responsive treatment — GPUI has no media-query channel. Breakpoint/inset exposed via `narrow_breakpoint_rem()`/`narrow_inset_rem()` for parity, not applied.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` stored, not emitted; live-region delegated to ToastStack which also lacks it.
+- Pass 42 audit: placement (all 4 corners), 28rem width cap, and 1rem inset are token/spec-resolved (toast_host.rs:126-145). No representable gap remains.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No store subscription / normalization — `js_toast_host` takes a pre-built `&ToastStackSpec`; `variant`-to-tone mapping, title fallback, `normalizeToast` absent. **Platform-owned** (store/normalization is app-side per contract §10 + Tier 3).
-- [ ] No auto-dismiss timers / sticky enforcement — `spec.auto_dismiss_ms`/`spec.sticky_tones` exposed but the timer loop belongs to the preview/app event loop (Tier 3); not implemented there yet.
+- [x] accepted (pass 42, Tier 3): No store subscription / normalization — `js_toast_host` takes a pre-built `&ToastStackSpec`; `variant`-to-tone mapping, title fallback, `normalizeToast` absent. **Platform-owned** (store/normalization is app-side per contract §10 + Tier 3). Not representable in the component.
+- [x] accepted (pass 42, Tier 3): No auto-dismiss timers / sticky enforcement — `spec.auto_dismiss_ms`/`spec.sticky_tones` exposed but the timer loop belongs to the preview/app event loop. No-op in the component by design.
 - [x] FIXED `z-index: 80` now carried on the spec via `z_index()`. JsEl has no z-index channel; the host relies on overlay render order (mounted last) — documented in the impl. (note)
 - [x] FIXED Hardcoded width `rem_to_px(28.0)` → `rem_to_px(spec.width_rem())` (28rem) with `.max_w(width)` cap. The `min(…, calc(100vw - 2rem))` viewport clamp is web-only (no viewport-relative unit in JsEl) — documented. (note)
 - [x] FIXED Hardcoded inset `rem_to_px(1.0)` → `rem_to_px(spec.inset_rem())` (1rem placement inset).
-- [ ] No narrow-viewport responsive override (`max-width: 40rem`) — **web-only**; no media-query channel in JsEl. `narrow_breakpoint_rem()`/`narrow_inset_rem()` exposed on the spec for parity, not applied.
-- [ ] `onDismiss`/`onAction` callbacks not wired — JsEl's immediate pass has no nested-component event-handler slot; dismiss/action click handling lives in the preview event loop (consistent with the ToastStack note). Inert in the component itself.
+- [x] accepted (pass 42, web-only): No narrow-viewport responsive override (`max-width: 40rem`) — no media-query channel in JsEl. `narrow_breakpoint_rem()`/`narrow_inset_rem()` exposed on the spec for parity, not applied.
+- [x] accepted (pass 42, preview-loop): `onDismiss`/`onAction` callbacks not wired — JsEl's immediate pass has no nested-component event-handler slot; dismiss/action click handling lives in the preview event loop (consistent with the ToastStack note). Inert in the component itself.
 - accepted: no ARIA channel (documented across jetstream impls).
+- Pass 42 audit: placement (all 4 corners), 28rem width cap, and 1rem inset are token/spec-resolved (toast_host.rs:26-53) and probe-tested (`bottom_end_placement_uses_inset_width`, `top_start_placement_renders_toasts`, `stacks_multiple_toasts_with_gap`). No representable gap remains.
 
 ## Specimen parity
 

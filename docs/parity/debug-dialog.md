@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=3 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap -->
+<!-- pass: GPUI rebuilt to compose Dialog primitive (title/close/lg-width) wrapping a Code block; gap tokenized (space.stack.md); value-as-String reclassified accepted (Rust has no `unknown`). max_height wired into both targets' Code blocks via new DebugDialogSpec::max_height_px(). -->
 # Parity: DebugDialog
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -18,12 +19,27 @@ Perfect parity. All eight contract props present in Svelte with identical names/
 
 ## GPUI gap (vs Svelte + contract)
 
-Renders Button + Code side-by-side; does **not** wrap them in a Dialog.
+Now composes the Dialog primitive: trigger Button + Dialog (title / close button / lg width) wrapping a JSON Code block. Renders nothing when value is null.
 
-- [ ] No Dialog container — `debug_dialog.rs:29-45` is a flex div holding Button + Code; contract requires the JSON code block inside a dialog opened by the trigger. Wrap in the `dialog` primitive.
-- [ ] Hardcoded gap `px(12.0)` at `debug_dialog.rs:32` — resolve from a spacing token.
-- [ ] Spec stores `value: Option<String>` (`packages/contracts/components/src/debug_dialog.rs`) — contract `value` is `unknown`; pre-serializing to String loses non-JSON-string inputs. Accept structured/serializable value, serialize at render.
-- accepted: no ARIA / no Dialog focus-trap/aria-modal (gpui has no accessibility API) — follows from the missing Dialog wrapper above; ARIA itself is the standing gpui delta.
+- [x] DONE: **Dialog container.** `debug_dialog.rs` rebuilt — trigger `Button`
+  (variant + size from spec) stacked above a `Dialog::from_spec` (`title`,
+  `width=Lg`, `show_close_button`, `close_label`) whose content slot is the JSON
+  `Code` block. Matches Svelte's Button + `<Dialog width="lg">` structure. Open
+  state is parent/preview-loop owned (`default_open(true)` so the surface is
+  built for verification).
+- [x] DONE: **Hardcoded gap `px(12.0)` removed** — the trigger/surface stack gap
+  now resolves from `space.stack.md`.
+- [x] DONE: **`maxHeight` wired** — `DebugDialogSpec::max_height_px()` (new
+  additive helper) parses the rem term of the CSS string (default
+  `"min(60vh, 32rem)"` → 512px) and feeds `Code::with_max_height`; the vh term is
+  viewport-relative and owned by the centering parent.
+- accepted (architectural): Spec stores `value: Option<String>` rather than
+  contract `unknown`. Rust has no `unknown` type; the idiomatic channel is a
+  pre-serialized JSON string supplied by the caller (matches the Jetstream side).
+  A `serde_json::Value` field would couple `poodle-specs` to serde for one
+  component — out of scope. Callers serialize via `JSON.stringify`-equivalent
+  before constructing the spec.
+- accepted: no ARIA / no Dialog focus-trap/aria-modal (gpui has no accessibility API) — the standing gpui delta, inherited from the Dialog primitive.
 
 ## Jetstream gap (vs Svelte + contract)
 

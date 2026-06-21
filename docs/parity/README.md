@@ -142,7 +142,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | date-time-picker | fixed | 0 | 0 | gap |
 | date-time-range-picker | fixed | 1 | 1 | gap |
 | date-time-zone-picker | fixed | 2 | 1 | gap |
-| debug-dialog | ok | 3 | 1 | gap |
+| debug-dialog | ok | 0 | 1 | gap |
 | detail-item | fixed | 0 | 0 | gap |
 | detail-section | fixed | 0 | 0 | gap |
 | detail-section-group | fixed | 0 | 0 | gap |
@@ -236,15 +236,15 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-ago | fixed | 2 | 2 | ok |
 | time-input | fixed | 0 | 0 | ok |
 | time-zone-select | fixed | 0 | 0 | gap |
-| toast-host | fixed | 3 | 4 | gap |
-| toast-stack | ok | 1 | 3 | gap |
+| toast-host | fixed | 0 | 0 | gap |
+| toast-stack | ok | 0 | 3 | gap |
 | toggle-group | fixed | 0 | 0 | gap |
 | token-input | fixed | 2 | 3 | gap |
 | toolbar | fixed | 1 | 1 | gap |
 | tooltip | fixed | 0 | 0 | ok |
 | tree | ok | 0 | 0 | ok |
 | tri-state-switch | fixed | 1 | 2 | ok |
-| ui-presentation-provider | fixed | 3 | 2 | gap |
+| ui-presentation-provider | fixed | 0 | 0 | gap |
 | validation-summary | gap | 0 | 0 | gap |
 | video-player | fixed | 0 | 0 | gap |
 <!-- END MATRIX -->

@@ -28,16 +28,20 @@ pub fn js_debug_dialog(spec: &DebugDialogSpec, theme: &JetstreamThemeProvider) -
         button = button.with_size(size);
     }
 
+    // Code block: JSON value, with the max-height clamp parsed from the spec's
+    // CSS string (the rem term — the vh term is viewport-relative).
+    let mut code = CodeSpec::new()
+        .with_content(spec.value.clone().unwrap_or_default())
+        .with_language("json");
+    if let Some(mh) = spec.max_height_px() {
+        code = code.with_max_height(mh);
+    }
+
     ui_element::div()
         .flex_col()
         .gap(rem_to_px(0.75))
         .child(js_button(&button, theme))
-        .child(js_code(
-            &CodeSpec::new()
-                .with_content(spec.value.clone().unwrap_or_default())
-                .with_language("json"),
-            theme,
-        ))
+        .child(js_code(&code, theme))
 }
 
 #[cfg(test)]

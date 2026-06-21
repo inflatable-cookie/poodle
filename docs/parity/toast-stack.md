@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=1 jetstream=3 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=3 specimen=gap pass=fixed-pass-42 -->
+<!-- pass-42: GPUI toast bg now the contract 90deg tone→elevated linear-gradient (was flat tint) — last GPUI gap closed. Jetstream 3 remaining all preview-loop/ARIA (dismiss/action handlers, real Button slot, role=list) — accepted. -->
 # Parity: ToastStack
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,7 +26,8 @@ Props, anatomy, tone set, ARIA, size/density tables all match Svelte. Minor note
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [x] Info tone uses wrong token — FIXED: `ToastTone::Info` now maps to `COLOR_STATUS_INFO` (new `color.status.info` token), not `COLOR_ACCENT_BASE`. (The accent *fallback* read at toast_stack.rs:100 is a separate concern only hit for unknown tones.)
-- [x] DONE (pass 41): accent-bar + tone mixes — accent bar `color_mix(tone, white, 0.94)` (≈82%/white-6% intent), border `color_mix(tone 34%, border-default)`, background `color_mix(tone 12%, elevated)` flat tint. Bar is now absolute, full-height.
+- [x] DONE (pass 41): accent-bar + tone mixes — accent bar `color_mix(tone, white, 0.94)` (≈82%/white-6% intent), border `color_mix(tone 34%, border-default)`.
+- [x] DONE (pass 42): background is now the contract §8 `linear-gradient(90deg, color-mix(tone 12%, elevated) → elevated 18%)` via `gpui::linear_gradient`/`linear_color_stop` (was a flat `color_mix(tone 12%, elevated)` tint). Matches Svelte + Jetstream. The contract's two transparent-composited layers collapse to this single gradient on GPUI (no multi-layer alpha background channel). Bar is absolute, full-height.
 - [x] DONE: dismiss is the `Icon` primitive (`name="x"`) with `aria_label("Dismiss {title}")`, absolute top-right, sized square.
 - [x] DONE: action affordance is the real `Button` primitive (variant Secondary, size/density forwarded), wired to `on_action`.
 - [x] DONE: per-size title + message font ladder (§8 size table); message is the smaller body scale, title the heading scale.
@@ -58,5 +60,6 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Jetstream `js_toast_stack` is the largest gap in this pair: it renders only a bordered box with the message string — no title, no accent bar, no dismiss, no action, no tone color, no elevation. It is effectively a placeholder and per CLAUDE.md "worse than no specimen" risk applies; treat the 11 todos as one coherent rebuild against the contract.
 - GPUI info-tone token bug (`color.accent.base` vs `color.status.info`) is a concrete correctness defect, not just a missing mix — info toasts render the accent hue, not the status-info blue.
-- Rust `ToastStackSpec` exposes `shadow_token()` and full tone/color token methods (spec toast_stack.rs:97-140) that both impls partially or fully ignore — the spec surface is ahead of both renderers.
+- Rust `ToastStackSpec` exposes `shadow_token()` and full tone/color token methods (spec toast_stack.rs:97-140); GPUI uses `elevation_overlay_shadow()` and Jetstream approximates via `shadow_md()` (no token-driven box-shadow on JsEl). `shadow_token()` itself is still unread surface (both targets derive the shadow from a preset/helper, not the token string).
+- Pass 42: GPUI background brought to gradient parity; the only remaining open items are the 3 Jetstream preview-loop/ARIA entries (dismiss+action click handlers, real `Button` slot for the action affordance, `role=list` transient-notification semantics) — all accepted runtime/no-channel limits, not representable in the immediate JsEl pass.
 - Light theme: contract §8 says "None"; nothing to verify.
