@@ -385,6 +385,134 @@ pub fn duration_pad_x_density_adjust_rem(density: ControlDensity) -> f32 {
     }
 }
 
+// ── RelationPicker size / density scales ─────────────────────────
+//
+// Contract §8 "Size adjustments" / "Density adjustments" + the Svelte
+// `.poodle-relation-picker[data-size]` / `[data-density]` custom-property
+// overrides. Candidate-item geometry (`--relation-picker-item-y/x/gap`),
+// copy font sizes, and list gap are all size/density-driven; these mirror the
+// authoritative Svelte values so the component resolves geometry from one
+// source of truth instead of flat rem literals.
+
+/// Candidate-item vertical padding in rem (`--relation-picker-item-y`).
+/// Svelte: xs 0.25, sm/md 0.375, lg/xl 0.5.
+pub fn relation_picker_item_y_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.375,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.5,
+    }
+}
+
+/// Candidate-item horizontal padding in rem (`--relation-picker-item-x`).
+/// Svelte: xs 0.375, sm/md 0.5, lg 0.625, xl 0.75.
+pub fn relation_picker_item_x_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        ControlSize::Sm => 0.5,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.625,
+        ControlSize::Xl => 0.75,
+    }
+}
+
+/// Candidate-item inner gap in rem (`--relation-picker-item-gap`).
+/// Svelte: xs 0.375, sm/md/lg/xl 0.5.
+pub fn relation_picker_item_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        _ => 0.5,
+    }
+}
+
+/// Candidate-copy title (`strong`) font size in rem (`--relation-picker-title-size`).
+/// Svelte: xs 0.6875, sm 0.75, md 0.8125, lg 0.875, xl 0.9375.
+pub fn relation_picker_title_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.9375,
+    }
+}
+
+/// Candidate-copy description (`small`) font size in rem (`--relation-picker-desc-size`).
+/// Svelte: xs 0.5625, sm 0.625, md 0.6875, lg 0.75, xl 0.8125.
+pub fn relation_picker_desc_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5625,
+        ControlSize::Sm => 0.625,
+        ControlSize::Md => 0.6875,
+        ControlSize::Lg => 0.75,
+        ControlSize::Xl => 0.8125,
+    }
+}
+
+/// Candidate-list inter-row gap in rem (`--relation-picker-list-gap`).
+/// Svelte density: compact 0.1875, default 0.25, comfortable 0.3125.
+pub fn relation_picker_list_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.1875,
+        ControlDensity::Default => 0.25,
+        ControlDensity::Comfortable => 0.3125,
+    }
+}
+
+// ── TokenInput size / density scales ─────────────────────────────
+//
+// Contract §8 + the Svelte `.poodle-token-input[data-size]` / `[data-density]`
+// custom-property overrides. Padding-block/inline derive from `space.control.y/x`
+// with per-size offsets; font-size and the wrap-row gap are size/density-driven.
+
+/// Token-row padding-block offset in rem added to `space.control.y`.
+/// Svelte: xs -0.125, sm -0.0625, md 0, lg +0.0625, xl +0.125.
+pub fn token_input_pad_y_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.125,
+        ControlSize::Sm => -0.0625,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.0625,
+        ControlSize::Xl => 0.125,
+    }
+}
+
+/// Token-row padding-inline offset in rem added to `space.control.x`.
+/// Svelte: xs -0.25, sm -0.125, md 0, lg +0.125, xl +0.1875.
+pub fn token_input_pad_x_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.25,
+        ControlSize::Sm => -0.125,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.125,
+        ControlSize::Xl => 0.1875,
+    }
+}
+
+/// Token-row / draft-input font size in rem (`--token-input-font-size`).
+/// Svelte: xs 0.75, sm 0.8125, md body-size (returns None → use token), lg 0.9375, xl 1.
+pub fn token_input_font_rem(size: ControlSize) -> Option<f32> {
+    match size {
+        ControlSize::Xs => Some(0.75),
+        ControlSize::Sm => Some(0.8125),
+        ControlSize::Md => None,
+        ControlSize::Lg => Some(0.9375),
+        ControlSize::Xl => Some(1.0),
+    }
+}
+
+/// Token-row wrap gap in rem (`--token-input-gap`).
+/// Svelte density: compact 0.25, default 0.375, comfortable 0.5.
+pub fn token_input_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.25,
+        ControlDensity::Default => 0.375,
+        ControlDensity::Comfortable => 0.5,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0

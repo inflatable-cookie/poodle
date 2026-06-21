@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=10 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=4 specimen=gap | pass: real search TextInput, token-resolved candidate/drill geometry, weight 500, color-mix selected/base bg, breadcrumb accent fixed, drill-row transparent base -->
 # Parity: RelationPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,30 +26,28 @@ Svelte carries a large undocumented prop/snippet/callback surface. Svelte is aut
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Candidate label weight wrong — uses `FontWeight::SEMIBOLD` (600) at `relation_picker.rs:494`; Svelte is `500`. Drill label same issue at `relation_picker.rs:393`.
-- [ ] Hardcoded spacing literals: `px(rem_to_px(0.125))` row-gap (`relation_picker.rs:124`) and inner gaps (`:390,:409,:490`), `pad_x = px(rem_to_px(0.75))` / `pad_y = px(rem_to_px(0.5))` (`:125-126`) — Svelte item padding is `0.375rem 0.5rem` (md) via `--relation-picker-item-y/x` and scales by size. Resolve from size/density tokens, not flat rem.
-- [ ] Selected-row background is an alpha-blend hack `accent.a*0.10 + surface.a*0.90` over `surface` (`relation_picker.rs:450-453`); Svelte is `color-mix(accent 10%, transparent)` over the base item bg. Approximation diverges from `color-mix`.
-- [ ] Unselected row bg uses `elevated`+`surface` blend (`relation_picker.rs:455-458`); Svelte base is `color-mix(surface 86%, transparent)` (`RelationPicker.svelte:896`). Wrong base color.
-- [ ] No search `TextInput` — renders a static fake search box (icon + query text in a div, `relation_picker.rs:189-222`); Svelte composes the real `TextInput type="search"` with clear + keydown. No typing, clear, or describedBy.
-- [ ] No `filters` / `searchPlaceholder` / `footerNote` / `showFooter` / `showSelectionSummary` support — spec/builder lack these props.
-- [ ] No keyboard nav — Arrow/Home/End/Escape/Backspace candidate + drill-back navigation absent (interaction is click-only via `on_select`/`on_drill_enter`).
-- [ ] Drill-list/candidate hover + focus-visible states from contract §8 not rendered (no `:hover` bg on candidate rows, no focus ring).
-- [ ] No `data-selected` / `aria-pressed` equivalent for selection state beyond visual border.
-- accepted: no ARIA (gpui has no accessibility API) — `aria-label`, `aria-pressed`, `aria-describedby` from contract §6 not emitted.
+- [x] FIXED — candidate + drill label weight now `FontWeight::MEDIUM` (500) via the shared `LABEL_WEIGHT` const (was SEMIBOLD/600).
+- [x] FIXED — candidate/drill geometry resolves from size/density tokens: `relation_picker_item_x/y/gap_rem(size)` + `relation_picker_list_gap_rem(density)` (new `presentation` helpers mirroring the Svelte size/density tables). No flat `0.75/0.5/0.125` literals.
+- [x] FIXED — selected-row bg is `color_mix(accent, transparent, 0.10)` and base is `color_mix(surface, transparent, 0.86)`; selected border `color_mix(accent, transparent, 0.60)`. Matches the contract §8 / Svelte `color-mix` exactly (no alpha-blend hack, no `elevated` base).
+- [x] FIXED — real search field: `TextInput::from_spec` with `input_type="search"`, leading `search` icon, clear button, and the current query as value. Replaces the faked icon+query div.
+- [ ] No `filters` / `footerNote` / `showFooter` / `showSelectionSummary` support — `RelationPickerSpec`/builder lack these props (would need additive spec fields; out of scope this pass).
+- [ ] No keyboard nav — Arrow/Home/End/Escape/Backspace candidate + drill-back navigation absent. Preview-loop: interaction lives in the consumer event loop alongside `on_select`/`on_drill_enter`.
+- [ ] Drill-list/candidate hover + focus-visible states (contract §8) not rendered. Preview-loop: GPUI hover/focus are runtime states owned by the consumer.
+- accepted: no ARIA (gpui has no accessibility API) — `aria-label`, `aria-pressed`, `aria-describedby`, `data-selected` from contract §6 not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Pervasive hardcoded pixel literals throughout `relation_picker.rs`: `text_size(12.0)`/`text_size(14.0)`/`text_size(11.0)`/`text_size(13.0)`, `pl(12.0)`/`pr(12.0)`/`pt(8.0)`/`pb(8.0)`, `gap(8.0)`/`gap(4.0)`/`gap(2.0)`, `w(14.0)`/`h(14.0)`, `pl(10.0)`/`pr(10.0)` — every dimension is a raw float (e.g. `:204-214`, `:233-279`, `:310-355`). Resolve all from size/density tokens.
-- [ ] Candidate + drill label weight wrong — `text_weight(600)` at `relation_picker.rs:342,255`; Svelte is `500`.
-- [ ] Item padding hardcoded `12/8` (`relation_picker.rs:314-321`); Svelte md item is `0.375rem 0.5rem` and scales by size. No size/density scaling at all.
-- [ ] Selected-row bg `tint(accent, 0.10)` (`relation_picker.rs:300`) replaces the base item color entirely instead of layering `color-mix(accent 10%, transparent)` over `color-mix(surface 86%)`. Unselected uses `tint(surface, 0.86)` which is closer but still not a true mix.
-- [ ] Breadcrumb item color bug — `accent_or(text_primary, text_primary)` at `relation_picker.rs:164` always passes `text_primary`, never the accent color; Svelte breadcrumb items are `--poodle-color-accent-base`. Resolve `color.accent.base` and pass it.
-- [ ] No real search input — static icon + query label (`relation_picker.rs:184-216`); no `TextInput`, no clear/keydown.
-- [ ] No `filters` / `searchPlaceholder` / `footerNote` / `showFooter` / `showSelectionSummary` support.
-- [ ] No keyboard nav (Arrow/Home/End/Escape/Backspace) and no drill-back wiring — `Back` button (`relation_picker.rs:142`) has no handler; interaction must live in preview `main.rs` event loop and is currently absent.
-- [ ] Drill-row bg `tint(elevated, 0.88)` (`relation_picker.rs:245`) does not match Svelte drill button (transparent, `:hover color-mix(surface 60%)`). No hover/focus states.
-- [ ] `theme` param unused in `drill_row`/`candidate_row` (leading `_`-style dead arg) — search/candidate colors are passed in but hover/focus tokens never resolved.
-- accepted: no ARIA channel (Jetstream has no a11y tree); interaction click/keyboard handlers belong in preview event loop.
+- [x] FIXED — all hardcoded pixel literals replaced by token-resolved geometry: candidate/drill padding from `relation_picker_item_x/y_rem(size)`, inner gap from `relation_picker_item_gap_rem(size)`, list gap from `relation_picker_list_gap_rem(density)`, title/desc fonts from `relation_picker_title/desc_size_rem(size)`, label/crumb fonts from `typography.label.size`. Chevron sized in rem (`0.875`).
+- [x] FIXED — candidate + drill label weight now `500` (`LABEL_WEIGHT`).
+- [x] FIXED — selected-row bg is `color_mix(accent, transparent, 0.10)`; base is `color_mix(surface, transparent, 0.86)`; selected border `color_mix(accent, transparent, 0.60)`. True color-mix per contract §8.
+- [x] FIXED — breadcrumb item color bug gone: breadcrumb items now resolve `color.accent.base` and render as id-tagged buttons (`poodle-relation-crumb-{i}`) at weight 500.
+- [x] FIXED — real search input via `js_text_input` (`input_type="search"`, leading `search` icon, clear button, query as value). No faked icon+label box.
+- [x] FIXED — drill-row base is transparent (`glam::Vec4::ZERO`) matching Svelte `.drill-list__button`; drill rows are id-tagged hit targets (`poodle-relation-drill-{id}`). Drill-empty "No items found" state added.
+- [x] FIXED — dead `theme`/`surface`/`elevated` args pruned from `drill_row`; remaining args are all live.
+- [ ] No `filters` / `footerNote` / `showFooter` / `showSelectionSummary` support — spec lacks these props (additive spec fields, out of scope this pass).
+- [ ] No keyboard nav (Arrow/Home/End/Escape/Backspace) and no drill-back/breadcrumb/candidate click wiring. Preview-loop: the `poodle-relation-{drill,crumb,candidate,drill-back}-*` ids are emitted as hit targets, but the handlers belong in the preview `main.rs` event loop and are absent.
+- [ ] Hover/focus states (contract §8 `:hover`/`:focus-visible`) not rendered. Preview-loop: runtime states owned by the event loop (JsEl has no static focus modifier).
+- accepted: no ARIA channel (Jetstream has no a11y tree).
 
 ## Specimen parity
 

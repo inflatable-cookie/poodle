@@ -1,43 +1,60 @@
-//! MediaPicker — media selection/upload interface backed by MediaPickerSpec.
+//! MediaPicker — dialog-based media selection composite backed by
+//! MediaPickerSpec.
+//!
+//! Contract: `docs/contracts/components/media-picker.md`
+//! Reference: `packages/svelte/components/src/MediaPicker.svelte`
+//!
+//! Single-select, select-and-close model (no multi-select / confirm footer).
+//! Composes the real `Tabs`, `TextInput`, `MediaThumbnail`, and `FileUpload`
+//! primitives — no hand-coded chrome. Browse grid renders the real
+//! `spec.items`; the upload tab renders the real FileUpload dropzone.
 
 use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
+    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
 };
-use crate::primitives::Icon;
+use crate::primitives::{FileUpload, Tabs, TextInput};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
-use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::MediaPickerSpec;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    AspectRatio, ControlDensity, ControlSize, FileUploadSpec, MediaKind, MediaPickerItem,
+    MediaPickerSpec, MediaPickerTab, MediaThumbnailSpec, SemanticControlSizeRole, TabDefinition,
+    TabsSpec, TextInputSpec,
+};
 use std::rc::Rc;
 
-/// Which tab is active in the media picker.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum MediaPickerTab {
-    #[default]
-    Browse,
-    Upload,
+use super::media_thumbnail::MediaThumbnail;
+
+/// Browse-grid minimum column width in rem per size (contract §8 size table).
+fn grid_min_col_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 4.75,
+        ControlSize::Sm => 5.25,
+        ControlSize::Md => 5.5,
+        ControlSize::Lg => 6.0,
+        ControlSize::Xl => 6.5,
+    }
 }
 
-/// A thumbnail item shown in the picker grid.
-#[derive(Clone, Debug)]
-pub struct MediaPickerItem {
-    pub id: String,
-    pub label: String,
-    pub is_selected: bool,
+/// Browse-grid gap + item padding in rem per density (contract §8).
+fn grid_gap_and_pad_rem(density: ControlDensity) -> (f32, f32) {
+    match density {
+        ControlDensity::Compact => (0.25, 0.25),
+        ControlDensity::Default => (0.375, 0.375),
+        ControlDensity::Comfortable => (0.5, 0.5),
+    }
+}
+
+/// Map a media item kind to the thumbnail's MediaKind.
+fn to_media_kind(kind: MediaKind) -> MediaKind {
+    kind
 }
 
 pub struct MediaPicker {
     spec: MediaPickerSpec,
     theme: GpuiThemeProvider,
-    active_tab: MediaPickerTab,
-    thumbnails: Vec<MediaPickerItem>,
-    content: Option<AnyElement>,
     on_select: Option<Rc<dyn Fn(&str, &ClickEvent, &mut Window, &mut App) + 'static>>,
-    on_confirm: Option<Rc<dyn Fn(&ClickEvent, &mut Window, &mut App) + 'static>>,
-    on_tab_change: Option<Rc<dyn Fn(MediaPickerTab, &ClickEvent, &mut Window, &mut App) + 'static>>,
+    on_tab_change: Option<Rc<dyn Fn(MediaPickerTab, &mut Window, &mut App) + 'static>>,
 }
 
 impl std::ops::Deref for MediaPicker {
@@ -52,11 +69,7 @@ impl MediaPicker {
         Self {
             spec: MediaPickerSpec::new("Select media"),
             theme: theme.clone(),
-            active_tab: MediaPickerTab::Browse,
-            thumbnails: Vec::new(),
-            content: None,
             on_select: None,
-            on_confirm: None,
             on_tab_change: None,
         }
     }
@@ -64,28 +77,20 @@ impl MediaPicker {
         Self {
             spec,
             theme: theme.clone(),
-            active_tab: MediaPickerTab::Browse,
-            thumbnails: Vec::new(),
-            content: None,
             on_select: None,
-            on_confirm: None,
             on_tab_change: None,
         }
     }
-    pub fn with_content(mut self, c: impl IntoElement) -> Self {
-        self.content = Some(c.into_any_element());
-        self
-    }
     pub fn with_active_tab(mut self, tab: MediaPickerTab) -> Self {
-        self.active_tab = tab;
+        self.spec.active_tab = tab;
         self
     }
-    pub fn with_thumbnail(mut self, thumb: MediaPickerItem) -> Self {
-        self.thumbnails.push(thumb);
+    pub fn with_items(mut self, items: Vec<MediaPickerItem>) -> Self {
+        self.spec.items = items;
         self
     }
-    pub fn with_thumbnails(mut self, thumbs: impl IntoIterator<Item = MediaPickerItem>) -> Self {
-        self.thumbnails.extend(thumbs);
+    pub fn with_item(mut self, item: MediaPickerItem) -> Self {
+        self.spec.items.push(item);
         self
     }
     pub fn on_select(
@@ -95,16 +100,9 @@ impl MediaPicker {
         self.on_select = Some(Rc::new(handler));
         self
     }
-    pub fn on_confirm(
-        mut self,
-        handler: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static,
-    ) -> Self {
-        self.on_confirm = Some(Rc::new(handler));
-        self
-    }
     pub fn on_tab_change(
         mut self,
-        handler: impl Fn(MediaPickerTab, &ClickEvent, &mut Window, &mut App) + 'static,
+        handler: impl Fn(MediaPickerTab, &mut Window, &mut App) + 'static,
     ) -> Self {
         self.on_tab_change = Some(Rc::new(handler));
         self
@@ -126,324 +124,235 @@ impl MediaPicker {
 impl IntoElement for MediaPicker {
     type Element = AnyElement;
     fn into_element(self) -> Self::Element {
-        // When closed, render nothing — matches dialog-style composites
-        // (confirm_action, etc.). Callers drive is_open via spec/state.
+        // When closed, render nothing — callers drive is_open via spec/state.
         if !self.spec.is_open {
             return div().into_any_element();
         }
         let theme = &self.theme;
-        let effective_size = resolve_semantic_size(self.spec.size, self.spec.size_role);
-        let font_size = rem_to_px(size_font_rem(effective_size));
-        let pad_x = rem_to_px(panel_space_x_rem(self.spec.density));
-        let pad_y = rem_to_px(panel_space_y_rem(self.spec.density));
-        let item_gap = rem_to_px(control_space_x_rem(self.spec.density));
+        let spec = &self.spec;
+        let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let fill = resolve_color(theme, self.spec.fill_token());
+        let pad_x = px(rem_to_px(panel_space_x_rem(spec.density)));
+        let pad_y = px(rem_to_px(panel_space_y_rem(spec.density)));
+        let stack_gap = px(rem_to_px(0.5));
+
+        let fill = resolve_color(theme, spec.fill_token());
         let radius = resolve_radius(theme, "radius.surface");
         let border_color = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
-        let accent = resolve_color(theme, "color.accent.base");
-        let label_size = px(font_size);
-        let label_tok = resolve_px(theme, "typography.label.size");
-        let radius_control = resolve_radius(theme, "radius.control");
-        let gap_sm = resolve_px(theme, "space.inline.sm");
-        let gap_md = resolve_px(theme, "space.inline.md");
-        let gap_lg = resolve_px(theme, "space.inline.lg");
 
-        // ── Dialog wrapper ───────────────────────────────────────
+        // ── Dialog chrome (elevated surface + dialog shadow) ──
         let mut dialog = div()
             .bg(fill)
             .rounded(radius)
             .shadow(crate::theme_ext::elevation_dialog_shadow())
             .flex()
             .flex_col()
-            .min_w(px(480.0))
-            .max_h(px(520.0))
+            .min_w(px(rem_to_px(30.0)))
+            .max_h(px(rem_to_px(32.5)))
             .overflow_hidden()
             .border_1()
             .border_color(border_color);
 
-        // ── Title bar ────────────────────────────────────────────
-        let title_bar = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .px(px(pad_x))
-            .py(px(pad_y))
-            .border_b_1()
-            .border_color(border_color)
-            .child(
-                div()
-                    .text_color(text_primary)
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .child(self.spec.title.clone()),
-            )
-            .child({
-                let close_icon = Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), theme)
-                    .with_color(text_secondary);
-                div().cursor_pointer().child(close_icon)
-            });
-
-        dialog = dialog.child(title_bar);
-
-        // ── Tab header (Browse / Upload) ─────────────────────────
-        let browse_active = self.active_tab == MediaPickerTab::Browse;
-
-        let tab_item = |_label: &str, is_active: bool| -> Div {
-            let base = div()
-                .px(gap_lg)
-                .py(gap_sm)
-                .text_size(label_size)
-                .font_weight(FontWeight::MEDIUM)
-                .cursor_pointer();
-            if is_active {
-                base.text_color(accent).border_b_2().border_color(accent)
-            } else {
-                base.text_color(text_secondary)
-            }
-        };
-
-        let browse_icon = Icon::from_spec(IconSpec::new("image").with_size(IconSize::Sm), theme)
-            .with_color(if browse_active {
-                accent
-            } else {
-                text_secondary
-            });
-
-        let upload_icon = Icon::from_spec(IconSpec::new("upload").with_size(IconSize::Sm), theme)
-            .with_color(if !browse_active {
-                accent
-            } else {
-                text_secondary
-            });
-
-        let on_tab_change = self.on_tab_change;
-
-        let browse_tab = {
-            let mut el = tab_item("Browse", browse_active)
-                .id("media-picker-tab-browse")
+        // ── Title bar ──
+        let close_icon =
+            crate::primitives::Icon::from_spec(poodle_specs::IconSpec::new("x"), theme)
+                .with_px_size(rem_to_px(1.0))
+                .with_color(text_secondary);
+        dialog = dialog.child(
+            div()
                 .flex()
                 .items_center()
-                .gap(gap_sm)
-                .child(browse_icon)
-                .child("Browse");
-            if let Some(ref handler) = on_tab_change {
-                let handler = handler.clone();
-                el = el.on_click(move |ev, win, app| {
-                    handler(MediaPickerTab::Browse, ev, win, app);
-                });
-            }
-            el
-        };
+                .justify_between()
+                .px(pad_x)
+                .py(pad_y)
+                .border_b_1()
+                .border_color(border_color)
+                .child(
+                    div()
+                        .text_color(text_primary)
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child(spec.title.clone()),
+                )
+                .child(div().cursor_pointer().child(close_icon)),
+        );
 
-        let upload_tab = {
-            let mut el = tab_item("Upload", !browse_active)
-                .id("media-picker-tab-upload")
-                .flex()
-                .items_center()
-                .gap(gap_sm)
-                .child(upload_icon)
-                .child("Upload");
-            if let Some(ref handler) = on_tab_change {
-                let handler = handler.clone();
-                el = el.on_click(move |ev, win, app| {
-                    handler(MediaPickerTab::Upload, ev, win, app);
-                });
-            }
-            el
-        };
+        // ── Tabs (Browse | Upload) with content panels ──
+        let active_value = if spec.is_browsing() { "browse" } else { "upload" };
+        let tab_defs = vec![
+            TabDefinition::new("browse", "Browse"),
+            TabDefinition::new("upload", "Upload"),
+        ];
 
-        let tabs = div()
-            .flex()
-            .border_b_1()
-            .border_color(border_color)
-            .child(browse_tab)
-            .child(upload_tab);
+        let browse_panel = self.browse_panel(theme, effective_size);
+        let upload_panel = self.upload_panel(theme);
 
-        dialog = dialog.child(tabs);
+        let mut tabs = Tabs::from_spec(
+            TabsSpec::new(tab_defs)
+                .with_value(active_value)
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density),
+            theme,
+        )
+        .with_id("media-picker")
+        .with_content("browse", browse_panel)
+        .with_content("upload", upload_panel);
 
-        // ── Search input area ────────────────────────────────────
-        let search_icon = Icon::from_spec(IconSpec::new("search").with_size(IconSize::Sm), theme)
-            .with_color(text_secondary);
-
-        let search_bar = div()
-            .flex()
-            .items_center()
-            .gap(gap_sm)
-            .mx(gap_lg)
-            .my(gap_md)
-            .px(gap_md)
-            .py(gap_sm)
-            .rounded(radius_control)
-            .border_1()
-            .border_color(border_color)
-            .child(search_icon)
-            .child(
-                div()
-                    .flex_grow()
-                    .text_size(label_size)
-                    .text_color(text_secondary)
-                    .child("Search media\u{2026}"),
-            );
-
-        dialog = dialog.child(search_bar);
-
-        // ── Accepted types hint ──────────────────────────────────
-        if let Some(ref types) = self.spec.accepted_types {
-            dialog = dialog.child(
-                div()
-                    .px(gap_lg)
-                    .text_size(label_tok)
-                    .text_color(text_secondary)
-                    .child(format!("Accepted: {}", types)),
-            );
+        if let Some(handler) = self.on_tab_change.clone() {
+            tabs = tabs.on_change(move |value, win, app| {
+                let tab = if value == "upload" {
+                    MediaPickerTab::Upload
+                } else {
+                    MediaPickerTab::Browse
+                };
+                handler(tab, win, app);
+            });
         }
 
-        // ── Thumbnail grid ───────────────────────────────────────
-        let mut grid = div()
-            .flex()
-            .flex_wrap()
-            .gap(px(item_gap))
-            .px(px(pad_x))
-            .py(px(pad_y))
-            .overflow_hidden()
-            .flex_grow();
+        dialog = dialog.child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(stack_gap)
+                .px(pad_x)
+                .py(pad_y)
+                .child(tabs),
+        );
 
-        if self.thumbnails.is_empty() && self.content.is_none() {
-            // Empty-state copy: prefer spec.empty_message when set,
-            // fall back to the contract default ("No media items
-            // found." per Svelte reference). This honours the
-            // `emptyMessage` prop from the contract doc.
-            let empty_text = self
-                .spec
+        dialog.into_any_element()
+    }
+}
+
+impl MediaPicker {
+    /// Browse tab: search input + grid of real items, or empty state.
+    fn browse_panel(&self, theme: &GpuiThemeProvider, effective_size: ControlSize) -> AnyElement {
+        let spec = &self.spec;
+        let text_secondary = resolve_color(theme, "color.text.secondary");
+        let stack_gap = px(rem_to_px(0.5));
+
+        let search = TextInput::from_spec(
+            TextInputSpec::new()
+                .with_placeholder("Search media...")
+                .with_size(spec.size)
+                .with_size_role(spec.size_role)
+                .with_density(spec.density),
+            theme,
+        )
+        .with_id("media-picker-search");
+
+        let mut panel = div()
+            .flex()
+            .flex_col()
+            .gap(stack_gap)
+            .child(div().mt(px(rem_to_px(0.25))).child(search));
+
+        if spec.has_items() {
+            let (grid_gap, item_pad) = grid_gap_and_pad_rem(spec.density);
+            let grid_min = px(rem_to_px(grid_min_col_rem(effective_size)));
+            let item_radius = resolve_radius(theme, spec.item_radius_token());
+            let label_size = resolve_px(theme, "typography.label.size");
+            let label_color = resolve_color(theme, spec.label_token());
+            let border_focus = resolve_color(theme, spec.item_border_token());
+            let item_hover_bg = resolve_color(theme, spec.item_hover_fill_token());
+            let on_select = self.on_select.clone();
+
+            let mut grid = div()
+                .id("media-picker-grid")
+                .flex()
+                .flex_wrap()
+                .gap(px(rem_to_px(grid_gap)))
+                .max_h(px(rem_to_px(20.0)))
+                .overflow_y_scroll();
+
+            for item in &spec.items {
+                let item_id = SharedString::from(format!("media-picker-item-{}", item.id));
+                // Thumbnail — real MediaThumbnail (compact, square, no caption).
+                let thumb = MediaThumbnail::from_spec(
+                    MediaThumbnailSpec::new(to_media_kind(item.kind))
+                        .with_aspect_ratio(AspectRatio::Square)
+                        .with_show_caption(false),
+                    theme,
+                );
+
+                let mut cell = div()
+                    .id(item_id)
+                    .focusable()
+                    .min_w(grid_min)
+                    .flex_grow()
+                    .flex()
+                    .flex_col()
+                    .items_center()
+                    .gap(px(rem_to_px(0.25)))
+                    .p(px(rem_to_px(item_pad)))
+                    .border_1()
+                    .border_color(gpui::transparent_black())
+                    .rounded(item_radius)
+                    .cursor_pointer()
+                    // Contract §8 :hover / :focus-visible → border-focus + panel bg.
+                    .hover(move |s| s.border_color(border_focus).bg(item_hover_bg))
+                    .focus(move |s| s.border_color(border_focus).bg(item_hover_bg))
+                    .child(thumb)
+                    .child(
+                        div()
+                            .max_w_full()
+                            .text_size(label_size)
+                            .text_color(label_color)
+                            .overflow_hidden()
+                            .text_ellipsis()
+                            .whitespace_nowrap()
+                            .child(item.label.clone()),
+                    );
+
+                if let Some(ref handler) = on_select {
+                    let handler = handler.clone();
+                    let id = item.id.clone();
+                    cell = cell.on_click(move |ev, win, app| handler(&id, ev, win, app));
+                }
+
+                grid = grid.child(cell);
+            }
+
+            panel = panel.child(grid);
+        } else {
+            // Empty state — centered message, min-height 10rem.
+            let empty_text = spec
                 .empty_message
                 .clone()
                 .unwrap_or_else(|| "No media items found.".to_string());
-            grid = grid.child(
+            panel = panel.child(
                 div()
-                    .w_full()
-                    .py(gap_lg)
-                    .text_size(label_size)
+                    .min_h(px(rem_to_px(10.0)))
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .text_size(px(rem_to_px(0.875)))
                     .text_color(text_secondary)
-                    .text_center()
                     .child(empty_text),
             );
         }
 
-        let on_select = self.on_select;
+        panel.into_any_element()
+    }
 
-        for thumb in &self.thumbnails {
-            let selected_border = if thumb.is_selected {
-                accent
-            } else {
-                border_color
-            };
-            let border_w = if thumb.is_selected { px(2.0) } else { px(1.0) };
-
-            let item_id = SharedString::from(format!("media-picker-thumb-{}", thumb.id));
-
-            let mut item = div()
-                .id(item_id)
-                .w(px(72.0))
-                .h(px(72.0))
-                .rounded(radius_control)
-                .border(border_w)
-                .border_color(selected_border)
-                .bg(resolve_color(theme, "color.background.surface"))
-                .flex()
-                .flex_col()
-                .items_center()
-                .justify_center()
-                .gap(gap_sm)
-                .cursor_pointer()
-                .child({
-                    let icon =
-                        Icon::from_spec(IconSpec::new("image").with_size(IconSize::Md), theme)
-                            .with_color(text_secondary);
-                    icon
-                })
-                .child(
-                    div()
-                        .text_size(label_tok)
-                        .text_color(text_secondary)
-                        .max_w(px(80.0))
-                        .overflow_x_hidden()
-                        .child(thumb.label.clone()),
-                );
-
-            if let Some(ref handler) = on_select {
-                let handler = handler.clone();
-                let thumb_id = thumb.id.clone();
-                item = item.on_click(move |ev, win, app| {
-                    handler(&thumb_id, ev, win, app);
-                });
-            }
-
-            grid = grid.child(item);
+    /// Upload tab: real FileUpload dropzone (multi-file).
+    fn upload_panel(&self, theme: &GpuiThemeProvider) -> AnyElement {
+        let spec = &self.spec;
+        let mut upload_spec = FileUploadSpec::new()
+            .with_multiple(true)
+            .with_size(spec.size)
+            .with_size_role(spec.size_role)
+            .with_density(spec.density);
+        if let Some(ref accept) = spec.accept {
+            upload_spec = upload_spec.with_accept(accept.clone());
         }
-
-        if let Some(c) = self.content {
-            grid = grid.child(c);
+        if let Some(max) = spec.max_file_size {
+            upload_spec = upload_spec.with_max_size(max);
         }
-
-        dialog = dialog.child(grid);
-
-        // ── Footer with selection count ──────────────────────────
-        // is_multiple shapes the wording: single-select picker shows
-        // "1 selected" / "None selected" (no pluralization ambiguity),
-        // multi-select shows "N items selected".
-        let selected = self.spec.selected_count;
-        let is_multi = self.spec.is_multiple;
-        let footer_text = if is_multi {
-            format!(
-                "{} item{} selected",
-                selected,
-                if selected == 1 { "" } else { "s" },
-            )
-        } else if selected == 0 {
-            "None selected".to_string()
-        } else {
-            "1 selected".to_string()
-        };
-        let footer = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .px(px(pad_x))
-            .py(px(pad_y))
-            .border_t_1()
-            .border_color(border_color)
-            .child(
-                div()
-                    .text_size(label_tok)
-                    .text_color(text_secondary)
-                    .when(selected > 0, |el| el.text_color(text_primary))
-                    .child(footer_text),
-            )
-            .child({
-                let mut confirm_btn = div()
-                    .id("media-picker-confirm")
-                    .px(gap_md)
-                    .py(gap_sm)
-                    .rounded(radius_control)
-                    .bg(accent)
-                    .text_color(gpui::white())
-                    .text_size(label_size)
-                    .font_weight(FontWeight::MEDIUM)
-                    .cursor_pointer()
-                    .child("Confirm");
-                if let Some(ref handler) = self.on_confirm {
-                    let handler = handler.clone();
-                    confirm_btn = confirm_btn.on_click(move |ev, win, app| {
-                        handler(ev, win, app);
-                    });
-                }
-                confirm_btn
-            });
-
-        dialog = dialog.child(footer);
-
-        dialog.into_any_element()
+        div()
+            .mt(px(rem_to_px(0.25)))
+            .child(FileUpload::from_spec(upload_spec, theme).with_id("media-picker"))
+            .into_any_element()
     }
 }

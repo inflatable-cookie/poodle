@@ -1,6 +1,118 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
+/// Upload lifecycle of a single file in the list. Mirrors the Svelte
+/// `FileUploadItem.status` union (`"pending" | "uploading" | "complete"
+/// | "error"`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum FileUploadStatus {
+    #[default]
+    Pending,
+    Uploading,
+    Complete,
+    Error,
+}
+
+/// A single file row rendered in the upload list. Mirrors the Svelte
+/// `FileUploadItem` interface — the Rust side carries the
+/// already-resolved display fields (name, byte size, progress, status,
+/// preview flag, error) rather than a live `File` handle, since the
+/// component is render-only and the host owns the actual file bytes.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FileUploadItem {
+    /// Stable identity (host-assigned) used as the row key.
+    pub id: String,
+    /// Display file name (shown in `.file-upload__name`, truncated).
+    pub name: String,
+    /// File size in bytes (formatted for `.file-upload__size`).
+    pub size: u64,
+    /// Upload progress 0..=100. Only meaningful while `Uploading`.
+    pub progress: u8,
+    pub status: FileUploadStatus,
+    /// When true the row is an image with an available preview thumbnail
+    /// (`.file-upload__preview`); when false it renders the generic file
+    /// icon (`.file-upload__file-icon`). The actual bitmap is host-owned
+    /// (preview-loop) — this flag only drives which anatomy part shows.
+    pub has_preview: bool,
+    /// Per-file error message shown in `.file-upload__error-text` when
+    /// `status == Error`.
+    pub error: Option<String>,
+}
+
+impl FileUploadItem {
+    pub fn new(id: impl Into<String>, name: impl Into<String>, size: u64) -> Self {
+        Self {
+            id: id.into(),
+            name: name.into(),
+            size,
+            progress: 0,
+            status: FileUploadStatus::Pending,
+            has_preview: false,
+            error: None,
+        }
+    }
+
+    pub fn with_progress(mut self, progress: u8) -> Self {
+        self.progress = progress.min(100);
+        self.status = if self.progress >= 100 {
+            FileUploadStatus::Complete
+        } else {
+            FileUploadStatus::Uploading
+        };
+        self
+    }
+
+    pub fn with_status(mut self, status: FileUploadStatus) -> Self {
+        self.status = status;
+        self
+    }
+
+    pub fn with_preview(mut self, has_preview: bool) -> Self {
+        self.has_preview = has_preview;
+        self
+    }
+
+    pub fn with_error(mut self, error: impl Into<String>) -> Self {
+        self.error = Some(error.into());
+        self.status = FileUploadStatus::Error;
+        self
+    }
+
+    pub fn is_error(&self) -> bool {
+        self.status == FileUploadStatus::Error
+    }
+
+    pub fn is_uploading(&self) -> bool {
+        self.status == FileUploadStatus::Uploading
+    }
+
+    pub fn is_complete(&self) -> bool {
+        self.status == FileUploadStatus::Complete
+    }
+
+    /// Human-readable byte size (`bytes` / `KB` / `MB`) matching Svelte's
+    /// `formatFileSize` thresholds.
+    pub fn formatted_size(&self) -> String {
+        format_file_size(self.size)
+    }
+}
+
+/// Format a byte count as `bytes` / `KB` / `MB`, matching the Svelte
+/// `formatFileSize` helper used by both the file list and the dropzone
+/// hint.
+pub fn format_file_size(bytes: u64) -> String {
+    const KB: f64 = 1024.0;
+    const MB: f64 = 1024.0 * 1024.0;
+    let b = bytes as f64;
+    if b < KB {
+        format!("{bytes} bytes")
+    } else if b < MB {
+        format!("{:.1} KB", b / KB)
+    } else {
+        format!("{:.1} MB", b / MB)
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FileUploadSpec {
     pub accept: Option<String>,
@@ -24,6 +136,10 @@ pub struct FileUploadSpec {
     /// non-null string — here the caller runs their validator and
     /// passes the resolved error (if any).
     pub validation_error: Option<String>,
+    /// Files currently in the upload list. Drives the `.file-upload__list`
+    /// anatomy (File Item / Preview / Meta / Progress / Remove). Empty by
+    /// default — the list is conditional on `files.len() > 0`.
+    pub files: Vec<FileUploadItem>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -41,6 +157,7 @@ impl Default for FileUploadSpec {
             show_preview: true,
             compress: false,
             validation_error: None,
+            files: Vec::new(),
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -102,8 +219,65 @@ impl FileUploadSpec {
         self.validation_error.is_some()
     }
 
+    pub fn with_files(mut self, files: Vec<FileUploadItem>) -> Self {
+        self.files = files;
+        self
+    }
+
+    pub fn with_file(mut self, file: FileUploadItem) -> Self {
+        self.files.push(file);
+        self
+    }
+
+    pub fn has_files(&self) -> bool {
+        !self.files.is_empty()
+    }
+
     pub fn error_color_token(&self) -> &'static str {
         semantic::COLOR_STATUS_DANGER
+    }
+
+    // ── File-list item token targets (contract §8) ───────────────
+
+    /// File item row background (`.file-upload__item`).
+    pub fn item_fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    /// Danger base used for the error-item background mix and error text
+    /// (`.file-upload__item--error`, `.file-upload__error-text`).
+    pub fn item_error_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_DANGER
+    }
+
+    /// Surface base mixed at 82% for the file icon / progress track /
+    /// remove-hover backgrounds.
+    pub fn item_surface_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_SURFACE
+    }
+
+    /// File-icon glyph + remove-button rest color.
+    pub fn item_icon_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_SECONDARY
+    }
+
+    /// File name color (`.file-upload__name`).
+    pub fn item_name_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_PRIMARY
+    }
+
+    /// File size / hint color (`.file-upload__size`).
+    pub fn item_size_token(&self) -> &'static str {
+        semantic::COLOR_TEXT_TERTIARY
+    }
+
+    /// Progress-bar fill (`.file-upload__progress-bar`).
+    pub fn progress_fill_token(&self) -> &'static str {
+        semantic::COLOR_ACCENT_BASE
+    }
+
+    pub fn item_radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
     }
 
     pub fn fill_token(&self) -> &'static str {

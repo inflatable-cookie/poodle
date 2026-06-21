@@ -1,41 +1,16 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, MediaPicker, MediaPickerItem};
-use poodle_specs::MediaPickerSpec;
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPickerSpec, MediaPickerTab, SemanticControlSizeRole};
 
 fn sample_items() -> Vec<MediaPickerItem> {
     vec![
-        MediaPickerItem {
-            id: "img-1".to_string(),
-            label: "Banner image".to_string(),
-            is_selected: false,
-        },
-        MediaPickerItem {
-            id: "img-2".to_string(),
-            label: "Profile photo".to_string(),
-            is_selected: true,
-        },
-        MediaPickerItem {
-            id: "img-3".to_string(),
-            label: "Icon set".to_string(),
-            is_selected: false,
-        },
-        MediaPickerItem {
-            id: "doc-1".to_string(),
-            label: "Readme.pdf".to_string(),
-            is_selected: false,
-        },
-        MediaPickerItem {
-            id: "vid-1".to_string(),
-            label: "Demo video".to_string(),
-            is_selected: false,
-        },
-        MediaPickerItem {
-            id: "img-4".to_string(),
-            label: "Screenshot".to_string(),
-            is_selected: false,
-        },
+        MediaPickerItem::new("img-1", "Banner image", MediaKind::Image).with_thumbnail(true),
+        MediaPickerItem::new("img-2", "Profile photo", MediaKind::Image).with_thumbnail(true),
+        MediaPickerItem::new("icon-1", "Icon set", MediaKind::Image),
+        MediaPickerItem::new("doc-1", "Readme.pdf", MediaKind::Document),
+        MediaPickerItem::new("vid-1", "Demo video", MediaKind::Video),
+        MediaPickerItem::new("img-3", "Screenshot", MediaKind::Image).with_thumbnail(true),
     ]
 }
 
@@ -58,7 +33,45 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         MediaPickerSpec::new("Select an asset").with_open(true),
                         theme,
                     )
-                    .with_thumbnails(sample_items()),
+                    .with_items(sample_items()),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Upload tab"),
+                    theme,
+                ))
+                .child(
+                    MediaPicker::from_spec(
+                        MediaPickerSpec::new("Select an asset")
+                            .with_open(true)
+                            .with_active_tab(MediaPickerTab::Upload)
+                            .with_accept("image/*"),
+                        theme,
+                    )
+                    .with_items(sample_items()),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Empty state"),
+                    theme,
+                ))
+                .child(
+                    MediaPicker::from_spec(
+                        MediaPickerSpec::new("Select an asset")
+                            .with_open(true)
+                            .with_empty_message("No media items yet."),
+                        theme,
+                    ),
                 ),
         )
         .child(
@@ -83,7 +96,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_density(ControlDensity::Compact),
                                 theme,
                             )
-                            .with_thumbnails(sample_items()),
+                            .with_items(sample_items()),
                         )
                         .child(
                             MediaPicker::from_spec(
@@ -93,7 +106,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_density(ControlDensity::Compact),
                                 theme,
                             )
-                            .with_thumbnails(sample_items()),
+                            .with_items(sample_items()),
                         ),
                 ),
         )

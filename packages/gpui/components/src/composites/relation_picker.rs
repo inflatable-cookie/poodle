@@ -9,9 +9,17 @@ use poodle_specs::{
 use std::rc::Rc;
 
 use super::{PickerShell, SelectionSummary};
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
-use crate::primitives::{Button, Checkbox, Icon};
-use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
+use crate::presentation::{
+    control_space_x_rem, rem_to_px, relation_picker_desc_size_rem, relation_picker_item_gap_rem,
+    relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
+    relation_picker_title_size_rem, resolve_semantic_size,
+};
+use crate::primitives::{Button, Checkbox, Icon, TextInput};
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+
+/// Candidate / drill copy strong label weight (Svelte `strong { font-weight: 500 }`).
+/// FontWeight::MEDIUM == 500.
+const LABEL_WEIGHT: FontWeight = FontWeight::MEDIUM;
 
 #[derive(Clone, Debug)]
 pub struct DrillEnterArgs {
@@ -118,17 +126,20 @@ impl IntoElement for RelationPicker {
         let theme = &self.theme;
         let spec = &self.spec;
         let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-        let body_size = px(rem_to_px(size_font_rem(effective_size)));
         let label_size = resolve_px(theme, "typography.label.size");
+        // Toolbar/footer inline gap (density-driven).
         let gap = px(rem_to_px(control_space_x_rem(spec.density)));
-        let row_gap = px(rem_to_px(0.125));
-        let pad_x = px(rem_to_px(0.75));
-        let pad_y = px(rem_to_px(0.5));
+        // Candidate/drill geometry from size + density tokens (contract §8).
+        let row_gap = px(rem_to_px(relation_picker_list_gap_rem(spec.density)));
+        let item_x = px(rem_to_px(relation_picker_item_x_rem(effective_size)));
+        let item_y = px(rem_to_px(relation_picker_item_y_rem(effective_size)));
+        let item_gap = px(rem_to_px(relation_picker_item_gap_rem(effective_size)));
+        let title_font = px(rem_to_px(relation_picker_title_size_rem(effective_size)));
+        let desc_font = px(rem_to_px(relation_picker_desc_size_rem(effective_size)));
         let border = resolve_color(theme, "color.border.subtle");
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
         let surface = resolve_color(theme, "color.background.surface");
-        let elevated = resolve_color(theme, "color.background.elevated");
         let accent = resolve_color(theme, "color.accent.base");
         let radius = resolve_radius(theme, "radius.control");
 
@@ -186,40 +197,23 @@ impl IntoElement for RelationPicker {
             }
         }
 
-        search_col = search_col.child(
-            div()
-                .w_full()
-                .px(pad_x)
-                .py(pad_y)
-                .rounded(radius)
-                .border_1()
-                .border_color(border)
-                .bg(surface)
-                .flex()
-                .items_center()
-                .gap(gap)
-                .child(
-                    Icon::from_spec(
-                        poodle_specs::IconSpec::new("search").with_size(poodle_specs::IconSize::Sm),
-                        theme,
-                    )
-                    .with_color(text_secondary),
-                )
-                .child(
-                    div()
-                        .text_size(body_size)
-                        .text_color(if spec.query.is_empty() {
-                            text_secondary
-                        } else {
-                            text_primary
-                        })
-                        .child(if spec.query.is_empty() {
-                            "Search…".to_string()
-                        } else {
-                            spec.query.clone()
-                        }),
-                ),
-        );
+        // Real search field — TextInput type="search" with a leading search
+        // icon and clear button, current query as value. Typing/clear are
+        // owned by the consumer's event loop (render-only here).
+        let mut search_spec = poodle_specs::TextInputSpec::new()
+            .with_id("relation-picker-search")
+            .with_input_type("search")
+            .with_leading_icon("search")
+            .with_placeholder("Search picker results")
+            .with_show_clear_button(true);
+        search_spec.size = effective_size;
+        search_spec.size_role = spec.size_role;
+        search_spec.density = spec.density;
+        if !spec.query.is_empty() {
+            search_spec = search_spec.with_value(spec.query.clone());
+        }
+        search_col =
+            search_col.child(div().w_full().child(TextInput::from_spec(search_spec, theme)));
 
         let selection_items = spec.selection_summary_items();
         let selection_el = if !selection_items.is_empty() {
@@ -253,16 +247,13 @@ impl IntoElement for RelationPicker {
                 let mut row = drill_row(
                     &item,
                     theme,
-                    body_size,
+                    title_font,
                     label_size,
-                    gap,
-                    pad_x,
-                    pad_y,
-                    border,
+                    item_gap,
+                    item_x,
+                    item_y,
                     text_primary,
                     text_secondary,
-                    surface,
-                    elevated,
                     radius,
                 );
                 if let Some(ref handler) = self.on_drill_enter {
@@ -288,16 +279,15 @@ impl IntoElement for RelationPicker {
                     is_selected,
                     spec.selection_mode,
                     theme,
-                    body_size,
-                    label_size,
-                    gap,
-                    pad_x,
-                    pad_y,
+                    title_font,
+                    desc_font,
+                    item_gap,
+                    item_x,
+                    item_y,
                     border,
                     text_primary,
                     text_secondary,
                     surface,
-                    elevated,
                     accent,
                     radius,
                     spec.size,
@@ -347,19 +337,17 @@ impl IntoElement for RelationPicker {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn drill_row(
     item: &DrillDownItem,
     theme: &GpuiThemeProvider,
-    body_size: Pixels,
+    title_font: Pixels,
     label_size: Pixels,
-    gap: Pixels,
-    pad_x: Pixels,
-    pad_y: Pixels,
-    border: Hsla,
+    item_gap: Pixels,
+    item_x: Pixels,
+    item_y: Pixels,
     text_primary: Hsla,
     text_secondary: Hsla,
-    surface: Hsla,
-    elevated: Hsla,
     radius: Pixels,
 ) -> Stateful<Div> {
     let meta = item
@@ -367,22 +355,19 @@ fn drill_row(
         .map(|count| format!("{count} items"))
         .unwrap_or_default();
 
+    // Drill button base is transparent (Svelte `.drill-list__button`
+    // background: transparent; hover color-mix(surface 60%) is consumer-owned).
     div()
         .id(SharedString::from(format!("poodle-drill-row-{}", item.id)))
         .w_full()
         .flex()
         .items_center()
         .justify_between()
-        .gap(gap)
-        .px(pad_x)
-        .py(pad_y)
+        .gap(item_gap)
+        .px(item_x)
+        .py(item_y)
         .rounded(radius)
-        .border_1()
-        .border_color(border)
-        .bg(Hsla {
-            a: surface.a * 0.6 + elevated.a * 0.4,
-            ..elevated
-        })
+        .bg(gpui::transparent_black())
         .child(
             div()
                 .flex()
@@ -390,8 +375,8 @@ fn drill_row(
                 .gap(px(rem_to_px(0.125)))
                 .child(
                     div()
-                        .text_size(body_size)
-                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_size(title_font)
+                        .font_weight(LABEL_WEIGHT)
                         .text_color(text_primary)
                         .child(item.label.clone()),
                 )
@@ -406,7 +391,7 @@ fn drill_row(
             div()
                 .flex()
                 .items_center()
-                .gap(px(rem_to_px(0.5)))
+                .gap(px(rem_to_px(0.25)))
                 .children((!meta.is_empty()).then(|| {
                     div()
                         .text_size(label_size)
@@ -430,43 +415,46 @@ fn candidate_row(
     is_selected: bool,
     selection_mode: SelectionMode,
     theme: &GpuiThemeProvider,
-    body_size: Pixels,
-    label_size: Pixels,
-    gap: Pixels,
-    pad_x: Pixels,
-    pad_y: Pixels,
+    title_font: Pixels,
+    desc_font: Pixels,
+    item_gap: Pixels,
+    item_x: Pixels,
+    item_y: Pixels,
     border: Hsla,
     text_primary: Hsla,
     text_secondary: Hsla,
     surface: Hsla,
-    elevated: Hsla,
     accent: Hsla,
     radius: Pixels,
     size: ControlSize,
     size_role: SemanticControlSizeRole,
     density: ControlDensity,
 ) -> Stateful<Div> {
+    let transparent = gpui::transparent_black();
+    // Base item bg: color-mix(surface 86%, transparent) (Svelte `.item`).
+    let base_bg = color_mix(surface, transparent, 0.86);
+    // Selected bg replaces the base with color-mix(accent 10%, transparent)
+    // (contract §8 selected table — a single semi-transparent accent fill).
     let row_bg = if is_selected {
-        Hsla {
-            a: accent.a * 0.10 + surface.a * 0.90,
-            ..surface
-        }
+        color_mix(accent, transparent, 0.10)
     } else {
-        Hsla {
-            a: surface.a * 0.6 + elevated.a * 0.4,
-            ..elevated
-        }
+        base_bg
     };
-    let row_border = if is_selected { accent } else { border };
+    // Selected border: color-mix(accent 60%, transparent); else border-subtle.
+    let row_border = if is_selected {
+        color_mix(accent, transparent, 0.60)
+    } else {
+        border
+    };
 
     let mut row = div()
         .id(SharedString::from(format!("poodle-picker-row-{}", item.id)))
         .w_full()
         .flex()
         .items_center()
-        .gap(gap)
-        .px(pad_x)
-        .py(pad_y)
+        .gap(item_gap)
+        .px(item_x)
+        .py(item_y)
         .rounded(radius)
         .border_1()
         .border_color(row_border)
@@ -487,23 +475,24 @@ fn candidate_row(
         div()
             .flex()
             .flex_col()
-            .gap(px(rem_to_px(0.125)))
+            .min_w_0()
+            .gap(px(rem_to_px(0.25)))
             .child(
                 div()
-                    .text_size(body_size)
-                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_size(title_font)
+                    .font_weight(LABEL_WEIGHT)
                     .text_color(text_primary)
                     .child(item.label.clone()),
             )
             .children(item.description.clone().map(|description| {
                 div()
-                    .text_size(label_size)
+                    .text_size(desc_font)
                     .text_color(text_secondary)
                     .child(description)
             }))
             .children(item.meta.clone().map(|meta| {
                 div()
-                    .text_size(label_size)
+                    .text_size(desc_font)
                     .text_color(text_secondary)
                     .child(meta)
             })),

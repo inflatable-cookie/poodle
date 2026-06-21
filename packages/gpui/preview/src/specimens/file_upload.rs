@@ -1,7 +1,7 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, FileUpload};
-use poodle_specs::{EyebrowSpec, FileUploadSpec};
+use poodle_specs::{EyebrowSpec, FileUploadItem, FileUploadSpec, FileUploadStatus};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     div()
@@ -27,7 +27,39 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Document upload (single file) ---
+        // --- Populated file list (preview + progress + complete + error) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Populated file list"),
+                    theme,
+                ))
+                .child(FileUpload::from_spec(
+                    FileUploadSpec::new()
+                        .with_accept("image/*")
+                        .with_multiple(true)
+                        .with_max_size(5 * 1024 * 1024)
+                        .with_file(
+                            FileUploadItem::new("a", "hero-banner.png", 1_887_436)
+                                .with_preview(true)
+                                .with_status(FileUploadStatus::Complete),
+                        )
+                        .with_file(
+                            FileUploadItem::new("b", "profile-photo.jpg", 524_288)
+                                .with_preview(true)
+                                .with_progress(60),
+                        )
+                        .with_file(
+                            FileUploadItem::new("c", "raw-capture.tiff", 99_614_720)
+                                .with_error("Exceeds 5 MB limit"),
+                        ),
+                    theme,
+                )),
+        )
+        // --- Document upload (single file, no preview) ---
         .child(
             div()
                 .flex()
@@ -40,7 +72,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .child(FileUpload::from_spec(
                     FileUploadSpec::new()
                         .with_accept(".pdf,.doc,.docx,.txt")
-                        .with_max_size(10 * 1024 * 1024),
+                        .with_show_preview(false)
+                        .with_max_size(10 * 1024 * 1024)
+                        .with_file(FileUploadItem::new("d", "spec-sheet.pdf", 3_355_443)),
                     theme,
                 )),
         )

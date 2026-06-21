@@ -150,6 +150,120 @@ pub fn panel_space_y_rem(density: ControlDensity) -> f32 {
     }
 }
 
+// ── RelationPicker size / density scales ─────────────────────────
+//
+// Contract §8 + the Svelte `.poodle-relation-picker[data-size]`/`[data-density]`
+// overrides. Mirrors `poodle_gpui::presentation` exactly.
+
+/// Candidate-item vertical padding in rem (`--relation-picker-item-y`).
+pub fn relation_picker_item_y_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.25,
+        ControlSize::Sm => 0.375,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.5,
+    }
+}
+
+/// Candidate-item horizontal padding in rem (`--relation-picker-item-x`).
+pub fn relation_picker_item_x_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        ControlSize::Sm => 0.5,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.625,
+        ControlSize::Xl => 0.75,
+    }
+}
+
+/// Candidate-item inner gap in rem (`--relation-picker-item-gap`).
+pub fn relation_picker_item_gap_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        _ => 0.5,
+    }
+}
+
+/// Candidate-copy title (`strong`) font size in rem (`--relation-picker-title-size`).
+pub fn relation_picker_title_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.9375,
+    }
+}
+
+/// Candidate-copy description (`small`) font size in rem (`--relation-picker-desc-size`).
+pub fn relation_picker_desc_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5625,
+        ControlSize::Sm => 0.625,
+        ControlSize::Md => 0.6875,
+        ControlSize::Lg => 0.75,
+        ControlSize::Xl => 0.8125,
+    }
+}
+
+/// Candidate-list inter-row gap in rem (`--relation-picker-list-gap`).
+pub fn relation_picker_list_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.1875,
+        ControlDensity::Default => 0.25,
+        ControlDensity::Comfortable => 0.3125,
+    }
+}
+
+// ── TokenInput size / density scales ─────────────────────────────
+//
+// Contract §8 + the Svelte `.poodle-token-input[data-size]`/`[data-density]`
+// overrides. Mirrors `poodle_gpui::presentation` exactly.
+
+/// Token-row padding-block offset in rem added to `space.control.y`.
+pub fn token_input_pad_y_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.125,
+        ControlSize::Sm => -0.0625,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.0625,
+        ControlSize::Xl => 0.125,
+    }
+}
+
+/// Token-row padding-inline offset in rem added to `space.control.x`.
+pub fn token_input_pad_x_offset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => -0.25,
+        ControlSize::Sm => -0.125,
+        ControlSize::Md => 0.0,
+        ControlSize::Lg => 0.125,
+        ControlSize::Xl => 0.1875,
+    }
+}
+
+/// Token-row / draft-input font size in rem (`--token-input-font-size`).
+/// `None` → use the resolved `typography.body.size` token (md base).
+pub fn token_input_font_rem(size: ControlSize) -> Option<f32> {
+    match size {
+        ControlSize::Xs => Some(0.75),
+        ControlSize::Sm => Some(0.8125),
+        ControlSize::Md => None,
+        ControlSize::Lg => Some(0.9375),
+        ControlSize::Xl => Some(1.0),
+    }
+}
+
+/// Token-row wrap gap in rem (`--token-input-gap`).
+pub fn token_input_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.25,
+        ControlDensity::Default => 0.375,
+        ControlDensity::Comfortable => 0.5,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0

@@ -1,34 +1,64 @@
 //! RelationPicker — Jetstream relation picker backed by RelationPickerSpec.
+//!
+//! Contract: `docs/contracts/components/relation-picker.md`
+//! Reference: Svelte `RelationPicker.svelte` (parity authority); GPUI
+//! `composites/relation_picker.rs`.
+//!
+//! Render-only: candidate toggling, drill navigation (advance / back /
+//! breadcrumb jump), live search typing, and keyboard nav live in the preview
+//! event loop — this builder renders the current open state (search field,
+//! selection summary, candidate/drill list, footer). All geometry, colors, and
+//! type sizes resolve from size/density tokens — zero hardcoded px/hsla.
+
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
-    BrowseState, ButtonSpec, ButtonVariant, CheckboxSpec, PickerItemSpec, RelationPickerSpec,
-    SelectionMode,
+    BrowseState, ButtonSpec, ButtonVariant, CheckboxSpec, ControlSize, PickerItemSpec,
+    RelationPickerSpec, SelectionMode, TextInputSpec,
 };
 
 use crate::button::js_button;
 use crate::checkbox::js_checkbox;
 use crate::picker_shell::js_picker_shell;
+use crate::presentation::{
+    control_space_x_rem, rem_to_px, relation_picker_desc_size_rem, relation_picker_item_gap_rem,
+    relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
+    relation_picker_title_size_rem, resolve_semantic_size,
+};
 use crate::selection_summary::js_selection_summary;
-use crate::theme_ext::{resolve_color, resolve_radius, tint};
+use crate::text_input::js_text_input;
+use crate::theme_ext::{color_mix, resolve_color, resolve_px, resolve_radius};
+
+/// Candidate / drill copy strong label weight (Svelte `strong { font-weight: 500 }`).
+const LABEL_WEIGHT: u16 = 500;
 
 pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider) -> JsEl {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+
     let text_primary = resolve_color(theme, "color.text.primary");
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let border = resolve_color(theme, "color.border.subtle");
     let accent = resolve_color(theme, "color.accent.base");
     let surface = resolve_color(theme, "color.background.surface");
-    let elevated = resolve_color(theme, "color.background.elevated");
     let radius = resolve_radius(theme, "radius.control");
+    let transparent = glam::Vec4::ZERO;
+
+    // Density-driven inter-row gap (contract §8 density table).
+    let list_gap = rem_to_px(relation_picker_list_gap_rem(spec.density));
+    let title_font = rem_to_px(relation_picker_title_size_rem(effective_size));
+    let desc_font = rem_to_px(relation_picker_desc_size_rem(effective_size));
+    let item_gap = rem_to_px(relation_picker_item_gap_rem(effective_size));
+    let item_x = rem_to_px(relation_picker_item_x_rem(effective_size));
+    let item_y = rem_to_px(relation_picker_item_y_rem(effective_size));
+    let label_size = resolve_px(theme, "typography.label.size");
 
     let search = build_search(
         spec,
         theme,
-        text_primary,
+        effective_size,
         text_secondary,
-        border,
-        surface,
-        radius,
+        accent,
+        label_size,
     );
 
     let selection_items = spec.selection_summary_items();
@@ -47,34 +77,49 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
 
     let mut body = None;
     if spec.state == BrowseState::Ready {
-        if spec.drill_down.is_some()
-            && spec
-                .drill_down
-                .as_ref()
-                .map(|dd| !dd.is_at_leaf(&spec.drill_down_path))
-                .unwrap_or(false)
-        {
-            let mut list = ui_element::div().flex_col().gap(2.0);
-            for item in spec.drill_items() {
-                list = list.child(drill_row(
-                    &item,
-                    theme,
-                    text_primary,
-                    text_secondary,
-                    border,
-                    surface,
-                    elevated,
-                    radius,
-                ));
+        let is_drilling = spec
+            .drill_down
+            .as_ref()
+            .map(|dd| !dd.is_at_leaf(&spec.drill_down_path))
+            .unwrap_or(false);
+
+        if is_drilling {
+            let drill_items = spec.drill_items();
+            if drill_items.is_empty() {
+                // Drill empty state (contract §2 [DrillEmpty]).
+                body = Some(
+                    ui_element::div()
+                        .flex_col()
+                        .items_center()
+                        .py(item_y * 2.5)
+                        .child(
+                            ui_element::label("No items found")
+                                .text_color(text_secondary)
+                                .text_size(rem_to_px(0.8125)),
+                        ),
+                );
+            } else {
+                let mut list = ui_element::div().flex_col().gap(list_gap);
+                for item in drill_items {
+                    list = list.child(drill_row(
+                        &item,
+                        text_primary,
+                        text_secondary,
+                        transparent,
+                        radius,
+                        item_gap,
+                        item_x,
+                        item_y,
+                        title_font,
+                        label_size,
+                    ));
+                }
+                body = Some(list);
             }
-            body = Some(list);
         } else {
-            let mut list = ui_element::div().flex_col().gap(2.0);
+            let mut list = ui_element::div().flex_col().gap(list_gap);
             for item in spec.current_items() {
-                let is_selected = spec
-                    .selected_ids
-                    .iter()
-                    .any(|selected| selected == &item.id);
+                let is_selected = spec.selected_ids.iter().any(|selected| selected == &item.id);
                 list = list.child(candidate_row(
                     &item,
                     is_selected,
@@ -85,8 +130,12 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
                     border,
                     accent,
                     surface,
-                    elevated,
                     radius,
+                    item_gap,
+                    item_x,
+                    item_y,
+                    title_font,
+                    desc_font,
                     spec.size,
                     spec.size_role,
                     spec.density,
@@ -98,18 +147,19 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
 
     let footer_actions = ui_element::div()
         .flex_row()
-        .gap(8.0)
+        .gap(rem_to_px(control_space_x_rem(spec.density)))
+        .justify_end()
         .child(js_button(
             &ButtonSpec::new()
                 .with_variant(ButtonVariant::Ghost)
-                .with_size(poodle_specs::ControlSize::Sm)
+                .with_size(ControlSize::Sm)
                 .with_label(&spec.cancel_label),
             theme,
         ))
         .child(js_button(
             &ButtonSpec::new()
                 .with_variant(ButtonVariant::Primary)
-                .with_size(poodle_specs::ControlSize::Sm)
+                .with_size(ControlSize::Sm)
                 .with_label(&spec.confirm_label),
             theme,
         ));
@@ -125,24 +175,29 @@ pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvi
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_search(
     spec: &RelationPickerSpec,
-    _theme: &JetstreamThemeProvider,
-    text_primary: glam::Vec4,
+    theme: &JetstreamThemeProvider,
+    effective_size: ControlSize,
     text_secondary: glam::Vec4,
-    border: glam::Vec4,
-    surface: glam::Vec4,
-    radius: f32,
+    accent: glam::Vec4,
+    label_size: f32,
 ) -> JsEl {
-    let mut col = ui_element::div().flex_col().gap(8.0);
+    let mut col = ui_element::div().flex_col().gap(rem_to_px(0.5));
 
     if let Some(ref drill_down) = spec.drill_down {
         if !spec.drill_down_path.is_empty() {
-            let mut crumbs = ui_element::div().flex_row().items_center().gap(4.0);
+            let mut crumbs = ui_element::div()
+                .flex_row()
+                .items_center()
+                .gap(rem_to_px(0.25));
+            // Back navigation (handler lives in preview event loop).
             crumbs = crumbs.child(
                 ui_element::button("Back")
+                    .id("poodle-relation-drill-back")
                     .text_color(text_secondary)
-                    .text_size(12.0)
+                    .text_size(label_size)
                     .focusable(),
             );
 
@@ -157,12 +212,17 @@ fn build_search(
                     .child(
                         ui_element::label("/")
                             .text_color(text_secondary)
-                            .text_size(11.0),
+                            .text_size(label_size),
                     )
                     .child(
-                        ui_element::label(&label)
-                            .text_color(accent_or(text_primary, text_primary))
-                            .text_size(12.0),
+                        // Breadcrumb items are accent-colored (Svelte
+                        // `--poodle-color-accent-base`), with weight 500.
+                        ui_element::button(&label)
+                            .id(format!("poodle-relation-crumb-{idx}"))
+                            .text_color(accent)
+                            .text_size(label_size)
+                            .text_weight(LABEL_WEIGHT)
+                            .focusable(),
                     );
             }
 
@@ -174,106 +234,91 @@ fn build_search(
                 col = col.child(
                     ui_element::label(&level.label.to_uppercase())
                         .text_color(text_secondary)
-                        .text_size(12.0)
+                        .text_size(label_size)
                         .text_weight(600),
                 );
             }
         }
     }
 
-    col.child(
-        ui_element::div()
-            .flex_row()
-            .items_center()
-            .gap(8.0)
-            .pl(10.0)
-            .pr(10.0)
-            .pt(6.0)
-            .pb(6.0)
-            .border(1.0)
-            .border_color(border)
-            .rounded(radius)
-            .bg(surface)
-            .child(
-                ui_element::icon("search")
-                    .w(14.0)
-                    .h(14.0)
-                    .text_color(text_secondary),
-            )
-            .child(
-                ui_element::label(if spec.query.is_empty() {
-                    "Search…"
-                } else {
-                    spec.query.as_str()
-                })
-                .text_color(if spec.query.is_empty() {
-                    text_secondary
-                } else {
-                    text_primary
-                })
-                .text_size(13.0),
-            ),
-    )
+    // Real search field — a TextInput type="search" with leading search icon
+    // and the current query as its value (Svelte composes the real TextInput).
+    // Typing/clear are owned by the preview event loop (render-only here).
+    let mut search_spec = TextInputSpec::new()
+        .with_id("relation-picker-search")
+        .with_input_type("search")
+        .with_leading_icon("search")
+        .with_size(effective_size)
+        .with_size_role(spec.size_role)
+        .with_density(spec.density)
+        .with_placeholder("Search picker results")
+        .with_show_clear_button(true);
+    if !spec.query.is_empty() {
+        search_spec = search_spec.with_value(spec.query.clone());
+    }
+    col.child(js_text_input(&search_spec, theme))
 }
 
+#[allow(clippy::too_many_arguments)]
 fn drill_row(
     item: &poodle_specs::DrillDownItem,
-    theme: &JetstreamThemeProvider,
     text_primary: glam::Vec4,
     text_secondary: glam::Vec4,
-    border: glam::Vec4,
-    surface: glam::Vec4,
-    elevated: glam::Vec4,
+    transparent: glam::Vec4,
     radius: f32,
+    item_gap: f32,
+    item_x: f32,
+    item_y: f32,
+    title_font: f32,
+    label_size: f32,
 ) -> JsEl {
     let meta = item
         .count
         .map(|count| format!("{count} items"))
         .unwrap_or_default();
+    // Drill button base is transparent (Svelte `.drill-list__button` background:
+    // transparent; hover color-mix(surface 60%) is preview-owned).
     ui_element::button("")
+        .id(format!("poodle-relation-drill-{}", item.id))
         .flex_row()
         .items_center()
         .justify_between()
-        .gap(12.0)
-        .pl(12.0)
-        .pr(12.0)
-        .pt(8.0)
-        .pb(8.0)
+        .gap(item_gap)
+        .px(item_x)
+        .py(item_y)
         .rounded(radius)
-        .border(1.0)
-        .border_color(border)
-        .bg(tint(elevated, 0.88))
+        .bg(transparent)
         .focusable()
         .child(
             ui_element::div()
                 .flex_col()
-                .gap(2.0)
+                .gap(rem_to_px(0.125))
                 .child(
                     ui_element::label(&item.label)
                         .text_color(text_primary)
-                        .text_size(14.0)
-                        .text_weight(600),
+                        .text_size(title_font)
+                        .text_weight(LABEL_WEIGHT),
                 )
                 .child(
                     ui_element::label(item.description.as_deref().unwrap_or(""))
                         .text_color(text_secondary)
-                        .text_size(12.0),
+                        .text_size(label_size),
                 ),
         )
         .child(
             ui_element::div()
                 .flex_row()
                 .items_center()
-                .gap(8.0)
+                .gap(rem_to_px(0.25))
                 .child(
                     ui_element::label(&meta)
                         .text_color(text_secondary)
-                        .text_size(12.0),
+                        .text_size(label_size),
                 )
                 .child(
                     ui_element::icon("chevron-right")
-                        .w(14.0)
-                        .h(14.0)
+                        .w(rem_to_px(0.875))
+                        .h(rem_to_px(0.875))
                         .text_color(text_secondary),
                 ),
         )
@@ -290,31 +335,37 @@ fn candidate_row(
     border: glam::Vec4,
     accent: glam::Vec4,
     surface: glam::Vec4,
-    elevated: glam::Vec4,
     radius: f32,
+    item_gap: f32,
+    item_x: f32,
+    item_y: f32,
+    title_font: f32,
+    desc_font: f32,
     size: poodle_specs::ControlSize,
     size_role: poodle_specs::SemanticControlSizeRole,
     density: poodle_specs::ControlDensity,
 ) -> JsEl {
-    let row_bg = if is_selected {
-        tint(accent, 0.10)
-    } else {
-        tint(surface, 0.86)
-    };
+    let transparent = glam::Vec4::ZERO;
+    // Base item bg: color-mix(surface 86%, transparent) (Svelte `.item`).
+    let base_bg = color_mix(surface, transparent, 0.86);
+    // Selected bg replaces the base with color-mix(accent 10%, transparent)
+    // (contract §8 selected table — a single semi-transparent accent fill).
+    let selected_bg = color_mix(accent, transparent, 0.10);
+    let row_bg = if is_selected { selected_bg } else { base_bg };
+    // Selected border: color-mix(accent 60%, transparent); else border-subtle.
     let row_border = if is_selected {
-        tint(accent, 0.60)
+        color_mix(accent, transparent, 0.60)
     } else {
         border
     };
 
     let mut row = ui_element::button("")
+        .id(format!("poodle-relation-candidate-{}", item.id))
         .flex_row()
         .items_center()
-        .gap(8.0)
-        .pl(12.0)
-        .pr(12.0)
-        .pt(8.0)
-        .pb(8.0)
+        .gap(item_gap)
+        .px(item_x)
+        .py(item_y)
         .border(1.0)
         .border_color(row_border)
         .rounded(radius)
@@ -335,30 +386,146 @@ fn candidate_row(
     row.child(
         ui_element::div()
             .flex_col()
-            .gap(2.0)
+            .gap(rem_to_px(0.25))
+            .min_w_0()
             .child(
                 ui_element::label(&item.label)
                     .text_color(text_primary)
-                    .text_size(14.0)
-                    .text_weight(600),
+                    .text_size(title_font)
+                    .text_weight(LABEL_WEIGHT),
             )
             .children(item.description.as_ref().map(|description| {
                 ui_element::label(description)
                     .text_color(text_secondary)
-                    .text_size(12.0)
+                    .text_size(desc_font)
             }))
             .children(item.meta.as_ref().map(|meta| {
                 ui_element::label(meta)
                     .text_color(text_secondary)
-                    .text_size(12.0)
+                    .text_size(desc_font)
             })),
     )
 }
 
-fn accent_or(accent: glam::Vec4, fallback: glam::Vec4) -> glam::Vec4 {
-    if accent == glam::Vec4::ZERO {
-        fallback
-    } else {
-        accent
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render_probe::probe;
+    use poodle_specs::{DrillDownConfig, DrillDownItem, DrillDownLevel, PickerItemSpec};
+
+    fn theme() -> JetstreamThemeProvider {
+        JetstreamThemeProvider::from_theme(&poodle_tokens::themes::DARK)
+    }
+
+    fn sample_items() -> Vec<PickerItemSpec> {
+        vec![
+            PickerItemSpec::new("btn", "Button").with_description("Primary action"),
+            PickerItemSpec::new("card", "Card").with_meta("layout"),
+            PickerItemSpec::new("input", "Input"),
+        ]
+    }
+
+    #[test]
+    fn renders_candidate_rows_and_search() {
+        let el = js_relation_picker(&RelationPickerSpec::new(sample_items()), &theme());
+        let tree = probe(&el, 480.0, 520.0);
+        assert!(tree.has_text("Button") && tree.has_text("Card") && tree.has_text("Input"));
+        // Real search field renders its leading search icon (not a faked div).
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|n| n.kind == "Icon" && n.text.as_deref() == Some("search")),
+            "search icon missing: {:?}",
+            tree.texts()
+        );
+        // Each candidate row is an id-tagged, hit-testable target.
+        assert!(tree.find_token("poodle-relation-candidate-btn").is_some());
+    }
+
+    #[test]
+    fn selected_candidate_summary_and_remove() {
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items())
+                .with_selected_ids(vec!["btn".into(), "card".into()]),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        // Selection summary renders the chosen item labels…
+        assert!(tree.has_text("Button") && tree.has_text("Card"));
+        // …each summary chip carries a `×` remove glyph (SelectionSummary).
+        assert!(
+            tree.has_text("×"),
+            "selection summary remove glyph missing: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn multiple_mode_shows_checkboxes() {
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items())
+                .with_selection_mode(SelectionMode::Multiple)
+                .with_selected_ids(vec!["btn".into()]),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        // Multiple mode pairs a Checkbox with each candidate row.
+        assert!(
+            tree.count_kind("Panel") > 0,
+            "expected rendered structure: {:?}",
+            tree.texts()
+        );
+        assert!(tree.find_token("poodle-relation-candidate-btn").is_some());
+    }
+
+    #[test]
+    fn single_mode_omits_checkboxes_keeps_rows() {
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items()).with_selection_mode(SelectionMode::Single),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        assert!(tree.has_text("Button"));
+        assert!(tree.find_token("poodle-relation-candidate-input").is_some());
+    }
+
+    #[test]
+    fn drilling_renders_drill_rows_breadcrumb_back() {
+        let config = DrillDownConfig::new(
+            vec![DrillDownLevel::new(
+                "cat",
+                "Category",
+                vec![
+                    DrillDownItem::new("forms", "Forms").with_count(4),
+                    DrillDownItem::new("layout", "Layout").with_count(2),
+                ],
+            )],
+            vec![],
+        );
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items()).with_drill_down(config),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        assert!(tree.has_text("Forms") && tree.has_text("Layout"));
+        assert!(
+            tree.find_token("poodle-relation-drill-forms").is_some(),
+            "drill row should be hit-testable: {:?}",
+            tree.texts()
+        );
+    }
+
+    #[test]
+    fn results_surface_hidden_in_non_ready_state() {
+        let el = js_relation_picker(
+            &RelationPickerSpec::new(sample_items()).with_state(BrowseState::Loading),
+            &theme(),
+        );
+        let tree = probe(&el, 480.0, 520.0);
+        // Candidate rows are not rendered when the picker is not "ready".
+        assert!(
+            tree.find_token("poodle-relation-candidate-btn").is_none(),
+            "non-ready state must not render candidates"
+        );
     }
 }

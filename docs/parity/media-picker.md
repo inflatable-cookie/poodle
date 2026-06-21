@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=8 jetstream=8 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- pass: spec reconciled to single-select select-and-close (dropped is_multiple/selected_count; added MediaPickerItem/items/accept/maxFileSize/active_tab + MediaPickerTab); both targets render real items, compose real MediaThumbnail/TextInput/FileUpload (GPUI) primitives, empty state, browse+upload tabs; fabricated footer/count removed. -->
 # Parity: MediaPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -18,41 +19,41 @@
 Contract↔Svelte are aligned (props, callbacks, tabs, listbox/option roles, size/density tables) — verified clean. `consv=fixed`: no contract edit needed; the contract already matches Svelte and correctly excludes the Rust-invented multi-select/confirm model. The remaining divergence is Rust-spec-side, tracked under the Rust gaps.
 
 - [x] VERIFIED Contract↔Svelte: all 9 props (`open`, `items`, `accept`, `maxFileSize`, `title`, `emptyMessage`, `size`, `sizeRole`, `density`) and 3 callbacks (`onSelect`, `onUpload`, `onOpenChange`) match `MediaPicker.svelte:18-46`. `role="listbox"`/`role="option"`, select+auto-close (`MediaPicker.svelte:80-83`), Tabs/TextInput/FileUpload composition all present. Contract §1 lists "multi-select" as out of scope and §5 documents select-and-close — no Confirm/selection-count in contract or Svelte. The `multiple` attribute in Svelte is on the FileUpload (multi-file *upload*), not multi-*select*.
-- **Spec model divergence (Rust-side, not contract↔Svelte)**: `MediaPickerSpec` (`media_picker.rs:5-16`) carries `is_multiple` + `selected_count`, which contradict the contract+Svelte single-select select-and-close model. **Fix is in the Rust spec, not the contract: drop `is_multiple`/`selected_count`.** Per the directive "keep contract as Svelte has it", the contract is intentionally left as-is.
-- Spec is also missing the real `items`/`accept`/`maxFileSize` payload (Rust-side) — it carries only `accepted_types: Option<String>` and no item list, so both Rust impls cannot render real items.
+- [x] **Spec reconciled.** Dropped `is_multiple` + `selected_count`; added `MediaPickerItem { id, label, has_thumbnail, kind }`, `items: Vec<MediaPickerItem>`, `accept`, `max_file_size`, `active_tab` + `MediaPickerTab` enum, and browse-grid token methods. Contract left as-is (single-select select-and-close). `accepted_types` replaced by `accept`.
 
 ## GPUI gap (vs Svelte + contract)
 
 GPUI renders its own dialog chrome + a fabricated footer; many literals and a wrong interaction model.
 
-- [ ] Hardcoded HSLA shadow literals: `hsla(0.0, 0.0, 0.0, 0.12)` and `hsla(0.0, 0.0, 0.0, 0.08)` (`media_picker.rs:160,166`) — resolve from `spec.shadow_token()` (which exists, `media_picker.rs:63`) not raw HSLA.
-- [ ] Hardcoded px literals: dialog `min_w(px(480.0))`/`max_h(px(520.0))` (`:174-175`), shadow offsets/blur `px(8.0)`/`px(24.0)`/`px(2.0)` (`:161-169`), item `w(px(72.0)).h(px(72.0))` (`:361-362`), `max_w(px(80.0))` (`:383`), border `px(2.0)`/`px(1.0)` (`:355`) — all magic; resolve from size/tokens (contract §8 thumb-size table is size-driven).
-- [ ] **Fabricated footer** — selection-count text + "Confirm" button (`:405-456`) not in contract/Svelte (select-and-close model). Remove.
-- [ ] Wrong selection model — renders `is_selected` borders + count; contract is single-click-to-select-and-close.
-- [ ] Search is a static text div (`:283-301`) not a real TextInput; no filtering.
-- [ ] Upload tab does not render FileUpload — tab toggles but no dropzone exists (only the browse grid renders regardless of `active_tab`).
-- [ ] Grid items render a generic `image` Icon placeholder; no `thumbnailUrl` image path, no placeholder-SVG distinction (contract §8 thumbnail vs placeholder).
-- [ ] Confirm button bg uses raw `accent` + `gpui::white()` text instead of accent fill + on-accent text token.
+- [x] Dialog shadow now uses `elevation_dialog_shadow()`; dialog min-w/max-h are contract-exact rem (`rem_to_px`).
+- [x] Magic px gone — grid min-column width from the contract §8 size table, item padding/gap from density; thumbnail geometry owned by the composed `MediaThumbnail`.
+- [x] **Fabricated footer removed** (no selection count / Confirm button).
+- [x] Single-select select-and-close — grid items fire `on_select(id)`; no `is_selected` borders/count.
+- [x] Search is a real `TextInput` primitive (placeholder "Search media…").
+- [x] Upload tab renders the real `FileUpload` dropzone (multi-file, forwards `accept`/`max_file_size`); browse/upload composed via the real `Tabs` primitive with content panels.
+- [x] Grid items compose the real `MediaThumbnail` (compact, square, no caption) + truncated label — placeholder posture is MediaThumbnail-owned.
 - accepted: no ARIA (`role=listbox/option`, `aria-selected` not emitted).
+- note: thumbnail bitmaps host-owned — `MediaPickerItem::has_thumbnail` is carried on the spec for the placeholder-vs-image split (MediaThumbnail renders the placeholder posture in both Rust targets since neither decodes images).
 
 ## Jetstream gap (vs Svelte + contract)
 
 Skeletal + fabricated placeholder items.
 
-- [ ] **MOCKUP VIOLATION**: grid renders 4 hardcoded placeholder items `format!("Item {}", i + 1)` (`media_picker.rs:83-102`) — no real `items` flow through the spec. Per CLAUDE.md "No Mockups". Either thread real items through the spec or leave the grid unimplemented.
-- [ ] Hardcoded px literals: title `rem_to_px(1.0)` (`:47`), search padding `rem_to_px(0.5)`/`0.25` (`:70-71`), thumb-radius `rem_to_px(0.25)` (`:93`), placeholder label `rem_to_px(0.8125)` (`:99`) — magic numbers.
-- [ ] **Fabricated selection count** — "N selected" footer (`:106-111`) not in contract/Svelte.
-- [ ] Search is a static label (`:66-76`), not a TextInput; no filtering.
-- [ ] Upload tab does not render FileUpload — tabs are non-functional buttons; browse grid always shown.
-- [ ] Tabs render but `active_tab` is not in the spec, so switching has no effect.
-- [ ] No empty state (`empty_message` ignored).
+- [x] **Mockup removed** — grid renders the real `spec.items` (no `"Item N"` placeholders); placeholder items show the token-resolved image glyph, thumbnail items the panel surface.
+- [x] Remaining literals are contract-exact rem via `rem_to_px` (title 1rem, thumb radius 0.25rem, label/size fonts) — token-resolved colors/radii throughout.
+- [x] **Fabricated selection count removed.**
+- [x] Search is a real `text_input` element (placeholder "Search media…").
+- [x] Upload tab composes the real `js_file_upload` dropzone (multi-file, forwards `accept`/`max_file_size`); browse vs upload driven by `spec.active_tab`.
+- [x] `active_tab` now lives on the spec and drives which tab content renders + the active tab indicator.
+- [x] Empty state rendered (centered `empty_message`, min-height 10rem).
 - accepted: interaction (tab switch, select) would live in preview event loop; absent.
+- note: JsEl has no CSS auto-fill grid, so the browse grid uses `flex_wrap` with the size/density gap (approximation, noted).
 
 ## Specimen parity
 
 - Svelte covers: Media picker dialog (6 sample items, mix of thumbnails + placeholders, select-and-close, upload tab) + size/density grid (`MediaPickerSpecimen.svelte`).
-- GPUI covers: Media picker dialog (sample thumbnails), Semantic presentation (size/density variants) (`media_picker_specimen.rs`). — missing: upload tab content, real images, select-and-close (shows confirm footer instead).
-- Jetstream covers: Browse tab, With-selections (`with_selected_count(2)`) (`media_picker.rs:13-25`). — missing: real items (fabricated), upload tab, select interaction. "With selections" demonstrates the non-contract multi-select model.
+- GPUI covers: Media picker dialog (6 real items, mix of thumbnail/placeholder), Upload tab (real FileUpload), Empty state, Semantic presentation (size/density variants). Select-and-close model; no footer.
+- Jetstream covers: Browse tab (6 real items), Upload tab (real FileUpload dropzone), Empty state. No fabricated selection count.
 
 ## Notes
 

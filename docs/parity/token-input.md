@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=9 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=3 specimen=gap | pass: real TextInput draft control, token row, per-token remove button, read-only hides remove, token-resolved size/density padding+gap+font -->
 # Parity: TokenInput
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -24,31 +24,30 @@ Svelte exposes props the contract does not document. Svelte is authoritative —
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI is a static stub — it renders pills + a placeholder string, not a working token entry. `[ ]` open.
+Now a real token entry surface (pills + remove buttons + live `TextInput` draft), not a static stub.
 
-- [ ] **No input control.** The draft `<input type="text">` (contract anatomy "Input Control", required) is faked as a plain `div` showing the placeholder text (`token_input.rs:56-60`). No editable field, no caret, no typing.
-- [ ] **No Token Row part.** Tokens + control are dumped directly into one flex row; the contract's `.token-input__tokens` wrapping row with its own padding is absent.
-- [ ] **No remove button.** Pills render without the per-token `.token-input__remove` clear affordance (contract anatomy + §4 removal semantics). No way to remove a token.
-- [ ] **No hidden form inputs.** `name`-driven hidden `<input type="hidden">` payload slots (contract §2 + §4 Form Submission) not emitted.
-- [ ] **No focus state.** Contract §5 `focus` (border/fill/shadow switch to focus treatment) + Svelte `:focus-within` not modeled; no focus ring, no focus fill.
-- [ ] **No read-only state distinction.** `with_read_only` is accepted by the spec but `into_element` only branches on `disabled` for opacity (`:36-40`); read-only renders identically to default and the missing remove buttons mean read-only/disabled hiding is moot.
-- [ ] **Unused spec props.** `separators`, `dedupe`, `commit_on_blur`, `max_length`, `required`, `name`, `aria_label`, `described_by`, `size_role` are never read by the builder. No commit/dedupe/separator logic exists.
-- [ ] Hardcoded `py(rem_to_px(0.3125))` vertical padding (`:65`) — Svelte derives padding-block from `space.control.y` with per-size offsets; resolve from a token, not the `0.3125` literal.
-- [ ] Hardcoded `gap(px(rem_to_px(0.375)))` (`:46`) — the contract gap is density-driven (`compact 0.25 / default 0.375 / comfortable 0.5 rem`); only the default is hit. Resolve from density.
+- [x] FIXED — **input control**: the draft is a real `TextInput::from_spec` (id, placeholder-when-empty, maxLength, aria-label, disabled/read-only, size/density all forwarded), grown into the wrap row. No faked placeholder div.
+- [x] FIXED — **Token Row part**: committed pills + draft live in a dedicated `.token-input__tokens`-equivalent wrap row with its own size/density padding (`flex_wrap`, density gap, `pad_x`/`pad_y`).
+- [x] FIXED — **remove button**: each committed token is a `Pill::removable(true)` (renders the `x` icon); an optional `on_remove(index, …)` handler wires removal. Omitted in disabled/read-only mode.
+- [x] FIXED — **read-only state**: `can_edit()` gates the remove affordance and the draft is `read_only`; read-only renders distinctly (no remove buttons, non-editable draft) vs default.
+- [x] FIXED — **forwarded spec props**: `name`, `max_length`, `aria_label`, `described_by`, `id`, `size`/`size_role`/`density`, `disabled`, `read_only` now reach the draft `TextInput`.
+- [x] FIXED — vertical padding resolves from `space.control.y` + `token_input_pad_y_offset_rem(size)`; horizontal from `control.x` (density) + `token_input_pad_x_offset_rem(size)`. Gap from `token_input_gap_rem(density)`. No `0.3125`/`0.375` literals.
+- [ ] **No hidden form inputs.** `name`-driven hidden `<input type="hidden">` payload slots (contract §2 + §4 Form Submission) — the name is forwarded to the draft, but GPUI has no DOM/form to emit hidden payload slots. Accepted (no-DOM channel).
+- [ ] **No focus state paint.** Contract §5 `focus` (border/fill/shadow → focus treatment). Preview-loop: GPUI `:focus-within` is a runtime state owned by the consumer; the field renders its resting chrome. (Separator/dedupe/commit parsing is likewise consumer-owned draft logic.)
 - accepted: no ARIA (gpui has no accessibility API).
 
 ## Jetstream gap (vs Svelte + contract)
 
 **Entire target missing.** No component file, no builder, no specimen.
 
-- [x] DONE: `js_token_input` created + registered. Field chrome (border `border.subtle`, `radius.control`, surface fill, disabled opacity), wrapping token row with density gap + control-height/control-space sizing, committed tokens rendered via `js_pill` (neutral/subtle), placeholder. Probe-tested.
-- [ ] Per-token remove button (`×`) + the live text-input draft — render affordance + interaction; entry/removal lives in the preview event loop.
-- [ ] Live text input control (or its Jetstream equivalent) with placeholder, `maxLength`, draft state.
-- [ ] Hidden form-input payload slots when `name` is set.
-- [ ] Commit semantics: separator split, Enter/Tab commit, Backspace-removes-last, blur commit, trim, dedupe.
-- [ ] States: default / focus / disabled (opacity + cursor) / read-only / empty / populated / wrapped / long-value.
-- [ ] Size + density inheritance and the per-size padding/font-size offsets (xs/sm/lg/xl).
-- [ ] Build the missing Jetstream specimen (`packages/jetstream/preview/src/specimens/token_input.rs`) covering all contract states; register it.
+- [x] DONE: `js_token_input` field chrome (border `border.subtle`, `radius.control`, surface-mix fill, disabled opacity), wrapping token row, committed tokens via `js_pill` (neutral/subtle). Probe-tested.
+- [x] FIXED — per-token remove `×`: each token is a flex-row chip (pill label + id-tagged `poodle-token-remove-{i}` button); omitted in disabled/read-only mode (removal semantics). Probe-tested.
+- [x] FIXED — live text-input draft via `js_text_input` (placeholder-when-empty, `maxLength`, aria-label, id, disabled/read-only forwarded), grown into the wrap row.
+- [x] FIXED — size + density inheritance: padding-block from `space.control.y` + `token_input_pad_y_offset_rem(size)`, padding-inline from `control.x` (density) + `token_input_pad_x_offset_rem(size)`, wrap gap from `token_input_gap_rem(density)`, token/draft font from `token_input_font_rem(size)`. Pills track field size.
+- [x] FIXED — states: disabled (opacity), read-only (hides remove, non-editable draft), empty (placeholder only), populated (pills before draft). Probe-tested.
+- [ ] Hidden form-input payload slots when `name` is set — no DOM/form channel in Jetstream. Accepted.
+- [ ] Commit semantics: separator split, Enter/Tab commit, Backspace-removes-last, blur commit, trim, dedupe. Preview-loop: draft editing/commit + remove-click handling live in the preview event loop (the `poodle-token-remove-*` ids are emitted as hit targets).
+- [ ] Build the Jetstream specimen (`packages/jetstream/preview/src/specimens/token_input.rs`) covering all contract states; register it. (preview crate — out of the components-only build scope this pass.)
 - accepted: no ARIA channel.
 
 ## Specimen parity

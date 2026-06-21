@@ -172,7 +172,9 @@ pub use editable_label::{EditableLabelActivation, EditableLabelSpec, EditableLab
 pub use eyebrow::EyebrowSpec;
 pub use field::{FieldRelationships, FieldSpec};
 pub use field_set::{FieldSetSpec, SpaceScale};
-pub use file_upload::FileUploadSpec;
+pub use file_upload::{
+    format_file_size, FileUploadItem, FileUploadSpec, FileUploadStatus,
+};
 pub use form_actions::FormActionsSpec;
 pub use form_dialog::FormDialogSpec;
 pub use form_layout::FormLayoutSpec;
@@ -295,7 +297,7 @@ pub use list_container::{ListContainerSpec, ListContainerState};
 pub use log_list::{LogFilter, LogFilterKind, LogFilterOption, LogListSpec};
 pub use markdown_editor::MarkdownEditorSpec;
 pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
-pub use media_picker::MediaPickerSpec;
+pub use media_picker::{MediaPickerItem, MediaPickerSpec, MediaPickerTab};
 pub use media_preview::MediaPreviewSpec;
 pub use media_thumbnail::{
     MediaFit, MediaFrameWidth, MediaPresentation, MediaThumbnailSpec,
@@ -1141,5 +1143,54 @@ mod tests {
         );
         assert!(generic.has_raw_embed());
         assert_eq!(auto.effective_aspect_ratio(), None);
+    }
+
+    #[test]
+    fn format_file_size_thresholds() {
+        use super::format_file_size;
+        assert_eq!(format_file_size(512), "512 bytes");
+        assert_eq!(format_file_size(2048), "2.0 KB");
+        assert_eq!(format_file_size(5 * 1024 * 1024), "5.0 MB");
+    }
+
+    #[test]
+    fn file_upload_item_progress_drives_status() {
+        use super::{FileUploadItem, FileUploadStatus};
+        let mid = FileUploadItem::new("a", "photo.png", 1024).with_progress(40);
+        assert_eq!(mid.status, FileUploadStatus::Uploading);
+        assert!(mid.is_uploading());
+
+        let done = FileUploadItem::new("b", "doc.pdf", 2048).with_progress(100);
+        assert_eq!(done.status, FileUploadStatus::Complete);
+        assert!(done.is_complete());
+
+        let bad = FileUploadItem::new("c", "big.zip", 9999).with_error("Too large");
+        assert!(bad.is_error());
+        assert_eq!(bad.error.as_deref(), Some("Too large"));
+    }
+
+    #[test]
+    fn file_upload_spec_files_drive_list() {
+        use super::{FileUploadItem, FileUploadSpec};
+        let spec = FileUploadSpec::new()
+            .with_file(FileUploadItem::new("a", "one.png", 10).with_preview(true))
+            .with_file(FileUploadItem::new("b", "two.txt", 20));
+        assert!(spec.has_files());
+        assert_eq!(spec.files.len(), 2);
+        assert!(spec.files[0].has_preview);
+    }
+
+    #[test]
+    fn media_picker_spec_tab_and_items() {
+        use super::{MediaKind, MediaPickerItem, MediaPickerSpec, MediaPickerTab};
+        let spec = MediaPickerSpec::new("Pick")
+            .with_item(MediaPickerItem::new("i1", "Banner", MediaKind::Image).with_thumbnail(true))
+            .with_item(MediaPickerItem::new("d1", "Readme", MediaKind::Document))
+            .with_active_tab(MediaPickerTab::Upload);
+        assert!(spec.has_items());
+        assert_eq!(spec.items.len(), 2);
+        assert!(!spec.is_browsing());
+        assert!(spec.items[0].has_thumbnail);
+        assert!(!spec.items[1].has_thumbnail);
     }
 }

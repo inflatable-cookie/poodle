@@ -160,7 +160,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | eyebrow | ok | 5 | 5 | gap |
 | field | ok | 6 | 6 | gap |
 | field-set | fixed | 6 | 6 | gap |
-| file-upload | ok | 8 | 8 | gap |
+| file-upload | ok | 0 | 0 | ok |
 | filter-toolbar | fixed | 7 | 6 | gap |
 | form-actions | ok | 6 | 7 | gap |
 | form-dialog | ok | 3 | 9 | gap |
@@ -180,7 +180,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | log-list | ok | 1 | 2 | ok |
 | markdown-editor | fixed | 11 | 8 | gap |
 | media-browse-panel | ok | 2 | 4 | gap |
-| media-picker | fixed | 8 | 8 | gap |
+| media-picker | fixed | 0 | 0 | ok |
 | media-preview | fixed | 1 | 1 | gap |
 | media-thumbnail | ok | 1 | 1 | gap |
 | menu | fixed | 2 | 5 | ok |
@@ -206,7 +206,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | range-slider | gap | 6 | 8 | gap |
 | rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 5 | gap |
-| relation-picker | fixed | 9 | 10 | gap |
+| relation-picker | fixed | 4 | 4 | gap |
 | remediation-banner | gap | 1 | 8 | gap |
 | resize-handle | ok | 4 | 3 | gap |
 | scroll-shell | ok | 3 | 1 | gap |
@@ -239,7 +239,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | toast-host | fixed | 6 | 7 | gap |
 | toast-stack | ok | 1 | 3 | gap |
 | toggle-group | fixed | 4 | 6 | gap |
-| token-input | fixed | 9 | 6 | gap |
+| token-input | fixed | 2 | 3 | gap |
 | toolbar | fixed | 4 | 5 | gap |
 | tooltip | fixed | 3 | 6 | gap |
 | tree | ok | 2 | 4 | ok |
