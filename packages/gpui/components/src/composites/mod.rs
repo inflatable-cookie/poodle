@@ -20,6 +20,7 @@ mod error_boundary;
 mod filter_toolbar;
 mod form_dialog;
 mod form_layout;
+mod form_shell;
 mod inline_list_section;
 mod list_container;
 mod log_list;
@@ -39,6 +40,7 @@ mod split_view;
 mod toast_host;
 mod tree;
 mod toast_stack;
+mod validation_summary;
 mod video_player;
 
 pub use action_discovery_panel::ActionDiscoveryPanel;
@@ -63,6 +65,7 @@ pub use error_boundary::ErrorBoundary;
 pub use filter_toolbar::FilterToolbar;
 pub use form_dialog::FormDialog;
 pub use form_layout::FormLayout;
+pub use form_shell::FormShell;
 pub use inline_list_section::InlineListSection;
 pub use list_container::ListContainer;
 pub use log_list::{LogEntry, LogLevel, LogList};
@@ -85,4 +88,5 @@ pub use tree::{
     Tree, TreeContextRequest, TreeDragOver, TreeReorderRequest, TreeSelectionUpdate,
 };
 pub use toast_stack::ToastStack;
+pub use validation_summary::ValidationSummary;
 pub use video_player::VideoPlayer;

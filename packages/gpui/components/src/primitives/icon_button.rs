@@ -11,7 +11,9 @@ use poodle_specs::{
 
 use super::icon::Icon;
 use super::spinner::Spinner;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_height_offset_rem};
+use crate::presentation::{
+    rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_height_offset_rem,
+};
 use crate::theme_ext::{
     color_mix, color_mix_black, resolve_color, resolve_opacity, resolve_px, resolve_radius,
 };
@@ -149,15 +151,31 @@ impl IntoElement for IconButton {
 
         let is_unavailable = spec.is_disabled || spec.is_loading;
         let is_pressed = spec.is_pressed.unwrap_or(false);
+        let is_primary = matches!(spec.variant, ButtonVariant::Primary);
 
-        // ── Hover/active/pressed fills ────────────────────────────
-        // Svelte: hover = color-mix(fill 76%, elevated), active = color-mix(fill 64%, elevated)
-        let hover_fill = color_mix(fill, elevated, 0.76);
-        // Contract: hover border = 74% text-primary mix (darkening)
-        let hover_border = color_mix(border_color, text_primary, 0.74);
-        let active_fill = color_mix(fill, elevated, 0.64);
-        // Pressed: accent-tinted background (contract: 20% accent mix)
-        let pressed_fill = color_mix(accent, fill, 0.20);
+        // ── Pressed treatment (contract §8 "Root — Pressed") ──────
+        // Non-primary variants get a solid-accent treatment: fill accent-base,
+        // border accent-base 85% black, inverse text, shadow none. Primary keeps
+        // its own variant styling when pressed.
+        let pressed_active = is_pressed && !is_primary;
+        let text_inverse = resolve_color(theme, "color.text.inverse");
+        let (current_fill, current_border, text_color) = if pressed_active {
+            (accent, color_mix_black(accent, 0.85), text_inverse)
+        } else {
+            (fill, border_color, text_color)
+        };
+
+        // ── Hover/active fills ────────────────────────────────────
+        // Svelte: hover = color-mix(fill 76%, elevated), active = color-mix(fill 64%, elevated).
+        // Pressed hover is `color-mix(white 12%, accent-base)`.
+        let hover_fill = if pressed_active {
+            color_mix(gpui::white(), accent, 0.12)
+        } else {
+            color_mix(current_fill, elevated, 0.76)
+        };
+        // Contract: hover border = 74% border mixed toward text-primary.
+        let hover_border = color_mix(current_border, text_primary, 0.74);
+        let active_fill = color_mix(current_fill, elevated, 0.64);
 
         let icon_name = spec.icon.clone().unwrap_or_default();
         let id_str = if let Some(ref suffix) = self.id_suffix {
@@ -166,12 +184,7 @@ impl IntoElement for IconButton {
             format!("poodle-icon-btn-{}", icon_name)
         };
 
-        // ── Build root ────────────────────────────────────────────
-        // Contract: pressed = double inset shadow
-        let pressed_border = color_mix(border_color, text_primary, 0.74);
-
         let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
-        let current_fill = if is_pressed { pressed_fill } else { fill };
 
         let mut el = div()
             .id(SharedString::from(id_str))
@@ -181,7 +194,7 @@ impl IntoElement for IconButton {
             .rounded(radius);
 
         // Brand-raised treatment: gradient fills and elevated shadows
-        if theme.brand_raised && !is_ghost && !is_unavailable && !is_pressed {
+        if theme.brand_raised && !is_ghost && !is_unavailable && !pressed_active {
             use crate::theme_ext::{
                 brand_raised_interactive_fill, brand_raised_interactive_shadow,
                 brand_raised_primary_fill, brand_raised_primary_shadow,
@@ -205,32 +218,12 @@ impl IntoElement for IconButton {
         el = el
             .text_color(text_color)
             .border_1()
-            .border_color(if is_pressed {
-                pressed_border
-            } else {
-                border_color
-            })
+            .border_color(current_border)
             .flex()
             .items_center()
             .justify_center();
 
-        // Contract: pressed = double inset shadow (accent 8%, accent 12%)
-        if is_pressed {
-            el = el.shadow(vec![
-                gpui::BoxShadow {
-                    color: accent.opacity(0.08),
-                    offset: point(px(0.0), px(1.0)),
-                    blur_radius: px(2.0),
-                    spread_radius: px(0.0),
-                },
-                gpui::BoxShadow {
-                    color: accent.opacity(0.12),
-                    offset: point(px(0.0), px(0.0)),
-                    blur_radius: px(0.0),
-                    spread_radius: px(1.0),
-                },
-            ]);
-        }
+        // Contract §8 pressed: shadow is `none` (no inset stack).
 
         // ── Focus ring ────────────────────────────────────────────
         el = el.focus(move |s| {
@@ -262,8 +255,11 @@ impl IntoElement for IconButton {
                 .with_color(text_color),
             );
         } else if !icon_name.is_empty() {
+            // Contract §13: glyph size resolves through the supporting-size
+            // mapping (one stop smaller than the control), not a fixed size.
+            let glyph_size = IconSize::from(resolve_supporting_visual_size(effective_size));
             el = el.child(
-                Icon::from_spec(IconSpec::new(&icon_name).with_size(IconSize::Sm), theme)
+                Icon::from_spec(IconSpec::new(&icon_name).with_size(glyph_size), theme)
                     .with_color(text_color),
             );
         }

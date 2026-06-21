@@ -264,6 +264,75 @@ pub fn token_input_gap_rem(density: ControlDensity) -> f32 {
     }
 }
 
+// ── EditableList size / density scales ───────────────────────────
+//
+// Contract §8 "Size Adjustments" / "Density Adjustments". Mirrors
+// `poodle_gpui::presentation::editable_list_*` exactly so both Rust targets
+// resolve identical row geometry from a single source of truth.
+
+/// Handle (grip) square size in rem. Contract: xs 0.875, sm/md 1, lg 1.125, xl 1.25.
+pub fn editable_list_handle_size_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.875,
+        ControlSize::Sm => 1.0,
+        ControlSize::Md => 1.0,
+        ControlSize::Lg => 1.125,
+        ControlSize::Xl => 1.25,
+    }
+}
+
+/// Item horizontal padding in rem. Contract: xs 0.5, sm/md 0.625, lg 0.75, xl 0.875.
+pub fn editable_list_item_x_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.5,
+        ControlSize::Sm => 0.625,
+        ControlSize::Md => 0.625,
+        ControlSize::Lg => 0.75,
+        ControlSize::Xl => 0.875,
+    }
+}
+
+/// Item vertical padding in rem. Contract: xs 0.375, sm 0.4375, md 0.5, lg 0.5625, xl 0.625.
+pub fn editable_list_item_y_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.375,
+        ControlSize::Sm => 0.4375,
+        ControlSize::Md => 0.5,
+        ControlSize::Lg => 0.5625,
+        ControlSize::Xl => 0.625,
+    }
+}
+
+/// Item / content font size in rem. Contract: xs 0.6875, sm 0.75, md 0.8125, lg 0.875, xl 0.9375.
+pub fn editable_list_font_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.6875,
+        ControlSize::Sm => 0.75,
+        ControlSize::Md => 0.8125,
+        ControlSize::Lg => 0.875,
+        ControlSize::Xl => 0.9375,
+    }
+}
+
+/// List inter-row gap in rem. Contract density: compact 0.0625, default 0.125, comfortable 0.1875.
+pub fn editable_list_list_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.0625,
+        ControlDensity::Default => 0.125,
+        ControlDensity::Comfortable => 0.1875,
+    }
+}
+
+/// Per-item inner gap (handle↔content↔remove) in rem. Contract density:
+/// compact 0.375, default 0.5, comfortable 0.625.
+pub fn editable_list_item_gap_rem(density: ControlDensity) -> f32 {
+    match density {
+        ControlDensity::Compact => 0.375,
+        ControlDensity::Default => 0.5,
+        ControlDensity::Comfortable => 0.625,
+    }
+}
+
 /// Convert rem to pixels at the standard 16px base.
 pub fn rem_to_px(rem: f32) -> f32 {
     rem * 16.0

@@ -152,7 +152,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | drawer | ok | 6 | 6 | gap |
 | duration-input | fixed | 2 | 2 | gap |
 | editable-label | ok | 2 | 2 | gap |
-| editable-list | fixed | 4 | 11 | gap |
+| editable-list | fixed | 4 | 3 | gap |
 | embed-input | fixed | 6 | 7 | gap |
 | embed-preview | fixed | 7 | 5 | gap |
 | empty-state | ok | 2 | 5 | ok |
@@ -165,11 +165,11 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | form-actions | ok | 6 | 7 | gap |
 | form-dialog | ok | 3 | 9 | gap |
 | form-layout | fixed | 2 | 2 | gap |
-| form-shell | gap | 10 | 12 | gap |
+| form-shell | gap | 0 | 0 | gap |
 | grid | fixed | 4 | 4 | gap |
 | hover-card | ok | 4 | 6 | ok |
 | icon | ok | 2 | 1 | gap |
-| icon-button | fixed | 6 | 9 | gap |
+| icon-button | fixed | 1 | 2 | gap |
 | icon-provider | fixed | 1 | 1 | gap |
 | inline-list-section | fixed | 6 | 1 | gap |
 | inline-remediation | ok | 1 | 6 | gap |
@@ -245,7 +245,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tree | ok | 2 | 4 | ok |
 | tri-state-switch | fixed | 5 | 6 | gap |
 | ui-presentation-provider | fixed | 3 | 2 | gap |
-| validation-summary | gap | 8 | 9 | gap |
+| validation-summary | gap | 0 | 0 | gap |
 | video-player | fixed | 7 | 3 | gap |
 <!-- END MATRIX -->
 

@@ -1,4 +1,5 @@
-<!-- parity consv=gap gpui=8 jetstream=9 specimen=gap -->
+<!-- parity consv=gap gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: built ValidationSummary on both Rust targets to the contract (no Svelte authority — contract is sole authority; consv stays gap until ValidationSummary.svelte exists). GPUI composite created (composites/validation_summary.rs) + Jetstream renderer rebuilt: tone-bordered surface (danger blocking / accent pending-only via border_token), optional title, List of Entry rows (tone dot + label + message), empty state renders nothing. Spec gained fill/radius/padding_x/padding_y/list_gap/entry_gap/entry_text_gap/title_size/entry_text_size token methods (additive; contract §6 previously only defined border_token). Indicator dot + entry field-id interaction-id are noted enrichments beyond contract anatomy. 5 Jetstream probe tests. -->
 # Parity: ValidationSummary
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

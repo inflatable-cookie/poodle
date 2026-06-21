@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=6 jetstream=9 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=2 specimen=gap | pass: GPUI pressed treatment + glyph-size fixed; Jetstream rebuilt (variant/tone/pressed/loading/border, 9 render_probe tests). Remaining: success tone (shared ButtonTone has no Success arm) -->
 # Parity: IconButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -25,30 +25,45 @@ Svelte has surface the contract does not document, and its pressed treatment div
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Hardcoded shadow px literals in pressed inset shadow at `icon_button.rs:219-232` — `px(1.0)`, `px(2.0)`, `px(0.0)` and `accent.opacity(0.08)`/`(0.12)`. Contract §8 pressed shadow is `inset white 12%` + `inset accent 18%`; resolve mix percentages from contract, avoid ad-hoc 0.08/0.12.
-- [ ] No `success` tone — variant/tone color resolution (`icon_button.rs:124-148`) only handles default/danger via spec token methods; success falls through.
-- [ ] No tooltip — `spec.tooltip` carried but never rendered; contract §2 tooltip part + §6 `role="tooltip"`/`aria-describedby` + 300ms delay absent.
-- [ ] Icon size fixed to `IconSize::Sm` (`icon_button.rs:266`) — contract §13 (line 471) and Svelte derive glyph size from the resolved control size via the supporting-size mapping; should track `effective_size`, not a constant.
-- [ ] Pressed border uses `color_mix(border, text_primary, 0.74)` (`icon_button.rs:171`) — that is the *hover* mix, not the pressed border (contract §8 pressed border = `accent 56%`). Wrong mix reused.
-- [ ] Glyph 45% width/height sizing (contract §8 glyph table) not replicated — icon scales via `IconSize::Sm` instead of `width:45%` of the square.
+Fix pass (2026-06-21): pressed treatment rewritten to the contract §8 table,
+glyph size now derives from the supporting-size mapping, and the ad-hoc inset
+shadow literals are gone.
+
+- [ ] No `success` tone — variant/tone color resolution uses the shared `ButtonVariant::{fill,border,text}_token(tone)` methods, but the shared `ButtonTone` enum has only `Default`/`Danger` (no `Success`). Adding a `Success` arm is a cross-cutting shared-type change (touches Button/SplitButton/AlertDialog/ConfirmAction in both targets + all exhaustive matches), out of scope for an icon-button-only pass. (deferred — shared-type change)
 - accepted: no ARIA (gpui has no accessibility API) — `aria-label`/`aria-pressed`/`aria-busy` not emitted.
-- accepted: tooltip positioning/delay is host-driven (contract §11 Tier 3).
+- accepted: no tooltip — `spec.tooltip` carried for consumer wiring; contract §2 tooltip surface + §6 `role="tooltip"`/`aria-describedby` + 300ms delay are host/overlay-driven (contract §11 Tier 3).
+- accepted: glyph uses the `IconSize` token scale (Sm/Md/Lg) derived from the supporting-size mapping rather than a literal `width:45%` of the square — the contract glyph %-sizing is a CSS detail; GPUI sizes icons by token. Visual result is comparable (contract §12 known-delta: icon rendering is platform-owned).
+
+### Resolved in fix pass
+
+- [x] FIXED Pressed treatment (non-primary) now matches contract §8 "Root — Pressed": solid `accent-base` fill, border `color-mix(accent-base 85%, black)` via `color_mix_black(accent, 0.85)`, `text-inverse` glyph, and shadow `none`. Primary keeps its own variant styling when pressed.
+- [x] FIXED Removed the ad-hoc pressed inset-shadow stack (`px(1.0)`/`px(2.0)` + `accent.opacity(0.08/0.12)`) — contract pressed shadow is `none`.
+- [x] FIXED Pressed border no longer reuses the hover mix (`0.74`) — now the contract `accent 85% black`.
+- [x] FIXED Pressed hover fill is `color-mix(white 12%, accent-base)` per the contract pressed `fill-hover`.
+- [x] FIXED Glyph size derives from `IconSize::from(resolve_supporting_visual_size(effective_size))` (contract §13) — tracks the effective control size, no longer the constant `IconSize::Sm`.
 
 ## Jetstream gap (vs Svelte + contract)
 
-`js_icon_button` is a near-stub: one fill, one hover, no variant/tone/state differentiation. Most of the contract is unimplemented.
+Rebuild pass (2026-06-21): `js_icon_button` rebuilt from a near-stub to a
+contract-faithful component — per-variant × tone fill/border/text, pressed,
+loading/spinner, border, hover/active, and the contract per-size square all
+resolve from tokens. 9 `render_probe` tests cover the closed gaps.
 
-- [ ] Hardcoded hover mix literal `surface.mix(elevated, 0.84)` at `icon_button.rs:29` — contract §8 hover fill is `color-mix(fill 76%, elevated)`; resolve per-variant fill then mix at the contract ratio, not a flat 0.84 on surface.
-- [ ] No variant differentiation — primary/secondary/ghost all render identical surface fill (`icon_button.rs:27,34-47`). Contract §8 requires distinct fill/border/text per variant (primary=accent, secondary=surface+border-default, ghost=transparent). `spec.variant` ignored.
-- [ ] No `tone` handling — danger/success ignored; specimen passes `ButtonTone::Danger` but component renders default. Add tone color resolution.
-- [ ] No pressed state — `spec.is_pressed` unread; contract §8 pressed accent treatment absent.
-- [ ] No loading/spinner — `spec.is_loading` unread; contract §2 spinner part + §6 `aria-busy` absent.
-- [ ] No border — `button("")` has no `.border(...)`; contract §8 base requires `0.0625rem solid var(--poodle-icon-button-border)`.
-- [ ] No focus ring — `.focusable()` set but no focus-visible outline (contract §8 focus table).
-- [ ] No tooltip — contract §2 tooltip part absent.
-- [ ] Size offsets: uses `control_height_rem(effective_size)` directly; verify it matches the contract's per-size square deltas (xs −0.25, sm −0.375, lg +0.375, xl +0.5 from md). Currently relies on the size scale, not the contract's explicit offsets.
-- accepted: no ARIA channel.
+- [ ] No `success` tone — same shared-type limit as GPUI: `ButtonTone` has only `Default`/`Danger`. Danger tone is handled; success is deferred pending the shared enum change. (deferred — shared-type change)
+- accepted: no focus-visible outline — the `JsEl` builder exposes `.hover`/`.active` but no `.focus` state modifier, so the contract §8 focus ring is not expressible in Jetstream. `.focusable()` is set for hit-testing.
+- accepted: no ARIA channel; no tooltip surface (host/overlay-driven).
 - accepted: click/keyboard interaction lives in preview `main.rs` event loop.
+
+### Resolved in rebuild pass
+
+- [x] FIXED Per-variant differentiation — ghost (transparent fill/border), primary (accent fill, `accent 84% black` border, inverse text), secondary (surface fill, border-default). `spec.variant` now drives color resolution.
+- [x] FIXED Tone handling — danger × {ghost,primary,secondary} per contract §8 (ghost danger = transparent fill + danger text; primary danger = solid danger; secondary danger = `danger 16% surface` fill + `danger 46% border`).
+- [x] FIXED Hover fill now `color-mix(fill 76%, elevated)` resolved per-variant; hover border `74%` toward text-primary; active `color-mix(fill 64%, elevated)` — no flat `0.84`-on-surface literal.
+- [x] FIXED Pressed (non-primary) — solid accent fill, `accent 85% black` border, inverse text per contract §8.
+- [x] FIXED Loading swaps the glyph for the `loader` spinner icon and sets disabled (suppresses activation).
+- [x] FIXED Border now `1px solid` resolved per-variant border token (was none).
+- [x] FIXED Square size uses the contract per-size deltas (xs −0.25, sm −0.375, md 0, lg +0.375, xl +0.5) off the md control-height — via a local `icon_button_size_delta_rem` (distinct from the Button height-offset scale, which uses xs −0.5).
+- [x] FIXED Glyph tracks the supporting-visual size (contract §13), not a constant.
 
 ## Specimen parity
 
@@ -58,6 +73,6 @@ Svelte has surface the contract does not document, and its pressed treatment div
 
 ## Notes
 
-- consv=gap driver: undocumented `success` tone + pressed treatment that disagrees with the contract's documented color-mix. Both belong in the contract per "Svelte is parity authority".
-- Jetstream is the biggest gap overall — the component renders a single generic icon button regardless of variant/tone/state, so its specimen visually misrepresents the props it is passed. This is the "mockup risk" CLAUDE.md warns about: the specimen passes real props but the component drops them.
-- GPUI is broadly faithful (variant/tone/pressed/loading via spec token methods) — gaps are tooltip, success tone, icon-size derivation, and a few hardcoded shadow literals.
+- Remaining gap on both targets is `success` tone, blocked on the shared `ButtonTone` enum (only `Default`/`Danger`). Adding `Success` is a cross-cutting change (Button/SplitButton/AlertDialog/ConfirmAction + every exhaustive `match`); deferred to a dedicated shared-type pass.
+- Jetstream is no longer a stub — `js_icon_button` now resolves variant/tone/pressed/loading/border/hover from tokens, so the specimen demonstrates real differences (mockup risk closed). Probe-verified (9 tests).
+- GPUI pressed treatment now matches the contract §8 table exactly (solid accent, `accent 85% black` border, inverse text, no shadow); glyph size derives from the supporting-size mapping. Build-verified.

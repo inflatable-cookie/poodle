@@ -73,4 +73,52 @@ impl ValidationSummarySpec {
             semantic::COLOR_ACCENT_BASE
         }
     }
+
+    /// Surface fill behind the summary (contract §2 Root background). Tinted
+    /// toward the tone color by the renderer; this is the neutral base.
+    pub fn fill_token(&self) -> &'static str {
+        semantic::COLOR_BACKGROUND_PANEL
+    }
+
+    /// Surface corner radius (contract §2 Root radius).
+    pub fn radius_token(&self) -> &'static str {
+        semantic::RADIUS_SURFACE
+    }
+
+    /// Inline (left/right) padding of the surface (contract §2 Root padding).
+    pub fn padding_x_token(&self) -> &'static str {
+        semantic::SPACE_PANEL_X
+    }
+
+    /// Block (top/bottom) padding of the surface (contract §2 Root padding).
+    pub fn padding_y_token(&self) -> &'static str {
+        semantic::SPACE_PANEL_Y
+    }
+
+    /// Gap between the title and the list, and between list rows
+    /// (contract §2/§6 list spacing).
+    pub fn list_gap_token(&self) -> &'static str {
+        semantic::SPACE_STACK_SM
+    }
+
+    /// Inline gap inside an entry row between the indicator and the text column
+    /// (contract §2/§6 Entry spacing).
+    pub fn entry_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_SM
+    }
+
+    /// Gap between an entry's label and its message (contract §2 Entry).
+    pub fn entry_text_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_XS
+    }
+
+    /// Title typography size (contract §2/§6 typography-label).
+    pub fn title_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    /// Entry label/message typography size (contract §2/§6 Entry text).
+    pub fn entry_text_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
 }

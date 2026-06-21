@@ -1,4 +1,5 @@
-<!-- parity consv=gap gpui=10 jetstream=12 specimen=gap -->
+<!-- parity consv=gap gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: built FormShell on both Rust targets to the contract (no Svelte authority — contract is sole authority; consv stays gap until FormShell.svelte exists). GPUI composite created (composites/form_shell.rs) + Jetstream renderer rebuilt: header (title/desc), Callout status summary via resolved_status_tone, sections w/ description + field slots, FormActions row honoring align, token-resolved disabled opacity, busy/disabled states. Spec gained header_gap/section_internal_gap/title/description/section_title/status size + disabled_opacity token methods (additive). 7 Jetstream probe tests. -->
 # Parity: FormShell
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

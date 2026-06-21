@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=4 jetstream=11 specimen=gap -->
+<!-- parity consv=fixed gpui=4 jetstream=3 specimen=gap | pass: Jetstream rebuilt to GPUI anatomy (handle/conditional-remove/header/banners/add-row/counter), all geometry token-resolved, 13 render_probe tests -->
 # Parity: EditableList
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -50,18 +50,31 @@ open items are interaction/a11y/feature-scope, not renderable-anatomy gaps.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Static render — NO callbacks, no add/remove/reorder interaction.
-- [ ] No drag handle rendered at all — `reorderable` ignored entirely; no drag/drop/grab states.
-- [ ] Remove button rendered unconditionally on every row (`editable_list.rs:80-86`) — contract shows remove only when `editable||removable`.
-- [ ] No live region, no `<ul>`/role/aria, no header/workflow, no error/info banners, no window-nav, no long-list warning. No ARIA.
-- [ ] Drops most props: no aria_label, dirty, submitting, error/info, longList, window, submit/cancel, editable/removable distinction.
-- [ ] Hardcoded disabled opacity `.opacity(0.48)` at `editable_list.rs:61` — contract requires `state-opacity-disabled` token (CLAUDE.md violation).
-- [ ] Hardcoded size scale `rem_to_px(1.0|1.125|1.25|1.375|1.5)` remove sizes at `editable_list.rs:17-23` — diverges from BOTH contract (xs=0.875) and GPUI; resolve from tokens.
-- [ ] Hardcoded font `rem_to_px(0.8125)` at `editable_list.rs:14`, remove-icon `.text_size(rem_to_px(0.75))` at `:84`, remove radius `.rounded(rem_to_px(0.25))` at `:85`.
-- [ ] Hardcoded border width `.border(1.0)` at `editable_list.rs:99,114` and `.text_weight(500)` at `:119` — resolve from tokens.
-- [ ] Density tuple literals inline at `editable_list.rs:40-44` — resolve from density tokens.
-- accepted: no ARIA.
+Buildout pass (2026-06-21): `js_editable_list` rebuilt to mirror the GPUI
+composite anatomy. Row anatomy now renders the drag handle (when reorderable),
+content label, and a conditional ghost remove `IconButton`; the workflow header,
+error/info banners, add row, and counter are all present and composed from the
+real `js_button` / `js_text_input` / `js_icon_button` primitives. All geometry
+resolves from the new token-exact `presentation::editable_list_*` scales (mirrors
+GPUI exactly). 13 `render_probe` tests cover the closed gaps. Remaining open
+items are interaction/a11y/feature-scope, not renderable-anatomy gaps.
+
+- [ ] Static render — NO callbacks (onReorder/onAdd/onRemove/onChange/onSubmit/onCancel). No add/remove/reorder interaction; the grip renders at rest, no drag/drop/grab visual states. (preview-event-loop bound)
+- [ ] Workflow chrome gated on `dirty||submitting` rather than contract's onSubmit/onCancel presence (no callbacks in Jetstream to gate on). (accepted divergence)
+- [ ] No window-nav (Previous/label/Next), no long-list warning, no `windowSize`/`longListThreshold`/`longListWarningText`. (feature scope — not yet built)
+- accepted: no ARIA — the `JsEl` builder has no accessibility sink; `<ul role=listbox>`/`<li role=option>`, live region, and aria-labels are omitted.
 - accepted: interaction (add/remove/reorder/submit) would live in preview event loop; absent here.
+
+### Resolved in buildout pass
+
+- [x] FIXED Drag handle now rendered — `grip-vertical` 6-dot grip Icon, sized to the contract handle-size square, shown only when `reorderable`.
+- [x] FIXED Remove button now conditional — ghost `IconButton` (icon `x`, chrome size role), shown only when `editable || removable` (was unconditional).
+- [x] FIXED Workflow header composes real secondary/primary `js_button` (cancel + submit, submit disabled unless dirty, "Saving…" while submitting); error/info banners rendered (`role` semantics N/A in Jetstream).
+- [x] FIXED Add row composes the real `js_text_input` (placeholder, size/density, disabled) + primary `js_button` — not hand-rolled input/button divs; hidden at max-items.
+- [x] FIXED Counter shows only when `maxItems` set, rendering `"N/M"`.
+- [x] FIXED Disabled opacity now `state.opacity.disabled` token (was hardcoded `0.48`).
+- [x] FIXED Size/density geometry resolves from new `presentation::editable_list_{handle_size,item_x,item_y,font,list_gap,item_gap}_rem` (contract §8) — mirrors GPUI; the old larger remove-size scale and inline density tuples are gone.
+- [x] FIXED Item border `0.0625rem solid transparent`, `radius.control`, transparent background per contract — no hardcoded font/radius/border-width/weight literals (delegated to composed primitives).
 
 ## Specimen parity
 
@@ -71,6 +84,6 @@ open items are interaction/a11y/feature-scope, not renderable-anatomy gaps.
 
 ## Notes
 
-- Three-way size-scale disagreement: contract handle xs/sm/md/lg/xl = `0.875/1/1/1.125/1.25`; GPUI remove = `0.875/0.875/1.0/1.125/1.25` (sm wrong); Jetstream remove = `1.0/1.125/1.25/1.375/1.5` (entirely larger). None agree — needs a single tokenized source.
-- Both Rust targets are presentational shells: zero callbacks, zero ARIA, zero drag/keyboard, no `<ul>`/role semantics, no live region. The reorder behavior that defines this component is unimplemented in both.
-- Jetstream is weakest: no handle, unconditional remove button, hardcoded `0.48` disabled opacity.
+- Size-scale now reconciled: both Rust targets share the contract handle scale `0.875/1/1/1.125/1.25` via their `presentation::editable_list_handle_size_rem` helpers (GPUI + Jetstream mirror each other). The old Jetstream `1.0/1.125/1.25/1.375/1.5` remove scale is gone.
+- Both Rust targets are presentational shells: zero callbacks, zero ARIA, zero drag/keyboard, no `<ul>`/role semantics, no live region. The reorder behavior that defines this component is unimplemented in both — preview-event-loop bound.
+- Jetstream and GPUI now have parity in renderable anatomy (handle, conditional remove, header, banners, add row, counter); the gap is interaction/a11y only.

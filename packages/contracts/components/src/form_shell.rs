@@ -111,4 +111,40 @@ impl FormShellSpec {
     pub fn section_gap_token(&self) -> &'static str {
         semantic::SPACE_STACK_MD
     }
+
+    /// Gap between title and description inside the header (contract §6).
+    pub fn header_gap_token(&self) -> &'static str {
+        semantic::SPACE_STACK_SM
+    }
+
+    /// Gap between a section's title and its field slots (contract §2/§6).
+    pub fn section_internal_gap_token(&self) -> &'static str {
+        semantic::SPACE_STACK_SM
+    }
+
+    /// Form title typography size (contract §6 typography-heading).
+    pub fn title_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_HEADING_SIZE
+    }
+
+    /// Description typography size (contract §6 typography-body).
+    pub fn description_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_BODY_SIZE
+    }
+
+    /// Section title (`<h3>`) typography size (contract §2/§6).
+    pub fn section_title_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    /// Status-summary supporting text size (contract §6).
+    pub fn status_size_token(&self) -> &'static str {
+        semantic::TYPOGRAPHY_LABEL_SIZE
+    }
+
+    /// Opacity applied to the whole shell when disabled (contract §4 —
+    /// `state.opacity.disabled`).
+    pub fn disabled_opacity_token(&self) -> &'static str {
+        semantic::STATE_OPACITY_DISABLED
+    }
 }
