@@ -1,4 +1,10 @@
 <!-- parity consv=gap gpui=0 jetstream=0 specimen=gap -->
+<!-- gpui-specimen pass: GPUI specimen complete — added Popover variant and Modal variant groups
+     (each: header title+description, search TextInput, body option rows, FormActions footer with
+     Cancel/Add), plus Error and Empty state groups, joining existing inline-ready / loading /
+     no-results / multiple-selection groups. Real PickerShell + TextInput + FormActions/Button only;
+     no hand-rolled surfaces. Covers contract variants (inline/popover/modal) and all five states.
+     gpui/preview builds clean. GPUI specimen done; Jetstream pending engine recovery — specimen=gap kept. -->
 <!-- pass: both targets now branch popover vs modal (overlay/dialog elevation, 32rem popover width cap, modal elevated bg via color-mix); Jetstream title→rem_to_px(1.25) + border→rem_to_px(0.0625) + sr-only status clipped to 1×1; PickerShellSpec gained is_popover()/is_modal()/popover_max_width_rem(). consv=gap unchanged (Svelte-side effective_state_* shortfall, not a Rust target). -->
 # Parity: PickerShell
 

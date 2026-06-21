@@ -1,21 +1,28 @@
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{BulkActionBar, Eyebrow};
-use poodle_specs::{BulkAction, BulkActionBarSpec, BulkActionTone, EyebrowSpec};
+use poodle_specs::{
+    BulkAction, BulkActionBarSpec, BulkActionTone, ControlDensity, ControlSize, EyebrowSpec,
+};
+
+/// The four-tone demo action set (default, default, danger, warning) shared by
+/// several specimen groups and both ladders.
+fn default_actions() -> Vec<BulkAction> {
+    vec![
+        BulkAction::new("export", "Export").with_icon("download"),
+        BulkAction::new("archive", "Archive").with_icon("folder"),
+        BulkAction::new("delete", "Delete")
+            .with_tone(BulkActionTone::Danger)
+            .with_icon("trash-2"),
+        BulkAction::new("review", "Review")
+            .with_tone(BulkActionTone::Warning)
+            .with_icon("circle-alert"),
+    ]
+}
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let default_actions = || {
-        vec![
-            BulkAction::new("export", "Export").with_icon("download"),
-            BulkAction::new("archive", "Archive").with_icon("folder"),
-            BulkAction::new("delete", "Delete")
-                .with_tone(BulkActionTone::Danger)
-                .with_icon("trash-2"),
-            BulkAction::new("review", "Review")
-                .with_tone(BulkActionTone::Warning)
-                .with_icon("circle-alert"),
-        ]
-    };
 
     div()
         .flex()
@@ -108,4 +115,89 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
+        // --- Size ladder ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Size ladder"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(16.0))
+                        .child(size_block(theme, "XS", ControlSize::Xs))
+                        .child(size_block(theme, "SM", ControlSize::Sm))
+                        .child(size_block(theme, "MD", ControlSize::Md))
+                        .child(size_block(theme, "LG", ControlSize::Lg))
+                        .child(size_block(theme, "XL", ControlSize::Xl)),
+                ),
+        )
+        // --- Density ladder ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Density ladder"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(16.0))
+                        .child(density_block(theme, "COMPACT", ControlDensity::Compact))
+                        .child(density_block(theme, "DEFAULT", ControlDensity::Default))
+                        .child(density_block(
+                            theme,
+                            "COMFORTABLE",
+                            ControlDensity::Comfortable,
+                        )),
+                ),
+        )
+}
+
+/// Label above a ladder entry (mirrors the Svelte specimen variant labels).
+fn ladder_label(theme: &GpuiThemeProvider, label: &str) -> Div {
+    div()
+        .text_xs()
+        .font_weight(FontWeight::BOLD)
+        .text_color(color_to_hsla(theme.resolve_color("color.text.muted")))
+        .child(label.to_string())
+}
+
+fn size_block(theme: &GpuiThemeProvider, label: &str, size: ControlSize) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(ladder_label(theme, label))
+        .child(BulkActionBar::from_spec(
+            BulkActionBarSpec::new()
+                .with_selection_count(5)
+                .with_actions(default_actions())
+                .with_size(size),
+            theme,
+        ))
+}
+
+fn density_block(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(ladder_label(theme, label))
+        .child(BulkActionBar::from_spec(
+            BulkActionBarSpec::new()
+                .with_selection_count(5)
+                .with_actions(default_actions())
+                .with_density(density),
+            theme,
+        ))
 }

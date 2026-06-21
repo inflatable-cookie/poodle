@@ -419,6 +419,11 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
         description: "Tabbed interface with underline, card, pill, and strip variants.",
     },
     ComponentEntry {
+        slug: "tab-strip",
+        display_name: "TabStrip",
+        description: "Tablist-only primitive with closable, reorderable tabs.",
+    },
+    ComponentEntry {
         slug: "text",
         display_name: "Text",
         description: "Small text primitive for body, caption, hint, and status copy.",
@@ -780,8 +785,8 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "context-menu" | "menubar" | "confirm-action" | "form-dialog" | "command-palette" => {
             ComponentTag::Overlay
         }
-        "tabs" | "breadcrumbs" | "pagination" | "pagination-summary" | "navigation-menu"
-        | "sidebar-nav" | "nav-card" => ComponentTag::Navigation,
+        "tabs" | "tab-strip" | "breadcrumbs" | "pagination" | "pagination-summary"
+        | "navigation-menu" | "sidebar-nav" | "nav-card" => ComponentTag::Navigation,
         "table" | "data-table" | "list-card" | "list-container" | "editable-list" | "card"
         | "list-card-counter" | "card-radio-group" | "card-toggle-group" | "accordion"
         | "collapsible" | "order-by" | "selection-summary" | "filter-toolbar" | "log-list"

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=0 specimen=gap | GPUI specimen done; Jetstream pending engine recovery. GPUI specimen now full: top-level triggers with leading icons, active/disabled states, disclosed viewport panel (per-item description), interactive on_change, sizes + densities. -->
 <!-- finalize pass (2026-06-21): GPUI icon gap CLOSED — `NavigationMenuEntry` gains
      additive `icon: Option<String>` (contract §3); BOTH Rust targets now render the
      leading icon (real Icon primitive / ui_element::icon) ahead of the label, sized
@@ -82,7 +82,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - **Svelte covers** (`NavigationMenuSpecimen.svelte`): Horizontal navigation with controlled `value`, `onValueChange`, disabled Changelog item, viewport `children` snippet ("Active section"), plus `sizes` and `densities` snippet matrices.
-- **GPUI covers** (`navigation_menu.rs`): Horizontal navigation (active=Components, disabled Changelog), interactive `on_change` updating active value, "Active section" text, full sizes + densities matrices via `specimen_layout`. — missing: none material; closest parity of the three.
+- **GPUI covers** (`navigation_menu.rs`): **GPUI specimen done.** Horizontal navigation (active=Components, disabled Changelog), **leading icons** per trigger (contract §3 `icon`), **disclosed viewport panel** rendering the active item's `description` (Known Delta §12 slot-prop equivalent), interactive `on_change` updating active value, plus full sizes + densities matrices via `specimen_layout`. — covers all contract §4 states + §13 specimen; icon + viewport added beyond the bare §13 row.
 - **Jetstream covers** (`navigation_menu.rs`): three static groups — Default (auto-select first), Active=Contracts, With disabled entry. — **missing: sizes matrix, densities matrix, viewport panel, controlled/interactive selection, aria-labelled nav.** Uses a different item set (Docs/Contracts/Tokens/Changelog) than the contract §13 specimen (Home/Components/Tokens/Guides/Changelog).
 
 ## Notes

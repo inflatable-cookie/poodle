@@ -1,4 +1,4 @@
-<!-- parity consv=gap gpui=0 jetstream=0 specimen=gap | pass: GPUI close-button + vertical-active opacity now token/spec-resolved, Enter/Space activation + Alt+Arrow reorder wired; Jetstream built out from placeholder to contract-faithful (size/density tokens, close button, disabled, vertical, accent indicator, current_value fallback) + 6 render-probe tests. No Svelte authority — built to contract; no add-tab/overflow/reorder-handle invented (not in contract anatomy). -->
+<!-- parity consv=gap gpui=0 jetstream=0 specimen=gap | GPUI specimen done; Jetstream pending engine recovery. Dedicated GPUI specimen created (specimens/tab_strip.rs, registered slug=tab-strip): horizontal closable+reorderable, disabled items, vertical, sizes + densities — no add-tab/overflow/reorder-handle invented (out of contract §1 scope). | pass: GPUI close-button + vertical-active opacity now token/spec-resolved, Enter/Space activation + Alt+Arrow reorder wired; Jetstream built out from placeholder to contract-faithful (size/density tokens, close button, disabled, vertical, accent indicator, current_value fallback) + 6 render-probe tests. No Svelte authority — built to contract. -->
 # Parity: TabStrip
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -12,7 +12,7 @@
 - GPUI: `packages/gpui/components/src/primitives/tab_strip.rs`
 - Jetstream: `packages/jetstream/components/src/tab_strip.rs`
 - Spec: `packages/contracts/components/src/tab_strip.rs` (`TabStripSpec`), item type `packages/contracts/components/src/types.rs:789` (`TabStripItem`)
-- Specimens: svelte **none** (folded into `packages/svelte/preview/src/specimens/TabsSpecimen.svelte`) · gpui **none dedicated** — driven via `packages/gpui/preview/src/specimens/tabs.rs` sections 5/6/7 · jetstream `packages/jetstream/preview/src/specimens/tab_strip.rs`
+- Specimens: svelte **none** (folded into `packages/svelte/preview/src/specimens/TabsSpecimen.svelte`) · gpui **dedicated** `packages/gpui/preview/src/specimens/tab_strip.rs` (slug `tab-strip`; the `tabs.rs` strip sections 5/6/7 remain as Tabs-context demos) · jetstream `packages/jetstream/preview/src/specimens/tab_strip.rs`
 
 ## Contract ↔ Svelte
 
@@ -52,7 +52,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: **no TabStrip specimen.** `TabsSpecimen.svelte` exercises the `strip` variant of `Tabs` (closable/reorderable/vertical) instead. This is the reference for strip visuals.
-- GPUI covers (`specimens/tabs.rs`): horizontal strip closable+reorderable (§5, `tabs.rs:238-287`), vertical strip (§6, `tabs.rs:289-318`), collapse-toggle horizontal↔vertical (§7, `tabs.rs:320-357`) — all real `TabStrip` instances with live `on_change`/`on_close`. — missing: disabled-item demo; icon-only vertical (degrades to text labels since `TabStripItem` has no icon).
+- GPUI covers: **GPUI specimen done.** Dedicated `specimens/tab_strip.rs` (slug `tab-strip`): horizontal closable + reorderable strip with live `on_change`/`on_close`/`on_reorder` and host-owned panel, **disabled-items** group (dimmed, skipped by arrow nav), **vertical** orientation (labels + close buttons stay visible per contract §4), and full **sizes + densities** matrices via `specimen_layout` — all real `TabStrip` instances. No add-tab/overflow/reorder-handle affordances (out of contract §1 scope). The earlier `tabs.rs` strip sections 5/6/7 remain as Tabs-context demos. — accepted gap: icon-only collapse (no `icon` field on `TabStripItem`, by contract).
 - Jetstream covers (`specimens/tab_strip.rs`): two horizontal selection states only (`review` selected, `history` selected), one closable item rendered but with **no visible close button** since the component omits it. — missing: **vertical orientation, disabled item, working close button, reorderable, size/density variation, keyboard/selection wiring**. Specimen is a static render, not an interactive integration test.
 
 ## Notes

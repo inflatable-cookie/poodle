@@ -12,12 +12,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
+    // Leading icons (contract §3 `icon`, §10 GPUI renders icon ahead of label)
+    // plus per-item descriptions that drive the disclosed viewport content
+    // (Known Delta §12 — `description` is the Rust slot-prop equivalent).
     let items = vec![
-        NavigationMenuEntry::new("home", "Home"),
-        NavigationMenuEntry::new("components", "Components"),
-        NavigationMenuEntry::new("tokens", "Tokens"),
-        NavigationMenuEntry::new("guides", "Guides"),
-        NavigationMenuEntry::new("changelog", "Changelog").with_disabled(true),
+        NavigationMenuEntry::new("home", "Home")
+            .with_icon("arrow-right")
+            .with_description("Overview, highlights, and what's new this release."),
+        NavigationMenuEntry::new("components", "Components")
+            .with_icon("filter")
+            .with_description("Buttons, inputs, overlays, and the full primitive catalog."),
+        NavigationMenuEntry::new("tokens", "Tokens")
+            .with_icon("check")
+            .with_description("Color, spacing, typography, and radius semantic tokens."),
+        NavigationMenuEntry::new("guides", "Guides")
+            .with_icon("chevron-right")
+            .with_description("Adoption guides, theming, and migration walkthroughs."),
+        NavigationMenuEntry::new("changelog", "Changelog")
+            .with_icon("clock")
+            .with_disabled(true),
     ];
 
     let active_value = state

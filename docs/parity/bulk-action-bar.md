@@ -1,4 +1,10 @@
 <!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- gpui-specimen pass: GPUI specimen complete — added Size ladder (xs–xl) and Density ladder
+     (compact/default/comfortable) groups via real BulkActionBar (with_size/with_density), joining
+     existing selection-count+select-all / single-item / disabled / loading+disabled groups. Count
+     "N selected (of M)", ghost IconButton actions with danger+warning tones, select-all + clear all
+     covered. Matches Svelte BulkActionBarSpecimen + contract §13. gpui/preview builds clean.
+     GPUI specimen done; Jetstream pending engine recovery — specimen=gap kept. -->
 <!-- pass 43: Jetstream rebuilt to match GPUI — ghost js_icon_buttons (toned_icon_button helper
      for danger/warning), select-all (check-check) + clear (x), count "{N} selected" + "of {M}",
      accent fill color-mix(panel 93%, text-primary), per-action + bar-wide disabled gating

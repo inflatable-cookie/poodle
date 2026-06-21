@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=gap | GPUI specimen done; Jetstream pending engine recovery. GPUI specimen now full: File/Edit/View triggers, open overlay with shortcuts+separators, checkbox + radio rows (View menu), disabled item (Edit), disabled trigger (Window), sizes + densities. -->
 <!-- pass 41: Jetstream menubar rebuilt to full contract anatomy. Added: List chrome
      (border-subtle 72%, radius-surface, panel-96% bg, 0.1875rem padding, 0.125rem gap);
      Overlay/dropdown rendering current_menu().items — action rows (label + shortcut meta),
@@ -61,7 +61,7 @@ Rebuilt to full contract anatomy (pass 41): List chrome + Trigger strip + Overla
 ## Specimen parity
 
 - Svelte covers: Application menu bar with File/Edit/View, each with shortcut items + separators; interactive open/switch (`MenubarSpecimen.svelte`).
-- GPUI covers: File/Edit/View with shortcuts + separators, tracked open value + selected action (`menubar.rs`). — covers trigger strip + dropdown; matches contract specimen.
+- GPUI covers: **GPUI specimen done.** File/Edit/View triggers with shortcut items + separators, open overlay via real `Menu`, **checkbox + radio rows** in the View menu (live-toggled checked state), **disabled item** (Paste Special in Edit), **disabled top-level trigger** (Window), tracked open value + selected action, plus full **sizes + densities** matrices (`menubar.rs`). Covers every contract §4 state and §13 specimen; checkbox/radio/disabled added beyond §13.
 - Jetstream covers: Default (File open), Edit open, With disabled entry (`menubar.rs:46-57`). — triggers render with open/disabled states, but **no dropdown items render** (impl has no overlay), so the submenu specimen content is invisible. `specimen=gap`.
 
 ## Notes

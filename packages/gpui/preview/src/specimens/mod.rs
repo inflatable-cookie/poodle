@@ -83,6 +83,7 @@ mod menubar;
 mod navigation_menu;
 mod overlay_state;
 mod popover;
+mod tab_strip;
 mod tabs;
 mod tooltip;
 
@@ -371,6 +372,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "menu" => specimen_card("Menu", theme, menu::render(state, cx)),
         "context-menu" => specimen_card("ContextMenu", theme, context_menu::render(state, cx)),
         "tabs" => specimen_card("Tabs", theme, tabs::render(state, cx)),
+        "tab-strip" => specimen_card("TabStrip", theme, tab_strip::render(state, cx)),
         "navigation-menu" => {
             specimen_card("NavigationMenu", theme, navigation_menu::render(state, cx))
         }

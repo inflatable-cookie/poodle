@@ -1,4 +1,9 @@
 <!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- gpui-specimen pass: GPUI specimen complete — added Density ladder (compact/default/comfortable)
+     and Size ladder (xs–xl) groups using real AppHeader + Button/IconButton (with_density/with_size),
+     joining the existing full-window-header / title+actions+utility / title-only / custom-identity
+     groups. Matches Svelte AppHeaderSpecimen coverage + contract §10. gpui/preview builds clean.
+     GPUI specimen done; Jetstream pending engine recovery — specimen=gap kept. -->
 <!-- pass 40: app-header rebuilt on BOTH targets to the contract 3-region anatomy. GPUI: flat
      flex-justify-between → 3-col grid (identity 1fr / actions auto / utility auto), title→title-
      size ladder + subtitle→subtitle-size (were body), panel@94% bg + border.subtle, composed

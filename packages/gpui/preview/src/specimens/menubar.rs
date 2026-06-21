@@ -17,6 +17,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let active_menu = state.specimens.text.get("menubar-active").cloned();
     let last_action = state.specimens.text.get("menubar-last-action").cloned();
 
+    // Checkbox + radio selection state for the View menu (contract §3 kinds)
+    let show_sidebar = state.specimens.is_on("menubar-show-sidebar");
+    let show_statusbar = state.specimens.is_on("menubar-show-statusbar");
+    let zoom_level = state
+        .specimens
+        .text
+        .get("menubar-zoom")
+        .cloned()
+        .unwrap_or_else(|| "zoom-100".to_string());
+
     let menubar_items = vec![
         MenubarEntry::new(
             "file",
@@ -39,19 +49,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 MenuEntry::new("cut", "Cut").with_shortcut_label("\u{2318}X"),
                 MenuEntry::new("copy", "Copy").with_shortcut_label("\u{2318}C"),
                 MenuEntry::new("paste", "Paste").with_shortcut_label("\u{2318}V"),
+                // Disabled item (contract §4 disabled item state)
+                MenuEntry::new("paste-special", "Paste Special\u{2026}").with_disabled(true),
             ],
         ),
+        // View menu: checkbox rows + a radio group, exercising
+        // menuitemcheckbox / menuitemradio roles (contract §2, §6).
         MenubarEntry::new(
             "view",
             "View",
             vec![
-                MenuEntry::new("zoom-in", "Zoom in").with_shortcut_label("\u{2318}+"),
-                MenuEntry::new("zoom-out", "Zoom out").with_shortcut_label("\u{2318}-"),
+                MenuEntry::new("show-sidebar", "Show Sidebar")
+                    .with_kind(MenuItemKind::Checkbox)
+                    .with_checked(show_sidebar)
+                    .with_shortcut_label("\u{2318}0"),
+                MenuEntry::new("show-statusbar", "Show Status Bar")
+                    .with_kind(MenuItemKind::Checkbox)
+                    .with_checked(show_statusbar),
                 MenuEntry::new("sep1", "").with_kind(MenuItemKind::Separator),
+                MenuEntry::new("zoom-100", "Actual Size")
+                    .with_kind(MenuItemKind::Radio)
+                    .with_checked(zoom_level == "zoom-100")
+                    .with_shortcut_label("\u{2318}0"),
+                MenuEntry::new("zoom-125", "Zoom 125%")
+                    .with_kind(MenuItemKind::Radio)
+                    .with_checked(zoom_level == "zoom-125"),
+                MenuEntry::new("zoom-150", "Zoom 150%")
+                    .with_kind(MenuItemKind::Radio)
+                    .with_checked(zoom_level == "zoom-150"),
+                MenuEntry::new("sep2", "").with_kind(MenuItemKind::Separator),
                 MenuEntry::new("fullscreen", "Full screen")
                     .with_shortcut_label("\u{2303}\u{2318}F"),
             ],
         ),
+        // Disabled top-level trigger (contract §4 disabled trigger state).
+        MenubarEntry::new(
+            "window",
+            "Window",
+            vec![MenuEntry::new("minimize", "Minimize")],
+        )
+        .with_disabled(true),
     ];
 
     let mut spec = MenubarSpec::new(menubar_items).with_aria_label("Application menu");
@@ -88,6 +125,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             cx.notify();
                         }))
                         .on_select(cx.listener(|this, val: &str, _w, cx| {
+                            // Toggle checkbox rows and set the radio group so the
+                            // View menu's checked indicators reflect real state.
+                            match val {
+                                "show-sidebar" => {
+                                    this.state.specimens.toggle("menubar-show-sidebar");
+                                }
+                                "show-statusbar" => {
+                                    this.state.specimens.toggle("menubar-show-statusbar");
+                                }
+                                "zoom-100" | "zoom-125" | "zoom-150" => {
+                                    this.state
+                                        .specimens
+                                        .text
+                                        .insert("menubar-zoom".to_string(), val.to_string());
+                                }
+                                _ => {}
+                            }
                             this.state
                                 .specimens
                                 .text
