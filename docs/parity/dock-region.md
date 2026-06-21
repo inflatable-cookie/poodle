@@ -6,6 +6,11 @@
      mode, compact/icon-only tabs. GPUI dropped px(4/36/32) — strip dims from density tokens.
      Jetstream tab_gap/border/active-tint → tokens. 6 probe tests; specs 61, jet 184, gpui clean.
      Tab activation/collapse/DnD = preview-loop; JsEl no dashed-border (solid+8% approx). -->
+<!-- specimen note: GPUI specimen done (dock_split.rs) — added emphasis (quiet/standard/strong),
+     collapsed hidden posture, compact top-edge icon-strip, canAcceptPanel drop affordance, and
+     cross-region two-dock DnD groups; real DockRegion only, no fakes; gpui/preview builds 0 errors.
+     Jetstream pending engine recovery. specimen=gap held — Jetstream half unverifiable while
+     engine is build-blocked. -->
 # Parity: DockRegion
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -55,11 +60,11 @@ Simplified horizontal-strip-only impl; many contract behaviors absent.
 ## Specimen parity
 
 - Svelte covers: flexible expanded (icon+label tabs, body, closable/reorderable), flexible collapsed icon-strip (vertical icon tabs), interactive collapse toggle with click-to-expand, bottom-edge dock, cross-region DnD with validation, static horizontal, static vertical, size variants, density variants.
-- GPUI covers: static horizontal/vertical, flexible expanded, flexible collapsed icon-strip, collapse toggle (external button), right edge, bottom edge, SplitView horizontal/vertical. — missing: **cross-region DnD**, **size variants**, **density variants**, **icon-only compact mode**, **CollapseToggle primitive** (toggle is an external button), **closable/reorderable tabs**.
+- GPUI covers: static horizontal/vertical, flexible expanded, flexible collapsed icon-strip, collapse toggle (external button), right edge, bottom edge, **emphasis (quiet/standard/strong)**, **collapsed hidden posture**, **compact tabs (top-edge icon-strip)**, **canAcceptPanel drop affordance**, **cross-region drag-and-drop (two side-by-side regions, both `can_accept_panel`)**, SplitView horizontal/vertical. **GPUI specimen done** — every contract §13 specimen state plus the §4 emphasis / collapsed-posture / drop-affordance variants, all driven by the real `DockRegion` (no fakes). Jetstream pending engine recovery. — remaining (accepted GPUI deltas, not specimen gaps): CollapseToggle is an external button (no primitive), and auto-compact is static-only (no ResizeObserver in GPUI).
 - Jetstream covers: left dock with tabs, empty dock, active selection, bottom dock, top dock, collapsed state. — missing: **expanded with body**, **interactive collapse toggle**, **right edge**, **cross-region DnD**, **static mode**, **size variants**, **density variants**, **icon-only compact**, **closable/reorderable tabs**, **collapsed-posture variants**, **emphasis variants**.
 
 ## Notes
 
 - `consv=ok`: contract and Svelte aligned.
-- Both Rust targets share the same structural deficit: collapsed-posture, emphasis, and cross-region DnD are unimplemented. Jetstream is further behind (no static mode, no compact tabs).
+- GPUI specimen now exercises collapsed-posture (hidden + icon-strip), emphasis (quiet/standard/strong), and the cross-region drop affordance (`can_accept_panel` → drop-zone overlay) — the component already supports all three (`dock_region.rs`); they were just unexercised by the specimen. Jetstream is further behind (no static mode, no compact tabs) and is build-blocked.
 - GPUI specimen file is `dock_split.rs` (also hosts SplitView demos), not `dock_region.rs`.

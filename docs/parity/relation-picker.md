@@ -1,4 +1,10 @@
 <!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap | pass: additive RelationPickerSpec fields (searchPlaceholder, filters+filterValues, footerNote, showFooter, showSelectionSummary) now rendered on both targets — toolbar filter Selects, footer note, footer/summary gating; remaining open = keyboard-nav + hover/focus (preview-loop/accepted) -->
+<!-- pass 41: GPUI specimen completed to full contract coverage — added Filters+footer+summary
+     group (two PickerFilterConfig Selects + seeded filter_value + footer note + summary), Empty
+     state, Sizes sweep (xs–xl via with_size), Densities sweep (compact/default/comfortable). All
+     real RelationPicker::from_spec, no fakes; gpui/preview builds clean. GPUI specimen done;
+     Jetstream pending engine recovery — specimen=gap held (Jetstream half unverifiable while
+     engine build-blocked). -->
 # Parity: RelationPicker
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -51,8 +57,10 @@ Svelte carries a large undocumented prop/snippet/callback surface. Svelte is aut
 
 ## Specimen parity
 
+> GPUI specimen done; Jetstream pending engine recovery. `specimen=gap` held because the Jetstream half is unverifiable while the engine is build-blocked.
+
 - Svelte covers: Multiple selection (pre-selected), Single selection, Drill-down (2 levels + finalItems), Sizes (xs–xl), Densities — plus live `onSelectionChange` echo.
-- GPUI covers: Multiple, Single, Loading state, Drill-down (interactive via drill-path state), Semantic presentation (chrome/comfortable). — missing: **Sizes** and **Densities** variant groups (Svelte sweeps all five sizes; GPUI shows one Sm/chrome combo).
+- GPUI covers (**complete**): Multiple, Single, Loading, Drill-down (interactive via drill-path state), Semantic presentation (chrome/comfortable), **Filters + footer note + selection summary** (two `PickerFilterConfig` toolbar Selects with a seeded `filter_value`, footer note, summary), **Empty state**, **Sizes** sweep (xs–xl via `with_size`), **Densities** sweep (compact / default / comfortable via `with_density`). All real `RelationPicker::from_spec` over the shared `PickerShell`/`SelectionSummary`/`Select` composites — no hand-rolled fakes. Full contract specimen coverage on GPUI.
 - Jetstream covers: With selection, No selection, Single selection, Loading, Drill-down (static path). — missing: **Sizes** and **Densities** sweeps; drill-down is fixed-path (no interactive navigation).
 
 ## Notes

@@ -1,15 +1,18 @@
 use crate::app_state::AppState;
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{DrillEnterArgs, Eyebrow, RelationPicker};
 use poodle_specs::{
     BrowseState, DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel,
-    PickerItemSpec, RelationPickerSpec, SelectionMode,
+    PickerFilterConfig, PickerFilterOption, PickerItemSpec, RelationPickerSpec, SelectionMode,
 };
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let text_secondary = theme.resolve_color("color.text.secondary");
 
     let items = || {
         vec![
@@ -121,7 +124,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .map(|s| s.split('/').map(|x| x.to_string()).collect())
         .unwrap_or_default();
 
-    div()
+    let mut root = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -262,5 +265,143 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_density(ControlDensity::Comfortable),
                     theme,
                 )),
-        )
+        );
+
+    // --- Filters + footer note + selection summary ---
+    let filters = vec![
+        PickerFilterConfig::new(
+            "kind",
+            "Kind",
+            vec![
+                PickerFilterOption::new("primitive", "Primitive"),
+                PickerFilterOption::new("composite", "Composite"),
+            ],
+        ),
+        PickerFilterConfig::new(
+            "status",
+            "Status",
+            vec![
+                PickerFilterOption::new("stable", "Stable"),
+                PickerFilterOption::new("beta", "Beta"),
+            ],
+        ),
+    ];
+    root = root.child(
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .child(Eyebrow::from_spec(
+                EyebrowSpec::new().with_content("Filters, footer note, and selection summary"),
+                theme,
+            ))
+            .child(RelationPicker::from_spec(
+                RelationPickerSpec::new(items())
+                    .with_title("Select components")
+                    .with_description("Choose related components.")
+                    .with_selected_ids(vec!["btn".to_string(), "dlg".to_string()])
+                    .with_selection_mode(SelectionMode::Multiple)
+                    .with_state(BrowseState::Ready)
+                    .with_search_placeholder("Search components\u{2026}")
+                    .with_filters(filters)
+                    .with_filter_value("kind", "primitive")
+                    .with_footer_note("Two of five components selected.")
+                    .with_show_footer(true)
+                    .with_show_selection_summary(true),
+                theme,
+            )),
+    );
+
+    // --- Empty state ---
+    root = root.child(
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .child(Eyebrow::from_spec(
+                EyebrowSpec::new().with_content("Empty state"),
+                theme,
+            ))
+            .child(RelationPicker::from_spec(
+                RelationPickerSpec::new(Vec::new())
+                    .with_title("Select components")
+                    .with_selection_mode(SelectionMode::Multiple)
+                    .with_state(BrowseState::Empty),
+                theme,
+            )),
+    );
+
+    // --- Sizes (xs–xl) ---
+    let mut sizes_row = div().flex().flex_col().gap(px(16.0)).child(Eyebrow::from_spec(
+        EyebrowSpec::new().with_content("Sizes"),
+        theme,
+    ));
+    for (label, size) in [
+        ("XS", ControlSize::Xs),
+        ("SM", ControlSize::Sm),
+        ("MD", ControlSize::Md),
+        ("LG", ControlSize::Lg),
+        ("XL", ControlSize::Xl),
+    ] {
+        sizes_row = sizes_row.child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(4.0))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(label),
+                )
+                .child(RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_title("Select components")
+                        .with_description("Choose related components.")
+                        .with_selected_ids(vec!["btn".to_string()])
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Ready)
+                        .with_size(size),
+                    theme,
+                )),
+        );
+    }
+    root = root.child(sizes_row);
+
+    // --- Densities ---
+    let mut densities_row = div().flex().flex_col().gap(px(16.0)).child(Eyebrow::from_spec(
+        EyebrowSpec::new().with_content("Densities"),
+        theme,
+    ));
+    for (label, density) in [
+        ("Compact", ControlDensity::Compact),
+        ("Default", ControlDensity::Default),
+        ("Comfortable", ControlDensity::Comfortable),
+    ] {
+        densities_row = densities_row.child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(4.0))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(label),
+                )
+                .child(RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_title("Select components")
+                        .with_description("Choose related components.")
+                        .with_selected_ids(vec!["btn".to_string()])
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Ready)
+                        .with_density(density),
+                    theme,
+                )),
+        );
+    }
+    root = root.child(densities_row);
+
+    root
 }

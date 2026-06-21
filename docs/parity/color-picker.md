@@ -1,4 +1,8 @@
 <!-- parity consv=fixed gpui=0 jetstream=2 specimen=gap -->
+<!-- pass 41: GPUI specimen verified already at full contract coverage (Basic/Swatches/Alpha/
+     RGB-open/Preview-only/Disabled + sizes + densities) over the real surface build-out — no
+     fakes, no change needed. gpui/preview builds clean. GPUI specimen done; Jetstream pending
+     engine recovery — specimen=gap held (Jetstream half unverifiable while engine build-blocked). -->
 <!-- pass 28: Jetstream color-picker built out (parallel to GPUI pass 27). Real trigger
      swatch from spec.current_value() (not accent-base); surface with gradient sat-value pad
      (JsEl gradients work — 7-stop hue in one gradient), hue/alpha sliders, js_segmented_control
@@ -81,8 +85,10 @@ now renders the defining controls.
 
 ## Specimen parity
 
+> GPUI specimen done; Jetstream pending engine recovery. `specimen=gap` held because the Jetstream half is unverifiable while the engine is build-blocked.
+
 - Svelte covers: Basic picker, With swatches, With alpha, Default open + RGB mode, Preview only (no input), Disabled, sizes, densities (`ColorPickerSpecimen.svelte`).
-- GPUI covers: Basic picker, With swatches, With alpha, Default open + RGB mode, Preview only (no input), Disabled, sizes, densities — **specimen set matches Svelte**, but the rendered surface is incomplete (no gradient/sliders/mode toggle), so the "alpha" / "RGB mode" specimens cannot show their distinguishing UI. Functional under-coverage → gap.
+- GPUI covers (**complete**): Basic picker, With swatches, With alpha, Default open + RGB mode, Preview only (no input), Disabled, sizes, densities — specimen set matches Svelte and the surface build-out is complete (gradient pad, hue + alpha sliders, mode toggle `SegmentedControl`, channel `NumberInput`s, active swatch grid), so the alpha / RGB-mode / swatch specimens each render their distinguishing UI. All real `ColorPicker::from_spec`, every visual resolved from tokens — no fakes. Full contract specimen coverage on GPUI.
 - Jetstream covers: With color, No color, With swatches, Disabled. — missing: **With alpha**, **Default open + RGB mode**, **Preview only**, **sizes**, **densities**; and "With swatches" renders no swatches (component emits none). Under-covers vs Svelte → `specimen=gap`.
 
 ## Notes

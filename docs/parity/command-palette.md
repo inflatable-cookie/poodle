@@ -1,4 +1,9 @@
 <!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 41: GPUI specimen completed to full contract coverage — Open-states group (ready/
+     loading/error/empty/no-results), Sizes sweep (xs–xl via with_size), Densities sweep
+     (compact/default/comfortable). All real CommandPalette::from_spec, no fakes; gpui/preview
+     builds clean. GPUI specimen done; Jetstream pending engine recovery — specimen=gap held
+     (Jetstream half unverifiable while engine build-blocked). -->
 <!-- pass 35: Jetstream command-palette built to match GPUI — overlay backdrop scrim, centered
      modal surface (45rem cap, dialog border mix, radius.surface), header (title/description +
      hint pill + close), composed js_text_input (type=search + leading icon), grouped results
@@ -72,8 +77,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Specimen parity
 
+> GPUI specimen done; Jetstream pending engine recovery. `specimen=gap` held because the Jetstream half is unverifiable while the engine is build-blocked.
+
 - Svelte covers: Command Palette (button-triggered, grouped 7 items + shortcuts, interactive open/query), Semantic presentation (compact + prominent), sizes (per-size palette), densities (`CommandPaletteSpecimen.svelte`).
-- GPUI covers: Command Palette (button + grouped items + shortcuts + active highlight), Semantic presentation (compact / prominent), but rendered inline without overlay/close/hint/status — structurally incomplete. No sizes/densities matrix groups (relies on size_role specimen only). — missing: overlay framing demo, close/hint/status, sizes & densities grids.
+- GPUI covers (**complete**): Command Palette (button-triggered, grouped 7 items + shortcuts + active highlight), Semantic presentation (compact), **Open states** group exercising all five contract §6 postures (ready / loading / error / empty / no-results) as always-open palettes — each wrapped in its own `relative` container so the backdrop is region-scoped, **Sizes** sweep (xs–xl open palettes via `with_size`), **Densities** sweep (compact / default / comfortable via `with_density`). The component renders the full modal shell (overlay backdrop, header with title/hint pill/close, real search `TextInput`, grouped results, status region, per-state areas), so every group shows its distinguishing UI. No fakes — every palette is a real `CommandPalette::from_spec`. Full contract specimen coverage on GPUI.
 - Jetstream covers: Empty query, Filtered results, No results, Active item, Custom placeholder, With title+description. — but the component renders none of these distinctions (no filter, no active highlight, no title/description header, no no-results state), so the specimens are **labelled for states the component cannot show**. Under-covers vs Svelte and the labels overstate behavior → `specimen=gap`.
 
 ## Notes

@@ -5,7 +5,10 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{DockRegion, Eyebrow, SplitView};
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{DockEdge, DockRegionSpec, PanelTabItem, SplitOrientation, SplitViewSpec};
+use poodle_specs::{
+    DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, PanelTabItem, SplitOrientation,
+    SplitViewSpec,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -394,6 +397,269 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                         this.state.specimens.toggle("dock-bottom-collapsed");
                                         cx.notify();
                                     })),
+                            ),
+                        ),
+                ),
+        )
+        // --- Emphasis variants (quiet / standard / strong) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Emphasis (quiet / standard / strong)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(12.0))
+                        .child(
+                            div().w(px(200.0)).h(px(120.0)).child(
+                                DockRegion::from_spec(
+                                    DockRegionSpec::new(
+                                        DockEdge::Left,
+                                        vec![
+                                            PanelTabItem::new("explorer", "Explorer")
+                                                .with_icon("folder"),
+                                            PanelTabItem::new("search", "Search")
+                                                .with_icon("search"),
+                                        ],
+                                    )
+                                    .with_value("explorer")
+                                    .with_emphasis(DockEmphasis::Quiet),
+                                    theme,
+                                )
+                                .with_content(
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child("Quiet"),
+                                    ),
+                                ),
+                            ),
+                        )
+                        .child(
+                            div().w(px(200.0)).h(px(120.0)).child(
+                                DockRegion::from_spec(
+                                    DockRegionSpec::new(
+                                        DockEdge::Left,
+                                        vec![
+                                            PanelTabItem::new("explorer", "Explorer")
+                                                .with_icon("folder"),
+                                            PanelTabItem::new("search", "Search")
+                                                .with_icon("search"),
+                                        ],
+                                    )
+                                    .with_value("explorer")
+                                    .with_emphasis(DockEmphasis::Standard),
+                                    theme,
+                                )
+                                .with_content(
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child("Standard"),
+                                    ),
+                                ),
+                            ),
+                        )
+                        .child(
+                            div().w(px(200.0)).h(px(120.0)).child(
+                                DockRegion::from_spec(
+                                    DockRegionSpec::new(
+                                        DockEdge::Left,
+                                        vec![
+                                            PanelTabItem::new("explorer", "Explorer")
+                                                .with_icon("folder"),
+                                            PanelTabItem::new("search", "Search")
+                                                .with_icon("search"),
+                                        ],
+                                    )
+                                    .with_value("explorer")
+                                    .with_emphasis(DockEmphasis::Strong),
+                                    theme,
+                                )
+                                .with_content(
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child("Strong"),
+                                    ),
+                                ),
+                            ),
+                        ),
+                ),
+        )
+        // --- Collapsed hidden posture (only collapse toggle visible) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Collapsed hidden posture (only collapse toggle)"),
+                    theme,
+                ))
+                .child(
+                    div().h(px(120.0)).flex().child(
+                        DockRegion::from_spec(
+                            DockRegionSpec::new(
+                                DockEdge::Left,
+                                vec![
+                                    PanelTabItem::new("explorer", "Explorer").with_icon("folder"),
+                                    PanelTabItem::new("search", "Search").with_icon("search"),
+                                ],
+                            )
+                            .with_collapsed(true)
+                            .with_collapsible(true)
+                            .with_collapsed_posture(DockCollapsedPosture::Hidden),
+                            theme,
+                        )
+                        .with_content(div()),
+                    ),
+                ),
+        )
+        // --- Compact tabs (collapsed icon-strip, top edge → horizontal icon-only) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Compact tabs (top-edge icon-strip)"),
+                    theme,
+                ))
+                .child(
+                    div().h(px(48.0)).child(
+                        DockRegion::from_spec(
+                            DockRegionSpec::new(
+                                DockEdge::Top,
+                                vec![
+                                    PanelTabItem::new("terminal", "Terminal").with_icon("terminal"),
+                                    PanelTabItem::new("output", "Output").with_icon("file-text"),
+                                    PanelTabItem::new("problems", "Problems")
+                                        .with_icon("alert-circle"),
+                                ],
+                            )
+                            .with_value("terminal")
+                            .with_collapsed(true)
+                            .with_collapsed_posture(DockCollapsedPosture::IconStrip),
+                            theme,
+                        )
+                        .with_content(div()),
+                    ),
+                ),
+        )
+        // --- canAcceptPanel drop affordance (drag-over drop-zone overlay) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Drop affordance (canAcceptPanel)"),
+                    theme,
+                ))
+                .child(
+                    div().h(px(120.0)).flex().child(
+                        div().w(px(220.0)).h_full().child(
+                            DockRegion::from_spec(
+                                DockRegionSpec::new(
+                                    DockEdge::Left,
+                                    vec![
+                                        PanelTabItem::new("explorer", "Explorer")
+                                            .with_icon("folder"),
+                                        PanelTabItem::new("search", "Search").with_icon("search"),
+                                    ],
+                                )
+                                .with_value("explorer")
+                                .with_aria_label("Drop target dock")
+                                .with_can_accept_panel(true),
+                                theme,
+                            )
+                            .with_content(
+                                div().p(px(8.0)).child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("Accepts cross-region panel drops"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+        )
+        // --- Cross-region drag-and-drop (two side-by-side regions) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Cross-region drag-and-drop"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(12.0))
+                        .h(px(140.0))
+                        .child(
+                            div().flex_1().h_full().child(
+                                DockRegion::from_spec(
+                                    DockRegionSpec::new(
+                                        DockEdge::Left,
+                                        vec![
+                                            PanelTabItem::new("explorer", "Explorer")
+                                                .with_icon("folder"),
+                                            PanelTabItem::new("search", "Search")
+                                                .with_icon("search"),
+                                            PanelTabItem::new("source-control", "Source Control")
+                                                .with_icon("git-branch"),
+                                        ],
+                                    )
+                                    .with_value("explorer")
+                                    .with_aria_label("Left dock")
+                                    .with_can_accept_panel(true),
+                                    theme,
+                                )
+                                .with_content(
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child("Left dock \u{2014} 3 panels"),
+                                    ),
+                                ),
+                            ),
+                        )
+                        .child(
+                            div().flex_1().h_full().child(
+                                DockRegion::from_spec(
+                                    DockRegionSpec::new(
+                                        DockEdge::Right,
+                                        vec![PanelTabItem::new("outline", "Outline")
+                                            .with_icon("list")],
+                                    )
+                                    .with_value("outline")
+                                    .with_aria_label("Right dock")
+                                    .with_can_accept_panel(true),
+                                    theme,
+                                )
+                                .with_content(
+                                    div().p(px(8.0)).child(
+                                        div()
+                                            .text_xs()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child("Right dock \u{2014} 1 panel"),
+                                    ),
+                                ),
                             ),
                         ),
                 ),

@@ -13,6 +13,10 @@
      grid + actions rows gained the contract `margin-top = grid-gap`. Jetstream gains a
      7-test render_probe module (states, load-more switch, meta=13px guard, lg min-column).
      contracts test + gpui build + jetstream media_browse_panel tests all pass. -->
+<!-- specimen note: GPUI specimen done (added Loading-more group; browse/loading/error/empty
+     already present; real MediaBrowsePanel only, no fakes; gpui/preview builds 0 errors);
+     Jetstream pending engine recovery. specimen=gap held — Jetstream half unverifiable while
+     engine is build-blocked. -->
 # Parity: MediaBrowsePanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -61,12 +65,12 @@ Aligned. Svelte matches the contract on props, anatomy, states, and token tables
 ## Specimen parity
 
 - Svelte covers: Browse grid (+load more), Loading, Error, Empty (`MediaBrowsePanelSpecimen.svelte` per contract §12).
-- GPUI covers: Browse panel (+load more), States (loading/error/empty), Semantic presentation (size+density, sizeRole prominent) — broad. — missing: nothing vs contract specimen set; but thumbnails/load-more render as fakes (see GPUI gaps), so visual parity is broken despite specimen coverage.
+- GPUI covers: Browse panel (+load more), States (loading/error/empty), **Loading more** (items + loading + has_more → disabled "Loading..." Button), Semantic presentation (size+density, sizeRole prominent). **GPUI specimen done** — composes the real `MediaBrowsePanel` (which itself wraps real `MediaThumbnail`/`Callout`/`Button`); no fakes. Full contract state coverage. Jetstream pending engine recovery.
 - Jetstream covers: With items, Loading more, Loading, Error, Empty, Sizes (sm/md/lg), Densities (compact/default/comfortable) — broadest coverage; uses real MediaThumbnail/Callout/Button. — missing: nothing; hardcoded `text_size(11.0)` group labels (specimen-local).
 
 ## Notes
 
-- **GPUI is the worst offender here**: it reimplements MediaThumbnail, Callout, and Button inline as bare divs with hardcoded geometry instead of composing the real primitives. Per CLAUDE.md "No Mockups, No Fakes" this specimen is arguably worse than unimplemented — the placeholder thumbnail rectangle and fake load-more button hide that the composition is incomplete. This is the top-priority fix for this component.
+- GPUI now composes the real `MediaBrowsePanel` component (rebuilt in pass 18), which internally uses real `MediaThumbnail` (compact, square), `Callout` (danger), and `Button` (secondary, "Loading..." while loading-more). The old "bare-div fakes" critique is resolved — the specimen has no hand-rolled geometry; it only drives spec props. Specimen audited: zero fakes.
 - Jetstream correctly composes `js_media_thumbnail`, `js_callout`, `js_button` — the right pattern; remaining gaps are token-resolution polish.
 - Spec field `thumbnail_url` exists on `MediaBrowseItem` but neither Rust target renders an actual image (both show the kind-based thumbnail shell only). Svelte renders an `<img>` when `thumbnailUrl` is present (contract §2 image part). Image rendering is a shared gap but lower priority (specimens pass no URLs). Flag low.
 - The `lg=12.5 / xl=14.0` min-column bug is identical in both Rust targets — likely copy-paste; fix both.

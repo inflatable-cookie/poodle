@@ -68,6 +68,25 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Loading more"),
+                    theme,
+                ))
+                // Items present + loading + has_more → load-more Button shows
+                // "Loading..." and is disabled (contract §4 loading-more posture).
+                .child(MediaBrowsePanel::from_spec(
+                    MediaBrowsePanelSpec::new()
+                        .with_items(items.clone())
+                        .with_has_more(true)
+                        .with_loading(true),
+                    theme,
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("Semantic presentation"),
                     theme,
                 ))

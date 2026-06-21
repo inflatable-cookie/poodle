@@ -6,6 +6,9 @@
      ×10 loading, js_empty_state states, accent badge + kbd chips, active accent bg+ring. 4 probe
      tests; specs 61, jet 173, gpui clean. Activation/keyboard = preview-loop; GPUI active ring
      outset (no inset primitive); js_eyebrow verbatim vs GPUI uppercase (Eyebrow-primitive delta). -->
+<!-- specimen note: GPUI specimen done (active/loading/error/empty/no-results groups added,
+     real ActionDiscoveryPanel, gpui/preview builds 0 errors); Jetstream pending engine recovery.
+     specimen=gap held — Jetstream half unverifiable while engine is build-blocked. -->
 # Parity: ActionDiscoveryPanel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -64,7 +67,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Grouped actions, With descriptions and badges, Empty state, Sizes (xs–xl via `sizes` snippet), Densities (via `densities` snippet) — `ActionDiscoveryPanelSpecimen.svelte`.
-- GPUI covers: Grouped, With descriptions and badges, Empty, Semantic presentation (compact + prominent). — missing: explicit per-size sweep; loading/error/no-results states never shown.
+- GPUI covers: Grouped, With descriptions and badges, **Active item** (accent bg + ring via `with_active_id`), **Loading (skeleton)**, Empty, **Error**, **No results**, Semantic presentation (compact + prominent). **GPUI specimen done** — full contract state coverage with real `ActionDiscoveryPanel` (no fakes); Jetstream pending engine recovery.
 - Jetstream covers: Default (two empty sections), Empty. — missing: **action items entirely** (sections have `vec![]`), badges, shortcuts, descriptions, sizes, densities, loading/error states. Specimen is effectively non-functional until `js_action_discovery_panel` renders items.
 
 ## Notes

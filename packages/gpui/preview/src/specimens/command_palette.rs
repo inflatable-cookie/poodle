@@ -5,7 +5,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{Button, CommandPalette, Eyebrow};
-use poodle_specs::{ButtonSpec, CommandActionItem, CommandPaletteSpec};
+use poodle_specs::{ButtonSpec, CommandActionItem, CommandPaletteSpec, DiscoveryState};
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -100,7 +100,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // ── Open: main grouped palette ────────────────────────────────
     if is_open {
-        let mut spec = CommandPaletteSpec::new(actions)
+        let mut spec = CommandPaletteSpec::new(actions.clone())
             .with_title("Command palette")
             .with_invocation_hint("\u{2318}K");
         if !query.is_empty() {
@@ -168,5 +168,176 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
     }
 
+    // ── Open states (contract §6: ready/loading/error/empty/no-results) ──
+    // Each palette mounts inside its own `relative` group container so the
+    // `absolute inset_0` backdrop is confined to that group region.
+    let state_groups = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Open states"),
+            theme,
+        ))
+        .child(open_state_group(
+            "Open / ready",
+            actions.clone(),
+            "",
+            DiscoveryState::Ready,
+            "cmd-state-ready",
+            theme,
+        ))
+        .child(open_state_group(
+            "Open / loading",
+            actions.clone(),
+            "",
+            DiscoveryState::Loading,
+            "cmd-state-loading",
+            theme,
+        ))
+        .child(open_state_group(
+            "Open / no-results",
+            actions.clone(),
+            "zxqv",
+            DiscoveryState::NoResults,
+            "cmd-state-noresults",
+            theme,
+        ))
+        .child(open_state_group(
+            "Open / empty",
+            Vec::new(),
+            "",
+            DiscoveryState::Empty,
+            "cmd-state-empty",
+            theme,
+        ))
+        .child(open_state_group(
+            "Open / error",
+            actions.clone(),
+            "",
+            DiscoveryState::Error,
+            "cmd-state-error",
+            theme,
+        ));
+    root = root.child(state_groups);
+
+    // ── Sizes (xs–xl): one open palette per intrinsic size ────────
+    let mut sizes_row = div()
+        .flex()
+        .flex_col()
+        .gap(px(16.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Sizes"),
+            theme,
+        ));
+    for (label, size) in [
+        ("XS", ControlSize::Xs),
+        ("SM", ControlSize::Sm),
+        ("MD", ControlSize::Md),
+        ("LG", ControlSize::Lg),
+        ("XL", ControlSize::Xl),
+    ] {
+        sizes_row = sizes_row.child(
+            div()
+                .relative()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(label),
+                )
+                .child(
+                    CommandPalette::from_spec(
+                        CommandPaletteSpec::new(actions.clone())
+                            .with_open(true)
+                            .with_title(format!("{label} command palette"))
+                            .with_invocation_hint("\u{2318}K")
+                            .with_size(size),
+                        theme,
+                    )
+                    .with_id(format!("cmd-size-{label}")),
+                ),
+        );
+    }
+    root = root.child(sizes_row);
+
+    // ── Densities: one open palette per density ───────────────────
+    let mut densities_row = div()
+        .flex()
+        .flex_col()
+        .gap(px(16.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content("Densities"),
+            theme,
+        ));
+    for (label, density) in [
+        ("Compact", ControlDensity::Compact),
+        ("Default", ControlDensity::Default),
+        ("Comfortable", ControlDensity::Comfortable),
+    ] {
+        densities_row = densities_row.child(
+            div()
+                .relative()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(label),
+                )
+                .child(
+                    CommandPalette::from_spec(
+                        CommandPaletteSpec::new(actions.clone())
+                            .with_open(true)
+                            .with_title(format!("{label} command palette"))
+                            .with_invocation_hint("\u{2318}K")
+                            .with_density(density),
+                        theme,
+                    )
+                    .with_id(format!("cmd-density-{label}")),
+                ),
+        );
+    }
+    root = root.child(densities_row);
+
     root
+}
+
+/// Build one labeled group containing an always-open palette demonstrating a
+/// single `DiscoveryState`. Wrapped in its own `relative` container so the
+/// palette's `absolute inset_0` backdrop stays inside this group's bounds.
+fn open_state_group(
+    label: &str,
+    actions: Vec<CommandActionItem>,
+    query: &str,
+    state: DiscoveryState,
+    id: &str,
+    theme: &poodle_gpui::GpuiThemeProvider,
+) -> Div {
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let mut spec = CommandPaletteSpec::new(actions)
+        .with_open(true)
+        .with_title("Command palette")
+        .with_invocation_hint("\u{2318}K")
+        .with_state(state);
+    if !query.is_empty() {
+        spec = spec.with_query(query);
+    }
+    div()
+        .relative()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(
+            div()
+                .text_xs()
+                .text_color(color_to_hsla(text_secondary))
+                .child(label.to_string()),
+        )
+        .child(CommandPalette::from_spec(spec, theme).with_id(id.to_string()))
 }

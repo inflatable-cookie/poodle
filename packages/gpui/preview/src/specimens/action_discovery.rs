@@ -66,6 +66,47 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
 
     let empty_spec = ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Empty);
 
+    // Active-item state: same grouped data, with one item highlighted.
+    let active_spec = ActionDiscoveryPanelSpec::new(vec![
+        ActionDiscoverySection::new(
+            "file",
+            "File",
+            vec![
+                CommandActionItem::new("save", "Save").with_shortcut("\u{2318}S"),
+                CommandActionItem::new("open-file", "Open File").with_shortcut("\u{2318}O"),
+            ],
+        ),
+        ActionDiscoverySection::new(
+            "edit",
+            "Edit",
+            vec![
+                CommandActionItem::new("find-in-files", "Find in Files")
+                    .with_shortcut("\u{21E7}\u{2318}F"),
+                CommandActionItem::new("find-and-replace", "Find and Replace")
+                    .with_shortcut("\u{2318}H"),
+            ],
+        ),
+    ])
+    .with_active_id("open-file");
+
+    let loading_spec = ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Loading);
+    let error_spec = ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Error);
+    let no_results_spec =
+        ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::NoResults);
+
+    // Shared frame wrapper so every panel sits in the same bordered surface.
+    let framed = |inner: ActionDiscoveryPanel| {
+        div()
+            .max_w(px(512.0))
+            .max_h(px(320.0))
+            .border_1()
+            .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
+            .rounded(px(8.0))
+            .p(px(12.0))
+            .overflow_hidden()
+            .child(inner)
+    };
+
     div()
         .flex()
         .flex_col()
@@ -124,23 +165,69 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Active item"),
+                    theme,
+                ))
+                .child(framed(
+                    ActionDiscoveryPanel::from_spec(active_spec, theme)
+                        .with_id("action-disc-active"),
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Loading (skeleton)"),
+                    theme,
+                ))
+                .child(framed(
+                    ActionDiscoveryPanel::from_spec(loading_spec, theme)
+                        .with_id("action-disc-loading"),
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content("Empty state"),
                     theme,
                 ))
-                .child(
-                    div()
-                        .max_w(px(512.0))
-                        .max_h(px(320.0))
-                        .border_1()
-                        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
-                        .rounded(px(8.0))
-                        .p(px(12.0))
-                        .overflow_hidden()
-                        .child(
-                            ActionDiscoveryPanel::from_spec(empty_spec, theme)
-                                .with_id("action-disc-empty"),
-                        ),
-                ),
+                .child(framed(
+                    ActionDiscoveryPanel::from_spec(empty_spec, theme)
+                        .with_id("action-disc-empty"),
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Error state"),
+                    theme,
+                ))
+                .child(framed(
+                    ActionDiscoveryPanel::from_spec(error_spec, theme)
+                        .with_id("action-disc-error"),
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("No results"),
+                    theme,
+                ))
+                .child(framed(
+                    ActionDiscoveryPanel::from_spec(no_results_spec, theme)
+                        .with_id("action-disc-no-results"),
+                )),
         )
         .child(
             div()
