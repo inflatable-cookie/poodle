@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: success tone closed on both targets — ButtonTone::Success added cross-cutting; GPUI + Jetstream resolve ghost-text/primary-fill via shared token methods and apply the secondary 16%/46% color-mixes. Remaining: specimen coverage only (Jetstream loading/pressed specimens). -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | specimen pass: both Rust targets backfilled to full contract coverage with real js_icon_button/IconButton. Jetstream rebuilt from a variant/tone-ignoring stub to variant×tone matrix (default/danger/success), xs–xl sizes, pressed/active, loading spinner, disabled; GPUI gained the success-tone ×3-variant group on top of existing variants/danger/toggle/states/sizes. Both previews build clean (0 err). -->
 # Parity: IconButton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

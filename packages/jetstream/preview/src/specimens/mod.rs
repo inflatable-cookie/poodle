@@ -20,6 +20,7 @@ pub mod calendar;
 pub mod callout;
 pub mod card;
 pub mod card_radio_group;
+pub mod card_toggle_group;
 pub mod checkbox;
 pub mod code;
 pub mod collapse_toggle;
@@ -122,6 +123,7 @@ pub mod tab_strip;
 pub mod table;
 pub mod tabs;
 pub mod text_input;
+pub mod text_link;
 pub mod time_ago;
 pub mod time_field;
 pub mod time_zone_select;
@@ -261,6 +263,7 @@ fn render_specimen(
         "callout" => Some(callout::render(theme)),
         "card" => Some(card::render(theme)),
         "card-radio-group" => Some(card_radio_group::render(theme)),
+        "card-toggle-group" => Some(card_toggle_group::render(theme)),
         "checkbox" => Some(checkbox::render(theme)),
         "code" => Some(code::render(theme)),
         "collapse-toggle" => Some(collapse_toggle::render(theme)),
@@ -362,6 +365,7 @@ fn render_specimen(
         "table" => Some(table::render(theme)),
         "tabs" => Some(tabs::render(theme)),
         "text-input" => Some(text_input::render(theme)),
+        "text-link" => Some(text_link::render(theme)),
         "time-ago" => Some(time_ago::render(theme)),
         "time-field" => Some(time_field::render(theme)),
         "time-zone-select" => Some(time_zone_select::render(theme)),

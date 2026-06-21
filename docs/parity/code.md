@@ -1,4 +1,7 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass: Jetstream code specimen rebuilt on the real js_code builder — full contract set (block+lang,
+     line-numbers+highlight, CSS max-height, inline, inline variants plain/typography, no-copy, Sizes,
+     Densities). GPUI specimen already full. Both previews build clean. -->
 <!-- pass 39: Jetstream rebuilt from a bordered label to match GPUI — toolbar (language label +
      copy button composing icon), line-numbers gutter (2.5rem), highlighted-line ±1rem bleed
      accent-12%, inline variant (+ inline_variant/typography fields), maxHeight overflow_scroll,
@@ -70,7 +73,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers: Block with language label, With line numbers and highlight, CSS with max height, Inline code, No copy button, Sizes, Densities (`CodeSpecimen.svelte`).
 - GPUI covers: Block w/ language, Line numbers + highlight, CSS max-height, Inline code, No copy button, Sizes, Densities. — missing: nothing in the specimen set, but the underlying copy/feedback behavior is non-functional (static button).
-- Jetstream covers: Code block, With language hint (no toolbar rendered), With line numbers (not actually rendered). — missing: real **toolbar/language label**, **highlight**, **inline**, **max-height/CSS**, **no-copy-button** variant, **Sizes**, **Densities**. Most specimens are nominal only because the component lacks the features.
+- Jetstream covers: Block with language label, Line numbers + highlight, CSS max-height, Inline code, Inline variants (plain + inline-typography), No copy button, Sizes, Densities — `code.rs`, all on the real `js_code` builder (toolbar/highlight/inline/max-height now actually render). Full contract set.
 
 ## Notes
 

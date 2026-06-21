@@ -134,6 +134,50 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     })),
                 ),
         )
+        // --- Variant x tone matrix ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Variant x tone (default / danger / success)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(8.0))
+                        .child(matrix_row(theme, ButtonVariant::Primary))
+                        .child(matrix_row(theme, ButtonVariant::Secondary))
+                        .child(matrix_row(theme, ButtonVariant::Ghost)),
+                ),
+        )
+        // --- Dropdown menu open ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Dropdown menu open (items + separator)"),
+                    theme,
+                ))
+                .child(SplitButton::from_spec(
+                    SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_label("Save")
+                        .with_items(vec![
+                            SplitMenuItem::action("save-draft", "Save as draft"),
+                            SplitMenuItem::action("save-template", "Save as template"),
+                            SplitMenuItem::Separator,
+                            SplitMenuItem::action("discard", "Discard changes"),
+                        ]),
+                    theme,
+                )
+                .open(true)),
+        )
         // --- Loading state ---
         .child(
             div()
@@ -312,4 +356,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .into_any_element()
         },
     )
+}
+
+/// One row of the variant x tone matrix: default / danger / success for a variant.
+fn matrix_row(theme: &GpuiThemeProvider, variant: ButtonVariant) -> Div {
+    let cell = |tone: ButtonTone, label: &str| {
+        SplitButton::from_spec(
+            SplitButtonSpec::new()
+                .with_variant(variant)
+                .with_tone(tone)
+                .with_label(label)
+                .with_items(vec![
+                    SplitMenuItem::action("a", "Action A"),
+                    SplitMenuItem::action("b", "Action B"),
+                ]),
+            theme,
+        )
+        .into_any_element()
+    };
+
+    div()
+        .flex()
+        .gap(px(8.0))
+        .items_center()
+        .child(cell(ButtonTone::Default, "Default"))
+        .child(cell(ButtonTone::Danger, "Danger"))
+        .child(cell(ButtonTone::Success, "Success"))
 }

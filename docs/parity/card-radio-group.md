@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- specimen pass: GPUI already full (plan+disabled-item, instance size, disabled group, sizes+densities, live readout); Jetstream backfilled to match — with/no selection, disabled option, disabled group, sizes (xs–xl), densities. Both previews build clean. `columns` not exercised: no field on CardRadioGroupSpec (shared-spec gap). -->
 <!-- pass 45: Jetstream rebuilt to match GPUI — each option composes js_card (interactive/
      selected, Card owns the fill — dropped selected_fill swap) with a radio indicator (ring +
      dot from indicator_size_rem/dot_size_rem/indicator_border_rem), title + optional description;

@@ -102,6 +102,7 @@ pub static PRIMITIVES: &[ComponentEntry] = &[
     ComponentEntry { slug: "table", display_name: "Table", description: "Static data table.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "tabs", display_name: "Tabs", description: "Tabbed interface.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "text-input", display_name: "TextInput", description: "Single or multi-line text input.", tier: Tier::Primitive, has_specimen: true },
+    ComponentEntry { slug: "text-link", display_name: "TextLink", description: "Inline text action or navigation link.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "time-ago", display_name: "TimeAgo", description: "Relative timestamp.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "time-field", display_name: "TimeField", description: "Time-of-day input.", tier: Tier::Primitive, has_specimen: true },
     ComponentEntry { slug: "time-zone-select", display_name: "TimeZoneSelect", description: "Timezone selection.", tier: Tier::Primitive, has_specimen: true },

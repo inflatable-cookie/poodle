@@ -145,6 +145,55 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 ),
         )
+        // --- Success tone ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Success tone"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Primary)
+                                    .with_tone(ButtonTone::Success)
+                                    .with_icon("check")
+                                    .with_aria_label("Approve"),
+                                theme,
+                            )
+                            .with_id("success-primary"),
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_tone(ButtonTone::Success)
+                                    .with_icon("check")
+                                    .with_aria_label("Approve"),
+                                theme,
+                            )
+                            .with_id("success-secondary"),
+                        )
+                        .child(
+                            IconButton::from_spec(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_tone(ButtonTone::Success)
+                                    .with_icon("check")
+                                    .with_aria_label("Approve"),
+                                theme,
+                            )
+                            .with_id("success-ghost"),
+                        ),
+                ),
+        )
         // --- Toggle (text editor toolbar) ---
         .child(
             div()

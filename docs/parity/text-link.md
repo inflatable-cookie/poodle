@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=0 jetstream=1 specimen=gap — pass: GPUI now sets rest underline at 55% tone color + strengthens to full on hover/focus-visible; inherit→currentColor / anchor-vs-button reclassed accepted (no currentColor / no DOM anchors in GPUI/JsEl). Jetstream component done; only the preview specimen (+registry) remains open (preview-app task, not build-verified here). -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok — pass: GPUI now sets rest underline at 55% tone color + strengthens to full on hover/focus-visible; inherit→currentColor / anchor-vs-button reclassed accepted (no currentColor / no DOM anchors in GPUI/JsEl). Jetstream component done. -->
+<!-- pass: Jetstream text_link specimen CREATED + registered (specimens/mod.rs dispatch + component_registry) on the real js_text_link builder (inline prose, 3 tones, button action, disabled anchor+button); GPUI specimen gained the missing inline-prose + disabled-anchor groups. Both previews build clean. Icons/underline/focus-ring skipped — no spec/JsEl channel (icons out of scope per contract). -->
 # Parity: TextLink
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -9,8 +10,8 @@
 - Contract: `docs/contracts/components/text-link.md`
 - Svelte (authoritative): `packages/svelte/components/src/TextLink.svelte`
 - GPUI: `packages/gpui/components/src/primitives/text_link.rs`
-- Jetstream: _missing_ — no `packages/jetstream/components/src/text_link.rs`, no `js_text_link` export in `lib.rs`
-- Specimens: svelte `packages/svelte/preview/src/specimens/TextLinkSpecimen.svelte` · gpui `packages/gpui/preview/src/specimens/text_link.rs` · jetstream _missing_
+- Jetstream: `packages/jetstream/components/src/text_link.rs` (`js_text_link`, exported via `lib.rs`)
+- Specimens: svelte `packages/svelte/preview/src/specimens/TextLinkSpecimen.svelte` · gpui `packages/gpui/preview/src/specimens/text_link.rs` · jetstream `packages/jetstream/preview/src/specimens/text_link.rs`
 
 ## Contract ↔ Svelte
 
@@ -43,13 +44,13 @@ Jetstream has no TextLink at all — the dominant gap. Confirmed: no `text_link.
 - [x] DONE: resolves text color from `TextLinkSpec::color_token()` for all three tones (`inherit`→text-primary, the no-currentColor approximation GPUI also uses).
 - [x] DONE: disabled dims via `state.opacity.disabled`. (Anchor-vs-button + `onClick`/preventDefault are preview-event-loop concerns; the render is the same Label.)
 - accepted: Underline + focus-visible ring — JsEl exposes no underline/decoration or focus-ring affordance (runtime gap, like other Jetstream primitives). Color tone + disabled opacity are the representable surface; covered by probe tests (`accent_tone_is_default_color`, `secondary_tone_resolves_secondary`, `disabled_dims_opacity`).
-- [ ] Add `packages/jetstream/preview/src/specimens/text_link.rs` + register in `specimens/mod.rs` and the component registry. Deferred: preview-app task touching the shared specimen registry; not build-verified in this pass (shared target lock).
+- [x] DONE: created `packages/jetstream/preview/src/specimens/text_link.rs` + registered in `specimens/mod.rs` (dispatch arm) and `component_registry.rs`. Covers inline prose, 3 tones, button action, disabled anchor+button. Preview builds clean.
 
 ## Specimen parity
 
 - Svelte covers: Inline prose, Tones (accent/secondary/inherit), Button action, Disabled (anchor + action) — `TextLinkSpecimen.svelte:7-32`.
-- GPUI covers: Tones (accent/secondary/inherit) via `with_href`, Button action, single Disabled action — `text_link.rs:6-40`. — missing: **Inline-prose** usage (link embedded in a `Text` run) and the **disabled anchor** case (only disabled button shown).
-- Jetstream covers: nothing — no specimen exists. — missing: entire specimen.
+- GPUI covers: Inline prose, Tones (accent/secondary/inherit) via `with_href`, Button action, Disabled (anchor + button) — `text_link.rs`. Full representable set.
+- Jetstream covers: Inline prose, Tones (accent/secondary/inherit), Button action, Disabled (anchor + button) — `text_link.rs`. Icons/underline/focus-ring skipped (no spec/JsEl channel; icons out of scope per contract).
 
 ## Notes
 

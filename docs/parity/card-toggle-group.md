@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- specimen pass: GPUI rebuilt (single + multi selection, disabled option, disabled group, sizes xs–xl, densities) and Jetstream card_toggle_group.rs created + registered (pub mod + dispatch arm) with the same coverage via real js_card_toggle_group/Card. Both previews build clean. `count` pill + `columns` not exercised: neither field exists on CardToggleGroupSpec/CardToggleOption (shared-spec gap, same omission as GPUI component). -->
 <!-- pass 46: Jetstream js_card_toggle_group rebuilt to match GPUI — each option composes
      js_card(interactive/selected when in values) with title (weight 600, text-primary at
      title_font_rem) + optional description (text-secondary at description_font_rem); multi-
