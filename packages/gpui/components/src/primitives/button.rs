@@ -212,6 +212,15 @@ impl IntoElement for Button {
                 let border_default = resolve_color(theme, "color.border.default");
                 (fill, border_default, base_text)
             }
+            (ButtonVariant::Secondary, ButtonTone::Warning) => {
+                // Warning mirrors danger: color-mix(status-warning 16%, surface),
+                // idle border plain border-default (button.md §8 Tone: warning).
+                let warning = resolve_color(theme, "color.status.warning");
+                let surface = resolve_color(theme, "color.background.surface");
+                let fill = color_mix(warning, surface, 0.16);
+                let border_default = resolve_color(theme, "color.border.default");
+                (fill, border_default, base_text)
+            }
             (ButtonVariant::Primary, _) => {
                 // Svelte treatment-interactive-primary-border: accent-base 86% + black
                 let darkened_border = color_mix_black(base_fill, 0.86);
@@ -226,6 +235,11 @@ impl IntoElement for Button {
                 // Ghost×success: text uses status-success
                 let success_text = resolve_color(theme, "color.status.success");
                 (base_fill, base_border, success_text)
+            }
+            (ButtonVariant::Ghost, ButtonTone::Warning) => {
+                // Ghost×warning: text uses status-warning (button.md §8 Tone: warning)
+                let warning_text = resolve_color(theme, "color.status.warning");
+                (base_fill, base_border, warning_text)
             }
             _ => (base_fill, base_border, base_text),
         };
@@ -270,6 +284,14 @@ impl IntoElement for Button {
                     Hsla { a: 0.28, ..success },
                 )
             }
+            (ButtonVariant::Ghost, ButtonTone::Warning) => {
+                let warning = resolve_color(theme, "color.status.warning");
+                (
+                    Hsla { a: 0.12, ..warning }, // button.md §8 ghost warning hover 12%
+                    Hsla { a: 0.18, ..warning }, // active 18%
+                    Hsla { a: 0.28, ..warning }, // border-hover 28%
+                )
+            }
             (ButtonVariant::Secondary, ButtonTone::Danger) => {
                 let danger = resolve_color(theme, "color.status.danger");
                 let surface = resolve_color(theme, "color.background.surface");
@@ -290,6 +312,17 @@ impl IntoElement for Button {
                     color_mix(success, border_default, 0.62),
                 )
             }
+            (ButtonVariant::Secondary, ButtonTone::Warning) => {
+                // button.md §8 secondary warning: hover 24%, active 32%, border-hover 62%
+                let warning = resolve_color(theme, "color.status.warning");
+                let surface = resolve_color(theme, "color.background.surface");
+                let border_default = resolve_color(theme, "color.border.default");
+                (
+                    color_mix(warning, surface, 0.24),
+                    color_mix(warning, surface, 0.32),
+                    color_mix(warning, border_default, 0.62),
+                )
+            }
             (ButtonVariant::Primary, ButtonTone::Danger) => {
                 let danger = resolve_color(theme, "color.status.danger");
                 let white = Hsla { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };
@@ -303,6 +336,15 @@ impl IntoElement for Button {
                 let black = Hsla { h: 0.0, s: 0.0, l: 0.0, a: 1.0 };
                 let hf = color_mix(success, white, 0.88);
                 (hf, color_mix(success, black, 0.88), color_mix_black(hf, 0.86))
+            }
+            (ButtonVariant::Primary, ButtonTone::Warning) => {
+                // button.md §8 primary warning: hover mix(white 12%, warning),
+                // active mix(warning 88%, black).
+                let warning = resolve_color(theme, "color.status.warning");
+                let white = Hsla { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };
+                let black = Hsla { h: 0.0, s: 0.0, l: 0.0, a: 1.0 };
+                let hf = color_mix(warning, white, 0.88);
+                (hf, color_mix(warning, black, 0.88), color_mix_black(hf, 0.86))
             }
             _ => {
                 let hf = color_mix(fill, elevated, 0.84);

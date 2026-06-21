@@ -36,11 +36,13 @@ pub fn js_button(spec: &ButtonSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tone = spec.effective_tone();
 
-    // Status family for danger/success secondary color-mix (button.md §8
-    // Tone: danger; icon-button.md §8 Tone: success). `Default` has no status mix.
+    // Status family for danger/success/warning secondary color-mix (button.md §8
+    // Tone: danger / Tone: warning; icon-button.md §8 Tone: success). `Default`
+    // has no status mix.
     let status_token = match tone {
         ButtonTone::Danger => Some("color.status.danger"),
         ButtonTone::Success => Some("color.status.success"),
+        ButtonTone::Warning => Some("color.status.warning"),
         ButtonTone::Default => None,
     };
 
@@ -330,6 +332,85 @@ mod tests {
         assert!(
             (d.r - s.r).abs() > 0.001 || (d.g - s.g).abs() > 0.001 || (d.b - s.b).abs() > 0.001,
             "secondary success fill must differ from default secondary surface"
+        );
+    }
+
+    #[test]
+    fn primary_warning_fills_with_status_warning() {
+        let theme = test_theme();
+        let warning: Color = resolve_color(&theme, "color.status.warning").into();
+        let el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Primary)
+                .with_tone(ButtonTone::Warning)
+                .with_label("Proceed"),
+            &theme,
+        );
+        let bg = el.style.background.expect("bg set");
+        assert!(
+            (bg.r - warning.r).abs() < 0.02
+                && (bg.g - warning.g).abs() < 0.02
+                && (bg.b - warning.b).abs() < 0.02,
+            "primary warning fill should be status-warning, got {bg:?}"
+        );
+    }
+
+    #[test]
+    fn ghost_warning_recolors_text() {
+        let theme = test_theme();
+        let warning: Color = resolve_color(&theme, "color.status.warning").into();
+        let el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_tone(ButtonTone::Warning)
+                .with_label("Review"),
+            &theme,
+        );
+        let txt = el.style.text_color.expect("text color set");
+        assert!(
+            (txt.r - warning.r).abs() < 0.02 && (txt.g - warning.g).abs() < 0.02,
+            "ghost warning text should be status-warning, got {txt:?}"
+        );
+        if let Some(bg) = el.style.background {
+            assert!(bg.a < 0.01, "ghost warning fill stays transparent");
+        }
+    }
+
+    #[test]
+    fn secondary_warning_fill_differs_from_default_and_danger() {
+        let theme = test_theme();
+        let default_el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_label("x"),
+            &theme,
+        );
+        let warning_el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_tone(ButtonTone::Warning)
+                .with_label("x"),
+            &theme,
+        );
+        let danger_el = js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Secondary)
+                .with_tone(ButtonTone::Danger)
+                .with_label("x"),
+            &theme,
+        );
+        let d = default_el.style.background.expect("default bg");
+        let w = warning_el.style.background.expect("warning bg");
+        let dg = danger_el.style.background.expect("danger bg");
+        // Secondary warning is color-mix(warning 16%, surface) — tinted away from
+        // plain surface AND distinct from the danger tint.
+        assert!(
+            (d.r - w.r).abs() > 0.001 || (d.g - w.g).abs() > 0.001 || (d.b - w.b).abs() > 0.001,
+            "secondary warning fill must differ from default secondary surface"
+        );
+        assert!(
+            (dg.r - w.r).abs() > 0.001 || (dg.g - w.g).abs() > 0.001 || (dg.b - w.b).abs() > 0.001,
+            "secondary warning fill must differ from danger tint"
         );
     }
 

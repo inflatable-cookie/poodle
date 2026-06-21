@@ -1,12 +1,17 @@
 <!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
-<!-- pass 41: audit pass — confirmed both targets already closed in pass 37 (Jetstream rebuild)
-     and the earlier GPUI build-out. All visual/token gaps verified against code: outside-month
-     opacity = state.opacity.muted (0.72) on both; per-size cell/nav/day-font scales; Month+Year
-     edit-affordance triggers; exact week count; selected/range/today/in-range/disabled treatments;
-     weekday header. The remaining gpui=3 / jet=3 counts are the accepted / preview-loop items only
-     (roving-tabindex keyboard, Home/End or month-change = preview event loop; weekday-row-height
-     1.5rem + Jetstream weekday caption font = contract-exact rem, no token). No code change this
-     pass — Jetstream body reconciled to the post-rebuild reality. -->
+<!-- pass 42: finalize audit — re-confirmed against code that EVERY representable visual/token gap
+     is closed on both targets (outside-month muted opacity 0.72; per-size cell/nav/day-font/month-
+     label scales; Month+Year edit-affordance triggers; exact week count; selected / range-start/end /
+     in-range / today / hover / selected-hover / disabled treatments; weekday header). The remaining
+     gpui=3 / jet=3 are NOT representable gaps — they are reclassified runtime limits, held as-is:
+       • GPUI: (1) roving-tabindex focus model + Enter/Space focus-cursor selection — preview-loop /
+         focus-model (current keyboard is selection-driven, mutates committed value); (2) Home/End —
+         blocked behind the focus cursor, preview-loop; (3) weekday-row-height 1.5rem — TOKEN GAP
+         (no token; contract-exact rem, accepted).
+       • Jetstream: (1) keyboard + roving-tabindex + month-change wiring — preview-loop; (2) weekday-
+         caption font (typography.caption.size → 0 in adapter) + weekday-row-height 1.5rem — TOKEN
+         GAP (contract-exact rems); (3) no ARIA channel — accepted (runtime has no a11y API).
+     No code change this pass — both bodies already reflect reality; only this status note refreshed. -->
 <!-- pass 37: Jetstream calendar rebuilt to match GPUI — outside-month opacity 0.4 →
      state.opacity.muted (0.72, the core bug); static month label → Month + Year edit-affordance
      triggers (dashed underline, current values); per-size cell/nav/day-font scales (calendar
@@ -43,10 +48,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED Hardcoded cell-size literal — now `calendar_cell_size_rem(effective_size)` (xs 1.75 / sm 2 / md 2.25 / lg 2.5 / xl 2.75rem) per contract §8 size table. New helper in `presentation.rs`; this is the calendar-specific scale, NOT `control_height_rem` (which gives 1.5/1.75/2.25/2.75/3.25 — wrong for cells).
 - [x] FIXED Hardcoded nav-button-size literal — now `calendar_nav_size_rem(effective_size)` (xs 1.5 … xl 2.5rem) per contract size table. New helper.
 - [x] FIXED Hardcoded outside-month opacity literal — now `resolve_opacity(theme, "state.opacity.muted")` (= 0.72). The token exists; no longer a raw literal.
-- [ ] accepted: weekday-header row height `1.5rem` — no token exists; kept as a named contract-exact `rem_to_px(1.5)` (`weekday_row_height`). Acceptable per rules (contract-exact rem).
+- token gap (accepted): weekday-header row height `1.5rem` — no token exists; kept as a named contract-exact `rem_to_px(1.5)` (`weekday_row_height`, calendar.rs:585). Acceptable per rules (contract-exact rem; not a hardcode violation). Closing it requires adding a `size.calendar.weekdayRowHeight` token — deferred, not invented.
 - [x] FIXED Month/year header is now a composed editable control — Month Trigger + Year Trigger buttons with the dashed-underline edit affordance and hover treatment (Svelte `.month-button`/`.year-button`), rendered at the current month/year. Double-click-to-edit + inline Month Select / Year Input editors remain preview-loop interaction.
-- [ ] preview-loop: roving tabindex / Enter-Space focus-cursor selection — keyboard handler still derives the current day from the selected value, not a focus cursor; render-side controls present, interaction is preview event-loop.
-- [ ] preview-loop: Home/End keyboard handling — week-boundary keys are interaction; left untouched (container handler unchanged).
+- preview-loop (reclassified, confirmed pass 42): roving tabindex / Enter-Space focus-cursor selection — the `on_key_down` handler (calendar.rs:519) is selection-driven: arrows mutate the committed value via `on_select`/`on_navigate`, not a roving focus cursor. A faithful focus cursor needs per-frame focus state the render-immediate model doesn't hold here, so the focus-roving + Enter/Space-on-cursor semantics stay host-owned. Not a representable visual/token gap.
+- preview-loop (reclassified, confirmed pass 42): Home/End keyboard handling — absent from the handler and blocked behind the focus cursor above (without a cursor, Home/End would wrongly mutate the committed value to a week boundary). Held until the focus model lands.
 - [x] FIXED Per-size scaling — cell size, nav button, day font (`calendar_day_font_rem`), and month-label font (`size_font_rem`) now all vary by `effective_size` per the contract size table.
 - [x] FIXED Added selected / range-endpoint hover treatment — `color-mix(accent 88%, white 8%)` via `color_mix(accent, white, 0.88)` (matches button.rs danger-hover pattern); was missing entirely.
 - accepted: no ARIA (gpui has no accessibility API) — grid/row/gridcell roles + aria-selected/aria-live not emitted.

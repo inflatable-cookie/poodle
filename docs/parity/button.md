@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap | pass: ButtonTone::Success added cross-cutting; GPUI hover-shadow token-resolved + success branches; Jetstream icon-inset/gap tokenized, has_leading/has_trailing + chevron + success tone. Remaining GPUI: truncate/fit/maxWidth, warning tone, interactive toggle. Remaining Jetstream: pressed/toggle, truncate/fit/maxWidth, warning tone. -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap | pass 42: ButtonTone::Warning added cross-cutting (enum + types.rs fill/border/text matches + GPUI button base+hover/active+ghost-text arms + GPUI icon_button secondary-tint arm + Jetstream button/icon_button/split_button status matches). 3 Jetstream warning probe tests (primary fill, ghost text, secondary tint ≠ default ≠ danger). Remaining GPUI: truncate/fit/maxWidth (representable-but-needs-additive-spec-fields, deferred feature pass), interactive toggle (preview-loop). Remaining Jetstream: truncate/fit/maxWidth (same), pressed/toggle (preview-loop). -->
 # Parity: Button
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,9 +27,9 @@ Svelte has props/behavior the contract does not document. Svelte is authoritativ
 
 - [x] FIXED Hardcoded hover shadow literal `hsla(0.0, 0.0, 1.0, 0.10)` — replaced with `theme_ext::button_hover_shadow()` encoding contract §8 `inset 0 0.0625rem 0 color-mix(white 8%, transparent)` (white via `gpui::white()`, offset via `rem_to_px(0.0625)`). No raw HSLA in the hover path.
 - [x] FIXED `success` tone — explicit `Success` branches added to both `(variant, tone)` matches (base colors + hover/active), mirroring danger with `color.status.success`. Shared `ButtonTone::Success` resolves base tokens; component applies the secondary 16%/24%/32% color-mixes.
-- [ ] No `truncate` / `fit` / `maxWidth` support (props absent from builder + spec usage).
-- [ ] No `warning` tone branch — `warning` falls through to default. (`ButtonTone` has no `Warning` arm; separate cross-cutting pass.)
-- [ ] `pressed`/toggle: spec exposes `is_toggle_mode()`/`current_pressed()` and pressed fill is applied (`button.rs:228-237`), but there is no toggle builder method (`pressed`/`default_pressed`) and click does not flip pressed state — toggle is render-only, not interactive.
+- [x] FIXED `warning` tone — explicit `Warning` arms added to both `(variant, tone)` matches (base fill/border/text + hover/active), mirroring danger with `color.status.warning`. Secondary applies the 16%/24%/32% color-mixes; primary uses `status-warning` base via `types.rs`; ghost recolors text to `status-warning`. `ButtonTone::Warning` resolves base tokens in `types.rs` (fill/border/text). GPUI build-verified.
+- reclassified (representable, deferred feature pass): `truncate` / `fit` / `maxWidth` — these are label-overflow/shrink-wrap layout props, representable in GPUI (`overflow_hidden`/`text_ellipsis`/`min_w(0)`/`max_w`) but absent from the portable `ButtonSpec`. Closing them needs additive `ButtonSpec` fields (`truncate: bool`, `fit`, `max_width`) wired through every `Button`/`js_button` site — a deliberate separate feature pass, NOT a token/state parity bug. Not done this pass.
+- preview-loop: `pressed`/toggle — spec exposes `is_toggle_mode()`/`current_pressed()` and pressed fill is applied (render-side), but there is no toggle builder click that flips state. Toggle is render-only; the click-to-flip + `onPressedChange` lives in the host event loop, not the component.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_expanded` stored but not emitted (documented in file header).
 - accepted: active `translateY` omitted (contract Known Delta).
 
@@ -40,9 +40,9 @@ Svelte has props/behavior the contract does not document. Svelte is authoritativ
 - [x] FIXED Icon-side padding now uses `has_leading` (leading icon OR loading) and `has_trailing` (trailing icon OR chevron), matching Svelte `data-has-leading`/`data-has-trailing`.
 - [x] FIXED `chevron` rendering — `js_button` now reads `spec.chevron` and emits a trailing `chevron-down` glyph at 0.5 opacity (contract §2/§8).
 - [x] FIXED `success` tone — danger/success share a `status_token` path; secondary success applies `color-mix(success 16%, surface)` fill + `color-mix(success 46%, border-default)` border; primary/ghost success via shared token methods.
-- [ ] No `warning` tone — `ButtonTone` has no `Warning` arm (separate cross-cutting pass).
-- [ ] No pressed/toggle accent treatment (`is_toggle_mode`/`current_pressed` unused).
-- [ ] No `truncate`/`fit`/`maxWidth` support.
+- [x] FIXED `warning` tone — danger/success/warning share the `status_token` path; secondary warning applies `color-mix(warning 16%, surface)` fill + `color-mix(warning 46%, border-default)` border; primary fill resolves `status-warning`; ghost recolors text to `status-warning`. Probe-asserted: `primary_warning_fills_with_status_warning`, `ghost_warning_recolors_text`, `secondary_warning_fill_differs_from_default_and_danger`.
+- preview-loop: pressed/toggle accent treatment — `is_toggle_mode`/`current_pressed` render-side only; click-to-flip + `onPressedChange` is host event-loop, not the component.
+- reclassified (representable, deferred feature pass): `truncate`/`fit`/`maxWidth` — representable via JsEl (`text_ellipsis`, `min_w(0)`, `max_w`) but absent from `ButtonSpec`. Needs additive spec fields wired through every `js_button` site — a separate feature pass, not a token/state bug.
 - accepted: no ARIA channel for `aria_expanded` (documented in header).
 - accepted: interaction (click handler) lives in preview event loop, not the component.
 

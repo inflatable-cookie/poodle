@@ -1,4 +1,16 @@
-<!-- parity consv=fixed gpui=3 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=0 specimen=gap -->
+<!-- finalize pass (2026-06-21): GPUI icon gap CLOSED — `NavigationMenuEntry` gains
+     additive `icon: Option<String>` (contract §3); BOTH Rust targets now render the
+     leading icon (real Icon primitive / ui_element::icon) ahead of the label, sized
+     from effective control size, tinted text-primary, separated by the trigger gap
+     `space.inline.sm`. Contracts test 114 pass; gpui builds; jetstream nav probe test
+     `trigger_renders_leading_icon_when_set` added (5 pass at run time, before an
+     external `jetstream-renderer` engine WIP regression broke the lib build —
+     `sdf.rs:90` Vec3::xz, outside Poodle, not from this change). Contract §10/§12 updated
+     (`icon` honored on Rust spec; `description` ratified as accepted Rust-only viewport
+     shortcut). Remaining GPUI 2 = roving-tabindex/arrow-keys + click toggle-close, both
+     RECLASSIFIED preview-loop bound (focus/key/outside-click handling lives in the
+     preview event loop, not representable in build-verify). Jetstream stays 0. -->
 <!-- pass 41: trigger height + hover + min-height pass. GPUI: trigger min-height now
      flat size.control.height (dropped the bogus `- px(2.0)` inset + per-size offset,
      matching contract §8 / Svelte); viewport shadow already token-resolved
@@ -47,9 +59,9 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [x] FIXED (pass 41, was already done) — **viewport shadow** now token-resolved via `elevation_overlay_shadow()` (`navigation_menu.rs` viewport branch), reading `poodle_tokens::typed::semantic::ELEVATION_OVERLAY`. No raw HSLA/px literals remain.
 - [x] FIXED (pass 41) — **trigger height literal removed.** `trigger_height` is now flat `size.control.height` (dropped both the per-size `size_height_offset_rem` and the `- px(2.0)` inset), matching contract §8's flat min-height and Svelte `NavigationMenu.svelte:210`. No bare px literal.
-- [ ] **No icon support** — `NavigationMenuEntry` has no `icon` field (only `description`); GPUI trigger never renders an icon. Contract §3 `icon` absent from the Rust spec entirely (`contracts/components/src/types.rs:690-695`).
-- [ ] **No roving tabindex / arrow-key focus movement** — triggers are `.focusable()` (`:169`) but there is no ArrowLeft/Right/Home/End handling and no roving `tabindex` (contract §6, §11 Tier-1). Keyboard nav across triggers is absent.
-- [ ] **Click activates but does not toggle/close** — `on_click` calls the host `on_change` with the value (`:207-209`); there is no Escape/outside-click close and no toggle-off (Svelte `toggleValue` sets null when re-clicking). Active item can never be closed to show "all closed" state.
+- [x] FIXED (finalize pass 2026-06-21) — **icon support added.** `NavigationMenuEntry` now carries `icon: Option<String>` (additive, `types.rs`); when set, the GPUI trigger renders the leading icon ahead of the label via the real `Icon` primitive — sized from the effective control size (`IconSize::from(effective_size)`), tinted to the trigger foreground (`text-primary`), separated by the contract trigger gap `space.inline.sm` (now applied to the trigger flex row). Contract §3 `icon` is now honored on the Rust spec + GPUI render.
+- [ ] **No roving tabindex / arrow-key focus movement** — triggers are `.focusable()` but there is no ArrowLeft/Right/Home/End handling and no roving `tabindex` (contract §6, §11 Tier-1). Keyboard nav across triggers is absent. (preview-loop bound — focus/key handling lives in the preview event loop; not representable in build-verify)
+- [ ] **Click activates but does not toggle/close** — `on_click` calls the host `on_change` with the value; there is no Escape/outside-click close and no toggle-off (Svelte `toggleValue` sets null when re-clicking). Active item can never be closed to show "all closed" state. (preview-loop bound — toggle/close + outside-click + Escape all need the preview event loop)
 - accepted: no ARIA (gpui has no accessibility API) — `aria_expanded`/`aria_controls`/`aria-labelledby` (contract §6) not emitted.
 - accepted: viewport uses `description` content instead of Svelte's `children` snippet (contract §12 Known Delta: viewport content rendering strategy may differ; slot props equivalent via `current_item()`).
 
@@ -63,6 +75,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED (pass 29, confirmed pass 41) — **no `pad_y` literal**: trigger has no baked vertical padding; height now comes from `min-height` (control-height).
 - [x] FIXED (pass 29) — **list gap** resolves from `space.inline.sm` (`resolve_px(theme, "space.inline.sm")`), not a literal.
 - [x] FIXED (pass 41) — **trigger min-height** now set to `size.control.height` (`resolve_px(theme, "size.control.height")`), matching Svelte's control-height tie. Trigger is `.items_center()` so the label vertically centers within the min-height.
+- [x] FIXED (finalize pass 2026-06-21) — **leading icon** rendered for parity with GPUI: when `entry.icon` is set, the trigger composes `ui_element::icon(name)` + label children separated by the trigger gap (`space.inline.sm`), icon sized to the trigger font and tinted `text-primary`; no-icon entries keep the cheap `button(&label)` path. Probe-tested (`trigger_renders_leading_icon_when_set`).
 - accepted: no ARIA channel (no accessibility API in jetstream runtime).
 - accepted: roving-tabindex / arrow-key focus and outside-click close may live in preview `main.rs` event loop — verify there before adding to the component.
 
@@ -74,7 +87,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- The Rust `NavigationMenuEntry` (`contracts/components/src/types.rs:690-695`) drops the contract's `icon` field and adds a non-contract `description` field used to drive the GPUI viewport. This is a spec-level divergence from both contract §3 (which has `icon`, no `description`) and Svelte (which has `icon` in the TS type and a `children` snippet, no per-item description). Reconcile: add `icon`, and decide whether `description` is an accepted Rust-only viewport shortcut (note it in §12 if kept).
+- RESOLVED (finalize pass 2026-06-21): the Rust `NavigationMenuEntry` (`contracts/components/src/types.rs`) now carries the contract's `icon: Option<String>` field (added additively alongside the existing `description`). Both Rust targets render the leading icon. The non-contract `description` field is now ratified as an accepted Rust-only viewport-content shortcut in contract §12 Known Deltas (the Rust targets have no `children` snippet, so `description` is the slot-prop-equivalent viewport source). Spec divergence closed.
 - Biggest single gap: **Jetstream is visually a plain text-button row** — missing the pill border, idle background, correct active/hover treatment, and the entire viewport. It does not yet implement the navigation-menu contract's anatomy.
 - GPUI is the most faithful target but still lacks keyboard roving focus and close-on-Escape/outside-click; both are Tier-1 strict-parity items in contract §11.
 - `consv=fixed`: contract §8 size/font/padding table reconciled to Svelte's token-resolved, flatter size variants (font-size-only stepping; min-height/padding pinned to control tokens); base metrics now name tokens; density padding row added. The `icon` field stays in the contract per the no-weakening rule, flagged as a Svelte under-implementation (§9). Remaining Rust spec note: `NavigationMenuEntry` (`types.rs:690-695`) drops `icon` and adds non-contract `description` for the GPUI viewport — code-side reconciliation, out of scope here.

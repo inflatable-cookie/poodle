@@ -304,6 +304,12 @@ no height change):
 - Trigger typography (label-family, 0.75rem, weight 600) matches Menubar triggers
 - The slot pattern translates to a content callback or child-builder that
   receives the active item
+- Leading `icon` (contract §3): `NavigationMenuEntry` carries an optional
+  `icon: Option<String>`. When set, the trigger renders the icon ahead of the
+  label, separated by the trigger gap (`space.inline.sm`), sized from the
+  effective control size and tinted to the trigger foreground (`text-primary`).
+  Both Rust targets (GPUI + Jetstream) render it; the Svelte reference still
+  under-implements (see §9 Svelte gap).
 
 ## 11. Parity Checklist
 
@@ -355,6 +361,7 @@ no height change):
 | GPUI viewport may use different layout primitive | desktop layout differs from CSS grid | allowed | spacing, padding, and visual density must match |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 | Viewport content rendering strategy may differ | platform rendering model | allowed | slot props must be equivalent |
+| Rust `NavigationMenuEntry` adds a per-item `description: Option<String>` field | the Rust targets have no `children` snippet, so the active item's `description` is the viewport content source (slot-prop equivalent) | allowed | keep slot props equivalent; `icon` is now present on the Rust entry per §3 |
 
 ## 13. Specimen Definitions
 

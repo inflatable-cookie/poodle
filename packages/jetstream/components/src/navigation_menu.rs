@@ -98,10 +98,34 @@ pub fn js_navigation_menu(spec: &NavigationMenuSpec, theme: &JetstreamThemeProvi
             (idle_bg, idle_border)
         };
 
-        let mut btn = ui_element::button(&entry.label)
-            .text_color(text_primary)
-            .text_size(font_size)
-            .text_weight(600)
+        // Contract §3 `icon`: when an entry carries a leading icon, the trigger
+        // composes the icon + label as explicit children separated by the
+        // trigger gap (`space.inline.sm`); the icon is tinted to the trigger
+        // foreground (text-primary) and sized to the trigger font. Without an
+        // icon the label is the button's own text (cheapest path).
+        let mut btn = if let Some(ref icon_name) = entry.icon {
+            ui_element::button("")
+                .flex_row()
+                .gap(list_gap)
+                .child(
+                    ui_element::icon(icon_name.as_str())
+                        .w(font_size)
+                        .h(font_size)
+                        .text_color(text_primary),
+                )
+                .child(
+                    ui_element::label(&entry.label)
+                        .text_color(text_primary)
+                        .text_size(font_size)
+                        .text_weight(600),
+                )
+        } else {
+            ui_element::button(&entry.label)
+                .text_color(text_primary)
+                .text_size(font_size)
+                .text_weight(600)
+        };
+        btn = btn
             .min_h(control_height)
             .items_center()
             .pl(pad_x)
@@ -327,6 +351,39 @@ mod tests {
                 && (bc.g - viewport_border.y).abs() < 0.01
                 && (bc.b - viewport_border.z).abs() < 0.01,
             "viewport border should be border-subtle 74%"
+        );
+    }
+
+    #[test]
+    fn trigger_renders_leading_icon_when_set() {
+        let th = theme();
+        // One entry with an icon, one without — the icon must render only for
+        // the entry that carries it (contract §3 `icon`).
+        let nav = NavigationMenuSpec::new(vec![
+            NavigationMenuEntry::new("home", "Home").with_icon("house"),
+            NavigationMenuEntry::new("plain", "Plain"),
+        ])
+        .with_value("home");
+
+        let el = js_navigation_menu(&nav, &th);
+        let tree = probe(&el, 400.0, 80.0);
+
+        // The leading icon glyph and both labels make it through layout.
+        assert!(
+            tree.has_text("house"),
+            "leading icon should render for the icon entry: {:?}",
+            tree.texts()
+        );
+        assert!(tree.has_text("Home"), "icon entry still renders its label");
+        assert!(tree.has_text("Plain"), "plain entry renders its label");
+
+        // The icon entry's trigger composes icon + label children; the plain
+        // entry's trigger has no leading icon child.
+        let list = &el.children[0];
+        let icon_trigger = &list.children[0];
+        assert!(
+            icon_trigger.children.len() >= 2,
+            "icon trigger holds icon + label children"
         );
     }
 

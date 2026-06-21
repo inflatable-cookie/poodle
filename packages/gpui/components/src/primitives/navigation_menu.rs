@@ -8,9 +8,11 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec, SemanticControlSizeRole,
+    ControlDensity, ControlSize, IconSize, IconSpec, NavigationMenuEntry, NavigationMenuSpec,
+    SemanticControlSizeRole,
 };
 
+use super::Icon;
 use crate::presentation::{
     panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
 };
@@ -163,12 +165,15 @@ impl IntoElement for NavigationMenu {
             let is_disabled = item.is_disabled;
             let item_id = SharedString::from(format!("{}-{}", self.id_prefix, item.value));
 
-            // Contract: pill-style trigger with border, padding per density
+            // Contract: pill-style trigger with border, padding per density.
+            // Contract §8 trigger `gap: var(--poodle-space-inline-sm)` separates
+            // the optional leading icon from the label.
             let mut trigger = div()
                 .id(item_id)
                 .focusable()
                 .flex()
                 .items_center()
+                .gap(gap_sm)
                 .min_h(trigger_height)
                 .px(trigger_pad_x)
                 .border_1()
@@ -208,6 +213,19 @@ impl IntoElement for NavigationMenu {
                         handler(&val, window, cx);
                     });
                 }
+            }
+
+            // Contract §3 `icon`: optional leading icon ahead of the label,
+            // sized from the effective control size and tinted to the trigger
+            // foreground (text-primary).
+            if let Some(ref icon_name) = item.icon {
+                let icon = Icon::from_spec(
+                    IconSpec::new(icon_name.clone())
+                        .with_size(IconSize::from(effective_size)),
+                    theme,
+                )
+                .with_color(text_primary);
+                trigger = trigger.child(icon);
             }
 
             trigger = trigger.child(item.label.clone());

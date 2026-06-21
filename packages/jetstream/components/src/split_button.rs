@@ -40,10 +40,11 @@ fn resolve_split_colors(spec: &SplitButtonSpec, theme: &JetstreamThemeProvider) 
     let text_primary: Color = resolve_color(theme, "color.text.primary").into();
     let text_inverse: Color = resolve_color(theme, "color.text.inverse").into();
 
-    // Status family for danger/success tone mixes; Default has no status mix.
+    // Status family for danger/success/warning tone mixes; Default has no status mix.
     let status: Option<Color> = match spec.tone {
         ButtonTone::Danger => Some(resolve_color(theme, "color.status.danger").into()),
         ButtonTone::Success => Some(resolve_color(theme, "color.status.success").into()),
+        ButtonTone::Warning => Some(resolve_color(theme, "color.status.warning").into()),
         ButtonTone::Default => None,
     };
 

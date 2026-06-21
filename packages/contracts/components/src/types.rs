@@ -208,16 +208,18 @@ pub enum ButtonVariant {
     Danger,
 }
 
-/// Button tone (default, danger, or success). The tone modifies variant colors.
-/// Contract: variant × tone combinations produce different visual treatments.
-/// `Success` mirrors `Danger` but resolves the `color.status.success` family
-/// (button.md / icon-button.md §8 Tone: success).
+/// Button tone (default, danger, success, or warning). The tone modifies variant
+/// colors. Contract: variant × tone combinations produce different visual
+/// treatments. `Success` and `Warning` mirror `Danger` but resolve the
+/// `color.status.success` / `color.status.warning` families respectively
+/// (button.md §8 Tone: warning; icon-button.md §8 Tone: success).
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum ButtonTone {
     #[default]
     Default,
     Danger,
     Success,
+    Warning,
 }
 
 impl ButtonVariant {
@@ -229,9 +231,11 @@ impl ButtonVariant {
                 semantic::COLOR_STATUS_DANGER
             }
             (Self::Primary, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
-            // Secondary success/danger return surface here; the status-tinted
-            // color-mix (16% status, surface) is applied in the component.
-            (Self::Secondary, ButtonTone::Danger | ButtonTone::Success) => {
+            (Self::Primary, ButtonTone::Warning) => semantic::COLOR_STATUS_WARNING,
+            // Secondary success/danger/warning return surface here; the
+            // status-tinted color-mix (16% status, surface) is applied in the
+            // component.
+            (Self::Secondary, ButtonTone::Danger | ButtonTone::Success | ButtonTone::Warning) => {
                 semantic::COLOR_BACKGROUND_SURFACE
             }
             (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
@@ -247,8 +251,10 @@ impl ButtonVariant {
                 semantic::COLOR_STATUS_DANGER
             }
             (Self::Primary, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
+            (Self::Primary, ButtonTone::Warning) => semantic::COLOR_STATUS_WARNING,
             (Self::Secondary, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
             (Self::Secondary, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
+            (Self::Secondary, ButtonTone::Warning) => semantic::COLOR_STATUS_WARNING,
             (Self::Primary, ButtonTone::Default) => semantic::COLOR_ACCENT_BASE,
             (Self::Secondary, ButtonTone::Default) => semantic::COLOR_BORDER_DEFAULT,
         }
@@ -259,8 +265,9 @@ impl ButtonVariant {
         match (self, tone) {
             (Self::Ghost, ButtonTone::Danger) => semantic::COLOR_STATUS_DANGER,
             (Self::Ghost, ButtonTone::Success) => semantic::COLOR_STATUS_SUCCESS,
+            (Self::Ghost, ButtonTone::Warning) => semantic::COLOR_STATUS_WARNING,
             (Self::Ghost, ButtonTone::Default) => semantic::COLOR_TEXT_PRIMARY,
-            (Self::Secondary, ButtonTone::Danger | ButtonTone::Success) => {
+            (Self::Secondary, ButtonTone::Danger | ButtonTone::Success | ButtonTone::Warning) => {
                 semantic::COLOR_TEXT_PRIMARY
             }
             (Self::Primary, _) | (Self::Danger, _) => semantic::COLOR_TEXT_INVERSE,
@@ -811,6 +818,9 @@ pub struct NavigationMenuEntry {
     pub value: String,
     pub label: String,
     pub is_disabled: bool,
+    /// Optional leading icon name (contract §3 `icon`). When set, the trigger
+    /// renders the icon ahead of the label, separated by the trigger gap token.
+    pub icon: Option<String>,
     pub description: Option<String>,
 }
 
@@ -820,8 +830,15 @@ impl NavigationMenuEntry {
             value: value.into(),
             label: label.into(),
             is_disabled: false,
+            icon: None,
             description: None,
         }
+    }
+
+    /// Set the optional leading icon (contract §3 `icon`).
+    pub fn with_icon(mut self, icon: impl Into<String>) -> Self {
+        self.icon = Some(icon.into());
+        self
     }
 
     pub fn with_description(mut self, description: impl Into<String>) -> Self {

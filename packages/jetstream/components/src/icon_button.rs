@@ -71,6 +71,9 @@ pub fn js_icon_button(spec: &IconButtonSpec, theme: &JetstreamThemeProvider) -> 
         (_, ButtonTone::Success) => {
             Some(resolve_color(theme, "color.status.success").into())
         }
+        (_, ButtonTone::Warning) => {
+            Some(resolve_color(theme, "color.status.warning").into())
+        }
         (_, ButtonTone::Default) => None,
     };
 
