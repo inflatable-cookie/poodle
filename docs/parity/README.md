@@ -151,7 +151,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | dock-region | ok | 7 | 10 | gap |
 | drawer | ok | 6 | 6 | gap |
 | duration-input | fixed | 2 | 2 | gap |
-| editable-label | ok | 8 | 11 | gap |
+| editable-label | ok | 2 | 2 | gap |
 | editable-list | fixed | 4 | 11 | gap |
 | embed-input | fixed | 6 | 7 | gap |
 | embed-preview | fixed | 7 | 5 | gap |

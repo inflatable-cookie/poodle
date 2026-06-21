@@ -1,4 +1,11 @@
-<!-- parity consv=ok gpui=8 jetstream=11 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 42: editable-label rebuilt on BOTH targets — display mode (label + optional pencil
+     edit-icon + hover hint) and editing mode (composed TextInput/text_input seeded with value),
+     honoring variant flush/default, empty_text, show_edit_icon, max_length, placeholder, size,
+     density, disabled. GPUI dropped the synthetic key-by-key on_change re-render; token fixes
+     (padding space.control, focus-shadow border.width.focus, edit-icon text-secondary [was
+     nonexistent color.text.muted]). 5 Jetstream probe tests; gpui+preview+jet build, specs 61.
+     Remaining: activation gesture/commit-keys/select-on-focus/onChange = preview-loop. -->
 # Parity: EditableLabel
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
