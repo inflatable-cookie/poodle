@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen pass: both Rust previews built out to full contract coverage (build-verified 0 err). GPUI adds Content-fit (equalWidth=false, xs, per-option aria_label) alongside existing Default/disabled-option/Fully-disabled/Equal-width + size+density panes. Jetstream rebuilt to contract Grid/List/Table set: Default (render-only seeded selection), With-disabled-option (Draft), Fully-disabled, Equal-width, Content-fit (equalWidth=false), full xs–xl Sizes ladder, Compact/Default/Comfortable Densities. Skipped honestly: icon/title segments (ChoiceOption has no icon/title field — used aria_label as closest); live on_change readout on Jetstream (render-only per architecture). -->
 <!-- pass: both Rust targets reworked to contract — GPUI selected inset highlight (text-inverse 12%, 0.0625rem, blur 0), inner radius via rem_to_px(0.125), density-driven seg padding, invented separator + transparent-border hack removed, 0.125rem gap added; Jetstream font fixed at 0.75rem, inner radius (control − 0.125rem), root bg color-mix(surface 93%, text-primary), border alpha 84%, equalWidth=false left-aligns. Selected inset shadow not representable on JsEl (noted). Per-option aria/title + click/arrow selection = accepted channel / preview-loop limits. Jetstream probe tests cover segments, accent selected fill, fixed font, density-≠-height, disabled group. -->
 # Parity: SegmentedControl
 
@@ -53,8 +54,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - **Svelte covers** (`SegmentedControlSpecimen.svelte`): Default (controlled, live `onValueChange` + readout), With disabled option, **Content Fit** (`equalWidth={false}` + `size="xs"` + `title` tooltips), Fully disabled, plus `sizes` and `densities` snippet matrices.
-- **GPUI covers** (`segmented_control.rs`): Default (controlled, live `on_change` + "Selected:" readout), With disabled option, Fully disabled, Equal-width, plus size + density matrices. — missing: **Content Fit / `equalWidth=false`** group (GPUI only shows `equal_width=true`), and **`title` tooltip** coverage.
-- **Jetstream covers** (`segmented_control.rs`): Default, No selection, Disabled (whole control), With disabled option, Small size, Large size. — missing: **controlled-selection demo with live readout** (renders static `default_value` only, no `on_change`), **density matrix**, **full size matrix** (only Sm/Lg, no xs/md/xl), **`equalWidth=false` / Content Fit**, **`title` tooltips**.
+- **GPUI covers** (`segmented_control.rs`): Default (controlled, live `on_change` + "Selected:" readout), With disabled option, Fully disabled, Equal-width, **Content fit (`equalWidth=false`, xs, per-option `aria_label`)**, plus size + density matrices. — no remaining gaps; `title` tooltip not representable (shared `ChoiceOption` spec has no `title` field — `aria_label` used as the closest accessible-name channel).
+- **Jetstream covers** (`segmented_control.rs`): Default (Grid selected, render-only seeded), With disabled option (Draft), Fully disabled, Equal-width, **Content fit (`equalWidth=false`)**, **full xs–xl Sizes ladder**, **Compact/Default/Comfortable Densities**. — no remaining gaps; live `on_change` readout omitted (render-only per Jetstream architecture); `title` tooltip not representable (no spec field).
 
 ## Notes
 

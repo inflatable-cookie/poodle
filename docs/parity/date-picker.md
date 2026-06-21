@@ -48,7 +48,7 @@ Props, callbacks, ARIA, and anatomy all align. Size token-form reconciled. FIXED
 
 - Svelte covers: Default (with selected-value readout), With default value, Disabled, plus Sizes + Densities snippets (`DatePickerSpecimen.svelte`).
 - GPUI covers: Default (open-toggle + selected readout, interactive), With default value (open-toggle), Disabled, Sizes, Densities. — closest parity of the three.
-- Jetstream covers: Empty, With value, Disabled, Open (real composed Calendar), Sizes (xs..xl), Densities. "With value" + "Disabled" now render their states (component reads `current_value()`/`is_disabled`). Specimen parity reached.
+- Jetstream covers: Default (placeholder), With default value, Open (real composed Calendar), Disabled, Sizes (xs..xl), Densities — labels aligned to the contract/Svelte set; all groups render the real `js_date_picker` + `DatePickerSpec` (Open composes the real `js_calendar` surface, no fake grid). "With default value" + "Disabled" render their states (`current_value()` / `is_disabled`). Specimen parity holds. No "invalid" group: `DatePickerSpec` has no invalid/error field and the contract defines none — not a renderable state, not faked.
 
 ## Notes
 

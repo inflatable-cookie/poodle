@@ -1,10 +1,12 @@
 use crate::app_state::AppState;
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Eyebrow, ToggleGroup};
-use poodle_specs::{EyebrowSpec, ToggleGroupOption};
+use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -52,7 +54,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ToggleGroupOption::new("board", "Board"),
     ];
 
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -67,6 +69,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     ToggleGroup::new(single_options, theme)
+                        .aria_label("View mode")
                         .default_value(vec![single_value.clone()])
                         .on_change(cx.listener(|this, val: &str, _w, cx| {
                             this.state
@@ -94,6 +97,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     ToggleGroup::new(four_options, theme)
+                        .aria_label("Text alignment")
                         .default_value(vec![four_value])
                         .on_change(cx.listener(|this, val: &str, _w, cx| {
                             this.state
@@ -115,8 +119,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     ToggleGroup::new(multi_options, theme)
+                        .aria_label("Filter tags")
                         .default_value(vec!["design".to_string(), "docs".to_string()])
-                        .selection_mode(poodle_specs::ToggleGroupSelectionMode::Multiple),
+                        .selection_mode(ToggleGroupSelectionMode::Multiple),
                 )
                 .child(
                     div()
@@ -125,58 +130,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child("Selected: design, docs"),
                 ),
         )
-        // --- Semantic role offsets ---
+        // --- Allow deactivation (single mode clears on re-select) ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Semantic role offsets"),
+                    EyebrowSpec::new().with_content("Allow deactivation"),
                     theme,
                 ))
                 .child(
-                    div()
-                        .flex()
-                        .flex_wrap()
-                        .gap(px(12.0))
-                        .items_center()
-                        .child(
-                            ToggleGroup::new(
-                                vec![
-                                    ToggleGroupOption::new("grid", "Grid"),
-                                    ToggleGroupOption::new("list", "List"),
-                                    ToggleGroupOption::new("board", "Board"),
-                                ],
-                                theme,
-                            )
-                            .default_value(vec!["grid".to_string()]),
-                        )
-                        .child(
-                            ToggleGroup::new(
-                                vec![
-                                    ToggleGroupOption::new("grid", "Grid"),
-                                    ToggleGroupOption::new("list", "List"),
-                                    ToggleGroupOption::new("board", "Board"),
-                                ],
-                                theme,
-                            )
-                            .default_value(vec!["list".to_string()]),
-                        )
-                        .child(
-                            ToggleGroup::new(
-                                vec![
-                                    ToggleGroupOption::new("grid", "Grid"),
-                                    ToggleGroupOption::new("list", "List"),
-                                    ToggleGroupOption::new("board", "Board"),
-                                ],
-                                theme,
-                            )
-                            .default_value(vec!["board".to_string()]),
-                        ),
+                    ToggleGroup::new(
+                        vec![
+                            ToggleGroupOption::new("grid", "Grid"),
+                            ToggleGroupOption::new("list", "List"),
+                            ToggleGroupOption::new("board", "Board"),
+                        ],
+                        theme,
+                    )
+                    .aria_label("Optional view mode")
+                    .default_value(vec!["grid".to_string()])
+                    .allow_deactivation(true),
                 ),
         )
-        // --- Disabled ---
+        // --- Disabled group ---
         .child(
             div()
                 .flex()
@@ -188,6 +166,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     ToggleGroup::new(disabled_options, theme)
+                        .aria_label("Disabled toggle group")
                         .default_value(vec!["list".to_string()])
                         .disabled(true),
                 ),
@@ -211,7 +190,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ],
                         theme,
                     )
+                    .aria_label("Toggle group with disabled item")
                     .default_value(vec!["grid".to_string()]),
                 ),
         )
+        .into_any_element();
+
+    let make_opts = || {
+        vec![
+            ToggleGroupOption::new("grid", "Grid"),
+            ToggleGroupOption::new("list", "List"),
+            ToggleGroupOption::new("board", "Board"),
+        ]
+    };
+
+    specimen_layout(
+        state,
+        cx,
+        "toggle-group",
+        examples,
+        move |size, theme: &GpuiThemeProvider| {
+            ToggleGroup::new(make_opts(), theme)
+                .default_value(vec!["grid".to_string()])
+                .size(size)
+                .into_any_element()
+        },
+        move |density, theme: &GpuiThemeProvider| {
+            ToggleGroup::new(make_opts(), theme)
+                .default_value(vec!["grid".to_string()])
+                .density(density)
+                .into_any_element()
+        },
+    )
 }

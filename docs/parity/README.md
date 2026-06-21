@@ -122,7 +122,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | breadcrumbs | fixed | 0 | 0 | gap |
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 2 | 2 | ok |
-| calendar | fixed | 2 | 2 | gap |
+| calendar | fixed | 2 | 2 | ok |
 | callout | fixed | 2 | 2 | ok |
 | card | fixed | 2 | 2 | ok |
 | card-radio-group | fixed | 2 | 2 | gap |
@@ -210,7 +210,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | remediation-banner | gap | 0 | 0 | ok |
 | resize-handle | ok | 1 | 1 | gap |
 | scroll-shell | ok | 1 | 0 | gap |
-| segmented-control | fixed | 0 | 0 | gap |
+| segmented-control | fixed | 0 | 0 | ok |
 | select | ok | 0 | 0 | gap |
 | selection-summary | fixed | 0 | 0 | gap |
 | separator | ok | 0 | 0 | gap |
@@ -238,7 +238,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | time-zone-select | fixed | 0 | 0 | gap |
 | toast-host | fixed | 0 | 0 | gap |
 | toast-stack | ok | 0 | 3 | gap |
-| toggle-group | fixed | 0 | 0 | gap |
+| toggle-group | fixed | 0 | 0 | ok |
 | token-input | fixed | 2 | 3 | gap |
 | toolbar | fixed | 1 | 1 | gap |
 | tooltip | fixed | 0 | 0 | ok |

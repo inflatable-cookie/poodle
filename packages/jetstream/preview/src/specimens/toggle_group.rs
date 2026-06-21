@@ -1,58 +1,136 @@
-//! ToggleGroup specimen — single/multiple selection, disabled items.
+//! ToggleGroup specimen — single/multiple selection, disabled states, plus
+//! full size and density matrices. Mirrors the contract §13 specimens and the
+//! Svelte ToggleGroupSpecimen (Grid/List/Board + alignment sets).
+//!
+//! NOTE: `js_toggle_group` is render-only — selection is drawn from the spec
+//! value; click/key/`on_change` wiring lives in the preview event loop per
+//! Jetstream architecture (accepted limit, see parity/toggle-group.md).
 
 use jetstream_runtime::ui_element::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_jetstream_components::toggle_group::js_toggle_group;
 use poodle_jetstream_components::theme_ext::*;
-use poodle_specs::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+use poodle_jetstream_components::toggle_group::js_toggle_group;
+use poodle_specs::{
+    ControlDensity, ControlSize, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let secondary = resolve_color(theme, "color.text.secondary");
 
-    let options = vec![
-        ToggleGroupOption::new("bold", "B"),
-        ToggleGroupOption::new("italic", "I"),
-        ToggleGroupOption::new("underline", "U"),
-    ];
-
-    // Single selection
     div().flex_col().gap(24.0)
+        // Single selection — Grid / List / Board, Grid selected.
         .child(group("Single selection", secondary,
             js_toggle_group(
-                &ToggleGroupSpec::new(options.clone())
+                &ToggleGroupSpec::new(view_opts())
                     .with_selection_mode(ToggleGroupSelectionMode::Single)
-                    .with_value(vec!["bold".into()]),
+                    .with_aria_label("View mode")
+                    .with_value(vec!["grid".into()]),
                 theme,
             )
         ))
-        // Multiple selection
+        // Four options — Left / Center / Right / Justify, Left selected.
+        .child(group("Four options", secondary,
+            js_toggle_group(
+                &ToggleGroupSpec::new(vec![
+                    ToggleGroupOption::new("left", "Left"),
+                    ToggleGroupOption::new("center", "Center"),
+                    ToggleGroupOption::new("right", "Right"),
+                    ToggleGroupOption::new("justify", "Justify"),
+                ])
+                .with_aria_label("Text alignment")
+                .with_value(vec!["left".into()]),
+                theme,
+            )
+        ))
+        // Multiple selection — Design + Docs selected, Engineering off.
         .child(group("Multiple selection", secondary,
             js_toggle_group(
-                &ToggleGroupSpec::new(options.clone())
-                    .with_selection_mode(ToggleGroupSelectionMode::Multiple)
-                    .with_value(vec!["bold".into(), "underline".into()]),
+                &ToggleGroupSpec::new(vec![
+                    ToggleGroupOption::new("design", "Design"),
+                    ToggleGroupOption::new("engineering", "Engineering"),
+                    ToggleGroupOption::new("docs", "Docs"),
+                ])
+                .with_selection_mode(ToggleGroupSelectionMode::Multiple)
+                .with_aria_label("Filter tags")
+                .with_value(vec!["design".into(), "docs".into()]),
                 theme,
             )
         ))
-        // Disabled items
-        .child(group("With disabled item", secondary, {
-            let mut opts = options.clone();
-            opts[2] = ToggleGroupOption::new("underline", "U").with_disabled(true);
+        // Allow deactivation — single mode that can clear on re-select.
+        .child(group("Allow deactivation", secondary,
             js_toggle_group(
-                &ToggleGroupSpec::new(opts)
-                    .with_value(vec!["italic".into()]),
+                &ToggleGroupSpec::new(view_opts())
+                    .with_aria_label("Optional view mode")
+                    .with_allow_deactivation(true)
+                    .with_value(vec!["grid".into()]),
                 theme,
             )
-        }))
-        // Fully disabled
+        ))
+        // With disabled item — List muted, Grid selected.
+        .child(group("With disabled item", secondary,
+            js_toggle_group(
+                &ToggleGroupSpec::new(vec![
+                    ToggleGroupOption::new("grid", "Grid"),
+                    ToggleGroupOption::new("list", "List").with_disabled(true),
+                    ToggleGroupOption::new("board", "Board"),
+                ])
+                .with_aria_label("Toggle group with disabled item")
+                .with_value(vec!["grid".into()]),
+                theme,
+            )
+        ))
+        // Fully disabled — whole group muted, List shows selected styling.
         .child(group("Fully disabled", secondary,
             js_toggle_group(
-                &ToggleGroupSpec::new(options)
-                    .with_value(vec!["bold".into()])
+                &ToggleGroupSpec::new(view_opts())
+                    .with_aria_label("Disabled toggle group")
+                    .with_value(vec!["list".into()])
                     .with_disabled(true),
                 theme,
             )
         ))
+        // Sizes — full xs–xl ladder.
+        .child(group("Sizes", secondary,
+            div().flex_row().gap(8.0).items_end()
+                .child(sized(theme, ControlSize::Xs))
+                .child(sized(theme, ControlSize::Sm))
+                .child(sized(theme, ControlSize::Md))
+                .child(sized(theme, ControlSize::Lg))
+                .child(sized(theme, ControlSize::Xl))
+        ))
+        // Densities — compact / default / comfortable (height unchanged).
+        .child(group("Densities", secondary,
+            div().flex_row().gap(16.0).items_center()
+                .child(dense(theme, ControlDensity::Compact))
+                .child(dense(theme, ControlDensity::Default))
+                .child(dense(theme, ControlDensity::Comfortable))
+        ))
+}
+
+fn view_opts() -> Vec<ToggleGroupOption> {
+    vec![
+        ToggleGroupOption::new("grid", "Grid"),
+        ToggleGroupOption::new("list", "List"),
+        ToggleGroupOption::new("board", "Board"),
+    ]
+}
+
+fn sized(theme: &JetstreamThemeProvider, size: ControlSize) -> JsEl {
+    js_toggle_group(
+        &ToggleGroupSpec::new(view_opts())
+            .with_value(vec!["grid".into()])
+            .with_size(size),
+        theme,
+    )
+}
+
+fn dense(theme: &JetstreamThemeProvider, density: ControlDensity) -> JsEl {
+    js_toggle_group(
+        &ToggleGroupSpec::new(view_opts())
+            .with_value(vec!["grid".into()])
+            .with_density(density),
+        theme,
+    )
 }
 
 fn group(title: &str, text_secondary: glam::Vec4, content: JsEl) -> JsEl {

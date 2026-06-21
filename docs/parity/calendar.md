@@ -1,4 +1,11 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 82: Jetstream calendar specimen backfilled to full Svelte coverage — added
+     With pre-selected date, Range selection (pre-seeded start/end/in-range), Range with
+     pre-selected range, Range disabled, Sizes (xs..xl), Densities. All groups render the
+     real js_calendar + CalendarSpec fields only (no hand-rolled grid). Both previews build
+     clean (gpui + jetstream/preview cargo build, 0 errors). specimen gap→ok. No
+     disabled-dates group: CalendarSpec has no disabled_dates field and Svelte (authority)
+     omits it — not a renderable state, not faked. -->
 <!-- pass 81: typography.caption.size adapter gap fixed on BOTH adapters (gpui + jetstream
      theme.rs were missing the arm → resolved to 0). Closes the calendar weekday-caption
      token-gap on both targets (also benefits tabs badge, menu meta, select, color-picker).
@@ -91,7 +98,7 @@ range endpoints + in-range tint, per-size day font, and exact week count.
 
 - Svelte covers: Default (interactive + double-click-edit hint), With pre-selected date, Disabled, Range selection, Range with pre-selected range, Range disabled, sizes, densities (`CalendarSpecimen.svelte`).
 - GPUI covers: Default (interactive select + navigate), With pre-selected date, Range selection (interactive), Range with pre-selected range, Disabled, Range disabled, sizes, densities — **broad, matches Svelte**. — missing: month/year-editing demo (not implementable until inline editing exists).
-- Jetstream covers: Default, With selected date, Range mode (no pre-seeded range), Disabled. — missing: **With pre-selected date** group, **Range with pre-selected range**, **Range disabled**, **sizes**, **densities**. Under-covers vs Svelte → `specimen=gap`.
+- Jetstream covers: Default, With pre-selected date, Range selection (pre-seeded start/end/in-range), Range with pre-selected range, Disabled, Range disabled, Sizes (xs..xl), Densities — **matches Svelte**, all via real `js_calendar` + `CalendarSpec` (no hand-rolled grid). `specimen=ok`. — not covered: month/year-editing demo (preview-loop, same as GPUI); a "with disabled dates" group is absent on every target (no `disabled_dates` field; Svelte omits it) — not a renderable state, not faked.
 
 ## Notes
 

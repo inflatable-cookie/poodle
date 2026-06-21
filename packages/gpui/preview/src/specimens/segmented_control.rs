@@ -107,7 +107,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("seg-fully-disabled"),
                 ),
         )
-        // --- Equal width segments ---
+        // --- Equal width segments (equalWidth=true, default) ---
         .child(
             div()
                 .flex()
@@ -133,6 +133,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("seg-equal-width")
                         .aria_label("Time range"),
                     ),
+                ),
+        )
+        // --- Content fit (equalWidth=false): segments size to label, group left-aligns ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Content fit (equalWidth=false)"),
+                    theme,
+                ))
+                .child(
+                    SegmentedControl::from_spec(
+                        SegmentedControlSpec::new(vec![
+                            ChoiceOption::new("1h", "1h").with_aria_label("Last 1 hour"),
+                            ChoiceOption::new("6h", "6h").with_aria_label("Last 6 hours"),
+                            ChoiceOption::new("24h", "24h").with_aria_label("Last 24 hours"),
+                        ])
+                        .with_default_value("24h")
+                        .with_size(poodle_specs::ControlSize::Xs)
+                        .with_equal_width(false),
+                        theme,
+                    )
+                    .with_id("seg-content-fit")
+                    .aria_label("Timeline window"),
                 ),
         )
         .into_any_element();
