@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok -->
+<!-- pass 42: Jetstream specimen backfilled to full contract coverage — Default
+     (3 interactive), States (disabled unchecked/checked, mixed, read-only),
+     Custom selected color (green/amber), Sizes (xs–xl), Densities. Matches the
+     Svelte/GPUI group set via real js_checkbox + token-resolved CheckboxSpec
+     (no hand-rolled boxes). Both previews build clean. specimen=gap → ok. -->
 <!-- pass 41: indicator now = icon-{size} + 0.125rem on BOTH targets (was raw icon
      token → ~2px small). GPUI mark rendered at exact px (with_px_size) not a discrete
      IconSize step. Jetstream: per-size radius ladder (0.1875→0.4375rem), border-width
@@ -53,7 +58,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers: Default (3 interactive), States (disabled unchecked/checked, mixed, readOnly), Custom selected color (green/amber), Sizes, Densities (`CheckboxSpecimen.svelte`).
 - GPUI covers: Default (3 interactive w/ on_change), States (all four), Custom selected color (green/amber), Sizes, Densities. — missing: nothing material; full coverage.
-- Jetstream covers: States (unchecked/checked/mixed), Disabled (unchecked/checked). — missing: **readOnly** state, **Custom selected color** group, **Sizes** group, **Densities** group (`jetstream/.../checkbox.rs`).
+- Jetstream covers: Default (3), States (disabled unchecked/checked, mixed, read-only), Custom selected color (green/amber), Sizes (xs–xl), Densities (`jetstream/.../checkbox.rs`). — backfilled pass 42; full coverage, matches Svelte/GPUI group set.
 
 ## Notes
 

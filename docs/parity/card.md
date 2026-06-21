@@ -1,4 +1,8 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- specimen: GPUI + Jetstream previews render the real Card (Card / js_card) across the
+     full contract state set — default/outlined/elevated/selected/interactive, media slot,
+     horizontal + compact layouts, and the compact/default/comfortable density matrix. No
+     hand-rolled surfaces or hardcoded dims; both previews build clean. -->
 <!-- pass 44: both targets — additive CardSpec density + has_media + density-aware
      gap/padding/footer token methods. Fixed card-fill (panel 10%, elevated) + hover-fill;
      density-driven internal padding/gap; token border width; media region (overflow-clipped,

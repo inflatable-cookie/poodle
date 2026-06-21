@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok -->
+<!-- pass 42: Jetstream specimen backfilled to full coverage — Vertical, Horizontal,
+     Disabled, Disabled-option, Custom selected color, Sizes (xs–xl), Densities, now
+     using the contract §13 Free/Pro/Enterprise + Small/Medium/Large/Extra-large
+     label sets (was generic Option A/B/C). Real js_radio_group + token-resolved
+     RadioGroupSpec. Both previews build clean. specimen=gap → ok. -->
 <!-- pass 30: selected_color now honored — custom hex parsed via theme_ext::hex_to_rgb255
      → indicator ring + dot use it (else accent.base); ICON_DEFAULT hardcode replaced with
      resolve_px(size.icon.md) base. Probe-tested (custom #ff0000 ≠ accent). -->
@@ -64,7 +69,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - Svelte covers: Vertical (default), Horizontal, Disabled, **Custom selected color**, **size matrix** (xs–xl snippet), **density matrix** (snippet) — plus live "Selected:" readout (`RadioGroupSpecimen.svelte`).
 - GPUI covers: Vertical, Horizontal, Disabled, **Disabled option**, **Custom selected color**, size matrix + density matrix (via `specimen_layout`), live "Selected:" readout. — fullest of the three; no gaps vs Svelte (adds Disabled-option case).
-- Jetstream covers: Vertical, Horizontal, Disabled only (`radio_group.rs:18-33`). — missing: **Custom selected color**, **Disabled option**, **size matrix**, **density matrix**, live "Selected:" readout. Uses generic `Option A/B/C` instead of the contract §13 `Free/Pro/Enterprise` + `Small/Medium/Large/Extra large` labels.
+- Jetstream covers: Vertical, Horizontal, Disabled, Disabled option, Custom selected color, Sizes (xs–xl), Densities — backfilled pass 42 with the contract §13 `Free/Pro/Enterprise` + `Small/Medium/Large/Extra large` labels. Matches the Svelte/GPUI group set. (Live "Selected:" readout stays preview-loop-specific; static specimen omits it, consistent with the other Jetstream specimens.) Option `description` field exists on `ChoiceOption` but no target renders it, so no description group is shown.
 
 ## Notes
 

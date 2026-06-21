@@ -1,4 +1,8 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- specimen: GPUI + Jetstream previews render the real Callout (Callout / js_callout) across
+     the full contract state set — all six tones incl. neutral + pending (ring spinner badge),
+     message prop, dismissible (x control), without-title, sizes, density, and a with-action group
+     paired with a real Button (Callout has no actions slot). Both previews build clean. -->
 <!-- pass 44: both targets — additive CallOutSpec (dismissible, dismiss_label, announce_mode
      [CalloutAnnounceMode None/Polite/Assertive], aria_label) + tone methods (info→status-info,
      pending→accent, neutral→text-secondary; is_neutral/pending; fill/border mixes; icon_badge;

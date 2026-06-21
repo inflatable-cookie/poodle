@@ -123,11 +123,11 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 2 | 2 | gap |
 | calendar | fixed | 2 | 2 | gap |
-| callout | fixed | 2 | 2 | gap |
-| card | fixed | 2 | 2 | gap |
+| callout | fixed | 2 | 2 | ok |
+| card | fixed | 2 | 2 | ok |
 | card-radio-group | fixed | 2 | 2 | gap |
 | card-toggle-group | fixed | 2 | 2 | gap |
-| checkbox | ok | 1 | 1 | gap |
+| checkbox | ok | 1 | 1 | ok |
 | code | fixed | 2 | 2 | gap |
 | code-input | fixed | 0 | 0 | gap |
 | collapse-toggle | fixed | 0 | 1 | gap |
@@ -202,7 +202,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | pill | fixed | 0 | 0 | gap |
 | popover | fixed | 0 | 0 | gap |
 | progress | fixed | 0 | 1 | gap |
-| radio-group | ok | 1 | 1 | gap |
+| radio-group | ok | 1 | 1 | ok |
 | range-slider | fixed | 1 | 1 | gap |
 | rating | ok | 1 | 2 | gap |
 | region | ok | 1 | 0 | ok |

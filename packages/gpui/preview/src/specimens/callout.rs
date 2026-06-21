@@ -5,8 +5,8 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_components::{Callout, Eyebrow};
-use poodle_specs::{CallOutSpec, EyebrowSpec, StatusTone};
+use poodle_gpui_components::{Button, Callout, Eyebrow};
+use poodle_specs::{ButtonSpec, ButtonVariant, CallOutSpec, EyebrowSpec, StatusTone};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -55,6 +55,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_tone(StatusTone::Danger)
                                 .with_title("Error")
                                 .with_content("Unable to connect to the database. Check your credentials and try again."),
+                            theme,
+                        ))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Pending)
+                                .with_title("Pending")
+                                .with_content("Provisioning resources. This may take a moment."),
                             theme,
                         ))
                 )
@@ -129,6 +136,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_content("A simple inline callout without a title for brief contextual notes."),
                         theme,
                     )
+                )
+        )
+
+        // --- With action ---
+        // The Callout primitive has no actions slot; pair it with a real Button.
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("With action"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(Callout::from_spec(
+                            CallOutSpec::new()
+                                .with_tone(StatusTone::Warning)
+                                .with_title("Quota warning")
+                                .with_content("API usage is approaching the current workspace limit."),
+                            theme,
+                        ))
+                        .child(
+                            div().flex().justify_end().child(
+                                Button::from_spec(
+                                    ButtonSpec::new()
+                                        .with_variant(ButtonVariant::Secondary)
+                                        .with_label("Review limits"),
+                                    theme,
+                                )
+                                .with_id("callout-action-button"),
+                            ),
+                        )
                 )
         )
         .into_any_element();
