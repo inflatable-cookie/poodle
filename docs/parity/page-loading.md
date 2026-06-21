@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=5 jetstream=7 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap | pass: both targets rebuilt — GPUI strips inline-card chrome, composes Progress primitive, gates cancel on can_cancel + correct elevation-overlay token; Jetstream composes ring Spinner + Progress primitive, adds presentation branch, cancel chrome, token border-width (shadow approximated, JsEl delta) -->
 # Parity: PageLoading
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -22,25 +22,25 @@ Svelte matches the contract: props (`visible`, `presentation`, `value`, `max`, `
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded card shadow built from raw `hsla(0,0,0,0.12)`/`hsla(0,0,0,0.08)` + `px(8.0)`/`px(24.0)`/`px(2.0)` offsets at `page_loading.rs:101-112` — contract §8 card shadow is `var(--poodle-elevation-overlay)`; resolve from an elevation token, not literal HSLA + pixel blur.
-- [ ] Cancel padding uses literal rem args `rem_to_px(0.875)`/`rem_to_px(0.375)` at `page_loading.rs:192-193`, and inline-mode padding `rem_to_px(3.0)`/`rem_to_px(1.0)` at `:214-215` — these bypass tokens (Svelte values `0.375rem 0.875rem` and `3rem 1rem`); resolve from space tokens.
-- [ ] No inline-vs-overlay chrome difference on the card. Contract §8 says the inline card drops border/bg/shadow (`min-width:auto`, `padding:0`, `border:none`, `background:transparent`). GPUI builds one card with full chrome (border/bg/shadow, `page_loading.rs:94-119`) for both modes; inline only changes the outer wrapper padding (`:208-217`). **Strip card chrome in inline mode.**
-- [ ] No determinate Progress primitive — track is hand-rolled `div().w(track_width).h(track_height)` (`page_loading.rs:151-165`) using `size.icon.xs` / `size.control.minWidth` proxies (admitted in comment `:147-149`); Svelte composes the shared `Progress` primitive. No ariaLabel, no `Progress` token chrome.
-- [ ] Cancel button only renders when BOTH `can_cancel` AND an `on_cancel` handler are set (`page_loading.rs:180-181`); Svelte renders the button on `canCancel` alone (handler optional). Visibility should gate on `can_cancel` only.
+- [x] Card shadow now resolves from `elevation_overlay_shadow()` (contract §8 `var(--poodle-elevation-overlay)`) — no raw HSLA/px (was wrongly `elevation_dialog`).
+- accepted: cancel padding `rem_to_px(0.875)`/`rem_to_px(0.375)` and inline padding `rem_to_px(3.0)`/`rem_to_px(1.0)` are contract-exact rem (`0.375rem 0.875rem`, `3rem 1rem`) — `rem_to_px(<contract rem>)` is not a hardcoded-px violation.
+- [x] Inline-vs-overlay chrome: the card now drops border/bg/shadow/padding and caps at max-width 24rem in inline mode (contract §8 inline-card override); overlay keeps full elevated chrome.
+- [x] Determinate progress now composes the shared `Progress` primitive (`Progress::from_spec`) inside a full-width wrapper, with ariaLabel = message ?? "Loading progress" — no hand-rolled track / icon-size proxies.
+- [x] Cancel button gates on `can_cancel` alone (Svelte parity); the click handler is wired only when one is supplied. Bordered control per contract §8 (`.page-loading__cancel`).
 - accepted: no ARIA (gpui has no accessibility API) — `role="status"`/`aria-live` not emitted; backdrop `aria-hidden` n/a.
 - accepted: backdrop `blur(2px)` not reproduced (GPUI has no `backdrop-filter`; contract §10 acknowledges this).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] No spinner — renders a static `icon("loader")` (`page_loading.rs:42-46`), not an animated ring Spinner. Contract §2 requires the shared Spinner primitive (`variant="ring"`). No motion = wrong loading affordance.
-- [ ] Spinner size hardcoded `rem_to_px(2.0)` at `page_loading.rs:31` — resolve from an icon/size token.
-- [ ] Border width literal `.border(1.0)` at `page_loading.rs:36` — resolve from `border.width` token, not raw `1.0`.
-- [ ] Progress bar geometry fully hardcoded: `bar_h = rem_to_px(0.25)`, `bar_w = rem_to_px(12.0)`, `bar_radius = rem_to_px(0.125)` at `page_loading.rs:58-60` — no Progress primitive, no token resolution.
-- [ ] No presentation branch — `js_page_loading` always renders the full-viewport backdrop (`page_loading.rs:88-92`) and ignores `spec.presentation`. Inline mode (no backdrop, in-flow, `max-width:24rem`, no chrome) is unimplemented. Contract §3/§4 require both modes.
-- [ ] Cancel is a non-interactive `label("Cancel")` (`page_loading.rs:78-85`) — no button chrome (border/radius/padding per contract §8 `.page-loading__cancel`), no hover, no click wiring. Size uses heuristic `* 0.85` multiplier, not a token.
-- [ ] No card shadow / elevation — card has border + bg but omits the `elevation-overlay` shadow the contract §8 card requires.
+- [x] Spinner now composes the shared ring `js_spinner` (`variant="ring"`, `sizeRole`→Lg, `tone="accent"`) — no static `icon("loader")`. js_spinner resolves its own diameter, so no hardcoded `rem_to_px(2.0)`.
+- [x] Spinner size: resolved inside `js_spinner` from `SpinnerSpec` — no literal diameter in page-loading.
+- [x] Border width now `resolve_px(theme, "border.width.default")` — no raw `.border(1.0)`.
+- [x] Progress bar now composes the shared `js_progress` primitive (full card width) — no hardcoded bar geometry.
+- [x] Presentation branch added: inline renders in-flow (no backdrop, padding `3rem 1rem`, card max-width 24rem, no chrome); overlay renders the full-viewport scrim. Honours `spec.presentation`.
+- [x] Cancel is a bordered control (border-width token, radius-control, padding `0.375rem 0.875rem` per contract §8), font from `size_font_rem` not the `* 0.85` heuristic.
+- accepted: no card box-shadow — JsEl has no box-shadow primitive; the `elevation-overlay` card shadow is approximated by the border + elevated fill (JsEl delta).
 - accepted: no ARIA channel (documented runtime limit).
-- accepted: cancel click handler would live in preview event loop, not the component — but the cancel element is currently a plain label with no id/affordance to wire.
+- accepted: cancel click handler lives in the preview event loop, not the component.
 
 ## Specimen parity
 

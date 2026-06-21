@@ -12,20 +12,38 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
     let body_font = rem_to_px(size_font_rem(ControlSize::Md));
     let text_primary = resolve_color(theme, "color.text.primary");
 
-    let list_content = div().flex_col().gap(4.0)
-        .child(label("Item 1").text_color(text_primary).text_size(body_font))
-        .child(label("Item 2").text_color(text_primary).text_size(body_font))
-        .child(label("Item 3").text_color(text_primary).text_size(body_font));
+    let rows = || {
+        div().flex_col().gap(4.0)
+            .child(label("Item 1").text_color(text_primary).text_size(body_font))
+            .child(label("Item 2").text_color(text_primary).text_size(body_font))
+            .child(label("Item 3").text_color(text_primary).text_size(body_font))
+    };
 
     div().flex_col().gap(24.0)
-        .child(group("With items", secondary,
+        // Ready with pagination summary + controls.
+        .child(group("Ready with pagination", secondary,
             js_list_container(
                 &ListContainerSpec::new("Recent Projects")
                     .with_subtitle("Showing your most recent work.")
-                    .with_current_page(1)
-                    .with_total_pages(5),
+                    .with_current_page(2)
+                    .with_total_pages(5)
+                    .with_total_items(48)
+                    .with_page_size(10),
                 theme,
-                Some(list_content),
+                Some(rows()),
+                None,
+                None,
+            )
+        ))
+        // Ready with filters + batch slots.
+        .child(group("Filters and batch", secondary,
+            js_list_container(
+                &ListContainerSpec::new("Team members")
+                    .with_eyebrow("Settings"),
+                theme,
+                Some(rows()),
+                Some(label("Filter toolbar").text_color(secondary).text_size(body_font)),
+                Some(label("3 selected").text_color(secondary).text_size(body_font)),
             )
         ))
         .child(group("Empty", secondary,
@@ -36,6 +54,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     .with_empty_message("Upload your first asset to get started."),
                 theme,
                 None,
+                None,
+                None,
             )
         ))
         .child(group("Loading", secondary,
@@ -44,6 +64,19 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                     .with_state(ListContainerState::Loading)
                     .with_loading_message("Searching..."),
                 theme,
+                None,
+                None,
+                None,
+            )
+        ))
+        .child(group("Error", secondary,
+            js_list_container(
+                &ListContainerSpec::new("Reports")
+                    .with_state(ListContainerState::Error)
+                    .with_error_message("A network error occurred. Please try again."),
+                theme,
+                None,
+                None,
                 None,
             )
         ))

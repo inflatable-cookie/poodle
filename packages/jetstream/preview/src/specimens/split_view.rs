@@ -52,6 +52,42 @@ pub fn render(theme: &JetstreamThemeProvider) -> JsEl {
                 )
             )
         ))
+        .child(group("Horizontal with collapse toggles", secondary,
+            div().h(h_short).child(
+                js_split_view(
+                    &SplitViewSpec::new(SplitOrientation::Horizontal)
+                        .with_show_collapse_primary(true)
+                        .with_show_collapse_secondary(true),
+                    theme,
+                    Some(
+                        div().grow().bg(bg).border_1().border_color(border).p(pad)
+                            .child(label("Primary").text_color(text_primary).text_size(font_size))
+                    ),
+                    Some(
+                        div().grow().bg(bg).border_1().border_color(border).p(pad)
+                            .child(label("Secondary").text_color(secondary).text_size(font_size))
+                    ),
+                )
+            )
+        ))
+        .child(group("Vertical with collapse toggles", secondary,
+            div().h(h_tall).child(
+                js_split_view(
+                    &SplitViewSpec::new(SplitOrientation::Vertical)
+                        .with_show_collapse_primary(true)
+                        .with_show_collapse_secondary(true),
+                    theme,
+                    Some(
+                        div().grow().bg(bg).border_1().border_color(border).p(pad)
+                            .child(label("Top pane").text_color(text_primary).text_size(font_size))
+                    ),
+                    Some(
+                        div().grow().bg(bg).border_1().border_color(border).p(pad)
+                            .child(label("Bottom pane").text_color(secondary).text_size(font_size))
+                    ),
+                )
+            )
+        ))
         .child(group("Primary pane only (secondary empty)", secondary,
             div().h(h_short).child(
                 js_split_view(

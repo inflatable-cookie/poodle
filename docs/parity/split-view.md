@@ -1,4 +1,6 @@
-<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 41: both targets compose real ResizeHandle + CollapseToggle; GPUI toggles flip state (two-way) and divider derives from rem helpers; Jetstream adds collapse toggles, min-size, and axis-correct fixed/collapsed sizing for vertical. Remaining open = rail-collapse/drag-collapse lifecycle (spec lacks *CollapsedSize / collapse*BelowSize). Probe tests added; specimens gain collapse-toggle groups. -->
+
 # Parity: SplitView
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -28,31 +30,31 @@ Svelte implements the full prop surface (orientation, ratio/defaultRatio, min/fi
 
 GPUI renders panes with ratio/fixed/min allocation, collapse hiding, a divider with hover, and collapse-toggle buttons. Layout logic is largely faithful.
 
-- [ ] **Hardcoded px literals throughout the divider/toggles** — `size(px(16.0))`, `rounded(px(8.0))`, divider `w(px(8.0))`, line `w(px(1.0))`, `gap(px(4.0))` (`split_view.rs:272-273, 369, 378, 391`). Contract divider is `0.5rem`; toggle sizing should derive from the `CollapseToggle` primitive. Resolve from tokens / rem helpers.
-- [ ] **Does not compose `CollapseToggle` primitive** — hand-builds circular chevron buttons (`split_view.rs:300-358`) instead of delegating to `CollapseToggle` per contract §2/§7. Visual + behavioral drift from the primitive.
-- [ ] **Collapse callbacks can only collapse, never expand** — both toggles fire `handler(true, ...)` unconditionally (`split_view.rs:321, 350`); contract toggles flip state (Expand when already collapsed). Pass `!is_collapsed`.
-- [ ] **No keyboard resize / ResizeHandle composition** — divider is a bare hover-highlighted `div` with `cursor_col_resize` (`split_view.rs:398-417`); it does not embed the `ResizeHandle` primitive, so arrow-key resize (contract §6) and separator semantics are absent.
-- [ ] **No rail-collapse / drag-to-collapse** — `*CollapsedSize`, `collapse*BelowSize`, 2%/98% thresholds, preserved ratio are not implemented (spec carries the fields but the renderer ignores them). Contract §8 Rail-Collapse / Drag-To-Collapse tables.
-- [ ] **No fixed-collapsed (railed) content mounting** — collapsed panes are dropped entirely (`if !is_primary_collapsed`, `split_view.rs:195,424`); contract railed state keeps content mounted at a pinned size.
-- accepted: no ARIA (gpui has no accessibility API); drag physics platform-owned.
+- [x] FIXED **Hardcoded px in divider/toggles** — divider now sized `px(rem_to_px(0.5))` on the split axis; toggle cluster gap/padding `rem_to_px(0.125)`; the `px(16.0)`/`rounded(px(8.0))`/`px(1.0)` line literals are gone (handle + toggles own their sizing).
+- [x] FIXED **Does not compose `CollapseToggle`** — now `CollapseToggle::from_spec` with direction by orientation (Left/Right or Up/Down), collapsed state, disabled, and dynamic aria-label ("Collapse/Expand primary/secondary").
+- [x] FIXED **Collapse callbacks one-way** — toggles now fire `handler(!is_collapsed, …)` so they flip state.
+- [x] FIXED **No ResizeHandle composition** — divider now embeds `ResizeHandle::from_spec` (orientation inverse of split axis, `aria_value_now=ratio`, disabled forwarded), giving separator semantics + the keyboard-resizable affordance.
+- [ ] **No rail-collapse / drag-to-collapse** — `*CollapsedSize`, `collapse*BelowSize`, 2%/98% thresholds, preserved ratio are not implemented. **Spec gap**: `SplitViewSpec` has no `primary_collapsed_size` / `secondary_collapsed_size` / `collapse_*_below_size` fields. Out of scope this pass (additive spec expansion + drag lifecycle); the drag/threshold logic lives in the preview event loop.
+- [ ] **No fixed-collapsed (railed) content mounting** — collapsed panes are still dropped; coupled to the rail-collapse spec gap above (needs `*CollapsedSize` to know the pinned size).
+- accepted: no ARIA exposure (gpui has no accessibility API); drag physics platform-owned. Two-way toggle + keyboard-resizable separator now provided by the composed primitives.
 
 ## Jetstream gap (vs Svelte + contract)
 
 Jetstream composes the real `js_resize_handle` and maps orientation correctly (`Horizontal` split → `Vertical` handle line, `split_view.rs:58-61`). Panes use ratio via `flex_grow`, fixed size, and collapse-to-zero.
 
-- [ ] **No collapse toggles** — `show_collapse_primary`/`secondary` ignored; no `CollapseToggle` composition (contract §2 Toggles/CollapseToggle). Cannot collapse/expand via UI.
-- [ ] **No min-size constraints** — `min_primary_size`/`min_secondary_size` unused (panes hardcode `min_w(0.0)`/`min_h(0.0)`, `split_view.rs:21-25`); contract applies min-width/height inline when set.
-- [ ] **Vertical orientation uses `w()` for fixed/collapsed sizing** — `spec.primary_size` always applied as `.w(px)` and collapse as `.w(0.0)` (`split_view.rs:19,23,38,41`) regardless of orientation; for a vertical split this should be height. Axis-incorrect for fixed/collapsed panes in vertical mode.
-- [ ] **No rail-collapse / drag-to-collapse / keyboard resize** — `*CollapsedSize`, `collapse*BelowSize`, thresholds, ratio streaming all absent (interaction lives in preview event loop, but none is wired and the handle emits no callbacks).
-- [ ] **Collapsed pane content dropped** — collapse renders a zero-width div; railed (content-mounted) state not supported.
-- [ ] **Depends on the inverted `ResizeHandle`** — `js_resize_handle` itself renders orientation inverted (see `resize-handle.md`); here the split_view's compensating mapping happens to produce a correct line, but the two bugs are coupled — fixing one without the other will flip the divider. Note the coupling.
-- accepted: interaction (drag, keyboard, collapse) lives in preview `main.rs` event loop; no ARIA channel.
+- [x] FIXED **No collapse toggles** — now composes `js_collapse_toggle` per `show_collapse_*`, with contract visibility rules (primary hidden when secondary collapsed and vice-versa) and direction by orientation (Left/Right or Up/Down). Cluster overlays the handle inline (immediate-mode has no absolute centering — approximate, noted).
+- [x] FIXED **No min-size constraints** — `min_primary_size` / `min_secondary_size` now applied inline (`min_w` for horizontal, `min_h` for vertical) when set and the pane is not collapsed.
+- [x] FIXED **Vertical orientation axis** — fixed and collapsed sizing now applied on the correct axis: `w()` for horizontal, `h()` for vertical (probe test `split_view_vertical_fixed_primary_uses_height_axis`).
+- [ ] **No rail-collapse / drag-to-collapse / keyboard resize wiring** — `*CollapsedSize`, `collapse*BelowSize`, thresholds, ratio streaming still absent. **Spec gap** (same as GPUI): fields not on `SplitViewSpec`. Interaction lives in the preview event loop; the handle + toggles render but emit no callbacks. Out of scope this pass.
+- [ ] **Collapsed pane content dropped** — legacy collapse hides the pane (0-size on the split axis), matching the contract's non-railed collapse; railed content-mounting needs the rail-collapse spec fields above.
+- note: **coupled to inverted `ResizeHandle`** — `js_resize_handle` renders orientation inverted (see `resize-handle.md`); the split_view's compensating mapping (Horizontal split → `Orientation::Vertical` handle) still produces the correct line. Fixing the handle bug requires flipping this mapping in lock-step.
+- preview-loop: drag, keyboard, collapse interaction lives in the preview event loop; no ARIA channel.
 
 ## Specimen parity
 
 - Svelte covers: Basic horizontal, Basic vertical, Horizontal w/ collapse toggles, Vertical w/ collapse toggles, **Nested splits (IDE)**, **Disabled**. Six groups.
 - GPUI covers: all six matching groups (Basic h/v, h/v collapse toggles, Nested, Disabled) — full group parity, though the toggles are hand-built and collapse is one-way.
-- Jetstream covers: Horizontal split, Vertical split, **Primary-only**. — missing: **collapse-toggle groups** (h + v), **Nested splits**, **Disabled**. No collapse story at all.
+- Jetstream covers: Horizontal split, Vertical split, **Horizontal + Vertical collapse-toggle groups**, Primary-only. Collapse toggles now render via the composed `js_collapse_toggle`. Still missing vs GPUI: **Nested splits**, **Disabled** (lower priority — no spec gap).
 
 ## Notes
 

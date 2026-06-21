@@ -257,7 +257,8 @@ pub use types::{
     DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
     FormActionAlign, InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry,
     NavigationMenuEntry, Orientation, Overflow, OverlayPlacement, PaddingScale,
-    PopoverInitialFocus, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
+    PopoverInitialFocus, PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole,
+    SeparatorOrientation, StatusTone,
     SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
     TabVariant, TimeZoneOption, ValidationState, ZonedDateTimeValue,
 };

@@ -2,12 +2,14 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, IconSize, IconSpec, SemanticControlSizeRole};
+use poodle_specs::{
+    CollapseDirection, CollapseToggleSpec, ControlDensity, ControlSize, Orientation,
+    ResizeHandleSpec, SemanticControlSizeRole,
+};
 use poodle_specs::{SplitOrientation, SplitViewSpec};
 
-use crate::presentation::resolve_semantic_size;
-use crate::primitives::Icon;
-use crate::theme_ext::resolve_color;
+use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::primitives::{CollapseToggle, ResizeHandle};
 
 /// A real GPUI split view backed by `SplitViewSpec`.
 ///
@@ -162,7 +164,6 @@ impl IntoElement for SplitView {
         let spec = &self.spec;
         let _effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-        let border = resolve_color(theme, "color.border.default");
         let ratio = spec.current_ratio();
         let is_horizontal = spec.orientation == SplitOrientation::Horizontal;
 
@@ -233,188 +234,141 @@ impl IntoElement for SplitView {
             container = container.child(primary_pane);
         }
 
-        // Divider — with optional collapse toggles.
+        // Divider — composes the real ResizeHandle primitive plus optional
+        // CollapseToggle primitives.
         //
-        // Layout strategy: the divider is a small fixed-width container
-        // running the full cross-axis length. Collapse toggles (when
-        // enabled via spec.show_collapse_*) stack inside it as overlay
-        // circles near the edges. Clicking a toggle fires the matching
-        // on_primary_collapse / on_secondary_collapse callback with the
-        // new collapsed state — the caller is responsible for updating
-        // the spec via toolbar / app state.
+        // The divider container is 0.5rem on the split axis (contract §8),
+        // running the full cross-axis length. The ResizeHandle renders the
+        // draggable / keyboard-resizable separator (separator semantics,
+        // aria-label="Resize"). When collapse toggles are enabled they overlay
+        // the handle as a centred cluster. Clicking a toggle fires the matching
+        // on_primary_collapse / on_secondary_collapse callback with the *flipped*
+        // collapse state (Collapse when expanded, Expand when collapsed).
         if !spec.is_primary_collapsed && !spec.is_secondary_collapsed {
-            let icon_color = resolve_color(theme, "color.icon.primary");
-            let surface_bg = resolve_color(theme, "color.surface.raised");
-
-            // Chevron pointing toward the primary pane collapses it
-            // (e.g. in horizontal mode, chevron-left collapses the
-            // left / primary pane). The secondary chevron points the
-            // opposite way.
-            let (primary_chevron, secondary_chevron) = if is_horizontal {
-                ("chevron-left", "chevron-right")
+            // ResizeHandle line axis is the inverse of the split axis:
+            // horizontal split (side-by-side) → vertical handle line.
+            let handle_orientation = if is_horizontal {
+                Orientation::Horizontal
             } else {
-                ("chevron-up", "chevron-down")
+                Orientation::Vertical
+            };
+            let handle = ResizeHandle::from_spec(
+                ResizeHandleSpec::new()
+                    .with_orientation(handle_orientation)
+                    .with_disabled(spec.is_disabled)
+                    .with_aria_value_now(ratio),
+                theme,
+            )
+            .with_id("split-resize");
+
+            // Contract toggle visibility (both panes are expanded in this
+            // branch, so only the show_collapse_* flags gate them).
+            let (primary_dir, secondary_dir) = if is_horizontal {
+                (CollapseDirection::Left, CollapseDirection::Right)
+            } else {
+                (CollapseDirection::Up, CollapseDirection::Down)
             };
 
-            // Helper: build one circular collapse-toggle button.
-            let build_toggle = |id: &'static str,
-                                chevron: &str,
-                                handler: Option<&Box<dyn Fn(bool, &mut Window, &mut App)>>|
-             -> AnyElement {
-                let icon = Icon::from_spec(IconSpec::new(chevron).with_size(IconSize::Sm), theme)
-                    .with_color(icon_color);
-
-                let mut btn = div()
-                    .id(SharedString::from(id))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .size(px(16.0))
-                    .rounded(px(8.0))
-                    .bg(surface_bg)
-                    .border_1()
-                    .border_color(border)
-                    .child(icon);
-
-                if !spec.is_disabled {
-                    btn = btn.cursor_pointer();
-                    if let Some(h) = handler {
-                        // The handler type is `Box<dyn Fn(bool, ...)>`
-                        // which doesn't implement Clone — we bypass the
-                        // moved-closure restriction by using Rc.
-                        // Instead of cloning, we rely on the fact that
-                        // each toggle uses its own handler reference
-                        // via the wrapping code below.
-                        let _ = h;
-                    }
-                }
-                btn.into_any_element()
-            };
-
-            // We can't just pass `&Box<dyn Fn>` because we need to move
-            // the callback into an on_click closure. Consume the fields
-            // from `self` here so the `Box` can be moved.
-            let primary_handler = self.on_primary_collapse;
-            let secondary_handler = self.on_secondary_collapse;
+            let primary_collapsed = spec.is_primary_collapsed;
+            let secondary_collapsed = spec.is_secondary_collapsed;
+            let disabled = spec.is_disabled;
 
             let primary_toggle = if spec.show_collapse_primary {
-                let icon = Icon::from_spec(
-                    IconSpec::new(primary_chevron).with_size(IconSize::Sm),
+                let mut toggle = CollapseToggle::from_spec(
+                    CollapseToggleSpec::new()
+                        .with_direction(primary_dir)
+                        .with_collapsed(primary_collapsed)
+                        .with_disabled(disabled)
+                        .with_aria_label(if primary_collapsed {
+                            "Expand primary"
+                        } else {
+                            "Collapse primary"
+                        }),
                     theme,
                 )
-                .with_color(icon_color);
-                let mut btn = div()
-                    .id(SharedString::from("split-collapse-primary"))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .size(px(16.0))
-                    .rounded(px(8.0))
-                    .bg(surface_bg)
-                    .border_1()
-                    .border_color(border)
-                    .child(icon);
-                if !spec.is_disabled {
-                    btn = btn.cursor_pointer();
-                    if let Some(handler) = primary_handler {
-                        btn = btn.on_click(move |_event, window, cx| {
-                            handler(true, window, cx);
-                        });
-                    }
+                .with_id("split-primary");
+                if let Some(handler) = self.on_primary_collapse {
+                    // Toggle flips state: Expand when already collapsed.
+                    toggle = toggle.on_toggle(move |_event, window, cx| {
+                        handler(!primary_collapsed, window, cx);
+                    });
                 }
-                Some(btn.into_any_element())
+                Some(toggle.into_any_element())
             } else {
                 None
             };
 
             let secondary_toggle = if spec.show_collapse_secondary {
-                let icon = Icon::from_spec(
-                    IconSpec::new(secondary_chevron).with_size(IconSize::Sm),
+                let mut toggle = CollapseToggle::from_spec(
+                    CollapseToggleSpec::new()
+                        .with_direction(secondary_dir)
+                        .with_collapsed(secondary_collapsed)
+                        .with_disabled(disabled)
+                        .with_aria_label(if secondary_collapsed {
+                            "Expand secondary"
+                        } else {
+                            "Collapse secondary"
+                        }),
                     theme,
                 )
-                .with_color(icon_color);
-                let mut btn = div()
-                    .id(SharedString::from("split-collapse-secondary"))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .size(px(16.0))
-                    .rounded(px(8.0))
-                    .bg(surface_bg)
-                    .border_1()
-                    .border_color(border)
-                    .child(icon);
-                if !spec.is_disabled {
-                    btn = btn.cursor_pointer();
-                    if let Some(handler) = secondary_handler {
-                        btn = btn.on_click(move |_event, window, cx| {
-                            handler(true, window, cx);
-                        });
-                    }
+                .with_id("split-secondary");
+                if let Some(handler) = self.on_secondary_collapse {
+                    toggle = toggle.on_toggle(move |_event, window, cx| {
+                        handler(!secondary_collapsed, window, cx);
+                    });
                 }
-                Some(btn.into_any_element())
+                Some(toggle.into_any_element())
             } else {
                 None
             };
 
-            // Suppress the unused helper warning — `build_toggle` was an
-            // earlier factoring attempt kept here as documentation for
-            // the per-toggle construction pattern that replaced it.
-            let _ = build_toggle;
+            let has_toggles = primary_toggle.is_some() || secondary_toggle.is_some();
 
-            let mut divider = div().flex_shrink_0().relative();
-
-            // Build the divider line + centred toggle cluster.
-            let line = if is_horizontal {
-                div().w(px(1.0)).h_full().bg(border)
+            // Toggle cluster: horizontal splits stack toggles in a column
+            // (primary above secondary); vertical splits stack them in a row.
+            let toggles_gap = px(rem_to_px(0.125));
+            let toggle_cluster = if has_toggles {
+                let mut cluster = if is_horizontal {
+                    div().absolute().flex().flex_col().gap(toggles_gap)
+                } else {
+                    div().absolute().flex().flex_row().gap(toggles_gap)
+                }
+                .items_center()
+                .justify_center()
+                .p(px(rem_to_px(0.125)));
+                if let Some(btn) = primary_toggle {
+                    cluster = cluster.child(btn);
+                }
+                if let Some(btn) = secondary_toggle {
+                    cluster = cluster.child(btn);
+                }
+                Some(cluster)
             } else {
-                div().h(px(1.0)).w_full().bg(border)
+                None
             };
 
-            // Toggles cluster: horizontal splits stack toggles vertically
-            // (primary then secondary, top-to-bottom); vertical splits
-            // stack them horizontally (primary then secondary, L to R).
-            let mut toggle_cluster = if is_horizontal {
-                div().absolute().flex().flex_col().gap(px(4.0))
-            } else {
-                div().absolute().flex().flex_row().gap(px(4.0))
-            };
-            if let Some(btn) = primary_toggle {
-                toggle_cluster = toggle_cluster.child(btn);
-            }
-            if let Some(btn) = secondary_toggle {
-                toggle_cluster = toggle_cluster.child(btn);
-            }
-
+            // Divider container: 0.5rem on the split axis, full cross-axis.
+            let mut divider = div()
+                .flex_shrink_0()
+                .relative()
+                .flex()
+                .items_center()
+                .justify_center();
             if is_horizontal {
-                divider = divider
-                    .w(px(8.0))
-                    .h_full()
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(line)
-                    .child(toggle_cluster);
+                divider = divider.w(px(rem_to_px(0.5))).h_full();
                 if !spec.is_disabled {
                     divider = divider.cursor_col_resize();
                 }
             } else {
-                divider = divider
-                    .h(px(8.0))
-                    .w_full()
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(line)
-                    .child(toggle_cluster);
+                divider = divider.h(px(rem_to_px(0.5))).w_full();
                 if !spec.is_disabled {
                     divider = divider.cursor_row_resize();
                 }
             }
 
-            if !spec.is_disabled {
-                divider =
-                    divider.hover(|s| s.bg(resolve_color(theme, "color.accent.base").opacity(0.3)));
+            divider = divider.child(handle);
+            if let Some(cluster) = toggle_cluster {
+                divider = divider.child(cluster);
             }
 
             container = container.child(divider);

@@ -1,4 +1,6 @@
-<!-- parity consv=fixed gpui=6 jetstream=6 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- pass 41: both Rust targets now compose real PageHeader/Callout/EmptyState/Pagination/PaginationSummary; filters+batch slots added; root gap → stack.lg; Jetstream typography resolves from tokens; specimens cover ready+filters/batch+loading+error+empty; Jetstream probe tests added. -->
+
 # Parity: ListContainer
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -23,31 +25,33 @@ One real divergence, plus a class-name namespacing note.
 
 ## GPUI gap (vs Svelte + contract)
 
-GPUI hand-rolls header + state text instead of delegating to PageHeader/Callout/EmptyState/Pagination composites, so most contract anatomy is faked rather than composed.
+GPUI now composes the real PageHeader / Callout / EmptyState / Pagination / PaginationSummary components. Slot builders cover filters/batch/breadcrumbs/actions; page-change is wired.
 
-- [ ] Hardcoded px literals throughout: `min_w(px(70.0))` not present here but `pl(px(70.0 + 8.0))` — N/A; actual literals: none in floats except spacing resolves from tokens. Recheck: header/state text sizes all resolve from tokens. No raw px literals. (clean)
-- [ ] No Filters / Batch regions — `ListContainerSpec` has no filter/batch slots; contract §2 requires `.list-container__filters` and `.list-container__batch` between header and content. Add slot fields + render (`list_container.rs:134-138` only renders `self.content`).
-- [ ] No real Pagination control — only summary text "Page X of Y" + "Showing N–M of T" (`list_container.rs:147-182`); contract requires composed `Pagination` primitive with `onPageChange`. Wire the GPUI pagination primitive; current render is summary-only.
-- [ ] No `onPageChange` callback — builder exposes no page-change handler; pagination is non-interactive.
-- [ ] Header is hand-built (eyebrow/title/subtitle divs, `list_container.rs:50-79`) instead of delegating to PageHeader composite; breadcrumbs + actions slots absent entirely (contract §2 + props).
-- [ ] Loading/error/empty render plain text blocks (`list_container.rs:83-133`) instead of Callout(pending)/Callout(danger, assertive)/EmptyState; `emptyVariant`, `loadingMessage` default, error `announceMode` semantics all dropped.
-- accepted: no ARIA (gpui has no accessibility API) — `aria-label`/`data-state`/`role` not emitted.
+- [x] FIXED No Filters / Batch regions — added `with_filters` / `with_batch` builders rendering `stack.md` regions between header and content (Ready state only). No spec field needed — slots are component-level `AnyElement`.
+- [x] FIXED No real Pagination control — now composes `Pagination::from_spec` (current/total/sibling/aria) + `PaginationSummary::from_spec`; pagination region justifies controls to the end (contract §8 `justify-self: end`).
+- [x] FIXED No `onPageChange` callback — added `on_page_change` builder forwarding to the composed `Pagination`.
+- [x] FIXED Header hand-built — now delegates to `PageHeader::from_spec` with `with_breadcrumbs` / `with_actions` slot forwarding.
+- [x] FIXED Loading/error/empty plain-text blocks — now `Callout(pending)` / `Callout(danger, announceMode=Assertive)` / `EmptyState`, resolving message/title/announce semantics from the composed specs.
+- accepted: no ARIA (gpui has no accessibility API) — `aria-label`/`data-state`/`role` not emitted; the composed Callout carries `announce_mode` for cross-target parity.
+- note: `emptyVariant` is not on `ListContainerSpec` (host-driven via the EmptyState slot in Svelte); GPUI uses EmptyState's default neutral variant. Not a spec gap — matches contract prop ownership.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded px literals: `heading_size = rem_to_px(1.125)`, `body_size = rem_to_px(0.8125)`, `eyebrow_size = rem_to_px(0.6875)` (`list_container.rs:21-23`) — resolve from typography tokens (`typography.heading.size`, `typography.body.size`, `typography.label.size`), not raw rem constants.
-- [ ] Root gap uses `space.stack.md` (`list_container.rs:18`); contract §8 root gap is `space.stack.lg`. GPUI got this right (`stack_gap = space.stack.lg`). **Fix token.**
-- [ ] No Filters / Batch regions (same as GPUI — spec lacks slots).
-- [ ] No real Pagination — only centered "Page X of Y" text (`list_container.rs:97-105`); no `Pagination` primitive, no `onPageChange`, no PaginationSummary.
-- [ ] Header hand-built (`list_container.rs:27-46`) not delegated to PageHeader; breadcrumbs + actions slots absent.
-- [ ] Loading/error/empty hand-built (icon+label / label / centered label, `list_container.rs:52-88`) instead of Callout/EmptyState delegation; `emptyVariant` dropped, empty uses `pt/pb 2.0rem` raw literals.
-- accepted: interaction (page change) would live in preview event loop; no pager exists to wire.
+Jetstream now mirrors GPUI: composes the real PageHeader / Callout / EmptyState / Pagination / PaginationSummary functions; typography + spacing resolve from tokens.
+
+- [x] FIXED Hardcoded px typography (`rem_to_px(1.125/0.8125/0.6875)`) — header now delegated to `js_page_header_with_slots`, which resolves heading/subtitle/eyebrow sizes from tokens. (The old constants were also wrong: heading token = 1rem, body = 0.875rem.)
+- [x] FIXED Root gap `space.stack.md` → `space.stack.lg` (contract §8); regions use `space.stack.md`.
+- [x] FIXED No Filters / Batch regions — `js_list_container` gained `filters` / `batch` params rendering `stack.md` regions (Ready state).
+- [x] FIXED No real Pagination — now `js_pagination` (current/total/sibling/aria) + `js_pagination_summary` ("Showing N – M of T") when totals known; gated by `show_pagination && total_pages > 1`.
+- [x] FIXED Header hand-built — delegated to `js_page_header_with_slots`.
+- [x] FIXED Loading/error/empty hand-built — now `js_callout(pending)` / `js_callout(danger, Assertive)` / `js_empty_state`; the raw `pt/pb 2.0rem` empty literals are gone.
+- preview-loop: page-change interaction lives in the preview event loop; `js_pagination` renders controls but emits no callback here.
 
 ## Specimen parity
 
 - Svelte covers: Ready (full shell: header, batch slot, list cards, summary + pagination), plus interactive state toggle (loading/error/empty) on a second instance.
-- GPUI covers: Ready-with-pagination-summary, Loading, Error, Empty (`list_container_specimen.rs`). — missing: filters/batch slots, breadcrumbs, real pagination controls (none exist in impl).
-- Jetstream covers: only Empty + Loading groups (`list_container.rs:31-44`). — missing: **Ready-with-content**, **Error**, pagination, breadcrumbs/actions. Thinnest of the three.
+- GPUI covers: Ready-with-content + built-in pagination (real Pagination + summary), Loading, Error, Empty (`list_container_specimen.rs`). Slot builders (filters/batch/breadcrumbs/actions) available; specimen can add them without impl changes.
+- Jetstream covers: Ready-with-pagination, Filters+batch, Empty, Loading, Error (`split`-equivalent five groups, `list_container.rs` specimen). Pagination summary + controls render via composed primitives.
 
 ## Notes
 

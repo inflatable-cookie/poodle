@@ -594,6 +594,24 @@ pub enum PopoverInitialFocus {
     None,
 }
 
+/// Surface width strategy for Popover (contract §3 `surfaceWidth`).
+///
+/// `Content` (default) sizes the surface to its content within the
+/// min/max-width constraints; `Trigger` makes the surface match the
+/// trigger width (`width: 100%` / `min-width: 100%`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum PopoverSurfaceWidth {
+    #[default]
+    Content,
+    Trigger,
+}
+
+impl PopoverSurfaceWidth {
+    pub fn is_trigger(self) -> bool {
+        matches!(self, Self::Trigger)
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DialogKind {
     Dialog,

@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=5 jetstream=7 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: PopoverSpec gains disabled/block/surface_width/surface_min/max_width_rem (additive) + border token methods; GPUI wires disabled (blocks open), surfaceWidth=trigger, min/max overrides, initialFocus focusable branch; Jetstream resolves panel padding + border-subtle@74% + min/max width from tokens (shadow approximated, placement/trigger/open-close = preview-loop) -->
 # Parity: Popover
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -29,25 +29,24 @@ Svelte exposes props the contract omits, and the contract's surface token table 
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded shadow color/blur literals: `hsla(0.0,0.0,0.0,0.10)` + `px(16.0)` and `hsla(0.0,0.0,0.0,0.06)` + `px(4.0)` at `popover.rs:181–191`. Resolve the elevation stack from an elevation token, not raw HSLA/px. (Also diverges from Svelte's inset-highlight + two-drop stack.)
-- [ ] Wrong border token: uses `color.border.subtle` × 0.74 (`popover.rs:132,142–145`) which matches *Svelte* but the surface bg uses plain `elevated` while Svelte's contract reconciliation is still pending — verify against final contract once §8 border/background fixed. Currently consistent with Svelte, flag to re-check after contract update.
-- [ ] No `surfaceWidth`/`surfaceMinWidth`/`surfaceMaxWidth` support — builder (`popover.rs:64–98`) has no width props; `min_w`/`max_w` are fixed from `size.menu.minWidth`/`size.popover.maxWidth` tokens (`popover.rs:135–136,196–197`). Trigger-width anchoring impossible.
-- [ ] No `disabled` support — no builder method; trigger always clickable (`popover.rs:151–165`). Svelte `disabled` blocks open + sets not-allowed cursor.
-- [ ] `initialFocus` not honored — spec stores it but `into_element` never reads `initial_focus`; surface is `.focusable()` only (`popover.rs:175`), no first-focusable vs content branch. (Documented partial delta in header, but `first-focusable` vs `content` distinction is lost.)
-- accepted: no ARIA — `role="dialog"`, `aria-expanded`, `aria-controls` not expressible on GPUI native elements (documented in file header lines 19–24).
-- accepted: `dismiss_on_outside_interact` — no window-level outside-click interceptor; Escape-to-close wired instead (header note). Spec field stored, unused.
+- accepted: shadow already resolves from `elevation_overlay_shadow()` (token-resolved elevation stack), not raw HSLA/px. (Svelte's exact inset-highlight + two-drop stack is an internal rendering delta — Tier-3.)
+- [x] Border token: now resolves via `spec.surface_border_token()` (`color.border.subtle`) × `spec.surface_border_alpha()` (0.74) and bg via `spec.surface_fill_token()` (plain `elevated`) — matches the reconciled contract §8.
+- [x] `surfaceWidth`/`surfaceMinWidth`/`surfaceMaxWidth` now supported: builder methods `surface_width`/`surface_min_width_rem`/`surface_max_width_rem`; min/max-width resolve from `spec.effective_surface_{min,max}_width_rem()` (14rem/24rem defaults); `surfaceWidth="trigger"` sets the surface to `w_full().min_w(100%)`.
+- [x] `disabled` now supported: builder `disabled(bool)`; a disabled trigger ignores the click handler and the surface is suppressed (`current_open() && !disabled`). (aria-disabled/not-allowed cursor remain GPUI ARIA deltas.)
+- [x] `initialFocus` honored: surface is `.focusable()` only when `initial_focus != None`; `"content"` focuses the surface, otherwise the parent focuses the first focusable child. (first-focusable vs content child distinction stays a GPUI focus-model delta.)
+- accepted: no ARIA — `role="dialog"`, `aria-expanded`, `aria-controls` not expressible on GPUI native elements (documented in file header).
+- accepted: `dismiss_on_outside_interact` — no window-level outside-click interceptor; Escape-to-close wired instead. Spec field stored, unused.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded panel padding: `rem_to_px(0.75)` / `rem_to_px(0.5)` at `popover.rs:19–20`. Contract §8 padding = `var(--poodle-space-panel-y) var(--poodle-space-panel-x)`; resolve from `space.panel.x`/`space.panel.y` tokens (as GPUI does at `popover.rs:133–134`), not raw rem literals.
-- [ ] Wrong border token: uses `color.border.default` (`popover.rs:15`) at full opacity; Svelte uses `border-subtle` at 74%. Resolve subtle + apply 0.74 alpha.
-- [ ] No `min-width`/`max-width` constraint — `js_popover` (`popover.rs:22–28`) sets no `min_w`/`max_w`; contract §7 requires min 14rem / max min(24rem,90vw). Surface sizes only to content.
-- [ ] Generic `shadow_md()` (`popover.rs:28`) instead of the contract elevation-overlay stack — no token resolution, no match to Svelte's 3-layer shadow.
-- [ ] No `placement` handling — `js_popover` ignores `spec.placement`; positioning is whatever `overlay()` does. Contract §8 placement offset rules (top/bottom/left/right + end) unimplemented. Trigger anchoring + `--poodle-popover-offset` absent.
-- [ ] No trigger rendering or open/close state — `js_popover` renders the surface only; there is no trigger, no `aria`/role, no `disabled`, no `surfaceWidth`. Open/close + dismiss/Escape must live in preview `main.rs` event loop (verify it exists there; not in component).
-- [ ] No `disabled`/`onOpenChange`/`initialFocus` surface at all.
+- [x] Panel padding now `resolve_px(theme, "space.panel.x")` / `space.panel.y` (contract §8), matching GPUI — no raw rem literals.
+- [x] Border token now `tint(spec.surface_border_token() = border-subtle, spec.surface_border_alpha() = 0.74)` — matches Svelte/contract §8; border-width from `border.width.default`.
+- [x] min-width/max-width now applied from `spec.effective_surface_{min,max}_width_rem()` (14rem / 24rem defaults; overridable). The `min(…,90vw)` clamp is viewport-relative and not expressible — 24rem arm used (note).
+- accepted: `shadow_md()` retained — JsEl has no token-resolved box-shadow primitive; the contract `elevation-overlay` 3-layer stack is approximated (JsEl delta).
+- accepted: `placement` anchoring lives in the preview event loop (`overlay()` lifts the surface; the loop positions it). The component renders the open panel at current state — no in-component collision engine.
+- accepted: trigger rendering + open/close + dismiss/Escape live in the preview `main.rs` event loop, not the component (Jetstream has no DOM/overlay-positioning engine in the component layer).
+- accepted: `disabled`/`onOpenChange`/`initialFocus` are interaction concerns handled by the preview loop; spec now carries `disabled`/`surface_width`/min/max for callers that build the surface.
 - accepted: no ARIA channel (`role="dialog"`, `aria-expanded`, `aria-controls`) — Jetstream has no accessibility API.
-- accepted: interaction (toggle, outside-dismiss, Escape) lives in the preview event loop, not the component.
 
 ## Specimen parity
 

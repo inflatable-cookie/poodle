@@ -3,7 +3,9 @@
 use gpui::*;
 use gpui::StatefulInteractiveElement;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlSize, OverlayPlacement, PopoverInitialFocus, PopoverSpec};
+use poodle_specs::{
+    ControlSize, OverlayPlacement, PopoverInitialFocus, PopoverSpec, PopoverSurfaceWidth,
+};
 
 use crate::presentation::{control_height_rem, rem_to_px};
 use crate::theme_ext::{resolve_color, resolve_px, resolve_radius};
@@ -86,6 +88,26 @@ impl Popover {
         self.spec.aria_label = Some(v.into());
         self
     }
+    pub fn disabled(mut self, v: bool) -> Self {
+        self.spec.disabled = v;
+        self
+    }
+    pub fn block(mut self, v: bool) -> Self {
+        self.spec.block = v;
+        self
+    }
+    pub fn surface_width(mut self, v: PopoverSurfaceWidth) -> Self {
+        self.spec.surface_width = v;
+        self
+    }
+    pub fn surface_min_width_rem(mut self, v: f32) -> Self {
+        self.spec.surface_min_width_rem = Some(v);
+        self
+    }
+    pub fn surface_max_width_rem(mut self, v: f32) -> Self {
+        self.spec.surface_max_width_rem = Some(v);
+        self
+    }
 
     pub fn with_trigger(mut self, trigger: impl IntoElement) -> Self {
         self.trigger = Some(trigger.into_any_element());
@@ -128,19 +150,22 @@ impl IntoElement for Popover {
             OverlayPlacement::LeftEnd => 11_usize,
         };
 
-        let elevated_bg = resolve_color(theme, "color.background.elevated");
-        let border_subtle = resolve_color(theme, "color.border.subtle");
+        let elevated_bg = resolve_color(theme, spec.surface_fill_token());
+        let border_subtle = resolve_color(theme, spec.surface_border_token());
         let panel_x = resolve_px(theme, "space.panel.x");
         let panel_y = resolve_px(theme, "space.panel.y");
-        let menu_min_w = resolve_px(theme, "size.menu.minWidth");
-        let popover_max_w = resolve_px(theme, "size.popover.maxWidth");
+        // Contract §7/§8: min-width 14rem, max-width min(24rem, 90vw). Both
+        // overridable via surfaceMinWidth/surfaceMaxWidth (spec resolves the
+        // effective rem; 90vw is not expressible in GPUI, so 24rem is used).
+        let surface_min_w = px(rem_to_px(spec.effective_surface_min_width_rem()));
+        let surface_max_w = px(rem_to_px(spec.effective_surface_max_width_rem()));
         let radius = resolve_radius(theme, "radius.surface");
 
         // Svelte Popover.svelte: background = background-elevated (no mix)
         //         border = color-mix(border-subtle 74%, transparent)
         let surface_bg = elevated_bg;
         let border = Hsla {
-            a: border_subtle.a * 0.74,
+            a: border_subtle.a * spec.surface_border_alpha(),
             ..border_subtle
         };
 
@@ -151,13 +176,22 @@ impl IntoElement for Popover {
         let trigger_el: AnyElement = if let Some(trigger) = self.trigger {
             let mut trigger_wrapper =
                 div().id(("poodle-popover-trigger", placement_id)).child(trigger);
-            if let Some(ref handler) = self.on_open_change {
-                let click_handler = handler.clone();
-                let next_open = !spec.current_open();
-                trigger_wrapper =
-                    trigger_wrapper.on_click(move |_event, window, cx| {
-                        click_handler(next_open, window, cx);
-                    });
+            // Contract §3 `block`: trigger expands to available width.
+            if spec.block {
+                trigger_wrapper = trigger_wrapper.w_full();
+            }
+            // Contract §6: a disabled trigger ignores click/keydown and the
+            // popover cannot open. GPUI cannot emit aria-disabled (documented
+            // delta), but the click wiring is gated so open is blocked.
+            if !spec.disabled {
+                if let Some(ref handler) = self.on_open_change {
+                    let click_handler = handler.clone();
+                    let next_open = !spec.current_open();
+                    trigger_wrapper =
+                        trigger_wrapper.on_click(move |_event, window, cx| {
+                            click_handler(next_open, window, cx);
+                        });
+                }
             }
             trigger_wrapper.into_any_element()
         } else {
@@ -167,11 +201,10 @@ impl IntoElement for Popover {
         // ── Build surface element (None when closed) ──────────────────────────
         // Contract §6: surface carries role="dialog", tabindex, aria-label.
         // GPUI note: same delta as trigger — ARIA not expressible.
-        let surface_el: Option<AnyElement> = if spec.current_open() {
+        let surface_el: Option<AnyElement> = if spec.current_open() && !spec.disabled {
             self.content.map(|content| {
                 let mut surface = div()
                     .id("poodle-popover-surface")
-                    .focusable()
                     .rounded(radius)
                     .border_1()
                     .border_color(border)
@@ -179,10 +212,24 @@ impl IntoElement for Popover {
                     .shadow(crate::theme_ext::elevation_overlay_shadow())
                     .px(panel_x)
                     .py(panel_y)
-                    // Contract: min-width 14rem, max-width min(24rem, 90vw)
-                    .min_w(menu_min_w)
-                    .max_w(popover_max_w)
+                    // Contract §7: min-width 14rem, max-width min(24rem, 90vw)
+                    // (overridable via surfaceMinWidth/surfaceMaxWidth).
+                    .min_w(surface_min_w)
+                    .max_w(surface_max_w)
                     .child(content);
+
+                // Contract §3 surfaceWidth="trigger": surface matches the
+                // trigger width (width:100% / min-width:100%).
+                if spec.surface_width.is_trigger() {
+                    surface = surface.w_full().min_w(relative(1.0));
+                }
+
+                // Contract §6: surface is focusable only when initialFocus is
+                // not "none". When initialFocus="content" the surface itself is
+                // the focus target; otherwise the first focusable child is.
+                if spec.initial_focus != PopoverInitialFocus::None {
+                    surface = surface.focusable();
+                }
 
                 // Brand-raised treatment: gradient fill for elevated surface
                 if theme.brand_raised {

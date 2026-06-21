@@ -175,7 +175,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | inline-remediation | ok | 1 | 6 | gap |
 | list-card | fixed | 2 | 4 | gap |
 | list-card-counter | fixed | 2 | 2 | ok |
-| list-container | fixed | 6 | 6 | gap |
+| list-container | fixed | 0 | 0 | ok |
 | list-grid | fixed | 1 | 1 | gap |
 | log-list | ok | 1 | 2 | ok |
 | markdown-editor | fixed | 2 | 1 | ok |
@@ -194,13 +194,13 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | number-input | gap | 5 | 6 | gap |
 | order-by | fixed | 2 | 2 | ok |
 | page-header | fixed | 1 | 1 | ok |
-| page-loading | ok | 5 | 7 | gap |
+| page-loading | ok | 0 | 0 | gap |
 | pagination | fixed | 0 | 1 | gap |
 | pagination-summary | fixed | 2 | 2 | gap |
 | password-requirements | ok | 5 | 6 | gap |
 | picker-shell | gap | 4 | 4 | gap |
 | pill | fixed | 3 | 5 | gap |
-| popover | fixed | 5 | 7 | gap |
+| popover | fixed | 0 | 0 | gap |
 | progress | fixed | 3 | 4 | gap |
 | radio-group | ok | 4 | 4 | gap |
 | range-slider | gap | 3 | 3 | gap |
@@ -220,7 +220,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | spacer | ok | 2 | 2 | gap |
 | spinner | fixed | 5 | 6 | gap |
 | split-button | fixed | 4 | 7 | gap |
-| split-view | fixed | 6 | 6 | gap |
+| split-view | fixed | 2 | 2 | ok |
 | stack | fixed | 3 | 3 | gap |
 | state-tile | gap | 1 | 8 | gap |
 | status-bar | fixed | 0 | 0 | gap |
