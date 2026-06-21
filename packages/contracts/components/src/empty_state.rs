@@ -1,6 +1,7 @@
 use poodle_tokens::semantic;
 
 use crate::composite_types::{EmptyStateVariant, RemediationAction};
+use crate::types::ControlDensity;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EmptyStateSpec {
@@ -13,6 +14,9 @@ pub struct EmptyStateSpec {
     /// for embedding inside lists or small containers — reduced
     /// vertical padding, smaller title, smaller icon.
     pub compact: bool,
+    /// Density override for root gap + vertical padding (contract §8 density
+    /// adjustments). Orthogonal to `compact` (which is the size axis).
+    pub density: ControlDensity,
 }
 
 impl EmptyStateSpec {
@@ -24,11 +28,17 @@ impl EmptyStateSpec {
             aria_label: None,
             actions: Vec::new(),
             compact: false,
+            density: ControlDensity::Default,
         }
     }
 
     pub fn with_compact(mut self, compact: bool) -> Self {
         self.compact = compact;
+        self
+    }
+
+    pub fn with_density(mut self, density: ControlDensity) -> Self {
+        self.density = density;
         self
     }
 
@@ -56,7 +66,13 @@ impl EmptyStateSpec {
         self.actions.len()
     }
 
+    /// Root gap token, density-aware (contract §8 density adjustments):
+    /// compact → stack.sm, default → stack.md, comfortable → stack.lg.
     pub fn layout_gap_token(&self) -> &'static str {
-        semantic::SPACE_STACK_MD
+        match self.density {
+            ControlDensity::Compact => semantic::SPACE_STACK_SM,
+            ControlDensity::Default => semantic::SPACE_STACK_MD,
+            ControlDensity::Comfortable => semantic::SPACE_STACK_LG,
+        }
     }
 }

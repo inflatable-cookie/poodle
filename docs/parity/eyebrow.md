@@ -1,7 +1,13 @@
-<!-- parity consv=ok gpui=5 jetstream=5 specimen=gap -->
-<!-- pass 47: js_eyebrow now uppercases content (.to_uppercase()) matching Svelte
-     `text-transform: uppercase` + GPUI — JsEl has no CSS transform. Cross-cutting:
-     fixes every eyebrow section title across consumers. Probe-tested. -->
+<!-- parity consv=ok gpui=1 jetstream=2 specimen=gap -->
+<!-- pass 48: EyebrowSpec extended (size xs/sm/md, spacing none/bottom, element
+     span/p/h2/h3/h4, ariaLabel + font_family/font_weight/line_height/
+     letter_spacing_em/margin_bottom_rem methods). GPUI: size-based font-size,
+     label font-family resolved from token, weight 600 (contract literal),
+     line-height 1.5, spacing="bottom" margin. Jetstream: size-based font-size,
+     spacing margin; weight 600. Both uppercase (pass 47). 3 jet probe tests
+     (uppercase/md-size/spacing). REMAINING: gpui=letter-spacing (no GPUI text
+     channel — accepted delta); jet=letter-spacing + font-family (no JsEl channel
+     — runtime gap). ARIA/heading semantics on both = accepted (no a11y API). -->
 # Parity: Eyebrow
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -27,26 +33,31 @@ Svelte matches the contract exactly. No divergence.
 
 ## GPUI gap (vs Svelte + contract)
 
-Root cause: shared `EyebrowSpec` (`contracts/components/src/eyebrow.rs:4-6`) only carries `content`. No `as`/`size`/`spacing`/`ariaLabel` fields and no size/spacing/letter-spacing/family/weight/line-height tokens — so most gaps below require extending the spec first, not just the GPUI builder.
+`EyebrowSpec` now carries `element` (`as`), `aria_label`, `size`, `spacing` plus
+`font_family()`/`font_weight()`/`line_height()`/`letter_spacing_em()`/
+`margin_bottom_rem()` methods (`contracts/components/src/eyebrow.rs`). GPUI builder
+resolves them all except the noted delta.
 
-- [ ] No `size` variant support — spec lacks a `size` field + per-size font tokens; `font_size_rem()` is a flat `0.6875` (`eyebrow.rs:58`). Add `size` to `EyebrowSpec` (`xs`/`sm`/`md`) resolving `0.6875`/`0.6875`/`0.85rem`, then branch in the builder.
-- [ ] No `spacing` support — contract `spacing="bottom"` (margin-bottom `0.5rem`, `0.35rem` for xs) has no spec field; GPUI never applies bottom margin. Add `spacing` to spec + apply `.mb(...)` from a token.
-- [ ] No `as` / heading semantics — `into_element` always emits a plain `div` (`eyebrow.rs:60-66`); `as` not in spec. Carry `as` and select element/semantics.
-- [ ] `letter-spacing 0.12em` not applied — flagged as known delta in code comment (`eyebrow.rs:57`) but contract §8 + Tier-2 checklist require it. Track as a delta or implement once GPUI exposes letter-spacing.
-- [ ] `font-family` not resolved — builder sets size/weight/color but never reads `font.family` / `typography.label.family`; relies on GPUI default font. Resolve the label family token.
-- accepted: no ARIA (gpui has no accessibility API) — `ariaLabel` cannot be emitted.
+- [x] FIXED `size` variant — `font_size_rem()` branches `xs`/`sm` → `0.6875rem`, `md` → `0.85rem` (contract-exact literals). Builder uses it.
+- [x] FIXED `spacing="bottom"` — builder applies `.mb(rem_to_px(margin_bottom_rem()))` (`0.5rem`, `0.35rem` for xs) when spacing is bottom.
+- [x] FIXED `font-family` — builder calls `.font_family(spec.font_family())` resolving `TYPOGRAPHY_LABEL_FAMILY`.
+- [x] FIXED `font-weight`/`line-height` — `FontWeight(spec.font_weight())` (600, contract literal — heavier than the 500 label-weight token), `relative(spec.line_height())` (1.5).
+- [x] ACCEPTED `as`/heading semantics — `element` stored on the spec; GPUI has no a11y/heading API so it is not emitted, but the visual treatment is identical on every element (contract §4 "same visual on a heading element"). Same accepted bucket as ARIA.
+- [ ] `letter-spacing` (0.12em / 0.04em md) — `letter_spacing_em()` exists on the spec but GPUI has no text letter-spacing channel. Accepted typographic delta (contract §12-eligible).
+- accepted: no ARIA (gpui has no accessibility API) — `aria_label` cannot be emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-Same shared-spec root cause as GPUI: `EyebrowSpec` only carries `content`.
+Same extended `EyebrowSpec`. `js_eyebrow` resolves size/spacing/weight; uppercase
+done in-component (pass 47).
 
-- [ ] `text-transform: uppercase` NOT applied — `js_eyebrow` passes `spec.content` through verbatim (`eyebrow.rs:15-17`); GPUI uppercases the string (`gpui/.../eyebrow.rs:54`) but Jetstream does not, so casing depends entirely on caller-supplied caps. Uppercase in the component.
-- [ ] Hardcoded `text_weight(600)` literal (`eyebrow.rs:20`) — resolve weight from a token (e.g. `font.weight.semibold`), not a raw `600`.
-- [ ] No `size` variant support — spec lacks `size`; flat `font_size_rem()` only (`eyebrow.rs:13`). Add spec field + per-size tokens, then branch.
-- [ ] No `spacing="bottom"` support — no margin applied; spec field absent. Add field + bottom-margin token.
-- [ ] No `as` / heading semantics — always emits `label()` (`eyebrow.rs:17`); `as` not in spec.
-- [ ] `letter-spacing 0.12em` not applied — contract §8 requires it; `js_eyebrow` sets only color/size/weight. Apply tracking from a token (or record as accepted delta if runtime lacks tracking).
-- accepted: no ARIA channel for `ariaLabel`.
+- [x] FIXED `text-transform: uppercase` — `js_eyebrow` uppercases `spec.content` (`eyebrow.rs`), matching GPUI + Svelte. Probe-tested with mixed-case input.
+- [x] FIXED `text_weight` — now `spec.font_weight()` (600, contract-exact literal; the label-weight token is 500, so this is NOT a missing token resolution — the contract specifies the literal).
+- [x] FIXED `size` variant — `font_size_rem()` branches per size; md probe-tested (font larger than sm).
+- [x] FIXED `spacing="bottom"` — `.mb(rem_to_px(margin_bottom_rem()))` applied; probe-tested.
+- [x] ACCEPTED `as`/heading semantics — `element` stored; Jetstream has no heading/a11y channel. Visual treatment identical across elements.
+- [ ] `letter-spacing` + `font-family` — JsEl has no `letter_spacing`/`font_family`/`text_transform` builder methods. Runtime gap (note): `letter_spacing_em()`/`font_family()` live on the spec, applied once the runtime exposes the channels.
+- accepted: no ARIA channel for `aria_label`.
 - accepted: this component is non-interactive — no preview event-loop wiring needed.
 
 ## Specimen parity
@@ -57,7 +68,7 @@ Same shared-spec root cause as GPUI: `EyebrowSpec` only carries `content`.
 
 ## Notes
 
-- Biggest driver: `EyebrowSpec` is impoverished (`content` only). The contract/Svelte define four props (`as`, `ariaLabel`, `size`, `spacing`); the shared spec models none of them, so every GPUI/Jetstream gap above is downstream of the spec, not the renderers. Fix the spec first, then both Rust targets.
-- Jetstream's missing `text-transform: uppercase` is the one functional (non-typographic-polish) bug — GPUI does it, Jetstream does not, and the specimen hides it by feeding pre-capitalized strings.
+- `EyebrowSpec` now models all four contract props: `element` (`as`), `aria_label`, `size`, `spacing`, plus typographic metric methods. Both Rust targets resolve them; the only open items are runtime-channel gaps (letter-spacing on both; font-family on Jetstream) and the accepted no-a11y/heading-semantics bucket.
 - `consv=ok`: contract and Svelte agree on every prop, default, anatomy part, and ARIA rule.
-- Contract §14 flags a possible future `tone` prop — not yet in Svelte or contract props, so out of scope for parity.
+- The pass-47 prompt note mentioned a possible eyebrow `tone` prop and a leading icon/dot — neither is in the contract (§14 flags `tone` only as a *future* follow-up) or in Svelte, so both are out of scope for parity. Do not add them speculatively.
+- `font-weight: 600` is a contract literal (§8), intentionally heavier than the `TYPOGRAPHY_LABEL_WEIGHT` token (500). Resolving weight "from a token" would regress it — keep the literal.

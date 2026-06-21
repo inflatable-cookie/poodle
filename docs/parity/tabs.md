@@ -1,12 +1,17 @@
-<!-- parity consv=fixed gpui=4 jetstream=4 specimen=gap -->
-<!-- pass 51: variant/state cleanup both targets. GPUI: removed non-Svelte hover bg from
-     text/card + accent bottom-border on active (pill tint only); density padding via
-     control_space_x_rem; card-row gap from list_gap_token. Jetstream: all tabs weight 600
-     (was per-selection); zero vertical pad + min_h(control-height − 0.25rem) (was *0.25 heuristic);
-     close-x for closable card tabs; uniform card border + radius (dropped fragile reset); icon↔label
-     gap from space.inline.sm. 6 probe tests; jet 231, gpui clean. REMAINING (real, deferred):
-     strip variant (separate tab_strip.rs), vertical orientation, separator/actions/collapse/
-     fullWidth/historyKey/tooltips host features. Activation/keyboard/reorder = preview-loop. -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 52: fullWidth + vertical orientation built on BOTH targets. Added
+     TabsSpec.is_full_width (+ with_full_width, uses_full_width(), is_vertical()).
+     fullWidth (horizontal): list flex w_full, tabs flex_grow + w_full + justify_center
+     (underline/card; block already flexes under fullWidth — content-sized otherwise per
+     Svelte flex:0 0 auto). Vertical: flex_col, border shifts to inline-end (right) edge,
+     icon-only label (contract §8 label display:none), block separator → top border.
+     build_tab_label gained icon_only param. Jetstream caption-size badge now from
+     typography.caption.size token. 4 new probe tests (jet: fullWidth equal-width,
+     vertical icon-only, vertical block column); gpui clean. REMAINING (accepted/deferred):
+     strip variant = separate tab_strip.rs (architecture delta); badge geometry rems
+     (radius 0.5625 / min-w 1.125 / px 0.3125) = token gap, no dedicated token;
+     separator/actions/collapse/historyKey/tooltips = host-snippet/preview-loop;
+     close/reorder/keyboard = preview-loop. -->
 # Parity: Tabs
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -40,12 +45,15 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED Removed the `color.background.elevated` hover background from the underline and card variants — Svelte text/card variants have NO hover bg (only block/strip do, which keep their token-resolved hover).
 - [x] FIXED Density→padding match arms (underline/block/pill) now resolve via `control_space_x_rem(density)` instead of inline `0.5/0.75/1.0` floats.
 - [x] FIXED Removed the `border_b_2()` accent underline from the active text/underline tab — the indicator is now the pill-shaped bg tint only, matching Svelte.
-- [ ] No close button interaction — card close icon rendered (`tabs.rs:441-452`) but no `onClose` callback wired; Delete key unhandled.
-- [ ] No reorder (drag-and-drop or Alt+Arrow) — `reorderable` absent from builder + spec usage.
-- [ ] No `strip` variant in `Tabs` — handled by separate `tab_strip.rs`/`TabStripItem`; contract treats strip as a Tabs variant. Note split.
-- [ ] No vertical orientation rendering — `orientation` builder exists (`tabs.rs:132`) but render fns ignore it; no icon-only collapse, no label/close hiding.
-- [ ] No `separator`, `actions`, `count` token resolution (count badge bg is `color_mix(text,surface,0.14)` ad-hoc, not Pill tokens), `collapseWhenOverflow`, `fullWidth`, `historyKey`, tooltips.
-- [ ] Arrow-key nav wraps unconditionally and ignores disabled tabs (`tabs.rs:276-292`) — Svelte skips disabled via `findNextEnabledIndex`; no Home/End handling.
+- [x] FIXED `fullWidth` — `uses_full_width()` (horizontal only) makes the underline/card list `w_full` and each tab `flex_grow().w_full().justify_center()`; block tabs flex to equal shares under fullWidth (content-sized `flex:0 0 auto` otherwise, matching Svelte). Contract §8 Full-width table.
+- [x] FIXED vertical orientation — `is_vertical()` drives `flex_col` lists with the rule on the inline-end (right) edge, icon-only tabs (label/close hidden per contract §8), and block separators on the top border. `build_tab_label` icon_only param.
+- [x] FIXED count badge size now from `typography.caption.size` (already resolved in GPUI's `build_tab_label`). Badge background still `color_mix(text,surface,0.14)` — see badge-geometry note below.
+- [ ] No close button interaction — card close icon rendered but no `onClose` callback wired; Delete key unhandled. **preview-loop** (interaction lives in the host event loop, not the component).
+- [ ] No reorder (drag-and-drop or Alt+Arrow). **preview-loop**.
+- accepted: `strip` variant handled by separate `tab_strip.rs`/`TabStripItem` (architecture delta — contract treats strip as a Tabs variant; audit under a `tab-strip` pass).
+- accepted: badge geometry rems (radius `0.5625rem`, `min-w 1.125rem`, `px 0.3125rem`) — **token gap**: no dedicated badge token exists; `radius.pill` is a full 999px pill, not the 9px badge radius. Contract-exact rems until a badge token lands.
+- accepted: `separator`/`actions`/`collapseWhenOverflow`/`historyKey`/tooltips — host-snippet / overflow-measurement / URL-sync features, not component visual structure.
+- [ ] Arrow-key nav wraps unconditionally and ignores disabled tabs — Svelte skips disabled via `findNextEnabledIndex`; no Home/End handling. **preview-loop** (keyboard handling).
 - accepted: no ARIA (gpui has no accessibility API) — `role=tablist/tab/tabpanel`, `aria-selected`, `aria-controls` not emitted.
 
 ## Jetstream gap (vs Svelte + contract)
@@ -56,12 +64,16 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED All tabs now render at `font-weight: 600` (underline/card/block); weight no longer changes on selection.
 - [x] FIXED Removed the accent `border_b_2().border_color_bottom()` from the active underline tab — pill-shaped bg tint only, matching Svelte.
 - [x] FIXED Close `x` button now rendered for closable card tabs (1.25rem square, `text-secondary` icon, `radius-control − 0.125rem`, `margin-right 0.25rem`). `onClose`/Delete interaction is preview-loop.
-- [ ] No reorder; interaction (click/keyboard) lives in preview `main.rs` event loop — note if absent there.
-- [ ] No `strip` variant in `js_tabs` — handled by separate `tab_strip.rs`. Contract treats strip as a Tabs variant.
-- [ ] No vertical orientation, no `separator`, no `actions`, no `count` Pill tokens, no `collapseWhenOverflow`/`fullWidth`/`historyKey`/tooltips.
-- [ ] No panel rendering — `js_tabs` returns tab bar only (`tabs.rs:394-407`); content is caller's responsibility, so `role=tabpanel`/`aria-labelledby` linkage absent.
+- [x] FIXED `fullWidth` — `uses_full_width()` (horizontal only) sets the underline/card list `w_full` and each tab `flex_grow().w_full().justify_center()`. Probe-tested: 3 tabs each ≈ container/3. Block flexes equally already.
+- [x] FIXED vertical orientation — `is_vertical()` renders `flex_col` lists with the rule on the right edge (`border_r_1`), icon-only tabs (label hidden via `build_tab_label` icon_only), block separators on the top border. Probe-tested: vertical underline is icon-only; vertical block stacks into a column.
+- [x] FIXED count-badge font now from `typography.caption.size` token (was `rem_to_px(0.6875)` literal).
+- [ ] No reorder; interaction (click/keyboard) lives in the preview `main.rs` event loop. **preview-loop**.
+- accepted: `strip` variant handled by separate `tab_strip.rs` (architecture delta).
+- accepted: `separator`/`actions`/`collapseWhenOverflow`/`historyKey`/tooltips — host-snippet/overflow/URL features, not component visual structure.
+- accepted: badge geometry rems (radius `0.5625`, `min-w 1.125`, `px 0.3125`) — **token gap**, no dedicated badge token (`radius.pill` is a 999px full pill).
+- [ ] No panel rendering — `js_tabs` returns the tab bar only; content is the caller's responsibility, so `role=tabpanel`/`aria-labelledby` linkage is absent. accepted (panel is host-owned).
 - [x] FIXED Removed the fragile card active-tab bottom-border reset workaround — card items now use a uniform border + `radius-control` on all sides, with selected recoloring border/bg only (matches Svelte, which keeps a uniform card border).
-- [ ] Disabled tabs not skipped in nav; Home/End/Delete unhandled (lives in main.rs).
+- [ ] Disabled tabs not skipped in nav; Home/End/Delete unhandled. **preview-loop** (lives in main.rs).
 - accepted: no ARIA channel; interaction in preview event loop, not the component.
 
 ## Specimen parity

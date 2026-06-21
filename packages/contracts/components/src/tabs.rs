@@ -23,6 +23,11 @@ pub struct TabsSpec {
     /// indicator is suppressed — useful for flush layouts. Matches
     /// Svelte `bordered` prop (default true).
     pub is_bordered: bool,
+    /// When true (and orientation is horizontal), tabs flex to fill the
+    /// row at equal widths with centered labels. Matches Svelte
+    /// `fullWidth` prop / `data-full-width` (default false). Contract §8
+    /// Full-width table.
+    pub is_full_width: bool,
     /// Optional key used to persist the active tab across sessions.
     /// The consumer owns the actual storage; this field carries the
     /// key so the render surface can expose a stable id for tests /
@@ -45,6 +50,7 @@ impl Default for TabsSpec {
             aria_label: None,
             is_reorderable: false,
             is_bordered: true,
+            is_full_width: false,
             history_key: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
@@ -74,6 +80,23 @@ impl TabsSpec {
     pub fn with_bordered(mut self, is_bordered: bool) -> Self {
         self.is_bordered = is_bordered;
         self
+    }
+
+    pub fn with_full_width(mut self, is_full_width: bool) -> Self {
+        self.is_full_width = is_full_width;
+        self
+    }
+
+    /// True when the full-width flex layout applies: `fullWidth` set and the
+    /// orientation is horizontal (contract §8 Full-width is non-vertical only).
+    pub fn uses_full_width(&self) -> bool {
+        self.is_full_width && self.orientation == Orientation::Horizontal
+    }
+
+    /// True when the tablist renders vertically (icon-only collapse, border on
+    /// the inline-end edge). Contract §7 + §8 vertical tables.
+    pub fn is_vertical(&self) -> bool {
+        self.orientation == Orientation::Vertical
     }
 
     pub fn with_history_key(mut self, history_key: impl Into<String>) -> Self {

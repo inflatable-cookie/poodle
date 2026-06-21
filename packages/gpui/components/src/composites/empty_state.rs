@@ -3,7 +3,8 @@
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ButtonSpec, EmptyStateSpec, EmptyStateVariant, IconSize, IconSpec, RemediationAction,
+    ButtonSpec, ControlDensity, EmptyStateSpec, EmptyStateVariant, IconSize, IconSpec,
+    RemediationAction,
 };
 
 use crate::presentation::rem_to_px;
@@ -94,7 +95,9 @@ impl IntoElement for EmptyState {
         let spec = &self.spec;
 
         let inline_gap = resolve_px(theme, "space.inline.sm");
-        let body_size = resolve_px(theme, "typography.body.size");
+        // Message font: 0.8125rem default, 0.75rem compact — match Svelte.
+        let message_size = px(rem_to_px(if spec.compact { 0.75 } else { 0.8125 }));
+        // Root gap — density-aware via spec.layout_gap_token().
         let gap = resolve_px(theme, spec.layout_gap_token());
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
@@ -122,11 +125,12 @@ impl IntoElement for EmptyState {
         // Svelte: title = 1.125rem default, 0.9375rem compact.
         // Svelte: padding = panel_y*1.5 vertical (default) / space.stack.lg (compact), panel_x horizontal.
         let title_size = px(rem_to_px(if spec.compact { 0.9375 } else { 1.125 }));
-        let vertical_padding = if spec.compact {
-            resolve_px(theme, "space.stack.lg")
-        } else {
-            // panel_y (default) * 1.5
-            resolve_px(theme, "space.panel.y") * 1.5
+        // Vertical padding — density-aware (contract §8): compact → stack.lg,
+        // default → panel_y * 1.5, comfortable → panel_y * 2.
+        let vertical_padding = match spec.density {
+            ControlDensity::Compact => resolve_px(theme, "space.stack.lg"),
+            ControlDensity::Default => resolve_px(theme, "space.panel.y") * 1.5,
+            ControlDensity::Comfortable => resolve_px(theme, "space.panel.y") * 2.0,
         };
         let horiz_padding = resolve_px(theme, "space.panel.x");
 
@@ -191,7 +195,7 @@ impl IntoElement for EmptyState {
         if let Some(ref message) = spec.message {
             container = container.child(
                 div()
-                    .text_size(body_size)
+                    .text_size(message_size)
                     .text_color(text_secondary)
                     .text_center()
                     .max_w(px(rem_to_px(24.0)))

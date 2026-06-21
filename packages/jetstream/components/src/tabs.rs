@@ -29,9 +29,25 @@ fn build_tab_label(
     theme: &JetstreamThemeProvider,
     text_color: glam::Vec4,
     font_size: f32,
+    icon_only: bool,
 ) -> JsEl {
     let has_icon = tab.icon.is_some();
     let has_count = tab.count.is_some();
+
+    // Vertical/icon-only mode: contract §8 hides `.poodle-tabs__label`. Show the
+    // icon alone; if there is no icon fall back to the label so the tab is never
+    // empty.
+    if icon_only {
+        if let Some(ref icon_name) = tab.icon {
+            return ui_element::icon(icon_name.as_str())
+                .w(font_size)
+                .h(font_size)
+                .text_color(text_color);
+        }
+        return ui_element::label(&tab.label)
+            .text_size(font_size)
+            .text_color(text_color);
+    }
 
     // Fast path: plain label with no decoration.
     if !has_icon && !has_count {
@@ -66,8 +82,11 @@ fn build_tab_label(
 
     // Trailing count badge.
     if let Some(count) = tab.count {
-        // Small pill: accent-tint bg at 14% opacity, caption-size text.
-        let caption_size = rem_to_px(0.6875); // ~11px caption
+        // Small pill: accent-tint bg at 14% opacity, caption-size text from the
+        // caption typography token. Badge geometry (radius 0.5625rem, min-width
+        // 1.125rem, padding-x 0.3125rem) has no dedicated token — contract-exact
+        // rems, noted as a token gap in the parity doc.
+        let caption_size = resolve_px(theme, "typography.caption.size");
         let accent = resolve_color(theme, "color.accent.base");
         let badge_bg = tint(accent, 0.14);
         let badge = ui_element::label(format!("{count}"))
@@ -129,11 +148,28 @@ fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let radius = resolve_radius(theme, "radius.control");
 
     let selected = spec.current_value().map(|s| s.to_string());
+    let vertical = spec.is_vertical();
+    let full_width = spec.uses_full_width();
 
-    let mut tab_bar = ui_element::div().flex_row();
-    if spec.is_bordered {
-        tab_bar = tab_bar.border_b_1().border_color(border);
-    }
+    // Contract §8: horizontal list carries a bottom border baseline; vertical
+    // list (Text vertical table) shifts the rule to the inline-end (right) edge.
+    let mut tab_bar = if vertical {
+        let mut bar = ui_element::div().flex_col();
+        if spec.is_bordered {
+            bar = bar.border_r_1().border_color(border).pr(rem_to_px(0.5));
+        }
+        bar
+    } else {
+        let mut bar = ui_element::div().flex_row();
+        if spec.is_bordered {
+            bar = bar.border_b_1().border_color(border);
+        }
+        // Contract §8 Full-width: list becomes flex + width:100%.
+        if full_width {
+            bar = bar.w_full();
+        }
+        bar
+    };
 
     for tab in &spec.tabs {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
@@ -153,8 +189,14 @@ fn render_underline(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .text_color(text_color)
             .rounded(radius)
             .focusable()
-            .cursor_pointer()
-            .child(build_tab_label(tab, theme, text_color, font_size));
+            .cursor_pointer();
+
+        // Contract §8 Full-width: each tab flexes to equal width with centered
+        // label. Contract §8 vertical: icon-only (label hidden).
+        if full_width {
+            tab_el = tab_el.flex_grow().w_full().justify_center();
+        }
+        tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
         // Contract Tab — Text variant (selected): pill-shaped bg tint only.
         // No accent bottom border on the tab itself (the list carries the baseline).
@@ -199,12 +241,23 @@ fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let card_selected_border = blend(accent, border, 0.32);
 
     let selected = spec.current_value().map(|s| s.to_string());
+    let vertical = spec.is_vertical();
+    let full_width = spec.uses_full_width();
 
+    // Card list: row of bordered cards (horizontal) or stacked column (vertical).
     // items_end aligns shorter tabs to the bottom of the row.
-    let mut tab_bar = ui_element::div()
-        .flex_row()
-        .items_end()
-        .gap(rem_to_px(0.125));
+    let mut tab_bar = if vertical {
+        ui_element::div().flex_col().gap(rem_to_px(0.125))
+    } else {
+        let mut bar = ui_element::div()
+            .flex_row()
+            .items_end()
+            .gap(rem_to_px(0.125));
+        if full_width {
+            bar = bar.w_full();
+        }
+        bar
+    };
 
     for tab in &spec.tabs {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
@@ -235,8 +288,13 @@ fn render_card(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .border_color(bc)
             .rounded(radius)
             .focusable()
-            .cursor_pointer()
-            .child(build_tab_label(tab, theme, text_color, font_size));
+            .cursor_pointer();
+
+        // Contract §8 Full-width: equal-width cards with centered content.
+        if full_width {
+            tab_el = tab_el.flex_grow().w_full().justify_center();
+        }
+        tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
         // Contract Close button: rendered when the tab is closable.
         if tab.is_closable {
@@ -303,7 +361,8 @@ fn render_pill(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .rounded(pill_radius)
             .focusable()
             .cursor_pointer()
-            .child(build_tab_label(tab, theme, text_color, font_size));
+            // Pill is always horizontal (vertical pill not in contract §8).
+            .child(build_tab_label(tab, theme, text_color, font_size, false));
 
         if is_active {
             tab_el = tab_el.bg(active_bg);
@@ -343,13 +402,25 @@ fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let selected_bg = blend(accent, surface_bg, spec.block_selected_accent_mix());
 
     let selected = spec.current_value().map(|s| s.to_string());
+    let vertical = spec.is_vertical();
 
-    let mut tab_bar = ui_element::div()
-        .flex_row()
-        .w_full()
-        .bg(list_bg)
-        .border_b_1()
-        .border_color(border);
+    // Contract §8: block list is a full-width flex row (horizontal) or a
+    // stacked column (vertical), tinted panel bg + a closing border on the
+    // block axis edge.
+    let mut tab_bar = if vertical {
+        ui_element::div()
+            .flex_col()
+            .bg(list_bg)
+            .border_r_1()
+            .border_color(border)
+    } else {
+        ui_element::div()
+            .flex_row()
+            .w_full()
+            .bg(list_bg)
+            .border_b_1()
+            .border_color(border)
+    };
 
     for (idx, tab) in spec.tabs.iter().enumerate() {
         let is_active = selected.as_deref() == Some(tab.value.as_str());
@@ -371,11 +442,16 @@ fn render_block(spec: &TabsSpec, theme: &JetstreamThemeProvider) -> JsEl {
             .text_color(text_color)
             .focusable()
             .cursor_pointer()
-            .child(build_tab_label(tab, theme, text_color, font_size));
+            .child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
-        // Vertical separator: left border on all tabs except the first.
+        // Contract §8: separator between sibling items. Horizontal = left
+        // border; vertical = top border (block vertical item table).
         if idx > 0 {
-            tab_el = tab_el.border_l_1().border_color(separator);
+            tab_el = if vertical {
+                tab_el.border_t_1().border_color(separator)
+            } else {
+                tab_el.border_l_1().border_color(separator)
+            };
         }
 
         if is_active {
@@ -565,5 +641,92 @@ mod tests {
         .with_value("a");
         let tree = probe(&js_tabs(&spec, &th), 600.0, 120.0);
         assert!(tree.has_text("FAQ"));
+    }
+
+    /// Contract §8 Full-width: tabs flex to equal widths spanning the row.
+    /// Each underline tab button should be roughly container-width / n wide,
+    /// markedly wider than the content-sized default.
+    #[test]
+    fn full_width_tabs_share_row_equally() {
+        let th = theme();
+        let width = 600.0;
+        let spec = TabsSpec::new(three_tabs())
+            .with_variant(TabVariant::Underline)
+            .with_value("a")
+            .with_full_width(true);
+        let tree = probe(&js_tabs(&spec, &th), width, 120.0);
+
+        // Collect the three tab button widths.
+        let tab_widths: Vec<f32> = tree
+            .nodes
+            .iter()
+            .filter(|n| n.kind == "Button")
+            .map(|n| n.w)
+            .collect();
+        assert_eq!(tab_widths.len(), 3, "expected 3 tab buttons");
+        // Equal width: each ~ width/3; allow generous tolerance for borders.
+        let expected = width / 3.0;
+        for w in &tab_widths {
+            assert!(
+                (*w - expected).abs() < expected * 0.25,
+                "full-width tab {w} not near equal share {expected}; tree: {}",
+                tree.to_json()
+            );
+        }
+    }
+
+    /// Contract §8 vertical: label is hidden, the icon stands alone. A vertical
+    /// underline tablist renders icons but NOT the label text.
+    #[test]
+    fn vertical_underline_is_icon_only() {
+        let th = theme();
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "Explorer").with_icon("folder"),
+            TabDefinition::new("b", "Search").with_icon("search"),
+        ])
+        .with_variant(TabVariant::Underline)
+        .with_orientation(poodle_specs::Orientation::Vertical)
+        .with_value("a");
+        let tree = probe(&js_tabs(&spec, &th), 80.0, 240.0);
+
+        // Icon names surface as Icon nodes.
+        let icon_names: Vec<&str> = tree
+            .nodes
+            .iter()
+            .filter(|n| n.kind == "Icon")
+            .filter_map(|n| n.text.as_deref())
+            .collect();
+        assert!(icon_names.contains(&"folder"), "icons: {icon_names:?}");
+        // Labels are hidden in icon-only vertical mode.
+        assert!(
+            !tree.has_text("Explorer"),
+            "vertical tab should hide label; texts: {:?}",
+            tree.texts()
+        );
+    }
+
+    /// Contract §8 vertical: a vertical block tablist stacks tabs in a column,
+    /// so the bar is taller than it is wide for a narrow viewport.
+    #[test]
+    fn vertical_block_stacks_into_column() {
+        let th = theme();
+        let spec = TabsSpec::new(three_tabs())
+            .with_variant(TabVariant::Block)
+            .with_orientation(poodle_specs::Orientation::Vertical)
+            .with_value("a");
+        let tree = probe(&js_tabs(&spec, &th), 120.0, 300.0);
+
+        // Buttons should be stacked: distinct y offsets, increasing down the column.
+        let ys: Vec<f32> = tree
+            .nodes
+            .iter()
+            .filter(|n| n.kind == "Button")
+            .map(|n| n.y)
+            .collect();
+        assert_eq!(ys.len(), 3, "expected 3 stacked tab buttons");
+        assert!(
+            ys[1] > ys[0] && ys[2] > ys[1],
+            "vertical block tabs should stack with increasing y: {ys:?}"
+        );
     }
 }

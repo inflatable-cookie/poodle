@@ -2,7 +2,7 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::EyebrowSpec;
+use poodle_specs::{EyebrowElement, EyebrowSize, EyebrowSpacing, EyebrowSpec};
 
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_color;
@@ -40,6 +40,26 @@ impl Eyebrow {
         self.spec.content = Some(v.into());
         self
     }
+
+    pub fn element(mut self, v: EyebrowElement) -> Self {
+        self.spec.element = v;
+        self
+    }
+
+    pub fn size(mut self, v: EyebrowSize) -> Self {
+        self.spec.size = v;
+        self
+    }
+
+    pub fn spacing(mut self, v: EyebrowSpacing) -> Self {
+        self.spec.spacing = v;
+        self
+    }
+
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
 }
 
 impl IntoElement for Eyebrow {
@@ -53,16 +73,24 @@ impl IntoElement for Eyebrow {
         // Contract: uppercase the content
         let label = spec.content.clone().unwrap_or_default().to_uppercase();
 
-        // Contract: 0.6875rem, weight 600, line-height 1.5
-        // letter-spacing 0.12em not available in GPUI (known delta)
+        // Contract §8: size-dependent font-size (0.6875rem xs/sm, 0.85rem md),
+        // weight 600, line-height 1.5, label font-family. letter-spacing
+        // (0.12em / 0.04em md) has no GPUI text-style channel — accepted delta.
         let font_size = px(rem_to_px(spec.font_size_rem()));
-
-        div()
+        let font_weight = FontWeight(spec.font_weight() as f32);
+        let mut el = div()
             .text_size(font_size)
             .text_color(text_color)
-            .font_weight(FontWeight::SEMIBOLD)
-            .line_height(relative(1.5))
-            .child(label)
-            .into_any_element()
+            .font_family(spec.font_family())
+            .font_weight(font_weight)
+            .line_height(relative(spec.line_height()));
+
+        // Contract §8 spacing="bottom": bottom margin (0.5rem, 0.35rem for xs).
+        let mb = spec.margin_bottom_rem();
+        if mb > 0.0 {
+            el = el.mb(px(rem_to_px(mb)));
+        }
+
+        el.child(label).into_any_element()
     }
 }

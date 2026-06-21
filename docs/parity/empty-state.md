@@ -1,9 +1,13 @@
-<!-- parity consv=ok gpui=2 jetstream=5 specimen=ok -->
-<!-- pass 20: GPUI now honors variant (dashed border, root radius, per-variant bg
-     tint neutral/search/firstRun, default visual circle + icon inbox/search/plus),
-     composes Button::from_spec per RemediationAction, and wires the previously-dead
-     on_action callback. Dropped max_w(400)/px button literals. Build clean.
-     Remaining GPUI: ARIA (accepted no-a11y). -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- pass 41: both Rust targets closed. Added additive EmptyStateSpec.density
+     (ControlDensity) + density-aware layout_gap_token(). GPUI: density-aware
+     vertical padding (compact→stack.lg / default→panel_y*1.5 / comfortable→
+     panel_y*2) and compact message font 0.75rem (was fixed body_size). Jetstream:
+     dashed-border-approx (solid; JsEl has no dashed) + variant root tint
+     (neutral surface@76% / search accent@7% / firstRun success@7%) + radius
+     (surface-0.125rem) + density-aware vertical padding (was fixed 2rem). Probe
+     tests added (icon+title+message, variant icon/tint, actions, compact font).
+     Remaining: ARIA (accepted, no a11y API); JsEl dashed border (approx solid). -->
 # Parity: EmptyState
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -23,27 +27,25 @@ Svelte implements the full contract — props (`title`, `message`, `variant`, `s
 
 ## GPUI gap (vs Svelte + contract)
 
-- [ ] Root is a plain `div` (`empty_state.rs:113-121`), not a `<section>` — no dashed border, no border-radius, no variant background tint, no aria-label.
-- [ ] `variant` field is never read in render — variant background tint AND default variant icon both absent. When no illustration passed, there is no visual at all.
-- [ ] No circular visual container — default variant icon (inbox/search/plus) not rendered; only the optional `with_illustration` slot shows anything.
-- [ ] No `aria-hidden` on visual; title is a plain `div` (`:135-142`), not an `<h3>` heading.
-- [ ] No `size` enum (uses bool `compact`); `compact` only affects title font + padding, not message font and (absent) visual circle. No `density` prop.
-- [ ] Actions are hand-rolled `div` buttons (`empty_state.rs:157-184`), not real Button components (Jetstream composes `js_button`; GPUI does not).
-- [ ] `on_action` callback stored (`empty_state.rs:78`) but never wired to the buttons — dead callback; buttons have no `.on_click`.
-- [ ] Hardcoded `.max_w(px(400.0))` at `empty_state.rs:151` (contract message max-width is copy `24rem` — wrong element + raw px); resolve from a token.
-- [ ] Hardcoded button padding `.px(px(16.0))` `:168` / `.py(px(8.0))` `:169` and disabled `opacity 0.5` — resolve from control tokens.
-- accepted: no ARIA (gpui has no accessibility API) — `<section>` aria-label, `aria-hidden`, heading role.
+All static-render gaps closed. GPUI honors variant (dashed border, root radius,
+per-variant tint, default visual circle + icon), composes real Buttons, wires
+`on_action`, resolves message max-width from rem, and (pass 41) scales the message
+font with compact (0.75rem) and applies density-aware vertical padding.
+
+- accepted: no ARIA (gpui has no accessibility API) — `<section>` aria-label, `aria-hidden`, heading role. The visual circle is decorative; the textual message/action labels carry the semantic core.
+- note: JsEl/GPUI render uses a real dashed border (`border_dashed`).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Root is a plain `div` (`empty_state.rs:48-50`), not a `<section>` — no dashed border, no border-radius, no variant background tint, no aria-label.
-- [ ] Variant background tint not applied — `variant` drives icon selection only (`empty_state.rs:24-28`); circular visual bg is flat `color.background.panel` (`:34`) without the 90% color-mix.
-- [ ] No `density` prop; `size` is bool `compact` (full font/icon scaling present — better than GPUI).
-- [ ] No custom `visual` slot equivalent.
-- [ ] Hardcoded vertical padding `.pt(rem_to_px(2.0)).pb(rem_to_px(2.0))` at `empty_state.rs:50` — contract is `panel_y * 1.5`, density-aware; fixed 2rem ignores density.
-- accepted: no ARIA (no `<section>`/aria-label, no `aria-hidden`, no heading).
+All static-render gaps closed (pass 41): root now carries border + variant tint
+(neutral surface@76% / search accent@7% / firstRun success@7%) + radius
+(surface-0.125rem), and vertical padding is density-aware (was a fixed 2rem). Real
+`js_button` composition, variant icon selection, and compact font/icon scaling were
+already present.
 
-> Jetstream is the stronger of the two Rust targets: real `js_button` composition (`empty_state.rs:80-88`), variant icon selection, and full compact scaling. Its gaps are border/background/radius, variant tint, density, and aria.
+- accepted: no ARIA (no `<section>`/aria-label, no `aria-hidden`, no heading).
+- note: JsEl has no dashed-border style — the root border is rendered solid (visual approximation of the contract's dashed border). All other border properties (width, color) match.
+- note: no custom `visual` slot equivalent (Jetstream has no snippet channel); default variant icon always used.
 
 ## Specimen parity
 

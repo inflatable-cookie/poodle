@@ -28,8 +28,24 @@ fn build_tab_label(
     tab_def: &TabDefinition,
     theme: &GpuiThemeProvider,
     text_color: Hsla,
+    icon_only: bool,
 ) -> AnyElement {
     let caption_size = resolve_px(theme, "typography.caption.size");
+
+    // Vertical/icon-only mode: contract §8 hides `.poodle-tabs__label`. Show the
+    // icon alone; fall back to the label when the tab has no icon.
+    if icon_only {
+        if let Some(ref icon_name) = tab_def.icon {
+            return Icon::from_spec(
+                IconSpec::new(icon_name.clone()).with_size(IconSize::Sm),
+                theme,
+            )
+            .with_color(text_color)
+            .into_any_element();
+        }
+        return div().child(tab_def.label.clone()).into_any_element();
+    }
+
     // Fast path: no decoration — just the label string.
     if tab_def.icon.is_none() && tab_def.count.is_none() {
         return div().child(tab_def.label.clone()).into_any_element();
@@ -191,15 +207,31 @@ impl Tabs {
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
+        let vertical = self.spec.is_vertical();
+        let full_width = self.spec.uses_full_width();
 
         // is_bordered (default true) controls whether the underline
         // indicator line renders under the whole tab list for the
         // Text/Underline variant. Setting it false gives a flush
-        // layout with no baseline.
-        let mut tab_row = div().flex();
-        if self.spec.is_bordered {
-            tab_row = tab_row.border_b_1().border_color(border);
-        }
+        // layout with no baseline. Contract §8: horizontal carries a
+        // bottom border, vertical shifts the rule to the right edge.
+        let mut tab_row = if vertical {
+            let mut row = div().flex().flex_col();
+            if self.spec.is_bordered {
+                row = row.border_r_1().border_color(border).pr(px(rem_to_px(0.5)));
+            }
+            row
+        } else {
+            let mut row = div().flex();
+            if self.spec.is_bordered {
+                row = row.border_b_1().border_color(border);
+            }
+            // Contract §8 Full-width: list becomes flex + width:100%.
+            if full_width {
+                row = row.w_full();
+            }
+            row
+        };
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
 
@@ -215,6 +247,11 @@ impl Tabs {
                 .py(control_y)
                 .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD);
+
+            // Contract §8 Full-width: equal-width tabs with centered labels.
+            if full_width {
+                tab = tab.flex_grow().w_full().flex().justify_center();
+            }
 
             if is_active {
                 // Svelte text variant (selected): pill-shaped highlight with
@@ -288,7 +325,8 @@ impl Tabs {
             } else {
                 text_secondary
             };
-            tab = tab.child(build_tab_label(tab_def, theme, label_color));
+            // Contract §8 vertical: icon-only (label hidden).
+            tab = tab.child(build_tab_label(tab_def, theme, label_color, vertical));
             tab_row = tab_row.child(tab);
         }
 
@@ -315,9 +353,20 @@ impl Tabs {
         let label_size = px(rem_to_px(size_font_rem(effective_size)));
 
         let current_value = self.spec.current_value().map(|s| s.to_string());
+        let vertical = self.spec.is_vertical();
+        let full_width = self.spec.uses_full_width();
 
         // Card-row inter-item gap = list gap (space.inline.sm per contract §8 List).
-        let mut tab_row = div().flex().items_end().gap(resolve_px(theme, self.spec.list_gap_token()));
+        // Vertical stacks the cards into a column; full-width spans the row.
+        let mut tab_row = if vertical {
+            div().flex().flex_col().gap(resolve_px(theme, self.spec.list_gap_token()))
+        } else {
+            let mut row = div().flex().items_end().gap(resolve_px(theme, self.spec.list_gap_token()));
+            if full_width {
+                row = row.w_full();
+            }
+            row
+        };
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
 
@@ -334,6 +383,11 @@ impl Tabs {
                 .font_weight(FontWeight::SEMIBOLD)
                 .border_1()
                 .rounded(radius);
+
+            // Contract §8 Full-width: equal-width cards with centered content.
+            if full_width {
+                tab = tab.flex_grow().w_full().flex().items_center().justify_center();
+            }
 
             // Svelte: default = surface 92% fill, border-subtle 68% border
             // Selected = accent 32% + border-subtle border, text-primary color
@@ -428,21 +482,22 @@ impl Tabs {
             } else {
                 text_secondary
             };
-            // Closable tab: label + close button in a flex row
-            if tab_def.is_closable {
+            // Closable tab: label + close button in a flex row. Contract §8
+            // vertical hides both the label (icon-only) and the close button.
+            if tab_def.is_closable && !vertical {
                 let icon_muted = resolve_color(&self.theme, "color.icon.muted");
                 let gap_sm = resolve_px(theme, "space.inline.sm");
                 tab = tab
                     .flex()
                     .items_center()
                     .gap(gap_sm)
-                    .child(build_tab_label(tab_def, theme, label_color))
+                    .child(build_tab_label(tab_def, theme, label_color, false))
                     .child(
                         Icon::from_spec(IconSpec::new("x").with_size(IconSize::Sm), &self.theme)
                             .with_color(icon_muted),
                     );
             } else {
-                tab = tab.child(build_tab_label(tab_def, theme, label_color));
+                tab = tab.child(build_tab_label(tab_def, theme, label_color, vertical));
             }
             tab_row = tab_row.child(tab);
         }
@@ -486,12 +541,25 @@ impl Tabs {
             self.spec.block_selected_hover_accent_mix(),
         );
 
-        let mut tab_row = div()
-            .flex()
-            .w_full()
-            .bg(list_bg)
-            .border_b_1()
-            .border_color(border);
+        let vertical = self.spec.is_vertical();
+
+        // Contract §8: block list is a full-width flex row (horizontal) or a
+        // stacked column (vertical) with the closing rule on the block-axis edge.
+        let mut tab_row = if vertical {
+            div()
+                .flex()
+                .flex_col()
+                .bg(list_bg)
+                .border_r_1()
+                .border_color(border)
+        } else {
+            div()
+                .flex()
+                .w_full()
+                .bg(list_bg)
+                .border_b_1()
+                .border_color(border)
+        };
 
         let tab_values: Vec<String> = self.spec.tabs.iter().map(|t| t.value.clone()).collect();
 
@@ -511,9 +579,23 @@ impl Tabs {
                 .text_size(label_size)
                 .font_weight(FontWeight::SEMIBOLD);
 
-            // Vertical separator between sibling items (left border on all but first).
+            // Contract §8: vertical block tabs stack full-width in the column;
+            // horizontal block items are content-sized (`flex: 0 0 auto`) unless
+            // fullWidth flexes them to equal shares (`flex: 1 1 0`).
+            if vertical {
+                tab = tab.w_full();
+            } else if self.spec.uses_full_width() {
+                tab = tab.flex_grow().w_full().justify_center();
+            }
+
+            // Separator between sibling items: horizontal = left border,
+            // vertical = top border (contract block vertical item table).
             if idx > 0 {
-                tab = tab.border_l_1().border_color(separator_color);
+                tab = if vertical {
+                    tab.border_t_1().border_color(separator_color)
+                } else {
+                    tab.border_l_1().border_color(separator_color)
+                };
             }
 
             if is_active {
@@ -589,7 +671,8 @@ impl Tabs {
             } else {
                 text_secondary
             };
-            tab = tab.child(build_tab_label(tab_def, theme, label_color));
+            // Contract §8 vertical: icon-only (label hidden).
+            tab = tab.child(build_tab_label(tab_def, theme, label_color, vertical));
             tab_row = tab_row.child(tab);
         }
 
@@ -714,7 +797,8 @@ impl Tabs {
             } else {
                 text_secondary
             };
-            tab = tab.child(build_tab_label(tab_def, theme, label_color));
+            // Pill is always horizontal (vertical pill not in contract §8).
+            tab = tab.child(build_tab_label(tab_def, theme, label_color, false));
             tabs = tabs.child(tab);
         }
 

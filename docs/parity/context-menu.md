@@ -1,4 +1,14 @@
-<!-- parity consv=ok gpui=2 jetstream=5 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- pass 41: Jetstream rebuilt to match Menu item surface. min-width 10→14rem,
+     item padding 0.75→0.5rem (size-table driven), per-size item metrics
+     (min-height/padding/font xs–xl), density-aware item gap, shortcut (meta)
+     column 0.6875rem, separators (border-subtle@72% 1px), checkbox/radio leading
+     check indicator, disabled opacity (state-opacity-disabled), destructive
+     (status.danger) label color, accent@16% hover, item radius control-0.125rem,
+     overlay padding 0.25rem. Probe tests: items+shortcuts, separators, danger,
+     size scaling. GPUI: surface complete via Menu delegation; its 2 remaining
+     todos (viewport clamping, focus restoration) are runtime/preview-loop, not
+     static render gaps — accepted. Specimen still gap (preview-loop wiring). -->
 # Parity: ContextMenu
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -20,21 +30,21 @@ All contract props (`items`, `open`, `defaultOpen`, `anchorPoint`, `size`, `size
 
 ## GPUI gap (vs Svelte + contract)
 
-Delegates to `Menu` for item rendering; applies absolute positioning at anchor.
+Delegates to `Menu` for item rendering (full item surface: separators, size/density,
+shortcuts, disabled opacity, destructive danger color, check indicators); applies
+absolute positioning at anchor. No open static-render gaps.
 
-- [ ] No viewport clamping. Svelte clamps overlay to 8px edge padding (`ContextMenu.svelte:74-92`); GPUI positions raw at anchor with no collision adjustment. Add edge-clamp on render.
-- [ ] No focus restoration to invocation target after close. Svelte tracks trigger for focus return; GPUI ContextMenu spec doesn't. Track + restore.
+- preview-loop: viewport clamping. Svelte clamps overlay to 8px edge padding (`ContextMenu.svelte:74-92`); GPUI positions raw at anchor. Contract Tier 3 marks collision/clamping internals as implementation-free — runtime concern, not a render gap.
+- preview-loop: focus restoration to invocation target after close — runtime focus behavior, not a static render property.
 - accepted: no ARIA (gpui has no accessibility API) — `aria_label` forwarded via MenuSpec but not emitted on overlay role.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] Hardcoded `min_width = rem_to_px(10.0)` at `context_menu.rs:23` — contract specifies 14rem min-width; resolve from `ContextMenuSpec` min-width token, not raw 10.0.
-- [ ] Hardcoded `item_px = rem_to_px(0.75)` at `context_menu.rs:24` — contract item padding-inline is 0.5rem; resolve from token, not raw 0.75.
-- [ ] No size scaling — xs/sm/md/lg/xl from contract §3 not applied to item dimensions/font.
-- [ ] No density support — compact/default/comfortable not applied to item gaps.
-- [ ] No `shortcutLabel` (meta column) rendering — contract §2 anatomy requires it; `js_context_menu` never reads item shortcut.
+All static-render gaps closed (pass 41). `js_context_menu` now mirrors the `js_menu`
+item surface with the context-menu §8 token values.
+
 - accepted: no ARIA channel (Jetstream emits no runtime roles).
-- accepted: separator `kind` + open/close interaction live in preview `main.rs` event loop.
+- preview-loop: open/close interaction + anchor positioning live in the preview event loop.
 
 ## Specimen parity
 

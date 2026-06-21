@@ -171,7 +171,7 @@ pub use dialog::DialogSpec;
 pub use drawer::DrawerSpec;
 pub use duration_input::DurationInputSpec;
 pub use editable_label::{EditableLabelActivation, EditableLabelSpec, EditableLabelVariant};
-pub use eyebrow::EyebrowSpec;
+pub use eyebrow::{EyebrowElement, EyebrowSize, EyebrowSpacing, EyebrowSpec};
 pub use field::{FieldRelationships, FieldSpec};
 pub use field_set::{FieldSetSpec, SpaceScale};
 pub use file_upload::{
