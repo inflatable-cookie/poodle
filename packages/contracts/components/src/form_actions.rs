@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, FormActionAlign};
+use crate::types::{ControlDensity, FormActionAlign, FormActionDangerItem};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FormActionsSpec {
@@ -10,6 +10,11 @@ pub struct FormActionsSpec {
     /// Spacing density. Controls inline gap, top separation, and border
     /// gap per contract §8 (Density Variants + Divider Offset Variants).
     pub density: ControlDensity,
+    /// Overflow danger-action descriptors (contract `dangerItems`, §3). When
+    /// non-empty (and inline danger content is present), these are the
+    /// narrow-container overflow treatment shown behind the danger-menu
+    /// trigger. Empty by default.
+    pub danger_items: Vec<FormActionDangerItem>,
 }
 
 impl Default for FormActionsSpec {
@@ -19,6 +24,7 @@ impl Default for FormActionsSpec {
             show_top_separation: true,
             show_top_border: false,
             density: ControlDensity::Default,
+            danger_items: Vec::new(),
         }
     }
 }
@@ -45,6 +51,18 @@ impl FormActionsSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
+        self
+    }
+
+    /// Replace the overflow danger-item descriptors (contract `dangerItems`).
+    pub fn with_danger_items(mut self, items: Vec<FormActionDangerItem>) -> Self {
+        self.danger_items = items;
+        self
+    }
+
+    /// Append a single overflow danger-item descriptor.
+    pub fn with_danger_item(mut self, item: FormActionDangerItem) -> Self {
+        self.danger_items.push(item);
         self
     }
 
@@ -102,6 +120,27 @@ impl FormActionsSpec {
 
     pub fn border_token(&self) -> &'static str {
         semantic::COLOR_BORDER_SUBTLE
+    }
+
+    /// Whether an overflow danger menu is configured (contract §8 Responsive
+    /// Swap requires `dangerItems` to be present). The actual collapse also
+    /// requires inline `danger` content + a narrow container, both of which
+    /// are host/runtime concerns.
+    pub fn has_danger_menu(&self) -> bool {
+        !self.danger_items.is_empty()
+    }
+
+    /// Inline danger group gap (contract §8 Danger Inline: `gap =
+    /// var(--poodle-form-actions-gap)`), in rem, when density overrides the
+    /// token default. Mirrors [`gap_rem`] so the danger row tracks the root.
+    pub fn danger_inline_gap_rem(&self) -> Option<f32> {
+        self.gap_rem()
+    }
+
+    /// Token backing the inline danger group gap when no density override
+    /// applies (== the root [`action_gap_token`]).
+    pub fn danger_inline_gap_token(&self) -> &'static str {
+        self.action_gap_token()
     }
 
     pub fn wraps_on_narrow_widths(&self) -> bool {

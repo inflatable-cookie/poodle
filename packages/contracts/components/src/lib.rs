@@ -257,7 +257,7 @@ pub use types::{
     AccordionItemSpec, AccordionSelectionValue, Alignment, BadgeVariant, ButtonTone, ButtonVariant,
     CalendarWeekStart, CheckState, ChoiceOption, ControlDensity, ControlSize, DateRangeValue,
     DateTimeRangeValue, DateTimeValue, DialogKind, DialogWidth, Dimension, Direction, DrawerEdge,
-    FormActionAlign, InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry,
+    FormActionAlign, FormActionDangerItem, InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry,
     NavigationMenuEntry, Orientation, Overflow, OverlayPlacement, PaddingScale,
     PopoverInitialFocus, PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole,
     SeparatorOrientation, StatusTone,
@@ -409,7 +409,8 @@ mod tests {
         CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlSize,
         DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
         DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, DialogKind, DialogSpec,
-        Direction, DrawerEdge, DrawerSpec, FieldSpec, FormActionAlign, FormActionsSpec, GridSpec,
+        Direction, DrawerEdge, DrawerSpec, FieldSpec, FormActionAlign, FormActionDangerItem,
+        FormActionsSpec, GridSpec,
         IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry, MenubarSpec,
         NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement, PaddingScale,
         PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec, ScrollShellSpec,
@@ -607,6 +608,34 @@ mod tests {
         assert_eq!(spec.stack_separation_token(), semantic::SPACE_STACK_SM);
         assert_eq!(spec.border_token(), semantic::COLOR_BORDER_SUBTLE);
         assert!(spec.wraps_on_narrow_widths());
+    }
+
+    #[test]
+    fn form_actions_danger_items_model() {
+        // Default: no overflow danger menu.
+        let spec = FormActionsSpec::new();
+        assert!(spec.danger_items.is_empty());
+        assert!(!spec.has_danger_menu());
+
+        // Additive danger items, with value fallback to `index:label`.
+        let spec = FormActionsSpec::new()
+            .with_danger_item(FormActionDangerItem::new("Delete account"))
+            .with_danger_item(
+                FormActionDangerItem::new("Archive")
+                    .with_value("archive")
+                    .with_disabled(true),
+            );
+        assert!(spec.has_danger_menu());
+        assert_eq!(spec.danger_items.len(), 2);
+        // First item has no explicit value -> `0:Delete account`.
+        assert_eq!(spec.danger_items[0].resolved_value(0), "0:Delete account");
+        assert!(!spec.danger_items[0].disabled);
+        // Second item keeps its explicit value and disabled flag.
+        assert_eq!(spec.danger_items[1].resolved_value(1), "archive");
+        assert!(spec.danger_items[1].disabled);
+        // Inline danger gap mirrors the root action gap.
+        assert_eq!(spec.danger_inline_gap_token(), spec.action_gap_token());
+        assert_eq!(spec.danger_inline_gap_rem(), spec.gap_rem());
     }
 
     #[test]

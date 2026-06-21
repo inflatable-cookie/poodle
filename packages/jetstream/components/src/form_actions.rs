@@ -2,12 +2,29 @@
 
 use jetstream_runtime::ui_element::{self, JsEl};
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{FormActionAlign, FormActionsSpec};
+use poodle_specs::{
+    ButtonVariant, FormActionAlign, FormActionsSpec, IconButtonSpec, SemanticControlSizeRole,
+};
 
+use crate::icon_button::js_icon_button;
 use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_px;
 
+/// Render a form-actions row with no inline danger content (the common case).
+/// Delegates to [`js_form_actions_full`] with an empty danger group.
 pub fn js_form_actions(spec: &FormActionsSpec, theme: &JetstreamThemeProvider, children: Vec<JsEl>) -> JsEl {
+    js_form_actions_full(spec, theme, Vec::new(), children)
+}
+
+/// Render a form-actions row with optional inline danger content (contract
+/// `danger` snippet, §2/§8 Danger Inline) plus the collapsed overflow danger
+/// menu trigger when `spec.danger_items` is non-empty (§8 Responsive Swap).
+pub fn js_form_actions_full(
+    spec: &FormActionsSpec,
+    theme: &JetstreamThemeProvider,
+    danger: Vec<JsEl>,
+    children: Vec<JsEl>,
+) -> JsEl {
     // Density-keyed gap: compact/comfortable use contract-exact rems,
     // default inherits the inline-md token (contract §8).
     let gap = match spec.gap_rem() {
@@ -47,6 +64,35 @@ pub fn js_form_actions(spec: &FormActionsSpec, theme: &JetstreamThemeProvider, c
         FormActionAlign::Start => { el = el.justify_start(); }
         FormActionAlign::End => { el = el.justify_end(); }
         FormActionAlign::Between => { el = el.justify_between(); }
+    }
+
+    // Inline danger group (contract §2 danger snippet, §8 Danger Inline:
+    // inline-flex, gap == form-actions gap). Rendered before the primary
+    // actions so destructive/cancel content stays visually separated.
+    if !danger.is_empty() {
+        let mut danger_group = ui_element::div().flex_row().items_center().gap(gap);
+        for child in danger {
+            danger_group = danger_group.child(child);
+        }
+        el = el.child(danger_group);
+    }
+
+    // Overflow danger menu trigger (contract §2 danger menu / §8 Responsive
+    // Swap). Shown when `dangerItems` is present. The container-query collapse
+    // — hiding the inline group and showing only this trigger below 31.25rem —
+    // is a runtime concern the JsEl render-immediate model can't express (no
+    // container-query channel), so both render here; the trigger is a real
+    // ghost ellipsis IconButton with an aria-label per contract §6.
+    if spec.has_danger_menu() {
+        let trigger = js_icon_button(
+            &IconButtonSpec::new()
+                .with_icon("ellipsis")
+                .with_variant(ButtonVariant::Ghost)
+                .with_aria_label("More actions")
+                .with_size_role(SemanticControlSizeRole::Chrome),
+            theme,
+        );
+        el = el.child(ui_element::div().flex_row().items_center().child(trigger));
     }
 
     for child in children {
@@ -153,6 +199,48 @@ mod tests {
         assert!(
             g_comfy > g_compact,
             "comfortable gap ({g_comfy}) should exceed compact gap ({g_compact})"
+        );
+    }
+
+    #[test]
+    fn danger_inline_content_and_overflow_trigger_render() {
+        let th = theme();
+        // Inline danger content = a destructive ghost button.
+        let danger = vec![js_button(
+            &ButtonSpec::new()
+                .with_variant(ButtonVariant::Ghost)
+                .with_label("Delete"),
+            &th,
+        )];
+        // dangerItems present -> overflow trigger should render.
+        let spec = FormActionsSpec::new()
+            .with_danger_item(poodle_specs::FormActionDangerItem::new("Delete account"));
+        let el = js_form_actions_full(&spec, &th, danger, primary_secondary(&th));
+        let tree = probe(&el, 600.0, 100.0);
+        // Inline danger button is present alongside the two primary actions.
+        assert!(tree.has_text("Delete"), "inline danger missing: {:?}", tree.texts());
+        assert!(tree.has_text("Save changes"), "primary missing: {:?}", tree.texts());
+        // Delete + overflow-trigger + Cancel + Save = 4 Button widgets (the icon
+        // button is itself a Button containing an Icon glyph).
+        assert_eq!(tree.count_kind("Button"), 4, "expected danger + trigger + 2 primary");
+        // The overflow trigger renders the ellipsis glyph icon.
+        assert!(
+            tree.nodes.iter().any(|n| n.kind == "Icon" && n.text.as_deref() == Some("ellipsis")),
+            "overflow danger trigger (ellipsis Icon) missing: {:?}",
+            tree.nodes.iter().filter(|n| n.kind == "Icon").map(|n| n.text.clone()).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn no_danger_items_means_no_overflow_trigger() {
+        let th = theme();
+        // No dangerItems -> no overflow trigger; only the two plain action buttons.
+        let el = js_form_actions(&FormActionsSpec::new(), &th, primary_secondary(&th));
+        let tree = probe(&el, 600.0, 100.0);
+        assert_eq!(tree.count_kind("Button"), 2);
+        assert!(
+            !tree.nodes.iter().any(|n| n.kind == "Icon" && n.text.as_deref() == Some("ellipsis")),
+            "no overflow trigger expected without dangerItems"
         );
     }
 

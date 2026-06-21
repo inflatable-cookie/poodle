@@ -122,7 +122,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | breadcrumbs | fixed | 0 | 0 | gap |
 | bulk-action-bar | fixed | 2 | 2 | gap |
 | button | fixed | 2 | 2 | gap |
-| calendar | fixed | 3 | 3 | gap |
+| calendar | fixed | 2 | 2 | gap |
 | callout | fixed | 2 | 2 | gap |
 | card | fixed | 2 | 2 | gap |
 | card-radio-group | fixed | 2 | 2 | gap |
@@ -162,7 +162,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | field-set | fixed | 1 | 1 | gap |
 | file-upload | ok | 0 | 0 | ok |
 | filter-toolbar | fixed | 0 | 0 | gap |
-| form-actions | ok | 2 | 3 | gap |
+| form-actions | ok | 1 | 1 | gap |
 | form-dialog | ok | 0 | 1 | gap |
 | form-layout | fixed | 2 | 2 | gap |
 | form-shell | gap | 0 | 0 | gap |

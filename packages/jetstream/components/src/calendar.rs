@@ -119,9 +119,9 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> JsEl 
     // Month-label font scales per size (xs 0.6875 … xl 0.9375rem); matches
     // `size_font_rem`, distinct from the day-cell font.
     let month_label_font_px = rem_to_px(size_font_rem(effective_size));
-    // Weekday caption font — contract §8 weekday label `0.6875rem`. The
-    // `typography.caption.size` token resolves to 0 in the Jetstream adapter
-    // (no match arm), so this uses the contract-exact rem. TOKEN GAP noted.
+    // Weekday caption font — contract §8 weekday label `0.6875rem` (== the
+    // `typography.caption.size` token, now resolving to 11px in the adapter).
+    // Kept as the contract-exact rem so the value is self-documenting.
     let weekday_font_px = rem_to_px(0.6875);
     // Weekday header row height — no token exists; contract-adjacent rem.
     let weekday_row_height_px = rem_to_px(1.5);

@@ -19,9 +19,8 @@ use crate::theme_ext::{resolve_color, resolve_opacity, resolve_px, resolve_radiu
 pub fn js_menu(spec: &MenuSpec, theme: &JetstreamThemeProvider) -> JsEl {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    // Contract §8 Meta: fixed 0.6875rem (== typography.caption.size). The
-    // Jetstream adapter has no `typography.caption.size` mapping, so this uses
-    // the contract-exact rem rather than a 0px token miss.
+    // Contract §8 Meta: fixed 0.6875rem (== typography.caption.size, which now
+    // resolves to 11px in the adapter). Kept as the contract-exact rem.
     let meta_font_size = rem_to_px(0.6875);
 
     // Contract §8 Item: padding `0.375rem 0.5rem`. Horizontal padding is the

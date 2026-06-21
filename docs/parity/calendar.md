@@ -1,17 +1,29 @@
-<!-- parity consv=fixed gpui=3 jetstream=3 specimen=gap -->
-<!-- pass 42: finalize audit — re-confirmed against code that EVERY representable visual/token gap
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- pass 81: typography.caption.size adapter gap fixed on BOTH adapters (gpui + jetstream
+     theme.rs were missing the arm → resolved to 0). Closes the calendar weekday-caption
+     token-gap on both targets (also benefits tabs badge, menu meta, select, color-picker).
+     Remaining 2/2: weekday-row-height 1.5rem (no token) + roving-tabindex (preview-loop). -->
+<!-- pass 43: adapter caption-size gap CLOSED for Jetstream. The cross-cutting
+     `typography.caption.size` → 0 bug (missing match arm in the Jetstream adapter)
+     is fixed — adapter now resolves caption/heading/code sizes + label/heading
+     weights from the typed semantic constants (caption.size = 11px). The weekday
+     caption no longer relies on a 0px token miss; it stays the contract-exact
+     0.6875rem (== 11px) for self-documentation. Jetstream count 3 → 2 (the
+     caption-size half of the old token-gap item is closed; weekday-row-height
+     1.5rem remains a genuine no-token gap). GPUI unchanged (its adapter still
+     lacks the caption arm too — noted, out of this pass's scope).
+     pass 42: finalize audit — re-confirmed against code that EVERY representable visual/token gap
      is closed on both targets (outside-month muted opacity 0.72; per-size cell/nav/day-font/month-
      label scales; Month+Year edit-affordance triggers; exact week count; selected / range-start/end /
      in-range / today / hover / selected-hover / disabled treatments; weekday header). The remaining
-     gpui=3 / jet=3 are NOT representable gaps — they are reclassified runtime limits, held as-is:
+     gpui=3 / jet=2 are NOT representable gaps — they are reclassified runtime limits, held as-is:
        • GPUI: (1) roving-tabindex focus model + Enter/Space focus-cursor selection — preview-loop /
          focus-model (current keyboard is selection-driven, mutates committed value); (2) Home/End —
          blocked behind the focus cursor, preview-loop; (3) weekday-row-height 1.5rem — TOKEN GAP
          (no token; contract-exact rem, accepted).
        • Jetstream: (1) keyboard + roving-tabindex + month-change wiring — preview-loop; (2) weekday-
-         caption font (typography.caption.size → 0 in adapter) + weekday-row-height 1.5rem — TOKEN
-         GAP (contract-exact rems); (3) no ARIA channel — accepted (runtime has no a11y API).
-     No code change this pass — both bodies already reflect reality; only this status note refreshed. -->
+         row-height 1.5rem — TOKEN GAP (contract-exact rem); no ARIA channel — accepted (runtime has
+         no a11y API). -->
 <!-- pass 37: Jetstream calendar rebuilt to match GPUI — outside-month opacity 0.4 →
      state.opacity.muted (0.72, the core bug); static month label → Month + Year edit-affordance
      triggers (dashed underline, current values); per-size cell/nav/day-font scales (calendar
@@ -66,11 +78,12 @@ range endpoints + in-range tint, per-size day font, and exact week count.
 - [x] FIXED **Outside-month opacity** — now `resolve_opacity(theme, "state.opacity.muted")` (= 0.72), not the old `0.4` value bug. Probe-asserted (`outside_month_day_uses_muted_opacity_not_point_four`).
 - [x] FIXED Nav-button size — `calendar_nav_size_rem(effective_size)` per-size (xs 1.5 … xl 2.5rem), no longer a fixed `rem_to_px(2.0)`.
 - [x] FIXED Root padding `rem_to_px(0.75)` and grid gap `rem_to_px(0.125)` are now the contract-exact Root/grid rems (§8 Root gap 0.75rem, Grid/Week gap 0.125rem). `rem_to_px` of a contract-exact rem is not a hardcode violation.
-- [x] FIXED Caption font — the magic `size_font_rem − 0.125` offset is gone; weekday caption is the contract-exact `rem_to_px(0.6875)` (contract §8 weekday label). See token gap below.
+- [x] FIXED Caption font — the magic `size_font_rem − 0.125` offset is gone; weekday caption is the contract-exact `rem_to_px(0.6875)` (contract §8 weekday label). The `typography.caption.size` token now resolves correctly too (11px) after the adapter fix.
 - [x] FIXED Month/year inline editing — composed Month Trigger + Year Trigger controls with the dashed-underline edit affordance (`border_b_1`, color-mix underline + accent hover), rendered at the current month/year. Inline Select / Input editors remain preview-loop.
 - [x] FIXED Exact week count — `total_cells.div_ceil(7)` rows; no fixed 6-row grid, no trailing all-outside row for short months. Probe-asserted (`exact_week_count_no_trailing_blank_row`).
 - [x] FIXED Per-size scaling — cell size, nav button, day font, and month-label font all vary by `effective_size` (contract §8 size table).
-- token gap: `typography.caption.size` resolves to `0` in the Jetstream adapter (no match arm), so the weekday caption uses the contract-exact `rem_to_px(0.6875)`. Weekday-row-height `1.5rem` likewise has no token. Both noted as contract-exact rems.
+- [x] FIXED `typography.caption.size` adapter gap — the missing match arm was added (pass 43); it now resolves to `11px` from `TYPOGRAPHY_CAPTION_SIZE`, no longer `0`. The weekday caption still uses the contract-exact `rem_to_px(0.6875)` (== 11px) for self-documentation, but the token miss that previously forced that workaround is gone.
+- token gap (remaining): weekday-row-height `1.5rem` has no token; kept as a contract-exact rem.
 - preview-loop: navigation wiring (prev/next click), keyboard (arrows/Home/End/PageUp/PageDown/Enter/Space), and roving-tabindex live in the preview event loop, not the component. The component renders at the current spec state and exposes interaction ids.
 - accepted: no ARIA channel (grid/row/gridcell roles, aria-selected, aria-live).
 

@@ -1,13 +1,25 @@
-<!-- parity consv=ok gpui=2 jetstream=3 specimen=gap -->
-<!-- pass 41: FormActionsSpec gained `density` (+ gap_rem/top_separation_rem/
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- pass 42: danger model landed (additive). `FormActionDangerItem` struct added
+     to poodle-specs (label/value?/disabled, value-fallback `index:label`) +
+     `FormActionsSpec.danger_items` Vec + `with_danger_item(s)`/`has_danger_menu`/
+     `danger_inline_gap_*` helpers. Both targets now render the inline `__danger`
+     group (inline-flex, gap == form-actions gap, before primary actions) and the
+     overflow danger-menu trigger (real ghost ellipsis IconButton, aria-label
+     "More actions", sizeRole chrome) when `dangerItems` is present — GPUI via
+     `with_danger_action(...)`, Jetstream via `js_form_actions_full(spec, theme,
+     danger, children)` (the old `js_form_actions` delegates with empty danger).
+     2 new Jetstream probe tests (inline danger + ellipsis trigger render; absent
+     without dangerItems) + 1 spec unit test. Only remaining gap on each target is
+     the responsive container-query collapse — RECLASSIFIED as a runtime/preview-
+     loop limit (no container-query channel in either Rust target; both the inline
+     group and the trigger render, the width-driven swap is host-owned). Builds +
+     all tests green.
+     pass 41: FormActionsSpec gained `density` (+ gap_rem/top_separation_rem/
      border_gap_rem helpers, contract §8 exact rems). Both targets now resolve
      gap/top-separation/border-gap per density; dropped the `max(4.0)*0.5`
      border-gap heuristic. GPUI gained show_top_separation/show_top_border/
      density builders; Jetstream Start align now explicit justify_start + probe
-     tests (alignment + density + primary/secondary + submitting). Remaining:
-     danger snippet / dangerItems overflow / responsive container-query swap —
-     deferred (need a danger-item model on the spec + runtime container queries;
-     not faked). Builds + probe tests green. -->
+     tests (alignment + density + primary/secondary + submitting). -->
 # Parity: FormActions
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -41,9 +53,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] `density` support added — `FormActionsSpec.density` + `.density()` builder; gap/top-separation/border-gap resolve per density (compact/comfortable use contract-exact rems, default inherits tokens).
 - [x] `showTopSeparation` builder added — `FormActions::show_top_separation(bool)`; footer-embedded mode reachable.
 - [x] `showTopBorder` builder added — `FormActions::show_top_border(bool)`; bordered-separation state reachable.
-- [ ] No `danger` snippet / `__danger` inline group — actions are still a flat `Vec<AnyElement>`; contract §2 danger anatomy absent. **Deferred:** needs a danger-item model on `FormActionsSpec` first.
-- [ ] No `dangerItems` overflow menu / responsive collapse — `__danger-menu` trigger and `@container` swap (contract §8) not implemented. **Deferred** with the danger model (no container-query primitive in GPUI; would be faked otherwise).
-- accepted: no ARIA (gpui has no accessibility API) — collapsed danger trigger `aria-label` (contract §6) cannot be emitted; moot until danger menu exists.
+- [x] `danger` snippet / `__danger` inline group added — `FormActions::with_danger_action(...)` accumulates inline destructive/cancel content into an `inline-flex` group (gap == form-actions gap, contract §8 Danger Inline) rendered before the primary actions (contract §2 anatomy order).
+- [x] `dangerItems` overflow menu trigger added — when `spec.has_danger_menu()` the row renders a real ghost ellipsis `IconButton` (`aria-label "More actions"`, `sizeRole` chrome) matching the Svelte `__danger-menu` trigger. The `FormActionDangerItem` descriptors live on the spec; `onSelect` is host-owned.
+- [ ] Responsive container-query collapse not implemented — the `@container (max-width: 31.25rem)` swap that *hides* the inline group and shows *only* the trigger (contract §8 Responsive Swap) has no channel in GPUI's render-immediate model. **Runtime limit (reclassified):** both the inline group and the trigger render; the width-driven hide/show is host-owned, not faked.
+- accepted: no ARIA (gpui has no accessibility API) — the overflow trigger carries an `aria_label` on the spec/builder but GPUI cannot emit it to the platform a11y tree.
 
 ## Jetstream gap (vs Svelte + contract)
 
@@ -51,21 +64,21 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] `density` support added — `js_form_actions` varies gap/top-separation/border-gap by `spec.density` (compact/comfortable contract-exact rems, default token-inherited).
 - [x] `FormActionAlign::Start` now explicit `el.justify_start()` (no longer relying on default flex start).
 - [x] `showTopBorder` border-gap now contract density value (`border_gap_rem`), not the old heuristic.
-- [ ] No `danger` snippet / `__danger` inline group — children are still a flat `Vec<JsEl>`; contract §2 danger anatomy absent. **Deferred:** needs a danger-item model on `FormActionsSpec`.
-- [ ] No `dangerItems` overflow menu — `__danger-menu` trigger not rendered; contract §8 responsive swap absent. **Deferred** with the danger model.
-- [ ] No responsive container-query swap — no `inline-size` boundary / `max-width: 31.25rem` collapse (contract §8). **Deferred:** no container-query primitive in the JsEl runtime; would be faked otherwise.
-- accepted: no ARIA channel for collapsed danger trigger `aria-label` (contract §6) — moot until danger menu exists.
-- accepted: interaction (button click) lives in preview event loop, not the component.
+- [x] `danger` snippet / `__danger` inline group added — `js_form_actions_full(spec, theme, danger, children)` renders inline destructive/cancel content in an `inline-flex` group (gap == form-actions gap, contract §8 Danger Inline) before the primary actions (contract §2). `js_form_actions(...)` delegates with an empty danger group, so existing callers are unchanged.
+- [x] `dangerItems` overflow menu trigger added — when `spec.has_danger_menu()` the row renders a real ghost ellipsis `js_icon_button` (`aria-label "More actions"`, `sizeRole` chrome), the JsEl analogue of the Svelte `__danger-menu` trigger. Probe-asserted (inline danger + ellipsis Icon present; absent without `dangerItems`).
+- [ ] No responsive container-query swap — no `inline-size` boundary / `max-width: 31.25rem` collapse (contract §8). **Runtime limit (reclassified):** the JsEl render-immediate model has no container-query channel, so both the inline group and the trigger render; the width-driven hide/show is host-owned, not faked.
+- accepted: no ARIA channel for the overflow trigger `aria-label` (contract §6) — the spec carries it; the runtime has no a11y surface to emit it.
+- accepted: interaction (button click, `dangerItems[].onSelect`) lives in the preview event loop, not the component.
 
 ## Specimen parity
 
 - Svelte covers: End-aligned (default), Start-aligned, Space between, Responsive danger actions (with `dangerItems` + `danger` snippet, constrained to 20rem to show collapse), Bordered separation, Density ladder (compact/default/comfortable via `densities` snippet) (`FormActionsSpecimen.svelte`).
-- GPUI covers: End-aligned, Start-aligned, Space between, Responsive danger actions (renders 3 buttons inline only — no actual overflow menu), Last-action click feedback. — missing: **Density ladder**, **Bordered separation** (`showTopBorder`), **Footer-embedded** (`showTopSeparation=false`), real **danger-collapse** overflow.
-- Jetstream covers: End-aligned, Start-aligned, Between, Dialog footer custom actions (`showTopSeparation=false`). — missing: **Density ladder**, **Bordered separation** (`showTopBorder`), **Responsive danger actions** (no danger snippet / overflow menu).
+- GPUI covers: End-aligned, Start-aligned, Space between, Responsive danger actions (renders inline buttons), Last-action click feedback. The component now supports `with_danger_action(...)` + the overflow trigger, but the specimen has not yet been re-wired to drive `dangerItems`. — missing (specimen): **Density ladder**, **Bordered separation** (`showTopBorder`), **Footer-embedded** (`showTopSeparation=false`), danger-overflow demo using the new `with_danger_action` / `dangerItems` path.
+- Jetstream covers: End-aligned, Start-aligned, Between, Dialog footer custom actions (`showTopSeparation=false`). The component now supports `js_form_actions_full` (inline danger + overflow trigger), but the specimen has not yet been re-wired. — missing (specimen): **Density ladder**, **Bordered separation** (`showTopBorder`), **Responsive danger actions** demo using the new danger path.
 
 ## Notes
 
 - consv=ok: Svelte is a faithful, complete implementation of the contract — every prop, anatomy part, density value, alignment, responsive rule, and ARIA requirement is present and matches.
-- The dominant cross-target gap is **density** and **danger overflow**: `FormActionsSpec` (`packages/contracts/components/src/form_actions.rs`) has no `density` field and no danger-snippet / `dangerItems` model, so neither Rust target can implement contract §4 density states or the §8 responsive danger swap. Adding a `density` field + `border_gap_token()` (density-keyed) to the spec is the prerequisite for closing the first GPUI/Jetstream border-gap and density todos.
-- Both Rust border-gap heuristics (`separation.max(4.0) * 0.5`) are the only hardcoded literals; there are zero hardcoded color literals or raw-px sizing literals in either component.
-- The GPUI "Responsive danger actions" specimen and the Jetstream specimen both lack the real overflow-menu behavior; they render inline buttons only, so they demonstrate layout but not the danger-collapse contract state.
+- Density (pass 41) and the danger model (pass 42) are both now resolved on the spec: `FormActionsSpec` (`packages/contracts/components/src/form_actions.rs`) has `density` + `danger_items: Vec<FormActionDangerItem>` with `has_danger_menu()` / `danger_inline_gap_*` helpers. Both Rust targets render the inline `__danger` group and the overflow trigger from these.
+- The only remaining cross-target gap is the **responsive container-query collapse** (§8 Responsive Swap) — reclassified as a runtime limit on both targets (no `inline-size` container-query channel in render-immediate / JsEl). Both render the inline group *and* the trigger; the width-driven hide/show is host-owned.
+- There are zero hardcoded color literals or raw-px sizing literals in either component; all danger-region spacing reuses the form-actions gap (token / density rem).

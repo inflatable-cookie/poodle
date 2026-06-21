@@ -222,6 +222,10 @@ impl GpuiThemeProvider {
             "typography.body.lineHeight" => typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.as_f32(),
             "typography.label.size" => typed::semantic::TYPOGRAPHY_LABEL_SIZE.as_f32(),
             "typography.label.lineHeight" => typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.as_f32(),
+            "typography.caption.size" => typed::semantic::TYPOGRAPHY_CAPTION_SIZE.as_f32(),
+            "typography.caption.lineHeight" => {
+                typed::semantic::TYPOGRAPHY_CAPTION_LINE_HEIGHT.as_f32()
+            }
             "typography.counter.size" => typed::semantic::TYPOGRAPHY_COUNTER_SIZE.as_f32(),
             "typography.heading.size" => typed::semantic::TYPOGRAPHY_HEADING_SIZE.as_f32(),
             "typography.heading.lineHeight" => {

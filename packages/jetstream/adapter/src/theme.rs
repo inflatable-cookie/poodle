@@ -298,11 +298,25 @@ fn match_semantic_space(token: &str) -> Option<f32> {
         // Border width tokens
         t if t.contains("border.width.default") || t.contains("borderWidth.default") => Some(typed::semantic::BORDER_WIDTH_DEFAULT.0),
         t if t.contains("border.width.focus") || t.contains("borderWidth.focus") => Some(typed::semantic::BORDER_WIDTH_FOCUS.0),
-        // Typography size (common token used by components)
-        t if t.contains("typography.label.size") => Some(13.0), // from typed typography
+        // Typography sizes / line-heights — read from typed semantic constants,
+        // never hardcoded. Order longest/most-specific paths first so e.g.
+        // `typography.label.lineHeight` does not get swallowed by the
+        // `typography.label.size` arm (`contains` matches substrings).
+        t if t.contains("typography.body.lineHeight") => Some(typed::semantic::TYPOGRAPHY_BODY_LINE_HEIGHT.0),
+        t if t.contains("typography.body.size") => Some(typed::semantic::TYPOGRAPHY_BODY_SIZE.0),
+        t if t.contains("typography.label.lineHeight") => Some(typed::semantic::TYPOGRAPHY_LABEL_LINE_HEIGHT.0),
+        t if t.contains("typography.label.weight") => Some(typed::semantic::TYPOGRAPHY_LABEL_WEIGHT),
+        t if t.contains("typography.label.size") => Some(typed::semantic::TYPOGRAPHY_LABEL_SIZE.0),
+        t if t.contains("typography.caption.lineHeight") => Some(typed::semantic::TYPOGRAPHY_CAPTION_LINE_HEIGHT.0),
+        t if t.contains("typography.caption.weight") => Some(typed::semantic::TYPOGRAPHY_CAPTION_WEIGHT),
+        t if t.contains("typography.caption.size") => Some(typed::semantic::TYPOGRAPHY_CAPTION_SIZE.0),
         t if t.contains("typography.counter.size") => Some(typed::semantic::TYPOGRAPHY_COUNTER_SIZE.0),
-        t if t.contains("typography.body.size") => Some(14.0),
-        t if t.contains("typography.heading") => Some(20.0),
+        t if t.contains("typography.heading.lineHeight") => Some(typed::semantic::TYPOGRAPHY_HEADING_LINE_HEIGHT.0),
+        t if t.contains("typography.heading.weight") => Some(typed::semantic::TYPOGRAPHY_HEADING_WEIGHT),
+        t if t.contains("typography.heading.size") => Some(typed::semantic::TYPOGRAPHY_HEADING_SIZE.0),
+        t if t.contains("typography.heading") => Some(typed::semantic::TYPOGRAPHY_HEADING_SIZE.0),
+        t if t.contains("typography.code.lineHeight") => Some(typed::semantic::TYPOGRAPHY_CODE_LINE_HEIGHT.0),
+        t if t.contains("typography.code.size") => Some(typed::semantic::TYPOGRAPHY_CODE_SIZE.0),
         // Opacity tokens
         t if t.contains("state.opacity.disabled") => Some(typed::semantic::STATE_OPACITY_DISABLED),
         t if t.contains("state.opacity.muted") => Some(typed::semantic::STATE_OPACITY_MUTED),
@@ -416,6 +430,40 @@ mod tests {
         assert_eq!(theme.resolve_color("unknown"), ColorValue(0.0, 0.0, 0.0, 1.0));
         assert_eq!(theme.resolve_space("unknown"), 0.0);
         assert_eq!(theme.resolve_opacity("unknown"), 1.0);
+    }
+
+    #[test]
+    fn resolves_typography_size_tokens_nonzero() {
+        let theme = JetstreamThemeProvider::default();
+        // Regression: `typography.caption.size` previously had no match arm and
+        // resolved to 0.0, breaking weekday captions / tab count badges / menu meta.
+        assert_eq!(theme.resolve_space("typography.caption.size"), 11.0);
+        assert_eq!(theme.resolve_space("typography.label.size"), 13.0);
+        assert_eq!(theme.resolve_space("typography.body.size"), 14.0);
+        assert_eq!(theme.resolve_space("typography.heading.size"), 16.0);
+        assert_eq!(theme.resolve_space("typography.counter.size"), 12.0);
+        assert_eq!(theme.resolve_space("typography.code.size"), 13.0);
+        // Weight tokens resolve too (used by label/heading callers).
+        assert_eq!(theme.resolve_space("typography.label.weight"), 500.0);
+        // None of the typography size tokens should resolve to 0.
+        for t in [
+            "typography.caption.size",
+            "typography.label.size",
+            "typography.body.size",
+            "typography.heading.size",
+            "typography.counter.size",
+        ] {
+            assert!(theme.resolve_space(t) > 0.0, "{t} resolved to 0");
+        }
+    }
+
+    #[test]
+    fn typography_line_height_not_swallowed_by_size_arm() {
+        // `contains` matching must not let `...label.size` capture `...label.lineHeight`.
+        let theme = JetstreamThemeProvider::default();
+        assert_eq!(theme.resolve_space("typography.label.lineHeight"), 16.0);
+        assert_eq!(theme.resolve_space("typography.body.lineHeight"), 20.0);
+        assert_eq!(theme.resolve_space("typography.caption.lineHeight"), 16.0);
     }
 
     #[test]

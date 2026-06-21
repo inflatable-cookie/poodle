@@ -3,18 +3,26 @@
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, FormActionAlign, FormActionsSpec};
+use poodle_specs::{
+    ButtonVariant, ControlDensity, FormActionAlign, FormActionsSpec, SemanticControlSizeRole,
+};
 
 use crate::presentation::rem_to_px;
+use crate::primitives::IconButton;
 use crate::theme_ext::resolve_color;
 
 /// A real GPUI form actions bar backed by `FormActionsSpec`.
 ///
 /// Lays out action buttons (submit, cancel, etc.) with configurable alignment.
+/// Optional inline danger content + a collapsed overflow danger menu (contract
+/// §2/§8) are rendered when supplied via `with_danger_action` / `dangerItems`.
 pub struct FormActions {
     spec: FormActionsSpec,
     theme: GpuiThemeProvider,
     actions: Vec<AnyElement>,
+    /// Inline destructive/cancel content (contract `danger` snippet). Rendered
+    /// left of the primary actions in a `__danger` inline-flex group.
+    danger_actions: Vec<AnyElement>,
 }
 
 impl std::ops::Deref for FormActions {
@@ -30,6 +38,7 @@ impl FormActions {
             spec: FormActionsSpec::new(),
             theme: theme.clone(),
             actions: Vec::new(),
+            danger_actions: Vec::new(),
         }
     }
 
@@ -38,6 +47,7 @@ impl FormActions {
             spec,
             theme: theme.clone(),
             actions: Vec::new(),
+            danger_actions: Vec::new(),
         }
     }
 
@@ -72,6 +82,14 @@ impl FormActions {
     /// Add an action element (typically a Button).
     pub fn with_action(mut self, action: impl IntoElement) -> Self {
         self.actions.push(action.into_any_element());
+        self
+    }
+
+    /// Add inline destructive/cancel content (contract `danger` snippet),
+    /// rendered left-aligned in a `__danger` inline-flex group before the
+    /// primary actions.
+    pub fn with_danger_action(mut self, action: impl IntoElement) -> Self {
+        self.danger_actions.push(action.into_any_element());
         self
     }
 }
@@ -134,6 +152,33 @@ impl IntoElement for FormActions {
             FormActionAlign::Between => {
                 row = row.justify_between();
             }
+        }
+
+        // Inline danger group (contract §2 danger snippet, §8 Danger Inline:
+        // inline-flex, gap == form-actions gap). Rendered before the primary
+        // actions so the destructive/cancel content stays visually separated.
+        if !self.danger_actions.is_empty() {
+            let mut danger = div().flex().items_center().gap(px(gap));
+            for action in self.danger_actions {
+                danger = danger.child(action);
+            }
+            row = row.child(danger);
+        }
+
+        // Overflow danger menu trigger (contract §2 danger menu / §8 Responsive
+        // Swap). Shown when `dangerItems` is present. The real container-query
+        // collapse — hiding the inline group and showing only this trigger below
+        // 31.25rem — is a runtime concern GPUI's render-immediate model can't
+        // express (no container-query channel), so both the inline group and the
+        // trigger render here; the trigger itself is a real ghost IconButton with
+        // an aria-label per contract §6.
+        if self.spec.has_danger_menu() {
+            let trigger = IconButton::new(theme)
+                .icon("ellipsis")
+                .variant(ButtonVariant::Ghost)
+                .aria_label("More actions")
+                .size_role(SemanticControlSizeRole::Chrome);
+            row = row.child(div().flex().items_center().child(trigger));
         }
 
         for action in self.actions {

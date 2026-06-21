@@ -500,6 +500,51 @@ pub enum FormActionAlign {
     Between,
 }
 
+/// Descriptor for a collapsed danger action shown in the FormActions overflow
+/// menu on narrow containers (contract `FormActionDangerItem`, §3). Mirrors the
+/// Svelte `{ label, onSelect, value?, disabled? }` shape — `onSelect` is a host
+/// callback that lives in the preview/event loop, so the spec carries only the
+/// descriptor data needed to render the menu item.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FormActionDangerItem {
+    /// Visible menu-item label.
+    pub label: String,
+    /// Stable value/key for the item. `None` falls back to `index:label`,
+    /// matching the Svelte default.
+    pub value: Option<String>,
+    /// When true the item renders disabled and is not selectable.
+    pub disabled: bool,
+}
+
+impl FormActionDangerItem {
+    pub fn new(label: impl Into<String>) -> Self {
+        Self {
+            label: label.into(),
+            value: None,
+            disabled: false,
+        }
+    }
+
+    pub fn with_value(mut self, value: impl Into<String>) -> Self {
+        self.value = Some(value.into());
+        self
+    }
+
+    pub fn with_disabled(mut self, disabled: bool) -> Self {
+        self.disabled = disabled;
+        self
+    }
+
+    /// Resolve the item's stable value, falling back to `index:label` when no
+    /// explicit value was provided (matches Svelte `value ?? `${index}:${label}``).
+    pub fn resolved_value(&self, index: usize) -> String {
+        match &self.value {
+            Some(v) => v.clone(),
+            None => format!("{index}:{}", self.label),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CalendarWeekStart {
     Sunday,
