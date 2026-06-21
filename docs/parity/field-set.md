@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- specimen=ok: both Rust specimens backfilled (legend+description, real Field children via js_field, multi-column, span=full, gap=none, multiple groups); Jetstream field_set children are now real Field components (was bare text inputs); both previews build clean. -->
 <!-- pass: FieldSetSpec gained description, span, SpaceScale::None; legend size repointed to fixed 0.6875rem eyebrow scale (LEGEND_SIZE_REM), gap_token now mirrors Svelte scaleToSpace (sm→inline-sm, md→panel-y, lg→panel-x, none→0) and returns Option; description part + asymmetric row-gap (col-gap + 0.5rem) + equal-fraction columns implemented both targets; Jetstream legend uppercased. Remaining open: span = accepted layout delta; legend letter-spacing/line-height = engine delta (no JsEl/GPUI div API). Jetstream probe tests cover legend+description+children+multi-column+gap-none. -->
 # Parity: FieldSet
 

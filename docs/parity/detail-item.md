@@ -1,4 +1,6 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen pass: both Rust targets now cover inline + stacked, simple vs surface, empty/em-dash value, with-action (real js_button/Button), with-value slot (real js_pill/Pill), inline description, truncation, and the three density variants. Both preview crates build clean. -->
+
 <!-- pass: both Rust targets rebuilt — layout(inline/stacked), simple/surface presentation, density-aware spacing, token-resolved fonts, em-dash placeholder, value emphasis, action slot. Spec gained `density` field + em-dash default + density/typography token helpers. Jetstream probe tests added. -->
 # Parity: DetailItem
 
@@ -46,8 +48,8 @@ Rebuilt: layout-aware row/column root, presentation-gated chrome, density-driven
 ## Specimen parity
 
 - Svelte covers: inline layout (default), with-description (Popover info icon), with-action slot, with-value slot (Pill), stacked layout (truncated UUID), surface presentation, density variants (compact/default/comfortable).
-- GPUI covers: basic pairs, with-description (+truncate), with-action, with-value, stacked, surface. — missing: **density variants**, **responsive collapse demo** (45rem → single column).
-- Jetstream covers: key-value rows, one inline description, basic rows. — missing: **action slot**, **value slot**, **stacked layout**, **simple presentation**, **density variants**, **info Popover description**.
+- GPUI covers: basic pairs, with-description (+truncate), with-action, with-value, stacked, surface, **simple vs surface**, **empty/em-dash value**, **density variants** (compact/default/comfortable). — missing: responsive collapse demo (container-query, host-driven Tier-3).
+- Jetstream covers: inline (default), with-description (inline), **with-action slot** (real `js_button`), **with-value slot** (real `js_pill`), **empty/em-dash value**, **stacked layout** (truncated), **simple vs surface presentation**, **density variants** (compact/default/comfortable). — info Popover is inline (JsEl has no popover channel — approximated, noted in component parity).
 
 ## Notes
 

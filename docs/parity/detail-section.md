@@ -1,4 +1,6 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- specimen pass: both Rust targets now cover title+rows, with-actions (real button), item descriptions, description-only (no title), empty/no-separator, two-column via the real `columns(2)`/`with_columns(2)` builder (GPUI fixed-px wrappers replaced with relative flex-basis), and the three density variants. Both preview crates build clean. -->
+
 <!-- pass: both Rust targets rebuilt — columns() + density() builders, density-aware root/header/title/body gaps + separated top-padding, separator rule = 0.0625rem, title-block gap from spec. Spec gained `density` field + density gap helpers. Jetstream probe tests added. -->
 # Parity: DetailSection
 
@@ -41,8 +43,8 @@
 ## Specimen parity
 
 - Svelte covers: title + rows, with-actions, item descriptions + truncate, two-column (`columns={2}`), density variants (compact/default/comfortable).
-- GPUI covers: title + rows, with-actions, item descriptions, two-column (via hardcoded `div().w(px(192.0))` wrappers). — missing: **density variants**; two-column is faked with fixed-width wrappers (`detail_section_specimen.rs:154,162,170,178`) rather than a `columns` builder.
-- Jetstream covers: title+description+body, title+actions, empty/no-separator. — missing: **two-column layout**, **density variants**, **description-only (no title)**.
+- GPUI covers: title + rows, with-actions, item descriptions, **two-column via the real `.columns(2)` builder** (hardcoded `div().w(px(192.0))` wrappers replaced with relative `flex_basis(relative(0.5 - 0.01))` `col_item` helper), **description-only (no title)**, **density variants** (compact/default/comfortable).
+- Jetstream covers: title+description+body, title+actions (real `js_button`), item descriptions, **two-column via `with_columns(2)`** (`col_item` wraps each row in `flex_1().min_w(10rem)`), **description-only (no title)**, empty/no-separator, **density variants** (compact/default/comfortable).
 
 ## Notes
 

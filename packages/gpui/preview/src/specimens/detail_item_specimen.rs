@@ -4,8 +4,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, DetailItem, Eyebrow};
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlSize, DetailItemLayout, DetailItemPresentation,
-    DetailItemSpec, EyebrowSpec,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout,
+    DetailItemPresentation, DetailItemSpec, EyebrowSpec,
 };
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -128,5 +128,81 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     )
                 )
+        )
+        // --- Simple vs surface presentation ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Simple vs surface presentation"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(8.0))
+                        .child(DetailItem::from_spec(
+                            DetailItemSpec::new("Simple")
+                                .with_value("Plain row, no chrome")
+                                .with_presentation(DetailItemPresentation::Simple),
+                            theme,
+                        ))
+                        .child(DetailItem::from_spec(
+                            DetailItemSpec::new("Surface")
+                                .with_value("Elevated card row")
+                                .with_presentation(DetailItemPresentation::Surface),
+                            theme,
+                        ))
+                )
+        )
+        // --- Empty value (em-dash placeholder) ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty value (em-dash)"), theme))
+                .child(
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("Owner"),
+                        theme,
+                    )
+                )
+        )
+        // --- Density variants ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Density variants"), theme))
+                .child(
+                    div().flex().flex_col().gap(px(12.0))
+                        .child(density_demo("Compact", ControlDensity::Compact, theme))
+                        .child(density_demo("Default", ControlDensity::Default, theme))
+                        .child(density_demo("Comfortable", ControlDensity::Comfortable, theme))
+                )
+        )
+}
+
+fn density_demo(label: &str, density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
+    let muted = theme.resolve_color("color.text.muted");
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(4.0))
+        .child(
+            div()
+                .text_xs()
+                .text_color(color_to_hsla(muted))
+                .child(label.to_string()),
+        )
+        .child(
+            DetailItem::from_spec(
+                DetailItemSpec::new("Storage")
+                    .with_value("84.2 GB")
+                    .with_description("Current usage for the active workspace.")
+                    .with_presentation(DetailItemPresentation::Surface)
+                    .with_density(density),
+                theme,
+            )
+            .with_action(
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_size(ControlSize::Sm)
+                        .with_label("Manage"),
+                    theme,
+                )
+                .with_id(format!("dr-density-{label}")),
+            ),
         )
 }

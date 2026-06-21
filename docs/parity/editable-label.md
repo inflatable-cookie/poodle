@@ -1,4 +1,4 @@
-<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=ok | specimen backfill (2026-06-21): both Rust targets now cover display (value+pencil), editing mode (composed input via with_editing), flush display+editing, empty (empty_text), max-length (editing), disabled, plus size+density sweeps — real js_editable_label/EditableLabel + tokens only, no fakes. Fixed prior GPUI mislabels: with-icon/flush/max-length now set their distinguishing prop (.show_edit_icon/.variant(Flush)/.max_length) instead of rendering default. gpui+jetstream preview build clean. -->
 <!-- pass 42: editable-label rebuilt on BOTH targets — display mode (label + optional pencil
      edit-icon + hover hint) and editing mode (composed TextInput/text_input seeded with value),
      honoring variant flush/default, empty_text, show_edit_icon, max_length, placeholder, size,
@@ -52,8 +52,8 @@ Svelte implements the full contract — all 13 props (`value`, `ariaLabel`, `dis
 ## Specimen parity
 
 - Svelte covers: Double-click default (commit+cancel), Click-to-edit with icon (enterOrSpace + showEditIcon), Empty state (emptyText), Flush variant, With max length (maxLength + placeholder), Disabled, Last-event readout, plus size + density sweeps. All 6 contract specimen states.
-- GPUI covers: 6 groups + size/density, BUT several do not configure their distinguishing prop — "Click to edit with icon" omits `.show_edit_icon` (no icon), "Flush variant" omits `.variant(Flush)` (renders default), "With max length" applies no maxLength. — missing: those three behaviors are mislabeled, not demonstrated.
-- Jetstream covers: Display mode, Empty (placeholder). — missing: **with-icon, flush, max-length, disabled, sizes, densities** (2 of 6+ states).
+- GPUI covers (rebuilt 2026-06-21): Display mode (value + edit icon), Editing mode (composed input via `.with_editing`), Double-click default (interactive), Click-to-edit with icon (`enterOrSpace` + `.show_edit_icon`), Empty (`.empty_text`), Flush display (`.variant(Flush)` + icon) + Flush editing (bottom-border-only input), With max length (`.max_length(20)` + placeholder, editing), Disabled, Last-event, plus size + density sweeps. All 6 contract specimen states + display/editing modes. Prior mislabels fixed — with-icon / flush / max-length now actually set their distinguishing prop.
+- Jetstream covers (rebuilt 2026-06-21): Display mode (value + edit icon), Editing mode (composed input), Empty (`empty_text`), Flush display + Flush editing, With max length (editing), Disabled, plus size + density sweeps. All 6 contract specimen states + display/editing modes. (was only 2 groups.)
 
 ## Notes
 

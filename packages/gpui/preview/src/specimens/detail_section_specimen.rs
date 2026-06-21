@@ -1,9 +1,11 @@
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, DetailItem, DetailSection, Eyebrow};
 use poodle_specs::DetailSectionSpec;
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlSize, DetailItemLayout, DetailItemSpec, EyebrowSpec,
+    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout, DetailItemSpec,
+    EyebrowSpec,
 };
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -148,41 +150,116 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_body(
                         div()
                             .flex()
-                            .flex_wrap()
-                            .gap(px(4.0))
-                            .child(
-                                div().w(px(192.0)).child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Route")
-                                        .with_value("local-brokered")
-                                        .with_layout(DetailItemLayout::Stacked),
-                                    theme,
-                                )),
-                            )
-                            .child(
-                                div().w(px(192.0)).child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Posture")
-                                        .with_value("aura-local-brokered")
-                                        .with_layout(DetailItemLayout::Stacked),
-                                    theme,
-                                )),
-                            )
-                            .child(
-                                div().w(px(192.0)).child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Authority")
-                                        .with_value("local")
-                                        .with_layout(DetailItemLayout::Stacked),
-                                    theme,
-                                )),
-                            )
-                            .child(
-                                div().w(px(192.0)).child(DetailItem::from_spec(
-                                    DetailItemSpec::new("Displays")
-                                        .with_value("2")
-                                        .with_layout(DetailItemLayout::Stacked),
-                                    theme,
-                                )),
-                            ),
+                            .flex_col()
+                            .child(col_item("Route", "local-brokered", theme))
+                            .child(col_item("Posture", "aura-local-brokered", theme))
+                            .child(col_item("Authority", "local", theme))
+                            .child(col_item("Displays", "2", theme)),
                     ),
                 ),
+        )
+        // --- Description only (no title) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Description only (no title)"),
+                    theme,
+                ))
+                .child(
+                    DetailSection::from_spec(
+                        DetailSectionSpec::new()
+                            .with_description("A section header carried by description text alone."),
+                        theme,
+                    )
+                    .with_body(
+                        div()
+                            .flex()
+                            .flex_col()
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Region").with_value("eu-west-1"),
+                                theme,
+                            ))
+                            .child(DetailItem::from_spec(
+                                DetailItemSpec::new("Zone").with_value("eu-west-1a"),
+                                theme,
+                            )),
+                    ),
+                ),
+        )
+        // --- Density variants ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Density variants"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(16.0))
+                        .child(density_demo("Compact", ControlDensity::Compact, theme))
+                        .child(density_demo("Default", ControlDensity::Default, theme))
+                        .child(density_demo(
+                            "Comfortable",
+                            ControlDensity::Comfortable,
+                            theme,
+                        )),
+                ),
+        )
+}
+
+/// A stacked detail row sized for a two-column wrapping body. The relative
+/// flex-basis (half row, minus a hair) mirrors the DetailSectionGroup column
+/// pattern so two items land per row inside the `columns(2)` flex-wrap body.
+fn col_item(label: &str, value: &str, theme: &GpuiThemeProvider) -> Div {
+    div()
+        .flex_grow()
+        .flex_shrink_0()
+        .flex_basis(relative(0.5 - 0.01))
+        .child(DetailItem::from_spec(
+            DetailItemSpec::new(label)
+                .with_value(value)
+                .with_layout(DetailItemLayout::Stacked),
+            theme,
+        ))
+}
+
+fn density_demo(label: &str, density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
+    let muted = theme.resolve_color("color.text.muted");
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(4.0))
+        .child(
+            div()
+                .text_xs()
+                .text_color(crate::style_bridge::color_to_hsla(muted))
+                .child(label.to_string()),
+        )
+        .child(
+            DetailSection::from_spec(
+                DetailSectionSpec::new()
+                    .with_title("Workspace access")
+                    .with_description("Shared settings and runtime defaults.")
+                    .with_columns(2)
+                    .with_density(density),
+                theme,
+            )
+            .with_body(
+                div()
+                    .flex()
+                    .flex_col()
+                    .child(col_item("Default role", "Editor", theme))
+                    .child(col_item("Approvals", "Required", theme))
+                    .child(col_item("Region", "eu-west-1", theme))
+                    .child(col_item("Retention", "30 days", theme)),
+            ),
         )
 }

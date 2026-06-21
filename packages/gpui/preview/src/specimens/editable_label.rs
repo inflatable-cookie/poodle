@@ -7,7 +7,9 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{EditableLabel, Eyebrow};
-use poodle_specs::{EditableLabelSpec, EyebrowSpec};
+use poodle_specs::{
+    EditableLabelActivation, EditableLabelSpec, EditableLabelVariant, EyebrowSpec,
+};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -41,7 +43,47 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0))
-        // --- Double-click to edit (default) ---
+        // --- Display mode (value + pencil edit-icon) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Display mode (value + edit icon)"),
+                    theme,
+                ))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value("My project title")
+                            .with_show_edit_icon(true),
+                        theme,
+                    )
+                    .with_id("display-icon"),
+                ),
+        )
+        // --- Editing mode (composed input shown) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Editing mode (input shown)"),
+                    theme,
+                ))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value("My project title")
+                            .with_editing(true),
+                        theme,
+                    )
+                    .with_id("editing"),
+                ),
+        )
+        // --- Double-click to edit (default, interactive) ---
         .child(
             div()
                 .flex()
@@ -77,7 +119,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     })),
                 ),
         )
-        // --- Click to edit with icon ---
+        // --- Click to edit with icon (enterOrSpace + showEditIcon) ---
         .child(
             div()
                 .flex()
@@ -89,7 +131,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     EditableLabel::from_spec(
-                        EditableLabelSpec::new().with_value(&title_value),
+                        EditableLabelSpec::new()
+                            .with_value(&title_value)
+                            .with_activation_mode(EditableLabelActivation::EnterOrSpace)
+                            .with_show_edit_icon(true),
                         theme,
                     )
                     .with_id("with-icon")
@@ -106,7 +151,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     })),
                 ),
         )
-        // --- Empty state ---
+        // --- Empty state (emptyText) ---
         .child(
             div()
                 .flex()
@@ -120,6 +165,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EditableLabel::from_spec(
                         EditableLabelSpec::new()
                             .with_value(&empty_value)
+                            .with_activation_mode(EditableLabelActivation::EnterOrSpace)
+                            .with_empty_text("Add a description\u{2026}")
                             .with_placeholder("Add a description\u{2026}"),
                         theme,
                     )
@@ -137,7 +184,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     })),
                 ),
         )
-        // --- Flush variant ---
+        // --- Flush variant (display) ---
         .child(
             div()
                 .flex()
@@ -149,7 +196,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     EditableLabel::from_spec(
-                        EditableLabelSpec::new().with_value(&flush_value),
+                        EditableLabelSpec::new()
+                            .with_value(&flush_value)
+                            .with_variant(EditableLabelVariant::Flush)
+                            .with_activation_mode(EditableLabelActivation::EnterOrSpace)
+                            .with_show_edit_icon(true),
                         theme,
                     )
                     .with_id("flush")
@@ -162,19 +213,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     })),
                 ),
         )
-        // --- With max length ---
+        // --- Flush variant (editing — bottom border only) ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With max length"),
+                    EyebrowSpec::new().with_content("Flush variant (editing)"),
                     theme,
                 ))
                 .child(
                     EditableLabel::from_spec(
-                        EditableLabelSpec::new().with_value("Short text"),
+                        EditableLabelSpec::new()
+                            .with_value("Inline heading")
+                            .with_variant(EditableLabelVariant::Flush)
+                            .with_editing(true),
+                        theme,
+                    )
+                    .with_id("flush-editing"),
+                ),
+        )
+        // --- With max length (maxLength + placeholder, editing) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("With max length (20)"),
+                    theme,
+                ))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new()
+                            .with_value("Short text")
+                            .with_activation_mode(EditableLabelActivation::EnterOrSpace)
+                            .with_max_length(20)
+                            .with_placeholder("Enter text\u{2026}")
+                            .with_editing(true),
                         theme,
                     )
                     .with_id("max-length"),

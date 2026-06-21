@@ -35,6 +35,7 @@ pub mod date_time_picker;
 pub mod date_time_range_picker;
 pub mod detail_item;
 pub mod detail_section;
+pub mod detail_section_group;
 pub mod detail_shell;
 pub mod dialog;
 pub mod dock_region;
@@ -275,6 +276,7 @@ fn render_specimen(
         "date-time-range-picker" => Some(date_time_range_picker::render(theme)),
         "detail-item" => Some(detail_item::render(theme)),
         "detail-section" => Some(detail_section::render(theme)),
+        "detail-section-group" => Some(detail_section_group::render(theme)),
         "detail-shell" => Some(detail_shell::render(theme)),
         "dialog" => Some(dialog::render(theme)),
         "dock-region" => Some(dock_region::render(theme)),

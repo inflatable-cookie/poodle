@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- parity consv=ok gpui=1 jetstream=1 specimen=ok -->
+<!-- specimen=ok: both Rust specimens backfilled to full state coverage (label+control, required, optional, optional+description, info icon, error/invalid, pending, valid, sizes xs-xl, densities) with real Field + js_text_input; both previews build clean. -->
 <!-- pass: label color now color-mix(text-primary 45%, text-secondary) both targets; info-icon pill part added (em-scaled, secondary-tinted, pill radius), description no longer inline; Jetstream optional marker on supporting size + header space-between. Remaining open: span/grid-area = accepted layout delta (no CSS-grid parent). Jetstream probe tests cover label+required+info-icon+error+optional. -->
 # Parity: Field
 

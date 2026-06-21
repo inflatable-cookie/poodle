@@ -9,19 +9,21 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(512.0))
-        // --- Single column (default) ---
+        // --- Legend + description + grouped fields ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Single column (default)"),
+                    EyebrowSpec::new().with_content("Legend + description"),
                     theme,
                 ))
                 .child(
                     FieldSet::from_spec(
-                        FieldSetSpec::new().with_legend("Contact Information"),
+                        FieldSetSpec::new()
+                            .with_legend("Contact Information")
+                            .with_description("We use this to reach you about your account."),
                         theme,
                     )
                     .with_child(
@@ -64,20 +66,34 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     ),
                 ),
         )
-        // --- Two columns ---
+        // --- Multi-column (two) with full-width span field ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Two columns"),
+                    EyebrowSpec::new().with_content("Two columns + span"),
                     theme,
                 ))
                 .child(
                     FieldSet::from_spec(
                         FieldSetSpec::new().with_legend("Address").with_columns(2),
                         theme,
+                    )
+                    // `span="full"` is exercised on the spec; GPUI emits no
+                    // CSS-grid placement (accepted layout delta, contract §12).
+                    .with_child(
+                        Field::from_spec(
+                            FieldSpec::new("fs-street", "Street").with_span("full"),
+                            theme,
+                        )
+                        .with_control(TextInput::from_spec(
+                            TextInputSpec::new()
+                                .with_id("fs-street")
+                                .with_placeholder("123 Main St"),
+                            theme,
+                        )),
                     )
                     .with_child(
                         Field::from_spec(FieldSpec::new("fs-city", "City"), theme).with_control(
@@ -133,6 +149,45 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                     .with_placeholder("Smith"),
                                 theme,
                             )),
+                    ),
+                ),
+        )
+        // --- Gap: none ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Gap: none"),
+                    theme,
+                ))
+                .child(
+                    FieldSet::from_spec(
+                        FieldSetSpec::new()
+                            .with_legend("Tightly stacked")
+                            .with_gap(SpaceScale::None),
+                        theme,
+                    )
+                    .with_child(
+                        Field::from_spec(FieldSpec::new("fs-line1", "Line 1"), theme).with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("fs-line1")
+                                    .with_placeholder("Apartment, suite, etc."),
+                                theme,
+                            ),
+                        ),
+                    )
+                    .with_child(
+                        Field::from_spec(FieldSpec::new("fs-line2", "Line 2"), theme).with_control(
+                            TextInput::from_spec(
+                                TextInputSpec::new()
+                                    .with_id("fs-line2")
+                                    .with_placeholder("Building, floor, etc."),
+                                theme,
+                            ),
+                        ),
                     ),
                 ),
         )
