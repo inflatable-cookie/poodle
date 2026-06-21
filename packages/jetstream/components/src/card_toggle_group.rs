@@ -35,7 +35,10 @@ pub fn js_card_toggle_group(spec: &CardToggleGroupSpec, theme: &JetstreamThemePr
     let text_secondary = resolve_color(theme, "color.text.secondary");
     let disabled_opacity = resolve_opacity(theme, "state.opacity.disabled");
 
-    let mut root = ui_element::div().flex_row().flex_wrap().gap(grid_gap);
+    // Contract §6: options lay out in a grid capped at `columns` (1–4). Collect each cell,
+    // then assemble rows of `column_count()`.
+    let cols = spec.column_count();
+    let mut cells: Vec<JsEl> = Vec::new();
 
     for option in &spec.options {
         let is_selected = spec.is_selected(&option.value);
@@ -69,7 +72,27 @@ pub fn js_card_toggle_group(spec: &CardToggleGroupSpec, theme: &JetstreamThemePr
             option_el = option_el.opacity(disabled_opacity);
         }
 
-        root = root.child(option_el);
+        cells.push(option_el);
+    }
+
+    // Assemble rows of `cols` cells; pad a short final row with flex spacers so card
+    // widths stay aligned across rows (matches the auto-fit grid's column track).
+    let mut root = ui_element::div().flex_col().gap(grid_gap);
+    let mut iter = cells.into_iter();
+    let mut remaining = spec.options.len();
+    while remaining > 0 {
+        let take = cols.min(remaining);
+        let mut row = ui_element::div().flex_row().gap(grid_gap);
+        for _ in 0..take {
+            if let Some(cell) = iter.next() {
+                row = row.child(cell);
+            }
+        }
+        for _ in take..cols {
+            row = row.child(ui_element::div().flex_1());
+        }
+        root = root.child(row);
+        remaining -= take;
     }
 
     if spec.disabled {
@@ -107,6 +130,27 @@ mod tests {
             tree.texts()
         );
         assert!(tree.has_text("First"), "description missing");
+    }
+
+    #[test]
+    fn columns_chunk_renders_all_options_in_rows() {
+        // Contract §3 columns: 4 options at columns=2 → two rows of 2; chunking must
+        // not drop any cell, and column_count clamps to 1..4.
+        let four = vec![
+            CardToggleOption::new("a", "Alpha"),
+            CardToggleOption::new("b", "Bravo"),
+            CardToggleOption::new("c", "Charlie"),
+            CardToggleOption::new("d", "Delta"),
+        ];
+        let spec = CardToggleGroupSpec::new(four).with_columns(2);
+        assert_eq!(spec.column_count(), 2);
+        let tree = probe(&js_card_toggle_group(&spec, &theme()), 480.0, 320.0);
+        for t in ["Alpha", "Bravo", "Charlie", "Delta"] {
+            assert!(tree.has_text(t), "{t} missing with columns=2: {:?}", tree.texts());
+        }
+        // Clamp: 0 → 1, 9 → 4.
+        assert_eq!(CardToggleGroupSpec::new(vec![]).with_columns(0).column_count(), 1);
+        assert_eq!(CardToggleGroupSpec::new(vec![]).with_columns(9).column_count(), 4);
     }
 
     #[test]

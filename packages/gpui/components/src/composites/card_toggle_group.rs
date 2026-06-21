@@ -58,7 +58,10 @@ impl IntoElement for CardToggleGroup {
         let text_primary = resolve_color(theme, "color.text.primary");
         let text_secondary = resolve_color(theme, "color.text.secondary");
 
-        let mut root = div().flex().flex_row().flex_wrap().gap(grid_gap);
+        // Contract §6: options lay out in a grid capped at `columns` (1–4). Collect each
+        // option cell, then assemble rows of `column_count()`.
+        let cols = spec.column_count();
+        let mut cells: Vec<AnyElement> = Vec::new();
 
         for option in spec.options.iter() {
             let is_selected = spec.is_selected(&option.value);
@@ -123,7 +126,27 @@ impl IntoElement for CardToggleGroup {
                 }
             }
 
-            root = root.child(option_el);
+            cells.push(option_el.into_any_element());
+        }
+
+        // Assemble rows of `cols` cells; pad a short final row with flex spacers so the
+        // card widths stay aligned across rows (matches the auto-fit grid's column track).
+        let mut root = div().flex().flex_col().gap(grid_gap);
+        let mut iter = cells.into_iter();
+        let mut remaining = spec.options.len();
+        while remaining > 0 {
+            let take = cols.min(remaining);
+            let mut row = div().flex().flex_row().gap(grid_gap);
+            for _ in 0..take {
+                if let Some(cell) = iter.next() {
+                    row = row.child(cell);
+                }
+            }
+            for _ in take..cols {
+                row = row.child(div().flex_1());
+            }
+            root = root.child(row);
+            remaining -= take;
         }
 
         if spec.disabled {

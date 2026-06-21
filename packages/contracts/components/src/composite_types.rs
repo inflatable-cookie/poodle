@@ -373,6 +373,10 @@ pub enum MediaKind {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AspectRatio {
+    /// Frame respects the media's intrinsic ratio (contract `data-aspect-ratio="auto"`).
+    /// Web uses `aspect-ratio: auto`; with no real media in the Rust targets the frame
+    /// falls back to the landscape default for placeholder sizing — see `is_auto()`.
+    Auto,
     Square,
     Landscape,
     Portrait,

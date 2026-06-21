@@ -1,4 +1,9 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
+<!-- pass 85: closed the columns gap — added CardToggleGroupSpec.columns (u32, default 2) +
+     with_columns + column_count() (clamp 1..4). Both targets now lay options out in rows of
+     column_count() (flex_col of flex_rows, last row padded with flex spacers) instead of a
+     plain flex-wrap. Contract §3 columns done. Remaining 1/1: count pill (no spec field).
+     1 probe test (4 opts @ columns=2 render all + clamp); specs 116, jet 739, gpui clean. -->
 <!-- specimen pass: GPUI rebuilt (single + multi selection, disabled option, disabled group, sizes xs–xl, densities) and Jetstream card_toggle_group.rs created + registered (pub mod + dispatch arm) with the same coverage via real js_card_toggle_group/Card. Both previews build clean. `count` pill + `columns` not exercised: neither field exists on CardToggleGroupSpec/CardToggleOption (shared-spec gap, same omission as GPUI component). -->
 <!-- pass 46: Jetstream js_card_toggle_group rebuilt to match GPUI — each option composes
      js_card(interactive/selected when in values) with title (weight 600, text-primary at

@@ -190,15 +190,23 @@ impl MediaThumbnailSpec {
     }
 
     /// Aspect ratio as a `(width, height)` pair (contract §9 Aspect Ratios).
-    /// The Rust `AspectRatio` enum has no `auto` variant, so every variant maps
-    /// to a concrete ratio here.
+    /// Every variant maps to a concrete ratio for placeholder framing. `Auto` has no
+    /// intrinsic media in the Rust targets, so it falls back to the landscape default;
+    /// use `is_auto()` if an impl wants content-driven height instead of a fixed frame.
     pub fn aspect_ratio_pair(&self) -> (f32, f32) {
         match self.aspect_ratio {
+            AspectRatio::Auto => (16.0, 10.0),
             AspectRatio::Square => (1.0, 1.0),
             AspectRatio::Landscape => (16.0, 10.0),
             AspectRatio::Portrait => (3.0, 4.0),
             AspectRatio::Video => (16.0, 9.0),
         }
+    }
+
+    /// True when the frame should follow the media's intrinsic ratio rather than a
+    /// fixed aspect (contract `data-aspect-ratio="auto"`).
+    pub fn is_auto(&self) -> bool {
+        matches!(self.aspect_ratio, AspectRatio::Auto)
     }
 
     /// Frame height derived from a resolved frame width and the aspect ratio
@@ -292,5 +300,24 @@ impl MediaThumbnailSpec {
     /// Placeholder / fallback icon color (contract §9 Placeholder `icon color`).
     pub fn placeholder_icon_token(&self) -> &'static str {
         semantic::COLOR_TEXT_SECONDARY
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn auto_aspect_ratio_resolves_and_flags() {
+        // Contract `AspectRatio = "auto" | …` — Auto must resolve a placeholder pair
+        // (landscape fallback, no real media) and report is_auto() for content-driven impls.
+        let spec = MediaThumbnailSpec::new(MediaKind::Image).with_aspect_ratio(AspectRatio::Auto);
+        assert!(spec.is_auto());
+        assert_eq!(spec.aspect_ratio_pair(), (16.0, 10.0));
+        assert!(spec.frame_height_for_width(160.0) > 0.0);
+
+        let fixed = MediaThumbnailSpec::new(MediaKind::Image).with_aspect_ratio(AspectRatio::Square);
+        assert!(!fixed.is_auto());
+        assert_eq!(fixed.aspect_ratio_pair(), (1.0, 1.0));
     }
 }

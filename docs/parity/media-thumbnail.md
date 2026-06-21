@@ -1,4 +1,9 @@
 <!-- parity consv=ok gpui=1 jetstream=1 specimen=ok -->
+<!-- pass 85: added the contract's 5th AspectRatio variant Auto (was Square/Landscape/Portrait/
+     Video only). aspect_ratio_pair maps Auto → landscape placeholder (no real media in Rust);
+     is_auto() lets impls choose content-driven height. Only one exhaustive match (aspect_ratio_
+     pair) — all other sites are constructors. 1 spec test; specs 116, gpui clean, jet 739.
+     Remaining 1/1 = radial-gradient frame (no gradient primitive) — accepted runtime delta. -->
 # Parity: MediaThumbnail
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);

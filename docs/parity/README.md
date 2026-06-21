@@ -126,7 +126,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | callout | fixed | 2 | 2 | ok |
 | card | fixed | 2 | 2 | ok |
 | card-radio-group | fixed | 2 | 2 | ok |
-| card-toggle-group | fixed | 2 | 2 | ok |
+| card-toggle-group | fixed | 1 | 1 | ok |
 | checkbox | ok | 1 | 1 | ok |
 | code | fixed | 2 | 2 | ok |
 | code-input | fixed | 0 | 0 | ok |

@@ -37,6 +37,10 @@ pub struct CardToggleGroupSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Grid column upper bound (contract §3 `columns`, 1–4, default 2). The web target
+    /// is a responsive auto-fit grid capped at this; the Rust targets render the options
+    /// in rows of `column_count()` cards.
+    pub columns: u32,
 }
 
 impl Default for CardToggleGroupSpec {
@@ -48,6 +52,7 @@ impl Default for CardToggleGroupSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            columns: 2,
         }
     }
 }
@@ -87,6 +92,16 @@ impl CardToggleGroupSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+
+    pub fn with_columns(mut self, columns: u32) -> Self {
+        self.columns = columns;
+        self
+    }
+
+    /// Column count clamped to the contract's 1–4 range.
+    pub fn column_count(&self) -> usize {
+        self.columns.clamp(1, 4) as usize
     }
 
     /// Title font-size in rem for the given effective size.
