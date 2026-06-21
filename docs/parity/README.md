@@ -163,7 +163,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | file-upload | ok | 0 | 0 | ok |
 | filter-toolbar | fixed | 0 | 0 | gap |
 | form-actions | ok | 1 | 1 | gap |
-| form-dialog | ok | 0 | 1 | gap |
+| form-dialog | ok | 0 | 0 | gap |
 | form-layout | fixed | 2 | 2 | ok |
 | form-shell | gap | 0 | 0 | gap |
 | grid | fixed | 0 | 0 | ok |
