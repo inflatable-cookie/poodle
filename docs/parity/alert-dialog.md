@@ -1,4 +1,10 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 44: specimens backfilled to full contract coverage on both Rust targets with REAL
+     components. GPUI alert_dialog.rs: added always-on Working/pending group (.working + label
+     swap + disabled buttons) and item-detail group (.item_detail) alongside the interactive
+     danger/warning triggers. Jetstream alert_dialog.rs rebuilt: danger, warning, working
+     (js_alert_dialog_working), item-detail (with_item_detail) — all open via js_alert_dialog
+     composing the real Dialog + tone-driven Buttons. No fakes. Both previews build clean. -->
 <!-- pass 43: Jetstream rebuilt to match GPUI — composes js_dialog (role=AlertDialog, width=Sm) +
      js_buttons (ghost cancel / primary tone-driven confirm: Danger→Danger, Warning→Default);
      js_alert_dialog_working entry (label swap + buttons disabled + dismissal gated); item-detail

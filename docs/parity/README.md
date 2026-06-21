@@ -113,7 +113,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 |---|---|---|---|---|
 | accordion | fixed | 2 | 2 | gap |
 | action-discovery-panel | fixed | 2 | 2 | gap |
-| alert-dialog | fixed | 2 | 2 | gap |
+| alert-dialog | fixed | 2 | 2 | ok |
 | app-header | fixed | 2 | 2 | gap |
 | audio-player | ok | 2 | 2 | gap |
 | avatar | ok | 0 | 0 | gap |
@@ -134,7 +134,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | collapsible | fixed | 2 | 2 | gap |
 | color-picker | fixed | 0 | 2 | gap |
 | command-palette | fixed | 2 | 2 | gap |
-| confirm-action | ok | 0 | 0 | gap |
+| confirm-action | ok | 0 | 0 | ok |
 | context-menu | ok | 0 | 0 | gap |
 | data-table | fixed | 1 | 0 | gap |
 | date-picker | fixed | 0 | 0 | ok |
@@ -200,7 +200,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | password-requirements | ok | 0 | 0 | gap |
 | picker-shell | gap | 0 | 0 | gap |
 | pill | fixed | 0 | 0 | ok |
-| popover | fixed | 0 | 0 | gap |
+| popover | fixed | 0 | 0 | ok |
 | progress | fixed | 0 | 1 | gap |
 | radio-group | ok | 1 | 1 | ok |
 | range-slider | fixed | 1 | 1 | gap |

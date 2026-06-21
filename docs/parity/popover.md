@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap | pass: PopoverSpec gains disabled/block/surface_width/surface_min/max_width_rem (additive) + border token methods; GPUI wires disabled (blocks open), surfaceWidth=trigger, min/max overrides, initialFocus focusable branch; Jetstream resolves panel padding + border-subtle@74% + min/max width from tokens (shadow approximated, placement/trigger/open-close = preview-loop) -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok | pass: specimens backfilled to full contract coverage with real components on both Rust targets — GPUI adds Placement(left/right), Surface-width(trigger), Surface-width(fixed 20rem), Disabled groups via real Popover+Button+Eyebrow; Jetstream replaces the surface-only content shells (and hand-rolled `div().h(1.0)` divider + raw `p(12.0)`) with real js_button trigger + js_popover surface + js_separator across Default/Top/Header-body-footer/Surface-width-fixed/Disabled. Both previews build clean -->
 # Parity: Popover
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -51,8 +51,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default (bottom-start) with Button trigger + heading/paragraph content, Top placement with Button trigger + paragraph — both interactive (open/dismiss/Escape) (`PopoverSpecimen.svelte`). Matches contract §13 exactly.
-- GPUI covers: Default (bottom-start) + Top placement, real Button triggers, `on_open_change` wired through `overlay_state`, open/close interactive (`gpui/.../popover.rs`). — matches Svelte; closest parity of the three.
-- Jetstream covers: "With text content", "With rich content" (divider + options), "Empty (no content)" — **surface-only, no trigger, no placement, not interactive** (`jetstream/.../popover.rs`). — missing: **Button trigger**, **bottom-start vs top placement** groups, **open/dismiss interaction**. Demonstrates content shells rather than the contract's anchored-overlay behavior. Largest specimen gap.
+- GPUI covers: Default (bottom-start) + Top placement (contract §13), plus Placement(left/right), Surface-width:trigger, Surface-width:fixed(20rem), and Disabled groups — all via the real `Popover` + `Button` + `Eyebrow`, `on_open_change` wired through `overlay_state`, open/close interactive (`gpui/.../popover.rs`). Surface-width and disabled flow through `PopoverSpec` (consumed by `from_spec`).
+- Jetstream covers: Default (bottom-start), Top placement, Header/body/footer (split by a real `js_separator`), Surface-width:fixed(20rem), and Disabled groups — each a real `js_button` trigger + the real `js_popover` open surface rendered inline (render-only model; placement/open-close = preview-loop). Replaced the former surface-only shells and the hand-rolled `div().h(1.0)` divider + redundant `p(12.0)` content padding with real components/tokens. Surface min/max width honored via `effective_surface_{min,max}_width_rem()`; `surfaceWidth=trigger` is not rendered here (needs trigger anchoring the render-only surface lacks — preview-loop concern, omitted honestly rather than faked).
 
 ## Notes
 

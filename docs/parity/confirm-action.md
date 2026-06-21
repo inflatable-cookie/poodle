@@ -1,4 +1,10 @@
-<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=ok -->
+<!-- pass 44: specimens backfilled with REAL components. GPUI confirm_action_specimen.rs
+     already covered default-trigger(danger)/warning/custom-ghost-trigger/body-content
+     interactively — left intact (full coverage). Jetstream confirm_action.rs rebuilt: closed
+     default trigger (danger + default tones) + open confirm dialog (danger + default tones),
+     all via js_confirm_action (secondary trigger Button / delegated js_alert_dialog). Custom
+     trigger + body slot remain AlertDialog-side limits, not faked. Both previews build clean. -->
 <!-- pass 19: GPUI rebuilt — was hand-rolled trigger div + hand-rolled dialog (literal
      shadows, min_w(360), white() text). Now composes a real Button trigger + delegates
      the open state entirely to the AlertDialog primitive (tone/labels/size/density/body),
