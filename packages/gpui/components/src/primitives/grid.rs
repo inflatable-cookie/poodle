@@ -5,8 +5,9 @@
 
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{Dimension, GridSpec, PaddingScale};
+use poodle_specs::{Dimension, GridColumns, GridSpec, GridTrack, PaddingScale};
 
+use crate::presentation::rem_to_px;
 use crate::theme_ext::resolve_px;
 
 /// A grid layout approximated with flex-wrap.
@@ -62,34 +63,14 @@ impl Grid {
         self
     }
 
+    pub fn aria_label(mut self, v: impl Into<String>) -> Self {
+        self.spec.aria_label = Some(v.into());
+        self
+    }
+
     pub fn with_child(mut self, child: impl IntoElement) -> Self {
         self.children.push(child.into_any_element());
         self
-    }
-}
-
-impl Grid {
-    /// Parse column count from spec.columns (e.g. "1fr" -> 1, "repeat(3, 1fr)" -> 3, "1fr 1fr 1fr" -> 3).
-    fn column_count(&self) -> usize {
-        let cols_str = self.spec.columns.as_str();
-        // Try "repeat(N, ...)" pattern
-        if cols_str.starts_with("repeat(") {
-            if let Some(n) = cols_str
-                .trim_start_matches("repeat(")
-                .split(',')
-                .next()
-                .and_then(|s| s.trim().parse::<usize>().ok())
-            {
-                return n;
-            }
-        }
-        // Count space-separated tracks
-        let count = cols_str.split_whitespace().count();
-        if count > 0 {
-            count
-        } else {
-            1
-        }
     }
 }
 
@@ -97,10 +78,20 @@ impl IntoElement for Grid {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
+        // GPUI/Taffy has no CSS grid, so the grid is approximated with
+        // `flex().flex_wrap()`. Two-axis CSS `gap` maps to `gap_x`/`gap_y`
+        // (same token, per contract §8). Column tracks drive per-child flex:
+        //   - `Fr(w)` tracks → each child grows by its weight (`1fr 2fr` →
+        //     1/3 + 2/3 split); cycles when there are more children than tracks.
+        //   - `AutoFit { min_rem }` → each child has a min-width of `min_rem`
+        //     and grows to fill the row, wrapping like `repeat(auto-fit, …)`.
+        // DELTA vs CSS grid: explicit `rows` tracks are not honored (Taffy has
+        // no row-track concept); rows emerge from flex-wrap. Fixed `Rem` tracks
+        // size to their rem width but do not pin an exact column count.
         let theme = &self.theme;
         let spec = &self.spec;
         let padding = spec.resolved_padding();
-        let _col_count = self.column_count();
+        let columns = spec.parsed_columns();
 
         let mut el = div().flex().flex_wrap();
 
@@ -108,12 +99,12 @@ impl IntoElement for Grid {
         if let Some(gap_token) = spec.resolved_column_gap() {
             el = el.gap_x(resolve_px(theme, gap_token));
         }
-        // Row gap (applied same as column gap for consistent grid spacing)
+        // Row gap — same token as column gap (CSS `gap` is one value).
         if let Some(row_gap_token) = spec.resolved_row_gap() {
             el = el.gap_y(resolve_px(theme, row_gap_token));
         }
 
-        // Padding
+        // Padding (uniform on both axes, contract §8 `padding: <value>`).
         if let Some(h) = padding.horizontal {
             el = el.px(resolve_px(theme, h));
         }
@@ -121,10 +112,48 @@ impl IntoElement for Grid {
             el = el.py(resolve_px(theme, v));
         }
 
-        // Wrap each child in a container that enforces equal columns
-        // Using flex-basis percentage approximation
-        for child in self.children {
-            let wrapper = div().flex_1().min_w(px(0.0)).child(child);
+        // Total fr-weight across the track list, used to turn a track's weight
+        // into a relative flex-basis fraction (`1fr 2fr` → 1/3, 2/3). Rem tracks
+        // contribute no fr-weight (they take a fixed width instead).
+        let fr_total: f32 = match &columns {
+            GridColumns::Tracks(tracks) => tracks
+                .iter()
+                .filter_map(|t| match t {
+                    GridTrack::Fr(w) => Some(*w),
+                    GridTrack::Rem(_) => None,
+                })
+                .sum::<f32>()
+                .max(1.0),
+            GridColumns::AutoFit { .. } => 1.0,
+        };
+
+        for (i, child) in self.children.into_iter().enumerate() {
+            let wrapper = match &columns {
+                // `repeat(auto-fit, minmax(min_rem, 1fr))`: each cell at least
+                // `min_rem` wide, grows to fill, wraps to new rows.
+                GridColumns::AutoFit { min_rem } => div()
+                    .flex_grow()
+                    .flex_basis(px(rem_to_px(*min_rem)))
+                    .min_w(px(rem_to_px(*min_rem)))
+                    .child(child),
+                GridColumns::Tracks(tracks) if !tracks.is_empty() => {
+                    match tracks[i % tracks.len()] {
+                        // Weighted fr track → relative basis = weight / total.
+                        GridTrack::Fr(weight) => div()
+                            .flex_grow()
+                            .flex_shrink_0()
+                            .flex_basis(relative(weight / fr_total - 0.001))
+                            .min_w(px(0.0))
+                            .child(child),
+                        // Fixed rem track → exact width, no grow/shrink.
+                        GridTrack::Rem(rem) => {
+                            div().w(px(rem_to_px(rem))).flex_shrink_0().child(child)
+                        }
+                    }
+                }
+                // Empty/degenerate track list → single equal column.
+                GridColumns::Tracks(_) => div().flex_grow().min_w(px(0.0)).child(child),
+            };
             el = el.child(wrapper);
         }
 

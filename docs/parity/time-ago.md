@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=4 jetstream=4 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass: spec fixed (text-primary, live=true default, +interval/tooltip_format/timezone, shared format_relative w/ no week tier); GPUI font-size token-resolved + week tier dropped; Jetstream now computes relative time (parse→diff→shared formatter) + probe tests; Jetstream specimen rebuilt on real ISO timestamps (+Future/Long/Static groups). Remaining gpui/jet=2 each = live re-render (preview-loop) + tooltip (no Tooltip primitive wired) — accepted cross-target follow-ups. -->
 # Parity: TimeAgo
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -24,36 +25,37 @@ Prop/anatomy/state divergences. Contract-side mismatches are fixed below. The re
 - [x] FIXED **`short` just-now clarification.** §4 just-now row + §8 table now explicitly label short=`"now"` / long=`"just now"`.
 - [x] FIXED **`yesterday` long-form special case.** Svelte returns `"yesterday"` for `!short && !isFuture && days === 1` (`TimeAgo.svelte:64`). Added the special-case note under the §8 formatting table.
 
-Spec/code-side (not contract↔Svelte; left for Rust pass — docs-only task):
-- [ ] (spec) `TimeAgoSpec::text_color_token()` returns `COLOR_TEXT_SECONDARY` (`time_ago.rs:58-60`); contract/Svelte want `text-primary`. Spec is wrong — fix in code.
-- [ ] (spec) `TimeAgoSpec` lacks `interval`/`tooltip_format`/`timezone` (`time_ago.rs:6-14`); contract §3 has them. Add fields in code.
-- [ ] (spec) `TimeAgoSpec::default()` sets `live: false` (`time_ago.rs:20`); contract/Svelte default `true`. Fix default in code.
+Spec/code-side (fixed in this pass):
+- [x] FIXED (spec) `TimeAgoSpec::text_color_token()` now returns `COLOR_TEXT_PRIMARY` — contract/Svelte align. Unblocks the color todo on both Rust targets.
+- [x] FIXED (spec) Added `interval: u32` (default 30000), `tooltip_format: TimeAgoTooltipFormat` (default `Datetime`), `timezone: Option<String>` (default `None`) + builders, matching contract §3.
+- [x] FIXED (spec) `TimeAgoSpec::default()` now sets `live: true`.
+- [x] ADDED (spec) `TimeAgoSpec::format_relative(diff_seconds)` + free `format_relative()` — single-source threshold table (no week tier, long-form "yesterday") matching Svelte. Both Rust targets delegate to it. Unit-tested in `poodle_specs`.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded font size `el.text_size(px(rem_to_px(0.875)))` at `time_ago.rs:80` — `0.875` is a raw literal. Resolve from `spec.font_size_token()` via the theme, like Jetstream does. ZERO hardcoded rem values allowed.
-- [ ] Renders `text-secondary` (spec returns `COLOR_TEXT_SECONDARY`, applied at `time_ago.rs:70`) — contract/Svelte want `text-primary`. Blocked on the spec `text_color_token()` fix above.
-- [ ] Threshold divergence: GPUI inserts a **week** tier (`WEEK`, `"w"/"week"`) between days and months (`time_ago.rs:158,176-184,193`). Svelte/contract go straight from days (<30d) to months — no weeks. Months are also computed as `seconds / MONTH` only in the `< YEAR` branch, so a 10-day diff falls into the week branch and prints e.g. `"1w ago"`, which Svelte never produces. **Fix: drop the week tier; match the 6-row threshold table.**
-- [ ] No live re-render: `live` is stored (`time_ago.rs:45-48`) but `into_element` computes once against `SystemTime::now()` (`time_ago.rs:145`) with no timer/frame loop. Contract §10 requires periodic re-render when `live=true`. Preview has no timer wiring either.
+- [x] FIXED Font size now resolves from `spec.font_size_token()` via `resolve_px(theme, …)` (was hardcoded `rem_to_px(0.875)`).
+- [x] FIXED Renders `text-primary` now (via the spec `text_color_token()` fix).
+- [x] FIXED Week tier dropped. The component no longer owns its own `format_duration`; it parses + diffs and delegates to `spec.format_relative()` (no week tier; 10d → "10d ago").
+- [ ] No live re-render: `live` is stored but `into_element` computes once against `SystemTime::now()` with no timer/frame loop. Contract §10 requires periodic re-render when `live=true`. Preview has no timer wiring either. **Accepted cross-target follow-up (preview-loop concern, not a token/format bug).**
 - accepted: no `<time>`/`datetime`/`aria-label` (gpui has no semantic-element or accessibility API) — renders a plain `div`.
 - accepted: no tooltip / absolute-time `title` (no Tooltip primitive wired here).
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [ ] **No relative-time computation at all.** `js_time_ago` labels `spec.timestamp` verbatim (`time_ago.rs:11`). It only "works" because the specimen passes pre-formatted strings like `"2 minutes ago"`. Pass a real timestamp and it prints the raw ISO string. Contract §10 (and GPUI) require replicating the threshold table. **Fix: port the `format_duration` logic (parse timestamp → diff → relative string).**
-- [ ] Renders `text-secondary` (spec `text_color_token()` applied at `time_ago.rs:10`) — contract/Svelte want `text-primary`. Blocked on the spec fix above.
-- [ ] No live re-render: `spec.live` is never read; no timer in component or preview `main.rs`. Contract §10 requires periodic update when `live=true`.
-- [ ] No tooltip / absolute-time affordance — no `title`/Tooltip equivalent.
+- [x] FIXED **Relative-time computation added.** `js_time_ago` now parses the timestamp (ISO 8601 with/without time, `Z` suffix), diffs vs `SystemTime::now()`, and delegates to `spec.format_relative()` (the shared threshold table — same source as GPUI). Falls back to the raw string only on parse failure. Probe-tested (2m/3h/2d, 10d no-week, long-form words).
+- [x] FIXED Renders `text-primary` now (via the spec `text_color_token()` fix). Probe-tested.
+- [ ] No live re-render: `spec.live` is read by the spec but no timer in component or preview. **Accepted cross-target follow-up (preview-loop concern).**
+- [ ] No tooltip / absolute-time affordance. **Accepted delta — no Tooltip primitive wired into this component (GPUI is also tooltip-less here).**
 - accepted: no ARIA / semantic `<time>` element (Jetstream has no accessibility channel).
-- note: token resolution itself is clean — `resolve_px(theme, spec.font_size_token())` (`time_ago.rs:16`), no hardcoded literals. The gaps are behavioral, not token violations.
+- note: token resolution is clean — font-size via `resolve_px(theme, spec.font_size_token())`, color via the spec token. No hardcoded literals.
 
 ## Specimen parity
 
 - Svelte covers: Recent (2m/3h/2d), Future (+5m), Long format (2m/2d), Static (`live=false`), Inherited typography (inline prose), From ISO string (`TimeAgoSpecimen.svelte`).
 - GPUI covers: Recent (2m/3h/2d), Future (+5m), Inherit typography, Long format (2m/2d), From ISO string, Static (no live update) — **all from ISO timestamps**, so it actually exercises the relative-time math (`time_ago_specimen.rs`). Closest to Svelte. — missing: nothing material; static group can't demonstrate the live/no-live distinction since live isn't implemented.
-- Jetstream covers: Timestamps (2 entries + "Yesterday"), Inherit typography (`time_ago.rs`). — missing: **Future**, **Long format**, **Static**, **From ISO string** groups. Worse, every value is a **hand-typed relative string** (`"2 minutes ago"`, `"Yesterday"`), not a timestamp — this is a fake specimen per CLAUDE.md "No Mockups": it hides that `js_time_ago` does no formatting. **Fix: feed ISO timestamps once the component computes relative time.**
+- Jetstream covers (rebuilt this pass): Recent (2m/3h/2d), Future, Long format (2m/2d), Static (`live=false`), Inherit typography — **all from real ISO timestamps** now, so the specimen exercises the parse→diff→format path instead of hand-typed strings. No longer a fake specimen. Live-tick demonstration is still a preview-loop follow-up.
 
 ## Notes
 

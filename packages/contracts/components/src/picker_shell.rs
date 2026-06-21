@@ -103,6 +103,23 @@ impl PickerShellSpec {
         matches!(self.variant, PickerVariant::Modal | PickerVariant::Popover)
     }
 
+    /// True only for the popover variant (overlay elevation, width clamp).
+    pub fn is_popover(&self) -> bool {
+        matches!(self.variant, PickerVariant::Popover)
+    }
+
+    /// True only for the modal variant (dialog elevation, elevated background).
+    pub fn is_modal(&self) -> bool {
+        matches!(self.variant, PickerVariant::Modal)
+    }
+
+    /// Contract §7/§8 popover width cap, in rem. Svelte (authority) caps at
+    /// `min(32rem, calc(100vw - 2rem))`; the viewport clamp is a web-only
+    /// concern, so the Rust targets apply the `32rem` ceiling.
+    pub fn popover_max_width_rem(&self) -> f32 {
+        32.0
+    }
+
     pub fn summary_tone(&self) -> StatusTone {
         if self.state == BrowseState::Error {
             StatusTone::Danger
@@ -162,5 +179,27 @@ impl PickerShellSpec {
             BrowseState::NoResults => Some("No results found."),
             BrowseState::Ready => None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn variant_predicates_are_exclusive() {
+        let inline = PickerShellSpec::new("t");
+        assert!(!inline.is_popover() && !inline.is_modal() && !inline.is_modal_like());
+
+        let popover = PickerShellSpec::new("t").with_variant(PickerVariant::Popover);
+        assert!(popover.is_popover() && !popover.is_modal() && popover.is_modal_like());
+
+        let modal = PickerShellSpec::new("t").with_variant(PickerVariant::Modal);
+        assert!(modal.is_modal() && !modal.is_popover() && modal.is_modal_like());
+    }
+
+    #[test]
+    fn popover_max_width_is_32rem() {
+        assert_eq!(PickerShellSpec::new("t").popover_max_width_rem(), 32.0);
     }
 }

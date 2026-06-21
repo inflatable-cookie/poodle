@@ -180,7 +180,7 @@ pub use file_upload::{
 pub use form_actions::FormActionsSpec;
 pub use form_dialog::FormDialogSpec;
 pub use form_layout::FormLayoutSpec;
-pub use grid::GridSpec;
+pub use grid::{GridColumns, GridSpec, GridTrack};
 pub use hover_card::HoverCardSpec;
 pub use icon::{IconSize, IconSpec};
 pub use icon_button::IconButtonSpec;
@@ -237,7 +237,7 @@ pub use text::{TextElement, TextLeading, TextSize, TextSpec, TextTone, TextWeigh
 pub type TextAreaSpec = TextInputSpec;
 pub use text_input::TextInputSpec;
 pub use text_link::{TextLinkSpec, TextLinkTone};
-pub use time_ago::TimeAgoSpec;
+pub use time_ago::{TimeAgoSpec, TimeAgoTooltipFormat};
 pub use time_field::TimeFieldSpec;
 pub use time_zone_select::{
     default_time_zone_options, TimeZoneSelectSpec, TIME_ZONE_EMPTY_MESSAGE, TIME_ZONE_PLACEHOLDER,
@@ -446,8 +446,10 @@ mod tests {
     fn grid_defaults_match_single_track_baseline() {
         let spec = GridSpec::default();
         assert_eq!(spec.columns.as_str(), "1fr");
-        assert_eq!(spec.resolved_column_gap(), Some(semantic::SPACE_INLINE_MD));
-        assert_eq!(spec.resolved_row_gap(), Some(semantic::SPACE_STACK_MD));
+        // Contract §8 Grid SpaceScale: gap `md` → `space-panel-y`, single value
+        // on both axes (CSS `gap` is one value).
+        assert_eq!(spec.resolved_column_gap(), Some(semantic::SPACE_PANEL_Y));
+        assert_eq!(spec.resolved_row_gap(), Some(semantic::SPACE_PANEL_Y));
     }
 
     #[test]

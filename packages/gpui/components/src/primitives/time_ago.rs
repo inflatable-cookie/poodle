@@ -6,8 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{InlineTypographyMode, TimeAgoSpec};
 
-use crate::presentation::rem_to_px;
-use crate::theme_ext::resolve_color;
+use crate::theme_ext::{resolve_color, resolve_px};
 
 /// A real GPUI relative time display component backed by `TimeAgoSpec`.
 pub struct TimeAgo {
@@ -70,14 +69,16 @@ impl IntoElement for TimeAgo {
         let text_color = resolve_color(theme, spec.text_color_token());
 
         let display = if spec.timestamp.is_empty() {
-            "just now".to_string()
+            spec.format_relative(0)
         } else {
-            relative_time(&spec.timestamp, spec.short).unwrap_or_else(|| spec.timestamp.clone())
+            relative_time(spec, &spec.timestamp).unwrap_or_else(|| spec.timestamp.clone())
         };
 
         let mut el = div().text_color(text_color).child(display);
         if !spec.inherits_typography() {
-            el = el.text_size(px(rem_to_px(0.875)));
+            // Contract §8: font-size = typography.body.size. Resolve from token,
+            // never a hardcoded rem literal.
+            el = el.text_size(resolve_px(theme, spec.font_size_token()));
         }
         el.into_any_element()
     }
@@ -89,7 +90,10 @@ impl IntoElement for TimeAgo {
 /// Supports formats: "YYYY-MM-DDThh:mm:ss", "YYYY-MM-DDThh:mm:ssZ",
 /// "YYYY-MM-DD hh:mm:ss", and "YYYY-MM-DD".
 /// Returns `None` if parsing fails, allowing the caller to fall back.
-fn relative_time(timestamp: &str, short: bool) -> Option<String> {
+///
+/// Formatting is delegated to `TimeAgoSpec::format_relative` (the shared,
+/// single-source threshold table) — this only owns parsing + the now-diff.
+fn relative_time(spec: &TimeAgoSpec, timestamp: &str) -> Option<String> {
     let ts = timestamp.trim();
     // Strip trailing 'Z' if present (treat as UTC either way).
     let ts = ts.strip_suffix('Z').unwrap_or(ts);
@@ -144,67 +148,10 @@ fn relative_time(timestamp: &str, short: bool) -> Option<String> {
 
     let now_epoch = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs() as i64;
 
-    let diff = now_epoch - ts_epoch;
-    let is_future = diff < 0;
-    let abs_diff = diff.unsigned_abs();
-
-    Some(format_duration(abs_diff, short, is_future))
-}
-
-fn format_duration(seconds: u64, short: bool, is_future: bool) -> String {
-    const MINUTE: u64 = 60;
-    const HOUR: u64 = 3600;
-    const DAY: u64 = 86400;
-    const WEEK: u64 = 7 * DAY;
-    const MONTH: u64 = 30 * DAY;
-    const YEAR: u64 = 365 * DAY;
-
-    if seconds < 5 {
-        return if short {
-            "now".to_string()
-        } else {
-            "just now".to_string()
-        };
-    }
-
-    let (value, unit_short, unit_long_singular, unit_long_plural) = if seconds < MINUTE {
-        (seconds, "s", "second", "seconds")
-    } else if seconds < HOUR {
-        (seconds / MINUTE, "m", "minute", "minutes")
-    } else if seconds < DAY {
-        (seconds / HOUR, "h", "hour", "hours")
-    } else if seconds < WEEK {
-        let d = seconds / DAY;
-        if !short && !is_future && d == 1 {
-            return "yesterday".to_string();
-        }
-        (d, "d", "day", "days")
-    } else if seconds < MONTH {
-        (seconds / WEEK, "w", "week", "weeks")
-    } else if seconds < YEAR {
-        (seconds / MONTH, "mo", "month", "months")
-    } else {
-        (seconds / YEAR, "y", "year", "years")
-    };
-
-    if short {
-        if is_future {
-            format!("in {}{}", value, unit_short)
-        } else {
-            format!("{}{} ago", value, unit_short)
-        }
-    } else {
-        let unit = if value == 1 {
-            unit_long_singular
-        } else {
-            unit_long_plural
-        };
-        if is_future {
-            format!("in {} {}", value, unit)
-        } else {
-            format!("{} {} ago", value, unit)
-        }
-    }
+    // `now − timestamp`: positive = past, negative = future. Formatting (and the
+    // exact threshold table, including the no-week-tier rule and the long-form
+    // "yesterday" case) is owned by the shared spec method.
+    Some(spec.format_relative(now_epoch - ts_epoch))
 }
 
 /// Convert a date/time to approximate Unix epoch seconds.

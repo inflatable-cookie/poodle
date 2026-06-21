@@ -116,7 +116,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | alert-dialog | fixed | 2 | 2 | gap |
 | app-header | fixed | 2 | 2 | gap |
 | audio-player | ok | 2 | 2 | gap |
-| avatar | ok | 4 | 3 | gap |
+| avatar | ok | 0 | 0 | gap |
 | block-editor | fixed | 1 | 2 | gap |
 | box | ok | 2 | 3 | gap |
 | breadcrumbs | fixed | 0 | 0 | gap |
@@ -166,7 +166,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | form-dialog | ok | 0 | 1 | gap |
 | form-layout | fixed | 2 | 2 | gap |
 | form-shell | gap | 0 | 0 | gap |
-| grid | fixed | 4 | 4 | gap |
+| grid | fixed | 0 | 0 | ok |
 | hover-card | ok | 1 | 0 | ok |
 | icon | ok | 2 | 1 | gap |
 | icon-button | fixed | 0 | 0 | gap |
@@ -198,7 +198,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | pagination | fixed | 0 | 1 | gap |
 | pagination-summary | fixed | 2 | 2 | gap |
 | password-requirements | ok | 0 | 0 | gap |
-| picker-shell | gap | 4 | 4 | gap |
+| picker-shell | gap | 0 | 0 | gap |
 | pill | fixed | 0 | 0 | gap |
 | popover | fixed | 0 | 0 | gap |
 | progress | fixed | 3 | 4 | gap |
@@ -233,7 +233,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | text | ok | 4 | 2 | gap |
 | text-input | fixed | 2 | 2 | gap |
 | text-link | ok | 0 | 1 | gap |
-| time-ago | fixed | 4 | 4 | gap |
+| time-ago | fixed | 2 | 2 | ok |
 | time-input | fixed | 0 | 0 | ok |
 | time-zone-select | fixed | 0 | 0 | gap |
 | toast-host | fixed | 3 | 4 | gap |

@@ -1,4 +1,5 @@
-<!-- parity consv=ok gpui=4 jetstream=3 specimen=gap -->
+<!-- parity consv=ok gpui=0 jetstream=0 specimen=gap -->
+<!-- pass: AvatarSpec gained token methods (background_base/mix_token, background_mix_ratio, color_token, radius_token) + is_circle/circle_radius_rem (=size/2) + has_image; both targets now resolve tone/shape from the spec (no inlined token strings, no 999 sentinel — circle = half the box). Both targets render an image node when src is set (object-fit cover; URL decode is host/runtime). Jetstream probe tests cover size scale, circle radius, rounded token, image-over-initials, tone bg. Contract-confirmed: status dot / badge / ring / seed-tint are OUT OF SCOPE (§1) — not added. Remaining: decorative/ARIA accepted (no a11y channel on either Rust target); Jetstream avatar specimen file still TODO (specimen=gap). -->
 # Parity: Avatar
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -26,18 +27,19 @@ Svelte matches the contract on every prop (name/type/default), the size + font-s
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] Hardcoded circle radius literal `px(rem_to_px(999.0))` at `avatar.rs:42` — circle should use a `50%`/pill radius derived from the resolved `size`, not a raw `999.0` rem sentinel. Add `AvatarSpec` shape-radius handling instead of the magic number.
-- [ ] No image (`src`) rendering — `into_element` only ever emits `fallback_text()` (`avatar.rs:58`); `spec.src`/`spec.alt`/object-fit cover (contract §3) are ignored. Render an image element when `spec.src.is_some()`.
-- [ ] `tone`/`shape`/`size` resolve colors via raw token strings + inline `color_mix` (`avatar.rs:33-43`) — `AvatarSpec` exposes no token methods (`background`/`color`/`radius`), only `size_rem`/`font_size_rem`. Add `AvatarSpec::background_token()`/`color_token()`/`radius_token()` so resolution is spec-driven, not duplicated in the component.
-- [ ] `decorative` prop unhandled — `spec.decorative`/`accessible_label()` are never read in `into_element`; no behavioral difference (accepted that ARIA itself is absent, but decorative should still gate any future label/alt logic).
+- [x] FIXED Circle radius now `rem_to_px(spec.circle_radius_rem())` = half the box size (CSS `border-radius: 50%` on a square), via the new `AvatarSpec::is_circle()`/`circle_radius_rem()`. No more `999.0` sentinel.
+- [x] FIXED Image rendering — `into_element` now emits a `gpui::img(src).size_full().object_fit(ObjectFit::Cover)` child when `spec.has_image()` (contract §3 cover). URL decode/load is the GPUI asset pipeline's job. Initials fallback only when no `src`.
+- [x] FIXED Tone/shape now resolve through the spec token methods (`background_base_token`/`background_mix_token`/`background_mix_ratio`/`color_token`/`radius_token`) — no inlined token strings duplicated in the component.
+- [ ] `decorative` prop unhandled — still not read in `into_element`. **Accepted: ARIA is absent on GPUI (no a11y API); there is no visible behavioral difference to drive.**
 - accepted: no ARIA (gpui has no accessibility API) — `role="img"`/`aria-label`/`aria-hidden` from contract §4 cannot be emitted.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [x] DONE: created `packages/jetstream/components/src/avatar.rs` (`js_avatar`) + registered in lib.rs; inline-flex square from `size_rem()`, `flex_none()`, centered, `overflow_hidden()`.
-- [x] DONE: shape (circle → `rem_to_px(999.0)` pill, same convention as GPUI; rounded → `radius.control`); tone neutral/accent via the new shared `theme_ext::color_mix`; initials fallback at `font_size_rem()` weight 600; all font sizes token-resolved. Probe-tested.
-- [ ] Image (`src`) rendering — JsEl has no image-by-URL channel; runtime limit (GPUI is also initials-only). Documented, not faked.
-- [ ] Add `AvatarSpec` token methods (`background_token`/`color_token`/`radius_token`) so both Rust targets share the mix math instead of duplicating it.
+- [x] DONE: `packages/jetstream/components/src/avatar.rs` (`js_avatar`) exists (declared `pub mod avatar` in lib.rs); inline-flex square from `size_rem()`, `flex_none()`, centered, `overflow_hidden()`.
+- [x] DONE: shape (circle → half-box radius via `circle_radius_rem()`; rounded → `radius.control`); tone neutral/accent via the spec token methods + `theme_ext::color_mix`; initials fallback at `font_size_rem()` weight 600; all font sizes token-resolved. Probe-tested.
+- [x] FIXED Image (`src`) rendering — `js_avatar` now emits `ui_element::image(src).w(size).h(size).object_fit_cover()` when `spec.has_image()` (JsEl *does* have an image-by-path channel: `Widget::Image`). URL decode is the Jetstream texture pipeline's job; the avatar only forwards the URL + cover fit. Initials fallback only when no `src`. Probe-tested (image node present, initials suppressed).
+- [x] FIXED Circle radius now `rem_to_px(spec.circle_radius_rem())` = half the box (was the `999.0` sentinel); rounded uses `spec.radius_token()`. Probe-tested.
+- [x] FIXED `AvatarSpec` token methods added; the component resolves tone/shape from the spec (shared with GPUI), no duplicated inline token strings.
 - accepted: no ARIA channel (contract §4 `role="img"`/`aria-label`/`aria-hidden` not expressible); decorative-vs-labeled distinction has no Jetstream a11y surface.
 
 ## Specimen parity
@@ -48,6 +50,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `AvatarSpec` (`packages/contracts/components/src/avatar.rs`) is complete for props and exposes `fallback_text()`/`accessible_label()`/`size_rem()`/`font_size_rem()`, but lacks color/radius token methods — both Rust targets currently inline the token math. Adding those methods is the cleanest unblock for the Jetstream build and the GPUI cleanup.
-- Avatar is the top-priority gap: the entire Jetstream target (component + specimen) is missing, while GPUI is initials-only.
-- consv=ok — contract and Svelte are fully aligned; all open work is on the Rust targets.
+- `AvatarSpec` (`packages/contracts/components/src/avatar.rs`) now exposes the color/radius token methods (`background_base_token`/`background_mix_token`/`background_mix_ratio`/`color_token`/`radius_token`) plus `is_circle()`/`circle_radius_rem()` and `has_image()`. Both Rust targets resolve tone/shape from the spec; the mix math is no longer duplicated inline.
+- **Out of scope per contract §1:** presence/status dot, badge, border/ring, and name/seed-derived background tint are NOT avatar features — the only fallback tints are the fixed neutral/accent tone mixes. These were deliberately not added (contract is source of truth).
+- Both Rust targets now render an image node when `src` is set; image *decode* (URL → texture) remains a host/runtime concern on both.
+- consv=ok — contract and Svelte are fully aligned. Remaining open: the Jetstream avatar specimen file (`packages/jetstream/preview/src/specimens/avatar.rs`) is still unwritten (specimen=gap); GPUI specimen still missing the `xl` + image groups.

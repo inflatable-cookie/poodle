@@ -150,18 +150,36 @@ impl IntoElement for PickerShell {
         let panel_bg = resolve_color(theme, "color.background.panel");
         let surface_bg = resolve_color(theme, "color.background.surface");
 
+        // Modal uses the elevated background (contract §8 modal variant); popover
+        // and inline keep the panel background.
+        let elevated_bg = resolve_color(theme, "color.background.elevated");
+        let shell_bg = if spec.is_modal() {
+            // color-mix(in srgb, elevated 96%, transparent) → elevated at 96% alpha.
+            crate::theme_ext::color_mix(elevated_bg, Hsla::transparent_black(), 0.96)
+        } else {
+            // color-mix(in srgb, panel 94%, transparent) → panel at 94% alpha.
+            crate::theme_ext::color_mix(panel_bg, Hsla::transparent_black(), 0.94)
+        };
+
         let mut shell = div()
             .grid()
             .gap(stack_md)
-            .bg(panel_bg)
+            .bg(shell_bg)
             .border_1()
             .border_color(border)
             .rounded(surface_radius)
             .px(panel_x)
             .py(panel_y)
-            .when(spec.is_modal_like(), |el| {
+            // Popover: overlay elevation + width clamp to 32rem (contract §8).
+            .when(spec.is_popover(), |el| {
+                el.shadow(crate::theme_ext::elevation_overlay_shadow())
+                    .w_full()
+                    .max_w(px(rem_to_px(spec.popover_max_width_rem())))
+            })
+            // Modal: dialog elevation (contract §8); no width clamp (Svelte
+            // leaves modal width to the host dialog).
+            .when(spec.is_modal(), |el| {
                 el.shadow(crate::theme_ext::elevation_dialog_shadow())
-                .max_w(px(480.0))
             });
 
         let mut title_block = div().flex().flex_col().gap(stack_sm).child(

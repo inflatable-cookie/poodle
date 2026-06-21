@@ -114,6 +114,72 @@ impl AvatarSpec {
         )
     }
 
+    /// True when the avatar renders an image (`src` present). Image decode is a
+    /// host/runtime concern; the spec only reports the URL via `src`.
+    pub fn has_image(&self) -> bool {
+        self.src.as_deref().is_some_and(|s| !s.trim().is_empty())
+    }
+
+    // ── Tone token targets (contract §3 + Avatar.svelte tone rules) ──
+    //
+    // Both Rust targets resolve these instead of inlining the token strings.
+    // Background is `color-mix(base ratio%, mix)`; ratios live in
+    // `background_mix_ratio()`.
+
+    /// Base color token mixed to produce the fallback background.
+    /// Neutral → `background.surface`; accent → `accent.base`.
+    pub fn background_base_token(&self) -> &'static str {
+        match self.tone {
+            AvatarTone::Neutral => "color.background.surface",
+            AvatarTone::Accent => "color.accent.base",
+        }
+    }
+
+    /// Color token mixed *into* the base to produce the fallback background.
+    /// Neutral → `text.primary`; accent → `background.surface`.
+    pub fn background_mix_token(&self) -> &'static str {
+        match self.tone {
+            AvatarTone::Neutral => "color.text.primary",
+            AvatarTone::Accent => "color.background.surface",
+        }
+    }
+
+    /// Proportion of the base color kept in the mix (CSS `base X%`).
+    /// Neutral → 0.82 (surface 82%); accent → 0.76 (accent 76%).
+    pub fn background_mix_ratio(&self) -> f32 {
+        match self.tone {
+            AvatarTone::Neutral => 0.82,
+            AvatarTone::Accent => 0.76,
+        }
+    }
+
+    /// Foreground (initials) color token.
+    /// Neutral → `text.secondary`; accent → `text.primary`.
+    pub fn color_token(&self) -> &'static str {
+        match self.tone {
+            AvatarTone::Neutral => "color.text.secondary",
+            AvatarTone::Accent => "color.text.primary",
+        }
+    }
+
+    /// Rounded-shape radius token (contract §3 `--poodle-radius-control`).
+    /// Circle shape is computed as half the resolved size (`border-radius: 50%`),
+    /// so it has no token of its own; see `is_circle`.
+    pub fn radius_token(&self) -> &'static str {
+        "radius.control"
+    }
+
+    /// True when the shape is a circle (`border-radius: 50%`).
+    pub fn is_circle(&self) -> bool {
+        self.shape == AvatarShape::Circle
+    }
+
+    /// Circle radius in rem: half the box size (CSS `border-radius: 50%` on a
+    /// square box). Only meaningful when `is_circle()`.
+    pub fn circle_radius_rem(&self) -> f32 {
+        self.size_rem() / 2.0
+    }
+
     pub fn size_rem(&self) -> f32 {
         match self.size {
             AvatarSize::Xs => 1.5,
