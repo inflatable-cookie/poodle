@@ -8,6 +8,7 @@ pub mod action_discovery_panel;
 pub mod alert_dialog;
 pub mod app_header;
 pub mod audio_player;
+pub mod avatar;
 pub mod badge;
 pub mod banner;
 pub mod block_editor;
@@ -247,6 +248,7 @@ fn render_specimen(
         "alert-dialog" => Some(alert_dialog::render(theme)),
         "app-header" => Some(app_header::render(theme)),
         "audio-player" => Some(audio_player::render(theme)),
+        "avatar" => Some(avatar::render(theme)),
         "badge" => Some(badge::render(theme)),
         "banner" => Some(banner::render(theme)),
         "block-editor" => Some(block_editor::render(theme)),
