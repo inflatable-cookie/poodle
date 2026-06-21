@@ -1,4 +1,9 @@
-<!-- parity consv=ok gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=ok gpui=2 jetstream=2 specimen=ok -->
+<!-- specimen pass: GPUI + Jetstream specimens backfilled to full contract state coverage with
+     real AudioPlayer/js_audio_player + AudioPlayerSpec only — transport (paused vs playing,
+     mid-progress seek fill), volume (muted, reduced), speed-active (with_rate 1x/1.5x), all 5
+     sizes, all 3 densities, semantic role. No hand-rolled bars; seek/volume fills come from
+     spec progress/volume. Both previews build clean. -->
 <!-- pass 41: audio-player built out on BOTH targets. Added AudioPlayerSpec.rate (+ with_rate
      + rate_label). GPUI: button/icon/track now size-driven (were fixed 32px/Sm/4px); split
      combined "{:.0}s/{:.0}s" → two m:ss CurrentTime/TotalTime labels; added volume slider +

@@ -202,6 +202,98 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- Valid ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Valid"),
+                    theme,
+                ))
+                .child(TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_id("valid-field")
+                        .with_value("you@example.com")
+                        .with_validation_state(ValidationState::Valid),
+                    theme,
+                )),
+        )
+        // --- Leading icon ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Leading icon"),
+                    theme,
+                ))
+                .child(TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_id("leading-field")
+                        .with_leading_icon("search")
+                        .with_placeholder("Search components…"),
+                    theme,
+                )),
+        )
+        // --- Trailing icon ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Trailing icon"),
+                    theme,
+                ))
+                .child(TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_id("trailing-field")
+                        .with_trailing_icon("x-circle")
+                        .with_value("Some text"),
+                    theme,
+                )),
+        )
+        // --- Character count ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Character count"),
+                    theme,
+                ))
+                .child(TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_id("charcount-field")
+                        .with_value("Hello")
+                        .with_max_length(40)
+                        .with_show_char_count(true)
+                        .with_placeholder("Up to 40 characters…"),
+                    theme,
+                )),
+        )
+        // --- Read-only ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Read-only"),
+                    theme,
+                ))
+                .child(TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_id("readonly-field")
+                        .with_value("read-only value")
+                        .with_read_only(true),
+                    theme,
+                )),
+        )
         // --- Prefix and suffix ---
         .child(
             div()

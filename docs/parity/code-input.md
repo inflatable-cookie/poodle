@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=gap -->
+<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- pass 42: specimens backfilled to full contract coverage on both Rust targets — empty/partial/complete, numbers-only vs alphanumeric, masked, invalid, disabled, plus size + density ladders. All groups use real CodeInput/js_code_input from CodeInputSpec (no hand-rolled slots). Both previews build clean. -->
 <!-- pass 41: both targets — square slot ladder (code_input_slot_size_rem), slot font ladder (code_input_slot_font_rem), token-resolved density gap (xs→sm→md inline), fixed split-after (space.inline.md) on Jetstream, active slot uses accent.border, numbers_only spec flag drives alphanumeric on both. Remaining: real input / paste / autofill / slot-click caret + monospace font + caret are runtime/preview-loop gaps (accepted). -->
 # Parity: CodeInput
 

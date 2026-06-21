@@ -115,7 +115,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | action-discovery-panel | fixed | 2 | 2 | gap |
 | alert-dialog | fixed | 2 | 2 | ok |
 | app-header | fixed | 2 | 2 | gap |
-| audio-player | ok | 2 | 2 | gap |
+| audio-player | ok | 2 | 2 | ok |
 | avatar | ok | 0 | 0 | gap |
 | block-editor | fixed | 1 | 2 | gap |
 | box | ok | 0 | 0 | fixed |
@@ -129,7 +129,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | card-toggle-group | fixed | 2 | 2 | gap |
 | checkbox | ok | 1 | 1 | ok |
 | code | fixed | 2 | 2 | gap |
-| code-input | fixed | 0 | 0 | gap |
+| code-input | fixed | 0 | 0 | ok |
 | collapse-toggle | fixed | 0 | 1 | gap |
 | collapsible | fixed | 2 | 2 | gap |
 | color-picker | fixed | 0 | 2 | gap |
@@ -231,7 +231,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | table | fixed | 0 | 0 | gap |
 | tabs | fixed | 2 | 2 | ok |
 | text | ok | 0 | 1 | gap |
-| text-input | fixed | 2 | 2 | gap |
+| text-input | fixed | 2 | 2 | ok |
 | text-link | ok | 0 | 1 | gap |
 | time-ago | fixed | 2 | 2 | ok |
 | time-input | fixed | 0 | 0 | ok |
@@ -246,7 +246,7 @@ contract: `badge.rs`, `banner.rs`, `reorderable_list.rs`, `shell_status_bar.rs`,
 | tri-state-switch | fixed | 1 | 2 | ok |
 | ui-presentation-provider | fixed | 0 | 0 | gap |
 | validation-summary | gap | 0 | 0 | gap |
-| video-player | fixed | 0 | 0 | gap |
+| video-player | fixed | 0 | 0 | ok |
 <!-- END MATRIX -->
 
 ## Status compiler

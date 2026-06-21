@@ -1,4 +1,5 @@
-<!-- parity consv=fixed gpui=2 jetstream=2 specimen=gap -->
+<!-- parity consv=fixed gpui=2 jetstream=2 specimen=ok -->
+<!-- pass 51: specimens backfilled to full contract coverage on both Rust targets — placeholder/value, invalid/valid/pending, leading + trailing icon, prefix/suffix (and combined), char count, read-only, disabled, plus size + density ladders. All groups use real TextInput/js_text_input from TextInputSpec (no hand-rolled input boxes). Both previews build clean. -->
 <!-- pass 50: both targets. Additive TextInputSpec token methods (char_count_font_size,
      border_width, affix_separator_solid, pending/validation_indicator_color). Validation icons
      → Svelte check/x (was circle-check/circle-x); pending → ring spinner (accent); affix
