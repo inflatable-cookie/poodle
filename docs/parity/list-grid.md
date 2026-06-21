@@ -37,8 +37,8 @@ Mirrors GPUI; all dimensions token-resolved. Clean on tokens.
 ## Specimen parity
 
 - Svelte covers: Responsive default (`minItemWidth={14}`), With header actions (`minItemWidth={16}`, Export + IconButton), Compact (`ListGridSpecimen.svelte`).
-- GPUI covers: Default (min 14em), With header actions, Compact (`list_grid.rs:46,87,95`). — matches Svelte 1:1.
-- Jetstream covers: Default (wrap + min tile), Compact (`list_grid.rs:41-42`). — missing: **header-actions** group (the `with_header` path is exercised by the contract but not shown in a dedicated group; default group does pass a header label). Minor.
+- GPUI specimen DONE; Jetstream pending engine recovery: Default (min 14em, real `Surface` tiles), With header actions (Export + IconButton), Compact single-column, **With ListCards** (grid of real `ListCard::from_spec` tiles — auto-fill min 16em), **Empty** (header actions row + token-resolved empty `Text`, no items). All items are real components (Surface / ListCard / Text); no hand-rolled boxes. `gpui/preview` builds 0 errors.
+- Jetstream covers: Default (wrap + min tile), Compact (`list_grid.rs:41-42`). — specimen build-out deferred (engine externally build-blocked). Missing: header-actions / with-cards / empty groups, to add once unblocked.
 
 ## Notes
 

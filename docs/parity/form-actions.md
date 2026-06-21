@@ -1,4 +1,5 @@
 <!-- parity consv=ok gpui=1 jetstream=1 specimen=gap -->
+<!-- gpui-specimen pass: GPUI specimen done; Jetstream pending engine recovery. form_actions.rs now covers End/Start/Between, danger-overflow (real with_danger_action + dangerItems → ghost ellipsis), Submitting (loading primary + disabled cancel), Density ladder (compact/default/comfortable), Footer-embedded (showTopSeparation=false), Bordered separation (showTopBorder=true). Replaced the old fake "responsive danger" group (three plain stacked buttons) with the real danger inline-group + overflow trigger path. specimen stays gap — Jetstream specimen unverifiable while the engine is build-blocked. -->
 <!-- pass 42: danger model landed (additive). `FormActionDangerItem` struct added
      to poodle-specs (label/value?/disabled, value-fallback `index:label`) +
      `FormActionsSpec.danger_items` Vec + `with_danger_item(s)`/`has_danger_menu`/
@@ -73,7 +74,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: End-aligned (default), Start-aligned, Space between, Responsive danger actions (with `dangerItems` + `danger` snippet, constrained to 20rem to show collapse), Bordered separation, Density ladder (compact/default/comfortable via `densities` snippet) (`FormActionsSpecimen.svelte`).
-- GPUI covers: End-aligned, Start-aligned, Space between, Responsive danger actions (renders inline buttons), Last-action click feedback. The component now supports `with_danger_action(...)` + the overflow trigger, but the specimen has not yet been re-wired to drive `dangerItems`. — missing (specimen): **Density ladder**, **Bordered separation** (`showTopBorder`), **Footer-embedded** (`showTopSeparation=false`), danger-overflow demo using the new `with_danger_action` / `dangerItems` path.
+- GPUI covers (specimen done): End-aligned, Start-aligned, Space between, Responsive danger actions (real `with_danger_action` inline group + `dangerItems` overflow ellipsis trigger), Submitting (loading primary + disabled cancel), Density ladder (compact/default/comfortable), Footer-embedded (`showTopSeparation=false`), Bordered separation (`showTopBorder=true`), Last-action click feedback. Full contract-state coverage; no fakes. (Jetstream specimen pending engine recovery.)
 - Jetstream covers: End-aligned, Start-aligned, Between, Dialog footer custom actions (`showTopSeparation=false`). The component now supports `js_form_actions_full` (inline danger + overflow trigger), but the specimen has not yet been re-wired. — missing (specimen): **Density ladder**, **Bordered separation** (`showTopBorder`), **Responsive danger actions** demo using the new danger path.
 
 ## Notes

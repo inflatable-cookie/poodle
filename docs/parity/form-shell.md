@@ -1,4 +1,5 @@
 <!-- parity consv=gap gpui=0 jetstream=0 specimen=gap -->
+<!-- gpui-specimen pass: GPUI specimen done; Jetstream pending engine recovery. Added packages/gpui/preview/src/specimens/form_shell.rs (registered in specimens/mod.rs + component_registry.rs) driving the real FormShell composite across all four contract lifecycle states: ready, blocked (invalid field → danger Callout + dimmed actions via blocks_submission), busy (Pending Callout + loading primary), disabled (whole-shell dim). Header (title+description) + two sections hosting real Field+TextInput slots + real Callout StatusSummary + FormActions footer of real Buttons. No fakes. specimen stays gap — Jetstream specimen unverifiable while the engine is build-blocked. -->
 <!-- pass: built FormShell on both Rust targets to the contract (no Svelte authority — contract is sole authority; consv stays gap until FormShell.svelte exists). GPUI composite created (composites/form_shell.rs) + Jetstream renderer rebuilt: header (title/desc), Callout status summary via resolved_status_tone, sections w/ description + field slots, FormActions row honoring align, token-resolved disabled opacity, busy/disabled states. Spec gained header_gap/section_internal_gap/title/description/section_title/status size + disabled_opacity token methods (additive). 7 Jetstream probe tests. -->
 # Parity: FormShell
 
@@ -39,7 +40,7 @@ Entire component missing — the single biggest todo. No renderer reads `FormShe
 - [ ] Apply `is_disabled` dim via `state.opacity.disabled` token (contract §4) — requires a `disabled_opacity_token()` on the spec (see Jetstream note; spec lacks it).
 - [ ] Handle `is_busy` state: fields read-only, spinner in status summary, actions disabled — contract §4.
 - [ ] Derive submission gating from `blocks_submission()` to disable the actions row — contract §3/§4.
-- [ ] Add GPUI specimen `packages/gpui/preview/src/specimens/form_shell.rs` covering all five states.
+- [x] Add GPUI specimen `packages/gpui/preview/src/specimens/form_shell.rs` covering the contract states (ready / blocked / busy / disabled). Registered in `specimens/mod.rs` (`"form-shell"` arm) + `component_registry.rs`. Real FormShell composite, no fakes; `cd packages/gpui/preview && cargo build` → 0 errors. (Jetstream specimen pending engine recovery.)
 - accepted: no ARIA (gpui has no accessibility API) — `aria-labelledby` / `aria-describedby` from contract §5 not emittable (contract §8 Known Delta).
 
 ## Jetstream gap (vs Svelte + contract)

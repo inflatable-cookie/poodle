@@ -65,8 +65,8 @@ Svelte had several props/snippets the contract §3 did not document. Svelte is a
 ## Specimen parity
 
 - Svelte covers (602 lines): Interactive cards, Hierarchy titles (titleContent + chevrons), Rounded-square leading, With badges, With footer counters, Solid fill + accent colors, With context menu, Not-live (dashed), Corner sash badges, Static card.
-- GPUI covers (823 lines): broad — interactive, leading shapes, sash, reorder handle, selectable, footer, not-live, etc. — closest target. Verify hierarchy-title and accent-color solid groups render correctly (accentColor unsupported on leading).
-- Jetstream covers (41 lines, **1 group "List cards"**): badly under-covers. Missing badges, footer counters, sash, not-live, selectable, rounded-square+solid+accent, hierarchy, context menu. Largest specimen gap of the assigned set.
+- GPUI specimen DONE; Jetstream pending engine recovery: full contract-state coverage — interactive, rounded-square leading, badges (via trailing Pill), footer counters (+ inherited typography), solid fill + accent colors, context menu, not-live, sash, selectable, **link roots (href)**, **highlighted**, **selection-indicator checkbox**, **layout default/compact/stacked**, **leading-size-offset**, reorder handle, static. Every group is a real `ListCard::from_spec` resolving from tokens — no hand-rolled boxes. Groups the GPUI component does not visually distinguish (a dedicated `badges`-next-to-title slot, `corner`, `actions` snippets, `titleContent`/`metaContent`) are component-API gaps, not added as fakes. `gpui/preview` builds 0 errors.
+- Jetstream covers (41 lines, **1 group "List cards"**): badly under-covers. Specimen build-out deferred — engine is externally build-blocked. Largest specimen gap of the assigned set once unblocked.
 
 ## Notes
 

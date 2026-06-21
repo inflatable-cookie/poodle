@@ -567,6 +567,16 @@ pub static COMPOSITES: &[ComponentEntry] = &[
         description: "Responsive form grid with error messaging.",
     },
     ComponentEntry {
+        slug: "form-shell",
+        display_name: "FormShell",
+        description: "Orchestrated form surface with sections, status summary, and submission gating.",
+    },
+    ComponentEntry {
+        slug: "validation-summary",
+        display_name: "ValidationSummary",
+        description: "Grouped error surface listing all currently-invalid fields.",
+    },
+    ComponentEntry {
         slug: "inline-list-section",
         display_name: "InlineListSection",
         description: "Compact related-list section for detail and metadata pages.",
@@ -792,6 +802,8 @@ pub fn component_tag(slug: &str) -> ComponentTag {
         | "field-set"
         | "form-actions"
         | "form-layout"
+        | "form-shell"
+        | "validation-summary"
         | "block-editor"
         | "markdown-editor"
         | "inline-list-section"

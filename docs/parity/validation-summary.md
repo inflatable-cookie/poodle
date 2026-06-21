@@ -1,4 +1,5 @@
 <!-- parity consv=gap gpui=0 jetstream=0 specimen=gap -->
+<!-- gpui-specimen pass: GPUI specimen done; Jetstream pending engine recovery. Added packages/gpui/preview/src/specimens/validation_summary.rs (registered in specimens/mod.rs + component_registry.rs) driving the real ValidationSummary composite: blocking (danger-bordered surface, multiple invalid entries), pending-only (accent border via include_pending), mixed (danger precedence), untitled (no heading), and empty (only-valid entries → active_entries() empty → renders nothing, proven by a muted placeholder note). Real tone-bordered surface + title + dot/label/message entry rows; no fakes. No size axis exists on the spec/contract, so none is invented. specimen stays gap — Jetstream specimen unverifiable while the engine is build-blocked. -->
 <!-- pass: built ValidationSummary on both Rust targets to the contract (no Svelte authority — contract is sole authority; consv stays gap until ValidationSummary.svelte exists). GPUI composite created (composites/validation_summary.rs) + Jetstream renderer rebuilt: tone-bordered surface (danger blocking / accent pending-only via border_token), optional title, List of Entry rows (tone dot + label + message), empty state renders nothing. Spec gained fill/radius/padding_x/padding_y/list_gap/entry_gap/entry_text_gap/title_size/entry_text_size token methods (additive; contract §6 previously only defined border_token). Indicator dot + entry field-id interaction-id are noted enrichments beyond contract anatomy. 5 Jetstream probe tests. -->
 # Parity: ValidationSummary
 
@@ -34,7 +35,7 @@ GPUI has **no implementation at all** — this is the dominant gap.
 - [ ] Resolve border from `spec.border_token()` (danger vs accent by blocking count) — contract §6.
 - [ ] Render `active_entries()` and handle empty → render nothing (contract §4 empty state).
 - [ ] Emulate href focus-jump with imperative GPUI focus calls (contract §8 known delta — web-only href).
-- [ ] Add a GPUI specimen `packages/gpui/preview/src/specimens/validation_summary.rs` + register it.
+- [x] Add a GPUI specimen `packages/gpui/preview/src/specimens/validation_summary.rs` + register it. Covers blocking / pending-only / mixed / untitled / empty (renders nothing). Registered in `specimens/mod.rs` (`"validation-summary"` arm) + `component_registry.rs`. Real composite, no fakes; `cd packages/gpui/preview && cargo build` → 0 errors. (Jetstream specimen pending engine recovery.)
 - [ ] Resolve all spacing/size/typography from tokens (blocked on contract §6 gaining those token targets — see Notes).
 - accepted: no ARIA / aria-live (gpui has no accessibility API) — contract §8 known delta.
 

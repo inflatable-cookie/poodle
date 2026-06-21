@@ -4,9 +4,11 @@ use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_components::{Button, Eyebrow, FormActions};
 use poodle_specs::{
-    ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionAlign, FormActionsSpec,
+    ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, EyebrowSpec, FormActionAlign,
+    FormActionDangerItem, FormActionsSpec,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -153,14 +155,65 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ),
                 ),
         )
-        // --- Responsive danger actions ---
+        // --- Responsive danger actions (inline danger group + overflow menu) ---
+        // `with_danger_action` renders the inline destructive content; supplying
+        // `dangerItems` on the spec turns on the ghost ellipsis overflow trigger
+        // (contract §2 danger menu / §8 Responsive Swap). Both render together
+        // here since GPUI's render-immediate model has no container-query channel.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Responsive danger actions"),
+                    EyebrowSpec::new().with_content("Responsive danger actions (overflow)"),
+                    theme,
+                ))
+                .child(
+                    FormActions::from_spec(
+                        FormActionsSpec::new()
+                            .with_danger_item(FormActionDangerItem::new("Discard draft"))
+                            .with_danger_item(FormActionDangerItem::new("Reset form")),
+                        theme,
+                    )
+                    .with_danger_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_tone(ButtonTone::Danger)
+                                .with_label("Discard draft"),
+                            theme,
+                        )
+                        .with_id("fa-discard-danger"),
+                    )
+                    .with_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Cancel"),
+                            theme,
+                        )
+                        .with_id("fa-cancel-danger"),
+                    )
+                    .with_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_label("Save changes"),
+                            theme,
+                        )
+                        .with_id("fa-save-danger"),
+                    ),
+                ),
+        )
+        // --- Submitting state (loading primary, disabled cancel) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Submitting"),
                     theme,
                 ))
                 .child(
@@ -168,31 +221,111 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_action(
                             Button::from_spec(
                                 ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_tone(ButtonTone::Danger)
-                                    .with_label("Discard draft"),
+                                    .with_variant(ButtonVariant::Secondary)
+                                    .with_label("Cancel")
+                                    .with_disabled(true),
                                 theme,
                             )
-                            .with_id("fa-discard-danger"),
-                        )
-                        .with_action(
-                            Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_variant(ButtonVariant::Ghost)
-                                    .with_label("Back"),
-                                theme,
-                            )
-                            .with_id("fa-back-danger"),
+                            .with_id("fa-cancel-busy"),
                         )
                         .with_action(
                             Button::from_spec(
                                 ButtonSpec::new()
                                     .with_variant(ButtonVariant::Primary)
-                                    .with_label("Save changes"),
+                                    .with_label("Saving…")
+                                    .with_loading(true),
                                 theme,
                             )
-                            .with_id("fa-save-danger"),
+                            .with_id("fa-save-busy"),
                         ),
+                ),
+        )
+        // --- Density ladder (compact / default / comfortable) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Density ladder"),
+                    theme,
+                ))
+                .child(density_row(theme, "Compact", ControlDensity::Compact))
+                .child(density_row(theme, "Default", ControlDensity::Default))
+                .child(density_row(
+                    theme,
+                    "Comfortable",
+                    ControlDensity::Comfortable,
+                )),
+        )
+        // --- Footer-embedded (showTopSeparation=false) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Footer-embedded (no top separation)"),
+                    theme,
+                ))
+                .child(
+                    FormActions::from_spec(
+                        FormActionsSpec::new().with_top_separation(false),
+                        theme,
+                    )
+                    .with_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_label("Cancel"),
+                            theme,
+                        )
+                        .with_id("fa-cancel-footer"),
+                    )
+                    .with_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_label("Save changes"),
+                            theme,
+                        )
+                        .with_id("fa-save-footer"),
+                    ),
+                ),
+        )
+        // --- Bordered separation (showTopBorder=true) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Bordered separation"),
+                    theme,
+                ))
+                .child(
+                    FormActions::from_spec(
+                        FormActionsSpec::new().with_top_border(true),
+                        theme,
+                    )
+                    .with_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Cancel"),
+                            theme,
+                        )
+                        .with_id("fa-cancel-border"),
+                    )
+                    .with_action(
+                        Button::from_spec(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_label("Save changes"),
+                            theme,
+                        )
+                        .with_id("fa-save-border"),
+                    ),
                 ),
         )
         // --- Last action feedback ---
@@ -204,4 +337,39 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .child(format!("Last action: {}", last_action)),
             )
         })
+}
+
+/// One labelled row of the density ladder: a secondary + primary pair laid out
+/// by a `FormActions` at the given density. Density changes the inline gap and
+/// top separation only — child button size stays constant (contract §8).
+fn density_row(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(4.0))
+        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(
+            FormActions::from_spec(
+                FormActionsSpec::new().with_density(density),
+                theme,
+            )
+            .with_action(
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Cancel"),
+                    theme,
+                )
+                .with_id(format!("fa-density-cancel-{label}")),
+            )
+            .with_action(
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Primary)
+                        .with_label("Save changes"),
+                    theme,
+                )
+                .with_id(format!("fa-density-save-{label}")),
+            ),
+        )
 }

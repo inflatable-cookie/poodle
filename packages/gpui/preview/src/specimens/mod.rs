@@ -111,6 +111,7 @@ mod field_set_specimen;
 mod filter_toolbar_specimen;
 mod form_dialog_specimen;
 mod form_layout;
+mod form_shell;
 mod inline_list_section_specimen;
 mod list_card;
 mod list_card_counter;
@@ -141,6 +142,7 @@ mod time_ago_specimen;
 mod toast_host;
 mod toast_stack_specimen;
 mod tree;
+mod validation_summary;
 mod video_player_specimen;
 
 // ── Layout Helpers ───────────────────────────────────────
@@ -385,6 +387,12 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "nav-card" => specimen_card("NavCard", theme, nav_card::render(theme)),
         "pagination" => specimen_card("Pagination", theme, pagination::render(state, cx)),
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
+        "form-shell" => specimen_card("FormShell", theme, form_shell::render(state, cx)),
+        "validation-summary" => specimen_card(
+            "ValidationSummary",
+            theme,
+            validation_summary::render(state, cx),
+        ),
         "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
         "detail-item" => specimen_card("DetailItem", theme, detail_item_specimen::render(theme)),
         "detail-section" => specimen_card(

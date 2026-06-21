@@ -50,8 +50,8 @@ The compact muted **row chrome is entirely missing** and most dimensions are har
 ## Specimen parity
 
 - Svelte covers: framed section with title + actions + populated rows + count, and empty-state variant (64 lines).
-- GPUI covers: title/actions/items + empty (50 lines) — but since the row chrome is missing, the specimen does not visually demonstrate the contract's compact muted rows. Verify `framed=false` and `count` variants are shown.
-- Jetstream covers: **none**.
+- GPUI specimen DONE; Jetstream pending engine recovery: **Framed — count pill + header action** (uppercase title, count pill, `IconButton` add action, three muted rows with `Pill` status), **Header actions (no count)** (ghost `IconButton`), **Empty state** (italic empty message), **Unframed** (count + rows, no card). Rows render the contract's compact muted row chrome from the rebuilt component (pass 46). All real `InlineListSection::from_spec` / `IconButton` / `Pill` / `Text` — no hand-rolled boxes. `gpui/preview` builds 0 errors. Note: divider lines are not a contract part — rows are spaced muted boxes (`space.stack.sm` gap), which the component renders.
+- Jetstream covers: **none** — component + specimen deferred (engine externally build-blocked).
 
 ## Notes
 

@@ -6,8 +6,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui_components::{ContextMenu, Eyebrow, Icon, ListCard, ListCardCounter, Pill, StatusIndicator};
 use poodle_specs::{
     ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, InlineTypographyMode, LeadingFill,
-    LeadingShape, ListCardCounterSpec, ListCardSpec, MenuEntry, MenuItemKind, PillSpec, PillTone,
-    StatusIndicatorSpec, StatusTone,
+    LeadingShape, ListCardCounterSpec, ListCardLayout, ListCardSpec, MenuEntry, MenuItemKind,
+    PillSpec, PillTone, SelectionIndicator, StatusIndicatorSpec, StatusTone,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -770,6 +770,313 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     theme,
                                 )
                                 .with_color(gpui::white()),
+                            ),
+                        ),
+                ),
+        )
+        // -- Link roots (href navigation) --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Link roots (href)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Billing settings")
+                                    .with_subtitle("Manage invoices and payment methods")
+                                    .with_href("#billing"),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("credit-card").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            )
+                            .with_trailing(Pill::from_spec(
+                                PillSpec::new()
+                                    .with_label("2")
+                                    .with_tone(PillTone::Neutral),
+                                theme,
+                            )),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Documentation portal")
+                                    .with_subtitle("Opens the external guide")
+                                    .with_meta("docs.example.com")
+                                    .with_href("https://example.com/docs"),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("book-open").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        ),
+                ),
+        )
+        // -- Highlighted (accent emphasis) --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Highlighted (accent emphasis)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Active selection")
+                                    .with_subtitle("Accent-tinted border and inset ring")
+                                    .with_meta("Now")
+                                    .with_interactive(true)
+                                    .with_highlighted(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("star").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Highlighted with custom accent")
+                                    .with_subtitle("Accent gradient over the fill")
+                                    .with_interactive(true)
+                                    .with_highlighted(true)
+                                    .with_accent_color("#6366f1"),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("sparkles").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        ),
+                ),
+        )
+        // -- Selection indicator (checkbox) --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Selection indicator (checkbox)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Selected row")
+                                    .with_subtitle("Checkbox indicator, checked")
+                                    .with_selectable(true)
+                                    .with_selected(true)
+                                    .with_selection_indicator(SelectionIndicator::Checkbox),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("file-text").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Unselected row")
+                                    .with_subtitle("Checkbox indicator, unchecked")
+                                    .with_selectable(true)
+                                    .with_selection_indicator(SelectionIndicator::Checkbox),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("file-text").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        ),
+                ),
+        )
+        // -- Layout (default / compact / stacked) --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Layout (default / compact / stacked)"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Default layout")
+                                    .with_subtitle("Standard leading + body row")
+                                    .with_meta("2.0rem")
+                                    .with_layout(ListCardLayout::Default)
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("rows").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Compact layout")
+                                    .with_subtitle("Denser — smaller leading box")
+                                    .with_meta("1.75rem")
+                                    .with_layout(ListCardLayout::Compact)
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("rows").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Stacked layout")
+                                    .with_subtitle("Leading on top, body below, bottom rail")
+                                    .with_layout(ListCardLayout::Stacked)
+                                    .with_leading_shape(LeadingShape::RoundedSquare)
+                                    .with_leading_fill(LeadingFill::Solid)
+                                    .with_accent_color("#6366f1")
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("layers").with_size(IconSize::Md),
+                                    theme,
+                                )
+                                .with_color(gpui::white()),
+                            )
+                            .with_trailing(Pill::from_spec(
+                                PillSpec::new()
+                                    .with_label("Published")
+                                    .with_tone(PillTone::Success),
+                                theme,
+                            )),
+                        ),
+                ),
+        )
+        // -- Leading size offset --
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Leading size offset"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(6.0))
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Default leading")
+                                    .with_subtitle("Matches the card size ladder")
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("file-text").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Offset leading (+1 step)")
+                                    .with_subtitle("Leading block steps up by 0.25rem")
+                                    .with_leading_size_offset(1)
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("file-text").with_size(IconSize::Sm),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
+                            ),
+                        )
+                        .child(
+                            ListCard::from_spec(
+                                ListCardSpec::new()
+                                    .with_title("Offset leading (+2 steps)")
+                                    .with_subtitle("Larger leading box, same typography")
+                                    .with_leading_size_offset(2)
+                                    .with_interactive(true),
+                                theme,
+                            )
+                            .with_leading(
+                                Icon::from_spec(
+                                    IconSpec::new("file-text").with_size(IconSize::Md),
+                                    theme,
+                                )
+                                .with_color(color_to_hsla(text_muted)),
                             ),
                         ),
                 ),

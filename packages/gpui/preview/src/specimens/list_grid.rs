@@ -3,10 +3,11 @@ use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_gpui_components::{Button, Eyebrow, IconButton, ListGrid, Surface};
+use poodle_gpui_components::{Button, Eyebrow, Icon, IconButton, ListCard, ListGrid, Surface, Text};
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, EyebrowSpec, IconButtonSpec, ListGridSpec, ListGridVariant,
-    PaddingScale, SurfaceBorder, SurfaceSpec,
+    ButtonSpec, ButtonVariant, EyebrowSpec, IconSize, IconSpec, IconButtonSpec, LeadingShape,
+    ListCardSpec, ListGridSpec, ListGridVariant, PaddingScale, SurfaceBorder, SurfaceSpec, TextSpec,
+    TextTone,
 };
 
 fn tile(theme: &poodle_gpui::GpuiThemeProvider, title: &str, blurb: &str, text_muted: Hsla) -> Surface {
@@ -103,6 +104,79 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     ))
     .with_child(tile(theme, "Two", "Tighter default gap.", text_muted));
 
+    // Grid of real ListCard tiles (contract: ListGrid hosts card collections).
+    let card_tile = |title: &str, subtitle: &str, icon: &str| {
+        ListCard::from_spec(
+            ListCardSpec::new()
+                .with_title(title)
+                .with_subtitle(subtitle)
+                .with_leading_shape(LeadingShape::RoundedSquare)
+                .with_interactive(true),
+            theme,
+        )
+        .with_leading(
+            Icon::from_spec(IconSpec::new(icon).with_size(IconSize::Md), theme)
+                .with_color(text_muted),
+        )
+    };
+
+    let with_cards = ListGrid::from_spec(
+        ListGridSpec::new().with_min_item_width_em(16.0),
+        theme,
+    )
+    .with_child(card_tile(
+        "Design system",
+        "Tokens, primitives, composites",
+        "layers",
+    ))
+    .with_child(card_tile(
+        "Media library",
+        "Images, video, and audio",
+        "image",
+    ))
+    .with_child(card_tile(
+        "Documentation",
+        "Contracts and guides",
+        "book",
+    ))
+    .with_child(card_tile(
+        "Analytics",
+        "Usage and adoption metrics",
+        "bar-chart",
+    ));
+
+    // Empty grid: header actions row with no items (contract: empty-state is
+    // host-owned; the grid renders its header and an empty content region).
+    let empty_grid = ListGrid::from_spec(
+        ListGridSpec::new().with_min_item_width_em(16.0),
+        theme,
+    )
+    .with_header(
+        div()
+            .flex()
+            .flex_row()
+            .items_center()
+            .gap(px(theme.resolve_space("space.inline.sm")))
+            .child(Button::from_spec(
+                ButtonSpec::new()
+                    .with_variant(ButtonVariant::Secondary)
+                    .with_label("New item"),
+                theme,
+            )),
+    )
+    .with_child(
+        div()
+            .flex()
+            .items_center()
+            .justify_center()
+            .py(px(theme.resolve_space("space.stack.lg")))
+            .child(Text::from_spec(
+                TextSpec::new("No items yet \u{2014} add one to populate the grid.")
+                    .with_tone(TextTone::Secondary),
+                theme,
+            )),
+    );
+
     div()
         .flex()
         .flex_col()
@@ -146,5 +220,31 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     ),
                 )
                 .child(compact),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(stack_sm)
+                .child(
+                    Eyebrow::from_spec(
+                        EyebrowSpec::new().with_content("With ListCards"),
+                        theme,
+                    ),
+                )
+                .child(with_cards),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(stack_sm)
+                .child(
+                    Eyebrow::from_spec(
+                        EyebrowSpec::new().with_content("Empty — header with no items"),
+                        theme,
+                    ),
+                )
+                .child(empty_grid),
         )
 }
